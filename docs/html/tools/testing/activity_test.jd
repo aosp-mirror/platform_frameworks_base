@@ -1,0 +1,1334 @@
+page.title=Activity Testing Tutorial
+parent.title=Testing
+parent.link=index.html
+@jd:body
+ <div id="qv-wrapper">
+  <div id="qv">
+  <h2>In this document</h2>
+  <ol>
+    <li>
+      <a href="#Prerequisites">Prerequisites</a>
+    </li>
+    <li>
+      <a href="#DownloadCode">Installing the Tutorial Sample Code</a>
+    </li>
+    <li>
+        <a href="#SetupEmulator">Setting Up the Emulator</a>
+    </li>
+    <li>
+        <a href="#SetupProjects">Setting Up the Projects</a>
+    </li>
+    <li>
+      <a href="#CreateTestCaseClass">Creating the Test Case Class</a>
+      <ol>
+        <li>
+          <a href="#AddTestCaseClass">Adding the test case class file</a>
+        </li>
+        <li>
+          <a href="#AddConstructor">Adding the test case constructor</a>
+        </li>
+        <li>
+            <a href="#AddSetupMethod">Adding the setup method</a>
+        </li>
+        <li>
+            <a href="#AddPreConditionsTest">Adding an initial conditions test</a>
+        </li>
+        <li>
+            <a href="#AddUITest">Adding a UI test</a>
+        </li>
+        <li>
+            <a href="#StateManagementTests">Adding state management tests</a>
+        </li>
+      </ol>
+    </li>
+    <li>
+        <a href="#RunTests">Running the Tests and Seeing the Results</a>
+    </li>
+    <li>
+        <a href="#TestFailure">Forcing Some Tests to Fail</a>
+    </li>
+    <li>
+        <a href="#NextSteps">Next Steps</a>
+    </li>
+</ol>
+<h2 id="#Appendix">Appendix</h2>
+<ol>
+    <li>
+        <a href="#InstallCompletedTestApp">Installing the Completed Test Application File</a>
+    </li>
+    <li>
+        <a href="#EditorCommandLine">For Users Not Developing In Eclipse</a>
+    </li>
+</ol>
+<h2>See Also</h2>
+<ol>
+    <li>
+        <a href="{@docRoot}tools/testing/testing_android.html">Testing Fundamentals</a>
+    </li>
+    <li>
+        {@link android.test.ActivityInstrumentationTestCase2}
+    </li>
+    <li>
+        {@link junit.framework.Assert}
+    </li>
+    <li>
+        {@link android.test.InstrumentationTestRunner}
+    </li>
+</ol>
+</div>
+</div>
+<p>
+  Android includes powerful tools for testing applications. The tools extend JUnit with additional features, provide convenience classes for mock Android system objects, and use
+  instrumentation to give you control over your main application while you are testing it. The entire Android testing environment is discussed in the document
+  <a href="{@docRoot}tools/testing/testing_android.html">Testing Fundamentals</a>.
+</p>
+<p>
+  This tutorial demonstrates the Android testing tools by presenting a simple Android application and then leading you step-by-step through the creation of a test application for it.
+  The test application demonstrates these key points:
+</p>
+  <ul>
+    <li>
+      An Android test is itself an Android application that is linked to the application under test by entries in its <code>AndroidManifest.xml</code> file.
+    </li>
+    <li>
+      Instead of Android components, an Android test application contains one or more test cases. Each of these is a separate class definition.
+    </li>
+    <li>
+      Android test case classes extend the JUnit {@link junit.framework.TestCase} class.
+    </li>
+    <li>
+      Android test case classes for activities extend JUnit and also connect you to the application under test with instrumentation. You can send keystroke or touch events directly to the UI.
+    </li>
+    <li>
+      You choose an Android test case class based on the type of component (application, activity, content provider, or service) you are testing.
+    </li>
+    <li>
+      Additional test tools in Eclipse/ADT provide integrated support for creating test applications, running them, and viewing the results.
+    </li>
+  </ul>
+<p>
+  The test application contains methods that perform the following tests:
+</p>
+  <ul>
+    <li>
+      Initial conditions test. Tests that the application under test initializes correctly. This is also a unit test of the application's
+      {@link android.app.Activity#onCreate(android.os.Bundle) onCreate()} method. Testing initial conditions also provides a confidence measure for subsequent tests.
+    </li>
+    <li>
+      UI test. Tests that the main UI operation works correctly. This test demonstrates the instrumentation features available in activity testing.
+      It shows that you can automate UI tests by sending key events from the test application to the main application.
+    </li>
+    <li>
+      State management tests. Test the application's code for saving state. This test demonstrates the instrumentation features of the test runner, which
+      are available for testing any component.
+    </li>
+  </ul>
+<h2 id="Prerequisites">Prerequisites</h2>
+<p>
+  The instructions and code in this tutorial depend on the following:
+</p>
+  <ul>
+    <li>
+      Basic knowledge of Android programming. If you haven't yet written an Android application, 
+      do the class 
+      <a href="{@docRoot}training/basics/firstapp/index.html">Building Your First App</a>. 
+      If you want to learn more about Spinner, the application under test, then you 
+      might want to review the "Spinner" sample app.
+    </li>
+    <li>
+      Some familiarity with the Android testing framework and concepts. If you haven't explored
+      Android testing yet, start by reading the
+      <a href="{@docRoot}tools/testing/testing_android.html">Testing Fundamentals</a>
+      guide.
+    </li>
+    <li>
+        Eclipse with ADT. This tutorial describes how to set up and run a test application using
+        Eclipse with ADT. If you haven't yet installed Eclipse and the ADT plugin,
+        follow the steps in <a href="{@docRoot}sdk/installing/index.html">Installing the SDK</a>
+        to install them before continuing. If you are not developing in Eclipse, you will
+        find instructions for setting up and running the test application in the
+        <a href="#EditorCommandLine">appendix</a> of this document.
+    </li>
+    <li>
+        Android 1.5 platform (API Level 3) or higher. You must have the Android 1.5 platform
+        (API Level 3) or higher installed in your SDK, because this tutorial uses APIs that
+        were introduced in that version.
+        <p>
+            If you are not sure which platforms are installed in your SDK,
+            open the Android SDK and AVD Manager and check in the
+            <strong>Installed Packages</strong> panel.
+            If aren't sure how to download a platform into your SDK,
+            read <a href="{@docRoot}sdk/exploring.html">Exploring the SDK</a>.
+        </p>
+    </li>
+  </ul>
+<h2 id="DownloadCode">Installing the Tutorial Sample Code</h2>
+<p>
+    During this tutorial, you will be working with sample code that is provided as part
+    of the downloadable Samples component of the SDK. Specifically, you will be working
+    with a pair of related sample applications &mdash; an application under test and a test
+    application:
+</p>
+    <ul>
+        <li>
+            Spinner is the application under test. This tutorial focuses on the
+            common situation of writing tests for an application that already exists, so the main
+            application is provided to you.
+        </li>
+        <li>
+             SpinnerTest is the test application. In the tutorial, you create this application
+             step-by-step. If you want to run quickly through the tutorial,
+             you can install the completed SpinnerTest application first, and then follow the
+             text. You may get more from the tutorial, however, if you create the test application
+             as you go. The instructions for installing the completed test application are in the
+             section 
+             <a href="#InstallCompletedTestApp">Installing the Completed Test Application File</a>.
+        </li>
+    </ul>
+<p>
+    The sample applications are described in more detail in the 
+    <a href="{@docRoot}tools/samples/index.html">Samples</a> topic. Follow the instructions to
+    download the version of the samples that's appropriate for the platform you're working with.
+</p>
+<h2 id="SetupEmulator">Setting Up the Emulator</h2>
+<p>
+  In this tutorial, you will use the Android emulator to run applications. The emulator needs
+  an Android Virtual Device (AVD) with an API level equal to or higher than the one you set for the projects in the previous step.
+  To find out how to check this and create the right AVD if necessary, 
+  see <a href="{@docRoot}tools/devices/managing-avds.html">Creating an AVD</a>.
+</p>
+<p>
+    As a test of the AVD and emulator, run the SpinnerActivity application in Eclipse with ADT. When it starts,
+    click the large downward-pointing arrow to the right of the spinner text. You see the spinner expand and display the title &quot;Select a planet&quot; at the top.
+    Click one of the other planets. The spinner closes, and your selection appears below it on the screen.
+</p>
+<h2 id="SetupProjects">Setting Up the Projects</h2>
+<p>
+    When you are ready to get started with the tutorial, begin by setting up Eclipse projects for
+    both Spinner (the application under test) and SpinnerTest (the test application).
+</p>
+<p>
+    You'll be using the Spinner application as-is, without modification, so you'll be loading it
+    into Eclipse as a new Android project from existing source. In the process, you'll be
+    creating a new test project associated with Spinner that will contain the SpinnerTest
+    application. The SpinnerTest application will be completely new and you'll be
+    using the code examples in this tutorial to add test classes and tests to it.
+</p>
+<p>
+    To install the Spinner app in a new Android project from existing source, following these steps:
+</p>
+<ol>
+    <li>
+        In Eclipse, select <strong>File</strong>&nbsp;&gt;&nbsp;<strong>New</strong>&nbsp;&gt;&nbsp;<strong>Project</strong>&nbsp;&gt;&nbsp;<strong>Android</strong>&nbsp;&gt;&nbsp;<strong>Android Project</strong>,
+        then click Next. The <strong>New Android Project</strong> dialog appears.
+    </li>
+    <li>
+        In the <em>Project name</em> text box, enter &quot;SpinnerActivity&quot;. The <em>Properties</em> area is filled in automatically.
+    </li>
+    <li>
+        In the <em>Contents</em> area, set &quot;Create project from existing source&quot;.
+    </li>
+    <li>
+        For <em>Location</em>, click <strong>Browse</strong>, navigate to the directory <code>&lt;SDK_path&gt;/samples/android-8/Spinner</code>,
+        then click Open. The directory name <code>&lt;SDK_path&gt;/samples/android-8/Spinner</code> now appears in the <em>Location</em> text box.
+    </li>
+    <li>
+        In the <em>Build Target</em> area, set a API level of 3 or higher. If you are already developing with a particular target, and it is API level 3 or higher, then use that target.
+    </li>
+    <li>
+        In the <em>Properties</em> area, in the <em>Min SDK Version:</em>, enter &quot;3&quot;.
+    </li>
+    <li>
+        You should now see these values:
+        <ul>
+            <li><em>Project Name:</em> &quot;SpinnerActivity&quot;</li>
+            <li><em>Create project from existing source:</em> set</li>
+            <li><em>Location:</em> &quot;<code>&lt;SDK_path&gt;/samples/android-8/Spinner</code>&quot;</li>
+            <li><em>Build Target:</em> &quot;API level of 3 or higher&quot; (<em>Target Name</em> &quot;Android 1.5 or higher&quot;)</li>
+            <li><em>Package name:</em> (disabled, set to &quot;<code>com.android.example.spinner</code>&quot;)</li>
+            <li><em>Create Activity:</em> (disabled, set to &quot;.SpinnerActivity&quot;)</li>
+            <li><em>Min SDK Version:</em> &quot;3&quot;</li>
+        </ul>
+        <p>
+            The following screenshot summarizes these values:
+        </p>
+            <a href="{@docRoot}images/testing/eclipse_new_android_project_complete_callouts.png">
+                <img src="{@docRoot}images/testing/eclipse_new_android_project_complete_callouts.png" alt="New Android Project dialog with filled-in values" style="height:230px"/>
+            </a>
+
+    </li>
+</ol>
+<p>
+    To create a new test project for the SpinnerTest application, follow these steps:
+</p>
+<ol>
+    <li>
+        Click Next. The <strong>New Android Test Project</strong> dialog appears.
+    </li>
+    <li>
+        Set &quot;Create a Test Project&quot;.
+    </li>
+    <li>
+        Leave the other values unchanged. The result should be:
+        <ul>
+            <li><em>Create a Test Project:</em> checked</li>
+            <li><em>Test Project Name:</em> &quot;SpinnerActivityTest&quot;</li>
+            <li><em>Use default location:</em> checked (this should contain the directory name &quot;<code>workspace/SpinnerActivityTest</code>&quot;).</li>
+            <li><em>Build Target:</em> Use the same API level you used in the previous step.</li>
+            <li><em>Application name:</em> &quot;SpinnerActivityTest&quot;</li>
+            <li><em>Package name:</em> &quot;<code>com.android.example.spinner.test</code>&quot;</li>
+            <li><em>Min SDK Version:</em> &quot;3&quot;</li>
+        </ul>
+        <p>
+            The following screenshot summarizes these values:
+        </p>
+            <a href="{@docRoot}images/testing/eclipse_new_android_testproject_complete_callouts.png">
+            <img src="{@docRoot}images/testing/eclipse_new_android_testproject_complete_callouts.png" alt="New Android Test Project dialog with filled-in values" style="height:230px"/>
+            </a>
+    </li>
+    <li>
+        Click Finish. Entries for SpinnerActivity and SpinnerActivityTest should appear in the
+        <strong>Package Explorer</strong>.
+        <p class="note">
+            <strong>Note:</strong> If you set <em>Build Target</em> to an API level higher than &quot;3&quot;, you will see the warning
+            &quot;The API level for the selected SDK target does not match the Min SDK version&quot;. You do not need to change the API level or the Min SDK version.
+            The message tells you that you are building the projects with one particular API level, but specifying that a lower API level is required. This may
+            occur if you have chosen not to install the optional earlier API levels.
+        </p>
+        <p>
+            If you see errors listed in the <strong>Problems</strong> pane at the bottom of the Eclipse window, or if a red error marker appears next to
+            the entry for SpinnerActivity in the Package Explorer, highlight the SpinnerActivity entry and then select
+            <strong>Project</strong>&nbsp;&gt;&nbsp;<strong>Clean</strong>. This should fix any errors.
+        </p>
+    </li>
+</ol>
+<p>
+    You now have the application under test in the SpinnerActivity project,
+    and an empty test project in SpinnerActivityTest. You may
+    notice that the two projects are in different directories, but Eclipse with
+    ADT handles this automatically. You should have no problem in either building or running them.
+</p>
+<p>
+    Notice that Eclipse and ADT have already done some initial setup for your test application.
+    Expand the SpinnerActivityTest project, and notice that it already has an
+    Android manifest file <code>AndroidManifest.xml</code>.
+    Eclipse with ADT created this when you added the test project.
+    Also, the test application is already set up to use instrumentation. You can see this
+    by examining <code>AndroidManifest.xml</code>.
+    Open it, then at the bottom of the center pane click <strong>AndroidManifest.xml</strong>
+    to display the XML contents:
+</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="com.android.example.spinner.test"
+      android:versionCode="1"
+      android:versionName="1.0"&gt;
+    &lt;uses-sdk android:minSdkVersion="3" /&gt;
+    &lt;instrumentation
+        android:targetPackage="com.android.example.spinner"
+        android:name="android.test.InstrumentationTestRunner" /&gt;
+    &lt;application android:icon="@drawable/icon" android:label="@string/app_name"&gt;
+        &lt;uses-library android:name="android.test.runner" /&gt;
+        ...
+    &lt;/application&gt;
+&lt;/manifest&gt;
+</pre>
+<p>
+    Notice the <code>&lt;instrumentation&gt;</code> element. The attribute
+    <code>android:targetPackage="com.android.example.spinner"</code> tells Android that the
+    application under test is defined in the Android package
+    <code>com.android.example.spinner</code>. Android now knows to use that
+    package's <code>AndroidManifest.xml</code> file to launch the application under test.
+    The <code>&lt;instrumentation&gt;</code> element also contains the attribute
+    <code>android:name="android.test.InstrumentationTestRunner"</code>, which tells Android
+    instrumentation to run the test application with Android's instrumentation-enabled test runner.
+</p>
+<h2 id="CreateTestCaseClass">Creating the Test Case Class</h2>
+
+<p>
+    You now have a test project SpinnerActivityTest, and the basic structure of a test
+    application also called SpinnerActivityTest. The basic structure includes all the files and
+    directories you need to build and run a test application, except for the class that
+    contains your tests (the test case class).
+</p>
+<p>
+    The next step is to define the test case class. In this tutorial, you'll be creating a
+    test case class that includes:
+</p>
+<ul>
+    <li>
+        Test setup. This use of the JUnit {@link junit.framework.TestCase#setUp() setUp()}
+        method demonstrates some of the tasks you might perform before running an Android test.
+    </li>
+    <li>
+        Testing initial conditions. This test demonstrates a good testing technique.
+        It also demonstrates that with Android instrumentation you can look at the application
+        under test <em>before</em> the main activity starts. The test checks that the application's
+        important objects have been initialized.
+        If the test fails, you then know that any other tests against the application are
+        unreliable, since the application was running in an incorrect state.
+        <p class="note">
+            <strong>Note:</strong> The purpose of testing initial conditions is not the same as
+            using <code>setUp()</code>. The JUnit {@link junit.framework.TestCase#setUp()} runs once
+            before <strong>each test method</strong>, and its purpose is to create a clean test
+            environment. The initial conditions test runs once, and its purpose is to verify that the
+            application under test is ready to be tested.
+        </p>
+    </li>
+    <li>
+        Testing the UI. This test shows how to control the main application's UI
+        with instrumentation, a powerful automation feature of Android testing.
+    </li>
+    <li>
+        Testing state management. This test shows some techniques for testing how
+        well the application maintains state in the Android environment. Remember that to
+        provide a satisfactory user experience, your application must never lose its current state,
+        even if it's interrupted by a phone call or destroyed because of memory constraints.
+        The Android activity lifecycle provides ways to maintain state, and the
+        <code>SpinnerActivity</code> application uses them. The test shows the techniques for
+        verifying that they work.
+    </li>
+</ul>
+<p>
+  Android tests are contained in a special type of Android application that contains one or more test class definitions. Each of these contains
+  one or more test methods that do the actual tests. In this tutorial, you will first add a test case class, and then add tests to it.
+</p>
+<p>
+ You first choose an Android test case class to extend. You choose from the base test case classes according to the Android component you are testing and the types of tests you are doing.
+ In this tutorial, the application under test has a single simple activity, so the test case class will be for an Activity component. Android offers several, but the one that tests in
+ the most realistic environment is {@link android.test.ActivityInstrumentationTestCase2}, so you will use it as the base class. Like all activity test case classes,
+ <code>ActivityInstrumentationTestCase2</code> offers convenience methods for interacting directly with the UI of the application under test.
+</p>
+<h3 id="AddTestCaseClass">Adding the test case class file</h3>
+<p>
+    To add <code>ActivityInstrumentationTestCase2</code> as the base test case class, follow these steps:
+</p>
+<ol>
+  <li>
+    In the Package Explorer, expand the test project SpinnerActivityTest if it is not open already.
+  </li>
+  <li>
+    Within SpinnerActivityTest, expand the <code>src/</code> folder and then the package marker for
+    <code>com.android.example.spinner.test</code>. Right-click on the package name and select <strong>New</strong> &gt; <strong>Class</strong>:<br/>
+    <a href="{@docRoot}images/testing/spinner_create_test_class_callouts.png">
+      <img alt="Menu for creating a new class in the test application" src="{@docRoot}images/testing/spinner_create_test_class_callouts.png" style="height:230px"/>
+    </a>
+    <p>
+      The <strong>New Java Class</strong> wizard appears:
+    </p>
+    <a href="{@docRoot}images/testing/spinnertest_new_class_callouts.png">
+      <img alt="New Java Class wizard dialog" src="{@docRoot}images/testing/spinnertest_new_class_callouts.png" style="height:230px"/>
+    </a>
+  </li>
+  <li>
+    In the wizard, enter the following:
+    <ul>
+      <li>
+        <em>Name:</em> &quot;SpinnerActivityTest&quot;. This becomes the name of your test class.
+      </li>
+      <li>
+        <em>Superclass:</em> &quot;<code>android.test.ActivityInstrumentationTestCase2&lt;SpinnerActivity&gt;</code>&quot;. The superclass is parameterized, so
+        you have to provide it your main application's class name.
+      </li>
+    </ul>
+    <p>
+      Do not change any of the other settings. Click Finish.
+    </p>
+  </li>
+  <li>
+    You now have a new file <code>SpinnerActivityTest.java</code> in the project.
+  </li>
+  <li>
+    To resolve the reference to SpinnerActivity, add the following import:
+<pre>
+import com.android.example.spinner.SpinnerActivity;
+</pre>
+  </li>
+</ol>
+<h3 id="AddConstructor">Adding the test case constructor</h3>
+  <p>
+    To ensure that the test application is instantiated correctly, you must set up a constructor that the test
+    runner will call when it instantiates your test class. This constructor has no parameters, and its sole
+    purpose is to pass information to the superclass's default constructor. To set up this constructor, enter the
+    following code in the class:
+  </p>
+<pre>
+  public SpinnerActivityTest() {
+    super("com.android.example.spinner", SpinnerActivity.class);
+  } // end of SpinnerActivityTest constructor definition
+</pre>
+<p>
+  This calls the superclass constructor with the Android package name (<code>com.android.example.spinner</code>)and main activity's class
+  (<code>SpinnerActivity.class</code>) for the application under test. Android uses this information to find the application and activity to test.
+</p>
+<p>
+  You are now ready to add tests, by adding test methods to the class.
+</p>
+<h3 id="AddSetupMethod">Adding the setup method</h3>
+<p>
+    The <code>setUp()</code> method is invoked before every test. You use it to initialize variables and clean up from previous tests. You can also use
+    the JUnit {@link junit.framework.TestCase#tearDown() tearDown()} method, which runs <strong>after</strong> every test method. The tutorial does not use it.
+</p>
+<p>
+    The method you are going to add does the following:
+</p>
+<ul>
+  <li>
+    <code>super.setUp()</code>. Invokes the superclass constructor for <code>setUp()</code>, which is required by JUnit.
+  </li>
+  <li>
+    Calls {@link android.test.ActivityInstrumentationTestCase2#setActivityInitialTouchMode(boolean) setActivityInitialTouchMode(false)}.
+    This turns off <strong>touch mode</strong> in the device or emulator. If any of your test methods send key events to the application,
+    you must turn off touch mode <em>before</em> you start any activities; otherwise, the call is ignored.
+  </li>
+  <li>
+    Stores references to system objects. Retrieves and stores a reference to the activity under test, the <code>Spinner</code>
+    widget used by the activity, the <code>SpinnerAdapter</code> that backs the widget, and the string value of the selection that is
+    set when the application is first installed. These objects are used in the state management test. The methods invoked are:
+    <ul>
+      <li>
+        {@link android.test.ActivityInstrumentationTestCase2#getActivity()}. Gets a reference to the activity under test (<code>SpinnerActivity</code>).
+        This call also starts the activity if it is not already running.
+      </li>
+      <li>
+        {@link android.app.Activity#findViewById(int)}. Gets a reference to the <code>Spinner</code> widget of the application under test.
+      </li>
+      <li>
+        {@link android.widget.AbsSpinner#getAdapter()}. Gets a reference to the adapter (an array of strings) backing the spinner.
+      </li>
+    </ul>
+  </li>
+</ul>
+<p>
+    Add this code to the definition of <code>SpinnerActivityTest</code>, after the constructor definition:
+</p>
+<pre>
+  &#64;Override
+  protected void setUp() throws Exception {
+    super.setUp();
+
+    setActivityInitialTouchMode(false);
+
+    mActivity = getActivity();
+
+    mSpinner =
+      (Spinner) mActivity.findViewById(
+        com.android.example.spinner.R.id.Spinner01
+      );
+
+      mPlanetData = mSpinner.getAdapter();
+
+  } // end of setUp() method definition
+</pre>
+<p>
+    Add these members to the test case class:
+</p>
+<pre>
+  private SpinnerActivity mActivity;
+  private Spinner mSpinner;
+  private SpinnerAdapter mPlanetData;
+</pre>
+<p>
+  Add these imports:
+</p>
+<pre>
+import android.widget.Spinner;
+import android.widget.SpinnerAdapter;
+</pre>
+<p>
+    You now have the the complete <code>setUp()</code> method.
+</p>
+<h3 id="AddPreConditionsTest">Adding an initial conditions test</h3>
+<p>
+  The initial conditions test verifies that the application under test is initialized correctly. It is an illustration of the types of tests you can run, so it is not comprehensive.
+  It verifies the following:
+</p>
+<ul>
+  <li>
+    The item select listener is initialized. This listener is called when a selection is made from the spinner.
+  </li>
+  <li>
+    The adapter that provides values to the spinner is initialized.
+  </li>
+  <li>
+    The adapter contains the right number of entries.
+  </li>
+</ul>
+<p>
+  The actual initialization of the application under test is done in <code>setUp()</code>, which the test runner calls automatically before every test. The verifications are
+  done with JUnit {@link junit.framework.Assert} calls. As a useful convention, the method name is <code>testPreConditions()</code>:
+</p>
+<pre>
+  public void testPreConditions() {
+    assertTrue(mSpinner.getOnItemSelectedListener() != null);
+    assertTrue(mPlanetData != null);
+    assertEquals(mPlanetData.getCount(),ADAPTER_COUNT);
+  } // end of testPreConditions() method definition
+</pre>
+<p>
+  Add this member:
+</p>
+<pre>
+  public static final int ADAPTER_COUNT = 9;
+</pre>
+<h3 id="AddUITest">Adding a UI test</h3>
+<p>
+  Now create a UI test that selects an item from the <code>Spinner</code> widget. The test sends key events to the UI with key events.
+  The test confirms that the selection matches the result you expect.
+</p>
+<p>
+  This test demonstrates the power of using instrumentation in Android testing. Only an instrumentation-based test class allows you to send key events (or touch events)
+  to the application under test. With instrumentation, you can test your UI without having to take screenshots, record the screen, or do human-controlled testing.
+</p>
+<p>
+  To work with the spinner, the test has to request focus for it and then set it to a known position. The test uses {@link android.view.View#requestFocus() requestFocus()} and
+  {@link android.widget.AbsSpinner#setSelection(int) setSelection()} to do this. Both of these methods interact with a View in the application under test, so you have to call them
+  in a special way.
+</p>
+<p>
+  Code in a test application that interacts with a View of the application under test must run in the main application's thread, also
+  known as the <em>UI thread</em>. To do this, you use the {@link android.app.Activity#runOnUiThread(java.lang.Runnable) Activity.runOnUiThread()}
+  method. You pass the code to <code>runOnUiThread()</code>in an anonymous {@link java.lang.Runnable Runnable} object. To set
+  the statements in the <code>Runnable</code> object, you override the object's {@link java.lang.Runnable#run()} method.
+</p>
+<p>
+  To send key events to the UI of the application under test, you use the <a href="{@docRoot}reference/android/test/InstrumentationTestCase.html#sendKeys(int...)">sendKeys</a>() method.
+  This method does not have to run on the UI thread, since Android uses instrumentation to pass the key events to the application under test.
+</p>
+<p>
+  The last part of the test compares the selection made by sending the key events to a pre-determined value. This tests that the spinner is working as intended.
+</p>
+<p>
+    The following sections show you how to add the code for this test.
+</p>
+<ol>
+    <li>
+        Get focus and set selection. Create a new method <code>public void testSpinnerUI()</code>. Add
+        code to to request focus for the spinner and set its position to default or initial position, "Earth". This code is run on the UI thread of
+        the application under test:
+<pre>
+  public void testSpinnerUI() {
+
+    mActivity.runOnUiThread(
+      new Runnable() {
+        public void run() {
+          mSpinner.requestFocus();
+          mSpinner.setSelection(INITIAL_POSITION);
+        } // end of run() method definition
+      } // end of anonymous Runnable object instantiation
+    ); // end of invocation of runOnUiThread
+</pre>
+        <p>
+          Add the following member to the test case class.
+        </p>
+<pre>
+  public static final int INITIAL_POSITION = 0;
+</pre>
+    </li>
+    <li>
+      Make a selection. Send key events to the spinner to select one of the items. To do this, open the spinner by
+      "clicking" the center keypad button (sending a DPAD_CENTER key event) and then clicking (sending) the down arrow keypad button five times. Finally,
+      click the center keypad button again to highlight the desired item. Add the following code:
+<pre>
+    this.sendKeys(KeyEvent.KEYCODE_DPAD_CENTER);
+    for (int i = 1; i &lt;= TEST_POSITION; i++) {
+      this.sendKeys(KeyEvent.KEYCODE_DPAD_DOWN);
+    } // end of for loop
+
+    this.sendKeys(KeyEvent.KEYCODE_DPAD_CENTER);
+</pre>
+    <p>
+      Add the following member to the test case class:
+    </p>
+<pre>
+  public static final int TEST_POSITION = 5;
+</pre>
+    <p>
+      This sets the final position of the spinner to "Saturn" (the spinner's backing adapter is 0-based).
+    </p>
+  </li>
+  <li>
+    Check the result. Query the current state of the spinner, and compare its current selection to the expected value.
+    Call the method {@link android.widget.AdapterView#getSelectedItemPosition() getSelectedItemPosition()} to find out the current selection position, and then
+    {@link android.widget.AdapterView#getItemAtPosition(int) getItemAtPosition()} to get the object corresponding to that position (casting it to a String). Assert that
+    this string value matches the expected value of "Saturn":
+<pre>
+    mPos = mSpinner.getSelectedItemPosition();
+    mSelection = (String)mSpinner.getItemAtPosition(mPos);
+    TextView resultView =
+      (TextView) mActivity.findViewById(
+        com.android.example.spinner.R.id.SpinnerResult
+      );
+
+    String resultText = (String) resultView.getText();
+
+    assertEquals(resultText,mSelection);
+
+  } // end of testSpinnerUI() method definition
+</pre>
+<p>
+  Add the following members to the test case class:
+</p>
+<pre>
+  private String mSelection;
+  private int mPos;
+</pre>
+  <p>
+    Add the following imports to the test case class:
+  </p>
+<pre>
+  import android.view.KeyEvent;
+  import android.widget.TextView;
+</pre>
+  </li>
+</ol>
+<p>
+  Pause here to run the tests you have. The procedure for running a test application is different
+  from running a regular Android application. You run a test application as an Android JUnit
+  application. To see how to do this, see <a href="#RunTests">Running the Tests and Seeing the Results</a>.
+</p>
+<p>
+    Eventually, you will see the <code>SpinnerActivity</code> application start, and the test
+    application controlling it by sending it key events. You will also see a new
+    <strong>JUnit</strong> view in the Explorer pane, showing the results of the
+    test. The JUnit view is documented in a following section,
+    <a href="#RunTests">Running the Test and Seeing the Results</a>.
+</p>
+<h3 id="StateManagementTests">Adding state management tests</h3>
+<p>
+  You now write two tests that verify that SpinnerActivity maintains its state when it is paused or terminated.
+  The state, in this case, is the current selection in the spinner. When users make a selection,
+  pause or terminate the application, and then resume or restart it, they should see
+  the same selection.
+</p>
+<p>
+  Maintaining state is an important feature of an application. Users may switch from the current
+  application temporarily to answer the phone, and then switch back. Android may decide to
+  terminate and restart an activity to change the screen orientation, or terminate an unused
+  activity to regain storage. In each case, users are best served by having the UI return to its
+  previous state (except where the logic of the application dictates otherwise).
+</p>
+<p>
+  SpinnerActivity manages its state in these ways:
+</p>
+  <ul>
+    <li>
+      Activity is hidden. When the spinner screen (the activity) is running but hidden by some other screen, it
+      stores the spinner's position and value in a form that persists while the application is running.
+    </li>
+    <li>
+      Application is terminated. When the activity is terminated, it stores the spinner's position and value in
+      a permanent form. The activity can read the position and value when it restarts, and restore the spinner to its previous state.
+    </li>
+    <li>
+      Activity re-appears. When the user returns to the spinner screen, the previous selection is restored.
+    </li>
+    <li>
+      Application is restarted. When the user starts the application again, the previous selection is restored.
+    </li>
+  </ul>
+<p class="note">
+    <strong>Note:</strong> An application can manage its state in other ways as well, but these are
+    not covered in this tutorial.
+</p>
+<p>
+  When an activity is hidden, it is <strong>paused</strong>. When it re-appears, it
+  <strong>resumes</strong>. Recognizing that these are key points in an activity's life cycle,
+  the Activity class provides two callback methods {@link android.app.Activity#onPause()} and
+  {@link android.app.Activity#onResume()} for handling pauses and resumes.
+  SpinnerActivity uses them for code that saves and restores state.
+</p>
+<p>
+  <strong>Note:</strong> If you would like to learn more about the difference between losing
+  focus/pausing and killing an application,
+  read about the <a href="{@docRoot}guide/components/activities.html#Lifecycle">activity
+lifecycle</a>.
+</p>
+<p>
+  The first test verifies that the spinner selection is maintained after the entire application is shut down and then restarted. The test uses instrumentation to
+  set the spinner's variables outside of the UI. It then terminates the activity by calling {@link android.app.Activity#finish() Activity.finish()}, and restarts it
+  using the instrumentation method {@link android.test.ActivityInstrumentationTestCase2#getActivity()}. The test then asserts that the current spinner state matches
+  the test values.
+</p>
+<p>
+  The second test verifies that the spinner selection is maintained after the activity is paused and then resumed. The test uses instrumentation to
+  set the spinner's variables outside of the UI and then force calls to the <code>onPause()</code> and <code>onResume()</code> methods. The test then
+  asserts that the current spinner state matches the test values.
+</p>
+<p>
+  Notice that these tests make limited assumptions about the mechanism by which the activity manages state. The tests use the activity's getters and
+  setters to control the spinner. The first test also knows that hiding an activity calls <code>onPause()</code>, and bringing it back to the foreground
+  calls <code>onResume()</code>. Other than this, the tests treat the activity as a "black box".
+</p>
+<p>
+    To add the code for testing state management across shutdown and restart, follow these steps:
+</p>
+ <ol>
+    <li>
+      Add the test method <code>testStateDestroy()</code>, then
+      set the spinner selection to a test value:
+<pre>
+  public void testStateDestroy() {
+    mActivity.setSpinnerPosition(TEST_STATE_DESTROY_POSITION);
+    mActivity.setSpinnerSelection(TEST_STATE_DESTROY_SELECTION);
+</pre>
+    </li>
+    <li>
+      Terminate the activity and restart it:
+<pre>
+    mActivity.finish();
+    mActivity = this.getActivity();
+</pre>
+    </li>
+    <li>
+      Get the current spinner settings from the activity:
+<pre>
+    int currentPosition = mActivity.getSpinnerPosition();
+    String currentSelection = mActivity.getSpinnerSelection();
+</pre>
+    </li>
+    <li>
+      Test the current settings against the test values:
+<pre>
+    assertEquals(TEST_STATE_DESTROY_POSITION, currentPosition);
+    assertEquals(TEST_STATE_DESTROY_SELECTION, currentSelection);
+  } // end of testStateDestroy() method definition
+</pre>
+<p>
+  Add the following members to the test case class:
+<pre>
+  public static final int TEST_STATE_DESTROY_POSITION = 2;
+  public static final String TEST_STATE_DESTROY_SELECTION = "Earth";
+</pre>
+    </li>
+ </ol>
+<p>
+    To add the code for testing state management across a pause and resume, follow these steps:
+</p>
+<ol>
+    <li>
+      Add the test method <code>testStatePause()</code>:
+<pre>
+    &#64;UiThreadTest
+    public void testStatePause() {
+</pre>
+    <p>
+      The <code>@UiThreadTest</code> annotation tells Android to build this method so that it runs
+      on the UI thread. This allows the method to change the state of the spinner widget in the
+      application under test. This use of <code>@UiThreadTest</code> shows that, if necessary, you
+      can run an entire method on the UI thread.
+    </p>
+    </li>
+   <li>
+    Set up instrumentation. Get the instrumentation object
+    that is controlling the application under test. This is used later to
+    invoke the <code>onPause()</code> and <code>onResume()</code> methods:
+<pre>
+    Instrumentation mInstr = this.getInstrumentation();
+</pre>
+  </li>
+  <li>
+    Set the spinner selection to a test value:
+<pre>
+    mActivity.setSpinnerPosition(TEST_STATE_PAUSE_POSITION);
+    mActivity.setSpinnerSelection(TEST_STATE_PAUSE_SELECTION);
+</pre>
+  </li>
+  <li>
+    Use instrumentation to call the Activity's <code>onPause()</code>:
+<pre>
+    mInstr.callActivityOnPause(mActivity);
+</pre>
+    <p>
+      Under test, the activity is waiting for input. The invocation of
+      {@link android.app.Instrumentation#callActivityOnPause(android.app.Activity)}
+      performs a call directly to the activity's <code>onPause()</code> instead
+      of manipulating the activity's UI to force it into a paused state.
+    </p>
+  </li>
+  <li>
+    Force the spinner to a different selection:
+<pre>
+    mActivity.setSpinnerPosition(0);
+    mActivity.setSpinnerSelection("");
+</pre>
+    <p>
+      This ensures that resuming the activity actually restores the
+      spinner's state rather than simply leaving it as it was.
+    </p>
+  </li>
+  <li>
+    Use instrumentation to call the Activity's <code>onResume()</code>:
+<pre>
+    mInstr.callActivityOnResume(mActivity);
+</pre>
+    <p>
+      Invoking {@link android.app.Instrumentation#callActivityOnResume(android.app.Activity)}
+      affects the activity in a way similar to <code>callActivityOnPause</code>. The
+      activity's <code>onResume()</code> method is invoked instead of manipulating the
+      activity's UI to force it to resume.
+    </p>
+  </li>
+  <li>
+    Get the current state of the spinner:
+<pre>
+    int currentPosition = mActivity.getSpinnerPosition();
+    String currentSelection = mActivity.getSpinnerSelection();
+</pre>
+  </li>
+  <li>
+    Test the current spinner state against the test values:
+<pre>
+    assertEquals(TEST_STATE_PAUSE_POSITION,currentPosition);
+    assertEquals(TEST_STATE_PAUSE_SELECTION,currentSelection);
+  } // end of testStatePause() method definition
+</pre>
+    <p>
+      Add the following members to the test case class:
+    </p>
+<pre>
+  public static final int TEST_STATE_PAUSE_POSITION = 4;
+  public static final String TEST_STATE_PAUSE_SELECTION = "Jupiter";
+</pre>
+  </li>
+  <li>
+    Add the following imports:
+<pre>
+  import android.app.Instrumentation;
+  import android.test.UiThreadTest;
+</pre>
+  </li>
+</ol>
+<h2 id="RunTests">Running the Tests and Seeing the Results</h2>
+ <p>
+    The most simple way to run the <code>SpinnerActivityTest</code> test case is to run it directly from the Package Explorer.
+ </p>
+ <p>
+    To run the <code>SpinnerActivityTest</code> test, follow these steps:
+</p>
+ <ol>
+    <li>
+      In the Package Explorer, right-click the project SpinnerActivityTest at the top level, and then
+      select <strong>Run As</strong> &gt; <strong>Android JUnit Test</strong>:<br/>
+      <a href="{@docRoot}images/testing/spinnertest_runas_menu_callouts.png">
+        <img alt="Menu to run a test as an Android JUnit test" src="{@docRoot}images/testing/spinnertest_runas_menu_callouts.png" style="height:230px">
+      </a>
+    </li>
+    <li>
+        You will see the emulator start. When the unlock option is displayed (its appearance depends on the API level you specified for the AVD),
+        unlock the home screen.
+    </li>
+    <li>
+      The test application starts. You see a new tab for the <strong>JUnit</strong> view, next to the Package Explorer tab:<br/>
+      <a href="{@docRoot}images/testing/spinnertest_junit_panel.png">
+        <img alt="The JUnit window" src="{@docRoot}images/testing/spinnertest_junit_panel.png" style="height:230px">
+      </a>
+    </li>
+</ol>
+<p>
+    This view contains two sub-panes. The top pane summarizes the tests that were run, and the bottom pane shows failure traces for
+    highlighted tests.
+</p>
+<p>
+   At the conclusion of a successful test run, this is the view's appearance:<br/>
+   <a href="{@docRoot}images/testing/spinnertest_junit_success.png">
+    <img src="{@docRoot}images/testing/spinnertest_junit_success.png" alt="JUnit test run success" style="height:230px"/>
+   </a>
+</p>
+<p>
+    The upper pane summarizes the test:
+</p>
+    <ul>
+        <li>
+            Total time elapsed for the test application(labeled <em>Finished after &lt;x&gt; seconds</em>).
+        </li>
+        <li>
+            Number of runs (<em>Runs:</em>) - the number of tests in the entire test class.
+        </li>
+        <li>
+            Number of errors (<em>Errors:</em>) - the number of program errors and exceptions encountered during
+            the test run.
+        </li>
+        <li>
+            Number of failures (<em>Failures:</em>) - the number of test failures encountered during the test
+            run. This is the number of assertion failures. A test can fail even if the program does not encounter an error.
+        </li>
+        <li>
+            A progress bar. The progress bar extends from left to right as the tests run.
+            <p>
+               If all the tests succeed, the bar remains green. If a test fails, the bar turns from green to red.
+            </p>
+        </li>
+        <li>
+            A test method summary. Below the bar, you see a line for each class in the test application. To look at the results for the individual
+            methods in a test, click the arrow at the left to expand the line. You see the name of each test method. To the
+            right of the name, you see the time taken by the test. You can look at the test's code
+            by double-clicking its name.
+        </li>
+    </ul>
+<p>
+    The lower pane contains the failure trace. If all the tests are successful, this pane is empty. If some tests fail,
+    then if you highlight a failed test in the upper pane, the lower view contains a stack trace for the test. This is
+    demonstrated in the next section.
+</p>
+<p class="note">
+    <strong>Note:</strong> If you run the test application and nothing seems to happen, look for
+    the JUnit view. If you do not see it, you may have run the test application
+    as a regular Android application.
+    Remember that you need to run it as an Android <strong>JUnit</strong>
+    application.
+</p>
+<h2 id="TestFailure">Forcing Some Tests to Fail</h2>
+<p>
+  A test is as useful when it fails as when it succeeds. This section shows what happens in Eclipse with ADT when a test fails. You
+  can quickly see that a test class has failed, find the method or methods that failed, and then use a failure trace to find
+  the exact problem.
+</p>
+<p>
+  The example application SpinnerActivity that you downloaded passes all the tests in the test application SpinnerActivityTest.
+  To force the test to fail, you must modify the example application. You change a line of setup code in the application under test. This
+  causes the <code>testPreConditions()</code> and <code>testTextView()</code> test methods to fail.
+</p>
+<p>
+    To force the tests to fail, follow these steps:
+</p>
+<ol>
+  <li>
+    In Eclipse with ADT, go to the SpinnerActivity project and open the file <code>SpinnerActivity.java</code>.
+  </li>
+  <li>
+    At the top of <code>SpinnerActivity.java</code>, at the end of the <code>onCreate()</code> method, find the following line:
+<pre>
+    // mySpinner.setOnItemSelectedListener(null);
+</pre>
+    <p>Remove the forward slash characters at the beginning of the line to
+    uncomment the line. This sets the listener callback to null:
+    </p>
+<pre>
+    mySpinner.setOnItemSelectedListener(null);
+</pre>
+  </li>
+  <li>
+    The <code>testPreConditions()</code> method in <code>SpinnerActivityTest</code> contains the following test:
+    <code>assertTrue(mSpinner.getOnItemSelectedListener() != null);</code>. This test asserts that the listener callback is <em>not</em> null.
+    Since you have modified the application under test, this assertion now fails.
+  </li>
+  <li>
+    Run the test, as described in the previous section <a href="#RunTests">Running the Tests and Seeing the Results</a>.
+  </li>
+</ol>
+<p>
+    The JUnit view is either created or updated with the results of the test. Now, however, the progress bar is red,
+    the number of failures is 2, and small "x" icons appear in the list icons next to the testPreConditions and
+    TestSpinnerUI tests. This indicates that the tests have failed. The display is similar to this:<br/>
+    <a href="{@docRoot}images/testing/spinnertest_junit_panel_fail_callouts.png">
+      <img src="{@docRoot}images/testing/spinnertest_junit_panel_fail_callouts.png" alt="The JUnit Failure window" style="height:230px"/>
+    </a>
+</p>
+<p>
+  You now want to look at the failures to see exactly where they occurred.
+</p>
+<p>
+    To examine the failures, follow these steps:
+</p>
+<ol>
+  <li>
+    Click the testPreconditions entry. In the lower pane entitled <strong>Failure Trace</strong>,
+    you see a stack trace of the calls that led to the failure. This trace is similar to the following screenshot:<br/>
+    <a href="{@docRoot}images/testing/spinnertest_junit_panel_failtrace_callouts.png">
+      <img src="{@docRoot}images/testing/spinnertest_junit_panel_failtrace_callouts.png" alt="The JUnit failure trace" style="height:230px"/>
+    </a>
+  </li>
+  <li>
+      The first line of the trace tells you the error. In this case, a JUnit assertion failed. To look at the
+      assertion in the test code, double-click the next line (the first line of the trace). In the center pane
+      a new tabbed window opens, containing the code for the test application <code>SpinnerActivityTest</code>. The failed assertion
+      is highlighted in the middle of the window.
+  </li>
+</ol>
+<p>
+    The assertion failed because you modified the main application to set the <code>getOnItemSelectedListener</code> callback to <code>null</code>.
+</p>
+<p>
+    You can look at the failure in <code>testTextView</code> if you want. Remember, though, that <code>testPreConditions</code> is meant to verify the
+    initial setup of the application under test. If testPreConditions() fails, then succeeding tests can't be trusted. The best strategy to follow is to
+    fix the problem and re-run all the tests.
+</p>
+<p>
+    Remember to go back to <code>SpinnerActivity.java</code> and re-comment the line you uncommented in an earlier step.
+</p>
+<p>
+  You have now completed the tutorial.
+</p>
+<h2 id="NextSteps">Next Steps</h2>
+<p>
+    This example test application has shown you how to create a test project and link it to
+    the application you want to test, how to choose and add a test case class, how to write
+    UI and state management tests, and how to run the tests against the application under
+    test. Now that you are familiar with the basics of testing Android applications, here
+    are some suggested next steps:
+</p>
+<p>
+    <strong>Learn more about testing on Android</strong>
+</p>
+<ul>
+    <li>
+        If you haven't done so already, read the
+        <a href="{@docRoot}tools/testing/testing_android.html">Testing Fundamentals</a>
+        document in the <em>Dev Guide</em>. It provides an overview of how testing on Android
+        works. If you are just getting started with Android testing, reading that document will
+        help you understand the tools available to you, so that you can develop effective
+        tests.
+    </li>
+</ul>
+<p>
+    <strong>Review the main Android test case classes</strong>
+</p>
+<ul>
+    <li>
+        {@link android.test.ActivityInstrumentationTestCase2}
+    </li>
+    <li>
+        {@link android.test.ActivityUnitTestCase}
+    </li>
+    <li>
+        {@link android.test.ProviderTestCase2}
+    </li>
+    <li>
+        {@link android.test.ServiceTestCase}
+    </li>
+</ul>
+<p>
+    <strong>Learn more about the assert and utility classes</strong>
+</p>
+<ul>
+    <li>
+        {@link junit.framework.Assert}, the JUnit Assert class.
+    </li>
+    <li>
+        {@link android.test.MoreAsserts}, additional Android assert methods.
+    </li>
+    <li>
+        {@link android.test.ViewAsserts}, useful assertion methods for testing Views.
+    </li>
+    <li>
+        {@link android.test.TouchUtils}, utility methods for simulating touch events in an Activity.
+    </li>
+</ul>
+<p>
+    <strong>Learn about instrumentation and the instrumented test runner</strong>
+</p>
+<ul>
+    <li>
+        {@link android.app.Instrumentation}, the base instrumentation class.
+    </li>
+    <li>
+        {@link android.test.InstrumentationTestCase}, the base instrumentation test case.
+    </li>
+    <li>
+        {@link android.test.InstrumentationTestRunner}, the standard Android test runner.
+    </li>
+</ul>
+<h2 id="Appendix">Appendix</h2>
+<h3 id="InstallCompletedTestApp">Installing the Completed Test Application File</h3>
+<p>
+    The recommended approach to this tutorial is to follow the instructions step-by-step and
+    write the test code as you go. However, if you want to do this tutorial quickly,
+    you can install the entire file for the test application into the test project.
+</p>
+<p>
+    To do this, you first create a test project with the necessary structure and files by using
+    the automated tools in Eclipse. Then you exit Eclipse and copy the test application's file
+    from the SpinnerTest sample project into your test project. The SpinnerTest sample project is
+    part of the Samples component of the SDK.
+</p>
+<p>
+    The result is a complete test application, ready to run against the Spinner sample application.
+</p>
+<p>
+    To install the test application file, follow these steps:
+</p>
+<ol>
+    <li>
+        Set up the projects for the application under test and the test application, as described
+        in the section section <a href="#SetupProjects">Setting Up the Projects</a>.
+    </li>
+    <li>
+        Set up the emulator, as described in the section <a href="#SetupEmulator">Setting Up the Emulator</a>.
+    </li>
+    <li>
+        Add the test case class, as described in the section <a href="#AddTestCaseClass">Adding the test case class file</a>.
+    </li>
+    <li>
+        Close Eclipse with ADT.
+    </li>
+    <li>
+        Copy the file <code>&lt;SDK_path&gt;/samples/android-8/SpinnerTest/src/com/android/example/spinner/test/SpinnerActivityTest.java</code>
+        to the directory <code>workspace/SpinnerActivityTest/src/com/android/example/spinner/test/</code>.
+    </li>
+    <li>
+        Restart Eclipse with ADT.
+    </li>
+    <li>
+        In Eclipse with ADT, re-build the project <code>SpinnerActivityTest</code> by selecting it in the Package Explorer, right-clicking,
+        and selecting <em>Project</em>&nbsp;&gt;&nbsp;<em>Clean</em>.
+    </li>
+    <li>
+        The complete, working test application should now be in the <code>SpinnerActivityTest</code> project.
+    </li>
+</ol>
+<p>
+    You can now continue with the tutorial, starting at the section <a href="#AddConstructor">Adding the test case constructor</a> and
+    following along in the text.
+</p>
+<h3 id="EditorCommandLine">For Users Not Developing In Eclipse</h3>
+<p>
+    If you are not developing in Eclipse, you can still do this tutorial. Android provides tools for
+    creating test applications using a code editor and command-line tools. You use the following tools:
+</p>
+<ul>
+  <li>
+   <a href="{@docRoot}tools/help/adb.html">adb</a> - Installs and uninstalls applications and test applications to a device or the emulator. You
+   also use this tool to run the test application from the command line.
+  </li>
+  <li>
+    <a href="{@docRoot}tools/help/android.html">android</a> - Manages projects and test projects. This tool also manages AVDs and Android platforms.
+  </li>
+</ul>
+  <p>
+    You use the <code>emulator</code> tool to run the emulator from the command line.
+  </p>
+  <p>
+    Here are the general steps for doing this tutorial using an editor and the command line:
+  </p>
+<ol>
+  <li>
+    As described in the section <a href="#DownloadCode">Installing the Tutorial Sample Code</a>, get the sample code. You will then
+    have a directory <code>&lt;SDK_path&gt;/samples/android-8</code>, containing (among others) the directories <code>Spinner</code>
+    and <code>SpinnerTest</code>:
+    <ul>
+        <li>
+            <code>Spinner</code> contains the main application, also known as the <strong>application under test</strong>. This tutorial focuses on the
+            common situation of writing tests for an application that already exists, so the main application is provided to you.
+        </li>
+        <li>
+            <code>SpinnerTest</code> contains all the code for the test application. If you want to run quickly through the tutorial, you can
+            install the test code and then follow the text. You may get more from the tutorial, however, if you write the code as you go. The instructions
+            for installing the test code are in the section <a href="#InstallCompletedTestApp">Appendix: Installing the Completed Test Application File</a>.
+        </li>
+        </ul>
+  </li>
+  <li>
+    Navigate to the directory <code>&lt;SDK_path&gt;/samples/android-8</code>.
+  </li>
+  <li>
+    Create a new Android application project using <code>android create project</code>:
+<pre>
+$ android create project -t &lt;APItarget&gt; -k com.android.example.spinner -a SpinnerActivity -n SpinnerActivity -p Spinner
+</pre>
+    <p>
+        The value of <code>&lt;APItarget&gt;</code> should be &quot;3&quot; (API level 3) or higher. If you are already developing with a particular API level, and it is
+        higher than 3, then use that API level.
+    </p>
+    <p>
+        This a new Android project <code>SpinnerActivity</code> in the existing <code>Spinner</code> directory. The existing source and
+        resource files are not touched, but the <code>android</code> tool adds the necessary build files.
+    </p>
+  </li>
+  <li>
+    Create a new Android test project using <code>android create test-project</code>:
+<pre>
+$ android create test-project -m ../Spinner -n SpinnerActivityTest -p SpinnerActivityTest
+</pre>
+    <p>
+        This will create a new Android test project in the <em>new</em> directory <code>SpinnerActivityTest</code>. You do this
+        so that the solution to the tutorial that is in <code>SpinnerTest</code> is left untouched. If you want to use the solution
+        code instead of entering it as you read through the tutorial, refer to the section
+        <a href="#InstallCompletedTestApp">Appendix: Installing the Completed Test Application File</a>.
+    </p>
+    <p class="Note">
+      <strong>Note:</strong> Running <code>android create test-project</code> will automatically create
+      the file <code>AndroidManifest.xml</code> with the correct <code>&lt;instrumentation&gt;</code> element.
+    </p>
+  </li>
+  <li>
+    Build the sample application. If you are building with Ant, then it is easiest to use the command <code>ant debug</code> to build a debug version, since the SDK comes
+    with a debug signing key. The result will be the file <code>Spinner/bin/SpinnerActivity-debug.apk</code>.
+    You can install this to your device or emulator. Attach your device or start the emulator if you haven't already, and run the command:
+<pre>
+$ adb install Spinner/bin/SpinnerActivity-debug.apk
+</pre>
+  </li>
+  <li>
+    To create the test application, create a file <code>SpinnerActivityTest.java</code> in the directory
+    <code>SpinnerActivityTest/src/com/android/example/spinner/test/</code>.
+  </li>
+  <li>
+    Follow the tutorial, starting with the section <a href="#CreateTestCaseClass">Creating the Test Case Class</a>. When you are prompted to
+    run the sample application, go the the Launcher screen in your device or emulator and select SpinnerActivity.
+    When you are prompted to run the test application, return here to continue with the following instructions.
+  </li>
+  <li>
+    Build the test application. If you are building with Ant, then it is easiest to use the command <code>ant debug</code> to build a
+    debug version, since the SDK comes with a debug signing key. The result will be the Android file
+    <code>SpinnerActivityTest/bin/SpinnerActivityTest-debug.apk</code>. You can install this to your device or emulator.
+    Attach your device or start the emulator if you haven't already, and run the command:
+<pre>
+$ adb install SpinnerActivityTest/bin/SpinnerActivityTest-debug.apk
+</pre>
+  </li>
+  <li>
+    In your device or emulator, check that both the main application <code>SpinnerActivity</code> and the test application
+    <code>SpinnerActivityTest</code> are installed.
+  </li>
+  <li>
+    To run the test application, enter the following at the command line:
+<pre>
+$ adb shell am instrument -w com.android.example.spinner.test/android.test.InstrumentationTestRunner
+ </pre>
+  </li>
+</ol>
+<p>
+    The result of a successful test looks like this:
+</p>
+<pre>
+com.android.example.spinner.test.SpinnerActivityTest:....
+Test results for InstrumentationTestRunner=....
+Time: 10.098
+OK (4 tests)
+</pre>
+<p>
+    If you force the test to fail, as described in the previous section <a href="#TestFailure">Forcing Some Tests to Fail</a>, then
+    the output looks like this:
+</p>
+<pre>
+com.android.example.spinner.test.SpinnerActivityTest:
+Failure in testPreConditions:
+junit.framework.AssertionFailedError
+  at com.android.example.spinner.test.SpinnerActivityTest.testPreConditions(SpinnerActivityTest.java:104)
+  at java.lang.reflect.Method.invokeNative(Native Method)
+  at android.test.InstrumentationTestCase.runMethod(InstrumentationTestCase.java:205)
+  at android.test.InstrumentationTestCase.runTest(InstrumentationTestCase.java:195)
+  at android.test.ActivityInstrumentationTestCase2.runTest(ActivityInstrumentationTestCase2.java:175)
+  at android.test.AndroidTestRunner.runTest(AndroidTestRunner.java:169)
+  at android.test.AndroidTestRunner.runTest(AndroidTestRunner.java:154)
+  at android.test.InstrumentationTestRunner.onStart(InstrumentationTestRunner.java:430)
+  at android.app.Instrumentation$InstrumentationThread.run(Instrumentation.java:1447)
+Failure in testSpinnerUI:
+junit.framework.ComparisonFailure: expected:&lt;Result&gt; but was:&lt;Saturn&gt;
+  at com.android.example.spinner.test.SpinnerActivityTest.testSpinnerUI(SpinnerActivityTest.java:153)
+  at java.lang.reflect.Method.invokeNative(Native Method)
+  at android.test.InstrumentationTestCase.runMethod(InstrumentationTestCase.java:205)
+  at android.test.InstrumentationTestCase.runTest(InstrumentationTestCase.java:195)
+  at android.test.ActivityInstrumentationTestCase2.runTest(ActivityInstrumentationTestCase2.java:175)
+  at android.test.AndroidTestRunner.runTest(AndroidTestRunner.java:169)
+  at android.test.AndroidTestRunner.runTest(AndroidTestRunner.java:154)
+  at android.test.InstrumentationTestRunner.onStart(InstrumentationTestRunner.java:430)
+  at android.app.Instrumentation$InstrumentationThread.run(Instrumentation.java:1447)
+..
+Test results for InstrumentationTestRunner=.F.F..
+Time: 9.377
+FAILURES!!!
+Tests run: 4,  Failures: 2,  Errors: 0
+</pre>

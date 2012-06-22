@@ -1,0 +1,186 @@
+page.title=Debugging
+@jd:body
+
+
+ <div id="qv-wrapper">
+    <div id="qv">
+      <h2>In this document</h2>
+
+      <ol>
+        <li><a href="#stack">Debugging Environment</a></li>
+
+        <li><a href="#addltools">Additional Debugging Tools</a></li>
+
+        <li><a href="#tips">Debugging Tips</a></li>
+      </ol>
+    </div>
+  </div>
+
+  <p>The Android SDK provides most of the tools that you need to debug your applications. You need
+  a JDWP-compliant debugger if you want to be able to do things such as step through code,
+  view variable values, and pause execution of an application. If you are using Eclipse, a
+  JDWP-compliant debugger is already included and there is no setup required. If you are using
+  another IDE, you can use the debugger that comes with it and attach the debugger to a special
+  port so it can communicate with the application VMs on your devices. The main components that
+  comprise a typical Android debugging environment are:</p>
+
+  <dl>
+    <dt><a href="{@docRoot}tools/help/adb.html"><strong>adb</strong></a></dt>
+
+    <dd><code>adb</code> acts as a middleman between a device and your development system. It provides various
+    device management capabilities, including moving and syncing files to the emulator, running a
+    UNIX shell on the device or emulator, and providing a general means to communicate with
+    connected emulators and devices.</dd>
+
+    <dt><a href="{@docRoot}tools/debugging/ddms.html"><strong>Dalvik Debug Monitor
+    Server</strong></a></dt>
+
+    <dd>DDMS is a graphical program that communicates with your devices through <code>adb</code>. DDMS can
+    capture screenshots, gather thread and stack information, spoof incoming calls and SMS
+    messages, and has many other features.</dd>
+
+    <dt><strong><a href="{@docRoot}tools/device.html">Device</a> or
+    <a href="{@docRoot}tools/devices/index.html">Android Virtual Device</a></strong></dt>
+
+    <dd>Your application must run in a device or in an AVD so that it can be debugged. An <code>adb</code> device
+    daemon runs on the device or emulator and provides a means for the <code>adb</code> host daemon to
+    communicate with the device or emulator.</dd>
+
+    <dt><strong>JDWP debugger</strong></dt>
+
+    <dd>The Dalvik VM (Virtual Machine) supports the JDWP protocol to allow debuggers to attach to
+    a VM. Each application runs in a VM and exposes a unique port that you can attach a debugger to
+    via DDMS. If you want to debug multiple applications, attaching to each port might become
+    tedious, so DDMS provides a port forwarding feature that can forward a specific VM's debugging
+    port to port 8700. You can switch freely from application to application by highlighting it in the
+    Devices tab of DDMS. DDMS forwards the appropriate port to port 8700. Most modern Java IDEs include a JDWP debugger,
+    or you can use a command line debugger such as <a href="http://download.oracle.com/javase/6/docs/technotes/tools/">
+    <code>jdb</code></a>.</dd>
+  </dl>
+
+  <h2>Debugging Environment</h2>
+
+  <p>Figure 1 shows how the various debugging tools work together in a typical
+  debugging environment.</p>
+  <img src="{@docRoot}images/debugging.png"
+        alt="Debugging workflow" />
+  <p class="img-caption><strong>Figure 1. </strong> Debugging Workflow</p>
+
+  <p>On your emulator or device, each application runs in its own instance of a Dalvik VM. The <code>adb</code>
+  device daemon allows communication with the VMs from an outside party.</p>
+
+  <p>On your development machine, the <code>adb</code> host daemon communicates with the <code>adb</code> device daemon and
+  allows tools such as DDMS to communicate with the device or emulator. The <code>adb</code> host daemon also
+  allows you to access shell commands on the device as well as providing capabilities such as
+  application installation and file transferring.</p>
+
+  <p>Each application VM on the device or emulator exposes a debugging port that you can attach to
+  via DDMS. DDMS can forward any of these ports to a static debugging port (typically port 8700) by
+  selecting the application that you want to debug in the DDMS user interface. A JDWP debugger can
+  attach to this static debugging port and debug all the applications that are running on the
+  device or emulator without having to attach to multiple ports.</p>
+
+  <p>If you are using Eclipse, much of these interconnections are hidden from you. DDMS, <code>adb</code>, and a
+  JDWP debugger are all setup for you and you can access them through the Debug and DDMS
+  perspectives in Eclipse. If you are developing in a non-Eclipse environment, you have to invoke
+  these tools manually.</p>
+
+  <h2 id="addltools">Additional Debugging Tools</h2>
+
+  <p>In addition to the main debugging tools, the Android SDK provides additional tools to help you
+  debug and profile your applications:</p>
+
+  <dl>
+    <dt><strong><a href="{@docRoot}tools/debugging/debugging-ui.html">Heirarchy Viewer
+    and layoutopt</a></strong></dt>
+
+    <dd>Graphical programs that let you debug and profile user interfaces.</dd>
+
+    <dt><strong><a href=
+    "{@docRoot}tools/debugging/debugging-tracing.html">Traceview</a></strong></dt>
+
+    <dd>A graphical viewer that displays trace file data for method calls and times saved by your
+    application, which can help you profile the performance of your application.</dd>
+
+    <dt><strong><a href="{@docRoot}tools/debugging/debugging-devtools.html">Dev Tools
+    Android application</a></strong></dt>
+
+    <dd>The Dev Tools application included in the emulator system image exposes several settings
+    that provide useful information such as CPU usage and frame rate. You can also transfer the
+    application to a hardware device.</dd>
+  </dl>
+
+
+  <h2 id="tips">Debugging Tips</h2>
+
+<p>While debugging, keep these helpful tips in mind to help you figure out common problems with your
+applications:</p>
+
+<dl>
+<dt><strong>Dump the stack trace</strong></dt>
+<dd>To obtain a stack dump from emulator, you can log
+in with <code>adb shell</code>, use <code>ps</code> to find the process you
+want, and then <code>kill -3</code>. The stack trace appears in the log file.
+</dd>
+
+<dt><strong>Display useful info on the emulator screen</strong></dt>
+<dd>The device can display useful information such as CPU usage or highlights
+around redrawn areas. Turn these features on and off in the developer settings
+window as described in <a href="{@docRoot}tools/debugging/debugging-devtools.html">
+Debugging with the Dev Tools App</a>.
+</dd>
+
+<dt><strong>Get application and system state information from the emulator</strong></dt>
+<dd>You can access dumpstate information from the <code>adb shell</code> commands. See
+<a href="{@docRoot}tools/help/adb.html#dumpsys">dumpsys and
+dumpstate</a> on the adb topic page.</dd>
+
+
+
+<dt><strong>Get wireless connectivity information</strong></dt>
+<dd>You can get information about wireless connectivity using DDMS.
+From the <strong>Device</strong> menu, select <strong>Dump
+radio state</strong>.</dd>
+
+<dt><strong>Log trace data</strong></dt>
+<dd>You can log method calls and other tracing data in an activity by calling
+{@link android.os.Debug#startMethodTracing(String) startMethodTracing()}. See <a
+href="{@docRoot}tools/debugging/debugging-tracing.html">Profiling with Traceview and
+dmtracedump</a> for details. </dd>
+
+<dt><strong>Log radio data</strong></dt>
+<dd>By default, radio information is not logged to the system (it is a lot of
+data). However, you can enable radio logging using the following commands:
+
+<pre class="no-pretty-print">
+adb shell
+logcat -b radio
+</pre>
+</dd>
+
+<dt><strong>Capture screenshots</strong></dt>
+<dd>The Dalvik Debug Monitor Server (DDMS) can capture screenshots from the emulator. Select
+<strong>Device > Screen capture</strong>.</dd>
+
+<dt><strong>Use debugging helper classes</strong></dt>
+<dd>Android provides debug helper classes such as {@link android.util.Log
+    util.Log} and {@link android.os.Debug} for your convenience. </dd>
+
+<dt><strong>Garbage collection</strong></dt>
+<dd>
+The debugger and garbage collector are currently loosely integrated. The VM guarantees that any
+object the debugger is aware of is not garbage collected until after the debugger disconnects.
+This can result in a buildup of objects over time while the debugger is connected. For example,
+if the debugger sees a running thread, the associated {@link java.lang.Thread} object is not
+garbage collected even after the thread terminates.
+</dd>
+
+</dl>
+
+
+
+
+
+
+
+

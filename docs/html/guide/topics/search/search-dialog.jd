@@ -561,7 +561,7 @@ case, the search dialog naturally disappears).</p>
 events are triggered once the user executes a search (the current activity receives {@link
 android.app.Activity#onPause()} and so forth, as
 described in the <a
-href="{@docRoot}guide/topics/fundamentals/activities.html#Lifecycle">Activities</a>
+href="{@docRoot}guide/components/activities.html#Lifecycle">Activities</a>
 document). If, however, the current activity is the searchable activity, then one of two
 things happens:</p>
 

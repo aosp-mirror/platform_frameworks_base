@@ -1,0 +1,690 @@
+page.title=Testing from Other IDEs
+parent.title=Testing
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+    <div id="qv">
+        <h2>In this document</h2>
+            <ol>
+                <li>
+                    <a href="#CreateTestProjectCommand">Working with Test Projects</a>
+                    <ol>
+                        <li>
+                            <a href="#CreateTestProject">Creating a test project</a>
+                        </li>
+                        <li>
+                            <a href="#UpdateTestProject">Updating a test project</a>
+                        </li>
+                    </ol>
+                </li>
+                <li>
+                    <a href="#CreateTestApp">Creating a Test Package</a>
+                </li>
+                <li>
+                    <a href="#RunTestsCommand">Running Tests</a>
+                    <ol>
+                        <li>
+                            <a href="#RunTestsAnt">Quick build and run with Ant</a>
+                        </li>
+                        <li>
+                            <a href="#RunTestsDevice">Running tests on a device or emulator</a>
+                        </li>
+                    </ol>
+                </li>
+                <li>
+                    <a href="#AMSyntax">Using the Instrument Command</a>
+                    <ol>
+                        <li>
+                            <a href="#AMOptionsSyntax">Instrument options</a>
+                        </li>
+                        <li>
+                            <a href="#RunTestExamples">Instrument examples</a>
+                        </li>
+                    </ol>
+                </li>
+            </ol>
+        <h2>See Also</h2>
+            <ol>
+                <li>
+                    <a href="{@docRoot}tools/testing/testing_android.html">
+                        Testing Fundamentals</a>
+                </li>
+                <li>
+                    <a href="{@docRoot}tools/help/adb.html">Android Debug Bridge</a>
+                </li>
+            </ol>
+    </div>
+</div>
+<p>
+    This document describes how to create and run tests directly from the command line.
+    You can use the techniques described here if you are developing in an IDE other than Eclipse
+    or if you prefer to work from the command line. This document assumes that you already know how
+    to create a Android application in your programming environment. Before you start this
+    document, you should read the topic
+    <a href="{@docRoot}tools/testing/testing_android.html">Testing Fundamentals</a>,
+    which provides an overview of Android testing.
+</p>
+<p>
+    If you are developing in Eclipse with ADT, you can set up and run your tests
+    directly in Eclipse. For more information, please read
+    <a href="{@docRoot}tools/testing/testing_eclipse.html">
+    Testing from Eclipse with ADT</a>.
+</p>
+<h2 id="CreateTestProjectCommand">Working with Test Projects</h2>
+<p>
+    You use the <code>android</code> tool to create test projects.
+    You also use <code>android</code> to convert existing test code into an Android test project,
+    or to add the <code>run-tests</code> Ant target to an existing Android test project.
+    These operations are described in more detail in the section <a href="#UpdateTestProject">
+    Updating a test project</a>. The <code>run-tests</code> target is described in
+    <a href="#RunTestsAnt">Quick build and run with Ant</a>.
+</p>
+<h3 id="CreateTestProject">Creating a test project</h3>
+<p>
+    To create a test project with the <code>android</code> tool, enter:
+</p>
+<pre>
+android create test-project -m &lt;main_path&gt; -n &lt;project_name&gt; -p &lt;test_path&gt;
+</pre>
+<p>
+    You must supply all the flags. The following table explains them in detail:
+</p>
+<table>
+    <tr>
+        <th>Flag</th>
+        <th>Value</th>
+        <th>Description</th>
+    </tr>
+    <tr>
+        <td><code>-m, --main</code></td>
+        <td>
+            Path to the project of the application under test, relative to the test package
+            directory.
+        </td>
+        <td>
+            For example, if the application under test is in <code>source/HelloAndroid</code>, and
+            you want to create the test project in <code>source/HelloAndroidTest</code>, then the
+            value of <code>--main</code> should be <code>../HelloAndroid</code>.
+        <p>
+            To learn more about choosing the location of test projects, please read
+            <a href="{@docRoot}tools/testing/testing_android.html#TestProjects">
+            Testing Fundamentals</a>.
+        </p>
+        </td>
+    </tr>
+    <tr>
+        <td><code>-n, --name</code></td>
+        <td>Name that you want to give the test project.</td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td><code>-p, --path</code></td>
+        <td>Directory in which you want to create the new test project.</td>
+        <td>
+            The <code>android</code> tool creates the test project files and directory structure
+            in this directory. If the directory does not exist, <code>android</code> creates it.
+        </td>
+    </tr>
+</table>
+<p>
+    If the operation is successful, <code>android</code> lists to STDOUT the names of the files
+    and directories it has created.
+</p>
+<p>
+    This creates a new test project with the appropriate directories and build files. The directory
+    structure and build file contents are identical to those in a regular Android application
+    project. They are described in detail in the topic
+    <a href="{@docRoot}tools/projects/index.html">Managing Projects</a>.
+</p>
+<p>
+    The operation also creates an <code>AndroidManifest.xml</code> file with instrumentation
+    information. When you run the test, Android uses this information to load the application you
+    are testing and control it with instrumentation.
+</p>
+<p>
+    For example, suppose you create a project in the directory <code>~/source/HelloAndroid</code>,
+with the package name <code>com.example.helloandroid</code>,
+    and the activity name <code>HelloAndroid</code>. You can to create the test for this in
+    <code>~/source/HelloAndroidTest</code>. To do so, you enter:
+</p>
+<pre>
+$ cd ~/source
+$ android create test-project -m ../HelloAndroid -n HelloAndroidTest -p HelloAndroidTest
+</pre>
+<p>
+    This creates a directory called <code>~/src/HelloAndroidTest</code>. In the new directory you
+    see the file <code>AndroidManifest.xml</code>. This file contains the following
+    instrumentation-related elements and attributes:
+</p>
+<ul>
+    <li>
+        <code>&lt;application&gt;</code>: to contain the
+        <code>&lt;uses-library&gt;</code> element.
+    </li>
+    <li>
+        <code>&lt;uses-library android:name=&quot;android.test.runner&quot;</code>:
+        specifies this testing application uses the <code>android.test.runner</code> library.
+    </li>
+    <li>
+        <code>&lt;instrumentation&gt;</code>: contains attributes that control Android
+        instrumentation. The attributes are:
+        <ul>
+            <li>
+                <code>android:name=&quot;android.test.InstrumentationTestRunner&quot;</code>:
+                {@link android.test.InstrumentationTestRunner} runs test cases. It extends both
+                JUnit test case runner classes and Android instrumentation classes.
+            </li>
+            <li>
+                <code>android:targetPackage=&quot;com.example.helloandroid&quot;</code>: specifies
+                that the tests in HelloAndroidTest should be run against the application with the
+                <em>Android</em> package name <code>com.example.helloandroid</code>.
+            </li>
+            <li>
+                <code>android:label=&quot;Tests for .HelloAndroid&quot;</code>: specifies a
+                user-readable label for the instrumentation class. By default,
+                the <code>android</code> tool gives it the value &quot;Tests for &quot; plus
+                the name of the main Activity of the application under test.
+            </li>
+        </ul>
+    </li>
+</ul>
+<h3 id="UpdateTestProject">Updating a test project</h3>
+<p>
+    You use the <code>android</code> tool when you need to change the path to the
+    project of the application under test. If you are changing an existing test project created in
+    Eclipse with ADT so that you can also build and run it from the command line, you must use the
+    "create" operation. See the section <a href="#CreateTestProject">Creating a test project</a>.
+</p>
+<p class="note">
+    <strong>Note:</strong> If you change the Android package name of the application under test,
+    you must <em>manually</em> change the value of the <code>&lt;android:targetPackage&gt;</code>
+    attribute within the <code>AndroidManifest.xml</code> file of the test package.
+    Running <code>android update test-project</code> does not do this.
+</p>
+<p>
+  To update a test project with the <code>android</code> tool, enter:
+</p>
+<pre>android update test-project -m &lt;main_path&gt; -p &lt;test_path&gt;</pre>
+
+<table>
+    <tr>
+        <th>Flag</th>
+        <th>Value</th>
+        <th>Description</th>
+    </tr>
+    <tr>
+        <td><code>-m, --main</code></td>
+        <td>The path to the project of the application under test, relative to the test project</td>
+        <td>
+            For example, if the application under test is in <code>source/HelloAndroid</code>, and
+            the test project is in <code>source/HelloAndroidTest</code>, then the value for
+            <code>--main</code> is <code>../HelloAndroid</code>.
+        </td>
+    </tr>
+    <tr>
+        <td><code>-p, --path</code></td>
+        <td>The of the test project.</td>
+        <td>
+            For example, if the test project is in <code>source/HelloAndroidTest</code>, then the
+            value for <code>--path</code> is <code>HelloAndroidTest</code>.
+        </td>
+    </tr>
+</table>
+<p>
+    If the operation is successful, <code>android</code> lists to STDOUT the names of the files
+    and directories it has created.
+</p>
+<h2 id="CreateTestApp">Creating a Test Package</h2>
+<p>
+    Once you have created a test project, you populate it with a test package.
+    The application does not require an {@link android.app.Activity Activity},
+    although you can define one if you wish. Although your test package can
+    combine Activities, Android test class extensions, JUnit extensions, or
+    ordinary classes, you should extend one of the Android test classes or JUnit classes,
+    because these provide the best testing features.
+</p>
+<p>
+    If you run your tests with {@link android.test.InstrumentationTestRunner}
+    (or a related test runner), then it will run all the methods in each class. You can modify
+    this behavior by using the {@link junit.framework.TestSuite TestSuite} class.
+</p>
+
+<p>
+    To create a test package, start with one of Android's test classes in the Java package
+    {@link android.test android.test}. These extend the JUnit
+    {@link junit.framework.TestCase TestCase} class. With a few exceptions, the Android test
+    classes also provide instrumentation for testing.
+</p>
+<p>
+    For test classes that extend {@link junit.framework.TestCase TestCase}, you probably want to
+    override the <code>setUp()</code> and <code>tearDown()</code> methods:
+</p>
+<ul>
+    <li>
+        <code>setUp()</code>: This method is invoked before any of the test methods in the class.
+        Use it to set up the environment for the test. You can use <code>setUp()</code>
+        to instantiate a new <code>Intent</code> object with the action <code>ACTION_MAIN</code>.
+        You can then use this intent to start the Activity under test.
+        <p class="note">
+            <strong>Note:</strong> If you override this method, call
+            <code>super.setUp()</code> as the first statement in your code.
+        </p>
+    </li>
+    <li>
+        <code>tearDown()</code>: This method is invoked after all the test methods in the class. Use
+        it to do garbage collection and re-setting before moving on to the next set of tests.
+        <p class="note"><strong>Note:</strong> If you override this method, you must call
+        <code>super.tearDown()</code> as the <em>last</em> statement in your code.</p>
+    </li>
+</ul>
+<p>
+    Another useful convention is to add the method <code>testPreConditions()</code> to your test
+    class. Use this method to test that the application under test is initialized correctly. If this
+    test fails, you know that that the initial conditions were in error. When this happens, further
+    test results are suspect, regardless of whether or not the tests succeeded.
+</p>
+<p>
+    To learn more about creating test packages, see the topic <a
+    href="{@docRoot}tools/testing/testing_android.html">Testing Fundamentals</a>,
+    which provides an overview of Android testing. If you prefer to follow a tutorial,
+    try the <a href="{@docRoot}tools/testing/activity_test.html">Activity Testing</a>
+    tutorial, which leads you through the creation of tests for an actual Android application.
+</p>
+<h2 id="RunTestsCommand">Running Tests</h2>
+<p>
+    You run tests from the command line, either with Ant or with an
+    <a href="{@docRoot}tools/help/adb.html">
+    Android Debug Bridge (adb)</a> shell.
+</p>
+<h3 id="RunTestsAnt">Quick build and run with Ant</h3>
+<p>
+    You can use Ant to run all the tests in your test project, using the target
+    <code>run-tests</code>, which is created automatically when you create a test project with
+    the <code>android</code> tool.
+</p>
+<p>
+    This target re-builds your main project and test project if necessary, installs the test
+    application to the current AVD or device, and then runs all the test classes in the test
+    application. The results are directed to <code>STDOUT</code>.
+</p>
+<p>
+    You can update an existing test project to use this feature. To do this, use the
+    <code>android</code> tool with the <code>update test-project</code> option. This is described
+    in the section <a href="#UpdateTestProject">Updating a test project</a>.
+</p>
+<h3 id="RunTestsDevice">Running tests on a device or emulator</h3>
+<p>
+    When you run tests from the command line with
+    <a href="{@docRoot}tools/help/adb.html">
+    Android Debug Bridge (adb)</a>, you get more options for choosing the tests
+    to run than with any other method. You can select individual test methods, filter tests
+    according to their annotation, or specify testing options. Since the test run is controlled
+    entirely from a command line, you can customize your testing with shell scripts in various ways.
+</p>
+<p>
+    To run a test from the command line, you run <code>adb shell</code> to start a command-line
+    shell on your device or emulator, and then in the shell run the <code>am instrument</code>
+    command. You control <code>am</code> and your tests with command-line flags.
+</p>
+<p>
+    As a shortcut, you can start an <code>adb</code> shell, call <code>am instrument</code>, and
+    specify command-line flags all on one input line. The shell opens on the device or emulator,
+    runs your tests, produces output, and then returns to the command line on your computer.
+</p>
+<p>
+    To run a test with <code>am instrument</code>:
+</p>
+<ol>
+    <li>
+        If necessary, rebuild your main application and test package.
+    </li>
+    <li>
+        Install your test package and main application Android package files
+        (<code>.apk</code> files) to your current Android device or emulator</li>
+    <li>
+        At the command line, enter:
+<pre>
+$ adb shell am instrument -w &lt;test_package_name&gt;/&lt;runner_class&gt;
+</pre>
+        <p>
+            where <code>&lt;test_package_name&gt;</code> is the Android package name of your test
+            application, and <code>&lt;runner_class&gt;</code> is the name of the Android test
+            runner class you are using. The Android package name is the value of the
+            <code>package</code> attribute of the <code>manifest</code> element in the manifest file
+            (<code>AndroidManifest.xml</code>) of your test package. The Android test runner
+            class is usually {@link android.test.InstrumentationTestRunner}.
+        </p>
+        <p>
+            Your test results appear in <code>STDOUT</code>.
+        </p>
+    </li>
+</ol>
+<p>
+    This operation starts an <code>adb</code> shell, then runs <code>am instrument</code>
+    with the specified parameters. This particular form of the command will run all of the tests
+    in your test package. You can control this behavior with flags that you pass to
+    <code>am instrument</code>. These flags are described in the next section.
+</p>
+<h2 id="AMSyntax">Using the am instrument Command</h2>
+<p>
+    The general syntax of the <code>am instrument</code> command is:
+</p>
+<pre>
+    am instrument [flags] &lt;test_package&gt;/&lt;runner_class&gt;
+</pre>
+<p>
+    The main input parameters to <code>am instrument</code> are described in the following table:
+</p>
+<table>
+    <tr>
+        <th>
+            Parameter
+        </th>
+        <th>
+            Value
+        </th>
+        <th>
+            Description
+        </th>
+    </tr>
+    <tr>
+        <td>
+            <code>&lt;test_package&gt;</code>
+        </td>
+        <td>
+            The Android package name of the test package.
+        </td>
+        <td>
+            The value of the <code>package</code> attribute of the <code>manifest</code>
+            element in the test package's manifest file.
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <code>&lt;runner_class&gt;</code>
+        </td>
+        <td>
+            The class name of the instrumented test runner you are using.
+        </td>
+        <td>
+            This is usually {@link android.test.InstrumentationTestRunner}.
+        </td>
+    </tr>
+</table>
+<p>
+    The flags for <code>am instrument</code> are described in the following table:
+</p>
+<table>
+    <tr>
+        <th>
+            Flag
+        </th>
+        <th>
+            Value
+        </th>
+        <th>
+            Description
+        </th>
+    </tr>
+    <tr>
+        <td>
+            <code>-w</code>
+        </td>
+        <td>
+            (none)
+        </td>
+        <td>
+            Forces <code>am instrument</code> to wait until the instrumentation terminates
+            before terminating itself. The net effect is to keep the shell open until the tests
+            have finished. This flag is not required, but if you do not use it, you will not
+            see the results of your tests.
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <code>-r</code>
+        </td>
+        <td>
+            (none)
+        </td>
+        <td>
+            Outputs results in raw format. Use this flag when you want to collect
+            performance measurements, so that they are not formatted as test results. This flag is
+            designed for use with the flag <code>-e perf true</code> (documented in the section
+            <a href="#AMOptionsSyntax">Instrument options</a>).
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <code>-e</code>
+        </td>
+        <td>
+             &lt;test_options&gt;
+        </td>
+        <td>
+            Provides testing options as key-value pairs. The
+            <code>am instrument</code> tool passes these to the specified instrumentation class
+            via its <code>onCreate()</code> method. You can specify multiple occurrences of
+            <code>-e &lt;test_options&gt;</code>. The keys and values are described in the
+            section <a href="#AMOptionsSyntax">am instrument options</a>.
+            <p>
+                The only instrumentation class that uses these key-value pairs is
+                {@link android.test.InstrumentationTestRunner} (or a subclass). Using them with
+                any other class has no effect.
+            </p>
+        </td>
+    </tr>
+</table>
+
+<h3 id="AMOptionsSyntax">am instrument options</h3>
+<p>
+    The <code>am instrument</code> tool passes testing options to
+    <code>InstrumentationTestRunner</code> or a subclass in the form of key-value pairs,
+    using the <code>-e</code> flag, with this syntax:
+</p>
+<pre>
+    -e &lt;key&gt; &lt;value&gt;
+</pre>
+<p>
+    Some keys accept multiple values. You specify multiple values in a comma-separated list.
+    For example, this invocation of <code>InstrumentationTestRunner</code> provides multiple
+    values for the <code>package</code> key:
+</p>
+<pre>
+$ adb shell am instrument -w -e package com.android.test.package1,com.android.test.package2 \
+&gt; com.android.test/android.test.InstrumentationTestRunner
+</pre>
+<p>
+    The following table describes the key-value pairs and their result. Please review the
+    <strong>Usage Notes</strong> following the table.
+</p>
+<table>
+    <tr>
+        <th>Key</th>
+        <th>Value</th>
+        <th>Description</th>
+    </tr>
+    <tr>
+        <td>
+            <code>package</code>
+        </td>
+        <td>
+            &lt;Java_package_name&gt;
+        </td>
+        <td>
+            The fully-qualified <em>Java</em> package name for one of the packages in the test
+            application. Any test case class that uses this package name is executed. Notice that
+            this is not an <em>Android</em> package name; a test package has a single
+            Android package name but may have several Java packages within it.
+        </td>
+    </tr>
+    <tr>
+        <td rowspan="2"><code>class</code></td>
+        <td>&lt;class_name&gt;</td>
+        <td>
+            The fully-qualified Java class name for one of the test case classes. Only this test
+            case class is executed.
+        </td>
+    </tr>
+    <tr>
+        <td>&lt;class_name&gt;<strong>#</strong>method name</td>
+        <td>
+            A fully-qualified test case class name, and one of its methods. Only this method is
+            executed. Note the hash mark (#) between the class name and the method name.
+        </td>
+    </tr>
+    <tr>
+        <td><code>func</code></td>
+        <td><code>true</code></td>
+        <td>
+            Runs all test classes that extend {@link android.test.InstrumentationTestCase}.
+        </td>
+    </tr>
+    <tr>
+        <td><code>unit</code></td>
+        <td><code>true</code></td>
+        <td>
+            Runs all test classes that do <em>not</em> extend either
+            {@link android.test.InstrumentationTestCase} or
+            {@link android.test.PerformanceTestCase}.
+        </td>
+    </tr>
+    <tr>
+        <td><code>size</code></td>
+        <td>
+            [<code>small</code> | <code>medium</code> | <code>large</code>]
+        </td>
+        <td>
+            Runs a test method annotated by size. The  annotations are <code>@SmallTest</code>,
+            <code>@MediumTest</code>, and <code>@LargeTest</code>.
+        </td>
+    </tr>
+    <tr>
+        <td><code>perf</code></td>
+        <td><code>true</code></td>
+        <td>
+            Runs all test classes that implement {@link android.test.PerformanceTestCase}.
+            When you use this option, also specify the <code>-r</code> flag for
+            <code>am instrument</code>, so that the output is kept in raw format and not
+            re-formatted as test results.
+        </td>
+    </tr>
+    <tr>
+        <td><code>debug</code></td>
+        <td><code>true</code></td>
+        <td>
+            Runs tests in debug mode.
+        </td>
+    </tr>
+    <tr>
+        <td><code>log</code></td>
+        <td><code>true</code></td>
+        <td>
+            Loads and logs all specified tests, but does not run them. The test
+            information appears in <code>STDOUT</code>. Use this to verify combinations of other
+            filters and test specifications.
+        </td>
+    </tr>
+    <tr>
+        <td><code>emma</code></td>
+        <td><code>true</code></td>
+        <td>
+            Runs an EMMA code coverage analysis and writes the output to
+            <code>/data//coverage.ec</code> on the device. To override the file location, use the
+            <code>coverageFile</code> key that is described in the following entry.
+            <p class="note">
+                <strong>Note:</strong> This option requires an EMMA-instrumented build of the test
+                application, which you can generate with the <code>coverage</code> target.
+            </p>
+        </td>
+    </tr>
+    <tr>
+        <td><code>coverageFile</code></td>
+        <td><code>&lt;filename&gt;</code></td>
+        <td>
+            Overrides the default location of the EMMA coverage file on the device. Specify this
+            value as a path and filename in UNIX format. The default filename is described in the
+            entry for the <code>emma</code> key.
+        </td>
+    </tr>
+</table>
+<strong><code>-e</code> Flag Usage Notes</strong>
+<ul>
+    <li>
+        <code>am instrument</code> invokes
+        {@link android.test.InstrumentationTestRunner#onCreate(Bundle)}
+        with a {@link android.os.Bundle} containing the key-value pairs.
+    </li>
+    <li>
+        The <code>package</code> key takes precedence over the <code>class</code> key. If you
+        specifiy a package, and then separately specify a class within that package, Android
+        will run all the tests in the package and ignore the <code>class</code> key.
+    </li>
+    <li>
+        The <code>func</code> key and <code>unit</code> key are mutually exclusive.
+    </li>
+</ul>
+<h3 id="RunTestExamples">Usage examples</h3>
+<p>
+The following sections provide examples of using <code>am instrument</code> to run tests.
+They are based on the following structure:</p>
+<ul>
+    <li>
+        The test package has the Android package name <code>com.android.demo.app.tests</code>
+    </li>
+    <li>
+        There are three test classes:
+        <ul>
+            <li>
+                <code>UnitTests</code>, which contains the methods
+                <code>testPermissions</code> and <code>testSaveState</code>.
+            </li>
+            <li>
+                <code>FunctionTests</code>, which contains the methods
+                <code>testCamera</code>, <code>testXVGA</code>, and <code>testHardKeyboard</code>.
+            </li>
+            <li>
+                <code>IntegrationTests</code>,
+                which contains the method <code>testActivityProvider</code>.
+            </li>
+        </ul>
+    </li>
+    <li>
+        The test runner is {@link android.test.InstrumentationTestRunner}.
+    </li>
+</ul>
+<h4>Running the entire test package</h4>
+<p>
+    To run all of the test classes in the test package, enter:
+</p>
+<pre>
+$ adb shell am instrument -w com.android.demo.app.tests/android.test.InstrumentationTestRunner
+</pre>
+<h4>Running all tests in a test case class</h4>
+<p>
+    To run all of the tests in the class <code>UnitTests</code>, enter:
+</p>
+<pre>
+$ adb shell am instrument -w  \
+&gt; -e class com.android.demo.app.tests.UnitTests \
+&gt; com.android.demo.app.tests/android.test.InstrumentationTestRunner
+</pre>
+<p>
+  <code>am instrument</code> gets the value of the <code>-e</code> flag, detects the
+  <code>class</code> keyword, and runs all the methods in the <code>UnitTests</code> class.
+</p>
+<h4>Selecting a subset of tests</h4>
+<p>
+    To run all of the tests in <code>UnitTests</code>, and the <code>testCamera</code> method in
+    <code>FunctionTests</code>, enter:
+</p>
+<pre>
+$ adb shell am instrument -w \
+&gt; -e class com.android.demo.app.tests.UnitTests,com.android.demo.app.tests.FunctionTests#testCamera \
+&gt; com.android.demo.app.tests/android.test.InstrumentationTestRunner
+</pre>
+<p>
+    You can find more examples of the command in the documentation for
+    {@link android.test.InstrumentationTestRunner}.
+</p>

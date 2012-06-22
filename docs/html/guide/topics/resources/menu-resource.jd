@@ -111,7 +111,7 @@ only parameter, which indicates the item clicked. This method takes precedence o
 callback to {@link android.app.Activity#onOptionsItemSelected onOptionsItemSelected()}. See the
 example at the bottom.
           <p class="warning"><strong>Warning:</strong> If you obfuscate your code using <a
-href="{@docRoot}guide/developing/tools/proguard.html">ProGuard</a> (or a similar tool),
+href="{@docRoot}tools/help/proguard.html">ProGuard</a> (or a similar tool),
 be sure to exclude the method you specify in this attribute from renaming, because it can break the
 functionality.</p>
           <p>Introduced in API Level 11.</p></dd>
@@ -133,7 +133,8 @@ Avoid using this unless it's critical that the item always appear in the action
 bar. Setting multiple items to always appear as action items can result in them overlapping
 with other UI in the action bar.</td></tr>
             <tr><td><code>collapseActionView</code></td><td>The action view associated
-with this action item (as declared by <code>android:actionViewLayout</code>) is
+with this action item (as declared by <code>android:actionLayout</code> or
+<code>android:actionViewClass</code>) is
 collapsible.<br/>Introduced in API Level 14.</td></tr>
           </table>
           <p>See the <a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> developer 
@@ -141,7 +142,7 @@ guide for more information.</p>
           <p>Introduced in API Level 11.</p>
         </dd>
 
-        <dt><code>android:actionViewLayout</code></dt>
+        <dt><code>android:actionLayout</code></dt>
           <dd><em>Layout resource</em>. A layout to use as the action view.
           <p>See the <a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> developer 
 guide for more information.</p>
@@ -154,7 +155,7 @@ to use as the action view. For example,
           <p>See the <a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> developer 
 guide for more information.</p>
           <p class="warning"><strong>Warning:</strong> If you obfuscate your code using <a
-href="{@docRoot}guide/developing/tools/proguard.html">ProGuard</a> (or a similar tool),
+href="{@docRoot}tools/help/proguard.html">ProGuard</a> (or a similar tool),
 be sure to exclude the class you specify in this attribute from renaming, because it can break the
 functionality.</p>
           <p>Introduced in API Level 11.</p></dd>
@@ -166,7 +167,7 @@ android.view.ActionProvider} to use in place of the action item. For example,
           <p>See the <a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> developer
 guide for more information.</p>
           <p class="warning"><strong>Warning:</strong> If you obfuscate your code using <a
-href="{@docRoot}guide/developing/tools/proguard.html">ProGuard</a> (or a similar tool),
+href="{@docRoot}tools/help/proguard.html">ProGuard</a> (or a similar tool),
 be sure to exclude the class you specify in this attribute from renaming, because it can break the
 functionality.</p>
           <p>Introduced in API Level 14.</p></dd>

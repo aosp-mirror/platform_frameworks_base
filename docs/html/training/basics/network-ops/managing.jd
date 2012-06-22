@@ -1,0 +1,445 @@
+page.title=Managing Network Usage
+parent.title=Performing Network Operations
+parent.link=index.html
+
+trainingnavtop=true
+
+previous.title=Connecting to the Network
+previous.link=connecting.html
+next.title=Parsing XML Data
+next.link=xml.html
+
+@jd:body
+ 
+<div id="tb-wrapper"> 
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+    <ol>
+  <li><a href="#check-connection">Check a Device's Network Connection</a></li>
+  <li><a href="#manage-usage">Manage Network Usage</a></li>
+  <li><a href="#prefs">Implement a Preferences Activity</a></li>
+  <li><a href="#pref-change">Respond to Preference Changes</a></li>
+  <li><a href="#detect-changes">Detect Connection Changes</a></li>
+</ol>
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}training/monitoring-device-state/index.html">Optimizing Battery Life</a></li>
+  <li><a href="{@docRoot}training/efficient-downloads/index.html">Transferring Data Without Draining the Battery</a></li>
+  <li><a href="{@docRoot}guide/webapps/index.html">Web Apps Overview</a></li>
+</ul>
+
+<h2>Try it out</h2>
+
+<div class="download-box">
+  <a href="{@docRoot}shareables/training/NetworkUsage.zip"
+class="button">Download the sample</a>
+ <p class="filename">NetworkUsage.zip</p>
+</div>
+
+</div> 
+</div>
+
+<p>This lesson describes how to write applications that have fine-grained
+control over their usage of network resources. If your application performs a
+lot of network operations, you should provide user settings that allow users
+to control your app’s data habits, such as how often your app syncs data,
+whether to perform uploads/downloads only when on Wi-Fi, whether to use data
+while roaming, and so on. With these controls available to them, users are much
+less likely to disable your app’s access to background data when they approach their
+limits, because they can instead precisely control how much data your app
+uses.</p>
+
+<p>For general guidelines on how to write apps that minimize the battery life 
+impact of downloads and network connections, see 
+<a href="{@docRoot}training/monitoring-device-state/index.html">Optimizing Battery Life</a> 
+and <a href="{@docRoot}training/efficient-downloads/index.html">Transferring Data Without Draining the Battery</a>.
+
+<h2 id="check-connection">Check a Device's Network Connection</h2>
+
+<p>A device can have various types of network connections. This lesson  
+focuses on using either a Wi-Fi or a mobile network connection. For the full 
+list of possible network types, see {@link android.net.ConnectivityManager}.<p>
+
+<p>Wi-Fi is typically faster. Also, mobile data is often metered, which can get
+expensive. 
+A common strategy for apps is to only fetch large data
+if a Wi-Fi network is available.</p>
+
+<p>Before you perform network operations, it's good practice to check the state of
+network connectivity. Among other things, this could prevent your app from inadvertently using
+the wrong radio. If a network connection is unavailable, your application
+should respond gracefully. To check the network connection, you typically use
+the following classes:</p>
+
+<ul>
+
+  <li>{@link android.net.ConnectivityManager}: Answers queries about the state
+of network connectivity. It also  notifies applications when network
+connectivity changes. </li>
+  
+  <li>{@link android.net.NetworkInfo}: Describes the status of a network
+interface of a given type  (currently either Mobile or Wi-Fi).
+  </li>
+  
+</ul>
+
+
+
+<p>This code snippet tests network connectivity for Wi-Fi and mobile. It
+determines whether these network interfaces are available (that is, whether
+network connectivity is possible) and/or connected (that is, whether network
+connectivity exists and if it is possible to establish sockets and pass
+data): </p>
+
+<pre>
+private static final String DEBUG_TAG = &quot;NetworkStatusExample&quot;;
+...      
+ConnectivityManager connMgr = (ConnectivityManager) 
+        getSystemService(Context.CONNECTIVITY_SERVICE);
+NetworkInfo networkInfo = connMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI); 
+boolean isWifiConn = networkInfo.isConnected();
+networkInfo = connMgr.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+boolean isMobileConn = networkInfo.isConnected();
+Log.d(DEBUG_TAG, "Wifi connected: " + isWifiConn);
+Log.d(DEBUG_TAG, "Mobile connected: " + isMobileConn);
+</pre> 
+
+<p>Note that you should not base decisions on whether a network is
+&quot;available.&quot; You should always check {@link
+android.net.NetworkInfo#isConnected isConnected()} before performing network
+operations, since {@link android.net.NetworkInfo#isConnected isConnected()}
+handles  cases like flaky mobile networks, airplane mode, and restricted
+background data.</p>
+
+<p>A more concise way of checking whether a network interface is available is as
+follows. The method {@link
+android.net.ConnectivityManager#getActiveNetworkInfo() getActiveNetworkInfo()}
+returns a {@link android.net.NetworkInfo} instance representing the first
+connected network interface it can find, or <code>null</code> if none if the
+interfaces is connected (meaning that an
+internet connection is not available):</p>
+
+<pre>
+public boolean isOnline() {
+    ConnectivityManager connMgr = (ConnectivityManager) 
+            getSystemService(Context.CONNECTIVITY_SERVICE);
+    NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+    return (networkInfo != null && networkInfo.isConnected());
+}  </pre>
+
+<p>To query more fine-grained state you can use {@link
+android.net.NetworkInfo.DetailedState}, but this should seldom be necessary.</p>
+
+
+<h2 id="manage-usage">Manage Network Usage</h2>
+
+<p>You can implement a preferences activity that gives users explicit control
+over your app's usage of network resources. For
+example:</p>
+
+<ul>
+
+<li>You might allow users to upload videos only when the device is connected to a
+Wi-Fi network.</li>
+
+<li>You might sync (or not) depending on specific criteria such as network
+availability, time interval, and so on.</li>
+
+</ul>
+
+<p>To write an app that supports network access and managing 
+network usage, your manifest must have the right permissions and 
+intent filters.
+</p>
+
+<ul>
+  <li>The manifest excerpted below includes the following permissions:
+    <ul>
+    
+      <li>{@link android.Manifest.permission#INTERNET
+android.permission.INTERNET}&mdash;Allows applications to open network
+sockets.</li>
+      
+      <li>{@link android.Manifest.permission#ACCESS_NETWORK_STATE
+android.permission.ACCESS_NETWORK_STATE}&mdash;Allows applications to access
+information about networks.</li>
+      
+    </ul>
+  </li>
+  
+  <li>You can declare the intent filter for the 
+{@link android.content.Intent#ACTION_MANAGE_NETWORK_USAGE} action (introduced in
+Android 4.0) to indicate that your application defines an activity that offers
+options to control data usage. {@link
+android.content.Intent#ACTION_MANAGE_NETWORK_USAGE} shows settings for managing
+the network data usage of a specific application. When your app has a settings activity 
+that allows users to control network usage, you should declare this intent filter for that activity. 
+In the sample application, this action is handled by the class
+<code>SettingsActivity</code>, which displays a preferences UI to let users
+decide when to download a feed.</li>
+  
+</ul>
+
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.android.networkusage"
+    ...&gt;
+
+    &lt;uses-sdk android:minSdkVersion="4" 
+           android:targetSdkVersion="14" /&gt;
+        
+    &lt;uses-permission android:name="android.permission.INTERNET" /&gt;
+    &lt;uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /&gt;
+
+    &lt;application
+        ...&gt;
+        ...
+        &lt;activity android:label="SettingsActivity" android:name=".SettingsActivity"&gt;
+             &lt;intent-filter&gt;
+                &lt;action android:name="android.intent.action.MANAGE_NETWORK_USAGE" /&gt;
+                &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+          &lt;/intent-filter&gt;
+        &lt;/activity&gt;
+    &lt;/application&gt;
+&lt;/manifest&gt;
+</pre>
+
+<h2 id="prefs">Implement a Preferences Activity</h2>
+
+<p>As you can see in the manifest excerpt above, the sample app's activity
+<code>SettingsActivity</code> has an intent filter for the {@link
+android.content.Intent#ACTION_MANAGE_NETWORK_USAGE} action.
+<code>SettingsActivity</code> is a subclass of {@link
+android.preference.PreferenceActivity}. It displays a preferences screen 
+(shown in figure 1) that
+lets users specify the following:</p>
+
+<ul>
+
+  <li>Whether to display summaries for each XML feed entry, or just a link for
+each entry.</li>
+  
+  <li>Whether to download the XML feed if any network connection is available,
+or only if Wi-Fi is available.</li>
+  
+</ul>
+
+<img src="{@docRoot}images/training/basics/network-settings1.png" alt="Preferences panel" />
+
+<img src="{@docRoot}images/training/basics/network-settings2.png" alt="Setting a network preference" />
+<p class="img-caption"><strong>Figure 1.</strong> Preferences activity.</p>
+
+<p>Here is <code>SettingsActivity</code>. Note that it implements 
+{@link android.content.SharedPreferences.OnSharedPreferenceChangeListener OnSharedPreferenceChangeListener}. 
+When a user changes a preference, it fires
+{@link android.content.SharedPreferences.OnSharedPreferenceChangeListener#onSharedPreferenceChanged onSharedPreferenceChanged()}, 
+which sets {@code refreshDisplay} to true. This causes the display to refresh when the user 
+returns to the main activity:</p>
+
+<pre>public class SettingsActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
+    
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        
+        // Loads the XML preferences file
+        addPreferencesFromResource(R.xml.preferences);
+    }
+  
+    &#64;Override
+    protected void onResume() {
+        super.onResume();
+
+        // Registers a listener whenever a key changes            
+        getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
+    }
+  
+    &#64;Override
+    protected void onPause() {
+        super.onPause();
+
+       // Unregisters the listener set in onResume().
+       // It's best practice to unregister listeners when your app isn't using them to cut down on 
+       // unnecessary system overhead. You do this in onPause().            
+       getPreferenceScreen().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);    
+    }
+  
+    // When the user changes the preferences selection, 
+    // onSharedPreferenceChanged() restarts the main activity as a new
+    // task. Sets the the refreshDisplay flag to "true" to indicate that 
+    // the main activity should update its display.
+    // The main activity queries the PreferenceManager to get the latest settings.
+    
+    &#64;Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {    
+        // Sets refreshDisplay to true so that when the user returns to the main
+        // activity, the display refreshes to reflect the new settings.
+        NetworkActivity.refreshDisplay = true;
+    }
+}</pre>
+
+<h2 id="pref-change">Respond to Preference Changes</h2>
+
+<p>When the user changes preferences in the settings screen, it typically has
+consequences for the app's behavior. In this snippet, the app checks the
+preferences settings in {@code onStart()}. if there is a match between the setting and
+the device's network connection (for example, if the setting is {@code "Wi-Fi"} and the
+device has a Wi-Fi connection), the app downloads the feed and refreshes the
+display.</p>
+
+<pre>
+public class NetworkActivity extends Activity {
+    public static final String WIFI = "Wi-Fi";
+    public static final String ANY = "Any";
+    private static final String URL = "http://stackoverflow.com/feeds/tag?tagnames=android&sort=newest";
+   
+    // Whether there is a Wi-Fi connection.
+    private static boolean wifiConnected = false; 
+    // Whether there is a mobile connection.
+    private static boolean mobileConnected = false;
+    // Whether the display should be refreshed.
+    public static boolean refreshDisplay = true;
+    
+    // The user's current network preference setting.
+    public static String sPref = null;
+    
+    // The BroadcastReceiver that tracks network connectivity changes.
+    private NetworkReceiver receiver = new NetworkReceiver();
+    
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        
+        // Registers BroadcastReceiver to track network connection changes.
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        receiver = new NetworkReceiver();
+        this.registerReceiver(receiver, filter);
+    }
+    
+    &#64;Override 
+    public void onDestroy() {
+        super.onDestroy();
+        // Unregisters BroadcastReceiver when app is destroyed.
+        if (receiver != null) {
+            this.unregisterReceiver(receiver);
+        }
+    }
+    
+    // Refreshes the display if the network connection and the
+    // pref settings allow it.
+    
+    &#64;Override
+    public void onStart () {
+        super.onStart();  
+        
+        // Gets the user's network preference settings
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        
+        // Retrieves a string value for the preferences. The second parameter
+        // is the default value to use if a preference value is not found.
+        sPref = sharedPrefs.getString("listPref", "Wi-Fi");
+
+        updateConnectedFlags(); 
+       
+        if(refreshDisplay){
+            loadPage();    
+        }
+    }
+    
+    // Checks the network connection and sets the wifiConnected and mobileConnected
+    // variables accordingly. 
+    public void updateConnectedFlags() {
+        ConnectivityManager connMgr = (ConnectivityManager) 
+                getSystemService(Context.CONNECTIVITY_SERVICE);
+        
+        NetworkInfo activeInfo = connMgr.getActiveNetworkInfo();
+        if (activeInfo != null && activeInfo.isConnected()) {
+            wifiConnected = activeInfo.getType() == ConnectivityManager.TYPE_WIFI;
+            mobileConnected = activeInfo.getType() == ConnectivityManager.TYPE_MOBILE;
+        } else {
+            wifiConnected = false;
+            mobileConnected = false;
+        }  
+    }
+      
+    // Uses AsyncTask subclass to download the XML feed from stackoverflow.com.
+    public void loadPage() {
+        if (((sPref.equals(ANY)) && (wifiConnected || mobileConnected))
+                || ((sPref.equals(WIFI)) && (wifiConnected))) {
+            // AsyncTask subclass
+            new DownloadXmlTask().execute(URL);
+        } else {
+            showErrorPage();
+        }
+    }
+...
+    
+}</pre>
+
+<h2 id="detect-changes">Detect Connection Changes</h2>
+
+<p>The final piece of the puzzle is the {@link
+android.content.BroadcastReceiver} subclass, <code>NetworkReceiver</code>. When
+the device's network connection changes, <code>NetworkReceiver</code> intercepts
+the  action {@link android.net.ConnectivityManager#CONNECTIVITY_ACTION},
+determines what the  network connection status is, and sets the flags
+<code>wifiConnected</code> and <code>mobileConnected</code> to true/false
+accordingly. The upshot is that the next time the user returns to the app, the
+app will only download the latest feed and update the display if 
+<code>NetworkActivity.refreshDisplay</code> is set to <code>true</code>.</p>
+
+<p>Setting up a BroadcastReceiver that gets called unnecessarily can be a 
+drain on system resources.
+The sample application registers the 
+{@link android.content.BroadcastReceiver} {@code NetworkReceiver} in 
+{@link android.app.Activity#onCreate(android.os.Bundle) onCreate()}, 
+and it unregisters it in 
+{@link android.app.Activity#onDestroy onDestroy()}. This is more lightweight 
+than declaring a {@code &lt;receiver&gt;} in the manifest. When you declare a 
+{@code &lt;receiver&gt;} in the manifest, it can wake up your app at any time, 
+even if you haven't run it for weeks. By registering and unregistering 
+{@code NetworkReceiver} within the main activity, you ensure that the app won't 
+be woken up after the user leaves the app. 
+If you do declare a {@code &lt;receiver&gt;} in the manifest and you know exactly 
+where you need it, you can use 
+{@link android.content.pm.PackageManager#setComponentEnabledSetting setComponentEnabledSetting()}
+to enable and disable it as appropriate.</p>
+
+<p>Here is  <code>NetworkReceiver</code>:</p>
+
+<pre>public class NetworkReceiver extends BroadcastReceiver {   
+      
+&#64;Override
+public void onReceive(Context context, Intent intent) {
+    ConnectivityManager conn =  (ConnectivityManager)
+        context.getSystemService(Context.CONNECTIVITY_SERVICE);
+    NetworkInfo networkInfo = conn.getActiveNetworkInfo();
+       
+    // Checks the user prefs and the network connection. Based on the result, decides whether
+    // to refresh the display or keep the current display.
+    // If the userpref is Wi-Fi only, checks to see if the device has a Wi-Fi connection.
+    if (WIFI.equals(sPref) && networkInfo != null && networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
+        // If device has its Wi-Fi connection, sets refreshDisplay
+        // to true. This causes the display to be refreshed when the user
+        // returns to the app.
+        refreshDisplay = true;
+        Toast.makeText(context, R.string.wifi_connected, Toast.LENGTH_SHORT).show();
+
+    // If the setting is ANY network and there is a network connection
+    // (which by process of elimination would be mobile), sets refreshDisplay to true.
+    } else if (ANY.equals(sPref) && networkInfo != null) {
+        refreshDisplay = true;
+                 
+    // Otherwise, the app can't download content--either because there is no network
+    // connection (mobile or Wi-Fi), or because the pref setting is WIFI, and there 
+    // is no Wi-Fi connection.
+    // Sets refreshDisplay to false.
+    } else {
+        refreshDisplay = false;
+        Toast.makeText(context, R.string.lost_connection, Toast.LENGTH_SHORT).show();
+    }
+}</pre>
+

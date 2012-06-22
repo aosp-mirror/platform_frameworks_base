@@ -1,0 +1,246 @@
+page.title=Licensing Overview
+parent.title=Application Licensing
+parent.link=index.html
+@jd:body
+
+
+<div id="qv-wrapper">
+<div id="qv">
+  
+  <h2>Quickview</h2>
+  <ul>
+    <li>Licensing allows you to verify your app was purchased from Google Play</li>
+    <li>Your app maintains control of how it enforces its licensing status</li>
+    <li>The service is free for all developers who publish on Google Play</li>
+  </ul>
+  
+  <h2>In this document</h2>
+  <ol>
+  <li><a href="#Secure">License Responses are Secure</a></li>
+  <li><a href="#LVL">Licensing Verification Library</a></li>
+  <li><a href="#Reqs">Requirements and Limitations</a></li>
+  <li><a href="#CopyProtection">Replacement for Copy Protection</a></li>
+</ol>
+  
+</div>
+</div>
+
+
+<p>Google Play Licensing is a network-based service that lets an application query a trusted
+Google Play licensing server to determine whether the application is licensed to the current
+device user. The licensing service is based on the capability of the Google Play licensing server
+to determine whether a given user is licensed to use a given application. Google Play considers a
+user to be licensed if the user is a recorded purchaser of the application.</p>
+
+<p>The request starts when your application makes a request to a service hosted by
+the Google Play client application. The Google Play application then sends a request to
+the licensing server and receives the result. The Google Play application sends
+the result to your application, which can allow or disallow further use of the
+application as needed.</p>
+
+<p class="note"><strong>Note:</strong> If a paid application has been uploaded to Google Play but
+saved only as a draft application (the app is unpublished), the licensing server considers all users
+to be licensed users of the application (because it's not even possible to purchase the app).
+This exception is necessary in order for you to perform testing of your licensing
+implementation.</p>
+
+
+<div class="figure" style="width:469px">
+<img src="{@docRoot}images/licensing_arch.png" alt=""/>
+<p class="img-caption"><strong>Figure 1.</strong> Your application initiates a
+license check through the License Verification Library and the Google Play
+client, which handles communication with the Google Play server.</p>
+</div>
+
+
+<p>To properly identify the user and determine the license status, the licensing server requires
+information about the application and user&mdash;your application and the Google Play client work
+together to assemble the information and the Google Play client passes it to the server. </p>
+
+<p>To help you add licensing to your application, the Android SDK provides a downloadable set of
+library sources that you can include in your application project: the Google Market
+Licensing package. The License Verification Library (LVL) is a library you can add to your
+application that
+handles all of the licensing-related communication with the Google Play licensing service. With
+the LVL added to your application, your application can determine its licensing status for the
+current user by simply calling a method and implementing a callback that receives the status
+response.</p>
+
+<p>Your application does not query the licensing server
+directly, but instead calls the Google Play client over remote IPC to
+initiate a license request. In the license request:</p>
+
+<ul>
+<li>Your application provides: its package name, a nonce that is later used to
+validate any response from the server, and a callback over which the
+response can be returned asynchronously.</li>
+<li>The Google Play client collects the necessary information about the user and the device,
+such as the device's primary Google account username, IMSI, and other
+information. It then sends the license check request to the server on behalf of
+your application.</li>
+<li>The Google Play server evaluates the request using all available information, attempting
+to establish the user's identity to a sufficient level of confidence. The server
+then checks the user identity against purchase records for your application and
+returns a license response, which the Google Play client returns to your
+application over the IPC callback.</li>
+</ul>
+
+<p>You can choose when, and how often, you want your application to check its
+license and you have full control over how it handles the response, verifies the
+signed response data, and enforces access controls.</p>
+
+<p>Notice that during a license check, your application does not manage any
+network connections or use any licensing related APIs in the Android platform.</p>
+
+
+
+
+<h2 id="Secure">License Responses are Secure</h2>
+
+<p>To ensure the integrity of each license query, the server signs the license
+response data using an RSA key pair that is shared exclusively between the Google Play
+server and you.</p>
+
+<p>The licensing service generates a single licensing key pair for each
+publisher account and exposes the public key in your account's profile page. You must copy the
+public key from the web site and embed it in your application source code. The server retains the
+private key internally and uses it to sign license responses for the applications you
+publish with that account.</p>
+
+<p>When your application receives a signed response, it uses the embedded public
+key to verify the data. The use of public key cryptography in the licensing
+service makes it possible for the application to detect responses that have been
+tampered with or that are spoofed.</p>
+
+
+
+
+<h2 id="LVL">Licensing Verification Library</h2>
+
+<p>The Android SDK provides a downloadable package called the Google Market Licensing package,
+which includes the License Verification Library (LVL). The LVL greatly simplifies the process of
+adding licensing to your application and helps ensure a more secure, robust implementation for your
+application. The LVL provides internal classes that handle most of the standard operations of a
+license query, such as contacting the Google Play client to initiate a license request and
+verifying and validating the responses. It also exposes interfaces that let you easily plug in your
+custom code for defining licensing policy and managing access as needed by your application. The key
+LVL interfaces are: </p>
+
+<dl>
+<dt>{@code Policy}</dt>
+  <dd>Your implementation determines whether to allow access to the
+application, based on the license response received from the server and any
+other data available (such as from a backend server associated with your
+application). The implementation can evaluate the various fields of the license
+response and apply other constraints, if needed. The implementation also lets
+you manage the handling of license checks that result in errors, such as network
+errors.</dd>
+
+<dt>{@code LicenseCheckerCallback}</dt>
+  <dd>Your implementation manages access to the
+application, based on the result of the {@code Policy} object's handling of the license
+response. Your implementation can manage access in any way needed, including
+displaying the license result in the UI or directing the user to purchase the
+application (if not currently licensed).</dd>
+</dl>
+
+
+<p>To help you get started with a {@code Policy}, the LVL provides two fully complete
+{@code Policy} implementations that you can use without modification or adapt to your
+needs:</p>
+
+<dl>
+<dt><a href="adding-licensing.html#ServerManagedPolicy">{@code ServerManagedPolicy}</a></dt>
+  <dd>A flexible {@code Policy}
+that uses settings provided by the licensing server to manage response caching
+and access to the application while the device is offline (such as when the
+user is on an airplane). For most applications, the use of
+{@code ServerManagedPolicy} is highly recommended.</dd>
+
+<dt><a href="adding-licensing.html#StrictPolicy">{@code StrictPolicy}</a></dt>
+  <dd>A restrictive {@code Policy} that
+does not cache any response data and allows the application access <em>only</em>
+when the server returns a licensed response.</dd>
+</dl>
+
+<p>The LVL is available as a downloadable package of the Android SDK. The
+package includes both the LVL itself and an example application that shows how
+the library should be integrated with your application and how your application
+should manage response data, UI interaction, and error conditions. </p>
+
+<p>The LVL sources are provided as an Android <em>library project</em>, which
+means that you can maintain a single set of library sources and share them
+across multiple applications. A full test environment is also available through
+the SDK, so you can develop and test the licensing implementation in your
+applications before publishing them, even if you don't have access to a
+physical device.</p>
+
+
+
+
+<h2 id="Reqs">Requirements and Limitations</h2>
+
+<p>Google Play Licensing is designed to let you apply license controls to
+applications that you publish through Google Play. The service is not
+designed to let you control access to applications that are not published
+through Google Play or that are run on devices that do not offer the Google
+Play client. </p>
+
+<p>Here are some points to keep in mind as you implement licensing in your
+application: </p>
+
+<ul>
+<li>An application can use the service only if the Google Play client is
+installed on its host device and the device is running Android 1.5 (API level 3)
+or higher.</li>
+<li>To complete a license check, the licensing server must be accessible over
+the network. You can implement license caching behaviors to manage access to your application when
+there is no network connectivity. </li>
+<li>The security of your application's licensing controls ultimately relies on
+the design of your implementation itself. The service provides the building
+blocks that let you securely check licensing, but the actual enforcement and
+handling of the license are factors are up to you. By following the best
+practices in the following documents, you can help ensure that your implementation will be
+secure.</li>
+<li>Adding licensing to an application does not affect the way the application
+functions when run on a device that does not offer Google Play.</li>
+<li>You can implement licensing controls for a free app, but only if you're using the service to 
+provide <a
+href="{@docRoot}guide/google/play/expansion-files.html">APK expansion files</a>.</li>
+</ul>
+
+
+
+<h2 id="CopyProtection">Replacement for Copy Protection</h2>
+
+<p>Google Play Licensing is a flexible, secure mechanism for controlling
+access to your applications. It effectively replaces the Copy Protection
+mechanism offered on Google Play and gives you wider distribution
+potential for your applications. </p>
+
+<ul>
+<li>A limitation of the legacy Copy Protection mechanism on Google Play is
+that applications using it can be installed only on compatible devices that
+provide a secure internal storage environment. For example, a copy-protected
+application cannot be downloaded from Google Play to a device that provides root
+access, and the application cannot be installed to a device's SD card. </li>
+<li>With Google Play licensing, you can move to a license-based model in
+which access is not bound to the characteristics of the host device, but to your
+publisher account on Google Play and the licensing policy that you define.
+Your application can be installed and controlled on any compatible device on
+any storage, including SD card.</li>
+</ul>
+
+<p>Although no license mechanism can completely prevent all unauthorized use,
+the licensing service lets you control access for most types of normal usage,
+across all compatible devices, locked or unlocked, that run Android 1.5 or
+higher version of the platform.</p>
+
+<p>To begin adding application licensing to your application, continue to <a
+href="{@docRoot}guide/google/play/licensing/setting-up.html">Setting Up for Licensing</a>.</p>
+
+
+
+
+
+

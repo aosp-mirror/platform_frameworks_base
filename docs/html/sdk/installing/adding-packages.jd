@@ -1,0 +1,78 @@
+page.title=Adding Platforms and Packages
+walkthru=1
+
+@jd:body
+
+
+<p>The Android SDK separates different parts of the SDK into separately downloadable packages. The
+SDK starter package that you've installed includes only the SDK Tools. To develop an Android app,
+you also need to download at least one Android platform and the latest SDK Platform-tools.</p>
+
+<p>You can update and install SDK packages at any time using the Android SDK Manager.</p>
+
+<p>If you've used the Windows installer to install the SDK tools, you should already have the
+Android SDK Manager open. Otherwise, you can launch the Android SDK Manager in one of the following
+ways:</p>
+<ul>
+  <li>On Windows, double-click the <code>SDK Manager.exe</code> file at the root of the Android
+SDK directory.</li>
+  <li>On Mac or Linux, open a terminal and navigate to the <code>tools/</code> directory in the
+Android SDK, then execute <code>android sdk</code>.</li>
+</ul>
+
+<p>When you open the Android SDK Manager, it automatically selects a set of recommended packages.
+Simply click <strong>Install</strong> to install the recommended packages. The Android SDK Manager
+installs the selected packages into
+your Android SDK environment. The following sections describe some of the available SDK
+packages and more about which ones we recommend you install.</p>
+
+<p>Once you have installed your packages, continue to the next page.</p>
+
+<img src="/images/sdk_manager_packages.png" alt="" />
+<p class="img-caption"><strong>Figure 1.</strong> The Android SDK Manager shows the
+SDK packages that are available, already installed, or for which an update is available.</p>
+
+
+
+
+<h2 id="Recommended">Recommended Packages</h2>
+
+<p>Here's an outlines of the packages required and those we recommend you use:
+</p>
+
+<dl>
+  <dt>SDK Tools</dt>
+  <dd><strong>Required.</strong> Your new SDK installation already has the latest version. Make sure
+you keep this up to date.</dd>
+  <dt>SDK Platform-tools</dt>
+  <dd><strong>Required.</strong> You must install this package when you install the SDK for
+the first time.</dd>
+  <dt>SDK Platform</dt>
+  <dd><strong>Required.</strong>You need to download <strong
+style="color:red">at least one platform</strong> into your environment so you're
+able to compile your application. In order to provide the best user experience on the latest
+devices, we recommend that you use the latest platform version as your build target. You'll
+still be able to run your app on older versions, but you must build against the latest version
+in order to use new features when running on devices with the latest version of Android.</dd>
+  <dt>System Image</dt>
+  <dd>Recommended. Although you might have one or more Android-powered devices on which to test
+ your app, it's unlikely you have a device for every version of Android your app supports. It's
+a good practice to download a system image for each version of Android you support and use them
+to test your app on the Android emulator.</dd>
+  <dt>SDK Samples</dt>
+  <dd>Recommended. The samples give you source code that you can use to learn about
+Android, load as a project and run, or reuse in your own app. Note that multiple
+samples packages are available &mdash; one for each Android platform version. When
+you are choosing a samples package to download, select the one whose API Level
+matches the API Level of the Android platform that you plan to use.</dd>
+  <dt>Android Support</dt>
+  <dd>Recommended. The APIs available in this static library allow you to use a variety of new
+framework features (including some not available in even the latest version) on devices running
+a platform version as old as Android 1.6. For more information, read <a
+href="{@docRoot}tools/extras/support-library.html">Support Library</a>.</dd>
+</dl>
+
+
+<p class="note"><strong>Tip:</strong> For easy access to the SDK tools from a command line, add the
+location of the SDK's <code>tools/</code> and
+<code>platform-tools</code> to your <code>PATH</code> environment variable.</p>

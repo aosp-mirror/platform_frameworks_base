@@ -29,8 +29,8 @@ page.title=Eclipse 内で ADT を使用
   <li>プロジェクトを、ユーザーに配布可能な署名済みの APK 形式でエクスポートすることもできます。</li>
 </ul>
 
-<p>ADT を組み込んだ Eclipse 総合開発環境で Android アプリケーションの開発を始めるには、最初に Eclipse 総合開発環境をダウンロードしてから、ADT プラグインをダウンロードしてインストールする必要があります。そのためには、<a href="{@docRoot}sdk/eclipse-adt.html#installing">Eclipse 用 ADT プラグインのインストール</a>に記載されている手順どおりに操作します。</p>
-<p>バージョン 0.9 より前の ADT を使用してアプリケーションを既に開発中の場合は、必ず最新バージョンにアップグレードしてから続行してください。<a href="{@docRoot}sdk/eclipse-adt.html#updating">Eclipse ADT プラグインをアップデート</a>するためのガイドをご覧ください。</p>
+<p>ADT を組み込んだ Eclipse 総合開発環境で Android アプリケーションの開発を始めるには、最初に Eclipse 総合開発環境をダウンロードしてから、ADT プラグインをダウンロードしてインストールする必要があります。そのためには、<a href="{@docRoot}tools/sdk/eclipse-adt.html#installing">Eclipse 用 ADT プラグインのインストール</a>に記載されている手順どおりに操作します。</p>
+<p>バージョン 0.9 より前の ADT を使用してアプリケーションを既に開発中の場合は、必ず最新バージョンにアップグレードしてから続行してください。<a href="{@docRoot}tools/sdk/eclipse-adt.html#updating">Eclipse ADT プラグインをアップデート</a>するためのガイドをご覧ください。</p>
 <p class="note"><strong>注:</strong> このガイドでは、ADT プラグインの最新バージョンを使用していることを前提としています。説明の大半は、以前のバージョンにも当てはまりますが、以前のバージョンを使用している場合は、このドキュメントのオンライン版ではなく、SDK パッケージに付属された資料内の同ドキュメントをご覧ください。</p>
 
 
@@ -84,9 +84,9 @@ page.title=Eclipse 内で ADT を使用
 
 <h2 id="Running">アプリケーションの実行</h2>
 
-<p>注意してください。<em></em>アプリケーションを Android エミュレータで実行する前に、Android 仮想デバイス（AVD）を作成する<strong>必要があります</strong>。AVD では、エミュレータで使用する Android プラットフォームを指定します。詳しくは <a href="{@docRoot}guide/developing/tools/avd.html">Android 仮想デバイス</a> のドキュメントをご覧ください。ただし、すぐにアプリケーションを実行したい場合は、次の簡単な手順に従って AVD を作成してください。</p>
+<p>注意してください。<em></em>アプリケーションを Android エミュレータで実行する前に、Android 仮想デバイス（AVD）を作成する<strong>必要があります</strong>。AVD では、エミュレータで使用する Android プラットフォームを指定します。詳しくは <a href="{@docRoot}tools/avd.html">Android 仮想デバイス</a> のドキュメントをご覧ください。ただし、すぐにアプリケーションを実行したい場合は、次の簡単な手順に従って AVD を作成してください。</p>
 
-<p>携帯端末の実機でのみアプリケーションを実行する場合は、AVD は必要ありません。この場合のアプリケーションの実行について詳しくは、<a href="{@docRoot}guide/developing/device.html">Developing On a Device</a> をご覧ください。</p>
+<p>携帯端末の実機でのみアプリケーションを実行する場合は、AVD は必要ありません。この場合のアプリケーションの実行について詳しくは、<a href="{@docRoot}tools/device.html">Developing On a Device</a> をご覧ください。</p>
 
 <h3 id="CreatingAnAvd">AVD の作成</h3>
 
@@ -119,7 +119,7 @@ id:2
 
 <p>これで AVD が作成できました。次のセクションでは、エミュレータでアプリケーションを起動する際に、AVD がどのように使用されるかについて説明します。</p>
 
-<p>AVD の作成と管理について詳しくは、<a href="{@docRoot}guide/developing/tools/avd.html">Android 仮想デバイス</a> のドキュメントをご覧ください。</p>
+<p>AVD の作成と管理について詳しくは、<a href="{@docRoot}tools/avd.html">Android 仮想デバイス</a> のドキュメントをご覧ください。</p>
 
 
 <h3 id="RunningYourApplication">アプリケーションの実行</h3>
@@ -193,7 +193,7 @@ id:2
 
 <p>Android アプリケーションの開発を始めると、Android アプリケーションをシステムがエミュレータや実機にインストールする前に、どの Android アプリケーションにもデジタル署名が必要であることがわかります。署名には、デバッグ キーを使用する方法（エミュレータや開発用端末ですぐにテストする場合）と、非公開キーを使用する方法（アプリケーションを配布する場合）の 2 つがあります。</p>
 <p>ADT プラグインでは、アプリケーションをエミュレータや開発用端末にインストールする前に、.apk ファイルがデバッグ キーを使用して署名されるので、開発を早めることができます。つまり、独自の非公開キーを生成する必要がなく、Eclipse からアプリケーションをすぐに実行できます。Keytool に ADT がアクセスできれば、デベロッパーが特に操作する必要はありません。ただし、アプリケーションを公開する場合は、SDK ツールが生成するデバッグ キーではなく、独自の非公開キーを使用してアプリケーションに署名する<strong>必要があります</strong>。</p>
-<p><a href="{@docRoot}guide/publishing/app-signing.html">アプリケーションへの署名</a>をご覧ください。Android でのアプリケーションへの署名と、Android アプリケーション デベロッパーにとっての署名の意味について説明しています。このドキュメントには、ADT のエクスポート ウィザードを使用してアプリケーションをエクスポートし、署名するためのガイドも含まれています。</p>
+<p><a href="{@docRoot}tools/publishing/app-signing.html">アプリケーションへの署名</a>をご覧ください。Android でのアプリケーションへの署名と、Android アプリケーション デベロッパーにとっての署名の意味について説明しています。このドキュメントには、ADT のエクスポート ウィザードを使用してアプリケーションをエクスポートし、署名するためのガイドも含まれています。</p>
 
 <h2 id="Tips">Eclipse のヒント </h2>
 
@@ -224,7 +224,7 @@ id:2
 
 <h3>DDMS の手動による実行</h3>
 
-<p>ADT プラグインを使用するデバッグをおすすめしますが、手動で DDMS を実行し、ポート 8700 でデバッグするように Eclipse を設定することができます（<strong>注:</strong> 最初に必ず <a href="{@docRoot}guide/developing/tools/ddms.html">DDMS</a> を起動してください）。 </p>
+<p>ADT プラグインを使用するデバッグをおすすめしますが、手動で DDMS を実行し、ポート 8700 でデバッグするように Eclipse を設定することができます（<strong>注:</strong> 最初に必ず <a href="{@docRoot}tools/ddms.html">DDMS</a> を起動してください）。 </p>
 
 <!-- TODO: clean this up and expand it to cover more wizards and features
 <h3>ADT Wizards</h3>

@@ -18,7 +18,7 @@ messages</li>
 
 <h2>See also</h2>
 <ol>
-  <li><a href="{@docRoot}guide/developing/debugging/index.html">Debugging</a></li>
+  <li><a href="{@docRoot}tools/debugging/index.html">Debugging</a></li>
 </ol>
 
 </div>
@@ -43,10 +43,10 @@ the device throws an error, as well as log messages written from your applicatio
 those written using JavaScript {@code console} APIs.</p>
   <p>To run logcat and view messages, execute
 {@code adb logcat} from your Android SDK {@code tools/} directory, or, from DDMS, select
-<strong>Device > Run logcat</strong>. When using the <a href="{@docRoot}sdk/eclipse-adt.html">ADT
+<strong>Device > Run logcat</strong>. When using the <a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT
 plugin for Eclipse</a>, you can also view logcat messages by opening the Logcat view, available from
 <strong>Window > Show View > Other > Android > Logcat</strong>.</p>
-  <p>See <a href="{@docRoot}guide/developing/debugging/debugging-log.html">Debugging</a>
+  <p>See <a href="{@docRoot}tools/debugging/debugging-log.html">Debugging</a>
   for more information about <codelogcat</code>.</p>
 </div>
 </div>

@@ -1,0 +1,279 @@
+page.title=Cómo admitir varios tamaños de pantalla
+parent.title=Cómo diseñar aplicaciones para varias pantallas
+parent.link=index.html
+
+trainingnavtop=true
+next.title=Cómo admitir varias densidades de pantalla
+next.link=screendensities.html
+
+@jd:body
+
+
+<!-- This is the training bar -->
+<div id="tb-wrapper"> 
+<div id="tb"> 
+
+<h2>En esta sección puedes aprender:</h2>
+<ol>
+  <li><a href="#TaskUseWrapMatchPar">Cómo utilizar los valores "wrap_content" y "match_parent"</a></li>
+  <li><a href="#TaskUseRelativeLayout">Cómo utilizar RelativeLayout</a></li>
+  <li><a href="#TaskUseSizeQuali">Cómo utilizar calificadores de tamaño</a></li>
+  <li><a href="#TaskUseSWQuali">Cómo utilizar el calificador de ancho más pequeño</a></li>
+  <li><a href="#TaskUseAliasFilters">Cómo utilizar alias de diseño</a></li>
+  <li><a href="#TaskUseOriQuali">Cómo utilizar calificadores de orientación</a></li>
+  <li><a href="#TaskUse9Patch">Cómo utilizar mapas de bits de la clase NinePatch</a></li>
+</ol>
+
+<h2>También puedes consultar:</h2>
+
+<ul>
+  <li><a href="{@docRoot}guide/practices/screens_support.html">Cómo admitir varias pantallas</a></li>
+</ul>
+
+<h2>¡Pruébalo!</h2> 
+ 
+<div class="download-box"> 
+<a href="http://developer.android.com/shareables/training/NewsReader.zip" class="button">Descargar la aplicación de ejemplo</a>
+<p class="filename">NewsReader.zip</p> 
+</div> 
+ 
+</div> 
+</div> 
+
+<p>En esta sección se explica cómo admitir varios tamaños de pantalla. Para ello, sigue estos pasos:</p>
+<ul> 
+  <li>Asegúrate de que el diseño se haya ajustado correctamente al tamaño de la pantalla.</li> 
+  <li>Configura la pantalla con el diseño de interfaz adecuado.</li> 
+  <li>Asegúrate de aplicar el diseño adecuado a la pantalla correspondiente.</li>
+  <li>Utiliza el mapa de bits con la escala adecuada.</li> 
+</ul> 
+
+
+<h2 id="TaskUseWrapMatchPar">Cómo utilizar los valores "wrap_content" y "match_parent"</h2> 
+
+<p>Para garantizar que el diseño es flexible y que se adapta a varios tamaños de pantalla, debes utilizar los valores <code>"wrap_content"</code> y <code>"match_parent"</code> para la altura y el ancho de algunos componentes de la vista. Si utilizas <code>"wrap_content"</code>, el ancho o la altura de la vista se establece en el tamaño mínimo necesario para adaptar el contenido a esta vista, mientras que <code>"match_parent"</code> (también conocido como <code>"fill_parent"</code> antes del nivel 8 del API) provoca que el componente se amplíe hasta coincidir con el tamaño de la vista principal.</p>
+
+<p>Al utilizar los valores de tamaño <code>"wrap_content"</code> y <code>"match_parent"</code> en lugar de los tamaños predefinidos, las vistas pueden utilizar únicamente el espacio requerido para esa vista o ampliarse hasta rellenar el espacio disponible respectivamente. Por ejemplo:</p>
+
+{@sample development/samples/training/multiscreen/newsreader/res/layout/onepane_with_bar.xml all}
+
+<p>Observa cómo se utilizan en el ejemplo los valores <code>"wrap_content"</code> y <code>"match_parent"</code> para los tamaños de los componentes en lugar de dimensiones específicas. Esto permite que el diseño se adapte correctamente a diferentes tamaños y orientaciones de la pantalla.</p>
+
+<p>Por ejemplo, esta es la apariencia del diseño en modo horizontal y vertical. Ten en cuenta que los tamaños de los componentes se adaptan automáticamente a la altura y al ancho:</p>
+
+<img src="{@docRoot}images/training/layout-hvga.png" />
+<p class="img-caption"><strong>Figura 1.</strong> La aplicación de ejemplo News Reader en modo vertical (izquierda) y horizontal (derecha)</p>
+
+
+<h2 id="TaskUseRelativeLayout">Cómo utilizar RelativeLayout</h2> 
+
+<p>Puedes crear diseños de un cierto nivel de complejidad con instancias anidadas de <PH>{@link android.widget.LinearLayout}</PH> y combinaciones de los valores de tamaño <code>"wrap_content"</code> y <code>"match_parent"</code>. Sin embargo, <PH>{@link android.widget.LinearLayout}</PH> no te permite controlar con precisión las relaciones espaciales de las vistas secundarias; las vistas de <PH>{@link android.widget.LinearLayout}</PH> simplemente se alinean en paralelo. Si quieres orientar las vistas secundarias de una forma que no sea una línea recta, a menudo la mejor solución es utilizar <PH>{@link android.widget.RelativeLayout}</PH>que te permite especificar el diseño según las relaciones espaciales entre los componentes. Por ejemplo, puedes alinear una vista secundaria en el lateral izquierdo y otra vista en el lateral derecho de la pantalla.</p>
+
+<p>Por ejemplo:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"&gt;
+    &lt;TextView
+        android:id="&#64;+id/label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Type here:"/&gt;
+    &lt;EditText
+        android:id="&#64;+id/entry"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="&#64;id/label"/&gt;
+    &lt;Button
+        android:id="&#64;+id/ok"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="&#64;id/entry"
+        android:layout_alignParentRight="true"
+        android:layout_marginLeft="10dp"
+        android:text="OK" /&gt;
+    &lt;Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="&#64;id/ok"
+        android:layout_alignTop="&#64;id/ok"
+        android:text="Cancel" /&gt;
+&lt;/RelativeLayout&gt;
+</pre>
+
+<p>La figura 2 indica cómo se muestra este diseño en una pantalla QVGA.</p>
+
+<img src="{@docRoot}images/training/relativelayout1.png" />
+<p class="img-caption"><strong>Figura 2.</strong> Captura de pantalla de una pantalla QVGA (pantalla pequeña)</p>
+
+<p>La figura 3 indica cómo se muestra este diseño en una pantalla más grande.</p>
+
+<img src="{@docRoot}images/training/relativelayout2.png" />
+<p class="img-caption"><strong>Figura 3.</strong> Captura de pantalla de una pantalla WSVGA (pantalla grande)</p>
+
+<p>Ten en cuenta que aunque el tamaño de los componentes es diferente, las relaciones espaciales se mantienen según se ha especificado con <PH>{@link android.widget.RelativeLayout.LayoutParams}</PH>.</p>
+
+ 
+<h2 id="TaskUseSizeQuali">Cómo utilizar calificadores de tamaño</h2> 
+
+<p>Hay mucha diferencia entre un diseño flexible y un diseño relativo como el que se ha utilizado en las secciones anteriores. Aunque ambos diseños se adaptan a diferentes pantalla estirando el espacio dentro de los componentes y alrededor de los mismos, puede que no ofrezcan la mejor experiencia de usuario para cada tamaño de pantalla. Por tanto, tu aplicación no solo debe implementar los diseños flexibles, sino que también debe ofrecer varios diseños alternativos para diferentes configuraciones de pantalla. Para ello, se utilizan <a href="http://developer.android.com/guide/practices/screens_support.html#qualifiers">calificadores de configuración</a>, que permiten que el tiempo de ejecución seleccione el recurso adecuado en función de la configuración actual del dispositivo (por ejemplo, un diseño diferente para diferentes tamaños de pantalla).</p>
+
+<p>Por ejemplo, muchas aplicaciones implementan el patrón de "panel dual" para pantallas grandes (la aplicación mostraría una lista de elementos en un panel y el contenido en otro panel). Aunque los tablets y las televisiones son lo suficientemente grandes como para que los dos paneles aparezcan simultáneamente en la pantalla, las pantallas de los teléfonos tienen que mostrarlos por separado. Para implementar estos diseños, puedes utilizar los siguientes archivos:</p>
+
+<ul>
+  <li><code>res/layout/main.xml</code>, diseño de panel único (predeterminado):
+
+{@sample development/samples/training/multiscreen/newsreader/res/layout/onepane.xml all}
+</li>
+  <li><code>res/layout-large/main.xml</code>, diseño de panel dual:
+
+{@sample development/samples/training/multiscreen/newsreader/res/layout/twopanes.xml all}
+</li>
+</ul>
+
+<p>Observa el calificador <code>large</code> en el nombre de directorio del segundo diseño. Este diseño se seleccionará en dispositivos con pantallas clasificadas como grandes (por ejemplo, tablets de 7" y superiores). El otro diseño (sin calificadores) se seleccionará en el caso de dispositivos más pequeños.</p>
+
+
+<h2 id="TaskUseSWQuali">Cómo utilizar el calificador de ancho mínimo</h2>
+
+<p>Una de las dificultades a las que se enfrentaron los desarrolladores con los dispositivos Android anteriores a la versión 3.2 fue el contenedor de tamaño de pantalla "grande". Algunos ejemplos de este tipo de dispositivo son el tablet Dell Streak, el tablet Galaxy Tab original y los tablets de 7" en general. Sin embargo, es posible que muchas aplicaciones quieran mostrar varios diseños para diferentes dispositivos de esta categoría (por ejemplo, para dispositivos de 5" y de 7"), aunque todos estos dispositivos se consideren de pantalla grande. Por esta razón, Android introdujo el calificador de "ancho mínimo" (entre otros) en Android 3.2.</p>
+
+<p>Este calificador te permite mostrar contenido en pantallas que tengan un ancho mínimo determinado en píxeles independientes de la densidad. Por ejemplo, el tablet típico de 7" tiene un ancho mínimo de 600 dp, por lo que si quieres que la interfaz de usuario sea de panel dual en esta pantalla (y una única lista en pantallas más pequeñas), puedes utilizar los mismos dos diseños de la sección anterior para los diseños de panel único y de panel dual, solo que en lugar de utilizar el calificador de tamaño <code>large</code>, debes utilizar <code>sw600dp</code> para indicar que el diseño de panel dual se utiliza con las pantallas cuyo ancho mínimo sea de 600 dp:</p>
+
+<ul>
+  <li><code>res/layout/main.xml</code>, diseño de panel único (predeterminado):
+
+{@sample development/samples/training/multiscreen/newsreader/res/layout/onepane.xml all}
+</li>
+  <li><code>res/layout-sw600dp/main.xml</code>, diseño de panel dual:
+
+{@sample development/samples/training/multiscreen/newsreader/res/layout/twopanes.xml all}
+</li>
+</ul>
+
+<p>Esto significa que los dispositivos cuyo ancho mínimo sea igual o superior a 600 dp utilizarán el diseño <code>layout-sw600dp/main.xml</code> (panel dual), mientras que las pantallas más pequeñas utilizarán el diseño <code>layout/main.xml</code> (panel único).</p>
+
+<p>No obstante, esto no funcionará en los dispositivos anteriores a Android 3.2 porque no reconocen <code>sw600dp</code> como calificador de tamaño, por lo que también tendrás que seguir utilizando el calificador <code>large</code>. Por tanto, debes tener un archivo con el nombre <code>res/layout-large/main.xml</code> idéntico a <code>res/layout-sw600dp/main.xml</code>. En la siguiente sección, obtendrás información sobre una técnica que te permite evitar que se dupliquen los archivos de diseños.</p>
+
+
+<h2 id="TaskUseAliasFilters">Cómo utilizar alias de diseño</h2> 
+
+<p>El calificador de ancho mínimo solo está disponible en Android 3.2 o superior. Por tanto, tendrás que seguir utilizando los contenedores de tamaño abstractos (pequeño, normal, grande y extragrande) para que sean compatibles con versiones anteriores. Por ejemplo, si quieres que tu interfaz de usuario sea de panel único en teléfonos pero multipanel en tablets de 7", televisiones y otros dispositivos grandes, tendrás que utilizar los siguientes archivos:</p>
+
+<p><ul>
+<li><code>res/layout/main.xml:</code> diseño de panel único,</li>
+<li><code>res/layout-large:</code> diseño multipanel,</li>
+<li><code>res/layout-sw600dp:</code> diseño multipanel.</li>
+</ul></p>
+
+<p>Los dos últimos archivos son idénticos porque uno de ellos se utilizará con dispositivos Android 3.2 y el otro con tablets y televisiones que utilicen versiones anteriores de Android.</p>
+
+<p>Para evitar la duplicación del mismo archivo para tablets y televisiones (así como todos los problemas que esto conlleva), puedes utilizar archivos alias. Por ejemplo, puedes establecer los siguientes diseños:</p>
+
+<ul>
+<li><code>res/layout/main.xml</code>: diseño de panel único,</li>
+<li><code>res/layout/main_twopanes.xml</code>: diseño de panel dual.</li>
+</ul>
+
+<p>Añade estos dos archivos:</p>
+
+<p><ul>
+<li><code>res/values-large/layout.xml</code>:
+<pre>
+&lt;resources>
+    &lt;item name="main" type="layout">&#64;layout/main_twopanes&lt;/item>
+&lt;/resources>
+</pre>
+</li>
+
+<li><code>res/values-sw600dp/layout.xml</code>:
+<pre>
+&lt;resources>
+    &lt;item name="main" type="layout">&#64;layout/main_twopanes&lt;/item>
+&lt;/resources>
+</pre>
+
+</li>
+</ul></p>
+
+<p>Estos dos últimos archivos tienen el mismo contenido, pero en realidad no definen el diseño. Solo configuran <PH>{@code main}</PH> para que sea un alias de <PH>{@code main_twopanes}</PH>. Como los archivos tienen selectores <code>large</code> y <code>sw600dp</code>, se aplican a tablets y a televisiones independientemente de la versión de Android (las televisiones y los tablets anteriores a la versión 3.2 utilizarán
+<PH>{@code large}</PH>y las televisiones y los tablets posteriores a la versión 3.2 utilizarán <code>sw600dp</code>).</p>
+
+
+<h2 id="TaskUseOriQuali">Cómo utilizar calificadores de orientación</h2> 
+
+<p>Aunque algunos diseños se pueden utilizar tanto en modo horizontal como vertical, la mayoría de ellos pueden beneficiarse de los ajustes. A continuación, se indica cómo se comporta el diseño según cada tamaño y orientación de la pantalla en la aplicación de ejemplo News Reader:</p>
+
+<p><ul>
+<li><b>pantalla pequeña, vertical:</b> panel único con logotipo,</li>
+<li><b>pantalla pequeña, horizontal:</b> panel único con logotipo,</li>
+<li><b>tablet de 7", vertical:</b> panel único con barra de acciones,</li>
+<li><b>tablet de 7", horizontal:</b> panel dual ancho con barra de acciones,</li>
+<li><b>tablet de 10", vertical:</b> panel dual estrecho con barra de acciones,</li>
+<li><b>tablet de 10", horizontal:</b> panel dual ancho con barra de acciones,</li>
+<li><b>televisión, horizontal:</b> panel dual ancho con barra de acciones.</li>
+</ul></p>
+
+<p>Cada uno de estos diseños se establecen en un archivo XML en el directorio <code>res/layout/</code>. Para definir posteriormente las diferentes configuraciones de pantalla, la aplicación utiliza alias de diseño para asignarlos a cada configuración:</p>
+
+<p><code>res/layout/onepane.xml:</code></p>
+{@sample development/samples/training/multiscreen/newsreader/res/layout/onepane.xml all}
+
+<p><code>res/layout/onepane_with_bar.xml:</code></p>
+{@sample development/samples/training/multiscreen/newsreader/res/layout/onepane_with_bar.xml all}
+
+<p><code>res/layout/twopanes.xml</code>:</p>
+{@sample development/samples/training/multiscreen/newsreader/res/layout/twopanes.xml all}
+
+<p><code>res/layout/twopanes_narrow.xml</code>:</p>
+{@sample development/samples/training/multiscreen/newsreader/res/layout/twopanes_narrow.xml all}
+
+<p>Una vez que se hayan definido todos los diseños posibles, solo se debe asignar el diseño adecuado a cada configuración a través de calificadores de configuración. Ahora ya puedes utilizar la técnica de los alias de diseño:</p>
+
+<p><code>res/values/layouts.xml</code>:</p>
+{@sample development/samples/training/multiscreen/newsreader/res/values/layouts.xml all}
+
+<p><code>res/values-sw600dp-land/layouts.xml</code>:</p>
+{@sample development/samples/training/multiscreen/newsreader/res/values-sw600dp-land/layouts.xml
+all}
+
+<p><code>res/values-sw600dp-port/layouts.xml</code>:</p>
+{@sample development/samples/training/multiscreen/newsreader/res/values-sw600dp-port/layouts.xml
+all}
+
+<p><code>res/values-large-land/layouts.xml</code>:</p>
+{@sample development/samples/training/multiscreen/newsreader/res/values-large-land/layouts.xml all}
+
+<p><code>res/values-large-port/layouts.xml</code>:</p>
+{@sample development/samples/training/multiscreen/newsreader/res/values-large-port/layouts.xml all}
+
+
+
+<h2 id="TaskUse9Patch">Cómo utilizar mapas de bits de la clase NinePatch</h2>
+
+<p>Admitir diferentes tamaños de pantalla normalmente implica que las fuentes de imagen también deben poder adaptarse a varios tamaños. Por ejemplo, un fondo de botón debe adaptarse a cualquier forma de botón a la que se aplique.</p>
+
+<p>Si utilizas imágenes sencillas en componentes que pueden cambiar de tamaño, observarás rápidamente que los resultados no es que sean precisamente impresionantes, ya que las imágenes se estirarán o estrecharán. La solución es utilizar mapas de bits de la clase NinePatch, que son archivos PNG con un formato especial que indican las áreas que se pueden y no se pueden estirar.</p>
+
+<p>Por tanto, al diseñar mapas de bits que se vayan a utilizar en componentes con tamaño variable, utiliza siempre mapas de bits de la clase NinePatch. Para convertir un mapa de bits en uno de la clase NinePatch, puedes empezar con una imagen normal (consulta la figura 4, que se ha ampliado cuatro veces para obtener una mayor claridad).</p>
+
+<img src="{@docRoot}images/training/button.png" />
+<p class="img-caption"><strong>Figura 4.</strong> <code>button.png</code></p>
+
+<p>A continuación, puedes pasar a la utilidad <ode
+href="{@docRoot}tools/help/draw9patch.html"><code>draw9patch</code></a> del SDK (que se localiza en el directorio <code>tools/</code>) en la que puedes marcar las áreas que se deben estirar dibujando píxeles a lo largo de los bordes superior e izquierdo. También puedes marcar el área que debe incluir el contenido dibujando píxeles a lo largo de los bordes inferior y derecho, como se muestra en la figura 5.</p>
+
+<img src="{@docRoot}images/training/button_with_marks.png" />
+<p class="img-caption"><strong>Figura 5.</strong> <code>button.9.png</code></p>
+
+<p>Observa los píxeles de color negro situados junto a los bordes. Los que aparecen en los bordes superior e izquierdo indican los lugares en los que se puede estirar la imagen, mientras que los que aparecen en los bordes inferior y derecho indican dónde se debe situar el contenido.</p>
+
+<p>Además, observa la extensión <code>.9.png</code>. Debes utilizar esta extensión, ya que, de este modo, el marco detecta que se trata de una imagen de la clase NinePatch, en lugar de una imagen PNG normal.</p>
+
+<p>Cuando aplicas este fondo a un componente (definiendo <code>android:background="&#64;drawable/button"</code>), el marco estira la imagen de forma adecuada para adaptarla al botón, como se muestra en varios tamaños de la figura 6.</p>
+
+<img src="{@docRoot}images/training/buttons_stretched.png" />
+<p class="img-caption"><strong>Figura 6.</strong> Botón que utiliza la clase NinePatch <code>button.9.png</code> en varios tamaños</p>
+

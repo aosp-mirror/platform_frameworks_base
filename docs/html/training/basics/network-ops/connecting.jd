@@ -1,0 +1,284 @@
+page.title=Connecting to the Network
+parent.title=Performing Network Operations
+parent.link=index.html
+
+trainingnavtop=true
+next.title=Managing Network Usage
+next.link=managing.html
+
+@jd:body
+ 
+<div id="tb-wrapper"> 
+<div id="tb">
+
+
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#http-client">Choose an HTTP Client</a></li>
+  <li><a href="#connection">Check the Network Connection</a></li>
+  <li><a href="#AsyncTask">Perform Network Operations on a Separate Thread</a></li>
+  <li><a href="#download">Connect and Download Data</a></li>
+  <li><a href="#stream">Convert the InputStream to a String</a></li>
+  
+</ol>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}training/monitoring-device-state/index.html">Optimizing Battery Life</a></li>
+  <li><a href="{@docRoot}training/efficient-downloads/index.html">Transferring Data Without Draining the Battery</a></li>
+  <li><a href="{@docRoot}guide/webapps/index.html">Web Apps Overview</a></li>
+  <li><a href="{@docRoot}guide/components/fundamentals.html">Application Fundamentals</a></li>
+</ul>
+
+</div> 
+</div>
+
+<p>This lesson shows you how to implement a simple application that connects to
+the network. It explains some of the best practices you should follow in
+creating even the simplest network-connected app.</p>
+
+<p>Note that to perform the network operations described in this lesson, your
+application manifest must include the following permissions:</p>
+
+<pre>&lt;uses-permission android:name=&quot;android.permission.INTERNET&quot; /&gt;
+&lt;uses-permission android:name=&quot;android.permission.ACCESS_NETWORK_STATE&quot; /&gt;</pre>
+
+
+
+<h2 id="http-client">Choose an HTTP Client</h2>
+
+<p>Most network-connected Android apps  use HTTP to send and receive  data.
+Android includes two HTTP clients: {@link java.net.HttpURLConnection} and Apache
+ {@link org.apache.http.client.HttpClient}. Both support HTTPS, streaming uploads and downloads,  configurable
+timeouts, IPv6, and connection pooling. We recommend using {@link
+java.net.HttpURLConnection} for applications targeted at Gingerbread and higher. For
+more discussion of this topic, see the blog post <a
+href="http://android-developers.blogspot.com/2011/09/androids-http-clients.html"
+>Android's HTTP Clients</a>.</p>
+
+<h2 id="connection">Check the Network Connection</h2>
+
+<p>Before your app attempts to connect to the network, it should check to see whether a
+network connection is available using 
+{@link android.net.ConnectivityManager#getActiveNetworkInfo getActiveNetworkInfo()}
+and {@link android.net.NetworkInfo#isConnected isConnected()}. 
+Remember, the device may be out of range of a
+network, or the user may have disabled both Wi-Fi and mobile data access. 
+For more discussion of this topic, see the lesson <a
+href="{@docRoot}training/network-ops/managing.html">Managing Network
+Usage</a>.</p>
+
+<pre>
+public void myClickHandler(View view) {
+    ...
+    ConnectivityManager connMgr = (ConnectivityManager) 
+        getSystemService(Context.CONNECTIVITY_SERVICE);
+    NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+    if (networkInfo != null &amp;&amp; networkInfo.isConnected()) {
+        // fetch data
+    } else {
+        // display error
+    }
+    ...
+}</pre>
+
+<h2 id="AsyncTask">Perform Network Operations on a Separate Thread</h2>
+
+<p>Network operations can involve unpredictable delays. To prevent this from
+causing a poor user experience, always perform network operations on a separate
+thread from the UI. The {@link android.os.AsyncTask} class provides one of the
+simplest ways to fire off a new task from the UI thread. For more discussion of
+this topic, see the blog post <a
+href="http://android-developers.blogspot.com/2010/07/multithreading-for-
+performance.html">Multithreading For Performance</a>.</p>
+
+
+<p>In the following snippet, the <code>myClickHandler()</code> method invokes <code>new
+DownloadWebpageTask().execute(stringUrl)</code>. The
+<code>DownloadWebpageTask</code> class is a subclass of {@link
+android.os.AsyncTask}. <code>DownloadWebpageTask</code> implements the following
+{@link android.os.AsyncTask} methods:</p>
+
+    <ul>
+    
+      <li>{@link android.os.AsyncTask#doInBackground doInBackground()} executes
+the method <code>downloadUrl()</code>. It passes the  web page URL as a
+parameter. The method <code>downloadUrl()</code> fetches and processes the web
+page content. When it finishes, it passes back a result string.</li>
+      
+      <li>{@link android.os.AsyncTask#onPostExecute onPostExecute()} takes the
+returned string and displays it in the UI.</li>
+      
+      
+    </ul>
+    
+<pre>
+public class HttpExampleActivity extends Activity {
+    private static final String DEBUG_TAG = "HttpExample";
+    private EditText urlText;
+    private TextView textView;
+    
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main);   
+        urlText = (EditText) findViewById(R.id.myUrl);
+        textView = (TextView) findViewById(R.id.myText);
+    }
+
+    // When user clicks button, calls AsyncTask.
+    // Before attempting to fetch the URL, makes sure that there is a network connection.
+    public void myClickHandler(View view) {
+        // Gets the URL from the UI's text field.
+        String stringUrl = urlText.getText().toString();
+        ConnectivityManager connMgr = (ConnectivityManager) 
+            getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        if (networkInfo != null &amp;&amp; networkInfo.isConnected()) {
+            new DownloadWebpageText().execute(stringUrl);
+        } else {
+            textView.setText("No network connection available.");
+        }
+    }
+
+     // Uses AsyncTask to create a task away from the main UI thread. This task takes a 
+     // URL string and uses it to create an HttpUrlConnection. Once the connection
+     // has been established, the AsyncTask downloads the contents of the webpage as
+     // an InputStream. Finally, the InputStream is converted into a string, which is
+     // displayed in the UI by the AsyncTask's onPostExecute method.
+     private class DownloadWebpageText extends AsyncTask<String, Void, String> {
+        &#64;Override
+        protected String doInBackground(String... urls) {
+              
+            // params comes from the execute() call: params[0] is the url.
+            try {
+                return downloadUrl(urls[0]);
+            } catch (IOException e) {
+                return "Unable to retrieve web page. URL may be invalid.";
+            }
+        }
+        // onPostExecute displays the results of the AsyncTask.
+        &#64;Override
+        protected void onPostExecute(String result) {
+            textView.setText(result);
+       }
+    }
+    ...
+}</pre>
+
+<p>The sequence of events in this snippet is as follows:</p>
+<ol>
+
+  <li>When users click the button that invokes {@code myClickHandler()}, 
+  the app passes
+the specified URL to the {@link android.os.AsyncTask} subclass
+<code>DownloadWebpageTask</code>.</li>
+ 
+ <li>The {@link android.os.AsyncTask} method {@link
+android.os.AsyncTask#doInBackground doInBackground()} calls the 
+<code>downloadUrl()</code> method. </li>
+  
+  <li>The <code>downloadUrl()</code> method takes a URL string as a parameter
+and uses it to create a {@link java.net.URL} object.</li>
+  
+  <li>The {@link java.net.URL} object is used to establish an {@link
+java.net.HttpURLConnection}.</li>
+  
+  <li>Once the connection has been established, the {@link
+java.net.HttpURLConnection} object fetches the web page content as an {@link
+java.io.InputStream}.</li>
+  
+  <li>The {@link java.io.InputStream} is passed to the <code>readIt()</code>
+method, which converts the stream to a string.</li>
+  
+  <li>Finally, the {@link android.os.AsyncTask}'s {@link
+android.os.AsyncTask#onPostExecute onPostExecute()} method displays the string
+in the main activity's UI.</li>
+
+</ol>
+
+ <h2 id="download">Connect and Download Data</h2>
+ 
+ <p>In your thread that performs your network transactions, you can use 
+ {@link java.net.HttpURLConnection} to perform a {@code GET} and download your data. 
+ After you call {@code connect()}, you can get an {@link java.io.InputStream} of the data 
+ by calling {@code getInputStream()}.
+ 
+ <p>In the following snippet, the {@link android.os.AsyncTask#doInBackground
+doInBackground()} method calls the method <code>downloadUrl()</code>. The
+<code>downloadUrl()</code> method takes the given URL and uses it to connect to
+the network via {@link java.net.HttpURLConnection}. Once a connection has been
+established, the app uses the method <code>getInputStream()</code> to retrieve
+the data as an {@link java.io.InputStream}.</p>
+ 
+<pre>
+// Given a URL, establishes an HttpUrlConnection and retrieves
+// the web page content as a InputStream, which it returns as
+// a string.
+private String downloadUrl(String myurl) throws IOException {
+    InputStream is = null;
+    // Only display the first 500 characters of the retrieved
+    // web page content.
+    int len = 500;
+        
+    try {
+        URL url = new URL(myurl);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setReadTimeout(10000 /* milliseconds */);
+        conn.setConnectTimeout(15000 /* milliseconds */);
+        conn.setRequestMethod("GET");
+        conn.setDoInput(true);
+        // Starts the query
+        conn.connect();
+        int response = conn.getResponseCode();
+        Log.d(DEBUG_TAG, "The response is: " + response);
+        is = conn.getInputStream();
+
+        // Convert the InputStream into a string
+        String contentAsString = readIt(is, len);
+        return contentAsString;
+        
+    // Makes sure that the InputStream is closed after the app is
+    // finished using it.
+    } finally {
+        if (is != null) {
+            is.close();
+        } 
+    }
+}</pre>
+
+<p>Note that the method <code>getResponseCode()</code> returns the connection's
+<a href="http://www.w3.org/Protocols/HTTP/HTRESP.html">status code</a>. This is
+a useful way of getting additional information about the connection. A status
+code of 200 indicates success.</p>
+
+<h2 id="stream">Convert the InputStream to a String</h2>
+
+<p>An {@link java.io.InputStream} is a readable source of bytes. Once you get an {@link java.io.InputStream}, 
+it's common to decode or convert it into a
+target data type. For example, if you were downloading image data, you might
+decode and display it like this:</p>
+
+<pre>InputStream is = null;
+...
+Bitmap bitmap = BitmapFactory.decodeStream(is);
+ImageView imageView = (ImageView) findViewById(R.id.image_view);
+imageView.setImageBitmap(bitmap);
+</pre>
+
+<p>In the example shown above, the {@link java.io.InputStream} represents the text of a
+web page. This is how the example converts the {@link java.io.InputStream} to
+a string so that the activity can display it in the UI:</p>
+
+<pre>// Reads an InputStream and converts it to a String.
+public String readIt(InputStream stream, int len) throws IOException, UnsupportedEncodingException {
+    Reader reader = null;
+    reader = new InputStreamReader(stream, "UTF-8");        
+    char[] buffer = new char[len];
+    reader.read(buffer);
+    return new String(buffer);
+}</pre>
+
+
+

@@ -1,0 +1,118 @@
+page.title=Relative Layout
+parent.title=Layouts
+parent.link=layout-objects.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>In this document</h2>
+  <ol>
+    <li><a href="#Position">Positioning Views</a></li>
+    <li><a href="#Example">Example</a></li>
+  </ol>
+  <h2>Key classes</h2>
+  <ol>
+  <li>{@link android.widget.RelativeLayout}</li>
+  <li>{@link android.widget.RelativeLayout.LayoutParams}</li>
+  </ol>
+</div>
+</div>
+
+<p>{@link android.widget.RelativeLayout} is a view group that displays child views in relative
+positions. The position of each view can be specified as relative to sibling elements (such as to
+the left-of or below another view) or in positions relative to the parent {@link
+android.widget.RelativeLayout} area (such as aligned to the bottom, left of center).</p>
+
+<img src="{@docRoot}images/ui/relativelayout.png" alt="" />
+
+<p>A {@link android.widget.RelativeLayout} is a very powerful utility for designing a user interface
+because it can eliminate nested view groups and keep your layout hierarchy flat, which improves
+performance. If you find yourself using several nested {@link android.widget.LinearLayout} groups,
+you may be able to replace them with a single {@link android.widget.RelativeLayout}.</p>
+
+
+<h2 id="Position">Positioning Views</h2>
+
+<p>{@link android.widget.RelativeLayout} lets child views specify their position relative to the
+parent view or to each other (specified by ID). So you can align two elements by right border, or
+make one below another, centered in the screen, centered left, and so on. By default, all child
+views are drawn at the top-left of the layout, so you must define the position of each view
+using the various layout properties available from {@link
+android.widget.RelativeLayout.LayoutParams}.</p>
+ 
+<p>Some of the many layout properties available to views in a {@link android.widget.RelativeLayout}
+include:</p>
+<dl>
+  <dt><a
+href="{docRoot}reference/android/widget/RelativeLayout.LayoutParams.html#attr_android:layout_alignParentTop"
+>{@code android:layout_alignParentTop}</a></dt>
+    <dd>If {@code "true"}, makes the top edge of this view match the top edge of the parent. </dd>
+  <dt><a
+href="{docRoot}reference/android/widget/RelativeLayout.LayoutParams.html#attr_android:layout_centerVertical"
+>{@code android:layout_centerVertical}</a></dt>
+    <dd>If {@code "true"}, centers this child vertically within its parent.</dd>
+  <dt><a
+href="{docRoot}reference/android/widget/RelativeLayout.LayoutParams.html#attr_android:layout_below"
+>{@code android:layout_below}</a></dt>
+    <dd>Positions the top edge of this view below the view specified with a resource ID.</dd>
+  <dt><a
+href="{docRoot}reference/android/widget/RelativeLayout.LayoutParams.html#attr_android:layout_toRightOf"
+>{@code android:layout_toRightOf}</a></dt>
+    <dd>Positions the left edge of this view to the right of the view specified with a resource ID.</dd>
+</dl>
+
+<p>These are just a few examples. All layout attributes are documented at {@link
+android.widget.RelativeLayout.LayoutParams}.</p>
+
+<p>The value for each layout property is either a boolean to
+enable a layout position relative to the parent {@link android.widget.RelativeLayout} or an ID that
+references another view in the layout against which the view should be positioned.</p>
+
+<p>In your XML layout, dependencies against other views in the layout can be declared in any order.
+For example, you can declare that "view1" be positioned below "view2" even if "view2" is the last
+view declared in the hierarchy. The example below demonstrates such a scenario.</p>
+
+
+<h2 id="Example">Example</h2>
+
+<p>Each of the attributes that control the relative position of each view are emphasized.</p>
+<div class="figure" style="width:220px;margin-top:0">
+<img src="{@docRoot}images/ui/sample-relativelayout.png" alt="" />
+</div>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp" >
+    &lt;EditText
+        android:id="@+id/name"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/reminder" />
+    &lt;Spinner
+        android:id="@+id/dates"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        <strong>android:layout_below="@id/name"</strong>
+        <strong>android:layout_alignParentLeft="true"</strong>
+        <strong>android:layout_toLeftOf="@+id/times"</strong> />
+    &lt;Spinner
+        android:id="@id/times"
+        android:layout_width="96dp"
+        android:layout_height="wrap_content"
+        <strong>android:layout_below="@id/name"</strong>
+        <strong>android:layout_alignParentRight="true"</strong> />
+    &lt;Button
+        android:layout_width="96dp"
+        android:layout_height="wrap_content"
+        <strong>android:layout_below="@id/times"</strong>
+        <strong>android:layout_alignParentRight="true"</strong>
+        android:text="@string/done" />
+&lt;/RelativeLayout>
+</pre>
+
+<p>For details about all the layout attributes available to each child view of a {@link
+android.widget.RelativeLayout}, see {@link android.widget.RelativeLayout.LayoutParams}.</p>

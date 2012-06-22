@@ -1,0 +1,116 @@
+page.title=In-app Billing
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>Topics</h2>
+  <ol>
+    <li><a href="{@docRoot}guide/google/play/billing/billing_overview.html">Overview of In-app
+    Billing</a></li>
+    <li><a href="{@docRoot}guide/google/play/billing/billing_integrate.html">Implementing In-app
+    Billing</a></li>
+    <li><a href="{@docRoot}guide/google/play/billing/billing_subscriptions.html">Subscriptions</a></li>
+    <li><a href="{@docRoot}guide/google/play/billing/billing_best_practices.html">Security and
+    Design</a></li>    <li><a href="{@docRoot}guide/google/play/billing/billing_testing.html">Testing In-app
+    Billing</a></li>
+    <li><a href="{@docRoot}guide/google/play/billing/billing_admin.html">Administering In-app
+    Billing</a></li>
+  </ol>
+  <h2>Reference</h2>
+  <ol>
+    <li><a href="{@docRoot}guide/google/play/billing/billing_reference.html">In-app Billing
+    Reference</a></li>
+  </ol>
+  <h2>Downloads</h2>
+  <ol>
+    <li><a href="{@docRoot}guide/google/play/billing/billing_integrate.html#billing-download">Sample
+    Application</a></li>
+  </ol>  
+</div>
+</div>
+
+<p>In-app Billing is a Google Play service that lets you sell digital content from inside
+your applications. You can use the service to sell a wide range of content, including downloadable
+content such as media files or photos, virtual content such as game levels or potions, premium services 
+and features, and more. You can use In-app Billing to sell products as</p>
+
+<ul>
+<li>Standard in-app products (one-time billing), or</li>
+<li>Subscriptions, (recurring, automated billing)</li>
+</ul>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <h2>Support for subscriptions <span class="new">New!</span></h2>
+  <p>In-app Billing now lets you sell subscriptions in your apps, as well as standard in-app products. 
+  For details on how to sell subscriptions to content, services, and features, see the
+  <a href="{@docRoot}guide/google/play/billing/billing_subscriptions.html">Subscriptions</a> documentation.</p>
+</div>
+</div>
+
+<p>When you use the in-app billing service to sell an item,
+whether it's an in-app product or a subscription, Google Play
+handles all checkout details so your application never has to directly process
+any financial transactions. Google Play uses the same checkout backend service as
+is used for application purchases, so your users experience a consistent and
+familiar purchase flow (see figure 1). Also, the transaction fee for in-app
+purchases is the same as the transaction fee for application purchases
+(30%).</p>
+
+<p>Any application that you publish through Google Play can implement In-app Billing. No special
+account or registration is required other than an Android Market publisher account and a Google
+Wallet Merchant account. Also, because the service uses no dedicated framework APIs, you can add
+in-app billing to any application that uses a minimum API level of 4 or higher.</p>
+
+<p>To help you integrate in-app billing into your application, the Android SDK
+provides a sample application that demonstrates how to sell standard in-app
+products and subscriptions from inside an app. The sample contains examples of
+billing-related classes you can use to implement in-app billing in your
+application. It also contains examples of the database, user interface, and
+business logic you might use to implement in-app billing.</p>
+
+<p class="caution"><strong>Important</strong>: Although the sample application is a working example
+of how you can implement in-app billing, we <em>strongly recommend</em> that you modify and
+obfuscate the sample code before you use it in a production application. For more information, see
+<a href="{@docRoot}guide/google/play/billing/billing_best_practices.html">Security and Design</a>.</p>
+
+<img src="{@docRoot}images/billing_checkout_flow.png" height="382" id="figure1" />
+<p class="img-caption">
+  <strong>Figure 1.</strong> Applications initiate in-app billing requests through their own UI
+  (first screen). Google Play responds to the request by providing the checkout user interface
+  (middle screen). When checkout is complete, the application resumes.
+</p>
+
+<p>To learn more about Google Play's in-app billing service and start integrating it into your
+applications, read the following documents:</p>
+
+<dl>
+  <dt><strong><a href="{@docRoot}guide/google/play/billing/billing_overview.html">Overview of In-app
+  Billing</a></strong></dt>
+    <dd>Learn how the service works and what a typical in-app billing implementation looks
+    like.</dd>
+  <dt><strong><a href="{@docRoot}guide/google/play/billing/billing_integrate.html">Implementing
+  In-app Billing</a></strong></dt>
+    <dd>Use this step-by-step guide to start incorporating in-app billing into your
+    application. The instructions apply to both one-time and subscription purchases.</dd>
+    
+    <dt><strong><a href="{@docRoot}guide/google/play/billing/billing_subscriptions.html">Subscriptions</a></strong></dt>
+    <dd>Learn how subscriptions work and how to implement support for them in your app.</dd>
+  <dt><strong><a href="{@docRoot}guide/google/play/billing/billing_best_practices.html">Security
+  and Design</a></strong></dt>
+    <dd>Review these best practices to help ensure that your in-app billing implementation is
+    secure and well designed.</dd>
+  <dt><strong><a href="{@docRoot}guide/google/play/billing/billing_testing.html">Testing In-app
+  Billing</a></strong></dt>
+    <dd>Understand how the in-app billing test tools work and learn how to test your in-app billing
+    implementation.</dd>
+  <dt><strong><a href="{@docRoot}guide/google/play/billing/billing_admin.html">Administering
+  In-app Billing</a></strong></dt>
+    <dd>Learn how to set up your product list, register test accounts, and handle refunds.</dd>
+  <dt><strong><a href="{@docRoot}guide/google/play/billing/billing_reference.html">In-app Billing
+  Reference</a></strong></dt>
+    <dd>Get detailed information about Google Play response codes and the in-app billing
+    interface.</dd>
+</dl>
+

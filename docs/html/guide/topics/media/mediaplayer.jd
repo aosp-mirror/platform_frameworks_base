@@ -457,7 +457,7 @@ stopForeground(true);
 </pre>
 
 <p>For more information, see the documentation about <a
-href="{@docRoot}guide/topics/fundamentals/services.html#Foreground">Services</a> and
+href="{@docRoot}guide/components/services.html#Foreground">Services</a> and
 <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Status Bar Notifications</a>.</p>
 
 

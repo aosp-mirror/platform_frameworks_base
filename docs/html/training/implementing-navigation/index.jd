@@ -15,7 +15,7 @@ next.link=lateral.html
 <ul>
   <li>API level 14</li>
   <li>Understanding of fragments and Android layouts</li>
-  <li><a href="{@docRoot}sdk/compatibility-library.html">The Android Support Package</a></li>
+  <li><a href="{@docRoot}tools/extras/support-library.html">The Android Support Package</a></li>
   <li><a href="{@docRoot}training/design-navigation/index.html">Designing Effective Navigation</a></li>
 </ul>
 
@@ -23,7 +23,7 @@ next.link=lateral.html
 
 <ul>
   <li><a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a></li>
-  <li><a href="{@docRoot}guide/topics/fundamentals/fragments.html">Fragments</a></li>
+  <li><a href="{@docRoot}guide/components/fragments.html">Fragments</a></li>
   <li><a href="{@docRoot}training/multiscreen/index.html">Designing for Multiple Screens</a></li>
 </ul>
 

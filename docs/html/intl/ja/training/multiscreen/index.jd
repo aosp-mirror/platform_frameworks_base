@@ -1,0 +1,64 @@
+page.title=複数画面のデザイン
+
+trainingnavtop=true
+startpage=true
+next.title=さまざまな画面サイズのサポート
+next.link=screensizes.html
+
+@jd:body
+
+<div id="tb-wrapper"> 
+<div id="tb"> 
+ 
+<h2>必要な知識と前提条件</h2> 
+
+<ul>
+  <li>Android 1.6 以上（サンプル アプリを使用するには 2.1 以上）</li>
+  <li><a
+href="http://developer.android.com/guide/components/activities.html">アクティビティ</a>と<a href="http://developer.android.com/guide/components/fragments.html">フラグメント</a>の基礎知識</li>
+  <li>Android <a
+href="http://developer.android.com/guide/topics/ui/index.html">ユーザー インターフェース</a>の開発経験</li>
+  <li><a
+href="{@docRoot}tools/extras/support-library.html">サポート ライブラリ</a>の利用（一部の機能で必要）</li>
+</ul>
+
+<h2>関連ドキュメント</h2>
+
+<ul>
+  <li><a href="{@docRoot}guide/practices/screens_support.html">複数画面のサポート</a></li>
+</ul>
+ 
+<h2>試してみる</h2> 
+ 
+<div class="download-box"> 
+<a href="http://developer.android.com/shareables/training/NewsReader.zip" class="button">サンプル アプリのダウンロード</a>
+<p class="filename">NewsReader.zip</p> 
+</div> 
+ 
+</div> 
+</div> 
+ 
+<p>Android は、小さな携帯電話から大きなテレビまで、画面サイズも種類もさまざまなデバイスに搭載できます。そのため、できる限り多くのユーザーが使用できるように、すべての画面サイズに対応できるようアプリを設計することが重要になります。</p>
+
+<p>しかし、さまざまな種類のデバイスに対応できるだけでは十分ではありません。画面サイズによって、ユーザーが操作できることが決まってくるため、本当にユーザーを満足させてよい印象を持ってもらうためには、アプリが単に複数の画面をサポートするだけでは不十分です: 画面設定ごとにユーザー エクスペリエンスを最適化する必要があります。<em></em><em></em></p>
+
+<p>このクラスは、いくつかの画面設定に合わせて最適化されたユーザー インターフェースを実装する方法を提供します。</p>
+
+<p>各レッスンで紹介されているコードは、複数の画面に合わせて最適化する際、ベスト プラクティスとなるサンプル アプリから抜粋したものです。このサンプルを（右側から）ダウンロードして、再利用可能なコードのソースとしてご自分のアプリに使用することができます。</p>
+
+<p class="note"><strong>注:</strong> このクラスと関連サンプルでは、<a
+href="{@docRoot}tools/extras/support-library.html">サポート ライブラリ</a>を使用します。理由は、Android 3.0 未満のバージョンで <PH>{@link android.app.Fragment}</PH> API を使用するためです。このクラスのすべての API を使用するには、ライブラリをダウンロードして、アプリに追加する必要があります。</p>
+ 
+
+<h2>レッスン</h2> 
+ 
+<dl> 
+  <dt><b><a href="screensizes.html">さまざまな画面サイズのサポート</a></b></dt> 
+    <dd>このレッスンでは、さまざまな画面サイズに適したレイアウトを（柔軟なビュー サイズ、 <PH>{@link android.widget.RelativeLayout}</PH>、画面サイズと画面の向きの修飾子、エイリアス フィルタ、ナインパッチ ビットマップを使用して）設計する方法について学習します。</dd> 
+ 
+  <dt><b><a href="screendensities.html">さまざまな画面密度のサポート</a></b></dt> 
+    <dd>このレッスンでは、（密度非依存ピクセルを使用し、各密度に適したビットマップを提供して）ピクセル密度が異なる画面をサポートする方法について学習します。</dd> 
+ 
+  <dt><b><a href="adaptui.html">順応性のある UI フローの実装</a></b></dt> 
+    <dd>このレッスンでは、いくつかの画面サイズ/密度の組み合わせに適した方法（実行時にアクティブなレイアウトを検出する方法、現在のレイアウトに合わせて応答する方法、画面設定の変更を処理する方法）で UI を実装する方法について学習します。</dd> 
+</dl> 

@@ -1,0 +1,306 @@
+page.title=Text Fields
+parent.title=Input Controls
+parent.link=../controls.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  
+<h2>In this document</h2>
+<ol>
+  <li><a href="#Keyboard">Specifying the Keyboard Type</a>
+    <ol>
+      <li><a href="#Behaviors">Controlling other behaviors</a></li>
+    </ol>
+  </li>
+  <li><a href="#Actions">Specifying Keyboard Actions</a>
+    <ol>
+      <li><a href="#ActionEvent">Responding to action button events</a></li>
+      <li><a href="#ActionLabel">Setting a custom action button label</a></li>
+    </ol>
+  </li>
+  <li><a href="#Flags">Adding Other Keyboard Flags</a></li>
+  <li><a href="#AutoComplete">Providing Auto-complete Suggestions</a></li>
+</ol>
+<h2>Key classes</h2>
+<ol>
+  <li>{@link android.widget.EditText}</li>
+  <li>{@link android.widget.AutoCompleteTextView}</li>
+</ol>
+
+</div>
+</div>
+
+<p>A text field allows the user to type text into your app. It can be either single line or
+multi-line. Touching a text field places the cursor and automatically displays the keyboard. In
+addition to typing, text fields allow for a variety of other activities, such as text selection
+(cut, copy, paste) and data look-up via auto-completion.</p>
+
+<p>You can add a text field to you layout with the {@link android.widget.EditText} object. You
+should usually do so in your XML layout with a {@code &lt;EditText&gt;} element.</p>
+
+<img src="{@docRoot}images/ui/edittext-noextract.png" alt="" />
+
+
+
+<h2 id="Keyboard">Specifying the Keyboard Type</h2>
+
+<div class="figure" style="width:300px;margin-top:0">
+<img src="{@docRoot}images/ui/edittext-text.png" alt="" />
+<p class="img-caption"><strong>Figure 1.</strong> The default {@code text} input type.</p>
+</div>
+
+<div class="figure" style="width:300px">
+<img src="{@docRoot}images/ui/edittext-email.png" alt="" />
+<p class="img-caption"><strong>Figure 2.</strong> The {@code textEmailAddress} input type.</p>
+</div>
+
+<div class="figure" style="width:300px">
+<img src="{@docRoot}images/ui/edittext-phone.png" alt="" />
+<p class="img-caption"><strong>Figure 3.</strong> The {@code phone} input type.</p>
+</div>
+
+<p>Text fields can have different input types, such as number, date, password, or email address. The
+type determines what kind of characters are allowed inside the field, and may prompt the virtual
+keyboard to optimize its layout for frequently used characters.</p>
+
+<p>You can specify the type of keyboard you want for your {@link android.widget.EditText} object
+with the <a href="{@docRoot}reference/android/widget/TextView.html#attr_android:inputType">{@code
+android:inputType}</a> attribute. For example, if you want the user to input an email address, you
+should use the {@code textEmailAddress} input type:</p>
+
+<pre>
+&lt;EditText
+    android:id="&#64;+id/email_address"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:hint="&#64;string/email_hint"
+    android:inputType="textEmailAddress" />
+</pre>
+
+
+<p>There are several different input types available for different situations. You can find
+them all listed with the documentation for <a
+href="{@docRoot}reference/android/widget/TextView.html#attr_android:inputType">{@code
+android:inputType}</a>.</p>
+
+<p class="note"><strong>Tip:</strong> To allow users to input long strings of text with line
+breaks, use the {@code "textMultiLine"} input type. By default, an {@link android.widget.EditText}
+object is restricted to one line of text and scrolls horizontally when the text exceeds the
+available width.</p>
+
+
+<h3 id="Behaviors">Controlling other behaviors</h3>
+
+<p>The <a href="{@docRoot}reference/android/widget/TextView.html#attr_android:inputType">{@code
+android:inputType}</a> also allows you to specify certain keyboard behaviors, such as whether to
+capitalize all new words or use features like auto-complete and spelling suggestions.</p>
+
+<p>The <a href="{@docRoot}reference/android/widget/TextView.html#attr_android:inputType">{@code
+android:inputType}</a> attribute allows bitwise combinations so you can specify both a keyboard
+layout and one or more behaviors at once. For example, here's how you can collect a postal
+address, capitalize each word, and disable text suggestions:</p>
+
+<pre>
+&lt;EditText
+    android:id="@+id/postal_address"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:hint="&#64;string/postal_address_hint"
+    android:inputType="textPostalAddress|
+                       textCapWords|
+                       textNoSuggestions" />
+</pre>
+
+<p>All behaviors are also listed with the <a
+href="{@docRoot}reference/android/widget/TextView.html#attr_android:inputType">{@code
+android:inputType}</a> documentation.</p>
+
+
+<h2 id="Actions">Specifying Keyboard Actions</h2>
+
+<div class="figure" style="width:300px">
+<img src="{@docRoot}images/ui/edittext-actionsend.png" alt="" />
+<p class="img-caption"><strong>Figure 4.</strong> If you declare {@code
+android:imeOptions="actionSend"}, the keyboard includes the Send action.</p>
+</div>
+
+<p>In addition to changing the keyboard's input type, Android allows you to specify an action to be
+made when users have completed their input. The action specifies the button that appears in place of
+the carriage return key and the action to be made, such as "Search" or "Send."</p>
+
+<p>You can specify the action by setting the <a
+href="{@docRoot}reference/android/widget/TextView.html#attr_android:imeOptions">{@code
+android:imeOptions}</a> attribute. For example, here's how you can specify the Send action:</p>
+
+<pre>
+&lt;EditText
+    android:id="@+id/search"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:hint="@string/search_hint"
+    android:inputType="text"
+    android:imeOptions="actionSend" />
+</pre>
+
+<p>If you do not explicitly specify an input action then the system attempts to determine if there
+are any subsequent <a
+href="{@docRoot}reference/android/view/View.html#attr_android:focusable">{@code
+android:focusable}</a> fields. If any focusable fields are found following this one, the system
+applies the (@code actionNext} action to the current {@link android.widget.EditText} so the user can
+select Next to move to the next field. If there's no subsequent focusable field, the system applies
+the {@code "actionDone"} action. You can override this by setting the <a
+href="{@docRoot}reference/android/widget/TextView.html#attr_android:imeOptions">{@code
+android:imeOptions}</a> attribute to any other value such as {@code "actionSend"} or {@code
+"actionSearch"} or suppress the default behavior by using the {@code "actionNone"} action.</p>
+
+
+<h3 id="ActionEvent">Responding to action button events</h3>
+
+<p>If you have specified a keyboard action for the input method using <a
+href="{@docRoot}reference/android/widget/TextView.html#attr_android:imeOptions">{@code
+android:imeOptions}</a> attribute (such as {@code "actionSend"}), you can listen for the specific
+action event using an {@link android.widget.TextView.OnEditorActionListener}. The {@link
+android.widget.TextView.OnEditorActionListener} interface provides a callback method called {@link
+android.widget.TextView.OnEditorActionListener#onEditorAction onEditorAction()} that indicates the
+action type invoked with an action ID such as {@link
+android.view.inputmethod.EditorInfo#IME_ACTION_SEND} or {@link
+android.view.inputmethod.EditorInfo#IME_ACTION_SEARCH}.</p>
+
+<p>For example, here's how you can listen for when the user clicks the Send button on the
+keyboard:</p>
+
+<pre>
+EditText editText = (EditText) findViewById(R.id.search);
+editText.setOnEditorActionListener(new OnEditorActionListener() {
+    &#64;Override
+    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+        boolean handled = false;
+        if (actionId == EditorInfo.IME_ACTION_SEND) {
+            // Send the user message
+            handled = true;
+        }
+        return handled;
+    }
+});
+</pre>
+
+
+<h3 id="ActionLabel">Setting a custom action button label</h3>
+
+<p>If the keyboard is too large to reasonably share space with the underlying application (such as
+when a handset device is in landscape orientation) then fullscreen ("extract mode") is triggered. In
+this mode, a labeled action button is displayed next to the input. You can customize the text of
+this button by setting the <a
+href="{@docRoot}reference/android/widget/TextView.html#attr_android:imeActionLabel">{@code
+android:imeActionLabel}</a> attribute:</p>
+
+<pre>
+&lt;EditText
+    android:id="&#64;+id/launch_codes"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:hint="&#64;string/enter_launch_codes"
+    android:inputType="number"
+    android:imeActionLabel="&#64;string/launch" />
+</pre>
+
+<img src="{@docRoot}images/ui/edittext-actionlabel.png" alt="" />
+<p class="img-caption"><strong>Figure 5.</strong> A custom action label with <a
+href="{@docRoot}reference/android/widget/TextView.html#attr_android:imeActionLabel">{@code
+android:imeActionLabel}</a>.</p>
+
+
+
+<h2 id="Flags">Adding Other Keyboard Flags</h2>
+
+<p>In addition to the actions you can specify with the <a
+href="{@docRoot}reference/android/widget/TextView.html#attr_android:imeOptions">{@code
+android:imeOptions}</a> attribute, you can add additional flags to specify other keyboard
+behaviors. All available flags are listed along with the actions in the <a
+href="{@docRoot}reference/android/widget/TextView.html#attr_android:imeOptions">{@code
+android:imeOptions}</a> documentation.</p>
+
+<p>For example, figure 5 shows how the system enables a fullscreen text field when a handset device
+is in landscape orientation (or the screen space is otherwise constrained for space). You can
+disable the fullscreen input mode with {@code flagNoExtractUi} in the <a
+href="{@docRoot}reference/android/widget/TextView.html#attr_android:imeOptions">{@code
+android:imeOptions}</a> attribute, as shown in figure 6.</p>
+
+<img src="{@docRoot}images/ui/edittext-noextract.png" alt="" />
+<p class="img-caption"><strong>Figure 6.</strong> The fullscreen text field ("extract mode") is
+disabled with {@code android:imeOptions="flagNoExtractUi"}.</p>
+
+
+
+
+<h2 id="AutoComplete">Providing Auto-complete Suggestions</h2>
+
+<p>If you want to provide suggestions to users as they type, you can use a subclass of {@link
+android.widget.EditText} called {@link android.widget.AutoCompleteTextView}. To implement
+auto-complete, you must specify an (@link android.widget.Adapter) that provides the text
+suggestions. There are several kinds of adapters available, depending on where the data is coming
+from, such as from a database or an array.</p>
+
+<img src="{@docRoot}images/ui/edittext-autocomplete.png" alt="" />
+<p class="img-caption"><strong>Figure 7.</strong> Example of {@link
+android.widget.AutoCompleteTextView} with text suggestions.</p>
+
+<p>The following procedure describes how to set up an {@link android.widget.AutoCompleteTextView}
+that provides suggestions from an array, using {@link android.widget.ArrayAdapter}:
+
+<ol>
+  <li>Add the {@link android.widget.AutoCompleteTextView} to your layout. Here's a
+layout with only the text field:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;AutoCompleteTextView xmlns:android="http://schemas.android.com/apk/res/android" 
+    android:id="&#64;+id/autocomplete_country"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content" />
+</pre>
+</li>
+
+<li>Define the array that contains all text suggestions. For example, here's an array of country
+names that's defined in an XML resource file ({@code res/values/strings.xml}):
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;resources>
+    &lt;string-array name="countries_array">
+        &lt;item>Afghanistan&lt;/item>
+        &lt;item>Albania&lt;/item>
+        &lt;item>Algeria&lt;/item>
+        &lt;item>American Samoa&lt;/item>
+        &lt;item>Andorra&lt;/item>
+        &lt;item>Angola&lt;/item>
+        &lt;item>Anguilla&lt;/item>
+        &lt;item>Antarctica&lt;/item>
+        ...
+    &lt;/string-array>
+&lt;/resources>
+</pre>
+</li>
+
+<li>In your {@link android.app.Activity} or {@link android.app.Fragment}, use the following
+code to specify the adapter that supplies the suggestions:
+<pre>
+// Get a reference to the AutoCompleteTextView in the layout
+AutoCompleteTextView textView = (AutoCompleteTextView) findViewById(R.id.autocomplete_country);
+// Get the string array
+String[] countries = getResources().getStringArray(R.array.countries_array);
+// Create the adapter and set it to the AutoCompleteTextView 
+ArrayAdapter&lt;String> adapter = 
+        new ArrayAdapter&lt;String>(this, android.R.layout.simple_list_item_1, countries);
+textView.setAdapter(adapter);
+</pre>
+
+<p>Here, a new {@link
+android.widget.ArrayAdapter} is initialized to bind each item in the <code>COUNTRIES</code>
+string array to a {@link android.widget.TextView} that exists in the {@code simple_list_item_1}
+layout (this is a layout provided by Android that provides a standard appearance for text in a
+list).</p>
+<p>Then assign the adapter to the {@link android.widget.AutoCompleteTextView} by
+calling {@link android.widget.AutoCompleteTextView#setAdapter setAdapter()}.</p>
+</li>
+</ol>
+

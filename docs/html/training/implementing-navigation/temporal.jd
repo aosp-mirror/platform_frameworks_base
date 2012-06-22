@@ -22,7 +22,7 @@ next.link=descendant.html
 <h2>You should also read</h2>
 <ul>
   <li><a href="{@docRoot}training/design-navigation/ancestral-temporal.html">Providing Ancestral and Temporal Navigation</a></li>
-  <li><a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back Stack</a></li>
+  <li><a href="{@docRoot}guide/components/tasks-and-back-stack.html">Tasks and Back Stack</a></li>
   <li><a href="{@docRoot}design/patterns/navigation.html">Android Design: Navigation</a></li>
 </ul>
 
@@ -32,7 +32,7 @@ next.link=descendant.html
 
 <p><em>Temporal navigation</em> is navigation to previously visited screens. Users can visit previous screens by pressing the device <em>Back</em> button. This user interface pattern is described further in <a href="{@docRoot}training/design-navigation/ancestral-temporal.html">Providing Ancestral and Temporal Navigation</a> in <em>Designing Effective Navigation</em> and in <a href="{@docRoot}design/patterns/navigation.html">Android Design: Navigation</a>.</p>
 
-<p>Android handles basic <em>Back</em> navigation for you (see <a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back Stack</a> for details on this behavior). This lesson discusses a number of cases where applications should provide specialized logic for the <em>Back</em> button.</p>
+<p>Android handles basic <em>Back</em> navigation for you (see <a href="{@docRoot}guide/components/tasks-and-back-stack.html">Tasks and Back Stack</a> for details on this behavior). This lesson discusses a number of cases where applications should provide specialized logic for the <em>Back</em> button.</p>
 
 
 <h2 id="back-fragments">Implement <em>Back</em> Navigation with Fragments</h2>

@@ -1,0 +1,206 @@
+page.title=Installing the Eclipse Plugin
+walkthru=1
+adt.zip.version=18.0.0
+adt.zip.download=ADT-18.0.0.zip
+adt.zip.bytes=12834793
+adt.zip.checksum=b446fa157ed97af79d1e21629201efbb
+
+@jd:body
+
+
+
+<p>Android offers a custom plugin for the Eclipse IDE, called Android
+Development Tools (ADT). This plugin is designed to give you a powerful, integrated
+environment in which to develop Android apps. It extends the capabilites
+of Eclipse to let you quickly set up new Android projects, build an app
+UI, debug your app, and export signed (or unsigned) app packages (APKs) for distribution.
+</p>
+
+<p>If you will be developing in Eclipse with the ADT Plugin, first make sure that you have a
+suitable version of Eclipse
+installed on your computer as described by the 
+<a href="{@docRoot}tools/sdk/index.html#Requirements">system requirements</a>.</p>
+
+<p>If you need to install Eclipse, you can download it from <a href=
+"http://www.eclipse.org/downloads/">http://www.eclipse.org/downloads/</a>.
+We recommend the "Eclipse Classic" version. Otherwise, you should use a Java or
+RCP version of Eclipse.</p>
+
+
+<p class="note"><strong>Note:</strong> If you prefer to work in a different IDE, you do not need to
+install Eclipse or ADT. Instead, you can directly use the SDK tools to build and
+debug your application. So if you're not using Eclipse, continue to the next page by clicking
+the <strong>Next</strong> link on the right.</p>
+
+
+
+<h2 id="Download">Download the ADT Plugin</h2>
+
+
+<ol>
+    <li>Start Eclipse, then select <strong>Help</strong> &gt; <strong>Install New
+Software...</strong>.</li>
+    <li>Click <strong>Add</strong>, in the top-right corner.</li>
+    <li>In the Add Repository dialog that appears, enter "ADT Plugin" for the <em>Name</em> and the
+following URL for the <em>Location</em>:
+      <pre>https://dl-ssl.google.com/android/eclipse/</pre>
+    </li>
+    <li>Click <strong>OK</strong>
+      <p>Note: If you have trouble acquiring the plugin, try using "http" in the Location URL,
+instead of "https" (https is preferred for security reasons).</p></li>
+    <li>In the Available Software dialog, select the checkbox next to Developer Tools and click
+<strong>Next</strong>.</li>
+    <li>In the next window, you'll see a list of the tools to be downloaded. Click
+<strong>Next</strong>. </li>
+    <li>Read and accept the license agreements, then click <strong>Finish</strong>.
+      <p>Note: If you get a security warning saying that the authenticity or validity of
+the software can't be established, click <strong>OK</strong>.</p></li>
+    <li>When the installation completes, restart Eclipse. </li>
+</ol>
+
+
+
+
+<h2 id="Configure">Configure the ADT Plugin</h2>
+
+<p>After you've installed ADT and restarted Eclipse, you
+  must specify the location of your Android SDK directory:</p>
+
+<ol>
+    <li>Select <strong>Window</strong> &gt; <strong>Preferences...</strong> to open the Preferences
+        panel (on Mac OS X, select <strong>Eclipse</strong> &gt; <strong>Preferences</strong>).</li>
+    <li>Select <strong>Android</strong> from the left panel.</li>
+      <p>You may see a dialog asking whether you want to send usage statistics to Google. If so,
+make your choice and click <strong>Proceed</strong>.</p>
+    <li>For the <em>SDK Location</em> in the main panel, click <strong>Browse...</strong> and
+        locate your downloaded Android SDK directory (such as <code>android-sdk-windows</code>).</li>
+    <li>Click <strong>Apply</strong>, then <strong>OK</strong>.</li>
+</ol>
+
+
+<p>If you haven't encountered any errors, you're done setting up ADT
+  and can continue to the next step of the SDK installation.</p>
+
+
+
+
+<h2 id="Updating">Updating the ADT Plugin</h2>
+
+<p>From time to time, a new revision of the ADT Plugin becomes available, with
+new features and bug fixes. Generally, when a new revision of ADT is available,
+you should update to it as soon as convenient. </p>
+
+<p>In some cases, a new revision of ADT will have a dependency on a specific
+revision of the Android SDK Tools. If such dependencies exist, you will need to
+update the SDK Tools package of the SDK after installing the new revision of
+ADT. To update the SDK Tools package, use the Android SDK Manager, as
+described in <a href="{@docRoot}sdk/exploring.html">Exploring the SDK</a>.</p>
+
+<p>To learn about new features of each ADT revision and also any dependencies on
+the SDK Tools, see the listings in the <a href="#notes">Revisions</a>
+section. To determine the version currently installed, open the
+Eclipse Installed Software window using <strong>Help</strong>
+&gt; <strong>Software Updates</strong> and refer to the version listed for
+"Android Development Tools".</p>
+
+<p>Follow the steps below to check whether an update is available and, if so,
+to install it. </p>
+
+<ol>
+    <li>Select <strong>Help</strong> &gt; <strong>Check for Updates</strong>.
+      <p>If there are no updates available, a dialog will say so and you're done.</p></li>
+    <li>If there are updates available, select Android DDMS, Android Development Tools,
+      and Android Hierarchy Viewer, then click <strong>Next</strong>.</li>
+    <li>In the Update Details dialog, click <strong>Next</strong>.</li>
+    <li>Read and accept the license agreement and then click <strong>Finish</strong>.
+      This will download and install the latest version of Android DDMS and
+      Android Development Tools.</li>
+    <li>Restart Eclipse.</li>
+</ol>
+
+
+<p>If you encounter problems during the update, remove the existing ADT plugin from Eclipse, then
+perform a fresh installation, using the instructions for <a href="#installing">Installing the ADT
+Plugin</a>.</p>
+
+
+
+<h2 id="Troubleshooting">Troubleshooting</h2>
+
+<p> If you are having trouble downloading the ADT plugin after following the
+steps above, here are some suggestions: </p>
+
+<ul>
+  <li>If Eclipse can not find the remote update site containing the ADT plugin,
+try changing the remote site URL to use http, rather than https. That is, set
+the Location for the remote site to:
+<pre>http://dl-ssl.google.com/android/eclipse/</pre></li>
+<li>If you are behind a firewall (such as a corporate firewall), make sure that
+you have properly configured your proxy settings in Eclipse. In Eclipse,
+you can configure proxy information from the main Eclipse menu in
+<strong>Window</strong> (on Mac OS X, <strong>Eclipse</strong>) &gt;
+<strong>Preferences</strong> &gt; <strong>General</strong> &gt; <strong>Network
+Connections</strong>.</li>
+</ul>
+
+<p> If you are still unable to use Eclipse to download the ADT plugin as a
+remote update site, you can download the ADT zip file to your local machine and
+manually install it:</p>
+
+<ol>
+  <li>Download the current ADT Plugin zip file from the table below (do not unpack it).
+
+  <table class="download">
+    <tr>
+      <th>Name</th>
+      <th>Package</th>
+      <th>Size</th>
+      <th>MD5 Checksum</th>
+  </tr>
+  <tr>
+    <td>ADT {@adtZipVersion}</td>
+    <td>
+      <a href="http://dl.google.com/android/{@adtZipDownload}">{@adtZipDownload}</a>
+    </td>
+    <td>{@adtZipBytes} bytes</td>
+    <td>{@adtZipChecksum}</td>
+  </tr>
+</table>
+</li>
+
+</li>
+  <li>Follow steps 1 and 2 in the <a href="#installing">default install
+      instructions</a> (above).</li>
+  <li>In the Add Site dialog, click <strong>Archive</strong>.</li>
+  <li>Browse and select the downloaded zip file.</li>
+  <li>Enter a name for the local update site (e.g.,
+      "Android Plugin") in the "Name" field.</li>
+  <li>Click <strong>OK</strong>.
+  <li>Follow the remaining procedures as listed for
+      <a href="#installing">default installation</a> above,
+      starting from step 4.</li>
+</ol>
+
+<p>To update your plugin once you've installed using the zip file, you will have
+to follow these steps again instead of the default update instructions.</p>
+
+<h4>Other install errors</h4>
+
+<p>Note that there are features of ADT that require some optional
+Eclipse packages (for example, WST). If you encounter an error when
+installing ADT, your Eclipse installion might not include these packages.
+For information about how to quickly add the necessary packages to your
+Eclipse installation, see the troubleshooting topic
+<a href="{@docRoot}resources/faq/troubleshooting.html#installeclipsecomponents">ADT
+Installation Error: "requires plug-in org.eclipse.wst.sse.ui"</a>.</p>
+
+<h4>For Linux users</h4>
+<p>If you encounter this error when installing the ADT Plugin for Eclipse:
+<pre>
+An error occurred during provisioning.
+Cannot connect to keystore.
+JKS</pre>
+<p>
+...then your development machine lacks a suitable Java VM. Installing Sun
+Java 6 will resolve this issue and you can then reinstall the ADT
+Plugin.</p>

@@ -13,8 +13,7 @@ device's location and bearing and register for updates</li>
 
   <h2>Topics</h2>
   <ol>
-    <li><a href="{@docRoot}guide/topics/location/obtaining-user-location.html">Obtaining User
-Location</a></li>
+    <li><a href="{@docRoot}guide/topics/location/strategies.html">Location Strategies</a></li>
   </ol>
   
   <h2>See Also</h2>
@@ -58,8 +57,7 @@ comes within a given proximity (specified by radius in meters) of a given lat/lo
 </ul>
 
 <p>For more information, read the guide to <a
-href="{@docRoot}guide/topics/location/obtaining-user-location.html">Obtaining User
-Location</a>.</p>
+href="{@docRoot}guide/topics/location/strategies.html">Location Strategies</a>.</p>
 
 
 <h2 id="maps">Google Maps External Library</h2>
@@ -98,8 +96,8 @@ Google APIs add-on, visit</p>
 href="http://code.google.com/android/add-ons/google-apis">http://code.google.com/android/add-ons/google-apis</a></p>
 
 <p>For your convenience, the Google APIs add-on is also available as a downloadable component from
-the Android SDK Manager (see <a href="{@docRoot}sdk/adding-components.html">Adding SDK
-Components</a>).</p>
+the Android SDK Manager (see <a href="{@docRoot}sdk/exploring.html">Exploring the
+SDK</a>).</p>
 
 <p class="note"><strong>Note:</strong> In order to display Google Maps data in a
 MapView, you must register with the Google Maps service and obtain a Maps API

@@ -241,8 +241,8 @@ that launcher icons are legible across on any background color.</p>
 
 <h3 id="icons_in_market">Application Icons on Google Play</h3>
 
-<p>If you are <a href="{@docRoot}guide/publishing/publishing.html">publishing your application on
-Google Play</a>, you will also need to provide a 512 x 512 pixel, high-resolution application icon
+<p>If you are publishing your app on
+Google Play, you will also need to provide a 512 x 512 pixel, high-resolution application icon
 in the <a href="http://play.google.com/apps/publish">developer console</a> at upload time. This icon
 will be used in various locations on Google Play and does not replace your launcher icon.</p>
 

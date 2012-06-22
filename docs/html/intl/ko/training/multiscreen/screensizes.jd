@@ -1,0 +1,279 @@
+page.title=다양한 화면 크기 지원
+parent.title=다양한 화면 지원
+parent.link=index.html
+
+trainingnavtop=true
+next.title=다양한 화면 밀도 지원
+next.link=screendensities.html
+
+@jd:body
+
+
+<!-- This is the training bar -->
+<div id="tb-wrapper"> 
+<div id="tb"> 
+
+<h2>강의 목표</h2>
+<ol>
+  <li><a href="#TaskUseWrapMatchPar">'wrap_content' 및 'match_parent' 사용</a></li>
+  <li><a href="#TaskUseRelativeLayout">RelativeLayout 사용</a></li>
+  <li><a href="#TaskUseSizeQuali">크기 한정자 사용</a></li>
+  <li><a href="#TaskUseSWQuali">최소 너비 한정자 사용</a></li>
+  <li><a href="#TaskUseAliasFilters">레이아웃 별칭 사용</a></li>
+  <li><a href="#TaskUseOriQuali">방향 한정자 사용</a></li>
+  <li><a href="#TaskUse9Patch">나인-패치 비트맵 사용</a></li>
+</ol>
+
+<h2>참고자료</h2>
+
+<ul>
+  <li><a href="{@docRoot}guide/practices/screens_support.html">다양한 화면 지원</a></li>
+</ul>
+
+<h2>다운로드 </h2> 
+ 
+<div class="download-box"> 
+<a href="http://developer.android.com/shareables/training/NewsReader.zip" class="button">샘플 앱 다운로드</a>
+<p class="filename">NewsReader.zip</p> 
+</div> 
+ 
+</div> 
+</div> 
+
+<p>이 강의에서는 다양한 화면 크기를 지원하는 방법을 설명합니다.</p>
+<ul> 
+  <li>화면에 맞게 레이아웃 크기 조정</li> 
+  <li>화면 구성에 따라 적합한 UI 레이아웃 제공</li> 
+  <li>올바른 화면에 올바른 레이아웃 적용</li>
+  <li>정확하게 확대되는 비트맵 제공</li> 
+</ul> 
+
+
+<h2 id="TaskUseWrapMatchPar">'wrap_content' 및 'match_parent' 사용</h2> 
+
+<p>레이아웃이 다양한 화면 크기에 따라 유연하게 조정되도록 하려면 일부 뷰 구성요소의 너비와 높이에 <code>"wrap_content"</code> 및 <code>"match_parent"</code>를 사용해야 합니다. <code>"wrap_content"</code>를 사용하면 뷰의 너비와 높이가 해당 뷰 내에 콘텐츠가 들어가는데 필요한 최소 크기로 설정되는 반면, <code>"match_parent"</code>(API 수준 8 이전에는 <code>"fill_parent"</code>라고도 함)를 사용하면 구성요소가 확장되어 부모뷰의 크기와 일치하게 됩니다.</p>
+
+<p>하드코딩된 크기 대신 <code>"wrap_content"</code> 크기 값을 사용하면 뷰가 해당 뷰에 필요한 여백만을 사용하며 <code>"match_parent"</code> 크기 값을 사용하면 뷰가 확대되어 사용 가능한 여백을 채웁니다. 예를 들면 다음과 같습니다.</p>
+
+{@sample development/samples/training/multiscreen/newsreader/res/layout/onepane_with_bar.xml all}
+
+<p>샘플에서 구성요소 크기에 특정 크기가 아닌 <code>"wrap_content"</code> 및 <code>"match_parent"</code>가 사용된 것을 눈여겨 보시기 바랍니다. 이렇게 하면 레이아웃이 다양한 화면 크기 및 방향에 맞게 조정됩니다.</p>
+
+<p>예를 들어 세로 및 가로 모드에서 레이아웃은 다음과 같이 표시됩니다. 구성요소의 크기가 너비와 높이에 맞게 자동으로 조정됩니다.</p>
+
+<img src="{@docRoot}images/training/layout-hvga.png" />
+<p class="img-caption"><strong>그림 1.</strong> 세로 모드(왼쪽) 및 가로 모드(오른쪽)에서의 뉴스 리더 샘플 앱</p>
+
+
+<h2 id="TaskUseRelativeLayout">RelativeLayout 사용</h2> 
+
+<p>비교적 복잡한 레이아웃을 만들려면 <PH>{@link android.widget.LinearLayout}의 중첩 인스턴스와</PH> <code>"wrap_content"</code> 및 <code>"match_parent"</code> 크기의 조합을 사용합니다. 하지만 <PH>{@link android.widget.LinearLayout}</PH> 을 사용하면 자식뷰의 여백 관계를 정확하게 제어할 수 없으며 <PH>{@link android.widget.LinearLayout}</PH> 단순히 나란하게 표시됩니다. 자식뷰를 일직선이 아닌 다양한 방향으로 표시해야 하는 경우 구성요소 사이의 여백 관계를 중심으로 레이아웃을 지정할 수 있는 <PH>{@link android.widget.RelativeLayout}</PH>을 사용하는 것이 더 좋은 방법일 수 있습니다. 예를 들어 화면 왼쪽에 하나의 자식뷰를, 오른쪽에 다른 자식뷰를 정렬할 수 있습니다.</p>
+
+<p>예를 들면 다음과 같습니다.</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"&gt;
+    &lt;TextView
+        android:id="&#64;+id/label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Type here:"/&gt;
+    &lt;EditText
+        android:id="&#64;+id/entry"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="&#64;id/label"/&gt;
+    &lt;Button
+        android:id="&#64;+id/ok"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="&#64;id/entry"
+        android:layout_alignParentRight="true"
+        android:layout_marginLeft="10dp"
+        android:text="OK" /&gt;
+    &lt;Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="&#64;id/ok"
+        android:layout_alignTop="&#64;id/ok"
+        android:text="Cancel" /&gt;
+&lt;/RelativeLayout&gt;
+</pre>
+
+<p>그림 2는 이 레이아웃이 QVGA 화면에 어떻게 표시되는지 보여줍니다.</p>
+
+<img src="{@docRoot}images/training/relativelayout1.png" />
+<p class="img-caption"><strong>그림 2.</strong> QVGA 화면(작은 화면)의 스크린샷</p>
+
+<p>그림 3은 이 레이아웃이 큰 화면에서 어떻게 표시되는지 보여줍니다.</p>
+
+<img src="{@docRoot}images/training/relativelayout2.png" />
+<p class="img-caption"><strong>그림 3.</strong> WSVGA 화면(큰 화면)의 스크린샷</p>
+
+<p>구성요소의 크기가 변하더라도 여백 관계가  <PH>{@link android.widget.RelativeLayout.LayoutParams}</PH>.</p>
+
+ 
+<h2 id="TaskUseSizeQuali">크기 한정자 사용</h2> 
+
+<p>이전 섹션에서 다룬 유연한 레이아웃이나 상대적 레이아웃으로는 한계가 있습니다. 이러한 레이아웃이 구성요소 내부 및 주위의 여백을 확장하여 다양한 화면에 맞게 조정되긴 하지만 화면 크기별로 최적의 사용자 환경을 제공하지는 못할 수 있습니다. 따라서 애플리케이션은 유연한 레이아웃을 구현할 뿐 아니라 다양한 화면 구성을 타겟팅할 수 있도록 다양한 대체 레이아웃을 제공해야 합니다. 그 방법은 런타임이 현재 기기의 구성에 따라 적합한 리소스(예: 화면 크기별로 다른 레이아웃 디자인)를 자동으로 선택하도록 해 주는 <a href="http://developer.android.com/guide/practices/screens_support.html#qualifiers">구성 한정자</a>를 사용하는 것입니다.</p>
+
+<p>예를 들어 많은 애플리케이션이 큰 화면에 '이중 창(two pane)' 패턴을 구현합니다(한 쪽 창에는 아이템의 목록을 표시하고 다른 창에는 콘텐츠를 표시). 태블릿 및 TV는 두 개의 창 모두가 화면에 동시에 들어갈 정도로 크지만 휴대전화 화면은 두 창을 따로 표시해야 합니다. 따라서 이러한 레이아웃을 구현하려면 다음 파일이 있어야 합니다.</p>
+
+<ul>
+  <li><code>res/layout/main.xml</code>, 단일 창(기본값) 레이아웃:
+
+{@sample development/samples/training/multiscreen/newsreader/res/layout/onepane.xml all}
+</li>
+  <li><code>res/layout-large/main.xml</code>, 이중 창 레이아웃:
+
+{@sample development/samples/training/multiscreen/newsreader/res/layout/twopanes.xml all}
+</li>
+</ul>
+
+<p>두 번째 레이아웃의 디렉토리 이름에서 <code>large</code> 한정자를 눈여겨 보시기 바랍니다. 이 레이아웃은 대형(예: 7인치 태블릿 이상)으로 분류된 화면을 가진 기기에서 선택됩니다. 한정자가 없는 다른 레이아웃은 소형 기기에서 선택됩니다.</p>
+
+
+<h2 id="TaskUseSWQuali">최소 너비 한정자 사용</h2>
+
+<p>Android 3.2 이전 기기에서 개발자가 어려움을 느꼈던 문제 중의 하나는 Dell Streak, 최초의 Galaxy 탭 및 7인치 태블릿에 두루 사용되는 '큰' 화면 크기 빈이었습니다. 하지만 많은 애플리케이션은 화면이 '큰' 기기라 하더라도 이 카테고리(예: 5인치 및 7인치 기기)에 속하는 다양한 기기에 다양한 레이아웃을 표시하고 싶어 합니다. 이것이 Android에서 Android 3.2에 '최소 너비' 한정자를 도입한 이유입니다.</p>
+
+<p>최소 너비 한정자를 사용하면 dp 단위의 특정 최소 너비를 가진 화면을 타겟팅할 수 있습니다. 예를 들어 일반적인 7인치 태블릿에는 600dp라는 최소 너비가 있으므로 이러한 화면에서 두 개의 창에 UI를 사용(작은 화면에서는 단일 목록 사용) 하고 싶은 경우 단일 및 이중 창 레이아웃에 이전 섹션과 동일한 레이아웃을 사용하면 되지만, 이중 창 레이아웃은 최소 너비가 600dp인 화면에 사용한다는 것을 나타내기 위해서 <code>large</code> 크기 한정자 대신 <code>sw600dp</code>를 사용해야 합니다.</p>
+
+<ul>
+  <li><code>res/layout/main.xml</code>, 단일 창(기본값) 레이아웃:
+
+{@sample development/samples/training/multiscreen/newsreader/res/layout/onepane.xml all}
+</li>
+  <li><code>res/layout-sw600dp/main.xml</code>, 이중 창 레이아웃:
+
+{@sample development/samples/training/multiscreen/newsreader/res/layout/twopanes.xml all}
+</li>
+</ul>
+
+<p>이는 최소 너비가 600dp 이상인 기기는 <code>layout-sw600dp/main.xml</code>(이중 창) 레이아웃을 선택하는 반면 소형 화면은 <code>layout/main.xml</code> (단일 창) 레이아웃을 선택한다는 것을 의미합니다.</p>
+
+<p>하지만 Android 3.2 이전 기기는 <code>sw600dp</code>를 크기 한정자로 인식하지 않기 때문에 최소 너비 한정자가 제대로 작동하지 않으며 따라서 <code>large</code> 한정자도 계속 사용해야 합니다. 따라서 <code>res/layout-large/main.xml</code>라는 이름의 파일이 있어야 하며 이 파일은 <code>res/layout-sw600dp/main.xml</code>과 동일한 파일입니다. 다음 섹션에서는 이런 식으로 레이아웃 파일이 중복되지 않게 하는 기술을 살펴보겠습니다.</p>
+
+
+<h2 id="TaskUseAliasFilters">레이아웃 별칭 사용</h2> 
+
+<p>최소 너비 한정자는 Android 3.2 이상 버전에서만 사용할 수 있습니다. 따라서 이전 버전과 호환되도록 하려면 추상화 크기 빈(소형, 보통, 대형 및 초대형)을 계속 사용해야 합니다. 예를 들어 휴대전화에서는 단일 창 UI가 표시되고 7인치 태블릿, TV 및 기타 대형 기기에서는 다중 창 UI가 표시되도록 UI를 디자인하려면 다음 파일을 제공해야 합니다.</p>
+
+<p><ul>
+<li><code>res/layout/main.xml:</code> 단일 창 레이아웃</li>
+<li><code>res/layout-large:</code> 다중 창 레이아웃</li>
+<li><code>res/layout-sw600dp:</code> 다중 창 레이아웃</li>
+</ul></p>
+
+<p>마지막 두 개의 파일은 하나는 Android 3.2 기기와 일치하고 다른 하나는 이전 버전의 Android가 탑재된 태블릿 및 TV를 위한 것으로 서로 동일한 파일입니다.</p>
+
+<p>이 경우 별칭 파일을 사용하면 태블릿 및 TV용으로 동일한 파일이 중복되지 않도록 하고 이를 관리해야 하는 번거로움을 없앨 수 있습니다. 예를 들어 다음 레이아웃을 지정할 수 있습니다.</p>
+
+<ul>
+<li><code>res/layout/main.xml</code>, 단일 창 레이아웃</li>
+<li><code>res/layout/main_twopanes.xml</code>, 이중 창 레이아웃</li>
+</ul>
+
+<p>또한 다음 두 개의 파일을 추가합니다.</p>
+
+<p><ul>
+<li><code>res/values-large/layout.xml</code>:
+<pre>
+&lt;resources>
+    &lt;item name="main" type="layout">&#64;layout/main_twopanes&lt;/item>
+&lt;/resources>
+</pre>
+</li>
+
+<li><code>res/values-sw600dp/layout.xml</code>:
+<pre>
+&lt;resources>
+    &lt;item name="main" type="layout">&#64;layout/main_twopanes&lt;/item>
+&lt;/resources>
+</pre>
+
+</li>
+</ul></p>
+
+<p>뒤에 있는 두 개의 파일은 콘텐츠는 동일하지만 실제로 레이아웃을 지정하지는 않으며 단지 <PH>{@code main}</PH> 이 <PH>{@code main_twopanes}에 대한 별칭이 되도록 설정합니다.</PH> 이 파일에는 <code>large</code> 및 <code>sw600dp</code> 선택기가 있으므로 Android 버전에 관계없이 태블릿 및 TV에 적용됩니다(3.2 버전 이전의 태블릿 및 TV는
+<PH>{@code large}</PH>,3.2 이후 버전은 <code>sw600dp</code>와 일치).</p>
+
+
+<h2 id="TaskUseOriQuali">방향 한정자 사용</h2> 
+
+<p>일부 레이아웃은 가로 및 세로 방향 모두에서 잘 작동하지만 대부분의 레이아웃은 조정을 통해 많은 이점을 누릴 수 있습니다. 다음은 뉴스 리더 샘플 앱에서 화면 크기와 방향별로 레이아웃이 어떻게 작동하는지 보여줍니다.</p>
+
+<p><ul>
+<li><b>소형 화면, 세로:</b> 단일 창, 로고 표시</li>
+<li><b>소형 화면, 가로:</b> 단일 창, 로고 표시</li>
+<li><b>7인치 태블릿, 세로:</b> 단일 창, 작업 표시줄 표시</li>
+<li><b>7인치 태블릿, 가로:</b> 이중 창, 와이드, 작업 표시줄 표시</li>
+<li><b>10인치 태블릿, 세로:</b> 이중 창, 내로우, 작업 표시줄 표시</li>
+<li><b>10인치 태블릿, 가로:</b> 이중 창, 와이드, 작업 표시줄 표시</li>
+<li><b>TV, 가로:</b> 이중 창, 와이드, 작업 표시줄 표시</li>
+</ul></p>
+
+<p>따라서 이러한 각 레이아웃은 <code>res/layout/</code> 디렉토리의 XML 파일에서 지정됩니다. 그러면 앱은 각 레이아웃을 다양한 화면 구성에 지정하기 위해 레이아웃 별칭을 사용해 레이아웃을 각 구성과 일치시킵니다.</p>
+
+<p><code>res/layout/onepane.xml:</code></p>
+{@sample development/samples/training/multiscreen/newsreader/res/layout/onepane.xml all}
+
+<p><code>res/layout/onepane_with_bar.xml:</code></p>
+{@sample development/samples/training/multiscreen/newsreader/res/layout/onepane_with_bar.xml all}
+
+<p><code>res/layout/twopanes.xml</code>:</p>
+{@sample development/samples/training/multiscreen/newsreader/res/layout/twopanes.xml all}
+
+<p><code>res/layout/twopanes_narrow.xml</code>:</p>
+{@sample development/samples/training/multiscreen/newsreader/res/layout/twopanes_narrow.xml all}
+
+<p>가능한 레이아웃을 모두 지정했으므로 구성 한정자를 사용하여 올바른 레이아웃을 각 구성에 매핑하기만 하면 되며 이는 레이아웃 별칭 기술을 사용하면 됩니다.</p>
+
+<p><code>res/values/layouts.xml</code>:</p>
+{@sample development/samples/training/multiscreen/newsreader/res/values/layouts.xml all}
+
+<p><code>res/values-sw600dp-land/layouts.xml</code>:</p>
+{@sample development/samples/training/multiscreen/newsreader/res/values-sw600dp-land/layouts.xml
+all}
+
+<p><code>res/values-sw600dp-port/layouts.xml</code>:</p>
+{@sample development/samples/training/multiscreen/newsreader/res/values-sw600dp-port/layouts.xml
+all}
+
+<p><code>res/values-large-land/layouts.xml</code>:</p>
+{@sample development/samples/training/multiscreen/newsreader/res/values-large-land/layouts.xml all}
+
+<p><code>res/values-large-port/layouts.xml</code>:</p>
+{@sample development/samples/training/multiscreen/newsreader/res/values-large-port/layouts.xml all}
+
+
+
+<h2 id="TaskUse9Patch">나인-패치 비트맵 사용</h2>
+
+<p>일반적으로 다양한 화면 크기를 지원하려면 이미지 리소스도 다양한 크기에 맞게 조정될 수 있어야 합니다. 예를 들어 버튼 배경은 버튼 배경이 적용되는 모든 버튼 모양과 맞아야 합니다.</p>
+
+<p>구성요소에 크기가 바뀔 수 있는 단순한 이미지를 사용하는 경우 런타임이 이미지를 균등하게 확대하거나 축소하기 때문에 기대에 미치지 못하는 결과가 나옵니다. 이에 대한 해결 방법은 확대될 수 있는 영역과 확대될 수 없는 영역을 나타내는 특별한 형식의 PNG 파일인 나인-패치 비트맵을 사용하는 것입니다.</p>
+
+<p>따라서 다양한 크기를 가진 구성요소에 사용할 비트맵을 디자인할 때에는 항상 나인-패치를 사용하시기 바랍니다. 비트맵을 나인-패치로 변환하려면 일반적인 이미지부터 시작합니다(그림 4, 명확하게 보이도록 4배 줌으로 표시).</p>
+
+<img src="{@docRoot}images/training/button.png" />
+<p class="img-caption"><strong>그림 4.</strong> <code>button.png</code></p>
+
+<p>그 다음 이 이미지에 <ode
+href="{@docRoot}tools/help/draw9patch.html">SDK의 <code>draw9patch</code></a> 유틸리티(<code>tools/</code> 디렉토리에 있음)를 실행합니다. 이 때 왼쪽 및 상단 테두리를 따라 픽셀을 그려 확대되어야 할 영역을 표시할 수 있습니다. 또한 오른쪽 및 하단 테두리를 따라 픽셀을 그려 콘텐츠가 들어가야 할 영역을 표시할 수 있으며 그 결과는 그림 5와 같습니다.</p>
+
+<img src="{@docRoot}images/training/button_with_marks.png" />
+<p class="img-caption"><strong>그림 5.</strong> <code>button.9.png</code></p>
+
+<p>테두리를 따라 있는 검은색 픽셀을 눈여겨 보시기 바랍니다. 상단 및 왼쪽 테두리의 픽셀은 이미지가 확대될 수 있는 영역을 나타내며 오른쪽 및 하단 테두리는 콘텐츠가 위치해야 하는 영역을 나타냅니다.</p>
+
+<p>또한 <code>.9.png</code> 확장자를 확인하시기 바랍니다. 프레임워크는 이 확장자를 통해 이미지가 일반적인 PNG 이미지가 아닌 나인-패치 이미지임을 감지할 수 있으므로 이 확장자를 사용해야 합니다.</p>
+
+<p><code>android:background="&#64;drawable/button"</code>을 설정하여 이 배경을 구성요소에 적용하면 그림 6의 다양한 크기로 표시된 것처럼 프레임워크가 버튼의 크기를 수용할 수 있도록 이미지를 올바르게 확대합니다.</p>
+
+<img src="{@docRoot}images/training/buttons_stretched.png" />
+<p class="img-caption"><strong>그림 6.</strong> 다양한 크기에 <code>button.9.png</code> 나인-패치를 사용하는 버튼</p>
+

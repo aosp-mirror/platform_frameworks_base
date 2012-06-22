@@ -1,0 +1,555 @@
+page.title=Parsing XML Data
+parent.title=Performing Network Operations
+parent.link=index.html
+
+trainingnavtop=true
+
+previous.title=Managing Network Usage
+previous.link=managing.html
+
+@jd:body
+
+<div id="tb-wrapper"> 
+<div id="tb">
+
+
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#choose">Choose a Parser</a></li>
+  <li><a href="#analyze">Analyze the Feed</a></li>
+  <li><a href="#instantiate">Instantiate the Parser</a></li>
+  <li><a href="#read">Read the Feed</a></li>
+  <li><a href="#parse">Parse XML</a></li>
+  <li><a href="#skip">Skip Tags You Don't Care About</a></li>
+  <li><a href="#consume">Consume XML Data</a></li>
+</ol>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}guide/webapps/index.html">Web Apps Overview</a></li>
+</ul>
+
+<h2>Try it out</h2>
+
+<div class="download-box">
+  <a href="{@docRoot}shareables/training/NetworkUsage.zip"
+class="button">Download the sample</a>
+ <p class="filename">NetworkUsage.zip</p>
+</div>
+
+</div> 
+</div>
+
+<p>Extensible Markup Language (XML) is a set of rules for encoding documents in
+machine-readable form. XML is a popular format for sharing data on the internet.
+Websites that frequently update their content, such as news sites or blogs,
+often provide an XML feed so that external programs can keep abreast of content
+changes. Uploading and parsing XML data is a common task for network-connected
+apps. This lesson explains how to parse XML documents and use their data.</p>
+
+<h2 id="choose">Choose a Parser</h2>
+
+<p>We recommend {@link org.xmlpull.v1.XmlPullParser}, which is an efficient and
+maintainable way to parse XML on Android. Historically Android has had two
+implementations of this interface:</p>
+
+<ul>
+  <li><a href="http://kxml.sourceforge.net/"><code>KXmlParser</code></a> 
+  via {@link org.xmlpull.v1.XmlPullParserFactory#newPullParser XmlPullParserFactory.newPullParser()}. 
+  </li>
+  <li><code>ExpatPullParser</code>, via 
+  {@link android.util.Xml#newPullParser Xml.newPullParser()}. 
+  </li>
+</ul>
+
+<p>Either choice is fine. The
+example in this section uses <code>ExpatPullParser</code>, via
+{@link android.util.Xml#newPullParser Xml.newPullParser()}. </p>
+
+<h2 id="analyze">Analyze the Feed</h2>
+
+<p>The first step in parsing a feed is to decide which fields you're interested in. 
+The parser extracts data for those fields and ignores the rest.</p>
+
+<p>Here is an excerpt from the feed that's being parsed in the sample app. Each
+post to <a href="http://stackoverflow.com">StackOverflow.com</a> appears in the
+feed as an <code>entry</code> tag that contains several nested tags:</p>
+
+<pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt; 
+&lt;feed xmlns=&quot;http://www.w3.org/2005/Atom&quot; xmlns:creativeCommons=&quot;http://backend.userland.com/creativeCommonsRssModule&quot; ...&quot;&gt;     
+&lt;title type=&quot;text&quot;&gt;newest questions tagged android - Stack Overflow&lt;/title&gt;
+...
+    &lt;entry&gt;
+    ...
+    &lt;/entry&gt;
+    &lt;entry&gt;
+        &lt;id&gt;http://stackoverflow.com/q/9439999&lt;/id&gt;
+        &lt;re:rank scheme="http://stackoverflow.com"&gt;0&lt;/re:rank&gt;
+        &lt;title type="text"&gt;Where is my data file?&lt;/title&gt;
+        &lt;category scheme="http://stackoverflow.com/feeds/tag?tagnames=android&amp;sort=newest/tags" term="android"/&gt;
+        &lt;category scheme="http://stackoverflow.com/feeds/tag?tagnames=android&amp;sort=newest/tags" term="file"/&gt;
+        &lt;author&gt;
+            &lt;name&gt;cliff2310&lt;/name&gt;
+            &lt;uri&gt;http://stackoverflow.com/users/1128925&lt;/uri&gt;
+        &lt;/author&gt;
+        &lt;link rel="alternate" href="http://stackoverflow.com/questions/9439999/where-is-my-data-file" /&gt;
+        &lt;published&gt;2012-02-25T00:30:54Z&lt;/published&gt;
+        &lt;updated&gt;2012-02-25T00:30:54Z&lt;/updated&gt;
+        &lt;summary type="html"&gt;
+            &lt;p&gt;I have an Application that requires a data file...&lt;/p&gt;
+
+        &lt;/summary&gt;
+    &lt;/entry&gt;
+    &lt;entry&gt;
+    ...
+    &lt;/entry&gt;
+...
+&lt;/feed&gt;</pre>
+
+<p>The sample app  
+extracts data for the <code>entry</code> tag and its nested tags
+<code>title</code>, <code>link</code>, and <code>summary</code>.</p>
+
+
+<h2 id="instantiate">Instantiate the Parser</h2>
+
+<p>The next step is to
+instantiate a parser and kick off the parsing process. In this snippet, a parser
+is initialized to not process namespaces, and to use the provided {@link
+java.io.InputStream} as its input. It starts the parsing process with a call to
+{@link org.xmlpull.v1.XmlPullParser#nextTag() nextTag()} and invokes the
+<code>readFeed()</code> method, which extracts and processes the data the app is
+interested in:</p>
+
+<pre>public class StackOverflowXmlParser {
+    // We don't use namespaces
+    private static final String ns = null;
+   
+    public List<Entry> parse(InputStream in) throws XmlPullParserException, IOException {
+        try {
+            XmlPullParser parser = Xml.newPullParser();
+            parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
+            parser.setInput(in, null);
+            parser.nextTag();
+            return readFeed(parser);
+        } finally {
+            in.close();
+        }
+    }
+ ... 
+}</pre>
+
+<h2 id="read">Read the Feed</h2>
+
+<p>The <code>readFeed()</code> method does the actual work of processing the
+feed. It looks for elements tagged "entry" as a starting point for recursively
+processing the feed. If a tag isn't an {@code entry} tag, it skips it. Once the whole
+feed has been recursively processed, <code>readFeed()</code> returns a {@link
+java.util.List} containing the entries (including nested data members) it
+extracted from the feed. This {@link java.util.List} is then returned by the
+parser.</p>
+
+<pre>
+private List<Entry> readFeed(XmlPullParser parser) throws XmlPullParserException, IOException {
+    List<Entry> entries = new ArrayList<Entry>();
+
+    parser.require(XmlPullParser.START_TAG, ns, "feed");
+    while (parser.next() != XmlPullParser.END_TAG) {
+        if (parser.getEventType() != XmlPullParser.START_TAG) {
+            continue;
+        }
+        String name = parser.getName();
+        // Starts by looking for the entry tag
+        if (name.equals("entry")) {
+            entries.add(readEntry(parser));
+        } else {
+            skip(parser);
+        }
+    }  
+    return entries;
+}</pre>
+
+
+<h2 id="parse">Parse XML</h2>
+
+
+<p>The steps for parsing an XML feed are as follows:</p>
+<ol>
+
+  <li>As described in <a href="#analyze">Analyze the Feed</a>, identify the tags you want to include in your app. This
+example extracts data for the <code>entry</code> tag and its nested tags
+<code>title</code>, <code>link</code>, and <code>summary</code>.</li>
+
+<li>Create the following methods:</p>
+
+<ul>
+
+<li>A "read" method for each tag you're interested in. For example,
+<code>readEntry()</code>, <code>readTitle()</code>, and so on. The parser reads
+tags from the input stream. When it encounters a tag named <code>entry</code>, 
+<code>title</code>,
+<code>link</code> or <code>summary</code>, it calls the appropriate method
+for that tag. Otherwise, it skips the tag.
+</li>
+
+<li>Methods to extract data for each different type of tag and to advance the
+parser to the next tag. For example:
+<ul>
+
+<li>For the <code>title</code> and <code>summary</code> tags, the parser calls
+<code>readText()</code>. This method extracts data for these tags by calling
+<code>parser.getText()</code>.</li>
+
+<li>For the <code>link</code> tag, the parser extracts data for links by first 
+determining if the link is the kind
+it's interested in. Then it uses <code>parser.getAttributeValue()</code> to
+extract the link's value.</li>
+
+<li>For the <code>entry</code> tag, the parser calls <code>readEntry()</code>.
+This method parses the entry's nested tags and returns an <code>Entry</code>
+object with the data members <code>title</code>, <code>link</code>, and
+<code>summary</code>.</li>
+
+</ul>
+</li>
+<li>A helper <code>skip()</code> method that's recursive. For more discussion of this topic, see <a href="#skip">Skip Tags You Don't Care About</a>.</li>
+</ul>
+  
+  </li>
+</ol>
+
+<p>This snippet shows how the parser parses entries, titles, links, and summaries.</p>
+<pre>public static class Entry {
+    public final String title;
+    public final String link;
+    public final String summary;
+
+    private Entry(String title, String summary, String link) {
+        this.title = title;
+        this.summary = summary;
+        this.link = link;
+    }
+}
+  
+// Parses the contents of an entry. If it encounters a title, summary, or link tag, hands them off
+// to their respective &quot;read&quot; methods for processing. Otherwise, skips the tag.
+private Entry readEntry(XmlPullParser parser) throws XmlPullParserException, IOException {
+    parser.require(XmlPullParser.START_TAG, ns, "entry");
+    String title = null;
+    String summary = null;
+    String link = null;
+    while (parser.next() != XmlPullParser.END_TAG) {
+        if (parser.getEventType() != XmlPullParser.START_TAG) {
+            continue;
+        }
+        String name = parser.getName();
+        if (name.equals("title")) {
+            title = readTitle(parser);
+        } else if (name.equals("summary")) {
+            summary = readSummary(parser);
+        } else if (name.equals("link")) {
+            link = readLink(parser);
+        } else {
+            skip(parser);
+        }
+    }
+    return new Entry(title, summary, link);
+}
+
+// Processes title tags in the feed.
+private String readTitle(XmlPullParser parser) throws IOException, XmlPullParserException {
+    parser.require(XmlPullParser.START_TAG, ns, "title");
+    String title = readText(parser);
+    parser.require(XmlPullParser.END_TAG, ns, "title");
+    return title;
+}
+  
+// Processes link tags in the feed.
+private String readLink(XmlPullParser parser) throws IOException, XmlPullParserException {
+    String link = "";
+    parser.require(XmlPullParser.START_TAG, ns, "link");
+    String tag = parser.getName();
+    String relType = parser.getAttributeValue(null, "rel");  
+    if (tag.equals("link")) {
+        if (relType.equals("alternate")){
+            link = parser.getAttributeValue(null, "href");
+            parser.nextTag();
+        } 
+    }
+    parser.require(XmlPullParser.END_TAG, ns, "link");
+    return link;
+}
+
+// Processes summary tags in the feed.
+private String readSummary(XmlPullParser parser) throws IOException, XmlPullParserException {
+    parser.require(XmlPullParser.START_TAG, ns, "summary");
+    String summary = readText(parser);
+    parser.require(XmlPullParser.END_TAG, ns, "summary");
+    return summary;
+}
+
+// For the tags title and summary, extracts their text values.
+private String readText(XmlPullParser parser) throws IOException, XmlPullParserException {
+    String result = "";
+    if (parser.next() == XmlPullParser.TEXT) {
+        result = parser.getText();
+        parser.nextTag();
+    }
+    return result;
+}
+  ...
+}</pre>
+
+<h2 id="skip">Skip Tags You Don't Care About</h2>
+
+<p>One of the steps in the XML parsing described above is for the parser to skip tags it's not interested in. Here is the parser's <code>skip()</code> method:</p>
+
+<pre>
+private void skip(XmlPullParser parser) throws XmlPullParserException, IOException {
+    if (parser.getEventType() != XmlPullParser.START_TAG) {
+        throw new IllegalStateException();
+    }
+    int depth = 1;
+    while (depth != 0) {
+        switch (parser.next()) {
+        case XmlPullParser.END_TAG:
+            depth--;
+            break;
+        case XmlPullParser.START_TAG:
+            depth++;
+            break;
+        }
+    }
+ }
+</pre>
+
+<p>This is how it works:</p>
+
+<ul>
+
+<li>It throws an exception if the current event isn't a
+<code>START_TAG</code>.</li>
+
+<li>It consumes the <code>START_TAG</code>, and all events up to and including
+the matching <code>END_TAG</code>.</li>
+
+<li>To make sure that it stops at the correct <code>END_TAG</code> and not at
+the first tag it encounters after the original <code>START_TAG</code>, it keeps
+track of the nesting depth.</li>
+
+</ul>
+
+<p>Thus if the current element has nested elements, the value of
+<code>depth</code> won't be 0 until the parser has consumed all events between
+the original <code>START_TAG</code> and its matching <code>END_TAG</code>. For
+example, consider how the parser skips the <code>&lt;author&gt;</code> element,
+which has 2 nested elements, <code>&lt;name&gt;</code> and
+<code>&lt;uri&gt;</code>:</p>
+
+<ul>
+
+<li>The first time through the <code>while</code> loop, the next tag the parser
+encounters after <code>&lt;author&gt;</code> is the <code>START_TAG</code> for 
+<code>&lt;name&gt;</code>. The value for <code>depth</code> is incremented to
+2.</li>
+
+<li>The second time through the <code>while</code> loop, the next tag the parser
+encounters is the <code>END_TAG</code>  <code>&lt;/name&gt;</code>. The value
+for <code>depth</code> is decremented to 1.</li>
+
+<li>The third time through the <code>while</code> loop, the next tag the parser
+encounters is the <code>START_TAG</code>  <code>&lt;uri&gt;</code>. The value
+for <code>depth</code> is incremented to 2.</li>
+
+<li>The fourth time through the <code>while</code> loop, the next tag the parser
+encounters is the <code>END_TAG</code>  <code>&lt;/uri&gt;</code>. The value for
+<code>depth</code> is decremented to 1.</li>
+
+<li>The fifth time and final time through the <code>while</code> loop, the next
+tag the parser encounters is the <code>END_TAG</code> 
+<code>&lt;/author&gt;</code>. The value for <code>depth</code> is decremented to
+0, indicating that the <code>&lt;author&gt;</code> element has been successfully
+skipped.</li>
+
+</ul>
+
+<h2 id="consume">Consume XML Data</h2>
+
+<p>The example application fetches and parses the XML feed within an {@link
+android.os.AsyncTask}. This takes the processing off the main UI thread. When 
+processing is complete, the app updates the UI in the main activity
+(<code>NetworkActivity</code>).</p>
+<p>In the excerpt shown below, the <code>loadPage()</code> method does the
+following:</p>
+
+<ul>
+
+  <li>Initializes a string variable with the URL for the XML feed.</li>
+  
+  <li>If the user's settings and the network connection allow it, invokes
+<code>new DownloadXmlTask().execute(url)</code>. This instantiates a new 
+<code>DownloadXmlTask</code> object ({@link android.os.AsyncTask} subclass) and
+runs its {@link android.os.AsyncTask#execute execute()} method, which downloads
+and parses the feed and returns a string result to be displayed in the UI.</li>
+  
+</ul>
+<pre>
+public class NetworkActivity extends Activity {
+    public static final String WIFI = "Wi-Fi";
+    public static final String ANY = "Any";
+    private static final String URL = "http://stackoverflow.com/feeds/tag?tagnames=android&sort=newest";
+   
+    // Whether there is a Wi-Fi connection.
+    private static boolean wifiConnected = false; 
+    // Whether there is a mobile connection.
+    private static boolean mobileConnected = false;
+    // Whether the display should be refreshed.
+    public static boolean refreshDisplay = true; 
+    public static String sPref = null;
+
+    ...
+      
+    // Uses AsyncTask to download the XML feed from stackoverflow.com.
+    public void loadPage() {  
+      
+        if((sPref.equals(ANY)) && (wifiConnected || mobileConnected)) {
+            new DownloadXmlTask().execute(URL);
+        }
+        else if ((sPref.equals(WIFI)) && (wifiConnected)) {
+            new DownloadXmlTask().execute(URL);
+        } else {
+            // show error
+        }  
+    }</pre>
+    
+<p>The {@link android.os.AsyncTask} subclass shown below,
+<code>DownloadXmlTask</code>, implements the following {@link
+android.os.AsyncTask} methods:</p>
+
+    <ul>
+    
+      <li>{@link android.os.AsyncTask#doInBackground doInBackground()} executes
+the method <code>loadXmlFromNetwork()</code>. It passes the feed URL as a
+parameter. The method <code>loadXmlFromNetwork()</code> fetches and processes
+the feed. When it finishes, it passes back a result string.</li>
+      
+      <li>{@link android.os.AsyncTask#onPostExecute onPostExecute()} takes the
+returned string and displays it in the UI.</li>
+      
+    </ul>
+    
+<pre>
+// Implementation of AsyncTask used to download XML feed from stackoverflow.com.
+private class DownloadXmlTask extends AsyncTask&lt;String, Void, String&gt; {
+    &#64;Override
+    protected String doInBackground(String... urls) {
+        try {
+            return loadXmlFromNetwork(urls[0]);
+        } catch (IOException e) {
+            return getResources().getString(R.string.connection_error);
+        } catch (XmlPullParserException e) {
+            return getResources().getString(R.string.xml_error);
+        }
+    }
+
+    &#64;Override
+    protected void onPostExecute(String result) {  
+        setContentView(R.layout.main);
+        // Displays the HTML string in the UI via a WebView
+        WebView myWebView = (WebView) findViewById(R.id.webview);
+        myWebView.loadData(result, "text/html", null);
+    }
+}</pre>
+
+   <p>Below is the method <code>loadXmlFromNetwork()</code> that is invoked from
+<code>DownloadXmlTask</code>. It does the following:</p>
+   
+   <ol>
+   
+     <li>Instantiates a <code>StackOverflowXmlParser</code>. It also creates variables for
+a {@link java.util.List} of <code>Entry</code> objects (<code>entries</code>), and 
+<code>title</code>, <code>url</code>, and <code>summary</code>, to hold the
+values extracted from the XML feed for those fields.</li>
+     
+     <li>Calls <code>downloadUrl()</code>, which fetches the feed and returns it as 
+     an {@link java.io.InputStream}.</li>
+     
+     <li>Uses <code>StackOverflowXmlParser</code> to parse the {@link java.io.InputStream}. 
+     <code>StackOverflowXmlParser</code> populates a 
+     {@link java.util.List} of <code>entries</code> with data from the feed.</li>
+     
+     <li>Processes the <code>entries</code> {@link java.util.List}, 
+ and combines the feed data with HTML markup.</li>
+     
+     <li>Returns an HTML string that is displayed in the main activity
+UI by the {@link android.os.AsyncTask} method {@link
+android.os.AsyncTask#onPostExecute onPostExecute()}.</li>
+     
+</ol>
+
+<pre>
+// Uploads XML from stackoverflow.com, parses it, and combines it with
+// HTML markup. Returns HTML string.
+private String loadXmlFromNetwork(String urlString) throws XmlPullParserException, IOException {
+    InputStream stream = null;
+    // Instantiate the parser
+    StackOverflowXmlParser stackOverflowXmlParser = new StackOverflowXmlParser();
+    List&lt;Entry&gt; entries = null;
+    String title = null;
+    String url = null;
+    String summary = null;
+    Calendar rightNow = Calendar.getInstance(); 
+    DateFormat formatter = new SimpleDateFormat("MMM dd h:mmaa");
+        
+    // Checks whether the user set the preference to include summary text
+    SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+    boolean pref = sharedPrefs.getBoolean("summaryPref", false);
+        
+    StringBuilder htmlString = new StringBuilder();
+    htmlString.append("&lt;h3&gt;" + getResources().getString(R.string.page_title) + "&lt;/h3&gt;");
+    htmlString.append("&lt;em&gt;" + getResources().getString(R.string.updated) + " " + 
+            formatter.format(rightNow.getTime()) + "&lt;/em&gt;");
+        
+    try {
+        stream = downloadUrl(urlString);        
+        entries = stackOverflowXmlParser.parse(stream);
+    // Makes sure that the InputStream is closed after the app is
+    // finished using it.
+    } finally {
+        if (stream != null) {
+            stream.close();
+        } 
+     }
+    
+    // StackOverflowXmlParser returns a List (called "entries") of Entry objects.
+    // Each Entry object represents a single post in the XML feed.
+    // This section processes the entries list to combine each entry with HTML markup.
+    // Each entry is displayed in the UI as a link that optionally includes
+    // a text summary.
+    for (Entry entry : entries) {       
+        htmlString.append("&lt;p&gt;&lt;a href='");
+        htmlString.append(entry.link);
+        htmlString.append("'&gt;" + entry.title + "&lt;/a&gt;&lt;/p&gt;");
+        // If the user set the preference to include summary text,
+        // adds it to the display.
+        if (pref) {
+            htmlString.append(entry.summary);
+        }
+    }
+    return htmlString.toString();
+}
+
+// Given a string representation of a URL, sets up a connection and gets
+// an input stream.
+private InputStream downloadUrl(String urlString) throws IOException {
+    URL url = new URL(urlString);
+    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+    conn.setReadTimeout(10000 /* milliseconds */);
+    conn.setConnectTimeout(15000 /* milliseconds */);
+    conn.setRequestMethod("GET");
+    conn.setDoInput(true);
+    // Starts the query
+    conn.connect();
+    InputStream stream = conn.getInputStream();      
+}</pre>

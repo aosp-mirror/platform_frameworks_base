@@ -268,9 +268,9 @@ no dither applied for 24-bit.
   <thead>
   <tr>
     <th>&nbsp;</th>
-    <th style="background-color:#f3f3f3;font-weight:normal"><acronym title="Standard definition">SD</a> (Low quality)</th>
-    <th style="background-color:#f3f3f3;font-weight:normal"><acronym title="Standard definition">SD</a> (High quality)</th>
-    <th style="background-color:#f3f3f3;font-weight:normal"><acronym title="High definition">HD</a> (Not available on all devices)</th>
+    <th><acronym title="Standard definition">SD</a> (Low quality)</th>
+    <th><acronym title="Standard definition">SD</a> (High quality)</th>
+    <th><acronym title="High definition">HD</a> (Not available on all devices)</th>
   </tr>
   </thead>
   <tbody>

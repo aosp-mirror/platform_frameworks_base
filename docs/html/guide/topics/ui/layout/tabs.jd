@@ -1,0 +1,219 @@
+page.title=Tabbed
+parent.title=Layouts
+parent.link=layout-objects.html
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+<h2>In this document</h2>
+  <ol>
+    <li><a href="#example">Example</a></li>
+  </ol>
+  <h2>Key classes</h2>
+  <ol>
+<li>{@link android.widget.TabWidget}</li>
+<li>{@link android.widget.TabHost}</li>
+<li>{@link android.widget.TabHost.TabSpec}</li>
+<li>{@link android.widget.FrameLayout}</li>
+  </ol>
+</div>
+</div>
+<p>To create a tabbed UI, you need to use a {@link android.widget.TabHost} and a {@link
+android.widget.TabWidget}. The {@link android.widget.TabHost} must be the root node for the layout,
+which contains both the {@link android.widget.TabWidget} for displaying the tabs and a {@link
+android.widget.FrameLayout} for displaying the tab content.</p>
+
+<img src="{@docRoot}images/ui/tabs.png" alt="" />
+
+<p>You can implement your tab content in one of two ways: use the tabs to swap
+{@link android.view.View}s within the same {@link android.app.Activity}, or use the tabs to change
+between entirely separate activities. Which method you want for your application will depend on your
+demands, but if each tab provides a distinct user activity, then it probably makes sense to use
+a separate {@link android.app.Activity} for each tab, so that you can better manage the application
+in discrete groups, rather than one massive application and layout.</p>
+<h2 id="example">Example</h2>
+<p>In this tutorial, you'll create a tabbed UI that uses a separate {@link
+android.app.Activity} for each tab.</p>
+
+<ol>
+  <li>Start a new project named <em>HelloTabWidget</em>.</li>
+  <li>First, create three separate {@link android.app.Activity} classes in your project:
+<code>ArtistsActivity</code>, <code>AlbumsActivity</code>, and <code>SongsActivity</code>. These
+will each represent a separate tab. For now, make each one display a simple message using a {@link
+android.widget.TextView}. For example:
+<pre>
+public class ArtistsActivity extends Activity {
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        TextView textview = new TextView(this);
+        textview.setText("This is the Artists tab");
+        setContentView(textview);
+    }
+}
+</pre>
+  <p>Notice that this doesn't use a layout file. Just create a {@link
+android.widget.TextView}, give it some text and set that as the content. Duplicate this for
+each of the three activities, and add the corresponding <code>&lt;activity/&gt;</code> tags to the Android Manifest file.</p>
+
+  <li>You need an icon for each of your tabs. For each icon, you should create two versions: one
+for when the tab is selected and one for when it is unselected. The
+general design recommendation is for the selected icon to be a dark color (grey), and the
+unselected icon to be a light color (white). (See the <a
+href="{@docRoot}guide/practices/ui_guidelines/icon_design.html#tabstructure">Icon Design
+Guidelines</a>.) For example:
+  <p>
+  <img src="images/ic_tab_artists_white.png" title="unselected tab icon"  alt="" />
+  <img src="images/ic_tab_artists_grey.png" title="selected tab icon" alt="" />
+  </p>
+  <p>For this tutorial, you can copy these images and use them for all three tabs. (When you
+create tabs in your own application, you should create customized tab icons.)</p>
+  <p>Now create a <a
+href="{@docRoot}guide/topics/resources/drawable-resource.html#StateList">state-list drawable</a>
+that specifies which image to use for each tab state:</p>
+  <ol>
+    <li>Save the icon images in your project <code>res/drawable/</code> directory.</li>
+    <li>Create a new XML file in <code>res/drawable/</code>
+named <code>ic_tab_artists.xml</code> and insert the following:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;selector xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;!-- When selected, use grey -->
+    &lt;item android:drawable="@drawable/ic_tab_artists_grey"
+          android:state_selected="true" />
+    &lt;!-- When not selected, use white-->
+    &lt;item android:drawable="@drawable/ic_tab_artists_white" />
+&lt;/selector>
+</pre>
+  <p>This is a <a
+href="{@docRoot}guide/topics/resources/drawable-resource.html#StateList">state-list drawable</a>,
+which you will apply as the tab image. When the tab state changes, the tab icon will
+automatically switch between the images defined here.</p>
+    </li>
+  </ol>
+  </li>
+
+  <li>Open the <code>res/layout/main.xml</code> file and insert the following:
+  <pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;TabHost xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/tabhost"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+    &lt;LinearLayout
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:padding="5dp">
+        &lt;TabWidget
+            android:id="@android:id/tabs"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" />
+        &lt;FrameLayout
+            android:id="@android:id/tabcontent"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:padding="5dp" />
+    &lt;/LinearLayout>
+&lt;/TabHost>
+</pre>
+    <p>This is the layout that will display the tabs and provide navigation between each {@link
+    android.app.Activity} created above.</p>
+    <p>The {@link android.widget.TabHost} requires that a {@link android.widget.TabWidget} and a
+{@link android.widget.FrameLayout} both live somewhere within it. To position the {@link
+android.widget.TabWidget} and {@link android.widget.FrameLayout} vertically, a {@link
+android.widget.LinearLayout} is used. The {@link android.widget.FrameLayout} is where the content
+for each tab goes, which is empty now because the {@link android.widget.TabHost} will automatically
+embed each {@link android.app.Activity} within it.</p>
+    <p>Notice that the {@link android.widget.TabWidget} and the {@link android.widget.FrameLayout}
+    elements have the IDs {@code tabs} and {@code tabcontent}, respectively. These names
+    must be used so that the {@link android.widget.TabHost} can retrieve references to each of
+    them. It expects exactly these names.</p>
+  </li>
+
+  <li>Now open <code>HelloTabWidget.java</code> and make it extend {@link
+  android.app.TabActivity}:</p>
+<pre>
+public class HelloTabWidget extends TabActivity {
+</pre>
+  </li>
+  <li>Use the following code for the {@link android.app.Activity#onCreate(Bundle) onCreate()}
+  method:
+<pre>
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.main);
+
+    Resources res = getResources(); // Resource object to get Drawables
+    TabHost tabHost = getTabHost();  // The activity TabHost
+    TabHost.TabSpec spec;  // Resusable TabSpec for each tab
+    Intent intent;  // Reusable Intent for each tab
+
+    // Create an Intent to launch an Activity for the tab (to be reused)
+    intent = new Intent().setClass(this, ArtistsActivity.class);
+
+    // Initialize a TabSpec for each tab and add it to the TabHost
+    spec = tabHost.newTabSpec("artists").setIndicator("Artists",
+                      res.getDrawable(R.drawable.ic_tab_artists))
+                  .setContent(intent);
+    tabHost.addTab(spec);
+
+    // Do the same for the other tabs
+    intent = new Intent().setClass(this, AlbumsActivity.class);
+    spec = tabHost.newTabSpec("albums").setIndicator("Albums",
+                      res.getDrawable(R.drawable.ic_tab_albums))
+                  .setContent(intent);
+    tabHost.addTab(spec);
+
+    intent = new Intent().setClass(this, SongsActivity.class);
+    spec = tabHost.newTabSpec("songs").setIndicator("Songs",
+                      res.getDrawable(R.drawable.ic_tab_songs))
+                  .setContent(intent);
+    tabHost.addTab(spec);
+
+    tabHost.setCurrentTab(2);
+}
+</pre>
+    <p>This sets up each tab with their text and icon, and assigns each one an {@link
+android.app.Activity}.</p>
+    <p>A reference to the {@link android.widget.TabHost} is first captured with {@link
+android.app.TabActivity#getTabHost()}. Then, for
+each tab, a {@link android.widget.TabHost.TabSpec} is created to define the tab properties. The
+{@link android.widget.TabHost#newTabSpec(String)} method creates a new {@link
+android.widget.TabHost.TabSpec} identified by the given string tag. For each
+{@link android.widget.TabHost.TabSpec}, {@link
+android.widget.TabHost.TabSpec#setIndicator(CharSequence,Drawable)} is called to set the text and
+icon for the tab, and {@link android.widget.TabHost.TabSpec#setContent(Intent)} is called to specify
+the {@link android.content.Intent} to open the appropriate {@link android.app.Activity}. Each
+{@link android.widget.TabHost.TabSpec} is then added to the {@link android.widget.TabHost} by
+calling {@link android.widget.TabHost#addTab(TabHost.TabSpec)}.</p>
+
+    <p>At the very end, {@link
+    android.widget.TabHost#setCurrentTab(int)} opens the tab to be displayed by default, specified
+    by the index position of the tab.</p>
+
+    <p>Notice that not once was the {@link android.widget.TabWidget} object referenced. This is
+    because a {@link android.widget.TabWidget} must always be a child of a {@link
+    android.widget.TabHost}, which is what you use for almost all interaction with the tabs. So when
+    a tab is added to the {@link android.widget.TabHost}, it's automatically added to the child
+    {@link android.widget.TabWidget}.</p>
+  </li>
+
+  <li>Now open the Android Manifest file and add the <code>NoTitleBar</code> theme to the
+<em>HelloTabWidget</em>'s
+  <code>&lt;activity></code> tag. This will remove the default application title from the top
+  of the layout, leaving more space for the tabs, which effectively operate as their own titles.
+  The <code>&lt;activity></code> tag should look like this:
+<pre>
+&lt;activity android:name=".HelloTabWidget" android:label="@string/app_name"
+          android:theme="&#64;android:style/Theme.NoTitleBar">
+</pre>
+  </li>
+
+  <li>Run the application.</li>
+</ol>
+
+
+<p>Your application should look like this (though your icons may be different):</p>
+<img src="images/hello-tabwidget.png" width="150px" />
+
+

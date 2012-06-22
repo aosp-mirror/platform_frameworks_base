@@ -19,7 +19,7 @@ parent.link=index.html
 for <a href="{@docRoot}design/patterns/app-structure.html">App Structure</a> and
 <a href="{@docRoot}design/patterns/navigation.html">Navigation</a>, or the developer guide
 about <a
-href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back Stack</a>.</p>
+href="{@docRoot}guide/components/tasks-and-back-stack.html">Tasks and Back Stack</a>.</p>
 
  <input style="margin-top:1em;padding:5px" type="button"
         value="That's nice, but I still want to read this document"
@@ -88,7 +88,7 @@ need to</a></li>
 <h2>See also</h2>
 
 <ol>
-  <li><a href="{@docRoot}guide/topics/fundamentals.html">Application Fundamentals</a></li>
+  <li><a href="{@docRoot}guide/components/fundamentals.html">Application Fundamentals</a></li>
 </ol>
 
 </div>
@@ -121,9 +121,9 @@ need to</a></li>
 <p>
   Be sure to look at the <a href="#design_tips">Design Tips</a> section
   for guidelines, tips, and things to avoid. This document is a
-  complement to the <a href="{@docRoot}guide/topics/fundamentals.html">Application
+  complement to the <a href="{@docRoot}guide/components/fundamentals.html">Application
 Fundamentals</a> documentation (particularly the <a
-href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back Stack</a>
+href="{@docRoot}guide/components/tasks-and-back-stack.html">Tasks and Back Stack</a>
 document),
   which covers the underlying mechanics for programmers.
 </p>
@@ -189,7 +189,7 @@ document),
 <p>
   An activity handles a particular type of content (data) and accepts a
   set of related user actions. Each activity has a 
-  <a href="{@docRoot}guide/topics/fundamentals/activities.html#Lifecycle">lifecycle</a> that is
+  <a href="{@docRoot}guide/components/activities.html#Lifecycle">lifecycle</a> that is
 independent of the other
   activities in its application or task &mdash; each activity is
   launched (started) independently, and the user or system can start,
@@ -268,7 +268,7 @@ independent of the other
   An activity is the most prominent of four <em>components</em> of an
   application. The other components are service, content provider and
   broadcast receiver. For more details on activities, see the
-  <a href="{@docRoot}guide/topics/fundamentals/activities.html">Activities</a> document.
+  <a href="{@docRoot}guide/components/activities.html">Activities</a> document.
 </p>
 
 
@@ -750,7 +750,7 @@ itself.
 
     <p>
       For more about intents, see <a
-href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and Intent Filters</a>.
+href="{@docRoot}guide/components/intents-filters.html">Intents and Intent Filters</a>.
     </p>
 
 
@@ -947,7 +947,7 @@ href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and Intent Fi
         Home screen), or from a shortcut icon on the Home screen, or
         from the task switcher.  (The mechanism for this is for the
         activity to have an 
-        <a href={@docRoot}guide/topics/intents/intents-filters.html>intent filter</a> with action
+        <a href={@docRoot}guide/components/intents-filters.html>intent filter</a> with action
 MAIN and
         category LAUNCHER.)
       </li>

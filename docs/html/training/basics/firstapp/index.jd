@@ -35,7 +35,7 @@ to:</p>
   <li>Download the latest SDK tools and platforms using the SDK Manager.</li>
 </ol>
 
-<p>If you haven't already done this setup, read <a href="{@docRoot}sdk/installing.html">Installing
+<p>If you haven't already done this setup, read <a href="{@docRoot}sdk/installing/index.html">Installing
 the SDK</a>. Once you've finished the setup, you're ready to begin this class.</p>
 
 <p>This class uses a tutorial format that incrementally builds a small Android app in order to teach

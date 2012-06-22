@@ -1,0 +1,103 @@
+page.title=Radio Buttons
+parent.title=Input Controls
+parent.link=../controls.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>In this document</h2>
+<ol>
+  <li><a href="#HandlingEvents">Responding to Click Events</a></li>
+</ol>
+
+<h2>Key classes</h2>
+<ol>
+  <li>{@link android.widget.RadioButton}</li>
+  <li>{@link android.widget.RadioGroup}</li>
+</ol>
+</div>
+</div>
+
+<p>Radio buttons allow the user to select one option from a set. You should use radio buttons for
+optional sets that are mutually exclusive if you think that the user needs to see all available
+options side-by-side. If it's not necessary to show all options side-by-side, use a <a
+href="{@docRoot}guide/topics/ui/controls/spinner.html">spinner</a> instead.</p>
+
+<img src="{@docRoot}images/ui/radiobuttons.png" alt="" />
+
+<p>To create each radio button option, create a {@link android.widget.RadioButton} in your layout.
+However, because radio buttons are mutually exclusive, you must group them together inside a
+{@link android.widget.RadioGroup}. By grouping them together, the system ensures that only one
+radio button can be selected at a time.</p>
+
+<h2 id="HandlingEvents">Responding to Click Events</h2>
+
+<p>When the user selects one of the radio buttons, the corresponding {@link
+android.widget.RadioButton} object receives an on-click event.</p>
+
+<p>To define the click event handler for a button, add the <code><a
+href="/reference/android/R.attr.html#onClick">android:onClick</a></code> attribute to the
+<code>&lt;RadioButton&gt;</code> element in your XML
+layout. The value for this attribute must be the name of the method you want to call in response
+to a click event. The {@link android.app.Activity} hosting the layout must then implement the
+corresponding method.</p>
+
+<p>For example, here are a couple {@link android.widget.RadioButton} objects:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+    &lt;RadioButton android:id="@+id/radio_pirates"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/pirates"
+        android:onClick="onRadioButtonClicked"/>
+    &lt;RadioButton android:id="@+id/radio_ninjas"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/ninjas"
+        android:onClick="onRadioButtonClicked"/>
+&lt;/RadioGroup>
+</pre>
+
+<p class="note"><strong>Note:</strong> The {@link android.widget.RadioGroup} is a subclass of
+{@link android.widget.LinearLayout} that has a vertical orientation by default.</p>
+
+<p>Within the {@link android.app.Activity} that hosts this layout, the following method handles the
+click event for both radio buttons:</p>
+
+<pre>
+public void onRadioButtonClicked(View view) {
+    // Is the button now checked?
+    boolean checked = (RadioButton) view).isChecked();
+    
+    // Check which radio button was clicked
+    switch(view.getId()) {
+        case R.id.radio_pirates:
+            if (checked)
+                // Pirates are the best
+            break;
+        case R.id.radio_ninjas:
+            if (checked)
+                // Ninjas rule
+            break;
+    }
+}
+</pre>
+
+<p>The method you declare in the {@link android.R.attr#onClick android:onClick} attribute
+must have a signature exactly as shown above. Specifically, the method must:</p>
+<ul>
+  <li>Be public</li>
+  <li>Return void</li>
+  <li>Define a {@link android.view.View} as its only parameter (this will be the {@link
+android.view.View} that was clicked)</li>
+</ul>
+
+<p class="note"><strong>Tip:</strong> If you need to change the radio button state
+yourself (such as when loading a saved {@link android.preference.CheckBoxPreference}),
+use the {@link android.widget.CompoundButton#setChecked(boolean)} or {@link
+android.widget.CompoundButton#toggle()} method.</p>

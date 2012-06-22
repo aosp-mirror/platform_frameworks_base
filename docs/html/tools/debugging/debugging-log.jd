@@ -1,0 +1,308 @@
+page.title=Reading and Writing Logs
+parent.title=Debugging
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+    <div id="qv">
+      <h2>In this document</h2>
+
+      <ol>
+        <li><a href="#logClass">The Log class</a></li>
+
+        <li><a href="#startingLogcat">Starting LogCat</a></li>
+
+        <li><a href="#filteringOutput">Filtering Log Output</a></li>
+
+        <li><a href="#outputFormat">Controlling Log Output Format</a></li>
+
+        <li><a href="#alternativeBuffers">Viewing Alternative Log Output Buffers</a></li>
+
+        <li><a href="#viewingStd">Viewing stdout and stderr</a></li>
+
+        <li><a href="#DebuggingWebPages">Debugging Web Pages</a></li>
+      </ol>
+    </div>
+  </div>
+
+  <p>The Android logging system provides a mechanism for collecting and viewing system debug
+  output. Logcat dumps a log of system messages, which include things such as stack traces when the
+  emulator throws an error and messages that you have written from your application by using the
+  {@link android.util.Log} class. You can run LogCat through ADB or from DDMS, which allows you to
+  read the messages in real time.</p>
+
+  <h2 id="logClass">The <code>Log</code> class</h2>
+
+  <p>{@link android.util.Log} is a logging class that you can utilize in your code to print out
+  messages to the LogCat. Common logging methods include:</p>
+
+  <ul>
+    <li>{@link android.util.Log#v(String,String)} (verbose)</li>
+
+    <li>{@link android.util.Log#d(String,String)} (debug)</li>
+
+    <li>{@link android.util.Log#i(String,String)} (information)</li>
+
+    <li>{@link android.util.Log#w(String,String)} (warning)</li>
+
+    <li>{@link android.util.Log#e(String,String)} (error)</li>
+  </ul>For example:
+  <pre class="no-pretty-print">
+Log.i("MyActivity", "MyClass.getView() &mdash; get item number " + position);
+</pre>
+
+  <p>The LogCat will then output something like:</p>
+  <pre class="no-pretty-print">
+I/MyActivity( 1557): MyClass.getView() &mdash; get item number 1
+</pre>
+
+  <h2 id="startingLogcat">Using LogCat</h2>
+
+  <p>You can use LogCat from within DDMS or call it on an ADB shell. For more information on how to
+  use LogCat within DDMS, see <a href="{@docRoot}tools/debugging/ddms.html#logcat">Using
+  DDMS</a>. To run LogCat, through the ADB shell, the general usage is:</p>
+  <pre>
+[adb] logcat [&lt;option&gt;] ... [&lt;filter-spec&gt;] ...
+</pre>
+
+  <p>You can use the <code>logcat</code> command from your development computer or from a remote
+  adb shell in an emulator/device instance. To view log output in your development computer, you
+  use</p>
+  <pre>
+$ adb logcat
+</pre>
+
+  <p>and from a remote adb shell you use</p>
+  <pre>
+# logcat
+</pre>
+
+  <p>The following table describes the <code>logcat</code> command line options:</p>
+
+  <table>
+    <tr>
+      <td><code>-c</code></td>
+
+      <td>Clears (flushes) the entire log and exits.</td>
+    </tr>
+
+    <tr>
+      <td><code>-d</code></td>
+
+      <td>Dumps the log to the screen and exits.</td>
+    </tr>
+
+    <tr>
+      <td><code>-f&nbsp;&lt;filename&gt;</code></td>
+
+      <td>Writes log message output to <code>&lt;filename&gt;</code>. The default is
+      <code>stdout</code>.</td>
+    </tr>
+
+    <tr>
+      <td><code>-g</code></td>
+      <td>Prints the size of the specified log buffer and exits.</td>
+    </tr>
+
+    <tr>
+      <td><code>-n&nbsp;&lt;count&gt;</code></td>
+
+      <td>Sets the maximum number of rotated logs to <code>&lt;count&gt;</code>. The default value
+      is 4. Requires the <code>-r</code> option.</td>
+    </tr>
+
+    <tr>
+      <td><code>-r&nbsp;&lt;kbytes&gt;</code></td>
+
+      <td>Rotates the log file every <code>&lt;kbytes&gt;</code> of output. The default value is
+      16. Requires the <code>-f</code> option.</td>
+    </tr>
+
+    <tr>
+      <td><code>-s</code></td>
+
+      <td>Sets the default filter spec to silent.</td>
+    </tr>
+
+    <tr>
+      <td><code>-v&nbsp;&lt;format&gt;</code></td>
+
+      <td>Sets the output format for log messages. The default is <code>brief</code> format. For a
+      list of supported formats, see <a href="#outputFormat">Controlling Log Output
+      Format</a>.</td>
+    </tr>
+  </table>
+
+  <h3 id="filteringOutput">Filtering Log Output</h3>
+
+  <p>Every Android log message has a <em>tag</em> and a <em>priority</em> associated with it.</p>
+
+  <ul>
+    <li>The tag of a log message is a short string indicating the system component from which the
+    message originates (for example, "View" for the view system).</li>
+
+    <li>The priority is one of the following character values, ordered from lowest to highest
+    priority:</li>
+
+    <li style="list-style: none; display: inline">
+      <ul>
+        <li><code>V</code> &mdash; Verbose (lowest priority)</li>
+
+        <li><code>D</code> &mdash; Debug</li>
+
+        <li><code>I</code> &mdash; Info</li>
+
+        <li><code>W</code> &mdash; Warning</li>
+
+        <li><code>E</code> &mdash; Error</li>
+
+        <li><code>F</code> &mdash; Fatal</li>
+
+        <li><code>S</code> &mdash; Silent (highest priority, on which nothing is ever printed)</li>
+      </ul>
+    </li>
+  </ul>
+
+  <p>You can obtain a list of tags used in the system, together with priorities, by running
+  LogCat and observing the first two columns of each message, given as
+  <code>&lt;priority&gt;/&lt;tag&gt;</code>.</p>
+
+  <p>Here's an example of logcat output that shows that the message relates to priority level "I"
+  and tag "ActivityManager":</p>
+  <pre>
+I/ActivityManager(  585): Starting activity: Intent { action=android.intent.action...}
+</pre>
+
+  <p>To reduce the log output to a manageable level, you can restrict log output using <em>filter
+  expressions</em>. Filter expressions let you indicate to the system the tags-priority
+  combinations that you are interested in &mdash; the system suppresses other messages for the
+  specified tags.</p>
+
+  <p>A filter expression follows this format <code>tag:priority ...</code>, where <code>tag</code>
+  indicates the tag of interest and <code>priority</code> indicates the <em>minimum</em> level of
+  priority to report for that tag. Messages for that tag at or above the specified priority are
+  written to the log. You can supply any number of <code>tag:priority</code> specifications in a
+  single filter expression. The series of specifications is whitespace-delimited.</p>
+
+  <p>Here's an example of a filter expression that suppresses all log messages except those with
+  the tag "ActivityManager", at priority "Info" or above, and all log messages with tag "MyApp",
+  with priority "Debug" or above:</p>
+  <pre>
+adb logcat ActivityManager:I MyApp:D *:S
+</pre>
+
+  <p>The final element in the above expression, <code>*:S</code>, sets the priority level for all
+  tags to "silent", thus ensuring only log messages with "View" and "MyApp" are displayed. Using
+  <code>*:S</code> is an excellent way to ensure that log output is restricted to the filters that
+  you have explicitly specified &mdash; it lets your filters serve as a "whitelist" for log
+  output.</p>
+
+  <p>The following filter expression displays all log messages with priority level "warning" and higher, on all tags:</p>
+  <pre>
+adb logcat *:W
+</pre>
+
+  <p>If you're running LogCat from your development computer (versus running it on a
+  remote adb shell), you can also set a default filter expression by exporting a value for the
+  environment variable <code>ANDROID_LOG_TAGS</code>:</p>
+  <pre>
+export ANDROID_LOG_TAGS="ActivityManager:I MyApp:D *:S"
+</pre>
+
+  <p>Note that <code>ANDROID_LOG_TAGS</code> filter is not exported to the emulator/device
+  instance, if you are running LogCat from a remote shell or using <code>adb shell
+  logcat</code>.</p>
+
+  <h3 id="outputFormat">Controlling Log Output Format</h3>
+
+  <p>Log messages contain a number of metadata fields, in addition to the tag and priority. You can
+  modify the output format for messages so that they display a specific metadata field. To do so,
+  you use the <code>-v</code> option and specify one of the supported output formats listed
+  below.</p>
+
+  <ul>
+    <li><code>brief</code> &mdash; Display priority/tag and PID of the process issuing the
+    message (the default format).</li>
+
+    <li><code>process</code> &mdash; Display PID only.</li>
+
+    <li><code>tag</code> &mdash; Display the priority/tag only.</li>
+
+    <li><code>raw</code> &mdash; Display the raw log message, with no other metadata fields.</li>
+
+    <li><code>time</code> &mdash; Display the date, invocation time, priority/tag, and PID of the
+    process issuing the message.</li>
+
+    <li><code>threadtime</code> &mdash; Display the date, invocation time, priority, tag, and
+    the PID and TID of the thread issuing the message.</li>
+
+    <li><code>long</code> &mdash; Display all metadata fields and separate messages with blank
+    lines.</li>
+  </ul>
+
+  <p>When starting LogCat, you can specify the output format you want by using the
+  <code>-v</code> option:</p>
+  <pre>
+[adb] logcat [-v &lt;format&gt;]
+</pre>
+
+  <p>Here's an example that shows how to generate messages in <code>thread</code> output
+  format:</p>
+  <pre>
+adb logcat -v thread
+</pre>
+
+  <p>Note that you can only specify one output format with the <code>-v</code> option.</p>
+
+  <h3 id="alternativeBuffers">Viewing Alternative Log Buffers</h3>
+
+  <p>The Android logging system keeps multiple circular buffers for log messages, and not all of
+  the log messages are sent to the default circular buffer. To see additional log messages, you can
+  run the <code>logcat</code> command with the <code>-b</code> option, to request viewing of an alternate
+  circular buffer. You can view any of these alternate buffers:</p>
+
+  <ul>
+    <li><code>radio</code> &mdash; View the buffer that contains radio/telephony related
+    messages.</li>
+
+    <li><code>events</code> &mdash; View the buffer containing events-related messages.</li>
+
+    <li><code>main</code> &mdash; View the main log buffer (default)</li>
+  </ul>
+
+  <p>The usage of the <code>-b</code> option is:</p>
+  <pre>
+[adb] logcat [-b &lt;buffer&gt;]
+</pre>
+
+  <p>Here's an example of how to view a log buffer containing radio and telephony messages:</p>
+  <pre>
+adb logcat -b radio
+</pre><a name="stdout"
+        id="stdout"></a>
+
+  <h2 id="viewingStd">Viewing stdout and stderr</h2>
+
+  <p>By default, the Android system sends <code>stdout</code> and <code>stderr</code>
+  (<code>System.out</code> and <code>System.err</code>) output to <code>/dev/null</code>. In
+  processes that run the Dalvik VM, you can have the system write a copy of the output to the log
+  file. In this case, the system writes the messages to the log using the log tags
+  <code>stdout</code> and <code>stderr</code>, both with priority <code>I</code>.</p>
+
+  <p>To route the output in this way, you stop a running emulator/device instance and then use the
+  shell command <code>setprop</code> to enable the redirection of output. Here's how you do it:</p>
+  <pre>
+$ adb shell stop
+$ adb shell setprop log.redirect-stdio true
+$ adb shell start
+</pre>
+
+  <p>The system retains this setting until you terminate the emulator/device instance. To use the
+  setting as a default on the emulator/device instance, you can add an entry to
+  <code>/data/local.prop</code> on the device.</p>
+
+  <h2 id="DebuggingWebPages">Debugging Web Apps</h2>
+  <p>
+  If you're developing a web application for Android, you can debug your JavaScript using the console JavaScript APIs,
+  which output messages to LogCat. For more information, see
+  <a href="{@docRoot}guide/webapps/debugging.html">Debugging Web Apps</a>.</p>

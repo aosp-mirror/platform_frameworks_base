@@ -551,7 +551,7 @@ public class ExampleProvider extends ContentProvider {
         All of these methods except {@link android.content.ContentProvider#onCreate() onCreate()}
         can be called by multiple threads at once, so they must be thread-safe. To learn
         more about multiple threads, see the topic
-        <a href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html">
+        <a href="{@docRoot}guide/components/processes-and-threads.html">
         Processes and Threads</a>.
     </li>
     <li>
@@ -1211,5 +1211,5 @@ vnd.android.cursor.<strong>item</strong>/vnd.com.example.provider.table1
 <p>
     Handling an incoming intent that wishes to modify your provider's data is no different from
     handling other intents. You can learn more about using intents by reading the topic
-    <a href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and Intent Filters</a>.
+    <a href="{@docRoot}guide/components/intents-filters.html">Intents and Intent Filters</a>.
 </p>

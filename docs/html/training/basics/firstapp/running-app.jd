@@ -25,9 +25,9 @@ next.link=building-ui.html
 <h2>You should also read</h2>
 
 <ul>
-  <li><a href="{@docRoot}guide/developing/device.html">Using Hardware Devices</a></li>
-  <li><a href="{@docRoot}guide/developing/devices/index.html">Managing Virtual Devices</a></li>
-  <li><a href="{@docRoot}guide/developing/projects/index.html">Managing Projects</a></li>
+  <li><a href="{@docRoot}tools/device.html">Using Hardware Devices</a></li>
+  <li><a href="{@docRoot}tools/devices/index.html">Managing Virtual Devices</a></li>
+  <li><a href="{@docRoot}tools/projects/index.html">Managing Projects</a></li>
 </ul>
  
  
@@ -85,7 +85,7 @@ the app.</p>
 <ol>
   <li>Plug in your Android-powered device to your machine with a USB cable.
 If you’re developing on Windows, you might need to install the appropriate USB driver for your
-device. For help installing drivers, see the <a href=”{@docRoot}sdk/oem-usb.html”>OEM USB
+device. For help installing drivers, see the <a href="{@docRoot}tools/extras/oem-usb.html">OEM USB
 Drivers</a> document.</li>
   <li>Ensure that <strong>USB debugging</strong> is enabled in the device Settings (open Settings
 and navitage to <strong>Applications > Development</strong> on most devices, or select
@@ -116,7 +116,7 @@ lesson</a>.</p>
 <h2 id="Emulator">Run on the Emulator</h2>
 
 <p>Whether you’re using Eclipse or the command line, you need to first create an <a
-href="{@docRoot}guide/developing/devices/index.html">Android Virtual
+href="{@docRoot}tools/devices/index.html">Android Virtual
 Device</a> (AVD). An AVD is a
 device configuration for the Android emulator that allows you to model
 different device configurations.</p>

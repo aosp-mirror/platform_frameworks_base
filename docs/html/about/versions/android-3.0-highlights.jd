@@ -1,0 +1,261 @@
+page.title=Honeycomb
+
+@jd:body
+
+
+<style type="text/css">
+#jd-content {
+  max-width:1200px;
+}
+#jd-content div.screenshot {
+  float:left;
+  clear:left;
+  padding:15px 30px 15px 0;
+}
+#jd-content div.video {
+  float:right;
+  padding:0 60px 40px;
+}
+#jd-content table.columns {
+  margin:0 0 1em 0;
+}
+#jd-content table.columns td {
+  padding:0;
+}
+#jd-content table.columns td+td {
+  padding:0 2em;
+}
+#jd-content table.columns td img {
+  margin:0;
+}
+#jd-content table.columns td+td>*:first-child {
+  margin-top:-2em;
+}
+.green {
+  color:#8db529;
+  font-weight:bold;
+}
+</style>
+
+
+<p>Welcome to Android 3.0!</p>
+
+<p>The Android 3.0 platform introduces many new and exciting features for users and developers. 
+This document provides a glimpse of some of the new features and technologies, as delivered in
+Android 3.0. For a more detailed look at new developer APIs, see the <a
+href="{@docRoot}about/versions/android-3.0.html">Android 3.0 Platform</a> document.</p>
+
+<ul>
+  <li><a href="#UserFeatures">New User Features</a></li>
+  <li><a href="#DeveloperApis">New Developer Features</a></li>
+</ul>
+
+<h2 id="UserFeatures" style="clear:right">New User Features</h2>
+
+<div  style="padding-top:0em;">
+<div style="float:right;margin-left:20px;"><a
+href="{@docRoot}sdk/images/3.0/home_hero1_full.png" target="_android"><img
+src="{@docRoot}sdk/images/3.0/home_hero1.png" alt="" height="280" /></a></div>
+
+<h3>New UI designed from the ground up for tablets</h3>
+
+<p>Android 3.0 is a new version of the Android platform that is specifically optimized for devices with larger screen sizes, particularly tablets. It introduces a brand new, truly virtual and “holographic” UI design, as well as an elegant, content-focused interaction model.</p>
+
+<p>Android 3.0 builds on the things people love most about Android &mdash; refined multitasking, rich notifications, Home screen customization, widgets, and more &mdash; and transforms them with a vibrant, 3D experience and deeper interactivity, making them familiar but even better than before.</p> 
+
+<p>The new UI brings fresh paradigms for interaction, navigation, and customization and makes them available to all applications &mdash; even those built for earlier versions of the platform. Applications written for Android 3.0 are able to use an extended set of UI objects, powerful graphics, and media capabilities to engage users in new ways.</p>
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>System Bar, for global status and notifications</strong></p>
+
+<p>Across the system and in all applications, users have quick access to notifications, system status, and soft navigation buttons in a System Bar, available at the bottom of the screen. The System Bar is always present and is a key touchpoint for users, but in a new "lights out mode" can also be dimmed for full-screen viewing, such as for videos.</p>
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Action Bar, for application control</strong></p>
+
+<p>In every application, users have access to contextual options, navigation, widgets, or other types of content in an Action Bar, displayed at the top of the screen. The Action Bar is always present when an application is in use, although its content, theme, and other properties are managed by the application rather than the system. The Action Bar is another key touchpoint for users, especially with action items and an overflow dropdown menu, which users frequently access in a similar manner in most applications. </p>
+
+</div>
+
+<div  style="padding-top:0em;">
+<div style="float:right;margin-left:20px;"><a
+href="{@docRoot}sdk/images/3.0/homescreen_cust_port_full.png" target="_android"><img
+src="{@docRoot}sdk/images/3.0/homescreen_cust_port.png" alt="" height="280" /></a></div>
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Customizable Home screens</strong></p>
+
+<p>Five customizable Home screens give users instant access to all parts of the system from any context. Each screen offers a large grid that maintains spatial arrangement in all orientations. Users can select and manipulate Home screen widgets, app shortcuts, and wallpapers using a dedicated visual layout mode. Visual cues and drop shadows improve visibility when adjusting the layout of shortcuts and widgets. Each Home screen also offers a familiar launcher for access to all installed applications, as well as a Search box for universal search of apps, contacts, media files, web content, and more.</p>
+
+</div>
+
+<div  style="padding-top:0em;">
+<div style="margin-right:1.5em;float:left;"><a href="{@docRoot}sdk/images/3.0/tasks_full.png"
+target="_android"><img src="{@docRoot}sdk/images/3.0/tasks.png" alt="" height="280" /></a>
+
+<!--<p style="font-size:90%">Figure</p> --></div>
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Recent Apps, for easy visual multitasking</strong></p>
+
+<p>Multitasking is a key strength of Android and it is central to the Android 3.0 experience. As users launch applications to handle various tasks, they can use the Recent Apps list in the System Bar to see the tasks underway and quickly jump from one application context to another. To help users rapidly identify the task associated with each app, the list shows a snapshot of its actual state when the user last viewed it.</p>
+
+</div>
+
+
+<h3>Redesigned keyboard</h3>
+
+<p>The Android soft keyboard is redesigned to make entering text fast and accurate on larger screen sizes. The keys are reshaped and repositioned for improved targeting, and new keys have been added, such as a Tab key, to provide richer and more efficient text input. Users can touch-hold keys to access menus of special characters and switch text/voice input modes from a button in the System Bar.</p>
+
+<div  style="padding-top:1em;">
+<div style="margin-left:20px;float:right;"><a href="{@docRoot}sdk/images/3.0/copy_full.png"
+target="_android"><img src="{@docRoot}sdk/images/3.0/copy.png" alt="" height="180" /></a></div>
+
+
+<h3>Improved text selection, copy and paste</h3>
+
+<p>When entering or viewing text, a new UI lets users quickly select a word by press-hold and then adjust the selection area as needed by dragging a set of bounding arrows to new positions. Users can then select an action from the Action Bar, such as copy to the clipboard, share, paste, web search, or find. </p>
+
+
+<h3>New connectivity options</h3>
+
+<p>Android 3.0 includes new connectivity features that add versatility and convenience for users. Built-in support for Media/Picture Transfer Protocol lets users instantly sync media files with a USB-connected camera or desktop computer, without needing to mount a USB mass-storage device. Users can also connect full keyboards over either USB or Bluetooth, for a familiar text-input environment. For improved wi-fi connectivity, a new combo scan reduces scan times across bands and filters. New support for Bluetooth tethering means that more types of devices can share the network connection of an Android-powered device.</p>
+
+
+<h3>Updated set of standard apps</h3>
+
+<div  style="padding-top:0em;">
+<div style="margin-left:20px;float:right;;padding-top:0em;"><a
+href="{@docRoot}sdk/images/3.0/browser_full.png" target="_android"><img
+src="{@docRoot}sdk/images/3.0/browser.png" alt="" height="200" /></a><br>
+<a href="{@docRoot}sdk/images/3.0/camera_full.png" target="_android"><img
+src="{@docRoot}sdk/images/3.0/camera.png" alt="" height="200" /></a></div>
+
+<p>The Android 3.0 platform includes an updated set of standard applications that are designed for use on larger screen devices. The sections below highlight some of the new features. </p>
+
+<strong>Browser</strong></p>
+
+<p>The browser includes new features that let users navigate and organize more efficiently. Multiple tabs replace browser windows and a new “incognito” mode allows anonymous browsing. Bookmarks and history are presented and managed in a single unified view. Users can now choose to automatically sign into Google sites on the browser with a supplied account and sync bookmarks with Google Chrome. New multitouch support is now available to JavaScript and plugins. Users can enjoy a better browsing experience at non-mobile sites through an improved zoom and viewport model, overflow scrolling, support for fixed positioning, and more.</p>
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Camera and Gallery</strong></p>
+
+<p>The Camera application has been redesigned to take advantage of a larger screen for quick access to exposure, focus, flash, zoom, front-facing camera, and more. To let users capture scenes in new ways, it adds built-in support for time-lapse video recording. The Gallery application lets users view albums and other collections in full-screen mode, with easy access to thumbnails for other photos in the collection. </p>
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Contacts</strong></p>
+
+<p>The Contacts app uses a new two-pane UI and Fast Scroll to let users easily organize and locate contacts. The application offers improved formatting of international phone numbers as user types, based on home country and an international  number parsing library. Contact information is presented in a card-like UI, making it easier for users to read and edit contacts.</p>
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Email</strong></p>
+
+<p>The Email application uses a new two-pane UI to make viewing and organizing messages more efficient. The app lets users select one or more messages, then select an action from the Action Bar, such as moving them to a folder. Users can sync attachments for later viewing and keep track of email using a home screen Widget.</p>
+
+</div>
+
+
+<h2 id="DeveloperApis" style="clear:both">New Developer Features</h2>
+
+<p>The Android 3.0 platform is designed specially to meet the unique needs of applications on devices with larger screen sizes. It offers all of the tools developers need to create incredible visual and interaction experiences on these devices.</p>
+
+ <ul>
+<li><a href="#ui">New UI framework for creating great tablet apps</a></li>
+<li><a href="#graphics">High-performance 2D and 3D graphics</a></li>
+<li><a href="#multicore">Support for multicore processor architectures</a></li>
+<li><a href="#multimedia">Rich multimedia and connectivity</a></li>
+<li><a href="#enterprise">Enhancements for enterprise</a></li>
+<li><a href="#compatibility">Compatibility with existing apps</a></li>
+</ul>
+
+<h3 id="ui">New UI Framework for creating great tablet apps</h3>
+
+<div  style="padding-top:0em;">
+<div style="float:right;margin-left:20px;"><a
+href="{@docRoot}sdk/images/3.0/contacts_full.png" target="_android"><img
+src="{@docRoot}sdk/images/3.0/contacts.png" alt="" height="200" /></a></div>
+
+
+<p style="margin-top:.75em;margin-bottom:.75em;"><strong>Activity fragments, for greater control of content and design flexibility</strong></p>
+
+<p>Starting with Android 3.0, developers can break the Activities of their applications into subcomponents called Fragments, then combine them in a variety of ways to create a richer, more interactive experience. For example, an application can use a set of Fragments to create a true multipane UI, with the user being able to interact with each pane independently. Fragments can be added, removed, replaced, and animated inside an Activity dynamically, and they are modular and reusable across multiple Activities. Because they are modular, Fragments also offer an efficient way for developers to write applications that can run properly on both larger screen as well as smaller screen devices.</p>
+
+</div>
+
+<p style="margin-top:1.25em;margin-bottom:.75em;"><strong>Redesigned UI widgets</strong></p>
+
+<p>Android 3.0 offers an updated set of UI widgets that developers can use to quickly add new types of content to their applications. The new UI widgets are redesigned for use on larger screens such as tablets and incorporate the new holographic UI theme. Several new widget types are available, including a 3D stack, search box, a date/time picker, number picker, calendar, popup menu, and others. Most of the redesigned UI widgets can now be used as remote views in application widgets displayed on the home screen. Applications written for earlier versions can inherit the new Widget designs and themes.</p>
+
+
+<div  style="padding-top:0em;">
+<div style="margin-right:1.5em;float:left;margin-left:0em;"><a
+href="{@docRoot}sdk/images/3.0/widgets.png" target="_android"><img
+src="{@docRoot}sdk/images/3.0/widgets.png" alt="" height="200"  target="_android" /></a></div>
+
+<p style="margin-top:1.25em;margin-bottom:.75em;"><strong>Expanded Home screen widgets</strong></p>
+
+<p>Home screen widgets are popular with users because they offer fast access to application-specific data directly from the home screen. Android 3.0 lets developers take home screen widgets to the next level, offering more types of content and new modes of interaction with users. Developers can now use more standard UI widget types  home screen widgets, including widgets that let users flip through collections of content as 3D stacks, grids, or lists. Users can interact with the home screen widgets in new ways, such as by using touch gestures to scroll and flip the content displayed in a widget.  </p>
+
+</div>
+
+<p style="margin-top:1.25em;margin-bottom:.75em;"><strong>Persistent Action Bar</strong></p>
+
+<p>The platform provides each application with its own instance of the Action Bar at the top of the screen, which the application can use to give the user quick access to contextual options, widgets, status, navigation, and more. The application can also customize the display theme of its Action Bar instance. The Action Bar lets developers expose more features of their applications to users in a familiar location, while also unifying the experience of using an application that spans multiple Activities or states.</p>
+
+<p style="margin-top:1.25em;margin-bottom:.75em;"><strong>Richer notifications</strong></p>
+
+<p>Notifications are a key part of the Android user experience because they let applications show key updates and status information to users in real time. Android 3.0 extends this capability, letting developers include richer content and control more properties. A new builder class lets developers quickly create notifications that include large and small icons, a title, a priority flag, and any properties already available in previous versions. Notifications can offer more types of content by building on the expanded set of UI Widgets that are now available as remote Views.</p>
+
+<div  style="padding-top:0em;">
+<div style="float:right;margin-left:20px;"><a
+href="{@docRoot}sdk/images/3.0/mail_drag_full.png" target="_android"><img
+src="{@docRoot}sdk/images/3.0/mail_drag.png" alt="" height="200"
+style="padding-top:1em;"/></a></div>
+
+<p style="margin-top:1.25em;margin-bottom:.75em;"><strong>Multiselect, clipboard, and drag-and-drop</strong></p>
+
+<p>The platform offers convenient new interaction modes that developers can use. For managing collections of items in lists or grids, developers can offer a new multiselect mode that lets users choose multiple items for an action. Developers can also use a new system-wide Clipboard to let users easily copy any type of data into and out of their applications. To make it easier for users to manage and organize files, developers can now add drag-and-drop interaction through a DragEvent framework.</p>
+
+</div>
+
+
+<h3 id="graphics">High-performance 2D and 3D graphics</h3>
+
+<p style="margin-top:.75em;margin-bottom:.75em;"><strong>New animation framework</strong></p>
+
+<p>The platform includes a flexible new animation framework that lets developers easily animate the properties of UI elements such as Views, Widgets, Fragments, Drawables, or any arbitrary object. Animations can create fades or movement between states, loop an animated image or an existing animation, change colors, and much more. Adding animation to UI elements can add visual interest to an application and refine the user experience, to keep users engaged.</p>
+
+<p style="margin-top:1.25em;margin-bottom:.75em;"><strong>Hardware-accelerated 2D graphics</strong></p>
+
+<p>Android 3.0 offers a new hardware-accelerated OpenGL renderer that gives a performance boost to many common graphics operations for applications running in the Android framework. When the renderer is enabled, most operations in Canvas, Paint, Xfermode, ColorFilter, Shader, and Camera are accelerated. Developers can control how hardware-acceleration is applied at every level, from enabling it globally in an application to enabling it in specific Activities and Views inside the application.</p>
+
+<p style="margin-top:1.25em;margin-bottom:.75em;"><strong>Renderscript 3D graphics engine</strong></p>
+
+<p>Renderscript is a runtime 3D framework that provides both an API for building 3D scenes as well as a special, platform-independent shader language for maximum performance. Using Renderscript, you can accelerate graphics operations and data processing. Renderscript is an ideal way to create high-performance 3D effects for applications, wallpapers, carousels, and more.</p>
+
+
+<h3 id="multicore">Support for multicore processor architectures</h3>
+
+<p>Android 3.0 is the first version of the platform designed to run on either single or multicore processor architectures. A variety of changes in the Dalvik VM, Bionic library, and elsewhere add support for symmetric multiprocessing in multicore environments. These optimizations can benefit all applications, even those that are single-threaded. For example, with two active cores, a single-threaded application might still see a performance boost if the Dalvik garbage collector runs on the second core. The system will arrange for this automatically.</p>
+
+
+<h3 id="multimedia">Rich multimedia and connectivity</h3>
+
+<p style="margin-top:.75em;margin-bottom:.75em;"><strong>HTTP Live streaming</strong></p>
+
+<p>Applications can now pass an M3U playlist URL to the media framework to begin an HTTP Live streaming session. The media framework supports most of the HTTP Live streaming specification, including adaptive bit rate.</p>
+
+<p style="margin-top:1.25em;margin-bottom:.75em;"><strong>Pluggable DRM framework</strong></p>
+
+<p>Android 3.0 includes an extensible DRM framework that lets applications manage protected content according to a variety of DRM mechanisms that may be available on the device. For application developers, the framework API offers an consistent, unified API that simplifies the management of protected content, regardless of the underlying DRM engines. </p>
+
+<p style="margin-top:1.25em;margin-bottom:.75em;"><strong>Digital media file transfer</strong></p>
+
+<p>The platform includes built-in support for Media/Picture Transfer Protocol (MTP/PTP) over USB, which lets users easily transfer any type of media files between devices and to a host computer. Developers can build on this support, creating applications that let users create or manage media files that they may want to transfer or share across devices. </p>
+
+<p style="margin-top:1.25em;margin-bottom:.75em;"><strong>More types of connectivity</strong></p>
+
+<p>The platform offers new connectivity that developers can build on. API support for Bluetooth A2DP and HSP profiles lets applications query Bluetooth profiles for connected devices, audio state, and more, then notify the user. For example, a music application can check connectivity and status and let the user know that music is playing through a stereo headset. Applications can also register to receive system broadcasts of pre-defined vendor-specific AT commands, such as Platronics Xevent. For example, an application could receive broadcasts that indicate a connected device's battery level and could notify the user or take other action as needed. Applications can also take advantage of the platform's new support for full keyboards connected by USB or Bluetooth. </p>
+
+
+<h3 id="enterprise">Enhancements for enterprise</h3>
+
+<p>In Android 3.0, developers of device administration applications can support new types of policies, including policies for encrypted storage, password expiration, password history, and password complex characters required. </p>
+
+<h3 id="compatibility">Compatibility with existing apps</h3>
+
+<p>Android 3.0 brings a new UI designed for tablets and other larger screen devices, but it also is fully compatible with applications developed for earlier versions of the platform, or for smaller screen sizes. Existing applications can seamlessly participate in the new holographic UI theme without code changes, by adding a single attribute in their manifest files. The platform emulates the Menu key, which is replaced by the overflow menu in the Action Bar in the new UI. Developers wanting to take fuller advantage of larger screen sizes can also create dedicated layouts and assets for larger screens and add them to their existing applications.</p>
+

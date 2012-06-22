@@ -139,7 +139,7 @@ files for further customization.
 
     <ul>
       <li class="no-bullet with-icon tablet">
-        <p>Action bar icons for phones and tablets should be <strong>32x32 <acronym title="Density-independent pixels. One dp is one pixel on a 160 dpi screen.">dp</acronym></strong>.</p></li>
+        <p>Action bar icons for phones should be <strong>32x32 <acronym title="Density-independent pixels. One dp is one pixel on a 160 dpi screen.">dp</acronym></strong>.</p></li>
     </ul>
 
   </div>

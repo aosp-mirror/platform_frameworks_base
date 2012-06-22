@@ -20,8 +20,7 @@ page.title=﻿Designing for Security
 <ol>
 <li><a href="http://source.android.com/tech/security/index.html">Android
 Security Overview</a></li>
-<li><a href="{@docRoot}guide/topics/security/security.html">Android Security
-And Permissions</a></li>
+<li><a href="{@docRoot}guide/topics/security/permissions.html">Permissions</a></li>
 </ol>
 </div></div>
 <p>Android was designed so that most developers will be able to build
@@ -136,7 +135,7 @@ dynamic permission grants on a case-by-case basis.</p>
 <p>To provide additional protection for sensitive data, some applications
 choose to encrypt local files using a key that is not accessible to the
 application. (For example, a key can be placed in a <code><a
-href={@docRoot}reference/java/security/KeyStore.html">KeyStore</a></code> and
+href="{@docRoot}reference/java/security/KeyStore.html">KeyStore</a></code> and
 protected with a user password that is not stored on the device).  While this
 does not protect data from a root compromise that can monitor the user
 inputting the password,  it can provide protection for a lost device without <a

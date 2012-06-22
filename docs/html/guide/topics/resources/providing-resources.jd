@@ -44,7 +44,7 @@ Screens</a></li>
 <p>You should always externalize application resources such as images and strings from your
 code, so that you can maintain them independently. You should also provide alternative resources for
 specific device configurations, by grouping them in specially-named resource directories. At
-runtime, Android uses uses the appropriate resource based on the current configuration. For
+runtime, Android uses the appropriate resource based on the current configuration. For
 example, you might want to provide a different UI layout depending on the screen size or different
 strings depending on the language setting.</p>
 
@@ -89,7 +89,7 @@ supported inside project {@code res/} directory.</p>
 
   <tr>
     <td><code>animator/</code></td>
-    <td>XML files that define <a href="{@docRoot}guide/topics/graphics/animation.html">property
+    <td>XML files that define <a href="{@docRoot}guide/topics/graphics/prop-animation.html">property
 animations</a>.</td>
   </tr>
 
@@ -744,7 +744,7 @@ orientation" described above.</p>
         <p>The API level supported by the device. For example, <code>v1</code> for API level
 1 (devices with Android 1.0 or higher) and <code>v4</code> for API level 4 (devices with Android
 1.6 or higher). See the <a
-href="{@docRoot}guide/appendix/api-levels.html">Android API levels</a> document for more information
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">Android API levels</a> document for more information
 about these values.</p>
         <p class="caution"><strong>Caution:</strong> Android 1.5 and 1.6 only match resources
 with this qualifier when it exactly matches the platform version. See the section below about <a
@@ -976,7 +976,7 @@ put {@code normal} size resources in the corresponding default resource director
 notlong} resources in the corresponding default resource directory.</p>
   </li>
 
-  <li>Ensure that your <a href="{@docRoot}sdk/tools-notes.html">SDK Tools</a> version
+  <li>Ensure that your <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools</a> version
 is r6 or greater.
 
     <p>You need SDK Tools, Revision 6 (or greater), because it includes a new packaging tool that

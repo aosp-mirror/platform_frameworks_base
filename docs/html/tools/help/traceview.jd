@@ -1,0 +1,16 @@
+page.title=Traceview
+parent.title=Tools
+parent.link=index.html
+@jd:body
+
+<p>Traceview is a graphical viewer for execution logs saved by your application. 
+Traceview can help you debug your application and profile its performance.</p>
+
+<p>To start Traceview, enter the following command from the SDK <code>tools/</code> directory:</p>
+  <pre>traceview</pre>
+</ol>
+
+<p>For more information on how to use Traceview, see 
+<a href="{@docRoot}tools/debugging/debugging-tracing.html">Profiling with Traceview and dmtracedump</a>
+</p>
+

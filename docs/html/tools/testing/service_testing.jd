@@ -1,0 +1,176 @@
+page.title=Service Testing
+parent.title=Testing
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+  <h2>In this document</h2>
+  <ol>
+    <li>
+        <a href="#DesignAndTest">Service Design and Testing</a>
+    </li>
+    <li>
+        <a href="#ServiceTestCase">ServiceTestCase</a>
+    </li>
+    <li>
+        <a href="#MockObjects">Mock object classes</a>
+    </li>
+    <li>
+        <a href="#TestAreas">What to Test</a>
+    </li>
+  </ol>
+  <h2>Key Classes</h2>
+    <ol>
+      <li>{@link android.test.InstrumentationTestRunner}</li>
+      <li>{@link android.test.ServiceTestCase}</li>
+      <li>{@link android.test.mock.MockApplication}</li>
+      <li>{@link android.test.RenamingDelegatingContext}</li>
+    </ol>
+  <h2>Related Tutorials</h2>
+    <ol>
+        <li>
+            <a href="{@docRoot}tools/testing/activity_test.html">Activity Testing Tutorial</a>
+        </li>
+    </ol>
+  <h2>See Also</h2>
+      <ol>
+        <li>
+          <a href="{@docRoot}tools/testing/testing_eclipse.html">
+          Testing From Eclipse with ADT</a>
+        </li>
+        <li>
+          <a href="{@docRoot}tools/testing/testing_otheride.html">
+          Testing From Other IDEs</a>
+        </li>
+      </ol>
+  </div>
+</div>
+<p>
+    Android provides a testing framework for Service objects that can run them in
+    isolation and provides mock objects. The test case class for Service objects is
+    {@link android.test.ServiceTestCase}. Since the Service class assumes that it is separate
+    from its clients, you can test a Service object without using instrumentation.
+</p>
+<p>
+    This document describes techniques for testing Service objects. If you aren't familiar with the
+    Service class, please read the <a href="{@docRoot}guide/components/services.html">
+    Services</a> document. If you aren't familiar with Android testing, please read
+    <a href="{@docRoot}tools/testing/testing_android.html">Testing Fundamentals</a>,
+    the introduction to the Android testing and instrumentation framework.
+</p>
+<h2 id="DesignAndTest">Service Design and Testing</h2>
+<p>
+    When you design a Service, you should consider how your tests can examine the various states
+    of the Service lifecycle. If the lifecycle methods that start up your Service, such as
+    {@link android.app.Service#onCreate() onCreate()} or
+    {@link android.app.Service#onStartCommand(Intent, int, int) onStartCommand()} do not normally
+    set a global variable to indicate that they were successful, you may want to provide such a
+    variable for testing purposes.
+</p>
+<p>
+    Most other testing is facilitated by the methods in the {@link android.test.ServiceTestCase}
+    test case class. For example, the {@link android.test.ServiceTestCase#getService()} method
+    returns a handle to the Service under test, which you can test to confirm that the Service is
+    running even at the end of your tests.
+</p>
+<h2 id="ServiceTestCase">ServiceTestCase</h2>
+<p>
+    {@link android.test.ServiceTestCase} extends the JUnit {@link junit.framework.TestCase} class
+    with with methods for testing application permissions and for controlling the application and
+    Service under test. It also provides mock application and Context objects that isolate your
+    test from the rest of the system.
+</p>
+<p>
+    {@link android.test.ServiceTestCase} defers initialization of the test environment until you
+    call {@link android.test.ServiceTestCase#startService(Intent) ServiceTestCase.startService()} or
+    {@link android.test.ServiceTestCase#bindService(Intent) ServiceTestCase.bindService()}. This
+    allows you to set up your test environment, particularly your mock objects, before the Service
+    is started.
+</p>
+<p>
+    Notice that the parameters to <code>ServiceTestCase.bindService()</code>are different from
+    those for <code>Service.bindService()</code>. For the <code>ServiceTestCase</code> version,
+    you only provide an Intent. Instead of returning a boolean,
+    <code>ServiceTestCase.bindService()</code> returns an object that subclasses
+    {@link android.os.IBinder}.
+</p>
+<p>
+    The {@link android.test.ServiceTestCase#setUp()} method for {@link android.test.ServiceTestCase}
+    is called before each test. It sets up the test fixture by making a copy of the current system
+    Context before any test methods touch it. You can retrieve this Context by calling
+    {@link android.test.ServiceTestCase#getSystemContext()}. If you override this method, you must
+    call <code>super.setUp()</code> as the first statement in the override.
+</p>
+<p>
+    The methods {@link android.test.ServiceTestCase#setApplication(Application) setApplication()}
+    and {@link android.test.AndroidTestCase#setContext(Context)} setContext()} allow you to set
+    a mock Context or mock Application (or both) for the Service, before you start it. These mock
+    objects are described in <a href="#MockObjects">Mock object classes</a>.
+</p>
+<p>
+    By default, {@link android.test.ServiceTestCase} runs the test method
+    {@link android.test.AndroidTestCase#testAndroidTestCaseSetupProperly()}, which asserts that
+    the base test case class successfully set up a Context before running.
+</p>
+<h2 id="MockObjects">Mock object classes</h2>
+<p>
+    <code>ServiceTestCase</code> assumes that you will use a mock Context or mock Application
+    (or both) for the test environment. These objects isolate the test environment from the
+    rest of the system. If you don't provide your own instances of these objects before you
+    start the Service, then {@link android.test.ServiceTestCase} will create its own internal
+    instances and inject them into the Service. You can override this behavior by creating and
+    injecting your own instances before starting the Service
+</p>
+<p>
+    To inject a mock Application object into the Service under test, first create a subclass of
+    {@link android.test.mock.MockApplication}. <code>MockApplication</code> is a subclass of
+    {@link android.app.Application} in which all the methods throw an Exception, so to use it
+    effectively you subclass it and override the methods you need. You then inject it into the
+    Service with the
+    {@link android.test.ServiceTestCase#setApplication(Application) setApplication()} method.
+    This mock object allows you to control the application values that the Service sees, and
+    isolates it from the real system. In addition, any hidden dependencies your Service has on
+    its application reveal themselves as exceptions when you run the test.
+</p>
+<p>
+    You inject a mock Context into the Service under test with the
+    {@link android.test.AndroidTestCase#setContext(Context) setContext()} method. The mock
+    Context classes you can use are described in more detail in
+    <a href="{@docRoot}tools/testing/testing_android.html#MockObjectClasses">
+    Testing Fundamentals</a>.
+</p>
+<h2 id="TestAreas">What to Test</h2>
+<p>
+    The topic <a href="{@docRoot}tools/testing/what_to_test.html">What To Test</a>
+    lists general considerations for testing Android components.
+    Here are some specific guidelines for testing a Service:
+</p>
+<ul>
+    <li>
+        Ensure that the {@link android.app.Service#onCreate()} is called in response to
+        {@link android.content.Context#startService(Intent) Context.startService()} or
+    {@link android.content.Context#bindService(Intent,ServiceConnection,int) Context.bindService()}.
+        Similarly, you should ensure that {@link android.app.Service#onDestroy()} is called in
+        response to {@link android.content.Context#stopService(Intent) Context.stopService()},
+        {@link android.content.Context#unbindService(ServiceConnection) Context.unbindService()},
+        {@link android.app.Service#stopSelf()}, or
+        {@link android.app.Service#stopSelfResult(int) stopSelfResult()}.
+    </li>
+    <li>
+        Test that your Service correctly handles multiple calls from
+        <code>Context.startService()</code>. Only the first call triggers
+        <code>Service.onCreate()</code>, but all calls trigger a call to
+        <code>Service.onStartCommand()</code>.
+        <p>
+            In addition, remember that <code>startService()</code> calls don't
+            nest, so a single call to <code>Context.stopService()</code> or
+            <code>Service.stopSelf()</code> (but not <code>stopSelf(int)</code>)
+            will stop the Service. You should test that your Service stops at the correct point.
+        </p>
+    </li>
+    <li>
+        Test any business logic that your Service implements. Business logic includes checking for
+        invalid values, financial and arithmetic calculations, and so forth.
+    </li>
+</ul>

@@ -1,0 +1,1270 @@
+page.title=APK Expansion Files
+@jd:body
+
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>Quickview</h2>
+<ul>
+  <li>Recommended for most apps that exceed the 50MB APK limit</li>
+  <li>You can provide up to 4GB of additional data for each APK</li>
+  <li>Google Play hosts and serves the expansion files at no charge</li>
+  <li>The files can be any file type you want and are saved to the device's shared storage</li>
+</ul>
+
+<h2>In this document</h2>
+<ol>
+  <li><a href="#Overview">Overview</a>
+    <ol>
+      <li><a href="#Filename">File name format</a></li>
+      <li><a href="#StorageLocation">Storage location</a></li>
+      <li><a href="#DownloadProcess">Download process</a></li>
+      <li><a href="#Checklist">Development checklist</a></li>
+    </ol>
+  </li>
+  <li><a href="#Rules">Rules and Limitations</a></li>
+  <li><a href="#Downloading">Downloading the Expansion Files</a>
+    <ol>
+      <li><a href="#AboutLibraries">About the Downloader Library</a></li>
+      <li><a href="#Preparing">Preparing to use the Downloader Library</a></li>
+      <li><a href="#Permissions">Declaring user permissions</a></li>
+      <li><a href="#DownloaderService">Implementing the downloader service</a></li>
+      <li><a href="#AlarmReceiver">Implementing the alarm receiver</a></li>
+      <li><a href="#Download">Starting the download</a></li>
+      <li><a href="#Progress">Receiving download progress</a></li>
+    </ol>
+  </li>
+  <li><a href="#ExpansionPolicy">Using APKExpansionPolicy</a></li>
+  <li><a href="#ReadingTheFile">Reading the Expansion File</a>
+    <ol>
+      <li><a href="#GettingFilenames">Getting the file names</a></li>
+      <li><a href="#ZipLib">Using the APK Expansion Zip Library</a></li>
+    </ol>
+  </li>
+  <li><a href="#Testing">Testing Your Expansion Files</a>
+    <ol>
+      <li><a href="#TestingReading">Testing file reads</a></li>
+      <li><a href="#TestingReading">Testing file downloads</a></li>
+    </ol>
+  </li>
+  <li><a href="#Updating">Updating Your Application</a></li>
+</ol>
+
+<h2>See also</h2>
+<ol>
+  <li><a href="{@docRoot}guide/google/play/licensing/index.html">Application Licensing</a></li>
+  <li><a href="{@docRoot}guide/google/play/publishing/multiple-apks.html">Multiple
+APK Support</a></li>
+</ol>
+</div>
+</div>
+
+
+
+<p>Google Play currently requires that your APK file be no more than 50MB. For most
+applications, this is plenty of space for all the application's code and assets.
+However, some apps need more space for high-fidelity graphics, media files, or other large assets.
+Previously, if your app exceeded 50MB, you had to host and download the additional resources
+yourself when the user opens the app. Hosting and serving the extra files can be costly, and the
+user experience is often less than ideal. To make this process easier for you and more pleasant
+for users, Google Play allows you to attach two large expansion files that supplement your
+APK.</p>
+
+<p>Google Play hosts the expansion files for your application and serves them to the device at
+no cost to you. The expansion files are saved to the device's shared storage location (the
+SD card or USB-mountable partition; also known as the "external" storage) where your app can access
+them. On most devices, Google Play downloads the expansion file(s) at the same time it
+downloads the APK, so your application has everything it needs when the user opens it for the
+first time. In some cases, however, your application must download the files from Google Play
+when your application starts.</p>
+
+
+
+<h2 id="Overview">Overview</h2>
+
+<p>Each time you upload an APK using the Google Play Android Developer Console, you have the option to
+add one or two expansion files to the APK. Each file can be up to 2GB and it can be any format you
+choose, but we recommend you use a compressed file to conserve bandwidth during the download.
+Conceptually, each expansion file plays a different role:</p>
+
+<ul>
+  <li>The <strong>main</strong> expansion file is the
+primary expansion file for additional resources required by your application.</li>
+  <li>The <strong>patch</strong> expansion file is optional and intended for small updates to the
+main expansion file.</li>
+</ul>
+
+<p>While you can use the two expansion files any way you wish, we recommend that the main
+expansion file deliver the primary assets and should rarely if ever updated; the patch expansion
+file should be smaller and serve as a “patch carrier,” getting updated with each major
+release or as necessary.</p>
+
+<p>However, even if your application update requires only a new patch expansion file, you still must
+upload a new APK with an updated <a
+href="{@docRoot}guide/topics/manifest/manifest-element.html#vcode">{@code
+versionCode}</a> in the manifest. (The
+Developer Console does not allow you to upload an expansion file to an existing APK.)</p>
+
+<p class="note"><strong>Note:</strong> The patch expansion file is semantically the same as the
+main expansion file&mdash;you can use each file any way you want. The system does
+not use the patch expansion file to perform patching for your app. You must perform patching
+yourself or be able to distinguish between the two files.</p>
+
+
+
+<h3 id="Filename">File name format</h3>
+
+<p>Each expansion file you upload can be any format you choose (ZIP, PDF, MP4, etc.). Regardless of
+the file type, Google Play considers them opaque binary blobs and renames the files
+using the following scheme:</p>
+
+<pre class="classic no-pretty-print">
+[main|patch].&lt;expansion-version&gt;.&lt;package-name&gt;.obb
+</pre>
+
+<p>There are three components to this scheme:</p>
+
+<dl>
+  <dt>{@code main} or {@code patch}</dt>
+    <dd>Specifies whether the file is the main or patch expansion file. There can be
+only one main file and one patch file for each APK.</dd>
+  <dt>{@code &lt;expansion-version&gt;}</dt>
+    <dd>This is an integer that matches the version code of the APK with which the expansion is
+<em>first</em> associated (it matches the application's <a
+href="{@docRoot}guide/topics/manifest/manifest-element.html#vcode">{@code android:versionCode}</a>
+value).
+    <p>"First" is emphasized because although the Developer Console allows you to
+re-use an uploaded expansion file with a new APK, the expansion file's name does not change&mdash;it
+retains the version applied to it when you first uploaded the file.</p></dd>
+  <dt>{@code &lt;package-name&gt;}</dt> 
+    <dd>Your application's Java-style package name.</dd>
+</dl>
+
+<p>For example, suppose your APK version is 314159 and your package name is com.example.app. If you
+upload a main expansion file, the file is renamed to:</p>
+<pre class="classic no-pretty-print">main.314159.com.example.app.obb</pre>
+
+
+<h3 id="StorageLocation">Storage location</h3>
+
+<p>When Google Play downloads your expansion files to a device, it saves them to the system's
+shared storage location. To ensure proper behavior, you must not delete, move, or rename the
+expansion files. In the event that your application must perform the download from Google Play
+itself, you must save the files to the exact same location.</p>
+
+<p>The specific location for your expansion files is:</p>
+
+<pre class="classic no-pretty-print">
+&lt;shared-storage&gt;/Android/obb/&lt;package-name&gt;/
+</pre>
+
+<ul>
+  <li>{@code &lt;shared-storage&gt;} is the path to the shared storage space, available from
+{@link android.os.Environment#getExternalStorageDirectory()}.</li>
+  <li>{@code &lt;package-name&gt;} is your application's Java-style package name, available
+from {@link android.content.Context#getPackageName()}.</li>
+</ul>
+
+<p>For each application, there are never more than two expansion files in this directory.
+One is the main expansion file and the other is the patch expansion file (if necessary). Previous
+versions are overwritten when you update your application with new expansion files.</p>
+
+<p>If you must unpack the contents of your expansion files, <strong>do not</strong> delete the
+{@code .obb} expansion files afterwards and <strong>do not</strong> save the unpacked data
+in the same directory. You should save your unpacked files in the directory
+specified by {@link android.content.Context#getExternalFilesDir getExternalFilesDir()}. However,
+if possible, it's best if you use an expansion file format that allows you to read directly from
+the file instead of requiring you to unpack the data. For example, we've provided a library
+project called the <a href="#ZipLib">APK Expansion Zip Library</a> that reads your data directly
+from the ZIP file.</p>
+
+<p class="note"><strong>Note:</strong> Unlike APK files, any files saved on the shared storage can
+be read by the user and other applications.</p>
+
+<p class="note"><strong>Tip:</strong> If you're packaging media files into a ZIP, you can use media
+playback calls on the files with offset and length controls (such as {@link
+android.media.MediaPlayer#setDataSource(FileDescriptor,long,long) MediaPlayer.setDataSource()} and
+{@link android.media.SoundPool#load(FileDescriptor,long,long,int) SoundPool.load()}) without the
+need to unpack your ZIP. In order for this to work, you must not perform additional compression on
+the media files when creating the ZIP packages. For example, when using the <code>zip</code> tool,
+you should use the <code>-n</code> option to specify the file suffixes that should not be
+compressed: <br/>
+<code>zip -n .mp4;.ogg main_expansion media_files</code></p>
+
+
+<h3 id="DownloadProcess">Download process</h3>
+
+<p>Most of the time, Google Play downloads and saves your expansion files at the same time it
+downloads the APK to the device. However, in some cases Google Play
+cannot download the expansion files or the user might have deleted previously downloaded expansion
+files. To handle these situations, your app must be able to download the files
+itself when the main activity starts, using a URL provided by Google Play.</p>
+
+<p>The download process from a high level looks like this:</p>
+
+<ol>
+  <li>User selects to install your app from Google Play.</li>
+  <li>If Google Play is able to download the expansion files (which is the case for most
+devices), it downloads them along with the APK.
+     <p>If Google Play is unable to download the expansion files, it downloads the
+APK only.</p>
+  </li>
+  <li>When the user launches your application, your app must check whether the expansion files are
+already saved on the device.
+    <ol>
+      <li>If yes, your app is ready to go.</li>
+      <li>If no, your app must download the expansion files over HTTP from Google Play. Your app
+must send a request to the Google Play client using the Google Play's <a
+href="{@docRoot}guide/google/play/licensing/index.html">Application Licensing</a> service, which
+responds with the name, file size, and URL for each expansion file. With this information, you then
+download the files and save them to the proper <a href="#StorageLocation">storage location</a>.</li>
+    </ol>
+  </li>
+</ol>
+
+<p class="caution"><strong>Caution:</strong> It is critical that you include the necessary code to
+download the expansion files from Google Play in the event that the files are not already on the
+device when your application starts. As discussed in the following section about <a
+href="#Downloading">Downloading the Expansion Files</a>, we've made a library available to you that
+greatly simplifies this process and performs the download from a service with a minimal amount of
+code from you.</p>
+
+
+
+
+<h3 id="Checklist">Development checklist</h3>
+
+<p>Here's a summary of the tasks you should perform to use expansion files with your
+application:</p>
+
+<ol>
+  <li>First determine whether your application absolutely requires more than 50MB per installation.
+Space is precious and you should keep your total application size as small as possible. If your app
+uses more than 50MB in order to provide multiple versions of your graphic assets for multiple screen
+densities, consider instead publishing <a
+href="{@docRoot}guide/google/play/publishing/multiple-apks.html">multiple APKs</a> in which each APK
+contains only the assets required for the screens that it targets.</li>
+  <li>Determine which application resources to separate from your APK and package them in a
+file to use as the main expansion file.
+    <p>Normally, you should only use the second patch expansion file when performing updates to
+the main expansion file. However, if your resources exceed the 2GB limit for the main
+expansion file, you can use the patch file for the rest of your assets.</p>
+  </li>
+  <li>Develop your application such that it uses the resources from your expansion files in the
+device's <a href="#StorageLocation">shared storage location</a>.
+    <p>Remember that you must not delete, move, or rename the expansion files.</p>
+    <p>If your application doesn't demand a specific format, we suggest you create ZIP files for 
+your expansion files, then read them using the <a href="#ZipLib">APK Expansion Zip
+Library</a>.</p>
+  </li>
+  <li>Add logic to your application's main activity that checks whether the expansion files
+are on the device upon start-up. If the files are not on the device, use Google Play's <a
+href="{@docRoot}guide/google/play/licensing/index.html">Application Licensing</a> service to request URLs
+for the expansion files, then download and save them.
+    <p>To greatly reduce the amount of code you must write and ensure a good user experience
+during the download, we recommend you use the <a href="AboutLibraries">Downloader
+Library</a> to implement your download behavior.</p>
+    <p>If you build your own download service instead of using the library, be aware that you
+must not change the name of the expansion files and must save them to the proper
+<a href="#StorageLocation">storage location</a>.</p></li>
+</ol>
+
+<p>Once you've finished your application development, follow the guide to <a href="#Testing">Testing
+Your Expansion Files</a>.</p>
+
+
+
+
+
+
+<h2 id="Rules">Rules and Limitations</h2>
+
+<p>Adding APK expansion files is a feature available when you upload your application using the
+Developer Console. When uploading your application for the first time or updating an
+application that uses expansion files, you must be aware of the following rules and limitations:</p>
+
+<ol type="I">
+  <li>Each expansion file can be no more than 2GB.</li>
+  <li>In order to download your expansion files from Google Play, <strong>the user must have
+acquired your application from Google Play</strong>. Google Play will not
+provide the URLs for your expansion files if the application was installed by other means.</li>
+  <li>When performing the download from within your application, the URL that Google Play
+provides for each file is unique for every download and each one expires shortly after it is given
+to your application.</li>
+  <li>If you update your application with a new APK or upload <a
+href="{@docRoot}guide/google/play/publishing/multiple-apks.html">multiple APKs</a> for the same
+application, you can select expansion files that you've uploaded for a previous APK. <strong>The
+expansion file's name does not change</strong>&mdash;it retains the version received by the APK to
+which the file was originally associated.</li>
+  <li>If you use expansion files in combination with <a
+href="{@docRoot}guide/google/play/publishing/multiple-apks.html">multiple APKs</a> in order to
+provide different expansion files for different devices, you still must upload separate APKs
+for each device in order to provide a unique  <a
+href="{@docRoot}guide/topics/manifest/manifest-element.html#vcode">{@code versionCode}</a>
+value and declare different <a href="{@docRoot}guide/google/play/filters.html">filters</a> for
+each APK.</li>
+  <li>You cannot issue an update to your application by changing the expansion files
+alone&mdash;<strong>you must upload a new APK</strong> to update your app. If your changes only
+concern the assets in your expansion files, you can update your APK simply by changing the <a
+href="{@docRoot}guide/topics/manifest/manifest-element.html#vcode">{@code versionCode}</a> (and
+perhaps also the <a href="{@docRoot}guide/topics/manifest/manifest-element.html#vname">{@code
+versionName}</a>).</p></li>
+  <li><strong>Do not save other data into your <code>obb/</code>
+directory</strong>. If you must unpack some data, save it into the location specified by {@link
+android.content.Context#getExternalFilesDir getExternalFilesDir()}.</li>
+  <li><strong>Do not delete or rename the {@code .obb} expansion file</strong> (unless you're
+performing an update). Doing so will cause Google Play (or your app itself) to repeatedly
+download the expansion file.</li>
+  <li>When updating an expansion file manually, you must delete the previous expansion file.</li>
+</ol>
+
+
+
+
+
+
+
+
+
+<h2 id="Downloading">Downloading the Expansion Files</h2>
+
+<p>In most cases, Google Play downloads and saves your expansion files to the device at the same
+time it installs or updates the APK. This way, the expansion files are available when your
+application launches for the first time. However, in some cases your app must download the
+expansion files itself by requesting them from a URL provided to you in a response
+from Google Play's <a
+href="{@docRoot}guide/google/play/licensing/index.html">Application Licensing</a> service.</p>
+
+<p>The basic logic you need to download your expansion files is the following:</p>
+
+<ol>
+  <li>When your application starts, look for the expansion files on the <a
+href="#StorageLocation">shared storage location</a> (in the
+<code>Android/obb/&lt;package-name&gt;/</code> directory).
+    <ol type="a">
+      <li>If the expansion files are there, you're all set and your application can continue.</li>
+      <li>If the expansion files are <em>not</em> there:
+        <ol>
+          <li>Perform a request using Google Play's <a
+href="{@docRoot}guide/google/play/licensing/index.html">Application Licensing</a> to get your
+app's expansion file names, sizes, and URLs.</li> 
+          <li>Use the URLs provided by Google Play to download the expansion files and save
+the expansion files. You <strong>must</strong> save the files to the <a
+href="#StorageLocation">shared storage location</a>
+(<code>Android/obb/&lt;package-name&gt;/</code>) and use the exact file name provided
+by Google Play's response.
+            <p class="note"><strong>Note:</strong> The URL that Google Play provides for your
+expansion files is unique for every download and each one expires shortly after it is given to
+your application.</p>
+          </li>
+        </ol>
+      </li>
+    </ol>
+  </li>
+</ol>
+
+
+<p>If your application is free (not a paid app), then you probably haven't used the <a
+href="{@docRoot}guide/google/play/licensing/index.html">Application Licensing</a> service. It's primarily
+designed for you to enforce
+licensing policies for your application and ensure that the user has the right to
+use your app (he or she rightfully paid for it on Google Play). In order to facilitate the
+expansion file functionality, the licensing service has been enhanced to provide a response
+to your application that includes the URL of your application's expansion files that are hosted
+on Google Play. So, even if your application is free for users, you need to include the
+License Verification Library (LVL) to use APK expansion files. Of course, if your application
+is free, you don't need to enforce license verification&mdash;you simply need the
+library to perform the request that returns the URL of your expansion files.</p>
+
+<p class="note"><strong>Note:</strong> Whether your application is free or not, Google Play
+returns the expansion file URLs only if the user acquired your application from Google Play.</p>
+
+<p>In addition to the LVL, you need a set of code that downloads the expansion files
+over an HTTP connection and saves them to the proper location on the device's shared storage.
+As you build this procedure into your application, there are several issues you should take into
+consideration:</p>
+
+<ul>
+  <li>The device might not have enough space for the expansion files, so you should check
+before beginning the download and warn the user if there's not enough space.</li>
+  <li>File downloads should occur in a background service in order to avoid blocking the user
+interaction and allow the user to leave your app while the download completes.</li>
+  <li>A variety of errors might occur during the request and download that you must
+gracefully handle.</li>
+  <li>Network connectivity can change during the download, so you should handle such changes and
+if interrupted, resume the download when possible.</li>
+  <li>While the download occurs in the background, you should provide a notification that
+indicates the download progress, notifies the user when it's done, and takes the user back to
+your application when selected.</li>
+</ul>
+
+
+<p>To simplify this work for you, we've built the <a href="#AboutLibraries">Downloader Library</a>,
+which requests the expansion file URLs through the licensing service, downloads the expansion files,
+performs all of the tasks listed above, and even allows your activity to pause and resume the
+download. By adding the Downloader Library and a few code hooks to your application, almost all the
+work to download the expansion files is already coded for you. As such, in order to provide the best
+user experience with minimal effort on your behalf, we recommend you use the Downloader Library to
+download your expansion files. The information in the following sections explain how to integrate
+the library into your application.</p>
+
+<p>If you'd rather develop your own solution to download the expansion files using the Google
+Play URLs, you must follow the <a href="{@docRoot}guide/google/play/licensing/index.html">Application
+Licensing</a> documentation to perform a license request, then retrieve the expansion file names,
+sizes, and URLs from the response extras. You should use the <a href="#ExpansionPolicy">{@code
+APKExpansionPolicy}</a> class (included in the License Verification Library) as your licensing
+policy, which captures the expansion file names, sizes, and URLs from the licensing service..</p>
+
+
+
+<h3 id="AboutLibraries">About the Downloader Library</h3>
+
+<p>To use APK expansion files with your application and provide the best user experience with
+minimal effort on your behalf, we recommend you use the Downloader Library that's included in the
+Google Market Apk Expansion package. This library downloads your expansion files in a
+background service, shows a user notification with the download status, handles network
+connectivity loss, resumes the download when possible, and more.</p>
+
+<p>To implement expansion file downloads using the Downloader Library, all you need to do is:</p>
+
+<ul>
+  <li>Extend a special {@link android.app.Service} subclass and {@link
+android.content.BroadcastReceiver} subclass that each require just a few
+lines of code from you.</li>
+  <li>Add some logic to your main activity that checks whether the expansion files have
+already been downloaded and, if not, invokes the download process and displays a
+progress UI.</li>
+  <li>Implement a callback interface with a few methods in your main activity that
+receives updates about the download progress.</li>
+</ul>
+
+<p>The following sections explain how to set up your app using the Downloader Library.</p>
+
+
+<h3 id="Preparing">Preparing to use the Downloader Library</h3>
+
+<p>To use the Downloader Library, you need to
+download two packages from the SDK Manager and add the appropriate libraries to your
+application.</p>
+
+<p>First, open the <a href="{@docRoot}sdk/exploring.html">Android SDK Manager</a>, expand
+<em>Extras</em> and download:</p>
+<ul>
+  <li><em>Google Market Licensing package</em></li>
+  <li><em>Google Market Apk Expansion package</em></li>
+</ul>
+
+<p>If you're using Eclipse, create a project for each library and add it to your app:</p>
+<ol>
+  <li>Create a new Library Project for the License Verification Library and Downloader
+Library. For each library:
+    <ol>
+      <li>Begin a new Android project.</li>
+      <li>Select <strong>Create project from existing
+source</strong> and choose the library from the {@code &lt;sdk&gt;/extras/google/} directory
+({@code market_licensing/} for the License Verification Library or {@code
+market_apk_expansion/downloader_library/} for the Downloader Library).</li>
+      <li>Specify a <em>Project Name</em> such as "Google Play License Library" and "Google Play
+Downloader
+Library"</li>
+      <li>Click <strong>Finish</strong>.</li>
+    </ol>
+<p class="note"><strong>Note:</strong> The Downloader Library depends on the License
+Verification Library. Be sure to add the License
+Verification Library to the Downloader Library's project properties (same process as
+steps 2 and 3 below).</p>
+  </li>
+  <li>Right-click the Android project in which you want to use APK expansion files and
+select <strong>Properties</strong>.</li>
+  <li>In the <em>Library</em> panel, click <strong>Add</strong> to select and add each of the
+libraries to your application.</li>
+</ol>
+
+<p>Or, from a command line, update your project to include the libraries:</p>
+<ol>
+  <li>Change directories to the <code>&lt;sdk&gt;/tools/</code> directory.</li>
+  <li>Execute <code>android update project</code> with the {@code --library} option to add both the
+LVL and the Downloader Library to your project. For example:
+<pre class="no-pretty-print">
+android update project --path ~/Android/MyApp \
+--library ~/android_sdk/extras/google/market_licensing \
+--library ~/android_sdk/extras/google/market_apk_expansion/downloader_library
+</pre>
+  </li>
+</ol>
+
+<p>With both the License Verification Library and Downloader Library added to your
+application, you'll be able to quickly integrate the ability to download expansion files from
+Google Play. The format that you choose for the expansion files and how you read them
+from the shared storage is a separate implementation that you should consider based on your
+application needs.</p>
+
+<p class="note"><strong>Tip:</strong> The Apk Expansion package includes a sample
+application
+that shows how to use the Downloader Library in an app. The sample uses a third library
+available in the Apk Expansion package called the APK Expansion Zip Library. If
+you plan on
+using ZIP files for your expansion files, we suggest you also add the APK Expansion Zip Library to
+your application. For more information, see the section below
+about <a href="#ZipLib">Using the APK Expansion Zip Library</a>.</p>
+
+
+
+<h3 id="Permissions">Declaring user permissions</h3>
+
+<p>In order to download the expansion files, the Downloader Library
+requires several permissions that you must declare in your application's manifest file. They
+are:</p>
+
+<pre>
+&lt;manifest ...>
+    &lt;!-- Required to access Google Play Licensing -->
+    &lt;uses-permission android:name="com.android.vending.CHECK_LICENSE" />
+
+    &lt;!-- Required to download files from Google Play -->
+    &lt;uses-permission android:name="android.permission.INTERNET" />
+
+    &lt;!-- Required to keep CPU alive while downloading files (NOT to keep screen awake) -->
+    &lt;uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    &lt;!-- Required to poll the state of the network connection and respond to changes -->
+    &lt;uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    &lt;!-- Required to check whether Wi-Fi is enabled -->
+    &lt;uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+
+    &lt;!-- Required to read and write the expansion files on shared storage -->
+    &lt;uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    ...
+&lt;/manifest>
+</pre>
+
+<p class="note"><strong>Note:</strong> By default, the Downloader Library requires API
+level 4, but the APK Expansion Zip Library requires API level 5.</p>
+
+
+<h3 id="DownloaderService">Implementing the downloader service</h3>
+
+<p>In order to perform downloads in the background, the Downloader Library provides its
+own {@link android.app.Service} subclass called {@code DownloaderService} that you should extend. In
+addition to downloading the expansion files for you, the {@code DownloaderService} also:</p>
+
+<ul>
+  <li>Registers a {@link android.content.BroadcastReceiver} that listens for changes to the
+device's network connectivity (the {@link android.net.ConnectivityManager#CONNECTIVITY_ACTION}
+broadcast) in order to pause the download when necessary (such as due to connectivity loss) and
+resume the download when possible (connectivity is acquired).</li>
+  <li>Schedules an {@link android.app.AlarmManager#RTC_WAKEUP} alarm to retry the download for
+cases in which the service gets killed.</li>
+  <li>Builds a custom {@link android.app.Notification} that displays the download progress and
+any errors or state changes.</li>
+  <li>Allows your application to manually pause and resume the download.</li>
+  <li>Verifies that the shared storage is mounted and available, that the files don't already exist,
+and that there is enough space, all before downloading the expansion files. Then notifies the user
+if any of these are not true.</li>
+</ul>
+
+<p>All you need to do is create a class in your application that extends the {@code
+DownloaderService} class and override three methods to provide specific application details:</p>
+
+<dl>
+  <dt>{@code getPublicKey()}</dt>
+    <dd>This must return a string that is the Base64-encoded RSA public key for your publisher
+account, available from the profile page on the Developer Console (see <a
+href="{@docRoot}guide/google/play/licensing/setting-up.html">Setting Up for Licensing</a>).</dd>
+  <dt>{@code getSALT()}</dt>
+    <dd>This must return an array of random bytes that the licensing {@code Policy} uses to
+create an <a
+href="{@docRoot}guide/google/play/licensing/adding-licensing.html#impl-Obfuscator">{@code
+Obfuscator}</a>. The salt ensures that your obfuscated {@link android.content.SharedPreferences}
+file in which your licensing data is saved will be unique and non-discoverable.</dd>
+  <dt>{@code getAlarmReceiverClassName()}</dt>
+    <dd>This must return the class name of the {@link android.content.BroadcastReceiver} in
+your application that should receive the alarm indicating that the download should be
+restarted (which might happen if the downloader service unexpectedly stops).</dd>
+</dl>
+
+<p>For example, here's a complete implementation of {@code DownloaderService}:</p>
+
+<pre>
+public class SampleDownloaderService extends DownloaderService {
+    // You must use the public key belonging to your publisher account
+    public static final String BASE64_PUBLIC_KEY = "YourLVLKey";
+    // You should also modify this salt
+    public static final byte[] SALT = new byte[] { 1, 42, -12, -1, 54, 98,
+            -100, -12, 43, 2, -8, -4, 9, 5, -106, -107, -33, 45, -1, 84
+    };
+
+    &#64;Override
+    public String getPublicKey() {
+        return BASE64_PUBLIC_KEY;
+    }
+
+    &#64;Override
+    public byte[] getSALT() {
+        return SALT;
+    }
+
+    &#64;Override
+    public String getAlarmReceiverClassName() {
+        return SampleAlarmReceiver.class.getName();
+    }
+}
+</pre>
+
+<p class="caution"><strong>Notice:</strong> You must update the {@code BASE64_PUBLIC_KEY} value
+to be the public key belonging to your publisher account. You can find the key in the Developer
+Console under your profile information. This is necessary even when testing
+your downloads.</p>
+
+<p>Remember to declare the service in your manifest file:</p>
+<pre>
+&lt;application ...>
+    &lt;service android:name=".SampleDownloaderService" />
+    ...
+&lt;/application>
+</pre>
+
+
+
+<h3 id="AlarmReceiver">Implementing the alarm receiver</h3>
+
+<p>In order to monitor the progress of the file downloads and restart the download if necessary, the
+{@code DownloaderService} schedules an {@link android.app.AlarmManager#RTC_WAKEUP} alarm that
+delivers an {@link android.content.Intent} to a {@link android.content.BroadcastReceiver} in your
+application. You must define the {@link android.content.BroadcastReceiver} to call an API
+from the Downloader Library that checks the status of the download and restarts
+it if necessary.</p>
+
+<p>You simply need to override the {@link android.content.BroadcastReceiver#onReceive
+onReceive()} method to call {@code
+DownloaderClientMarshaller.startDownloadServiceIfRequired()}.</p>
+
+<p>For example:</p>
+
+<pre>
+public class SampleAlarmReceiver extends BroadcastReceiver {
+    &#64;Override
+    public void onReceive(Context context, Intent intent) {
+        try {
+            DownloaderClientMarshaller.startDownloadServiceIfRequired(context, intent,
+                    SampleDownloaderService.class);
+        } catch (NameNotFoundException e) {
+            e.printStackTrace();
+        }      
+    }
+}
+</pre>
+
+<p>Notice that this is the class for which you must return the name
+in your service's {@code getAlarmReceiverClassName()} method (see the previous section).</p>
+
+<p>Remember to declare the receiver in your manifest file:</p>
+<pre>
+&lt;application ...>
+    &lt;receiver android:name=".SampleAlarmReceiver" />
+    ...
+&lt;/application>
+</pre>
+
+
+
+<h3 id="Download">Starting the download</h3>
+
+<p>The main activity in your application (the one started by your launcher icon) is
+responsible for verifying whether the expansion files are already on the device and initiating
+the download if they are not.</p>
+
+<p>Starting the download using the Downloader Library requires the following
+procedures:</p>
+
+<ol>
+  <li>Check whether the files have been downloaded.
+    <p>The Downloader Library includes some APIs in the {@code Helper} class to
+help with this process:</p>
+  <ul>
+    <li>{@code getExtendedAPKFileName(Context, c, boolean mainFile, int
+versionCode)}</li>
+    <li>{@code doesFileExist(Context c, String fileName, long fileSize)}</li>
+  </ul>
+    <p>For example, the sample app provided in the Apk Expansion package calls the
+following method in the activity's {@link android.app.Activity#onCreate onCreate()} method to check
+whether the expansion files already exist on the device:</p>
+<pre>
+boolean expansionFilesDelivered() {
+    for (XAPKFile xf : xAPKS) {
+        String fileName = Helpers.getExpansionAPKFileName(this, xf.mIsBase, xf.mFileVersion);
+        if (!Helpers.doesFileExist(this, fileName, xf.mFileSize, false))
+            return false;
+    }
+    return true;
+}        
+</pre>
+    <p>In this case, each {@code XAPKFile} object holds the version number and file size of a known
+expansion file and a boolean as to whether it's the main expansion file. (See the sample
+application's {@code SampleDownloaderActivity} class for details.)</p>
+    <p>If this method returns false, then the application must begin the download.</p>
+  </li>
+  <li>Start the download by calling the static method {@code
+DownloaderClientMarshaller.startDownloadServiceIfRequired(Context c, PendingIntent
+notificationClient, Class&lt;?> serviceClass)}.
+    <p>The method takes the following parameters:</p>
+    <ul>
+      <li><code>context</code>: Your application's {@link android.content.Context}.</li>
+      <li><code>notificationClient</code>: A {@link android.app.PendingIntent} to start your main
+activity. This is used in the {@link android.app.Notification} that the {@code DownloaderService}
+creates to show the download progress. When the user selects the notification, the system
+invokes the {@link android.app.PendingIntent} you supply here and should open the activity
+that shows the download progress (usually the same activity that started the download).</li>
+      <li><code>serviceClass</code>: The {@link java.lang.Class} object for your implementation of
+{@code DownloaderService}, required to start the service and begin the download if necessary.</li>
+    </ul>
+    <p>The method returns an integer that indicates
+whether or not the download is required. Possible values are:</p>
+    <ul>
+      <li>{@code NO_DOWNLOAD_REQUIRED}: Returned if the files already
+exist or a download is already in progress.</li>
+      <li>{@code LVL_CHECK_REQUIRED}: Returned if a license verification is
+required in order to acquire the expansion file URLs.</li>
+      <li>{@code DOWNLOAD_REQUIRED}: Returned if the expansion file URLs are already known,
+but have not been downloaded.</li>
+    </ul>
+    <p>The behavior for {@code LVL_CHECK_REQUIRED} and {@code DOWNLOAD_REQUIRED} are essentially the
+same and you normally don't need to be concerned about them. In your main activity that calls {@code
+startDownloadServiceIfRequired()}, you can simply check whether or not the response is {@code
+NO_DOWNLOAD_REQUIRED}. If the response is anything <em>other than</em> {@code NO_DOWNLOAD_REQUIRED},
+the Downloader Library begins the download and you should update your activity UI to
+display the download progress (see the next step). If the response <em>is</em> {@code
+NO_DOWNLOAD_REQUIRED}, then the files are available and your application can start.</p>
+    <p>For example:</p>
+<pre>
+&#64;Override
+public void onCreate(Bundle savedInstanceState) {
+    // Check if expansion files are available before going any further
+    if (!expansionFilesDelivered()) {
+        // Build an Intent to start this activity from the Notification
+        Intent notifierIntent = new Intent(this, MainActivity.getClass());
+        notifierIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
+                                Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        ...
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
+                notifierIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        
+        // Start the download service (if required)
+        int startResult = DownloaderClientMarshaller.startDownloadServiceIfRequired(this,
+                        pendingIntent, SampleDownloaderService.class);
+        // If download has started, initialize this activity to show download progress
+        if (startResult != DownloaderClientMarshaller.NO_DOWNLOAD_REQUIRED) {
+            // This is where you do set up to display the download progress (next step)
+            ...
+            return;
+        } // If the download wasn't necessary, fall through to start the app
+    }
+    startApp(); // Expansion files are available, start the app
+}
+</pre>
+  </li>
+  <li>When the {@code startDownloadServiceIfRequired()} method returns anything <em>other
+than</em> {@code NO_DOWNLOAD_REQUIRED}, create an instance of {@code IStub} by
+calling {@code DownloaderClientMarshaller.CreateStub(IDownloaderClient client, Class&lt;?>
+downloaderService)}. The {@code IStub} provides a binding between your activity to the downloader
+service such that your activity receives callbacks about the download progress.
+    <p>In order to instantiate your {@code IStub} by calling {@code CreateStub()}, you must pass it
+an implementation of the {@code IDownloaderClient} interface and your {@code DownloaderService}
+implementation. The next section about <a href="#Progress">Receiving download progress</a> discusses
+the {@code IDownloaderClient} interface, which you should usually implement in your {@link
+android.app.Activity} class so you can update the activity UI when the download state changes.</p>
+    <p>We recommend that you call {@code
+CreateStub()} to instantiate your {@code IStub} during your activity's {@link
+android.app.Activity#onCreate onCreate()} method, after {@code startDownloadServiceIfRequired()}
+starts the download. </p>
+    <p>For example, in the previous code sample for {@link android.app.Activity#onCreate
+onCreate()}, you can respond to the {@code startDownloadServiceIfRequired()} result like this:</p>
+<pre>
+        // Start the download service (if required)
+        int startResult = DownloaderClientMarshaller.startDownloadServiceIfRequired(this,
+                        pendingIntent, SampleDownloaderService.class);
+        // If download has started, initialize activity to show progress
+        if (startResult != DownloaderClientMarshaller.NO_DOWNLOAD_REQUIRED) {
+            // Instantiate a member instance of IStub
+            mDownloaderClientStub = DownloaderClientMarshaller.CreateStub(this,
+                    SampleDownloaderService.class);
+            // Inflate layout that shows download progress
+            setContentView(R.layout.downloader_ui);
+            return;
+        }
+</pre>
+
+    <p>After the {@link android.app.Activity#onCreate onCreate()} method returns, your activity
+receives a call to {@link android.app.Activity#onResume onResume()}, which is where you should then
+call {@code connect()} on the {@code IStub}, passing it your application's {@link
+android.content.Context}. Conversely, you should call
+{@code disconnect()} in your activity's {@link android.app.Activity#onStop onStop()} callback.</p>
+<pre>
+&#64;Override
+protected void onResume() {
+    if (null != mDownloaderClientStub) {
+        mDownloaderClientStub.connect(this);
+    }
+    super.onResume();
+}
+
+&#64;Override
+protected void onStop() {
+    if (null != mDownloaderClientStub) {
+        mDownloaderClientStub.disconnect(this);
+    }
+    super.onStop();
+}
+</pre>
+    <p>Calling {@code connect()} on the {@code IStub} binds your activity to the {@code
+DownloaderService} such that your activity receives callbacks regarding changes to the download
+state through the {@code IDownloaderClient} interface.</p>
+  </li>
+</ol>
+
+
+
+<h3 id="Progress">Receiving download progress</h3>
+
+<p>To receive updates regarding the download progress and to interact with the {@code
+DownloaderService}, you must implement the Downloader Library's {@code IDownloaderClient} interface.
+Usually, the activity you use to start the download should implement this interface in order to
+display the download progress and send requests to the service.</p>
+
+<p>The required interface methods for {@code IDownloaderClient} are:</p>
+
+<dl>
+  <dt>{@code onServiceConnected(Messenger m)}</dt>
+    <dd>After you instantiate the {@code IStub} in your activity, you'll receive a call to this
+method, which passes a {@link android.os.Messenger} object that's connected with your instance
+of {@code DownloaderService}. To send requests to the service, such as to pause and resume
+downloads, you must call {@code DownloaderServiceMarshaller.CreateProxy()} to receive the {@code
+IDownloaderService} interface connected to the service.
+    <p>A recommended implementation looks like this:</p>
+<pre>
+private IDownloaderService mRemoteService;
+...
+
+&#64;Override
+public void onServiceConnected(Messenger m) {
+    mRemoteService = DownloaderServiceMarshaller.CreateProxy(m);
+    mRemoteService.onClientUpdated(mDownloaderClientStub.getMessenger());
+}
+</pre>
+    <p>With the {@code IDownloaderService} object initialized, you can send commands to the
+downloader service, such as to pause and resume the download ({@code requestPauseDownload()}
+and {@code requestContinueDownload()}).</p>
+</dd>
+  <dt>{@code onDownloadStateChanged(int newState)}</dt>
+    <dd>The download service calls this when a change in download state occurs, such as the
+download begins or completes.
+      <p>The <code>newState</code> value will be one of several possible values specified in
+by one of the {@code IDownloaderClient} class's {@code STATE_*} constants.</p>
+      <p>To provide a useful message to your users, you can request a corresponding string
+for each state by calling {@code Helpers.getDownloaderStringResourceIDFromState()}. This
+returns the resource ID for one of the strings bundled with the Downloader
+Library. For example, the string "Download paused because you are roaming" corresponds to {@code
+STATE_PAUSED_ROAMING}.</p></dd>
+  <dt>{@code onDownloadProgress(DownloadProgressInfo progress)}</dt>
+    <dd>The download service calls this to deliver a {@code DownloadProgressInfo} object,
+which describes various information about the download progress, including estimated time remaining,
+current speed, overall progress, and total so you can update the download progress UI.</dd>
+</dl>
+<p class="note"><strong>Tip:</strong> For examples of these callbacks that update the download
+progress UI, see the {@code SampleDownloaderActivity} in the sample app provided with the
+Apk Expansion package.</p>
+
+<p>Some public methods for the {@code IDownloaderService} interface you might find useful are:</p>
+
+<dl>
+  <dt>{@code requestPauseDownload()}</dt>
+    <dd>Pauses the download.</dd>
+  <dt>{@code requestContinueDownload()}</dt>
+    <dd>Resumes a paused download.</dd>
+  <dt>{@code setDownloadFlags(int flags)}</dt>
+    <dd>Sets user preferences for network types on which its OK to download the files. The
+current implementation supports one flag, {@code FLAGS_DOWNLOAD_OVER_CELLULAR}, but you can add
+others. By default, this flag is <em>not</em> enabled, so the user must be on Wi-Fi to download
+expansion files. You might want to provide a user preference to enable downloads over
+the cellular network. In which case, you can call:
+<pre>
+mRemoteService.setDownloadFlags(IDownloaderService.FLAGS_DOWNLOAD_OVER_CELLULAR);
+</pre>
+</dd>
+</dl>
+
+
+
+
+<h2 id="ExpansionPolicy">Using APKExpansionPolicy</h2>
+
+<p>If you decide to build your own downloader service instead of using the Google Play
+<a href="#AboutLibraries">Downloader Library</a>, you should still use the {@code
+APKExpansionPolicy} that's provided in the License Verification Library. The {@code
+APKExpansionPolicy} class is nearly identical to {@code ServerManagedPolicy} (available in the
+Google Play License Verification Library) but includes additional handling for the APK expansion
+file response extras.</p>
+
+<p class="note"><strong>Note:</strong> If you <em>do use</em> the <a
+href="#AboutLibraries">Downloader Library</a> as discussed in the previous section, the
+library performs all interaction with the {@code APKExpansionPolicy} so you don't have to use
+this class directly.</p>
+
+<p>The class includes methods to help you get the necessary information about the available
+expansion files:</p>
+
+<ul>
+  <li>{@code getExpansionURLCount()}</li>
+  <li>{@code getExpansionURL(int index)}</li>
+  <li>{@code getExpansionFileName(int index)}</li>
+  <li>{@code getExpansionFileSize(int index)}</li>
+</ul>
+
+<p>For more information about how to use the {@code APKExpansionPolicy} when you're <em>not</em>
+using the <a
+href="#AboutLibraries">Downloader Library</a>, see the documentation for <a
+href="{@docRoot}guide/google/play/licensing/adding-licensing.html">Adding Licensing to Your App</a>,
+which explains how to implement a license policy such as this one.</p>
+
+
+
+
+
+
+
+<h2 id="ReadingTheFile">Reading the Expansion File</h2>
+
+<p>Once your APK expansion files are saved on the device, how you read your files
+depends on the type of file you've used. As discussed in the <a href="#Overview">overview</a>, your
+expansion files can be any kind of file you
+want, but are renamed using a particular <a href="#Filename">file name format</a> and are saved to
+{@code &lt;shared-storage&gt;/Android/obb/&lt;package-name&gt;/}.</p>
+
+<p>Regardless of how you read your files, you should always first check that the external
+storage is available for reading. There's a chance that the user has the storage mounted to a
+computer over USB or has actually removed the SD card.</p>
+
+<p class="note"><strong>Note:</strong> When your application starts, you should always check whether
+the external storage space is available and readable by calling {@link
+android.os.Environment#getExternalStorageState()}. This returns one of several possible strings
+that represent the state of the external storage. In order for it to be readable by your
+application, the return value must be {@link android.os.Environment#MEDIA_MOUNTED}.</p>
+
+
+<h3 id="GettingFilenames">Getting the file names</h3>
+
+<p>As described in the <a href="#Overview">overview</a>, your APK expansion files are saved
+using a specific file name format:</p>
+
+<pre class="classic no-pretty-print">
+[main|patch].&lt;expansion-version&gt;.&lt;package-name&gt;.obb
+</pre>
+
+<p>To get the location and names of your expansion files, you should use the
+{@link android.os.Environment#getExternalStorageDirectory()} and {@link
+android.content.Context#getPackageName()} methods to construct the path to your files.</p>
+
+<p>Here's a method you can use in your application to get an array containing the complete path
+to both your expansion files:</p>
+
+<pre>
+// The shared path to all app expansion files
+private final static String EXP_PATH = "/Android/obb/";
+
+static String[] getAPKExpansionFiles(Context ctx, int mainVersion, int patchVersion) {
+    String packageName = ctx.getPackageName();
+    Vector&lt;String> ret = new Vector&lt;String>();
+    if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+        // Build the full path to the app's expansion files
+        File root = Environment.getExternalStorageDirectory();
+        File expPath = new File(root.toString() + EXP_PATH + packageName);
+
+        // Check that expansion file path exists
+        if (expPath.exists()) {
+            if ( mainVersion > 0 ) {
+                String strMainPath = expPath + File.separator + "main." +
+                        mainVersion + "." + packageName + ".obb";
+                File main = new File(strMainPath);
+                if ( main.isFile() ) {
+                        ret.add(strMainPath);
+                }
+            }
+            if ( patchVersion > 0 ) {
+                String strPatchPath = expPath + File.separator + "patch." +
+                        mainVersion + "." + packageName + ".obb";
+                File main = new File(strPatchPath);
+                if ( main.isFile() ) {
+                        ret.add(strPatchPath);
+                }
+            }
+        }
+    }
+    String[] retArray = new String[ret.size()];
+    ret.toArray(retArray);
+    return retArray;
+}
+</pre>
+
+<p>You can call this method by passing it your application {@link android.content.Context}
+and the desired expansion file's version.</p>
+
+<p>There are many ways you could determine the expansion file version number. One simple way is to
+save the version in a {@link android.content.SharedPreferences} file when the download begins, by
+querying the expansion file name with the {@code APKExpansionPolicy} class's {@code
+getExpansionFileName(int index)} method. You can then get the version code by reading the {@link
+android.content.SharedPreferences} file when you want to access the expansion
+file.</p>
+
+<p>For more information about reading from the shared storage, see the <a
+href="{@docRoot}guide/topics/data/data-storage.html#filesExternal">Data Storage</a>
+documentation.</p>
+
+
+
+<h3 id="ZipLib">Using the APK Expansion Zip Library</h3>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <h3>Reading media files from a ZIP</h3>
+  <p>If you're using your expansion files to store media files, a ZIP file still allows you to
+use Android media playback calls that provide offset and length controls (such as {@link
+android.media.MediaPlayer#setDataSource(FileDescriptor,long,long) MediaPlayer.setDataSource()} and
+{@link android.media.SoundPool#load(FileDescriptor,long,long,int) SoundPool.load()}). In order for
+this to work, you must not perform additional compression on the media files when creating the ZIP
+packages. For example, when using the <code>zip</code> tool, you should use the <code>-n</code>
+option to specify the file suffixes that should not be compressed:</p>
+<p><code>zip -n .mp4;.ogg main_expansion media_files</code></p>
+</div>
+</div>
+
+<p>The Google Market Apk Expansion package includes a library called the APK
+Expansion Zip Library (located in {@code
+&lt;sdk>/extras/google/google_market_apk_expansion/zip_file/}). This is an optional library that
+helps you read your expansion
+files when they're saved as ZIP files. Using this library allows you to easily read resources from
+your ZIP expansion files as a virtual file system.</p>
+
+<p>The APK Expansion Zip Library includes the following classes and APIs:</p>
+
+<dl>
+  <dt>{@code APKExpansionSupport}</dt>
+    <dd>Provides some methods to access expansion file names and ZIP files:
+      
+      <dl style="margin-top:1em">
+        <dt>{@code getAPKExpansionFiles()}</dt> 
+          <dd>The same method shown above that returns the complete file path to both expansion
+files.</dd>
+        <dt>{@code getAPKExpansionZipFile(Context ctx, int mainVersion, int
+patchVersion)}</dt>
+          <dd>Returns a {@code ZipResourceFile} representing the sum of both the main file and
+patch file. That is, if you specify both the <code>mainVersion</code> and the
+<code>patchVersion</code>, this returns a {@code ZipResourceFile} that provides read access to
+all the data, with the patch file's data merged on top of the main file.</dd>
+      </dl>
+    </dd>
+    
+  <dt>{@code ZipResourceFile}</dt>
+    <dd>Represents a ZIP file on the shared storage and performs all the work to provide a virtual
+file system based on your ZIP files. You can get an instance using {@code
+APKExpansionSupport.getAPKExpansionZipFile()} or with the {@code ZipResourceFile} by passing it the
+path to your expansion file. This class includes a variety of useful methods, but you generally
+don't need to access most of them. A couple of important methods are:
+
+      <dl style="margin-top:1em">
+        <dt>{@code getInputStream(String assetPath)}</dt>
+          <dd>Provides an {@link java.io.InputStream} to read a file within the ZIP file. The
+<code>assetPath</code> must be the path to the desired file, relative to
+the root of the ZIP file contents.</dd>
+        <dt>{@code getAssetFileDescriptor(String assetPath)}</dt>
+          <dd>Provides an {@link android.content.res.AssetFileDescriptor} for a file within the
+ZIP file. The <code>assetPath</code> must be the path to the desired file, relative to
+the root of the ZIP file contents. This is useful for certain Android APIs that require  an {@link
+android.content.res.AssetFileDescriptor}, such as some {@link android.media.MediaPlayer} APIs.</dd>
+      </dl>
+    </dd>
+    
+  <dt>{@code APEZProvider}</dt>
+    <dd>Most applications don't need to use this class. This class defines a {@link
+android.content.ContentProvider} that marshals the data from the ZIP files through a content
+provider {@link android.net.Uri} in order to provide file access for certain Android APIs that
+expect {@link android.net.Uri} access to media files. For example, this is useful if you want to
+play a video with {@link android.widget.VideoView#setVideoURI VideoView.setVideoURI()}.</p></dd>
+</dl>
+
+<h4>Reading from a ZIP file</h4>
+
+<p>When using the APK Expansion Zip Library, reading a file from your ZIP usually requires the
+following:</p>
+
+<pre>
+// Get a ZipResourceFile representing a merger of both the main and patch files
+ZipResourceFile expansionFile = APKExpansionSupport.getAPKExpansionZipFile(appContext,
+        mainVersion, patchVersion);
+        
+// Get an input stream for a known file inside the expansion file ZIPs
+InputStream fileStream = expansionFile.getInputStream(pathToFileInsideZip);
+</pre>
+
+<p>The above code provides access to any file that exists in either your main expansion file or
+patch expansion file, by reading from a merged map of all the files from both files. All you
+need to provide the {@code getAPKExpansionFile()} method is your application {@code
+android.content.Context} and the version number for both the main expansion file and patch
+expansion file.</p>
+
+<p>If you'd rather read from a specific expansion file, you can use the {@code
+ZipResourceFile} constructor with the path to the desired expansion file:</p>
+
+<pre>
+// Get a ZipResourceFile representing a specific expansion file
+ZipResourceFile expansionFile = new ZipResourceFile(filePathToMyZip);
+
+// Get an input stream for a known file inside the expansion file ZIPs
+InputStream fileStream = expansionFile.getInputStream(pathToFileInsideZip);
+</pre>
+
+<p>For more information about using this library for your expansion files, look at
+the sample application's {@code SampleDownloaderActivity} class, which includes additional code to
+verify the downloaded files using CRC. Beware that if you use this sample as the basis for
+your own implementation, it requires that you <strong>declare the byte size of your expansion
+files</strong> in the {@code xAPKS} array.</p>
+
+
+
+
+<h2 id="Testing">Testing Your Expansion Files</h2>
+
+<p>Before publishing your application, there are two things you should test: Reading the
+expansion files and downloading the files.</p>
+
+
+<h3 id="TestingReading">Testing file reads</h3>
+
+<p>Before you upload your application to Google Play, you
+should test your application's ability to read the files from the shared storage. All you need to do
+is add the files to the appropriate location on the device shared storage and launch your
+application:</p>
+
+<ol>
+  <li>On your device, create the appropriate directory on the shared storage where Google
+Play will save your files.
+  <p>For example, if your package name is {@code com.example.android}, you need to create
+the directory {@code Android/obb/com.example.android/} on the shared storage space. (Plug in
+your test device to your computer to mount the shared storage and manually create this
+directory.)</p>
+  </li>
+  <li>Manually add the expansion files to that directory. Be sure that you rename your files to
+match the <a href="#Filename">file name format</a> that Google Play will use.
+  <p>For example, regardless of the file type, the main expansion file for the {@code
+com.example.android} application should be {@code main.0300110.com.example.android.obb}.
+The version code can be whatever value you want. Just remember:</p>
+  <ul>
+    <li>The main expansion file always starts with {@code main} and the patch file starts with
+{@code patch}.</li>
+    <li>The package name always matches that of the APK to which the file is attached on
+Google Play.
+  </ul>
+  </li>
+  <li>Now that the expansion file(s) are on the device, you can install and run your application to
+test your expansion file(s).</li>
+</ol>
+
+<p>Here are some reminders about handling the expansion files:</p>
+<ul>
+  <li><strong>Do not delete or rename</strong> the {@code .obb} expansion files (even if you unpack
+the data to a different location). Doing so will cause Google Play (or your app itself) to
+repeatedly download the expansion file.</li>
+  <li><strong>Do not save other data into your <code>obb/</code>
+directory</strong>. If you must unpack some data, save it into the location specified by {@link
+android.content.Context#getExternalFilesDir getExternalFilesDir()}.</li>
+</ul>
+
+
+
+<h3 id="TestingReading">Testing file downloads</h3>
+
+<p>Because your application must sometimes manually download the expansion files when it first
+opens, it's important that you test this process to be sure your application can successfully query
+for the URLs, download the files, and save them to the device.</p>
+
+<p>To test your application's implementation of the manual download procedure, you must upload
+your application to Google Play as a "draft" to make your expansion files available for
+download:</p>
+
+<ol>
+  <li>Upload your APK and corresponding expansion files using the Google Play Developer
+Console.</li>
+  <li>Fill in the necessary application details (title, screenshots, etc.). You can come back and
+finalize these details before publishing your application.
+  <p>Click the <strong>Save</strong> button. <em>Do not click Publish.</em> This saves
+the application as a draft, such that your application is not published for Google Play users,
+but the expansion files are available for you to test the download process.</p></li>
+  <li>Install the application on your test device using the Eclipse tools or <a
+href="{@docRoot}tools/help/adb.html">{@code adb}</a>.</li>
+  <li>Launch the app.</li>
+</ol>
+
+<p>If everything works as expected, your application should begin downloading the expansion
+files as soon as the main activity starts.</p>
+
+
+
+
+<h2 id="Updating">Updating Your Application</h2>
+
+<p>One of the great benefits to using expansion files on Google Play is the ability to
+update your application without re-downloading all of the original assets. Because Google Play
+allows you to provide two expansion files with each APK, you can use the second file as a "patch"
+that provides updates and new assets. Doing so avoids the
+need to re-download the main expansion file which could be large and expensive for users.</p>
+
+<p>The patch expansion file is technically the same as the main expansion file and neither
+the Android system nor Google Play perform actual patching between your main and patch expansion
+files. Your application code must perform any necessary patches itself.</p>
+
+<p>If you use ZIP files as your expansion files, the <a href="#ZipLib">APK Expansion Zip
+Library</a> that's included with the Apk Expansion package includes the ability to merge
+your
+patch file with the main expansion file.</p>
+
+<p class="note"><strong>Note:</strong> Even if you only need to make changes to the patch
+expansion file, you must still update the APK in order for Google Play to perform an update.
+If you don't require code changes in the application, you should simply update the <a
+href="{@docRoot}guide/topics/manifest/manifest-element.html#vcode">{@code versionCode}</a> in the
+manifest.</p>
+
+<p>As long as you don't change the main expansion file that's associated with the APK
+in the Developer Console, users who previously installed your application will not
+download the main expansion file. Existing users receive only the updated APK and the new patch
+expansion file (retaining the previous main expansion file).</p>
+
+<p>Here are a few issues to keep in mind regarding updates to expansion files:</p>
+
+<ul>
+  <li>There can be only two expansion files for your application at a time. One main expansion
+file and one patch expansion file. During an update to a file, Google Play deletes the
+previous version (and so must your application when performing manual updates).</li>
+  <li>When adding a patch expansion file, the Android system does not actually patch your
+application or main expansion file. You must design your application to support the patch data.
+However, the Apk Expansion package includes a library for using ZIP files
+as expansion files, which merges the data from the patch file into the main expansion file so
+you can easily read all the expansion file data.</li>
+</ul>
+
+
+
+<!-- Tools are not ready.
+     
+<h3>Using OBB tool and APIs</h3>
+
+<pre>
+$ mkobb.sh -d /data/myfiles -k my_secret_key -o /data/data.obb
+$ obbtool a -n com.example.myapp -v 1 -s seed_from_mkobb /data/data.obb
+</pre>
+
+<pre>
+storage = (StorageManager) getSystemService( STORAGE_SERVICE );
+storage.mountObb( obbFilepath, "my_secret_key", myListener );
+obbContentPath = storage.getMountedObbPath( obbFilepath );
+</pre>
+-->

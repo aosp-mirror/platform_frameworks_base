@@ -1,0 +1,1066 @@
+page.title=Ice Cream Sandwich
+
+@jd:body
+
+
+<style type="text/css">
+#jd-content {
+  max-width:1024px;
+}
+#jd-content div.screenshot {
+  float:left;
+  clear:left;
+  padding:15px 30px 15px 0;
+}
+#jd-content div.video {
+  float:right;
+  padding:0 0 40px 60px;
+}
+#jd-content table.columns {
+  margin:0 0 1em 0;
+}
+#jd-content table.columns td {
+  padding:0;
+}
+#jd-content table.columns td+td {
+  padding:0 2em;
+}
+#jd-content table.columns td img {
+  margin:0;
+}
+#jd-content table.columns td+td>*:first-child {
+  margin-top:-2em;
+}
+.green {
+  color:#8db529;
+  font-weight:bold;
+}
+</style>
+
+<p>Welcome to Android 4.0!</p>
+
+<p>Android 4.0 delivers a refined, unified UI for phones and tablets and
+introduces innovative features for users and developers. This document provides
+a glimpse of the many new features and technologies that make Android 4.0
+simple, beautiful, and beyond smart. <!--For technical details about
+new developer APIs described below, see the <a
+href="{@docRoot}about/versions/android-4.0.html">Android 4.0 API Overview</a>
+document.--></p>
+
+<ul>
+  <li><a href="#UserFeatures">Android 4.0 for Users</a></li>
+  <li><a href="#DeveloperApis">Android 4.0 for Developers</a></li>
+</ul>
+
+<h2 id="UserFeatures" style="clear:right">Android 4.0 for Users</h2>
+
+<div style="padding-bottom:0em;">
+<a href="{@docRoot}sdk/images/4.0/home-lg.png" target="_android"><img
+style="margin-left:10px;float:right;xborder:1px solid #ddd;border-radius: 5px;"
+src="{@docRoot}sdk/images/4.0/home.png" alt="" height="300" width="180" /></a>
+<a href="{@docRoot}sdk/images/4.0/lock-lg.png" target="_android"><img
+style="margin-left:20px;float:right;border:1px solid #ddd;border-radius: 5px;"
+src="{@docRoot}sdk/images/4.0/lock.png" alt="" height="300" width="180" /></a>
+</div>
+
+
+<h3 id="simple" style="color:#258AAF">Simple, beautiful, beyond smart</h3>
+
+<p>Android 4.0 builds on the things people love most about Android &mdash; easy
+multitasking, rich notifications, customizable home screens, resizable widgets,
+and deep interactivity &mdash; and adds powerful new ways of communicating and
+sharing.</p>
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Refined, evolved UI</strong></p>
+
+<p>Focused on bringing the power of Android to the surface, Android 4.0 makes
+<strong>common actions more visible</strong> and lets users navigate with
+simple, intuitive gestures. Refined <strong>animations</strong> and feedback
+throughout the system make interactions engaging and interesting. An entirely
+<strong>new typeface</strong> optimized for high-resolution screens improves
+readability and brings a polished, modern feel to the user interface.</p>
+
+<p>Virtual buttons in the System Bar let users navigate instantly to Back, Home,
+and Recent Apps. The <strong>System Bar</strong> and virtual buttons are present
+across all apps, but can be dimmed by applications for full-screen viewing.
+Users can access each application's contextual options in the <strong>Action
+Bar</strong>, displayed at the top (and sometimes also at the bottom) of the
+screen.</p>
+
+<p><strong>Multitasking</strong> is a key strength of Android and it's made even
+easier and more visual on Android 4.0. The Recent Apps button lets users jump
+instantly from one task to another using the list in the System Bar. The list
+pops up to show thumbnail images of apps used recently &mdash; tapping a
+thumbnail switches to the app.</p>
+
+<div  style="padding-top:0em;">
+<div style="margin-right:.5em;float:left;width:182px;padding-top:.5em;">
+<a href="{@docRoot}sdk/images/4.0/tasks-lg.png" target="_android">
+<img src="{@docRoot}sdk/images/4.0/tasks.png" alt="" height="240" width="144" style="border:1px
+solid #ddd;border-radius: 6px;" /></a>
+<div style="padding-bottom:1em;font-size:.9em;padding-right:1em;">The Recent Apps list makes
+multitasking simple.</div>
+<a href="{@docRoot}sdk/images/4.0/lock-camera-lg.png" target="_android">
+<img src="{@docRoot}sdk/images/4.0/lock-camera.png" alt="" height="240" width="144"
+style="border:1px solid #ddd;border-radius: 6px;" /></a>
+<div style="padding-bottom:1em;font-size:.9em;padding-right:1.75em;">Jump to the camera or see
+notifications without unlocking.</div>
+<a href="{@docRoot}sdk/images/4.0/contact-call-lg.png" target="_android">
+<img src="{@docRoot}sdk/images/4.0/contact-call.png" alt="" height="240" width="144"
+style="border:1px solid #ddd;border-radius: 6px;padding:0" /></a>
+<!--<a href="{@docRoot}sdk/images/4.0/quick-response-lg.png" target="_android">
+<img src="{@docRoot}sdk/images/4.0/quick-responses-new.png" alt="" height="240" width="144"
+style="border:1px solid #ddd;border-radius: 6px;" /></a>-->
+<div style="padding-bottom:.5em;font-size:.9em;padding-right:1.75em;">For incoming calls, you can
+respond instantly by&nbsp;text.</div>
+</div>
+</div>
+
+<p>Rich and interactive <strong>notifications</strong> let users keep in
+constant touch with incoming messages, play music tracks, see real-time updates
+from apps, and much more. On smaller-screen devices, notifications appear at the
+top of the screen, while on larger-screen devices they appear in the System
+Bar.</p>
+
+<div  style="padding-top:0em;">
+<div
+style="float:right;margin-left:20px;margin-top:.5em;margin-bottom:0;padding-bottom:
+0 ; width:326px">
+<a href="{@docRoot}sdk/images/4.0/allapps-lg.png" target="_android">
+<img src="{@docRoot}sdk/images/4.0/allapps.png" alt="" height="240" width="144" style="border:1px
+solid #ddd;border-radius: 6px;" /></a>
+<a href="{@docRoot}sdk/images/4.0/calendar-widget-lg.png" target="_android">
+<img src="{@docRoot}sdk/images/4.0/calendar-widget.png" alt="" height="240" width="144"
+style="border:1px solid #ddd;border-radius: 6px;" /></a>
+<div style="padding-bottom:1em;margin-top:0;padding-top:0;font-size:.9em"><!--<strong>Figure
+3.</strong>-->The All Apps launcher (left) and resizable widgets (right) give you apps and rich
+content from the home screen.</div>
+</div>
+</div>
+
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Home screen folders and
+favorites tray</strong></p>
+
+<p>New home screen <strong>folders</strong> offer a new way for users to group
+their apps and shortcuts logically, just by dragging one onto another. Also, 
+in All Apps launcher, users can now simply <strong>drag an app</strong> to get
+information about it or immediately uninstall it, or disable a pre-installed app.</p>
+
+<p>On smaller-screen devices, the home screen now includes a customizable
+<strong>favorites tray</strong> visible from all home screens. Users can drag
+apps, shortcuts, folders, and other priority items in or out of the favorites
+tray for instant access from any home screen.</p>
+
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Resizable
+widgets</strong></p>
+
+<p>Home screens in Android 4.0 are designed to be content-rich and customizable.
+Users can do much more than add shortcuts &mdash; they can embed live
+application content directly through interactive <strong>widgets</strong>.
+Widgets let users check email, flip through a calendar, play music, check social
+streams, and more &mdash; right from the home screen, without having to launch
+apps. Widgets are resizable, so users can expand them to show more content or
+shrink them to save space.</p>
+
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>New lock screen
+actions</strong></p>
+
+<p>The lock screens now let users do more without unlocking. From the slide lock
+screen, users can <strong>jump directly to the camera</strong> for a picture or
+<strong>pull down the notifications window</strong> to check for messages. When
+listening to music, users can even manage music tracks and see album art. </p>
+
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Quick responses for
+incoming calls</strong></p>
+
+<p>When an incoming call arrives, users can now quickly <strong>respond by text
+message</strong>, without needing to pick up the call or unlock the device. On
+the incoming call screen, users simply slide a control to see a list of text
+responses and then tap to send and end the call. Users can add their own
+responses and manage the list from the Settings app.</p>
+
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Swipe to dismiss
+notifications, tasks, and browser tabs</strong></p>
+
+<p>Android 4.0 makes managing notifications, recent apps, and browser tabs even
+easier. Users can now dismiss individual notifications, apps from the Recent
+Apps list, and browser tabs with a simple swipe of a finger. </p>
+
+<div  style="padding-top:0em;">
+<div
+style="float:right;margin-left:20px;margin-top:1.5em;margin-bottom:0;padding-bottom
+: 0 ; width:200px">
+<a href="{@docRoot}sdk/images/4.0/text-replace-lg.png" target="_android">
+<img src="{@docRoot}sdk/images/4.0/text-replace.png" alt="" width="190" style="border:1px solid
+#ddd;border-radius: 6px;" /></a>
+<div style="padding-bottom:1.25em;margin-top:0;padding-top:0;font-size:.9em"><!--<strong>Figure
+3.</strong>-->A spell-checker lets you find errors and fix them faster. </div>
+<a href="{@docRoot}sdk/images/4.0/tts-lg.png" target="_android">
+<img src="{@docRoot}sdk/images/4.0/tts.png" alt="" width="190" style="border:1px solid
+#ddd;border-radius: 6px;" /></a>
+<div style="padding-bottom:1.25em;margin-top:0;padding-top:0;font-size:.9em">A powerful voice input
+engine lets you dictate continously.</div>
+</div>
+</div>
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Improved text input and
+spell-checking</strong></p>
+  
+<p>The soft keyboard in Android 4.0 makes text input even faster and more
+accurate. Error correction and word suggestion are improved through a new set of
+default dictionaries and more accurate heuristics for handling cases such as
+double-typed characters, skipped letters, and omitted spaces. Word suggestion
+is also improved and the suggestion strip is simplified to show only three
+words at a time.</p>
+
+<p>To fix misspelled words more easily, Android 4.0 adds a
+<strong>spell-checker</strong> that locates and underlines errors and suggests
+replacement words. With one tap, users can choose from multiple spelling
+suggestions, delete a word, or add it to the dictionary. Users can even tap to
+see replacement suggestions for words that are spelled correctly. For
+specialized features or additional languages, users can now download and install
+third-party dictionaries, spell-checkers, and other text services.</p>
+
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Powerful voice input
+engine</strong></p>
+
+<p>Android 4.0 introduces a powerful new voice input engine that offers a
+continuous "open microphone" experience and streaming voice recognition. The new
+voice input engine lets users dictate the text they want, for as long as they
+want, using the language they want. Users can <strong>speak continously</strong> for a prolonged
+time, even pausing for intervals if needed, and dictate punctuation to create
+correct sentences. As the voice input engine enters text, it underlines possible
+dictation errors in gray. After dictating, users can tap the underlined words to
+quickly replace them from a list of suggestions.</p>
+
+<div  style="padding-top:0em;">
+<div style="margsin-right:.8em;float:left;width:350px;padding-top:1em;">
+<a href="{@docRoot}sdk/images/4.0/usage-all-lg.png" target="_android">
+<img src="{@docRoot}sdk/images/4.0/usage-all.png" alt="" height="240" width="144" style="border:1px
+solid #ddd;border-radius: 6px;" /></a>
+<a href="{@docRoot}sdk/images/4.0/usage-maps-lg.png" target="_android">
+<img src="{@docRoot}sdk/images/4.0/usage-maps.png" alt="" height="240" width="144" style="border:1px
+solid #ddd;border-radius: 6px;" /></a>
+<div style="padding-bottom:1em;font-size:.9em;padding-right:1.75em;"><!--<strong>Figure
+3.</strong>--> Data usage controls let you monitor total usage by network type and application and
+then set limits if needed.</div>
+</div>
+</div>
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Control over network
+data</strong></p>
+
+<p>Mobile devices can make extensive use of network data for streaming content,
+synchronizing data, downloading apps, and more. To meet the needs of users with
+<strong>tiered or metered data plans</strong>, Android 4.0 adds new controls for
+managing network data usage.</p>
+
+<p>In the Settings app, colorful charts show the total data usage on each
+network type (mobile or Wi-Fi), as well as amount of data used by each running
+application. Based on their data plans, users can optionally set warning levels
+or hard limits on data usage or disable mobile data altogether. Users can also
+manage the background data used by individual applications as needed.</p>
+
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Designed for
+accessibility</strong></p>
+
+<p>A variety of new features greatly enhance the accessibility of Android 4.0
+for blind or visually impaired users. Most important is a new
+<strong>explore-by-touch mode</strong> that lets users navigate without having
+to see the screen. Touching the screen once triggers audible feedback that
+identifies the UI component below; a second touch in the same component
+activates it with a full touch event. The new mode is especially important to
+support users on new devices that use virtual buttons in the System Bar, rather
+than dedicated hardware buttons or trackballs. Also, standard apps are updated
+to offer an improved accessibility experience. The <strong>Browser</strong>
+supports a script-based screen reader for reading favorite web content and
+navigating sites. For improved readability, users can also increase the default
+font size used across&nbsp;the&nbsp;system.</p>
+
+<p>The accessibility experience begins at first setup &mdash; a simple
+<strong>touch gesture</strong> during setup (clockwise square from upper left)
+activates all accessibility features and loads a setup tutorial. Once
+accessibility features are active, everything visible on the screen can be
+spoken aloud by the standard screen reader.</p>
+
+
+<h3 id="comms" style="color:#258AAF">Communication and sharing</h3>
+
+<div  style="padding-top:0em;">
+<div
+style="float:right;margin-left:20px;margin-top:1.5em;margin-bottom:0;padding-bottom
+: 0 ; width:490px">
+<!--<img src="{@docRoot}sdk/images/4.0/contact-call.png" alt="" height="240" width="144"
+style="border:1px solid #ddd;border-radius: 6px;" />-->
+<a href="{@docRoot}sdk/images/4.0/contact-faves-lg.png" target="_android">
+<img src="{@docRoot}sdk/images/4.0/contact-faves.png" alt="" height="240" width="144"
+style="border:1px solid #ddd;border-radius: 6px;padding:0" /></a>
+<a href="{@docRoot}sdk/images/4.0/contact-connect-lg.png" target="_android">
+<img src="{@docRoot}sdk/images/4.0/contact-connect.png" alt="" height="240" width="144"
+style="border:1px solid #ddd;border-radius: 6px;padding:0" /></a>
+<a href="{@docRoot}sdk/images/4.0/contact-email-lg.png" target="_android">
+<img src="{@docRoot}sdk/images/4.0/contact-email.png" alt="" height="240" width="144"
+style="border:1px solid #ddd;border-radius: 6px;padding:0" /></a>
+
+<div style="padding-bottom:1.25em;margin-top:0;padding-top:0;font-size:.9em"><!--<strong>Figure
+3.</strong>-->Contacts and profiles are integrated across apps and social networks, for a
+consistent, personal experience everywhere &mdash; from incoming calls to emails.</div>
+</div>
+</div>
+
+<p>Designed for the way people live, Android 4.0 integrates rich social
+communication and sharing touchpoints across the system, making it easy to talk,
+email, text, and share.</p>
+
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>People and
+profiles</strong></p>
+
+<p>Throughout the system, a user’s social groups, profiles, and contacts are
+linked together and integrated for easy accessibility. At the center is a new
+<strong>People app</strong> that offers richer profile information, including a
+large profile picture, phone numbers, addresses and accounts, status updates,
+events, stream items, and a new button for connecting on integrated social networks. </p>
+
+<p>The user's own contact information is stored in a new <strong>"Me"
+profile</strong>, allowing easier sharing with apps and people. All of the
+user's integrated contacts are displayed in an easy to manage list, including
+controls over which contacts are shown from any integrated account or social
+network. Wherever the user navigates across the system, tapping a profile photo
+displays Quick Contacts, with large profile pictures, shortcuts to phone numbers,
+text messaging, and more. </p>
+
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Unified calendar, visual
+voicemail</strong></p>
+
+<p>To help organize appointments and events, an updated <strong>Calendar
+app</strong> brings together personal, work, school, and social agendas. With
+user permission, other applications can contribute events to the calendar and
+manage reminders, for an integrated view across multiple calendar providers. The
+app is redesigned to let users manage events more easily. Calendars are
+color-coded and users can <strong>swipe left or right</strong> to change dates
+and pinch to zoom in or out agendas. </p>
+
+<p>In the phone app, a new <strong>visual voicemail</strong> features integrates
+incoming messages, voice transcriptions, and audio files from one or more
+providers. Third-party applications can integrate with the Phone app to add
+their own voice messages, transcriptions, and more to the visual voicemail
+inbox. </p>
+
+<div  style="padding-top:0em;">
+<div style="margin-right:0em;float:left;width:282px;padding-top:1em;">
+<a href="{@docRoot}sdk/images/4.0/camera-lg.png" target="_android">
+<img src="{@docRoot}sdk/images/4.0/camera.png" alt="" width="240" height="144" style="border:1px
+solid #ddd;border-radius: 6px;" /></a>
+<a href="{@docRoot}sdk/images/4.0/gallery-edit-lg.png" target="_android">
+<img src="{@docRoot}sdk/images/4.0/gallery-edit.png" alt="" width="240" height="144"
+style="border:1px solid #ddd;border-radius: 6px;" /></a>
+<a href="{@docRoot}sdk/images/4.0/gallery-share-lg.png" target="_android">
+<img src="{@docRoot}sdk/images/4.0/gallery-share.png" alt="" width="240" height="144"
+style="border:1px solid #ddd;border-radius: 6px;" /></a>
+<div style="padding-bottom:1em;font-size:.9em;padding-right:2.75em;">Capture the picture you want,
+edit, and share instantly. </div>
+</div>
+</div>
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Rich and versatile camera
+capabilities</strong></p>
+
+<p>The Camera app includes many new features that let users capture special moments
+with great photos and videos. After capturing images, they can edit and share
+them easily with friends. </p>
+
+<p>When taking pictures, <strong>continuous focus</strong>, <strong>zero shutter
+lag exposure</strong>, and decreased shot-to-shot speed help capture clear,
+precise images. <strong>Stabilized image zoom</strong> lets users compose photos
+and video in the way they want, including while video is recording. For new
+flexibility and convenience while shooting video, users can now take
+<strong>snapshots at full video resolution</strong> just by tapping the screen
+as video continues to record.</p>
+
+<p>To make it easier to take great pictures of people, built-in <strong>face
+detection</strong> locates faces in the frame and automatically sets focus. For
+more control, users can <strong>tap to focus</strong> anywhere in the preview
+image. </p>
+
+<p>For capturing larger scenes, the Camera introduces a <strong>single-motion
+panorama</strong> mode. In this mode, the user starts an exposure and then
+slowly turns the Camera to encompass as wide a perspective as needed. The Camera
+assembles the full range of continuous imagery into a single panoramic
+photo.</p>
+
+<p>After taking a picture or video, users can quickly share it by email, text
+message, bluetooth, social networks, and more, just by tapping the thumbnail in
+the camera controls. </p>
+
+
+<div  style="padding-top:0em;">
+<div
+style="float:right;margin-left:20px;padding-top:1em;margin-bottom:1em;padding-
+bottom : 0 ;width:160px">
+<img src="{@docRoot}sdk/images/4.0/gallery-widget.png" alt="" width="144" style="border:1px solid
+#ddd;border-radius: 6px;" />
+<div style="padding-bottom:1.25em;margin-top:0;padding-top:0;font-size:.9em">A Photo Gallery widget
+on the home screen.</div>
+</div>
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Redesigned Gallery app
+with photo editor</strong></p>
+
+<p>The Gallery app now makes it easier to manage, show, and share photos and
+videos. For managing collections, a <strong>redesigned album layout</strong>
+shows many more albums and offers larger thumbnails. There are many ways to sort
+albums, including by time, location, people, and tags. To help pictures look
+their best, the Gallery now includes a powerful <strong>photo editor</strong>.
+Users can crop and rotate pictures, set levels, remove red eyes, add effects,
+and much more. After retouching, users can select one or multiple pictures or
+videos to share instantly over email, text messaging, bluetooth, social
+networks, or other apps.</p>
+
+<p>An improved <strong>Picture Gallery widget</strong> lets users look at
+pictures directly on their home screen. The widget can display pictures from a
+selected album, shuffle pictures from all albums, or show a single image. After
+adding the widget to the home screen, users can flick through the photo stacks
+to locate the image they want, then tap to load it in Gallery. </p>
+
+<div  style="padding-top:0em;clear:right;">
+<div
+style="float:right;margin-left:20px;padding-top:1em;margin-bottom:1em;padding-
+bottom : 0 ;width:320px">
+<img src="{@docRoot}sdk/images/4.0/live-effects.png" alt="" width="297" style="border:1px solid
+#ddd;border-radius: 6px;" />
+<div style="padding-bottom:1em;margin-top:0;padding-top:0;font-size:.9em">Live Effects let you
+change backgrounds and use Silly Faces during video.</div>
+</div>
+</div>
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Live Effects for transforming
+video</strong></p>
+
+<p>Live Effects is a collection of graphical transformations that add interest
+and fun to videos captured in the Camera app. For example, users can
+<strong>change the background</strong> behind them to any stock or custom image,
+for just the right setting when shooting videeo. Also available for video is
+Silly Faces, a set of morphing effects that use state-of-the-art face
+recognition and GPU filters to transform facial features. For example, you can
+use effects such as small eyes, big mouth, big nose, face squeeze, and more.
+Outside of the Camera app, Live Effects is available during video chat in the
+Google Talk app.</p>
+
+<div  style="padding-top:0em;">
+<div style="margsin-right:.8em;float:left;width:186px;padding-top:1em;">
+<a href="{@docRoot}sdk/images/4.0/screenshot-lg.png" target="_android">
+<img src="{@docRoot}sdk/images/4.0/screenshot.png" alt="" height="240"  width="144"
+style="border:1px solid #ddd;border-radius: 6px;" /></a>
+<div style="padding-bottom:1.25em;margin-top:0;padding-top:0;font-size:.9em"> Snapping a
+screenshot.</div>
+</div>
+</div>
+</div>
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Sharing with screenshots</strong></p>
+
+<p>Users can now share what's on their screens more easily by taking
+screenshots. Hardware buttons let them snap a <strong>screenshot</strong> and
+store it locally. Afterward, they can view, edit, and share the screen shot in
+Gallery or a similar app.</p>
+
+
+<h3 id="cloud" style="color:#258AAF">Cloud-connected experience</h3>
+
+<div  style="padding-top:0em;">
+<div
+style="float:right;margin-left:20px;padding-top:1em;margin-bottom:0;padding-bottom:
+0 ; width:326px">
+<a href="{@docRoot}sdk/images/4.0/browser-tabs-lg.png" target="_android">
+<img src="{@docRoot}sdk/images/4.0/browser-tabs.png" alt="" height="240" width="144"
+style="border:1px solid #ddd;border-radius: 6px;" /></a>
+<a href="{@docRoot}sdk/images/4.0/browser-lg.png" target="_android">
+<img src="{@docRoot}sdk/images/4.0/browser.png" alt="" height="240" width="144" style="border:1px
+solid #ddd;border-radius: 6px;" /></a>
+<div style="padding-bottom:1.25em;margin-top:0;padding-top:0;font-size:.9em"><!--<strong>Figure
+3.</strong>-->The Browser tabs menu <em>(left)</em> lets you quickly switch browser tabs. The
+options menu <em>(right)</em> gives you new ways to manage your browsing experience.</div>
+<img src="{@docRoot}sdk/images/4.0/bbench.png" alt="" width="310" />
+<div style="padding-bottom:1em;margin-top:0;padding-top:0;font-size:.9em">Benchmark comparisons of
+Android Browser.</div>
+</div>
+</div>
+
+<p>Android has always been cloud-connected, letting users browse the web and
+sync photos, apps, games, email, and contacts &mdash; wherever they are and
+across all of their devices. Android 4.0 adds new browsing and email
+capabilities to let users take even more with them and keep communication
+organized.</p>
+
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Powerful web
+browsing</strong></p>
+
+<p>The Android Browser offers an experience that’s as rich and convenient as a
+desktop browser. It lets users instantly sync and manage <strong>Google Chrome
+bookmarks</strong> from all of their accounts, jump to their favorite content
+faster, and even save it for reading later in case there's no network
+available.</p>
+
+<p>To get the most out of web content, users can now request full
+<strong>desktop versions</strong> of web sites, rather than their mobile
+versions. Users can set their preference for web sites separately for each
+<strong>browser tab</strong>. For longer content, users can save a copy for
+<strong>offline reading</strong>. To find and open saved pages, users can browse
+a visual list that’s included with browser bookmarks and history.  For better
+readability and accessibility, users can increase the browser’s <strong>zoom
+levels</strong> and override the system default <strong>text sizes</strong>.</p>
+
+<p>Across all types of content, the Android Browser offers dramatically improved
+<strong>page rendering performance</strong> through updated versions of the
+WebKit core and the V8 Crankshaft compilation engine for JavaScript. In
+benchmarks run on a Nexus S device, the Android 4.0 browser showed an
+improvement of nearly 220% over the Android 2.3 browser in the V8 Benchmark
+Suite and more than 35% in the SunSpider 9.1 JavaScript Benchmark. When run on a
+Galaxy Nexus device, the Android 4.0 browser showed improvement of nearly 550%
+in the V8 benchmark and nearly 70% in the SunSpider benchmark.</p>
+
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Improved
+email</strong></p>
+
+<p>In Android 4.0, email is easier to send, read, and manage. For composing
+email, <strong>improved auto-completion</strong> of recipients helps with
+finding and adding frequent contacts more quickly. For easier input of frequent
+text, users can now create <strong>quick responses</strong> and store them in
+the app, then enter them from a convenient menu when composing. When replying to
+a message, users can now toggle the message to Reply All and Forward without
+changing screens.</p>
+
+<p>For easier browsing across accounts and labels, the app adds an
+<strong>integrated menu</strong> of accounts and recent labels. To help users
+locate and organize IMAP and Exchange email, the Email app now supports
+<strong>nested mail subfolders</strong>, each with synchronization rules. Users
+can also search across folders on the server, for faster results. </p>
+
+<p>For <strong>enterprises</strong>, the Email app supports EAS v14. It supports
+EAS certificate authentication, provides ABQ strings for device type and mode,
+and allows automatic sync to be disabled while roaming. Administrators can also
+limit attachment size or disable attachments.</p>
+
+<p>For keeping track of incoming email more easily, a <strong>resizable Email
+widget</strong> lets users flick through recent email right from the home
+screen, then jump into the Email app to compose or reply.</p>
+
+
+<div  style="padding-top:0em;">
+<div style="margsin-right:.8em;float:left;width:186px;padding-top:1em;">
+<a href="{@docRoot}sdk/images/4.0/beam-lg.png" target="_android">
+<img src="{@docRoot}sdk/images/4.0/beam.png" alt="" height="240" width="144" style="border:1px solid
+#ddd;border-radius: 6px;" /></a>
+<div
+style="padding-bottom:1em;margin-top:0;padding-top:0;font-size:.9em;padding-right:1.5em;">Android
+Beam lets users share what they are using with a single tap.</div>
+</div>
+</div>
+
+<h3 id="innovation" style="color:#258AAF">Innovation</h3>
+
+<p>Android is continously driving innovation forward, pushing the boundaries of
+communication and sharing with new capabilities and interactions.</p>
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Android Beam for
+NFC-based sharing</strong></p>
+
+<p>Android Beam is an innovative, convenient feature for sharing across two
+NFC-enabled devices, It lets people instantly exchange favorite apps, contacts,
+music, videos &mdash; almost anything. It’s incredibly simple and convenient to
+use &mdash; there’s no menu to open, application to launch, or pairing needed.
+Just touch one Android-powered phone to another, then tap to send.</p>
+
+<p>For sharing apps, Android Beam pushes a link to the app's details page in
+Google Play. On the other device, the Google Play client app launches and loads the
+details page, for easy downloading of the app. Individual apps can build on
+Android Beam to add other types of interactions, such as passing game scores,
+initiating a multiplayer game or chat, and more.</p>
+
+<div  style="padding-top:0em;">
+<div
+style="float:right;margin-left:20px;margin-top:.5em;margin-bottom:0;padding-bottom:
+0 ; width:160px">
+<a href="{@docRoot}sdk/images/4.0/face-unlock-lg.png" target="_android">
+<img src="{@docRoot}sdk/images/4.0/face-unlock.png" alt="" height="240" width="144" style="border:1px solid #ddd;border-radius: 6px;" /></a>
+<div style="padding-bottom:1em;margin-top:0;padding-top:0;font-size:.9em">Face recognition lets you
+unlock your phone with your face.</div>
+</div>
+</div>
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Face Unlock</strong></p>
+
+<p>Android 4.0 introduces a completely new approach to securing a device, making
+each person's device even more personal &mdash; Face Unlock is a new screen-lock
+option that lets users unlock their devices with their faces. It takes advantage
+of the device front-facing camera and state-of-the-art facial recognition
+technology to register a face during setup and then to recognize it again when
+unlocking the device. Users just hold their devices in front of their faces to
+unlock, or use a backup PIN or pattern. </p>
+
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Wi-Fi Direct and Bluetooth HDP</strong></p>
+
+<p>Support for <strong>Wi-Fi Direct</strong> lets users connect directly to
+nearby peer devices over Wi-Fi, for more reliable, higher-speed communication.
+No internet connection or tethering is needed. Through third-party apps, users
+can connect to compatible devices to take advantage of new features such as
+instant sharing of files, photos, or other media; streaming video or audio from
+another device; or connecting to compatible printers or other devices.</p>
+
+<p>Android 4.0 also introduces built-in support for connecting to <strong>Bluetooth Health Device Profile (HDP)</strong> devices. With support from third-party apps, users can connect to wireless medical devices and sensors in hospitals, fitness centers, homes, and elsewhere.</p>
+
+
+<h2 id="DeveloperApis" style="clear:right">New Developer Features</h2>
+
+<!-- <ul>
+<li><a href="#ui-dev">Unified UI framework for phones, tablets, and more</a></li>
+<li><a href="#communication-dev">Communication and sharing</a></li>
+<li><a href="#media-dev">New media capabilities</a></li>
+<li><a href="#connectivity-dev">New types of connectivity</a></li>
+<li><a href="#uicomp-dev">New UI components and capabilities</a></li>
+<li><a href="input-dev">New input types and text services</a></li>
+<li><a href="#accessibility-dev">Enhanced accessibility APIs</a></li>
+<li><a href="#data-dev">Efficient network usage</a></li>
+<li><a href="#security-dev">Security for apps and content</a></li>
+<li><a href="#enterprise-dev">Enhancements for Enterprise</a></li>
+</ul>-->
+
+<h3 id="ui-dev">Unified UI framework for phones, tablets, and more</h3>
+
+<p>Android 4.0 brings a unified UI framework that lets developers create
+elegant, innovative apps for phones, tablets, and more. It includes all of the
+familiar Android 3.x interface elements and APIs &mdash; fragments, content
+loaders, Action Bar, rich notifications, resizable home screen widgets, and more
+&mdash; as well as new elements and APIs.</p>
+
+<p>For developers, the unified UI framework in Android 4.0 means new UI tools,
+consistent design practices, simplified code and resources, and streamlined
+development across the range of Android-powered devices.</p>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <h3>Key Honeycomb developer features, <br>now for phones too</h3>
+
+<p>Core UI</p>
+<ul>
+<li>Fragments and content loaders</li>
+<li>Resizeable home screen widgets</li>
+<li>Rich notifications</li>
+<li>Multi-selection, drag-drop, clipboard</li>
+<li>Improved screen-support API</li>
+<li>Hardware-accelerated 2D graphics</li>
+</ul>
+
+<p>Graphics and animation</p>
+<ul>
+<li>Property-based animation</li>
+<li>Renderscript 3D graphics</li>
+</ul>
+
+<p>Media and connectivity</p>
+<ul>
+<li>HTTP Live streaming</li>
+<li>Bluetooth A2DP and HSP devices</li>
+<li>Support for RTP</li>
+<li>MTP/PTP file transfer</li>
+<li>DRM framework</li>
+<li>Input from keyboard, mouse, gamepad, joystick</li>
+</ul>
+
+<p>Enterprise</p>
+<ul>
+<li>Full device encryption</li>
+<li>DPM policies for encrypted storage and passwords</li>
+</ul>
+</div>
+</div>
+
+<h3 id="communication-dev">Communication and sharing</h3>
+
+<p>Android 4.0 extends social and sharing features to any application on the
+device. Applications can integrate contacts, profile data, stream items, 
+and calendar events from any of the user’s activities or social networks.</p>
+
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Social API</strong></p>
+
+<p>A shared social provider and API provide a new unified store for contacts,
+profile data, stream items, and photos. Any app or social network with user
+permission can contribute raw contacts and make them accessible to other apps
+and networks. Applications with user permission can also read profile data from
+the provider and display it in their applications.</p>
+
+<p>The social API lets applications store standard contact data as well as new
+types of content for any given contact, including large profile photos, stream
+items, and recent activity feedback. Recent activity feedback is a standard way for
+applications to “tag” a contact with common activity, such as when the user
+calls the contact or sends an email or SMS message. The social provider uses the
+recent activity feedback as a new signal in ranking, such as for name
+auto-complete, to keep the most relevant contacts ranked closest to the top.</p>
+
+<p>Applications can also let users set up a social connection to a contact from
+the People app. When the user touches Add Connection in a contact, the app
+sends a public intent that other apps can handle, displaying any UI needed
+to create the social connection.</p>
+
+<p>Building on the social API, developers can add powerful new interactions that
+span multiple social networks and contacts sources.</p>
+
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Calendar API</strong></p>
+
+<p>A shared calendar content provider and framework API make it easier for
+developers to add calendar services to their apps.</p>
+
+<p>With user permission, any application can add events to the shared database
+and manage dates, attendees, alerts, and reminders. Applications can also read
+entries from the database, including events contributed by other applications,
+and handle the display of event alerts and reminders. Using the calendar
+provider, applications can take advantage of event data sourced from a variety
+of apps and protocols, to offer innovative ways of viewing and managing a user’s
+events. Apps can also use calendar data to improve the relevance of their
+other content.</p>
+
+<p>For lighter-weight access to calendar services, the Calendar app defines a
+set of public Intents for creating, viewing, and editing events. Rather than
+needing to implement a calendar UI and integrate directly with the calendar
+provider, applications can simply broadcast calendar Intents. When the Calendar
+app receives the Intents, it launches the appropriate UI and stores any event
+data entered. Using calendar Intents, for example, apps can let users add events
+directly from lists, dialogs, or home screen widgets, such as for making
+restaurant reservations or booking time with friends.</p>
+
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Visual voicemail
+API</strong></p>
+
+<p>A shared Voicemail provider and API allow developers to build applications
+that contribute to a unified voicemail store.  Voicemails are displayed and
+played in the call log tab of the platform’s Phone app.</p>
+
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Android Beam</strong></p>
+
+<p>Android Beam is an NFC-based feature that lets users instantly share
+information about the apps they are using, just by touching two NFC-enabled
+phones together. When the devices are in range &mdash; within a few centimeters
+&mdash; the system sets up an NFC connection and displays a sharing UI. To share
+whatever they are viewing with the other device, users just touch the screen.
+</p>
+
+<p>For developers, Android Beam is a new way of triggering almost any type of
+proximity-based interaction. For example, it can let users instantly exchange
+contacts, set up multiplayer gaming, join a chat or video call, share a photo or
+video, and more. The system provides the low-level NFC support and the sharing
+UI, while the foreground app provides lightweight data to transfer to the other
+device. Developers have complete control over the data that is shared and how it
+is handled, so almost any interaction is possible. For larger payloads,
+developers can even use Android Beam to initiate a connection and transfer the
+data over Bluetooth, without the need for user-visible pairing.</p>
+
+<p>Even if developers do not add custom interactions based on Android Beam they
+can still benefit from it being deeply integrated into Android. By default the
+system shares the app’s Google Play URL, so it’s easy for the user to
+download or purchase the app right away.</p>
+
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Modular sharing
+widget</strong></p>
+
+<p>The UI framework includes a new widget, ShareActionProvider, that lets
+developers quickly embed standard share functionality and UI in the Action Bar
+of their applications. Developers simply add ShareActionProvider to the menu and
+set an intent that describes the desired sharing action. The system handles the
+rest, building up the list of applications that can handle the share intent and
+dispatching the intent when the user chooses from the menu.</p>
+
+
+<h3 id="media-dev">New media capabilities</h3>
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Low-level streaming
+multimedia</strong></p>
+
+<p>Android 4.0 provides a direct, efficient path for low-level streaming
+multimedia. The new path is ideal for applications that need to maintain
+complete control over media data before passing it to the platform for
+presentation. For example, media applications can now retrieve data from any
+source, apply proprietary encryption/decryption, and then send the data to the
+platform for display.</p>
+
+<p>Applications can now send processed data to the platform as a multiplexed
+stream of audio/video content in MPEG-2 transport stream format. The platform
+de-muxes, decodes, and renders the content. The audio track is rendered to the
+active audio device, while the video track is rendered to either a Surface or a
+SurfaceTexture. When rendering to a SurfaceTexture, the application can apply
+subsequent graphics effects to each frame using OpenGL.</p>
+
+<p>To support this low-level streaming, the platform introduces a new native API
+based on <a href="http://www.khronos.org/openmax/al/" target="_top">Khronos
+OpenMAX AL 1.0.1</a>. The  API is implemented on the same underlying services as
+the platform’s existing OpenSL ES API, so developers can make use of both APIs
+together if needed. Tools support for low-level streaming multimedia will be
+available in an upcoming release of the Android NDK.</p>
+
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>New camera
+capabilities</strong></p>
+
+<p>Developers can take advantage of a variety of new camera features in Android
+4.0. ZSL exposure, continuous focus, and image zoom let apps capture better
+still and video images, including during video capture. Apps can even capture
+full-resolution snapshots while shooting video. Apps can now set custom metering
+regions in a camera preview, then manage white balance and exposure dynamically
+for those regions. For easier focusing and image processing, a face-detection
+service identifies and tracks faces in a preview and returns their screen
+coordinates.</p>
+
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Media effects for
+transforming images and video</strong></p>
+
+<p>A set of high-performance transformation filters let developers apply rich
+effects to any image passed as an OpenGL ES 2.0 texture. Developers can adjust
+color levels and brightness, change backgrounds, sharpen, crop, rotate, add lens
+distortion, and apply other effects. The transformations are processed by the
+GPU, so they are fast enough for processing image frames loaded from disk,
+camera, or video stream.</p>
+
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Audio remote
+controls</strong></p>
+
+<p>Android 4.0 adds a new audio remote control API that lets media applications
+integrate with playback controls that are displayed in a remote view. Media
+applications can integrate with a remote music playback control that’s built
+into in the platform’s lock screen, allowing users to control song selection and
+playback without having to unlock and navigate to the music app.</p>
+
+<p>Using the audio remote control API, any music or media app can register to
+receive media button events from the remote control and then manage play state
+accordingly. The application can also supply metadata to the remote control,
+such as album art or image, play state, track number and description, duration,
+genre, and more.</p>
+
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>New media codecs and
+containers</strong></p>
+
+<p>Android 4.0 adds support for additional media types and containers to give
+developers access to the formats they need. For high-quality compressed images,
+the media framework adds support for WebP content. For video, the framework now
+supports streaming VP8 content. For streaming multimedia, the framework supports
+HTTP Live streaming protocol version 3 and encoding of ADTS-contained AAC
+content. Additionally, developers can now use Matroska containers for Vorbis and
+VP8 content.</p>
+
+
+<h3 id="connectivity-dev">New types of connectivity</h3>
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Wi-Fi Direct</strong></p>
+
+<p>Developers can use a framework API to discover and connect directly to nearby
+devices over a high-performance, secure Wi-Fi Direct connection. No internet
+connection or hotspot is needed.</p>
+
+<p>Wi-Fi Direct opens new opportunities for developers to add innovative
+features to their applications. Applications can use Wi-Fi Direct to share
+files, photos, or other media between devices or between a desktop computer and
+an Android-powered device. Applications could also use Wi-Fi Direct to stream
+media content from a peer device such as a digital television or audio player,
+connect a group of users for gaming, print files, and more.</p>
+
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Bluetooth Health Device
+Profile (HDP)</strong></p>
+
+<p>Developers can now build powerful medical applications that use Bluetooth to
+communicate with wireless devices and sensors in hospitals, fitness centers,
+homes, and elsewhere. Applications can collect and manage data from HDP source
+devices and transmit it to backend medical applications such as records systems,
+data analysis services, and others.</p>
+
+<p>Using a framework API, applications can use Bluetooth to discover nearby
+devices, establish reliable or streaming data channels, and manage data
+transmission. Applications can supply any IEEE 11073 Manager to retrieve and
+interpret health data from Continua-certified devices such as heart-rate
+monitors, blood meters, thermometers, and scales. </p>
+
+
+<h3 id="uicomp-dev">New UI components and capabilities</h3>
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Layout
+enhancements</strong></p>
+
+<p>A new layout, GridLayout, improves the performance of Android applications by
+supporting flatter view hierarchies that are faster to layout and render.
+Because hierarchies are flatter, developers can also manage alignments between
+components that are visually related to each other even when they are not
+logically related, for precise control over application UI. GridLayout is also
+specifically designed to be configured by drag-and-drop design tools such as the
+ADT Plug-in for Eclipse.</p>
+
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>OpenGL ES texture
+views</strong></p>
+
+<p>A new TextureView object lets developers directly integrate OpenGL ES
+textures as rendering targets in a UI hierarchy. The object lets developers
+display and manipulate OpenGL ES rendering just as they would a normal view
+object in the hierarchy, including moving, transforming, and animating the view
+as needed. The TextureView object makes it easy for developers to embed camera
+preview, decoded video, OpenGL game scenes, and more. TextureView can be viewed
+as a more powerful version of the existing SurfaceView object, since it offers
+the same benefits of access to a GL rendering surface, with the added advantage
+of having that surface participate fully in the normal view hierarchy.</p>
+
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Hardware-accelerated 2D
+drawing</strong></p>
+
+<p>All Android-powered devices running Android 4.0 are required to support
+hardware-accelerated 2D drawing. Developers can take advantage of this to add
+great UI effects while maintaining optimal performance on high-resolution
+screens, even on phones. For example, developers can rely on accelerated
+scaling, rotation, and other 2D operations, as well as accelerated UI components
+such as TextureView and compositing modes such as filtering, blending, and
+opacity.</p>
+
+
+<h3 id="input-dev">New input types and text services</h3>
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Stylus input, button
+support, hover events</strong></p>
+
+<p>Android 4.0 includes full support for stylus input events, including tilt and
+distance axes, pressure, and related motion event properties. To help
+applications distinguish motion events from different sources, the platform adds
+distinct tool types for stylus, finger, mouse, and eraser. For improved input
+from multi-button pointing devices, the platform now provides distinct primary,
+secondary, and tertiary buttons, as well as back and forward buttons.
+Hover-enter and hover-exit events are also added, for improved navigation and
+accessibility. Developers can build on these new input features to add powerful
+interactions to their apps, such as precise drawing and gesturing, handwriting
+and shape recognition, improved mouse input, and others.</p>
+
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Text services API for
+integrating spelling checkers</strong></p>
+
+<p>Android 4.0 lets applications query available text services such as
+dictionaries and spell checkers for word suggestions, corrections, and similar
+data. The text services are external to the active IME, so developers can create
+and distribute dictionaries and suggestion engines that plug into the platform.
+When an application receives results from a text service &mdash; for example,
+word suggestions &mdash; it can display them in a dedicated suggestion popup
+window directly inside the text view, rather than relying on the IME to display
+them. </p>
+
+
+<h3 id="accessibility-dev">Enhanced accessibility APIs</h3>
+
+<p>Android 4.0 adds new accessibility features and an enhanced API to let
+developers improve the user experience in their apps, especially on devices that
+don’t have hardware buttons. For accessibility services such as screen readers
+in particular, the platform offers new APIs to query window content, for easier
+navigation, better feedback, and richer user interfaces.</p>
+
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Accessibility
+API</strong></p>
+
+<p>To let applications manage interactions more effectively when accessibility
+features are enabled, the platform adds accessibility events for
+explore-by-touch mode, scrolling, and text selection. For these and other
+events, the platform can attach a new object called an accessibility record that
+provides extra information about the event context.</p>
+
+<p>Using the accessibility record and related APIs, applications can now access
+the view hierarchy associated with an event. Applications can query for key
+properties such as parent and child nodes, available states, supported actions,
+screen position, and more. Applications can also request changes to certain
+properties to help manage focus and selected state. For example, an
+accessibility service could use these new capabilities to add convenient
+features such as screen-search by text. </p> 
+
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Text-to-speech
+API</strong></p>
+
+<p>A new framework API lets developers write text-to-speech engines and make
+them available to any app requesting TTS capabilities.</p>
+
+
+<h3 id="data-dev">Efficient network usage</h3>
+
+<p>In Android 4.0, users can see how much network data their running apps are
+using. They can also set limits on data usage by network type and disable
+background data usage for specific applications. In this context, developers
+need to design their apps to run efficiently and follow best practices for
+checking the network connection. Android 4.0 provides network APIs to let
+applications meet those goals.</p>
+
+<p>As users move between networks or set limits on network data, the platform
+lets applications query for connection type and availability. Developers can use
+this information to dynamically manage network requests to ensure the best
+experience for users. Developers can also build custom network and data-usage
+options into their apps, then expose them to users directly from Settings by
+means of a new system Intent.</p>
+
+
+<h3 id="security-dev">Security for apps and content</h3>
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Secure management of
+credentials</strong></p>
+
+<p>Android 4.0 makes it easier for applications to manage authentication and
+secure sessions. A new keychain API and underlying encrypted storage let
+applications store and retrieve private keys and their corresponding certificate
+chains. Any application can use the keychain API to install and store user
+certificates and CAs securely.</p>
+
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Address Space Layout
+Randomization</strong></p>
+
+<p>Android 4.0 now provides address space layout randomization (ASLR) to help
+protect system and third party applications from exploitation due to
+memory-management issues.</p>
+
+
+<h3 id="enterprise-dev">Enhancements for Enterprise</h3>
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>VPN client
+API</strong></p>
+
+<p>Developers can now build or extend their own VPN solutions on the platform
+using a new VPN API and underlying secure credential storage. With user
+permission, applications can configure addresses and routing rules, process
+outgoing and incoming packets, and establish secure tunnels to a remote server.
+Enterprises can also take advantage of a standard VPN client built into the
+platform that provides access to L2TP and IPSec protocols.</p>
+
+
+<p style="margin-top:1em;margin-bottom:.75em;"><strong>Device policy management
+for camera</strong></p>
+
+<p>The platform adds a new policy control for administrators who manage devices
+using an installed Device Policy Manager. Administrators can now remotely
+disable the camera on a managed device for users working in sensitive
+environments.</p>
+
+
+
+
+

@@ -1,0 +1,366 @@
+fullpage=true
+page.title=Develop
+header.hide=1
+carousel=1
+tabbedList=1
+@jd:body
+
+<style>
+#noplayer-message {
+position:absolute;top:50%;left:0;width:100%;z-index:-1;text-align:center;display:none;
+}
+#player-frame object {z-index:1;}
+</style>
+
+<div id="player-wrapper">
+  <div id="player-frame">
+    <div id="noplayer-message">
+      <!-- busted flash player message -->
+      Your video is supposed to appear here.<br/>
+      Make sure you have the <a href="http://get.adobe.com/flashplayer/" target="_blank">Flash&reg; Player</a>.
+    </div>
+    <div id="player"><!-- Youtube embeds here... actually replaces this div --></div>
+    <a class="close" onclick="$('#player-wrapper').hide()">close video</a>
+  </div>
+</div>
+
+<div class="wrap">
+   <!-- Slideshow -->
+   <div class="slideshow-container slideshow-develop col-16">
+       <a href="" class="slideshow-prev">Prev</a>
+       <a href="" class="slideshow-next">Next</a>
+       <div class="frame">
+           <ul>
+               <li class="item carousel-home">
+                 <div class="col-8">
+                   <img
+src="http://1.bp.blogspot.com/-6qyjPxTuzv0/T6lde-Oq_fI/AAAAAAAABXc/zle7OFEGP44/s400/fddns%2Bcopy.png"
+class="play no-shadow no-transform" />
+                 </div>
+                <div class="content-right col-6">
+                  <p class="title-intro">From the blog:</p>
+                  <h2>Using DialogFragments</h2>
+                  <p>In this post, I'll show how to use DialogFragments with the <a
+href="http://developer.android.com/reference/android/support/v4/app/DialogFragment.html">v4 support
+library</a> (for backward compatibility on pre-Honeycomb devices) to show a simple edit dialog and
+return a result to the calling Activity using an interface.</p>
+                  <p><a
+href="http://android-developers.blogspot.com/2012/05/using-dialogfragments.html" class="button">Read
+more</a></p>
+                </div>            
+              </li>
+               <li class="item carousel-home">
+                   <div class="col-8">
+                     <img
+src="http://1.bp.blogspot.com/-6K1kfNOdek8/T72bXvtTSQI/AAAAAAAABmw/kYzmJt0_328/s1600/google-play-subscriptions.png" class="play"></div>
+                   <div class="content-right col-6">
+                   <p class="title-intro">From the blog:</p>
+                   <h2>In-app Subscriptions in Google Play</h2>
+                   <p>Starting today, developers can use In-app Billing to sell monthly or annual
+subscriptions from inside of their apps. All subscriptions are auto-renewing, for every app and game
+and every type of subscription product.</p>
+                   <p><a class="button"
+href="http://android-developers.blogspot.com/2012/05/in-app-subscriptions-in-google-play.html">Read
+more</a></p>
+                   </div>                
+                </li>
+               <li class="item carousel-home">
+                   <div class="col-8">
+                     <img
+src="{@docRoot}images/home/developers_live.png" class="play"></div>
+                   <div class="content-right col-6">
+                   <h2>Learn what great apps are made of</h2>
+                   <p>Every week we host a live broadcast in which we review a collection of apps and games
+                     nominated by the creators. It's no-holds-barred and we tell you exactly what is flawed or
+                     fantastic in each app and how to make improvements.</p>
+                   <p><a href="" class="button" onclick="$('ul#DevelopersLive li:first
+a').click();return false;">Watch the latest review</a></p>
+                   </div>                
+                </li>
+               <li class="item carousel-home">
+                   <div class="col-8">
+                     <img style="margin-top:30px;width:300px"
+src="{@docRoot}images/home/ics-android.png" class="play no-shadow no-transform" />
+                   </div>
+                   <div class="content-right col-6">
+                   <h2>Ice Cream Sandwich</h2>
+                   <p>Android 4.0 brings handsets and tablets together with a unified
+                   design and a set of APIs for you to build a great user experience on all devices.
+                   For information about API changes in the latest release (API level 15),
+                   read the <a href='{@docRoot}about/versions/android-4.0.3.html'>platform notes</a> and <a
+                   href='{@docRoot}sdk/api_diff/15/changes.html'>diff report</a>.</p>
+                   <p><a class="button"
+href="{@docRoot}about/versions/android-4.0-highlights.html">Read the highlights</a></p>
+                   </div>                
+                </li>
+           </ul>
+       </div>
+   </div>
+   <!-- /End slideshow -->
+</div>
+<div class="wrap">
+	<!-- news and feature feed -->
+	<div class="feed col-8" style="margin-left:0">
+		<ul class="feed-nav">
+			<li class="active">DEVELOPER NEWS</li>
+			<li>FEATURED DOCS</li>
+		</ul>
+		<div class="feed-container">
+			<div class="feed-frame">
+                                <!-- DEVELOPER NEWS -->
+				<ul>
+					<li><a href="http://android-developers.blogspot.com/2012/04/faster-emulator-with-better-hardware.html">
+                                          <div class="feed-image" style="background:url('../images/emulator-wvga800l.png') no-repeat 0 0">
+                                          </div>
+                                          <h4>A Faster Emulator with Better...</h4>
+                                          <p>Today we’re thrilled to announce several significant improvements to the emulator, including a dramatic...</p>
+					</a></li>
+					<li><a href="http://android-developers.blogspot.com/2012/04/android-c2dm-client-login-key.html">
+                                          <div class="feed-image" style="background:url('../images/develop/auth-code.png') no-repeat 0 0">
+                                          </div>
+                                          <h4>Android C2DM — Client Login key...</h4>
+                                          <p>In the upcoming weeks, some of the older Client
+					Login authentication keys will expire. If you generated the token you’re...</p>
+					</a></li>
+					<li><a href="http://android-developers.blogspot.com/2012/04/accessibility-are-you-serving-all-your.html">
+                                          <div class="feed-image">
+                                          </div>
+                                          <h4>Accessibility</h4>
+                                          <p>We recently published some new resources to help developers make their Android applications more accessible... </p>
+					</a></li>
+					<li><a href="http://android-developers.blogspot.com/2012/04/new-seller-countries-in-google-play.html">
+                                          <div class="feed-image" style="background:url('http://developer.android.com/images/home/play_logo.png') no-repeat 0 0" >
+                                          </div>
+                                          <h4>New Seller Countries in Google Play</h4>
+                                          <p>Over the past year we’ve been working to expand the list of 
+                                            countries and currencies from which Android developers...</p>
+					</a></li>
+				</ul>
+                                <!-- FEATURED DOCS -->
+				<ul>
+					<li><a href="{@docRoot}guide/google/play/billing/index.html">
+						<h4>Google Play In-app Billing</h4>
+						<p>In-app Billing is a Google Play service that lets you sell digital content from inside your applications. You can sell products as standard in-app products (one-time purchase) or with subscriptions (recurring...</p>
+					</a></li>
+					<li><a href="{@docRoot}guide/topics/providers/contacts-provider.html">
+						<h4>Contacts Provider</h4>
+						<p>The Contacts Provider is a powerful and flexible Android component that manages the device's central repository of data about people. You can use it to build powerful social features...</p>
+					</a></li>
+					<li><a href="{@docRoot}training/efficient-downloads/index.html">
+						<h4>Transferring Data Without Draining the Battery</h4>
+						<p>This training class demonstrates the best practices for scheduling and executing downloads using techniques such as caching, polling, and prefetching.</p>
+					</a></li>
+					<li><a href="{@docRoot}training/backward-compatible-ui/index.html">
+						<h4>Creating Backward-Compatible UIs</h4>
+						<p>This training class demonstrates how to use UI components and APIs available in newer versions of Android in a backward-compatible way, ensuring that your application still runs on previous versions...</p>
+					</a></li>
+				</ul>
+			</div>
+		</div>
+	</div>	<!-- /news and feature feed -->
+	<!-- video feed -->
+	<div class="feed col-8" style="margin-right:0">
+		<ul class="feed-nav">
+			<li class="active">DEVELOPERS LIVE</li>
+			<li>VIDEO PLAYLISTS</li>
+		</ul>
+		<div class="feed-container">
+			<div class="feed-frame">
+				<ul id="DevelopersLive">
+				</ul>
+				<ul id="VideoPlaylists">
+				</ul>
+			</div>
+		</div>
+	</div>
+	<!-- /video feed -->
+</div>
+
+<br class="clearfix"/>
+    </div>
+
+      
+      
+      
+      
+      
+      
+      
+      
+
+<script src="//swfobject.googlecode.com/svn/trunk/swfobject/swfobject.js" type="text/javascript"></script>
+<script type="text/javascript">
+
+/* Load a video into the player box.
+ * @param id        The YouTube video ID
+ * @param title     The video title to display in the player box (character escaped)
+ * @param autoplay  Whether to automatically play the video
+ */
+function loadVideo(id, title, autoplay) {
+  swfobject.embedSWF('//www.youtube.com/v/' + id + '&rel=1&border=0&fs=1&autoplay=' +
+      (autoplay?1:0), 'player', '525', '330', '9.0.0', false, false, {allowfullscreen: 'true'});
+  $("#videoPlayerTitle").html("<h2>" + unescape(title) + "</h2>");
+  $("#player-wrapper").show();
+  setTimeout(function(){$('#noplayer-message').show()}, 2000);
+}
+
+/* Draw all videos from a playlist into a 'videoPreviews' list
+ * @param data  The feed data returned from the youtube request
+ */
+function renderVideoPlaylists(data) {
+  var MAX_LIST_DESC_LENGTH = 130; // the length at which we will trim the description
+  var MAX_VIDEO_DESC_LENGTH = 100; // the length at which we will trim the description
+  var MAX_LIST_LENGTH = 4; // number of videos to put in the list
+  var feed = data.feed;
+  var entries = feed.entry || [];
+  var playlistId = feed.yt$playlistId.$t;
+
+  var $ulVideos = $('<ul style="display:none"/>');
+  var summary = feed.media$group.media$description != null ? feed.media$group.media$description.$t : feed.subtitle.$t;
+  
+  var $liPlaylist = $('<li class="playlist"></li>');
+  var $aPlaylist = $('<a href="" onclick="togglePlaylist(this);return false;"></a>');
+  $liPlaylist.append($aPlaylist);
+  $aPlaylist.append('<h4>' + feed.title.$t + '</h4>');
+  
+  var playlistDescription = summary.substr(0, MAX_LIST_DESC_LENGTH);
+  playlistDescription += playlistDescription.length == MAX_LIST_DESC_LENGTH ? "..." : ""; // add ellipsis if we've chopped the description
+  $aPlaylist.append('<p>' +  playlistDescription + '</p>');
+  
+  // Loop through each entry (each video) and add it to the 'videoPreviews' list
+  var length = feed.entry.length < MAX_LIST_LENGTH ? feed.entry.length : MAX_LIST_LENGTH; // max of 4 videos per list
+  for (var i = 0; i < length; i++) {
+    var entry = entries[i];
+
+    var title = entry.title.$t;
+    var id = entry.media$group.yt$videoid.$t;
+    var thumbUrl = entry.media$group.media$thumbnail[0].url;
+    var fullDescription = entry.media$group.media$description.$t;
+    var playerUrl = entry.media$group.media$content[0].url;
+
+    var shortDescription = fullDescription.substr(0, MAX_VIDEO_DESC_LENGTH);
+    shortDescription += shortDescription.length == MAX_VIDEO_DESC_LENGTH ? "..." : ""; // add ellipsis if we've chopped the description
+
+    var img = $('<img src="' + thumbUrl + '" width="60" height="45"/>');
+    var a = $('<a href="#" onclick="loadVideo(\'' + id + '\',\'' + escape(title) + '\',true); return false;" />');
+    var pShortDescription = $('<p>' + shortDescription + '</p>');
+    var h5Title = "<h5>" + title + "</h5>";
+    var li = $('<li class="playlist-video"/>');
+
+    li.append(a);
+    a.append(img).append(h5Title).append(pShortDescription);
+
+    $ulVideos.append(li);
+    
+    // use the first entry's thumbnail for the playlist
+    if (i == 0) {
+      $aPlaylist.prepend('<img src="' + thumbUrl + '" width="120" height="90"/>');
+    }
+  }
+  
+  if (feed.entry.length > MAX_LIST_LENGTH) {
+    // add item to go to youtube for playlist
+    $ulVideos.append('<li class="more"><a href="//www.youtube.com/playlist?list=PL' + playlistId + '">More &raquo;</a></li>');
+  }
+
+  $liPlaylist.append($ulVideos);
+  $('#VideoPlaylists').append($liPlaylist);
+}
+
+
+function renderDevelopersLivePlaylist(data) {
+
+  var MAX_DESC_LENGTH = 125; // the length at which we will trim the description
+  var feed = data.feed;
+  var entries = feed.entry || [];
+  var playlistId = feed.yt$playlistId.$t;
+
+  var ul = $('#DevelopersLive');
+
+  // Loop through each entry (each video) and add it to the '#DevelopersLive' list
+  for (var i = 0; i < 4; i++) {
+    var entry = entries[i];
+
+    var title = entry.title.$t;
+    var id = entry.media$group.yt$videoid.$t;
+    var thumbUrl = entry.media$group.media$thumbnail[0].url;
+    var fullDescription = entry.media$group.media$description.$t;
+    var playerUrl = entry.media$group.media$content[0].url;
+    var shortDescription = fullDescription.substr(0, MAX_DESC_LENGTH);
+    shortDescription += shortDescription.length == MAX_DESC_LENGTH ? "..." : ""; // add ellipsis if we've chopped the description
+
+    var img = $('<img src="' + thumbUrl + '" width="120" height="90"/>');
+    var a = $('<a href="#" onclick="loadVideo(\'' + id + '\',\'' + escape(title) + '\',true); return false;" />');
+    var pShortDescription = $('<p>' + shortDescription + '</p>');
+    var h4Title = "<h4>" + title + "</h4>";
+    var li = $('<li/>');
+
+    li.append(a);
+    a.append(img).append(h4Title).append(pShortDescription);
+
+    ul.append(li);
+  }
+}
+
+
+
+/* This 'playlist' object defines the playlist IDs for each tab.
+ * Each name inside 'playlist' corresponds to class names for the tab that the playlists belong to (eg: "googleioTab" and "googleioBox" divs).
+ * Each string in 'ids' is the ID of a YouTube playlist that belongs in the corresponding tab.
+ */
+var playlists = {
+  'googleio' : {
+    'ids': ["734A052F802C96B9"]
+  },
+  'fridayreview' : {
+    'ids': ["B7B9B23D864A55C3"]
+  },
+  'officehours' : {
+    'ids': ["7383D9AADA6E6D55"]
+  },
+  'about' : {
+    'ids': ["D7C64411AF40DEA5"]
+  }
+};
+
+/* Request the playlist feeds from YouTube */
+function showVideosPlaylists() {
+  for (var x in playlists) {
+    var ids = playlists[x].ids;
+    for (var i in ids) {
+      var script = "<script type='text/javascript' src='//gdata.youtube.com/feeds/api/playlists/"
+                    + ids[i] +
+                    "?v=2&alt=json-in-script&max-results=50&callback=renderVideoPlaylists&orderby=published'><\/script>";
+      $("body").append(script);
+    }
+  }
+}
+
+
+/* Request the playlist feeds from YouTube */
+function showDevelopersLivePlaylist() {
+  var playlistId = "B7B9B23D864A55C3"; /* The Friday Review */
+  var script = "<script type='text/javascript' src='//gdata.youtube.com/feeds/api/playlists/"
+                + playlistId +
+                "?v=2&alt=json-in-script&max-results=10&callback=renderDevelopersLivePlaylist&orderby=published'><\/script > ";
+  $("body").append(script);
+}
+
+
+function togglePlaylist(listLink) {
+  var $list = $(listLink).parent();
+  var $ul = $list.find('ul');
+  if ($ul.is(":visible")) {
+    $ul.slideUp(function() {
+      $list.css({'height':'inherit'});
+    });
+  } else {
+    $list.closest('ul').find('li.playlist').find('ul').slideUp();
+    $ul.slideDown();
+    $list.css({'height':'auto'});
+  }
+}
+
+showDevelopersLivePlaylist();
+showVideosPlaylists();
+</script>

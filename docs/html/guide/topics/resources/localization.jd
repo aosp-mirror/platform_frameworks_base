@@ -38,7 +38,6 @@ defaults.</li>
   <li><a href="#emulator">Testing on an Emulator</a></li>
   <li><a href="#test-for-default">Testing for Default Resources</a></li>
   </ol>
-<li><a href="#publishing">Publishing</a></li>
 <li><a href="#checklist">Localization Checklists</a></li>
   <ol>
   <li><a href="#planning-checklist">Planning and Design Checklist</a></li>
@@ -52,7 +51,7 @@ defaults.</li>
   <li><a
 href="{@docRoot}resources/tutorials/localization/index.html">Hello, L10N Tutorial</a></li>
     <li><a href="{@docRoot}guide/topics/resources/providing-resources.html">Providing Resources</a></li>
-    <li><a href="{@docRoot}guide/topics/ui/declaring-layout.html">XML Layouts</a></li>
+    <li><a href="{@docRoot}guide/topics/ui/declaring-layout.html">Layouts</a></li>
     <li><a href="{@docRoot}reference/android/app/Activity.html#ActivityLifecycle">Activity Lifecycle</a></li>
 </ol>
 </div>
@@ -430,7 +429,7 @@ Menu &gt; Settings &gt; Locale &amp; text &gt; Select locale). </p>
 <h3 id="emulator">Testing on an Emulator</h3>
 
 <p>For details about using the emulator, see See <a
-href="{@docRoot}guide/developing/tools/emulator.html">Android Emulator</a>.</p>
+href="{@docRoot}tools/help/emulator.html">Android Emulator</a>.</p>
 <h4>Creating and using a custom locale</h4>
 
 <p>A &quot;custom&quot; locale is a language/region combination that the Android
@@ -505,26 +504,6 @@ the new locale. </p>
 	<code>res/layout-port/main.xml</code>, then set the emulator or device to 
 	portrait orientation and see if the application will run. 
 
-<h2 id="publishing">Publishing Localized Applications</h2>
-
-<p>The Google Play is
-  the main application distribution system for Android devices. To publish a 
-  localized application, you need to sign your application, version it, and go
-through all the other steps described in <a
-href="{@docRoot}guide/publishing/preparing.html">Preparing to Publish</a>. </p>
-
-<p>If you split your application in several .apk files, each targeted to a
-different locale, follow these guidelines:</p>
-
-<ul>
-  <li>Sign each .apk file with the same certificate. For more about this, see <a
-href="{@docRoot}guide/publishing/app-signing.html#strategies">Signing
-Strategies</a>. </li>
-  <li>Give each .apk file a different application name. Currently it is
-impossible to publish two applications on Google Play that have exactly the
-same name.</li>
-<li>Include a complete set of default resources in each .apk file.</li>
-</ul>
 
 <h2 id="checklist">Localization Checklists</h2>
 
@@ -640,8 +619,6 @@ border="0"></td>
 border="0"></td>
     <td>Upload your .apk file or files to Google Play, selecting the appropriate
 languages as
-    you upload. (For more details, see <a
-href="{@docRoot}guide/publishing/publishing.html">Publishing Your
-Applications</a>.)</td>
+    you upload.</td>
   </tr>
 </table>

@@ -1,0 +1,448 @@
+page.title=MonkeyRunner
+parent.title=monkeyrunner
+parent.link=index.html
+@jd:body
+
+<style>
+    h4.jd-details-title {background-color: #DEE8F1;}
+</style>
+<p>
+    A monkeyrunner class that contains static utility methods.
+</p>
+<h2>Summary</h2>
+<table id="pubmethods" class="jd-sumtable">
+    <tr>
+        <th colspan="12" style="background-color: #E2E2E2">Methods</th>
+    </tr>
+    <tr class="api" >
+        <td class="jd-typecol">
+            <nobr>
+                void
+            </nobr>
+        </td>
+        <td class="jd-linkcol" width="100%">
+            <nobr>
+                <span class="sympad">
+                    <a href="#alert">alert</a>
+                </span>
+                (<em>string</em> message,
+                 <em>string</em> title,
+                 <em>string</em> okTitle)
+            </nobr>
+            <div class="jd-descrdiv">
+                Displays an alert dialog to the process running the current
+                program.
+            </div>
+        </td>
+    </tr>
+    <tr class="api" >
+        <td class="jd-typecol">
+            <nobr>
+                <em>integer</em>
+            </nobr>
+        </td>
+        <td class="jd-linkcol" width="100%">
+            <nobr>
+                <span class="sympad">
+                    <a href="#choice">choice</a>
+                </span>
+                (<em>string</em> message,
+                 <em>iterable</em> choices,
+                 <em>string</em> title)
+            </nobr>
+            <div class="jd-descrdiv">
+                Displays a dialog with a list of choices to the process running the current program.
+            </div>
+        </td>
+    </tr>
+    <tr class="api" >
+        <td class="jd-typecol">
+            <nobr>
+                void
+            </nobr>
+        </td>
+        <td class="jd-linkcol" width="100%">
+            <nobr>
+                <span class="sympad">
+                    <a href="#help">help</a>
+                </span>
+                (<em>string</em> format)
+            </nobr>
+            <div class="jd-descrdiv">
+                Displays the monkeyrunner API reference in a style similar to that of Python's
+                <code>pydoc</code> tool, using the specified format.
+            </div>
+        </td>
+    </tr>
+    <tr class="api" >
+        <td class="jd-typecol">
+            <nobr>
+                <em>string</em>
+            </nobr>
+        </td>
+        <td class="jd-linkcol" width="100%">
+            <nobr>
+                <span class="sympad">
+                    <a href="#input">input</a>
+                </span>
+                (<em>string</em> message,
+                 <em>string</em> initialValue,
+                 <em>string</em> title,
+                 <em>string</em> okTitle,
+                 <em>string</em> cancelTitle)
+            </nobr>
+            <div class="jd-descrdiv">
+                Displays a dialog that accepts input.
+            </div>
+        </td>
+    </tr>
+    <tr class="api" >
+        <td class="jd-typecol">
+            <nobr>
+                void
+            </nobr>
+        </td>
+        <td class="jd-linkcol" width="100%">
+            <nobr>
+                <span class="sympad">
+                    <a href="#sleep">sleep</a>
+                </span>
+                (<em>float</em> seconds)
+            </nobr>
+            <div class="jd-descrdiv">
+                Pauses the current program for the specified number of seconds.
+            </div>
+        </td>
+    </tr>
+    <tr class="api" >
+        <td class="jd-typecol">
+            <nobr>
+                <code>
+                    <a href="{@docRoot}tools/help/MonkeyDevice.html">MonkeyDevice</a>
+                </code>
+            </nobr>
+        </td>
+        <td class="jd-linkcol" width="100%">
+            <nobr>
+                <span class="sympad">
+                    <a href="#waitForConnection">waitForConnection</a>
+                </span>
+                (<em>float</em> timeout,
+                <em>string</em> deviceId)
+            </nobr>
+            <div class="jd-descrdiv">
+                Tries to make a connection between the <code>monkeyrunner</code> backend and the
+                specified device or emulator.
+            </div>
+        </td>
+    </tr>
+</table>
+<!-- ========= METHOD DETAIL ======== -->
+<!-- Public methods -->
+<h2>Public Methods</h2>
+<A NAME="alert"></A>
+<div class="jd-details api ">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        <em>string</em>
+      </span>
+      <span class="sympad">alert</span>
+      <span class="normal">
+      (
+            <em>string</em> message,
+            <em>string</em> title,
+            <em>string</em> okTitle)
+      </span>
+    </h4>
+  <div class="jd-details-descr">
+
+    <div class="jd-tagdata jd-tagdescr">
+        <p>
+            Displays an alert dialog to the process running the current
+            program. The dialog is modal, so the program pauses until the user clicks the dialog's
+            button.
+        </p>
+    </div>
+    <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Arguments</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>message</th>
+            <td>
+                The message to display in the dialog.
+            </td>
+        </tr>
+        <tr>
+            <th>title</th>
+            <td>
+                The dialog's title. The default value is "Alert".
+            </td>
+        </tr>
+        <tr>
+            <th>okTitle</th>
+            <td>
+                The text displayed in the dialog button. The default value is "OK".
+            </td>
+        </tr>
+        </table>
+    </div>
+</div>
+</div>
+<A NAME="choice"></A>
+<div class="jd-details api ">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        <em>integer</em>
+      </span>
+      <span class="sympad">choice</span>
+      <span class="normal">
+        (<em>string</em> message,
+         <em>iterable</em> choices,
+         <em>string</em> title)
+      </span>
+    </h4>
+  <div class="jd-details-descr">
+
+    <div class="jd-tagdata jd-tagdescr">
+        <p>
+            Displays a dialog with a list of choices to the process running the current program. The
+            dialog is modal, so the program pauses until the user clicks one of the dialog's
+            buttons.
+        </p>
+    </div>
+    <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Arguments</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>message</th>
+          <td>
+            The prompt message displayed in the dialog.
+          </td>
+        </tr>
+        <tr>
+          <th>choices</th>
+          <td>
+            A Python iterable containing one or more objects that are displayed as strings. The
+            recommended form is an array of strings.
+          </td>
+        </tr>
+        <tr>
+            <th>
+                title
+            </th>
+            <td>
+               The dialog's title. The default is "Input".
+            </td>
+        </tr>
+      </table>
+    </div>
+    <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist">
+        <li>
+            If the user makes a selection and clicks the "OK" button, the method returns
+            the 0-based index of the selection within the iterable.
+            If the user clicks the "Cancel" button, the method returns -1.
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+<A NAME="help"></A>
+<div class="jd-details api ">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        void
+      </span>
+      <span class="sympad">help</span>
+      <span class="normal">
+        (<em>string</em> format)
+      </span>
+    </h4>
+  <div class="jd-details-descr">
+
+    <div class="jd-tagdata jd-tagdescr">
+        <p>
+            Displays the monkeyrunner API reference in a style similar to that of Python's
+            <code>pydoc</code> tool, using the specified format.
+        </p>
+    </div>
+    <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Arguments</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>format</th>
+          <td>
+            The markup format to use in the output. The possible values are "text" for plain text
+            or "html" for HTML.
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+<A NAME="input"></A>
+<div class="jd-details api ">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        <em>string</em>
+      </span>
+      <span class="sympad">input</span>
+      <span class="normal">
+        (<em>string</em> message
+         <em>string</em> initialValue,
+         <em>string</em> title,
+         <em>string</em> okTitle,
+         <em>string</em> cancelTitle)
+      </span>
+    </h4>
+  <div class="jd-details-descr">
+
+    <div class="jd-tagdata jd-tagdescr">
+        <p>
+            Displays a dialog that accepts input and returns it to the program. The dialog is
+            modal, so the program pauses until the user clicks one of the dialog's buttons.
+        </p>
+        <p>
+            The dialog contains two buttons, one of which displays the okTitle value
+            and the other the cancelTitle value. If the user clicks the okTitle button,
+            the current value of the input box is returned. If the user clicks the cancelTitle
+            button, an empty string is returned.
+        </p>
+    </div>
+    <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Arguments</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>message</th>
+          <td>
+            The prompt message displayed in the dialog.
+          </td>
+        </tr>
+        <tr>
+          <th>initialValue</th>
+          <td>
+            The initial value to display in the dialog. The default is an empty string.
+          </td>
+        </tr>
+        <tr>
+          <th>title</th>
+          <td>
+            The dialog's title. The default is "Input".
+          </td>
+        </tr>
+        <tr>
+          <th>okTitle</th>
+          <td>
+            The text displayed in the okTitle button. The default is "OK".
+          </td>
+        </tr>
+        <tr>
+          <th>cancelTitle</th>
+          <td>
+            The text displayed in the cancelTitle button. The default is "Cancel".
+          </td>
+        </tr>
+      </table>
+    </div>
+    <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist">
+        <li>
+            If the user clicks the okTitle button, then the method returns the current value of
+            the dialog's input box. If the user clicks the cancelTitle button, the method returns
+            an empty string.
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+<A NAME="sleep"></A>
+<div class="jd-details api ">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        void
+      </span>
+      <span class="sympad">sleep</span>
+      <span class="normal">
+      (
+       <em>float</em> seconds
+      )
+      </span>
+    </h4>
+  <div class="jd-details-descr">
+
+    <div class="jd-tagdata jd-tagdescr">
+        <p>
+            Pauses the current program for the specified number of seconds.
+        </p>
+    </div>
+    <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Arguments</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>seconds</th>
+          <td>
+            The number of seconds to pause.
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+<A NAME="waitForConnection"></A>
+<div class="jd-details api ">
+    <h4 class="jd-details-title">
+      <span class="normal">
+          <code>
+              <a href="{@docRoot}tools/help/MonkeyDevice.html">MonkeyDevice</a>
+          </code>
+      </span>
+      <span class="sympad">waitForConnection</span>
+      <span class="normal">
+      (<em>float</em> timeout,
+       <em>string</em> deviceId)
+      </span>
+    </h4>
+  <div class="jd-details-descr">
+
+    <div class="jd-tagdata jd-tagdescr">
+        <p>
+            Tries to make a connection between the <code>monkeyrunner</code> backend and the
+            specified device or emulator.
+        </p>
+    </div>
+    <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Arguments</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>timeout</th>
+          <td>
+            The number of seconds to wait for a connection. The default is to wait forever.
+          </td>
+        </tr>
+        <tr>
+            <th>
+                deviceId
+            </th>
+            <td>
+                A regular expression that specifies the serial number of the device or emulator. See
+                the topic
+                <a href="{@docRoot}tools/help/adb.html">Android Debug Bridge</a>
+                for a description of device and emulator serial numbers.
+            </td>
+        </tr>
+      </table>
+    </div>
+        <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist">
+        <li>
+          A <code><a href="{@docRoot}tools/help/MonkeyDevice.html">MonkeyDevice</a></code>
+          instance for the device or emulator. Use this object to control and communicate with the
+          device or emulator.
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>

@@ -21,9 +21,9 @@ page.title=公開の準備
 </p>
 
 <p>アプリケーションを Android マーケットに公開する場合は、アプリケーションの具体的な準備要件について <a
-href="{@docRoot}guide/publishing/publishing.html#market">Android マーケットでの公開</a> もご覧ください。 </p>
+href="{@docRoot}tools/publishing/publishing.html#market">Android マーケットでの公開</a> もご覧ください。 </p>
 
-<p>アプリケーションを公開する方法の一般的な情報については、<a href="{@docRoot}guide/publishing/publishing.html">Publishing Your Applications</a> のドキュメントをご覧ください。 </p>
+<p>アプリケーションを公開する方法の一般的な情報については、<a href="{@docRoot}tools/publishing/publishing.html">Publishing Your Applications</a> のドキュメントをご覧ください。 </p>
 
 <div class="special">
 
@@ -56,7 +56,7 @@ href="{@docRoot}guide/publishing/publishing.html#market">Android マーケット
 
 <h3 id="test">1. アプリケーションを実際のデバイスで徹底的にテストする</h3>
 
-<p>アプリケーションをできる限り広範に徹底的にテストすることが重要です。この作業を支援するため、Android では多数のテスト用クラスとツールを用意しています。{@link android.app.Instrumentation Instrumentation} を使用して JUnit およびその他のテスト ケースを実行できます。また、<a href="{@docRoot}guide/developing/tools/monkey.html">UI/Application Exerciser Monkey</a> などのテスティング ツールを使用できます。  </p>
+<p>アプリケーションをできる限り広範に徹底的にテストすることが重要です。この作業を支援するため、Android では多数のテスト用クラスとツールを用意しています。{@link android.app.Instrumentation Instrumentation} を使用して JUnit およびその他のテスト ケースを実行できます。また、<a href="{@docRoot}tools/help/monkey.html">UI/Application Exerciser Monkey</a> などのテスティング ツールを使用できます。  </p>
 
 <ul>
 <li>ユーザーがアプリケーションを正常に実行できるようにするため、アプリケーションが実行されると予想されるタイプの携帯端末の実機を入手してください。実際のデバイスで、実際のネットワーク条件の下でアプリケーションをテストします。アプリケーションを実際のデバイスでテストすることは非常に重要です。これによって、作成したユーザー インターフェース要素のサイズが正しく（特にタッチスクリーン UI の場合）、アプリケーションのパフォーマンスと電池効率が適正であることを確認できるからです。</li>
@@ -96,13 +96,13 @@ href="{@docRoot}guide/publishing/publishing.html#market">Android マーケット
 
 <p>これまでにリリースしたバージョンがある場合、最新のアプリケーションのバージョン番号を旧バージョンから増加させる必要があります。アプリケーションのマニフェスト ファイルの <code>&lt;manifest&gt;</code> 要素の <code>android:versionCode</code> と <code>android:versionName</code> 属性の両方を適切な値を使用して増加する必要があります。 </p>
 
-<p>アプリケーションのバージョン情報を定義する方法は、<a href="{@docRoot}guide/publishing/versioning.html">Versioning Your Applications</a>をご覧ください。</p>
+<p>アプリケーションのバージョン情報を定義する方法は、<a href="{@docRoot}tools/publishing/versioning.html">Versioning Your Applications</a>をご覧ください。</p>
 
 <h3 id="cryptokey">6. 適切な暗号化キーを取得する</h3>
 
 <p>ここまで準備作業をすべて読んで実行していれば、アプリケーションはコンパイルされ、署名の準備ができています。.apk の内部では、アプリケーションは適切にバージョン管理されており、上記のように余分なファイルや非公開データは削除されています。 </p>
 
-<p>アプリケーションに署名する前に、適切な非公開キーがあることを確認する必要があります。非公開キーを取得（または生成）する方法については、<a href="{@docRoot}guide/publishing/app-signing.html#cert">適切な非公開キーの取得</a>をご覧ください。</p>
+<p>アプリケーションに署名する前に、適切な非公開キーがあることを確認する必要があります。非公開キーを取得（または生成）する方法については、<a href="{@docRoot}tools/publishing/app-signing.html#cert">適切な非公開キーの取得</a>をご覧ください。</p>
 
 <p>適切な非公開キーを取得（または生成）したら、キーを使用して次の手順を実行します:</p>
 
@@ -136,7 +136,7 @@ href="http://code.google.com/android/add-ons/google-apis/mapkey.html">Maps API �
 </ol>
 
 <p>署名と非公開キーについては、<a
-href="{@docRoot}guide/publishing/app-signing.html">アプリケーションへの署名</a>をご覧ください。</p>
+href="{@docRoot}tools/publishing/app-signing.html">アプリケーションへの署名</a>をご覧ください。</p>
 
 
 <h2 id="compile">アプリケーションのコンパイル</h2>
@@ -147,7 +147,7 @@ href="{@docRoot}guide/publishing/app-signing.html">アプリケーションへ�
 
 <h3 id="signapp">8. アプリケーションに署名する</h3>
 
-<p>非公開キーを使用してアプリケーションに署名します。アプリケーションに正しく署名することは、非常に重要です。詳細は、<a href="{@docRoot}guide/publishing/app-signing.html">アプリケーションへの署名</a>をご覧ください。 </p>
+<p>非公開キーを使用してアプリケーションに署名します。アプリケーションに正しく署名することは、非常に重要です。詳細は、<a href="{@docRoot}tools/publishing/app-signing.html">アプリケーションへの署名</a>をご覧ください。 </p>
 
 <h3 id="testapp">9. コンパイルして署名したアプリケーションのテスト</h3>
 

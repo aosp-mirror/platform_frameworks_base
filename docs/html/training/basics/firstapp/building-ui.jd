@@ -19,7 +19,7 @@ next.link=starting-activity.html
 
 <ol>
   <li><a href="#LinearLayout">Use a Linear Layout</a></li>
-  <li><a href="#TextInput">Add a Text Input Box</a></li>
+  <li><a href="#TextInput">Add a Text Field</a></li>
   <li><a href="#Strings">Add String Resources</a></li>
   <li><a href="#Button">Add a Button</a></li>
   <li><a href="#Weight">Make the Input Box Fill in the Screen Width</a></li>
@@ -61,7 +61,7 @@ Hardware</a>.</p>
 </div>
 </div>
 
-<img src="{@docRoot}images/viewgroup.png" alt="" />
+<img src="{@docRoot}images/viewgroup.png" alt="" width="440" />
 <p class="img-caption"><strong>Figure 1.</strong> Illustration of how {@link
 android.view.ViewGroup} objects form branches in the layout and contain {@link
 android.view.View} objects.</p>
@@ -130,12 +130,12 @@ href="{@docRoot}guide/topics/ui/declaring-layout.html">XML Layout</a> guide.</p>
 
 
 
-<h2 id="TextInput">Add a Text Input Box</h2>
+<h2 id="TextInput">Add a Text Field</h2>
 
-<p>To create a user-editable text box, add an {@link android.widget.EditText
+<p>To create a user-editable text field, add an {@link android.widget.EditText
 &lt;EditText>} element inside the {@link android.widget.LinearLayout &lt;LinearLayout>}. The {@link
 android.widget.EditText} class is a subclass of {@link android.view.View} that displays an editable
-text box.</p>
+text field.</p>
 
 <p>Like every {@link android.view.View} object, you must define certain XML attributes to specify
 the {@link android.widget.EditText} object's properties. Here’s how you should declare it
@@ -185,7 +185,8 @@ first time. It tells the SDK tools that the resource ID needs to be created. Thu
 compiled, the SDK tools use the ID value, <code>edit_message</code>, to create a new identifier in
 your project's {@code gen/R.java} file that is now assiciated with the {@link
 android.widget.EditText} element. Once the resource ID is created, other references to the ID do not
-need the plus symbol. See the sidebox for more information about resource objects.</p></dd>
+need the plus symbol. This is the only attribute that may need the plus-symbol. See the sidebox for
+more information about resource objects.</p></dd>
 
 <dt><a
 href="{@docRoot}reference/android/view/View.html#attr_android:layout_width">{@code
@@ -202,12 +203,12 @@ href="{@docRoot}guide/topics/ui/declaring-layout.html">XML Layouts</a> guide.</d
 <dt><a
 href="{@docRoot}reference/android/widget/TextView.html#attr_android:hint">{@code
 android:hint}</a></dt>
-<dd>This is a default string to display when the text box is empty. Instead of using a hard-coded
-string as the value, the value given in this example refers to a string resource. When you add the
-{@code
-"@string/edit_message"} value, you’ll see a compiler error because there’s no matching string
-resource by that name. You'll fix this in the next section by defining the string
-resource.</dd>
+<dd>This is a default string to display when the text field is empty. Instead of using a hard-coded
+string as the value, the {@code "@string/edit_message"} value refers to a string resource defined
+in a separate file. Because this value refers to an existing resource, it does not need the
+plus-symbol. However, because you haven't defined the string resource yet, you’ll see a compiler
+error when you add the {@code "@string/edit_message"} value. You'll fix this in the next section by
+defining the string resource.</dd>
 </dl>
 
 
@@ -276,9 +277,9 @@ figure 2.</p>
 android.widget.Button} widgets have their widths set to
 <code>"wrap_content"</code>.</p>
 
-<p>This works fine for the button, but not as well for the text box, because the user might type
+<p>This works fine for the button, but not as well for the text field, because the user might type
 something longer and there's extra space left on the screen. So, it'd be nice to fill that width
-using the text box.
+using the text field.
 {@link android.widget.LinearLayout} enables such a design with the <em>weight</em> property, which
 you can specify using the <a
 href="{@docRoot}reference/android/widget/LinearLayout.LayoutParams.html#weight">{@code

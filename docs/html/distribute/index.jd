@@ -1,0 +1,39 @@
+page.title=Distribute Apps
+header.hide=1
+
+@jd:body
+
+    
+    
+    <div class="marquee">
+    
+    <div continer>
+    
+  <div class="madin-img" style="position:absolute;margin-left:42px;margin-top:76px;">
+    <img src="/images/home/google-play.png">
+  </div>
+  <div class="copy" style="position:relative;left:480px;width:360;">
+    <h1>Introducing Google Play</h1>
+    <p>The most visited store in the world for Android apps.  Cloud-connected and always synced, it's never been easier for users to find and download your apps.</p>
+    
+    <p><a class="landing-page-link" href="http://youtu.be/g5SzWc8-X0M">Watch a video</a></p>
+  </div>    </div>
+</div>
+<div class="distribute-features col-13" style="clear:both;margin-top:246px;">
+  <ul>
+    <li><h5>Growth Engine</h5>
+    A billion downloads a month and growing. Get your apps in front of millions of users at Google's scale.<br />
+    <a href="{@docRoot}distribute/googleplay/about/visibility.html">Read More ›</a>
+    <li><h5>Build Your Business</h5> Sell your app in over 130 countries.  Flexible monetization options with in-app purchase, subscriptions, and more. <br />
+    <a href="{@docRoot}distribute/googleplay/about/monetizing.html">Read More ›</a></li>
+    <li class="last"><h5>Distribution Control</h5> Deliver your apps to the users you want, on the devices you want, on <em>your</em> schedule. <br />
+    <a href="{@docRoot}distribute/googleplay/about/distribution.html">Read More ›</a></li>
+  </ul>
+</div>
+
+
+
+    
+
+
+

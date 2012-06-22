@@ -295,7 +295,7 @@ Guidelines</a>.</p>
 
 <p>Creating the App Widget layout is simple if you're
 familiar with <a
-href="{@docRoot}guide/topics/ui/declaring-layout.html">XML Layouts</a>.
+href="{@docRoot}guide/topics/ui/declaring-layout.html">Layouts</a>.
 However, you must be aware that App Widget layouts are based on {@link
 android.widget.RemoteViews},
 which do not support every kind of layout or view widget.</p>
@@ -516,7 +516,7 @@ consider starting a {@link android.app.Service} in the
 {@link android.appwidget.AppWidgetProvider#onUpdate(Context,AppWidgetManager,int[]) onUpdate()} 
 method. From within the Service, you can perform your own updates
 to the App Widget without worrying about the AppWidgetProvider closing down due
-to an <a href="{@docRoot}guide/practices/design/responsiveness.html">Application
+to an <a href="{@docRoot}guide/practices/responsiveness.html">Application
 Not Responding</a> (ANR) error. See the <a
 href="http://code.google.com/p/wiktionary-android/source/browse/trunk/Wiktionary/src/com/example/android/wiktionary/WordWidget.java">Wiktionary sample's AppWidgetProvider</a> for an example of an App Widget running a {@link
 android.app.Service}.</p>

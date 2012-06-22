@@ -1,4 +1,4 @@
-page.title=Binding to Data with AdapterView
+page.title=AdapterView
 parent.title=User Interface
 parent.link=index.html
 @jd:body
@@ -20,32 +20,7 @@ parent.link=index.html
 </div>
 </div>
 
-<p>The {@link android.widget.AdapterView} is a ViewGroup subclass whose child Views are determined by an {@link android.widget.Adapter Adapter} that 
-binds to data of some type. AdapterView is useful whenever you need to display stored data (as opposed to resource strings or drawables) in your layout.</p>
 
-<p>{@link android.widget.Gallery Gallery}, {@link android.widget.ListView ListView}, and  {@link android.widget.Spinner Spinner} are examples of AdapterView subclasses that you can use to bind to a specific type of data and display it in a certain way. </p>
-
-
-<p>AdapterView objects have two main responsibilities: </p>
-<ul>
-    <li>Filling the layout with data
-    </li>
-    <li>Handling user selections
-    </li>
-</ul>
-
-
-<h2 id="FillingTheLayout">Filling the Layout with Data</h2>
-<p>Inserting data into the layout is typically done by binding the AdapterView class to an {@link
-android.widget.Adapter}, which retrieves data from an external source (perhaps a list that
-the code supplies or query results from the device's database). </p>
-<p>The following code sample does the following:</p>
-<ol>
-  <li>Creates a {@link android.widget.Spinner Spinner} with an existing View and binds it to a new ArrayAdapter
-that reads an array of colors from the local resources.</li>
-  <li>Creates another Spinner object from a View and binds it to a new SimpleCursorAdapter that will read 
-people's names from the device contacts (see {@link android.provider.Contacts.People}).</li>
-</ol>
 
 <pre>
 // Get a Spinner and bind it to an ArrayAdapter that 

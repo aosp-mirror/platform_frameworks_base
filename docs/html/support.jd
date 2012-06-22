@@ -1,0 +1,74 @@
+page.title=Developer Support
+fullpage=1
+@jd:body
+
+<div class="wrap" style="width:940px;">
+
+  <h1>Developer Support Resources</h1>
+<!--
+<p>A variety of support resources are available to help you report and resolve issues while you are developing apps for Android. </p>
+-->
+    <div style="margin: 20px 0 0;">
+
+  <div class="col-8" style="margin-left:0">
+    <h3 style="font-size: 14px;line-height: 21px;color: #555;text-transform: uppercase;border-bottom: 1px solid #CCC;margin: 0 0 20px;">Code-Level Support</h3>
+    
+<h5>Community and Office Hours</h5>
+<p style="color:#888">
+
+<a href="http://groups.google.com/group/android-developers">android-developers</a> support forum<br />
+<a href="http://groups.google.com/group/android-ndk">android-ndk</a> support forum<br />
+<a href="http://groups.google.com/group/android-security-discuss">android-security-discuss</a> support forum<br />
+
+  <a href="http://webchat.freenode.net/?channels=android">#android</a>, <a href="http://webchat.freenode.net/?channels=android-dev">#android-dev</a> <span style="color:#888">(IRC via irc.freenode.net)</span><br />
+  <a href="https://plus.google.com/108967384991768947849/posts">+Android Developers Office Hours</a> <span style="color:#888">(Wednesdays 2 PM PST (UTC-7))</span><br />
+</p>
+
+
+<h5>Send Feedback</h5>
+<p>
+  <a href="http://code.google.com/p/android/issues/entry?template=Developer%20Documentation">Report documentation bug</a><br />
+  <a href="https://code.google.com/p/android/issues/entry?template=User%20bug%20report">Report device bug</a><br />
+  <a href="https://code.google.com/p/android/issues/entry?template=Developer%20bug%20report">Report platform bug</a><br />
+  
+  </div>
+
+  
+  
+  <div class="col-8" style="margin-right:0">
+    <h3 style="font-size: 14px;line-height: 21px;color: #555;text-transform:
+uppercase;border-bottom: 1px solid #CCC;margin: 0 0 20px;">Google Play Support</h3>
+<h5>Help center</h5>
+<p style="color:#888">
+  <a href="http://support.google.com/googleplay/android-developer/">Help&nbsp;Center&nbsp;Home</a><br />
+  <a href="http://support.google.com/googleplay/android-developer/bin/static.py?hl=en&page=known_issues.cs">Known Issues</a><br />
+</p>
+
+<h5 id="contact">Direct support contacts for developers</h5>
+<p style="color:#888">
+  <a href="http://support.google.com/googleplay/android-developer/bin/request.py?contact_type=dev_registration">Registration, account issues</a><br />
+  <a href="http://support.google.com/googleplay/android-developer/bin/request.py?contact_type=publishing">Publishing, app distribution issues</a><br />
+  <a href="http://support.google.com/googleplay/android-developer/bin/request.py?contact_type=bugs">Developer Console issues</a><br />
+  <a href="http://support.google.com/googleplay/android-developer/bin/request.py?contact_type=takedown">Inappropriate apps</a><br />
+  <a href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=1085703&topic=15868&ctx=topic">Report a Google Play policy violation</a>
+</p>
+
+<h5>End-user support</h5>
+<p style="color:#888">
+  <a href="http://support.google.com/googleplay/bin/request.py?contact_type=contact_policy&policy=apps">Click-to-call and email support for Google Play end users</a><br />
+</p>  
+
+
+
+  <h5>Payment and Merchant Issues</h5>
+
+<p style="color:#888;margin-bottom:1.5em;">
+  <a href="http://support.google.com/checkout/sell/">Merchant&nbsp;Help&nbsp;Center&nbsp;Home<br />
+  <a href="http://support.google.com/checkout/sell/bin/static.py?hl=en&page=ts.cs&ts=2472700">Issue reporting tool<br />
+  <a href="https://productforums.google.com/forum/#!forum/checkout-merchant">checkout-merchant</a> support forum<br />
+  <a href="http://support.google.com/googleplay/android-developer/bin/request.py?contact_type=survey">Feedback survey</a>
+</p>
+
+
+</div>
+</div>

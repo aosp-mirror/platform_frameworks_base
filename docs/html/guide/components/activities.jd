@@ -1,0 +1,776 @@
+page.title=Activities
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>Quickview</h2>
+<ul>
+  <li>An activity provides a user interface for a single screen in your application</li>
+  <li>Activities can move into the background and then be resumed with their state restored</li>
+</ul>
+
+<h2>In this document</h2>
+<ol>
+  <li><a href="#Creating">Creating an Activity</a>
+    <ol>
+      <li><a href="#UI">Implementing a user interface</a></li>
+      <li><a href="#Declaring">Declaring the activity in the manifest</a></li>
+    </ol>
+  </li>
+  <li><a href="#StartingAnActivity">Starting an Activity</a>
+    <ol>
+      <li><a href="#StartingAnActivityForResult">Starting an activity for a result</a></li>
+    </ol>
+  </li>
+  <li><a href="#ShuttingDown">Shutting Down an Activity</a></li>
+  <li><a href="#Lifecycle">Managing the Activity Lifecycle</a>
+    <ol>
+      <li><a href="#ImplementingLifecycleCallbacks">Implementing the lifecycle callbacks</a></li>
+      <li><a href="#SavingActivityState">Saving activity state</a></li>
+      <li><a href="#ConfigurationChanges">Handling configuration changes</a></li>
+      <li><a href="#CoordinatingActivities">Coordinating activities</a></li>
+    </ol>
+  </li>
+</ol>
+
+<h2>Key classes</h2>
+<ol>
+  <li>{@link android.app.Activity}</li>
+</ol>
+
+<h2>See also</h2>
+<ol>
+  <li><a href="{@docRoot}guide/components/tasks-and-back-stack.html">Tasks and Back
+Stack</a></li>
+</ol>
+
+</div>
+</div>
+
+
+
+<p>An {@link android.app.Activity} is an application component that provides a screen with which
+users can interact in order to do something, such as dial the phone, take a photo, send an email, or
+view a map. Each activity is given a window in which to draw its user interface. The window
+typically fills the screen, but may be smaller than the screen and float on top of other
+windows.</p>
+
+<p> An application usually consists of multiple activities that are loosely bound
+to each other. Typically, one activity in an application is specified as the "main" activity, which
+is presented to the user when launching the application for the first time. Each
+activity can then start another activity in order to perform different actions. Each time a new
+activity starts, the previous activity is stopped, but the system preserves the activity
+in a stack (the "back stack"). When a new activity starts, it is pushed onto the back stack and
+takes user focus. The back stack abides to the basic "last in, first out" stack mechanism,
+so, when the user is done with the current activity and presses the <em>Back</em> button, it
+is popped from the stack (and destroyed) and the previous activity resumes. (The back stack is
+discussed more in the <a href="{@docRoot}guide/components/tasks-and-back-stack.html">Tasks
+and Back Stack</a> document.)</p>
+
+<p>When an activity is stopped because a new activity starts, it is notified of this change in state
+through the activity's lifecycle callback methods.
+There are several callback methods that an activity might receive, due to a change in its
+state&mdash;whether the system is creating it, stopping it, resuming it, or destroying it&mdash;and
+each callback provides you the opportunity to perform specific work that's
+appropriate to that state change. For instance, when stopped, your activity should release any
+large objects, such as network or database connections. When the activity resumes, you can
+reacquire the necessary resources and resume actions that were interrupted. These state transitions
+are all part of the activity lifecycle.</p>
+
+<p>The rest of this document discusses the basics of how to build and use an activity,
+including a complete discussion of how the activity lifecycle works, so you can properly manage
+the transition between various activity states.</p>
+
+
+
+<h2 id="Creating">Creating an Activity</h2>
+
+<p>To create an activity, you must create a subclass of {@link android.app.Activity} (or
+an existing subclass of it). In your subclass, you need to implement callback methods that the
+system calls when the activity transitions between various states of its lifecycle, such as when
+the activity is being created, stopped, resumed, or destroyed. The two most important callback
+methods are:</p>
+
+<dl>
+  <dt>{@link android.app.Activity#onCreate onCreate()}</dt>
+  <dd>You must implement this method. The system calls this when creating your
+    activity. Within your implementation, you should initialize the essential components of your
+activity.
+    Most importantly, this is where you must call {@link android.app.Activity#setContentView
+    setContentView()} to define the layout for the activity's user interface.</dd>
+  <dt>{@link android.app.Activity#onPause onPause()}</dt>
+  <dd>The system calls this method as the first indication that the user is leaving your
+activity (though it does not always mean the activity is being destroyed). This is usually where you
+should commit any changes that should be persisted beyond the current user session (because
+the user might not come back).</dd>
+</dl>
+
+<p>There are several other lifecycle callback methods that you should use in order to provide a
+fluid user experience between activities and handle unexpected interuptions that cause your activity
+to be stopped and even destroyed. All of the lifecycle callback methods are discussed later, in
+the section about <a href="#Lifecycle">Managing the Activity Lifecycle</a>.</p>
+
+
+
+<h3 id="UI">Implementing a user interface</h3>
+
+<p> The user interface for an activity is provided by a hierarchy of views&mdash;objects derived
+from the {@link android.view.View} class.  Each view controls a particular rectangular space
+within the activity's window and can respond to user interaction. For example, a view might be a
+button that initiates an action when the user touches it.</p>
+
+<p>Android provides a number of ready-made views that you can use to design and organize your
+layout. "Widgets" are views that provide a visual (and interactive) elements for the screen, such
+as a button, text field, checkbox, or just an image. "Layouts" are views derived from {@link
+android.view.ViewGroup} that provide a unique layout model for its child views, such as a linear
+layout, a grid layout, or relative layout. You can also subclass the {@link android.view.View} and
+{@link android.view.ViewGroup} classes (or existing subclasses) to create your own widgets and
+layouts and apply them to your activity layout.</p>
+
+<p>The most common way to define a layout using views is with an XML layout file saved in your
+application resources. This way, you can maintain the design of your user interface separately from
+the source code that defines the activity's behavior. You can set the layout as the UI for your
+activity with {@link android.app.Activity#setContentView(int) setContentView()}, passing the
+resource ID for the layout. However, you can also create new {@link android.view.View}s in your
+activity code and build a view hierarchy by inserting new {@link
+android.view.View}s into a {@link android.view.ViewGroup}, then use that layout by passing the root
+{@link android.view.ViewGroup} to {@link android.app.Activity#setContentView(View)
+setContentView()}.</p>
+
+<p>For information about creating a user interface, see the <a
+href="{@docRoot}guide/topics/ui/index.html">User Interface</a> documentation.</p>
+
+
+
+<h3 id="Declaring">Declaring the activity in the manifest</h3>
+
+<p>You must declare your activity in the manifest file in order for it to
+be accessible to the system. To declare your activity, open your manifest file and add an <a
+href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> element
+as a child of the <a
+href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>
+element. For example:</p>
+
+<pre>
+&lt;manifest ... &gt;
+  &lt;application ... &gt;
+      &lt;activity android:name=".ExampleActivity" /&gt;
+      ...
+  &lt;/application ... &gt;
+  ...
+&lt;/manifest &gt;
+</pre>
+
+<p>There are several other attributes that you can include in this element, to define properties
+such as the label for the activity, an icon for the activity, or a theme to style the activity's
+UI. The <a href="{@docRoot}guide/topics/manifest/activity-element.html#nm">{@code android:name}</a>
+attribute is the only required attribute&mdash;it specifies the class name of the activity. Once
+you publish your application, you should not change this name, because if you do, you might break
+some functionality, such as application shortcuts (read the blog post, <a
+href="http://android-developers.blogspot.com/2011/06/things-that-cannot-change.html">Things
+That Cannot Change</a>).</p>
+
+<p>See the <a
+href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> element
+reference for more information about declaring your activity in the manifest.</p>
+
+
+<h4>Using intent filters</h4>
+
+<p>An <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code
+&lt;activity&gt;}</a> element can also specify various intent filters&mdash;using the <a
+href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
+&lt;intent-filter&gt;}</a> element&mdash;in order to declare how other application components may
+activate it.</p>
+
+<p>When you create a new application using the Android SDK tools, the stub activity
+that's created for you automatically includes an intent filter that declares the activity
+responds to the "main" action and should be placed in the "launcher" category. The intent filter
+looks like this:</p>
+
+<pre>
+&lt;activity android:name=".ExampleActivity" android:icon="@drawable/app_icon"&gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.intent.action.MAIN" /&gt;
+        &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+    &lt;/intent-filter&gt;
+&lt;/activity&gt;
+</pre>
+
+<p>The <a href="{@docRoot}guide/topics/manifest/action-element.html">{@code
+&lt;action&gt;}</a> element specifies that this is the "main" entry point to the application. The <a
+href="{@docRoot}guide/topics/manifest/category-element.html">{@code
+&lt;category&gt;}</a> element specifies that this activity should be listed in the
+system's application launcher (to allow users to launch this activity).</p>
+
+<p>If you intend for your application to be self-contained and not allow other applications to
+activate its activities, then you don't need any other intent filters. Only one activity should
+have the "main" action and "launcher" category, as in the previous example. Activities that
+you don't want to make available to other applications should have no intent filters and you can
+start them yourself using explicit intents (as discussed in the following section).</p>
+
+<p>However, if you want your activity to respond to implicit intents that are delivered from
+other applications (and your own), then you must define additional intent filters for your
+activity. For each type of intent to which you want to respond, you must include an <a
+href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
+&lt;intent-filter&gt;}</a> that includes an
+<a href="{@docRoot}guide/topics/manifest/action-element.html">{@code
+&lt;action&gt;}</a> element and, optionally, a <a
+href="{@docRoot}guide/topics/manifest/category-element.html">{@code
+&lt;category&gt;}</a> element and/or a <a
+href="{@docRoot}guide/topics/manifest/data-element.html">{@code
+&lt;data&gt;}</a> element. These elements specify the type of intent to which your activity can
+respond.</p>
+
+<p>For more information about how your activities can respond to intents, see the <a
+href="{@docRoot}guide/components/intents-filters.html">Intents and Intent Filters</a>
+document.</p>
+
+
+
+<h2 id="StartingAnActivity">Starting an Activity</h2>
+
+<p>You can start another activity by calling {@link android.app.Activity#startActivity
+  startActivity()}, passing it an {@link android.content.Intent} that describes the activity you
+  want to start. The intent specifies either the exact activity you want to start or describes the
+  type of action you want to perform (and the system selects the appropriate activity for you,
+which
+  can even be from a different application). An intent can also carry small amounts of data to be
+  used by the activity that is started.</p>
+
+<p>When working within your own application, you'll often need to simply launch a known activity.
+ You can do so by creating an intent that explicitly defines the activity you want to start,
+using the class name. For example, here's how one activity starts another activity named {@code
+SignInActivity}:</p>
+
+<pre>
+Intent intent = new Intent(this, SignInActivity.class);
+startActivity(intent);
+</pre>
+
+<p>However, your application might also want to perform some action, such as send an email, text
+  message, or status update, using data from your activity. In this case, your application might
+ not have its own activities to perform such actions, so you can instead leverage the activities
+  provided by other applications on the device, which can perform the actions for you. This is where
+intents are really valuable&mdash;you can create an intent that describes an action you want to
+perform and the system
+  launches the appropriate activity from another application. If there are
+  multiple activities that can handle the intent, then the user can select which one to use. For
+  example, if you want to allow the user to send an email message, you can create the
+  following intent:</p>
+
+<pre>
+Intent intent = new Intent(Intent.ACTION_SEND);
+intent.putExtra(Intent.EXTRA_EMAIL, recipientArray);
+startActivity(intent);
+</pre>
+
+<p>The {@link android.content.Intent#EXTRA_EMAIL} extra added to the intent is a string array of
+  email addresses to which the email should be sent. When an email application responds to this
+  intent, it reads the string array provided in the extra and places them in the "to" field of the
+  email composition form. In this situation, the email application's activity starts and when the
+  user is done, your activity resumes.</p>
+
+
+
+
+<h3 id="StartingAnActivityForResult">Starting an activity for a result</h3>
+
+<p>Sometimes, you might want to receive a result from the activity that you start. In that case,
+  start the activity by calling {@link android.app.Activity#startActivityForResult
+  startActivityForResult()} (instead of {@link android.app.Activity#startActivity
+  startActivity()}). To then receive the result from the subsequent
+activity, implement the {@link android.app.Activity#onActivityResult onActivityResult()} callback
+  method. When the subsequent activity is done, it returns a result in an {@link
+android.content.Intent} to your {@link android.app.Activity#onActivityResult onActivityResult()}
+method.</p>
+
+<p>For example, perhaps you want the user to pick one of their contacts, so your activity can
+do something with the information in that contact. Here's how you can create such an intent and
+handle the result:</p>
+
+<pre>
+private void pickContact() {
+    // Create an intent to "pick" a contact, as defined by the content provider URI
+    Intent intent = new Intent(Intent.ACTION_PICK, Contacts.CONTENT_URI);
+    startActivityForResult(intent, PICK_CONTACT_REQUEST);
+}
+
+&#64;Override
+protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    // If the request went well (OK) and the request was PICK_CONTACT_REQUEST
+    if (resultCode == Activity.RESULT_OK &amp;&amp; requestCode == PICK_CONTACT_REQUEST) {
+        // Perform a query to the contact's content provider for the contact's name
+        Cursor cursor = getContentResolver().query(data.getData(),
+        new String[] {Contacts.DISPLAY_NAME}, null, null, null);
+        if (cursor.moveToFirst()) { // True if the cursor is not empty
+            int columnIndex = cursor.getColumnIndex(Contacts.DISPLAY_NAME);
+            String name = cursor.getString(columnIndex);
+            // Do something with the selected contact's name...
+        }
+    }
+}
+</pre>
+
+<p>This example shows the basic logic you should use in your {@link
+android.app.Activity#onActivityResult onActivityResult()} method in order to handle an
+activity result. The first condition checks whether the request was successful&mdash;if it was, then
+the {@code resultCode} will be {@link android.app.Activity#RESULT_OK}&mdash;and whether the request
+to which this result is responding is known&mdash;in this case, the {@code requestCode} matches the
+second parameter sent with {@link android.app.Activity#startActivityForResult
+startActivityForResult()}. From there, the code handles the activity result by querying the
+data returned in an {@link android.content.Intent} (the {@code data} parameter).</p>
+
+<p>What happens is, a {@link
+android.content.ContentResolver} performs a query against a content provider, which returns a
+{@link android.database.Cursor} that allows the queried data to be read. For more information, see
+the <a
+href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a> document.</p>
+
+<p>For more information about using intents, see the <a
+href="{@docRoot}guide/components/intents-filters.html">Intents and Intent
+Filters</a> document.</p>
+
+
+<h2 id="ShuttingDown">Shutting Down an Activity</h2>
+
+<p>You can shut down an activity by calling its {@link android.app.Activity#finish
+finish()} method. You can also shut down a separate activity that you previously started by calling
+{@link android.app.Activity#finishActivity finishActivity()}.</p>
+
+<p class="note"><strong>Note:</strong> In most cases, you should not explicitly finish an activity
+using these methods. As discussed in the following section about the activity lifecycle, the
+Android system manages the life of an activity for you, so you do not need to finish your own
+activities. Calling these methods could adversely affect the expected user
+experience and should only be used when you absolutely do not want the user to return to this
+instance of the activity.</p>
+
+
+<h2 id="Lifecycle">Managing the Activity Lifecycle</h2>
+
+<p>Managing the lifecycle of your activities by implementing callback methods is
+crucial to developing a strong
+and flexible application. The lifecycle of an activity is directly affected by its association with
+other activities, its task and back stack.</p>
+
+<p>An activity can exist in essentially three states:</p>
+
+<dl>
+  <dt><i>Resumed</i></dt>
+    <dd>The activity is in the foreground of the screen and has user focus. (This state is
+also sometimes referred to as "running".)</dd>
+
+  <dt><i>Paused</i></dt>
+    <dd>Another activity is in the foreground and has focus, but this one is still visible. That is,
+another activity is visible on top of this one and that activity is partially transparent or doesn't
+cover the entire screen. A paused activity is completely alive (the {@link android.app.Activity}
+object is retained in memory, it maintains all state and member information, and remains attached to
+the window manager), but can be killed by the system in extremely low memory situations.</dd>
+
+  <dt><i>Stopped</i></dt>
+    <dd>The activity is completely obscured by another activity (the activity is now in the
+"background"). A stopped activity is also still alive (the {@link android.app.Activity}
+object is retained in memory, it maintains all state and member information, but is <em>not</em>
+attached to the window manager). However, it is no longer visible to the user and it
+can be killed by the system when memory is needed elsewhere.</dd>
+</dl>
+
+<p>If an activity is paused or stopped, the system can drop it from memory either by asking it to
+finish (calling its {@link android.app.Activity#finish finish()} method), or simply killing its
+process.  When the activity is opened again (after being finished or killed), it must be created all
+over.</p>
+
+
+
+<h3 id="ImplementingLifecycleCallbacks">Implementing the lifecycle callbacks</h3>
+
+<p>When an activity transitions into and out of the different states described above, it is notified
+through various callback methods. All of the callback methods are hooks that you
+can override to do appropriate work when the state of your activity changes. The following skeleton
+activity includes each of the fundamental lifecycle methods:</p>
+
+
+<pre>
+public class ExampleActivity extends Activity {
+    &#64;Override
+    public void {@link android.app.Activity#onCreate onCreate}(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // The activity is being created.
+    }
+    &#64;Override
+    protected void {@link android.app.Activity#onStart onStart()} {
+        super.onStart();
+        // The activity is about to become visible.
+    }
+    &#64;Override
+    protected void {@link android.app.Activity#onResume onResume()} {
+        super.onResume();
+        // The activity has become visible (it is now "resumed").
+    }
+    &#64;Override
+    protected void {@link android.app.Activity#onPause onPause()} {
+        super.onPause();
+        // Another activity is taking focus (this activity is about to be "paused").
+    }
+    &#64;Override
+    protected void {@link android.app.Activity#onStop onStop()} {
+        super.onStop();
+        // The activity is no longer visible (it is now "stopped")
+    }
+    &#64;Override
+    protected void {@link android.app.Activity#onDestroy onDestroy()} {
+        super.onDestroy();
+        // The activity is about to be destroyed.
+    }
+}
+</pre>
+
+<p class="note"><strong>Note:</strong> Your implementation of these lifecycle methods must
+always call the superclass implementation before doing any work, as shown in the examples above.</p>
+
+<p>Taken together, these methods define the entire lifecycle of an activity. By implementing these
+methods, you can monitor three nested loops in the activity lifecycle: </p>
+
+<ul>
+<li>The <b>entire lifetime</b> of an activity happens between the call to {@link
+android.app.Activity#onCreate onCreate()} and the call to {@link
+android.app.Activity#onDestroy}. Your activity should perform setup of
+"global" state (such as defining layout) in {@link android.app.Activity#onCreate onCreate()}, and
+release all remaining resources in {@link android.app.Activity#onDestroy}. For example, if your
+activity has a thread running in the background to download data from the network, it might create
+that thread in {@link android.app.Activity#onCreate onCreate()} and then stop the thread in {@link
+android.app.Activity#onDestroy}.</li>
+
+<li><p>The <b>visible lifetime</b> of an activity happens between the call to {@link
+android.app.Activity#onStart onStart()} and the call to {@link
+android.app.Activity#onStop onStop()}. During this time, the user can see the activity
+on-screen and interact with it. For example, {@link android.app.Activity#onStop onStop()} is called
+when a new activity starts and this one is no longer visible. Between these two methods, you can
+maintain resources that are needed to show the activity to the user. For example, you can register a
+{@link android.content.BroadcastReceiver} in {@link
+android.app.Activity#onStart onStart()} to monitor changes that impact your UI, and unregister
+it in {@link android.app.Activity#onStop onStop()} when the user can no longer see what you are
+displaying. The system might call {@link android.app.Activity#onStart onStart()} and {@link
+android.app.Activity#onStop onStop()} multiple times during the entire lifetime of the activity, as
+the activity alternates between being visible and hidden to the user.</p></li>
+
+<li><p>The <b>foreground lifetime</b> of an activity happens between the call to {@link
+android.app.Activity#onResume onResume()} and the call to {@link android.app.Activity#onPause
+onPause()}. During this time, the activity is in front of all other activities on screen and has
+user input focus.  An activity can frequently transition in and out of the foreground&mdash;for
+example, {@link android.app.Activity#onPause onPause()} is called when the device goes to sleep or
+when a dialog appears. Because this state can transition often, the code in these two methods should
+be fairly lightweight in order to avoid slow transitions that make the user wait.</p></li>
+</ul>
+
+<p>Figure 1 illustrates these loops and the paths an activity might take between states.
+The rectangles represent the callback methods you can implement to perform operations when
+the activity transitions between states. <p>
+
+<img src="{@docRoot}images/activity_lifecycle.png" alt="" />
+<p class="img-caption"><strong>Figure 1.</strong> The activity lifecycle.</p>
+
+<p>The same lifecycle callback methods are listed in table 1, which describes each of the callback
+methods in more detail and locates each one within the
+activity's overall lifecycle, including whether the system can kill the activity after the
+callback method completes.</p>
+
+<p class="table-caption"><strong>Table 1.</strong> A summary of the activity lifecycle's
+callback methods.</p>
+
+<table border="2" width="85%" frame="hsides" rules="rows">
+<colgroup align="left" span="3"></colgroup>
+<colgroup align="left"></colgroup>
+<colgroup align="center"></colgroup>
+<colgroup align="center"></colgroup>
+
+<thead>
+<tr><th colspan="3">Method</th> <th>Description</th> <th>Killable after?</th> <th>Next</th></tr>
+</thead>
+
+<tbody>
+<tr>
+  <td colspan="3" align="left"><code>{@link android.app.Activity#onCreate onCreate()}</code></td>
+  <td>Called when the activity is first created.
+      This is where you should do all of your normal static set up &mdash;
+      create views, bind data to lists, and so on.  This method is passed
+      a Bundle object containing the activity's previous state, if that
+      state was captured (see <a href="#actstate">Saving Activity State</a>,
+      later).
+      <p>Always followed by {@code onStart()}.</p></td>
+  <td align="center">No</td>
+      <td align="center">{@code onStart()}</td>
+</tr>
+
+<tr>
+   <td rowspan="5" style="border-left: none; border-right: none;">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+   <td colspan="2" align="left"><code>{@link android.app.Activity#onRestart
+onRestart()}</code></td>
+   <td>Called after the activity has been stopped, just prior to it being
+       started again.
+       <p>Always followed by {@code onStart()}</p></td>
+   <td align="center">No</td>
+   <td align="center">{@code onStart()}</td>
+</tr>
+
+<tr>
+   <td colspan="2" align="left"><code>{@link android.app.Activity#onStart onStart()}</code></td>
+   <td>Called just before the activity becomes visible to the user.
+       <p>Followed by {@code onResume()} if the activity comes
+       to the foreground, or {@code onStop()} if it becomes hidden.</p></td>
+    <td align="center">No</td>
+    <td align="center">{@code onResume()} <br/>or<br/> {@code onStop()}</td>
+</tr>
+
+<tr>
+   <td rowspan="2" style="border-left: none;">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+   <td align="left"><code>{@link android.app.Activity#onResume onResume()}</code></td>
+   <td>Called just before the activity starts
+       interacting with the user.  At this point the activity is at
+       the top of the activity stack, with user input going to it.
+       <p>Always followed by {@code onPause()}.</p></td>
+   <td align="center">No</td>
+   <td align="center">{@code onPause()}</td>
+</tr>
+
+<tr>
+   <td align="left"><code>{@link android.app.Activity#onPause onPause()}</code></td>
+   <td>Called when the system is about to start resuming another
+       activity.  This method is typically used to commit unsaved changes to
+       persistent data, stop animations and other things that may be consuming
+       CPU, and so on.  It should do whatever it does very quickly, because
+       the next activity will not be resumed until it returns.
+       <p>Followed either by {@code onResume()} if the activity
+       returns back to the front, or by {@code onStop()} if it becomes
+       invisible to the user.</td>
+   <td align="center"><strong style="color:#800000">Yes</strong></td>
+   <td align="center">{@code onResume()} <br/>or<br/> {@code onStop()}</td>
+</tr>
+
+<tr>
+   <td colspan="2" align="left"><code>{@link android.app.Activity#onStop onStop()}</code></td>
+   <td>Called when the activity is no longer visible to the user.  This
+       may happen because it is being destroyed, or because another activity
+       (either an existing one or a new one) has been resumed and is covering it.
+       <p>Followed either by {@code onRestart()} if
+       the activity is coming back to interact with the user, or by
+       {@code onDestroy()} if this activity is going away.</p></td>
+   <td align="center"><strong style="color:#800000">Yes</strong></td>
+   <td align="center">{@code onRestart()} <br/>or<br/> {@code onDestroy()}</td>
+</tr>
+
+<tr>
+   <td colspan="3" align="left"><code>{@link android.app.Activity#onDestroy
+onDestroy()}</code></td>
+   <td>Called before the activity is destroyed.  This is the final call
+       that the activity will receive.  It could be called either because the
+       activity is finishing (someone called <code>{@link android.app.Activity#finish
+       finish()}</code> on it), or because the system is temporarily destroying this
+       instance of the activity to save space.  You can distinguish
+       between these two scenarios with the <code>{@link
+       android.app.Activity#isFinishing isFinishing()}</code> method.</td>
+   <td align="center"><strong style="color:#800000">Yes</strong></td>
+   <td align="center"><em>nothing</em></td>
+</tr>
+</tbody>
+</table>
+
+<p>The column labeled "Killable after?" indicates whether or not the system can
+kill the process hosting the activity at any time <em>after the method returns</em>, without
+executing another line of the activity's code.  Three methods are marked "yes": ({@link
+android.app.Activity#onPause
+onPause()}, {@link android.app.Activity#onStop onStop()}, and {@link android.app.Activity#onDestroy
+onDestroy()}). Because {@link android.app.Activity#onPause onPause()} is the first
+of the three, once the activity is created, {@link android.app.Activity#onPause onPause()} is the
+last method that's guaranteed to be called before the process <em>can</em> be killed&mdash;if
+the system must recover memory in an emergency, then {@link
+android.app.Activity#onStop onStop()} and {@link android.app.Activity#onDestroy onDestroy()} might
+not be called. Therefore, you should use {@link android.app.Activity#onPause onPause()} to write
+crucial persistent data (such as user edits) to storage. However, you should be selective about
+what information must be retained during {@link android.app.Activity#onPause onPause()}, because any
+blocking procedures in this method block the transition to the next activity and slow the user
+experience.</p>
+
+<p> Methods that are marked "No" in the <b>Killable</b> column protect the process hosting the
+activity from being killed from the moment they are called.  Thus, an activity is killable
+from the time {@link android.app.Activity#onPause onPause()} returns to the time
+{@link android.app.Activity#onResume onResume()} is called. It will not again be killable until
+{@link android.app.Activity#onPause onPause()} is again called and returns. </p>
+
+<p class="note"><strong>Note:</strong> An activity that's not technically "killable" by this
+definition in table 1 might still be killed by the system&mdash;but that would happen only in
+extreme circumstances when there is no other recourse. When an activity might be killed is
+discussed more in the <a
+href="{@docRoot}guide/components/processes-and-threads.html">Processes and
+Threading</a> document.</p>
+
+
+<h3 id="SavingActivityState">Saving activity state</h3>
+
+<p>The introduction to <a href="#Lifecycle">Managing the Activity Lifecycle</a> briefly mentions
+that
+when an activity is paused or stopped, the state of the activity is retained. This is true because
+the {@link android.app.Activity} object is still held in memory when it is paused or
+stopped&mdash;all information about its members and current state is still alive. Thus, any changes
+the user made within the activity are retained so that when the activity returns to the
+foreground (when it "resumes"), those changes are still there.</p>
+
+<p>However, when the system destroys an activity in order to recover memory, the {@link
+android.app.Activity} object is destroyed, so the system cannot simply resume it with its state
+intact. Instead, the system must recreate the {@link android.app.Activity} object if the user
+navigates back to it. Yet, the user is unaware
+that the system destroyed the activity and recreated it and, thus, probably
+expects the activity to be exactly as it was. In this situation, you can ensure that
+important information about the activity state is preserved by implementing an additional
+callback method that allows you to save information about the state of your activity: {@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()}.</p>
+
+<p>The system calls {@link android.app.Activity#onSaveInstanceState onSaveInstanceState()}
+before making the activity vulnerable to destruction. The system passes this method
+a {@link android.os.Bundle} in which you can save 
+state information about the activity as name-value pairs, using methods such as {@link
+android.os.Bundle#putString putString()} and {@link
+android.os.Bundle#putInt putInt()}. Then, if the system kills your application
+process and the user navigates back to your activity, the system recreates the activity and passes
+the {@link android.os.Bundle} to both {@link android.app.Activity#onCreate onCreate()} and {@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()}. Using either of these
+methods, you can extract your saved state from the {@link android.os.Bundle} and restore the
+activity state. If there is no state information to restore, then the {@link
+android.os.Bundle} passed to you is null (which is the case when the activity is created for
+the first time).</p>
+
+<img src="{@docRoot}images/fundamentals/restore_instance.png" alt="" />
+<p class="img-caption"><strong>Figure 2.</strong> The two ways in which an activity returns to user
+focus with its state intact: either the activity is destroyed, then recreated and the activity must restore
+the previously saved state, or the activity is stopped, then resumed and the activity state
+remains intact.</p>
+
+<p class="note"><strong>Note:</strong> There's no guarantee that {@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()} will be called before your
+activity is destroyed, because there are cases in which it won't be necessary to save the state
+(such as when the user leaves your activity using the <em>Back</em> button, because the user is
+explicitly
+closing the activity). If the system calls {@link android.app.Activity#onSaveInstanceState
+onSaveInstanceState()}, it does so before {@link
+android.app.Activity#onStop onStop()} and possibly before {@link android.app.Activity#onPause
+onPause()}.</p>
+
+<p>However, even if you do nothing and do not implement {@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()}, some of the activity state is
+restored by the {@link android.app.Activity} class's default implementation of {@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()}. Specifically, the default
+implementation calls the corresponding {@link
+android.view.View#onSaveInstanceState onSaveInstanceState()} method for every {@link
+android.view.View} in the layout, which allows each view to provide information about itself
+that should be saved. Almost every widget in the Android framework implements this method as
+appropriate, such that any visible changes to the UI are automatically saved and restored when your
+activity is recreated. For example, the {@link android.widget.EditText} widget saves any text
+entered by the user and the {@link android.widget.CheckBox} widget saves whether it's checked or
+not. The only work required by you is to provide a unique ID (with the <a
+href="{@docRoot}guide/topics/resources/layout-resource.html#idvalue">{@code android:id}</a>
+attribute) for each widget you want to save its state. If a widget does not have an ID, then the
+system cannot save its state.</p>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<p>You can also explicitly stop a view in your layout from saving its state by setting the
+{@link android.R.attr#saveEnabled android:saveEnabled} attribute to {@code "false"} or by calling
+the {@link android.view.View#setSaveEnabled setSaveEnabled()} method. Usually, you should not
+disable this, but you might if you want to restore the state of the activity UI differently.</p>
+</div>
+</div>
+
+<p>Although the default implementation of {@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()} saves useful information about
+your activity's UI, you still might need to override it to save additional information.
+For example, you might need to save member values that changed during the activity's life (which
+might correlate to values restored in the UI, but the members that hold those UI values are not
+restored, by default).</p>
+
+<p>Because the default implementation of {@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()} helps save the state of the UI, if
+you override the method in order to save additional state information, you should always call the
+superclass implementation of {@link android.app.Activity#onSaveInstanceState onSaveInstanceState()}
+before doing any work. Likewise, you should also call the supercall implementation of {@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} if you override it, so the
+default implementation can restore view states.</p>
+
+<p class="note"><strong>Note:</strong> Because {@link android.app.Activity#onSaveInstanceState
+onSaveInstanceState()} is not guaranteed
+to be called, you should use it only to record the transient state of the activity (the state of
+the UI)&mdash;you should never use it to store persistent data.  Instead, you should use  {@link
+android.app.Activity#onPause onPause()} to store persistent data (such as data that should be saved
+to a database) when the user leaves the activity.</p>
+
+<p>A good way to test your application's ability to restore its state is to simply rotate the
+device so that the screen orientation changes. When the screen orientation changes, the system
+destroys and recreates the activity in order to apply alternative resources that might be available
+for the new screen configuration. For this reason alone, it's very important that your activity
+completely restores its state when it is recreated, because users regularly rotate the screen while
+using applications.</p>
+
+
+<h3 id="ConfigurationChanges">Handling configuration changes</h3>
+
+<p>Some device configurations can change during runtime (such as screen orientation, keyboard
+availability, and language). When such a change occurs, Android recreates the running activity
+(the system calls {@link android.app.Activity#onDestroy}, then immediately calls {@link
+android.app.Activity#onCreate onCreate()}). This behavior is
+designed to help your application adapt to new configurations by automatically reloading your
+application with alternative resources that you've provided (such as different layouts for
+different screen orientations and sizes).</p>
+
+<p>If you properly design your activity to handle a restart due to a screen orientation change and
+restore the activity state as described above, your application will be more resilient to other
+unexpected events in the activity lifecycle.</p>
+
+<p>The best way to handle such a restart is
+  to save and restore the state of your activity using {@link
+  android.app.Activity#onSaveInstanceState onSaveInstanceState()} and {@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} (or {@link
+android.app.Activity#onCreate onCreate()}), as discussed in the previous section.</p>
+
+<p>For more information about configuration changes that happen at runtime and how you can handle
+them, read the guide to <a href="{@docRoot}guide/topics/resources/runtime-changes.html">Handling
+Runtime Changes</a>.</p>
+
+
+
+<h3 id="CoordinatingActivities">Coordinating activities</h3>
+
+ <p>When one activity starts another, they both experience lifecycle transitions. The first activity
+pauses and stops (though, it won't stop if it's still visible in the background), while the other
+activity is created. In case these activities share data saved to disc or elsewhere, it's important
+to understand that the first activity is not completely stopped before the second one is created.
+Rather, the process of starting the second one overlaps with the process of stopping the first
+one.</p>
+
+<p>The order of lifecycle callbacks is well defined, particularly when the two activities are in the
+same process and one is starting the other. Here's the order of operations that occur when Activity
+A starts Acivity B: </p>
+
+<ol>
+<li>Activity A's {@link android.app.Activity#onPause onPause()} method executes.</li>
+
+<li>Activity B's {@link android.app.Activity#onCreate onCreate()}, {@link
+android.app.Activity#onStart onStart()}, and {@link android.app.Activity#onResume onResume()}
+methods execute in sequence. (Activity B now has user focus.)</li>
+
+<li>Then, if Activity A is no longer visible on screen, its {@link
+android.app.Activity#onStop onStop()} method executes.</li>
+</ol>
+
+ <p>This predictable sequence of lifecycle callbacks allows you to manage the transition of
+information from one activity to another. For example, if you must write to a database when the
+first activity stops so that the following activity can read it, then you should write to the
+database during {@link android.app.Activity#onPause onPause()} instead of during {@link
+android.app.Activity#onStop onStop()}.</p>
+
+<!--
+<h2>Beginner's Path</h2>
+
+<p>For more information about how Android maintains a history of activities and
+enables user multitasking, continue with the <b><a
+href="{@docRoot}guide/components/tasks-and-back-stack.html">Tasks and Back
+Stack</a></b> document.</p>
+-->

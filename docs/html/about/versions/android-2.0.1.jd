@@ -1,0 +1,361 @@
+page.title=Android 2.0.1, Release 1
+sdk.platform.version=2.0.1
+sdk.platform.apiLevel=6
+sdk.platform.majorMinor=minor
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>In this document</h2>
+  <ol>
+	<li><a href="#features">Platform Highlights</a></li>
+	<li><a href="#relnotes">Revisions</a></li>
+	<li><a href="#apps">Built-in Applications</a></li>
+	<li><a href="#locs">Locales</a></li>
+	<li><a href="#skins">Emulator Skins</a></li>
+	<li><a href="#dev-features">Developer Features</a></li>
+	<li><a href="#api">Framework API</a>
+    <ol>
+      <li><a href="#api-level">API level</a></li>
+      <li><a href="#api-changes">API changes summary</a></li>
+      <li><a href="#behavior-changes">Behavior changes</a></li>
+      <li><a href="#bug-fixes">Bug fixes</a></li>
+      <li><a
+href="{@docRoot}sdk/api_diff/{@sdkPlatformApiLevel}/changes.html">API
+differences report &raquo;</a> </li>
+    </ol>
+  </li>
+  </ol>
+
+  <h2>See Also</h2>
+  <ol>
+    <li><a href="{@docRoot}sdk/exploring.html">Exploring the SDK</a></li>
+  </ol>
+
+</div>
+</div>
+
+<p>
+
+<em>API Level:</em>&nbsp;<strong>{@sdkPlatformApiLevel}</strong></p>
+
+<p>Android {@sdkPlatformVersion} is a {@sdkPlatformMajorMinor} platform release
+deployable to Android-powered handsets starting in December 2009.
+This release includes minor API
+changes, bug fixes and framework behavioral changes. For information on changes
+and fixes, see the <a href="#api">Framework API</a> section.</p>
+
+<p>For developers, the Android {@sdkPlatformVersion} platform is available as a
+downloadable component for the Android SDK. The downloadable platform includes a
+fully compliant Android library and system image, as well as a set of emulator
+skins, sample applications, and more. The downloadable platform
+includes no external libraries. </p>
+
+<p>To get started developing or testing against the Android
+{@sdkPlatformVersion} platform, use the Android SDK and AVD Manager tool to
+download the platform into your Android 1.6 or later SDK. For more information,
+see <a href="{@docRoot}sdk/exploring.html">Exploring the
+SDK</a>.</p>
+
+
+<h2 id="features">Platform Highlights</h2>
+
+<p>For a list of new user features and platform highlights, see the <a
+href="http://developer.android.com/about/versions/android-2.0-highlights.html">Android
+2.0 Platform Highlights</a> document.</p>
+
+<h2 id="relnotes">Revisions</h2>
+
+<p>The sections below provide notes about successive releases of
+the Android {@sdkPlatformVersion} platform component for the Android SDK, as denoted by
+revision number. To determine what revision(s) of the Android
+{@sdkPlatformVersion} platforms are installed in your SDK environment, refer to
+the "Installed Packages" listing in the Android SDK and AVD Manager.</p>
+
+<script type="text/javascript">
+function toggleDiv(link) {
+  var toggleable = $(link).parent();
+  if (toggleable.hasClass("closed")) {
+    //$(".toggleme", toggleable).slideDown("fast");
+    toggleable.removeClass("closed");
+    toggleable.addClass("open");
+    $(".toggle-img", toggleable).attr("title", "hide").attr("src", (toRoot + "assets/images/triangle-opened.png"));
+  } else {
+    //$(".toggleme", toggleable).slideUp("fast");
+    toggleable.removeClass("open");
+    toggleable.addClass("closed");
+    $(".toggle-img", toggleable).attr("title", "show").attr("src", (toRoot + "assets/images/triangle-closed.png"));
+  }
+  return false;
+}
+</script>
+<style>
+.toggleable {
+padding: .25em 1em;
+}
+.toggleme {
+  padding: 1em 1em 0 2em;
+  line-height:1em;
+}
+.toggleable a {
+  text-decoration:none;
+}
+.toggleable.closed .toggleme {
+  display:none;
+}
+#jd-content .toggle-img {
+  margin:0;
+}
+</style>
+
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px" />
+        Android 2.0.1, Revision 1</a> <em>(December 2009)</em></a>
+  <div class="toggleme">
+<dl>
+<dt>Dependencies:</dt>
+<dd>
+<p>Requires SDK Tools r4 or higher.</p>
+</dd>
+</dl>
+ </div>
+</div>
+
+<h2 id="apps">Built-in Applications</h2>
+
+<p>The system image included in the downloadable platform provides these
+built-in applications:</p>
+
+<table style="border:0;padding-bottom:0;margin-bottom:0;">
+<tr>
+<td style="border:0;padding-bottom:0;margin-bottom:0;">
+	<ul>
+	<li>Alarm Clock</li>
+	<li>Browser</li>
+	<li>Calculator</li>
+	<li>Camcorder</li>
+	<li>Camera</li>
+	<li>Contacts</li>
+	<li>Custom Locale (developer app)</li>
+	<li>Dev Tools (developer app)</li>
+	<li>Dialer</li>
+	</ul>
+</td>
+<td style="border:0;padding-bottom:0;margin-bottom:0;padding-left:5em;">
+	<ul>
+	<li>Email</li>
+	<li>Gallery</li>
+	<li>Gestures Builder</li>
+	<li>IME for Japanese text input</li>
+	<li>Messaging</li>
+	<li>Music</li>
+	<li>Settings</li>
+	<li>Spare Parts (developer app)</li>
+	</ul>
+</td>
+</tr>
+</table>
+
+<p><span class="new">New with 2.0.1</span> The Dev Tools app now
+includes a "Sync Tester" application to provide quick and easy testing of
+third-party sync adapters.</p>
+
+<h2 id="locs" style="margin-top:.75em;">Locales</h2>
+
+<p>The system image included in the downloadable platform provides a variety of
+built-in locales. In some cases, region-specific strings are available for the
+locales. In other cases, a default version of the language is used. The
+languages that are available in the Android {@sdkPlatformVersion} system 
+image are listed below (with <em>language</em>_<em>country/region</em> locale 
+descriptor).</p>
+
+<table style="border:0;padding-bottom:0;margin-bottom:0;">
+<tr>
+<td style="border:0;padding-bottom:0;margin-bottom:0;">
+<ul>
+<li>Chinese, PRC (zh_CN)</li>
+<li>Chinese, Taiwan (zh_TW)</li>
+<li>Czech (cs_CZ)</li>
+<li>Dutch, Netherlands (nl_NL)</li>
+<li>Dutch, Belgium (nl_BE)</li>
+<li>English, US (en_US)</li>
+<li>English, Britain (en_GB)</li>
+<li>English, Canada (en_CA)</li>
+<li>English, Australia (en_AU)</li>
+<li>English, New Zealand (en_NZ)</li>
+<li>English, Singapore(en_SG)</li>
+<li>French, France (fr_FR)</li>
+<li>French, Belgium (fr_BE)</li>
+</ul>
+</td>
+<td style="border:0;padding-bottom:0;margin-bottom:0;padding-left:5em;">
+<li>French, Canada (fr_CA)</li>
+<li>French, Switzerland (fr_CH)</li>
+<li>German, Germany (de_DE)</li>
+<li>German, Austria (de_AT)</li>
+<li>German, Switzerland (de_CH)</li>
+<li>German, Liechtenstein (de_LI)</li>
+<li>Italian, Italy (it_IT)</li>
+<li>Italian, Switzerland (it_CH)</li>
+<li>Japanese (ja_JP)</li>
+<li>Korean (ko_KR)</li>
+<li>Polish (pl_PL)</li>
+<li>Russian (ru_RU)</li>
+<li>Spanish (es_ES)</li>
+</td>
+</tr>
+</table>
+
+<p>Localized UI strings match the locales that are accessible 
+through Settings.</p>
+
+<h2 id="skins">Emulator Skins</h2>
+
+<p>The downloadable platform includes a set of emulator skins that you can use for modeling your application in different screen sizes and resolutions. The emulator skins are: </p>
+
+<ul>
+  <li>
+    QVGA (240x320, low density, small screen)
+  </li>
+  <li>
+    WQVGA (240x400, low density, normal screen)
+  </li>
+  <li>
+    FWQVGA (240x432, low density, normal screen)
+  </li>
+  <li>
+    HVGA (320x480, medium density, normal screen)
+  </li>
+  <li>
+    WVGA800 (480x800, high density, normal screen)
+  </li>
+  <li>
+    WVGA854 (480x854 high density, normal screen)
+  </li>
+</ul>
+
+<p>For more information about how to develop an application that displays and functions properly on all Android-powered devices, see <a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a>.</p>
+
+<h2 id="dev-features">Developer Features</h2>
+
+<p>The sections below provide information about new developer features offered by the downloadable Android 2.0 platform component.</p>
+
+<h3 id="ant">Ant Support</h3>
+
+<ul>
+<li>Debug- and release-mode application signing. Release-mode signing includes integrated support for <code>zipalign</code> optimization. For more information, see <a href="{@docRoot}tools/publishing/app-signing.html#releasecompile">Signing Your Applications</a>.</li>
+
+<li>Adds new Ant build system with support for Emma instrumentation projects (code coverage).</li>
+</ul>
+
+<h2 id="api">Framework API</h2>
+
+<p>The sections below provide information about changes made to the application
+framework API provided by the Android {@sdkPlatformVersion} platform. Note,
+however, that Android 2.0.1 is a minor release to Android 2.0, so for more
+information about the changes made to in Android 2.0, please refer to the
+<a href="{@docRoot}about/versions/android-2.0.html#api">Android 2.0 version notes</a>.</p>
+
+
+<h3 id="api-level">API level</h3>
+
+<p>The Android {@sdkPlatformVersion} platform delivers an updated version of the framework
+API. The Android {@sdkPlatformVersion} API
+is assigned an integer identifier &mdash; <strong>{@sdkPlatformApiLevel}</strong> &mdash; that is
+stored in the system itself. This identifier, called the "API Level", allows the
+system to correctly determine whether an application is compatible with
+the system, prior to installing the application. </p>
+
+<p>To use APIs introduced in Android {@sdkPlatformVersion} in your application, you need to 
+set the proper value, "{@sdkPlatformApiLevel}", in the attributes of the <code>&lt;uses-sdk&gt;</code> 
+element in your application's manifest. </p>
+
+<p>For more information about how to use API Level, see the <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API Levels</a> document. </p>
+
+
+<h3 id="api-changes">API changes summary</h3>
+
+<p>The following is a summary of changes to the framework APIs.</p>
+
+<ul>
+<li>New {@code quickContactBadgeStyle*} attributes that let
+applications apply necessary styles to the {@link
+android.widget.QuickContactBadge} widget.</li>
+
+<li>Remove support for the {@link
+android.content.Intent#ACTION_CONFIGURATION_CHANGED} broadcast when declared as
+a filter in the manifest. To receive this broadcast, an application must
+do so from the application at run-time, with {@link
+android.content.Context#registerReceiver(BroadcastReceiver, IntentFilter)}.</li>
+</ul>
+
+<h3 id="behavior-changes">Behavior changes</h3>
+
+<p>The following is a summary of changes that affect the behavior of some
+framework APIs but do not add or remove API functionality.</p>
+
+<h4>Bluetooth</h4>
+
+<p>Changes to the values returned by {@link
+android.bluetooth.BluetoothAdapter#ACTION_REQUEST_ENABLE} and
+{@link android.bluetooth.BluetoothAdapter#ACTION_REQUEST_DISCOVERABLE}:</p>
+
+<ul>
+<li>{@link android.bluetooth.BluetoothAdapter#ACTION_REQUEST_ENABLE} now
+returns {@link android.app.Activity#RESULT_OK} if Bluetooth was successfully
+enabled and {@link android.app.Activity#RESULT_CANCELED} if the user rejected
+the request to enable Bluetooth, rather than 0 and -1 (or -2),
+respectively.</li>
+
+<li>{@link android.bluetooth.BluetoothAdapter#ACTION_REQUEST_DISCOVERABLE}
+now returns {@link android.app.Activity#RESULT_CANCELED} if the user rejected
+the request to enable discoverability or if Bluetooth is not enabled, rather
+than -1 and -2, respectively.</li>
+</ul>
+
+<h4>Contacts</h4>
+
+<p>The {@link android.content.Intent#ACTION_INSERT} Intent now returns {@link
+android.app.Activity#RESULT_CANCELED} in cases where the contact was not
+persisted (for example, if the save was trimmed to a no-op).</p>
+
+
+<h3 id="bug-fixes">Bug fixes</h3>
+
+<p>The following is a summary of bug fixes that affect some framework APIs.</p>
+
+<h4>Resources</h4>
+
+<p>The framework now correctly selects application resources in project
+folders that use the API Level qualifier. For example, {@code drawable-v4/} is a
+folder of drawable resources for API Level 4 (or higher) devices. This version
+matching did not work properly and has been fixed.</p>
+
+<h4>Contacts</h4>
+
+<p>The {@link android.content.Intent#ACTION_INSERT} Intent now returns the
+appropriate kind of URI when the request is made using the (now
+deprecated) {@link android.provider.Contacts} APIs.</p>
+
+<h4>Other Framework fixes</h4>
+
+<ul>
+<li>{@link android.app.Activity#getCallingPackage()} now properly reports the
+package name, rather than the process name.</li>
+</ul>
+
+
+<h3 id="api-diff">API differences report</h3>
+
+<p>For a detailed view of API changes in Android {@sdkPlatformVersion} (API Level {@sdkPlatformApiLevel}), as compared to 
+API Level 5, see the <a
+href="{@docRoot}sdk/api_diff/{@sdkPlatformApiLevel}/changes.html">API
+Differences Report</a>. There are very few API changes in API Level 6, 
+so you might also be interested in reviewing the <a
+href="{@docRoot}sdk/api_diff/5/changes.html">API
+differences between 4 and 5</a>.</p>
+

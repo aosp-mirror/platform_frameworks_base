@@ -62,7 +62,7 @@ options.  None of its attributes have default values.
 <p>
 Information on how intent filters work, including the rules for how Intent objects
 are matched against filters, can be found in another document,
-<a href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and
+<a href="{@docRoot}guide/components/intents-filters.html">Intents and
 Intent Filters</a>.  See also the 
 <a href="{@docRoot}guide/topics/manifest/manifest-intro.html#ifs">Intent Filters</a> 
 section in the introduction.

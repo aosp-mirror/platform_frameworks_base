@@ -4,7 +4,7 @@ page.title=Intents List: Invoking Google Applications on Android Devices
 <div class="sidebox-wrapper">
 <div class="sidebox">
 For more information about intents, see the <a
-href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and Intent Filters</a>.
+href="{@docRoot}guide/components/intents-filters.html">Intents and Intent Filters</a>.
 </div>
 </div>
 

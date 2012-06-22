@@ -1,0 +1,410 @@
+page.title=Designing for Performance
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+<ol>
+  <li><a href="#intro">Introduction</a></li>
+  <li><a href="#optimize_judiciously">Optimize Judiciously</a></li>
+  <li><a href="#object_creation">Avoid Creating Unnecessary Objects</a></li>
+  <li><a href="#myths">Performance Myths</a></li>
+  <li><a href="#prefer_static">Prefer Static Over Virtual</a></li>
+  <li><a href="#internal_get_set">Avoid Internal Getters/Setters</a></li>
+  <li><a href="#use_final">Use Static Final For Constants</a></li>
+  <li><a href="#foreach">Use Enhanced For Loop Syntax</a></li>
+  <li><a href="#package_inner">Consider Package Instead of Private Access with Inner Classes</a></li>
+  <li><a href="#avoidfloat">Use Floating-Point Judiciously</a> </li>
+  <li><a href="#library">Know And Use The Libraries</a></li>
+  <li><a href="#native_methods">Use Native Methods Judiciously</a></li>
+  <li><a href="#closing_notes">Closing Notes</a></li>
+</ol>
+
+</div>
+</div>
+
+<p>An Android application will run on a mobile device with limited computing
+power and storage, and constrained battery life. Because of
+this, it should be <em>efficient</em>. Battery life is one reason you might
+want to optimize your app even if it already seems to run "fast enough".
+Battery life is important to users, and Android's battery usage breakdown
+means users will know if your app is responsible draining their battery.</p>
+
+<p>Note that although this document primarily covers micro-optimizations,
+these will almost never make or break your software. Choosing the right
+algorithms and data structures should always be your priority, but is
+outside the scope of this document.</p>
+
+<a name="intro" id="intro"></a>
+<h2>Introduction</h2>
+
+<p>There are two basic rules for writing efficient code:</p>
+<ul>
+    <li>Don't do work that you don't need to do.</li>
+    <li>Don't allocate memory if you can avoid it.</li>
+</ul>
+
+<h2 id="optimize_judiciously">Optimize Judiciously</h2>
+
+<p>This document is about Android-specific micro-optimization, so it assumes
+that you've already used profiling to work out exactly what code needs to be
+optimized, and that you already have a way to measure the effect (good or bad)
+of any changes you make. You only have so much engineering time to invest, so
+it's important to know you're spending it wisely.
+
+<p>(See <a href="#closing_notes">Closing Notes</a> for more on profiling and
+writing effective benchmarks.)
+
+<p>This document also assumes that you made the best decisions about data
+structures and algorithms, and that you've also considered the future
+performance consequences of your API decisions. Using the right data
+structures and algorithms will make more difference than any of the advice
+here, and considering the performance consequences of your API decisions will
+make it easier to switch to better implementations later (this is more
+important for library code than for application code).
+
+<p>(If you need that kind of advice, see Josh Bloch's <em>Effective Java</em>,
+item 47.)</p>
+
+<p>One of the trickiest problems you'll face when micro-optimizing an Android
+app is that your app is pretty much guaranteed to be running on multiple
+hardware platforms. Different versions of the VM running on different
+processors running at different speeds. It's not even generally the case
+that you can simply say "device X is a factor F faster/slower than device Y",
+and scale your results from one device to others. In particular, measurement
+on the emulator tells you very little about performance on any device. There
+are also huge differences between devices with and without a JIT: the "best"
+code for a device with a JIT is not always the best code for a device
+without.</p>
+
+<p>If you want to know how your app performs on a given device, you need to
+test on that device.</p>
+
+<a name="object_creation"></a>
+<h2>Avoid Creating Unnecessary Objects</h2>
+
+<p>Object creation is never free. A generational GC with per-thread allocation
+pools for temporary objects can make allocation cheaper, but allocating memory
+is always more expensive than not allocating memory.</p>
+
+<p>If you allocate objects in a user interface loop, you will force a periodic
+garbage collection, creating little "hiccups" in the user experience. The
+concurrent collector introduced in Gingerbread helps, but unnecessary work
+should always be avoided.</p>
+
+<p>Thus, you should avoid creating object instances you don't need to.  Some
+examples of things that can help:</p>
+
+<ul>
+    <li>If you have a method returning a string, and you know that its result
+    will always be appended to a StringBuffer anyway, change your signature
+    and implementation so that the function does the append directly,
+    instead of creating a short-lived temporary object.</li>
+    <li>When extracting strings from a set of input data, try
+    to return a substring of the original data, instead of creating a copy.
+    You will create a new String object, but it will share the char[]
+    with the data. (The trade-off being that if you're only using a small
+    part of the original input, you'll be keeping it all around in memory
+    anyway if you go this route.)</li>
+</ul>
+
+<p>A somewhat more radical idea is to slice up multidimensional arrays into
+parallel single one-dimension arrays:</p>
+
+<ul>
+    <li>An array of ints is a much better than an array of Integers,
+    but this also generalizes to the fact that two parallel arrays of ints
+    are also a <strong>lot</strong> more efficient than an array of (int,int)
+    objects.  The same goes for any combination of primitive types.</li>
+    <li>If you need to implement a container that stores tuples of (Foo,Bar)
+    objects, try to remember that two parallel Foo[] and Bar[] arrays are
+    generally much better than a single array of custom (Foo,Bar) objects.
+    (The exception to this, of course, is when you're designing an API for
+    other code to access;  in those cases, it's usually better to trade
+    good API design for a small hit in speed. But in your own internal
+    code, you should try and be as efficient as possible.)</li>
+</ul>
+
+<p>Generally speaking, avoid creating short-term temporary objects if you
+can.  Fewer objects created mean less-frequent garbage collection, which has
+a direct impact on user experience.</p>
+
+<a name="avoid_enums" id="avoid_enums"></a>
+<a name="myths" id="myths"></a>
+<h2>Performance Myths</h2>
+
+<p>Previous versions of this document made various misleading claims. We
+address some of them here.</p>
+
+<p>On devices without a JIT, it is true that invoking methods via a
+variable with an exact type rather than an interface is slightly more
+efficient. (So, for example, it was cheaper to invoke methods on a
+<code>HashMap map</code> than a <code>Map map</code>, even though in both
+cases the map was a <code>HashMap</code>.) It was not the case that this
+was 2x slower; the actual difference was more like 6% slower. Furthermore,
+the JIT makes the two effectively indistinguishable.</p>
+
+<p>On devices without a JIT, caching field accesses is about 20% faster than
+repeatedly accesssing the field. With a JIT, field access costs about the same
+as local access, so this isn't a worthwhile optimization unless you feel it
+makes your code easier to read. (This is true of final, static, and static
+final fields too.)
+
+<a name="prefer_static" id="prefer_static"></a>
+<h2>Prefer Static Over Virtual</h2>
+
+<p>If you don't need to access an object's fields, make your method static.
+Invocations will be about 15%-20% faster.
+It's also good practice, because you can tell from the method
+signature that calling the method can't alter the object's state.</p>
+
+<a name="internal_get_set" id="internal_get_set"></a>
+<h2>Avoid Internal Getters/Setters</h2>
+
+<p>In native languages like C++ it's common practice to use getters (e.g.
+<code>i = getCount()</code>) instead of accessing the field directly (<code>i
+= mCount</code>). This is an excellent habit for C++, because the compiler can
+usually inline the access, and if you need to restrict or debug field access
+you can add the code at any time.</p>
+
+<p>On Android, this is a bad idea.  Virtual method calls are expensive,
+much more so than instance field lookups.  It's reasonable to follow
+common object-oriented programming practices and have getters and setters
+in the public interface, but within a class you should always access
+fields directly.</p>
+
+<p>Without a JIT, direct field access is about 3x faster than invoking a
+trivial getter. With the JIT (where direct field access is as cheap as
+accessing a local), direct field access is about 7x faster than invoking a
+trivial getter. This is true in Froyo, but will improve in the future when
+the JIT inlines getter methods.</p>
+
+<p>Note that if you're using ProGuard, you can have the best
+of both worlds because ProGuard can inline accessors for you.</p>
+
+<a name="use_final" id="use_final"></a>
+<h2>Use Static Final For Constants</h2>
+
+<p>Consider the following declaration at the top of a class:</p>
+
+<pre>static int intVal = 42;
+static String strVal = "Hello, world!";</pre>
+
+<p>The compiler generates a class initializer method, called
+<code>&lt;clinit&gt;</code>, that is executed when the class is first used.
+The method stores the value 42 into <code>intVal</code>, and extracts a
+reference from the classfile string constant table for <code>strVal</code>.
+When these values are referenced later on, they are accessed with field
+lookups.</p>
+
+<p>We can improve matters with the "final" keyword:</p>
+
+<pre>static final int intVal = 42;
+static final String strVal = "Hello, world!";</pre>
+
+<p>The class no longer requires a <code>&lt;clinit&gt;</code> method,
+because the constants go into static field initializers in the dex file.
+Code that refers to <code>intVal</code> will use
+the integer value 42 directly, and accesses to <code>strVal</code> will
+use a relatively inexpensive "string constant" instruction instead of a
+field lookup. (Note that this optimization only applies to primitive types and
+<code>String</code> constants, not arbitrary reference types. Still, it's good
+practice to declare constants <code>static final</code> whenever possible.)</p>
+
+<a name="foreach" id="foreach"></a>
+<h2>Use Enhanced For Loop Syntax</h2>
+
+<p>The enhanced for loop (also sometimes known as "for-each" loop) can be used
+for collections that implement the Iterable interface and for arrays.
+With collections, an iterator is allocated to make interface calls
+to hasNext() and next(). With an ArrayList, a hand-written counted loop is
+about 3x faster (with or without JIT), but for other collections the enhanced
+for loop syntax will be exactly equivalent to explicit iterator usage.</p>
+
+<p>There are several alternatives for iterating through an array:</p>
+
+<pre>    static class Foo {
+        int mSplat;
+    }
+    Foo[] mArray = ...
+
+    public void zero() {
+        int sum = 0;
+        for (int i = 0; i &lt; mArray.length; ++i) {
+            sum += mArray[i].mSplat;
+        }
+    }
+
+    public void one() {
+        int sum = 0;
+        Foo[] localArray = mArray;
+        int len = localArray.length;
+
+        for (int i = 0; i &lt; len; ++i) {
+            sum += localArray[i].mSplat;
+        }
+    }
+
+    public void two() {
+        int sum = 0;
+        for (Foo a : mArray) {
+            sum += a.mSplat;
+        }
+    }
+</pre>
+
+<p><strong>zero()</strong> is slowest, because the JIT can't yet optimize away
+the cost of getting the array length once for every iteration through the
+loop.</p>
+
+<p><strong>one()</strong> is faster. It pulls everything out into local
+variables, avoiding the lookups. Only the array length offers a performance
+benefit.</p>
+
+<p><strong>two()</strong> is fastest for devices without a JIT, and
+indistinguishable from <strong>one()</strong> for devices with a JIT.
+It uses the enhanced for loop syntax introduced in version 1.5 of the Java
+programming language.</p>
+
+<p>To summarize: use the enhanced for loop by default, but consider a
+hand-written counted loop for performance-critical ArrayList iteration.</p>
+
+<p>(See also <em>Effective Java</em> item 46.)</p>
+
+<a name="package_inner" id="package_inner"></a>
+<h2>Consider Package Instead of Private Access with Private Inner Classes</h2>
+
+<p>Consider the following class definition:</p>
+
+<pre>public class Foo {
+    private class Inner {
+        void stuff() {
+            Foo.this.doStuff(Foo.this.mValue);
+        }
+    }
+
+    private int mValue;
+
+    public void run() {
+        Inner in = new Inner();
+        mValue = 27;
+        in.stuff();
+    }
+
+    private void doStuff(int value) {
+        System.out.println("Value is " + value);
+    }
+}</pre>
+
+<p>The key things to note here are that we define a private inner class
+(<code>Foo$Inner</code>) that directly accesses a private method and a private
+instance field in the outer class. This is legal, and the code prints "Value is
+27" as expected.</p>
+
+<p>The problem is that the VM considers direct access to <code>Foo</code>'s
+private members from <code>Foo$Inner</code> to be illegal because
+<code>Foo</code> and <code>Foo$Inner</code> are different classes, even though
+the Java language allows an inner class to access an outer class' private
+members. To bridge the gap, the compiler generates a couple of synthetic
+methods:</p>
+
+<pre>/*package*/ static int Foo.access$100(Foo foo) {
+    return foo.mValue;
+}
+/*package*/ static void Foo.access$200(Foo foo, int value) {
+    foo.doStuff(value);
+}</pre>
+
+<p>The inner class code calls these static methods whenever it needs to
+access the <code>mValue</code> field or invoke the <code>doStuff</code> method
+in the outer class. What this means is that the code above really boils down to
+a case where you're accessing member fields through accessor methods.
+Earlier we talked about how accessors are slower than direct field
+accesses, so this is an example of a certain language idiom resulting in an
+"invisible" performance hit.</p>
+
+<p>If you're using code like this in a performance hotspot, you can avoid the
+overhead by declaring fields and methods accessed by inner classes to have
+package access, rather than private access. Unfortunately this means the fields
+can be accessed directly by other classes in the same package, so you shouldn't
+use this in public API.</p>
+
+<a name="avoidfloat" id="avoidfloat"></a>
+<h2>Use Floating-Point Judiciously</h2>
+
+<p>As a rule of thumb, floating-point is about 2x slower than integer on
+Android devices. This is true on a FPU-less, JIT-less G1 and a Nexus One with
+an FPU and the JIT. (Of course, absolute speed difference between those two
+devices is about 10x for arithmetic operations.)</p>
+
+<p>In speed terms, there's no difference between <code>float</code> and
+<code>double</code> on the more modern hardware. Space-wise, <code>double</code>
+is 2x larger. As with desktop machines, assuming space isn't an issue, you
+should prefer <code>double</code> to <code>float</code>.</p>
+
+<p>Also, even for integers, some chips have hardware multiply but lack
+hardware divide. In such cases, integer division and modulus operations are
+performed in software &mdash; something to think about if you're designing a
+hash table or doing lots of math.</p>
+
+<a name="library" id="library"></a>
+<h2>Know And Use The Libraries</h2>
+
+<p>In addition to all the usual reasons to prefer library code over rolling
+your own, bear in mind that the system is at liberty to replace calls
+to library methods with hand-coded assembler, which may be better than the
+best code the JIT can produce for the equivalent Java. The typical example
+here is <code>String.indexOf</code> and friends, which Dalvik replaces with
+an inlined intrinsic. Similarly, the <code>System.arraycopy</code> method
+is about 9x faster than a hand-coded loop on a Nexus One with the JIT.</p>
+
+<p>(See also <em>Effective Java</em> item 47.)</p>
+
+<a name="native_methods" id="native_methods"></a>
+<h2>Use Native Methods Judiciously</h2>
+
+<p>Native code isn't necessarily more efficient than Java. For one thing,
+there's a cost associated with the Java-native transition, and the JIT can't
+optimize across these boundaries. If you're allocating native resources (memory
+on the native heap, file descriptors, or whatever), it can be significantly
+more difficult to arrange timely collection of these resources. You also
+need to compile your code for each architecture you wish to run on (rather
+than rely on it having a JIT). You may even have to compile multiple versions
+for what you consider the same architecture: native code compiled for the ARM
+processor in the G1 can't take full advantage of the ARM in the Nexus One, and
+code compiled for the ARM in the Nexus One won't run on the ARM in the G1.</p>
+
+<p>Native code is primarily useful when you have an existing native codebase
+that you want to port to Android, not for "speeding up" parts of a Java app.</p>
+
+<p>If you do need to use native code, you should read our
+<a href="{@docRoot}guide/practices/jni.html">JNI Tips</a>.</p>
+
+<p>(See also <em>Effective Java</em> item 54.)</p>
+
+<a name="closing_notes" id="closing_notes"></a>
+<h2>Closing Notes</h2>
+
+<p>One last thing: always measure. Before you start optimizing, make sure you
+have a problem. Make sure you can accurately measure your existing performance,
+or you won't be able to measure the benefit of the alternatives you try.</p>
+
+<p>Every claim made in this document is backed up by a benchmark. The source
+to these benchmarks can be found in the <a href="http://code.google.com/p/dalvik/source/browse/#svn/trunk/benchmarks">code.google.com "dalvik" project</a>.</p>
+
+<p>The benchmarks are built with the
+<a href="http://code.google.com/p/caliper/">Caliper</a> microbenchmarking
+framework for Java. Microbenchmarks are hard to get right, so Caliper goes out
+of its way to do the hard work for you, and even detect some cases where you're
+not measuring what you think you're measuring (because, say, the VM has
+managed to optimize all your code away). We highly recommend you use Caliper
+to run your own microbenchmarks.</p>
+
+<p>You may also find
+<a href="{@docRoot}tools/debugging/debugging-tracing.html">Traceview</a> useful
+for profiling, but it's important to realize that it currently disables the JIT,
+which may cause it to misattribute time to code that the JIT may be able to win
+back. It's especially important after making changes suggested by Traceview
+data to ensure that the resulting code actually runs faster when run without
+Traceview.

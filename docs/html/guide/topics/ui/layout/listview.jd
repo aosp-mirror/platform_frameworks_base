@@ -1,0 +1,151 @@
+page.title=List View
+parent.title=Layouts
+parent.link=declaring-layout.html
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+<h2>In this document</h2>
+  <ol>
+    <li><a href="#Loader">Using a Loader</a></li>
+    <li><a href="#Example">Example</a></li>
+  </ol>
+  <h2>Key classes</h2>
+  <ol>
+    <li>{@link android.widget.ListView}</li>
+    <li>{@link android.widget.Adapter}</li>
+    <li>{@link android.support.v4.content.CursorLoader}</li>
+  </ol>
+  <h2>See also</h2>
+  <ol>
+    <li><a
+href="{@docRoot}guide/components/loaders.html">Loaders</a></li>
+  </ol>
+</div>
+</div>
+
+<p>{@link android.widget.ListView} is a view group that displays a list of
+scrollable items. The list items are automatically inserted to the list using an {@link
+android.widget.Adapter} that pulls content from a source such as an array or database query and
+converts each item result into a view that's placed into the list.</p>
+
+<img src="{@docRoot}images/ui/listview.png" alt="" />
+
+<h2 id="Loader">Using a Loader</h2>
+
+<p>Using a {@link
+android.support.v4.content.CursorLoader} is the standard way to query a {@link
+android.database.Cursor} as an asynchronous task in order to avoid blocking your app's main thread
+with the query. When the {@link android.support.v4.content.CursorLoader} receives the {@link
+android.database.Cursor} result, the {@link android.support.v4.app.LoaderManager.LoaderCallbacks
+LoaderCallbacks} receives a callback to {@link
+android.support.v4.app.LoaderManager.LoaderCallbacks#onLoadFinished onLoadFinished()}, which is
+where you update your {@link
+android.widget.Adapter} with the new {@link android.database.Cursor} and the list view then
+displays the results.</p>
+
+<p>Although the {@link android.support.v4.content.CursorLoader} APIs were first introduced in
+Android 3.0 (API level 11), they are also available in the <a
+href="{@docRoot}tools/extras/support-library.html">Support Library</a> so that your app may use them
+while supporting devices running Android 1.6 or higher.</p>
+
+<p>For more information about using a {@link
+android.support.v4.content.Loader} to asynchronously load data, see the <a
+href="{@docRoot}guide/components/loaders.html">Loaders</a> guide.</p>
+
+
+<h2 id="Example">Example</h2>
+
+<p>The following example uses {@link android.app.ListActivity}, which is an activity that includes
+a {@link android.widget.ListView} as its only layout element by default. It performs a query to
+the <a
+href="{@docRoot}guide/topics/providers/contacts-provider.html">Contacts
+Provider</a> for a list of names and phone numbers.</p>
+
+<p>The activity implements the {@link android.support.v4.app.LoaderManager.LoaderCallbacks
+LoaderCallbacks} interface in order to use a {@link android.support.v4.content.CursorLoader} that
+dynamically loads the data for the list view.</p>
+
+<pre>
+public class ListViewLoader extends ListActivity
+        implements LoaderManager.LoaderCallbacks&lt;Cursor> {
+
+    // This is the Adapter being used to display the list's data
+    SimpleCursorAdapter mAdapter;
+
+    // These are the Contacts rows that we will retrieve
+    static final String[] PROJECTION = new String[] {ContactsContract.Data._ID,
+            ContactsContract.Data.DISPLAY_NAME};
+
+    // This is the select criteria
+    static final String SELECTION = "((" + 
+            ContactsContract.Data.DISPLAY_NAME + " NOTNULL) AND (" +
+            ContactsContract.Data.DISPLAY_NAME + " != '' ))";
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Create a progress bar to display while the list loads
+        ProgressBar progressBar = new ProgressBar(this);
+        progressBar.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
+                LayoutParams.WRAP_CONTENT, Gravity.CENTER));
+        progressBar.setIndeterminate(true);
+        getListView().setEmptyView(progressBar);
+
+        // Must add the progress bar to the root of the layout
+        ViewGroup root = (ViewGroup) findViewById(android.R.id.content);
+        root.addView(progressBar);
+
+        // For the cursor adapter, specify which columns go into which views
+        String[] fromColumns = {ContactsContract.Data.DISPLAY_NAME};
+        int[] toViews = {android.R.id.text1}; // The TextView in simple_list_item_1
+
+        // Create an empty adapter we will use to display the loaded data.
+        // We pass null for the cursor, then update it in onLoadFinished()
+        mAdapter = new SimpleCursorAdapter(this, 
+                android.R.layout.simple_list_item_1, null,
+                fromColumns, toViews, 0);
+        setListAdapter(mAdapter);
+
+        // Prepare the loader.  Either re-connect with an existing one,
+        // or start a new one.
+        getLoaderManager().initLoader(0, null, this);
+    }
+
+    // Called when a new Loader needs to be created
+    public Loader&lt;Cursor> onCreateLoader(int id, Bundle args) {
+        // Now create and return a CursorLoader that will take care of
+        // creating a Cursor for the data being displayed.
+        return new CursorLoader(this, ContactsContract.Data.CONTENT_URI,
+                PROJECTION, SELECTION, null, null);
+    }
+
+    // Called when a previously created loader has finished loading
+    public void onLoadFinished(Loader&lt;Cursor> loader, Cursor data) {
+        // Swap the new cursor in.  (The framework will take care of closing the
+        // old cursor once we return.)
+        mAdapter.swapCursor(data);
+    }
+
+    // Called when a previously created loader is reset, making the data unavailable
+    public void onLoaderReset(Loader&lt;Cursor> loader) {
+        // This is called when the last Cursor provided to onLoadFinished()
+        // above is about to be closed.  We need to make sure we are no
+        // longer using it.
+        mAdapter.swapCursor(null);
+    }
+
+    &#64;Override 
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        // Do something when a list item is clicked
+    }
+}
+</pre>
+
+<p class="note"><strong>Note:</strong> Because this sample performs a query on the <a
+href="{@docRoot}guide/topics/providers/contacts-provider.html">Contacts
+Provider</a>, if you want to
+try this code, your app must request the {@link android.Manifest.permission#READ_CONTACTS}
+permission in the manifest file:<br/>
+<code>&lt;uses-permission android:name="android.permission.READ_CONTACTS" /></p>
+
