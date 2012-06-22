@@ -170,9 +170,6 @@ public class WifiWatchdogStateMachine extends StateMachine {
     static final int RSSI_FETCH_SUCCEEDED                           = BASE + 24;
     static final int RSSI_FETCH_FAILED                              = BASE + 25;
 
-    private static final int SINGLE_ARP_CHECK = 0;
-    private static final int FULL_ARP_CHECK   = 1;
-
     private Context mContext;
     private ContentResolver mContentResolver;
     private WifiManager mWifiManager;
@@ -651,7 +648,9 @@ public class WifiWatchdogStateMachine extends StateMachine {
                     break;
                 case CMD_ARP_CHECK:
                     if (msg.arg1 == mArpToken) {
-                        if (doArpTest(FULL_ARP_CHECK) == true) {
+                        boolean success = ArpPeer.doArp(mWifiInfo.getMacAddress(), mLinkProperties,
+                                mArpPingTimeoutMs, mNumArpPings, mMinArpResponses);
+                        if (success) {
                             if (DBG) log("Notify link is good " + mCurrentSignalLevel);
                             mWsmChannel.sendMessage(GOOD_LINK_DETECTED);
                         } else {
@@ -840,50 +839,6 @@ public class WifiWatchdogStateMachine extends StateMachine {
             return false;
         }
         return true;
-    }
-
-    private boolean doArpTest(int type) {
-        boolean success;
-
-        String iface = mLinkProperties.getInterfaceName();
-        String mac = mWifiInfo.getMacAddress();
-        InetAddress inetAddress = null;
-        InetAddress gateway = null;
-
-        for (LinkAddress la : mLinkProperties.getLinkAddresses()) {
-            inetAddress = la.getAddress();
-            break;
-        }
-
-        for (RouteInfo route : mLinkProperties.getRoutes()) {
-            gateway = route.getGateway();
-            break;
-        }
-
-        if (DBG) log("ARP " + iface + "addr: " + inetAddress + "mac: " + mac + "gw: " + gateway);
-
-        try {
-            ArpPeer peer = new ArpPeer(iface, inetAddress, mac, gateway);
-            if (type == SINGLE_ARP_CHECK) {
-                success = (peer.doArp(mArpPingTimeoutMs) != null);
-                if (DBG) log("single ARP test result: " + success);
-            } else {
-                int responses = 0;
-                for (int i=0; i < mNumArpPings; i++) {
-                    if(peer.doArp(mArpPingTimeoutMs) != null) responses++;
-                }
-                if (DBG) log("full ARP test result: " + responses + "/" + mNumArpPings);
-                success = (responses >= mMinArpResponses);
-            }
-            peer.close();
-        } catch (SocketException se) {
-            //Consider an Arp socket creation issue as a successful Arp
-            //test to avoid any wifi connectivity issues
-            loge("ARP test initiation failure: " + se);
-            success = true;
-        }
-
-        return success;
     }
 
     private int calculateSignalLevel(int rssi) {
