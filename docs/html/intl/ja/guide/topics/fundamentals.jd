@@ -47,7 +47,7 @@ page.title=開発の基礎
 </div>
 
 <p>
-Android アプリケーションはすべて Java プログラミング言語で記述します。コンパイル済みの Java コード（およびそのアプリケーションに必要なすべてのデータやリソース ファイル）は、<a href="{@docRoot}guide/developing/tools/aapt.html"><code>aapt</code> ツール</a>を使用して Android パッケージにバンドルします。Android パッケージは、拡張子が {@code .apk} のアーカイブ ファイルです。<i></i>ユーザーは、このファイルをデバイスにダウンロードして利用します。つまり、Android パッケージは、アプリケーションをモバイル デバイスに配布およびインストールするための媒体として機能します。1 つの {@code .apk} ファイルに含まれているすべてのコードが、1 つのアプリケーションと見なされます。<i></i>
+Android アプリケーションはすべて Java プログラミング言語で記述します。コンパイル済みの Java コード（およびそのアプリケーションに必要なすべてのデータやリソース ファイル）は、<a href="{@docRoot}tools/aapt.html"><code>aapt</code> ツール</a>を使用して Android パッケージにバンドルします。Android パッケージは、拡張子が {@code .apk} のアーカイブ ファイルです。<i></i>ユーザーは、このファイルをデバイスにダウンロードして利用します。つまり、Android パッケージは、アプリケーションをモバイル デバイスに配布およびインストールするための媒体として機能します。1 つの {@code .apk} ファイルに含まれているすべてのコードが、1 つのアプリケーションと見なされます。<i></i>
 </p>
 
 <p>
@@ -185,7 +185,7 @@ android.content.BroadcastReceiver#onReceive onReceive()}</code> メソッドが�
 </ul>
 
 <p>
-インテント メッセージについて詳しくは、<a href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and Intent Filters</a> をご覧ください。
+インテント メッセージについて詳しくは、<a href="{@docRoot}guide/components/intents-filters.html">Intents and Intent Filters</a> をご覧ください。
 </p>
 
 
@@ -293,7 +293,7 @@ Intent オブジェクトでは、対象とするコンポーネントを明示�
 </p>
 
 <p>
-インテント フィルタについて詳しくは、<a href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and Intent Filters</a> をご覧ください。
+インテント フィルタについて詳しくは、<a href="{@docRoot}guide/components/intents-filters.html">Intents and Intent Filters</a> をご覧ください。
 </p>
 
 
@@ -526,7 +526,7 @@ RPC インターフェースに含めることができるのはメソッドの�
 </p>
 
 <p>
-このメカニズムを簡単に説明すると次のようになります。まず、シンプルなインターフェース定義言語（IDL）を使用して、実装したい RPC インターフェースを宣言します。<code><a href="{@docRoot}guide/developing/tools/aidl.html">aidl</a></code> ツールにより、RPC インターフェースの宣言から Java インターフェース定義が生成されます。この定義は、ローカルとリモートの両方のプロセスで使用する必要があります。定義には、次の図に示すように 2 つの内部クラスが含まれています:
+このメカニズムを簡単に説明すると次のようになります。まず、シンプルなインターフェース定義言語（IDL）を使用して、実装したい RPC インターフェースを宣言します。<code><a href="{@docRoot}tools/aidl.html">aidl</a></code> ツールにより、RPC インターフェースの宣言から Java インターフェース定義が生成されます。この定義は、ローカルとリモートの両方のプロセスで使用する必要があります。定義には、次の図に示すように 2 つの内部クラスが含まれています:
 </p>
 
 <p style="margin-left: 2em">
@@ -560,7 +560,7 @@ onServiceDisconnected()}</code> メソッドが実装されているため、リ
 </ul>
 
 <p>
-ここでは、説明を簡単にするため、RPC メカニズムの細かい点は省略しています。詳しくは、<a href="{@docRoot}guide/developing/tools/aidl.html">Designing a Remote Interface Using AIDL</a>、および {@link android.os.IBinder IBinder} クラスの説明をご覧ください。
+ここでは、説明を簡単にするため、RPC メカニズムの細かい点は省略しています。詳しくは、<a href="{@docRoot}tools/aidl.html">Designing a Remote Interface Using AIDL</a>、および {@link android.os.IBinder IBinder} クラスの説明をご覧ください。
 </p>  
 
 

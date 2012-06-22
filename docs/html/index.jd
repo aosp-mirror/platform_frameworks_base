@@ -1,218 +1,70 @@
-home=true
+fullpage=true
+no_footer_links=true
+carousel=true
 page.metaDescription=The official site for Android developers. Provides the Android SDK and documentation for app developers and designers.
 @jd:body
 
 
-<div id="mainBodyFixed">
-              <div id="mainBodyLeft">			
-                    <div id="homeMiddle">
-                        <div id="topAnnouncement">
-                            <div id="homeTitle">
-                                <h2>Developer Announcements</h2>
-                            </div><!-- end homeTitle -->
-                            <div id="announcement-block">
-                            <!-- total max width is 520px -->
-                                  <img src="{@docRoot}images/home/play_logo.png"
-alt="Google Play" width="120px" style="padding:10px 52px"/>
-                                  <div id="announcement" style="width:275px">
-    <p>Introducing <strong>Google Play</strong>: An integrated digital content destination where
-users buy and enjoy all of their favorite content in one place. It's the new destination for
-Android apps!</p>
-    <p><a href="http://android-developers.blogspot.com/2012/03/introducing-google-play.html">Read more &raquo;</a></p>
-                                </div> <!-- end annoucement -->
-                            </div> <!-- end annoucement-block -->
-                        </div><!-- end topAnnouncement -->
-                        <div id="carouselMain" style="height:205px"> <!-- this height can be
-                                                            adjusted based on the content height -->
+<div class="wrap">
+    <!-- Slideshow -->
+    <div class="slideshow-container slideshow-home col-16">
+        <a href="" class="slideshow-prev">Prev</a>
+        <a href="" class="slideshow-next">Next</a>
+        <div class="frame">
+            <ul>
+                <li class="item carousel-home">
+                    <div class="content-left col-10">
+                        <img src="{@docRoot}images/home/design.png" style="margin-top:30px">
+                    </div>
+                    <div class="content-right col-6">
+                    <h1>Make your Android apps<br>look great</h1>
+                    <p>New templates in the design guide make it easier than ever to design apps
+that are beautiful and easy to use.</p>
+                    <a href="/design/index.html" class="button">Learn More</a>
+                    </div>
+                </li>
+                <li class="item carousel-home">
+                        <div class="content-left col-10">
+                        <img src="/images/home/google-io.png">
                         </div>
-                            <div class="clearer"></div>
-                        <div id="carouselWheel">
-                            <div class="app-list-container" align="center"> 
-                                <a href="javascript:{}" id="arrow-left" onclick="" class="arrow-left-off"></a>
-                                <div id="list-clip">
-                                    <div style="left: 0px;" id="app-list">
-                                      <!-- populated by buildCarousel() -->
-                                    </div>
-                                </div><!-- end list-clip -->
-                                <a href="javascript:{ page_right(); }" id="arrow-right" onclick="" class="arrow-right-on"></a>
-                                <div class="clearer"></div>
-                            </div><!-- end app-list container -->
-                        </div><!-- end carouselWheel -->
-                    </div><!-- end homeMiddle -->
+                        <div class="content-right col-6">
+                        <h1>Watch Android at Google I/O!</h1>
+                        <p>See the keynote and more than 40 Android developer sessions streamed live from Moscone Center in San Francisco. <div style="margin-top:-22px;">Begins June 27, 9AM PDT (UTC-7).</span></p>
+                        <a href="https://developers.google.com/events/io/sessions#android"
+class="button">See the Android Sessions</a>
+                        </div>
+                </li>
+                <li class="item carousel-home">
+                        <div class="content-left col-10">
+                            <img src="/images/home/google-play.png"
+                                  style="margin-top:50px">
+                        </div>
+                        <div class="content-right col-6">
+                        <h1>Publish your apps<br>in Google Play</h1>
+                        <p>The most visited store in the world for Android apps. Cloud-connected and always synced, it's never been easier for users to find and download your apps.</p>
 
-                    <div style="clear:both">&nbsp;</div>
-              </div><!-- end mainBodyLeft -->
-
-              <div id="mainBodyRight">
-                      <table id="rightColumn">
-                              <tr>
-                                      <td class="imageCell"><a href="{@docRoot}sdk/index.html"><img src="{@docRoot}assets/images/icon_download.jpg" style="padding:0" /></a></td>
-                                      <td>
-                                              <h2 class="green">Download</h2>
-                                              <p>The Android SDK has the tools, sample code, and docs you need to create great apps.</p>
-                                              <p><a href="{@docRoot}sdk/index.html">Learn more &raquo;</a></p>
-                                      </td>
-                              </tr>
-                              
-                              
-                              <tr>
-                                      <td colspan="2"><div class="seperator">&nbsp;</div></td>
-                              </tr>
-                              <tr>
-                                      <td class="imageCell"><a href="{@docRoot}design/index.html"><img src="{@docRoot}assets/images/icon_design.png" style="padding:5px" /></a></td>
-                                      <td>
-                                              <h2 class="green">Design</h2>
-                                              <p>Learn about principles, building blocks, and patterns for creating world-class Android user interfaces.</p>
-                                              <p><a href="{@docRoot}design/index.html">Learn more &raquo;</a></p>
-                                      </td>
-                              </tr>
-                              
-                              <tr>
-                                      <td colspan="2"><div class="seperator">&nbsp;</div></td>
-                              </tr>
-                              <tr>
-                                      <td class="imageCell"><a href="http://play.google.com/apps/publish"><img src="{@docRoot}assets/images/icon_play.png" style="padding:0" /></a></td>
-                                      <td>
-                                              <h2 class="green">Publish</h2>
-                                              <p>Google Play is an open service that lets you distribute your apps to devices.</p>
-                                              <p><a href="http://play.google.com/apps/publish">Learn more &raquo;</a></p>
-                                      </td>
-                              </tr>
-                              
-                              <tr>
-                                      <td colspan="2"><div class="seperator">&nbsp;</div></td>
-                              </tr>
-                              <tr>
-                                      <td class="imageCell"><a
-href="{@docRoot}resources/dashboard/platform-versions.html"><img
-src="{@docRoot}images/icon_dashboard.png" style="padding:0" /></a></td>
-                                      <td>
-                                              <h2 class="green">Target Devices</h2>
-                                              <p>The Device Dashboard
-provides information about deployed Android devices to
-help you target suitable device configurations as you build and update your
-apps.</p>
-                                              <p><a
-href="{@docRoot}resources/dashboard/platform-versions.html">Learn more &raquo;</a></p>
-                                      </td>
-                              </tr>
-
-                      </table>
-              </div>
-	</div>
-
-<!--[if lte IE 6]>
-  <style>
-    #arrow-left {
-      margin:0 0 0 5px;
-    }
-    #arrow-right {
-      margin-left:0;
-    }
-    .app-list-container {
-      margin: 37px 0 0 23px;
-    }
-    div#list-clip { 
-      width:468px;
-    }
-  </style>
-<![endif]-->
-
-<script type="text/javascript">
-
-// * -- carousel dictionary -- * //
-  /* layout:  imgLeft, imgRight, imgTop
-     icon:    image for carousel entry. cropped (height:70px, width:90px)
-     name:    string for carousel entry
-     img:     image for bulletin post. cropped (height: 170, width:230px)
-     title:   header for bulletin (optional, insert "" value to skip
-     desc:    the bulletin post. must include html tags. 
-  */
-
-  var droidList = {
-    'sdk': {
-      'layout':"imgLeft",
-      'icon':"sdk-small.png",
-      'name':"Android 4.0.3",
-      'img':"ics-android.png",
-      'title':"Android 4.0.3",
-      'desc': "<p>Android 4.0.3 is an update to the Ice Cream Sandwich release that adds a "
-+ "handful of new features for users and developers. Check out the <a "
-+ "href='http://developer.android.com/sdk/android-4.0-highlights.html'>Platform Highlights</a> "
-+ "for an overview of all features in Android 4.0.x.</p>"
-+ "<p>For information about API changes in 4.0.3 (API level 15), read the "
-+ "<a href='{@docRoot}sdk/android-4.0.3.html'>platform notes</a> and <a "
-+ "href='{@docRoot}sdk/api_diff/15/changes.html'>diff report</a>. If you're new to Android, "
-+ "get started with the <a href='/sdk/index.html'>SDK starter package</a>.</p>"
-    },
+                        <a href="{@docRoot}distribute/index.html" class="button">Learn More</a>
+                        </div> 
+                </li>
+            </ul>
+        </div>
+    </div>
+    <!-- /End slideshow -->
     
-    'plus': {
-      'layout':"imgLeft",
-      'icon':"google-plus-small.png",
-      'name':"Google+ Page",
-      'img':"google-plus.png",
-      'title':"Android Developers on Google+",
-      'desc': "<p>We now have a Google+ page for <a "
-+ "href='https://plus.google.com/108967384991768947849'>+Android Developers</a>. "
-+ "We'll use it to host Hangouts for developers, talk about the latest releases, "
-+ "development and design tips, and much more.</p>"
-+ "<div style='margin:.7em 0 0 0'><g:plus href='https://plus.google.com/108967384991768947849' "
-+ "size=\"smallbadge\" width=\"275\"></g:plus></div>"
-    },
+    
+    
+</div>
+<div class="wrap" style="padding-bottom:20px">
+    <!-- Section links -->
+    <div class="home-sections">
+        <ul>
+            <li><a href="{@docRoot}about/index.html">About Android</a></li>
+            <li><a href="{@docRoot}sdk/index.html">Get the SDK</a></li>
+            <li><a href="http://source.android.com">Open Source</a></li>
+            <li><a href="{@docRoot}support.html">Support</a></li>
+            <li class="last"><a href="{@docRoot}legal.html">Legal</a></li>
+        </ul>
+    </div>
+    <!-- /Section links -->
+</div>     
 
-    'tv': {
-      'layout':"imgLeft",
-      'icon':"GTV_icon_small.png",
-      'name':"Google TV",
-      'img':"GTV_icon_large.png",
-      'title':"Google TV!",
-      'desc': "<p>Build something big. By big, we mean <em>worthy-of-the-living-room</em> big.</p>"
-	        +  " <p>Google TV brings the power of Android" 
-	        +  " and Google Chrome to television."
-		+  " The average American watches five hours of TV per day. Give them the apps"
-		+  " to update their status, listen to music, watch web videos, and more.</p>"
-                +  "<p><a href='http://code.google.com/tv'>Develop for Google TV &raquo;</a></p>"
-    },
-
-/*
-    'devphone': {
-      'layout':"imgLeft",
-      'icon':"devphone-small.png",
-      'name':"Dev Phones",
-      'img':"devphone-large.png",
-      'title':"Android Dev Phones",
-      'desc': "<p>Run and debug your Android applications directly on one of these "
- + "devices. Modify and rebuild the Android operating system, and flash it onto "
- + "the phone. The Android Dev Phones are carrier-independent, and available for "
- + "purchase by developers through their Google Play publisher accounts.</p><p> "
- + "<a href='http://play.google.com/apps/publish'>Visit Google Play "
- + "to learn more &raquo;</a></p>"
-    },
-    */
-
-    'mapskey': {
-      'layout':"imgLeft",
-      'icon':"maps-small.png",
-      'name':"Maps API Key",
-      'img':"maps-large.png",
-      'title':"Maps API Key",
-      'desc':"<p>If you're writing an Android application that uses Google Maps (with MapView), you must register your application to obtain a Maps API Key. Without the key, your maps application will not work on Android devices. Obtaining a key requires just a couple of steps.</p><p><a href='http://code.google.com/android/add-ons/google-apis/maps-overview.html'>Learn more &raquo;</a></p>"
-    }
-
-  }
-</script>
-<script type="text/javascript" src="{@docRoot}assets/carousel.js"></script>
-<script type="text/javascript">
-  initCarousel("plus");
-</script>
-
-<script type="text/javascript" src="https://plus.google.com/108967384991768947849"
-rel="publisher"></script>
-<script type="text/javascript">
-window.___gcfg = {lang: 'en'};
-(function() 
-{var po = document.createElement("script");
-po.type = "text/javascript"; po.async = true;po.src = "https://apis.google.com/js/plusone.js";
-var s = document.getElementsByTagName("script")[0];
-s.parentNode.insertBefore(po, s);
-})();</script>

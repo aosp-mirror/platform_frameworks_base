@@ -1,0 +1,976 @@
+page.title=Android 3.0 Platform
+sdk.platform.version=3.0
+sdk.platform.apiLevel=11
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+<ol>
+  <li><a href="#api">API Overview</a></li>
+  <li><a href="#api-level">API Level</a></li>
+</ol>
+
+<h2>Reference</h2>
+<ol>
+<li><a
+href="{@docRoot}sdk/api_diff/11/changes.html">API
+Differences Report &raquo;</a> </li>
+</ol>
+
+</div>
+</div>
+
+
+<p><em>API Level:</em>&nbsp;<strong>{@sdkPlatformApiLevel}</strong></p>
+
+<p>For developers, the Android {@sdkPlatformVersion} platform is available as a downloadable
+component for the Android SDK. The downloadable platform includes an Android library and system
+image, as well as a set of emulator skins and more. The downloadable platform includes no external
+libraries.</p>
+
+<p>For developers, the Android {@sdkPlatformVersion} platform is available as a
+downloadable component for the Android SDK. The downloadable platform includes
+an Android library and system image, as well as a set of emulator skins and
+more. To get started developing or testing against Android {@sdkPlatformVersion},
+use the Android SDK Manager to download the platform into your SDK.</p>
+
+
+
+
+
+
+<h2 id="#api">API Overview</h2>
+
+<p>The sections below provide a technical overview of what's new for developers in Android 3.0,
+including new features and changes in the framework API since the previous version.</p>
+
+
+
+
+
+<h3>Fragments</h3>
+
+<p>A fragment is a new framework component that allows you to separate distinct elements of an
+activity into self-contained modules that define their own UI and lifecycle. To create a
+fragment, you must extend the {@link android.app.Fragment} class and implement several lifecycle
+callback methods, similar to an {@link android.app.Activity}. You can then combine multiple
+fragments in a single activity to build a multi-pane UI in which each
+pane manages its own lifecycle and user inputs.</p>
+
+<p>You can also use a fragment without providing a UI and instead use the fragment as a worker
+for the activity, such as to manage the progress of a download that occurs only while the
+activity is running.</p>
+
+<p>Additionally:</p>
+
+<ul>
+  <li>Fragments are self-contained and you can reuse them in multiple activities</li>
+  <li>You can add, remove, replace and animate fragments inside the activity</li>
+  <li>You can add fragments to a back stack managed by the activity, preserving the state of
+fragments as they are changed and allowing the user to navigate backward through the different
+states</li>
+  <li>By <a
+href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">providing
+alternative layouts</a>, you can mix and match fragments, based
+on the screen size and orientation</li>
+  <li>Fragments have direct access to their container activity and can contribute items to the
+activity's Action Bar (discussed next)</li>
+</ul>
+
+<p>To manage the fragments in your activity, you must use the {@link
+android.app.FragmentManager}, which provides several APIs for interacting with fragments, such
+as finding fragments in the activity and popping fragments off the back stack to restore their
+previous state.</p>
+
+<p>To perform a transaction, such as add or remove a fragment, you must create a {@link
+android.app.FragmentTransaction}. You can then call methods such as {@link
+android.app.FragmentTransaction#add add()} {@link android.app.FragmentTransaction#remove
+remove()}, or {@link android.app.FragmentTransaction#replace replace()}. Once you've applied all
+the changes you want to perform for the transaction, you must call {@link
+android.app.FragmentTransaction#commit commit()} and the system applies the fragment transaction to
+the activity.</p>
+
+<p>For more information about using fragments, read the <a
+href="{@docRoot}guide/components/fragments.html">Fragments</a> documentation. Several
+samples are also available in the <a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/index.html#Fragment">
+API Demos</a> application.</p>
+
+
+
+
+<h3>Action Bar</h3>
+
+<p>The Action Bar is a replacement for the traditional title bar at the top of the activity window.
+It includes the application logo in the left corner and provides a new interface for items in the
+<a href="{@docRoot}guide/topics/ui/menus.html#options-menu">Options Menu</a>. Additionally, the
+Action Bar allows you to:</p>
+
+<ul>
+  <li>Add menu items directly in the Action Bar&mdash;as "action items."
+    <p>In your XML declaration for the menu item, include the {@code
+android:showAsAction} attribute with a value of {@code "ifRoom"}. When there's enough room, the menu
+item appears directly in the Action Bar. Otherwise, the item is placed in the
+overflow menu, revealed by the menu icon on the right side of the Action Bar.</p></li>
+
+  <li>Replace an action item with a widget (such as a search box)&mdash;creating an
+"action view."
+    <p>In the XML declaration for the menu item, add the {@code android:actionViewLayout} attribute
+with a layout resource or the {@code android:actionViewClass} attribute with the class name of a
+widget. (You must also declare the {@code android:showAsAction} attribute so that the item appears
+in the Action Bar.) If there's not enough room in the Action Bar and the item appears in the
+overflow menu, it behaves like a regular menu item and does not show the widget.</p></li>
+
+  <li>Add an action to the application logo and replace it with a custom logo
+    <p>The application logo is automatically assigned the {@code android.R.id.home} ID,
+which the system delivers to your activity's {@link android.app.Activity#onOptionsItemSelected
+onOptionsItemSelected()} callback when touched. Simply respond to this ID in your callback
+method to perform an action such as go to your application's "home" activity.</p>
+    <p>To replace the icon with a logo, specify your application logo in the manifest file with the
+<a href="{@docRoot}guide/topics/manifest/application-element.html#logo">{@code android:logo}</a>
+attribute, then call {@link android.app.ActionBar#setDisplayUseLogoEnabled
+setDisplayUseLogoEnabled(true)} in your activity.</p></li>
+
+  <li>Add breadcrumbs to navigate backward through the back stack of fragments</li>
+  <li>Add tabs or a drop-down list to navigate through fragments</li>
+  <li>Customize the Action Bar with themes and backgrounds</li>
+</ul>
+
+<p>The Action Bar is standard for all applications that use the new holographic theme, which is
+also standard when you set either the <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
+android:minSdkVersion}</a> or <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
+android:targetSdkVersion}</a> to {@code "11"}.</p>
+
+<p>For more information about the Action Bar, read the <a
+href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> documentation. Several
+samples are also available in the <a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/index.html#ActionBar">
+API Demos</a> application.</p>
+
+
+
+
+<h3>System clipboard</h3>
+
+<p>Applications can now copy and paste data (beyond mere text) to and from the system-wide
+clipboard. Clipped data can be plain text, a URI, or an intent.</p>
+
+<p>By providing the system access to the data you want the user to copy, through a content provider,
+the user can copy complex content (such as an image or data structure) from your application and
+paste it into another application that supports that type of content.</p>
+
+<p>To start using the clipboard, get the global {@link android.content.ClipboardManager} object
+by calling {@link android.content.Context#getSystemService getSystemService(CLIPBOARD_SERVICE)}.</p>
+
+<p>To copy an item to the clipboard, you need to create a new {@link
+android.content.ClipData} object, which holds one or more {@link android.content.ClipData.Item}
+objects, each describing a single entity. To create a {@link android.content.ClipData} object
+containing just one {@link android.content.ClipData.Item}, you can use one of the helper methods,
+such as {@link android.content.ClipData#newPlainText newPlainText()}, {@link
+android.content.ClipData#newUri newUri()}, and {@link android.content.ClipData#newIntent
+newIntent()}, which each return a {@link android.content.ClipData} object pre-loaded with the
+{@link android.content.ClipData.Item} you provide.</p>
+
+<p>To add the {@link android.content.ClipData} to the clipboard, pass it to {@link
+android.content.ClipboardManager#setPrimaryClip setPrimaryClip()} for your instance of {@link
+android.content.ClipboardManager}.</p>
+
+<p>You can then read a file from the clipboard (in order to paste it) by calling {@link
+android.content.ClipboardManager#getPrimaryClip()} on the {@link
+android.content.ClipboardManager}. Handling the {@link android.content.ClipData} you receive can
+be complicated and you need to be sure you can actually handle the data type in the clipboard
+before attempting to paste it.</p>
+
+<p>The clipboard holds only one piece of clipped data (a {@link android.content.ClipData}
+object) at a time, but one {@link android.content.ClipData} can contain multiple {@link
+android.content.ClipData.Item}s.</p>
+
+<p>For more information, read the <a href="{@docRoot}guide/topics/text/copy-paste.html">Copy
+and Paste</a> documentation. You can also see a simple implementation of copy and paste in the API Demos
+sample and a more complete implementation in the Note Pad sample.</p>
+
+
+
+
+<h3>Drag and drop</h3>
+
+<p>New APIs simplify drag and drop operations in your application's user interface. A drag
+operation is the transfer of some kind of data&mdash;carried in a {@link android.content.ClipData}
+object&mdash;from one place to another. The start and end point for the drag operation is a {@link
+android.view.View}, so the APIs that directly handle the drag and drop operations are
+in the {@link android.view.View} class.</p>
+
+<p>A drag and drop operation has a lifecycle that's defined by several drag actions&mdash;each
+defined by a {@link android.view.DragEvent} object&mdash;such as {@link
+android.view.DragEvent#ACTION_DRAG_STARTED}, {@link android.view.DragEvent#ACTION_DRAG_ENTERED}, and
+{@link android.view.DragEvent#ACTION_DROP}. Each view that wants to participate in a drag
+operation can listen for these actions.</p>
+
+<p>To begin dragging content in your activity, call {@link android.view.View#startDrag startDrag()}
+on a {@link android.view.View}, providing a {@link android.content.ClipData} object that represents
+the data to drag, a {@link android.view.View.DragShadowBuilder} to facilitate the "shadow"
+that users see under their fingers while dragging, and an {@link java.lang.Object} that can share
+information about the drag object with views that may receive the object.</p>
+
+<p>To accept a drag object in a {@link android.view.View} (receive the "drop"), register the view
+with an {@link android.view.View.OnDragListener OnDragListener} by calling {@link
+android.view.View#setOnDragListener setOnDragListener()}. When a drag event occurs on the view, the
+system calls {@link android.view.View.OnDragListener#onDrag onDrag()} for the  {@link
+android.view.View.OnDragListener OnDragListener}, which receives a {@link android.view.DragEvent}
+describing the type of drag action has occurred (such as {@link
+android.view.DragEvent#ACTION_DRAG_STARTED}, {@link android.view.DragEvent#ACTION_DRAG_ENTERED}, and
+{@link android.view.DragEvent#ACTION_DROP}). During a drag, the system repeatedly calls {@link
+android.view.View.OnDragListener#onDrag onDrag()} for the view underneath the drag, to deliver a
+stream of drag events. The receiving view can inquire the event type delivered to {@link
+android.view.View#onDragEvent onDragEvent()} by calling {@link android.view.DragEvent#getAction
+getAction()} on the {@link android.view.DragEvent}.</p>
+
+<p class="note"><strong>Note:</strong> Although a drag event may carry a {@link
+android.content.ClipData} object, this is not related to the system clipboard. A drag and drop
+operation should never put the dragged data in the system clipboard.</p>
+
+<p>For more information, read the <a href="{@docRoot}guide/topics/ui/drag-drop.html">Dragging and
+Dropping</a> documentation. You can also see an implementation of drag and drop in the <a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/DragAndDropDemo.html">
+API Demos</a> application and the <a
+href="{@docRoot}resources/samples/HoneycombGallery/index.html">Honeycomb Gallery</a>
+application.</p>
+
+
+
+<h3>App widgets</h3>
+
+<p>Android 3.0 supports several new widget classes for more interactive app widgets on the users
+Home screen, including: {@link android.widget.GridView}, {@link android.widget.ListView}, {@link
+android.widget.StackView}, {@link android.widget.ViewFlipper}, and {@link
+android.widget.AdapterViewFlipper}.</p>
+
+<p>More importantly, you can use the new {@link android.widget.RemoteViewsService} to create app
+widgets with collections, using widgets such as {@link android.widget.GridView}, {@link
+android.widget.ListView}, and {@link android.widget.StackView} that are backed by remote data,
+such as from a content provider.</p>
+
+<p>The {@link android.appwidget.AppWidgetProviderInfo} class (defined in XML with an {@code
+&lt;appwidget-provider&gt;} element) also supports two new fields: {@link
+android.appwidget.AppWidgetProviderInfo#autoAdvanceViewId} and {@link
+android.appwidget.AppWidgetProviderInfo#previewImage}. The {@link
+android.appwidget.AppWidgetProviderInfo#autoAdvanceViewId} field lets you specify the view ID of the
+app widget subview that should be auto-advanced by the app widget’s host. The
+{@link android.appwidget.AppWidgetProviderInfo#previewImage} field specifies a preview of what the
+app widget looks like and is shown to the user from the widget picker. If this field is not
+supplied, the app widget's icon is used for the preview.</p>
+
+<p>To help create a preview image for your app widget (to specify in the {@link
+android.appwidget.AppWidgetProviderInfo#previewImage} field), the Android emulator includes an
+application called "Widget Preview." To create a preview image, launch this application, select the
+app widget for your application and set it up how you'd like your preview image to appear, then save
+it and place it in your application's drawable resources.</p>
+
+<p>You can see an implementation of the new app widget features in the <a
+href="{@docRoot}resources/samples/StackWidget/index.html">StackView App Widget</a> and <a
+href="{@docRoot}resources/samples/WeatherListWidget/index.html">Weather List Widget</a>
+applications.</p>
+
+
+
+<h3>Status bar notifications</h3>
+
+<p>The {@link android.app.Notification} APIs have been extended to support more content-rich status
+bar notifications, plus a new {@link android.app.Notification.Builder} class allows you to easily
+create {@link android.app.Notification} objects.</p>
+<p>New features include:</p>
+<ul>
+  <li>Support for a large icon in the notification, using {@link
+android.app.Notification.Builder#setLargeIcon setLargeIcon()}. This is usually for
+social applications to show the contact photo of the person who is the source of the
+notification or for media apps to show an album thumbnail.</li>
+  <li>Support for custom layouts in the status bar ticker, using {@link
+android.app.Notification.Builder#setTicker(CharSequence,RemoteViews) setTicker()}.</li>
+  <li>Support for custom notification layouts to include buttons with {@link
+android.app.PendingIntent}s, for more interactive notification widgets. For example, a
+notification can control music playback without starting an activity.</li>
+</ul>
+
+
+
+<h3>Content loaders</h3>
+
+<p>New framework APIs facilitate asynchronous loading of data using the {@link
+android.content.Loader} class. You can use it in combination with UI components such as views and
+fragments to dynamically load data from worker threads. The {@link
+android.content.CursorLoader} subclass is specially designed to help you do so for data backed by
+a {@link android.content.ContentProvider}.</p>
+
+<p>All you need to do is implement the {@link android.app.LoaderManager.LoaderCallbacks
+LoaderCallbacks} interface to receive callbacks when a new loader is requested or the data has
+changed, then call {@link android.app.LoaderManager#initLoader initLoader()} to initialize the
+loader for your activity or fragment.</p>
+
+<p>For more information, read the <a
+href="{@docRoot}guide/components/loaders.html">Loaders</a> documentation. You can also see
+example code using loaders in the <a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderCursor.html">LoaderCursor</a>
+and <a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderThrottle.html">
+LoaderThrottle</a> samples.</p>
+
+
+
+<h3>Bluetooth A2DP and headset APIs</h3>
+
+<p>Android now includes APIs for applications to verify the state of connected Bluetooth A2DP and
+headset profile devices. For example, applications can identify when a Bluetooth headset is
+connected for listening to music and notify the user as appropriate. Applications can also receive
+broadcasts for vendor specific AT commands and notify the user about the state of the connected
+device, such as when the connected device's battery is low.</p>
+
+<p>You can initialize the respective {@link android.bluetooth.BluetoothProfile} by calling {@link
+android.bluetooth.BluetoothAdapter#getProfileProxy getProfileProxy()} with either the {@link
+android.bluetooth.BluetoothProfile#A2DP} or {@link android.bluetooth.BluetoothProfile#HEADSET}
+profile constant and a {@link android.bluetooth.BluetoothProfile.ServiceListener} to receive
+callbacks when the Bluetooth client is connected or disconnected.</p>
+
+
+
+
+<h3 id="animation">Animation framework</h3>
+
+<p>An all new flexible animation framework allows you to animate arbitrary properties of any object
+(View, Drawable, Fragment, Object, or anything else). It allows you to define several aspects of an
+animation, such as:</p>
+<ul>
+  <li>Duration</li>
+  <li>Repeat amount and behavior</li>
+  <li>Type of time interpolation</li>
+  <li>Animator sets to play animations together, sequentially, or after specified delays</li>
+  <li>Frame refresh delay</li>
+</ul>
+
+ <p>You can define these animation aspects, and others, for an object's int, float, and hexadecimal
+color values, by default. That is, when an object has a property field for one of these types, you
+can change its value over time to affect an animation. To animate any other type of value, you tell
+the system how to calculate the values for that given type, by implementing the {@link
+android.animation.TypeEvaluator} interface.</p>
+
+<p>There are two animators you can use to animate the values of a property: {@link
+android.animation.ValueAnimator} and {@link android.animation.ObjectAnimator}. The {@link
+android.animation.ValueAnimator} computes the animation values, but is not aware of the specific
+object or property that is animated as a result. It simply performs the calculations, and you must
+listen for the updates and process the data with your own logic. The {@link
+android.animation.ObjectAnimator} is a subclass of {@link android.animation.ValueAnimator} and
+allows you to set the object and property to animate, and it handles all animation work.
+That is, you give the {@link android.animation.ObjectAnimator} the object to animate, the
+property of the object to change over time, and a set of values to apply to the property over
+time, then start the animation.</p>
+
+<p>Additionally, the {@link android.animation.LayoutTransition} class enables automatic transition
+animations for changes you make to your activity layout. To enable transitions for part of the
+layout, create a {@link android.animation.LayoutTransition} object and set it on
+any {@link android.view.ViewGroup} by calling {@link
+android.view.ViewGroup#setLayoutTransition setLayoutTransition()}. This causes default
+animations to run whenever items are added to or removed from the group. To specify custom
+animations, call {@link android.animation.LayoutTransition#setAnimator setAnimator()} on the {@link
+android.animation.LayoutTransition} and provide a custom {@link android.animation.Animator},
+such as a {@link android.animation.ValueAnimator} or {@link android.animation.ObjectAnimator}
+discussed above.</p>
+
+<p>For more information, see the <a
+href="{@docRoot}guide/topics/graphics/prop-animation.html">Property Animation</a> documentation. You can
+also see several samples using the animation APIs in the <a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/animation/index.html">API
+Demos</a> application.</p>
+
+
+
+
+<h3>Extended UI framework</h3>
+
+<ul>
+  
+  <li><b>Multiple-choice selection for ListView and GridView</b>
+
+<p>New {@link android.widget.AbsListView#CHOICE_MODE_MULTIPLE_MODAL} mode for {@link
+android.widget.AbsListView#setChoiceMode setChoiceMode()} allows users to select multiple items
+from a {@link android.widget.ListView} or {@link android.widget.GridView}. When used in
+conjunction with the Action Bar, users can select multiple items and then select the action to
+perform from a list of options in the Action Bar (which has transformed into a Multi-choice
+Action Mode).</p>
+
+<p>To enable multiple-choice selection, call {@link
+android.widget.AbsListView#setChoiceMode setChoiceMode(CHOICE_MODE_MULTIPLE_MODAL)} and register a
+{@link android.widget.AbsListView.MultiChoiceModeListener MultiChoiceModeListener} with {@link
+android.widget.AbsListView#setMultiChoiceModeListener setMultiChoiceModeListener()}.</p>
+
+<p>When the user performs a long-press on an item, the Action Bar switches to the Multi-choice
+Action Mode. The system notifies the {@link android.widget.AbsListView.MultiChoiceModeListener
+MultiChoiceModeListener} when items are selected by calling {@link
+android.widget.AbsListView.MultiChoiceModeListener#onItemCheckedStateChanged
+onItemCheckedStateChanged()}.</p>
+
+<p>For an example of multiple-choice selection, see the <a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/List15.html">List15.
+java</a>
+class in the API Demos sample application.</p>
+  </li>
+
+  
+  <li><b>New APIs to transform views</b>
+  
+    <p>New APIs allow you to easily apply 2D and 3D transformations to views in your activity
+layout. New transformations are made possible with a set of object properties that define the view's
+layout position, orientation, transparency and more.</p>
+    <p>New methods to set the view properties include: {@link android.view.View#setAlpha
+setAlpha()}, {@link
+android.view.View#setBottom setBottom()}, {@link android.view.View#setLeft setLeft()}, {@link
+android.view.View#setRight setRight()}, {@link android.view.View#setBottom setBottom()}, {@link
+android.view.View#setPivotX setPivotX()}, {@link android.view.View#setPivotY setPivotY()}, {@link
+android.view.View#setRotationX setRotationX()}, {@link android.view.View#setRotationY
+setRotationY()}, {@link android.view.View#setScaleX setScaleX()}, {@link android.view.View#setScaleY
+setScaleY()}, {@link android.view.View#setAlpha setAlpha()}, and others.</p>
+
+    <p>Some methods also have a corresponding XML attribute that you can specify in your layout
+file, to apply a default transformation. Available attributes include: {@code translationX}, {@code
+translationY}, {@code rotation},
+{@code rotationX}, {@code rotationY}, {@code scaleX}, {@code scaleY}, {@code transformPivotX},
+{@code transformPivotY}, and {@code alpha}.</p>
+
+    <p>Using some of these new view properties in combination with the new <a
+href="#animation">animation framework</a> (discussed
+above), you can easily apply some fancy animations to your views. For example, to rotate a
+view on its y-axis, supply {@link android.animation.ObjectAnimator} with the {@link
+android.view.View}, the "rotationY" property, and the start and end values:</p>
+<pre>
+ObjectAnimator animator = ObjectAnimator.ofFloat(myView, "rotationY", 0, 360);
+animator.setDuration(2000);
+animator.start();
+</pre>
+  </li>
+
+  
+  <li><b>New holographic themes</b>
+
+    <p>The standard system widgets and overall look have been redesigned and incorporate a new
+"holographic" user interface theme. The system applies the new theme
+using the standard <a href="{@docRoot}guide/topics/ui/themes.html">style and theme</a> system.</p>
+
+<p>Any application that targets the Android 3.0 platform&mdash;by setting either the <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code android:minSdkVersion}</a>
+or <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
+android:targetSdkVersion}</a> value to {@code "11"}&mdash;inherits the holographic theme by default.
+However, if your application also applies its own theme, then your theme will override the
+holographic theme, unless you update your styles to inherit the holographic theme.</p>
+
+<p>To apply the holographic theme to individual activities or to inherit them in your own theme
+definitions, use one of several new {@link android.R.style#Theme_Holo Theme.Holo}
+themes. If your application is compatible with version of Android lower than 3.0 and applies
+custom themes, then you should <a
+href="{@docRoot}guide/topics/ui/themes.html#SelectATheme">select a theme based on platform
+version</a>.</p>
+
+  </li>
+  
+  
+  <li><b>New widgets</b>
+
+    <ul>
+    <li>{@link android.widget.AdapterViewAnimator}
+    <p>Base class for an {@link android.widget.AdapterView} that performs animations when switching
+    between its views.</p></li>
+    
+    <li>{@link android.widget.AdapterViewFlipper}
+    <p>Simple {@link android.widget.ViewAnimator} that animates between two or more views that have
+    been added to it. Only one child is shown at a time. If requested, it can automatically flip
+  between
+    each child at a regular interval.</p></li>
+    
+    <li>{@link android.widget.CalendarView}
+    <p>Allows users to select dates from a calendar by touching the date and can scroll or fling the
+calendar to a desired date. You can configure the range of dates available in the widget.</p></li>
+    
+    <li>{@link android.widget.ListPopupWindow}
+    <p>Anchors itself to a host view and displays a list of choices, such as for a list of
+    suggestions when typing into an {@link android.widget.EditText} view.</p></li>
+    
+    <li>{@link android.widget.NumberPicker}
+    <p>Enables the user to select a number from a predefined range. The widget presents an input
+field and up and down buttons for selecting a number. Touching the input field allows the user to
+scroll through values or touch again to directly edit the current value. It also allows you to map
+positions to strings, so that the corresponding string is displayed instead of the index
+position.</p></li>
+    
+    <li>{@link android.widget.PopupMenu}
+    <p>Displays a {@link android.view.Menu} in a modal popup window that's anchored to a view. The
+popup appears below the anchor view if there is room, or above it if there is not. If the IME (soft
+keyboard) is visible, the popup does not overlap the IME it until the user touches the
+menu.</p></li>
+    
+    <li>{@link android.widget.SearchView}
+    <p>Provides a search box that you can configure to deliver search queries to a specified
+activity and display search suggestions (in the same manner as the traditional search dialog). This
+widget is particularly useful for offering a search widget in the Action Bar. For more information,
+see <a href="{@docRoot}guide/topics/search/search-dialog.html">Creating a Search Interface.</p></li>
+    
+    <li>{@link android.widget.StackView}
+    <p>A view that displays its children in a 3D stack and allows users to swipe through
+  views like a rolodex.</p></li>
+    
+    </ul>
+  </li>
+  
+</ul>
+
+
+
+<h3>Graphics</h3>
+
+<ul>
+  <li><b>Hardware accelerated 2D graphics</b>
+
+<p>You can now enable the OpenGL renderer for your application by setting {@code
+android:hardwareAccelerated="true"} in your manifest element's <a
+href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>
+element or for individual <a
+href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>
+elements.</p>
+
+<p>This flag helps applications by making them draw faster. This results in smoother animations,
+smoother scrolling, and overall better performance and response to user interaction.</p></li>
+
+
+  <li><b>View support for hardware and software layers</b>
+  
+    <p>By default, a {@link android.view.View} has no layer specified. You can specify that the
+view be backed by either a hardware or software layer, specified by values {@link
+android.view.View#LAYER_TYPE_HARDWARE} and {@link android.view.View#LAYER_TYPE_SOFTWARE}, using
+{@link android.view.View#setLayerType setLayerType()} or the <a
+href="{@docRoot}reference/android/view/View.html#attr_android:layerType">{@code layerType}</a>
+attribute.</p>
+    <p>A hardware layer is backed by a hardware specific texture (generally Frame Buffer Objects or
+FBO on OpenGL hardware) and causes the view to be rendered using Android's hardware rendering
+pipeline, but only if hardware acceleration is turned on for the view hierarchy. When hardware
+acceleration is turned off, hardware layers behave exactly as software layers.</p>
+    <p>A software layer is backed by a bitmap and causes the view to be rendered using Android's
+software rendering pipeline, even if hardware acceleration is enabled. Software layers should be
+avoided when the affected view tree updates often. Every update will require to re-render the
+software layer, which can potentially be slow.</p>
+    <p>For more information, see the {@link android.view.View#LAYER_TYPE_HARDWARE} and {@link
+android.view.View#LAYER_TYPE_SOFTWARE} documentation.</p>
+  </li>
+  
+
+  <li><b>Renderscript 3D graphics engine</b>
+
+<p>Renderscript is a runtime 3D framework that provides both an API for building 3D scenes as well
+as a special, platform-independent shader language for maximum performance. Using Renderscript, you
+can accelerate graphics operations and data processing. Renderscript is an ideal way to create
+high-performance 3D effects for applications, wallpapers, carousels, and more.</p>
+<p>For more information, see the <a
+href="{@docRoot}guide/topics/graphics/renderscript.html">3D Rendering and Computation with
+Renderscript</a> documentation.</p></li>
+</ul>
+
+
+
+
+<h3>Media</h3>
+
+
+<ul>
+
+  <li><b>Time lapse video</b>
+
+<p>Camcorder APIs now support the ability to record time lapse video. The {@link
+android.media.MediaRecorder#setCaptureRate setCaptureRate()} sets the rate at which frames
+should be captured.</p></li>
+
+  <li><b>Texture support for image streams</b>
+    
+<p>New {@link android.graphics.SurfaceTexture} allows you to capture an image stream as an OpenGL ES
+texture. By calling {@link android.hardware.Camera#setPreviewTexture setPreviewTexture()} for your
+{@link android.hardware.Camera} instance, you can specify the {@link
+android.graphics.SurfaceTexture} upon which to draw video playback or preview frames from the
+camera.</p></li>
+
+  <li><b>HTTP Live streaming</b>
+    
+<p>Applications can now pass an M3U playlist URL to the media framework to begin an HTTP Live
+streaming session. The media framework supports most of the HTTP Live streaming specification,
+including adaptive bit rate. See the <a
+href="{@docRoot}guide/appendix/media-formats.html">Supported Media Formats</a> document for
+more information.</p></li>
+
+  <li><b>EXIF data</b>
+    
+<p>The {@link android.media.ExifInterface} includes new fields for photo aperture, ISO, and exposure
+time.</p></li>
+
+  <li><b>Camcorder profiles</b>
+
+<p>New {@link android.media.CamcorderProfile#hasProfile hasProfile()} method and several video
+quality profiles (such as {@link android.media.CamcorderProfile#QUALITY_1080P}, {@link
+android.media.CamcorderProfile#QUALITY_720P}, {@link
+android.media.CamcorderProfile#QUALITY_CIF}, and others) allow you to determine camcorder
+quality options.</p></li>
+
+  <li><b>Digital media file transfer</b>
+
+<p>The platform includes built-in support for Media/Picture Transfer Protocol (MTP/PTP) over USB,
+which lets users easily transfer any type of media files between devices and to a host computer.
+Developers can build on this support, creating applications that let users create or manage rich
+media files that they may want to transfer or share across devices. </p></li>
+
+  <li><b>Digital rights management (DRM)</b>
+
+<p>New extensible digital rights management (DRM) framework for checking and enforcing digital
+rights. It's implemented in two architectural layers:</p>
+<ul>
+  <li>A DRM framework API, which is exposed to applications and runs through the Dalvik VM for
+standard applications.</li>
+  <li>A native code DRM manager that implements the framework API and exposes an interface for DRM
+plug-ins to handle rights management and decryption for various DRM schemes.</li>
+</ul>
+
+<p>For application developers, the framework offers an abstract, unified API that simplifies the
+management of protected content. The API hides the complexity of DRM operations and allows a
+consistent operation mode for both protected and unprotected content, and across a variety of DRM
+schemes.</p>
+
+<p>For device manufacturers, content owners, and Internet digital media providers the DRM
+framework?s plugin API provides a means of adding support for a DRM scheme of choice into the
+Android system, for secure enforcement of content protection.</p>
+
+<p>The preview release does not provide any native DRM plug-ins for checking and enforcing digital
+rights. However, device manufacturers may ship DRM plug-ins with their devices.</p>
+
+<p>You can find all of the DRM APIs in the {@link android.drm} package.</p></li>
+
+</ul>
+
+
+
+<h3>Keyboard support</h3>
+
+<ul>
+<li>Support for Control, Meta, Caps Lock, Num Lock and Scroll Lock modifiers. For more information,
+see {@link android.view.KeyEvent#META_CTRL_ON} and related fields.</li>
+
+<li>Support for full desktop-style keyboards, including support for keys such as Escape, Home, End,
+Delete and others. You can determine whether key events are coming from a full keyboard by
+querying {@link android.view.KeyCharacterMap#getKeyboardType()} and checking for {@link
+android.view.KeyCharacterMap#FULL KeyCharacterMap.FULL}</li>
+
+<li>{@link android.widget.TextView} now supports keyboard-based cut, copy, paste, and select-all,
+using the key combinations Ctrl+X, Ctrl+C, Ctrl+V, and Ctrl+A.  It also supports PageUp/PageDown,
+Home/End, and keyboard-based text selection.</li>
+
+<li>{@link android.view.KeyEvent} adds several new methods to make it easier to check the key
+modifier state correctly and consistently. See {@link android.view.KeyEvent#hasModifiers(int)},
+{@link android.view.KeyEvent#hasNoModifiers()},
+{@link android.view.KeyEvent#metaStateHasModifiers(int,int) metaStateHasModifiers()},
+{@link android.view.KeyEvent#metaStateHasNoModifiers(int) metaStateHasNoModifiers()}.</li>
+
+<li>Applications can implement custom keyboard shortcuts by subclassing {@link
+android.app.Activity}, {@link android.app.Dialog}, or {@link android.view.View} and implementing
+{@link android.app.Activity#onKeyShortcut onKeyShortcut()}.  The framework calls this method
+whenever a key is combined with Ctrl key.  When creating an <a
+href="{@docRoot}guide/topics/ui/menus.html#options-menu">Options Menu</a>, you can register keyboard
+shortcuts by setting either the {@code android:alphabeticShortcut} or {@code
+android:numericShortcut} attribute for each <a
+href="{@docRoot}guide/topics/resources/menu-resource.html#item-element">{@code &lt;item&gt;}</a>
+element (or with {@link android.view.MenuItem#setShortcut setShortcut()}).</li>
+
+<li>Android 3.0 includes a new "virtual keyboard" device with the id {@link
+android.view.KeyCharacterMap#VIRTUAL_KEYBOARD KeyCharacterMap.VIRTUAL_KEYBOARD}. The virtual
+keyboard has a desktop-style US key map which is useful for synthesizing key events for testing
+input.</li>
+
+</ul>
+
+
+
+
+<h3>Split touch events</h3>
+
+<p>Previously, only a single view could accept touch events at one time. Android 3.0
+adds support for splitting touch events across views and even windows, so different views can accept
+simultaneous touch events.</p>
+
+<p>Split touch events is enabled by default when an application targets
+Android 3.0. That is, when the application has set either the <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code android:minSdkVersion}</a>
+or <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
+android:targetSdkVersion}</a> attribute's value to {@code "11"}.</p>
+
+<p>However, the following properties allow you to disable split touch events across views inside
+specific view groups and across windows.</p>
+
+<ul>
+<li>The {@link android.R.attr#splitMotionEvents android:splitMotionEvents} attribute for view groups
+allows you to disable split touch events that occur between child views in a layout. For example:
+<pre>
+&lt;LinearLayout android:splitMotionEvents="false" ... >
+    ...
+&lt;/LinearLayout>
+</pre>
+<p>This way, child views in the linear layout cannot split touch events&mdash;only one view can
+receive touch events at a time.</p>
+</li>
+
+<li>The {@link android.R.attr#windowEnableSplitTouch android:windowEnableSplitTouch} style property
+allows you to disable split touch events across windows, by applying it to a theme for the activity
+or entire application. For example:
+<pre>
+&lt;style name="NoSplitMotionEvents" parent="android:Theme.Holo">
+    &lt;item name="android:windowEnableSplitTouch">false&lt;/item>
+    ...
+&lt;/style>
+</pre>
+<p>When this theme is applied to an <a
+href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> or <a
+href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>,
+only touch events within the current activity window are accepted. For example, by disabling split
+touch events across windows, the system bar cannot receive touch events at the same time as the
+activity. This does <em>not</em> affect whether views inside the activity can split touch
+events&mdash;by default, the activity can still split touch events across views.</p>
+
+<p>For more information about creating a theme, read <a
+href="{@docRoot}guide/topics/ui/themes.html">Applying Styles and Themes</a>.</p>
+</li>
+</ul>
+
+
+
+<h3>WebKit</h3>
+
+<ul>
+  <li>New {@link android.webkit.WebViewFragment} class to create a fragment composed of a
+{@link android.webkit.WebView}.</li>
+  <li>New {@link android.webkit.WebSettings} methods:
+    <ul>
+      <li>{@link
+android.webkit.WebSettings#setDisplayZoomControls setDisplayZoomControls()} allows you to hide
+the on-screen zoom controls while still allowing the user to zoom with finger gestures ({@link
+android.webkit.WebSettings#setBuiltInZoomControls setBuiltInZoomControls()} must be set
+{@code true}).</li>
+      <li>New {@link android.webkit.WebSettings} method, {@link
+android.webkit.WebSettings#setEnableSmoothTransition setEnableSmoothTransition()}, allows you
+to enable smooth transitions when panning and zooming. When enabled, WebView will choose a solution
+to maximize the performance (for example, the WebView's content may not update during the
+transition).</li>
+    </ul>
+  <li>New {@link android.webkit.WebView} methods:
+    <ul>
+      <li>{@link android.webkit.WebView#onPause onPause()} callback, to pause any processing
+associated with the WebView when it becomes hidden. This is useful to reduce unnecessary CPU or
+network traffic when the WebView is not in the foreground.</li>
+      <li>{@link android.webkit.WebView#onResume onResume()} callback, to resume processing
+associated with the WebView, which was paused during {@link android.webkit.WebView#onPause
+onPause()}.</li>
+      <li>{@link android.webkit.WebView#saveWebArchive saveWebArchive()} allows you to save the
+current view as a web archive on the device.</li>
+      <li>{@link android.webkit.WebView#showFindDialog showFindDialog()} initiates a text search in
+the current view.</li>
+    </ul>
+  </li>
+</ul>
+
+
+
+<h3>Browser</h3>
+
+<p>The Browser application adds the following features to support web applications:</p>
+
+<ul>
+  <li><b>Media capture</b>
+    <p>As defined by the <a href="http://dev.w3.org/2009/dap/camera/">HTML Media Capture</a>
+specification, the Browser allows web applications to access audio, image and video capture
+capabilities of the device. For example, the following HTML provides an input for the user to
+capture a photo to upload:</p>
+<pre>
+&lt;input type="file" accept="image/*;capture=camera" />
+</pre>
+<p>Or by excluding the {@code capture=camera} parameter, the user can choose to either capture a
+new image with the camera or select one from the device (such as from the Gallery application).</p>
+  </li>
+
+  <li><b>Device Orientation</b>
+    <p>As defined by the <a
+href="http://dev.w3.org/geo/api/spec-source-orientation.html">Device Orientation Event</a>
+specification, the Browser allows web applications to listen to DOM events that provide information
+about the physical orientation and motion of the device.</p>
+    <p>The device orientation is expressed with the x, y, and z axes, in degrees and motion is
+expressed with acceleration and rotation rate data. A web page can register for orientation
+events by calling {@code window.addEventListener} with event type {@code "deviceorientation"}
+and register for motion events by registering the {@code "devicemotion"} event type.</p>
+  </li>
+  
+  <li><b>CSS 3D Transforms</b>
+    <p>As defined by the <a href="http://www.w3.org/TR/css3-3d-transforms/">CSS 3D Transform
+Module</a> specification, the Browser allows elements rendered by CSS to be transformed in three
+dimensions.</p>
+  </li>
+</ul>
+
+
+
+<h3>JSON utilities</h3>
+
+<p>New classes, {@link android.util.JsonReader} and {@link android.util.JsonWriter}, help you
+read and write JSON streams. The new APIs complement the {@link org.json} classes, which manipulate
+a document in memory.</p>
+
+<p>You can create an instance of {@link android.util.JsonReader} by calling
+its constructor method and passing the {@link java.io.InputStreamReader} that feeds the JSON string.
+Then begin reading an object by calling {@link android.util.JsonReader#beginObject()}, read a
+key name with {@link android.util.JsonReader#nextName()}, read the value using methods
+respective to the type, such as {@link android.util.JsonReader#nextString()} and {@link
+android.util.JsonReader#nextInt()}, and continue doing so while {@link
+android.util.JsonReader#hasNext()} is true.</p>
+
+<p>You can create an instance of {@link android.util.JsonWriter} by calling its constructor and
+passing the appropriate {@link java.io.OutputStreamWriter}. Then write the JSON data in a manner
+similar to the reader, using {@link android.util.JsonWriter#name name()} to add a property name
+and an appropriate {@link android.util.JsonWriter#value value()} method to add the respective
+value.</p>
+
+<p>These classes are strict by default. The {@link android.util.JsonReader#setLenient setLenient()}
+method in each class configures them to be more liberal in what they accept. This lenient
+parse mode is also compatible with the {@link org.json}'s default parser.</p>
+
+
+
+
+<h3>New feature constants</h3>
+
+<p>The <a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a> 
+manfest element should be used to inform external entities (such as Google Play) of the set of
+hardware and software features on which your application depends. In this release, Android adds the
+following new constants that applications can declare with this element:</p>
+
+<ul>
+  <li>{@link android.content.pm.PackageManager#FEATURE_FAKETOUCH "android.hardware.faketouch"}
+    <p>When declared, this indicates that the application is compatible with a device that offers an
+emulated touchscreen (or better). A device that offers an emulated touchscreen provides a user input
+system that can emulate a subset of touchscreen
+capabilities. An example of such an input system is a mouse or remote control that drives an
+on-screen cursor. Such input systems support basic touch events like click down, click up, and drag.
+However, more complicated input types (such as gestures, flings, etc.) may be more difficult or
+impossible on faketouch devices (and multitouch gestures are definitely not possible).</p>
+    <p>If your application does <em>not</em> require complicated gestures and you do
+<em>not</em> want your application filtered from devices with an emulated touchscreen, you
+should declare {@link
+android.content.pm.PackageManager#FEATURE_FAKETOUCH "android.hardware.faketouch"} with a <a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a>
+element. This way, your application will be available to the greatest number of device types,
+including those that provide only an emulated touchscreen input.</p>
+    <p>All devices that include a touchscreen also support {@link
+android.content.pm.PackageManager#FEATURE_FAKETOUCH "android.hardware.faketouch"}, because
+touchscreen capabilities are a superset of faketouch capabilities. Thus, unless you actually require
+a touchscreen, you should add a <a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a>
+element for faketouch.</p>
+  </li>
+</ul>
+
+
+
+
+<h3>New permissions</h3>
+
+<ul>
+  <li>{@link android.Manifest.permission#BIND_REMOTEVIEWS
+"android.permission.BIND_REMOTEVIEWS"}
+  <p>This must be declared as a required permission in the <a
+href="{@docRoot}guide/topics/manifest/service-element.html">{@code &lt;service&gt;}</a> manifest
+element for an implementation of {@link android.widget.RemoteViewsService}. For example, when
+creating an App Widget that uses {@link android.widget.RemoteViewsService} to populate a
+collection view, the manifest entry may look like this:</p>
+<pre>
+&lt;service android:name=".widget.WidgetService"
+    android:exported="false"
+    android:permission="android.permission.BIND_REMOTEVIEWS" />
+</pre>
+</ul>
+
+
+
+<h3>New platform technologies</h3>
+
+<ul>
+<li><strong>Storage</strong>
+  <ul>
+  <li>ext4 file system support to enable onboard eMMC storage.</li>
+  <li>FUSE file system to support MTP devices.</li>
+  <li>USB host mode support to support keyboards and USB hubs.</li>
+  <li>Support for MTP/PTP </li>
+  </ul>
+</li>
+
+<li><strong>Linux Kernel</strong>
+  <ul>
+  <li>Upgraded to 2.6.36</li>
+  </ul>
+</li>
+
+<li><strong>Dalvik VM</strong>
+  <ul>
+  <li>New code to support and optimize for SMP</li>
+  <li>Various improvements to the JIT infrastructure</li>
+  <li>Garbage collector improvements:
+    <ul>
+    <li>Tuned for SMP</li>
+    <li>Support for larger heap sizes</li>
+    <li>Unified handling for bitmaps and byte buffers</li>
+    </ul>
+  </li>
+  </ul>
+</li>
+
+<li><strong>Dalvik Core Libraries</strong>
+  <ul>
+  <li>New, much faster implementation of NIO (modern I/O library)</li>
+  <li>Improved exception messages</li>
+  <li>Correctness and performance fixes throughout</li>
+  </ul>
+</li>
+</ul>
+
+
+
+<h3 id="api-diff">API differences report</h3>
+
+<p>For a detailed view of all API changes in Android {@sdkPlatformVersion} (API Level
+{@sdkPlatformApiLevel}), see the <a
+href="{@docRoot}sdk/api_diff/{@sdkPlatformApiLevel}/changes.html">API Differences Report</a>.</p>
+
+
+
+
+
+<h2 id="api-level">API Level</h2>
+
+<p>The Android {@sdkPlatformVersion} platform delivers an updated version of
+the framework API. The Android {@sdkPlatformVersion} API
+is assigned an integer identifier &mdash;
+<strong>{@sdkPlatformApiLevel}</strong> &mdash; that is
+stored in the system itself. This identifier, called the "API Level", allows the
+system to correctly determine whether an application is compatible with
+the system, prior to installing the application. </p>
+
+<p>To use APIs introduced in Android {@sdkPlatformVersion} in your application,
+you need compile the application against the Android library that is provided in
+the Android {@sdkPlatformVersion} SDK platform. Depending on your needs, you might 
+also need to add an <code>android:minSdkVersion="{@sdkPlatformApiLevel}"</code>
+attribute to the <code>&lt;uses-sdk&gt;</code> element in the application's
+manifest. If your application is designed to run only on Android 2.3 and higher,
+declaring the attribute prevents the application from being installed on earlier
+versions of the platform.</p>
+
+<p>For more information, read <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">What is API
+Level?</a></p>

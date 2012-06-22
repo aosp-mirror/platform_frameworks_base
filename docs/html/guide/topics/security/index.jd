@@ -1,0 +1,65 @@
+page.title=Security and Permissions
+page.landing=true
+page.landing.intro=Android's security architecture gives the user full control over what resources are accessible to each app, protecting the system itself and all apps in it. Learn how to use system permissions to request access to the resources your app needs and design your app for optimal security. 
+page.landing.image=
+
+@jd:body
+
+<div style="width=100%;padding-left:1em;">
+
+  <div style="float:left;clear:both;padding-top:20px;">
+    <p style="text-transform:uppercase;"><b style="color:#666;font-size:14px;">Blog Articles</b></p>
+
+    <div class="" style="border-top:2px solid #DDD;margin:1em 0;background-color:#F7F7F7;width:336px">
+
+      <div style="float:left;padding:8px;padding-right:16px;">
+        <img src="/assets/images/resource-article.png">
+      </div>
+
+      <div class="caption">
+        <p style="margin:0;padding:0;font-weight:bold;"><a href="">Accessibility: Are You Serving All Your Users?</a></p>
+        <p style="margin:0;padding:0">In the upcoming weeks, some of the older Client Login authentication keys will expire. 
+        If you generated the token you’re currently using to authenticate with the C2DM servers before October 2011, it will stop working.</p>
+
+        <p style="margin:0;padding:0;font-weight:bold;"><a href="">Android C2DM — Client Login key expiration</a></p>
+        <p  style="margin:0;padding:0">Accessibility is about making sure that Android users who have limited vision or other physical impairments can use your application just as well</p>
+
+        <p style="margin:0;padding:0;font-weight:bold;"><a href="">A Faster Emulator with Better Hardware Support</a></p>
+        <p  style="margin:0;padding:0">The Android emulator is a key tool for Android developers in building and testing their apps.
+        As the power and diversity of Android devices has grown quickly, it’s been hard for the emulator keep pace. </p>
+
+        <a href="">More &raquo;</a>
+      </div>
+    </div>
+  </div>
+
+  <div style="float:right;padding-top:20px;">
+    <p style="text-transform:uppercase;"><b style="color:#666;font-size:14px;">Training</b></p>
+
+    <div class="" style="border-top:2px solid #DDD;bordddser-top:2px solid #FF8800;margin:1em 0;background-color:#F7F7F7;width:336px">
+
+      <div style="float:left;padding:8px;padding-right:16px;">
+        <img src="/assets/images/resource-tutorial.png">
+      </div>
+
+      <div class="caption">
+        <p style="margin:0;padding:0;font-weight:bold;"><a href="">Managing the Activity Lifecycle</a></p>
+        <p  style="margin:0;padding:0">This class explains important lifecycle callback methods that each Activity
+        instance receives and how you can use them so your activity does what the user expects and does not consume system
+        resources when your activity doesn't need them.</p>
+
+        <p style="margin:0;padding:0;font-weight:bold;"><a href="">Supporting Different Devices</a></p>
+        <p  style="margin:0;padding:0">This class teaches you how to use basic platform features that leverage alternative
+        resources and other features so your app can provide an optimized user experience on a variety of Android-compatible devices,
+        using a single application package (APK).</p>
+
+        <p style="margin:0;padding:0;font-weight:bold;"><a href="">Sharing Content</a></p>
+        <p  style="margin:0;padding:0">This class covers some common ways you can send and receive content between
+        applications using Intent APIs and the ActionProvider object.</p>
+
+        <a href="">More &raquo;</a>
+      </div>
+    </div>
+</div>
+
+</div>

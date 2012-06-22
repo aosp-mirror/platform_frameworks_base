@@ -166,6 +166,31 @@ parent.link=animation.html
   "{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/animation/index.html">API
   Demos</a> sample project provides many examples on how to use the property
   animation system.</p>
+  
+  <h2 id="property-vs-view">How Property Animation Differs from View Animation</h2>
+  
+  <p>The view animation system provides the capability to only animate {@link android.view.View}
+  objects, so if you wanted to animate non-{@link android.view.View} objects, you have to implement
+  your own code to do so. The view animation system is also constrained in the fact that it only
+  exposes a few aspects of a {@link android.view.View} object to animate, such as the scaling and
+  rotation of a View but not the background color, for instance.</p>
+
+  <p>Another disadvantage of the view animation system is that it only modified where the
+  View was drawn, and not the actual View itself. For instance, if you animated a button to move
+  across the screen, the button draws correctly, but the actual location where you can click the
+  button does not change, so you have to implement your own logic to handle this.</p>
+
+  <p>With the property animation system, these constraints are completely removed, and you can animate
+  any property of any object (Views and non-Views) and the object itself is actually modified.
+  The property animation system is also more robust in the way it carries out animation. At
+  a high level, you assign animators to the properties that you want to animate, such as color,
+  position, or size and can define aspects of the animation such as interpolation and
+  synchronization of multiple animators.</p>
+
+  <p>The view animation system, however, takes less time to setup and requires less code to write.
+  If view animation accomplishes everything that you need to do, or if your existing code already
+  works the way you want, there is no need to use the property animation system. It also might
+  make sense to use both animation systems for different situations if the use case arises.</p>
 
   <h2>API Overview</h2>
 

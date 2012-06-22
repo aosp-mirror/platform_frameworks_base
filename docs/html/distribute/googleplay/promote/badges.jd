@@ -1,0 +1,203 @@
+page.title=Google Play Badges
+@jd:body
+
+<p>Google Play badges give you an officially branded way of promoting your app to Android users. Use the form below to quickly create badges to link users to your products from web pages, ads, reviews, and more. See <a href="linking.html">Linking to your products</a> for more ways to bring users to your apps.</p>
+
+<p>Input your app's package or your publisher name, choose the style, size, and language, and click "Build my badge". The form will generate code for an embbeded button that links to your app's product page or a list of your apps. </p>
+
+<p>Note that you should not modify the Google Play badges after generating them, including colors, size, text, and logo. See <a href="http://www.android.com/branding.html">Android Brand Guidelines</a> for more information.</p>
+
+<style type="text/css">
+
+form.button-form {
+  margin-top:2em;
+}
+
+/* the label and input elements are blocks that float left in order to
+   keep the left edgets of the input aligned, and IE 6/7 do not fully support "inline-block" */
+label.block {
+  display: block;
+  float: left;
+  width: 100px;
+  padding-right: 10px;
+}
+
+input.text {
+  display: block;
+  float: left;
+  width: 250px;
+}
+
+div.button-row {
+  white-space:nowrap;
+  min-height:80px;
+}
+
+div.button-row input {
+  vertical-align:120%;
+}
+
+#jd-content div.button-row img {
+  margin: 0;
+}
+
+</style>
+
+<script type="text/javascript">
+
+// variables for creating 'try it out' demo button
+var imagePath = "http://www.android.com/images/brand/"
+var linkStart = "<a href=\"http://play.google.com/store/";
+var imageStart = "\">\n"
+        + "  <img alt=\"";
+  // leaves opening for the alt text value
+var imageSrc = "\"\n       src=\"" + imagePath;
+  // leaves opening for the image file name
+var imageEnd = ".png\" />\n</a>";
+
+// variables for creating code snippet
+var linkStartCode = "&lt;a href=\"http://play.google.com/store/";
+var imageStartCode = "\"&gt;\n"
+        + "  &lt;img alt=\"";
+  // leaves opening for the alt text value
+var imageSrcCode = "\"\n       src=\"" + imagePath;
+  // leaves opening for the image file name
+var imageEndCode = ".png\" />\n&lt;/a>";
+
+/** Generate the HTML snippet and demo based on form values */
+function buildButton(form) {
+  var selectedValue = $('form input[type=radio]:checked').val();
+  var altText = selectedValue.indexOf("get_it") != -1 ? "Get it on Google Play" : "Android app on Google Play";
+
+  if (form["package"].value != "com.example.android") {
+    $("#preview").show();
+    $("#snippet").show().html(linkStartCode + "apps/details?id=" + form["package"].value
+            + imageStartCode + altText + imageSrcCode
+            + selectedValue + imageEndCode);
+    $("#button-preview").html(linkStart + "apps/details?id=" + form["package"].value
+            + imageStart + altText + imageSrc
+            + selectedValue + imageEnd);
+  } else if (form["publisher"].value != "Example, Inc.") {
+    $("#preview").show();
+    $("#snippet").show().html(linkStartCode + "search?q=pub:" + form["publisher"].value
+            + imageStartCode + altText + imageSrcCode
+            + selectedValue + imageEndCode);
+    $("#button-preview").html(linkStart + "search?q=pub:" + form["publisher"].value
+            + imageStart + altText + imageSrc
+            + selectedValue + imageEnd);
+  } else {
+    alert("Please enter your package name or publisher name");
+  }
+  return false;
+}
+
+/** Listen for Enter key */
+function onTextEntered(event, form, me) {
+  // 13 = enter
+  if (event.keyCode == 13) {
+    buildButton(form);
+  }
+}
+
+/** When input is focused, remove example text and disable other input */
+function onInputFocus(object, example) {
+  if (object.value == example) {
+    $(object).val('').css({'color' : '#000'});
+  }
+  $('input[type="text"]:not(input[name='+object.name+'])',
+          object.parentNode).attr('disabled','true');
+  $('#'+object.name+'-clear').show();
+}
+
+/** When input is blured, restore example text if appropriate and enable other input */
+function onInputBlur(object, example) {
+  if (object.value.length < 1) {
+    $(object).attr('value',example).css({'color':'#ccc'});
+    $('input[type="text"]', object.parentNode).removeAttr('disabled');
+    $('#'+object.name+'-clear').hide();
+  }
+}
+
+/** Clear the form to start over */
+function clearLabel(id, example) {
+  $("#preview").hide();
+  $('#'+id+'').html('').attr('value',example).css({'color':'#ccc'});
+  $('input[type="text"]', $('#'+id+'').parent()).removeAttr('disabled');
+  $('#'+id+'-clear').hide();
+  return false;
+}
+
+/** When the doc is ready, find the inputs and color the input grey if the value is the example
+    text. This is necessary to handle back-navigation, which can auto-fill the form with previous
+    values (and text should not be grey) */
+$(document).ready(function() {
+  $(".button-form input.text").each(function(index) {
+    if ($(this).val() == $(this).attr("default")) {
+      $(this).css("color","#ccc");
+    } else {
+      /* This is necessary to handle back-navigation to the page after form was filled */
+      $('input[type="text"]:not(input[name='+this.name+'])',
+              this.parentNode).attr('disabled','true');
+      $('#'+this.name+'-clear').show();
+    }
+  });
+});
+
+</script>
+
+<form class="button-form">
+  <label class="block" for="package">Package name:</label>
+  <input class="text" type="text" id="package" name="package"
+         value="com.example.android"
+         default="com.example.android"
+         onfocus="onInputFocus(this, 'com.example.android')"
+         onblur="onInputBlur(this, 'com.example.android')"
+         onkeyup="return onTextEntered(event, this.parentNode, this)"/>&nbsp;
+         <a id="package-clear" style="display:none" href="#"
+            onclick="return clearLabel('package','com.example.android');">clear</a>
+  <p style="clear:both;margin:0">&nbsp;<em>or</em></p>
+  <label class="block" style="margin-top:5px" for="publisher">Publisher&nbsp;name:</label>
+  <input class="text" type="text" id="publisher" name="publisher"
+         value="Example, Inc."
+         default="Example, Inc."
+         onfocus="onInputFocus(this, 'Example, Inc.')"
+         onblur="onInputBlur(this, 'Example, Inc.')"
+         onkeyup="return onTextEntered(event, this.parentNode, this)"/>&nbsp;
+         <a id="publisher-clear" style="display:none" href="#"
+            onclick="return clearLabel('publisher','Example, Inc.');">clear</a>
+         <br/><br/>
+
+<div class="button-row">
+  <input type="radio" name="buttonStyle" value="get_it_on_play_logo_small" id="ns" checked="checked" />
+    <label for="ns"><img src="http://www.android.com/images/brand/get_it_on_play_logo_small.png"
+alt="Get it on Google Play (small)" /></label>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+  <input type="radio" name="buttonStyle" value="get_it_on_play_logo_large" id="nm" />
+    <label for="nm"><img src="http://www.android.com/images/brand/get_it_on_play_logo_large.png"
+alt="Get it on Google Play (large)" /></label>
+</div>
+
+<div class="button-row">
+  <input type="radio" name="buttonStyle" value="android_app_on_play_logo_small" id="ws" />
+    <label for="ws"><img src="http://www.android.com/images/brand/android_app_on_play_logo_small.png"
+alt="Android app on Google Play (small)" /></label>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+  <input type="radio" name="buttonStyle" value="android_app_on_play_logo_large" id="wm" />
+    <label for="wm"><img src="http://www.android.com/images/brand/android_app_on_play_logo_large.png"
+alt="Android app on Google Play (large)" /></label>
+</div>
+
+  <input type="button" onclick="return buildButton(this.parentNode)" value="Build my badge"
+style="padding:5px" />
+  <br/>
+</form>
+
+<div id="preview" style="display:none">
+  <p>Copy and paste this HTML into your web site:</p>
+  <textarea id="snippet" cols="100" rows="5" onclick="this.select()"
+style="font-family:monospace;background-color:#efefef;padding:5px;display:none;margin-bottom:1em">
+  </textarea >
+
+<p>Try it out:</p>
+<div id="button-preview" style="margin-top:1em"></div>
+</div>

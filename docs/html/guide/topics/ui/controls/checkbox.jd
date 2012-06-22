@@ -1,0 +1,101 @@
+page.title=Checkboxes
+parent.title=Input Controls
+parent.link=../controls.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>In this document</h2>
+<ol>
+  <li><a href="#HandlingEvents">Responding to Click Events</a></li>
+</ol>
+
+<h2>Key classes</h2>
+<ol>
+  <li>{@link android.widget.CheckBox}</li>
+</ol>
+</div>
+</div>
+
+<p>Checkboxes allow the user to select one or more options from a set. Typically, you should
+present each checkbox option in a vertical list.</p>
+
+<img src="{@docRoot}images/ui/checkboxes.png" alt="" />
+
+<p>To create each checkbox option, create a {@link android.widget.CheckBox} in your layout. Because
+a set of checkbox options allows the user to select multiple items, each checkbox is managed
+separately and you must register a click listener for each one.</p>
+
+<h2 id="HandlingEvents">Responding to Click Events</h2>
+
+<p>When the user selects a checkbox, the {@link android.widget.CheckBox} object receives an
+on-click event.</p>
+
+<p>To define the click event handler for a checkbox, add the <code><a
+href="/reference/android/R.attr.html#onClick">android:onClick</a></code> attribute to the
+<code>&lt;CheckBox&gt;</code> element in your XML
+layout. The value for this attribute must be the name of the method you want to call in response
+to a click event. The {@link android.app.Activity} hosting the layout must then implement the
+corresponding method.</p>
+
+<p>For example, here are a couple {@link android.widget.CheckBox} objects in a list:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+    &lt;CheckBox android:id="&#64;+id/checkbox_meat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="&#64;string/meat"
+        android:onClick="onCheckboxClicked"/>
+    &lt;CheckBox android:id="&#64;+id/checkbox_cheese"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="&#64;string/cheese"
+        android:onClick="onCheckboxClicked"/>
+&lt;/LinearLayout>
+</pre>
+
+<p>Within the {@link android.app.Activity} that hosts this layout, the following method handles the
+click event for both checkboxes:</p>
+
+<pre>
+public void onCheckboxClicked(View view) {
+    // Is the view now checked?
+    boolean checked = (CheckBox) view).isChecked();
+    
+    // Check which checkbox was clicked
+    switch(view.getId()) {
+        case R.id.checkbox_meat:
+            if (checked)
+                // Put some meat on the sandwich
+            else
+                // Remove the meat
+            break;
+        case R.id.checkbox_cheese:
+            if (checked)
+                // Cheese me
+            else
+                // I'm lactose intolerant
+            break;
+        // TODO: Veggie sandwich
+    }
+}
+</pre>
+
+<p>The method you declare in the {@link android.R.attr#onClick android:onClick} attribute
+must have a signature exactly as shown above. Specifically, the method must:</p>
+<ul>
+  <li>Be public</li>
+  <li>Return void</li>
+  <li>Define a {@link android.view.View} as its only parameter (this will be the {@link
+android.view.View} that was clicked)</li>
+</ul>
+
+<p class="note"><strong>Tip:</strong> If you need to change the radio button state
+yourself (such as when loading a saved {@link android.preference.CheckBoxPreference}),
+use the {@link android.widget.CompoundButton#setChecked(boolean)} or {@link
+android.widget.CompoundButton#toggle()} method.</p>

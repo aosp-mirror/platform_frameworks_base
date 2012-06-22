@@ -1040,7 +1040,7 @@ category. For example:</p>
 </pre>
 
 <p>Read more about writing intent filters in the
-<a href="/guide/topics/intents/intents-filters.html">Intents and Intent Filters</a> document.</p>
+<a href="/guide/components/intents-filters.html">Intents and Intent Filters</a> document.</p>
 
 <p>For a sample application using this technique, see the 
 <a href="{@docRoot}resources/samples/NotePad/src/com/example/android/notepad/NoteEditor.html">Note

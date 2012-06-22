@@ -1,0 +1,235 @@
+page.title=Dashboards
+header.hide=1
+@jd:body
+
+
+
+<h2 id="Platform">Platform Versions</h2>
+
+<p>This page provides data about the relative number of active devices
+running a given version of the Android platform. This can help you
+understand the landscape of device distribution and decide how to prioritize
+the development of your application features for the devices currently in
+the hands of users. For information about how to target your application to devices based on
+platform version, read about <a 
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API levels</a>.</p>
+
+
+<h3 id="PlatformCurrent">Current Distribution</h3>
+
+<p>The following pie chart and table is based on the number of Android devices that have accessed
+Google Play within a 14-day period ending on the data collection date noted below.</p>
+
+<div class="col-6" style="margin-left:0">
+
+
+<table>
+<tr>
+  <th>Version</th>
+  <th>Codename</th>
+  <th>API Level</th>
+  <th>Distribution</th>
+</tr>
+<tr><td><a href="/about/versions/android-1.5.html">1.5</a></td><td>Cupcake</td>  <td>3</td><td>0.3%</td></tr>
+<tr><td><a href="/about/versions/android-1.6.html">1.6</a></td><td>Donut</td>    <td>4</td><td>0.6%</td></tr>
+<tr><td><a href="/about/versions/android-2.1.html">2.1</a></td><td>Eclair</td>   <td>7</td><td>5.2%</td></tr>
+<tr><td><a href="/about/versions/android-2.2.html">2.2</a></td><td>Froyo</td>    <td>8</td><td>19.1%</td></tr>
+<tr><td><a href="/about/versions/android-2.3.html">2.3 - 2.3.2</a>
+                                   </td><td rowspan="2">Gingerbread</td>    <td>9</td><td>0.4%</td></tr>
+<tr><td><a href="/about/versions/android-2.3.3.html">2.3.3 - 2.3.7
+        </a></td><!-- Gingerbread -->                                       <td>10</td><td>64.6%</td></tr>
+<tr><td><a href="/about/versions/android-3.1.html">3.1</a></td>
+                                                   <td rowspan="2">Honeycomb</td>      <td>12</td><td>0.7%</td></tr>
+<tr><td><a href="/about/versions/android-3.2.html">3.2</a></td><!-- Honeycomb --><td>13</td><td>2%</td></tr> 
+<tr><td><a href="/about/versions/android-4.0.html">4.0 - 4.0.2</a></td>
+                                                <td rowspan="2">Ice Cream Sandwich</td><td>14</td><td>0.4%</td></tr> 
+<tr><td><a href="/about/versions/android-4.0.3.html">4.0.3 - 4.0.4</a>     </td><!-- ICS     -->  <td>15</td><td>6.7%</td></tr> 
+</table>
+
+
+</div>
+
+<div class="col-7" style="margin-right:0">
+<img alt=""
+src="http://chart.apis.google.com/chart?&cht=p&chs=460x250&chd=t:0.3,0.6,5.2,19.1,0.4,64.6,0.7,2.0,0.4,6.7&chl=Android%201.5|Android%201.6|Android%202.1|Android%202.2|Android%202.3|Android%202.3.3|Android%203.1|Android%203.2|Android%204.0|Android%204.0.3&chco=c4df9b,6fad0c&chf=bg,s,00000000" />
+
+</div><!-- end dashboard-panel -->
+
+<p style="clear:both"><em>Data collected during a 14-day period ending on June 1, 2012</em></p>
+<!--
+<p style="font-size:.9em">* <em>Other: 0.1% of devices running obsolete versions</em></p>
+-->
+
+<h3 id="PlatformHistorical">Historical Distribution</h3>
+
+<p>The following stacked line graph provides a history of the relative number of
+active Android devices running different versions of the Android platform. It also provides a
+valuable perspective of how many devices your application is compatible with, based on the
+platform version.</p>
+
+<p>Notice that the platform versions are stacked on top of each other with the oldest active
+version at the top. This format indicates the total percent of active devices that are compatible
+with a given version of Android. For example, if you develop your application for
+the version that is at the very top of the chart, then your application is
+compatible with 100% of active devices (and all future versions), because all Android APIs are
+forward compatible. Or, if you develop your application for a version lower on the chart,
+then it is currently compatible with the percentage of devices indicated on the y-axis, where the
+line for that version meets the y-axis on the right.</p>
+
+<p>Each dataset in the timeline is based on the number of Android devices that accessed
+Google Play within a 14-day period ending on the date indicated on the x-axis.</p>
+
+<img alt="" height="250" width="660"
+src="http://chart.apis.google.com/chart?&cht=lc&chs=660x250&chxt=x,x,y,r&chxr=0,0,12|1,0,12|2,0,100|3,0,100&chxl=0%3A%7C12/01%7C12/15%7C01/01%7C01/15%7C02/01%7C02/15%7C03/01%7C03/15%7C04/01%7C04/15%7C05/01%7C05/15%7C06/01%7C1%3A%7C2011%7C%7C2012%7C%7C%7C%7C%7C%7C%7C%7C%7C%7C2012%7C2%3A%7C0%25%7C25%25%7C50%25%7C75%25%7C100%25%7C3%3A%7C0%25%7C25%25%7C50%25%7C75%25%7C100%25&chxp=0,0,1,2,3,4,5,6,7,8,9,10,11,12&chxtc=0,5&chd=t:98.6,98.5,98.3,98.2,98.6,98.4,98.4,98.6,98.5,98.6,98.8,98.7,98.9|97.3,97.3,97.2,97.2,97.6,97.5,97.6,97.8,97.8,97.9,98.1,98.1,98.3|87.7,88.1,88.7,89.2,89.9,90.3,90.8,91.4,91.8,92.1,92.5,92.7,93.1|52.4,55.2,58.2,60.1,62.0,63.7,65.2,66.8,68.6,69.9,71.5,72.6,74.0|2.3,2.6,3.5,3.6,4.0,4.1,4.3,4.6,5.5,6.5,7.6,8.2,9.4|1.2,1.3,2.0,2.2,2.6,3.0,3.2,3.5,4.5,5.5,6.6,7.4,8.7|0.0,0.0,0.3,0.4,0.7,0.8,1.1,1.3,2.3,3.3,4.4,5.3,6.7&chm=b,c3df9b,0,1,0|b,b6dc7d,1,2,0|tAndroid%202.2,5b831d,2,0,15,,t::-5|b,aadb5e,2,3,0|tAndroid%202.3.3,496c13,3,0,15,,t::-5|b,9ddb3d,3,4,0|b,91da1e,4,5,0|b,80c414,5,6,0|B,6fad0c,6,7,0&chg=7,25&chdl=Android%201.6|Android%202.1|Android%202.2|Android%202.3.3|Android%203.1|Android%203.2|Android%204.0.3&chco=add274,a0d155,94d134,84c323,73ad18,62960f,507d08&chf=bg,s,00000000" />
+
+<p><em>Last historical dataset collected during a 14-day period ending on June 1, 2012</em></p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 id="Screens">Screen Sizes and Densities</h2>
+
+<p>This section provides data about the relative number of active devices that have a particular
+screen configuration, defined by a combination of screen size and density. To simplify the way that
+you design your user interfaces for different screen configurations, Android divides the range of
+actual screen sizes and densities into:</p> 
+ 
+<ul> 
+<li>A set of four generalized <strong>sizes</strong>: <em>small</em>, <em>normal</em>,
+<em>large</em>, and <em>xlarge</em></em></li>
+<li>A set of four generalized <strong>densities</strong>: <em>ldpi</em> (low), <em>mdpi</em>
+(medium), <em>hdpi</em> (high), and <em>xhdpi</em> (extra high)</li>
+</ul> 
+
+<p>For information about how you can support multiple screen configurations in your
+application, see <a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
+Screens</a>.</p>
+
+<p class="note"><strong>Note:</strong> This data is based on the number
+of Android devices that have accessed Google Play within a 7-day period
+ending on the data collection date noted below.</p>
+
+
+<div class="col-6" style="margin-left:0">
+
+
+<table>
+<tr>
+<th></th>
+<th scope="col">ldpi</th>
+<th scope="col">mdpi</th>
+<th scope="col">hdpi</th>
+<th scope="col">xhdpi</th>
+</tr>
+<tr><th scope="row">small</th> 
+<td>2.3%</td>     <!-- small/ldpi -->
+<td></td>     <!-- small/mdpi -->
+<td>2.4%</td> <!-- small/hdpi -->
+<td></td>     <!-- small/xhdpi -->
+</tr> 
+<tr><th scope="row">normal</th> 
+<td>0.7%</td>  <!-- normal/ldpi -->
+<td>26.2%</td> <!-- normal/mdpi -->
+<td>57.8%</td> <!-- normal/hdpi -->
+<td>0.9%</td>      <!-- normal/xhdpi -->
+</tr> 
+<tr><th scope="row">large</th> 
+<td>0.3%</td>     <!-- large/ldpi -->
+<td>2%</td> <!-- large/mdpi -->
+<td></td>     <!-- large/hdpi -->
+<td></td>     <!-- large/xhdpi -->
+</tr> 
+<tr><th scope="row">xlarge</th> 
+<td></td>     <!-- xlarge/ldpi -->
+<td>7.4%</td> <!-- xlarge/mdpi -->
+<td></td>     <!-- xlarge/hdpi -->
+<td></td>     <!-- xlarge/xhdpi -->
+</tr> 
+</table>
+
+
+</div>
+
+<div class="col-7" style="margin-right:0">
+<img alt=""
+src="http://chart.googleapis.com/chart?cht=p&chs=400x250&chco=c4df9b,6fad0c&chl=Xlarge%20/%20mdpi|Large%20/%20ldpi|Large%20/%20mdpi|Normal%20/%20hdpi|Normal%20/%20ldpi|Normal%20/%20mdpi|Normal%20/%20xhdpi|Small%20/%20hdpi|Small%20/%20ldpi&chd=t%3A7.4,0.3,2.0,57.8,0.7,26.2,0.9,2.4,2.3&chf=bg,s,00000000" />
+
+</div>
+
+<p style="clear:both"><em>Data collected during a 7-day period ending on May 1, 2012</em></p>
+
+
+
+
+
+
+
+
+
+
+
+<h2 id="OpenGL">Open GL Version</h2>
+
+<p>This section provides data about the relative number of active devices that support a particular
+version of OpenGL ES. Note that support for one particular version of OpenGL ES also implies
+support for any lower version (for example, support for version 2.0 also implies support for
+1.1).</p>
+
+<p>To declare which version of OpenGL ES your application requires, you should use the {@code
+android:glEsVersion} attribute of the <a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a>
+element. You can also use the <a
+href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">{@code
+&lt;supports-gl-texture&gt;}</a> element to declare the GL compression formats that your application
+uses.</p>
+
+<p class="note"><strong>Note:</strong> This data is based on the number
+of Android devices that have accessed Google Play within a 7-day period
+ending on the data collection date noted below.</p>
+
+
+<div class="col-6" style="margin-left:0">
+<table>
+<tr>
+<th scope="col">OpenGL ES Version</th>
+<th scope="col">Distribution</th>
+</tr>
+<tr>
+<td>1.1 only</th>
+<td>9.9%</td>
+</tr>
+<tr>
+<td>2.0 &amp; 1.1</th>
+<td>90.1%</td>
+</tr>
+</table>
+</div>
+
+<div class="col-7" style="margin-right:0">
+<img alt=""
+src="http://chart.googleapis.com/chart?cht=p&chs=400x250&chco=c4df9b,6fad0c&chl=GL%201.1%20only|GL% 202.0%20%26%201.1&chd=t%3A9.9,90.1&chf=bg,s,00000000" />
+
+</div>
+
+
+<p style="clear:both"><em>Data collected during a 7-day period ending on June 4, 2012</em></p>

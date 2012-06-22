@@ -1,0 +1,465 @@
+page.title=Android Interface Definition Language (AIDL)
+@jd:body
+
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>In this document</h2>
+<ol>
+  <li><a href="#Defining">Defining an AIDL Interface</a>
+    <ol>
+      <li><a href="#Create">Create the .aidl file</a></li>
+      <li><a href="#Implement">Implement the interface</a></li>
+      <li><a href="#Expose">Expose the interface to clients</a></li>
+    </ol>
+  </li>
+  <li><a href="#PassingObjects">Passing Objects over IPC</a></li>
+  <li><a href="#Calling">Calling an IPC Method</a></li>
+</ol>
+
+<h2>See also</h2>
+<ol>
+  <li><a href="{@docRoot}guide/components/bound-services.html">Bound Services</a></li>
+</ol>
+
+</div>
+</div>
+
+
+<p>AIDL (Android Interface Definition Language) is similar to other IDLs you might have
+worked with. It allows you to define the programming interface that both
+the client and service agree upon in order to communicate with each other using
+interprocess communication (IPC). On Android, one process cannot normally access the
+memory of another process. So to talk, they need to decompose their objects into primitives that the
+operating system can understand, and marshall the objects across that boundary for you. The code to
+do that marshalling is tedious to write, so Android handles it for you with AIDL.</p>
+
+<p class="note"><strong>Note:</strong> Using AIDL is necessary only if you allow clients from
+different applications to access your service for IPC and want to handle multithreading in your
+service. If you do not need to perform concurrent IPC across
+different applications, you should create your interface by <a
+href="{@docRoot}guide/components/bound-services.html#Binder">implementing a
+Binder</a> or, if you want to perform IPC, but do <em>not</em> need to handle multithreading,
+implement your interface <a
+href="{@docRoot}guide/components/bound-services.html#Messenger">using a Messenger</a>.
+Regardless, be sure that you understand <a
+href="{@docRoot}guide/components/bound-services.html">Bound Services</a> before
+implementing an AIDL.</p>
+
+<p>Before you begin designing your AIDL interface, be aware that calls to an AIDL interface are
+direct function calls.  You should not make assumptions about the thread in which the call
+occurs.  What happens is different depending on whether the call is from a thread in the
+local process or a remote process. Specifically:</p>
+
+<ul>
+<li>Calls made from the local process are executed in the same thread that is making the call. If
+this is your main UI thread, that thread continues to execute in the AIDL interface.  If it is
+another thread, that is the one that executes your code in the service.  Thus, if only local
+threads are accessing the service, you can completely control which threads are executing in it (but
+if that is the case, then you shouldn't be using AIDL at all, but should instead create the
+interface by <a href="{@docRoot}guide/components/bound-services.html#Binder">implementing a
+Binder</a>).</li>
+
+<li>Calls from a remote process are dispatched from a thread pool the platform maintains inside of
+your own process.  You must be prepared for incoming calls from unknown threads, with multiple calls
+happening at the same time.  In other words, an implementation of an AIDL interface must be
+completely thread-safe.</li>
+
+<li>The {@code oneway} keyword modifies the behavior of remote calls.  When used, a remote call does
+not block; it simply sends the transaction data and immediately returns.
+The implementation of the interface eventually receives this as a regular call from the {@link
+android.os.Binder} thread pool as a normal remote call. If {@code oneway} is used with a local call,
+there is no impact and the call is still synchronous.</li>
+</ul>
+
+
+<h2 id="Defining">Defining an AIDL Interface</h2>
+
+<p>You must define your AIDL interface in an {@code .aidl} file using the Java
+programming language syntax, then save it in the source code (in the {@code src/} directory) of both
+the application hosting the service and any other application that binds to the service.</p>
+
+<p>When you build each application that contains the {@code .aidl} file, the Android SDK tools
+generate an {@link android.os.IBinder} interface based on the {@code .aidl} file and save it in
+the project's {@code gen/} directory. The service must implement the {@link android.os.IBinder}
+interface as appropriate. The client applications can then bind to the service and call methods from
+the {@link android.os.IBinder} to perform IPC.</p>
+
+<p>To create a bounded service using AIDL, follow these steps:</p>
+<ol>
+    <li><a href="#CreateAidl">Create the .aidl file</a>
+      <p>This file defines the programming interface with method signatures.</p>
+    </li>
+    <li><a href="#ImplementTheInterface">Implement the interface</a>
+      <p>The Android SDK tools generate an interface in the Java programming language, based on your
+{@code .aidl} file. This interface has an inner abstract class named {@code Stub} that extends
+{@link android.os.Binder} and implements methods from your AIDL interface. You must extend the
+{@code Stub} class and implement the methods.</p>
+    </li>
+    <li><a href="#ExposeTheInterface">Expose the interface to clients</a>
+      <p>Implement a {@link android.app.Service Service} and override {@link
+android.app.Service#onBind onBind()} to return your implementation of the {@code Stub}
+class.</p>
+    </li>
+</ol>
+
+<p class="caution"><strong>Caution:</strong> Any changes that you make to your AIDL interface after
+your first release must remain backward compatible in order to avoid breaking other applications
+that use your service. That is, because your {@code .aidl} file must be copied to other applications
+in order for them to access your service's interface, you must maintain support for the original
+interface.</p>
+
+
+<h3 id="Create">1. Create the .aidl file</h3>
+
+<p>AIDL uses a simple syntax that lets you declare an interface with one or more methods that can
+take parameters and return values. The parameters and return values can be of any type, even other
+AIDL-generated interfaces.</p>
+
+<p>You must construct the {@code .aidl} file using the Java programming language. Each {@code .aidl}
+file must define a single interface and requires only the interface declaration and method
+signatures.</p>
+
+<p>By default, AIDL supports the following data types:</p>
+
+<ul>
+  <li>All primitive types in the Java programming language (such as {@code int}, {@code long},
+{@code char}, {@code boolean}, and so on)</li>
+  <li>{@link java.lang.String}</li>
+  <li>{@link java.lang.CharSequence}</li>
+  <li>{@link java.util.List}
+    <p>All elements in the {@link java.util.List} must be one of the supported data types in this
+list or one of the other AIDL-generated interfaces or parcelables you've declared. A {@link
+java.util.List} may optionally be used as a "generic" class (for example,
+<code>List&lt;String&gt;</code>).
+The actual concrete class that the other side receives is always an {@link
+java.util.ArrayList}, although the method is generated to use the {@link
+java.util.List} interface.</p>
+  </li>
+  <li>{@link java.util.Map}
+    <p>All elements in the {@link java.util.Map} must be one of the supported data types in this
+list or one of the other AIDL-generated interfaces or parcelables you've declared.  Generic maps,
+(such as those of the form
+{@code Map&lt;String,Integer&gt;} are not supported. The actual concrete class that the other side
+receives is always a {@link java.util.HashMap}, although the method is generated to
+use the {@link java.util.Map} interface.</p>
+  </li>
+</ul>
+
+<p>You must include an {@code import} statement for each additional type not listed above, even if
+they are defined in the same package as your interface.</p>
+
+<p>When defining your service interface, be aware that:</p>
+<ul>
+  <li>Methods can take zero or more parameters, and return a value or void.</li>
+  <li>All non-primitive parameters require a directional tag indicating which way the data goes.
+Either <code>in</code>, <code>out</code>, or <code>inout</code> (see the example below).
+    <p>Primitives are <code>in</code> by default, and cannot be otherwise.</p>
+    <p class="caution"><strong>Caution:</strong> You should limit the direction to what is truly
+needed, because marshalling parameters is expensive.</p></li>
+  <li>All code comments included in the {@code .aidl} file are included in the generated {@link
+android.os.IBinder} interface (except for comments before the import and package
+statements).</li>
+    <li>Only methods are supported; you cannot expose static fields in AIDL.</li>
+</ul>
+
+<p>Here is an example {@code .aidl} file:</p>
+
+<pre>
+// IRemoteService.aidl
+package com.example.android;
+
+// Declare any non-default types here with import statements
+
+/** Example service interface */
+interface IRemoteService {
+    /** Request the process ID of this service, to do evil things with it. */
+    int getPid();
+
+    /** Demonstrates some basic types that you can use as parameters
+     * and return values in AIDL.
+     */
+    void basicTypes(int anInt, long aLong, boolean aBoolean, float aFloat,
+            double aDouble, String aString);
+}
+</pre>
+
+<p>Simply save your {@code .aidl} file in your project's {@code src/} directory and when you
+build your application, the SDK tools generate the {@link android.os.IBinder} interface file in your
+project's {@code gen/} directory. The generated file name matches the {@code .aidl} file name, but
+with a {@code .java} extension (for example, {@code IRemoteService.aidl} results in {@code
+IRemoteService.java}).</p>
+
+<p>If you use Eclipse, the incremental build generates the binder class almost immediately. If you
+do not use Eclipse, then the Ant tool generates the binder class next time you build your
+application&mdash;you should build your project with <code>ant debug</code> (or <code>ant
+release</code>) as soon as you're finished writing the {@code .aidl} file, so that your code can
+link against the generated class.</p>
+
+
+<h3 id="Implement">2. Implement the interface</h3>
+
+<p>When you build your application, the Android SDK tools generate a {@code .java} interface file
+named after your {@code .aidl} file. The generated interface includes a subclass named {@code Stub}
+that is an abstract implementation of its parent interface (for example, {@code
+YourInterface.Stub}) and declares all the methods from the {@code .aidl} file.</p>
+
+<p class="note"><strong>Note:</strong> {@code Stub} also
+defines a few helper methods, most notably {@code asInterface()}, which takes an {@link
+android.os.IBinder} (usually the one passed to a client's {@link
+android.content.ServiceConnection#onServiceConnected onServiceConnected()} callback method) and
+returns an instance of the stub interface. See the section <a href="#calling">Calling an IPC
+Method</a> for more details on how to make this cast.</p>
+
+<p>To implement the interface generated from the {@code .aidl}, extend the generated {@link
+android.os.Binder} interface (for example, {@code YourInterface.Stub}) and implement the methods
+inherited from the {@code .aidl} file.</p>
+
+<p>Here is an example implementation of an interface called {@code IRemoteService} (defined by the
+{@code IRemoteService.aidl} example, above) using an anonymous instance:</p>
+  
+<pre>
+private final IRemoteService.Stub mBinder = new IRemoteService.Stub() {
+    public int getPid(){
+        return Process.myPid();
+    }
+    public void basicTypes(int anInt, long aLong, boolean aBoolean,
+        float aFloat, double aDouble, String aString) {
+        // Does nothing
+    }
+};
+</pre>
+
+<p>Now the {@code mBinder} is an instance of the {@code Stub} class (a {@link android.os.Binder}),
+which defines the RPC interface for the service. In the next step, this instance is exposed to
+clients so they can interact with the service.</p>
+
+<p>There are a few rules you should be aware of when implementing your AIDL interface: </p>
+<ul>
+    <li>Incoming calls are not guaranteed to be executed on the main thread, so you need to think
+about multithreading from the start and properly build your service to be thread-safe.</li>
+    <li>By default, RPC calls are synchronous. If you know that the service takes more than a few
+milliseconds to complete a request, you should not call it from the activity's main thread, because
+it might hang the application (Android might display an &quot;Application is Not Responding&quot;
+dialog)&mdash;you should usually call them from a separate thread in the client. </li>
+    <li>No exceptions that you throw are sent back to the caller.</li>
+</ul>
+
+
+<h3 id="Expose">3. Expose the interface to clients</h3>
+
+<p>Once you've implemented the interface for your service, you need to expose it to
+clients so they can bind to it. To expose the interface
+for your service, extend {@link android.app.Service Service} and implement {@link
+android.app.Service#onBind onBind()} to return an instance of your class that implements
+the generated {@code Stub} (as discussed in the previous section). Here's an example
+service that exposes the {@code IRemoteService} example interface to clients. </p>
+
+<pre>
+public class RemoteService extends Service {
+    &#64;Override
+    public void onCreate() {
+        super.onCreate();
+    }
+
+    &#64;Override
+    public IBinder onBind(Intent intent) {
+        // Return the interface
+        return mBinder;
+    }
+
+    private final IRemoteService.Stub mBinder = new IRemoteService.Stub() {
+        public int getPid(){
+            return Process.myPid();
+        }
+        public void basicTypes(int anInt, long aLong, boolean aBoolean,
+            float aFloat, double aDouble, String aString) {
+            // Does nothing
+        }
+    };
+}
+</pre>
+
+<p>Now, when a client (such as an activity) calls {@link android.content.Context#bindService
+bindService()} to connect to this service, the client's {@link
+android.content.ServiceConnection#onServiceConnected onServiceConnected()} callback receives the
+{@code mBinder} instance returned by the service's {@link android.app.Service#onBind onBind()}
+method.</p>
+
+<p>The client must also have access to the interface class, so if the client and service are in
+separate applications, then the client's application must have a copy of the {@code .aidl} file
+in its {@code src/} directory (which generates the {@code android.os.Binder}
+interface&mdash;providing the client access to the AIDL methods).</p>
+
+<p>When the client receives the {@link android.os.IBinder} in the {@link
+android.content.ServiceConnection#onServiceConnected onServiceConnected()} callback, it must call
+<code><em>YourServiceInterface</em>.Stub.asInterface(service)</code> to cast the returned
+parameter to <code><em>YourServiceInterface</em></code> type. For example:</p>
+
+<pre>
+IRemoteService mIRemoteService;
+private ServiceConnection mConnection = new ServiceConnection() {
+    // Called when the connection with the service is established
+    public void onServiceConnected(ComponentName className, IBinder service) {
+        // Following the example above for an AIDL interface,
+        // this gets an instance of the IRemoteInterface, which we can use to call on the service
+        mIRemoteService = IRemoteService.Stub.asInterface(service);
+    }
+
+    // Called when the connection with the service disconnects unexpectedly
+    public void onServiceDisconnected(ComponentName className) {
+        Log.e(TAG, "Service has unexpectedly disconnected");
+        mIRemoteService = null;
+    }
+};
+</pre>
+
+<p>For more sample code, see the <a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/RemoteService.html">{@code
+RemoteService.java}</a> class in <a
+href="{@docRoot}resources/samples/ApiDemos/index.html">ApiDemos</a>.</p>
+
+
+
+
+
+
+  
+
+<h2 id="PassingObjects">Passing Objects over IPC</h2>
+
+<p>If you have a class that you would like to send from one process to another through
+an IPC interface, you can do that. However, you must ensure that the code for your class is
+available to the other side of the IPC channel and your class must support the {@link
+android.os.Parcelable} interface. Supporting the {@link android.os.Parcelable} interface is
+important because it allows the Android system to decompose objects into primitives that can be
+marshalled across processes.</p>
+
+<p>To create a class that supports the {@link android.os.Parcelable} protocol, you must do the
+following:</b>
+<ol>
+<li>Make your class implement the {@link android.os.Parcelable} interface.</li>
+<li>Implement {@link android.os.Parcelable#writeToParcel writeToParcel}, which takes the
+current state of the object and writes it to a {@link android.os.Parcel}.</li>
+<li>Add a static field called <code>CREATOR</code> to your class which is an object implementing
+the {@link android.os.Parcelable.Creator Parcelable.Creator} interface.</li>
+<li>Finally, create an {@code .aidl} file that declares your parcelable class (as shown for the
+{@code Rect.aidl} file, below).
+  <p>If you are using a custom build process, do <em>not</em> add the {@code .aidl} file to your
+build. Similar to a header file in the C language, this {@code .aidl} file isn't compiled.</p></li>
+</ol>
+
+<p>AIDL uses these methods and fields in the code it generates to marshall and unmarshall
+your objects.</p>
+
+<p>For example, here is a {@code Rect.aidl} file to create a {@code Rect} class that's
+parcelable:</p>
+
+<pre>
+package android.graphics;
+
+// Declare Rect so AIDL can find it and knows that it implements
+// the parcelable protocol.
+parcelable Rect;
+</pre>
+
+<p>And here is an example of how the {@link android.graphics.Rect} class implements the
+{@link android.os.Parcelable} protocol.</p>
+
+<pre>
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public final class Rect implements Parcelable {
+    public int left;
+    public int top;
+    public int right;
+    public int bottom;
+
+    public static final Parcelable.Creator&lt;Rect&gt; CREATOR = new
+Parcelable.Creator&lt;Rect&gt;() {
+        public Rect createFromParcel(Parcel in) {
+            return new Rect(in);
+        }
+
+        public Rect[] newArray(int size) {
+            return new Rect[size];
+        }
+    };
+
+    public Rect() {
+    }
+
+    private Rect(Parcel in) {
+        readFromParcel(in);
+    }
+
+    public void writeToParcel(Parcel out) {
+        out.writeInt(left);
+        out.writeInt(top);
+        out.writeInt(right);
+        out.writeInt(bottom);
+    }
+
+    public void readFromParcel(Parcel in) {
+        left = in.readInt();
+        top = in.readInt();
+        right = in.readInt();
+        bottom = in.readInt();
+    }
+}
+</pre>
+
+<p>The marshalling in the {@code Rect} class is pretty simple.  Take a look at the other
+methods on {@link android.os.Parcel} to see the other kinds of values you can write
+to a Parcel.</p>
+
+<p class="warning"><strong>Warning:</strong> Don't forget the security implications of receiving
+data from other processes.  In this case, the {@code Rect} reads four numbers from the {@link
+android.os.Parcel}, but it is up to you to ensure that these are within the acceptable range of
+values for whatever the caller is trying to do.  See <a
+href="{@docRoot}guide/topics/security/security.html">Security and Permissions</a> for more
+information about how to keep your application secure from malware.</p>
+
+
+
+<h2 id="Calling">Calling an IPC Method</h2>
+
+<p>Here are the steps a calling class must take to call a remote interface defined with AIDL: </p>
+<ol>
+    <li>Include the {@code .aidl} file in the project {@code src/} directory.</li>
+    <li>Declare an instance of the {@link android.os.IBinder} interface (generated based on the
+AIDL). </li>
+    <li>Implement {@link android.content.ServiceConnection ServiceConnection}. </li>
+    <li>Call {@link
+android.content.Context#bindService(android.content.Intent,android.content.ServiceConnection,int)
+        Context.bindService()}, passing in your {@link
+android.content.ServiceConnection} implementation. </li>
+    <li>In your implementation of {@link
+android.content.ServiceConnection#onServiceConnected onServiceConnected()},
+you will receive an {@link android.os.IBinder} instance (called <code>service</code>). Call
+<code><em>YourInterfaceName</em>.Stub.asInterface((IBinder)<em>service</em>)</code> to
+        cast the returned parameter to <em>YourInterface</em> type.</li>
+    <li>Call the methods that you defined on your interface. You should always trap
+        {@link android.os.DeadObjectException} exceptions, which are thrown when
+        the connection has broken; this will be the only exception thrown by remote
+        methods.</li>
+    <li>To disconnect, call {@link
+android.content.Context#unbindService(android.content.ServiceConnection)
+        Context.unbindService()} with the instance of your interface. </li>
+</ol>
+<p>A few comments on calling an IPC service:</p>
+<ul>
+    <li>Objects are reference counted across processes. </li>
+    <li>You can send anonymous objects
+        as method arguments. </li>
+</ul>
+
+<p>For more information about binding to a service, read the <a
+href="{@docRoot}guide/components/bound-services.html#Binding">Bound Services</a>
+document.</p>
+
+<p>Here is some sample code demonstrating calling an AIDL-created service, taken
+    from the Remote Service sample in the ApiDemos project.</p>
+<p>{@sample development/samples/ApiDemos/src/com/example/android/apis/app/RemoteService.java
+    calling_a_service}</p>

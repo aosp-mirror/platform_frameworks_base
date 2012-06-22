@@ -1,0 +1,437 @@
+page.title=MonkeyImage
+parent.title=monkeyrunner
+parent.link=index.html
+@jd:body
+<style>
+    h4.jd-details-title {background-color: #DEE8F1;}
+</style>
+
+<p>
+    A monkeyrunner class to hold an image of the device or emulator's screen. The image is
+    copied from the screen buffer during a screenshot. This object's methods allow you to
+    convert the image into various storage formats, write the image to a file, copy parts of
+    the image, and compare this object to other <code>MonkeyImage</code> objects.
+</p>
+<p>
+    You do not need to create new instances of <code>MonkeyImage</code>. Instead, use
+<code><a href="{@docRoot}tools/help/MonkeyDevice.html#takeSnapshot">
+MonkeyDevice.takeSnapshot()</a></code> to create a new instance from a screenshot. For example, use:
+</p>
+<pre>
+newimage = MonkeyDevice.takeSnapshot()
+</pre>
+<h2>Summary</h2>
+<table id="pubmethods" class="jd-sumtable">
+    <tr>
+        <th colspan="12" style="background-color: #E2E2E2">Methods</th>
+    </tr>
+    <tr class="api" >
+        <td class="jd-typecol">
+            <nobr>
+                <em>string</em>
+            </nobr>
+        </td>
+        <td class="jd-linkcol" width="100%">
+            <nobr>
+                <span class="sympad">
+                    <a href="#convertToBytes">convertToBytes</a>
+                </span>
+                (<em>string</em> format)
+            </nobr>
+            <div class="jd-descrdiv">
+                Converts the current image to a particular format and returns it as a
+                <em>string</em> that you can then access as an <em>iterable</em> of binary bytes.
+            </div>
+        </td>
+    </tr>
+    <tr class="api" >
+        <td class="jd-typecol">
+            <nobr>
+                <em>tuple</em>
+            </nobr>
+        </td>
+        <td class="jd-linkcol" width="100%">
+            <nobr>
+                <span class="sympad">
+                    <a href="#getRawPixel">getRawPixel</a>
+                </span>
+                (<em>integer</em> x,
+                <em>integer</em> y)
+            </nobr>
+            <div class="jd-descrdiv">
+                Returns the single pixel at the image location (x,y), as an
+                a <em>tuple</em> of <em>integer</em>, in the form (a,r,g,b).
+            </div>
+        </td>
+    </tr>
+    <tr class="api" >
+        <td class="jd-typecol">
+            <nobr>
+                <em>integer</em>
+            </nobr>
+        </td>
+        <td class="jd-linkcol" width="100%">
+            <nobr>
+                <span class="sympad">
+                    <a href="#getRawPixelInt">getRawPixelInt</a>
+                </span>
+                (<em>integer</em> x,
+                 <em>integer</em> y)
+            </nobr>
+            <div class="jd-descrdiv">
+                Returns the single pixel at the image location (x,y), as
+                a 32-bit <em>integer</em>.
+            </div>
+        </td>
+    </tr>
+    <tr class="api" >
+        <td class="jd-typecol">
+            <nobr>
+                <code>
+                    <a href="{@docRoot}tools/help/MonkeyImage.html">MonkeyImage</a>
+                </code>
+            </nobr>
+        </td>
+        <td class="jd-linkcol" width="100%">
+            <nobr>
+                <span class="sympad">
+                    <a href="#getSubImage">getSubImage</a>
+                </span>
+                (<em>tuple</em> rect)
+            </nobr>
+            <div class="jd-descrdiv">
+                Creates a new <code>MonkeyImage</code> object from a rectangular selection of the
+                current image.
+            </div>
+        </td>
+    </tr>
+    <tr class="api" >
+        <td class="jd-typecol">
+            <nobr>
+                <em>boolean</em>
+            </nobr>
+        </td>
+        <td class="jd-linkcol" width="100%">
+            <nobr>
+                <span class="sympad">
+                    <a href="#sameAs">sameAs</a>
+                </span>
+         (<code><a href="{@docRoot}tools/help/MonkeyImage.html">MonkeyImage</a></code>
+            other,
+            <em>float</em> percent)
+            </nobr>
+            <div class="jd-descrdiv">
+                Compares this <code>MonkeyImage</code> object to another and returns the result of
+                the comparison. The <code>percent</code> argument specifies the percentage
+                difference that is allowed for the two images to be "equal".
+            </div>
+        </td>
+    </tr>
+    <tr class="api" >
+        <td class="jd-typecol">
+            <nobr>
+                <em>void</em>
+            </nobr>
+        </td>
+        <td class="jd-linkcol" width="100%">
+            <nobr>
+                <span class="sympad">
+                    <a href="#writeToFile">writeToFile</a>
+                </span>
+                (<em>string</em> path,
+                <em>string</em> format)
+            </nobr>
+            <div class="jd-descrdiv">
+                Writes the current image to the file specified by <code>filename</code>, in the
+                format specified by <code>format</code>.
+            </div>
+        </td>
+    </tr>
+</table>
+<!-- ========= METHOD DETAIL ======== -->
+<!-- Public methods -->
+<h2>Public Methods</h2>
+<A NAME="convertToBytes"></A>
+<div class="jd-details api ">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        <em>string</em>
+      </span>
+      <span class="sympad">convertToBytes</span>
+      <span class="normal">
+      (
+            <em>string</em> format)
+      </span>
+    </h4>
+  <div class="jd-details-descr">
+
+    <div class="jd-tagdata jd-tagdescr">
+        <p>
+            Converts the current image to a particular format and returns it as a <em>string</em>
+            that you can then access as an <em>iterable</em> of binary bytes.
+        </p>
+    </div>
+    <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Arguments</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>format</th>
+            <td>
+                The desired output format. All of the common raster output formats are supported.
+                The default value is "png" (Portable Network Graphics).
+            </td>
+        </tr>
+        </table>
+    </div>
+</div>
+</div>
+<A NAME="getRawPixel"></A>
+<div class="jd-details api ">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        <em>tuple</em>
+      </span>
+      <span class="sympad">getRawPixel</span>
+      <span class="normal">
+        (<em>integer</em> x,
+         <em>integer</em> y)
+      </span>
+    </h4>
+  <div class="jd-details-descr">
+
+    <div class="jd-tagdata jd-tagdescr">
+        <p>
+            Returns the single pixel at the image location (x,y), as an
+            a <em>tuple</em> of <em>integer</em>, in the form (a,r,g,b).
+        </p>
+    </div>
+    <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Arguments</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>x</th>
+          <td>
+            The horizontal position of the pixel, starting with 0 at the left of the screen in the
+            orientation it had when the screenshot was taken.
+          </td>
+        </tr>
+        <tr>
+          <th>y</th>
+          <td>
+            The vertical position of the pixel, starting with 0 at the top of the screen in the
+            orientation it had when the screenshot was taken.
+          </td>
+        </tr>
+      </table>
+    </div>
+    <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist">
+        <li>
+            A tuple of integers representing the pixel, in the form (a,r,g,b) where
+            a is the alpha channel value, and r, g, and b are the red, green, and blue values,
+            respectively.
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+<A NAME="getRawPixelInt"></A>
+<div class="jd-details api ">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        <em>tuple</em>
+      </span>
+      <span class="sympad">getRawPixelInt</span>
+      <span class="normal">
+        (<em>integer</em> x,
+         <em>integer</em> y)
+      </span>
+    </h4>
+  <div class="jd-details-descr">
+
+    <div class="jd-tagdata jd-tagdescr">
+        <p>
+            Returns the single pixel at the image location (x,y), as an
+            an <em>integer</em>. Use this method to economize on memory.
+        </p>
+    </div>
+    <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Arguments</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>x</th>
+          <td>
+            The horizontal position of the pixel, starting with 0 at the left of the screen in the
+            orientation it had when the screenshot was taken.
+          </td>
+        </tr>
+        <tr>
+          <th>y</th>
+          <td>
+            The vertical position of the pixel, starting with 0 at the top of the screen in the
+            orientation it had when the screenshot was taken.
+          </td>
+        </tr>
+      </table>
+    </div>
+    <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist">
+        <li>
+            The a,r,g, and b values of the pixel as 8-bit values combined into a 32-bit
+            integer, with a as the leftmost 8 bits, r the next rightmost, and so forth.
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+<A NAME="getSubImage"></A>
+<div class="jd-details api ">
+    <h4 class="jd-details-title">
+      <span class="normal">
+          <code>
+              <a href="{@docRoot}tools/help/MonkeyImage.html">MonkeyImage</a>
+          </code>
+      </span>
+      <span class="sympad">getSubImage</span>
+      <span class="normal">
+        (<em>tuple</em> rect)
+      </span>
+    </h4>
+  <div class="jd-details-descr">
+
+    <div class="jd-tagdata jd-tagdescr">
+        <p>
+           Creates a new <code>MonkeyImage</code> object from a rectangular selection of the
+           current image.
+        </p>
+    </div>
+    <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Arguments</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>rect</th>
+          <td>
+            A tuple (x, y, w, h) specifying the selection. x and y specify the 0-based pixel
+            position of the upper left-hand corner of the selection. w specifies the width of the
+            region, and h specifies its height, both in units of pixels.
+            <p>
+                The image's orientation is the same as the screen orientation at the time the
+                screenshot was made.
+            </p>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist">
+        <li>
+            A new <code>MonkeyImage</code> object containing the selection.
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+<A NAME="sameAs"></A>
+<div class="jd-details api ">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        <em>boolean</em>
+      </span>
+      <span class="sympad">sameAs</span>
+      <span class="normal">
+      (
+       <code>
+           <a href="{@docRoot}tools/help/MonkeyImage.html">MonkeyImage</a>
+       </code> otherImage,
+       <em>float</em> percent
+      )
+      </span>
+    </h4>
+  <div class="jd-details-descr">
+
+    <div class="jd-tagdata jd-tagdescr">
+        <p>
+           Compares this <code>MonkeyImage</code> object to another and returns the result of
+           the comparison. The <code>percent</code> argument specifies the percentage
+           difference that is allowed for the two images to be "equal".
+        </p>
+    </div>
+    <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Arguments</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>other</th>
+          <td>
+            Another <code>MonkeyImage</code> object to compare to this one.
+          </td>
+        </tr>
+        <tr>
+          <th>
+            percent
+          </th>
+          <td>
+            A float in the range 0.0 to 1.0, inclusive, indicating
+            the percentage of pixels that need to be the same for the method to return
+            <code>true</code>. The default is 1.0, indicating that all the pixels
+            must match.
+          </td>
+        </tr>
+      </table>
+    </div>
+    <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist">
+        <li>
+            Boolean <code>true</code> if the images match, or boolean <code>false</code> otherwise.
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+<A NAME="writeToFile"></A>
+<div class="jd-details api ">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        void
+      </span>
+      <span class="sympad">writeToFile</span>
+      <span class="normal">
+      (<em>string</em> filename,
+       <em>string</em> format)
+      </span>
+    </h4>
+  <div class="jd-details-descr">
+
+    <div class="jd-tagdata jd-tagdescr">
+        <p>
+           Writes the current image to the file specified by <code>filename</code>, in the
+           format specified by <code>format</code>.
+        </p>
+    </div>
+    <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Arguments</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>path</th>
+          <td>
+            The fully-qualified filename and extension of the output file.
+          </td>
+        </tr>
+        <tr>
+            <th>
+                format
+            </th>
+            <td>
+                The output format to use for the file. If no format is provided, then the
+                method tries to guess the format from the filename's extension. If no
+                extension is provided and no format is specified, then the default format of
+                "png" (Portable Network Graphics) is used.
+            </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>

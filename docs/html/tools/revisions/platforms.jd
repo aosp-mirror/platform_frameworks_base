@@ -1,0 +1,831 @@
+page.title=Platforms
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+
+<h2>See Also</h2>
+<ol>
+  <li><a href="{@docRoot}about/versions/android-4.0-highlights.html">Ice Cream Sandwich
+Highlights and APIs</a></li>
+  <li><a href="{@docRoot}about/versions/android-3.0-highlights.html">Honeycomb
+Highlights and APIs</a></li>
+  <li><a href="{@docRoot}about/versions/android-2.3-highlights.html">Gingerbread
+Highlights and APIs</a></li>
+</ol>
+
+</div>
+</div>
+
+
+
+<p>To develop an Android app, you must install at least one Android platform from the SDK Manager
+against which you can compile your app. Often, any given version of the Android will be revised
+with bug fixes or other changes, as denoted by the "revision" number. Below, you'll find the
+release notes for each version of the platform and the subsequent revisions to the platform
+version.</p>
+
+<p>To determine what revision of an Android platform you
+have installed, refer to the "Installed Packages" listing in the Android SDK Manager.</p>
+
+
+
+
+
+
+
+
+<h2 id="4.0.3">Android 4.0.3</h2>
+
+
+<p class="caution"><strong>Important:</strong> To download the new Android
+4.0.x system components from the Android SDK Manager, you must first update the
+SDK tools to revision 14 or later and restart the Android SDK Manager. If you do not,
+the Android 4.0.x system components will not be available for download.</p>
+
+<div class="toggle-content opened">
+
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-opened.png"
+class="toggle-content-img" alt="" />
+    Revision 3</a> <em>(March 2012)</em>
+  </a></p>
+
+  <div class="toggle-content-toggleme" style="padding-left:2em;">
+
+    <p>Maintenance update. The system version is 4.0.4.</p>
+    <p class="note"><strong>Note:</strong> This system image includes support for emulator
+hardware graphics acceleration when used with SDK Tools r17 or higher.
+(<a href="{@docRoot}tools/devices/emulator.html#accel-graphics">more info</a>)</p>
+    <dl>
+      <dt>Dependencies:</dt>
+      <dd>SDK Tools r17 or higher is required.</dd>
+    </dl>
+
+  </div>
+</div>
+
+<div class="toggle-content closed" >
+
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png"
+class="toggle-content-img" alt="" />
+    Revision 2</a> <em>(January 2012)</em>
+  </a></p>
+
+  <div class="toggle-content-toggleme" style="padding-left:2em;">
+
+    <p>Maintenance update. The system version is 4.0.3.</p>
+    <dl>
+      <dt>Dependencies:</dt>
+      <dd>SDK Tools r14 or higher is required.</dd>
+    </dl>
+
+  </div>
+</div>
+
+<div class="toggle-content closed" >
+
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png"
+class="toggle-content-img" alt="" />
+    Revision 1</a> <em>(December 2011)</em>
+  </a></p>
+
+  <div class="toggle-content-toggleme" style="padding-left:2em;">
+
+    <p>Initial release. The system version is 4.0.3.</p>
+    <dl>
+      <dt>Dependencies:</dt>
+      <dd>SDK Tools r14 or higher is required.</dd>
+    </dl>
+
+  </div>
+</div>
+
+<h3>Emulator Skins</h3>
+
+<p>The downloadable platform includes the following emulator skins:</p>
+
+<ul>
+  <li>
+    QVGA (240x320, low density, small screen)
+  </li>
+  <li>
+    WQVGA400 (240x400, low density, normal screen)
+  </li>
+  <li>
+    WQVGA432 (240x432, low density, normal screen)
+  </li>
+  <li>
+    HVGA (320x480, medium density, normal screen)
+  </li>
+  <li>
+    WVGA800 (480x800, high density, normal screen)
+  </li>
+  <li>
+    WVGA854 (480x854 high density, normal screen)
+  </li>
+  <li>
+    WXGA720 (1280x720, extra-high density, normal screen) 
+  </li>
+  <li>
+    WSVGA (1024x600, medium density, large screen) 
+  </li>
+  <li>
+    WXGA (1280x800, medium density, xlarge screen)
+  </li>
+</ul>
+
+<p>To test your application on an emulator that represents the latest Android device, you can create
+an AVD with the new WXGA720 skin (it's an xhdpi, normal screen device). Note that the emulator
+currently doesn't support the new on-screen navigation bar for devices without hardware navigation
+buttons, so when using this skin, you must use keyboard keys <em>Home</em> for the Home button,
+<em>ESC</em> for the Back button, and <em>F2</em> or <em>Page-up</em> for the Menu button.</p>
+
+<p>However, due to performance issues in the emulator when running high-resolution screens such as
+the one for the WXGA720 skin, we recommend that you primarily use the traditional WVGA800 skin
+(hdpi, normal screen) to test your application.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 id="4.0">Android 4.0</h2>
+
+
+<div class="toggle-content closed">
+
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png"
+class="toggle-content-img" alt="" />
+    Android 4.0, Revision 2</a> <em>(December 2011)</em>
+  </a></p>
+
+  <div class="toggle-content-toggleme" style="padding-left:2em;">
+    <p>Maintenance update. The system version is 4.0.2.</p>
+    <dl>
+      <dt>Dependencies:</dt>
+      <dd>SDK Tools r14 or higher is required.</dd>
+    </dl>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png"
+class="toggle-content-img" alt="" />
+    Android 4.0, Revision 1</a> <em>(October 2011)</em>
+  </a></p>
+
+  <div class="toggle-content-toggleme" style="padding-left:2em;">
+    <p>Initial release. The system version is 4.0.1.</p>
+    <dl>
+      <dt>Dependencies:</dt>
+      <dd>SDK Tools r14 or higher is required.</dd>
+    </dl>
+  </div>
+</div>
+
+
+<h3>Emulator Skins</h3>
+
+<p>The downloadable platform includes the following emulator skins:</p>
+
+<ul>
+  <li>
+    QVGA (240x320, low density, small screen)
+  </li>
+  <li>
+    WQVGA400 (240x400, low density, normal screen)
+  </li>
+  <li>
+    WQVGA432 (240x432, low density, normal screen)
+  </li>
+  <li>
+    HVGA (320x480, medium density, normal screen)
+  </li>
+  <li>
+    WVGA800 (480x800, high density, normal screen)
+  </li>
+  <li>
+    WVGA854 (480x854 high density, normal screen)
+  </li>
+  <li>
+    WXGA720 (1280x720, extra-high density, normal screen) <span class="new">new</span>
+  </li>
+  <li>
+    WSVGA (1024x600, medium density, large screen) <span class="new">new</span>
+  </li>
+  <li>
+    WXGA (1280x800, medium density, xlarge screen)
+  </li>
+</ul>
+
+<p>To test your application on an emulator that represents the latest Android device, you can create
+an AVD with the new WXGA720 skin (it's an xhdpi, normal screen device). Note that the emulator
+currently doesn't support the new on-screen navigation bar for devices without hardware navigation
+buttons, so when using this skin, you must use keyboard keys <em>Home</em> for the Home button,
+<em>ESC</em> for the Back button, and <em>F2</em> or <em>Page-up</em> for the Menu button.</p>
+
+<p>However, due to performance issues in the emulator when running high-resolution screens such as
+the one for the WXGA720 skin, we recommend that you primarily use the traditional WVGA800 skin
+(hdpi, normal screen) to test your application.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 id="3.2">Android 3.2</h2>
+
+
+
+<div class="toggle-content closed">
+
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png"
+class="toggle-content-img" alt="" />
+    Android 3.2, Revision 1</a> <em>(July 2011)</em>
+  </a></p>
+
+  <div class="toggle-content-toggleme" style="padding-left:2em;">
+
+<dl>
+<dt>Initial release. SDK Tools r12 or higher is recommended.</dt>
+</dl>
+
+  </div>
+</div>
+
+
+
+
+<h3>Emulator Skins</h3>
+
+<p>The downloadable platform includes the following emulator skin:</p>
+
+<ul>
+  <li>
+    WXGA (1280x800, medium density, xlarge screen)
+  </li>
+</ul>
+
+<p>For more information about how to develop an application that displays
+and functions properly on all Android-powered devices, see <a
+href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
+Screens</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 id="3.1">Android 3.1</h2>
+
+
+<div class="toggle-content closed">
+
+<p><a href="#" onclick="return toggleContent(this)">
+  <img src="{@docRoot}assets/images/triangle-closed.png"
+class="toggle-content-img" alt="" />
+  Android 3.1, Revision 3</a> <em>(July 2011)</em>
+</a></p>
+
+<div class="toggle-content-toggleme" style="padding-left:2em;">
+
+<dl>
+<dt>Dependencies:</dt>
+<dd>
+<p>Requires <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r12</a> or
+higher.</p>
+</dd>
+<dt>Notes:</dt>
+<dd>
+<p>Improvements to the platform's rendering library to support the visual layout editor in the ADT
+Eclipse plugin. This revision allows for more drawing features in ADT and fixes several
+bugs in the previous rendering library. It also unlocks several editor features that were added in
+ADT 12.</p>
+</dd>
+</dl>
+
+</div>
+</div>
+
+
+<div class="toggle-content closed" >
+
+<p><a href="#" onclick="return toggleContent(this)">
+  <img src="{@docRoot}assets/images/triangle-closed.png"
+class="toggle-content-img" alt="" />
+  Android 3.1, Revision 2</a> <em>(May 2011)</em>
+</a></p>
+
+<div class="toggle-content-toggleme" style="padding-left:2em;">
+
+<dl>
+<dt>Dependencies:</dt>
+<dd>
+<p>Requires <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r11</a> or
+higher.</p>
+</dd>
+<dt>Notes:</dt>
+<dd>
+<p>Fixes an issue with the visual layout editor rendering library that prevented Android 3.1 from
+running in ADT.</p>
+</dd>
+</dl>
+
+</div>
+</div>
+
+
+<div class="toggle-content closed">
+
+<p><a href="#" onclick="return toggleContent(this)">
+  <img src="{@docRoot}assets/images/triangle-closed.png"
+class="toggle-content-img" alt="" />
+  Android 3.1, Revision 1</a> <em>(May 2011)</em>
+</a></p>
+
+<div class="toggle-content-toggleme" style="padding-left:2em;">
+
+<dl>
+<dt>Dependencies:</dt>
+<dd>
+<p>Requires <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r11</a> or
+higher.</p>
+</dd>
+</dl>
+
+</div>
+</div>
+
+
+<h3>Emulator Skins</h3>
+
+<p>The downloadable platform includes the following emulator skin:</p>
+
+<ul>
+  <li>
+    WXGA (1280x800, medium density, xlarge screen)
+  </li>
+</ul>
+
+<p>For more information about how to develop an application that displays
+and functions properly on all Android-powered devices, see <a
+href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
+Screens</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+<h2 id="3.0">Android 3.0</h2>
+
+
+<div class="toggle-content closed" >
+
+<p><a href="#" onclick="return toggleContent(this)">
+  <img src="{@docRoot}assets/images/triangle-closed.png"
+class="toggle-content-img" alt="" />
+  Android 3.0, Revision 2</a> <em>(July 2011)</em>
+</a></p>
+
+<div class="toggle-content-toggleme" style="padding-left:2em;">
+
+<dl>
+<dt>Dependencies:</dt>
+<dd>
+<p>Requires <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r12</a> or
+higher.</p>
+</dd>
+<dt>Notes:</dt>
+<dd>
+<p>Improvements to the platform's rendering library to support the visual layout editor in the ADT
+Eclipse plugin. This revision allows for more drawing features in ADT and fixes several
+bugs in the previous rendering library. It also unlocks several editor features that were added in
+ADT 12.</p>
+</dd>
+</dl>
+
+</div>
+</div>
+
+<div class="toggle-content closed">
+
+<p><a href="#" onclick="return toggleContent(this)">
+  <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt="" />
+  Android 3.0, Revision 1</a> <em>(February 2011)</em>
+</a></p>
+
+<div class="toggle-content-toggleme" style="padding-left:2em;">
+    
+<dl>
+<dt>Dependencies:</dt>
+<dd>
+<p>Requires <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r10</a> or higher.</p>
+</dd>
+</dl>
+
+</div>
+</div>
+
+
+
+<h3>Emulator Skins</h3>
+
+<p>The downloadable platform includes the following emulator skin:</p>
+
+<ul>
+  <li>
+    WXGA (1280x800, medium density, xlarge screen)
+  </li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 id="2.3.4">Android 2.3.4</h2>
+
+
+
+<p>The sections below provide notes about successive releases of
+the Android 2.3.4 platform component for the Android SDK, as denoted by
+revision number. To determine what revision(s) of the Android
+2.3.4 platforms are installed in your SDK environment, refer to
+the "Installed Packages" listing in the Android SDK and AVD Manager.</p>
+
+<div class="toggle-content closed" >
+
+<p><a href="#" onclick="return toggleContent(this)">
+  <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt="" />
+        Android 2.3.4, Revision 1</a> <em>(May 2011)</em>
+</a></p>
+
+  <div class="toggle-content-toggleme" style="padding-left:2em;">
+    <dl>
+      <dt>Dependencies:</dt>
+      <dd>
+        <p>Requires SDK Tools r11 or higher.</p>
+      </dd>
+    </dl>
+  </div>
+</div>
+
+
+<h3>Emulator Skins</h3>
+
+<p>The downloadable platform includes a set of emulator skins that you can use
+for modeling your application in different screen sizes and resolutions. The
+emulator skins are:</p>
+
+<ul>
+  <li>
+    QVGA (240x320, low density, small screen)
+  </li>
+  <li>
+    WQVGA400 (240x400, low density, normal screen)
+  </li>
+  <li>
+    WQVGA432 (240x432, low density, normal screen)
+  </li>
+  <li>
+    HVGA (320x480, medium density, normal screen)
+  </li>
+  <li>
+    WVGA800 (480x800, high density, normal screen)
+  </li>
+  <li>
+    WVGA854 (480x854 high density, normal screen)
+  </li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 id="2.3.3">Android 2.3.3</h2>
+
+
+<div class="toggle-content closed" >
+
+<p><a href="#" onclick="return toggleContent(this)">
+  <img src="{@docRoot}assets/images/triangle-closed.png"
+class="toggle-content-img" alt="" />
+  Android 2.3.3, Revision 2</a> <em>(July 2011)</em>
+</a></p>
+
+<div class="toggle-content-toggleme" style="padding-left:2em;">
+
+<dl>
+<dt>Dependencies:</dt>
+<dd>
+<p>Requires <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r12</a> or
+higher.</p>
+</dd>
+<dt>Notes:</dt>
+<dd>
+<p>Improvements to the platform's rendering library to support the visual layout editor in the ADT
+Eclipse plugin. This revision allows for more drawing features in ADT and fixes several
+bugs in the previous rendering library. It also unlocks several editor features that were added in
+ADT 12.</p>
+</dd>
+</dl>
+
+</div>
+</div>
+
+<div class="toggle-content closed" >
+
+<p><a href="#" onclick="return toggleContent(this)">
+  <img src="{@docRoot}assets/images/triangle-closed.png"
+class="toggle-content-img" alt="" />
+  Android 2.3.3, Revision 1</a> <em>(February 2011)</em>
+</a></p>
+
+<div class="toggle-content-toggleme" style="padding-left:2em;">
+<dl>
+<dt>Dependencies:</dt>
+<dd>
+<p>Requires SDK Tools r9 or higher.</p>
+</dd>
+</dl>
+
+</div>
+</div>
+
+
+<h3>Emulator Skins</h3>
+
+<p>The downloadable platform includes a set of emulator skins that you can use
+for modeling your application in different screen sizes and resolutions. The
+emulator skins are:</p>
+
+<ul>
+  <li>
+    QVGA (240x320, low density, small screen)
+  </li>
+  <li>
+    WQVGA400 (240x400, low density, normal screen)
+  </li>
+  <li>
+    WQVGA432 (240x432, low density, normal screen)
+  </li>
+  <li>
+    HVGA (320x480, medium density, normal screen)
+  </li>
+  <li>
+    WVGA800 (480x800, high density, normal screen)
+  </li>
+  <li>
+    WVGA854 (480x854 high density, normal screen)
+  </li>
+</ul>
+  
+
+
+
+
+
+
+
+
+
+
+
+<h2 id="2.3">Android 2.3</h2>
+
+
+
+<p>The sections below provide notes about successive releases of
+the Android 2.3 platform component for the Android SDK, as denoted by
+revision number. To determine what revision(s) of the Android
+2.3 platforms are installed in your SDK environment, refer to
+the "Installed Packages" listing in the Android SDK and AVD Manager.</p>
+
+
+<div class="toggle-content closed" >
+
+<p><a href="#" onclick="return toggleContent(this)">
+  <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt="" />
+        Android 2.3, Revision 1</a> <em>(December 2010)</em>
+</a></p>
+
+  <div class="toggle-content-toggleme" style="padding-left:2em;">
+    <dl>
+      <dt>Dependencies:</dt>
+      <dd>
+      <p>Requires SDK Tools r8 or higher.</p>
+      </dd>
+    </dl>
+  </div>
+</div>
+
+
+<h3>Emulator Skins</h3>
+
+<p>The downloadable platform includes a set of emulator skins that you can use
+for modeling your application in different screen sizes and resolutions. The
+emulator skins are:</p>
+
+<ul>
+  <li>
+    QVGA (240x320, low density, small screen)
+  </li>
+  <li>
+    WQVGA400 (240x400, low density, normal screen)
+  </li>
+  <li>
+    WQVGA432 (240x432, low density, normal screen)
+  </li>
+  <li>
+    HVGA (320x480, medium density, normal screen)
+  </li>
+  <li>
+    WVGA800 (480x800, high density, normal screen)
+  </li>
+  <li>
+    WVGA854 (480x854 high density, normal screen)
+  </li>
+</ul>
+
+
+  
+
+
+
+
+
+
+<h2 id="2.2">Android 2.2</h2>
+
+
+<div class="toggle-content closed" >
+
+<p><a href="#" onclick="return toggleContent(this)">
+  <img src="{@docRoot}assets/images/triangle-closed.png"
+class="toggle-content-img" alt="" />
+  Android {@sdkPlatformVersion}, Revision 3</a> <em>(July 2011)</em>
+</a></p>
+
+<div class="toggle-content-toggleme" style="padding-left:2em;">
+
+<dl>
+<dt>Dependencies:</dt>
+<dd>
+<p>Requires <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r12</a> or
+higher.</p>
+</dd>
+<dt>Notes:</dt>
+<dd>
+<p>Improvements to the platform's rendering library to support the visual layout editor in the ADT
+Eclipse plugin. This revision allows for more drawing features in ADT and fixes several
+bugs in the previous rendering library. It also unlocks several editor features that were added in
+ADT 12.</p>
+</dd>
+</dl>
+
+</div>
+</div>
+
+<div class="toggle-content closed" >
+
+<p><a href="#" onclick="return toggleContent(this)">
+  <img src="{@docRoot}assets/images/triangle-closed.png"
+class="toggle-content-img" alt="" />
+  Android {@sdkPlatformVersion}, Revision 2</a> <em>(July 2010)</em>
+</a></p>
+
+<div class="toggle-content-toggleme" style="padding-left:2em;">
+<dt>Dependencies:</dt>
+<dd>
+<p>Requires SDK Tools r6 or higher.</p>
+</dd>
+
+<dt>System Image:</dt>
+<dd>
+<ul>
+<li>Adds default Search Widget.</li>
+<li>Includes proper provisioning for the platform's Backup Manager. For more information about how
+to use the Backup Manager, see <a href="{@docRoot}guide/topics/data/backup.html">Data
+Backup</a>.</li>
+<li>Updates the Android 2.2 system image to FRF91.</li>
+</ul>
+</dd>
+
+</dl>
+ </div>
+</div>
+
+<div class="toggle-content closed">
+
+<p><a href="#" onclick="return toggleContent(this)">
+  <img src="{@docRoot}assets/images/triangle-closed.png"
+class="toggle-content-img" alt="" />
+  Android {@sdkPlatformVersion}, Revision 1</a> <em>(May 2010)</em>
+</a></p>
+
+<div class="toggle-content-toggleme" style="padding-left:2em;">
+<dl>
+<dt>Dependencies:</dt>
+<dd>
+<p>Requires SDK Tools r6 or higher.</p>
+</dd>
+
+<dt>Tools:</dt>
+<dd>
+<p>Adds support for building with Android library projects. See <a href="tools-notes.html">SDK
+Tools, r6</a> for information.</p>
+</dd>
+
+</dl>
+ </div>
+</div>
+
+
+<h3>Emulator Skins</h3>
+
+<p>The downloadable platform includes a set of emulator skins that you can use
+for modeling your application in different screen sizes and resolutions. The
+emulator skins are:</p>
+
+<ul>
+  <li>
+    QVGA (240x320, low density, small screen)
+  </li>
+  <li>
+    WQVGA (240x400, low density, normal screen)
+  </li>
+  <li>
+    FWQVGA (240x432, low density, normal screen)
+  </li>
+  <li>
+    HVGA (320x480, medium density, normal screen)
+  </li>
+  <li>
+    WVGA800 (480x800, high density, normal screen)
+  </li>
+  <li>
+    WVGA854 (480x854 high density, normal screen)
+  </li>
+</ul>

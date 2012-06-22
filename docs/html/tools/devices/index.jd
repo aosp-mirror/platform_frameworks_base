@@ -1,0 +1,78 @@
+page.title=Managing Virtual Devices
+@jd:body
+
+
+ <p>An Android Virtual Device (AVD) is an emulator configuration that lets you model an actual
+  device by defining hardware and software options to be emulated by the Android Emulator.</p>
+
+  <p>The easiest way to create an AVD is to use the graphical <a href= 
+  "{@docRoot}tools/devices/managing-avds.html">AVD Manager</a>, which you launch
+  from Eclipse by clicking <strong>Window &gt; AVD Manager</strong>. You can also start the AVD
+Manager from the command line by calling the <code>android</code> tool with the <code>avd</code>
+options, from the <strong>&lt;sdk>/tools/</strong> directory.</p>
+
+  <p>You can also create AVDs on the command line by passing the <code>android</code> tool options.
+  For more information on how to create AVDs in this manner, see <a href= 
+  "{@docRoot}tools/devices/managing-avds-cmdline.html">Managing Virtual
+  Devices from the Command Line</a>.</p>
+
+  <p>An AVD consists of:</p>
+
+  <ul>
+    <li>A hardware profile: Defines the hardware features of the virtual
+    device. For example, you can define whether the device has a camera, whether it uses a physical
+    QWERTY keyboard or a dialing pad, how much memory it has, and so on.</li>
+
+    <li>A mapping to a system image: You can define what version of the Android platform will run
+    on the virtual device. You can choose a version of the standard Android platform or the system
+    image packaged with an SDK add-on.</li>
+
+    <li>Other options: You can specify the emulator skin you want to use with the AVD, which lets
+    you control the screen dimensions, appearance, and so on. You can also specify the emulated SD
+    card to use with the AVD.</li>
+
+    <li>A dedicated storage area on your development machine: the device's user data (installed
+    applications, settings, and so on) and emulated SD card are stored in this area.</li>
+  </ul>
+
+  <p>You can create as many AVDs as you need, based on the types of device you want to model. 
+  To thoroughly test your application, you should create an AVD for each general device configuration
+  (for example, different screen sizes and platform versions) with which your application is compatible
+  and test your application on each one.</p>
+
+  <p>Keep these points in mind when you are selecting a system image target for your AVD:</p>
+
+  <ul>
+    <li>The API Level of the target is important, because your application will not be able to run
+    on a system image whose API Level is less than that required by your application, as specified
+    in the <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">
+    <code>minSdkVersion</code></a> attribute of the application's manifest file. For more
+    information about the relationship between system API Level and application
+    <code>minSdkVersion</code>, see <a href=
+    "{@docRoot}tools/publishing/versioning.html">Specifying Minimum System API Version</a>.</li>
+
+    <li>You should create at least one AVD that uses a target whose API Level is greater than that required
+    by your application, because it allows you to test the
+    forward-compatibility of your application. Forward-compatibility testing ensures that, when
+    users who have downloaded your application receive a system update, your application will
+    continue to function normally.</li>
+
+    <li>If your application declares a 
+    <a href="{@docRoot}guide/topics/manifest/uses-library-element.html"><code>uses-library</code></a>
+    element in its manifest file, the application can only run on a system image in which that external
+    library is present. If you want to run your application on an emulator, create an AVD that
+    includes the required library. Usually, you must create such an AVD using an Add-on component for the
+    AVD's platform (for example, the Google APIs Add-on contains the Google Maps library).</li>
+  </ul>
+
+  <p>To learn how to manage AVDs using a graphical tool, read <a href=
+  "{@docRoot}tools/devices/managing-avds.html">Managing AVDs with AVD Manager</a>. To
+learn how to manage AVDs on the command line, read
+  <a href="{@docRoot}tools/devices/managing-avds-cmdline.html">Managing AVDs
+  from the Command Line</a>.</p>
+
+
+
+
+
+

@@ -23,7 +23,7 @@ next.link=shareaction.html
 <!-- other docs (NOT javadocs) -->
 <h2>You should also read</h2>
 <ul>
-  <li><a href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and
+  <li><a href="{@docRoot}guide/components/intents-filters.html">Intents and
 Intent Filters</a></li>
 </ul>
 
@@ -48,7 +48,7 @@ the <a href="{@docRoot}training/sharing/send.html">Send Content to Other Apps Us
 lesson, you create intent filters in order to be able to receive intents with this action. You 
 define an intent filter in your manifest, using the 
 <code><a
-href="{@docRoot}guide/topics/intents/intents-filters.html#ifs">&lt;intent-filter&gt;</a></code> 
+href="{@docRoot}guide/components/intents-filters.html#ifs">&lt;intent-filter&gt;</a></code> 
 element. For example, if your application handles receiving text content, a single image of any 
 type, or multiple images of any type, your manifest would look like:</p>
 
@@ -73,7 +73,7 @@ type, or multiple images of any type, your manifest would look like:</p>
 </pre>
 
 <p class="note"><strong>Note:</strong> For more information on intent filters and intent resolution 
-please read <a href="{@docRoot}guide/topics/intents/intents-filters.html#ifs">Intents and Intent
+please read <a href="{@docRoot}guide/components/intents-filters.html#ifs">Intents and Intent
 Filters</a></p>
 
 <p>When another application tries to share any of these things by constructing an intent and passing

@@ -1,0 +1,292 @@
+page.title=Making the View Interactive
+parent.title=Creating Custom Views
+parent.link=index.html
+
+trainingnavtop=true
+previous.title=Custom Drawing
+previous.link=custom-drawing.html
+next.title=Optmizing the View
+next.link=optimizing-view.html
+
+@jd:body
+
+<div id="tb-wrapper">
+    <div id="tb">
+
+        <h2>This lesson teaches you to</h2>
+        <ol>
+            <li><a href="#inputgesture">Handle Input Gestures</a></li>
+            <li><a href="#motion">Create Physically Plausible Motion</a></li>
+            <li><a href="#makesmooth">Make Your Transitions Smooth</a></li>
+        </ol>
+
+        <h2>You should also read</h2>
+        <ul>
+            <li><a href="{@docRoot}guide/topics/ui/ui-events.html">Input Events</a></li>
+            <li><a href="{@docRoot}guide/topics/graphics/prop-animation.html">Property Animation</a>
+            </li>
+        </ul>
+<h2>Try it out</h2>
+<div class="download-box">
+<a href="{@docRoot}shareables/training/CustomView.zip"
+class="button">Download the sample</a>
+<p class="filename">CustomView.zip</p>
+</div>
+    </div>
+</div>
+
+<p>Drawing a UI is only one part of creating a custom view. You also need to make your view respond
+to user input in a
+way that closely resembles the real-world action you're mimicking. Objects should always act in the
+same way that real
+objects do. For example, images should not immediately pop out of existence and reappear somewhere
+else, because objects
+in the real world don't do that. Instead, images should move from one place to another.</p>
+
+<p>Users also sense subtle behavior or feel in an interface, and react best to subtleties that
+mimic the real world.
+For example, when users fling a UI object, they should sense friction at the beginning that delays
+the motion, and then
+at the end sense momentum that carries the motion beyond the fling.</p>
+
+<p>This lesson demonstrates how to use features of the Android framework to add these real-world
+behaviors to your
+custom view.
+
+<h2 id="inputgesture">Handle Input Gestures</h2>
+
+<p>Like many other UI frameworks, Android supports an input event model. User actions are turned
+    into events that
+    trigger callbacks, and you can override the callbacks to customize how your application responds
+    to the user. The
+    most common input event in the Android system is <em>touch</em>, which triggers {@link
+    android.view.View#onTouchEvent(android.view.MotionEvent)}. Override this method to handle the
+    event:</p>
+
+<pre>
+   &#64Override
+   public boolean onTouchEvent(MotionEvent event) {
+    return super.onTouchEvent(event);
+   }
+</pre>
+
+<p>Touch events by themselves are not particularly useful. Modern touch UIs define interactions in
+    terms of gestures
+    such as tapping, pulling, pushing, flinging, and zooming. To convert raw touch events into
+    gestures, Android
+    provides {@link android.view.GestureDetector}.</p>
+
+<p>Construct a {@link android.view.GestureDetector} by passing in an instance of a class that
+    implements {@link
+    android.view.GestureDetector.OnGestureListener}. If you only want to process a few gestures, you
+    can extend {@link
+    android.view.GestureDetector.SimpleOnGestureListener} instead of implementing the {@link
+    android.view.GestureDetector.OnGestureListener}
+    interface. For instance, this code creates a class that extends {@link
+    android.view.GestureDetector.SimpleOnGestureListener} and overrides {@link
+    android.view.GestureDetector.SimpleOnGestureListener#onDown}.</p>
+
+<pre>
+class mListener extends GestureDetector.SimpleOnGestureListener {
+   &#64;Override
+   public boolean onDown(MotionEvent e) {
+       return true;
+   }
+}
+mDetector = new GestureDetector(PieChart.this.getContext(), new mListener());
+</pre>
+
+<p>Whether or not you use {@link
+    android.view.GestureDetector.SimpleOnGestureListener}, you must always implement an
+    {@link android.view.GestureDetector.OnGestureListener#onDown onDown()} method that
+    returns {@code true}. This step is necessary because all gestures begin with an
+    {@link android.view.GestureDetector.OnGestureListener#onDown onDown()} message. If
+    you return {@code
+    false} from {@link android.view.GestureDetector.OnGestureListener#onDown onDown()}, as
+    {@link android.view.GestureDetector.SimpleOnGestureListener} does, the system assumes that
+    you want to ignore the
+    rest of the gesture, and the other methods of
+    {@link android.view.GestureDetector.OnGestureListener} never get called. The
+    only time you should
+    return {@code false} from {@link android.view.GestureDetector.OnGestureListener#onDown onDown()}
+    is if you truly want to ignore an entire gesture.
+
+    Once you've implemented {@link android.view.GestureDetector.OnGestureListener}
+    and created an instance of {@link android.view.GestureDetector}, you can use
+    your {@link android.view.GestureDetector} to interpret the touch events you receive in {@link
+    android.view.GestureDetector#onTouchEvent onTouchEvent()}.</p>
+
+<pre>
+&#64;Override
+public boolean onTouchEvent(MotionEvent event) {
+   boolean result = mDetector.onTouchEvent(event);
+   if (!result) {
+       if (event.getAction() == MotionEvent.ACTION_UP) {
+           stopScrolling();
+           result = true;
+       }
+   }
+   return result;
+}
+</pre>
+
+<p>When you pass {@link android.view.GestureDetector#onTouchEvent onTouchEvent()} a touch event that
+    it doesn't
+    recognize as part of a gesture, it returns {@code false}. You can then run your own custom
+    gesture-detection
+    code.</p>
+
+<h2 id="motion">Create Physically Plausible Motion</h2>
+
+<p>Gestures are a powerful way to control touchscreen devices, but they can be counterintuitive and
+    difficult to
+    remember unless they produce physically plausible results. A good example of this is the <em>fling</em>
+    gesture, where the
+    user quickly moves a finger across the screen and then lifts it. This gesture makes sense if the UI
+    responds by moving
+    quickly in the direction of the fling, then slowing down, as if the user had pushed on a
+    flywheel and set it
+    spinning.</p>
+
+<p>However, simulating the feel of a flywheel isn't trivial. A lot of physics and math are required
+    to get a flywheel
+    model working correctly. Fortunately, Android provides helper classes to simulate this and other
+    behaviors. The
+    {@link android.widget.Scroller} class is the basis for handling flywheel-style <em>fling</em>
+    gestures.</p>
+
+<p>To start a fling, call {@link android.widget.Scroller#fling fling()} with the starting velocity
+    and the minimum and
+    maximum x and y values of the fling. For the velocity value, you can use the value computed for
+    you by {@link android.view.GestureDetector}.</p>
+
+<pre>
+&#64;Override
+public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+   mScroller.fling(currentX, currentY, velocityX / SCALE, velocityY / SCALE, minX, minY, maxX, maxY);
+   postInvalidate();
+}
+</pre>
+
+<p class="note"><strong>Note:</strong> Although the velocity calculated by
+    {@link android.view.GestureDetector} is physically accurate,
+    many developers feel
+    that using this value makes the fling animation too fast. It's common to divide the x and y
+    velocity by a factor of
+    4 to 8.</p>
+
+<p>The call to {@link android.widget.Scroller#fling fling()} sets up the physics model for the fling
+    gesture.
+    Afterwards, you need to update the {@link android.widget.Scroller Scroller} by calling {@link
+    android.widget.Scroller#computeScrollOffset Scroller.computeScrollOffset()} at regular
+    intervals. {@link
+    android.widget.Scroller#computeScrollOffset computeScrollOffset()} updates the {@link
+    android.widget.Scroller
+    Scroller} object's internal state by reading the current time and using the physics model to calculate
+    the x and y position
+    at that time. Call {@link android.widget.Scroller#getCurrX} and {@link
+    android.widget.Scroller#getCurrY} to
+    retrieve these values.</p>
+
+<p>Most views pass the {@link android.widget.Scroller Scroller} object's x and y position directly to
+    {@link
+    android.view.View#scrollTo scrollTo()}. The PieChart example is a little different: it
+    uses the current scroll
+    y position to set the rotational angle of the chart.</p>
+
+<pre>
+if (!mScroller.isFinished()) {
+    mScroller.computeScrollOffset();
+    setPieRotation(mScroller.getCurrY());
+}
+</pre>
+
+<p>The {@link android.widget.Scroller Scroller} class computes scroll positions for you, but it does
+    not automatically
+    apply those positions to your view. It's your responsibility to make sure you get and apply new
+    coordinates often
+    enough to make the scrolling animation look smooth. There are two ways to do this:</p>
+
+<ul>
+    <li>Call {@link android.view.View#postInvalidate() postInvalidate()} after calling
+        {@link android.widget.Scroller#fling(int, int, int, int, int, int, int, int) fling()},
+        in order to
+        force a redraw. This
+        technique requires that you compute scroll offsets in {@link android.view.View#onDraw onDraw()}
+        and call {@link android.view.View#postInvalidate() postInvalidate()} every
+        time the scroll offset changes.
+    </li>
+    <li>Set up a {@link android.animation.ValueAnimator} to animate for the duration of the fling,
+        and add a listener to process animation updates
+        by calling {@link android.animation.ValueAnimator#addUpdateListener addUpdateListener()}.
+    </li>
+</ul>
+
+<p>The PieChart example uses the second approach. This technique is slightly more complex to set up, but
+    it works more
+    closely with the animation system and doesn't require potentially unnecessary view
+    invalidation. The drawback is that {@link android.animation.ValueAnimator}
+    is not available prior to API level 11, so this technique cannot be used
+on devices running Android versions lower than 3.0.</p>
+
+<p class="note"><strong>Note:</strong> {@link android.animation.ValueAnimator} isn't available
+        prior to API level 11, but you can still use it in applications that
+target lower API levels. You just need to make sure to check the current API level
+at runtime, and omit the calls to the view animation system if the current level is less than 11.</p>
+
+<pre>
+       mScroller = new Scroller(getContext(), null, true);
+       mScrollAnimator = ValueAnimator.ofFloat(0,1);
+       mScrollAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+           &#64;Override
+           public void onAnimationUpdate(ValueAnimator valueAnimator) {
+               if (!mScroller.isFinished()) {
+                   mScroller.computeScrollOffset();
+                   setPieRotation(mScroller.getCurrY());
+               } else {
+                   mScrollAnimator.cancel();
+                   onScrollFinished();
+               }
+           }
+       });
+</pre>
+
+<h2 id="makesmooth">Make Your Transitions Smooth</h2>
+
+<p>Users expect a modern UI to transition smoothly between states. UI elements fade in and out
+    instead of appearing and
+    disappearing. Motions begin and end smoothly instead of starting and stopping abruptly. The
+    Android <a
+            href="{@docRoot}guide/topics/graphics/prop-animation.html">property animation
+        framework</a>, introduced in
+    Android 3.0, makes smooth transitions easy.</p>
+
+<p>To use the animation system, whenever a property changes that will affect your view's appearance,
+    do not change the
+    property directly. Instead, use {@link android.animation.ValueAnimator} to make the change. In
+    the following
+    example, modifying the
+    currently selected pie slice in PieChart causes the entire chart to rotate so that the selection
+    pointer is centered
+    in the selected slice. {@link android.animation.ValueAnimator} changes the rotation over a
+    period of several
+    hundred milliseconds,
+    rather than immediately setting the new rotation value.</p>
+
+<pre>
+mAutoCenterAnimator = ObjectAnimator.ofInt(PieChart.this, "PieRotation", 0);
+mAutoCenterAnimator.setIntValues(targetAngle);
+mAutoCenterAnimator.setDuration(AUTOCENTER_ANIM_DURATION);
+mAutoCenterAnimator.start();
+</pre>
+
+<p>If the value you want to change is one of the base {@link android.view.View} properties, doing
+    the animation
+    is even easier,
+    because Views have a built-in {@link android.view.ViewPropertyAnimator} that is optimized for
+    simultaneous animation
+    of multiple properties. For example:</p>
+
+<pre>
+animate().rotation(targetAngle).setDuration(ANIM_DURATION).start();
+</pre>

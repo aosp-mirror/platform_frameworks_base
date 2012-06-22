@@ -1,0 +1,50 @@
+page.title=Cómo manipular los receptores de emisión bajo demanda
+parent.title=Cómo optimizar la duración de la batería
+parent.link=index.html
+
+trainingnavtop=true
+
+previous.title=Cómo determinar y controlar el estado de la conectividad
+previous.link=connectivity-monitoring.html
+
+@jd:body
+
+<div id="tb-wrapper"> 
+<div id="tb">
+
+<h2>En esta sección puedes aprender:</h2>
+<ol>
+  <li><a href="#ToggleReceivers">Cómo alternar y superponer receptores de cambio de estado para mejorar el rendimiento</a></li>
+</ol>
+
+
+<h2>También puedes consultar:</h2>
+<ul>
+  <li><a href="{@docRoot}guide/components/intents-filters.html">Intentos y filtros de intentos</a>
+</ul>
+
+</div> 
+</div>
+
+<p>La forma más sencilla de controlar los cambios en el estado del dispositivo es crear un {@link android.content.BroadcastReceiver} para cada estado que vayas a controlar y registrar cada uno de ellos en el archivo de manifiesto de tu aplicación. A continuación, en cada uno de esos receptores solo tienes que volver a programar las alarmas recurrentes en función del estado actual del dispositivo.</p>
+
+<p>Un efecto secundario de este método es que tu aplicación activará el dispositivo siempre que uno de los receptores se active (probablemente, con más frecuencia de la necesaria).</p>
+
+<p>Te recomendamos que inhabilites o habilites los receptores de emisión en el momento de la ejecución. De este modo, puedes utilizar los receptores que hayas declarado en el archivo de manifiesto como alarmas pasivas que se activan mediante los eventos del sistema solo cuando es necesario.</p>
+ 
+
+<h2 id="ToggleReceivers">Cómo alternar y superponer receptores de cambio de estado para mejorar el rendimiento </h2> 
+ 
+<p>Se puede utilizar el {@link android.content.pm.PackageManager} para alternar el estado habilitado en cualquier componente definido en el archivo de manifiesto, incluidos los receptores de emisión que quieras habilitar o inhabilitar, como se muestra en el fragmento que aparece a continuación:</p>
+
+<pre>ComponentName receiver = new ComponentName(context, myReceiver.class);
+
+PackageManager pm = context.getPackageManager();
+
+pm.setComponentEnabledSetting(receiver,
+        PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+        PackageManager.DONT_KILL_APP)</pre>
+
+<p>Al utilizar esta técnica, si determinas que la conectividad se ha perdido, puedes inhabilitar todos los receptores excepto el receptor de cambio de conectividad. Por el contrario, cuando estés conectado, puedes dejar de detectar cambios de conectividad y solo comprobar si tienes conexión antes de realizar una actualización y de volver a programar una alarma de actualización recurrente.</p>
+
+<p>Puedes utilizar la misma técnica para posponer una descarga que requiera un nivel de ancho de banda superior para completarse. Solo tienes que habilitar un receptor de emisión que detecte los cambios de conectividad y que inicie la descarga solo cuando estés conectado a una red Wi-Fi.</p>

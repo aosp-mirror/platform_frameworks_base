@@ -1,4 +1,4 @@
-page.title=Status Bar Notifications
+page.title=Status Notifications
 parent.title=Notifications
 parent.link=index.html
 @jd:body
@@ -7,7 +7,7 @@ parent.link=index.html
   <div id="qv">
     <h2>Quickview</h2>
     <ul>
-      <li>A status bar notification allows your application to notify the user of an event
+      <li>A status notification allows your application to notify the user of an event
 without interupting their current activity</li>
       <li>You can attach an intent to your notification that the system will initiate when the
 user clicks it</li>
@@ -43,7 +43,7 @@ Design: Notifications</a></li>
   </div>
 </div>
 
-<p>A status bar notification adds an icon to the system's status bar
+<p>A status notification adds an icon to the system's status bar
 (with an optional ticker-text message) and a notification message in the notifications window.
 When the user selects the notification, Android fires an
 {@link android.content.Intent} that is defined by the {@link android.app.Notification} (usually to
@@ -51,11 +51,11 @@ launch an {@link android.app.Activity}).
 You can also configure the notification to alert the user with a sound, a vibration, and flashing
 lights on the device.</p>
 
-<p>A status bar notification should be used for any case in
+<p>A status notification should be used for any case in
 which a background service needs to alert the user about an event that requires a response. A
 background service
 <strong>should never</strong> launch an activity on its own in order to receive user interaction.
-The service should instead create a status bar notification that will launch the activity
+The service should instead create a status notification that will launch the activity
 when selected by the user.</p>
 
 <p>Figure 1 shows the status bar with a notification icon on the left side.</p>
@@ -78,9 +78,9 @@ href="{@docRoot}design/patterns/notifications.html">Notifications</a> guide.</p>
 
 <h2 id="Basics">The Basics</h2>
 
-<p>An {@link android.app.Activity} or {@link android.app.Service} can initiate a status bar
+<p>An {@link android.app.Activity} or {@link android.app.Service} can initiate a status
 notification. Because an activity can perform actions only while it is
-running in the foreground and its window has focus, you will usually create status bar notifications
+running in the foreground and its window has focus, you will usually create status notifications
 from a
 service. This way, the notification can be created from the background,
 while the user is using another application or
@@ -88,9 +88,9 @@ while the device is asleep. To create a notification, you must use two
 classes: {@link android.app.Notification} and {@link android.app.NotificationManager}.</p>
 
 <p>Use an instance of the {@link android.app.Notification} class to define the properties of your
-status bar notification, such as the status bar icon, the notification message, and extra settings
+status notification, such as the status icon, the notification message, and extra settings
 such as a sound to play. The {@link android.app.NotificationManager} is an Android system service
-that executes and manages all status bar notifications. You do not instantiate the
+that executes and manages all status notifications. You do not instantiate the
 {@link android.app.NotificationManager} directly. In order
 to give it your {@link android.app.Notification}, you must retrieve a reference to the
 {@link android.app.NotificationManager} with
@@ -98,7 +98,7 @@ to give it your {@link android.app.Notification}, you must retrieve a reference 
 then, when you want to notify the user, pass it your {@link android.app.Notification} with
 {@link android.app.NotificationManager#notify(int,Notification) notify()}. </p>
 
-<p>To create a status bar notification:</p>
+<p>To create a status notification:</p>
 <ol>
   <li>Get a reference to the {@link android.app.NotificationManager}:
 <pre>
@@ -277,7 +277,7 @@ String ns = Context.NOTIFICATION_SERVICE;
 NotificationManager mNotificationManager = (NotificationManager) getSystemService(ns);
 </pre>
 
-<p>When you want to deliver your status bar notification, pass the {@link android.app.Notification}
+<p>When you want to deliver your status notification, pass the {@link android.app.Notification}
 to the {@link android.app.NotificationManager} with {@link
 android.app.NotificationManager#notify(int,Notification)}.
 The first parameter is the unique ID for the notification and the second is the {@link
@@ -287,7 +287,7 @@ application. The ID is necessary if you need to update the notification or (if
 your application manages different kinds of notifications) select the appropriate action
 when the user returns to your application via the intent defined in the notification.</p>
 
-<p>To clear the status bar notification when the user selects it from the notifications
+<p>To clear the status notification when the user selects it from the notifications
 window, add the "FLAG_AUTO_CANCEL" flag to your {@link android.app.Notification}. You can
 also clear it manually with {@link android.app.NotificationManager#cancel(int)}, passing it the
 notification ID, or clear all your notifications with {@link
@@ -300,14 +300,14 @@ android.app.NotificationManager#cancelAll()}.</p>
 message that is displayed in the status bar and notifications window, and any other
 alert settings, such as sounds and blinking lights.</p>
 
-<p>A status bar notification <em>requires</em> all of the following:</p>
+<p>A status notification <em>requires</em> all of the following:</p>
 <ul>
   <li>An icon for the status bar</li>
   <li>A title and message, unless you define a
     <a href="#CustomExpandedView">custom notification layout</a></li>
   <li>A {@link android.app.PendingIntent}, to be fired when the notification is selected</li>
 </ul>
-<p>Optional settings for the status bar notification include:</p>
+<p>Optional settings for the status notification include:</p>
 <ul>
   <li>A ticker-text message for the status bar</li>
   <li>An alert sound</li>
@@ -339,7 +339,7 @@ notification.setLatestEventInfo(context, contentTitle, contentText, contentInten
 
 <h3 id="Updating">Updating the notification</h3>
 
-<p>You can update the information in your status bar notification as events
+<p>You can update the information in your status notification as events
 continue to occur in your application. For example, when a new SMS text message arrives
 before previous messages have been read, the Messaging application updates the existing
 notification to display the total number of new messages received.
@@ -484,7 +484,7 @@ following:</p>
   your notification is on-going.</dd>
   <dt>{@link android.app.Notification#number} field</dt>
   <dd>This value indicates the current number of events represented by the notification.
-  The appropriate number is overlaid on top of the status bar icon.
+  The appropriate number is overlaid on top of the status icon.
   If you intend to use this field, then you must start with "1" when the Notification is first
   created. (If you change the value from zero to anything greater during an update, the number
   is not shown.)</dd>

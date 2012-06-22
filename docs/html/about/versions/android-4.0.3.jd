@@ -1,0 +1,304 @@
+page.title=Android 4.0.3 Platform
+sdk.platform.version=4.0.3
+sdk.platform.apiLevel=15
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+<ol>
+  <li><a href="#api">API Overview</a></li>
+  <li><a href="#Honeycomb">Previous APIs</a></li>
+  <li><a href="#api-level">API Level</a></li>
+</ol>
+
+<h2>Reference</h2>
+<ol>
+<li><a
+href="{@docRoot}sdk/api_diff/15/changes.html">API
+Differences Report &raquo;</a> </li>
+</ol>
+
+</div>
+</div>
+
+<p><em>API Level:</em>&nbsp;<strong>{@sdkPlatformApiLevel}</strong></p>
+
+<p>Android {@sdkPlatformVersion} is an incremental release of the Android 4.x
+(Ice Cream Sandwich) platform family. This release includes new features for
+users and developers, API changes, and various bug fixes.</p>
+
+<p>For developers, the Android {@sdkPlatformVersion} platform is available as a
+downloadable component for the Android SDK. The downloadable platform includes
+an Android library and system image, as well as a set of emulator skins and
+more. To get started developing or testing against Android {@sdkPlatformVersion},
+use the Android SDK Manager to download the platform into your SDK.</p>
+
+
+<h2 id="api">API Overview</h2>
+
+<p>The sections below provide a technical overview of new APIs in Android 4.0.3.</p>
+
+<div class="toggle-content closed">
+
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png"
+class="toggle-content-img" alt="" />
+    <strong>Table of Contents</strong>
+  </a></p>
+
+  <div class="toggle-content-toggleme" style="padding-left:2em;">
+    <ol class="toc" style="margin-left:-1em">
+      <li><a href="#contacts">Social stream API in Contacts Provider</a></li>
+      <li><a href="#calendar">Calendar Provider</a></li>
+      <li><a href="#widgets">Home screen widgets</a></li>
+      <li><a href="#textservices">Spell-checking</a></li>
+      <li><a href="#bluetooth">Bluetooth</a></li>
+      <li><a href="#ui">UI toolkit</a></li>
+      <li><a href="#accessibility">Accessibility</a></li>
+      <li><a href="#tts">Text-to-speech</a></li>
+      <li><a href="#database">Database</a></li>
+      <li><a href="#intents">Intents</a></li>
+      <li><a href="#camera">Camera</a></li>
+      <li><a href="#permissions">Permissions</a></li>
+    </ol>
+  </div>
+</div>
+
+
+
+
+
+<h3 id="contacts">Social stream API in Contacts Provider</h3>
+
+<p>Applications that use social stream data such as status updates and check-ins
+can now sync that data with each of the user’s contacts, providing items in a
+stream along with photos for each.</p>
+
+<p>The database table that contains an individual contact’s social stream is
+defined by {@link android.provider.ContactsContract.StreamItems}, the Uri for
+which is nested within the {@link android.provider.ContactsContract.RawContacts}
+directory to which the stream items belong. Each social stream table includes
+several columns for metadata about each stream item, such as an icon
+representing the source (an avatar), a label for the item, the primary text
+content, comments about the item (such as responses from other people), and
+more. Photos associated with a stream are stored in another table, defined by
+{@link android.provider.ContactsContract.StreamItemPhotos}, which is available
+as a sub-directory of the {@link android.provider.ContactsContract.StreamItems}
+Uri.</p>
+
+<p>See {@link android.provider.ContactsContract.StreamItems} and
+{@link android.provider.ContactsContract.StreamItemPhotos} for more information.</p>
+
+<p>To read or write social stream items for a contact, an application must
+request permission from the user by declaring <code>&lt;uses-permission
+android:name="android.permission.READ_SOCIAL_STREAM"&gt;</code> and/or <code>&lt;uses-permission
+android:name="android.permission.WRITE_SOCIAL_STREAM"&gt;</code> in their manifest files.</p>
+
+<h3 id="calendar">Calendar Provider</h4>
+<ul>
+<li>Adds the class {@link android.provider.CalendarContract.Colors} to represent
+a color table in the <a href="{@docRoot}guide/topics/providers/calendar-provider.html">Calendar
+Provider</a>. The class provides fields for accessing
+colors available for a given account. Colors are referenced by 
+{@link android.provider.CalendarContract.ColorsColumns#COLOR_KEY COLOR_KEY}
+which must be unique for a given account name/type. These values can only be
+updated by the sync adapter.</li>
+<li>Adds {@link android.provider.CalendarContract.CalendarColumns#ALLOWED_AVAILABILITY ALLOWED_AVAILABILITY}
+and 
+{@link android.provider.CalendarContract.CalendarColumns#ALLOWED_ATTENDEE_TYPES ALLOWED_ATTENDEE_TYPES}
+for exchange/sync support.</li>
+<li>Adds {@link android.provider.CalendarContract.AttendeesColumns#TYPE_RESOURCE}
+(such as conference rooms) for attendees and 
+{@link android.provider.CalendarContract.EventsColumns#AVAILABILITY_TENTATIVE},
+as well as {@link android.provider.CalendarContract.EventsColumns#EVENT_COLOR_KEY}
+for events.</li>
+</ul>
+
+<h3 id="widgets">Home screen widgets</h3>
+
+<p>Starting from Android 4.0, home screen widgets should no longer include their
+own padding. Instead, the system now automatically adds padding for each widget,
+based the characteristics of the current screen. This leads to a more uniform,
+consistent presentation of widgets in a grid. To assist applications that host
+home screen widgets, the platform provides a new method 
+{@link android.appwidget.AppWidgetHostView#getDefaultPaddingForWidget(android.content.Context, android.content.ComponentName, android.graphics.Rect)
+getDefaultPaddingForWidget()}. Applications can call this method to get the
+system-defined padding and account for it when computing the number of cells to
+allocate to the widget.</p>
+
+<h3 id="textservices">Spell-checking</h3>
+
+<ul>
+<li>For apps that accessing spell-checker services, a new {@link
+android.view.textservice.SpellCheckerSession#cancel() cancel()} method cancels
+any pending and running spell-checker tasks in a session.</li>
+
+<li>For spell-checker services, a new suggestions flag, 
+{@link android.view.textservice.SuggestionsInfo#RESULT_ATTR_HAS_RECOMMENDED_SUGGESTIONS},
+lets the services distinguish higher-confidence suggestions from
+lower-confidence ones. For example, a spell-checker could set the flag if an
+input word is not in the user dictionary but has likely suggestions, or not set
+the flag if an input word is not in the dictionary and has suggestions that are
+likely to be less useful.
+
+<p>Apps connected to the spell-checker can use the {@link
+android.view.textservice.SuggestionsInfo#RESULT_ATTR_HAS_RECOMMENDED_SUGGESTIONS}
+flag in combination with other suggestion attributes, as well as the {@link
+android.view.textservice.SuggestionsInfo#getSuggestionsAttributes()} and {@link
+android.view.textservice.SuggestionsInfo#getSuggestionsCount()} methods, to
+determine whether to mark input words as typos and offer suggestions.</p></li>
+
+<li>A new {@link android.text.style.SuggestionSpan#FLAG_AUTO_CORRECTION} style
+for text spans indicates that auto correction is about to be applied to a
+word/text that the user is typing/composing. This type of suggestion is rendered
+differently, to indicate the auto correction is happening.</li>
+</ul>
+
+<h3 id="bluetooth">Bluetooth</h3>
+<p>New public methods {@link
+android.bluetooth.BluetoothDevice#fetchUuidsWithSdp()} and {@link
+android.bluetooth.BluetoothDevice#getUuids()} let apps determine the features
+(UUIDs) supported by a remote device. In the case of {@link
+android.bluetooth.BluetoothDevice#fetchUuidsWithSdp()}, the system performs a
+service discovery on the remote device to get the UUIDs supported, then
+broadcasts the result in an {@link
+android.bluetooth.BluetoothDevice#ACTION_UUID} intent.</p>
+
+<h3 id="ui">UI toolkit</h3>
+
+<p>New methods {@link android.app.Fragment#setUserVisibleHint(boolean) setUserVisibleHint()} and
+{@link android.app.Fragment#getUserVisibleHint() getUserVisibleHint()} allow a
+fragment to set a hint of whether or not it is currently user-visible. The
+system defers the start of fragments that are not user-visible until the loaders
+for visible fragments have run. The visibility hint is "true" by default.</li>
+</p>
+
+<h3 id="graphics">Graphics</h3>
+
+<ul>
+<li>New method {@link android.graphics.SurfaceTexture#setDefaultBufferSize(int
+width, int height)} in {@link android.graphics.SurfaceTexture} sets the default size of the image
+buffers. This method may be used to set the image size when producing images
+with {@link android.graphics.Canvas} (via {@link
+android.view.Surface#lockCanvas}), or OpenGL ES (via an EGLSurface).</li>
+<li>Adds definitions for the enums of the GL_OES_EGL_image_external OpenGL ES extension &mdash;
+{@link android.opengl.GLES11Ext#GL_REQUIRED_TEXTURE_IMAGE_UNITS_OES},
+{@link android.opengl.GLES11Ext#GL_SAMPLER_EXTERNAL_OES},
+{@link android.opengl.GLES11Ext#GL_TEXTURE_BINDING_EXTERNAL_OES}, and
+{@link android.opengl.GLES11Ext#GL_TEXTURE_EXTERNAL_OES}.</li>
+</ul>
+
+<h3 id="accessibility">Accessibility</h3>
+
+<ul>
+<li>Clients of {@link android.widget.RemoteViews} can now use the method {@link
+android.widget.RemoteViews#setContentDescription(int, java.lang.CharSequence)
+setContentDescription()} to set and get the content description of any View in
+the inflated layout.</li>
+
+<li>The methods {@link android.view.accessibility.AccessibilityRecord#getMaxScrollX()},
+{@link android.view.accessibility.AccessibilityRecord#getMaxScrollY()},
+{@link android.view.accessibility.AccessibilityRecord#setMaxScrollX(int) setMaxScrollX()}, and
+{@link android.view.accessibility.AccessibilityRecord#setMaxScrollY(int) setMaxScrollY()}
+allow apps to get and set the maximum scroll offset for an
+{@link android.view.accessibility.AccessibilityRecord} object.</li>
+
+<li>When touch-exploration mode is enabled, a new secure setting 
+{@link android.provider.Settings.Secure#ACCESSIBILITY_SPEAK_PASSWORD} 
+indicates whether the user requests the IME to speak text entered in password fields, even when
+a headset is not in use. By default, no password text is spoken unless a headset
+is in use.</li>
+</ul>
+
+<h3 id="tts">Text-to-speech</h3>
+
+<ul>
+<li>Adds the new method {@link
+android.speech.tts.TextToSpeech.Engine#getFeatures(java.util.Locale)
+getFeatures()}for querying and enabling network TTS support.
+<li>Adds a new listener class, {@link
+android.speech.tts.UtteranceProgressListener}, that engines can register to
+receive notification of speech-synthesis errors.</li>
+</ul>
+
+<h3 id="database">Database</h3>
+
+<ul>
+<li>A new {@link android.database.CrossProcessCursorWrapper} class lets content
+providers return results for a cross-process query more efficiently. The new
+class is a useful building block for wrapping cursors that will be sent to
+processes remotely. It can also transform normal {@link android.database.Cursor}
+objects into {@link android.database.CrossProcessCursor} objects
+transparently.
+
+<p>The {@link android.database.CrossProcessCursorWrapper} class fixes common
+performance issues and bugs that applications have encountered when
+implementing content providers.</p></li>
+
+<li>The {@link android.database.CursorWindow#CursorWindow(java.lang.String)}
+constructor now takes a name string as input. The system no longer distinguishes
+between local and remote cursor windows, so {@link
+android.database.CursorWindow#CursorWindow(boolean)} is now deprecated.</li>
+</ul>
+
+<h3 id="intents">Intents</h3>
+
+<p>Adds new categories for targeting common types of applications on the
+device, such as {@link android.content.Intent#CATEGORY_APP_BROWSER}, {@link
+android.content.Intent#CATEGORY_APP_CALENDAR}, {@link
+android.content.Intent#CATEGORY_APP_MAPS}, and more.</li>
+
+<h3 id="camera">Camera</h3>
+
+<ul>
+<li>{@link android.media.MediaMetadataRetriever} adds the new constant
+{@link android.media.MediaMetadataRetriever#METADATA_KEY_LOCATION} to let apps
+access retrieve location information for an image or video. </li>
+
+<li>{@link android.media.CamcorderProfile} adds the QVGA (320x240) resolution
+profiles. Quality level is represented by the
+{@link android.media.CamcorderProfile#QUALITY_QVGA}.and
+{@link android.media.CamcorderProfile#QUALITY_TIME_LAPSE_QVGA} constants.</li>
+
+<li>New methods {@link android.hardware.Camera.Parameters#setVideoStabilization(boolean) setVideoStabilization()},
+{@link android.hardware.Camera.Parameters#getVideoStabilization() setVideoStabilization()}, and {@link android.hardware.Camera.Parameters#isVideoStabilizationSupported() isVideoStabilizationSupported()}
+let you check and manage video stabilization for a {@link android.hardware.Camera}.</li>
+</ul>
+
+<h3 id="Permissions">Permissions</h3>
+
+<p>The following are new permissions:</p>
+<ul>
+<li>{@link android.Manifest.permission#READ_SOCIAL_STREAM} and 
+{@link android.Manifest.permission#WRITE_SOCIAL_STREAM}: Allow a sync
+adapter to read and write social stream data to a contact in the shared
+Contacts Provider.</li>
+</ul>
+
+
+<div class="special" style="margin-top:2em">
+<p>For a detailed view of all API changes in Android {@sdkPlatformVersion} (API Level
+{@sdkPlatformApiLevel}), see the <a
+href="{@docRoot}sdk/api_diff/{@sdkPlatformApiLevel}/changes.html">API Differences Report</a>.</p>
+</div>
+
+
+<h2 id="api-level">API Level</h2>
+
+<p>The Android {@sdkPlatformVersion} API is assigned an integer
+identifier&mdash;<strong>{@sdkPlatformApiLevel}</strong>&mdash;that is stored in the system itself.
+This identifier, called the "API level", allows the system to correctly determine whether an
+application is compatible with the system, prior to installing the application. </p>
+
+<p>To use APIs introduced in Android {@sdkPlatformVersion} in your application, you need compile the
+application against an Android platform that supports API level {@sdkPlatformApiLevel} or
+higher. Depending on your needs, you might also need to add an
+<code>android:minSdkVersion="{@sdkPlatformApiLevel}"</code> attribute to the
+<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code &lt;uses-sdk&gt;}</a>
+element.</p>
+
+<p>For more information, see the <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API Levels</a>
+document. </p>
+

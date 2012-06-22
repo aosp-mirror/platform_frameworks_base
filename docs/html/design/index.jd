@@ -1,4 +1,4 @@
-page.title=
+page.title=Design
 header.hide=1
 footer.hide=1
 @jd:body
@@ -10,7 +10,7 @@ footer.hide=1
 
 #text-overlay {
   position: absolute;
-  left: 10px;
+  left: 0;
   top: 472px;
   width: 280px;
 }

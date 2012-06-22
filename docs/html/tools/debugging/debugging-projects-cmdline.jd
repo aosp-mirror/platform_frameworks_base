@@ -1,0 +1,78 @@
+page.title=Debugging from Other IDEs
+parent.title=Debugging
+parent.link=index.html
+@jd:body
+
+
+ <div id="qv-wrapper">
+    <div id="qv">
+      <h2>In this document</h2>
+
+      <ol>
+        <li><a href="#start-debugging">Starting a Debugging Environment</a>
+        <ul>
+          <li><a href="#debuggingPort">Configuring Your IDE to Attach to the Debugging Port</a></li>
+        </ul>
+        </li>
+      </ol>
+    </div>
+  </div>
+ 
+  <p>If you are not using Eclipse to develop, you can still take advantage of all the tools that
+  the Android SDK provides for debugging. A basic debugging environment consists of:</p>
+
+  <ul>
+    <li><a href="{@docRoot}tools/help/adb.html">ADB</a></li>
+
+    <li><a href="{@docRoot}tools/debugging/ddms.html">DDMS</a></li>
+
+    <li>Java Debugger</li>
+  </ul>
+  
+  <p>You need to obtain a JDWP-compliant Java debugger to properly debug your application.
+  Most Java IDEs will already have one included, or you can use a command line debugger,
+  such as JDB, if you are using a simple text editor to develop applications.</p>
+
+  <h2 id="start-debugging">Starting a debugging environment</h2>
+  <p>A Java Debugger assists you in finding problems with
+  your code by letting you set breakpoints, step through execution of your application, and examine
+  variable values. Since you are not using Eclipse, you have to manually start up the debugging
+  environment yourself by running a few tools that are provided in the Android SDK. To begin
+  debugging your application, follow these general steps:</p>
+
+  <ol>
+    <li>Load an AVD with the Android emulator or connect a device to your computer.</li>
+    
+    <li>Start DDMS from the sdk <code>/tools</code> directory. This also starts ADB if it is 
+    not already started. You should see your device appear in DDMS.</li>
+
+    <li>Install and run your <code>.apk</code> file on the device or emulator. In DDMS, you should see your
+    application running under the device that you installed it to.</li>
+
+    <li>Attach your debugger to the debugging port 8700, or to the specific port shown for the
+    application in DDMS.</li>
+  </ol>
+
+  <h3 id="debuggingPort">Configuring Your IDE to Attach to the Debugging Port</h3>
+
+  <p>DDMS assigns a specific debugging port to every virtual machine that it finds on the
+  emulator. You must either attach your IDE to that port (listed on the Info tab for that VM), or
+  you can use a default port 8700 to connect to whatever application is currently selected on the
+  list of discovered virtual machines.</p>
+
+  <p>Your IDE should attach to your application running on the emulator, showing you its threads
+  and allowing you to suspend them, inspect their state, and set breakpoints. If you selected "Wait
+  for debugger" in the Development settings panel the application will run when Eclipse connects,
+  so you will need to set any breakpoints you want before connecting.</p>
+
+  <p>Changing either the application being debugged or the "Wait for debugger" option causes the
+  system to kill the selected application if it is currently running. You can use this to kill your
+  application if it is in a bad state by simply going to the settings and toggling the
+  checkbox.</p>
+
+
+
+
+
+
+

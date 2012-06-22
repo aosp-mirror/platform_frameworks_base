@@ -1,0 +1,77 @@
+page.title=Using the Dev Tools App
+parent.title=Debugging
+parent.link=index.html
+@jd:body
+
+<p>The Dev Tools application is installed by default on all system images included with the SDK,
+  so you can use it with the Android Emulator. With the Dev Tools application, you can enable a
+  number of settings on your device that will make it easier to test and debug your applications.</p>
+
+  <p> The Dev Tools application relies on a number of permissions that are not available for
+  third party applications. If you'd like to install the Dev Tools application
+  on a real development device, you'd have to build a system image for that device and sign
+  the Dev Tools application with the same key as used for the system image.</p>
+
+  <p>To get started, launch the Dev Tools application and select <strong>Development Settings</strong>. This will
+  open the Development Settings page with the following options (among others):</p>
+
+  <dl>
+    <dt><strong>Debug app</strong></dt>
+
+    <dd>
+      Lets you select the application to debug. You do not need to set this to attach a debugger,
+      but setting this value has two effects:
+
+      <ul>
+        <li>It will prevent Android from throwing an error if you pause on a breakpoint for a long
+        time while debugging.</li>
+
+        <li>It will enable you to select the <em>Wait for Debugger</em> option to pause application
+        startup until your debugger attaches (described next).</li>
+      </ul>
+    </dd>
+
+    <dt><strong>Wait for debugger</strong></dt>
+
+    <dd>Blocks the selected application from loading until a debugger attaches. This way you can
+    set a breakpoint in {@link android.app.Activity#onCreate onCreate()}, 
+    which is important to debug the startup process of an Activity.
+    When you change this option, any currently running instances of the selected application will
+    be killed. In order to check this box, you must have selected a debug application as described
+    in the previous option. You can do the same thing by adding {@link
+    android.os.Debug#waitForDebugger()} to your code.</dd>
+
+    <dt><strong>Show screen updates</strong></dt>
+
+    <dd>Flashes a momentary pink rectangle on any screen sections that are being redrawn. This is
+    very useful for discovering unnecessary screen drawing.</dd>
+
+    <dt><strong>Immediately destroy activities</strong></dt>
+
+    <dd>Tells the system to destroy an activity as soon as it is stopped (as if Android had to
+    reclaim memory).&nbsp; This is very useful for testing the {@link
+    android.app.Activity#onSaveInstanceState} / {@link
+    android.app.Activity#onCreate(android.os.Bundle)} code path, which would otherwise be difficult
+    to force. Choosing this option will probably reveal a number of problems in your application
+    due to not saving state. For more information about saving an activity's state, see the
+    <a href="{@docRoot}guide/components/activities.html#SavingActivityState">Activities</a>
+document.</dd>
+
+    <dt><strong>Show CPU usage</strong></dt>
+
+    <dd>Displays CPU meters at the top of the screen, showing how much the CPU is being used. The
+    top red bar shows overall CPU usage, and the green bar underneath it shows the CPU time spent
+    in compositing the screen. 
+    <p class="note">Note: You cannot turn this feature off once it is on, without
+    restarting the emulator.</p></dd>
+
+    <dt><strong>Show background</strong></dt>
+
+    <dd>Displays a background pattern when no activity screens are visible. This typically does not
+    happen, but can happen during debugging.</dd>
+  </dl>
+
+  <p>These settings will be remembered across emulator restarts.</p>
+
+
+

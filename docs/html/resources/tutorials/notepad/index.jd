@@ -44,11 +44,11 @@ steps in your environment. </p>
 
 <p>The tutorial  assumes that you have some familiarity with basic Android
 application concepts and terminology. If you are not, you
-should read <a href="{@docRoot}guide/topics/fundamentals.html">Application 
+should read <a href="{@docRoot}guide/components/fundamentals.html">Application 
 Fundamentals</a> before continuing. </p>
 
 <p>This tutorial also builds on the introductory information provided in the 
-<a href="{@docRoot}resources/tutorials/hello-world.html">Hello World</a>
+<a href="{@docRoot}training/basics/firstapp/index.html">Building Your First App</a>
 tutorial, which explains how to set up your Eclipse environment
 for building Android applications. We recommend you complete the Hello World
 tutorial before starting this one.</p>

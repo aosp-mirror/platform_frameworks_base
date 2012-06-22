@@ -20,6 +20,7 @@ parent.link=index.html
           <li><a href="#proj-es1">Projection and camera in ES 2.0</a></li>
         </ol>
       </li>
+      <li><a href="#faces-winding">Shape Faces and Winding</li>
       <li><a href="#compatibility">OpenGL Versions and Device Compatibility</a>
         <ol>
           <li><a href="#textures">Texture compression support</a></li>
@@ -33,11 +34,6 @@ parent.link=index.html
       <li>{@link android.opengl.GLSurfaceView}</li>
       <li>{@link android.opengl.GLSurfaceView.Renderer}</li>
     </ol>
-    <h2>Related tutorials</h2>
-    <ol>
-      <li><a href="{@docRoot}resources/tutorials/opengl/opengl-es10.html">OpenGL ES 1.0</a></li>
-      <li><a href="{@docRoot}resources/tutorials/opengl/opengl-es20.html">OpenGL ES 2.0</a></li>
-    </ol>
     <h2>Related samples</h2>
     <ol>
       <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/graphics/GLSurfaceViewActivity.html">GLSurfaceViewActivity</a></li>
@@ -48,8 +44,8 @@ href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/graphics
     </ol>
     <h2>See also</h2>
     <ol>
-      <li><a href="{@docRoot}resources/articles/glsurfaceview.html">Introducing
-GLSurfaceView</a></li>
+      <li><a href="{@docRoot}training/graphics/opengl/index.html">
+          Displaying Graphics with OpenGL ES</a></li>
       <li><a href="http://www.khronos.org/opengles/">OpenGL ES</a></li>
       <li><a href="http://www.khronos.org/opengles/1_X/">OpenGL ES 1.x Specification</a></li>
       <li><a href="http://www.khronos.org/opengles/2_X/">OpenGL ES 2.x specification</a></li>
@@ -73,7 +69,7 @@ OpenGL ES 2.0 API specification.</p>
 
 <p>Android supports OpenGL both through its framework API and the Native Development
 Kit (NDK). This topic focuses on the Android framework interfaces. For more information about the
-NDK, see the <a href="{@docRoot}sdk/ndk/index.html">Android NDK</a>.
+NDK, see the <a href="{@docRoot}tools/sdk/ndk/index.html">Android NDK</a>.
 
 <p>There are two foundational classes in the Android framework that let you create and manipulate
 graphics with the OpenGL ES API: {@link android.opengl.GLSurfaceView} and {@link
@@ -389,6 +385,43 @@ objects to be rendered by OpenGL.
 href="{@docRoot}resources/tutorials/opengl/opengl-es20.html#projection-and-views">OpenGL ES 2.0
 tutorial</a>.</p>
 
+<h2 id="faces-winding">Shape Faces and Winding</h2>
+
+<p>In OpenGL, the face of a shape is a surface defined by three or more points in three-dimensional
+space. A set of three or more three-dimensional points (called vertices in OpenGL) have a front face
+and a back face. How do you know which face is front and which is the back? Good question. The
+answer has to do with winding, or, the direction in which you define the points of a shape.</p>
+
+<img src="{@docRoot}images/opengl/ccw-winding.png">
+<p class="img-caption">
+  <strong>Figure 1.</strong> Illustration of a coordinate list which translates into a
+counterclockwise drawing order.</p>
+
+<p>In this example, the points of the triangle are defined in an order such that they are drawn in a
+counterclockwise direction. The order in which these coordinates are drawn defines the winding
+direction for the shape. By default, in OpenGL, the face which is drawn counterclockwise is the
+front face. The triangle shown in Figure 1 is defined so that you are looking at the front face of
+the shape (as interpreted by OpenGL) and the other side is the back face.</p>
+
+<p>Why is it important to know which face of a shape is the front face? The answer has to do with a
+commonly used feature of OpenGL, called face culling. Face culling is an option for the OpenGL
+environment which allows the rendering pipeline to ignore (not calculate or draw) the back face of a
+shape, saving time, memory and processing cycles:</p>
+
+<pre>
+// enable face culling feature
+gl.glEnable(GL10.GL_CULL_FACE);
+// specify which faces to not draw
+gl.glCullFace(GL10.GL_BACK);
+</pre>
+
+<p>If you try to use the face culling feature without knowing which sides of your shapes are the
+front and back, your OpenGL graphics are going to look a bit thin, or possibly not show up at all.
+So, always define the coordinates of your OpenGL shapes in a counterclockwise drawing order.</p>
+
+<p class="note"><strong>Note:</strong> It is possible to set an OpenGL environment to treat the
+clockwise face as the front face, but doing so requires more code and is likely to confuse
+experienced OpenGL developers when you ask them for help. So don’t do that.</p>
 
 <h2 id="compatibility">OpenGL Versions and Device Compatibility</h2>
 
@@ -410,7 +443,8 @@ texture compression, see the <a
 href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/graphics/CompressedTextureActivity.html"
 >CompressedTextureActivity</a> code sample.</p>
 
-<p>To check if the ETC1 format is supported on a device, call the {@link
+<p>The ETC format is supported by most Android devices, but it not guarranteed to be available. To
+check if the ETC1 format is supported on a device, call the {@link
 android.opengl.ETC1Util#isETC1Supported() ETC1Util.isETC1Supported()} method.</p>
 
 <p class="note"><b>Note:</b> The ETC1 texture compression format does not support textures with an

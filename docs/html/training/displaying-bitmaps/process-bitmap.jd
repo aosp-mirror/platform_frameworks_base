@@ -21,7 +21,7 @@ previous.link=load-bitmap.html
 
 <h2>You should also read</h2>
 <ul>
-  <li><a href="{@docRoot}guide/practices/design/responsiveness.html">Designing for Responsiveness</a></li>
+  <li><a href="{@docRoot}guide/practices/responsiveness.html">Designing for Responsiveness</a></li>
   <li><a
   href="http://android-developers.blogspot.com/2010/07/multithreading-for-performance.html">Multithreading
   for Performance</a></li>
@@ -45,7 +45,7 @@ disk or a network location (or really any source other than memory). The time th
 load is unpredictable and depends on a variety of factors (speed of reading from disk or network,
 size of image, power of CPU, etc.). If one of these tasks blocks the UI thread, the system flags
 your application as non-responsive and the user has the option of closing it (see <a
-href="{@docRoot}guide/practices/design/responsiveness.html">Designing for Responsiveness</a> for
+href="{@docRoot}guide/practices/responsiveness.html">Designing for Responsiveness</a> for
 more information).</p>
 
 <p>This lesson walks you through processing bitmaps in a background thread using

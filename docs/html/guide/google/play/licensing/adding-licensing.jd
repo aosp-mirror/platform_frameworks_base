@@ -1,0 +1,1071 @@
+page.title=Adding Licensing to Your App
+parent.title=Application Licensing
+parent.link=index.html
+@jd:body
+
+
+
+<div id="qv-wrapper">
+<div id="qv">
+  
+  <h2>In this document</h2>
+  <ol>
+  <li><a href="#manifest-permission">Adding the Licensing Permission</a></li>
+  <li><a href="#impl-Policy">Implementing a Policy</a>
+    <ol>
+      <li><a href="#custom-policies">Guidelines for custom policies</a></li>
+      <li><a href="#ServerManagedPolicy">ServerManagedPolicy</a></li>
+      <li><a href="#StrictPolicy">StrictPolicy</a></li>
+    </ol>
+  </li>
+  <li><a href="#impl-Obfuscator">Implementing an Obfuscator</a>
+    <ol>
+      <li><a href="#AESObfuscator">AESObfuscator</a></li>
+    </ol>
+  </li>
+  <li><a href="#impl-lc">Checking the License from an Activity</a>
+    <ol>
+      <li><a href="#lc-overview">Overview of license check and response</a></li>
+      <li><a href="#imports">Add imports</a></li>
+      <li><a href="#lc-impl">Implement LicenseCheckerCallback as a private inner class</a></li>
+      <li><a href="#thread-handler">Create a Handler for posting from LicenseCheckerCallback
+to the UI thread</a></li>
+      <li><a href="#lc-lcc">Instantiate LicenseChecker and LicenseCheckerCallback</a></li>
+      <li><a href="#check-access">Call checkAccess() to initiate the license check</a></li>
+      <li><a href="#account-key">Embed your public key for licensing</a></li>
+      <li><a href="#handler-cleanup">Call your LicenseChecker's onDestroy() method
+to close IPC connections</a></li>
+    </ol>
+  </li>
+  <li><a href="#impl-DeviceLimiter">Implementing a DeviceLimiter</a></li>
+  <li><a href="#app-obfuscation">Obfuscating Your Code</a></li>
+  <li><a href="#app-publishing">Publishing a Licensed Application</a>
+    <ol>
+      <li><a href="#">Removing Copy Protection</a></li>
+    </ol>
+  </li>
+  <li><a href="#support">Where to Get Support</a></li>
+</ol>
+  
+</div>
+</div>
+
+
+
+<p>After you've set up a publisher account and development environment (see <a
+href="setting-up.html">Setting Up for Licensing</a>), you are ready to add license verification to
+your app with the License Verification Library (LVL).</p>
+
+<p>Adding license verification with the LVL involves these tasks:</p>
+
+<ol>
+<li><a href="#manifest-permission">Adding the licensing permission</a> your application's manifest.</li>
+<li><a href="#impl-Policy">Implementing a Policy</a> &mdash; you can choose one of the full implementations provided in the LVL or create your own.</li>
+<li><a href="#impl-Obfuscator">Implementing an Obfuscator</a>, if your {@code Policy} will cache any
+license response data. </li>
+<li><a href="#impl-lc">Adding code to check the license</a> in your application's main
+Activity.</li>
+<li><a href="#impl-DeviceLimiter">Implementing a DeviceLimiter</a> (optional and not recommended for
+most applications).</li>
+</ol>
+
+<p>The sections below describe these tasks. When you are done with the
+integration, you should be able to compile your application successfully and you
+can begin testing, as described in <a
+href="{@docRoot}guide/google/play/licensing/setting-up.html#test-env">Setting Up the Test
+Environment</a>.</p>
+
+<p>For an overview of the full set of source files included in the LVL, see <a
+href="{@docRoot}guide/google/play/licensing/licensing-reference.html#lvl-summary">Summary of LVL Classes
+and Interfaces</a>.</p>
+
+
+<h2 id="manifest-permission">Adding the Licensing Permission</h2>
+
+<p>To use the Google Play application for sending a license check to the
+server, your application must request the proper permission,
+<code>com.android.vending.CHECK_LICENSE</code>. If your application does
+not declare the licensing permission but attempts to initiate a license check,
+the LVL throws a security exception.</p>
+
+<p>To request the licensing permission in your application, declare a <a
+href="{@docRoot}guide/topics/manifest/uses-permission-element.html"><code>&lt;uses-permission&gt;</code></a>
+element as a child of <code>&lt;manifest&gt;</code>, as follows: </p>
+
+<p style="margin-left:2em;"><code>&lt;uses-permission
+android:name="com.android.vending.CHECK_LICENSE"&gt;</code></p>
+
+<p>For example, here's how the LVL sample application declares the permission:
+</p>
+
+<pre>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android" ..."&gt;
+    &lt;!-- Devices &gt;= 3 have version of Google Play that supports licensing. --&gt;
+    &lt;uses-sdk android:minSdkVersion="3" /&gt;
+    &lt;!-- Required permission to check licensing. --&gt;
+    &lt;uses-permission android:name="com.android.vending.CHECK_LICENSE" /&gt;
+    ...
+&lt;/manifest&gt;
+</pre>
+
+<p class="note"><strong>Note:</strong> Currently, you cannot declare the
+<code>CHECK_LICENSE</code> permission in the LVL library project's manifest,
+because the SDK Tools will not merge it into the manifests of dependent
+applications. Instead, you must declare the permission in each dependent
+application's manifest. </p>
+
+
+<h2 id="impl-Policy">Implementing a Policy</h2>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h2>ServerManagedPolicy</h2>
+
+<p>The LVL includes a complete {@code Policy} implementation called ServerManagedPolicy
+that makes use of license-management settings provided by the Google Play
+server. </p>
+
+<p style="margin-top:.5em;">Use of ServerManagedPolicy as the basis for your
+Policy is strongly recommended. For more information, see <a
+href="#ServerManagedPolicy">ServerManagedPolicy</a> section, below.</p>
+
+</div>
+</div>
+
+<p>Google Play licensing service does not itself determine whether a
+given user with a given license should be granted access to your application.
+Rather, that responsibility is left to a {@code Policy} implementation that you provide
+in your application.</p>
+
+<p>Policy is an interface declared by the LVL that is designed to hold your
+application's logic for allowing or disallowing user access, based on the result
+of a license check. To use the LVL, your application <em>must</em> provide an
+implementation of {@code Policy}. </p>
+
+<p>The {@code Policy} interface declares two methods, <code>allowAccess()</code> and
+<code>processServerResponse()</code>, which are called by a {@code LicenseChecker}
+instance when processing a response from the license server. It also declares an
+enum called <code>LicenseResponse</code>, which specifies the license response
+value passed in calls to <code>processServerResponse()</code>. </p>
+
+<ul>
+<li><code>processServerResponse()</code> lets you preprocess the raw response
+data received from the licensing server, prior to determining whether to grant
+access.
+
+<p>A typical implementation would extract some or all fields from the license
+response and store the data locally to a persistent store, such as through
+{@link android.content.SharedPreferences} storage, to ensure that the data is
+accessible across application invocations and device power cycles. For example,
+a {@code Policy} would maintain the timestamp of the last successful license check, the
+retry count, the license validity period, and similar information in a
+persistent store, rather than resetting the values each time the application is
+launched.</p>
+
+<p>When storing response data locally, the {@code Policy} must ensure that the data is
+obfuscated (see <a href="#impl-Obfuscator">Implementing an Obfuscator</a>,
+below).</p></li>
+
+<li><code>allowAccess()</code> determines whether to grant the user access to
+your application, based on any available license response data (from the
+licensing server or from cache) or other application-specific information.  For
+example, your implementation of <code>allowAccess()</code> could take into
+account additional criteria, such as usage or other data retrieved from a
+backend server. In all cases, an implementation of <code>allowAccess()</code>
+should only return <code>true</code> if the user is licensed to use the
+application, as determined by the licensing server, or if there is a transient
+network or system problem that prevents the license check from completing. In
+such cases, your implementation can maintain a count of retry responses and
+provisionally allow access until the next license check is complete.</li>
+
+</ul>
+
+<p>To simplify the process of adding licensing to your application and to
+provide an illustration of how a {@code Policy} should be designed, the LVL includes
+two full {@code Policy} implementations that you can use without modification or
+adapt to your needs:</p>
+
+<ul>
+<li><a href="#ServerManagedPolicy">ServerManagedPolicy</a>, a flexible {@code Policy}
+that uses server-provided settings and cached responses to manage access across
+varied network conditions, and</li>
+<li><a href="#StrictPolicy">StrictPolicy</a>, which does not cache any response
+data and allows access <em>only</em> if the server returns a licensed
+response.</li>
+</ul>
+
+<p>For most applications, the use of ServerManagedPolicy is highly
+recommended. ServerManagedPolicy is the LVL default and is integrated with
+the LVL sample application.</p>
+
+
+<h3 id="custom-policies">Guidelines for custom policies</h3>
+
+<p>In your licensing implementation, you can use one of the complete policies
+provided in the LVL (ServerManagedPolicy or StrictPolicy) or you can create a
+custom policy. For any type of custom policy, there are several important design
+points to understand and account for in your implementation.</p>
+
+<p>The licensing server applies general request limits to guard against overuse
+of resources that could result in denial of service. When an application exceeds
+the request limit, the licensing server returns a 503 response, which gets
+passed through to your application as a general server error. This means that no
+license response will be available to the user until the limit is reset, which
+can affect the user for an indefinite period.</p>
+
+<p>If you are designing a custom policy, we recommend that the {@code Policy}:
+<ol>
+<!-- <li>Limits the number of points at which your app calls for a license check
+to the minimum. </li> -->
+<li>Caches (and properly obfuscates) the most recent successful license response
+in local persistent storage.</li>
+<li>Returns the cached response for all license checks, for as long as the
+cached response is valid, rather than making a request to the licensing server.
+Setting the response validity according to the server-provided <code>VT</code>
+extra is highly recommended. See <a
+href="{@docRoot}guide/google/play/licensing/licensing-reference.html#extras">Server Response Extras</a>
+for more information.</li>
+<li>Uses an exponential backoff period, if retrying any requests the result in
+errors. Note that the Google Play client automatically retries failed
+requests, so in most cases there is no need for your {@code Policy} to retry them.</li>
+<li>Provides for a "grace period" that allows the user to access your
+application for a limited time or number of uses, while a license check is being
+retried. The grace period benefits the user by allowing access until the next
+license check can be completed successfully and it benefits you by placing a
+hard limit on access to your application when there is no valid license response
+available.</li>
+</ol>
+
+<p>Designing your {@code Policy} according to the guidelines listed above is critical,
+because it ensures the best possible experience for users while giving you
+effective control over your application even in error conditions. </p>
+
+<p>Note that any {@code Policy} can use settings provided by the licensing server to
+help manage validity and caching, retry grace period, and more. Extracting the
+server-provided settings is straightforward and making use of them is highly
+recommended. See the ServerManagedPolicy implementation for an example of how to
+extract and use the extras. For a list of server settings and information about
+how to use them, see  <a
+href="{@docRoot}guide/google/play/licensing/licensing-reference.html#extras">Server Response
+Extras</a>.</p>
+
+<h3 id="ServerManagedPolicy">ServerManagedPolicy</h3>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h2>Server Response Extras</h2>
+
+<p>For certain types of licensing responses, the licensing server appends extra
+settings to the responses, to help the application manage licensing effectively.
+</p>
+
+<p style="margin-top:.5em;">See <a
+href="{@docRoot}guide/google/play/licensing/licensing-reference.html#extras">Server Response Extras</a>
+for
+a list of settings and <code>ServerManagedPolicy.java</code> for information
+about how a {@code Policy} can use the extras.</p>
+
+</div>
+</div>
+
+<p>The LVL includes a full and recommended implementation of the {@code Policy}
+interface called ServerManagedPolicy. The implementation is integrated with the
+LVL classes and serves as the default {@code Policy} in the library. </p>
+
+<p>ServerManagedPolicy provides all of the handling for license and retry
+responses. It caches all of the response data locally in a
+{@link android.content.SharedPreferences} file, obfuscating it with the
+application's {@code Obfuscator} implementation. This ensures that the license response
+data is secure and persists across device power cycles. ServerManagedPolicy
+provides concrete implementations of the interface methods
+<code>processServerResponse()</code> and <code>allowAccess()</code> and also
+includes a set of supporting methods and types for managing license
+responses.</p>
+
+<p>Importantly, a key feature of ServerMangedPolicy is its use of
+server-provided settings as the basis for managing licensing across an
+application's refund period and through varying network and error conditions.
+When an application contacts the Google Play server for a license check, the
+server appends several settings as key-value pairs in the extras field of certain
+license response types. For example, the server provides recommended values for the
+application's license validity period, retry grace period, and maximum allowable
+retry count, among others. ServerManagedPolicy extracts the values from the
+license response in its <code>processServerResponse()</code> method and checks
+them in its <code>allowAccess()</code> method. For a list of the server-provided
+settings used by ServerManagedPolicy, see <a
+href="{@docRoot}guide/google/play/licensing/licensing-reference.html#extras">Server Response
+Extras</a>.</p>
+
+<p>For convenience, best performance, and the benefit of using license settings
+from the Google Play server, <strong>using ServerManagedPolicy as your
+licensing {@code Policy} is strongly recommended</strong>. </p>
+
+<p>If you are concerned about the security of license response data that is
+stored locally in {@link android.content.SharedPreferences}, you can use a stronger obfuscation
+algorithm or design a stricter {@code Policy} that does not store license data. The LVL
+includes an example of such a {@code Policy} &mdash; see <a
+href="#StrictPolicy">StrictPolicy</a> for more information.</p>
+
+<p>To use ServerManagedPolicy, simply import it to your Activity, create an
+instance, and pass a reference to the instance when constructing your
+{@code LicenseChecker}. See <a href="#lc-lcc">Instantiate LicenseChecker and
+LicenseCheckerCallback</a> for more information. </p>
+
+<h3 id="StrictPolicy">StrictPolicy</h3>
+
+<p>The LVL includes an alternative full implementation of the {@code Policy} interface
+called StrictPolicy. The StrictPolicy implementation provides a more restrictive
+Policy than ServerManagedPolicy, in that it does not allow the user to access
+the application unless a license response is received from the server at the
+time of access that indicates that the user is licensed.</p>
+
+<p>The principal feature of StrictPolicy is that it does not store <em>any</em>
+license response data locally, in a persistent store. Because no data is stored,
+retry requests are not tracked and cached responses can not be used to fulfill
+license checks. The {@code Policy} allows access only if:</p>
+
+<ul>
+<li>The license response is received from the licensing server, and </li>
+<li>The license response indicates that the user is licensed to access the
+application. </li>
+</ul>
+
+<p>Using StrictPolicy is appropriate if your primary concern is to ensure that,
+in all possible cases, no user will be allowed to access the application unless
+the user is confirmed to be licensed at the time of use. Additionally, the
+Policy offers slightly more security than ServerManagedPolicy &mdash; since
+there is no data cached locally, there is no way a malicious user could tamper
+with the cached data and obtain access to the application.</p>
+
+<p>At the same time, this {@code Policy} presents a challenge for normal users, since it
+means that they won't be able to access the application when there is no network
+(cell or Wi-Fi) connection available. Another side-effect is that your
+application will send more license check requests to the server, since using a
+cached response is not possible.</p>
+
+<p>Overall, this policy represents a tradeoff of some degree of user convenience
+for absolute security and control over access. Consider the tradeoff carefully
+before using this {@code Policy}.</p>
+
+<p>To use StrictPolicy, simply import it to your Activity, create an instance,
+and pass a reference to it when constructing your {@code LicenseChecker}. See
+<a href="#lc-lcc">Instantiate LicenseChecker and LicenseCheckerCallback</a>
+for more information. </p>
+
+<h2 id="impl-Obfuscator">Implementing an Obfuscator</h2>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h2>AESObfuscator</h2>
+
+<p>The LVL includes a full {@code Obfuscator} implementation in the
+<code>AESObfuscator.java</code> file. The {@code Obfuscator} uses AES encryption to
+obfuscate/unobfuscate data. If you are using a {@code Policy} (such as
+ServerManagedPolicy) that caches license response data, using AESObfuscator as
+basis for your {@code Obfuscator} implementation is highly recommended. </p>
+
+</div>
+</div>
+
+<p>A typical {@code Policy} implementation needs to save the license response data for
+an application to a persistent store, so that it is accessible across
+application invocations and device power cycles.  For example, a {@code Policy} would
+maintain the timestamp of the last successful license check, the retry count,
+the license validity period, and similar information in a persistent store,
+rather than resetting the values each time the application is launched. The
+default {@code Policy} included in the LVL, ServerManagedPolicy, stores license response
+data in a {@link android.content.SharedPreferences} instance, to ensure that the
+data is persistent. </p>
+
+<p>Because the {@code Policy} will use stored license response data to determine whether
+to allow or disallow access to the application, it <em>must</em> ensure that any
+stored data is secure and cannot be reused or manipulated by a root user on a
+device. Specifically, the {@code Policy} must always obfuscate the data before storing
+it, using a key that is unique for the application and device. Obfuscating using
+a key that is both application-specific and device-specific is critical, because
+it prevents the obfuscated data from being shared among applications and
+devices.</p>
+
+<p>The LVL assists the application with storing its license response data in a
+secure, persistent manner. First, it provides an {@code Obfuscator}
+interface that lets your application supply the obfuscation algorithm of its
+choice for stored data. Building on that, the LVL provides the helper class
+PreferenceObfuscator, which handles most of the work of calling the
+application's {@code Obfuscator} class and reading and writing the obfuscated data in a
+{@link android.content.SharedPreferences} instance. </p>
+
+<p>The LVL provides a full {@code Obfuscator} implementation called
+AESObfuscator that uses AES encryption to obfuscate data. You can
+use AESObfuscator in your application without modification or you
+can adapt it to your needs. For more information, see the next section.</p>
+
+
+<h3 id="AESObfuscator">AESObfuscator</h3>
+
+<p>The LVL includes a full and recommended implementation of the {@code Obfuscator}
+interface called AESObfuscator. The implementation is integrated with the
+LVL sample application and serves as the default {@code Obfuscator} in the library. </p>
+
+<p>AESObfuscator provides secure obfuscation of data by using AES to
+encrypt and decrypt the data as it is written to or read from storage.
+The {@code Obfuscator} seeds the encryption using three data fields provided
+by the application: </p>
+
+<ol>
+<li>A salt &mdash; an array of random bytes to use for each (un)obfuscation. </li>
+<li>An application identifier string, typically the package name of the application.</li>
+<li>A device identifier string, derived from as many device-specific sources
+as possible, so as to make it as unique.</li>
+</ol>
+
+<p>To use AESObfuscator, first import it to your Activity. Declare a private
+static final array to hold the salt bytes and initialize it to 20 randomly
+generated bytes.</p>
+
+<pre>    ...
+    // Generate 20 random bytes, and put them here.
+    private static final byte[] SALT = new byte[] {
+     -46, 65, 30, -128, -103, -57, 74, -64, 51, 88, -95,
+     -45, 77, -117, -36, -113, -11, 32, -64, 89
+     };
+    ...
+</pre>
+
+<p>Next, declare a variable to hold a device identifier and generate a value for
+it in any way needed. For example, the sample application included in the LVL
+queries the system settings for the
+<code>android.Settings.Secure.ANDROID_ID</code>, which is unique to each device.
+</p>
+
+<p>Note that, depending on the APIs you use, your application might need to
+request additional permissions in order to acquire device-specific information.
+For example, to query the {@link android.telephony.TelephonyManager} to obtain
+the device IMEI or related data, the application will also need to request the
+<code>android.permission.READ_PHONE_STATE</code> permission in its manifest.</p>
+
+<p>Before requesting new permissions for the <em>sole purpose</em> of acquiring
+device-specific information for use in your {@code Obfuscator}, consider
+how doing so might affect your application or its filtering on Google Play
+(since some permissions can cause the SDK build tools to add
+the associated <code>&lt;uses-feature&gt;</code>).</p>
+
+<p>Finally, construct an instance of AESObfuscator, passing the salt,
+application identifier, and device identifier. You can construct the instance
+directly, while constructing your {@code Policy} and {@code LicenseChecker}. For example:</p>
+
+<pre>    ...
+    // Construct the LicenseChecker with a Policy.
+    mChecker = new LicenseChecker(
+        this, new ServerManagedPolicy(this,
+            new AESObfuscator(SALT, getPackageName(), deviceId)),
+        BASE64_PUBLIC_KEY  // Your public licensing key.
+        );
+    ...
+</pre>
+
+<p>For a complete example, see MainActivity in the LVL sample application.</p>
+
+
+<h2 id="impl-lc">Checking the License from an Activity</h2>
+
+<p>Once you've implemented a {@code Policy} for managing access to your application, the
+next step is to add a license check to your application, which initiates a query
+to the licensing server if needed and manages access to the application based on
+the license response. All of the work of adding the license check and handling
+the response takes place in your main {@link android.app.Activity} source file.
+</p>
+
+<p>To add the license check and handle the response, you must:</p>
+
+<ol>
+    <li><a href="#imports">Add imports</a></li>
+    <li><a href="#lc-impl">Implement LicenseCheckerCallback</a> as a private inner class</li>
+    <li><a href="#thread-handler">Create a Handler</a> for posting from LicenseCheckerCallback to the UI thread</li>
+    <li><a href="#lc-lcc">Instantiate LicenseChecker</a> and LicenseCheckerCallback</li>
+    <li><a href="#check-access">Call checkAccess()</a> to initiate the license check</li>
+    <li><a href="#account-key">Embed your public key</a> for licensing</li>
+    <li><a href="#handler-cleanup">Call your LicenseChecker's onDestroy() method</a> to close IPC connections.</li>
+</ol>
+
+<p>The sections below describe these tasks. </p>
+
+<h3 id="lc-overview">Overview of license check and response</h3>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h2>Example: MainActivity</h2>
+
+<p>The sample application included with the LVL provides a full example of how
+to initiate a license check and handle the result, in the
+<code>MainActivity.java</code> file.</p>
+
+</div>
+</div>
+
+<p>In most cases, you should add the license check to your application's main
+{@link android.app.Activity}, in the {@link android.app.Activity#onCreate onCreate()} method. This
+ensures that when the user launches your application directly, the license check
+will be invoked immediately. In some cases, you can add license checks in other
+locations as well. For example, if your application includes multiple Activity
+components that other applications can start by {@link android.content.Intent},
+you could add license checks in those Activities.</p>
+
+<p>A license check consists of two main actions: </p>
+
+<ul>
+<li>A call to a method to initiate the license check &mdash; in the LVL, this is
+a call to the <code>checkAccess()</code> method of a {@code LicenseChecker} object that
+you construct.</li>
+<li>A callback that returns the result of the license check. In the LVL, this is
+a <code>LicenseCheckerCallback</code> interface that you implement. The
+interface declares two methods, <code>allow()</code> and
+<code>dontAllow()</code>, which are invoked by the library based on to the
+result of the license check. You implement these two methods with whatever logic
+you need, to allow or disallow the user access to your application. Note that
+these methods do not determine <em>whether</em> to allow access &mdash; that
+determination is the responsibility of your {@code Policy} implementation. Rather, these
+methods simply provide the application behaviors for <em>how</em> to allow and
+disallow access (and handle application errors).
+  <p>The <code>allow()</code> and <code>dontAllow()</code> methods do provide a "reason"
+for their response, which can be one of the {@code Policy} values, {@code LICENSED},
+{@code NOT_LICENSED}, or {@code RETRY}. In particular, you should handle the case in which
+the method receives the {@code RETRY} response for {@code dontAllow()} and provide the user with an
+"Retry" button, which might have happened because the service was unavailable during the
+request.</p></li>
+</ul>
+
+<div style="margin-bottom:2em;">
+
+<img src="{@docRoot}images/licensing_flow.png" style="text-align:left;margin-bottom:0;margin-left:3em;" />
+<div style="margin:.5em 0 1.5em 2em;padding:0"><strong>Figure 6.</strong> Overview of a
+typical license check interaction.</div>
+</div>
+
+<p>The diagram above illustrates how a typical license check takes place: </p>
+
+<ol>
+<li>Code in the application's main Activity instantiates {@code LicenseCheckerCallback}
+and {@code LicenseChecker} objects. When constructing {@code LicenseChecker}, the code passes in
+{@link android.content.Context}, a {@code Policy} implementation to use, and the
+publisher account's public key for licensing as parameters. </li>
+<li>The code then calls the <code>checkAccess()</code> method on the
+{@code LicenseChecker} object. The method implementation calls the {@code Policy} to determine
+whether there is a valid license response cached locally, in
+{@link android.content.SharedPreferences}.
+  <ul>
+    <li>If so, the <code>checkAccess()</code> implementation calls
+  <code>allow()</code>.</li>
+    <li>Otherwise, the {@code LicenseChecker} initiates a license check request that is sent
+  to the licensing server.</li>
+  </ul>
+
+<p class="note"><strong>Note:</strong> The licensing server always returns
+<code>LICENSED</code> when you perform a license check of a draft application.</p>
+</li>
+<li>When a response is received, {@code LicenseChecker} creates a LicenseValidator that
+verifies the signed license data and extracts the fields of the response, then
+passes them to your {@code Policy} for further evaluation.
+  <ul>
+    <li>If the license is valid, the {@code Policy} caches the response in
+{@link android.content.SharedPreferences} and notifies the validator, which then calls the
+<code>allow()</code> method on the {@code LicenseCheckerCallback} object. </li>
+    <li>If the license not valid, the {@code Policy} notifies the validator, which calls
+the <code>dontAllow()</code> method on {@code LicenseCheckerCallback}. </li>
+  </ul>
+</li>
+<li>In case of a recoverable local or server error, such as when the network is
+not available to send the request, {@code LicenseChecker} passes a {@code RETRY} response to
+your {@code Policy} object's <code>processServerResponse()</code> method. 
+  <p>Also, both the {@code allow()} and {@code dontAllow()} callback methods receive a
+<code>reason</code> argument. The {@code allow()} method's reason is usually {@code
+Policy.LICENSED} or {@code Policy.RETRY} and the {@code dontAllow()} reason is usually {@code
+Policy.NOT_LICENSED} or {@code Policy.RETRY}. These response values are useful so you can show
+an appropriate response for the user, such as by providing a "Retry" button when {@code
+dontAllow()} responds with {@code Policy.RETRY}, which might have been because the service was
+unavailable.</p></li>
+<li>In case of a application error, such as when the application attempts to
+check the license of an invalid package name, {@code LicenseChecker} passes an error
+response to the LicenseCheckerCallback's  <code>applicationError()</code>
+method. </li>
+</ol>
+
+<p>Note that, in addition to initiating the license check and handling the
+result, which are described in the sections below, your application also needs
+to provide a <a href="#impl-Policy">Policy implementation</a> and, if the {@code Policy}
+stores response data (such as ServerManagedPolicy), an <a
+href="#impl-Obfuscator">Obfuscator</a> implementation. </p>
+
+
+<h3 id="imports">Add imports</h3>
+
+<p>First, open the class file of the application's main Activity and import
+{@code LicenseChecker} and {@code LicenseCheckerCallback} from the LVL package.</p>
+
+<pre>    import com.android.vending.licensing.LicenseChecker;
+    import com.android.vending.licensing.LicenseCheckerCallback;</pre>
+
+<p>If you are using the default {@code Policy} implementation provided with the LVL,
+ServerManagedPolicy, import it also, together with the AESObfuscator. If you are
+using a custom {@code Policy} or {@code Obfuscator}, import those instead. </p>
+
+<pre>    import com.android.vending.licensing.ServerManagedPolicy;
+    import com.android.vending.licensing.AESObfuscator;</pre>
+
+<h3 id="lc-impl">Implement LicenseCheckerCallback as a private inner class</h3>
+
+<p>{@code LicenseCheckerCallback} is an interface provided by the LVL for handling
+result of a license check. To support licensing using the LVL, you must
+implement {@code LicenseCheckerCallback} and
+its methods to allow or disallow access to the application.</p>
+
+<p>The result of a license check is always a call to one of the
+{@code LicenseCheckerCallback} methods, made based on the validation of the response
+payload, the server response code itself, and any additional processing provided
+by your {@code Policy}. Your application can implement the methods in any way needed. In
+general, it's best to keep the methods simple, limiting them to managing UI
+state and application access. If you want to add further processing of license
+responses, such as by contacting a backend server or applying custom constraints,
+you should consider incorporating that code into your {@code Policy}, rather than
+putting it in the {@code LicenseCheckerCallback} methods. </p>
+
+<p>In most cases, you should declare your implementation of
+{@code LicenseCheckerCallback} as a private class inside your application's main
+Activity class. </p>
+
+<p>Implement the <code>allow()</code> and <code>dontAllow()</code> methods as
+needed. To start with, you can use simple result-handling behaviors in the
+methods, such as displaying the license result in a dialog. This helps you get
+your application running sooner and can assist with debugging. Later, after you
+have determined the exact behaviors you want, you can add more complex handling.
+</p>
+
+<p>Some suggestions for handling unlicensed responses in
+<code>dontAllow()</code> include: </p>
+
+<ul>
+<li>Display a "Try again" dialog to the user, including a button to initiate a
+new license check if the <code>reason</code> supplied is {@code Policy.RETRY}. </li>
+<li>Display a "Purchase this application" dialog, including a button that
+deep-links the user to the application's details page on Google Play, from which the
+use can purchase the application. For more information on how to set up such
+links, see <a
+href="{@docRoot}distribute/googleplay/promote/linking.html">Linking to Your Products</a>. </li>
+<li>Display a Toast notification that indicates that the features of the
+application are limited because it is not licensed. </li>
+</ul>
+
+<p>The example below shows how the LVL sample application implements
+{@code LicenseCheckerCallback}, with methods that display the license check result in a
+dialog. </p>
+
+<pre>
+private class MyLicenseCheckerCallback implements LicenseCheckerCallback {
+    public void allow(int reason) {
+        if (isFinishing()) {
+            // Don't update UI if Activity is finishing.
+            return;
+        }
+        // Should allow user access.
+        displayResult(getString(R.string.allow));
+    }
+
+    public void dontAllow(int reason) {
+        if (isFinishing()) {
+            // Don't update UI if Activity is finishing.
+            return;
+        }
+        displayResult(getString(R.string.dont_allow));
+        
+        if (reason == Policy.RETRY) {
+            // If the reason received from the policy is RETRY, it was probably
+            // due to a loss of connection with the service, so we should give the
+            // user a chance to retry. So show a dialog to retry.
+            showDialog(DIALOG_RETRY);
+        } else {
+            // Otherwise, the user is not licensed to use this app.
+            // Your response should always inform the user that the application
+            // is not licensed, but your behavior at that point can vary. You might
+            // provide the user a limited access version of your app or you can
+            // take them to Google Play to purchase the app.
+            showDialog(DIALOG_GOTOMARKET);
+        }
+    }
+}
+</pre>
+
+<p>Additionally, you should implement the <code>applicationError()</code>
+method, which the LVL calls to let your application handle errors that are not
+retryable. For a list of such errors, see <a
+href="{@docRoot}guide/google/play/licensing/licensing-reference.html#server-response-codes">Server
+Response Codes</a> in the <a
+href="guide/google/play/licensing/licensing-reference.html">Licensing Reference</a>. You can implement
+the method in any way needed. In most cases, the
+method should log the error code and call <code>dontAllow()</code>.</p>
+
+<h3 id="thread-handler">Create a Handler for posting from LicenseCheckerCallback
+to the UI thread</h3>
+
+<p>During a license check, the LVL passes the request to the Google Play
+application, which handles communication with the licensing server. The LVL
+passes the request over asynchronous IPC (using {@link android.os.Binder}) so
+the actual processing and network communication do not take place on a thread
+managed by your application. Similarly, when the Google Play application
+receives the result, it invokes a  callback method over IPC, which in turn
+executes in an IPC thread pool in your application's process.</p>
+
+<p>The {@code LicenseChecker} class manages your application's IPC communication with
+the Google Play application, including the call that sends the request and
+the callback that receives the response. {@code LicenseChecker} also tracks open license
+requests and manages their timeouts. </p>
+
+<p>So that it can handle timeouts properly and also process incoming responses
+without affecting your application's UI thread, {@code LicenseChecker} spawns a
+background thread at instantiation. In the thread it does all processing of
+license check results, whether the result is a response received from the server
+or a timeout error. At the conclusion of processing, the LVL calls your
+{@code LicenseCheckerCallback} methods from the background thread. </p>
+
+<p>To your application, this means that:</p>
+
+<ol>
+<li>Your {@code LicenseCheckerCallback} methods will be invoked, in many cases, from a
+background thread.</li>
+<li>Those methods won't be able to update state or invoke any processing in the
+UI thread, unless you create a Handler in the UI thread and have your callback
+methods post to the Handler.</li>
+</ol>
+
+<p>If you want your {@code LicenseCheckerCallback} methods to update the UI thread,
+instantiate a {@link android.os.Handler} in the main Activity's
+{@link android.app.Activity#onCreate(android.os.Bundle) onCreate()} method,
+as shown below. In this example, the LVL sample application's
+{@code LicenseCheckerCallback} methods (see above) call <code>displayResult()</code> to
+update the UI thread through the Handler's
+{@link android.os.Handler#post(java.lang.Runnable) post()} method.</p>
+
+<pre>private Handler mHandler;
+
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        ...
+        mHandler = new Handler();
+    }
+</pre>
+
+<p>Then, in your {@code LicenseCheckerCallback} methods, you can use Handler methods to
+post Runnable or Message objects to the Handler. Here's how the sample
+application included in the LVL posts a Runnable to a Handler in the UI thread
+to display the license status.</p>
+
+<pre>    private void displayResult(final String result) {
+        mHandler.post(new Runnable() {
+            public void run() {
+                mStatusText.setText(result);
+                setProgressBarIndeterminateVisibility(false);
+                mCheckLicenseButton.setEnabled(true);
+            }
+        });
+    }
+</pre>
+
+<h3 id="lc-lcc">Instantiate LicenseChecker and LicenseCheckerCallback</h3>
+
+<p>In the main Activity's
+{@link android.app.Activity#onCreate(android.os.Bundle) onCreate()} method,
+create private instances of LicenseCheckerCallback and {@code LicenseChecker}. You must
+instantiate {@code LicenseCheckerCallback} first, because you need to pass a reference
+to that instance when you call the constructor for {@code LicenseChecker}. </p>
+
+<p>When you instantiate {@code LicenseChecker}, you need to pass in these parameters:</p>
+
+<ul>
+<li>The application {@link android.content.Context}</li>
+<li>A reference to the {@code Policy} implementation to use for the license check. In
+most cases, you would use the default {@code Policy} implementation provided by the LVL,
+ServerManagedPolicy. </li>
+<li>The String variable holding your publisher account's public key for
+licensing. </li>
+</ul>
+
+<p>If you are using ServerManagedPolicy, you won't need to access the class
+directly, so you can instantiate it in the {@code LicenseChecker} constructor,
+as shown in the example below. Note that you need to pass a reference to a new
+Obfuscator instance when you construct ServerManagedPolicy.</p>
+
+<p>The example below shows the instantiation of {@code LicenseChecker} and
+{@code LicenseCheckerCallback} from the <code>onCreate()</code> method of an Activity
+class. </p>
+
+<pre>public class MainActivity extends Activity {
+    ...
+    private LicenseCheckerCallback mLicenseCheckerCallback;
+    private LicenseChecker mChecker;
+
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        ...
+        // Construct the LicenseCheckerCallback. The library calls this when done.
+        mLicenseCheckerCallback = new MyLicenseCheckerCallback();
+
+        // Construct the LicenseChecker with a Policy.
+        mChecker = new LicenseChecker(
+            this, new ServerManagedPolicy(this,
+                new AESObfuscator(SALT, getPackageName(), deviceId)),
+            BASE64_PUBLIC_KEY  // Your public licensing key.
+            );
+        ...
+    }
+}
+</pre>
+
+
+<p>Note that {@code LicenseChecker} calls the {@code LicenseCheckerCallback} methods from the UI
+thread <em>only</em> if there is valid license response cached locally. If the
+license check is sent to the server, the callbacks always originate from the
+background thread, even for network errors. </p>
+
+
+<h3 id="check-access">Call checkAccess() to initiate the license check</h3>
+
+<p>In your main Activity, add a call to the <code>checkAccess()</code> method of the
+{@code LicenseChecker} instance. In the call, pass a reference to your
+{@code LicenseCheckerCallback} instance as a parameter. If you need to handle any
+special UI effects or state management before the call, you might find it useful
+to call <code>checkAccess()</code> from a wrapper method. For example, the LVL
+sample application calls <code>checkAccess()</code> from a
+<code>doCheck()</code> wrapper method:</p>
+
+<pre>    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        ...
+        // Call a wrapper method that initiates the license check
+        doCheck();
+        ...
+    }
+    ...
+    private void doCheck() {
+        mCheckLicenseButton.setEnabled(false);
+        setProgressBarIndeterminateVisibility(true);
+        mStatusText.setText(R.string.checking_license);
+        mChecker.checkAccess(mLicenseCheckerCallback);
+    }
+</pre>
+
+
+<h3 id="account-key">Embed your public key for licensing</h3>
+
+<p>For each publisher account, the Google Play service automatically
+generates a  2048-bit RSA public/private key pair that is used exclusively for
+licensing. The key pair is uniquely associated with the publisher account and is
+shared across all applications that are published through the account. Although
+associated with a publisher account, the key pair is <em>not</em> the same as
+the key that you use to sign your applications (or derived from it).</p>
+
+<p>The Google Play publisher site exposes the public key for licensing to any
+developer signed in to the publisher account, but it keeps the private key
+hidden from all users in a secure location. When an application requests a
+license check for an application published in your account, the licensing server
+signs the license response using the private key of your account's key pair.
+When the LVL receives the response, it uses the public key provided by the
+application to verify the signature of the license response. </p>
+
+<p>To add licensing to an application, you must obtain your publisher account's
+public key for licensing and copy it into your application. Here's how to find
+your account's public key for licensing:</p>
+
+<ol>
+<li>Go to the Google Play <a
+href="http://play.google.com/apps/publish">publisher site</a> and sign in.
+Make sure that you sign in to the account from which the application you are
+licensing is published (or will be published). </li>
+<li>In the account home page, locate the "Edit profile" link and click it. </li>
+<li>In the Edit Profile page, locate the "Licensing" pane, shown below. Your
+public key for licensing is given in the "Public key" text box. </li>
+</ol>
+
+<p>To add the public key to your application, simply copy/paste the key string
+from the text box into your application as the value of the String variable
+<code>BASE64_PUBLIC_KEY</code>. When you are copying, make sure that you have
+selected the entire key string, without omitting any characters. </p>
+
+<p>Here's an example from the LVL sample application:</p>
+
+<pre>    public class MainActivity extends Activity {
+        private static final String BASE64_PUBLIC_KEY = "MIIBIjANBgkqhkiG ... "; //truncated for this example
+    ...
+    }
+</pre>
+
+<h3 id="handler-cleanup">Call your LicenseChecker's onDestroy() method
+to close IPC connections</h3>
+
+<p>Finally, to let the LVL clean up before your application
+{@link android.content.Context} changes, add a call to the {@code LicenseChecker}'s
+<code>onDestroy()</code> method from your Activity's
+{@link android.app.Activity#onDestroy()} implementation. The call causes the
+{@code LicenseChecker} to properly close any open IPC connection to the Google Play
+application's ILicensingService and removes any local references to the service
+and handler.</p>
+
+<p>Failing to call the {@code LicenseChecker}'s <code>onDestroy()</code> method
+can lead to problems over the lifecycle of your application. For example, if the
+user changes screen orientation while a license check is active, the application
+{@link android.content.Context} is destroyed. If your application does not
+properly close the {@code LicenseChecker}'s IPC connection, your application will crash
+when the response is received. Similarly, if the user exits your application
+while a license check is in progress,  your application will crash when the
+response is received, unless it has properly called the
+{@code LicenseChecker}'s <code>onDestroy()</code> method to disconnect from the service.
+</p>
+
+<p>Here's an example from the sample application included in the LVL, where
+<code>mChecker</code> is the {@code LicenseChecker} instance:</p>
+
+<pre>    &#64;Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mChecker.onDestroy();
+        ...
+    }
+</pre>
+
+<p>If you are extending or modifying {@code LicenseChecker}, you might also need to call
+the {@code LicenseChecker}'s <code>finishCheck()</code> method, to clean up any open IPC
+connections.</p>
+
+<h2 id="impl-DeviceLimiter">Implementing a DeviceLimiter</h2>
+
+<p>In some cases, you might want your {@code Policy} to limit the number of actual
+devices that are permitted to use a single license. This would prevent a user
+from moving a licensed application onto a number of devices and using the
+application on those devices under the same account ID. It would also prevent a
+user from "sharing" the application by providing the account information
+associated with the license to other individuals, who could then sign in to that
+account on their devices and access the license to the application. </p>
+
+<p>The LVL supports per-device licensing by providing a
+<code>DeviceLimiter</code> interface, which declares a single method,
+<code>allowDeviceAccess()</code>. When a LicenseValidator is handling a response
+from the licensing server, it calls <code>allowDeviceAccess()</code>, passing a
+user ID string extracted from the response.</p>
+
+<p>If you do not want to support device limitation, <strong>no work is
+required</strong> &mdash; the {@code LicenseChecker} class automatically uses a default
+implementation called NullDeviceLimiter. As the name suggests, NullDeviceLimiter
+is a "no-op" class whose <code>allowDeviceAccess()</code> method simply returns
+a <code>LICENSED</code> response for all users and devices. </p>
+
+<div style="border-left:4px solid #FFCF00;margin:1em;padding: 0 0 0 .5em">
+<p><strong>Caution:</strong> Per-device licensing is <em>not recommended for
+most applications</em> because:</p>
+<ul>
+<li>It requires that you provide a backend server to manage a users and devices
+mapping, and </li>
+<li>It could inadvertently result in a user being denied access to an
+application that they have legitimately purchased on another device.</li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+<h2 id="app-obfuscation">Obfuscating Your Code</h2>
+
+<p>To ensure the security of your application, particularly for a paid
+application that uses licensing and/or custom constraints and protections, it's
+very important to obfuscate your application code. Properly obfuscating your
+code makes it more difficult for a malicious user to decompile the application's
+bytecode, modify it &mdash; such as by removing the license check &mdash;
+and then recompile it.</p>
+
+<p>Several obfuscator programs are available for Android applications, including
+<a href="http://proguard.sourceforge.net/">ProGuard</a>, which also offers
+code-optimization features. The use of ProGuard or a similar program to obfuscate
+your code is <em>strongly recommended</em> for all applications that use Google
+Play Licensing. </p>
+
+<h2 id="app-publishing">Publishing a Licensed Application</h2>
+
+<p>When you are finished testing your license implementation, you are ready to
+publish the application on Google Play. Follow the normal steps to <a
+href="{@docRoot}tools/publishing/preparing.html">prepare</a>, <a
+href="{@docRoot}tools/publishing/app-signing.html">sign</a>, and then <a
+href="{@docRoot}distribute/googleplay/publish/preparing.html">publish the application</a>.
+</p>
+
+<h3>Removing Copy Protection</h3>
+
+<p>After uploading your licensed application, remember to remove copy protection
+from the application, if it is currently used. To check and remove copy
+protection, sign in to the publisher site and go the application's upload
+details page. In the Publishing options section, make sure that the Copy
+Protection radio button selection is "Off".</p>
+
+
+<h2 id="support">Where to Get Support</h2>
+
+<p>If you have questions or encounter problems while implementing or deploying
+publishing in your applications, please use the support resources listed in the
+table below. By directing your queries to the correct forum, you can get the
+support you need more quickly. </p>
+
+<p class="table-caption"><strong>Table 2.</strong> Developer support resources
+for Google Play Licensing Service.</p>
+
+<table>
+
+<tr>
+<th>Support Type</th>
+<th>Resource</th>
+<th>Range of Topics</th>
+</tr>
+<tr>
+<td rowspan="2">Development and testing issues</td>
+<td>Google Groups: <a
+href="http://groups.google.com/group/android-developers">android-developers</a>
+</td>
+<td rowspan="2">LVL download and integration, library projects, {@code Policy}
+questions, user experience ideas, handling of responses, {@code Obfuscator}, IPC, test
+environment setup</td>
+</tr>
+<tr>
+<td>Stack Overflow: <a
+href="http://stackoverflow.com/questions/tagged/android">http://stackoverflow.com/questions/tagged/android</a></td>
+</tr>
+<tr>
+<td rowspan="2">Accounts, publishing, and deployment issues</td>
+<td><a href="http://www.google.com/support/forum/p/Android+Market">Google Play
+Help Forum</a></td>
+<td rowspan="2">Publisher accounts, licensing key pair, test accounts, server
+responses, test responses, application deployment and results</td>
+</tr>
+<tr>
+<td><a
+href="http://market.android.com/support/bin/answer.py?answer=186113">Market
+Licensing Support FAQ</a></td>
+</tr>
+<tr>
+<td>LVL issue tracker</td>
+<td><a href="http://code.google.com/p/marketlicensing/issues/">Marketlicensing
+project issue tracker</a></td>
+<td>Bug and issue reports related specifically to the LVL source code classes
+and interface implementations</td>
+</tr>
+
+</table>
+
+<p>For general information about how to post to the groups listed above, see <a
+href="{@docRoot}resources/community-groups.html">Developer Forums</a> document
+in the Resources tab.</p>
+
+

@@ -78,7 +78,7 @@ previous.link=ancestral-temporal.html
   <li>What's the learning curve? Professional vector illustration tools may have a steep learning curve, while tools designed for wireframing may offer a smaller set of features that are more relevant to the task.</li>
 </ul>
 
-<p>Lastly, the XML Layout Editor that comes with the <a href="{@docRoot}guide/developing/tools/adt.html">Android Development Tools (ADT)</a> plugin for Eclipse can often be used for prototyping. However, you should be careful to focus more on the high-level layout and less on visual design details at this point.</p>
+<p>Lastly, the XML Layout Editor that comes with the <a href="{@docRoot}tools/help/adt.html">Android Development Tools (ADT)</a> plugin for Eclipse can often be used for prototyping. However, you should be careful to focus more on the high-level layout and less on visual design details at this point.</p>
 
 
 <h2 id="wireframe-digital">Create Digital Wireframes</h2>
@@ -120,6 +120,6 @@ previous.link=ancestral-temporal.html
 <ul>
   <li><a href="{@docRoot}guide/topics/ui/index.html">Developer's Guide: User Interface</a>: learn how to implement your user interface designs using the Android SDK.</li>
   <li><a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a>: implement tabs, up navigation, on-screen actions, etc.
-  <li><a href="{@docRoot}guide/topics/fundamentals/fragments.html">Fragments</a>: implement re-usable, multi-pane layouts
-  <li><a href="{@docRoot}sdk/compatibility-library.html">Support Library</a>: implement horizontal paging (swipe views) using <code>ViewPager</code></li>
+  <li><a href="{@docRoot}guide/components/fragments.html">Fragments</a>: implement re-usable, multi-pane layouts
+  <li><a href="{@docRoot}tools/extras/support-library.html">Support Library</a>: implement horizontal paging (swipe views) using <code>ViewPager</code></li>
 </ul>

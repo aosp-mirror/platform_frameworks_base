@@ -24,7 +24,7 @@ Lifecycle</a>)</li>
   <li><a
 href="http://android-developers.blogspot.com/2009/11/integrating-application-with-intents.html">
 Integrating Application with Intents (blog post)</a></li>
-  <li><a href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and Intent
+  <li><a href="{@docRoot}guide/components/intents-filters.html">Intents and Intent
 Filters</a></li>
 </ul>
 
@@ -32,7 +32,7 @@ Filters</a></li>
 </div>
 
 <p>An Android app typically has several <a
-href="{@docRoot}guide/topics/fundamentals/activities.html">activities</a>. Each activity displays a
+href="{@docRoot}guide/components/activities.html">activities</a>. Each activity displays a
 user interface that allows the user to perform a specific task (such as view a map or take a photo).
 To take the user from one activity to another, your app must use an {@link
 android.content.Intent} to define your app's "intent" to do something. When you pass an

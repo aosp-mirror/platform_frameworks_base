@@ -1,0 +1,124 @@
+page.title=Toggle Buttons
+parent.title=Input Controls
+parent.link=../controls.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>In this document</h2>
+<ol>
+  <li><a href="#HandlingEvents">Responding to Click Events</a>
+    <ol>
+      <li><a href="#ClickListener">Using an OnCheckedChangeListener</a></li>
+    </ol>
+  </li>
+</ol>
+  <h2>Key classes</h2>
+  <ol>
+    <li>{@link android.widget.ToggleButton}</li>
+    <li>{@link android.widget.Switch}</li>
+  </ol>
+</div>
+</div>
+
+<p>A toggle button allows the user to change a setting between two states.</p>
+
+<p>You can add a basic toggle button to your layout with the {@link android.widget.ToggleButton}
+object. Android 4.0 (API level 14) introduces another kind of toggle button called a switch that
+provides a slider control, which you can add with a {@link android.widget.Switch} object.</p>
+
+<div style="float:left;width:200px">
+<img src="{@docRoot}images/ui/togglebutton.png" alt="" />
+<p class="img-caption"><em>Toggle buttons</em></p>
+</div>
+
+<div style="float:left;width:200px;margin-top:24px">
+<img src="{@docRoot}images/ui/switch.png" alt="" />
+<p class="img-caption"><em>Switches (in Android 4.0+)</em></p>
+</div>
+
+<p style="clear:left">The {@link android.widget.ToggleButton} and {@link android.widget.Switch}
+controls are subclasses of {@link android.widget.CompoundButton} and function in the same manner, so
+you can implement their behavior the same way.</p>
+
+<h2 id="HandlingEvents">Responding to Click Events</h2>
+
+<p>When the user selects a {@link android.widget.ToggleButton} and {@link android.widget.Switch},
+the object receives an on-click event.</p>
+
+<p>To define the click event handler, add the <code><a
+href="/reference/android/R.attr.html#onClick">android:onClick</a></code> attribute to the
+<code>&lt;ToggleButton&gt;</code> or <code>&lt;Switch&gt;</code> element in your XML
+layout. The value for this attribute must be the name of the method you want to call in response
+to a click event. The {@link android.app.Activity} hosting the layout must then implement the
+corresponding method.</p>
+
+<p>For example, here's a {@link android.widget.ToggleButton} with the <code><a
+href="/reference/android/R.attr.html#onClick">android:onClick</a></code> attribute:</p>
+
+<pre>
+&lt;ToggleButton 
+    android:id="@+id/togglebutton"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:textOn="Vibrate on"
+    android:textOff="Vibrate off"
+    android:onClick="onToggleClicked"/>
+</pre>
+
+<p>Within the {@link android.app.Activity} that hosts this layout, the following method handles the
+click event:</p>
+
+<pre>
+public void onToggleClicked(View view) {
+    // Is the toggle on?
+    boolean on = ((ToggleButton) view).isChecked();
+    
+    if (on) {
+        // Enable vibrate
+    } else {
+        // Disable vibrate
+    }
+}
+</pre>
+
+<p>The method you declare in the {@link android.R.attr#onClick android:onClick} attribute
+must have a signature exactly as shown above. Specifically, the method must:</p>
+<ul>
+  <li>Be public</li>
+  <li>Return void</li>
+  <li>Define a {@link android.view.View} as its only parameter (this will be the {@link
+android.view.View} that was clicked)</li>
+</ul>
+
+<p class="note"><strong>Tip:</strong> If you need to change the state
+yourself,
+use the {@link android.widget.CompoundButton#setChecked(boolean)} or {@link
+android.widget.CompoundButton#toggle()} method to change the state.</p>
+
+
+
+<h3 id="ClickListener">Using an OnCheckedChangeListener</h3>
+
+<p>You can also declare a click event handler pragmatically rather than in an XML layout. This
+might be necessary if you instantiate the {@link android.widget.ToggleButton} or {@link
+android.widget.Switch} at runtime or you need to
+declare the click behavior in a {@link android.app.Fragment} subclass.</p>
+
+<p>To declare the event handler programmatically, create an {@link
+android.widget.CompoundButton.OnCheckedChangeListener} object and assign it to the button by calling
+{@link
+android.widget.CompoundButton#setOnCheckedChangeListener}. For example:</p>
+
+<pre>
+ToggleButton toggle = (ToggleButton) findViewById(R.id.togglebutton);
+toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        if (isChecked) {
+            // The toggle is enabled
+        } else {
+            // The toggle is disabled
+        }
+    }
+});
+</pre>

@@ -1,0 +1,23 @@
+page.title=Data Storage
+page.landing=true
+page.landing.intro=Store application data in databases, files, or preferences, in internal or removeable storage. You can also add a data backup service to let users store and recover application and system data.  
+page.landing.image=
+
+@jd:body
+
+<div class="landing-docs">
+
+
+  <div class="col-12">
+    <h3>Training</h3>
+    
+    <a href="http://developer.android.com/training/cloudsync/index.html">
+      <h4>Syncing to the Cloud</h4>
+      <p>This class covers different strategies for cloud enabled applications. It covers syncing
+data with the cloud using your own back-end web application, and backing up data using the cloud so
+that users can restore their data when installing your application on a new device.</p>
+    </a>
+    
+  </div>
+
+</div>

@@ -229,7 +229,7 @@ in the <em>Developer's Guide</em> for information on how to achieve this with la
 practice to define this shape using nine patches; one for each screen density (see <a
 href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a> for details).
 Nine-patches can be created with the <a
-href="{@docRoot}guide/developing/tools/draw9patch.html">draw9patch</a> tool, or simply with a
+href="{@docRoot}tools/help/draw9patch.html">draw9patch</a> tool, or simply with a
 graphics editing program such as Adobe&reg; Photoshop. This will allow the widget background shape
 to take up the entire available space. The nine-patch should be edge-to-edge with no transparent
 pixels providing extra margins, save for perhaps a few border pixels for <strong>subtle</strong>

@@ -21,7 +21,7 @@ next.link=fragment-ui.html
 
     <h2>You should also read</h2>
     <ul>
-      <li><a href="{@docRoot}guide/topics/fundamentals/fragments.html">Fragments</a></li>
+      <li><a href="{@docRoot}guide/components/fragments.html">Fragments</a></li>
     </ul>
 
 <h2>Try it out</h2>
@@ -84,7 +84,7 @@ android.app.Activity#onPause()} method is called, any fragments in the activity 
 to {@link android.support.v4.app.Fragment#onPause()}.</p>
 
 <p>More information about the fragment lifecycle and callback methods is available in the <a
-href="{@docRoot}guide/topics/fundamentals/fragments.html">Fragments</a> developer guide.</p>
+href="{@docRoot}guide/components/fragments.html">Fragments</a> developer guide.</p>
 
 
 

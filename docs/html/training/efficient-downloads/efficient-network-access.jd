@@ -142,7 +142,7 @@ The wireless radio needs to become active in order to transmit the termination /
 
 <h2 id="DDMSNetworkTraffic">Use the DDMS Network Traffic Tool to Identify Areas of Concern</h2>
 
-<p>The Android <a href="{@docRoot}guide/developing/debugging/ddms.html">DDMS (Dalvik Debug Monitor Server)</a> includes a Detailed Network Usage tab that makes it possible to track when your application is making network requests. Using this tool, you can monitor how and when your app transfers data and optimize the underlying code appropriately.</p>
+<p>The Android <a href="{@docRoot}tools/debugging/ddms.html">DDMS (Dalvik Debug Monitor Server)</a> includes a Detailed Network Usage tab that makes it possible to track when your application is making network requests. Using this tool, you can monitor how and when your app transfers data and optimize the underlying code appropriately.</p>
 
 <p>Figure 3 shows a pattern of transferring small amounts of data roughly 15 seconds apart, suggesting that efficiency could be dramatically improved by prefetching each request or bundling the uploads.</p>
 

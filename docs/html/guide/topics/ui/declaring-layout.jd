@@ -1,4 +1,4 @@
-page.title=XML Layouts
+page.title=Layouts
 parent.title=User Interface
 parent.link=index.html
 @jd:body
@@ -6,18 +6,25 @@ parent.link=index.html
 <div id="qv-wrapper">
 <div id="qv">
   <h2>In this document</h2>
-  <ol>
-    <li><a href="#write">Write the XML</a></li>
-    <li><a href="#load">Load the XML Resource</a></li>
-    <li><a href="#attributes">Attributes</a>
-      <ol>
-        <li><a href="#id">ID</a></li>
-        <li><a href="#layout-params">Layout Parameters</a></li>
-      </ol>
-    </li>
-    <li><a href="#Position">Position</a></li>
-    <li><a href="#SizePaddingMargins">Size, Padding and Margins</a></li>
-  </ol>
+<ol>
+  <li><a href="#write">Write the XML</a></li>
+  <li><a href="#load">Load the XML Resource</a></li>
+  <li><a href="#attributes">Attributes</a>
+    <ol>
+      <li><a href="#id">ID</a></li>
+      <li><a href="#layout-params">Layout Parameters</a></li>
+    </ol>
+  </li>
+  <li><a href="#Position">Layout Position</a></li>
+  <li><a href="#SizePaddingMargins">Size, Padding and Margins</a></li>
+  <li><a href="#CommonLayouts">Common Layouts</a></li>
+  <li><a href="#AdapterViews">Building Layouts with an Adapter</a>
+    <ol>
+      <li><a href="#FillingTheLayout">Filling an adapter view with data</a></li>
+      <li><a href="#HandlingUserSelections">Handling click events</a></li>
+    </ol>
+  </li>
+</ol>
 
   <h2>Key classes</h2>
   <ol>
@@ -43,15 +50,15 @@ application can create View and ViewGroup objects (and manipulate their properti
 <div class="sidebox-wrapper">
 <div class="sidebox">
   <ul>
-  <li>The <a href="{@docRoot}sdk/eclipse-adt.html">ADT
+  <li>The <a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT
   Plugin for Eclipse</a> offers a layout preview of your XML &mdash; 
   with the XML file opened, select the <strong>Layout</strong> tab.</li>
   <li>You should also try the 
-  <a href="{@docRoot}guide/developing/debugging/debugging-ui.html#hierarchyViewer">Hierarchy Viewer</a> tool, 
+  <a href="{@docRoot}tools/debugging/debugging-ui.html#hierarchyViewer">Hierarchy Viewer</a> tool, 
   for debugging layouts &mdash; it reveals layout property values, 
   draws wireframes with padding/margin indicators, and full rendered views while 
   you debug on the emulator or device.</li>
-  <li>The <a href="{@docRoot}guide/developing/debugging/debugging-ui.html#layoutopt">layoutopt</a> tool lets
+  <li>The <a href="{@docRoot}tools/debugging/debugging-ui.html#layoutopt">layoutopt</a> tool lets
   you quickly analyze your layouts and hierarchies for inefficiencies or other problems.</li>
 </div>
 </div>
@@ -125,7 +132,7 @@ public void onCreate(Bundle savedInstanceState) {
 
 <p>The <code>onCreate()</code> callback method in your Activity is called by the Android framework when
 your Activity is launched (see the discussion about lifecycles, in the 
-<a href="{@docRoot}guide/topics/fundamentals/activities.html#Lifecycle">Activities</a>
+<a href="{@docRoot}guide/components/activities.html#Lifecycle">Activities</a>
 document).</p>
 
 
@@ -299,6 +306,214 @@ Available Resources</a> document.</p>
    <a href="{@docRoot}guide/topics/resources/more-resources.html#Dimension">Dimension Values</a>.
    </p>
    
+
+   
+   
+
+
+<style type="text/css">
+div.layout {
+  float:left;
+  width:200px;
+  margin:0 0 20px 20px;
+}
+div.layout.first {
+  margin-left:0;
+  clear:left;
+}
+</style>
+
+
+
+
+<h2 id="CommonLayouts">Common Layouts</h2>
+
+<p>Each subclass of the {@link android.view.ViewGroup} class provides a unique way to display
+the views you nest within it. Below are some of the more common layout types that are built
+into the Android platform.</p>
+
+<p class="note"><strong>Note:</strong> Although you can nest one or more layouts within another
+layout to acheive your UI design, you should strive to keep your layout hierarchy as shallow as
+possible. Your layout draws faster if it has fewer nested layouts (a wide view hierarchy is
+better than a deep view hierarchy).</p>
+
+<!-- 
+<h2 id="framelayout">FrameLayout</h2>
+<p>{@link android.widget.FrameLayout FrameLayout} is the simplest type of layout
+object. It's basically a blank space on your screen that you can
+later fill with a single object &mdash; for example, a picture that you'll swap in and out.
+All child elements of the FrameLayout are pinned to the top left corner of the screen; you cannot
+specify a different location for a child view. Subsequent child views will simply be drawn over
+previous ones,
+partially or totally obscuring them (unless the newer object is transparent).
+</p>
+-->
+
+
+<div class="layout first">
+  <h4><a href="layout/linear.html">Linear Layout</a></h4>
+  <a href="layout/linear.html"><img src="{@docRoot}images/ui/linearlayout-small.png" alt="" /></a>
+  <p>A layout that organizes its children into a single horizontal or vertical row. It
+  creates a scrollbar if the length of the window exceeds the length of the screen.</p>
+</div>
+
+<div class="layout">
+  <h4><a href="layout/relative.html">Relative Layout</a></h4>
+  <a href="layout/relative.html"><img src="{@docRoot}images/ui/relativelayout-small.png" alt=""
+/></a>
+  <p>Enables you to specify the location of child objects relative to each other (child A to
+the left of child B) or to the parent (aligned to the top of the parent).</p>
+</div>
+      
+<!--
+<div class="layout">
+  <h4><a href="layout/tabs.html">Tabs</a></h4>
+  <a href="layout/tabs.html"><img src="{@docRoot}images/ui/tabs-small.png" alt="" /></a>
+  <p>Provides a tab selection list that monitors clicks and enables the application to change
+the screen whenever a tab is clicked.</p>
+</div>
+      
+<div class="layout first">
+  <h4><a href="layout/grid.html">Table Layout</a></h4>
+  <a href="layout/table.html"><img src="{@docRoot}images/ui/gridlayout-small.png" alt="" /></a>
+  <p>A tabular layout with an arbitrary number of rows and columns, each cell holding the
+widget of your choice. The rows resize to fit the largest column. The cell borders are not
+visible.</p>
+</div>
+-->
+
+<div class="layout">
+  <h4><a href="{@docRoot}guide/webapps/webview.html">Web View</a></h4>
+  <a href="{@docRoot}guide/webapps/webview.html"><img src="{@docRoot}images/ui/webview-small.png"
+alt="" /></a>
+  <p>Displays web pages.</p>
+</div>
+
+
+
+
+<h2 id="AdapterViews" style="clear:left">Building Layouts with an Adapter</h2>
+
+<p>When the content for your layout is dynamic or not pre-determined, you can use a layout that
+subclasses {@link android.widget.AdapterView} to populate the layout with views at runtime. A
+subclass of the {@link android.widget.AdapterView} class uses an {@link android.widget.Adapter} to
+bind data to its layout. The {@link android.widget.Adapter} behaves as a middle-man between the data
+source and the {@link android.widget.AdapterView} layout&mdash;the {@link android.widget.Adapter}
+retreives the data (from a source such as an array or a database query) and converts each entry
+into a view that can be added into the {@link android.widget.AdapterView} layout.</p>
+
+<p>Common layouts backed by an adapter include:</p>
+
+<div class="layout first">
+  <h4><a href="layout/listview.html">List View</a></h4>
+  <a href="layout/list.html"><img src="{@docRoot}images/ui/listview-small.png" alt="" /></a>
+  <p>Displays a scrolling single column list.</p>
+</div>
+
+<div class="layout">
+  <h4><a href="layout/gridview.html">Grid View</a></h4>
+  <a href="layout/grid.html"><img src="{@docRoot}images/ui/gridview-small.png" alt="" /></a>
+  <p>Displays a scrolling grid of columns and rows.</p>
+</div>
+
+
+
+<h3 id="FillingTheLayout" style="clear:left">Filling an adapter view with data</h3>
+
+<p>You can populate an {@link android.widget.AdapterView} such as {@link android.widget.ListView} or
+{@link android.widget.GridView} by binding the {@link android.widget.AdapterView} instance to an
+{@link android.widget.Adapter}, which retrieves data from an external source and creates a {@link
+android.view.View} that represents each data entry.</p>
+
+<p>Android provides several subclasses of {@link android.widget.Adapter} that are useful for
+retrieving different kinds of data and building views for an {@link android.widget.AdapterView}. The
+two most common adapters are:</p>
+
+<dl>
+  <dt>{@link android.widget.ArrayAdapter}</dt>
+    <dd>Use this adapter when your data source is an array. By default, {@link
+android.widget.ArrayAdapter} creates a view for each array item by calling {@link
+java.lang.Object#toString()} on each item and placing the contents in a {@link
+android.widget.TextView}.
+      <p>For example, if you have an array of strings you want to display in a {@link
+android.widget.ListView}, initialize a new {@link android.widget.ArrayAdapter} using a
+constructor to specify the layout for each string and the string array:</p>
+<pre>
+ArrayAdapter adapter = new ArrayAdapter&lt;String>(this, 
+        android.R.layout.simple_list_item_1, myStringArray);
+</pre>
+<p>The arguments for this constructor are:</p>
+<ul>
+  <li>Your app {@link android.content.Context}</li>
+  <li>The layout that contains a {@link android.widget.TextView} for each string in the array</li>
+  <li>The string array</li>
+</ul>
+<p>Then simply call
+{@link android.widget.ListView#setAdapter setAdapter()} on your {@link android.widget.ListView}:</p>
+<pre>
+ListView listView = (ListView) findViewById(R.id.listview);
+listView.setAdapter(adapter);
+</pre>
+
+      <p>To customize the appearance of each item you can override the {@link
+java.lang.Object#toString()} method for the objects in your array. Or, to create a view for each
+item that's something other than a {@link android.widget.TextView} (for example, if you want an
+{@link android.widget.ImageView} for each array item), extend the {@link
+android.widget.ArrayAdapter} class and override {@link android.widget.ArrayAdapter#getView
+getView()} to return the type of view you want for each item.</p>
+
+</dd>
+
+  <dt>{@link android.widget.SimpleCursorAdapter}</dt>
+    <dd>Use this adapter when your data comes from a {@link android.database.Cursor}. When
+using {@link android.widget.SimpleCursorAdapter}, you must specify a layout to use for each
+row in the {@link android.database.Cursor} and which columns in the {@link android.database.Cursor}
+should be inserted into which views of the layout. For example, if you want to create a list of
+people's names and phone numbers, you can perform a query that returns a {@link
+android.database.Cursor} containing a row for each person and columns for the names and
+numbers. You then create a string array specifying which columns from the {@link
+android.database.Cursor} you want in the layout for each result and an integer array specifying the
+corresponding views that each column should be placed:</p>
+<pre>
+String[] fromColumns = {ContactsContract.Data.DISPLAY_NAME, 
+                        ContactsContract.CommonDataKinds.Phone.NUMBER};
+int[] toViews = {R.id.display_name, R.id.phone_number};
+</pre>
+<p>When you instantiate the {@link android.widget.SimpleCursorAdapter}, pass the layout to use for
+each result, the {@link android.database.Cursor} containing the results, and these two arrays:</p>
+<pre>
+SimpleCursorAdapter adapter = new SimpleCursorAdapter(this, 
+        R.layout.person_name_and_number, cursor, fromColumns, toViews, 0);
+ListView listView = getListView();
+listView.setAdapter(adapter);
+</pre>
+<p>The {@link android.widget.SimpleCursorAdapter} then creates a view for each row in the
+{@link android.database.Cursor} using the provided layout by inserting each {@code
+fromColumns} item into the corresponding {@code toViews} view.</p>.</dd>
+</dl>
+
+
+<p>If, during the course of your application's life, you change the underlying data that is read by
+your adapter, you should call {@link android.widget.ArrayAdapter#notifyDataSetChanged()}. This will
+notify the attached view that the data has been changed and it should refresh itself.</p>
+
+
+
+<h3 id="HandlingUserSelections">Handling click events</h3>
+
+<p>You can respond to click events on each item in an {@link android.widget.AdapterView} by
+implementing the {@link android.widget.AdapterView.OnItemClickListener} interface. For example:</p>
+
+<pre>
+// Create a message handling object as an anonymous class.
+private OnItemClickListener mMessageClickedHandler = new OnItemClickListener() {
+    public void onItemClick(AdapterView parent, View v, int position, long id) {
+        // Do something in response to the click
+    }
+};
+
+listView.setOnItemClickListener(mMessageClickedHandler); 
+</pre>
 
 
 

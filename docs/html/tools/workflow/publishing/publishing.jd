@@ -1,0 +1,703 @@
+page.title=Publishing on Google Play
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>Quickview</h2>
+
+<ul>
+<li>Learn how to publish and update apps on Google Play.</li>
+<li>Find out how to create links to apps that are published on Google Play.</li>
+<li>Learn about Google Play features.</li>
+</ul>
+
+
+<h2>In this document</h2>
+
+<ol>
+<li><a href="#overview">About Google Play</a>
+<li><A href="#marketpublish">Publishing Apps on Google Play</a></li>
+<li><a href="#marketupgrade">Publishing Updates on Google Play</a></li>
+<li><a href="#marketLicensing">Using Google Play Licensing Service</a></li>
+<li><a href="#marketinappbilling">Using Google Play In-app Billing</a></li>
+<li><a href="#marketintent">Linking to Your Apps on Google Play</a>
+  <ol>
+    <li><a href="#OpeningDetails">Opening an app's details page</a></li>
+    <li><a href="#PerformingSearch">Performing a search</a></li>
+    <li><a href="#BuildaButton">Build a Google Play button</a></li>
+    <li><a href="#UriSummary">Summary of URI formats</a></li>
+  </ol>
+</li>
+</ol>
+
+<h2>See also</h2>
+
+<ol>
+<li><a href="{@docRoot}tools/publishing/publishing_overview.html">Publishing Overview</a></li>
+<li><a href="{@docRoot}tools/publishing/preparing.html">Preparing for Release</a></li>
+</ol>
+
+<div id="qv-extra">
+  <img id="rule" src="{@docRoot}assets/images/grad-rule-qv.png">
+  <div id="qv-sub-rule">
+    <img src="{@docRoot}assets/images/icon_play.png" style="float:left;margin:0;padding:0 5px;">
+    <h2 style="color:#669999;">Already know about Google Play and want to get started?</h2>
+    <p>Go to <a href="http://play.google.com/apps/publish">Google Play</a>, create a developer
+account, and upload your application. For more information about required assets, listing details,
+and publishing options, see <a
+href="http://market.android.com/support/bin/answer.py?answer=113469">Upload
+Applications</a>.</p>
+  </div>
+</div>
+
+</div>
+</div>
+
+<p>One of the most effective ways to get your application into users' hands is to
+publish it on an application marketplace like Google Play. Publishing on Google Play is a
+straightforward process that you can do in just a few simple steps&mdash;register, configure,
+upload, and publish. Registration takes only a few minutes and needs to be done only once.
+The configuration and publishing steps can all be done through the Google Play Android Developer Console
+after you register as a Google Play developer.</p>
+
+<p>To start publishing on Google Play, first read this topic and then go to the <a
+href="https://play.google.com/apps/publish">Google Play Android Developer Console</a> and register as
+a Google Play developer.</p>
+
+
+<h2 id="overview">About Google Play</h2>
+
+<p>Google Play is a robust publishing platform that helps you publicize, sell, and distribute
+your Android applications to users around the world. When you release your applications through
+Google Play you have access to a suite of developer tools that let you analyze your sales,
+identify market trends, and control who your applications are being distributed to. You also have
+access to several revenue-enhancing features, such as <a
+href="{@docRoot}guide/google/play/billing/index.html">in-app billing</a> and
+<a href="{@docRoot}guide/google/play/licensing/index.html">application licensing</a>.</p>
+
+<p>Before you can publish applications on Google Play, you need to <a
+href="http://play.google.com/apps/publish">register</a> as a Google Play developer. During the
+registration process you will need to create a developer profile, pay a registration fee, and agree
+to the <a href="http://www.android.com/us/developer-distribution-agreement.html">Google Play
+Developer Distribution Agreement</a>. After you register you can access the Developer
+Console, where you can upload applications, configure publishing options, and monitor publishing
+data. If you want to sell your applications or use the in-app billing feature, you will also need
+to set up a Google Checkout merchant account. For more information about the registration process,
+see <a href="https://support.google.com/androidmarket/developer/bin/answer.py?hl=en&answer=113468">
+Developer Registration</a>.</p>
+
+<h2 id="marketpublish">Publishing Apps on Google Play</h2>
+
+<p>Publishing your application on Google Play is a simple process that involves three basic
+tasks (see figure 1):</p>
+
+<ul>
+  <li>Creating various graphical assets that
+accompany your app on Google Play.</li>
+  <li>Using the Google Play <a
+href="http://play.google.com/apps/publish">Developer Console</a> to configure publishing options,
+specify listing details, and upload your app and graphical assets to Google Play.</li>
+  <li>Reviewing your publishing settings and changing the release
+status of your app from Unpublished to Published.</li>
+</ul>
+
+<img src="{@docRoot}images/publishing/publishing_android_market.png"
+     alt="Shows the three steps that are required to publish on Google Play"
+     height="168"
+     id="figure1" />
+<p class="img-caption">
+  <strong>Figure 1.</strong> To publish apps on Google Play you must first <a
+href="{@docRoot}tools/publishing/preparing.html">prepare your app for release</a> and then perform
+three simple tasks.
+</p>
+
+<p class="caution"><strong>Important:</strong> You must <a
+href="{@docRoot}tools/publishing/preparing.html">prepare your application for release</a> before you
+can publish it on Google Play. When you prepare your application for release you configure it for
+release and build it in release mode. Building in release mode signs your application's {@code .apk}
+file with your private release key. You cannot publish an application on Google Play unless it is
+signed with your own private release key.</p>
+
+<h3>Preparing promotional materials</h3>
+
+<p>To fully leverage the marketing and publicity capabilities of Google Play, you need to create
+several graphical assets that accompany your app on Google Play, such as screenshots, videos,
+promotional graphics, and promotional text. At a minimum you must provide two screenshots of your
+application and a high resolution application icon. The screenshots are displayed on the details
+page for your application on Google Play, and the high resolution application icon is displayed
+in various locations throughout Google Play. The high resolution icon does not replace the
+launcher icon for your application, rather, it serves as a supplemental icon and should look
+the same as your launcher icon. Promotional video,
+graphics, and text are optional, although we strongly recommended that you prepare these for your
+app. For more information about the graphic assets that accompany your application, see <a
+href="http://support.google.com/androidmarket/developer/bin/answer.py?hl=en&answer=1078870">Graphic
+Assets for your Application</a>.</p>
+
+<h3>Configuring options and uploading assets</h3>
+
+<p>Google Play lets you target your application to a worldwide pool of users and devices. To
+reach these users you can use the Developer Console to configure various publishing
+options and listing details for your app. For example, you can choose the <a
+href="http://support.google.com/androidmarket/developer/bin/answer.py?hl=en&answer=138294&topic=
+2365624&ctx=topic">countries</a> you want to reach, the listing languages you want to use, and the
+<a
+href="http://support.google.com/androidmarket/developer/bin/answer.py?hl=en&answer=138412&topic=
+15867&ctx=topic">price</a> you want to charge in each country. You can also configure listing
+details such as the application type, <a
+href="https://support.google.com/androidmarket/developer/bin/answer.py?hl=en&answer=113475&topic=
+2365760&ctx=topic">category</a>, and <a
+href="http://support.google.com/androidmarket/developer/bin/answer.py?hl=en&answer=188189&topic=
+2364761&ctx=topic">content rating</a>. In addition, if you want to sell items within your app using
+the in-app billing feature, you can use the Developer Console to <a
+href="http://grendel.sea.corp.google.com:48014/guide/google/play/billing/billing_admin.html#billing-list
+- setup">create a product list</a> and control which items are available for purchase in your
+app.</p>
+
+<p>When you are finished setting publishing options and listing details, you can upload your assets
+and your application to Google Play. You can also upload your application as a draft
+(unpublished) application, which lets you do final testing before you publish it for final
+release.</p>
+
+<p>To learn more about Google Play publishing settings, see the following resources:</p>
+
+<ul>
+  <li><a
+href="http://support.google.com/androidmarket/developer/bin/answer.py?hl=en&answer=113469&topic=
+236562&ctx=topic">Upload Applications</a>&mdash;provides a summary of the publishing settings
+you can configure for an app.</li>
+  <li><a
+href="http://support.google.com/androidmarket/developer/bin/topic.py?hl=en&topic=15867">Selling
+Your Apps</a>&mdash;provides guidance about pricing, supported currencies, tax rates, and many
+other topics related to selling apps.</li>
+  <li><a
+href="https://support.google.com/androidmarket/developer/bin/answer.py?hl=en&answer=1169947&topic=
+15867&ctx=topic">Selling Apps in Multiple Currencies</a>&mdash;provides a description of how
+pricing, payouts, and exchange rates work.</li>
+</ul>
+
+<h3>Publishing your application</h3>
+
+<p>When you are satisfied that your publishing settings are correctly configured and your uploaded
+application is ready to be released to the public, you can simply click <strong>Publish</strong> in
+the Developer Console to make your app available for download
+around the world. Keep in mind, it can take several hours for your app to appear on Google
+Play after you click <strong>Publish</strong> in the Developer Console.</p>
+
+<h3>Controlling Distribution to Devices</h3>
+
+<p>If your application targets different device configurations, you can control which Android-powered
+devices have access to your application on Google Play by
+using Google Play filters. Filtering compares device configurations that you declare in your
+app's manifest file to the configuration defined by a device. For example, if you declare the camera
+filter in your manifest, only those devices that have a camera will see your app on Google
+Play. Filters must be configured in your application's manifest file when you are <a
+href="{@docRoot}tools/publishing/preparing.html">preparing your app for release</a> (that is, before
+you upload your app to Google Play). For more information, see <a
+href="{@docRoot}guide/google/play/filters.html">Filters on Google Play</a>.</p>
+
+<p>You can also use the multiple APK feature to distribute different {@code .apk} files under the same
+application listing and the same package name; however, you should use this option only as a last
+resort. Android applications usually run on most compatible devices with a single APK, by supplying
+alternative resources for different configurations (for example, different layouts for different screen
+sizes) and the Android system selects the appropriate resources for the device at runtime. In a
+few cases, however, a single APK is unable to support all device configurations, because alternative
+resources make the APK file too big (greater than 50MB) or other technical challenges prevent a
+single APK from working on all devices. Although we encourage you to develop and publish a single
+APK that supports as many device configurations as possible, doing so is sometimes
+not possible. To help you publish your application for as many devices as possible, Google Play
+allows you to publish multiple APKs under the same application listing. Google Play then supplies
+each APK to the appropriate devices based on configuration support you've declared in the manifest
+file of each APK. To use this feature, you need to build your separate {@code .apk} files when you are <a
+href="{@docRoot}tools/publishing/preparing.html">preparing your app for release</a> (that is, before
+you upload your app to Google Play). For more information, see <a
+href="{@docRoot}guide/google/play/publishing/multiple-apks.html">Multiple APK Support</a>.</p>
+
+<h2 id="marketupgrade">Publishing Updates on Google Play</h2>
+
+<p>At any time after publishing an application on Google Play, you can upload
+and publish an update to the same application package. When you publish an
+update to an application, users who have already installed the
+application may receive a notification that an update is
+available for the application. They can then choose to update the application
+to the latest version.</p>
+
+<p>Before uploading the updated application, be sure that you have incremented
+the <code>android:versionCode</code> and <code>android:versionName</code>
+attributes in the <a
+href="{@docRoot}guide/topics/manifest/manifest-element.html"><code>&lt;manifest&gt;</code></a>
+element of the manifest file. Also, the package name must be the same as the existing version and
+the {@code .apk} file must be signed with the same private key. If the package name and signing
+certificate do <em>not</em> match those of the existing version, Google Play will
+consider it a new application, publish it as such, and will not offer it to existing users as an
+update.</p>
+
+<p>If you plan to publish your application on Google Play, you must make sure
+  that it meets the requirements listed below, which are enforced by Google Play
+  when you upload the application.</p>
+
+<h2 id="marketLicensing">Using Google Play Licensing Service</h2>
+
+<p>Google Play offers a licensing service that lets you enforce licensing
+policies for paid applications that you publish through Google Play. With
+Google Play Licensing, your applications can query Google Play at runtime
+to obtain the licensing status for the current user, then allow or disallow
+further use of the application as appropriate. Using the service, you can apply a flexible
+licensing policy on an application-by-application basis&mdash;each
+application can enforce its licensing status in the way most appropriate
+for it. </p>
+
+<p>Any application that you publish through Google Play can use the Google
+Play Licensing Service. The service uses no dedicated framework APIs, so you can
+add licensing to any application that uses a minimum API Level of 3 or
+higher.</p>
+
+<p>For complete information about Google Play Licensing Service and how to
+use it in your application, read <a
+href="{@docRoot}guide/google/play/licensing/index.html">Application Licensing</a>.</p>
+
+<h2 id="marketinappbilling">Using Google Play In-app Billing</h2>
+
+<p><a href="{@docRoot}guide/google/play/billing/billing_overview.html">Google Play In-app Billing</a>
+is a Google Play service that lets you sell digital content in your applications. You can use
+the service to sell a wide range of content, including downloadable  content such as media files or
+photos, and virtual content such as game levels or potions.</p>
+
+<p>When you use Google Play's in-app billing service to sell an item, Google Play handles all
+billing details so your application never has to directly process any financial transactions.
+Google Play uses the same checkout service that is used for application purchases, so your users
+experience a consistent and familiar purchase flow (see figure 1). Also, the transaction fee for
+in-app purchases is the same as the transaction fee for application purchases (30%).</p>
+
+<p>Any application that you publish through Google Play can implement in-app billing. No special
+account or registration is required other than a Google Play publisher account and a Google
+Checkout Merchant account. Also, because the service uses no dedicated framework APIs, you can add
+in-app billing to any application that uses a minimum API level of 4 or higher.</p>
+
+<p>To help you integrate in-app billing into your application, the Android SDK provides a <a
+href="{@docRoot}guide/google/play/billing/billing_integrate.html#billing-download">sample application</a>
+that demonstrates a simple implementation of in-app billing. The sample application contains
+examples of billing-related classes you can use to implement in-app billing in your application. It
+also contains examples of the database, user interface, and business logic you might use to
+implement in-app billing. For more information about the in-app billing feature, see the
+<a href="{@docRoot}guide/google/play/billing/index.html">In-app Billing documentation</a>.</p>
+
+<h2 id="marketintent">Linking to Your Apps on Google Play</h2>
+
+<p>To help users discover your published applications, you can use two special Google Play URIs
+that direct users to your application's details page or perform a search for all of your published
+applications on Google Play. You can use these URIs to create a button in your application or a
+link on a web page that:</p>
+
+<ul>
+  <li>Opens your application's details page in the Google Play application or web site.</li>
+  <li>Searches for all your published applications in the Google Play application or web
+site.</li>
+</ul>
+
+<p>You can launch the Google Play application or web site in the following ways:</p>
+<ul>
+  <li>Initiate an {@link android.content.Intent} from your application that launches the
+Google Play application on the user's device.</li>
+  <li>Provide a link on a web page that opens the Google Play web site (but will also
+open the Google Play application if clicked from a device).</li>
+</ul>
+
+<p>In both cases, whether you want to initiate the action from your application or from a web
+page, the URIs are quite similar. The only difference is the URI prefix.</p>
+
+<p>To open the Google Play application from your application, the prefix for the intent's data
+URI is:</p>
+
+<p style="margin-left:2em"><code>market://</code></p>
+
+<p>To open Google Play store from your web site, the prefix for the link URI is:</p>
+
+<p style="margin-left:2em"><code>http://play.google.com/store/</code></p>
+
+<p>The following sections describe how to create a complete URI for each action.</p>
+
+<p class="note"><strong>Note:</strong> If you create a link to open Google Play from your web
+site and the user selects it from an Android-powered device, the device's Google Play application will
+resolve the link so the user can use the Google Play application on the device instead of opening the web
+site. As such, you should always use {@code http://play.google.com/store/apps/...} URIs when
+creating a link on
+a web page. When pointing to your apps from within your Android app, use the
+{@code market://} URIs in an intent, so that the Google Play application always opens.</p>
+
+
+<h3 id="OpeningDetails">Opening an app's details page</h3>
+
+<p>As described above, you can open the details page for a specific application either on the
+Google Play application or the Google Play web site. The details page allows the user to see
+the application description, screenshots, reviews and more, and choose to install it.</p>
+
+<p>The format for the URI that opens the details page is:</p>
+
+<p style="margin-left:2em"><code>&lt;URI_prefix&gt;<b>apps/details?id=</b>&lt;package_name&gt;</code></p>
+
+<p>The <code>&lt;package_name&gt;</code> is a placeholder for the target application's
+fully-qualified package name, as declared in the <a
+href="{@docRoot}guide/topics/manifest/manifest-element.html#package">{@code
+package}</a> attribute of the <a href="{@docRoot}guide/topics/manifest/manifest-element.html">{@code
+&lt;manifest&gt;}</a> element.</p>
+
+<p>For example: <code>http://play.google.com/store/apps/details?id=com.example.myapp</code></p>
+
+
+<h4>Opening the app details page from your Android app</h4>
+
+<p>To open the Google Play details page from your application,
+create an intent with the {@link android.content.Intent#ACTION_VIEW} action and include a data URI
+in this format:</p>
+
+<p style="margin-left:2em"><code>market://details?id=&lt;package_name&gt;</code></p>
+
+<p>For example, here's how you can create an intent and open an application's details page in
+Google Play:</p>
+
+<pre>
+Intent intent = new Intent(Intent.ACTION_VIEW);
+intent.setData(Uri.parse("market://details?id=com.example.android"));
+startActivity(intent);
+</pre>
+
+<p>This will open the Google Play application on the device to view the {@code
+com.example.android} application.</p>
+
+
+<h4>Opening the app details page from a web site</h4>
+
+<p>To open the details page from your web site, create a link with a URI in this
+format:</p>
+
+<p style="margin-left:2em">
+  <code>http://play.google.com/store/apps/details?id=&lt;package_name&gt;</code>
+</p>
+
+<p>For example, here's a link that opens an application's details page on Google Play:</p>
+
+<pre>
+&lt;a href="http://play.google.com/store/apps/details?id=com.example.android">App Link&lt;/a>
+</pre>
+
+<p>When clicked from a desktop web browser, this opens the Google Play web site to view the
+{@code com.example.android} application. When clicked from an Android-powered device, users are
+given the option to use either their web browser or the Google Play application to view the
+application.</p>
+
+
+
+<h3 id="PerformingSearch">Performing a search</h3>
+
+<p>To initiate a search on Google Play, the format for the URI is:</p>
+
+<p style="margin-left:2em">
+  <code>&lt;URI_prefix&gt;<b>search?q=</b>&lt;query&gt;</code>
+</p>
+
+<p>The <code>&lt;query&gt;</code> is a placeholder for the search query to execute in Google
+Play. The query can be a raw text string or you can include a parameter that performs a search
+based on the publisher name:</p>
+
+<ul>
+  <li>To perform a raw text search, append the query string:
+  <p><code>&lt;URI_prefix&gt;<b>search?q=</b>&lt;search_query&gt;</code></p></li>
+
+  <li>To search based on the publisher name, use the {@code pub:} parameter in the query, followed
+by the publisher name:
+  <p><code>&lt;URI_prefix&gt;<b>search?q=pub:</b>&lt;publisher_name&gt;</code></p>
+  <p>You can use this type of search to show all of your published applications.</p></li>
+</ul>
+
+
+<h4>Searching from your Android app</h4>
+
+<p>To initiate a search on Google Play from your application, create an intent with the
+{@link android.content.Intent#ACTION_VIEW} action and include a data URI in this format:</p>
+
+<p style="margin-left:2em"><code>market://search?q=&lt;query&gt;</code></p>
+
+<p>The query may include the {@code pub:} parameter described above.</p>
+
+<p>For example, here's how you can initiate a search in the Google Play application, based on the
+publisher name:</p>
+
+<pre>
+Intent intent = new Intent(Intent.ACTION_VIEW);
+intent.setData(Uri.parse("market://search?q=pub:Your Publisher Name"));
+startActivity(intent);
+</pre>
+
+<p>This opens the Google Play application to perform the search. The search result shows all
+applications published by the publisher that are compatible with the current device.</p>
+
+
+<h4>Searching from a web site</h4>
+
+<p>To initiate a search on Google Play from your web site, create a link with a URI in this
+format:</p>
+
+<p style="margin-left:2em">
+  <code>http://play.google.com/store/search?q=&lt;query&gt;</code>
+</p>
+
+<p>The query may include the {@code pub:} parameter described above.</p>
+
+<p>For example, here's a link that initiates a search on Google Play, based on the
+publisher name:</p>
+
+<pre>
+&lt;a href="http://play.google.com/store/search?q=pub:Your Publisher Name">Search Link&lt;/a>
+</pre>
+
+<p>When clicked from a desktop web browser, this opens the Google Play web site and performs the
+search. When clicked from an Android-powered device, users are given the option to use either their
+web browser or the Google Play application to perform the search.</p>
+
+
+
+<h3 id="BuildaButton">Build a Google Play button</h3>
+
+<p>Use the following form to create a button for your web site that takes users to your application
+on Google Play. Input either your application's package name or your publisher name and the button
+will take users to Google Play to either view your application's information or view a list of your
+published apps. If users click the button while on an Android-powered device, the Google Play
+application will respond to show users your application(s).</p>
+
+<p>This form offers two styles of the official brand badge each at recommended sizes. You can pick
+between either "Get it on Google Play" or "Android app on Google Play." You should not modify the
+badge images in any way. For more usage guidelines,
+see the <a href="http://www.android.com/branding.html">Android Brand Guidelines</a>.</p>
+
+<style type="text/css">
+
+form.button-form {
+  margin-top:2em;
+}
+
+/* the label and input elements are blocks that float left in order to
+   keep the left edgets of the input aligned, and IE 6/7 do not fully support "inline-block" */
+label.block {
+  display: block;
+  float: left;
+  width: 100px;
+  padding-right: 10px;
+}
+
+input.text {
+  display: block;
+  float: left;
+  width: 250px;
+}
+
+div.button-row {
+  white-space:nowrap;
+  min-height:80px;
+}
+
+div.button-row input {
+  vertical-align:120%;
+}
+
+#jd-content div.button-row img {
+  margin: 0;
+}
+
+</style>
+
+<script type="text/javascript">
+
+// variables for creating 'try it out' demo button
+var imagePath = "http://www.android.com/images/brand/"
+var linkStart = "<a href=\"http://play.google.com/store/";
+var imageStart = "\">\n"
+        + "  <img alt=\"";
+  // leaves opening for the alt text value
+var imageSrc = "\"\n       src=\"" + imagePath;
+  // leaves opening for the image file name
+var imageEnd = ".png\" />\n</a>";
+
+// variables for creating code snippet
+var linkStartCode = "&lt;a href=\"http://play.google.com/store/";
+var imageStartCode = "\"&gt;\n"
+        + "  &lt;img alt=\"";
+  // leaves opening for the alt text value
+var imageSrcCode = "\"\n       src=\"" + imagePath;
+  // leaves opening for the image file name
+var imageEndCode = ".png\" />\n&lt;/a>";
+
+/** Generate the HTML snippet and demo based on form values */
+function buildButton(form) {
+  var selectedValue = $('form input[type=radio]:checked').val();
+  var altText = selectedValue.indexOf("get_it") != -1 ? "Get it on Google Play" : "Android app on Google Play";
+
+  if (form["package"].value != "com.example.android") {
+    $("#preview").show();
+    $("#snippet").show().html(linkStartCode + "apps/details?id=" + form["package"].value
+            + imageStartCode + altText + imageSrcCode
+            + selectedValue + imageEndCode);
+    $("#button-preview").html(linkStart + "apps/details?id=" + form["package"].value
+            + imageStart + altText + imageSrc
+            + selectedValue + imageEnd);
+  } else if (form["publisher"].value != "Example, Inc.") {
+    $("#preview").show();
+    $("#snippet").show().html(linkStartCode + "search?q=pub:" + form["publisher"].value
+            + imageStartCode + altText + imageSrcCode
+            + selectedValue + imageEndCode);
+    $("#button-preview").html(linkStart + "search?q=pub:" + form["publisher"].value
+            + imageStart + altText + imageSrc
+            + selectedValue + imageEnd);
+  } else {
+    alert("Please enter your package name or publisher name");
+  }
+  return false;
+}
+
+/** Listen for Enter key */
+function onTextEntered(event, form, me) {
+  // 13 = enter
+  if (event.keyCode == 13) {
+    buildButton(form);
+  }
+}
+
+/** When input is focused, remove example text and disable other input */
+function onInputFocus(object, example) {
+  if (object.value == example) {
+    $(object).val('').css({'color' : '#000'});
+  }
+  $('input[type="text"]:not(input[name='+object.name+'])',
+          object.parentNode).attr('disabled','true');
+  $('#'+object.name+'-clear').show();
+}
+
+/** When input is blured, restore example text if appropriate and enable other input */
+function onInputBlur(object, example) {
+  if (object.value.length < 1) {
+    $(object).attr('value',example).css({'color':'#ccc'});
+    $('input[type="text"]', object.parentNode).removeAttr('disabled');
+    $('#'+object.name+'-clear').hide();
+  }
+}
+
+/** Clear the form to start over */
+function clearLabel(id, example) {
+  $("#preview").hide();
+  $('#'+id+'').html('').attr('value',example).css({'color':'#ccc'});
+  $('input[type="text"]', $('#'+id+'').parent()).removeAttr('disabled');
+  $('#'+id+'-clear').hide();
+  return false;
+}
+
+/** When the doc is ready, find the inputs and color the input grey if the value is the example
+    text. This is necessary to handle back-navigation, which can auto-fill the form with previous
+    values (and text should not be grey) */
+$(document).ready(function() {
+  $(".button-form input.text").each(function(index) {
+    if ($(this).val() == $(this).attr("default")) {
+      $(this).css("color","#ccc");
+    } else {
+      /* This is necessary to handle back-navigation to the page after form was filled */
+      $('input[type="text"]:not(input[name='+this.name+'])',
+              this.parentNode).attr('disabled','true');
+      $('#'+this.name+'-clear').show();
+    }
+  });
+});
+
+</script>
+
+<form class="button-form">
+  <label class="block" for="package">Package name:</label>
+  <input class="text" type="text" id="package" name="package"
+         value="com.example.android"
+         default="com.example.android"
+         onfocus="onInputFocus(this, 'com.example.android')"
+         onblur="onInputBlur(this, 'com.example.android')"
+         onkeyup="return onTextEntered(event, this.parentNode, this)"/>&nbsp;
+         <a id="package-clear" style="display:none" href="#"
+            onclick="return clearLabel('package','com.example.android');">clear</a>
+  <p style="clear:both;margin:0">&nbsp;<em>or</em></p>
+  <label class="block" style="margin-top:5px" for="publisher">Publisher name:</label>
+  <input class="text" type="text" id="publisher" name="publisher"
+         value="Example, Inc."
+         default="Example, Inc."
+         onfocus="onInputFocus(this, 'Example, Inc.')"
+         onblur="onInputBlur(this, 'Example, Inc.')"
+         onkeyup="return onTextEntered(event, this.parentNode, this)"/>&nbsp;
+         <a id="publisher-clear" style="display:none" href="#"
+            onclick="return clearLabel('publisher','Example, Inc.');">clear</a>
+         <br/><br/>
+
+<div class="button-row">
+  <input type="radio" name="buttonStyle" value="get_it_on_play_logo_small" id="ns" checked="checked" />
+    <label for="ns"><img src="http://www.android.com/images/brand/get_it_on_play_logo_small.png"
+alt="Get it on Google Play (small)" /></label>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+  <input type="radio" name="buttonStyle" value="get_it_on_play_logo_large" id="nm" />
+    <label for="nm"><img src="http://www.android.com/images/brand/get_it_on_play_logo_large.png"
+alt="Get it on Google Play (large)" /></label>
+</div>
+
+<div class="button-row">
+  <input type="radio" name="buttonStyle" value="android_app_on_play_logo_small" id="ws" />
+    <label for="ws"><img src="http://www.android.com/images/brand/android_app_on_play_logo_small.png"
+alt="Android app on Google Play (small)" /></label>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+  <input type="radio" name="buttonStyle" value="android_app_on_play_logo_large" id="wm" />
+    <label for="wm"><img src="http://www.android.com/images/brand/android_app_on_play_logo_large.png"
+alt="Android app on Google Play (large)" /></label>
+</div>
+
+  <input type="button" onclick="return buildButton(this.parentNode)" value="Build my button"
+style="padding:5px" />
+  <br/>
+</form>
+
+<div id="preview" style="display:none">
+  <p>Copy and paste this HTML into your web site:</p>
+  <textarea id="snippet" cols="100" rows="5" onclick="this.select()"
+style="font-family:monospace;background-color:#efefef;padding:5px;display:none;margin-bottom:1em">
+  </textarea >
+
+<p>Try it out:</p>
+<div id="button-preview" style="margin-top:1em"></div>
+</div>
+
+
+
+
+
+
+<h3 id="UriSummary">Summary of URI formats</h3>
+
+<p>The table below provides a summary of the URIs currently supported by the Google Play (both on
+the web and in the Android application), as discussed in the previous sections.</p>
+
+<table>
+<tr>
+<th>For this result</th>
+<th>Use this URI in a web page link</th>
+<th>Or this URI in an {@link android.content.Intent#ACTION_VIEW} intent</th>
+</tr>
+
+<tr>
+<td>Display the details screen for a specific application</td>
+<td><code>http://play.google.com/store/apps/details?id=&lt;package_name&gt;</code>
+<td><code>market://details?id=&lt;package_name&gt;</code></td>
+</tr>
+
+<tr>
+<td>Search for applications using a general string query.</td>
+<td><code>http://play.google.com/store/search?q=&lt;query&gt;</code></td>
+<td><code>market://search?q=&lt;query&gt;</code></td>
+</tr>
+
+<tr>
+<td>Search for applications by publisher name</td>
+<td><nobr><code>http://play.google.com/store/search?q=pub:&lt;publisher_name&gt;</code></nobr></td>
+<td><nobr><code>market://search?q=pub:&lt;publisher_name&gt;</code></nobr></td>
+</tr>
+
+</table>

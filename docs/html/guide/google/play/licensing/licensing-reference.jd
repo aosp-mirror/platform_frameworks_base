@@ -1,0 +1,439 @@
+page.title=Licensing Reference
+parent.title=Application Licensing
+parent.link=index.html
+@jd:body
+
+
+
+<div id="qv-wrapper">
+<div id="qv">
+  
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#lvl-summary">LVL Classes and Interfaces</a></li>
+    <li><a href="#server-response-codes">Server Response Codes</a></li>
+    <li><a href="#extras">Server Response Extras</a></li>
+  </ol>
+
+</div>
+</div>
+
+
+<h2 id="lvl-summary">LVL Classes and Interfaces</h2>
+
+<p>Table 1 lists all of the source files in the License Verification
+Library (LVL) available through the Android SDK. All of the files are part of
+the <code>com.android.vending.licensing</code> package.</p>
+
+<p class="table-caption"><strong>Table 1.</strong> Summary of LVL library
+classes and interfaces.</p>
+
+<div style="width:99%">
+<table width="100%">
+
+<tr>
+<th width="15%">Category</th>
+<th width="20%">Name</th>
+<th width="100%">Description</th>
+</tr>
+
+<tr>
+<td rowspan="2">License check and result</td>
+<td>LicenseChecker</td>
+<td>Class that you instantiate (or subclass) to initiate a license check.</td>
+</tr>
+<tr>
+<td><em>LicenseCheckerCallback</em></td>
+<td>Interface that you implement to handle result of the license check.</td>
+</tr>
+
+<tr>
+<td rowspan="3" width="15%">Policy</td>
+<td width="20%"><em>Policy</em></td>
+<td width="100%">Interface that you implement to determine whether to allow
+access to the application, based on the license response. </td>
+</tr>
+<tr>
+<td>ServerManagedPolicy</td>
+<td width="100%">Default {@code Policy} implementation. Uses settings provided by the
+licensing server to manage local storage of license data, license validity,
+retry.</td>
+</tr>
+<tr>
+<td>StrictPolicy</td>
+<td>Alternative {@code Policy} implementation. Enforces licensing based on a direct
+license response from the server only. No caching or request retry.</td>
+</tr>
+
+<tr>
+<td rowspan="2" width="15%">Data obfuscation <br><em>(optional)</em></td>
+<td width="20%"><em>Obfuscator</em></td>
+<td width="100%">Interface that you implement if you are using a {@code Policy} (such as
+ServerManagedPolicy) that caches license response data in a persistent store.
+Applies an obfuscation algorithm to encode and decode data being written or
+read.</td>
+</tr>
+<tr>
+<td>AESObfuscator</td>
+<td>Default Obfuscator implementation that uses AES encryption/decryption
+algorithm to obfuscate/unobfuscate data.</td>
+</tr>
+
+<tr>
+<td rowspan="2" width="15%">Device limitation<br><em>(optional)</em></td>
+<td width="20%"><em>DeviceLimiter</em></td>
+<td width="100%">Interface that you implement if you want to restrict use of an
+application to a specific device. Called from LicenseValidator. Implementing
+DeviceLimiter is not recommended for most applications because it requires a
+backend server and may cause the user to lose access to licensed applications,
+unless designed with care.</td>
+</tr>
+<tr>
+<td>NullDeviceLimiter</td>
+<td>Default DeviceLimiter implementation that is a no-op (allows access to all
+devices).</td>
+</tr>
+
+<tr>
+<td rowspan="6" width="15%">Library core, no integration needed</td>
+<td width="20%">ResponseData</td>
+<td width="100%">Class that holds the fields of a license response.</td>
+</tr>
+<tr>
+<td>LicenseValidator</td>
+<td>Class that decrypts and verifies a response received from the licensing
+server.</td>
+</tr>
+<tr>
+<td>ValidationException</td>
+<td>Class that indicates errors that occur when validating the integrity of data
+managed by an Obfuscator.</td>
+</tr>
+<tr>
+<td>PreferenceObfuscator</td>
+<td>Utility class that writes/reads obfuscated data to the system's
+{@link android.content.SharedPreferences} store.</td>
+</tr>
+<tr>
+<td><em>ILicensingService</em></td>
+<td>One-way IPC interface over which a license check request is passed to the
+Google Play client.</td>
+</tr>
+<tr>
+<td><em>ILicenseResultListener</em></td>
+<td>One-way IPC callback implementation over which the application receives an
+asynchronous response from the licensing server.</td>
+</tr>
+
+</table>
+</div>
+
+
+<h2 id="server-response-codes">Server Response Codes</h2>
+
+<p>Table 2 lists all of the license response codes supported by the
+licensing server. In general, an application should handle all of these response
+codes. By default, the LicenseValidator class in the LVL provides all of the
+necessary handling of these response codes for you. </p>
+
+<p class="table-caption"><strong>Table 2.</strong> Summary of response codes
+returned by the Google Play server in a license response.</p>
+
+<table>
+
+<tr>
+<th>Response Code</th>
+<th>Description</th>
+<th>Signed?</th>
+<th>Extras</th>
+<th>Comments</th>
+</tr>
+<tr>
+<td>{@code LICENSED}</td>
+<td>The application is licensed to the user. The user has purchased the
+application or the application only exists as a draft.</td>
+<td>Yes</td>
+<td><code>VT</code>,&nbsp;<code>GT</code>, <code>GR</code></td>
+<td><em>Allow access according to {@code Policy} constraints.</em></td>
+</tr>
+<tr>
+<td>{@code LICENSED_OLD_KEY}</td>
+<td>The application is licensed to the user, but there is an updated application
+version available that is signed with a different key. </td>
+<td>Yes </td>
+<td><code>VT</code>, <code>GT</code>, <code>GR</code>, <code>UT</code></td>
+<td><em>Optionally allow access according to {@code Policy} constraints.</em>
+<p style="margin-top:.5em;">Can indicate that the key pair used by the installed
+application version is invalid or compromised. The application can allow access
+if needed or inform the user that an upgrade is available and limit further use
+until upgrade.</p>
+</td>
+</tr>
+<tr>
+<td>{@code NOT_LICENSED}</td>
+<td>The application is not licensed to the user.</td>
+<td>No</td>
+<td></td>
+<td><em>Do not allow access.</em></td>
+</tr>
+<tr>
+<td>{@code ERROR_CONTACTING_SERVER}</td>
+<td>Local error &mdash; the Google Play application was not able to reach the
+licensing server, possibly because of network availability problems. </td>
+<td>No</td>
+<td></td>
+<td><em>Retry the license check according to {@code Policy} retry limits.</em></td>
+</tr>
+<tr>
+<td>{@code ERROR_SERVER_FAILURE}</td>
+<td>Server error &mdash; the server could not load the publisher account's key
+pair for licensing.</td>
+<td>No</td>
+<td></td>
+<td><em>Retry the license check according to {@code Policy} retry limits.</em>
+</td>
+</tr>
+<tr>
+<td>{@code ERROR_INVALID_PACKAGE_NAME}</td>
+<td>Local error &mdash; the application requested a license check for a package
+that is not installed on the device. </td>
+<td>No </td>
+<td></td>
+<td><em>Do not retry the license check.</em>
+<p style="margin-top:.5em;">Typically caused by a development error.</p>
+</td>
+</tr>
+<tr>
+<td>{@code ERROR_NON_MATCHING_UID}</td>
+<td>Local error &mdash; the application requested a license check for a package
+whose UID (package, user ID pair) does not match that of the requesting
+application. </td>
+<td>No </td>
+<td></td>
+<td><em>Do not retry the license check.</em>
+<p style="margin-top:.5em;">Typically caused by a development error.</p>
+</td>
+</tr>
+<tr>
+<td>{@code ERROR_NOT_MARKET_MANAGED}</td>
+<td>Server error &mdash; the application (package name) was not recognized by
+Google Play. </td>
+<td>No</td>
+<td></td>
+<td><em>Do not retry the license check.</em>
+<p style="margin-top:.5em;">Can indicate that the application was not published
+through Google Play or that there is an development error in the licensing
+implementation.</p>
+</td>
+</tr>
+
+</table>
+
+<p class="note"><strong>Note:</strong> As documented in <a
+href="{@docRoot}guide/google/play/licensing/setting-up.html#test-env">
+Setting Up The Testing Environment</a>, the response code can be manually
+overridden for the application developer and any registered test users via the
+Google Play publisher site.
+<br/><br/>
+Additionally, as noted above, applications that are in draft mode (in other
+words, applications that have been uploaded but have <em>never</em> been
+published) will return {@code LICENSED} for all users, even if not listed as a test
+user. Since the application has never been offered for download, it is assumed
+that any users running it must have obtained it from an authorized channel for
+testing purposes.</p>
+
+
+
+
+<h2 id="extras">Server Response Extras</h2>
+
+<p>To assist your application in managing access to the application across the application refund
+period and provide other information, The licensing server includes several pieces of
+information in the license responses. Specifically, the service provides recommended values for the
+application's license validity period, retry grace period, maximum allowable retry count, and other
+settings. If your application uses <a href="{@docRoot}guide/google/play/expansion-files.html">APK
+expansion files</a>, the response also includes the file names, sizes, and URLs. The server appends
+the settings as key-value pairs in the license response "extras" field. </p>
+
+<p>Any {@code Policy} implementation can extract the extras settings from the license
+response and use them as needed. The LVL default {@code Policy} implementation, <a
+href="{@docRoot}guide/google/play/licensing/adding-licensing.html#ServerManagedPolicy">{@code
+ServerManagedPolicy}</a>, serves as a working
+implementation and an illustration of how to obtain, store, and use the
+settings. </p>
+
+<p class="table-caption"><strong>Table 3.</strong> Summary of
+license-management settings supplied by the Google Play server in a license
+response.</p>
+
+<table>
+<tr>
+<th>Extra</th><th>Description</th>
+</tr>
+
+<tr>
+  <td>{@code VT}</td>
+  <td>License validity timestamp. Specifies the date/time at which the current
+(cached) license response expires and must be rechecked on the licensing server. See the section
+below about <a href="#VT">License validity period</a>.
+ </td>
+</tr>
+<tr>
+  <td>{@code GT}</td>
+  <td>Grace period timestamp. Specifies the end of the period during which a
+Policy may allow access to the application, even though the response status is
+{@code RETRY}. <p>The value is managed by the server, however a typical value would be 5
+or more days. See the section
+below about <a href="#GTGR">Retry period and maximum retry count</a>.</p></td>
+</tr>
+<tr>
+  <td>{@code GR}</td>
+  <td>Maximum retries count. Specifies how many consecutive {@code RETRY} license checks
+the {@code Policy} should allow, before denying the user access to the application.
+<p>The value is managed by the server, however a typical value would be "10" or
+higher. See the section
+below about <a href="#GTGR">Retry period and maximum retry count</a>.</p></td>
+</tr>
+<tr>
+  <td>{@code UT}</td>
+  <td>Update timestamp. Specifies the day/time when the most recent update to
+this application was uploaded and published. <p>The server returns this extra
+only for {@code LICENSED_OLD_KEYS} responses, to allow the {@code Policy} to determine how much
+time has elapsed since an update was published with new licensing keys before
+denying the user access to the application. </p></td>
+</tr>
+
+
+<!-- APK EXPANSION FILE RESPONSES -->
+
+<tr>
+  <td>{@code FILE_URL1} or {@code FILE_URL2}</td>
+  <td>The URL for an expansion file (1 is for the main file, 2 is the patch file). Use this to
+download the file over HTTP.</td>
+</tr>
+<tr>
+  <td>{@code FILE_NAME1} or {@code FILE_NAME2}</td>
+  <td>The expansion file's name (1 is for the main file, 2 is the patch file). You must use this
+name when saving the file on the device.</td>
+</tr>
+<tr>
+  <td>{@code FILE_SIZE1} or {@code FILE_SIZE2}</td>
+  <td>The size of the file in bytes (1 is for the main file, 2 is the patch file). Use this to
+assist with downloading and to ensure that enough space is available on the device's shared
+storage location before downloading.</td>
+</tr>
+
+</table>
+
+
+
+<h4 id="VT">License validity period</h4>
+
+<p>The Google Play licensing server sets a license validity period for all
+downloaded applications. The period expresses the interval of time over which an
+application's license status should be considered as unchanging and cacheable by
+a licensing {@code Policy} in the application. The licensing server includes the
+validity period in its response to all license checks, appending an
+end-of-validity timestamp to the response as an extra under the key {@code VT}. A
+{@code Policy} can extract the VT key value and use it to conditionally allow access to
+the application without rechecking the license, until the validity period
+expires. </p>
+
+<p>The license validity signals to a licensing {@code Policy} when it must recheck the
+licensing status with the licensing server. It is <em>not</em> intended to imply
+whether an application is actually licensed for use. That is, when an
+application's license validity period expires, this does not mean that the
+application is no longer licensed for use &mdash; rather, it indicates only that
+the {@code Policy} must recheck the licensing status with the server. It follows that,
+as long as the license validity period has not expired, it is acceptable for the
+{@code Policy} to cache the initial license status locally and return the cached license
+status instead of sending a new license check to the server.</p>
+
+<p>The licensing server manages the validity period as a means of helping the
+application properly enforce licensing across the refund period offered by
+Google Play for paid applications. It sets the validity period based on
+whether the application was purchased and, if so, how long ago. Specifically,
+the server sets a validity period as follows:</p>
+
+<ul>
+<li>For a paid application, the server sets the initial license validity period
+so that the license response remains valid for as long as the application is
+refundable. A licensing {@code Policy} in the application may cache the
+result of the initial license check and does not need to recheck the license
+until the validity period has expired.</li>
+<li>When an application is no longer refundable, the server
+sets a longer validity period &mdash; typically a number of days. </li>
+
+<!-- TODO: Verify the following behavior is still true w/ OBB: -->
+<li>For a free application, the server sets the validity period to a very high
+value (<code>long.MAX_VALUE</code>). This ensures that, provided the {@code Policy} has
+cached the validity timestamp locally, it will not need to recheck the
+license status of the application in the future.</li>
+</ul>
+
+<p>The {@code ServerManagedPolicy} implementation uses the extracted timestamp
+(<code>mValidityTimestamp</code>) as a primary condition for determining whether
+to recheck the license status with the server before allowing the user access to
+the application. </p>
+
+
+<h4 id="GTGR">Retry period and maximum retry count</h4>
+
+<p>In some cases, system or network conditions can prevent an application's
+license check from reaching the licensing server, or prevent the server's
+response from reaching the Google Play client application. For example, the
+user might launch an application when there is no cell network or data
+connection available&mdash;such as when on an airplane&mdash;or when the
+network connection is unstable or the cell signal is weak. </p>
+
+<p>When network problems prevent or interrupt a license check, the Google
+Play client notifies the application by returning a {@code RETRY} response code to
+the {@code Policy}'s <code>processServerResponse()</code> method. In the case of system
+problems, such as when the application is unable to bind with Google Play's
+{@code ILicensingService} implementation, the {@code LicenseChecker} library itself calls the
+Policy <code>processServerResonse()</code> method with a {@code RETRY} response code.
+</p>
+
+<p>In general, the {@code RETRY} response code is a signal to the application that an
+error has occurred that has prevented a license check from completing.
+
+<p>The Google Play server helps an application to manage licensing under
+error conditions by setting a retry "grace period" and a recommended maximum
+retries count. The server includes these values in all license check responses,
+appending them as extras under the keys {@code GT} and {@code GR}. </p>
+
+<p>The application {@code Policy} can extract the {@code GT} and {@code GR} extras and use them to
+conditionally allow access to the application, as follows:</p>
+
+<ul>
+<li>For a license check that results in a {@code RETRY} response, the {@code Policy} should
+cache the {@code RETRY} response code and increment a count of {@code RETRY} responses.</li>
+<li>The {@code Policy} should allow the user to access the application, provided that
+either the retry grace period is still active or the maximum retries count has
+not been reached.</li>
+</ul>
+
+<p>The {@code ServerManagedPolicy} uses the server-supplied {@code GT} and {@code GR} values as
+described above. The example below shows the conditional handling of the retry
+responses in the <code>allow()</code> method. The count of {@code RETRY} responses is
+maintained in the <code>processServerResponse()</code> method, not shown. </p>
+
+
+<pre>    
+public boolean allowAccess() {
+    long ts = System.currentTimeMillis();
+    if (mLastResponse == LicenseResponse.LICENSED) {
+        // Check if the LICENSED response occurred within the validity timeout.
+        if (ts &lt;= mValidityTimestamp) {
+            // Cached LICENSED response is still valid.
+            return true;
+        }
+    } else if (mLastResponse == LicenseResponse.RETRY &amp;&amp;
+                ts &lt; mLastResponseTime + MILLIS_PER_MINUTE) {
+        // Only allow access if we are within the retry period or we haven't used up our
+        // max retries.
+        return (ts &lt;= mRetryUntil || mRetryCount &lt;= mMaxRetries);
+    }
+    return false;
+}</pre>
+

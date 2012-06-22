@@ -1,0 +1,369 @@
+page.title=Managing AVDs from the Command Line
+parent.title=Managing Virtual Devices
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#listingtargets">Listing Targets</a></li>
+    <li><a href="#AVDCmdLine">Creating AVDs</a>
+      <ol>
+        <li><a href="#CustomDensity">Customize the device resolution or density</a></li>
+        <li><a href="#DefaultLocation">Default location of AVD files</a></li>
+        <li><a href="#hardwareopts">Setting hardware emulation options</a></li>
+      </ol>
+    </li>
+    <li><a href="#moving">Moving an AVD</a></li>
+    <li><a href="#updating">Updating an AVD</a></li>
+    <li><a href="#deleting">Deleting an AVD</a></li>
+  </ol>
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}tools/building/building-cmdline.html">Building and Running
+from the Command Line</a></li>
+    <li><a href="{@docRoot}tools/devices/emulator.html">Using the Android
+Emulator</a></li>
+  </ol>
+  </div>
+</div>
+
+
+<p>The <code>android</code> tool lets you manage AVDs on the command line. For a complete reference 
+of the command line options that you can use, see the reference for the 
+<a href="{@docRoot}tools/help/android.html"><code>android</code></a> tool.</p>
+
+
+
+<h2 id="listingtargets">Listing Targets</h2>
+
+<p>To generate a list of system image targets, use this command: </p>
+
+<pre>android list targets</pre>
+
+<p>The <code>android</code> tool scans the <code>&lt;sdk&gt;/platforms/</code> and
+<code>&lt;sdk&gt;/add-ons/</code> directories looking for valid system images and
+then generates the list of targets. Here's an example of the command output:
+</p>
+
+<pre>Available Android targets:
+id: 1 or "android-3"
+     Name: Android 1.5
+     Type: Platform
+     API level: 3
+     Revision: 4
+     Skins: QVGA-L, HVGA-L, HVGA (default), HVGA-P, QVGA-P
+id: 2 or "android-4"
+     Name: Android 1.6
+     Type: Platform
+     API level: 4
+     Revision: 3
+     Skins: QVGA, HVGA (default), WVGA800, WVGA854
+id: 3 or "android-7"
+     Name: Android 2.1-update1
+     Type: Platform
+     API level: 7
+     Revision: 2
+     Skins: QVGA, WQVGA400, HVGA (default), WVGA854, WQVGA432, WVGA800
+id: 4 or "android-8"
+     Name: Android 2.2
+     Type: Platform
+     API level: 8
+     Revision: 2
+     Skins: WQVGA400, QVGA, WVGA854, HVGA (default), WVGA800, WQVGA432
+id: 5 or "android-9"
+     Name: Android 2.3
+     Type: Platform
+     API level: 9
+     Revision: 1
+     Skins: HVGA (default), WVGA800, WQVGA432, QVGA, WVGA854, WQVGA400
+</pre>
+
+
+
+<h2 id="AVDCmdLine">Creating AVDs</h2>
+
+<p>In addition to creating AVDs with the 
+<a href="{@docRoot}tools/devices/managing-avds-cmdline.html">AVD Manager user interface</a>,
+you can also create them by passing in command line arguments to the <code>android</code> tool.
+</p>
+
+<p>Open a terminal window and change to
+the <code>&lt;sdk&gt;/tools/</code> directory, if needed.</p>
+
+<p>To create each AVD, you issue the command <code>android create avd</code>,
+with options that specify a name for the new AVD and the system image you want
+to run on the emulator when the AVD is invoked. You can specify other options on
+the command line also, such as the emulated SD card size, the emulator skin, or a custom
+location for the user data files.</p> 
+
+<p>Here's the command-line usage for creating an AVD: </p>
+
+<pre>android create avd -n &lt;name&gt; -t &lt;targetID&gt; [-&lt;option&gt; &lt;value&gt;] ... </pre>
+
+<p>You can use any name you want for the AVD, but since you are likely to be
+creating multiple AVDs, you should choose a name that lets you recognize the
+general characteristics offered by the AVD. The target ID is an integer assigned by the
+<code>android</code> tool. The target ID is not derived from the system image name, 
+version, or API Level, or other attribute, so you need to run the <code>android list targets</code>
+command to list the target ID of each system image. You should do this <em>before</em> you run
+the <code>android create avd</code> command. See the <a
+href="{@docRoot}tools/help/android.html">android</a>
+tool documentation for more information on the command line options.</p>
+
+
+<p>When you've selected the target you want to use and made a note of its ID,
+use the <code>android create avd</code> command to create the AVD, supplying the
+target ID as the <code>-t</code> argument. Here's an example that creates an
+AVD with name "my_android1.5" and target ID "2" (the standard Android 1.5 
+system image in the list above): </p>
+
+<pre>android create avd -n my_android1.5 -t 2</pre>
+
+<p>If the target you selected was a standard Android system image ("Type:
+platform"), the <code>android</code> tool next asks you whether you want to
+create a custom hardware profile. </p>
+<pre>Android 1.5 is a basic Android platform.
+Do you wish to create a custom hardware profile [no]</pre>
+
+<p>If you want to set custom hardware emulation options for the AVD, enter
+"yes" and set values as needed. If you want to use the default hardware
+emulation options for the AVD, just press the return key (the default is "no").
+The <code>android</code> tool creates the AVD with name and system image mapping you
+requested, with the options you specified. For more information, see <a href="#hardwareopts">
+Setting Hardware Emulation Options</a>.
+
+<p class="note"><strong>Note:</strong> If you are creating an AVD whose target is an SDK add-on, the
+<code>android</code> tool does not allow you to set hardware emulation options.
+It assumes that the provider of the add-on has set emulation options
+appropriately for the device that the add-on is modeling, and so prevents you
+from resetting the options. </p>
+
+
+<h3 id="CustomDensity">Customize the device resolution or density</h3>
+
+<p>When testing your application, we recommend that you test your application in several different
+AVDs, using different screen configurations (different combinations of size and density). In
+addition, you should set up the AVDs to run at a physical size that closely matches an actual
+device.</p>
+
+<p>To set up your AVDs for a specific resolution or density, follow these steps:</p>
+
+<ol>
+  <li>Use the <code>create avd</code> command to create a new AVD, specifying
+the <code>--skin</code> option with a value that references either a default
+skin name (such as "WVGA800") or a custom skin resolution (such as 240x432).
+Here's an example:
+     <pre>android create avd -n &lt;name&gt; -t &lt;targetID&gt; --skin WVGA800</pre>
+  </li>
+  <li>To specify a custom density for the skin, answer "yes" when asked whether
+you want to create a custom hardware profile for the new AVD.</li>
+  <li>Continue through the various profile settings until the tool asks you to
+specify "Abstracted LCD density" (<em>hw.lcd.density</em>). Enter an appropriate
+value, such as "120" for a low-density screen, "160" for a medium density screen,
+or "240" for a high-density screen.</li>
+  <li>Set any other hardware options and complete the AVD creation.</li>
+</ol>
+
+<p>In the example above (WVGA medium density), the new AVD will emulate a 5.8"
+WVGA screen.</p>
+
+<p>As an alternative to adjusting the emulator skin configuration, you can use
+the emulator skin's default density and add the <code>-dpi-device</code> option
+to the <a href="{@docRoot}tools/help/emulator.html">emulator</a> command line when
+starting the AVD. For example:</p>
+
+<pre>emulator -avd WVGA800 -scale 96dpi -dpi-device 160</pre>
+
+
+
+<h3 id="DefaultLocation">Default location of AVD files</h3>
+
+<p>When you create an AVD, the <code>android</code> tool creates a dedicated directory for it
+on your development computer. The directory contains the AVD configuration file,
+the user data image and SD card image (if available), and any other files
+associated with the device. Note that the directory does not contain a system
+image &mdash; instead, the AVD configuration file contains a mapping to the
+system image, which it loads when the AVD is launched. </p>
+
+<p>The <code>android</code> tool also creates an <code>&lt;AVD_name&gt;.ini</code> file for the AVD at the
+root of the <code>.android/avd/</code> directory on your computer. The file specifies the
+location of the AVD directory and always remains at the root the .android 
+directory.</p>
+
+<p>By default, the <code>android</code> tool creates the AVD directory inside
+<code>~/.android/avd/</code> (on Linux/Mac), <code>C:\Documents and
+Settings\&lt;user&gt;\.android\</code> on Windows XP, and 
+<code>C:\Users\&lt;user&gt;\.android\</code> on Windows 7 and Vista. 
+If you want to use a custom location for the AVD directory, you 
+can do so by using the <code>-p &lt;path&gt;</code> option when 
+you create the AVD: </p>
+
+<pre>android create avd -n my_android1.5 -t 2 -p path/to/my/avd</pre>
+
+<p>If the .android directory is hosted on a network drive, we recommend using
+the <code>-p</code> option to place the AVD directory in another location. 
+The  AVD's .ini file remains in the .android directory on the network
+drive, regardless of the location of the AVD directory. 
+
+
+<h3 id="hardwareopts">Setting hardware emulation options</h3>
+
+<p>When you are creating a new AVD that uses a standard Android system image ("Type:
+platform"), the <code>android</code> tool lets you set hardware emulation
+options for virtual device. The table below lists the options available and the
+default values, as well as the names of properties that store the emulated
+hardware options in the AVD's configuration file (the config.ini file in the
+AVD's local directory). </p>
+
+<p class="table-caption"><strong>Table 1.</strong> Available hardware profile options for AVDs and
+the default values </p>
+
+<table>
+<tr>
+<th>Characteristic</th>
+<th>Description</th>
+<th>Property</th>
+</tr>
+
+<tr>
+<td>Device ram size</td>
+<td>The amount of physical RAM on the device, in megabytes. Default value is "96".
+<td>hw.ramSize</td>
+</tr>
+
+<tr>
+<td>Touch-screen support</td>
+<td>Whether there is a touch screen or not on the device. Default value is "yes".</td>
+<td>hw.touchScreen
+
+<tr>
+<td>Trackball support </td>
+<td>Whether there is a trackball on the device. Default value is "yes".</td>
+<td>hw.trackBall</td>
+</tr>
+
+<tr>
+<td>Keyboard support</td>
+<td>Whether the device has a QWERTY keyboard. Default value is "yes".</td>
+<td>hw.keyboard</td>
+</tr>
+
+<tr>
+<td>DPad support</td>
+<td>Whether the device has DPad keys. Default value is "yes".</td>
+<td>hw.dPad</td>
+</tr>
+
+<tr>
+<td>GSM modem support</td>
+<td>Whether there is a GSM modem in the device. Default value is "yes".</td>
+<td>hw.gsmModem</td>
+</tr>
+
+<tr>
+<td>Camera support</td>
+<td>Whether the device has a camera. Default value is "no".</td>
+<td>hw.camera</td>
+</tr>
+
+<tr>
+<td>Maximum horizontal camera pixels</td>
+<td>Default value is "640".</td>
+<td>hw.camera.maxHorizontalPixels</td>
+</tr>
+
+<tr>
+<td>Maximum vertical camera pixels</td>
+<td>Default value is "480".</td>
+<td>hw.camera.maxVerticalPixels</td>
+</tr>
+
+<tr>
+<td>GPS support</td>
+<td>Whether there is a GPS in the device. Default value is "yes".</td>
+<td>hw.gps</td>
+</tr>
+
+<tr>
+<td>Battery support</td>
+<td>Whether the device can run on a battery. Default value is "yes".</td>
+<td>hw.battery</td>
+</tr>
+
+<tr>
+<td>Accelerometer</td>
+<td>Whether there is an accelerometer in the device. Default value is "yes".</td>
+<td>hw.accelerometer</td>
+</tr>
+
+<tr>
+<td>Audio recording support</td>
+<td>Whether the device can record audio. Default value is "yes".</td>
+<td>hw.audioInput</td>
+</tr>
+
+<tr>
+<td>Audio playback support</td>
+<td>Whether the device can play audio. Default value is "yes".</td>
+<td>hw.audioOutput</td>
+</tr>
+
+<tr>
+<td>SD Card support</td>
+<td>Whether the device supports insertion/removal of virtual SD Cards. Default value is "yes".</td>
+<td>hw.sdCard</td>
+</tr>
+
+<tr>
+<td>Cache partition support</td>
+<td>Whether we use a /cache partition on the device. Default value is "yes".</td>
+<td>disk.cachePartition</td>
+</tr>
+
+<tr>
+<td>Cache partition size</td>
+<td>Default value is "66MB".</td>
+<td>disk.cachePartition.size </td>
+</tr>
+
+<tr>
+<td>Abstracted LCD density</td>
+<td>Sets the generalized density characteristic used by the AVD's screen. Default value is "160".</td>
+<td>hw.lcd.density </td>
+</tr>
+
+<tr>
+<td>Trackball support</td>
+<td>Whether there is a trackball present.</td>
+<td>hw.trackBall </td>
+</tr>
+</table>
+
+
+<h2 id="moving">Moving an AVD</h2>
+
+<p>If you want to move or rename an AVD, you can do so using this command:</p>
+
+<pre>android move avd -n &lt;name&gt; [-&lt;option&gt; &lt;value&gt;] ...</pre>
+
+<h2 id="updating">Updating an AVD</h2>
+
+<p>If, for any reason, the platform/add-on root folder has its name changed (maybe because the user has installed an update of the platform/add-on) then the AVD will not be able to load the system image that it is mapped to. In this case, the <code>android list targets</code> command will produce this output: 
+
+<pre>The following Android Virtual Devices could not be loaded: 
+Name: foo 
+Path: &lt;path&gt;/.android/avd/foo.avd 
+Error: Invalid value in image.sysdir. Run 'android update avd -n foo' </pre>
+
+<p>To fix this error, use the <code>android update avd</code> command to recompute the path to the system images.</p>
+
+<h2 id="deleting">Deleting an AVD</h2>
+
+<p>You can use the <code>android</code> tool to delete an AVD. Here is the command usage:</p>
+
+<pre>android delete avd -n &lt;name&gt; </pre>
+
+<p>When you issue the command, the <code>android</code> tool looks for an AVD matching the 
+specified name deletes the AVD's directory and files. </p>

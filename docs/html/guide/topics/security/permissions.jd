@@ -1,0 +1,407 @@
+page.title=Permissions
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+<ol>
+<li><a href="#arch">Security Architecture</a></li>
+<li><a href="#signing">Application Signing</a></li>
+<li><a href="#userid">User IDs and File Access</a></li>
+<li><a href="#permissions">Using Permissions</a></li>
+<li><a href="#declaring">Declaring and Enforcing Permissions</a>
+	<ol>
+	<li><a href="#manifest">...in AndroidManifest.xml</a></li>
+	<li><a href="#broadcasts">...when Sending Broadcasts</a></li>
+	<li><a href="#enforcement">Other Permission Enforcement</a></li>
+	</ol></li>
+<li><a href="#uri">URI Permissions</a></li>
+</ol>
+</div>
+</div>
+<p>This document describes how application developers can use the
+security features provided by Android.  A more general <a
+href="http://source.android.com/tech/security/index.html"> Android Security
+Overview</a> is provided in the Android Open Source Project.</p>
+
+<p>Android is a privilege-separated operating system, in which each
+application runs with a distinct system identity (Linux user ID and group
+ID).  Parts of the system are also separated into distinct identities.
+Linux thereby isolates applications from each other and from the system.</p>
+
+<p>Additional finer-grained security features are provided through a
+"permission" mechanism that enforces restrictions on the specific operations
+that a particular process can perform, and per-URI permissions for granting
+ad-hoc access to specific pieces of data.</p>
+
+<a name="arch"></a>
+<h2>Security Architecture</h2>
+
+<p>A central design point of the Android security architecture is that no
+application, by default, has permission to perform any operations that would
+adversely impact other applications, the operating system, or the user.  This
+includes reading or writing the user's private data (such as contacts or
+e-mails), reading or writing another application's files, performing
+network access, keeping the device awake, etc.</p>
+
+<p>Because Android sandboxes applications from each other, applications
+must explicitly share resources and data. They do this by declaring the
+<em>permissions</em> they need for additional capabilities not provided by
+the basic sandbox. Applications statically declare the permissions they
+require, and the Android system prompts the user for consent at the time the
+application is installed. Android has no mechanism for granting permissions
+dynamically (at run-time) because it complicates the user experience to the
+detriment of security.</p>
+
+<p>The application sandbox does not depend on the technology used to build
+an application. In particular the Dalvik VM is not a security boundary, and
+any app can run native code (see <a href="/sdk/ndk/index.html">the Android
+NDK</a>). All types of applications &mdash; Java, native, and hybrid &mdash;
+are sandboxed in the same way and have the same degree of security from each
+other.</p>
+
+<a name="signing"></a>
+<h2>Application Signing</h2>
+
+<p>All Android applications (.apk files) must be signed with a certificate
+whose private key is held by their developer.  This certificate identifies
+the author of the application.  The certificate does <em>not</em> need to be
+signed by a certificate authority: it is perfectly allowable, and typical,
+for Android applications to use self-signed certificates. The purpose of
+certificates in Android is to distinguish application authors. This allows
+the system to grant or deny applications access to <a
+href="/guide/topics/manifest/permission-element.html#plevel">signature-level
+permissions</a> and to grant or deny an application's <a
+href="/guide/topics/manifest/manifest-element.html#uid">request to be given
+the same Linux identity</a> as another application.</p>
+
+<a name="userid"></a>
+<h2>User IDs and File Access</h2>
+
+<p>At install time, Android gives each package a distinct Linux user ID. The
+identity remains constant for the duration of the package's life on that
+device. On a different device, the same package may have a different UID;
+what matters is that each package has a distinct UID on a given device.</p>
+
+<p>Because security enforcement happens at the
+process level, the code of any two packages can not normally
+run in the same process, since they need to run as different Linux users.
+You can use the {@link android.R.attr#sharedUserId} attribute in the
+<code>AndroidManifest.xml</code>'s
+{@link android.R.styleable#AndroidManifest manifest} tag of each package to
+have them assigned the same user ID.  By doing this, for purposes of security
+the two packages are then treated as being the same application, with the same
+user ID and file permissions.  Note that in order to retain security, only two applications
+signed with the same signature (and requesting the same sharedUserId) will
+be given the same user ID.</p>
+
+<p>Any data stored by an application will be assigned that application's user
+ID, and not normally accessible to other packages.  When creating a new file
+with {@link android.content.Context#getSharedPreferences},
+{@link android.content.Context#openFileOutput}, or
+{@link android.content.Context#openOrCreateDatabase},
+you can use the
+{@link android.content.Context#MODE_WORLD_READABLE} and/or
+{@link android.content.Context#MODE_WORLD_WRITEABLE} flags to allow any other
+package to read/write the file.  When setting these flags, the file is still
+owned by your application, but its global read and/or write permissions have
+been set appropriately so any other application can see it.</p>
+
+
+<a name="permissions"></a>
+<h2>Using Permissions</h2>
+
+<p>A basic Android application has no permissions associated with it,
+meaning it can not do anything that would adversely impact the user experience
+or any data on the device.  To make use of protected features of the device,
+you must include in your <code>AndroidManifest.xml</code> one or more
+<code>{@link android.R.styleable#AndroidManifestUsesPermission &lt;uses-permission&gt;}</code>
+tags declaring the permissions that your application needs.</p>
+
+<p>For example, an application that needs to monitor incoming SMS messages would
+specify:</p>
+
+<pre>&lt;manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    package=&quot;com.android.app.myapp&quot; &gt;
+    &lt;uses-permission android:name=&quot;android.permission.RECEIVE_SMS&quot; /&gt;
+    ...
+&lt;/manifest&gt;</pre>
+
+<p>At application install time, permissions requested by the application are
+granted to it by the package installer, based on checks against the
+signatures of the applications declaring those permissions and/or interaction
+with the user. <em>No</em> checks with the user
+are done while an application is running: it either was granted a particular
+permission when installed, and can use that feature as desired, or the
+permission was not granted and any attempt to use the feature will fail
+without prompting the user.</p>
+
+<p>Often times a permission failure will result in a {@link
+java.lang.SecurityException} being thrown back to the application. However,
+this is not guaranteed to occur everywhere. For example, the {@link
+android.content.Context#sendBroadcast} method checks permissions as data is
+being delivered to each receiver, after the method call has returned, so you
+will not receive an exception if there are permission failures. In almost all
+cases, however, a permission failure will be printed to the system log.</p>
+
+<p>The permissions provided by the Android system can be found at {@link
+android.Manifest.permission}. Any application may also define and enforce its
+own permissions, so this is not a comprehensive list of all possible
+permissions.</p>
+
+<p>A particular permission may be enforced at a number of places during your
+program's operation:</p>
+
+<ul>
+<li>At the time of a call into the system, to prevent an application from
+executing certain functions.</li>
+<li>When starting an activity, to prevent applications from launching
+activities of other applications.</li>
+<li>Both sending and receiving broadcasts, to control who can receive
+your broadcast or who can send a broadcast to you.</li>
+<li>When accessing and operating on a content provider.</li>
+<li>Binding to or starting a service.</li>
+</ul>
+
+
+<a name="declaring"></a>
+<h2>Declaring and Enforcing Permissions</h2>
+
+<p>To enforce your own permissions, you must first declare them in your
+<code>AndroidManifest.xml</code> using one or more
+<code>{@link android.R.styleable#AndroidManifestPermission &lt;permission&gt;}</code>
+tags.</p>
+
+<p>For example, an application that wants to control who can start one
+of its activities could declare a permission for this operation as follows:</p>
+
+<pre>&lt;manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    package=&quot;com.me.app.myapp&quot; &gt;
+    &lt;permission android:name=&quot;com.me.app.myapp.permission.DEADLY_ACTIVITY&quot;
+        android:label=&quot;&#64;string/permlab_deadlyActivity&quot;
+        android:description=&quot;&#64;string/permdesc_deadlyActivity&quot;
+        android:permissionGroup=&quot;android.permission-group.COST_MONEY&quot;
+        android:protectionLevel=&quot;dangerous&quot; /&gt;
+    ...
+&lt;/manifest&gt;</pre>
+
+<p>The {@link android.R.styleable#AndroidManifestPermission_protectionLevel
+&lt;protectionLevel&gt;} attribute is required, telling the system how the
+user is to be informed of applications requiring the permission, or who is
+allowed to hold that permission, as described in the linked documentation.</p>
+
+<p>The {@link android.R.styleable#AndroidManifestPermission_permissionGroup
+&lt;permissionGroup&gt;} attribute is optional, and only used to help the system display
+permissions to the user.  You will usually want to set this to either a standard
+system group (listed in {@link android.Manifest.permission_group
+android.Manifest.permission_group}) or in more rare cases to one defined by
+yourself.  It is preferred to use an existing group, as this simplifies the
+permission UI shown to the user.</p>
+
+<p>Note that both a label and description should be supplied for the
+permission. These are string resources that can be displayed to the user when
+they are viewing a list of permissions
+(<code>{@link android.R.styleable#AndroidManifestPermission_label android:label}</code>)
+or details on a single permission (
+<code>{@link android.R.styleable#AndroidManifestPermission_description android:description}</code>).
+The label should be short, a few words
+describing the key piece of functionality the permission is protecting. The
+description should be a couple sentences describing what the permission allows
+a holder to do. Our convention for the description is two sentences, the first
+describing the permission, the second warning the user of what bad things
+can happen if an application is granted the permission.</p>
+
+<p>Here is an example of a label and description for the CALL_PHONE
+permission:</p>
+
+<pre>
+    &lt;string name=&quot;permlab_callPhone&quot;&gt;directly call phone numbers&lt;/string&gt;
+    &lt;string name=&quot;permdesc_callPhone&quot;&gt;Allows the application to call
+        phone numbers without your intervention. Malicious applications may
+        cause unexpected calls on your phone bill. Note that this does not
+        allow the application to call emergency numbers.&lt;/string&gt;
+</pre>
+
+<p>You can look at the permissions currently defined in the system with the
+Settings app and the shell command <code>adb shell pm list permissions</code>.
+To use the Settings app, go to Settings &gt; Applications.  Pick an app and
+scroll down to see the permissions that the app uses. For developers, the adb '-s'
+option displays the permissions in a form similar to how the user will see them:</p>
+
+<pre>
+$ adb shell pm list permissions -s
+All Permissions:
+
+Network communication: view Wi-Fi state, create Bluetooth connections, full
+Internet access, view network state
+
+Your location: access extra location provider commands, fine (GPS) location,
+mock location sources for testing, coarse (network-based) location
+
+Services that cost you money: send SMS messages, directly call phone numbers
+
+...</pre>
+
+<a name="manifest"></a>
+<h3>Enforcing Permissions in AndroidManifest.xml</h3>
+
+<p>High-level permissions restricting access to entire components of the
+system or application can be applied through your
+<code>AndroidManifest.xml</code>. All that this requires is including an {@link
+android.R.attr#permission android:permission} attribute on the desired
+component, naming the permission that will be used to control access to
+it.</p>
+
+<p><strong>{@link android.app.Activity}</strong> permissions
+(applied to the
+{@link android.R.styleable#AndroidManifestActivity &lt;activity&gt;} tag)
+restrict who can start the associated
+activity.  The permission is checked during
+{@link android.content.Context#startActivity Context.startActivity()} and
+{@link android.app.Activity#startActivityForResult Activity.startActivityForResult()};
+if the caller does not have
+the required permission then {@link java.lang.SecurityException} is thrown
+from the call.</p>
+
+<p><strong>{@link android.app.Service}</strong> permissions
+(applied to the
+{@link android.R.styleable#AndroidManifestService &lt;service&gt;} tag)
+restrict who can start or bind to the
+associated service.  The permission is checked during
+{@link android.content.Context#startService Context.startService()},
+{@link android.content.Context#stopService Context.stopService()} and
+{@link android.content.Context#bindService Context.bindService()};
+if the caller does not have
+the required permission then {@link java.lang.SecurityException} is thrown
+from the call.</p>
+
+<p><strong>{@link android.content.BroadcastReceiver}</strong> permissions
+(applied to the
+{@link android.R.styleable#AndroidManifestReceiver &lt;receiver&gt;} tag)
+restrict who can send broadcasts to the associated receiver.
+The permission is checked <em>after</em>
+{@link android.content.Context#sendBroadcast Context.sendBroadcast()} returns,
+as the system tries
+to deliver the submitted broadcast to the given receiver.  As a result, a
+permission failure will not result in an exception being thrown back to the
+caller; it will just not deliver the intent.  In the same way, a permission
+can be supplied to
+{@link android.content.Context#registerReceiver(android.content.BroadcastReceiver, android.content.IntentFilter, String, android.os.Handler)
+Context.registerReceiver()}
+to control who can broadcast to a programmatically registered receiver.
+Going the other way, a permission can be supplied when calling
+{@link android.content.Context#sendBroadcast(Intent, String) Context.sendBroadcast()}
+to restrict which BroadcastReceiver objects are allowed to receive the broadcast (see
+below).</p>
+
+<p><strong>{@link android.content.ContentProvider}</strong> permissions
+(applied to the
+{@link android.R.styleable#AndroidManifestProvider &lt;provider&gt;} tag)
+restrict who can access the data in
+a {@link android.content.ContentProvider}.  (Content providers have an important
+additional security facility available to them called
+<a href="#uri">URI permissions</a> which is described later.)
+Unlike the other components,
+there are two separate permission attributes you can set:
+{@link android.R.attr#readPermission android:readPermission} restricts who
+can read from the provider, and
+{@link android.R.attr#writePermission android:writePermission} restricts
+who can write to it.  Note that if a provider is protected with both a read
+and write permission, holding only the write permission does not mean
+you can read from a provider.  The permissions are checked when you first
+retrieve a provider (if you don't have either permission, a SecurityException
+will be thrown), and as you perform operations on the provider.  Using
+{@link android.content.ContentResolver#query ContentResolver.query()} requires
+holding the read permission; using
+{@link android.content.ContentResolver#insert ContentResolver.insert()},
+{@link android.content.ContentResolver#update ContentResolver.update()},
+{@link android.content.ContentResolver#delete ContentResolver.delete()}
+requires the write permission.
+In all of these cases, not holding the required permission results in a
+{@link java.lang.SecurityException} being thrown from the call.</p>
+
+
+<a name="broadcasts"></a>
+<h3>Enforcing Permissions when Sending Broadcasts</h3>
+
+<p>In addition to the permission enforcing who can send Intents to a
+registered {@link android.content.BroadcastReceiver} (as described above), you
+can also specify a required permission when sending a broadcast. By calling {@link
+android.content.Context#sendBroadcast(android.content.Intent,String)
+Context.sendBroadcast()} with a
+permission string, you require that a receiver's application must hold that
+permission in order to receive your broadcast.</p>
+
+<p>Note that both a receiver and a broadcaster can require a permission. When
+this happens, both permission checks must pass for the Intent to be delivered
+to the associated target.</p>
+
+
+<a name="enforcement"></a>
+<h3>Other Permission Enforcement</h3>
+
+<p>Arbitrarily fine-grained permissions can be enforced at any call into a
+service. This is accomplished with the {@link
+android.content.Context#checkCallingPermission Context.checkCallingPermission()}
+method. Call with a desired
+permission string and it will return an integer indicating whether that
+permission has been granted to the current calling process. Note that this can
+only be used when you are executing a call coming in from another process,
+usually through an IDL interface published from a service or in some other way
+given to another process.</p>
+
+<p>There are a number of other useful ways to check permissions. If you have
+the pid of another process, you can use the Context method {@link
+android.content.Context#checkPermission(String, int, int) Context.checkPermission(String, int, int)}
+to check a permission against that pid. If you have the package name of another
+application, you can use the direct PackageManager method {@link
+android.content.pm.PackageManager#checkPermission(String, String)
+PackageManager.checkPermission(String, String)}
+to find out whether that particular package has been granted a specific permission.</p>
+
+
+<a name="uri"></a>
+<h2>URI Permissions</h2>
+
+<p>The standard permission system described so far is often not sufficient
+when used with content providers.  A content provider may want to
+protect itself with read and write permissions, while its direct clients
+also need to hand specific URIs to other applications for them to operate on.
+A typical example is attachments in a mail application.  Access to the mail
+should be protected by permissions, since this is sensitive user data.  However,
+if a URI to an image attachment is given to an image viewer, that image viewer
+will not have permission to open the attachment since it has no reason to hold
+a permission to access all e-mail.</p>
+
+<p>The solution to this problem is per-URI permissions: when starting an
+activity or returning a result to an activity, the caller can set
+{@link android.content.Intent#FLAG_GRANT_READ_URI_PERMISSION
+Intent.FLAG_GRANT_READ_URI_PERMISSION} and/or
+{@link android.content.Intent#FLAG_GRANT_WRITE_URI_PERMISSION
+Intent.FLAG_GRANT_WRITE_URI_PERMISSION}.  This grants the receiving activity
+permission access the specific data URI in the Intent, regardless of whether
+it has any permission to access data in the content provider corresponding
+to the Intent.</p>
+
+<p>This mechanism allows a common capability-style model where user interaction
+(opening an attachment, selecting a contact from a list, etc) drives ad-hoc
+granting of fine-grained permission.  This can be a key facility for reducing
+the permissions needed by applications to only those directly related to their
+behavior.</p>
+
+<p>The granting of fine-grained URI permissions does, however, require some
+cooperation with the content provider holding those URIs.  It is strongly
+recommended that content providers implement this facility, and declare that
+they support it through the
+{@link android.R.styleable#AndroidManifestProvider_grantUriPermissions
+android:grantUriPermissions} attribute or
+{@link android.R.styleable#AndroidManifestGrantUriPermission
+&lt;grant-uri-permissions&gt;} tag.</p>
+
+<p>More information can be found in the
+{@link android.content.Context#grantUriPermission Context.grantUriPermission()},
+{@link android.content.Context#revokeUriPermission Context.revokeUriPermission()}, and
+{@link android.content.Context#checkUriPermission Context.checkUriPermission()}
+methods.</p>
+

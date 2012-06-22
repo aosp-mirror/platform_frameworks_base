@@ -1,0 +1,581 @@
+page.title=Android Emulator
+parent.title=Tools
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#KeyMapping">Keyboard Commands</a></li>
+    <li><a href="#startup-options">Command Line Parameters</a></li>
+  </ol>
+
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}tools/devices/emulator.html">Using the Android Emulator</a></li>
+    <li><a href="{@docRoot}tools/devices/index.html">Managing Virtual Devices</a></li>
+  </ol>
+
+</div>
+</div>
+
+
+<p>The Android SDK includes a mobile device emulator &mdash; a virtual mobile device
+that runs on your computer. The emulator lets you develop and test
+Android applications without using a physical device.</p>
+
+<p>This document is a reference to the available command line options and the keyboard mapping to
+device keys.
+For a complete guide to using the Android Emulator, see
+<a href="{@docRoot}tools/devices/emulator.html">Using the Android Emulator</a>.
+
+
+<h2 id="KeyMapping">Keyboard Commands</h2>
+
+<p>Table 1 summarizes the mappings between the emulator keys and the keys of your keyboard.</p>
+
+<p class="table-caption"><strong>Table 1.</strong> Emulator keyboard mapping</p>
+<table  border="0" style="clear:left;">
+  <tr>
+    <th>Emulated Device Key </th>
+    <th>Keyboard Key </th>
+  </tr>
+  <tr>
+    <td>Home</td>
+    <td>HOME</td>
+  </tr>
+  <tr>
+    <td>Menu (left softkey)</td>
+    <td>F2 <em>or</em> Page-up button</td>
+  </tr>
+  <tr>
+    <td>Star (right softkey)</td>
+    <td>Shift-F2 <em>or </em>Page Down</td>
+  </tr>
+  <tr>
+    <td>Back</td>
+    <td>ESC</td>
+  </tr>
+  <tr>
+    <td>Call/dial button </td>
+    <td>F3</td>
+  </tr>
+  <tr>
+    <td>Hangup/end call button</td>
+    <td>F4</td>
+  </tr>
+  <tr>
+    <td>Search</td>
+    <td>F5 </td>
+  </tr>
+  <tr>
+    <td>Power button</td>
+    <td>F7 </td>
+  </tr>
+  <tr>
+    <td>Audio volume up button</td>
+    <td>KEYPAD_PLUS, Ctrl-F5</td>
+  </tr>
+
+  <tr>
+    <td>Audio volume down button</td>
+    <td>KEYPAD_MINUS, Ctrl-F6</td>
+  </tr>
+  <tr>
+    <td>Camera button</td>
+    <td>Ctrl-KEYPAD_5, Ctrl-F3</td>
+  </tr>
+  <tr>
+    <td>Switch to previous layout orientation (for example, portrait, landscape)</td>
+    <td>KEYPAD_7, Ctrl-F11</td>
+  </tr>
+  <tr>
+    <td>Switch to next layout orientation (for example, portrait, landscape)</td>
+    <td>KEYPAD_9, Ctrl-F12</td>
+  </tr>
+  <tr>
+    <td>Toggle cell networking on/off</td>
+    <td>F8</td>
+  </tr>
+  <tr>
+    <td>Toggle code profiling</td>
+    <td>F9 (only with <code>-trace</code> startup option)</td>
+  </tr>
+  <tr>
+    <td>Toggle fullscreen mode</td>
+    <td>Alt-Enter</td>
+  </tr>
+  <tr>
+    <td>Toggle trackball mode</td>
+    <td>F6</td>
+  </tr>
+  <tr>
+    <td>Enter trackball mode temporarily (while key is pressed)</td>
+    <td>Delete</td>
+  </tr>
+  <tr>
+    <td>DPad left/up/right/down</td>
+    <td>KEYPAD_4/8/6/2</td>
+  </tr>
+  <tr>
+    <td>DPad center click</td>
+    <td>KEYPAD_5</td>
+  </tr>
+  <tr>
+    <td>Onion alpha increase/decrease</td>
+    <td>KEYPAD_MULTIPLY(*) / KEYPAD_DIVIDE(/)</td>
+  </tr>
+</table>
+
+
+<h2 id="startup-options">Command Line Parameters</h2>
+
+<p>The emulator supports a variety of options that you can specify
+when launching the emulator, to control its appearance or behavior.
+Here's the command-line syntax of the options available to the {@code emulator} program:</p>
+
+<pre>emulator -avd &lt;avd_name&gt; [-&lt;option&gt; [&lt;value&gt;]] ... [-&lt;qemu args&gt;]</pre>
+
+<p class="table-caption"><strong>Table 2.</strong> Emulator command line parameters</p>
+<table>
+<tr>
+  <th width="10%" >Category</th>
+  <th width="20%" >Option</th>
+    <th width="30%" >Description</th>
+    <th width="40%" >Comments</th>
+</tr>
+
+<tr>
+  <td>AVD</td>
+  <td><code>-avd &lt;avd_name&gt;</code> or <br>
+      <code>@&lt;avd_name&gt;</code></td>
+  <td><strong>Required</strong>. Specifies the AVD to load for this emulator
+      instance.</td>
+  <td>You must create an AVD configuration before launching the emulator. For
+      information, see <a href="{@docRoot}tools/devices/managing-avds.html">Managing
+      AVDs with AVD Manager</a>.</td>
+<tr>
+  <td rowspan="7">Disk Images</td>
+  <td><code>-cache&nbsp;&lt;filepath&gt;</code></td>
+  <td>Use &lt;filepath&gt; as the working cache partition image. </td>
+  <td>An absolute or relative path to the current working directory.
+  If no cache file is specified, the emulator's default behavior is to use a temporary file instead.
+  <p>For more information on disk images, use <code>-help-disk-images</code>.</p>
+</td></tr>
+<tr>
+  <td><code>-data&nbsp;&lt;filepath&gt;</code></td>
+  <td>Use {@code &lt;filepath&gt;} as the working user-data disk image. </td>
+  <td>Optionally, you can specify a path relative to the current working directory.
+  If <code>-data</code> is not used, the emulator looks for a file named {@code userdata-qemu.img}
+  in the storage area of the AVD being used (see <code>-avd</code>).
+</td></tr>
+<!--
+<tr>
+  <td><code>-datadir &lt;dir&gt;</code></td>
+  <td>Search for the user-data disk image specified in <code>-data</code> in &lt;dir&gt;</td>
+  <td><code>&lt;dir&gt;</code> is a path relative to the current working directory.
+
+<p>If you do not specify <code>-datadir</code>, the emulator looks for the user-data image
+in the storage area of the AVD being used (see <code>-avd</code>)</p><p>For more information
+on disk images, use <code>-help-disk-images</code>.</p>
+</td></tr>
+-->
+<!--
+<tr>
+  <td><code>-image&nbsp;&lt;filepath&gt;</code></td>
+  <td>Use &lt;filepath&gt; as the system image.</td>
+  <td>Optionally, you can specify a path relative to the current working directory.
+   Default is &lt;system&gt;/system.img.</td>
+</tr>
+-->
+<tr>
+  <td><code>-initdata&nbsp;&lt;filepath&gt;</code></td>
+  <td>When resetting the user-data image (through <code>-wipe-data</code>), copy the contents
+  of this file to the new user-data disk image. By default, the emulator copies the <code>&lt;system&gt;/userdata.img</code>.</td>
+  <td>Optionally, you can specify a path relative to the current working directory. See also <code>-wipe-data</code>.
+  <p>For more information on disk images, use <code>-help-disk-images</code>.</p></td>
+</tr>
+<tr>
+  <td><code>-nocache</code></td>
+  <td>Start the emulator without a cache partition.</td>
+  <td>See also <code>-cache &lt;file&gt;</code>.</td>
+</tr>
+<tr>
+  <td><code>-ramdisk&nbsp;&lt;filepath&gt;</code></td>
+  <td>Use &lt;filepath&gt; as the ramdisk image.</td>
+  <td>Default value is <code>&lt;system&gt;/ramdisk.img</code>.
+  <p>Optionally, you can specify a path relative to the current working directory.
+  For more information on disk images, use <code>-help-disk-images</code>.</p>
+</td>
+</tr>
+<tr>
+  <td><code>-sdcard&nbsp;&lt;filepath&gt;</code></td>
+  <td>Use &lt;file&gt; as the SD card image.</td>
+  <td>Default value is <code>&lt;system&gt;/sdcard.img</code>.
+  <p>Optionally, you can specify a path relative to the current working directory. For more information on disk images, use <code>-help-disk-images</code>.</p>
+</td>
+</tr>
+<!--
+<tr>
+ <td><code>-system&nbsp;&lt;dirpath&gt;</code></td>
+ <td>Search for system, ramdisk and user data images in &lt;dir&gt;.</td>
+ <td><code>&lt;dir&gt;</code> is a directory path relative to the current
+  working directory.</td>
+</tr>
+-->
+<tr>
+  <td><code>-wipe-data</code></td>
+  <td>Reset the current user-data disk image (that is, the file specified by <code>-datadir</code> and
+  <code>-data</code>, or the default file). The emulator deletes all data from the user data image file,
+  then copies the contents of the file at <code>-inidata</code> data to the image file before starting.
+  </td>
+  <td>See also <code>-initdata</code>.
+  <p>For more information on disk images, use <code>-help-disk-images</code>.</p>
+</td>
+</tr>
+<tr>
+  <td rowspan="9">Debug</td>
+  <td><code>-debug &lt;tags&gt;</code></td>
+  <td>Enable/disable debug messages for the specified debug tags.</td>
+  <td><code>&lt;tags&gt;</code> is a space/comma/column-separated list of debug component names.
+  Use <code>-help-debug-tags</code> to print a list of debug component names that you can use. </td>
+</tr>
+<tr>
+  <td><code>-debug-&lt;tag&gt;</code></td>
+  <td>Enable/disable debug messages for the specified debug tag.</td>
+  <td rowspan="2">Use <code>-help-debug-tags</code> to print a list of debug component names that you can use in <code>&lt;tag&gt;</code>. </td>
+</tr>
+<tr>
+  <td><code>-debug-no-&lt;tag&gt;</code></td>
+  <td>Disable debug messages for the specified debug tag.</td>
+</tr>
+<tr>
+  <td><code>-logcat &lt;logtags&gt;</code></td>
+  <td>Enable logcat output with given tags.</td>
+  <td>If the environment variable ANDROID_LOG_TAGS is defined and not
+    empty, its value will be used to enable logcat output by default.</td>
+</tr>
+<tr>
+  <td><code>-shell</code></td>
+  <td>Create a root shell console on the current terminal.</td>
+  <td>You can use this command even if the adb daemon in the emulated system is broken.
+  Pressing Ctrl-c from the shell stops the emulator instead of the shell.</td>
+</tr>
+<tr>
+  <td><code>-shell-serial&nbsp;&lt;device&gt;</code></td>
+  <td>Enable the root shell (as in <code>-shell</code> and specify the QEMU character
+  device to use for communication with the shell.</td>
+  <td>&lt;device&gt; must be a QEMU device type. See the documentation for '-serial <em>dev</em>' at
+  <a href="http://wiki.qemu.org/download/qemu-doc.html">http://wiki.qemu.org/download/qemu-doc.html</a>
+  for a list of device types.
+
+<p>Here are some examples: </p>
+<ul>
+  <li><code>-shell-serial stdio</code> is identical to <code>-shell</code></li>
+  <li><code>-shell-serial tcp::4444,server,nowait</code> lets you communicate with the shell over TCP port 4444</li>
+  <li><code>-shell-serial fdpair:3:6</code> lets a parent process communicate with the shell using fds 3 (in) and 6 (out)</li>
+  <li><code>-shell-serial fdpair:0:1</code> uses the normal stdin and stdout fds, except that QEMU won't tty-cook the data.</li>
+  </ul>
+</td>
+</tr>
+<tr>
+  <td><code>-show-kernel &lt;name&gt;</code></td>
+  <td>Display kernel messages.</td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td><code>-trace &lt;name&gt;</code></td>
+  <td>Enable code profiling (press F9 to start), written to a specified file.</td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td><code>-verbose</code></td>
+  <td>Enable verbose output.</td>
+  <td>Equivalent to <code>-debug-init</code>.
+<p>You can define the default verbose output options used by emulator instances in the Android environment variable
+ANDROID_VERBOSE. Define the options you want to use in a comma-delimited list, specifying only the stem of each option:
+<code>-debug-&lt;tags&gt;.</code> </p>
+<p>Here's an example showing ANDROID_VERBOSE defined with the <code>-debug-init</code> and <code>-debug-modem</code> options:
+<p><code>ANDROID_VERBOSE=init,modem</code></p>
+<p>For more information about debug tags, use <code>&lt;-help-debug-tags&gt;</code>.</p>
+</td>
+</tr>
+<tr>
+  <td rowspan="6">Media</td>
+  <td><code>-audio &lt;backend&gt;</code></td>
+  <td>Use the specified audio backend.</td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td><code>-audio-in &lt;backend&gt;</code></td>
+  <td>Use the specified audio-input backend.</td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td><code>-audio-out &lt;backend&gt;</code></td>
+  <td>Use the specified audio-output backend.</td>
+  <td>&nbsp;</td>
+</tr>
+<!--<tr>
+  <td><code>-mic &lt;device or file&gt;</code></td>
+  <td>Use device or WAV file for audio input.</td>
+  <td>&nbsp;</td>
+</tr>
+-->
+<tr>
+  <td><code>-noaudio</code></td>
+  <td>Disable audio support in the current emulator instance.</td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td><code>-radio &lt;device&gt;</code></td>
+  <td>Redirect radio modem interface to a host character device.</td>
+  <td>&nbsp;</td></tr>
+<tr>
+  <td><code>-useaudio</code></td>
+  <td>Enable audio support in the current emulator instance.</td>
+  <td>Enabled by default. </td>
+</tr>
+
+<tr>
+  <td rowspan="7">Network</td>
+  <td><code>-dns-server &lt;servers&gt;</code></td>
+  <td>Use the specified DNS server(s). </td>
+  <td>The value of <code>&lt;servers&gt;</code> must be a comma-separated list of up to 4 DNS server names or
+  IP addresses.</td>
+</tr>
+<tr>
+  <td><code>-http-proxy &lt;proxy&gt;</code></td>
+  <td>Make all TCP connections through a specified HTTP/HTTPS proxy</td>
+  <td>The value of <code>&lt;proxy&gt;</code> can be one of the following:<br>
+     <code>http://&lt;server&gt;:&lt;port&gt;</code><br>
+     <code>http://&lt;username&gt;:&lt;password&gt;@&lt;server&gt;:&lt;port&gt;</code>
+  <p>The <code>http://</code> prefix can be omitted. If the <code>-http-proxy &lt;proxy&gt;</code> command is not supplied,
+  the emulator looks up the <code>http_proxy</code> environment variable and automatically uses any value matching
+  the <code>&lt;proxy&gt;</code> format described above.</p></td>
+</tr>
+<tr>
+  <td><code>-netdelay &lt;delay&gt;</code></td>
+  <td>Set network latency emulation to &lt;delay&gt;.</td>
+  <td>Default value is <code>none</code>. See the table in
+    <a href="{@docRoot}tools/devices/emulator.html#netdelay">Network Delay Emulation</a>
+    for supported <code>&lt;delay&gt;</code> values. </td>
+</tr>
+<tr>
+  <td><code>-netfast</code></td>
+  <td>Shortcut for <code>-netspeed full -netdelay none</code></td>
+  <td>&nbsp;</td></tr>
+<tr>
+  <td><code>-netspeed &lt;speed&gt;</code></td>
+  <td>Set network speed emulation to &lt;speed&gt;.</td>
+  <td>Default value is <code>full</code>. See the table in
+    <a href="{@docRoot}tools/devices/emulator.html#netspeed">Network Speed Emulation</a> for
+  supported <code>&lt;speed&gt;</code> values. </td>
+</tr>
+<tr>
+  <td><code>-port &lt;port&gt;</code></td>
+  <td>Set the console port number for this emulator instance to <code>&lt;port&gt;</code>.</td>
+  <td>The console port number must be an even integer between 5554 and 5584, inclusive. <code>&lt;port&gt;</code>+1
+  must also be free and will be reserved for ADB.</td>
+</tr>
+<tr>
+  <td><code>-report-console &lt;socket&gt;</code></td>
+  <td>Report the assigned console port for this emulator instance to a remote third party
+  before starting the emulation. </td>
+  <td><code>&lt;socket&gt;</code> must use one of these formats:
+
+<p><code>tcp:&lt;port&gt;[,server][,max=&lt;seconds&gt;]</code></br>
+<code>unix:&lt;port&gt;[,server][,max=&lt;seconds&gt;]</code></p>
+
+<p>Use <code>-help-report-console</code></p> to view more information about this topic. </td>
+</tr>
+<tr>
+  <td rowspan="10">System</td>
+  <td><code>-cpu-delay &lt;delay&gt;</code></td>
+  <td>Slow down emulated CPU speed by &lt;delay&gt; </td>
+  <td>Supported values for &lt;delay&gt; are integers between 0 and 1000.
+
+<p>Note that the &lt;delay&gt; does not correlate to clock speed or other absolute metrics
+&mdash; it simply represents an abstract, relative delay factor applied non-deterministically
+in the emulator. Effective performance does not always
+scale in direct relationship with &lt;delay&gt; values.</p>
+</td>
+</tr>
+<tr>
+  <td><code>-gps &lt;device&gt;</code></td>
+  <td>Redirect NMEA GPS to character device.</td>
+  <td>Use this command to emulate an NMEA-compatible GPS unit connected to
+  an external character device or socket. The format of <code>&lt;device&gt;</code> must be QEMU-specific
+  serial device specification. See the documentation for 'serial -dev' at
+  <a href="http://wiki.qemu.org/download/qemu-doc.html">http://wiki.qemu.org/download/qemu-doc.html</a>.
+</td>
+</tr>
+<tr>
+  <td><code>-nojni</code></td>
+  <td>Disable JNI checks in the Dalvik runtime.</td><td>&nbsp;</td></tr>
+<tr>
+  <td><code>-qemu</code></td>
+  <td>Pass arguments to the qemu emulator software.</td>
+  <td><p class="caution"><strong>Important:</strong> When using this option, make sure it is the
+  <em>last option</em> specified, since all options after it are interpretted as qemu-specific
+  options.</p></td></tr>
+<tr>
+  <td><code>-qemu -enable-kvm</code></td>
+  <td>Enable KVM acceleration of the emulator virtual machine.</td>
+  <td>This option is only effective when your system is set up to use
+  <a href="{@docRoot}tools/devices/emulator.html#vm-linux">KVM-based VM acceleration</a>.
+  You can optionally specify a memory size ({@code -m &lt;size&gt;}) for the VM, which should match
+  your emulator's memory size:</p>
+  {@code -qemu -m 512 -enable-kvm}<br>
+  {@code -qemu -m 1024 -enable-kvm}
+  </td></tr>
+<tr>
+  <td><code>-qemu -h</code></td>
+  <td>Display qemu help.</td>
+  <td></td></tr>
+<tr>
+  <td><code>-gpu on</code></td>
+  <td>Turn on graphics acceleration for the emulator.</td>
+  <td>This option is only available for emulators using a system image with API Level 15, revision 3
+  and higher. For more information, see
+  <a href="{@docRoot}tools/devices/emulator.html#accel-graphics">Using the Android
+  Emulator</a>.</td></tr>
+<tr>
+  <td><code>-radio &lt;device&gt;</code></td>
+  <td>Redirect radio mode to the specified character device.</td>
+  <td>The format of <code>&lt;device&gt;</code> must be QEMU-specific
+  serial device specification. See the documentation for 'serial -dev' at
+<a href="http://wiki.qemu.org/download/qemu-doc.html">http://wiki.qemu.org/download/qemu-doc.html</a>.
+</td>
+</tr>
+<tr>
+ <td><code>-timezone &lt;timezone&gt;</code></td>
+ <td>Set the timezone for the emulated device to &lt;timezone&gt;, instead of the host's timezone.</td>
+ <td><code>&lt;timezone&gt;</code> must be specified in zoneinfo format. For example:
+<p>"America/Los_Angeles"<br>
+"Europe/Paris"</p>
+</td>
+</tr>
+<tr>
+ <td><code>-version</code></td>
+ <td>Display the emulator's version number.</td>
+ <td>&nbsp;</td>
+</tr>
+<tr>
+  <td rowspan="12">UI</td>
+  <td><code>-dpi-device &lt;dpi&gt;</code></td>
+  <td>Scale the resolution of the emulator to match the screen size
+  of a physical device.</td>
+  <td>The default value is 165. See also <code>-scale</code>.</td>
+</tr>
+<tr>
+  <td><code>-no-boot-anim</code></td>
+  <td>Disable the boot animation during emulator startup.</td>
+  <td>Disabling the boot animation can speed the startup time for the emulator.</td>
+</tr>
+<tr>
+  <td><code>-no-window</code></td>
+  <td>Disable the emulator's graphical window display.</td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td><code>-scale &lt;scale&gt;</code></td>
+  <td>Scale the emulator window. </td>
+  <td><code>&lt;scale&gt;</code> is a number between 0.1 and 3 that represents the desired scaling factor. You can
+  also specify scale as a DPI value if you add the suffix "dpi" to the scale value. A value of "auto"
+  tells the emulator to select the best window size.</td>
+</tr>
+<tr>
+  <td><code>-raw-keys</code></td>
+  <td>Disable Unicode keyboard reverse-mapping.</td>
+  <td>&nbsp;</td></tr>
+<tr>
+  <td><code>-noskin</code></td>
+  <td>Don't use any emulator skin.</td>
+  <td>&nbsp;</td></tr>
+<tr>
+  <td><code>-keyset &lt;file&gt;</code></td>
+  <td>Use the specified keyset file instead of the default.</td>
+  <td>The keyset file defines the list of key bindings between the emulator and the host keyboard.
+  For more information, use <code>-help-keyset</code> to print information about this topic.
+</td>
+</tr>
+<tr>
+  <td><code>-onion &lt;image&gt;</code></td>
+  <td>Use overlay image over screen.</td>
+  <td>No support for JPEG. Only PNG is supported.</td></tr>
+<tr>
+  <td><code>-onion-alpha &lt;percent&gt;</code></td>
+  <td>Specify onion skin translucency  value (as percent).
+  <td>Default is 50.</td>
+</tr>
+<tr>
+  <td><code>-onion-rotation &lt;position&gt;</code></td>
+  <td>Specify onion skin rotation.
+  <td><code>&lt;position&gt;</code> must be one of the values 0, 1, 2, 3.</td>
+</tr>
+<tr>
+  <td><code>-skin &lt;skinID&gt;</code></td>
+  <td>This emulator option is deprecated. </td>
+  <td>Please set skin options using AVDs, rather than by using this emulator
+option. Using this option may yield unexpected and in some cases misleading
+results, since the density with which to render the skin may not be defined.
+AVDs let you associate each skin with a default density and override the default
+as needed. For more information, see <a
+href="{@docRoot}tools/devices/managing-avds.html">Managing Virtual Devices
+with AVD Manager</a>.
+</td>
+</tr>
+<tr>
+  <td><code>-skindir &lt;dir&gt;</code></td>
+  <td>This emulator option is deprecated. </td>
+  <td>See comments for <code>-skin</code>, above.</td>
+</tr>
+<tr>
+  <td rowspan="9">Help</td>
+  <td><code>-help</code></td>
+  <td>Print a list of all emulator options.</td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td><code>-help-all</code></td>
+  <td>Print help for all startup options.</td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td><code>-help-&lt;option&gt;</code></td>
+  <td>Print help for a specific startup option.</td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td><code>-help-debug-tags</code></td>
+  <td>Print a list of all tags for <code>-debug &lt;tags&gt;</code>.</td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td><code>-help-disk-images</code></td>
+  <td>Print help for using emulator disk images.</td>
+  <td>&nbsp;</td>
+ </tr>
+<tr>
+  <td><code>-help-environment</code></td>
+  <td>Print help for emulator environment variables.</td>
+  <td>&nbsp;</td>s
+</tr><tr>
+  <td><code>-help-keys</code></td>
+  <td>Print the current mapping of keys.</td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td><code>-help-keyset-file</code></td>
+  <td>Print help for defining a custom key mappings file.</td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td><code>-help-virtual-device</code></td>
+  <td>Print help for Android Virtual Device usage.</td>
+  <td>&nbsp;</td>
+</tr>
+</table>

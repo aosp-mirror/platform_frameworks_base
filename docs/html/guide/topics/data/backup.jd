@@ -47,7 +47,7 @@ data onto the new device</li>
 
   <h2>See also</h2>
   <ol>
-    <li><a href="{@docRoot}guide/developing/tools/bmgr.html">{@code bmgr} tool</a></li>
+    <li><a href="{@docRoot}tools/help/bmgr.html">{@code bmgr} tool</a></li>
   </ol>
 
 </div>
@@ -316,7 +316,7 @@ backup for all applications that have requested a backup since the last backup w
 
 <p class="note"><strong>Tip:</strong> While developing your application, you can initiate an
 immediate backup operation from the Backup Manager with the <a
-href="{@docRoot}guide/developing/tools/bmgr.html">{@code bmgr} tool</a>.</p>
+href="{@docRoot}tools/help/bmgr.html">{@code bmgr} tool</a>.</p>
 
 <p>When the Backup Manager calls your {@link
 android.app.backup.BackupAgent#onBackup(ParcelFileDescriptor,BackupDataOutput,ParcelFileDescriptor)
@@ -460,7 +460,7 @@ android.app.backup.BackupManager#requestRestore(RestoreObserver) requestRestore(
 href="#RequestingRestore">Requesting restore</a> for more information).</p>
 
 <p class="note"><strong>Note:</strong> While developing your application, you can also request a
-restore operation with the <a href="{@docRoot}guide/developing/tools/bmgr.html">{@code bmgr}
+restore operation with the <a href="{@docRoot}tools/help/bmgr.html">{@code bmgr}
 tool</a>.</p>
 
 <p>When the Backup Manager calls your {@link
@@ -863,7 +863,7 @@ onBackup()}.</p>
 
 <p class="note"><strong>Note:</strong> While developing your application, you can request a
 backup and initiate an immediate backup operation with the <a
-href="{@docRoot}guide/developing/tools/bmgr.html">{@code bmgr}
+href="{@docRoot}tools/help/bmgr.html">{@code bmgr}
 tool</a>.</p>
 
 
@@ -878,7 +878,7 @@ android.app.backup.BackupAgent#onRestore(BackupDataInput,int,ParcelFileDescripto
 implementation, passing the data from the current set of backup data.</p>
 
 <p class="note"><strong>Note:</strong> While developing your application, you can request a
-restore operation with the <a href="{@docRoot}guide/developing/tools/bmgr.html">{@code bmgr}
+restore operation with the <a href="{@docRoot}tools/help/bmgr.html">{@code bmgr}
 tool</a>.</p>
 
 
@@ -886,7 +886,7 @@ tool</a>.</p>
 
 <p>Once you've implemented your backup agent, you can test the backup and restore functionality
 with the following procedure, using <a
-href="{@docRoot}guide/developing/tools/bmgr.html">{@code bmgr}</a>.</p>
+href="{@docRoot}tools/help/bmgr.html">{@code bmgr}</a>.</p>
 
 <ol>
   <li>Install your application on a suitable Android system image

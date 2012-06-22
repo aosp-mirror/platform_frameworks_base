@@ -1,0 +1,165 @@
+page.title=Building and Running from Eclipse with ADT
+parent.title=Building and Running
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+    <div id="qv">
+      <h2>In this document</h2>
+
+      <ol>
+        <li><a href="#RunningOnEmulatorEclipse">Running on an Emulator</a></li>
+
+        <li><a href="#RunningOnDeviceEclipse">Running on a Device</a></li>
+
+        <li><a href="#RunConfig">Creating a Run Configuration</a></li>
+      </ol>
+    </div>
+  </div>
+
+  <p>Eclipse and ADT provide an environment where most of the details of the build process are
+  hidden from you. By default, the build process constantly runs in the background as you make
+  changes to your project.</p>
+
+  <p>When Eclipse automatically builds your application, it enables debugging and signs the
+  <code>.apk</code> with a debug key, by default. When you run the application,
+  Eclipse invokes ADB and installs your application to a device or emulator, so you do not have to
+  manually perform these tasks. Since most of the build process is taken care of by Eclipse, the
+  following topics show you how to run an application, which will automatically build your
+  application as well.</p>
+
+  <p>To distribute your application, however, you must build your application in release mode and sign the
+  <code>.apk</code> file with your own private key.</p>
+  
+   <p>This document shows you how to run your application on an emulator or a real device 
+   from Eclipse&mdash;all of which is done using the debug version of your application. 
+   For more information about how to sign your application with a private key for release, see <a href=
+  "{@docRoot}tools/publishing/app-signing.html#ExportWizard">Signing Your Applications</a></p>
+
+  <h2 id="RunningOnEmulatorEclipse">Running on the emulator</h2>
+
+  <p>Before you can run your application on the Android Emulator, you must <a href=
+  "{@docRoot}tools/devices/managing-avds.html">create an AVD</a>.</p>
+
+  <p>To run (or debug) your application, select <strong>Run</strong> &gt; <strong>Run</strong> (or
+  <strong>Run</strong> &gt; <strong>Debug</strong>) from the Eclipse menu bar. The ADT plugin will
+  automatically create a default run configuration for the project. Eclipse will then perform the
+  following:</p>
+
+  <ol>
+    <li>Compile the project (if there have been changes since the last build).</li>
+
+    <li>Create a default run configuration (if one does not already exist for the project).</li>
+
+    <li>Install and start the application on an emulator (or device), based on the Deployment
+    Target defined by the run configuration.
+
+      <p>By default, Android run configurations use an "automatic target" mode for selecting a
+      device target. For information on how automatic target mode selects a deployment target, see
+      <a href="#AutoAndManualTargetModes">Automatic and manual target modes</a> below.</p>
+    </li>
+  </ol>
+
+  <p>If you run the application with the Debug option, the application will start in the "Waiting For Debugger" mode. Once the debugger
+  is attached, Eclipse opens the Debug perspective and starts the application's main activity. Otherwise, if you run the
+  application with the normal Run option, Eclipse installs the application on the device and launches the main activity.</p>
+
+  <p>To set or change the run configuration used for your project, use the run configuration
+  manager. See the section below about <a href="#RunConfig">Creating a Run Configuration</a> for more information.</p>
+
+  <p>Be certain to create multiple AVDs upon which to test your application. You should have one
+  AVD for each platform and screen type with which your application is compatible. For instance, if
+  your application compiles against the Android 1.5 (API Level 3) platform, you should create an
+  AVD for each platform equal to and greater than 1.5 and an AVD for each <a href=
+  "{@docRoot}guide/practices/screens_support.html">screen type</a> you support, then test your
+  application on each one.</p>
+
+  <h2 id="RunningOnDeviceEclipse">Running on a device</h2>
+
+  <p>Before you can run your application on a device, you must perform some basic setup for your
+  device:</p>
+
+  <ul>
+    <li>Ensure that your application is debuggable by setting the
+    <code>android:debuggable</code> attribute of the <code>&lt;application&gt;</code>
+    element to <code>true</code>. As of ADT 8.0, this is done by default when you build in debug mode.</li>
+
+    <li>Enable USB Debugging on your device. You can find the setting on most Android devices by
+    going to <strong>Settings > Applications > Development > USB debugging</strong>.</li>
+
+    <li>Ensure that your development computer can detect your device when connected via USB</li>
+  </ul>
+
+  <p>Read <a href="{@docRoot}tools/device.html">Using Hardware Devices</a>
+  for more information.</p>
+
+  <p>Once set up and your device is connected via USB, install your application on the device by
+  selecting <strong>Run</strong> &gt; <strong>Run</strong> (or <strong>Run</strong> &gt;
+  <strong>Debug</strong>) from the Eclipse menu bar.</p>
+
+  <h2 id="RunConfig">Creating a Run Configuration</h2>
+
+  <p>The run configuration specifies the project to run, the Activity to start, the emulator or
+  connected device to use, and so on. When you first run a project as an <em>Android
+  Application</em>, ADT will automatically create a run configuration. The default run
+  configuration will launch the default project Activity and use automatic target mode for device
+  selection (with no preferred AVD). If the default settings don't suit your project, you can
+  customize the run configuration or even create a new one.</p>
+
+  <p>To create or modify a run configuration, refer to the Eclipse documentation on how to create Run configurations.
+  The following steps highlight the important things you need to do for an Android project:</p>
+
+  <ol>
+    <li>Open the run configuration manager from the Run Menu.</li>
+
+    <li>Expand the <strong>Android Application</strong> item and create a new configuration or open
+    an existing one.
+    </li>
+
+    <li>With the Run Configuration selected, adjust your desired run configuration settings:
+      <ul>
+      <li>In the Android tab, specify the Project and Activity to launch.
+      </li>
+      <li><p>In the Target tab, consider whether you'd like to use Manual or Automatic mode when
+      selecting an AVD to run your application. See the following section on <a href=
+      "#AutoAndManualTargetModes">Automatic and manual target modes</a>).</p>
+
+      <p>You can specify any emulator options to the Additional Emulator Command Line Options
+      field. For example, you could add <code>-scale 96dpi</code> to scale the AVD's screen to an
+      accurate size, based on the dpi of your computer monitor. For a full list of emulator
+      options, see the <a href="{@docRoot}tools/help/emulator.html">Android
+      Emulator</a> document.</p>
+      </li>
+      </ul>
+    </li>
+  </ol>
+
+  <h4 id="AutoAndManualTargetModes">Automatic and manual target modes</h4>
+
+  <p>By default, a run configuration uses the <strong>automatic</strong> target mode in order to
+  select an AVD. In this mode, ADT will select an AVD for the application in the following
+  manner:</p>
+
+  <ol>
+    <li>If there's a device or emulator already running and its AVD configuration meets the
+    requirements of the application's build target, the application is installed and run upon
+    it.</li>
+
+    <li>If there's more than one device or emulator running, each of which meets the requirements
+    of the build target, a "device chooser" is shown to let you select which device to use.</li>
+
+    <li>If there are no devices or emulators running that meet the requirements of the build
+    target, ADT looks at the available AVDs. If there is an AVD that matches the build target of the project,
+    ADT chooses that AVD. If the AVD versions are newer than the build target of the project, ADT chooses
+    the oldest possible version of an AVD that meets the project's build target requirement.</li>
+
+    <li>If there are no suitable AVDs, the application is not installed a console error warning tells
+    you that there is no existing AVD that meets the build target requirements.</li>
+  </ol>
+
+  <p>However, if a "preferred AVD" is selected in the run configuration, then the application will
+  <em>always</em> be deployed to that AVD. If it's not already running, then a new emulator will be
+  launched.</p>
+
+  <p>If your run configuration uses <strong>manual</strong> mode, then the "device chooser" is
+  presented every time that your application is run, so that you can select which AVD to use.</p>

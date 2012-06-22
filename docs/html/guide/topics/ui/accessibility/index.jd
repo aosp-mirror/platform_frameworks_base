@@ -47,7 +47,7 @@ Accessible</a></strong>
   <dd>Development practices and API features to ensure your application is accessible to users with
 disabilities.</dd>
 
-  <dt><strong><a href="{@docRoot}guide/topics/ui/accessibility/service.html">Building Accessibility
+  <dt><strong><a href="{@docRoot}guide/topics/ui/accessibility/services.html">Building Accessibility
 Services</a></strong>
   </dt>
   <dd>How to use API features to build services that make other applications more accessible for

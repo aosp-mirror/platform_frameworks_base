@@ -19,9 +19,9 @@ page.title=その他の統合開発環境
 
   <h2>関連項目</h2>
   <ol>
-    <li><a href="{@docRoot}guide/developing/tools/othertools.html#android">android ツール</a></li>
-    <li><a href="{@docRoot}guide/developing/tools/emulator.html">Android Emulator</a></li>
-    <li><a href="{@docRoot}guide/developing/tools/adb.html">Android Debug Bridge</a></li>
+    <li><a href="{@docRoot}tools/othertools.html#android">android ツール</a></li>
+    <li><a href="{@docRoot}tools/help/emulator.html">Android Emulator</a></li>
+    <li><a href="{@docRoot}tools/help/adb.html">Android Debug Bridge</a></li>
   </ol>
 </div>
 </div>
@@ -36,11 +36,11 @@ page.title=その他の統合開発環境
 <p>Eclipse 以外の統合開発環境やエディタで開発する際には、次の Android SDK ツールについて知っておく必要があります:</p>
 
 <dl>
-  <dt><a href="{@docRoot}guide/developing/tools/othertools.html#android">android</a></dt>
+  <dt><a href="{@docRoot}tools/othertools.html#android">android</a></dt>
     <dd>Android プロジェクトの作成/更新、AVD の作成/移動/削除のために使用します。</dd>
-  <dt><a href="{@docRoot}guide/developing/tools/emulator.html">Android Emulator</a></dt>
+  <dt><a href="{@docRoot}tools/help/emulator.html">Android Emulator</a></dt>
     <dd>Android のエミュレーション プラットフォームで Android アプリケーションを実行するために使用します。</dd>
-  <dt><a href="{@docRoot}guide/developing/tools/adb.html">Android Debug Bridge</a></dt>
+  <dt><a href="{@docRoot}tools/help/adb.html">Android Debug Bridge</a></dt>
     <dd>エミュレータまたは接続先の端末とのインターフェースとして使用します（アプリケーションのインストール、端末のシェル、コマンドの実行などに使用）。
     </dd>
 </dl>
@@ -109,7 +109,7 @@ android create project \
   <li><code>tests/</code> - テスト用に、上記のすべての複製が含まれます。</li>
 </ul>
 
-<p>プロジェクトを作成すると、開発を始める準備ができます。開発のために、プロジェクト フォルダをどこにでも移動できますが、アプリケーションをエミュレータに送信するために(方法については後述します)、SDK の <code>tools/</code> ディレクトリにある <a href="{@docRoot}guide/developing/tools/adb.html">Android Debug Bridge</a>（adb）を使用する必要があります。そのためにプロジェクト ソリューションと <code>tools/</code> フォルダ間でアクセスする必要があります。</p>
+<p>プロジェクトを作成すると、開発を始める準備ができます。開発のために、プロジェクト フォルダをどこにでも移動できますが、アプリケーションをエミュレータに送信するために(方法については後述します)、SDK の <code>tools/</code> ディレクトリにある <a href="{@docRoot}tools/help/adb.html">Android Debug Bridge</a>（adb）を使用する必要があります。そのためにプロジェクト ソリューションと <code>tools/</code> フォルダ間でアクセスする必要があります。</p>
 
 <p class="warning"><strong>注:</strong> SDK ディレクトリは移動させないでください。移動するとビルド スクリプトが機能しなくなります（ビルド スクリプトをもう一度機能させるには、手動でスクリプトを更新して、SDK の新しいロケーションを反映させる必要があります）。</p>
 
@@ -140,7 +140,7 @@ android update project --target 2 --path ./myProject
 
 <p>Android のビルド ツールを使用すると、ビルド時にデバッグキーを使用して .apk ファイルに自動的に署名できるので、スムーズな開発が可能です。つまり、独自の非公開キーを生成しなくても、アプリケーションをコンパイルして、エミュレータにインストールすることができます。ただし、アプリケーションを公開する場合は、SDK ツールが生成したデバッグ キーではなく、独自の非公開キーを使用してアプリケーションに署名する<strong>必要があります</strong>。 </p>
 
-<p><a href="{@docRoot}guide/publishing/app-signing.html">アプリケーションへの署名</a>をご覧ください。Android でのアプリケーションへの署名と、Android アプリケーション デベロッパーにとっての署名の意味について説明しています。</p>
+<p><a href="{@docRoot}tools/publishing/app-signing.html">アプリケーションへの署名</a>をご覧ください。Android でのアプリケーションへの署名と、Android アプリケーション デベロッパーにとっての署名の意味について説明しています。</p>
 
 
 
@@ -150,7 +150,7 @@ android update project --target 2 --path ./myProject
 
 <p>デバッグ モードとリリース モードのどちらでビルドしているかに関係なく、プロジェクトをコンパイルし、ビルドするには Ant ツールが必要です。これにより、エミュレータや端末にインストールする .apk ファイルが作成されます。デバッグ モードでビルドすると、.apk ファイルは SDK ツールによりデバッグ キーを使用して自動的に署名されるので、インストールの準備がすぐに整います（ただし、エミュレータまたは接続された開発用端末上にのみインストールできます）。リリース モードでビルドされた .apk ファイルは署名されないので、Keytool と Jarsigner を使って、独自の非公開キーで手動で署名する必要があります。<em></em></p>
 
-<p><a href="{@docRoot}guide/publishing/app-signing.html">アプリケーションへの署名</a>の内容をよく理解する必要があります。また、アプリケーションをリリースしてエンドユーザーと共有することを計画している場合は非常に重要です。「アプリケーションへの署名」では、非公開キーを生成し、それを使用して .apk ファイルに署名する手順について説明しています。ただし、開発を始めたばかりであれば、デバッグ モードでビルドすることにより、エミュレータまたは独自の開発用端末でアプリケーションをすぐに実行できます。</p>
+<p><a href="{@docRoot}tools/publishing/app-signing.html">アプリケーションへの署名</a>の内容をよく理解する必要があります。また、アプリケーションをリリースしてエンドユーザーと共有することを計画している場合は非常に重要です。「アプリケーションへの署名」では、非公開キーを生成し、それを使用して .apk ファイルに署名する手順について説明しています。ただし、開発を始めたばかりであれば、デバッグ モードでビルドすることにより、エミュレータまたは独自の開発用端末でアプリケーションをすぐに実行できます。</p>
 
 <p>Ant をお持ちでない場合は、<a href="http://ant.apache.org/">Apache Ant ホームページ</a>から入手してください。Ant をインストールして、必ず実行可能パスに置きます。Ant を実行する前に、「JAVA_HOME」環境変数を宣言して JDK のインストールパスを指定する必要があります。</p>
 
@@ -191,7 +191,7 @@ android update project --target 2 --path ./myProject
   </li>
 </ol>
 
-<p>リリース モードではアプリケーションを署名せずにビルドを行います。このため、アプリケーションをエンドユーザーに配布するためには、次に非公開キーを使用して署名を行う必要があります。この手順を行う方法については、<a href="{@docRoot}guide/publishing/app-signing.html">Signing Your Application</a>をご覧ください。</p>
+<p>リリース モードではアプリケーションを署名せずにビルドを行います。このため、アプリケーションをエンドユーザーに配布するためには、次に非公開キーを使用して署名を行う必要があります。この手順を行う方法については、<a href="{@docRoot}tools/publishing/app-signing.html">Signing Your Application</a>をご覧ください。</p>
 
 <p>非公開キーを使用してアプリケーションに署名すると、アプリケーションをエミュレータや端末にインストールできるようになります。これについては次の<a href="#Running">アプリケーションの実行</a>のセクションで説明します。次の方法でウェブ サーバーから端末にインストールすることもできます。署名した APK をウェブサイトにアップロードし、Android ウェブブラウザでその .apk の URL を読み込んでアプリケーションをダウンロードし、インストールを開始します（端末上では、[設定] &gt; [アプリケーション] を選択し、[提供元不明のアプリ] をオンにする必要があります）。<em></em></p>
 
@@ -200,7 +200,7 @@ android update project --target 2 --path ./myProject
 
 <p>端末のハードウェア以外でアプリケーションを実行する場合は、アプリケーションのインストール先となるエミュレータを起動する必要があります。Android エミュレータのインスタンスは、特有の端末構成に合わせて設定された、特定の Android プラットフォームを実行しています。このプラットフォームと構成は、Android 仮想デバイス（AVD）で定義されます。そのためエミュレータを起動する前に、AVD を定義しなくてはいけません。</p>
 
-<p>端末ハードウェアでアプリケーションを実行する場合は、代わりに、<a href="{@docRoot}guide/developing/device.html">端末のでの開発</a> をご覧ください。</p>
+<p>端末ハードウェアでアプリケーションを実行する場合は、代わりに、<a href="{@docRoot}tools/device.html">端末のでの開発</a> をご覧ください。</p>
 
 <ol>
   <li><strong>AVD の作成</strong>
@@ -253,9 +253,9 @@ id:2
 
 <p>上記で使用したツールについて詳しくは、次のドキュメントをご覧ください:</p>
 <ul>
-  <li><a href="{@docRoot}guide/developing/tools/othertools.html#android">android ツール</a></li>
-  <li><a href="{@docRoot}guide/developing/tools/emulator.html">Android Emulator</a></li>
-  <li><a href="{@docRoot}guide/developing/tools/adb.html">Android Debug Bridge</a> (ADB)</li>
+  <li><a href="{@docRoot}tools/othertools.html#android">android ツール</a></li>
+  <li><a href="{@docRoot}tools/help/emulator.html">Android Emulator</a></li>
+  <li><a href="{@docRoot}tools/help/adb.html">Android Debug Bridge</a> (ADB)</li>
 </ul>
 
 
@@ -265,7 +265,7 @@ id:2
 
 <p>Eclipse プラグインを使用すると、デバッガへの接続は自動化されます。しかし他の総合開発環境でも、デバッグ ポートをリッスンしてデバッグ情報を受信するように設定することができます:</p>
 <ol>
-    <li>総合開発環境とエミュレータ間のポート転送サービスとして機能する <strong><a href="{@docRoot}guide/developing/tools/ddms.html">Dalvik Debug Monitor Server（DDMS）</a>ツールを起動します。</strong></li>
+    <li>総合開発環境とエミュレータ間のポート転送サービスとして機能する <strong><a href="{@docRoot}tools/ddms.html">Dalvik Debug Monitor Server（DDMS）</a>ツールを起動します。</strong></li>
     <li><strong>エミュレータでオプションのデバッグ構成を設定します</strong>。設定には、デバッガ接続まで Activity のアプリケーション起動をブロックするオプションなどが含まれます。エミュレータでの CPU 使用率や画面の更新率の表示のように、これらのデバッグ用オプションの多くは DDMS がなくても使用できます。</li>
     <li><strong>総合開発環境を設定して、デバッグ用にポート 8700 に接続します。</strong><a href="{@docRoot}guide/developing/debug-tasks.html#ide-debug-port">総合開発環境を設定してデバッグ ポートに接続する</a> をご覧ください。 </li>
 </ol>

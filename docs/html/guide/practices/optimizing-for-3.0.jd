@@ -53,7 +53,7 @@ onclick="$('#naMessage').hide();$('#deprecatedSticker').show()" />
   <li><a href="tablets-and-handsets.html">Supporting Tablets
 and Handsets</a></li>
   <li><a
-href="{@docRoot}sdk/compatibility-library.html">Compatibility Library</a></li>
+href="{@docRoot}tools/extras/support-library.html">Compatibility Library</a></li>
   <li><a href="http://code.google.com/p/iosched/">Google I/O App source code</a></li>
 </ol>
 
@@ -108,7 +108,7 @@ SDK with the new platform:</p>
 SDK starter package now</a>.)</p>
 
 <ol>
-  <li><a href="{@docRoot}sdk/adding-components.html#launching">Launch the Android SDK
+  <li><a href="{@docRoot}sdk/exploring.html#launching">Launch the Android SDK
 Manager</a> and install the following:
     <ul>
       <li>SDK Platform Android 3.0</li>
@@ -280,15 +280,15 @@ use techniques such as reflection to check for the availability of certain APIs 
 to help you add features from Android 3.0 without requiring you to change your <a
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code android:minSdkVersion}</a>
 or build target, we're providing a static library called the <a
-href="{@docRoot}sdk/compatibility-library.html">Compatibility Library</a>
+href="{@docRoot}tools/extras/support-library.html">Compatibility Library</a>
 (downloadable from the Android SDK Manager).</p>
 <p>This library includes APIs for <a
-href="{@docRoot}guide/topics/fundamentals/fragments.html">fragments</a>, <a
-href="{@docRoot}guide/topics/fundamentals/loaders.html">loaders</a>, and some updated classes. By
+href="{@docRoot}guide/components/fragments.html">fragments</a>, <a
+href="{@docRoot}guide/components/loaders.html">loaders</a>, and some updated classes. By
 simply adding this library to your Android project, you can use these APIs in your application and
 remain compatible with Android 1.6. For information about how to get the library and start
 using it in your application, see the <a
-href="{@docRoot}sdk/compatibility-library.html">Compatibility Library</a> document.</p>
+href="{@docRoot}tools/extras/support-library.html">Compatibility Library</a> document.</p>
 </div>
 </div>
 
@@ -357,7 +357,7 @@ input events. Thus, instead of using one activity to select an article and anoth
 read the article, the user can select an article and read it all within the same activity.</p>
 
 <p>For more information, read the <a
-href="{@docRoot}guide/topics/fundamentals/fragments.html">Fragments</a> document.</p>
+href="{@docRoot}guide/components/fragments.html">Fragments</a> document.</p>
 
 
 <h3>Use new animation APIs for transitions</h3>
@@ -374,7 +374,7 @@ New transformations are made possible with a set of object properties that defin
 position, orientation, transparency and more.</p>
 
 <p>For more information, read the <a
-href="{@docRoot}guide/topics/graphics/animation.html">Property Animation</a> document.</p>
+href="{@docRoot}guide/topics/graphics/prop-animation.html">Property Animation</a> document.</p>
 
 
 <h3>Enable hardware acceleration</h3>
@@ -412,15 +412,15 @@ application, such as drag and drop APIs, new Bluetooth APIs, a system-wide clipb
 new graphics engine called Renderscript, and more.</p>
 
 <p>To learn more about the APIs mentioned above and more, see the <a
-href="{@docRoot}sdk/android-3.0.html">Android 3.0 Platform</a> document.</p>
+href="{@docRoot}about/versions/android-3.0.html">Android 3.0 Platform</a> document.</p>
 
 
 <h3>Look at some samples</h3>
 
 <p>Many of the new features and APIs that are described above and in the <a
-href="{@docRoot}sdk/android-3.0.html#api">Android 3.0 Platform</a> document also have accompanying
+href="{@docRoot}about/versions/android-3.0.html#api">Android 3.0 Platform</a> document also have accompanying
 samples that allow you to preview the effects and can help you understand how to use them. To get
-the samples, download them from the SDK repository <a href="{@docRoot}sdk/adding-components.html"
+the samples, download them from the SDK repository <a href="{@docRoot}sdk/exploring.html"
 >using the Android SDK Manager</a>. After downloading the samples ("Samples for SDK API
 11"), you can find them in <code>&lt;sdk_root&gt;/samples/android-11/</code>. The following list
 provides links to the browsable source code for some of the samples:</p>
@@ -474,7 +474,7 @@ android:targetSdkVersion}</a> set to {@code "4"} or higher, then the Android sys
 application's layout and assets to fit the current device screen, whether the device screen is
 smaller or larger than the one for which you originally designed your application. As such, you
 should always test your application on real or <a
-href="{@docRoot}guide/developing/devices/index.html">virtual devices</a> with various screen sizes
+href="{@docRoot}tools/devices/index.html">virtual devices</a> with various screen sizes
 and densities.</p>
 
 <p>Although we recommend that you design your application to function properly on multiple
@@ -641,7 +641,7 @@ orientation. When the user rotates the screen, the system restarts the current a
 onCreate()}) in immediate succession. You should design your activity to account for these changes
 in the lifecycle, so the activity can save and restore its state. You can learn about the
 necessary lifecycle callback methods and how to save and restore the activity state in the <a
-href="{@docRoot}guide/topics/fundamentals/activities.html#Lifecycle">Activities</a>
+href="{@docRoot}guide/components/activities.html#Lifecycle">Activities</a>
 document. If your activity state is more complex and cannot retain it using the normal
 lifecycle callback methods, you can use alternative techniques described in <a
 href="{@docRoot}guide/topics/resources/runtime-changes.html">Handling Runtime Changes</a>.</p>

@@ -1,0 +1,293 @@
+page.title=Testing In-app Billing
+parent.title=In-app Billing
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#billing-testing-static">Testing in-app purchases with static responses</a></li>
+    <li><a href="#billing-testing-real">Testing in-app purchases using your own product IDs</a></li>
+
+  </ol>
+  <h2>Downloads</h2>
+  <ol>
+    <li><a href="{@docRoot}guide/google/play/billing/billing_integrate.html#billing-download">Sample
+    Application</a></li>
+  </ol>
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}guide/google/play/billing/billing_overview.html">Overview of In-app
+    Billing</a></li>
+    <li><a href="{@docRoot}guide/google/play/billing/billing_integrate.html">Implementing In-app
+    Billing</a></li>
+    <li><a href="{@docRoot}guide/google/play/billing/billing_best_practices.html">Security and
+    Design</a></li>
+    <li><a href="{@docRoot}guide/google/play/billing/billing_admin.html">Administering In-app
+    Billing</a></li>
+    <li><a href="{@docRoot}guide/google/play/billing/billing_reference.html">In-app Billing
+    Reference</a></li>
+  </ol>
+</div>
+</div>
+
+<p>The Google Play publisher site provides several tools that help you test your in-app billing
+implementation before it is published. You can use these tools to create test accounts and purchase
+special reserved items that send static billing responses to your application.</p>
+
+<p>To test in-app billing in an application you must install the application on an Android-powered
+device. You cannot use the Android emulator to test in-app billing.  The device you use for testing
+must run a standard version of the Android 1.6 or later platform (API level 4 or higher), and have
+the most current version of the Google Play application installed. If a device is not running the
+most current Google Play application, your application won't be able to send in-app billing
+requests to Google Play. For general information about how to set up a device for use in
+developing Android applications, see <a href="{@docRoot}tools/device.html">Using Hardware
+Devices</a>.</p>
+
+<p>The following section shows you how to set up and use the in-app billing test tools.</p>
+
+<h2 id="billing-testing-static">Testing in-app purchases with static responses</h2>
+
+<p>We recommend that you first test your in-app billing implementation using static responses from
+Google Play. This enables you to verify that your application is handling the primary Google
+Play responses correctly and that your application is able to verify signatures correctly.</p>
+
+<p>To test your implementation with static responses, you make an in-app billing request using a
+special item that has a reserved product ID. Each reserved product ID returns a specific static
+response from Google Play. No money is transferred when you make in-app billing requests with the
+reserved product IDs. Also, you cannot specify the form of payment when you make a billing request
+with a reserved product ID. Figure 1 shows the checkout flow for the reserved item that has the
+product ID android.test.purchased.</p>
+
+<img src="{@docRoot}images/billing_test_flow.png" height="381" id="figure1" />
+<p class="img-caption">
+  <strong>Figure 1.</strong> Wallet flow for the special reserved item android.test.purchased.
+</p>
+
+<p>You do not need to list the reserved products in your application's product list. Google Play
+already knows about the reserved product IDs. Also, you do not need to upload your application to
+the publisher site to perform static response tests with the reserved product IDs. You can simply
+install your application on a device, log into the device, and make billing requests using the
+reserved product IDs.</p>
+
+<p>There are four reserved product IDs for testing static in-app billing responses:</p>
+
+<ul>
+  <li><strong>android.test.purchased</strong>
+    <p>When you make an in-app billing request with this product ID, Google Play responds as
+    though you successfully purchased an item. The response includes a JSON string, which contains
+    fake purchase information (for example, a fake order ID). In some cases, the JSON string is
+    signed and the response includes the signature so you can test your signature verification
+    implementation using these responses.</p>
+  </li>
+  <li><strong>android.test.canceled</strong>
+    <p>When you make an in-app billing request with this product ID Google Play responds as
+    though the purchase was canceled. This can occur when an error is encountered in the order
+    process, such as an invalid credit card, or when you cancel a user's order before it is
+    charged.</p>
+  </li>
+  <li><strong>android.test.refunded</strong>
+    <p>When you make an in-app billing request with this product ID, Google Play responds as
+    though the purchase was refunded. Refunds cannot be initiated through Google Play's in-app
+    billing service. Refunds must be initiated by you (the merchant). After you process a refund
+    request through your Google Wallet account, a refund message is sent to your application by
+    Google Play. This occurs only when Google Play gets notification from Google Wallet that
+    a refund has been made. For more information about refunds, see <a
+    href="{@docRoot}guide/google/play/billing/billing_overview.html#billing-action-notify">Handling
+    IN_APP_NOTIFY messages</a> and <a
+    href="http://www.google.com/support/androidmarket/bin/answer.py?answer=1153485">In-app Billing
+    Pricing</a>.</p>
+  </li>
+  <li><strong>android.test.item_unavailable</strong>
+    <p>When you make an in-app billing request with this product ID, Google Play responds as
+    though the item being purchased was not listed in your application's product list.</p>
+  </li>
+</ul>
+
+<p>In some cases, the reserved items may return signed static responses, which lets you test
+signature verification in your application. To test signature verification with the special reserved
+product IDs, you may need to set up <a
+href="{@docRoot}guide/google/play/billing/billing_admin.html#billing-testing-setup">test accounts</a> or
+upload your application as a unpublished draft application. Table 1 shows you the conditions under
+which static responses are signed.</p>
+
+<p class="table-caption" id="static-responses-table"><strong>Table 1.</strong>
+Conditions under which static responses are signed.</p>
+
+<table>
+<tr>
+<th>Application ever been published?</th>
+<th>Draft application uploaded and unpublished?</th>
+<th>User who is running the application</th>
+<th>Static response signature</th>
+</tr>
+
+<tr>
+<td>No</td>
+<td>No</td>
+<td>Any</td>
+<td>Unsigned</td>
+</tr>
+
+<tr>
+<td>No</td>
+<td>No</td>
+<td>Developer</td>
+<td>Signed</td>
+</tr>
+
+<tr>
+<td>Yes</td>
+<td>No</td>
+<td>Any</td>
+<td>Unsigned</td>
+</tr>
+
+<tr>
+<td>Yes</td>
+<td>No</td>
+<td>Developer</td>
+<td>Signed</td>
+</tr>
+
+<tr>
+<td>Yes</td>
+<td>No</td>
+<td>Test account</td>
+<td>Signed</td>
+</tr>
+
+<tr>
+<td>Yes</td>
+<td>Yes</td>
+<td>Any</td>
+<td>Signed</td>
+</tr>
+
+</table>
+
+<p>To make an in-app billing request with a reserved product ID, you simply construct a normal
+<code>REQUEST_PURCHASE</code> request, but instead of using a real product ID from your
+application's product list you use one of the reserved product IDs.</p>
+
+<p>To test your application using the reserved product IDs, follow these steps:</p>
+
+<ol>
+  <li><strong>Install your application on an Android-powered device.</strong>
+    <p>You cannot use the emulator to test in-app billing; you must install your application on a
+    device to test in-app billing.</p>
+    <p>To learn how to install an application on a device, see <a
+    href="{@docRoot}tools/building/building-cmdline.html#RunningOnDevice">Running on a
+    device</a>.</p>
+  </li>
+  <li><strong>Sign in to your device with your developer account.</strong>
+    <p>You do not need to use a test account if you are testing only with the reserved product
+    IDs.</p>
+  </li>
+  <li><strong>Verify that your device is running a supported version of the Google Play
+  application or the MyApps application.</strong>
+    <p>If your device is running Android 3.0, in-app billing requires version 5.0.12 (or higher) of
+    the MyApps application. If your device is running any other version of Android, in-app billing
+    requires version 2.3.4 (or higher) of the Google Play application. To learn how to check the
+    version of the Google Play application, see <a
+    href="http://market.android.com/support/bin/answer.py?answer=190860">Updating Google
+    Play</a>.</p>
+  </li>
+  <li><strong>Run your application and purchase the reserved product IDs.</strong></li>
+</ol>
+
+<p class="note"><strong>Note</strong>: Making in-app billing requests with the reserved product IDs
+overrides the usual Google Play production system. When you send an in-app billing request for a
+reserved product ID, the quality of service will not be comparable to the production
+environment.</p>
+
+<h2 id="billing-testing-real">Testing In-app Purchases Using Your Own Product IDs</h2>
+
+<p>After you finish your static response testing, and you verify that signature verification is
+working in your application, you can test your in-app billing implementation by making actual in-app
+purchases. Testing real in-app purchases enables you to test the end-to-end in-app billing
+experience, including the actual responses from Google Play and the actual checkout flow that
+users will experience in your application.</p>
+
+<p class="note"><strong>Note</strong>: You do not need to publish your application to do end-to-end
+testing. You only need to upload your application as a draft application to perform end-to-end
+testing.</p>
+
+<p>To test your in-app billing implementation with actual in-app purchases, you will need to
+register at least one test account on the Google Play publisher site. You cannot use your
+developer account to test the complete in-app purchase process because Google Wallet does not let
+you buy items from yourself. If you have not set up test accounts before, see <a
+href="{@docRoot}guide/google/play/billing/billing_admin.html#billing-testing-setup">Setting up test
+accounts</a>.</p>
+
+<p>Also, a test account can purchase an item in your product list only if the item is published. The
+application does not need to be published, but the item does need to be published.</p>
+
+<p>When you use a test account to purchase items, the test account is billed through Google Wallet
+and your Google Wallet Merchant account receives a payout for the purchase. Therefore, you may
+want to refund purchases that are made with test accounts, otherwise the purchases will show up as
+actual payouts to your merchant account.</p>
+
+<p>To test your in-app billing implementation with actual purchases, follow these steps:</p>
+
+<ol>
+  <li><strong>Upload your application as a draft application to the publisher site.</strong>
+    <p>You do not need to publish your application to perform end-to-end testing with real product
+    IDs; you only need to upload your application as a draft application. However, you must sign
+    your application with your release key before you upload it as a draft application. Also, the
+    version number of the uploaded application must match the version number of the application you
+    load to your device for testing. To learn how to upload an application to Google Play, see
+    <a href="http://market.android.com/support/bin/answer.py?answer=113469">Uploading
+    applications</a>.</p>
+  </li>
+  <li><strong>Add items to the application's product list.</strong>
+    <p>Make sure that you publish the items (the application can remain unpublished). See <a
+    href="{@docRoot}guide/google/play/billing/billing_admin.html#billing-catalog">Creating a product
+    list</a> to learn how to do this.</p>
+  </li>
+  <li><strong>Install your application on an Android-powered device.</strong>
+    <p>You cannot use the emulator to test in-app billing; you must install your application on a
+    device to test in-app billing.</p>
+    <p>To learn how to install an application on a device, see <a
+    href="{@docRoot}tools/building/building-cmdline.html#RunningOnDevice">Running on a
+    device</a>.</p>
+  </li>
+ <li><strong>Make one of your test accounts the primary account on your device.</strong>
+    <p>To perform end-to-end testing of in-app billing, the primary account on your device must be
+    one of the <a
+    href="{@docRoot}guide/google/play/billing/billing_admin.html#billing-testing-setup">test accounts</a>
+    that you registered on the Google Play site. If the primary account on your device is not a
+    test account, you must do a factory reset of the device and then sign in with one of your test
+    accounts. To perform a factory reset, do the following:</p>
+    <ol>
+      <li>Open Settings on your device.</li>
+      <li>Touch <strong>Privacy</strong>.</li>
+      <li>Touch <strong>Factory data reset</strong>.</li>
+      <li>Touch <strong>Reset phone</strong>.</li>
+      <li>After the phone resets, be sure to sign in with one of your test accounts during the
+      device setup process.</li>
+    </ol>
+  </li>
+  <li><strong>Verify that your device is running a supported version of the Google Play
+  application or the MyApps application.</strong>
+    <p>If your device is running Android 3.0, in-app billing requires version 5.0.12 (or higher) of
+    the MyApps application. If your device is running any other version of Android, in-app billing
+    requires version 2.3.4 (or higher) of the Google Play application. To learn how to check the
+    version of the Google Play application, see <a
+    href="http://market.android.com/support/bin/answer.py?answer=190860">Updating Google
+    Play</a>.</p>
+  </li>
+  <li><strong>Make in-app purchases in your application.</strong></li>
+</ol>
+
+<p class="note"><strong>Note:</strong> The only way to change the primary account on a device is to
+do a factory reset, making sure you log on with your primary account first.</p>
+
+<p>When you are finished testing your in-app billing implementation, you are ready to
+publish your application on Google Play. You can follow the normal steps for <a
+href="{@docRoot}tools/publishing/preparing.html">preparing</a>, <a
+href="{@docRoot}tools/publishing/app-signing.html">signing</a>, and <a
+href="{@docRoot}distribute/googleplay/publish/preparing.html">publishing on Google Play</a>.
+</p>
+

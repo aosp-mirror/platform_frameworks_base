@@ -50,7 +50,7 @@ TV screens are always in landscape orientation. Follow these tips to build lands
 <ul>
   <li>Put on-screen navigational controls on the left or right side of the screen and save the 
   vertical space for content.</li>
-  <li>Create UIs that are divided into sections, by using <a href="{@docRoot}guide/topics/fundamentals/fragments.html">Fragments</a> 
+  <li>Create UIs that are divided into sections, by using <a href="{@docRoot}guide/components/fragments.html">Fragments</a> 
   and use view groups like {@link android.widget.GridView} instead 
   of {@link android.widget.ListView} to make better use of the 
   horizontal screen space.</li>
@@ -157,7 +157,7 @@ UI quality).
 </p>
 
 <p>
-To get the best scaling results for images, provide them as <a href="{@docRoot}guide/developing/tools/draw9patch.html">
+To get the best scaling results for images, provide them as <a href="{@docRoot}tools/help/draw9patch.html">
 9-patch image</a> elements if possible.
 If you provide low quality or small images in your layouts, they will appear pixelated, fuzzy, or grainy. This 
 is not a good experience for the user. Instead, use high-quality images. 

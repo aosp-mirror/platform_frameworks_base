@@ -1,0 +1,640 @@
+page.title=Testing Fundamentals
+parent.title=Testing
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+  <h2>In this document</h2>
+  <ol>
+    <li>
+        <a href="#TestStructure">Test Structure</a>
+    </li>
+    <li>
+        <a href="#TestProjects">Test Projects</a>
+    </li>
+    <li>
+      <a href="#TestAPI">The Testing API</a>
+      <ol>
+        <li>
+          <a href="#JUnit">JUnit</a>
+        </li>
+        <li>
+          <a href="#Instrumentation">Instrumentation</a>
+        </li>
+        <li>
+            <a href="#TestCaseClasses">Test case classes</a>
+        </li>
+        <li>
+          <a href="#AssertionClasses">Assertion classes</a>
+        </li>
+        <li>
+          <a href="#MockObjectClasses">Mock object classes</a>
+        </li>
+      </ol>
+    </li>
+    <li>
+        <a href="#InstrumentationTestRunner">Running Tests</a>
+    </li>
+    <li>
+        <a href="#TestResults">Seeing Test Results</a>
+    </li>
+    <li>
+        <a href="#Monkeys">monkey and monkeyrunner</a>
+    </li>
+    <li>
+       <a href="#PackageNames">Working With Package Names</a>
+    </li>
+    <li>
+        <a href="#WhatToTest">What To Test</a>
+    </li>
+    <li>
+        <a href="#NextSteps">Next Steps</a>
+    </li>
+  </ol>
+  <h2>Key classes</h2>
+    <ol>
+      <li>{@link android.test.InstrumentationTestRunner}</li>
+      <li>{@link android.test}</li>
+      <li>{@link android.test.mock}</li>
+      <li>{@link junit.framework}</li>
+    </ol>
+  <h2>Related tutorials</h2>
+    <ol>
+        <li>
+            <a href="{@docRoot}tools/testing/activity_test.html">Activity Testing Tutorial</a>
+        </li>
+    </ol>
+  <h2>See also</h2>
+      <ol>
+        <li>
+          <a href="{@docRoot}tools/testing/testing_eclipse.html">
+          Testing from Eclipse with ADT</a>
+        </li>
+        <li>
+          <a href="{@docRoot}tools/testing/testing_otheride.html">
+          Testing from Other IDEs</a>
+        </li>
+        <li>
+          <a href="{@docRoot}tools/help/monkeyrunner_concepts.html">
+          monkeyrunner</a>
+        </li>
+        <li>
+     <a href="{@docRoot}tools/help/monkey.html">UI/Application Exerciser Monkey</a>
+        </li>
+      </ol>
+  </div>
+</div>
+<p>
+    The Android testing framework, an integral part of the development environment,
+    provides an architecture and powerful tools that help you test every aspect of your application
+    at every level from unit to framework.
+</p>
+<p>
+    The testing framework has these key features:
+</p>
+<ul>
+    <li>
+        Android test suites are based on JUnit. You can use plain JUnit to test a class that doesn't
+        call the Android API, or Android's JUnit extensions to test Android components. If you're
+        new to Android testing, you can start with general-purpose test case classes such as {@link
+        android.test.AndroidTestCase} and then go on to use more sophisticated classes.
+    </li>
+    <li>
+        The Android JUnit extensions provide component-specific test case classes. These classes
+        provide helper methods for creating mock objects and methods that help you control the
+        lifecycle of a component.
+    </li>
+    <li>
+        Test suites are contained in test packages that are similar to main application packages, so
+        you don't need to learn a new set of tools or techniques for designing and building tests.
+    </li>
+    <li>
+        The SDK tools for building and tests are available in Eclipse with ADT, and also in
+        command-line form for use with other IDES. These tools get information from the project of
+        the application under test and use this information to automatically create the build files,
+        manifest file, and directory structure for the test package.
+    </li>
+    <li>
+        The SDK also provides
+  <a href="{@docRoot}tools/help/monkeyrunner_concepts.html">monkeyrunner</a>, an API
+        testing devices with Python programs, and <a
+        href="{@docRoot}tools/help/monkey.html">UI/Application Exerciser Monkey</a>,
+        a command-line tool for stress-testing UIs by sending pseudo-random events to a device.
+    </li>
+</ul>
+<p>
+    This document describes the fundamentals of the Android testing framework, including the
+    structure of tests, the APIs that you use to develop tests, and the tools that you use to run
+    tests and view results. The document assumes you have a basic knowledge of Android application
+    programming and JUnit testing methodology.
+</p>
+<p>
+    The following diagram summarizes the testing framework:
+</p>
+<div style="width: 70%; margin-left:auto; margin-right:auto;">
+<a href="{@docRoot}images/testing/test_framework.png">
+    <img src="{@docRoot}images/testing/test_framework.png"
+        alt="The Android testing framework"/>
+</a>
+</div>
+<h2 id="TestStructure">Test Structure</h2>
+<p>
+    Android's build and test tools assume that test projects are organized into a standard
+    structure of tests, test case classes, test packages, and test projects.
+</p>
+<p>
+    Android testing is based on JUnit. In general, a JUnit test is a method whose
+    statements test a part of the application under test. You organize test methods into classes
+    called test cases (or test suites). Each test is an isolated test of an individual module in
+    the application under test. Each class is a container for related test methods, although it
+    often provides helper methods as well.
+</p>
+<p>
+    In JUnit, you build one or more test source files into a class file. Similarly, in Android you
+    use the SDK's build tools to build one or more test source files into class files in an
+    Android test package. In JUnit, you use a test runner to execute test classes. In Android, you
+    use test tools to load the test package and the application under test, and the tools then
+    execute an Android-specific test runner.
+</p>
+<h2 id="TestProjects">Test Projects</h2>
+<p>
+    Tests, like Android applications, are organized into projects.
+</p>
+<p>
+    A test project is a directory or Eclipse project in which you create the source code, manifest
+    file, and other files for a test package. The Android SDK contains tools for Eclipse with ADT
+    and for the command line that create and update test projects for you. The tools create the
+    directories you use for source code and resources and the manifest file for the test package.
+    The command-line tools also create the Ant build files you need.
+</p>
+<p>
+    You should always use Android tools to create a test project. Among other benefits,
+    the tools:
+</p>
+    <ul>
+        <li>
+            Automatically set up your test package to use
+            {@link android.test.InstrumentationTestRunner} as the test case runner. You must use
+            <code>InstrumentationTestRunner</code> (or a subclass) to run JUnit tests.
+        </li>
+        <li>
+            Create an appropriate name for the test package. If the application
+            under test has a package name of <code>com.mydomain.myapp</code>, then the
+            Android tools set the test package name to <code>com.mydomain.myapp.test</code>. This
+            helps you identify their relationship, while preventing conflicts within the system.
+        </li>
+        <li>
+            Automatically create the proper build files, manifest file, and directory
+            structure for the test project. This helps you to build the test package without
+            having to modify build files and sets up the linkage between your test package and
+            the application under test.
+            The
+        </li>
+    </ul>
+<p>
+    You can create a test project anywhere in your file system, but the best approach is to
+    add the test project so that its root directory <code>tests/</code> is at the same level
+    as the <code>src/</code> directory of the main application's project. This helps you find the
+    tests associated with an application. For example, if your application project's root directory
+    is <code>MyProject</code>, then you should use the following directory structure:
+</p>
+<pre class="classic no-pretty-print">
+  MyProject/
+      AndroidManifest.xml
+      res/
+          ... (resources for main application)
+      src/
+          ... (source code for main application) ...
+      tests/
+          AndroidManifest.xml
+          res/
+              ... (resources for tests)
+          src/
+              ... (source code for tests)
+</pre>
+<h2 id="TestAPI">The Testing API</h2>
+<p>
+    The Android testing API is based on the JUnit API and extended with a instrumentation
+    framework and Android-specific testing classes.
+</p>
+<h3 id="JUnit">JUnit</h3>
+<p>
+    You can use the JUnit {@link junit.framework.TestCase TestCase} class to do unit testing on
+    a class that doesn't call Android APIs. <code>TestCase</code> is also the base class for
+    {@link android.test.AndroidTestCase}, which you can use to test Android-dependent objects.
+    Besides providing the JUnit framework, AndroidTestCase offers Android-specific setup,
+    teardown, and helper methods.
+</p>
+<p>
+    You use the JUnit {@link junit.framework.Assert} class to display test results.
+    The assert methods compare values you expect from a test to the actual results and
+    throw an exception if the comparison fails. Android also provides a class of assertions that
+    extend the possible types of comparisons, and another class of assertions for testing the UI.
+    These are described in more detail in the section <a href="#AssertionClasses">
+    Assertion classes</a>
+</p>
+<p>
+    To learn more about JUnit, you can read the documentation on the
+    <a href="http://www.junit.org">junit.org</a> home page.
+    Note that the Android testing API supports JUnit 3 code style, but not JUnit 4. Also, you must
+    use Android's instrumented test runner {@link android.test.InstrumentationTestRunner} to run
+    your test case classes. This test runner is described in the
+    section <a href="#InstrumentationTestRunner">Running Tests</a>.
+</p>
+<h3 id="Instrumentation">Instrumentation</h3>
+<p>
+    Android instrumentation is a set of control methods or "hooks" in the Android system. These hooks
+    control an Android component independently of its normal lifecycle. They also control how
+    Android loads applications.
+</p>
+<p>
+    Normally, an Android component runs in a lifecycle determined by the system. For example, an
+    Activity object's lifecycle starts when the Activity is activated by an Intent. The object's
+    <code>onCreate()</code> method is called, followed by <code>onResume()</code>. When the user
+    starts another application, the <code>onPause()</code> method is called. If the Activity
+    code calls the <code>finish()</code> method, the <code>onDestroy()</code> method is called.
+    The Android framework API does not provide a way for your code to invoke these callback
+    methods directly, but you can do so using instrumentation.
+</p>
+<p>
+    Also, the system runs all the components of an application into the same
+    process. You can allow some components, such as content providers, to run in a separate process,
+    but you can't force an application to run in the same process as another application that is
+    already running.
+</p>
+<p>
+    With Android instrumentation, though, you can invoke callback methods in your test code.
+    This allows you to run through the lifecycle of a component step by step, as if you were
+    debugging the component. The following test code snippet demonstrates how to use this to
+    test that an Activity saves and restores its state:
+</p>
+<a name="ActivitySnippet"></a>
+<pre>
+    // Start the main activity of the application under test
+    mActivity = getActivity();
+
+    // Get a handle to the Activity object's main UI widget, a Spinner
+    mSpinner = (Spinner)mActivity.findViewById(com.android.example.spinner.R.id.Spinner01);
+
+    // Set the Spinner to a known position
+    mActivity.setSpinnerPosition(TEST_STATE_DESTROY_POSITION);
+
+    // Stop the activity - The onDestroy() method should save the state of the Spinner
+    mActivity.finish();
+
+    // Re-start the Activity - the onResume() method should restore the state of the Spinner
+    mActivity = getActivity();
+
+    // Get the Spinner's current position
+    int currentPosition = mActivity.getSpinnerPosition();
+
+    // Assert that the current position is the same as the starting position
+    assertEquals(TEST_STATE_DESTROY_POSITION, currentPosition);
+</pre>
+<p>
+    The key method used here is
+    {@link android.test.ActivityInstrumentationTestCase2#getActivity()}, which is a
+    part of the instrumentation API. The Activity under test is not started until you call this
+    method. You can set up the test fixture in advance, and then call this method to start the
+    Activity.
+</p>
+<p>
+    Also, instrumentation can load both a test package and the application under test into the
+    same process. Since the application components and their tests are in the same process, the
+    tests can invoke methods in the components, and modify and examine fields in the components.
+</p>
+<h3 id="TestCaseClasses">Test case classes</h3>
+<p>
+    Android provides several test case classes that extend {@link junit.framework.TestCase} and
+    {@link junit.framework.Assert} with Android-specific setup, teardown, and helper methods.
+</p>
+<h4 id="AndroidTestCase">AndroidTestCase</h4>
+<p>
+    A useful general test case class, especially if you are
+    just starting out with Android testing, is {@link android.test.AndroidTestCase}. It extends
+    both {@link junit.framework.TestCase} and {@link junit.framework.Assert}. It provides the
+    JUnit-standard <code>setUp()</code> and <code>tearDown()</code> methods, as well as
+    all of JUnit's Assert methods. In addition, it provides methods for testing permissions, and a
+    method that guards against memory leaks by clearing out certain class references.
+</p>
+<h4 id="ComponentTestCase">Component-specific test cases</h4>
+<p>
+    A key feature of the Android testing framework is its component-specific test case classes.
+    These address specific component testing needs with methods for fixture setup and
+    teardown and component lifecycle control. They also provide methods for setting up mock objects.
+    These classes are described in the component-specific testing topics:
+</p>
+<ul>
+    <li>
+        <a href="{@docRoot}tools/testing/activity_testing.html">Activity Testing</a>
+    </li>
+    <li>
+        <a href="{@docRoot}tools/testing/contentprovider_testing.html">
+        Content Provider Testing</a>
+    </li>
+    <li>
+        <a href="{@docRoot}tools/testing/service_testing.html">Service Testing</a>
+    </li>
+</ul>
+<p>
+    Android does not provide a separate test case class for BroadcastReceiver. Instead, test a
+    BroadcastReceiver by testing the component that sends it Intent objects, to verify that the
+    BroadcastReceiver responds correctly.
+</p>
+<h4 id="ApplicationTestCase">ApplicationTestCase</h4>
+<p>
+    You use the {@link android.test.ApplicationTestCase} test case class to test the setup and
+    teardown of {@link android.app.Application} objects. These objects maintain the global state of
+    information that applies to all the components in an application package. The test case can
+    be useful in verifying that the &lt;application&gt; element in the manifest file is correctly
+    set up. Note, however, that this test case does not allow you to control testing of the
+    components within your application package.
+</p>
+<h4 id="InstrumentationTestCase">InstrumentationTestCase</h4>
+<p>
+    If you want to use instrumentation methods in a test case class, you must use
+    {@link android.test.InstrumentationTestCase} or one of its subclasses. The
+    {@link android.app.Activity} test cases extend this base class with other functionality that
+    assists in Activity testing.
+</p>
+
+<h3 id="AssertionClasses">Assertion classes</h3>
+<p>
+    Because Android test case classes extend JUnit, you can use assertion methods to display the
+    results of tests. An assertion method compares an actual value returned by a test to an
+    expected value, and throws an AssertionException if the comparison test fails. Using assertions
+    is more convenient than doing logging, and provides better test performance.
+</p>
+<p>
+    Besides the JUnit {@link junit.framework.Assert} class methods, the testing API also provides
+    the {@link android.test.MoreAsserts} and {@link android.test.ViewAsserts} classes:
+</p>
+<ul>
+    <li>
+        {@link android.test.MoreAsserts} contains more powerful assertions such as
+        {@link android.test.MoreAsserts#assertContainsRegex}, which does regular expression
+        matching.
+    </li>
+    <li>
+        {@link android.test.ViewAsserts} contains useful assertions about Views. For example
+        it contains {@link android.test.ViewAsserts#assertHasScreenCoordinates} that tests if a View
+        has a particular X and Y position on the visible screen. These asserts simplify testing of
+        geometry and alignment in the UI.
+    </li>
+</ul>
+<h3 id="MockObjectClasses">Mock object classes</h3>
+<p>
+    To facilitate dependency injection in testing, Android provides classes that create mock system
+    objects such as {@link android.content.Context} objects,
+    {@link android.content.ContentProvider} objects, {@link android.content.ContentResolver}
+    objects, and {@link android.app.Service} objects. Some test cases also provide mock
+    {@link android.content.Intent} objects. You use these mocks both to isolate tests
+    from the rest of the system and to facilitate dependency injection for testing. These classes
+    are found in the packages {@link android.test} and {@link android.test.mock}.
+</p>
+<p>
+    Mock objects isolate tests from a running system by stubbing out or overriding
+    normal operations. For example, a {@link android.test.mock.MockContentResolver}
+    replaces the normal resolver framework with its own local framework, which is isolated
+    from the rest of the system. MockContentResolver also stubs out the
+    {@link android.content.ContentResolver#notifyChange(Uri, ContentObserver, boolean)} method
+    so that observer objects outside the test environment are not accidentally triggered.
+</p>
+<p>
+    Mock object classes also facilitate dependency injection by providing a subclass of the
+    normal object that is non-functional except for overrides you define. For example, the
+    {@link android.test.mock.MockResources} object provides a subclass of
+    {@link android.content.res.Resources} in which all the methods throw Exceptions when called.
+    To use it, you override only those methods that must provide information.
+</p>
+<p>
+    These are the mock object classes available in Android:
+</p>
+<h4 id="SimpleMocks">Simple mock object classes</h4>
+<p>
+    {@link android.test.mock.MockApplication}, {@link android.test.mock.MockContext},
+    {@link android.test.mock.MockContentProvider}, {@link android.test.mock.MockCursor},
+    {@link android.test.mock.MockDialogInterface}, {@link android.test.mock.MockPackageManager}, and
+    {@link android.test.mock.MockResources} provide a simple and useful mock strategy. They are
+    stubbed-out versions of the corresponding system object class, and all of their methods throw an
+    {@link java.lang.UnsupportedOperationException} exception if called. To use them, you override
+    the methods you need in order to provide mock dependencies.
+</p>
+<p class="Note"><strong>Note:</strong>
+    {@link android.test.mock.MockContentProvider}
+    and {@link android.test.mock.MockCursor} are new as of API level 8.
+</p>
+<h4 id="ResolverMocks">Resolver mock objects</h4>
+<p>
+    {@link android.test.mock.MockContentResolver} provides isolated testing of content providers by
+    masking out the normal system resolver framework. Instead of looking in the system to find a
+    content provider given an authority string, MockContentResolver uses its own internal table. You
+    must explicitly add providers to this table using
+    {@link android.test.mock.MockContentResolver#addProvider(String,ContentProvider)}.
+</p>
+<p>
+    With this feature, you can associate a mock content provider with an authority. You can create
+    an instance of a real provider but use test data in it. You can even set the provider for an
+    authority to <code>null</code>. In effect, a MockContentResolver object isolates your test
+    from providers that contain real data. You can control the
+    function of the provider, and you can prevent your test from affecting real data.
+</p>
+<h3 id="ContextMocks">Contexts for testing</h3>
+<p>
+    Android provides two Context classes that are useful for testing:
+</p>
+<ul>
+    <li>
+        {@link android.test.IsolatedContext} provides an isolated {@link android.content.Context},
+        File, directory, and database operations that use this Context take place in a test area.
+        Though its functionality is limited, this Context has enough stub code to respond to
+        system calls.
+        <p>
+            This class allows you to test an application's data operations without affecting real
+            data that may be present on the device.
+        </p>
+    </li>
+    <li>
+        {@link android.test.RenamingDelegatingContext} provides a Context in which
+        most functions are handled by an existing {@link android.content.Context}, but
+        file and database operations are handled by a {@link android.test.IsolatedContext}.
+        The isolated part uses a test directory and creates special file and directory names.
+        You can control the naming yourself, or let the constructor determine it automatically.
+        <p>
+            This object provides a quick way to set up an isolated area for data operations,
+            while keeping normal functionality for all other Context operations.
+        </p>
+    </li>
+</ul>
+<h2 id="InstrumentationTestRunner">Running Tests</h2>
+<p>
+    Test cases are run by a test runner class that loads the test case class, set ups,
+    runs, and tears down each test. An Android test runner must also be instrumented, so that
+    the system utility for starting applications can control how the test package
+    loads test cases and the application under test. You tell the Android platform
+    which instrumented test runner to use by setting a value in the test package's manifest file.
+</p>
+<p>
+    {@link android.test.InstrumentationTestRunner} is the primary Android test runner class. It
+    extends the JUnit test runner framework and is also instrumented. It can run any of the test
+    case classes provided by Android and supports all possible types of testing.
+</p>
+<p>
+    You specify <code>InstrumentationTestRunner</code> or a subclass in your test package's
+    manifest file, in the 
+<code><a href="{@docRoot}guide/topics/manifest/instrumentation-element.html">&lt;instrumentation&gt;</a></code> 
+    element. Also, <code>InstrumentationTestRunner</code> code resides
+    in the shared library <code>android.test.runner</code>,  which is not normally linked to
+    Android code. To include it, you must specify it in a
+<code><a href="{@docRoot}guide/topics/manifest/uses-library-element.html">&lt;uses-library&gt;</a></code>
+    element. You do not have to set up these elements yourself. Both Eclipse with ADT and the
+    <code>android</code> command-line tool construct them automatically and add them to your
+    test package's manifest file.
+</p>
+<p class="Note">
+    <strong>Note:</strong> If you use a test runner other than
+    <code>InstrumentationTestRunner</code>, you must change the &lt;instrumentation&gt;
+    element to point to the class you want to use.
+</p>
+<p>
+    To run {@link android.test.InstrumentationTestRunner}, you use internal system classes called by
+    Android tools. When you run a test in Eclipse with ADT, the classes are called automatically.
+    When you run a test from the command line, you run these classes with
+    <a href="{@docRoot}tools/help/adb.html">Android Debug Bridge (adb)</a>.
+</p>
+<p>
+    The system classes load and start the test package, kill any processes that
+    are running an instance of the application under test, and then load a new instance of the
+    application under test. They then pass control to
+    {@link android.test.InstrumentationTestRunner}, which runs
+    each test case class in the test package. You can also control which test cases and
+    methods are run using settings in Eclipse with ADT, or using flags with the command-line tools.
+</p>
+<p>
+    Neither the system classes nor {@link android.test.InstrumentationTestRunner} run
+    the application under test. Instead, the test case does this directly. It either calls methods
+    in the application under test, or it calls its own methods that trigger lifecycle events in
+    the application under test. The application is under the complete control of the test case,
+    which allows it to set up the test environment (the test fixture) before running a test. This
+    is demonstrated in the previous <a href="#ActivitySnippet">code snippet</a> that tests an
+    Activity that displays a Spinner widget.
+</p>
+<p>
+    To learn more about running tests, please read the topics
+    <a href="{@docRoot}tools/testing/testing_eclipse.html">
+    Testing from Eclipse with ADT</a> or
+    <a href="{@docRoot}tools/testing/testing_otheride.html">
+    Testing from Other IDEs</a>.
+</p>
+<h2 id="TestResults">Seeing Test Results</h2>
+<p>
+    The Android testing framework returns test results back to the tool that started the test.
+    If you run a test in Eclipse with ADT, the results are displayed in a new JUnit view pane. If
+    you run a test from the command line, the results are displayed in <code>STDOUT</code>. In
+    both cases, you see a test summary that displays the name of each test case and method that
+    was run. You also see all the assertion failures that occurred. These include pointers to the
+    line in the test code where the failure occurred. Assertion failures also list the expected
+    value and actual value.
+</p>
+<p>
+    The test results have a format that is specific to the IDE that you are using. The test
+    results format for Eclipse with ADT is described in
+    <a href="{@docRoot}tools/testing/testing_eclipse.html#RunTestEclipse">
+    Testing from Eclipse with ADT</a>. The test results format for tests run from the
+    command line is described in
+    <a href="{@docRoot}tools/testing/testing_otheride.html#RunTestsCommand">
+    Testing from Other IDEs</a>.
+</p>
+<h2 id="Monkeys">monkey and monkeyrunner</h2>
+<p>
+    The SDK provides two tools for functional-level application testing:
+</p>
+    <ul>
+        <li>
+The <a href="{@docRoot}tools/help/monkey.html">UI/Application Exerciser Monkey</a>,
+            usually called "monkey", is a command-line tool that sends pseudo-random streams of
+            keystrokes, touches, and gestures to a device. You run it with the
+            <a href="{@docRoot}tools/help/adb.html">Android Debug Bridge</a> (adb) tool.
+            You use it to stress-test your application and report back errors that are encountered.
+            You can repeat a stream of events by running the tool each time with the same random
+            number seed.
+        </li>
+        <li>
+    The <a href="{@docRoot}tools/help/monkeyrunner_concepts.html">monkeyrunner</a> tool
+            is an API and execution environment for test programs written in Python. The API
+            includes functions for connecting to a device, installing and uninstalling packages,
+            taking screenshots, comparing two images, and running a test package against an
+            application. Using the API, you can write a wide range of large, powerful, and complex
+            tests. You run programs that use the API with the <code>monkeyrunner</code> command-line
+            tool.
+        </li>
+    </ul>
+<h2 id="PackageNames">Working With Package names</h2>
+<p>
+    In the test environment, you work with both Android application package names and
+    Java package identifiers. Both use the same naming format, but they represent substantially
+    different entities. You need to know the difference to set up your tests correctly.
+</p>
+<p>
+    An Android package name is a unique system name for a <code>.apk</code> file, set by the
+    &quot;android:package&quot; attribute of the &lt;manifest&gt; element in the package's
+    manifest. The Android package name of your test package must be different from the
+    Android package name of the application under test. By default, Android tools create the
+    test package name by appending ".test" to the package name of the application under test.
+</p>
+<p>
+    The test package also uses an Android package name to target the application package it
+    tests. This is set in the &quot;android:targetPackage&quot; attribute of the
+    &lt;instrumentation&gt; element in the test package's manifest.
+</p>
+<p>
+    A Java package identifier applies to a source file. This package name reflects the directory
+    path of the source file. It also affects the visibility of classes and members to each other.
+</p>
+<p>
+    Android tools that create test projects set up an Android test package name for you.
+    From your input, the tools set up the test package name and the target package name for the
+    application under test. For these tools to work, the application project must already exist.
+</p>
+<p>
+    By default, these tools set the Java package identifier for the test class to be the same
+    as the Android package identifier. You may want to change this if you want to expose
+    members in the application under test by giving them package visibility. If you do this,
+    change only the Java package identifier, not the Android package names, and change only the
+    test case source files. Do not change the Java package name of the generated
+    <code>R.java</code> class in your test package, because it will then conflict with the
+    <code>R.java</code> class in the application under test. Do not change the Android package name
+    of your test package to be the same as the application it tests, because then their names
+    will no longer be unique in the system.
+</p>
+<h2 id="WhatToTest">What to Test</h2>
+<p>
+    The topic <a href="{@docRoot}tools/testing/what_to_test.html">What To Test</a>
+    describes the key functionality you should test in an Android application, and the key
+    situations that might affect that functionality.
+</p>
+<p>
+    Most unit testing is specific to the Android component you are testing.
+    The topics <a href="{@docRoot}tools/testing/activity_testing.html">Activity Testing</a>,
+    <a href="{@docRoot}tools/testing/contentprovider_testing.html">
+    Content Provider Testing</a>, and <a href="{@docRoot}tools/testing/service_testing.html">
+    Service Testing</a> each have a section entitled "What To Test" that lists possible testing
+    areas.
+</p>
+<p>
+    When possible, you should run these tests on an actual device. If this is not possible, you can
+    use the <a href="{@docRoot}tools/devices/emulator.html">Android Emulator</a> with
+    Android Virtual Devices configured for the hardware, screens, and versions you want to test.
+</p>
+<h2 id="NextSteps">Next Steps</h2>
+<p>
+    To learn how to set up and run tests in Eclipse, please refer to 
+<a href="{@docRoot}tools/testing/testing_eclipse.html">Testing from Eclipse with ADT</a>.
+    If you're not working in Eclipse, refer to 
+<a href="{@docRoot}tools/testing/testing_otheride.html">Testing from Other IDEs</a>.
+</p>
+<p>
+    If you want a step-by-step introduction to Android testing, try the
+    <a href="{@docRoot}tools/testing/activity_test.html">Activity Testing Tutorial</a>.
+</p>

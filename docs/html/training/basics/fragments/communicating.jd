@@ -19,7 +19,7 @@ previous.link=fragment-ui.html
     
     <h2>You should also read</h2>
     <ul>
-      <li><a href="{@docRoot}guide/topics/fundamentals/fragments.html">Fragments</a></li>
+      <li><a href="{@docRoot}guide/components/fragments.html">Fragments</a></li>
     </ul>
 
 <h2>Try it out</h2>

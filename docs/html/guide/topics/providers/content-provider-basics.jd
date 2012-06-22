@@ -371,7 +371,7 @@ Uri singleUri = ContentUri.withAppendedId(UserDictionary.Words.CONTENT_URI,4);
     ContentResolver.query()} on the "UI thread"". In actual code, however, you should
     do queries asynchronously on a separate thread. One way to do this is to use the
     {@link android.content.CursorLoader} class, which is described
-    in more detail in the <a href="{@docRoot}guide/topics/fundamentals/loaders.html">
+    in more detail in the <a href="{@docRoot}guide/components/loaders.html">
     Loaders</a> guide. Also, the lines of code are snippets only; they don't show a complete
     application.
 </p>
@@ -941,7 +941,7 @@ mRowsDeleted = getContentResolver().delete(
     <li>
         Asynchronous queries: You should do queries in a separate thread. One way to do this is to
         use a {@link android.content.CursorLoader} object. The examples in the
-        <a href="{@docRoot}guide/topics/fundamentals/loaders.html">Loaders</a> guide demonstrate
+        <a href="{@docRoot}guide/components/loaders.html">Loaders</a> guide demonstrate
         how to do this.
     </li>
     <li>

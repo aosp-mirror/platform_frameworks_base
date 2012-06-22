@@ -508,7 +508,7 @@ other activities and tasks using the <em>Back</em> button. </p>
 
 <p>For more information on launch modes and their interaction with Intent
 flags, see the 
-<a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back Stack</a>
+<a href="{@docRoot}guide/components/tasks-and-back-stack.html">Tasks and Back Stack</a>
 document.
 </p>
 </dd>

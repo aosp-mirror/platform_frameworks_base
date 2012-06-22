@@ -250,27 +250,30 @@ and store its events on the device.</td>
 
 <h3 id="query">Querying a calendar</h3>
 
-<p>Here is an example that shows how to get all the calendars for a particular
+<p>Here is an example that shows how to get the calendars that are owned by a particular
 user. For simplicity's sake, in this example the query operation is shown in the
 user interface thread ("main thread"). In practice, this should be done in an asynchronous
 thread instead of on the main thread. For more discussion, see 
-<a href="{@docRoot}guide/topics/fundamentals/loaders.html">Loaders</a>. If you are not just reading data but modifying it, see {@link android.content.AsyncQueryHandler}.
+<a href="{@docRoot}guide/components/loaders.html">Loaders</a>. If you are not just 
+reading data but modifying it, see {@link android.content.AsyncQueryHandler}.
 </p>
 
 
 <pre>
-  // Projection array. Creating indices for this array instead of doing
-  // dynamic lookups improves performance.
-  public static final String[] EVENT_PROJECTION = new String[] {
+// Projection array. Creating indices for this array instead of doing
+// dynamic lookups improves performance.
+public static final String[] EVENT_PROJECTION = new String[] {
     Calendars._ID,                           // 0
     Calendars.ACCOUNT_NAME,                  // 1
-    Calendars.CALENDAR_DISPLAY_NAME          // 2
-  };
+    Calendars.CALENDAR_DISPLAY_NAME,         // 2
+    Calendars.OWNER_ACCOUNT                  // 3
+};
   
-  // The indices for the projection array above.
-  private static final int PROJECTION_ID_INDEX = 0;
-  private static final int PROJECTION_ACCOUNT_NAME_INDEX = 1;
-  private static final int PROJECTION_DISPLAY_NAME_INDEX = 2;</pre>
+// The indices for the projection array above.
+private static final int PROJECTION_ID_INDEX = 0;
+private static final int PROJECTION_ACCOUNT_NAME_INDEX = 1;
+private static final int PROJECTION_DISPLAY_NAME_INDEX = 2;
+private static final int PROJECTION_OWNER_ACCOUNT_INDEX = 3;</pre>
   
 
 <div class="sidebox-wrapper"> <div class="sidebox"> <h3>Why must you include
@@ -291,11 +294,15 @@ synced.</p> </div> </div>
 
 <p> In the next part of the example, you construct your query. The selection
 specifies the criteria for the query. In this example the query is looking for
-all calendars that have the <code>ACCOUNT_NAME</code>
-"sampleuser@google.com" and the <code>ACCOUNT_TYPE</code>
-"com.google". The query returns a {@link android.database.Cursor}
+calendars that have the <code>ACCOUNT_NAME</code>
+"sampleuser@google.com", the <code>ACCOUNT_TYPE</code>
+"com.google", and the <code>OWNER_ACCOUNT</code>
+"sampleuser@google.com". If you want to see all calendars that a user
+has viewed, not just calendars the user owns, omit the <code>OWNER_ACCOUNT</code>.
+The query returns a {@link android.database.Cursor}
 object that you can use to traverse the result set returned by the database
-query. For more discussion of using queries in content providers, see <a href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a>.</p>
+query. For more discussion of using queries in content providers, 
+see <a href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a>.</p>
 
 
 <pre>// Run query
@@ -303,8 +310,10 @@ Cursor cur = null;
 ContentResolver cr = getContentResolver();
 Uri uri = Calendars.CONTENT_URI;   
 String selection = "((" + Calendars.ACCOUNT_NAME + " = ?) AND (" 
-                        + Calendars.ACCOUNT_TYPE + " = ?))";
-String[] selectionArgs = new String[] {"sampleuser@gmail.com", "com.google"}; 
+                        + Calendars.ACCOUNT_TYPE + " = ?) AND ("
+                        + Calendars.OWNER_ACCOUNT + " = ?))";
+String[] selectionArgs = new String[] {"sampleuser@gmail.com", "com.google",
+        "sampleuser@gmail.com"}; 
 // Submit the query and get a Cursor object back. 
 cur = cr.query(uri, EVENT_PROJECTION, selection, selectionArgs, null);</pre>
 
@@ -316,12 +325,14 @@ for each field.</p>
 while (cur.moveToNext()) {
     long calID = 0;
     String displayName = null;
-    String accountName = null;        
+    String accountName = null;
+    String ownerName = null;
       
     // Get the field values
     calID = cur.getLong(PROJECTION_ID_INDEX);
     displayName = cur.getString(PROJECTION_DISPLAY_NAME_INDEX);
     accountName = cur.getString(PROJECTION_ACCOUNT_NAME_INDEX);
+    ownerName = cur.getString(PROJECTION_OWNER_ACCOUNT_INDEX);
               
     // Do something with the values...
 
@@ -1179,5 +1190,3 @@ However, a sync adapter is restricted to the <code>ACCOUNT_NAME</code> and
 </pre>
 <p>For a sample implementation of a sync adapter (not specifically related to Calendar), see 
 <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">SampleSyncAdapter</a>.
-</body>
-</html>

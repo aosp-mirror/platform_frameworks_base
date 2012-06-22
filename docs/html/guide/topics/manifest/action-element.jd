@@ -16,7 +16,7 @@ parent.link=manifest-intro.html
 An <code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code> element must contain 
 one or more {@code &lt;action&gt;} elements.  If it doesn't contain any, no
 Intent objects will get through the filter.  See 
-<a href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and 
+<a href="{@docRoot}guide/components/intents-filters.html">Intents and 
 Intent Filters</a> for details on intent filters and the role of action
 specifications within a filter.
 </dd>

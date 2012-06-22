@@ -1,0 +1,24 @@
+page.title=layoutopt
+parent.title=Tools
+parent.link=index.html
+@jd:body
+
+<p><code>layoutopt</code> is a command-line tool that helps you optimize the
+layouts and layout hierarchies of your applications.<p>
+
+<p>This document is a reference to the available command line options. For more information and sample
+output of the tool, see <a
+href="{@docRoot}tools/debugging/debugging-ui.html#layoutopt">Optimizing layouts with
+layoutopt</a>.</p>
+
+<h3>Usage</h3>
+
+<p>To run <code>layoutopt</code> against a given list of layout resources:</p>
+
+<pre>layoutopt &lt;file_or_directory&gt; ...</pre>
+
+<p>For example:</p>
+
+<pre>$ layoutopt res/layout-land</pre>
+<pre>$ layoutopt res/layout/main.xml res/layout-land/main.xml</pre>
+

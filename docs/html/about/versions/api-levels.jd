@@ -1,0 +1,421 @@
+page.title=Android API Levels
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>In this document</h2>
+<ol>
+  <li><a href="#intro">What is API Level?</a></li>
+  <li><a href="#uses">Uses of API Level in Android</a></li>
+  <li><a href="#considerations">Development Considerations</a>
+    <ol>
+      <li><a href="#fc">Application forward compatibility</a></li>
+      <li><a href="#bc">Application backward compatibility</a></li>
+      <li><a href="#platform">Selecting a platform version and API Level</a></li>
+      <li><a href="#apilevel">Declaring a minimum API Level</a></li>
+      <li><a href="#testing">Testing against higher API Levels</a></li>
+    </ol>
+  </li>
+  <li><a href="#provisional">Using a Provisional API Level</a></li>
+  <li><a href="#filtering">Filtering the Documentation</a></li>
+</ol>
+
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt;</a> manifest element</li>
+  </ol>
+
+</div>
+</div>
+
+<p>As you develop your application on Android, it's useful to understand the
+platform's general approach to API change management. It's also important to
+understand the API Level identifier and the role it plays in ensuring your 
+application's compatibility with devices on which it may be installed. </p>
+
+<p>The sections below provide information about API Level and how it affects
+your applications. </p>
+
+<p>For information about how to use the "Filter by API Level" control
+available in the API reference documentation, see 
+<a href="#filtering">Filtering the documentation</a> at the 
+end of this document. </p>
+
+<h2 id="intro">What is API Level?</h2>
+
+<p>API Level is an integer value that uniquely identifies the framework API
+revision offered by a version of the Android platform.</p>
+
+<p>The Android platform provides a framework API that applications can use to
+interact with the underlying Android system. The framework API consists of:</p>
+
+<ul>
+<li>A core set of packages and classes</li>
+<li>A set of XML elements and attributes for declaring a manifest file</li>
+<li>A set of XML elements and attributes for declaring and accessing resources</li>
+<li>A set of Intents</li>
+<li>A set of permissions that applications can request, as well as permission
+enforcements included in the system</li>
+</ul>
+
+<p>Each successive version of the Android platform can include updates to the
+Android application framework API that it delivers. </p>
+
+<p>Updates to the framework API are designed so that the new API remains
+compatible with earlier versions of the API. That is, most changes in the API
+are additive and introduce new or replacement functionality. As parts of the API
+are upgraded, the older replaced parts are deprecated but are not removed, so
+that existing applications can still use them. In a very small number of cases,
+parts of the API may be modified or removed, although typically such changes are
+only needed to ensure API robustness and application or system security. All
+other API parts from earlier revisions are carried forward without
+modification.</p>
+
+<p>The framework API that an Android platform delivers is specified using an
+integer identifier called "API Level". Each Android platform version supports
+exactly one API Level, although support is implicit for all earlier API Levels
+(down to API Level 1). The initial release of the Android platform provided 
+API Level 1 and subsequent releases have incremented the API Level.</p>
+
+<p>The following table specifies the API Level supported by each version of the
+Android platform.</p>
+
+<table>
+  <tr><th>Platform Version</th><th>API Level</th><th>VERSION_CODE</th><th>Notes</th></tr>
+ 
+     <tr><td><a href="{@docRoot}about/versions/android-4.0.3.html">Android 4.0.3</a></td>
+    <td><a href="{@docRoot}sdk/api_diff/15/changes.html" title="Diff Report">15</a></td>
+    <td>{@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH_MR1}</td>
+    <td rowspan="2"><a href="{@docRoot}about/versions/android-4.0-highlights.html">Platform
+Highlights</a></td></tr>
+
+    <tr><td><a href="{@docRoot}about/versions/android-4.0.html">Android 4.0, 4.0.1, 4.0.2</a></td>
+    <td><a href="{@docRoot}sdk/api_diff/14/changes.html" title="Diff Report">14</a></td>
+    <td>{@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH}</td>
+    </tr>
+  
+    <tr><td><a href="{@docRoot}about/versions/android-3.2.html">Android 3.2</a></td>
+    <td><a href="{@docRoot}sdk/api_diff/13/changes.html" title="Diff Report">13</a></td>
+    <td>{@link android.os.Build.VERSION_CODES#HONEYCOMB_MR2}</td>
+    <td><!-- <a href="{@docRoot}about/versions/android-3.2-highlights.html">Platform Highlights</a>--></td></tr>
+  
+  <tr><td><a href="{@docRoot}about/versions/android-3.1.html">Android 3.1.x</a></td>
+    <td><a href="{@docRoot}sdk/api_diff/12/changes.html" title="Diff Report">12</a></td>
+    <td>{@link android.os.Build.VERSION_CODES#HONEYCOMB_MR1}</td>
+    <td><a href="{@docRoot}about/versions/android-3.1-highlights.html">Platform Highlights</a></td></tr>
+    
+  <tr><td><a href="{@docRoot}about/versions/android-3.0.html">Android 3.0.x</td>
+    <td><a href="{@docRoot}sdk/api_diff/11/changes.html" title="Diff Report">11</a></td>
+    <td>{@link android.os.Build.VERSION_CODES#HONEYCOMB}</td>
+    <td><a href="{@docRoot}about/versions/android-3.0-highlights.html">Platform Highlights</a></td></tr>
+    
+  <tr><td><a href="{@docRoot}about/versions/android-2.3.3.html">Android 2.3.4<br>Android 2.3.3</td>
+    <td><a href="{@docRoot}sdk/api_diff/10/changes.html" title="Diff Report">10</a></td>
+    <td>{@link android.os.Build.VERSION_CODES#GINGERBREAD_MR1}</td>
+    <td rowspan="2"><a href="{@docRoot}about/versions/android-2.3-highlights.html">Platform Highlights</a></td></tr>
+  
+  <tr><td><a href="{@docRoot}about/versions/android-2.3.html">Android 2.3.2<br>Android 2.3.1<br>Android 2.3</td>
+    <td><a href="{@docRoot}sdk/api_diff/9/changes.html" title="Diff Report">9</a></td>
+    <td>{@link android.os.Build.VERSION_CODES#GINGERBREAD}</td>
+    </tr>
+  
+  <tr><td><a href="{@docRoot}about/versions/android-2.2.html">Android 2.2.x</td>
+    <td ><a href="{@docRoot}sdk/api_diff/8/changes.html" title="Diff Report">8</a></td>
+    <td>{@link android.os.Build.VERSION_CODES#FROYO}</td>
+    <td><a href="{@docRoot}about/versions/android-2.2-highlights.html">Platform Highlights</a></td></tr>
+  
+  <tr><td><a href="{@docRoot}about/versions/android-2.1.html">Android 2.1.x</td>
+    <td><a href="{@docRoot}sdk/api_diff/7/changes.html" title="Diff Report">7</a></td>
+    <td>{@link android.os.Build.VERSION_CODES#ECLAIR_MR1}</td>
+    <td rowspan="3" ><a href="{@docRoot}about/versions/android-2.0-highlights.html">Platform Highlights</a></td></tr>
+    
+  <tr><td><a href="{@docRoot}about/versions/android-2.0.1.html">Android 2.0.1</td>
+    <td><a href="{@docRoot}sdk/api_diff/6/changes.html" title="Diff Report">6</a></td>
+    <td>{@link android.os.Build.VERSION_CODES#ECLAIR_0_1}</td>
+    </tr>
+    
+  <tr><td><a href="{@docRoot}about/versions/android-2.0.html">Android 2.0</td>
+    <td><a href="{@docRoot}sdk/api_diff/5/changes.html" title="Diff Report">5</a></td>
+    <td>{@link android.os.Build.VERSION_CODES#ECLAIR}</td>
+    </tr>
+    
+  <tr><td><a href="{@docRoot}about/versions/android-1.6.html">Android 1.6</td>
+    <td><a href="{@docRoot}sdk/api_diff/4/changes.html" title="Diff Report">4</a></td>
+    <td>{@link android.os.Build.VERSION_CODES#DONUT}</td>
+    <td><a href="{@docRoot}about/versions/android-1.6-highlights.html">Platform Highlights</a></td></tr>
+    
+  <tr><td><a href="{@docRoot}about/versions/android-1.5.html">Android 1.5</td>
+    <td><a href="{@docRoot}sdk/api_diff/3/changes.html" title="Diff Report">3</a></td>
+    <td>{@link android.os.Build.VERSION_CODES#CUPCAKE}</td>
+    <td><a href="{@docRoot}about/versions/android-1.5-highlights.html">Platform Highlights</a></td></tr>
+    
+  <tr><td><a href="{@docRoot}about/versions/android-1.1.html">Android 1.1</td>
+    <td>2</td>
+    <td>{@link android.os.Build.VERSION_CODES#BASE_1_1}</td><td></td></tr>
+    
+  <tr><td>Android 1.0</td>
+    <td>1</td>
+    <td>{@link android.os.Build.VERSION_CODES#BASE}</td>
+    <td></td></tr>
+</table>
+
+
+<h2 id="uses">Uses of API Level in Android</h2>
+
+<p>The API Level identifier serves a key role in ensuring the best possible
+experience for users and application developers: 
+
+<ul>
+<li>It lets the Android platform describe the maximum framework API revision 
+that it supports</li>
+<li>It lets applications describe the framework API revision that they
+require</li>
+<li>It lets the system negotiate the installation of applications on the user's
+device, such that version-incompatible applications are not installed.</li>
+</ul>
+
+<p>Each Android platform version stores its API Level identifier internally, in
+the Android system itself. </p>
+
+<p>Applications can use a manifest element provided by the framework API &mdash;
+<code>&lt;uses-sdk&gt;</code> &mdash; to describe the minimum and maximum API
+Levels under which they are able to run, as well as the preferred API Level that
+they are designed to support. The element offers three key attributes:</p>
+
+<ul>
+<li><code>android:minSdkVersion</code> &mdash; Specifies the minimum API Level
+on which the application is able to run. The default value is "1".</li>
+<li><code>android:targetSdkVersion</code> &mdash; Specifies the API Level
+on which the application is designed to run. In some cases, this allows the
+application to use manifest elements or behaviors defined in the target
+API Level, rather than being restricted to using only those defined 
+for the minimum API Level.</li>
+<li><code>android:maxSdkVersion</code> &mdash; Specifies the maximum API Level
+on which the application is able to run. <strong>Important:</strong> Please read the <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>&lt;uses-sdk&gt;</code></a>
+documentation before using this attribute.  </li>
+</ul>
+
+<p>For example, to specify the minimum system API Level that an application
+requires in order to run, the application would include in its manifest a
+<code>&lt;uses-sdk&gt;</code> element with a <code>android:minSdkVersion</code>
+attribute. The value of <code>android:minSdkVersion</code> would be the integer
+corresponding to the API Level of the earliest version of the Android platform
+under which the application can run. </p>
+
+<p>When the user attempts to install an application, or when revalidating an
+appplication after a system update, the Android system first checks the
+<code>&lt;uses-sdk&gt;</code> attributes in the application's manifest and
+compares the values against its own internal API Level. The system allows the
+installation to begin only if these conditions are met:</p>
+
+<ul>
+<li>If a <code>android:minSdkVersion</code> attribute is declared, its value
+must be less than or equal to the system's API Level integer. If not declared,
+the system assumes that the application requires API Level 1. </li>
+<li>If a <code>android:maxSdkVersion</code> attribute is declared, its value
+must be equal to or greater than the system's API Level integer. 
+If not declared, the system assumes that the application
+has no maximum API Level. Please read the <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>&lt;uses-sdk&gt;</code></a>
+documentation for more information about how the system handles this attribute.</li>
+</ul>
+
+<p>When declared in an application's manifest, a <code>&lt;uses-sdk&gt;</code>
+element might look like this: </p>
+
+<pre>&lt;manifest&gt;
+  &lt;uses-sdk android:minSdkVersion="5" /&gt;
+  ...
+&lt;/manifest&gt;</pre>
+
+<p>The principal reason that an application would declare an API Level in
+<code>android:minSdkVersion</code> is to tell the Android system that it is
+using APIs that were <em>introduced</em> in the API Level specified. If the
+application were to be somehow installed on a platform with a lower API Level,
+then it would crash at run-time when it tried to access APIs that don't exist.
+The system prevents such an outcome by not allowing the application to be
+installed if the lowest API Level it requires is higher than that of the
+platform version on the target device.</p>
+
+<p>For example, the {@link android.appwidget} package was introduced with API
+Level 3. If an application uses that API, it must declare a
+<code>android:minSdkVersion</code> attribute with a value of "3". The
+application will then be installable on platforms such as Android 1.5 (API Level
+3) and Android 1.6 (API Level 4), but not on the Android 1.1 (API Level 2) and
+Android 1.0 platforms (API Level 1).</p>
+
+<p>For more information about how to specify an application's API Level
+requirements, see the <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>&lt;uses-sdk&gt;</code></a>
+ section of the manifest file documentation.</p>
+
+
+<h2 id="considerations">Development Considerations</h2>
+
+<p>The sections below provide information related to API level that you should
+consider when developing your application.</p>
+
+<h3 id="fc">Application forward compatibility</h3>
+
+<p>Android applications are generally forward-compatible with new versions of
+the Android platform.</p>
+
+<p>Because almost all changes to the framework API are additive, an Android
+application developed using any given version of the API (as specified by its
+API Level) is forward-compatible with later versions of the Android platform and
+higher API levels. The application should be able to run on all later versions
+of the Android platform, except in isolated cases where the application uses a
+part of the API that is later removed for some reason. </p>
+
+<p>Forward compatibility is important because many Android-powered devices
+receive over-the-air (OTA) system updates. The user may install your
+application and use it successfully, then later receive an OTA update to a new
+version of the Android platform. Once the update is installed, your application
+will run in a new run-time version of the environment, but one that has the API
+and system capabilities that your application depends on. </p>
+
+<p>In some cases, changes <em>below</em> the API, such those in the underlying
+system itself, may affect your application when it is run in the new
+environment. For that reason it's important for you, as the application
+developer, to understand how the application will look and behave in each system
+environment. To help you test your application on various versions of the Android
+platform, the Android SDK includes multiple platforms that you can download.
+Each platform includes a compatible system image that you can run in an AVD, to
+test your application. </p>
+
+<h3 id="bc">Application backward compatibility</h3>
+
+<p>Android applications are not necessarily backward compatible with versions of
+the Android platform older than the version against which they were compiled.
+</p>
+
+<p>Each new version of the Android platform can include new framework APIs, such
+as those that give applications access to new platform capabilities or replace
+existing API parts. The new APIs are accessible to applications when running on
+the new platform and, as mentioned above, also when running on later versions of
+the platform, as specified by API Level. Conversely, because earlier versions of
+the platform do not include the new APIs, applications that use the new APIs are
+unable to run on those platforms.</p>
+
+<p>Although it's unlikely that an Android-powered device would be downgraded to
+a previous version of the platform, it's important to realize that there are
+likely to be many devices in the field that run earlier versions of the
+platform. Even among devices that receive OTA updates, some might lag and
+might not receive an update for a significant amount of time. </p>
+
+<h3 id="platform">Selecting a platform version and API Level</h3>
+
+<p>When you are developing your application, you will need to choose
+the platform version against which you will compile the application. In
+general, you should compile your application against the lowest possible
+version of the platform that your application can support. 
+
+<p>You can determine the lowest possible platform version by compiling the
+application against successively lower build targets. After you determine the
+lowest version, you should create an AVD using the corresponding platform
+version (and API Level) and fully test your application. Make sure to declare a
+<code>android:minSdkVersion</code> attribute in the application's manifest and
+set its value to the API Level of the platform version. </p>
+
+<h3 id="apilevel">Declaring a minimum API Level</h3>
+
+<p>If you build an application that uses APIs or system features introduced in
+the latest platform version, you should set the
+<code>android:minSdkVersion</code> attribute to the API Level of the latest
+platform version. This ensures that users will only be able to install your
+application if their devices are running a compatible version of the Android
+platform. In turn, this ensures that your application can function properly on
+their devices. </p>
+
+<p>If your application uses APIs introduced in the latest platform version but
+does <em>not</em> declare a <code>android:minSdkVersion</code> attribute, then
+it will run properly on devices running the latest version of the platform, but
+<em>not</em> on devices running earlier versions of the platform. In the latter
+case, the application will crash at runtime when it tries to use APIs that don't
+exist on the earlier versions.</p>
+
+<h3 id="testing">Testing against higher API Levels</h3>
+
+<p>After compiling your application, you should make sure to test it on the
+platform specified in the application's <code>android:minSdkVersion</code>
+attribute. To do so, create an AVD that uses the platform version required by
+your application. Additionally, to ensure forward-compatibility, you should run
+and test the application on all platforms that use a higher API Level than that
+used by your application. </p>
+
+<p>The Android SDK includes multiple platform versions that you can use,
+including the latest version, and provides an updater tool that you can use to
+download other platform versions as necessary. </p>
+
+<p>To access the updater, use the <code>android</code> command-line tool,
+located in the &lt;sdk&gt;/tools directory. You can launch the SDK updater by
+executing <code>android sdk</code>. You can
+also simply double-click the android.bat (Windows) or android (OS X/Linux) file.
+In ADT, you can also access the updater by selecting 
+<strong>Window</strong>&nbsp;>&nbsp;<strong>Android SDK
+Manager</strong>.</p>
+
+<p>To run your application against different platform versions in the emulator,
+create an AVD for each platform version that you want to test. For more
+information about AVDs, see <a
+href="{@docRoot}tools/devices/index.html">Creating and Managing Virtual Devices</a>. If
+you are using a physical device for testing, ensure that you know the API Level
+of the Android platform it runs. See the table at the top of this document for
+a list of platform versions and their API Levels. </p>
+
+<h2 id="provisional">Using a Provisional API Level</h2>
+
+<p>In some cases, an "Early Look" Android SDK platform may be available. To let
+you begin developing on the platform although the APIs may not be final, the
+platform's API Level integer will not be specified. You must instead use the
+platform's <em>provisional API Level</em> in your application manifest, in order
+to build applications against the platform. A provisional API Level is not an
+integer, but a string matching the codename of the unreleased platform version.
+The provisional API Level will be specified in the release notes for the Early
+Look SDK release notes and is case-sensitive.</p>
+
+<p>The use of a provisional API Level is designed to protect developers and
+device users from inadvertently publishing or installing applications based on
+the Early Look framework API, which may not run properly on actual devices
+running the final system image.</p>
+
+<p>The provisional API Level will only be valid while using the Early Look SDK
+and can only be used to run applications in the emulator. An application using
+the provisional API Level can never be installed on an Android device. At the
+final release of the platform, you must replace any instances of the provisional
+API Level in your application manifest with the final platform's actual API
+Level integer.</p>
+
+
+<h2 id="filtering">Filtering the Reference Documentation by API Level</h2>
+
+<p>Reference documentation pages on the Android Developers site offer a "Filter
+by API Level" control in the top-right area of each page. You can use the 
+control to show documentation only for parts of the API that are actually 
+accessible to your application, based on the API Level that it specifies in 
+the <code>android:minSdkVersion</code> attribute of its manifest file. </p>
+
+<p>To use filtering, select the checkbox to enable filtering, just below the
+page search box. Then set the "Filter by API Level" control to the same API
+Level as specified by your application. Notice that APIs introduced in a later
+API Level are then grayed out and their content is masked, since they would not
+be accessible to your application. </p>
+
+<p>Filtering by API Level in the documentation does not provide a view
+of what is new or introduced in each API Level &mdash; it simply provides a way
+to view the entire API associated with a given API Level, while excluding API
+elements introduced in later API Levels.</p>
+
+<p>If you decide that you don't want to filter the API documentation, just
+disable the feature using the checkbox. By default, API Level filtering is
+disabled, so that you can view the full framework API, regardless of API Level.
+</p>
+
+<p>Also note that the reference documentation for individual API elements
+specifies the API Level at which each element was introduced. The API Level 
+for packages and classes is specified as "Since &lt;api level&gt;" at the 
+top-right corner of the content area on each documentation page. The API Level 
+for class members is specified in their detailed description headers, 
+at the right margin. </p>

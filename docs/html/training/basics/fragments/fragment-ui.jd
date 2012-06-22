@@ -20,7 +20,7 @@ next.link=communicating.html
     
     <h2>You should also read</h2>
     <ul>
-      <li><a href="{@docRoot}guide/topics/fundamentals/fragments.html">Fragments</a></li>
+      <li><a href="{@docRoot}guide/components/fragments.html">Fragments</a></li>
       <li><a href="{@docRoot}guide/practices/tablets-and-handsets.html">Supporting Tablets and
 Handsets</a></li>
     </ul>

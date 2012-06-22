@@ -1,0 +1,249 @@
+page.title=Designing for Seamlessness
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+<ol>
+  <li><a href="#drop">Don't Drop Data</a></li>
+  <li><a href="#expose">Don't Expose Raw Data</a></li>
+  <li><a href="#interrupt">Don't Interrupt the User</a></li>
+  <li><a href="#threads">Got a Lot to Do? Do it in a Thread</a></li>
+  <li><a href="#multiple-activities">Don't Overload a Single Activity Screen</a></li>
+  <li><a href="#themes">Extend System Themes</a></li>
+  <li><a href="#flexui">Design Your UI to Work with Multiple Screen Resolutions</a></li>
+  <li><a href="#network">Assume the Network is Slow</a></li>
+  <li><a href="#keyboard">Don't Assume Touchscreen or Keyboard</a></li>
+  <li><a href="#battery">Do Conserve the Device Battery</a></li>
+</ol>
+
+</div>
+</div>
+
+<p>Even if your application is fast and responsive, certain design decisions can
+still cause problems for users &mdash; because of unplanned interactions with
+other applications or dialogs, inadvertent loss of data, unintended blocking,
+and so on. To avoid these problems, it helps to understand the context in which
+your applications run and the system interactions that can affect your
+application. In short, you should strive to develop an application that
+interacts seamlessly with the system and with other applications. </p>
+
+<p>A common seamlessness problem is when an application's background process
+&mdash; for example, a service or broadcast receiver &mdash; pops up a dialog in
+response to some event. This may seem like harmless behavior, especially when
+you are building and testing your application in isolation, on the emulator.
+However, when your application is run on an actual device, your application may
+not have user focus at the time your background process displays the dialog. So
+it could end up that your application would display it's dialog behind the
+active application, or it could take focus from the current application and
+display the dialog in front of whatever the user was doing (such as dialing a
+phone call, for example). That behavior would not work for your application or
+for the user. </p>
+
+<p>To avoid these problems, your application should use the proper system 
+facility for notifying the user &mdash; the 
+{@link android.app.Notification Notification} classes. Using
+notifications, your application can signal the user that an event has 
+taken place, by displaying an icon in the status bar rather than taking
+focus and interrupting the user.</p>
+
+<p>Another example of a seamlessness problem is when an activity inadvertently
+loses state or user data because it doesn't correctly implement the onPause()
+and other lifecycle methods. Or, if your application exposes data intended to be
+used by other applications, you should expose it via a ContentProvider, rather
+than (for example) doing so through a world-readable raw file or database.</p>
+
+<p>What those examples have in common is that they involve cooperating nicely
+with the system and other applications. The Android system is designed to treat
+applications as a sort of federation of loosely-coupled components, rather than
+chunks of black-box code. This allows you as the developer to view the entire
+system as just an even-larger federation of these components. This benefits you
+by allowing you to integrate cleanly and seamlessly with other applications, and
+so you should design your own code to return the favor.</p>
+
+<p>This document discusses common seamlessness problems and how to avoid them.</p>
+
+<h2 id="drop">Don't Drop Data</h2>
+
+<p>Always keep in mind that Android is a mobile platform. It may seem obvious to
+say it, but it's important to remember that another Activity (such as the
+"Incoming Phone Call" app) can pop up over your own Activity at any moment.
+This will fire the onSaveInstanceState() and onPause() methods, and will likely result in
+your application being killed.</p>
+
+<p>If the user was editing data in your application when the other Activity
+appeared, your application will likely lose that data when your application is
+killed. Unless, of course, you save the work in progress first. The "Android
+Way" is to do just that: Android applications that accept or edit input should
+override the onSaveInstanceState() method and save their state in some appropriate
+fashion. When the user revisits the application, she should be able to
+retrieve her data.</p>
+
+<p>A classic example of a good use of this behavior is a mail application. If the
+user was composing an email when another Activity started up, the application
+should save the in-process email as a draft.</p>
+
+<h2 id="expose">Don't Expose Raw Data</h2>
+
+<p>If you wouldn't walk down the street in your underwear, neither should your
+data. While it's possible to expose certain kinds of application to the world
+to read, this is usually not the best idea. Exposing raw data requires other
+applications to understand your data format; if you change that format, you'll
+break any other applications that aren't similarly updated.</p>
+
+<p>The "Android Way" is to create a ContentProvider to expose your data to other
+applications via a clean, well-thought-out, and maintainable API. Using a
+ContentProvider is much like inserting a Java language interface to split up and
+componentize two tightly-coupled pieces of code. This means you'll be able to
+modify the internal format of your data without changing the interface exposed
+by the ContentProvider, and this without affecting other applications.</p>
+
+<h2 id="interrupt">Don't Interrupt the User</h2>
+
+<p>If the user is running an application (such as the Phone application during a
+call) it's a pretty safe bet he did it on purpose. That's why you should avoid
+spawning activities except in direct response to user input from the current
+Activity.</p>
+
+<p>That is, don't call startActivity() from BroadcastReceivers or Services running in
+the background. Doing so will interrupt whatever application is currently
+running, and result in an annoyed user. Perhaps even worse, your Activity may
+become a "keystroke bandit" and receive some of the input the user was in the
+middle of providing to the previous Activity. Depending on what your
+application does, this could be bad news.</p>
+
+<p>Instead of spawning Activity UIs directly from the background, you should
+instead use the NotificationManager to set Notifications. These will appear in
+the status bar, and the user can then click on them at his leisure, to see
+what your application has to show him.</p>
+
+<p>(Note that all this doesn't apply to cases where your own Activity is already
+in the foreground: in that case, the user expects to see your next Activity in
+response to input.)</p>
+
+<h2 id="threads">Got a Lot to Do? Do it in a Thread</h2>
+
+<p>If your application needs to perform some expensive or long-running
+computation, you should probably move it to a thread. This will prevent the
+dreaded "Application Not Responding" dialog from being displayed to the user,
+with the ultimate result being the fiery demise of your application.</p>
+
+<p>By default, all code in an Activity as well as all its Views run in the same
+thread. This is the same thread that also handles UI events. For example, when
+the user presses a key, a key-down event is added to the Activity's main
+thread's queue. The event handler system needs to dequeue and handle that
+event quickly; if it doesn't, the system concludes after a few seconds that
+the application is hung and offers to kill it for the user.</p>
+
+<p>If you have long-running code, running it inline in your Activity will run it
+on the event handler thread, effectively blocking the event handler. This will
+delay input processing, and result in the ANR dialogs. To avoid this, move
+your computations to a thread. This <a
+href="responsiveness.html">Design for Responsiveness</a> document 
+discusses how to do that..</p>
+
+<h2 id="multiple-activities">Don't Overload a Single Activity Screen</h2>
+
+<p>Any application worth using will probably have several different screens.
+When designing the screens of your UI, be sure to make use of multiple Activity
+object instances.</p>
+
+<p>Depending on your development background, you may interpret an Activity as
+similar to something like a Java Applet, in that it is the entry point for
+your application. However, that's not quite accurate: where an Applet subclass
+is the single entry point for a Java Applet, an Activity should be thought of
+as one of potentially several entry points to your application. The only
+difference between your "main" Activity and any others you might have is that
+the "main" one just happens to be the only one that expressed an interest in
+the "android.intent.action.MAIN" action in your AndroidManifest..xml file.</p>
+
+<p>So, when designing your application, think of your application as a federation
+of Activity objects. This will make your code a lot more maintainable in the long
+run, and as a nice side effect also plays nicely with Android's application
+history and "backstack" model.</p>
+
+<h2 id="themes">Extend System Themes</h2>
+
+<p>When it comes to the look-and-feel of the user interface, it's important to
+blend in nicely. Users are jarred by applications which contrast with the user
+interface they've come to expect. When designing your UIs, you should try and
+avoid rolling your own as much as possible. Instead, use a Theme. You
+can override or extend those parts of the theme that you need to, but at least
+you're starting from the same UI base as all the other applications. For all
+the details, read <a href="{@docRoot}guide/topics/ui/themes.html">Styles and Themes</a>.</p>
+
+<h2 id="flexui">Design Your UI to Work with Multiple Screen Resolutions</h2>
+
+<p>Different Android-powered devices will support different screen resolutions. 
+Some will even be able to change resolutions on the fly, such as by switching 
+to landscape mode. It's important to make sure your layouts and drawables 
+are flexible enough to display properly on a variety of device screens.</p>
+
+<p>Fortunately, this is very easy to do. In brief, what you must do is 
+provide different versions of your artwork (if you use any) for the key 
+resolutions, and then design your layout to accommodate various dimensions. 
+(For example, avoid using hard-coded positions and instead use relative 
+layouts.) If you do that much, the system handles the rest, and your 
+application looks great on any device.</p>
+
+<h2 id="network">Assume the Network is Slow</h2>
+
+<p>Android devices will come with a variety of network-connectivity options. All
+will have some data-access provision, though some will be faster than others.
+The lowest common denominator, however, is GPRS, the non-3G data service for
+GSM networks. Even 3G-capable devices will spend lots of time on non-3G
+networks, so slow networks will remain a reality for quite a long time to
+come.</p>
+
+<p>That's why you should always code your applications to minimize network
+accesses and bandwidth. You can't assume the network is fast, so you should
+always plan for it to be slow. If your users happen to be on faster networks,
+then that's great &mdash; their experience will only improve. You want to avoid the
+inverse case though: applications that are usable some of the time, but
+frustratingly slow the rest based on where the user is at any given moment are
+likely to be unpopular.</p>
+
+<p>One potential gotcha here is that it's very easy to fall into this trap if
+you're using the emulator, since the emulator uses your desktop computer's
+network connection. That's almost guaranteed to be much faster than a cell
+network, so you'll want to change the settings on the emulator that simulate
+slower network speeds. You can do this in Eclipse, in the "Emulator Settings"
+tab of your launch configuration or via a <a
+href="{@docRoot}tools/help/emulator.html#netspeed">command-line 
+option</a> when starting the emulator.</p>
+
+<h2 id="keyboard">Don't Assume Touchscreen or Keyboard</h2>
+
+<p>
+Android will support a variety of handset form-factors.  That's a fancy way of
+saying that some Android devices will have full "QWERTY" keyboards, while
+others will have 40-key, 12-key, or even other key configurations.  Similarly,
+some devices will have touch-screens, but many won't.
+</p><p>
+When building your applications, keep that in mind.  Don't make assumptions
+about specific keyboard layouts -- unless, of course, you're really interested
+in restricting your application so that it can only be used on those devices.
+</p>
+
+<h2 id="battery">Do Conserve the Device Battery</h2>
+<p>
+A mobile device isn't very mobile if it's constantly plugged into the
+wall.  Mobile devices are battery-powered, and the longer we can make that
+battery last on a charge, the happier everyone is &mdash; especially the user.
+Two of the biggest consumers of battery power are the processor, and the
+radio;  that's why it's important to write your applications to do as little
+work as possible, and use the network as infrequently as possible.
+</p><p>
+Minimizing the amount of processor time your application uses really comes
+down to <a href="performance.html">writing efficient
+code</a>.  To minimize the power drain from using the radio, be sure to handle
+error conditions gracefully, and only fetch what you need.  For example, don't
+constantly retry a network operation if one failed.  If it failed once, it's
+likely because the user has no reception, so it's probably going to fail again
+if you try right away; all you'll do is waste battery power.
+</p><p>
+Users are pretty smart:  if your program is power-hungry, you can count on
+them noticing.  The only thing you can be sure of at that point is that your
+program won't stay installed very long.
+</p>

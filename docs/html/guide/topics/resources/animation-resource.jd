@@ -18,7 +18,7 @@ parent.link=available-resources.html
     <h2>See also</h2>
     <ol>
       <li><a href="{@docRoot}guide/topics/graphics/view-animation.html">View Animation</a></li>
-      <li><a href="{@docRoot}guide/topics/graphics/animation.html">Property Animation</a></li>
+      <li><a href="{@docRoot}guide/topics/graphics/prop-animation.html">Property Animation</a></li>
     </ol>
   </div>
 </div>
@@ -334,7 +334,7 @@ set.start();
 <dt>see also:</dt>
 <dd>
 <ul>
-  <li><a href="{@docRoot}guide/topics/graphics/animation.html">Property Animation</a></li>
+  <li><a href="{@docRoot}guide/topics/graphics/prop-animation.html">Property Animation</a></li>
   <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/animation/index.html">API Demos</a> for examples
   on how to use the property animation system.</li>
 </ul>

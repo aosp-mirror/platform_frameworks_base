@@ -1,0 +1,147 @@
+page.title= Spinners
+parent.title=Input Controls
+parent.link=../controls.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  
+<h2>In this document</h2>
+<ol>
+  <li><a href="#Populate">Populate the Spinner with User Choices</a></li>
+  <li><a href="#SelectListener">Responding to User Selections</a></li>
+</ol>
+<h2>Key classes</h2>
+<ol>
+  <li>{@link android.widget.Spinner}</li>
+  <li>{@link android.widget.SpinnerAdapter}</li>
+  <li>{@link android.widget.AdapterView.OnItemSelectedListener}</li>
+</ol>
+
+</div>
+</div>
+
+<p>Spinners provide a quick way to select one value from a set. In the default state, a spinner
+shows its currently selected value. Touching the spinner displays a dropdown menu with all other
+available values, from which the user can select a new one.</p>
+
+<img src="{@docRoot}images/ui/spinner.png" alt="" />
+
+<p>You can add a spinner to your layout with the {@link android.widget.Spinner} object. You
+should usually do so in your XML layout with a {@code &lt;Spinner&gt;} element. For example:</p>
+
+<pre>
+&lt;Spinner
+    android:id="@+id/planets_spinner"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content" />
+</pre>
+
+<p>To populate the spinner with a list of choices, you then need to specify a {@link
+android.widget.SpinnerAdapter} in your {@link android.app.Activity} or {@link android.app.Fragment}
+source code.</p>
+
+<h2 id="Populate">Populate the Spinner with User Choices</h2>
+
+<p>The choices you provide for the spinner can come from any source, but must be provided through
+an {@link android.widget.SpinnerAdapter}, such as an {@link android.widget.ArrayAdapter} if the
+choices are available in an array or a {@link android.widget.CursorAdapter} if the choices are
+available from a database query.</p>
+
+<p>For instance, if the available choices for your spinner are pre-determined, you can provide
+them with a string array defined in a <a
+href="{@docRoot}guide/topics/resources/string-resource.html">string
+resource file</a>:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;resources>
+    &lt;string-array name="planets_array">
+        &lt;item>Mercury&lt;/item>
+        &lt;item>Venus&lt;/item>
+        &lt;item>Earth&lt;/item>
+        &lt;item>Mars&lt;/item>
+        &lt;item>Jupiter&lt;/item>
+        &lt;item>Saturn&lt;/item>
+        &lt;item>Uranus&lt;/item>
+        &lt;item>Neptune&lt;/item>
+    &lt;/string-array>
+&lt;/resources>
+</pre>
+
+  <p>With an array such as this one, you can use the following code in your {@link
+android.app.Activity} or {@link android.app.Fragment} to supply the spinner with the array using
+an instance of {@link android.widget.ArrayAdapter}:
+
+<pre>
+Spinner spinner = (Spinner) findViewById(R.id.spinner);
+// Create an ArrayAdapter using the string array and a default spinner layout
+ArrayAdapter&lt;CharSequence> adapter = ArrayAdapter.createFromResource(this,
+        R.array.planets_array, android.R.layout.simple_spinner_item);
+// Specify the layout to use when the list of choices appears
+adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+// Apply the adapter to the spinner
+spinner.setAdapter(adapter);
+</pre>
+
+<p>The {@link
+android.widget.ArrayAdapter#createFromResource(Context,int,int) createFromResource()} method allows
+you to create an {@link  android.widget.ArrayAdapter} from the string array. The third argument for
+this method is a layout resource that defines how the selected choice appears in the
+spinner control. The {@link android.R.layout#simple_spinner_item} layout is provided by the
+platform and is the default layout you should use unless you'd like to define your own layout
+for the spinner's appearance.</p>
+
+<p>You should then call {@link android.widget.ArrayAdapter#setDropDownViewResource(int)} to specify
+the layout the adapter should use to display the list of spinner choices ({@link
+android.R.layout#simple_spinner_dropdown_item} is another standard layout defined by the
+platform).</p>
+
+<p>Call {@link android.widget.AdapterView#setAdapter setAdapter()} to apply the adapter to your
+{@link android.widget.Spinner}.</p>
+
+
+<h2 id="SelectListener">Responding to User Selections</h2>
+
+<p>When the user selects an item from the drop-down, the {@link android.widget.Spinner} object
+receives an on-item-selected event.</p>
+
+<p>To define the selection event handler for a spinner, implement the {@link
+android.widget.AdapterView.OnItemSelectedListener} interface and the corresponding {@link
+android.widget.AdapterView.OnItemSelectedListener#onItemSelected onItemSelected()} callback method.
+For example, here's an implementation of the interface in an {@link android.app.Activity}:</p>
+
+<pre>
+public class SpinnerActivity extends Activity implements OnItemSelectedListener {
+    ...
+    
+    public void onItemSelected(AdapterView&lt;?> parent, View view, 
+            int pos, long id) {
+        // An item was selected. You can retrieve the selected item using
+        // parent.getItemAtPosition(pos)
+    }
+
+    public void onNothingSelected(AdapterView&lt;?> parent) {
+        // Another interface callback
+    }
+}
+</pre>
+
+<p>The {@link android.widget.AdapterView.OnItemSelectedListener} requires the {@link
+android.widget.AdapterView.OnItemSelectedListener#onItemSelected(AdapterView,View,int,long)
+onItemSelected()} and {@link
+android.widget.AdapterView.OnItemSelectedListener#onNothingSelected(AdapterView)
+onNothingSelected()} callback methods.</p>
+
+<p>Then you need to specify the interface implementation by calling {@link
+android.widget.AdapterView#setOnItemSelectedListener setOnItemSelectedListener()}:</p>
+
+<pre>
+Spinner spinner = (Spinner) findViewById(R.id.spinner);
+spinner.setOnItemSelectedListener(this);
+</pre>
+
+<p>If you implement the {@link
+android.widget.AdapterView.OnItemSelectedListener} interface with your {@link
+android.app.Activity} or {@link android.app.Fragment} (such as in the example above), you can pass
+<code>this</code> as the interface instance.</p>

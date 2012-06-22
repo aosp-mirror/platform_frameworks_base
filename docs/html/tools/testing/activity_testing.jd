@@ -1,0 +1,375 @@
+page.title=Activity Testing
+parent.title=Testing
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+  <h2>In this document</h2>
+  <ol>
+    <li>
+      <a href="#ActivityTestAPI">The Activity Testing API</a>
+      <ol>
+        <li>
+            <a href="#ActivityInstrumentationTestCase2">ActivityInstrumentationTestCase2</a>
+        </li>
+        <li>
+            <a href="#ActivityUnitTestCase">ActivityUnitTestCase</a>
+        </li>
+        <li>
+            <a href="#SingleLaunchActivityTestCase">SingleLaunchActivityTestCase</a>
+        </li>
+        <li>
+            <a href="#MockObjectNotes">Mock objects and activity testing</a>
+        </li>
+        <li>
+            <a href="#AssertionNotes">Assertions for activity testing</a>
+        </li>
+      </ol>
+    </li>
+    <li>
+        <a href="#WhatToTest">What to Test</a>
+    </li>
+    <li>
+        <a href="#NextSteps">Next Steps</a>
+    </li>
+    <li>
+      <a href="#UITesting">Appendix: UI Testing Notes</a>
+      <ol>
+        <li>
+          <a href="#RunOnUIThread">Testing on the UI thread</a>
+        </li>
+        <li>
+          <a href="#NotouchMode">Turning off touch mode</a>
+        </li>
+        <li>
+          <a href="#UnlockDevice">Unlocking the Emulator or Device</a>
+        </li>
+        <li>
+          <a href="#UITestTroubleshooting">Troubleshooting UI tests</a>
+        </li>
+      </ol>
+    </li>
+    </ol>
+<h2>Key Classes</h2>
+    <ol>
+      <li>{@link android.test.InstrumentationTestRunner}</li>
+      <li>{@link android.test.ActivityInstrumentationTestCase2}</li>
+      <li>{@link android.test.ActivityUnitTestCase}</li>
+    </ol>
+<h2>Related Tutorials</h2>
+    <ol>
+      <li>
+         <a href="{@docRoot}tools/testing/activity_test.html">Activity Testing Tutorial</a>
+      </li>
+    </ol>
+<h2>See Also</h2>
+      <ol>
+        <li>
+          <a href="{@docRoot}tools/testing/testing_eclipse.html">
+          Testing from Eclipse with ADT</a>
+        </li>
+        <li>
+          <a href="{@docRoot}tools/testing/testing_otheride.html">
+          Testing from Other IDEs</a>
+        </li>
+      </ol>
+  </div>
+</div>
+<p>
+    Activity testing is particularly dependent on the the Android instrumentation framework.
+    Unlike other components, activities have a complex lifecycle based on callback methods; these
+    can't be invoked directly except by instrumentation. Also, the only way to send events to the
+    user interface from a program is through instrumentation.
+</p>
+<p>
+    This document describes how to test activities using instrumentation and other test
+    facilities. The document assumes you have already read
+    <a href="{@docRoot}tools/testing/testing_android.html">Testing Fundamentals</a>,
+    the introduction to the Android testing and instrumentation framework.
+</p>
+<h2 id="ActivityTestAPI">The Activity Testing API</h2>
+<p>
+    The activity testing API base class is {@link android.test.InstrumentationTestCase},
+    which provides instrumentation to the test case subclasses you use for Activities.
+</p>
+<p>
+    For activity testing, this base class provides these functions:
+</p>
+<ul>
+    <li>
+        Lifecycle control: With instrumentation, you can start the activity under test, pause it,
+        and destroy it, using methods provided by the test case classes.
+    </li>
+    <li>
+        Dependency injection: Instrumentation allows you to create mock system objects such as
+        Contexts or Applications and use them to run the activity under test. This
+        helps you control the test environment and isolate it from production systems. You can
+        also set up customized Intents and start an activity with them.
+    </li>
+    <li>
+        User interface interaction: You use instrumentation to send keystrokes or touch events
+        directly to the UI of the activity under test.
+    </li>
+</ul>
+<p>
+    The activity testing classes also provide the JUnit framework by extending
+    {@link junit.framework.TestCase} and {@link junit.framework.Assert}.
+</p>
+<p>
+    The two main testing subclasses are {@link android.test.ActivityInstrumentationTestCase2} and
+    {@link android.test.ActivityUnitTestCase}. To test an Activity that is launched in a mode
+    other than <code>standard</code>, you use {@link android.test.SingleLaunchActivityTestCase}.
+</p>
+<h3 id="ActivityInstrumentationTestCase2">ActivityInstrumentationTestCase2</h3>
+<p>
+    The {@link android.test.ActivityInstrumentationTestCase2} test case class is designed to do
+    functional testing of one or more Activities in an application, using a normal system
+    infrastructure. It runs the Activities in a normal instance of the application under test,
+    using a standard system Context. It allows you to send mock Intents to the activity under
+    test, so you can use it to test an activity that responds to multiple types of intents, or
+    an activity that expects a certain type of data in the intent, or both. Notice, though, that it
+    does not allow mock Contexts or Applications, so you can not isolate the test from the rest of
+    a production system.
+</p>
+<h3 id="ActivityUnitTestCase">ActivityUnitTestCase</h3>
+<p>
+    The {@link android.test.ActivityUnitTestCase} test case class tests a single activity in
+    isolation. Before you start the activity, you can inject a mock Context or Application, or both.
+    You use it to run activity tests in isolation, and to do unit testing of methods
+    that do not interact with Android. You can not send mock Intents to the activity under test,
+    although you can call
+    {@link android.app.Activity#startActivity(Intent) Activity.startActivity(Intent)} and then
+    look at arguments that were received.
+</p>
+<h3 id="SingleLaunchActivityTestCase">SingleLaunchActivityTestCase</h3>
+<p>
+    The {@link android.test.SingleLaunchActivityTestCase} class is a convenience class for
+    testing a single activity in an environment that doesn't change from test to test.
+    It invokes {@link junit.framework.TestCase#setUp() setUp()} and
+    {@link junit.framework.TestCase#tearDown() tearDown()} only once, instead of once per
+    method call. It does not allow you to inject any mock objects.
+</p>
+<p>
+    This test case is useful for testing an activity that runs in a mode other than
+    <code>standard</code>. It ensures that the test fixture is not reset between tests. You
+    can then test that the activity handles multiple calls correctly.
+</p>
+<h3 id="MockObjectNotes">Mock objects and activity testing</h3>
+<p>
+    This section contains notes about the use of the mock objects defined in
+    {@link android.test.mock} with activity tests.
+</p>
+<p>
+    The mock object {@link android.test.mock.MockApplication} is only available for activity
+    testing if you use the {@link android.test.ActivityUnitTestCase} test case class.
+    By default, <code>ActivityUnitTestCase</code>, creates a hidden <code>MockApplication</code>
+    object that is used as the application under test. You can inject your own object using
+    {@link android.test.ActivityUnitTestCase#setApplication(Application) setApplication()}.
+</p>
+<h3 id="AssertionNotes">Assertions for activity testing</h3>
+<p>
+    {@link android.test.ViewAsserts} defines assertions for Views. You use it to verify the
+    alignment and position of View objects, and to look at the state of ViewGroup objects.
+</p>
+<h2 id="WhatToTest">What To Test</h2>
+<ul>
+    <li>
+        Input validation: Test that an activity responds correctly to input values in an
+        EditText View. Set up a keystroke sequence, send it to the activity, and then
+        use {@link android.view.View#findViewById(int)} to examine the state of the View. You can
+        verify that a valid keystroke sequence enables an OK button, while an invalid one leaves the
+        button disabled. You can also verify that the Activity responds to invalid input by
+        setting error messages in the View.
+    </li>
+    <li>
+        Lifecycle events: Test that each of your application's activities handles lifecycle events
+        correctly. In general, lifecycle events are actions, either from the system or from the
+        user, that trigger a callback method such as <code>onCreate()</code> or
+        <code>onClick()</code>. For example, an activity should respond to pause or destroy events
+        by saving its state. Remember that even a change in screen orientation causes the current
+        activity to be destroyed, so you should test that accidental device movements don't
+        accidentally lose the application state.
+    </li>
+    <li>
+        Intents: Test that each activity correctly handles the intents listed in the intent
+        filter specified in its manifest. You can use
+        {@link android.test.ActivityInstrumentationTestCase2} to send mock Intents to the
+        activity under test.
+    </li>
+    <li>
+        Runtime configuration changes: Test that each activity responds correctly to the
+        possible changes in the device's configuration while your application is running. These
+        include a change to the device's orientation, a change to the current language, and so
+        forth. Handling these changes is described in detail in the topic
+        <a href="{@docRoot}guide/topics/resources/runtime-changes.html">Handling Runtime
+        Changes</a>.
+    </li>
+    <li>
+        Screen sizes and resolutions: Before you publish your application, make sure to test it on
+        all of the screen sizes and densities on which you want it to run. You can test the
+        application on multiple sizes and densities using AVDs, or you can test your application
+        directly on the devices that you are targeting. For more information, see the topic
+        <a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a>.
+    </li>
+</ul>
+<h2 id="NextSteps">Next Steps</h2>
+<p>
+    To learn how to set up and run tests in Eclipse, please refer to 
+<a href="{@docRoot}tools/testing/testing_eclipse.html">Testing from Eclipse with ADT</a>.
+    If you're not working in Eclipse, refer to 
+<a href="{@docRoot}tools/testing/testing_otheride.html">Testing from Other IDEs</a>.
+</p>
+<p>
+    If you want a step-by-step introduction to testing activities, try the 
+    <a href="{@docRoot}tools/testing/activity_test.html">Activity Testing Tutorial</a>, which
+    guides you through a testing scenario that you develop against an activity-oriented application.
+</p>
+<h2 id="UITesting">Appendix: UI Testing Notes</h2>
+<p>
+    The following sections have tips for testing the UI of your Android application, specifically
+    to help you handle actions that run in the UI thread, touch screen and keyboard events, and home
+    screen unlock during testing.
+</p>
+<h3 id="RunOnUIThread">Testing on the UI thread</h3>
+<p>
+    An application's activities run on the application's <strong>UI thread</strong>. Once the
+    UI is instantiated, for example in the activity's <code>onCreate()</code> method, then all
+    interactions with the UI must run in the UI thread. When you run the application normally, it
+    has access to the thread and does not have to do anything special.
+</p>
+<p>
+    This changes when you run tests against the application. With instrumentation-based classes,
+    you can invoke methods against the UI of the application under test. The other test classes
+    don't allow this. To run an entire test method on the UI thread, you can annotate the thread
+    with <code>@UIThreadTest</code>. Notice that this will run <em>all</em> of the method statements
+    on the UI thread.  Methods that do not interact with the UI are not allowed; for example, you
+    can't invoke <code>Instrumentation.waitForIdleSync()</code>.
+</p>
+<p>
+    To run a subset of a test method on the UI thread, create an anonymous class of type
+    <code>Runnable</code>, put the statements you want in the <code>run()</code> method, and
+    instantiate a new instance of the class as a parameter to the method
+    <code><em>appActivity</em>.runOnUiThread()</code>, where <code><em>appActivity</em></code> is
+    the instance of the application you are testing.
+</p>
+<p>
+    For example, this code instantiates an activity to test, requests focus (a UI action) for the
+    Spinner displayed by the activity, and then sends a key to it. Notice that the calls to
+    <code>waitForIdleSync</code> and <code>sendKeys</code> aren't allowed to run on the UI thread:
+</p>
+<pre>
+  private MyActivity mActivity; // MyActivity is the class name of the app under test
+  private Spinner mSpinner;
+
+  ...
+
+  protected void setUp() throws Exception {
+      super.setUp();
+      mInstrumentation = getInstrumentation();
+
+      mActivity = getActivity(); // get a references to the app under test
+
+      /*
+       * Get a reference to the main widget of the app under test, a Spinner
+       */
+      mSpinner = (Spinner) mActivity.findViewById(com.android.demo.myactivity.R.id.Spinner01);
+
+  ...
+
+  public void aTest() {
+      /*
+       * request focus for the Spinner, so that the test can send key events to it
+       * This request must be run on the UI thread. To do this, use the runOnUiThread method
+       * and pass it a Runnable that contains a call to requestFocus on the Spinner.
+       */
+      mActivity.runOnUiThread(new Runnable() {
+          public void run() {
+              mSpinner.requestFocus();
+          }
+      });
+
+      mInstrumentation.waitForIdleSync();
+
+      this.sendKeys(KeyEvent.KEYCODE_DPAD_CENTER);
+</pre>
+
+<h3 id="NotouchMode">Turning off touch mode</h3>
+<p>
+    To control the emulator or a device with key events you send from your tests, you must turn off
+    touch mode. If you do not do this, the key events are ignored.
+</p>
+<p>
+    To turn off touch mode, you invoke
+    <code>ActivityInstrumentationTestCase2.setActivityTouchMode(false)</code>
+    <em>before</em> you call <code>getActivity()</code> to start the activity. You must invoke the
+    method in a test method that is <em>not</em> running on the UI thread. For this reason, you
+    can't invoke the touch mode method from a test method that is annotated with
+    <code>@UIThread</code>. Instead, invoke the touch mode method from <code>setUp()</code>.
+</p>
+<h3 id="UnlockDevice">Unlocking the emulator or device</h3>
+<p>
+    You may find that UI tests don't work if the emulator's or device's home screen is disabled with
+    the keyguard pattern. This is because the application under test can't receive key events sent
+    by <code>sendKeys()</code>. The best way to avoid this is to start your emulator or device
+    first and then disable the keyguard for the home screen.
+</p>
+<p>
+    You can also explicitly disable the keyguard. To do this,
+    you need to add a permission in the manifest file (<code>AndroidManifest.xml</code>) and
+    then disable the keyguard in your application under test. Note, though, that you either have to
+    remove this before you publish your application, or you have to disable it with code in
+    the published application.
+</p>
+<p>
+    To add the the permission, add the element
+    <code>&lt;uses-permission android:name="android.permission.DISABLE_KEYGUARD"/&gt;</code>
+    as a child of the <code>&lt;manifest&gt;</code> element. To disable the KeyGuard, add the
+    following code to the <code>onCreate()</code> method of activities you intend to test:
+</p>
+<pre>
+  mKeyGuardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
+  mLock = mKeyGuardManager.newKeyguardLock("<em>activity_classname</em>");
+  mLock.disableKeyguard();
+</pre>
+<p>where <code><em>activity_classname</em></code> is the class name of the activity.</p>
+<h3 id="UITestTroubleshooting">Troubleshooting UI tests</h3>
+<p>
+    This section lists some of the common test failures you may encounter in UI testing, and their
+    causes:
+</p>
+<dl>
+    <dt><code>WrongThreadException</code></dt>
+    <dd>
+      <p><strong>Problem:</strong></p>
+      For a failed test, the Failure Trace contains the following error message:
+      <code>
+        android.view.ViewRoot$CalledFromWrongThreadException: Only the original thread that created
+        a view hierarchy can touch its views.
+      </code>
+      <p><strong>Probable Cause:</strong></p>
+        This error is common if you tried to send UI events to the UI thread from outside the UI
+        thread. This commonly happens if you send UI events from the test application, but you don't
+        use the <code>@UIThread</code> annotation or the <code>runOnUiThread()</code> method. The
+        test method tried to interact with the UI outside the UI thread.
+      <p><strong>Suggested Resolution:</strong></p>
+        Run the interaction on the UI thread. Use a test class that provides instrumentation. See
+        the previous section <a href="#RunOnUIThread">Testing on the UI Thread</a>
+        for more details.
+    </dd>
+    <dt><code>java.lang.RuntimeException</code></dt>
+    <dd>
+      <p><strong>Problem:</strong></p>
+        For a failed test, the Failure Trace contains the following error message:
+      <code>
+        java.lang.RuntimeException: This method can not be called from the main application thread
+      </code>
+      <p><strong>Probable Cause:</strong></p>
+        This error is common if your test method is annotated with <code>@UiThreadTest</code> but
+        then tries to do something outside the UI thread or tries to invoke
+        <code>runOnUiThread()</code>.
+      <p><strong>Suggested Resolution:</strong></p>
+        Remove the <code>@UiThreadTest</code> annotation, remove the <code>runOnUiThread()</code>
+        call, or re-factor your tests.
+    </dd>
+</dl>

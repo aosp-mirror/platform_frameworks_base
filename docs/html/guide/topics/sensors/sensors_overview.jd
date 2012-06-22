@@ -50,13 +50,39 @@ href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/os/Senso
   </div>
 </div>
 
-<p>Most Android-powered devices have sensors that let you monitor changes in device
-position and motion. Many devices also have sensors that let you determine ambient environmental
-conditions, such as temperature, pressure, humidity, and lighting. You can access these
-sensors and acquire raw sensor data by using the Android sensor framework.</p>
+<p>Most Android-powered devices have built-in sensors that measure motion, orientation,
+and various environmental conditions. These sensors are capable of providing raw data with high
+precision and accuracy, and are useful if you want to monitor three-dimensional device movement or
+positioning, or you want to monitor changes in the ambient environment near a device. For example, a
+game might track readings from a device's gravity sensor to infer complex user gestures
+and motions, such as tilt, shake, rotation, or swing. Likewise, a weather application might use a
+device's temperature sensor and humidity sensor to calculate and report the dewpoint, or a travel
+application might use the geomagnetic field sensor and accelerometer to report a compass
+bearing.</p>
 
-<p>The sensor framework provides several classes and interfaces that help you perform a wide variety
-of sensor-related tasks. For example, you can use the sensor framework to do the following:</p>
+<p>The Android platform supports three broad categories of sensors:</p>
+
+<ul>
+  <li>Motion sensors
+    <p>These sensors measure acceleration forces and rotational forces along three axes. This
+      category includes accelerometers, gravity sensors, gyroscopes, and rotational vector
+      sensors.</p>
+  </li>
+  <li>Environmental sensors
+    <p>These sensors measure various environmental parameters, such as ambient air temperature
+      and pressure, illumination, and humidity. This category includes barometers, photometers, and
+      thermometers.</p>
+  </li>
+  <li>Position sensors
+    <p>These sensors measure the physical position of a device. This category includes
+      orientation sensors and magnetometers.</p>
+  </li>
+</ul>
+
+
+<p>You can access sensors available on the device and acquire raw sensor data by using the Android
+sensor framework. The sensor framework provides several classes and interfaces that help you perform a wide
+variety of sensor-related tasks. For example, you can use the sensor framework to do the following:</p>
 
 <ul>
    <li>Determine which sensors are available on a device.</li>

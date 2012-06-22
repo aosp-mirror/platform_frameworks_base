@@ -1,0 +1,373 @@
+page.title=Android 2.1 Platform
+sdk.platform.version=2.1
+sdk.platform.apiLevel=7
+sdk.platform.majorMinor=minor
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+<ol>
+  <li><a href="#features">Platform Highlights</a></li>
+  <li><a href="#relnotes">Revisions</a></li>
+  <li><a href="#api-level">API Level</a></li>
+  <li><a href="#api">Framework API Changes</a>
+  <li><a href="#apps">Built-in Applications</a></li>
+  <li><a href="#locs">Locales</a></li>
+  <li><a href="#skins">Emulator Skins</a></li>
+
+    </ol>
+  </li>
+</ol>
+
+<h2>Reference</h2>
+<ol>
+<li><a
+href="{@docRoot}sdk/api_diff/{@sdkPlatformApiLevel}/changes.html">API
+Differences Report &raquo;</a> </li>
+</ol>
+
+<h2>See Also</h2>
+<ol>
+  <li><a href="{@docRoot}sdk/exploring.html">Exploring the SDK</a></li>
+</ol>
+
+</div>
+</div>
+
+<p>
+<em>API Level:</em>&nbsp;<strong>{@sdkPlatformApiLevel}</strong></p>
+
+<p>Android {@sdkPlatformVersion} is a {@sdkPlatformMajorMinor} platform release
+deployable to Android-powered handsets starting in January 2010.
+This release includes new API
+changes and bug fixes. For information on changes, see the <a href="#api">Framework API</a>
+section.</p>
+
+<p>For developers, the Android {@sdkPlatformVersion} platform is available as a
+downloadable component for the Android SDK. The downloadable platform includes a
+fully compliant Android library and system image, as well as a set of emulator
+skins, sample applications, and more. The downloadable platform
+includes no external libraries. </p>
+
+<p>To get started developing or testing against the Android
+{@sdkPlatformVersion} platform, use the Android SDK and AVD Manager tool to
+download the platform into your SDK. For more information,
+see <a href="{@docRoot}sdk/exploring.html">Exploring the
+SDK</a>.</p>
+
+
+<h2 id="features">Platform Highlights</h2>
+
+<p>Android {@sdkPlatformVersion} does not add significant user features, see the <a
+href="http://developer.android.com/about/versions/android-2.0-highlights.html">Android
+2.0 Platform Highlights</a> document for the latest user features.</p>
+
+<h2 id="relnotes">Revisions</h2>
+
+<p>The sections below provide notes about successive releases of
+the Android {@sdkPlatformVersion} platform component for the Android SDK, as denoted by
+revision number. To determine what revision(s) of the Android
+{@sdkPlatformVersion} platforms are installed in your SDK environment, refer to
+the "Installed Packages" listing in the Android SDK and AVD Manager.</p>
+
+
+<div class="toggle-content opened" style="padding-left:1em;">
+
+<p><a href="#" onclick="return toggleContent(this)">
+  <img src="{@docRoot}assets/images/triangle-opened.png"
+class="toggle-content-img" alt="" />
+  Android {@sdkPlatformVersion}, Revision 3</a> <em>(July 2011)</em>
+</a></p>
+
+<div class="toggle-content-toggleme" style="padding-left:2em;">
+
+<dl>
+<dt>Dependencies:</dt>
+<dd>
+<p>Requires <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r12</a> or
+higher.</p>
+</dd>
+<dt>Notes:</dt>
+<dd>
+<p>Improvements to the platform's rendering library to support the visual layout editor in the ADT
+Eclipse plugin. This revision allows for more drawing features in ADT and fixes several
+bugs in the previous rendering library. It also unlocks several editor features that were added in
+ADT 12.</p>
+</dd>
+</dl>
+
+</div>
+</div>
+
+<div class="toggle-content closed" style="padding-left:1em;">
+
+<p><a href="#" onclick="return toggleContent(this)">
+  <img src="{@docRoot}assets/images/triangle-closed.png"
+class="toggle-content-img" alt="" />
+  Android {@sdkPlatformVersion}, Revision 2</a> <em>(May 2010)</em>
+</a></p>
+
+<div class="toggle-content-toggleme" style="padding-left:2em;">
+<dl>
+<dt>Dependencies:</dt>
+<dd>
+<p>Requires SDK Tools r6 or higher.</p>
+</dd>
+
+<dt>Tools:</dt>
+<dd>
+<ul> 
+<li>Adds support for library projects in the Ant build system.</li>
+<li>Adds improved layout rendering in ADT’s visual layout editor.</li>
+</ul> 
+</dd>
+
+</dl>
+ </div>
+</div>
+
+<div class="toggle-content closed" style="padding-left:1em;">
+
+<p><a href="#" onclick="return toggleContent(this)">
+  <img src="{@docRoot}assets/images/triangle-closed.png"
+class="toggle-content-img" alt="" />
+  Android {@sdkPlatformVersion}, Revision 1</a> <em>(January 2010)</em>
+</a></p>
+
+<div class="toggle-content-toggleme" style="padding-left:2em;">
+<dl>
+<dt>Dependencies:</dt>
+<dd>
+<p>Requires SDK Tools r4 or higher.</p>
+</dd>
+</dl>
+ </div>
+</div>
+
+
+<h2 id="api-level">API Level</h2>
+
+<p>The Android {@sdkPlatformVersion} platform delivers an updated version of
+the framework API. The Android {@sdkPlatformVersion} API
+is assigned an integer identifier &mdash;
+<strong>{@sdkPlatformApiLevel}</strong> &mdash; that is
+stored in the system itself. This identifier, called the "API Level", allows the
+system to correctly determine whether an application is compatible with
+the system, prior to installing the application. </p>
+
+<p>To use APIs introduced in Android {@sdkPlatformVersion} in your
+application, you need to set the proper value, "{@sdkPlatformApiLevel}", in the
+<code>android:minSdkVersion</code> attributes of the <code>&lt;uses-sdk&gt;</code>
+element in your application's manifest. </p>
+
+<p>For more information about how to use API Level, see the <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API Levels</a> document. </p>
+
+
+<h2 id="api">Framework API Changes</h2>
+
+<p>The sections below provide information about changes made to the application
+framework API provided by the Android {@sdkPlatformVersion} platform.</p>
+
+<h3>Live Wallpapers</h3>
+
+<p>The following additions provide APIs for you to develop animated wallpapers:</p>
+<ul>
+<li>New {@link android.service.wallpaper} package.</li>
+<li>New {@link android.app.WallpaperInfo} class.</li>
+<li>Updated {@link android.app.WallpaperManager}.</li>
+</ul>
+
+<p>Additionally, if your application uses or provides Live Wallpapers, you must
+remember to add a <a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html"><code>&lt;uses-feature></code></a>
+ element to the application's manifest, declaring the attribute
+<code>android:name="android.software.live_wallpaper"</code>. For example:</p>
+
+<pre class="no-pretty-print">
+&lt;uses-feature android:name="android.software.live_wallpaper" />
+</pre>
+
+<p>When you've published your application, Google Play checks for the
+presence of this element and uses it as a filter, ensuring that your application
+is not made available to users whose devices do not support Live Wallpapers.
+</p>
+
+<h3>Telephony</h3>
+
+<ul>
+<li>New {@link android.telephony.SignalStrength} class provides information
+about the device's current network signal. This can be acquired from the
+new {@link
+android.telephony.PhoneStateListener#onSignalStrengthsChanged(SignalStrength)}
+callback.</li>
+
+<li>New {@link
+android.telephony.PhoneStateListener#onDataConnectionStateChanged(int,int)}
+callback.</li>
+</ul>
+
+<h3>Views</h3>
+
+<ul>
+<li>New {@link android.view.View} methods {@link android.view.View#isOpaque()}
+and {@link android.view.View#onDrawScrollBars(Canvas)}.</li>
+
+<li>New {@link android.widget.RemoteViews} methods {@link
+android.widget.RemoteViews#addView(int,RemoteViews)} and {@link
+android.widget.RemoteViews#removeAllViews(int)}.</li>
+
+<li>New {@link android.view.ViewGroup} methods {@link
+android.view.ViewGroup#isChildrenDrawingOrderEnabled()} and {@link
+android.view.ViewGroup#setChildrenDrawingOrderEnabled(boolean)}.</li>
+</ul>
+
+<h3>WebKit</h3>
+
+<ul>
+<li>New {@link android.webkit.WebStorage} methods to manipulate web
+storage databases.</li>
+
+<li>New {@link android.webkit.GeolocationPermissions} methods to
+get Geolocation permissions from, and set them on the WebView.</li>
+
+<li>New {@link android.webkit.WebSettings} methods to manage settings for
+app cache, web storage, and zooming based on screen density.</li>
+
+<li>New {@link android.webkit.WebChromeClient} methods for handling video,
+browsing history, custom Views, app cache limits, and more.</li>
+</ul>
+
+</ul>
+
+<!--
+<h3 id="behavior-changes">Behavior changes</h3>
+
+<h3 id="bug-fixes">Bug fixes</h3>
+-->
+
+<h3 id="api-diff">API differences report</h3>
+
+<p>For a detailed view of all API changes in Android {@sdkPlatformVersion} (API
+Level {@sdkPlatformApiLevel}), as compared to API Level 6, see the <a
+href="{@docRoot}sdk/api_diff/{@sdkPlatformApiLevel}/changes.html">API
+Differences Report</a>.</p>
+
+<h2 id="apps">Built-in Applications</h2>
+
+<p>The system image included in the downloadable platform provides these
+built-in applications:</p>
+
+<table style="border:0;padding-bottom:0;margin-bottom:0;">
+<tr>
+<td style="border:0;padding-bottom:0;margin-bottom:0;">
+	<ul>
+	<li>Alarm Clock</li>
+	<li>Browser</li>
+	<li>Calculator</li>
+	<li>Camera</li>
+	<li>Contacts</li>
+	<li>Custom Locale (developer app)</li>
+	<li>Dev Tools (developer app)</li>
+    <li>Email</li>
+	</ul>
+</td>
+<td style="border:0;padding-bottom:0;margin-bottom:0;padding-left:5em;">
+	<ul>
+
+	<li>Gallery</li>
+	<li>IMEs for Japanese, Chinese, and Latin text input</li>
+	<li>Messaging</li>
+	<li>Music</li>
+	<li>Phone</li>
+	<li>Settings</li>
+	<li>Spare Parts (developer app)</li>
+	</ul>
+</td>
+</tr>
+</table>
+
+
+<h2 id="locs" style="margin-top:.75em;">Locales</h2>
+
+<p>The system image included in the downloadable platform provides a variety of
+built-in locales. In some cases, region-specific strings are available for the
+locales. In other cases, a default version of the language is used. The
+languages that are available in the Android {@sdkPlatformVersion} system
+image are listed below (with <em>language</em>_<em>country/region</em> locale
+descriptor).</p>
+
+<table style="border:0;padding-bottom:0;margin-bottom:0;">
+<tr>
+<td style="border:0;padding-bottom:0;margin-bottom:0;">
+<ul>
+<li>Chinese, PRC (zh_CN)</li>
+<li>Chinese, Taiwan (zh_TW)</li>
+<li>Czech (cs_CZ)</li>
+<li>Dutch, Netherlands (nl_NL)</li>
+<li>Dutch, Belgium (nl_BE)</li>
+<li>English, US (en_US)</li>
+<li>English, Britain (en_GB)</li>
+<li>English, Canada (en_CA)</li>
+<li>English, Australia (en_AU)</li>
+<li>English, New Zealand (en_NZ)</li>
+<li>English, Singapore(en_SG)</li>
+<li>French, France (fr_FR)</li>
+<li>French, Belgium (fr_BE)</li>
+</ul>
+</td>
+<td style="border:0;padding-bottom:0;margin-bottom:0;padding-left:5em;">
+<li>French, Canada (fr_CA)</li>
+<li>French, Switzerland (fr_CH)</li>
+<li>German, Germany (de_DE)</li>
+<li>German, Austria (de_AT)</li>
+<li>German, Switzerland (de_CH)</li>
+<li>German, Liechtenstein (de_LI)</li>
+<li>Italian, Italy (it_IT)</li>
+<li>Italian, Switzerland (it_CH)</li>
+<li>Japanese (ja_JP)</li>
+<li>Korean (ko_KR)</li>
+<li>Polish (pl_PL)</li>
+<li>Russian (ru_RU)</li>
+<li>Spanish (es_ES)</li>
+</td>
+</tr>
+</table>
+
+<p>Localized UI strings match the locales that are accessible
+through Settings.</p>
+
+<h2 id="skins">Emulator Skins</h2>
+
+<p>The downloadable platform includes a set of emulator skins that you can use
+for modeling your application in different screen sizes and resolutions. The
+emulator skins are:</p>
+
+<ul>
+  <li>
+    QVGA (240x320, low density, small screen)
+  </li>
+  <li>
+    WQVGA (240x400, low density, normal screen)
+  </li>
+  <li>
+    FWQVGA (240x432, low density, normal screen)
+  </li>
+  <li>
+    HVGA (320x480, medium density, normal screen)
+  </li>
+  <li>
+    WVGA800 (480x800, high density, normal screen)
+  </li>
+  <li>
+    WVGA854 (480x854 high density, normal screen)
+  </li>
+</ul>
+
+<p>For more information about how to develop an application that displays
+and functions properly on all Android-powered devices, see <a
+href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
+Screens</a>.</p>

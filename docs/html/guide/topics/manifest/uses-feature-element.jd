@@ -207,7 +207,7 @@ can check at run-time whether a higher level of OpenGL ES is available.)</p>
     <li>{@link android.content.pm.FeatureInfo}</li>
     <li>{@link android.content.pm.ConfigurationInfo}</li>
     <li><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html"><code>&lt;uses-permission&gt;</code></a></li>
-    <li><a href="{@docRoot}guide/appendix/market-filters.html">Filters on Google Play</a></li>
+    <li><a href="{@docRoot}guide/google/play/filters.html">Filters on Google Play</a></li>
   </ul>
 </dd>
 
@@ -501,7 +501,7 @@ If you are using SDK Tools r8 or higher, you can find <code>aapt</code> in the
 <p class="note"><strong>Note:</strong> You must use the version of
 <code>aapt</code> that is provided for the latest Platform-Tools component available. If
 you do not have the latest Platform-Tools component, download it using the <a
-href="{@docRoot}sdk/adding-components.html">Android SDK Manager</a>.
+href="{@docRoot}sdk/exploring.html">Android SDK Manager</a>.
 </p></li>
 <li>Run <code>aapt</code> using this syntax: </li>
 </ol>

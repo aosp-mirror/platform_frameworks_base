@@ -1,0 +1,81 @@
+page.title=Building and Running
+@jd:body
+
+<div id="qv-wrapper">
+    <div id="qv">
+      <h2>In this document</h2>
+      <ol>
+        <li><a href="#detailed-build">A Detailed Look at the Build Process</a></li>
+      </ol>
+    </div>
+  </div>
+  
+ <p>During the build process, your Android projects are compiled and packaged into an .apk file,
+  the container for your application binary. It contains all of the information necessary to run
+  your application on a device or emulator, such as compiled <code>.dex</code> files (<code>.class</code> files
+  converted to Dalvik byte code), a binary version of the <code>AndroidManifest.xml</code> file, compiled
+  resources (<code>resources.arsc</code>) and uncompiled resource files for your application.</p>
+
+  <p>If you are developing in Eclipse, the ADT plugin incrementally builds your project as you
+  make changes to the source code. Eclipse outputs an <code>.apk</code> file automatically to the bin folder of
+  the project, so you do not have to do anything extra to generate the <code>.apk</code>.</p>
+
+  <p>If you are developing in a non-Eclipse environment, you can build your project with the
+  generated <code>build.xml</code> Ant file that is in the project directory. The Ant file calls targets that
+  automatically call the build tools for you.</p>
+
+  <p>To run an application on an emulator or device, the application must be signed using debug or
+  release mode. You typically want to sign your application in debug mode when you develop and test
+  your application, because the build tools use a debug key with a known password so you do not have
+  to enter it every time you build. When you are ready to release the application to Google
+  Play, you must sign the application in release mode, using your own private key.</p>
+
+  <p>Fortunately, Eclipse or your Ant build script signs the application for you in debug mode
+  when you build your application. You can also easily setup Eclipse or your Ant build to sign your
+  application in release mode as well. For more information on signing applications, see <a href=
+  "{@docRoot}tools/publishing/app-signing.html">Signing Your Applications</a>.</p>
+  
+  <p>The following diagram depicts the components involved in building and running an application:</p>
+
+  <img src="{@docRoot}images/build-simplified.png" />
+
+  <h2 id="detailed-build">A Detailed Look at the Build Process</h2>
+
+  <p>The build process involves many tools and processes that generate intermediate files on the
+  way to producing an <code>.apk</code>. If you are developing in Eclipse, the complete build process is
+  automatically done periodically as you develop and save your code changes. If you are using other
+  IDEs, this build process is done every time you run the generated Ant build script for your
+  project. It is useful, however, to understand what is happening under the hood since much of the
+  tools and processes are masked from you. The following diagram depicts the different tools and
+  processes that are involved in a build:</p>
+
+  <img src="{@docRoot}images/build.png" />
+
+  <p>The general process for a typical build is outlined below:</p>
+
+  <ul>
+  
+    <li>The Android Asset Packaging Tool (aapt) takes your application resource files, such as the
+    <code>AndroidManifest.xml</code> file and the XML files for your Activities, and compiles them. An <code>R.java</code> is
+    also produced so you can reference your resources from your Java code.</li>
+
+    <li>The aidl tool converts any <code>.aidl</code> interfaces that you have into Java interfaces.</li>
+
+    <li>All of your Java code, including the <code>R.java</code> and <code>.aidl</code> files, are compiled by the Java
+    compiler and .class files are output.</li>
+
+    <li>The dex tool converts the .class files to Dalvik byte code. Any 3rd party libraries and
+    .class files that you have included in your project are also converted into <code>.dex</code> files so that
+    they can be packaged into the final <code>.apk</code> file.</li>
+
+    <li>All non-compiled resources (such as images), compiled resources, and the .dex files are
+    sent to the apkbuilder tool to be packaged into an <code>.apk</code> file.</li>
+
+    <li>Once the <code>.apk</code> is built, it must be signed with either a debug or release key before it can
+    be installed to a device.</li>
+
+    <li>Finally, if the application is being signed in release mode, you must align the <code>.apk</code> with
+    the zipalign tool. Aligning the final <code>.apk</code> decreases memory usage when the application is
+    running on a device.</li>
+  </ul>
+

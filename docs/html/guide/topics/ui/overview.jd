@@ -1,0 +1,74 @@
+page.title=UI Overview
+@jd:body
+
+
+<p>All user interface elements in an Android app are built using {@link android.view.View} and
+{@link android.view.ViewGroup} objects. A {@link android.view.View} is an object that draws
+something on the screen that the user can interact with. A {@link android.view.ViewGroup} is an
+object that holds other {@link android.view.View} (and {@link android.view.ViewGroup}) objects in
+order to define the layout of the interface.</p>
+
+<p>Android provides a collection of both {@link android.view.View} and {@link
+android.view.ViewGroup} subclasses that offer you common input controls (such as buttons and text
+fields) and various layout models (such as a linear or relative layout).</p>
+
+
+<h2 id="Layout">User Interface Layout</h2>
+
+<p>The user interface for each component of your app is defined using a hierarchy of {@link
+android.view.View} and {@link android.view.ViewGroup} objects, as shown in figure 1. Each view group
+is an invisible container that organizes child views, while the child views may be input
+controls or other widgets that
+draw some part of the UI. This hierarchy tree can be as simple or complex as you need
+it to be (but simplicity is best for performance).</p>
+
+<img src="{@docRoot}images/viewgroup.png" alt="" />
+<p class="img-caption"><strong>Figure 1.</strong> Illustration of a view hierarchy, which defines a
+UI layout.</p>
+
+<p>To declare your layout, you can instantiate {@link android.view.View} objects in code and start
+building a tree, but the easiest and most effective way to define your layout is with an XML file.
+XML offers a human-readable structure for the layout, similar to HTML.</p>
+
+<p>The name of an XML element for a view is respective to the Android class it represents. So a
+<code>&lt;TextView&gt;</code> element creates a {@link android.widget.TextView} widget in your UI,
+and a <code>&lt;LinearLayout&gt;</code> element creates a {@link android.widget.LinearLayout} view
+group. </p>
+
+<p>For example, a simple vertical layout with a text view and a button looks like this:</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="fill_parent" 
+              android:layout_height="fill_parent"
+              android:orientation="vertical" >
+    &lt;TextView android:id="@+id/text"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="I am a TextView" />
+    &lt;Button android:id="@+id/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="I am a Button" />
+&lt;/LinearLayout>
+</pre>
+
+<p>When you load a layout resource in your app, Android initializes each node of the layout into a
+runtime object you can use to define additional behaviors, query the object state, or modify the
+layout.</p>
+
+<p>For a complete guide to creating a UI layout, see <a href="declaring-layout.html">XML
+Layouts</a>.
+
+  
+<h2 id="UIComponents">User Interface Components</h2>
+
+<p>You don't have to build all of your UI using {@link android.view.View} and {@link
+android.view.ViewGroup} objects. Android provides several app components that offer
+a standard UI layout for which you simply need to define the content. These UI components each
+have a unique set of APIs that are described in their respective documents, such as <a
+href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a>, <a
+href="{@docRoot}guide/topics/ui/dialogs.html">Dialogs</a>, and <a
+href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Status Notifications</a>.</p>
+
+

@@ -1,0 +1,92 @@
+page.title=Input Controls
+parent.title=User Interface
+parent.link=index.html
+@jd:body
+
+<div class="figure" style="margin:0">
+  <img src="{@docRoot}images/ui/ui-controls.png" alt="" style="margin:0" />
+</div>
+
+<p>Input controls are the interactive components in your app's user interface. Android provides a
+wide variety of controls you can use in your UI, such as buttons, text fields, seek bars,
+checkboxes, zoom buttons, toggle buttons, and many more.</p>
+
+<p>Adding an input control to your UI is as simple as adding an XML element to your <a
+href="{@docRoot}guide/topics/ui/declaring-layout.html">XML layout</a>. For example, here's a
+layout with a text field and button:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="horizontal">
+    &lt;EditText android:id="@+id/edit_message"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/edit_message" />
+    &lt;Button android:id="@+id/button_send"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_send"
+        android:onClick="sendMessage" />
+&lt;/LinearLayout>
+</pre>
+
+<p>Each input control supports a specific set of input events so you can handle events such as when
+the user enters text or touches a button.</p>
+
+
+<h2 id="CommonControls">Common Controls</h2>
+<p>Here's a list of some common controls that you can use in your app. Follow the links to learn
+more about using each one.</p>
+
+<p class="note"><strong>Note:</strong> Android provides several more controls than are listed
+here. Browse the {@link android.widget} package to discover more. If your app requires a
+specific kind of input control, you can build your own <a
+href="{@docRoot}guide/topics/ui/custom-components.html">custom components</a>.</p>
+
+<table>
+    <tr>
+        <th scope="col">Control Type</th>
+        <th scope="col">Description</th>
+	<th scope="col">Related Classes</th>
+    </tr>
+    <tr>
+        <td><a href="controls/button.html">Button</a></td>
+        <td>A push-button that can be pressed, or clicked, by the user to perform an action.</td>
+	<td>{@link android.widget.Button Button} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/text.html">Text field</a></td>
+        <td>An editable text field. You can use the <code>AutoCompleteTextView</code> widget to create a text entry widget that provides auto-complete suggestions</td>
+	<td>{@link android.widget.EditText EditText}, {@link android.widget.AutoCompleteTextView}</td>
+    </tr>
+    <tr>
+        <td><a href="controls/checkbox.html">Checkbox</a></td>
+        <td>An on/off switch that can be toggled by the user. You should use checkboxes when presenting users with a group of selectable options that are not mutually exclusive.</td>
+	<td>{@link android.widget.CheckBox CheckBox} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/radiobutton.html">Radio button</a></td>
+        <td>Similar to checkboxes, except that only one option can be selected in the group.</td>
+	<td>{@link android.widget.RadioGroup RadioGroup} 
+	<br>{@link android.widget.RadioButton RadioButton} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/togglebutton.html" style="white-space:nowrap">Toggle button</a></td>
+        <td>An on/off button with a light indicator.</td>
+	<td>{@link android.widget.ToggleButton ToggleButton} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/spinner.html">Spinner</a></td>
+        <td>A drop-down list that allows users to select one value from a set.</td>
+	<td>{@link android.widget.Spinner Spinner} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/pickers.html">Pickers</a></td>
+        <td>A dialog for users to select a single value for a set by using up/down buttons or via a swipe gesture. Use a <code>DatePicker</code>code> widget to enter the values for the date (month, day, year) or a <code>TimePicker</code> widget to enter the values for a time (hour, minute, AM/PM), which will be formatted automatically for the user's locale.</td>
+	<td>{@link android.widget.DatePicker}, {@link android.widget.TimePicker}</td>
+    </tr>
+</table>

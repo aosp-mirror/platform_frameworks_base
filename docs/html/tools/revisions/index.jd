@@ -1,0 +1,9 @@
+page.title=Revisions
+page.noplus=1
+@jd:body
+
+<p>The Android SDK is composed of individual packages that may undergo
+an update at their own schedule, so some have their own set of release notes. You can
+find information about some of the packages in this section, including the core <a
+href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools</a> and the latest <a
+href="{@docRoot}tools/revisions/platforms.html">Platforms</a>.</p>
