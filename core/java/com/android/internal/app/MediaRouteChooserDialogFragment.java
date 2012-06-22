@@ -70,7 +70,6 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
     };
 
     MediaRouter mRouter;
-    AudioManager mAudio;
     private int mRouteTypes;
 
     private LayoutInflater mInflater;
@@ -98,7 +97,6 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         mRouter = (MediaRouter) activity.getSystemService(Context.MEDIA_ROUTER_SERVICE);
-        mAudio = (AudioManager) activity.getSystemService(Context.AUDIO_SERVICE);
     }
 
     @Override
@@ -150,7 +148,7 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
 
         final RouteInfo selectedRoute = mRouter.getSelectedRoute(mRouteTypes);
         if (selectedRoute.getVolumeHandling() == RouteInfo.PLAYBACK_VOLUME_VARIABLE) {
-            final int maxVolume = mAudio.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+            final int maxVolume = selectedRoute.getVolumeMax();
             newValue = Math.max(0, Math.min(newValue, maxVolume));
             selectedRoute.requestSetVolume(newValue);
         }
