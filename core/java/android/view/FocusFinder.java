@@ -181,8 +181,8 @@ public class FocusFinder {
             // only interested in other non-root views
             if (focusable == focused || focusable == root) continue;
 
-            // get visible bounds of other view in same coordinate system
-            focusable.getDrawingRect(mOtherRect);
+            // get focus bounds of other view in same coordinate system
+            focusable.getFocusRect(mOtherRect);
             root.offsetDescendantRectToMyCoords(focusable, mOtherRect);
 
             if (isBetterCandidate(direction, focusedRect, mOtherRect, mBestCandidateRect)) {
