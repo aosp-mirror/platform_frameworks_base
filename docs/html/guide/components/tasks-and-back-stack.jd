@@ -183,7 +183,7 @@ destroyed. The previous activity in the stack is resumed. When an activity is de
 </ul>
 
 
-<div class="design-announce">
+<div class="note design">
 <p><strong>Navigation Design</strong></p>
   <p>For more about how app navigation works on Android, read Android Design's <a
 href="{@docRoot}design/patterns/navigation.html">Navigation</a> guide.</p>

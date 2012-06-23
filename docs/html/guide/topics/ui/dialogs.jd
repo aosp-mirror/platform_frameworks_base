@@ -75,7 +75,7 @@ of the following subclasses:</p>
 base {@link android.app.Dialog} object or any of the subclasses listed above and define a new layout.
 See the section on <a href="#CustomDialog">Creating a Custom Dialog</a> below.</p>
 
-<div class="design-announce">
+<div class="note design">
 <p><strong>Dialog Design</strong></p>
   <p>For design guidelines, read Android Design's <a
 href="{@docRoot}design/building-blocks/dialogs.html">Dialogs</a> guide.</p>
