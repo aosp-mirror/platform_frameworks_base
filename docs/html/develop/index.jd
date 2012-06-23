@@ -77,22 +77,6 @@ src="{@docRoot}images/home/developers_live.png" class="play"></div>
 a').click();return false;">Watch the latest review</a></p>
                    </div>                
                 </li>
-               <li class="item carousel-home">
-                   <div class="col-8">
-                     <img style="margin-top:30px;width:300px"
-src="{@docRoot}images/home/ics-android.png" class="play no-shadow no-transform" />
-                   </div>
-                   <div class="content-right col-6">
-                   <h2>Ice Cream Sandwich</h2>
-                   <p>Android 4.0 brings handsets and tablets together with a unified
-                   design and a set of APIs for you to build a great user experience on all devices.
-                   For information about API changes in the latest release (API level 15),
-                   read the <a href='{@docRoot}about/versions/android-4.0.3.html'>platform notes</a> and <a
-                   href='{@docRoot}sdk/api_diff/15/changes.html'>diff report</a>.</p>
-                   <p><a class="button"
-href="{@docRoot}about/versions/android-4.0-highlights.html">Read the highlights</a></p>
-                   </div>                
-                </li>
            </ul>
        </div>
    </div>
