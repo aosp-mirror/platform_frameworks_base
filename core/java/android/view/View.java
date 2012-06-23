@@ -8726,6 +8726,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * When searching for a view to focus this rectangle is used when considering if this view is
+     * a good candidate for receiving focus.
+     *
+     * By default, the rectangle is the {@link #getDrawingRect}) of the view.
+     *
+     * @param r The rectangle to fill in, in this view's coordinates.
+     */
+    public void getFocusRect(Rect r) {
+        getDrawingRect(r);
+    }
+
+   /**
      * Utility method to retrieve the inverse of the current mMatrix property.
      * We cache the matrix to avoid recalculating it when transform properties
      * have not changed.
