@@ -164,7 +164,7 @@ public class AppWindowAnimator {
         }
         transformation.clear();
         final boolean more = animation.getTransformation(currentTime, transformation);
-        if (WindowManagerService.DEBUG_ANIM) Slog.v(
+        if (false && WindowManagerService.DEBUG_ANIM) Slog.v(
             TAG, "Stepped animation in " + mAppToken + ": more=" + more + ", xform=" + transformation);
         if (!more) {
             animation = null;

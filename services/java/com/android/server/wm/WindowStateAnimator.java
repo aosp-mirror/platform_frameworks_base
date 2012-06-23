@@ -203,7 +203,7 @@ class WindowStateAnimator {
         }
         mTransformation.clear();
         final boolean more = mAnimation.getTransformation(currentTime, mTransformation);
-        if (DEBUG_ANIM) Slog.v(
+        if (false && DEBUG_ANIM) Slog.v(
             TAG, "Stepped animation in " + this +
             ": more=" + more + ", xform=" + mTransformation);
         return more;
@@ -896,7 +896,7 @@ class WindowStateAnimator {
                 //Slog.i(TAG, "Not applying alpha transform");
             }
 
-            if (WindowManagerService.localLOGV && (mShownAlpha == 1.0 || mShownAlpha == 0.0)) Slog.v(
+            if ((DEBUG_SURFACE_TRACE || WindowManagerService.localLOGV) && (mShownAlpha == 1.0 || mShownAlpha == 0.0)) Slog.v(
                 TAG, "computeShownFrameLocked: Animating " + this +
                 " mAlpha=" + mAlpha +
                 " self=" + (selfTransformation ? mTransformation.getAlpha() : "null") +
@@ -1144,8 +1144,8 @@ class WindowStateAnimator {
                 }
             }
         } else {
-            if (DEBUG_ANIM) {
-                // Slog.v(TAG, "prepareSurface: No changes in animation for " + mWin);
+            if (DEBUG_ANIM && isAnimating()) {
+                Slog.v(TAG, "prepareSurface: No changes in animation for " + this);
             }
             displayed = true;
         }
