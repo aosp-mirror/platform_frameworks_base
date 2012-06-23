@@ -122,6 +122,8 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
     }
 
     void updateVolume() {
+        if (mRouter == null) return;
+
         final RouteInfo selectedRoute = mRouter.getSelectedRoute(mRouteTypes);
         mVolumeIcon.setImageResource(
                 selectedRoute.getPlaybackType() == RouteInfo.PLAYBACK_TYPE_LOCAL ?
