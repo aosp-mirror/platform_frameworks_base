@@ -3637,6 +3637,7 @@
 <!-- ===============================================================
      Resources added in version 16 of the platform (Jelly Bean)
      =============================================================== -->
+  <eat-comment />
   <public type="attr" name="parentActivityName" id="0x010103a7" />
   <public type="attr" name="permissionGroupFlags" id="0x010103a8" />
   <public type="attr" name="isolatedProcess" id="0x010103a9" />
