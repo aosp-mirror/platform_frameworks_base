@@ -63,7 +63,7 @@ service.</p>
 
 <li><em>Subscriptions</em> &mdash; Items that are sold with a developer-specified, recurring billing interval. When a user purchases a subscription, Google Play and its payment processor automatically bill the user's account at the specified interval and price, charging the amount to the original payment method. Once the user purchases a subscription, Google Play continues billing the account indefinitely, without requiring approval or action from the user. The user can cancel the subscription at any time. 
 
-<p>Subscriptions can only be sold using the "managed per user account" purchase type. As with in-app products, once the user has purchased an in-app product there is no refund window. Users desiring refunds must contact the developer directly. For more information about subscriptions and how to sell them in your apps, see the <a href="billing-subscriptions.html">Subscriptions</a> document.</p></li>
+<p>Subscriptions can only be sold using the "managed per user account" purchase type. As with in-app products, once the user has purchased an in-app product there is no refund window. Users desiring refunds must contact the developer directly. For more information about subscriptions and how to sell them in your apps, see the <a href="billing_subscriptions.html">Subscriptions</a> document.</p></li>
 </ul>
 
 <h3 id="purchasetypes">Purchase Types</h3>
