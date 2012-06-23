@@ -8,6 +8,7 @@ parent.link=manifest-intro.html
 <dd><pre class="stx">&lt;service android:<a href="#enabled">enabled</a>=["true" | "false"]
          android:<a href="#exported">exported</a>=["true" | "false"]
          android:<a href="#icon">icon</a>="<i>drawable resource</i>"
+         android:<a href="#isolated">isolatedProcess</a>=["true" | "false"]
          android:<a href="#label">label</a>="<i>string resource</i>"
          android:<a href="#nm">name</a>="<i>string</i>"
          android:<a href="#prmsn">permission</a>="<i>string</i>"
@@ -91,6 +92,12 @@ default icon for all the service's intent filters (see the
 <code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code> element's 
 <code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html#icon">icon</a></code> attribute).
 </p></dd> 
+
+<dt><a name="isolated"></a>{@code android:isolatedProcess}</dt>
+<dd>If set to true, this service will run under a special process that is isolated from the
+  rest of the system and has no permissions of its own.
+  The only communication with it is through the Service API 
+  (binding and starting).</dd>
 
 <dt><a name="label"></a>{@code android:label}</dt>
 <dd>A name for the service that can be displayed to users.  

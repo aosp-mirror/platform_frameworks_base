@@ -24,6 +24,7 @@ parent.link=manifest-intro.html
           android:<a href="#multi">multiprocess</a>=["true" | "false"]
           android:<a href="#nm">name</a>="<i>string</i>"
           android:<a href="#nohist">noHistory</a>=["true" | "false"]  <!-- ##api level 3## -->
+          android:<a href="#parent">parentActivityName</a>="<i>string</i>" <!-- api level 16 -->
           android:<a href="#prmsn">permission</a>="<i>string</i>"
           android:<a href="#proc">process</a>="<i>string</i>"
           android:<a href="#screen">screenOrientation</a>=["unspecified" | "user" | "behind" |
@@ -562,6 +563,24 @@ so the user will not be able to return to it.
 <p>
 This attribute was introduced in API Level 3.
 </p>
+</dd>
+
+<!-- api level 16 -->
+<dt><a name="parent"></a>{@code android:parentActivityName}</dt>
+<dd>The class name of the logical parent of the activity. The name here must be formatted
+  the same as the corresponding activity is declared in its own
+  <a href="#nm">android:name</a>.
+  
+<p>The system reads this attribute to determine which activity should be started when
+  the use presses the Up button in the action bar. The system can also use this information to
+  synthesize a back stack of activities with {@link android.app.TaskStackBuilder}.</p>
+
+<p>
+This attribute was introduced in API Level 16.
+</p>
+</dd>
+
+
 
 <dt><a name="prmsn"></a>{@code android:permission}</dt>
 <dd>The name of a permission that clients must have to launch the activity 

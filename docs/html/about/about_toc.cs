@@ -2,14 +2,18 @@
   
 <li class="nav-section">
     <div class="nav-section-header"><a href="<?cs var:toroot?>about/index.html">Welcome</a></div>
-    <ul>    
-     <!-- <li><a href="<?cs var:toroot ?>about/marketplace.html">Open Marketplace</a></li>
-    
-       <li><a href="<?cs var:toroot ?>about/flexible.html">Flexible Framework</a></li>
-    -->
+    <ul>
       <li><a href="<?cs var:toroot?>about/start.html">Get Started</a></li>
     </ul>
   </li> 
+
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="<?cs var:toroot ?>about/versions/jelly-bean.html">
+      <span class="en">Jelly Bean</span></a></div>
+      <ul>
+        <li><a href="<?cs var:toroot ?>about/versions/android-4.1.html">Android 4.1 APIs</a></li>
+      </ul>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="<?cs var:toroot ?>about/versions/android-4.0-highlights.html">
