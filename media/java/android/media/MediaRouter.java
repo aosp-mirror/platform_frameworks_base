@@ -1152,8 +1152,8 @@ public class MediaRouter {
             route.mGroup = this;
             mUpdateName = true;
             updateVolume();
-            dispatchRouteGrouped(route, this, at);
             routeUpdated();
+            dispatchRouteGrouped(route, this, at);
         }
 
         /**
@@ -1176,8 +1176,8 @@ public class MediaRouter {
             route.mGroup = this;
             mUpdateName = true;
             updateVolume();
-            dispatchRouteGrouped(route, this, insertAt);
             routeUpdated();
+            dispatchRouteGrouped(route, this, insertAt);
         }
 
         /**

@@ -374,5 +374,16 @@ public class MediaRouteButton extends View {
         public void onRouteRemoved(MediaRouter router, RouteInfo info) {
             updateRouteCount();
         }
+
+        @Override
+        public void onRouteGrouped(MediaRouter router, RouteInfo info, RouteGroup group,
+                int index) {
+            updateRouteCount();
+        }
+
+        @Override
+        public void onRouteUngrouped(MediaRouter router, RouteInfo info, RouteGroup group) {
+            updateRouteCount();
+        }
     }
 }
