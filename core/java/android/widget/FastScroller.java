@@ -181,10 +181,13 @@ class FastScroller {
     }
 
     public void setScrollbarPosition(int position) {
+        if (position == View.SCROLLBAR_POSITION_DEFAULT) {
+            position = mList.isLayoutRtl() ?
+                    View.SCROLLBAR_POSITION_LEFT : View.SCROLLBAR_POSITION_RIGHT;
+        }
         mPosition = position;
         switch (position) {
             default:
-            case View.SCROLLBAR_POSITION_DEFAULT:
             case View.SCROLLBAR_POSITION_RIGHT:
                 mOverlayDrawable = mOverlayDrawableRight;
                 break;
@@ -229,7 +232,6 @@ class FastScroller {
         final int viewWidth = mList.getWidth();
         // Bounds are always top right. Y coordinate get's translated during draw
         switch (mPosition) {
-            case View.SCROLLBAR_POSITION_DEFAULT:
             case View.SCROLLBAR_POSITION_RIGHT:
                 mThumbDrawable.setBounds(viewWidth - mThumbW, 0, viewWidth, mThumbH);
                 break;
@@ -327,7 +329,6 @@ class FastScroller {
             }
             int left = 0;
             switch (mPosition) {
-                case View.SCROLLBAR_POSITION_DEFAULT:
                 case View.SCROLLBAR_POSITION_RIGHT:
                     left = viewWidth - (mThumbW * alpha) / ScrollFade.ALPHA_MAX;
                     break;
@@ -360,7 +361,6 @@ class FastScroller {
                 int left = 0;
                 switch (mPosition) {
                     default:
-                    case View.SCROLLBAR_POSITION_DEFAULT:
                     case View.SCROLLBAR_POSITION_RIGHT:
                         left = Math.max(0,
                                 mThumbDrawable.getBounds().left - mThumbW - mOverlaySize);
@@ -410,7 +410,6 @@ class FastScroller {
         if (mThumbDrawable != null) {
             switch (mPosition) {
                 default:
-                case View.SCROLLBAR_POSITION_DEFAULT:
                 case View.SCROLLBAR_POSITION_RIGHT:
                     mThumbDrawable.setBounds(w - mThumbW, 0, w, mThumbH);
                     break;
@@ -820,7 +819,6 @@ class FastScroller {
         boolean inTrack = false;
         switch (mPosition) {
             default:
-            case View.SCROLLBAR_POSITION_DEFAULT:
             case View.SCROLLBAR_POSITION_RIGHT:
                 inTrack = x > mList.getWidth() - mThumbW;
                 break;
