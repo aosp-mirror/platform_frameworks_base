@@ -2377,7 +2377,7 @@
         <!-- The minimal period in milliseconds between two accessibility events of the same type
              are sent to this serivce. This setting can be changed at runtime by calling
              {@link android.accessibilityservice.AccessibilityService#setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)
-             android.accessibilityservice.AccessibilityService.setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)}. -->>
+             android.accessibilityservice.AccessibilityService.setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)}. -->
         <attr name="notificationTimeout" format="integer" />
         <!-- Additional flags as specified in
              {@link android.accessibilityservice.AccessibilityServiceInfo}.
