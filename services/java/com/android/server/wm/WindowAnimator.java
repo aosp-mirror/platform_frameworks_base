@@ -47,9 +47,6 @@ public class WindowAnimator {
     private class InnerLoopParams {
         boolean mTokenMayBeDrawn;
         boolean mForceHiding;
-        WindowState mDetachedWallpaper = null;
-        WindowState mWindowAnimationBackground;
-        int mWindowAnimationBackgroundColor;
     }
     InnerLoopParams mInner = new InnerLoopParams();
 
@@ -122,6 +119,8 @@ public class WindowAnimator {
                 }
             }
         };
+
+        mWindowAnimationBackgroundSurface = new DimSurface(mService.mFxSession);
     }
 
     /** Copy all WindowManagerService params into local params here. Locked on 'this'. */
@@ -159,46 +158,6 @@ public class WindowAnimator {
                 }
                 token.hidden = true;
             }
-        }
-    }
-
-    private void testWallpaperAndBackgroundLocked() {
-        final WindowState detachedWallpaper = mInner.mDetachedWallpaper;
-        if (mWindowDetachedWallpaper != detachedWallpaper) {
-            if (WindowManagerService.DEBUG_WALLPAPER) Slog.v(TAG,
-                    "Detached wallpaper changed from " + mWindowDetachedWallpaper
-                    + " to " + detachedWallpaper);
-            mWindowDetachedWallpaper = detachedWallpaper;
-            mBulkUpdateParams |= SET_WALLPAPER_MAY_CHANGE;
-        }
-
-        if (mInner.mWindowAnimationBackgroundColor != 0) {
-            // If the window that wants black is the current wallpaper
-            // target, then the black goes *below* the wallpaper so we
-            // don't cause the wallpaper to suddenly disappear.
-            WindowState target = mInner.mWindowAnimationBackground;
-            if (mService.mWallpaperTarget == target
-                    || mService.mLowerWallpaperTarget == target
-                    || mService.mUpperWallpaperTarget == target) {
-                final int N = mWinAnimators.size();
-                for (int i = 0; i < N; i++) {
-                    WindowStateAnimator winAnimator = mWinAnimators.get(i);
-                    if (winAnimator.mWin.mIsWallpaper) {
-                        target = winAnimator.mWin;
-                        break;
-                    }
-                }
-            }
-            if (mWindowAnimationBackgroundSurface == null) {
-                mWindowAnimationBackgroundSurface = new DimSurface(mService.mFxSession);
-            }
-            final int dw = mDw;
-            final int dh = mDh;
-            mWindowAnimationBackgroundSurface.show(dw, dh,
-                    target.mWinAnimator.mAnimLayer - WindowManagerService.LAYER_OFFSET_DIM,
-                    mInner.mWindowAnimationBackgroundColor);
-        } else if (mWindowAnimationBackgroundSurface != null) {
-            mWindowAnimationBackgroundSurface.hide();
         }
     }
 
@@ -259,6 +218,9 @@ public class WindowAnimator {
 
         ArrayList<WindowStateAnimator> unForceHiding = null;
         boolean wallpaperInUnForceHiding = false;
+        WindowStateAnimator windowAnimationBackground = null;
+        int windowAnimationBackgroundColor = 0;
+        WindowState detachedWallpaper = null;
 
         for (int i = mWinAnimators.size() - 1; i >= 0; i--) {
             WindowStateAnimator winAnimator = mWinAnimators.get(i);
@@ -281,15 +243,14 @@ public class WindowAnimator {
                     if (winAnimator.mAnimation != null) {
                         if ((flags & FLAG_SHOW_WALLPAPER) != 0
                                 && winAnimator.mAnimation.getDetachWallpaper()) {
-                            mInner.mDetachedWallpaper = win;
+                            detachedWallpaper = win;
                         }
                         final int backgroundColor = winAnimator.mAnimation.getBackgroundColor();
                         if (backgroundColor != 0) {
-                            final WindowState background = mInner.mWindowAnimationBackground;
-                            if (background == null || (winAnimator.mAnimLayer <
-                                    background.mWinAnimator.mAnimLayer)) {
-                                mInner.mWindowAnimationBackground = win;
-                                mInner.mWindowAnimationBackgroundColor = backgroundColor;
+                            if (windowAnimationBackground == null || (winAnimator.mAnimLayer <
+                                    windowAnimationBackground.mAnimLayer)) {
+                                windowAnimationBackground = winAnimator;
+                                windowAnimationBackgroundColor = backgroundColor;
                             }
                         }
                     }
@@ -305,15 +266,14 @@ public class WindowAnimator {
                         && appAnimator.animating) {
                     if ((flags & FLAG_SHOW_WALLPAPER) != 0
                             && appAnimator.animation.getDetachWallpaper()) {
-                        mInner.mDetachedWallpaper = win;
+                        detachedWallpaper = win;
                     }
                     final int backgroundColor = appAnimator.animation.getBackgroundColor();
                     if (backgroundColor != 0) {
-                        final WindowState background = mInner.mWindowAnimationBackground;
-                        if (background == null || (winAnimator.mAnimLayer <
-                                background.mWinAnimator.mAnimLayer)) {
-                            mInner.mWindowAnimationBackground = win;
-                            mInner.mWindowAnimationBackgroundColor = backgroundColor;
+                        if (windowAnimationBackground == null || (winAnimator.mAnimLayer <
+                                windowAnimationBackground.mAnimLayer)) {
+                            windowAnimationBackground = winAnimator;
+                            windowAnimationBackgroundColor = backgroundColor;
                         }
                     }
                 }
@@ -454,6 +414,42 @@ public class WindowAnimator {
             }
         } // end forall windows
 
+        if (mWindowDetachedWallpaper != detachedWallpaper) {
+            if (WindowManagerService.DEBUG_WALLPAPER) Slog.v(TAG,
+                    "Detached wallpaper changed from " + mWindowDetachedWallpaper
+                    + " to " + detachedWallpaper);
+            mWindowDetachedWallpaper = detachedWallpaper;
+            mBulkUpdateParams |= SET_WALLPAPER_MAY_CHANGE;
+        }
+
+        if (windowAnimationBackgroundColor != 0) {
+            // If the window that wants black is the current wallpaper
+            // target, then the black goes *below* the wallpaper so we
+            // don't cause the wallpaper to suddenly disappear.
+            int animLayer = windowAnimationBackground.mAnimLayer;
+            WindowState win = windowAnimationBackground.mWin;
+            if (windowAnimationBackground != null && mService.mWallpaperTarget == win
+                    || mService.mLowerWallpaperTarget == win
+                    || mService.mUpperWallpaperTarget == win) {
+                final int N = mWinAnimators.size();
+                for (int i = 0; i < N; i++) {
+                    WindowStateAnimator winAnimator = mWinAnimators.get(i);
+                    if (winAnimator.mWin.mIsWallpaper) {
+                        animLayer = winAnimator.mAnimLayer;
+                        break;
+                    }
+                }
+            }
+
+            final int dw = mDw;
+            final int dh = mDh;
+            mWindowAnimationBackgroundSurface.show(dw, dh,
+                    animLayer - WindowManagerService.LAYER_OFFSET_DIM,
+                    windowAnimationBackgroundColor);
+        } else {
+            mWindowAnimationBackgroundSurface.hide();
+        }
+
         // If we have windows that are being show due to them no longer
         // being force-hidden, apply the appropriate animation to them.
         if (unForceHiding != null) {
@@ -517,9 +513,6 @@ public class WindowAnimator {
     private void performAnimationsLocked() {
         mInner.mTokenMayBeDrawn = false;
         mInner.mForceHiding = false;
-        mInner.mDetachedWallpaper = null;
-        mInner.mWindowAnimationBackground = null;
-        mInner.mWindowAnimationBackgroundColor = 0;
 
         updateWindowsAndWallpaperLocked();
         if ((mPendingLayoutChanges & WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER) != 0) {
@@ -550,7 +543,6 @@ public class WindowAnimator {
         try {
             updateWindowsAppsAndRotationAnimationsLocked();
             performAnimationsLocked();
-            testWallpaperAndBackgroundLocked();
 
             // THIRD LOOP: Update the surfaces of all windows.
 
@@ -595,7 +587,7 @@ public class WindowAnimator {
                 animToLayout.mBulkUpdateParams = mBulkUpdateParams;
                 animToLayout.mPendingLayoutChanges = mPendingLayoutChanges;
                 animToLayout.mWindowDetachedWallpaper = mWindowDetachedWallpaper;
-                mService.setAnimatorParameters();
+                mService.setAnimatorParametersLocked();
             }
         }
 

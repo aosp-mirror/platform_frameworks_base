@@ -642,10 +642,13 @@ public class WindowManagerService extends IWindowManager.Stub
     }
     final LayoutFields mInnerFields = new LayoutFields();
 
+    /* Parameters being passed from mAnimator into this. 
+     * Do not modify unless holding (mWindowMap or mAnimator) and mAnimToLayout in that order */
     static class AnimatorToLayoutParams {
-      int mBulkUpdateParams;
-      int mPendingLayoutChanges;
-      WindowState mWindowDetachedWallpaper;
+        boolean mUpdateQueued;
+        int mBulkUpdateParams;
+        int mPendingLayoutChanges;
+        WindowState mWindowDetachedWallpaper;
     }
     final AnimatorToLayoutParams mAnimToLayout = new AnimatorToLayoutParams();
 
@@ -877,6 +880,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mHoldingScreenWakeLock.setReferenceCounted(false);
 
         mInputManager = new InputManagerService(context, mInputMonitor);
+        mFxSession = new SurfaceSession();
         mAnimator = new WindowAnimator(this, context, mPolicy);
 
         PolicyThread thr = new PolicyThread(mPolicy, this, context, pm);
@@ -895,7 +899,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
         // Add ourself to the Watchdog monitors.
         Watchdog.getInstance().addMonitor(this);
-        mFxSession = new SurfaceSession();
 
         Surface.openTransaction();
         createWatermark();
@@ -2322,7 +2325,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (localLOGV) Slog.v(
                 TAG, "New client " + client.asBinder()
                 + ": window=" + win);
-            
+
             if (win.isVisibleOrAdding() && updateOrientationFromAppTokensLocked(false)) {
                 reportNewConfig = true;
             }
@@ -2513,7 +2516,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 win.mAppToken.updateReportedVisibilityLocked();
             }
         }
-        
+
         mInputMonitor.updateInputWindowsLw(true /*force*/);
     }
 
@@ -2811,7 +2814,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 } catch (Exception e) {
                     mInputMonitor.updateInputWindowsLw(true /*force*/);
-                    
+
                     Slog.w(TAG, "Exception thrown when creating surface for client "
                              + client + " (" + win.mAttrs.getTitle() + ")",
                              e);
@@ -3402,7 +3405,7 @@ public class WindowManagerService extends IWindowManager.Stub
         Slog.w(TAG, msg);
         return false;
     }
-    
+
     boolean okToDisplay() {
         return !mDisplayFrozen && mDisplayEnabled && mPolicy.isScreenOnFully();
     }
@@ -3436,6 +3439,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @Override
     public void removeWindowToken(IBinder token) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "removeWindowToken()")) {
@@ -3553,6 +3557,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @Override
     public void setAppGroupId(IBinder token, int groupId) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "setAppStartingIcon()")) {
@@ -3595,9 +3600,9 @@ public class WindowManagerService extends IWindowManager.Stub
             if((req == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED) ||
                     (req == ActivityInfo.SCREEN_ORIENTATION_BEHIND)){
                 continue;
-            } else {
-                return (mLastWindowForcedOrientation=req);
             }
+
+            return (mLastWindowForcedOrientation=req);
         }
         return (mLastWindowForcedOrientation=ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
     }
@@ -7252,6 +7257,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     // Used to send multiple changes from the animation side to the layout side.
                     synchronized (mWindowMap) {
                         synchronized (mAnimToLayout) {
+                            mAnimToLayout.mUpdateQueued = false;
                             boolean doRequest = false;
                             final int bulkUpdateParams = mAnimToLayout.mBulkUpdateParams;
                             // TODO(cmautner): As the number of bits grows, use masks of bit groups to
@@ -10029,7 +10035,11 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    void setAnimatorParameters() {
-        mH.sendMessage(mH.obtainMessage(H.UPDATE_ANIM_PARAMETERS));
+    /** Locked on mAnimToLayout */
+    void setAnimatorParametersLocked() {
+        if (!mAnimToLayout.mUpdateQueued) {
+            mAnimToLayout.mUpdateQueued = true;
+            mH.sendMessage(mH.obtainMessage(H.UPDATE_ANIM_PARAMETERS));
+        }
     }
 }
