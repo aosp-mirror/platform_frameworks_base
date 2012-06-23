@@ -3,7 +3,7 @@ page.title=User Interface Guidelines
 
 
 
-<div class="design-announce" style="background:none;overflow:auto;padding:10px 5px">
+<div class="note design" style="background:none;overflow:auto;padding:10px 5px">
   <a href="{@docRoot}design/index.html"><img src="{@docRoot}images/home/android-design.png" alt=""
 style="float:left;margin:0 1em 0 0;"/></a>
 <p><strong>New Guides for App Designers!</strong></p> 

@@ -68,7 +68,7 @@ when selected by the user.</p>
 <p class="img-caption"><strong>Figure 2.</strong> The notifications window.</p>
 
 
-<div class="design-announce">
+<div class="note design">
 <p><strong>Notification Design</strong></p>
   <p>For design guidelines, read Android Design's <a
 href="{@docRoot}design/patterns/notifications.html">Notifications</a> guide.</p>
