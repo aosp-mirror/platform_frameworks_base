@@ -119,6 +119,6 @@
             android:drawablePadding="8dip"
             android:visibility="gone"/>
 
-    </RelativeLayout>>
+    </RelativeLayout>
 
 </LinearLayout>
