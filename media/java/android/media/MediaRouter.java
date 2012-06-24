@@ -240,7 +240,7 @@ public class MediaRouter {
         for (int i = 0; i < count; i++) {
             final CallbackInfo info = sStatic.mCallbacks.get(i);
             if (info.cb == cb) {
-                info.type &= types;
+                info.type |= types;
                 return;
             }
         }
@@ -342,6 +342,7 @@ public class MediaRouter {
         if (cat.isGroupable() && !(info instanceof RouteGroup)) {
             // Enforce that any added route in a groupable category must be in a group.
             final RouteGroup group = new RouteGroup(info.getCategory());
+            group.mSupportedTypes = info.mSupportedTypes;
             sStatic.mRoutes.add(group);
             dispatchRouteAdded(group);
             group.addRoute(info);
