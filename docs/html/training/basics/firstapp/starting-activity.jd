@@ -55,7 +55,7 @@ href="{@docRoot}reference/android/view/View.html#attr_android:onClick">{@code an
 attribute to the {@link android.widget.Button &lt;Button>} element:</p>
 
 <pre>
-&lt;Button android:id="@+id/button_send"
+&lt;Button
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:text="@string/button_send"

@@ -262,7 +262,9 @@ class.</p>
 </pre>
 
 <p>The height and width are set to <code>"wrap_content"</code> so the button is only as big as
-necessary to fit the button's text.</p>
+necessary to fit the button's text. This button doesn't need the 
+<a href="{@docRoot}reference/android/view/View.html#attr_android:id">{@code android:id}</a>
+attribute, because it won't be referenced from the activity code.</p>
 
 
 
@@ -337,7 +339,7 @@ android.widget.LinearLayout}.</p>
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:hint="@string/edit_message" />
-    &lt;Button android:id="@+id/button_send"
+    &lt;Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/button_send" />
