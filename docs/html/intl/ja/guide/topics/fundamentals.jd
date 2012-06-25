@@ -526,7 +526,7 @@ RPC インターフェースに含めることができるのはメソッドの�
 </p>
 
 <p>
-このメカニズムを簡単に説明すると次のようになります。まず、シンプルなインターフェース定義言語（IDL）を使用して、実装したい RPC インターフェースを宣言します。<code><a href="{@docRoot}tools/aidl.html">aidl</a></code> ツールにより、RPC インターフェースの宣言から Java インターフェース定義が生成されます。この定義は、ローカルとリモートの両方のプロセスで使用する必要があります。定義には、次の図に示すように 2 つの内部クラスが含まれています:
+このメカニズムを簡単に説明すると次のようになります。まず、シンプルなインターフェース定義言語（IDL）を使用して、実装したい RPC インターフェースを宣言します。<code><a href="{@docRoot}guide/components/aidl.html">aidl</a></code> ツールにより、RPC インターフェースの宣言から Java インターフェース定義が生成されます。この定義は、ローカルとリモートの両方のプロセスで使用する必要があります。定義には、次の図に示すように 2 つの内部クラスが含まれています:
 </p>
 
 <p style="margin-left: 2em">
@@ -560,7 +560,7 @@ onServiceDisconnected()}</code> メソッドが実装されているため、リ
 </ul>
 
 <p>
-ここでは、説明を簡単にするため、RPC メカニズムの細かい点は省略しています。詳しくは、<a href="{@docRoot}tools/aidl.html">Designing a Remote Interface Using AIDL</a>、および {@link android.os.IBinder IBinder} クラスの説明をご覧ください。
+ここでは、説明を簡単にするため、RPC メカニズムの細かい点は省略しています。詳しくは、<a href="{@docRoot}guide/components/aidl.html">Designing a Remote Interface Using AIDL</a>、および {@link android.os.IBinder IBinder} クラスの説明をご覧ください。
 </p>  
 
 

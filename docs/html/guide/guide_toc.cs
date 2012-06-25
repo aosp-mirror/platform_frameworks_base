@@ -41,6 +41,9 @@
           <li><a href="<?cs var:toroot ?>guide/components/bound-services.html">
               <span class="en">Bound Services</span>
             </a></li>
+          <li><a href="<?cs var:toroot ?>guide/components/aidl.html">
+              <span class="en">AIDL</span>
+            </a></li>
         </ul>
       </li>
       <li class="nav-section">
