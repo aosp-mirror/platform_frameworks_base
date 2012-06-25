@@ -323,7 +323,7 @@ public class AppWidgetManager {
      * 
      * <p>
      * The total Bitmap memory used by the RemoteViews object cannot exceed that required to
-     * fill the screen once, ie. (screen width x screen height x 4) bytes.
+     * fill the screen 1.5 times, ie. (screen width x screen height x 4 x 1.5) bytes.
      *
      * @param appWidgetIds     The AppWidget instances for which to set the RemoteViews.
      * @param views         The RemoteViews object to show.
@@ -391,7 +391,7 @@ public class AppWidgetManager {
      *
      * <p>
      * The total Bitmap memory used by the RemoteViews object cannot exceed that required to
-     * fill the screen once, ie. (screen width x screen height x 4) bytes.
+     * fill the screen 1.5 times, ie. (screen width x screen height x 4 x 1.5) bytes.
      *
      * @param appWidgetId      The AppWidget instance for which to set the RemoteViews.
      * @param views         The RemoteViews object to show.
