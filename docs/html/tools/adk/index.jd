@@ -1,0 +1,34 @@
+page.title=Accessory Development Kit
+@jd:body
+
+<p>The Accessory Development Kit (ADK) is a reference implementation for hardware manufacturers and
+hobbyists to use as a starting point for building accessories for Android. Each ADK release is
+provided with source code and hardware specifications to make the process of developing your own
+accessories easier. Creating new and alternative hardware based on the ADK is encouraged!</p>
+
+<p>Android accessories can be audio docking stations, exercise machines, personal medical testing
+devices, weather stations, or any other external hardware device that adds to the functionality of
+Android.</p>
+
+<p>Accessories use the Android Open Accessory (AOA) protocol to communicate with Android
+devices, over USB cable or through a Bluetooth connection. If you are building an accessory for
+Android devices, make sure you review the information below to understand about how to implement the
+AOA protocol.</p>
+
+<p>The following sections provide more information about the Android Accessory Development Kits, how
+to use them, and how to get started building your own accessories for Android.</p>
+
+<dl>
+  <dt><a href="adk2.html">ADK 2012 Guide</a></dt>
+  <dd>Guide to getting started with the ADK released at Google I/O 2012.</dd>
+
+  <dt><a href="adk.html">ADK 2011 Guide</a></dt>
+  <dd>Guide to getting started with the original ADK, released at Google I/O 2011.</dd>
+
+  <dt><a href="aoa.html">Android Open Accessory Protocol</a></dt>
+  <dd>Guide to implementing the Android Open Accessory Protocol.</dd>
+
+  <dt><a href="aoa2.html">Android Open Accessory Protocol 2.0</a></dt>
+  <dd>A description and guide to implementing the extended Android Open Accessory Protocol which
+  supports audio dock accessories.</dd>
+</dl>

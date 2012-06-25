@@ -1,4 +1,4 @@
-page.title=Android Open Accessory Development Kit
+page.title=Accessory Development Kit 2011 Guide
 @jd:body
 
   <div id="qv-wrapper">
@@ -20,21 +20,6 @@ page.title=Android Open Accessory Development Kit
             <li><a href="#running-demokit">Running the DemoKit Android application</a></li>
 
             <li><a href="#monitoring">Monitoring the ADK board</a></li>
-          </ol>
-        </li>
-
-        <li>
-          <a href="#accessory-protocol">Implementing the Android Accessory Protocol</a>
-
-          <ol>
-            <li><a href="#wait">Wait for and detect connected devices</a></li>
-
-            <li><a href="#determine">Determine the connected device's accessory mode
-            support</a></li>
-
-            <li><a href="#start">Attempt to start the device in accessory mode</a></li>
-
-            <li><a href="#establish">Establish communication with the device</a></li>
           </ol>
         </li>
 
@@ -66,72 +51,26 @@ page.title=Android Open Accessory Development Kit
         <li><a href="{@docRoot}guide/topics/connectivity/usb/accessory.html">USB Accessory Dev Guide</a></li>
       </ol>
 
-      <h2>Where to buy</h2>
-
-      <ol>
-
-      <li><a href="http://store.arduino.cc/">
-        Arduino Store</a></li>
-
-      <li><a href="https://store.diydrones.com/ProductDetails.asp?ProductCode=BR-PhoneDrone">
-        DIY Drones</a></li>
-
-      <li><a href=
-        "http://mbed.org/order/">
-        mbed</a></li>
-
-      <li><a href=
-        "http://www.microchip.com/android">
-        Microchip</a></li>
-
-      <li><a href="http://shop.moderndevice.com/products/freeduino-usb-host-board">
-        Modern Device</a></li>
-
-      <li><a href=
-        "http://www.rt-net.jp/shop/index.php?main_page=product_info&cPath=3_4&products_id=1">
-        RT Corp</a></li>
-
-      <li><a href="http://www.seeedstudio.com/depot/seeeduino-adk-main-board-p-846.html">
-        Seeed Studio</a></li>
-
-      <li><a href="http://www.sparkfun.com/products/10748">
-        SparkFun</a></li>
-
-      <li><a href="http://troido.de/de/shoplsmallgbuy-android-stufflsmallg">
-        Troido</a></li>
-
-      </ol>
     </div>
   </div>
 
-  <p>The Android 3.1 platform (also backported to Android 2.3.4) introduces Android Open Accessory
-  support, which allows external USB hardware (an Android USB accessory) to interact with an
-  Android-powered device in a special "accessory" mode. When an Android-powered powered device is
-  in accessory mode, the connected accessory acts as the USB host (powers the bus and enumerates
-  devices) and the Android-powered device acts as the USB device. Android USB accessories are
-  specifically designed to attach to Android-powered devices and adhere to a simple protocol
-  (Android accessory protocol) that allows them to detect Android-powered devices that support
-  accessory mode. Accessories must also provide 500mA at 5V for charging power. Many previously
-  released Android-powered devices are only capable of acting as a USB device and cannot initiate
-  connections with external USB devices. Android Open Accessory support overcomes this limitation
-  and allows you to build accessories that can interact with an assortment of Android-powered
-  devices by allowing the accessory to initiate the connection.</p>
+  <p>The Android Open Accessory Development Kit (ADK) is a reference implementation of an Android
+  Open Accessory, based on the <a href="http://www.arduino.cc/">Arduino open source electronics
+  prototyping platform</a>. The accessory's hardware design files, code that implements the
+  accessory's firmware, and the Android application that interacts with the accessory are provided
+  as part of the kit to help hardware builders and software developers get started building their
+  own accessories. The hardware design files and firmware code are contained in the <a href=
+  "https://dl-ssl.google.com/android/adk/adk_release_20120606.zip">ADK package download</a>.</p>
 
-  <p class="note"><strong>Note:</strong> Accessory mode is ultimately dependent on the device's
-  hardware and not all devices will support accessory mode. Devices that support accessory mode can
-  be filtered using a <code>&lt;uses-feature&gt;</code> element in your corresponding application's
-  Android manifest. For more information, see the <a href=
-  "{@docRoot}guide/topics/connectivity/usb/accessory.html#manifest">USB Accessory</a> Developer Guide.</p>
-
-  <p>The following list of distributers are currently producing Android Open Accessory compatible
-  development boards:</p>
+  <p>A limited number of kits were produced and distributed at the Google I/O 2011 developer
+  conference. However, many hardware builders have reproduced and enhanced the original design and
+  these boards are available for purchase. The following list of distributors are currently
+  producing Android Open Accessory compatible development boards:</p>
 
   <ul>
-
-    <li>The <a href="http://store.arduino.cc/">Arduino Store</a> provides the Arduino Mega ADK
-    (in <a href="http://store.arduino.cc/eu/index.php?main_page=product_info&cPath=11_12&products_id=144">EU nations</a>
-    or <a href="http://store.arduino.cc/ww/index.php?main_page=product_info&cPath=11_12&products_id=144">non-EU nations</a>)
-    that is based on the ATmega2560 and supports the ADK firmware.</li>
+    <li>The <a href="http://store.arduino.cc/">Arduino Store</a> provides the <a
+href="http://arduino.cc/en/Main/ArduinoBoardADK">Arduino Mega ADK</a> (for EU nations or non-
+    EU nations) that is based on the ATmega2560 and supports the ADK firmware.</li>
 
     <li><a href="https://store.diydrones.com/ProductDetails.asp?ProductCode=BR-PhoneDrone">DIY
     Drones</a> provides an Arduino-compatible board geared towards RC (radio controlled) and UAV
@@ -157,18 +96,16 @@ page.title=Android Open Accessory Development Kit
     <li><a href="http://www.sparkfun.com/products/10748">
     SparkFun</a>'s IOIO board now has beta support for the ADK firmware.</li>
 
+    <li><a href="http://troido.de/de/shoplsmallgbuy-android-stufflsmallg">Troido</a> has produced an
+    Arduino-compatible version of the ADK hardware.</li>
+
   </ul>
 
   <p>We expect more hardware distributers to create a variety of kits, so please stay tuned for
   further developments.</p>
 
   <h2 id="components">ADK Components</h2>
-  <p>The Android Open Accessory Development Kit (ADK) provides an implementation of an Android USB
-  accessory that is based on the <a href="http://www.arduino.cc/">Arduino open source electronics
-  prototyping platform</a>, the accessory's hardware design files, code that implements the
-  accessory's firmware, and the Android application that interacts with the accessory. The hardware
-  design files and firmware code are contained in the <a href=
-  "https://dl-ssl.google.com/android/adk/adk_release_20120606.zip">ADK package download</a>.</p>
+
   <p>The main hardware and software components of the ADK include:</p>
 
   <ul>
@@ -421,145 +358,6 @@ page.title=Android Open Accessory Development Kit
   accessories communicate with Android-powered devices describe much of what you should be doing in
   your own accessory.</p>
 
-  <h2 id="accessory-protocol">Implementing the Android Accessory Protocol</h2>
-
-  <p>An Android USB accessory must adhere to Android Accessory Protocol, which defines how
-  an accessory detects and sets up communication with an Android-powered device. In general, an
-  accessory should carry out the following steps:</p>
-
-  <ol>
-    <li>Wait for and detect connected devices</li>
-
-    <li>Determine the device's accessory mode support</li>
-
-    <li>Attempt to start the device in accessory mode if needed</li>
-
-    <li>Establish communication with the device if it supports the Android accessory protocol</li>
-  </ol>
-
-  <p>The following sections go into depth about how to implement these steps.</p>
-
-  <h3 id="wait">Wait for and detect connected devices</h3>
-
-  <p>Your accessory should have logic to continuously check
-  for connected Android-powered devices. When a device is connected, your accessory should
-  determine if the device supports accessory mode.</p>
-
-  <h3 id="determine">Determine the device's accessory mode support</h3>
-
-
-  <p>When an Android-powered device is connected, it can be in one of three states:</p>
-
-  <ol type="a">
-    <li>The attached device supports Android accessory mode and is already in accessory mode.</li>
-
-    <li>The attached device supports Android accessory mode, but it is not in accessory mode.</li>
-
-    <li>The attached device does not support Android accessory mode.</li>
-  </ol>
-
-  <p>During the initial connection, the accessory should check the vendor and product IDs of the
-  connected device's USB device descriptor. The vendor ID should match Google's ID (0x18D1) and the
-  product ID should be 0x2D00 or 0x2D01 if the device is already in accessory mode (case A). If so,
-  the accessory can now <a href="#establish">establish communication with the device</a> through
-  bulk transfer endpoints with its own communication protocol. There is no need to start the device
-  in accessory mode.</p>
-
-  <p class="note"><strong>Note:</strong> 0x2D00 is reserved for Android-powered devices that
-  support accessory mode. 0x2D01 is reserved for devices that support accessory mode as well as the
-  ADB (Android Debug Bridge) protocol, which exposes a second interface with two bulk endpoints for
-  ADB. You can use these endpoints for debugging the accessory application if you are simulating
-  the accessory on a computer. In general, do not use this interface unless your accessory is
-  implementing a passthrough to ADB on the device.</p>
-
-  <p>If the vendor and product ID do not match, there is no way to distinguish between states b and
-  c, so the accessory <a href="#start">attempts to start the device in accessory mode</a> to figure
-  out if the device is supported.</p>
-
-  <h3 id="start">Attempt to start the device in accessory mode</h3>
-
-  <p>If the vendor and product IDs do not correspond to an Android-powered device in accessory
-  mode, the accessory cannot discern whether the device supports accessory mode and is not in that
-  state, or if the device does not support accessory mode at all. This is because devices that
-  support accessory mode but aren't in it initially report the device's manufacturer vendor ID and
-  product ID, and not the special Android Open Accessory ones. In either case, the accessory should try to start
-  the device into accessory mode to figure out if the device supports it. The following steps
-  explain how to do this:</p>
-
-  <ol>
-    <li>Send a 51 control request ("Get Protocol") to figure out if the device supports the Android
-    accessory protocol. A non-zero number is returned if the protocol is supported, which
-    represents the version of the protocol that the device supports (currently, only version 1
-    exists). This request is a control request on endpoint 0 with the following characteristics:
-      <pre>
-requestType:    USB_DIR_IN | USB_TYPE_VENDOR
-request:        51
-value:          0
-index:          0
-data:           protocol version number (16 bits little endian sent from the device to the accessory)
-</pre>
-    </li>
-
-    <li>If the device returns a proper protocol version, send identifying string information to the
-    device. This information allows the device to figure out an appropriate application for this
-    accessory and also present the user with a URL if an appropriate application does not exist.
-    These requests are control requests on endpoint 0 (for each string ID) with the following
-    characteristics:
-      <pre>
-requestType:    USB_DIR_OUT | USB_TYPE_VENDOR
-request:        52
-value:          0
-index:          string ID
-data            zero terminated UTF8 string sent from accessory to device
-</pre>
-
-      <p>The following string IDs are supported, with a maximum size of 256 bytes for each string
-      (must be zero terminated with \0).</p>
-      <pre>
-manufacturer name:  0
-model name:         1
-description:        2
-version:            3
-URI:                4
-serial number:      5
-</pre>
-    </li>
-
-    <li>When the identifying strings are sent, request the device start up in accessory mode. This
-    request is a control request on endpoint 0 with the following characteristics:
-      <pre>
-requestType:    USB_DIR_OUT | USB_TYPE_VENDOR
-request:        53
-value:          0
-index:          0
-data:           none
-</pre>
-    </li>
-  </ol>
-
-  <p>After sending the final control request, the connected USB device should re-introduce itself
-  on the bus in accessory mode and the accessory can re-enumerate the connected devices. The
-  algorithm jumps back to <a href="#determine">determining the device's accessory mode support</a>
-  to check for the vendor and product ID. The vendor ID and product ID of the device will be
-  different if the device successfully switched to accessory mode and will now correspond to
-  Google's vendor and product IDs instead of the device manufacturer's IDs. The accessory can now
-  <a href="#establish">establish communication with the device</a>.</p>
-
-  <p>If at any point these steps fail, the device does not support Android accessory mode and the
-  accessory should wait for the next device to be connected.</p>
-
-  <h3 id="establish">Establish communication with the device</h3>
-
-  <p>If an Android-powered device in accessory mode is detected, the accessory can query the
-  device's interface and endpoint descriptors to obtain the bulk endpoints to communicate with the
-  device. An Android-powered device that has a product ID of 0x2D00 has one interface with two bulk
-  endpoints for input and output communication. A device with product ID of 0x2D01 has two
-  interfaces with two bulk endpoints each for input and output communication. The first interface
-  is for standard communication while the second interface is for ADB communication. To communicate
-  on an interface, all you need to do is find the first bulk input and output endpoints, set the
-  device's configuration to a value of 1 with a SET_CONFIGURATION (0x09) device request, then
-  communicate using the endpoints.</p>
-
   <h2 id="firmware">How the ADK board implements the Android Accessory protocol</h2>
 
   <p>If you have access to the ADK board and shield, the following sections describe the firmware
@@ -667,8 +465,10 @@ bool AndroidAccessory::isConnected(void)
   <p>If the device is not already in accessory mode, then the ADK board must determine whether or
   not it supports it by sending control request 51 to check the version of the USB accessory
   protocol that the device supports (see <code>AndroidAccessory::getProtocol()</code>). Protocol
-  version 1 is the only version for now, but this can be an integer greater than zero in the
-  future. If the appropriate protocol version is returned, the board sends control request 52 (one
+  version 1 is supported by Android 2.3.4 (API Level 10) and higher. Protocol version 2 is
+  supported by Android 4.1 (API Level 16) and higher. Versions greater than 2 may supported in
+  the future.
+  If the appropriate protocol version is returned, the board sends control request 52 (one
   for each string with <code>AndroidAcessory:sendString()</code>) to send it's identifying
   information, and tries to start the device in accessory mode with control request 53. The
   <code>AndroidAccessory::switchDevice()</code> method takes care of this:</p>
@@ -676,7 +476,7 @@ bool AndroidAccessory::isConnected(void)
 bool AndroidAccessory::switchDevice(byte addr)
 {
     int protocol = getProtocol(addr);
-    if (protocol == 1) {
+    if (protocol >= 1) {
         Serial.print("device supports protocol 1\n");
     } else {
         Serial.print("could not read device protocol version\n");

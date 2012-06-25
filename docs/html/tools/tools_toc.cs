@@ -197,12 +197,30 @@ class="en">USB Drivers</span></a>
   </li>
 
   
-  
   <li class="nav-section">
     <div class="nav-section-header empty"><a href="<?cs var:toroot
 ?>tools/samples/index.html"><span class="en">Samples</span></a></div>
   </li>
+
   
+  <li class="nav-section">
+    <div class="nav-section-header">
+    <a href="<?cs var:toroot ?>tools/adk/index.html">
+      <span class="en">ADK</span></a>
+    </div>
+    <ul>
+      <li><a href="<?cs var:toroot ?>tools/adk/adk2.html">ADK 2012 Guide</a></li>
+      <li><a href="<?cs var:toroot ?>tools/adk/adk.html">ADK 2011 Guide</a></li>
+      <li class="nav-section">
+        <div class="nav-section-header">
+        <a href="<?cs var:toroot ?>tools/adk/aoa.html">Android Open Accessory Protocol</a>
+        </div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>tools/adk/aoa2.html">AOA 2.0</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
   
 </ul><!-- nav -->
 

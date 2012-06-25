@@ -407,7 +407,6 @@
             <ul>
               <li><a href="<?cs var:toroot ?>guide/topics/connectivity/usb/accessory.html">Accessory</a></li>
               <li><a href="<?cs var:toroot ?>guide/topics/connectivity/usb/host.html">Host</a></li>
-              <li><a href="<?cs var:toroot ?>guide/topics/connectivity/usb/adk.html">Open Accessory Dev Kit</a></li>
             </ul>
      </li>
      <li><a href="<?cs var:toroot?>guide/topics/connectivity/sip.html">
