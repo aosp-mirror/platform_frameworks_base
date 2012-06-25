@@ -744,9 +744,15 @@ public class WindowManagerService extends IWindowManager.Stub
     // The desired scaling factor for compatible apps.
     float mCompatibleScreenScale;
 
+    // If true, only the core apps and services are being launched because the device
+    // is in a special boot mode, such as being encrypted or waiting for a decryption password.
+    // For example, when this flag is true, there will be no wallpaper service.
+    final boolean mOnlyCore;
+
     public static WindowManagerService main(Context context,
-            PowerManagerService pm, boolean haveInputMethods, boolean allowBootMsgs) {
-        WMThread thr = new WMThread(context, pm, haveInputMethods, allowBootMsgs);
+            PowerManagerService pm, boolean haveInputMethods, boolean allowBootMsgs,
+            boolean onlyCore) {
+        WMThread thr = new WMThread(context, pm, haveInputMethods, allowBootMsgs, onlyCore);
         thr.start();
 
         synchronized (thr) {
@@ -767,21 +773,23 @@ public class WindowManagerService extends IWindowManager.Stub
         private final PowerManagerService mPM;
         private final boolean mHaveInputMethods;
         private final boolean mAllowBootMessages;
+        private final boolean mOnlyCore;
 
         public WMThread(Context context, PowerManagerService pm,
-                boolean haveInputMethods, boolean allowBootMsgs) {
+                boolean haveInputMethods, boolean allowBootMsgs, boolean onlyCore) {
             super("WindowManager");
             mContext = context;
             mPM = pm;
             mHaveInputMethods = haveInputMethods;
             mAllowBootMessages = allowBootMsgs;
+            mOnlyCore = onlyCore;
         }
 
         @Override
         public void run() {
             Looper.prepare();
             WindowManagerService s = new WindowManagerService(mContext, mPM,
-                    mHaveInputMethods, mAllowBootMessages);
+                    mHaveInputMethods, mAllowBootMessages, mOnlyCore);
             android.os.Process.setThreadPriority(
                     android.os.Process.THREAD_PRIORITY_DISPLAY);
             android.os.Process.setCanSelfBackground(false);
@@ -844,10 +852,11 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private WindowManagerService(Context context, PowerManagerService pm,
-            boolean haveInputMethods, boolean showBootMsgs) {
+            boolean haveInputMethods, boolean showBootMsgs, boolean onlyCore) {
         mContext = context;
         mHaveInputMethods = haveInputMethods;
         mAllowBootMessages = showBootMsgs;
+        mOnlyCore = onlyCore;
         mLimitedAlphaCompositing = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_sf_limitedAlpha);
         mHeadless = "1".equals(SystemProperties.get(SYSTEM_HEADLESS, "0"));
@@ -5178,7 +5187,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 Slog.i(TAG, "performEnableScreen: mDisplayEnabled=" + mDisplayEnabled
                         + " mForceDisplayEnabled=" + mForceDisplayEnabled
                         + " mShowingBootMessages=" + mShowingBootMessages
-                        + " mSystemBooted=" + mSystemBooted, here);
+                        + " mSystemBooted=" + mSystemBooted
+                        + " mOnlyCore=" + mOnlyCore, here);
             }
             if (mDisplayEnabled) {
                 return;
@@ -5196,7 +5206,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 // wallpaper, don't bother waiting for it
                 boolean haveWallpaper = false;
                 boolean wallpaperEnabled = mContext.getResources().getBoolean(
-                        com.android.internal.R.bool.config_enableWallpaperService);
+                        com.android.internal.R.bool.config_enableWallpaperService)
+                        && !mOnlyCore;
                 boolean haveKeyguard = true;
                 final int N = mWindows.size();
                 for (int i=0; i<N; i++) {
