@@ -32,7 +32,7 @@ import com.android.systemui.R;
 public class NotificationPanelTitle extends RelativeLayout implements View.OnClickListener {
     private NotificationPanel mPanel;
     private ArrayList<View> buttons;
-    private View mNotificationsButton;
+    private View mSettingsButton;
 
     public NotificationPanelTitle(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -47,7 +47,7 @@ public class NotificationPanelTitle extends RelativeLayout implements View.OnCli
     @Override
     public void onFinishInflate() {
         super.onFinishInflate();
-        buttons.add(findViewById(R.id.settings_button));
+        buttons.add(mSettingsButton = findViewById(R.id.settings_button));
         buttons.add(findViewById(R.id.notification_button));
     }
 
@@ -63,6 +63,8 @@ public class NotificationPanelTitle extends RelativeLayout implements View.OnCli
 
     @Override
     public boolean onTouchEvent(MotionEvent e) {
+        if (!mSettingsButton.isEnabled())
+            return false;
         switch (e.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 setPressed(true);
@@ -88,7 +90,7 @@ public class NotificationPanelTitle extends RelativeLayout implements View.OnCli
 
     @Override
     public void onClick(View v) {
-        if (v == this) {
+        if (mSettingsButton.isEnabled() && v == this) {
             mPanel.swapPanels();
         }
     }
