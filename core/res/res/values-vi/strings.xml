@@ -1282,10 +1282,8 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Chấp nhận cuộc gọi?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Luôn chọn"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Chỉ một lần"</string>
-    <!-- no translation found for default_audio_route_name (4617053898167127471) -->
-    <skip />
-    <!-- no translation found for default_audio_route_name (4239291273420140123) -->
-    <skip />
+    <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Máy tính bảng"</string>
+    <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Điện thoại"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Tai nghe"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Loa đế"</string>
     <string name="default_audio_route_name_hdmi" msgid="7986404173839007682">"Âm thanh HDMI"</string>
