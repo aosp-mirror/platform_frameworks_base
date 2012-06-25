@@ -614,6 +614,29 @@
       <li><a href="<?cs var:toroot ?>guide/google/play/expansion-files.html">
           <span class="en">APK Expansion Files</span></a>
       </li>
+      
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="<?cs var:toroot ?>guide/google/gcm/index.html">
+          <span class="en">Google Cloud Messaging</span></a>
+        </div>
+        <ul>
+          <li><a href="<?cs var:toroot?>guide/google/gcm/gs.html">
+              <span class="en">Getting Started</span></a>
+          </li>
+          <li><a href="<?cs var:toroot?>guide/google/gcm/gcm.html">
+              <span class="en">Architectural Overview</span></a>
+          </li>
+          <li><a href="<?cs var:toroot?>guide/google/gcm/demo.html">
+              <span class="en">Demo App Tutorial</span></a>
+          </li>
+          <li><a href="<?cs var:toroot?>guide/google/gcm/adv.html">
+              <span class="en">Advanced Topics</span></a>
+          </li>
+          <li><a href="<?cs var:toroot?>guide/google/gcm/c2dm.html">
+              <span class="en">Migration</span></a>
+          </li>
+        </ul>
+      </li>
 
     </ul>
   </li><!-- end Google Play -->
