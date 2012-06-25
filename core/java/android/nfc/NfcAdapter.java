@@ -82,17 +82,16 @@ public final class NfcAdapter {
      * for this action and specify the desired tech types in a
      * manifest <code>meta-data</code> entry. Here is an example manfiest entry:
      * <pre>
-     *   &lt;activity android:name=".nfc.TechFilter" android:label="NFC/TechFilter"&gt;
-     *       &lt;!-- Add a technology filter --&gt;
-     *       &lt;intent-filter&gt;
-     *           &lt;action android:name="android.nfc.action.TECH_DISCOVERED" /&gt;
-     *       &lt;/intent-filter&gt;
+     * &lt;activity android:name=".nfc.TechFilter" android:label="NFC/TechFilter"&gt;
+     *     &lt;!-- Add a technology filter --&gt;
+     *     &lt;intent-filter&gt;
+     *         &lt;action android:name="android.nfc.action.TECH_DISCOVERED" /&gt;
+     *     &lt;/intent-filter&gt;
      *
-     *       &lt;meta-data android:name="android.nfc.action.TECH_DISCOVERED"
-     *           android:resource="@xml/filter_nfc"
-     *       /&gt;
-     *   &lt;/activity&gt;
-     * </pre>
+     *     &lt;meta-data android:name="android.nfc.action.TECH_DISCOVERED"
+     *         android:resource="@xml/filter_nfc"
+     *     /&gt;
+     * &lt;/activity&gt;</pre>
      *
      * <p>The meta-data XML file should contain one or more <code>tech-list</code> entries
      * each consisting or one or more <code>tech</code> entries. The <code>tech</code> entries refer
@@ -121,8 +120,7 @@ public final class NfcAdapter {
      *         &lt;tech&gt;android.nfc.tech.MifareClassic&lt;/tech&gt;
      *         &lt;tech&gt;android.nfc.tech.Ndef&lt;/tech&gt;
      *     &lt;/tech-list&gt;
-     * &lt;/resources&gt;
-     * </pre>
+     * &lt;/resources&gt;</pre>
      *
      * <p>This intent is started after {@link #ACTION_NDEF_DISCOVERED} and before
      * {@link #ACTION_TAG_DISCOVERED}. If any activities respond to {@link #ACTION_NDEF_DISCOVERED}
@@ -385,10 +383,9 @@ public final class NfcAdapter {
      * Most Android devices will only have one NFC Adapter (NFC Controller).
      * <p>
      * This helper is the equivalent of:
-     * <pre>{@code
+     * <pre>
      * NfcManager manager = (NfcManager) context.getSystemService(Context.NFC_SERVICE);
-     * NfcAdapter adapter = manager.getDefaultAdapter();
-     * }</pre>
+     * NfcAdapter adapter = manager.getDefaultAdapter();</pre>
      * @param context the calling application's context
      *
      * @return the default NFC adapter, or null if no NFC adapter exists
@@ -623,8 +620,7 @@ public final class NfcAdapter {
      *     NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(this);
      *     if (nfcAdapter == null) return;  // NFC not available on this device
      *     nfcAdapter.setBeamPushUris(new Uri[] {uri1, uri2}, this);
-     * }
-     * </pre>
+     * }</pre>
      * And that is it. Only one call per activity is necessary. The Android
      * OS will automatically release its references to the Uri(s) and the
      * Activity object when it is destroyed if you follow this pattern.
@@ -704,8 +700,7 @@ public final class NfcAdapter {
      *     NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(this);
      *     if (nfcAdapter == null) return;  // NFC not available on this device
      *     nfcAdapter.setBeamPushUrisCallback(callback, this);
-     * }
-     * </pre>
+     * }</pre>
      * And that is it. Only one call per activity is necessary. The Android
      * OS will automatically release its references to the Uri(s) and the
      * Activity object when it is destroyed if you follow this pattern.
@@ -758,14 +753,13 @@ public final class NfcAdapter {
      *
      * <p>If you want to prevent the Android OS from sending default NDEF
      * messages completely (for all activities), you can include a
-     * <code><meta-data></code> element inside the <code><application></code>
+     * {@code &lt;meta-data>} element inside the {@code &lt;application>}
      * element of your AndroidManifest.xml file, like this:
-     * <pre>{@code
-     *  <application ...>
-     *      <meta-data android:name="android.nfc.disable_beam_default"
-     *          android:value="true" />
-     *  </application>
-     * }</pre>
+     * <pre>
+     * &lt;application ...>
+     *     &lt;meta-data android:name="android.nfc.disable_beam_default"
+     *         android:value="true" />
+     * &lt;/application></pre>
      *
      * <p>The API allows for multiple activities to be specified at a time,
      * but it is strongly recommended to just register one at a time,
@@ -776,8 +770,7 @@ public final class NfcAdapter {
      *     NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(this);
      *     if (nfcAdapter == null) return;  // NFC not available on this device
      *     nfcAdapter.setNdefPushMessage(ndefMessage, this);
-     * }
-     * </pre>
+     * }</pre>
      * And that is it. Only one call per activity is necessary. The Android
      * OS will automatically release its references to the NDEF message and the
      * Activity object when it is destroyed if you follow this pattern.
@@ -857,14 +850,13 @@ public final class NfcAdapter {
      *
      * <p>If you want to prevent the Android OS from sending default NDEF
      * messages completely (for all activities), you can include a
-     * <code><meta-data></code> element inside the <code><application></code>
+     * {@code &lt;meta-data>} element inside the {@code &lt;application>}
      * element of your AndroidManifest.xml file, like this:
-     * <pre>{@code
-     *  <application ...>
-     *      <meta-data android:name="android.nfc.disable_beam_default"
-     *          android:value="true" />
-     *  </application>
-     * }</pre>
+     * <pre>
+     * &lt;application ...>
+     *     &lt;meta-data android:name="android.nfc.disable_beam_default"
+     *         android:value="true" />
+     * &lt;/application></pre>
      *
      * <p>The API allows for multiple activities to be specified at a time,
      * but it is strongly recommended to just register one at a time,
@@ -875,8 +867,7 @@ public final class NfcAdapter {
      *     NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(this);
      *     if (nfcAdapter == null) return;  // NFC not available on this device
      *     nfcAdapter.setNdefPushMessageCallback(callback, this);
-     * }
-     * </pre>
+     * }</pre>
      * And that is it. Only one call per activity is necessary. The Android
      * OS will automatically release its references to the callback and the
      * Activity object when it is destroyed if you follow this pattern.
@@ -941,8 +932,7 @@ public final class NfcAdapter {
      *     NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(this);
      *     if (nfcAdapter == null) return;  // NFC not available on this device
      *     nfcAdapter.setOnNdefPushCompleteCallback(callback, this);
-     * }
-     * </pre>
+     * }</pre>
      * And that is it. Only one call per activity is necessary. The Android
      * OS will automatically release its references to the callback and the
      * Activity object when it is destroyed if you follow this pattern.
@@ -1190,8 +1180,7 @@ public final class NfcAdapter {
      *     } else if (!nfcAdapter.isNdefPushEnabled()) {
      *         startActivity(new Intent(Settings.ACTION_NFCSHARING_SETTINGS));
      *     }
-     * }
-     * </pre>
+     * }</pre>
      *
      * @see android.provider.Settings#ACTION_NFCSHARING_SETTINGS
      * @return true if NDEF Push feature is enabled
