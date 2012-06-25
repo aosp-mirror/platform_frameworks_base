@@ -129,7 +129,7 @@ http://developer.android.com/tools/index.html
 http://developer.android.com/tools/aapt.html
 http://developer.android.com/tools/help/adb.html
 http://developer.android.com/tools/othertools.html
-http://developer.android.com/tools/aidl.html
+http://developer.android.com/guide/components/aidl.html
 http://developer.android.com/tools/avd.html
 http://developer.android.com/tools/bmgr.html
 http://developer.android.com/tools/ddms.html

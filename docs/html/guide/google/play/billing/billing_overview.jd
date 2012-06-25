@@ -154,7 +154,7 @@ messaging that takes place between your application and the Google Play applicat
 <p>Your application sends in-app billing requests by invoking a single IPC method
 (<code>sendBillingRequest()</code>), which is exposed by the <code>MarketBillingService</code>
 interface. This interface is defined in an <a
-href="{@docRoot}tools/aidl.html">Android Interface Definition Language</a> file
+href="{@docRoot}guide/components/aidl.html">Android Interface Definition Language</a> file
 (<code>IMarketBillingService.aidl</code>). You can <a
 href="{@docRoot}guide/google/play/billing/billing_integrate.html#billing-download">download</a> this AIDL
 file with the in-app billing sample application.</p>
