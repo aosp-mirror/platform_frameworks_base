@@ -5285,6 +5285,9 @@ public class WindowManagerService extends IWindowManager.Stub
             } catch (RemoteException ex) {
                 Slog.e(TAG, "Boot completed: SurfaceFlinger is dead!");
             }
+
+            // Enable input dispatch.
+            mInputMonitor.setEventDispatchingLw(mEventDispatchingEnabled);
         }
 
         mPolicy.enableScreenAfterBoot();
@@ -6636,7 +6639,8 @@ public class WindowManagerService extends IWindowManager.Stub
     // -------------------------------------------------------------
     
     final InputMonitor mInputMonitor = new InputMonitor(this);
-    
+    private boolean mEventDispatchingEnabled;
+
     public void pauseKeyDispatching(IBinder _token) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "pauseKeyDispatching()")) {
@@ -6672,7 +6676,10 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         synchronized (mWindowMap) {
-            mInputMonitor.setEventDispatchingLw(enabled);
+            mEventDispatchingEnabled = enabled;
+            if (mDisplayEnabled) {
+                mInputMonitor.setEventDispatchingLw(enabled);
+            }
             sendScreenStatusToClientsLocked();
         }
     }
