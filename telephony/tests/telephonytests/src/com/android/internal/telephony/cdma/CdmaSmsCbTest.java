@@ -705,4 +705,42 @@ public class CdmaSmsCbTest extends AndroidTestCase {
         assertEquals(0, programData.getMaxMessages());
         assertEquals(CdmaSmsCbProgramData.ALERT_OPTION_NO_ALERT, programData.getAlertOption());
     }
+
+    private static final byte[] CMAS_TEST_BEARER_DATA = {
+        0x00, 0x03, 0x1C, 0x78, 0x00, 0x01, 0x59, 0x02, (byte) 0xB8, 0x00, 0x02, 0x10, (byte) 0xAA,
+        0x68, (byte) 0xD3, (byte) 0xCD, 0x06, (byte) 0x9E, 0x68, 0x30, (byte) 0xA0, (byte) 0xE9,
+        (byte) 0x97, (byte) 0x9F, 0x44, 0x1B, (byte) 0xF3, 0x20, (byte) 0xE9, (byte) 0xA3,
+        0x2A, 0x08, 0x7B, (byte) 0xF6, (byte) 0xED, (byte) 0xCB, (byte) 0xCB, 0x1E, (byte) 0x9C,
+        0x3B, 0x10, 0x4D, (byte) 0xDF, (byte) 0x8B, 0x4E,
+        (byte) 0xCC, (byte) 0xA8, 0x20, (byte) 0xEC, (byte) 0xCB, (byte) 0xCB, (byte) 0xA2, 0x0A,
+        0x7E, 0x79, (byte) 0xF4, (byte) 0xCB, (byte) 0xB5, 0x72, 0x0A, (byte) 0x9A, 0x34,
+        (byte) 0xF3, 0x41, (byte) 0xA7, (byte) 0x9A, 0x0D, (byte) 0xFB, (byte) 0xB6, 0x79, 0x41,
+        (byte) 0x85, 0x07, 0x4C, (byte) 0xBC, (byte) 0xFA, 0x2E, 0x00, 0x08, 0x20, 0x58, 0x38,
+        (byte) 0x88, (byte) 0x80, 0x10, 0x54, 0x06, 0x38, 0x20, 0x60,
+        0x30, (byte) 0xA8, (byte) 0x81, (byte) 0x90, 0x20, 0x08
+    };
+
+    // Test case for CMAS test message received on the Sprint network.
+    public void testDecodeRawBearerData() throws Exception {
+        Parcel p = createBroadcastParcel(SmsEnvelope.SERVICE_CATEGORY_CMAS_TEST_MESSAGE);
+        SmsMessage msg = createMessageFromParcel(p, CMAS_TEST_BEARER_DATA);
+
+        SmsCbMessage cbMessage = msg.parseBroadcastSms();
+        assertNotNull("expected non-null for bearer data", cbMessage);
+        assertEquals("geoScope", cbMessage.getGeographicalScope(), 1);
+        assertEquals("serialNumber", cbMessage.getSerialNumber(), 51072);
+        assertEquals("serviceCategory", cbMessage.getServiceCategory(),
+                SmsEnvelope.SERVICE_CATEGORY_CMAS_TEST_MESSAGE);
+        assertEquals("payload", cbMessage.getMessageBody(),
+                "This is a test of the Commercial Mobile Alert System. This is only a test.");
+
+        SmsCbCmasInfo cmasInfo = cbMessage.getCmasWarningInfo();
+        assertNotNull("expected non-null for CMAS info", cmasInfo);
+        assertEquals("category", cmasInfo.getCategory(), SmsCbCmasInfo.CMAS_CATEGORY_OTHER);
+        assertEquals("responseType", cmasInfo.getResponseType(),
+                SmsCbCmasInfo.CMAS_RESPONSE_TYPE_NONE);
+        assertEquals("severity", cmasInfo.getSeverity(), SmsCbCmasInfo.CMAS_SEVERITY_SEVERE);
+        assertEquals("urgency", cmasInfo.getUrgency(), SmsCbCmasInfo.CMAS_URGENCY_EXPECTED);
+        assertEquals("certainty", cmasInfo.getCertainty(), SmsCbCmasInfo.CMAS_CERTAINTY_LIKELY);
+    }
 }
