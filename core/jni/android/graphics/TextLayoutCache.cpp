@@ -966,13 +966,13 @@ SkTypeface* TextLayoutShaper::getCachedTypeface(SkTypeface** typeface, HB_Script
         // CreateFromFile(path) can return NULL if the path is non existing
         if (!*typeface) {
 #if DEBUG_GLYPHS
-        ALOGD("Font path '%s' is not valid, will use default font", path);
+        ALOGD("No font for Harfbuzz script %d, will use default font", script);
 #endif
             return mDefaultTypeface;
         }
         (*typeface)->ref();
 #if DEBUG_GLYPHS
-        ALOGD("Created SkTypeface from file '%s' with uniqueID = %d", path, (*typeface)->uniqueID());
+        ALOGD("Created SkTypeface for Harfbuzz script %d with uniqueID = %d", script, (*typeface)->uniqueID());
 #endif
     }
     return *typeface;
