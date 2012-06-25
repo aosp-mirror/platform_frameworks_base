@@ -159,6 +159,22 @@ final public class MediaCodec {
 
     /**
      * Instantiate a decoder supporting input data of the given mime type.
+     *
+     * The following is a partial list of defined mime types and their semantics:
+     * <ul>
+     * <li>"video/x-vnd.on2.vp8" - VPX video (i.e. video in .webm)
+     * <li>"video/avc" - H.264/AVC video
+     * <li>"video/mp4v-es" - MPEG4 video
+     * <li>"video/3gpp" - H.263 video
+     * <li>"audio/3gpp" - AMR narrowband audio
+     * <li>"audio/amr-wb" - AMR wideband audio
+     * <li>"audio/mpeg" - MPEG1/2 audio layer III
+     * <li>"audio/mp4a-latm" - AAC audio
+     * <li>"audio/vorbis" - vorbis audio
+     * <li>"audio/g711-alaw" - G.711 alaw audio
+     * <li>"audio/g711-mlaw" - G.711 ulaw audio
+     * </ul>
+     *
      * @param type The mime type of the input data.
      */
     public static MediaCodec createDecoderByType(String type) {
