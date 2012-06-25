@@ -42,13 +42,6 @@ public class WindowAnimator {
 
     boolean mAnimating;
 
-    /** Variables only intended to be valid within each pass through animate(). Does not contain
-     * persistent state. */
-    private class InnerLoopParams {
-        boolean mForceHiding;
-    }
-    InnerLoopParams mInner = new InnerLoopParams();
-
     static class LayoutToAnimatorParams {
         boolean mAnimationScheduled;
         ArrayList<WindowStateAnimator> mWinAnimators = new ArrayList<WindowStateAnimator>();
@@ -215,15 +208,13 @@ public class WindowAnimator {
         }
     }
 
-    private void updateWindowsAndWallpaperLocked() {
+    private void updateWindowsLocked() {
         ++mAnimTransactionSequence;
 
         ArrayList<WindowStateAnimator> unForceHiding = null;
         boolean wallpaperInUnForceHiding = false;
-        WindowStateAnimator windowAnimationBackground = null;
-        int windowAnimationBackgroundColor = 0;
-        WindowState detachedWallpaper = null;
 
+        boolean forceHiding = false;
         for (int i = mWinAnimators.size() - 1; i >= 0; i--) {
             WindowStateAnimator winAnimator = mWinAnimators.get(i);
             WindowState win = winAnimator.mWin;
@@ -236,48 +227,6 @@ public class WindowAnimator {
                 if (WindowManagerService.DEBUG_WALLPAPER) {
                     Slog.v(TAG, win + ": wasAnimating=" + wasAnimating +
                             ", nowAnimating=" + nowAnimating);
-                }
-
-                // If this window is animating, make a note that we have
-                // an animating window and take care of a request to run
-                // a detached wallpaper animation.
-                if (nowAnimating) {
-                    if (winAnimator.mAnimation != null) {
-                        if ((flags & FLAG_SHOW_WALLPAPER) != 0
-                                && winAnimator.mAnimation.getDetachWallpaper()) {
-                            detachedWallpaper = win;
-                        }
-                        final int backgroundColor = winAnimator.mAnimation.getBackgroundColor();
-                        if (backgroundColor != 0) {
-                            if (windowAnimationBackground == null || (winAnimator.mAnimLayer <
-                                    windowAnimationBackground.mAnimLayer)) {
-                                windowAnimationBackground = winAnimator;
-                                windowAnimationBackgroundColor = backgroundColor;
-                            }
-                        }
-                    }
-                    mAnimating = true;
-                }
-
-                // If this window's app token is running a detached wallpaper
-                // animation, make a note so we can ensure the wallpaper is
-                // displayed behind it.
-                final AppWindowAnimator appAnimator =
-                        win.mAppToken == null ? null : win.mAppToken.mAppAnimator;
-                if (appAnimator != null && appAnimator.animation != null
-                        && appAnimator.animating) {
-                    if ((flags & FLAG_SHOW_WALLPAPER) != 0
-                            && appAnimator.animation.getDetachWallpaper()) {
-                        detachedWallpaper = win;
-                    }
-                    final int backgroundColor = appAnimator.animation.getBackgroundColor();
-                    if (backgroundColor != 0) {
-                        if (windowAnimationBackground == null || (winAnimator.mAnimLayer <
-                                windowAnimationBackground.mAnimLayer)) {
-                            windowAnimationBackground = winAnimator;
-                            windowAnimationBackgroundColor = backgroundColor;
-                        }
-                    }
                 }
 
                 if (wasAnimating && !winAnimator.mAnimating && mService.mWallpaperTarget == win) {
@@ -303,10 +252,10 @@ public class WindowAnimator {
                         mService.mFocusMayChange = true;
                     }
                     if (win.isReadyForDisplay() && winAnimator.mAnimationIsEntrance) {
-                        mInner.mForceHiding = true;
+                        forceHiding = true;
                     }
                     if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(TAG,
-                            "Force hide " + mInner.mForceHiding
+                            "Force hide " + forceHiding
                             + " hasSurface=" + win.mHasSurface
                             + " policyVis=" + win.mPolicyVisibility
                             + " destroying=" + win.mDestroying
@@ -316,7 +265,7 @@ public class WindowAnimator {
                             + " anim=" + win.mWinAnimator.mAnimation);
                 } else if (mPolicy.canBeForceHidden(win, win.mAttrs)) {
                     final boolean changed;
-                    if (mInner.mForceHiding && (!winAnimator.isAnimating()
+                    if (forceHiding && (!winAnimator.isAnimating()
                             || (winAnimator.mAttrFlags & FLAG_SHOW_WHEN_LOCKED) == 0)) {
                         changed = win.hideLw(false, false);
                         if (WindowManagerService.DEBUG_VISIBILITY && changed) Slog.v(TAG,
@@ -380,6 +329,78 @@ public class WindowAnimator {
             }
         } // end forall windows
 
+        // If we have windows that are being show due to them no longer
+        // being force-hidden, apply the appropriate animation to them.
+        if (unForceHiding != null) {
+            for (int i=unForceHiding.size()-1; i>=0; i--) {
+                Animation a = mPolicy.createForceHideEnterAnimation(wallpaperInUnForceHiding);
+                if (a != null) {
+                    final WindowStateAnimator winAnimator = unForceHiding.get(i);
+                    winAnimator.setAnimation(a);
+                    winAnimator.mAnimationIsEntrance = true;
+                }
+            }
+        }
+    }
+
+    private void updateWallpaperLocked() {
+        WindowStateAnimator windowAnimationBackground = null;
+        int windowAnimationBackgroundColor = 0;
+        WindowState detachedWallpaper = null;
+
+        for (int i = mWinAnimators.size() - 1; i >= 0; i--) {
+            WindowStateAnimator winAnimator = mWinAnimators.get(i);
+            if (winAnimator.mSurface == null) {
+                continue;
+            }
+
+            final int flags = winAnimator.mAttrFlags;
+            final WindowState win = winAnimator.mWin;
+
+            // If this window is animating, make a note that we have
+            // an animating window and take care of a request to run
+            // a detached wallpaper animation.
+            if (winAnimator.mAnimating) {
+                if (winAnimator.mAnimation != null) {
+                    if ((flags & FLAG_SHOW_WALLPAPER) != 0
+                            && winAnimator.mAnimation.getDetachWallpaper()) {
+                        detachedWallpaper = win;
+                    }
+                    final int backgroundColor = winAnimator.mAnimation.getBackgroundColor();
+                    if (backgroundColor != 0) {
+                        if (windowAnimationBackground == null || (winAnimator.mAnimLayer <
+                                windowAnimationBackground.mAnimLayer)) {
+                            windowAnimationBackground = winAnimator;
+                            windowAnimationBackgroundColor = backgroundColor;
+                        }
+                    }
+                }
+                mAnimating = true;
+            }
+
+            // If this window's app token is running a detached wallpaper
+            // animation, make a note so we can ensure the wallpaper is
+            // displayed behind it.
+            final AppWindowAnimator appAnimator =
+                    win.mAppToken == null ? null : win.mAppToken.mAppAnimator;
+            if (appAnimator != null && appAnimator.animation != null
+                    && appAnimator.animating) {
+                if ((flags & FLAG_SHOW_WALLPAPER) != 0
+                        && appAnimator.animation.getDetachWallpaper()) {
+                    detachedWallpaper = win;
+                }
+
+                final int backgroundColor = appAnimator.animation.getBackgroundColor();
+                if (backgroundColor != 0) {
+                    if (windowAnimationBackground == null || (winAnimator.mAnimLayer <
+                            windowAnimationBackground.mAnimLayer)) {
+                        windowAnimationBackground = winAnimator;
+                        windowAnimationBackgroundColor = backgroundColor;
+                    }
+                }
+            }
+        } // end forall windows
+
         if (mWindowDetachedWallpaper != detachedWallpaper) {
             if (WindowManagerService.DEBUG_WALLPAPER) Slog.v(TAG,
                     "Detached wallpaper changed from " + mWindowDetachedWallpaper
@@ -407,26 +428,11 @@ public class WindowAnimator {
                 }
             }
 
-            final int dw = mDw;
-            final int dh = mDh;
-            mWindowAnimationBackgroundSurface.show(dw, dh,
+            mWindowAnimationBackgroundSurface.show(mDw, mDh,
                     animLayer - WindowManagerService.LAYER_OFFSET_DIM,
                     windowAnimationBackgroundColor);
         } else {
             mWindowAnimationBackgroundSurface.hide();
-        }
-
-        // If we have windows that are being show due to them no longer
-        // being force-hidden, apply the appropriate animation to them.
-        if (unForceHiding != null) {
-            for (int i=unForceHiding.size()-1; i>=0; i--) {
-                Animation a = mPolicy.createForceHideEnterAnimation(wallpaperInUnForceHiding);
-                if (a != null) {
-                    final WindowStateAnimator winAnimator = unForceHiding.get(i);
-                    winAnimator.setAnimation(a);
-                    winAnimator.mAnimationIsEntrance = true;
-                }
-            }
         }
     }
 
@@ -470,9 +476,9 @@ public class WindowAnimator {
     }
 
     private void performAnimationsLocked() {
-        mInner.mForceHiding = false;
+        updateWindowsLocked();
+        updateWallpaperLocked();
 
-        updateWindowsAndWallpaperLocked();
         if ((mPendingLayoutChanges & WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER) != 0) {
             mPendingActions |= WALLPAPER_ACTION_PENDING;
         }
