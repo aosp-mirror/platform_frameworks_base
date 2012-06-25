@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.phone;
 
 import android.animation.Animator;
-import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
@@ -72,14 +71,15 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarNotification;
 import com.android.systemui.R;
 import com.android.systemui.recent.RecentTasksLoader;
 import com.android.systemui.statusbar.BaseStatusBar;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
-import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.RotationToggle;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarIconView;
@@ -87,9 +87,9 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.DateView;
 import com.android.systemui.statusbar.policy.IntruderAlertView;
 import com.android.systemui.statusbar.policy.LocationController;
-import com.android.systemui.statusbar.policy.OnSizeChangedListener;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
+import com.android.systemui.statusbar.policy.OnSizeChangedListener;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -203,7 +203,6 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     // the tracker view
     int mTrackingPosition; // the position of the top of the tracking view.
-    private boolean mPanelSlightlyVisible;
 
     // ticker
     private Ticker mTicker;
@@ -285,25 +284,6 @@ public class PhoneStatusBar extends BaseStatusBar {
             performFling(mFlingY + mViewDelta, mFlingVelocity, false);
         }
     };
-
-    private class ExpandedDialog extends Dialog {
-        ExpandedDialog(Context context) {
-            super(context, com.android.internal.R.style.Theme_Translucent_NoTitleBar);
-        }
-
-        @Override
-        public boolean dispatchKeyEvent(KeyEvent event) {
-            boolean down = event.getAction() == KeyEvent.ACTION_DOWN;
-            switch (event.getKeyCode()) {
-            case KeyEvent.KEYCODE_BACK:
-                if (!down) {
-                    animateCollapse();
-                }
-                return true;
-            }
-            return super.dispatchKeyEvent(event);
-        }
-    }
 
     @Override
     public void start() {
@@ -673,8 +653,6 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     private void addIntruderView() {
-        final int height = getStatusBarHeight();
-
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -857,12 +835,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
 
         mSettingsButton.setEnabled(isDeviceProvisioned());
-    }
-
-    private void reloadAllNotificationIcons() {
-        if (mNotificationIcons == null) return;
-        mNotificationIcons.removeAllViews();
-        updateNotificationIcons();
     }
 
     @Override
@@ -1789,64 +1761,6 @@ public class PhoneStatusBar extends BaseStatusBar {
     @Override
     public void setHardKeyboardStatus(boolean available, boolean enabled) { }
 
-    private class NotificationClicker implements View.OnClickListener {
-        private PendingIntent mIntent;
-        private String mPkg;
-        private String mTag;
-        private int mId;
-
-        NotificationClicker(PendingIntent intent, String pkg, String tag, int id) {
-            mIntent = intent;
-            mPkg = pkg;
-            mTag = tag;
-            mId = id;
-        }
-
-        public void onClick(View v) {
-            try {
-                // The intent we are sending is for the application, which
-                // won't have permission to immediately start an activity after
-                // the user switches to home.  We know it is safe to do at this
-                // point, so make sure new activity switches are now allowed.
-                ActivityManagerNative.getDefault().resumeAppSwitches();
-                // Also, notifications can be launched from the lock screen,
-                // so dismiss the lock screen when the activity starts.
-                ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
-            } catch (RemoteException e) {
-            }
-
-            if (mIntent != null) {
-                int[] pos = new int[2];
-                v.getLocationOnScreen(pos);
-                Intent overlay = new Intent();
-                overlay.setSourceBounds(
-                        new Rect(pos[0], pos[1], pos[0]+v.getWidth(), pos[1]+v.getHeight()));
-                try {
-                    mIntent.send(mContext, 0, overlay);
-                } catch (PendingIntent.CanceledException e) {
-                    // the stack trace isn't very helpful here.  Just log the exception message.
-                    Slog.w(TAG, "Sending contentIntent failed: " + e);
-                }
-
-                KeyguardManager kgm =
-                    (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
-                if (kgm != null) kgm.exitKeyguardSecurely(null);
-            }
-
-            try {
-                mBarService.onNotificationClick(mPkg, mTag, mId);
-            } catch (RemoteException ex) {
-                // system process is dead if we're here.
-            }
-
-            // close the shade if it was open
-            animateCollapse();
-
-            // If this click was on the intruder alert, hide that instead
-            mHandler.sendEmptyMessage(MSG_HIDE_INTRUDER);
-        }
-    }
-
     @Override
     protected void tick(IBinder key, StatusBarNotification n, boolean firstTime) {
         // no ticking in lights-out mode
@@ -2061,7 +1975,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
 
         // tracking view...
-        int pos;
         if (expandedPosition == EXPANDED_FULL_OPEN) {
             panelh = disph;
         }
@@ -2148,9 +2061,6 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     private View.OnClickListener mClearButtonListener = new View.OnClickListener() {
-        final int mini(int a, int b) {
-            return (b>a?a:b);
-        }
         public void onClick(View v) {
             synchronized (mNotificationData) {
                 // animate-swipe all dismissable notifications, then animate the shade closed

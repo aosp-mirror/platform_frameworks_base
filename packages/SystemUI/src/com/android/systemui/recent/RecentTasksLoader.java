@@ -53,7 +53,6 @@ public class RecentTasksLoader {
 
     private AsyncTask<Void, ArrayList<TaskDescription>, Void> mTaskLoader;
     private AsyncTask<Void, TaskDescription, Void> mThumbnailLoader;
-    private final Handler mHandler;
 
     private int mIconDpi;
     private Bitmap mDefaultThumbnailBackground;
@@ -96,8 +95,6 @@ public class RecentTasksLoader {
         // updated thumbnails
         final ActivityManager am = (ActivityManager)
                 mContext.getSystemService(Context.ACTIVITY_SERVICE);
-
-        mHandler = new Handler();
     }
 
     public void setRecentsPanel(RecentsPanelView recentsPanel) {
@@ -225,8 +222,6 @@ public class RecentTasksLoader {
         cancelLoadingThumbnailsAndIcons();
         final LinkedBlockingQueue<TaskDescription> tasksWaitingForThumbnails =
                 new LinkedBlockingQueue<TaskDescription>();
-        final ArrayList<TaskDescription> taskDescriptionsWaitingToLoad =
-                new ArrayList<TaskDescription>();
         mTaskLoader = new AsyncTask<Void, ArrayList<TaskDescription>, Void>() {
             @Override
             protected void onProgressUpdate(ArrayList<TaskDescription>... values) {
