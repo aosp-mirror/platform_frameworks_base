@@ -217,7 +217,7 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     */
 
     public void onClick(View v) {
-        if (v == mTitleArea) {
+        if (mSettingsButton.isEnabled() && v == mTitleArea) {
             swapPanels();
         }
     }
@@ -280,7 +280,7 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
 
     public void updatePanelModeButtons() {
         final boolean settingsVisible = (mSettingsView != null);
-        mSettingsButton.setVisibility(!settingsVisible ? View.VISIBLE : View.GONE);
+        mSettingsButton.setVisibility(!settingsVisible && mSettingsButton.isEnabled() ? View.VISIBLE : View.GONE);
         mNotificationButton.setVisibility(settingsVisible ? View.VISIBLE : View.GONE);
     }
 
@@ -420,6 +420,13 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
         boolean handled = mExpandHelper.onTouchEvent(ev) ||
                 super.onTouchEvent(ev);
         return handled;
+    }
+
+    public void setSettingsEnabled(boolean settingsEnabled) {
+        if (mSettingsButton != null) {
+            mSettingsButton.setEnabled(settingsEnabled);
+            mSettingsButton.setVisibility(settingsEnabled ? View.VISIBLE : View.GONE);
+        }
     }
 }
 

@@ -1235,7 +1235,7 @@ public class TabletStatusBar extends BaseStatusBar implements
     @Override
     protected void setAreThereNotifications() {
         if (mNotificationPanel != null) {
-            mNotificationPanel.setClearable(mNotificationData.hasClearableItems());
+            mNotificationPanel.setClearable(isDeviceProvisioned() && mNotificationData.hasClearableItems());
         }
     }
 
@@ -1533,10 +1533,13 @@ public class TabletStatusBar extends BaseStatusBar implements
         if (mInputMethodSwitchButton.getVisibility() != View.GONE) maxNotificationIconsCount --;
         if (mCompatModeButton.getVisibility()        != View.GONE) maxNotificationIconsCount --;
 
+        final boolean provisioned = isDeviceProvisioned();
+        // If the device hasn't been through Setup, we only show system notifications
         for (int i=0; toShow.size()< maxNotificationIconsCount; i++) {
             if (i >= N) break;
             Entry ent = mNotificationData.get(N-i-1);
-            if (ent.notification.score >= HIDE_ICONS_BELOW_SCORE) {
+            if ((provisioned && ent.notification.score >= HIDE_ICONS_BELOW_SCORE)
+                    || showNotificationEvenIfUnprovisioned(ent.notification)) {
                 toShow.add(ent.icon);
             }
         }
@@ -1567,9 +1570,13 @@ public class TabletStatusBar extends BaseStatusBar implements
 
         ArrayList<View> toShow = new ArrayList<View>();
 
+        final boolean provisioned = isDeviceProvisioned();
+        // If the device hasn't been through Setup, we only show system notifications
         for (int i=0; i<N; i++) {
-            View row = mNotificationData.get(N-i-1).row;
-            toShow.add(row);
+            Entry ent = mNotificationData.get(N-i-1);
+            if (provisioned || showNotificationEvenIfUnprovisioned(ent.notification)) {
+                toShow.add(ent.row);
+            }
         }
 
         ArrayList<View> toRemove = new ArrayList<View>();
@@ -1588,11 +1595,12 @@ public class TabletStatusBar extends BaseStatusBar implements
             View v = toShow.get(i);
             if (v.getParent() == null) {
                 // the notification panel has the most important things at the bottom
-                mPile.addView(v, N-1-i);
+                mPile.addView(v, Math.min(toShow.size()-1-i, mPile.getChildCount()));
             }
         }
 
-        mNotificationPanel.setNotificationCount(N);
+        mNotificationPanel.setNotificationCount(toShow.size());
+        mNotificationPanel.setSettingsEnabled(isDeviceProvisioned());
     }
 
     @Override
