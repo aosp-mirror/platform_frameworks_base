@@ -65,6 +65,7 @@ import com.android.systemui.recent.RecentsPanelView;
 import com.android.systemui.recent.RecentTasksLoader;
 import com.android.systemui.recent.TaskDescription;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
 import com.android.systemui.statusbar.tablet.StatusBarPanel;
 
@@ -903,5 +904,22 @@ public abstract class BaseStatusBar extends SystemUI implements
                 mHandler.sendEmptyMessage(MSG_HIDE_INTRUDER);
             }
         }
+    }
+
+    // Q: What kinds of notifications should show during setup?
+    // A: Almost none! Only things coming from the system (package is "android") that also
+    // have special "kind" tags marking them as relevant for setup (see below).
+    protected boolean showNotificationEvenIfUnprovisioned(StatusBarNotification sbn) {
+        if ("android".equals(sbn.pkg)) {
+            if (sbn.notification.kind != null) {
+                for (String aKind : sbn.notification.kind) {
+                    // IME switcher, created by InputMethodManagerService
+                    if ("android.system.imeswitcher".equals(aKind)) return true;
+                    // OTA availability & errors, created by SystemUpdateService
+                    if ("android.system.update".equals(aKind)) return true;
+                }
+            }
+        }
+        return false;
     }
 }
