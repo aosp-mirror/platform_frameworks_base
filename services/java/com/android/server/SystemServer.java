@@ -229,7 +229,7 @@ class ServerThread extends Thread {
             Slog.i(TAG, "Window Manager");
             wm = WindowManagerService.main(context, power,
                     factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL,
-                    !firstBoot);
+                    !firstBoot, onlyCore);
             ServiceManager.addService(Context.WINDOW_SERVICE, wm);
             inputManager = wm.getInputManagerService();
             ServiceManager.addService(Context.INPUT_SERVICE, inputManager);
