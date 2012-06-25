@@ -3,6 +3,7 @@
 package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
+import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 
 import static com.android.server.wm.WindowManagerService.LayoutFields.SET_UPDATE_ROTATION;
 import static com.android.server.wm.WindowManagerService.LayoutFields.SET_WALLPAPER_MAY_CHANGE;
@@ -300,7 +301,7 @@ public class WindowAnimator {
                         }
                         mService.mFocusMayChange = true;
                     }
-                    if (win.isReadyForDisplay() && !winAnimator.isAnimating()) {
+                    if (win.isReadyForDisplay() && winAnimator.mAnimationIsEntrance) {
                         mInner.mForceHiding = true;
                     }
                     if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(TAG,
@@ -314,7 +315,8 @@ public class WindowAnimator {
                             + " anim=" + win.mWinAnimator.mAnimation);
                 } else if (mPolicy.canBeForceHidden(win, win.mAttrs)) {
                     final boolean changed;
-                    if (mInner.mForceHiding && !winAnimator.isAnimating()) {
+                    if (mInner.mForceHiding && (!winAnimator.isAnimating()
+                            || (winAnimator.mAttrFlags & FLAG_SHOW_WHEN_LOCKED) == 0)) {
                         changed = win.hideLw(false, false);
                         if (WindowManagerService.DEBUG_VISIBILITY && changed) Slog.v(TAG,
                                 "Now policy hidden: " + win);
