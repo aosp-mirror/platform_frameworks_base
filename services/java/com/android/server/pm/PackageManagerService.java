@@ -1087,7 +1087,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                     /*
                      * If the package is scanned, it's not erased.
                      */
-                    if (mPackages.containsKey(ps.name)) {
+                    final PackageParser.Package scannedPkg = mPackages.get(ps.name);
+                    if (scannedPkg != null) {
                         /*
                          * If the system app is both scanned and in the
                          * disabled packages list, then it must have been
@@ -1096,7 +1097,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                          * application can be scanned.
                          */
                         if (mSettings.isDisabledSystemPackageLPr(ps.name)) {
-                            mPackages.remove(ps.name);
+                            Slog.i(TAG, "Expecting better updatd system app for " + ps.name
+                                    + "; removing system app");
+                            removePackageLI(scannedPkg, true);
                         }
 
                         continue;
@@ -8626,6 +8629,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                     pw.print("  ["); pw.print(entry.getKey()); pw.println("]:");
                     pw.print("    "); pw.println(p.toString());
+                    if (p.info != null && p.info.applicationInfo != null) {
+                        final String appInfo = p.info.applicationInfo.toString();
+                        pw.print("      applicationInfo="); pw.println(appInfo);
+                    }
                 }
             }
             
