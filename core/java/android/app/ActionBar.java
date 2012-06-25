@@ -918,6 +918,8 @@ public abstract class ActionBar {
             @ViewDebug.IntToString(from = Gravity.BOTTOM,            to = "BOTTOM"),
             @ViewDebug.IntToString(from = Gravity.LEFT,              to = "LEFT"),
             @ViewDebug.IntToString(from = Gravity.RIGHT,             to = "RIGHT"),
+            @ViewDebug.IntToString(from = Gravity.START,             to = "START"),
+            @ViewDebug.IntToString(from = Gravity.END,               to = "END"),
             @ViewDebug.IntToString(from = Gravity.CENTER_VERTICAL,   to = "CENTER_VERTICAL"),
             @ViewDebug.IntToString(from = Gravity.FILL_VERTICAL,     to = "FILL_VERTICAL"),
             @ViewDebug.IntToString(from = Gravity.CENTER_HORIZONTAL, to = "CENTER_HORIZONTAL"),
@@ -925,7 +927,7 @@ public abstract class ActionBar {
             @ViewDebug.IntToString(from = Gravity.CENTER,            to = "CENTER"),
             @ViewDebug.IntToString(from = Gravity.FILL,              to = "FILL")
         })
-        public int gravity = -1;
+        public int gravity = Gravity.NO_GRAVITY;
 
         public LayoutParams(Context c, AttributeSet attrs) {
             super(c, attrs);
@@ -933,13 +935,14 @@ public abstract class ActionBar {
             TypedArray a = c.obtainStyledAttributes(attrs,
                     com.android.internal.R.styleable.ActionBar_LayoutParams);
             gravity = a.getInt(
-                    com.android.internal.R.styleable.ActionBar_LayoutParams_layout_gravity, -1);
+                    com.android.internal.R.styleable.ActionBar_LayoutParams_layout_gravity,
+                    Gravity.NO_GRAVITY);
             a.recycle();
         }
 
         public LayoutParams(int width, int height) {
             super(width, height);
-            this.gravity = Gravity.CENTER_VERTICAL | Gravity.LEFT;
+            this.gravity = Gravity.CENTER_VERTICAL | Gravity.START;
         }
 
         public LayoutParams(int width, int height, int gravity) {

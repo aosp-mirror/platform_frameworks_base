@@ -84,7 +84,7 @@ public class ActionBarView extends AbsActionBarView {
             ActionBar.DISPLAY_SHOW_CUSTOM |
             ActionBar.DISPLAY_SHOW_TITLE;
 
-    private static final int DEFAULT_CUSTOM_GRAVITY = Gravity.LEFT | Gravity.CENTER_VERTICAL;
+    private static final int DEFAULT_CUSTOM_GRAVITY = Gravity.START | Gravity.CENTER_VERTICAL;
     
     private int mNavigationMode;
     private int mDisplayOptions = -1;
@@ -872,7 +872,7 @@ public class ActionBarView extends AbsActionBarView {
             }
             homeLayout.measure(homeWidthSpec,
                     MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
-            final int homeWidth = homeLayout.getMeasuredWidth() + homeLayout.getLeftOffset();
+            final int homeWidth = homeLayout.getMeasuredWidth() + homeLayout.getStartOffset();
             availableWidth = Math.max(0, availableWidth - homeWidth);
             leftOfCenter = Math.max(0, availableWidth - homeWidth);
         }
@@ -1010,8 +1010,6 @@ public class ActionBarView extends AbsActionBarView {
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        int x = getPaddingLeft();
-        final int y = getPaddingTop();
         final int contentHeight = b - t - getPaddingTop() - getPaddingBottom();
 
         if (contentHeight <= 0) {
@@ -1019,13 +1017,23 @@ public class ActionBarView extends AbsActionBarView {
             return;
         }
 
+        final boolean isLayoutRtl = isLayoutRtl();
+        final int direction = isLayoutRtl ? +1 : -1;
+        int menuStart = isLayoutRtl ? getPaddingLeft() : r - l - getPaddingRight();
+        // In LTR mode, we start from left padding and go to the right; in RTL mode, we start
+        // from the padding right and go to the left (in reverse way)
+        int x = isLayoutRtl ? r - l - getPaddingRight() : getPaddingLeft();
+        final int y = getPaddingTop();
+
         HomeView homeLayout = mExpandedActionView != null ? mExpandedHomeLayout : mHomeLayout;
         boolean needsTouchDelegate = false;
         int homeSlop = mMaxHomeSlop;
         int homeRight = 0;
         if (homeLayout.getVisibility() != GONE) {
-            final int leftOffset = homeLayout.getLeftOffset();
-            x += positionChild(homeLayout, x + leftOffset, y, contentHeight) + leftOffset;
+            final int startOffset = homeLayout.getStartOffset();
+            x += positionChild(homeLayout,
+                            next(x, startOffset, isLayoutRtl), y, contentHeight, isLayoutRtl);
+            x = next(x, startOffset, isLayoutRtl);
             needsTouchDelegate = homeLayout == mHomeLayout;
             homeRight = x;
         }
@@ -1034,7 +1042,7 @@ public class ActionBarView extends AbsActionBarView {
             final boolean showTitle = mTitleLayout != null && mTitleLayout.getVisibility() != GONE &&
                     (mDisplayOptions & ActionBar.DISPLAY_SHOW_TITLE) != 0;
             if (showTitle) {
-                x += positionChild(mTitleLayout, x, y, contentHeight);
+                x += positionChild(mTitleLayout, x, y, contentHeight, isLayoutRtl);
             }
 
             switch (mNavigationMode) {
@@ -1042,31 +1050,34 @@ public class ActionBarView extends AbsActionBarView {
                     break;
                 case ActionBar.NAVIGATION_MODE_LIST:
                     if (mListNavLayout != null) {
-                        if (showTitle) x += mItemPadding;
+                        if (showTitle) {
+                            x = next(x, mItemPadding, isLayoutRtl);
+                        }
                         homeSlop = Math.min(homeSlop, Math.max(x - homeRight, 0));
-                        x += positionChild(mListNavLayout, x, y, contentHeight) + mItemPadding;
+                        x += positionChild(mListNavLayout, x, y, contentHeight, isLayoutRtl);
+                        x = next(x, mItemPadding, isLayoutRtl);
                     }
                     break;
                 case ActionBar.NAVIGATION_MODE_TABS:
                     if (mTabScrollView != null) {
-                        if (showTitle) x += mItemPadding;
+                        if (showTitle) x = next(x, mItemPadding, isLayoutRtl);
                         homeSlop = Math.min(homeSlop, Math.max(x - homeRight, 0));
-                        x += positionChild(mTabScrollView, x, y, contentHeight) + mItemPadding;
+                        x += positionChild(mTabScrollView, x, y, contentHeight, isLayoutRtl);
+                        x = next(x, mItemPadding, isLayoutRtl);
                     }
                     break;
             }
         }
 
-        int menuLeft = r - l - getPaddingRight();
         if (mMenuView != null && mMenuView.getParent() == this) {
-            positionChildInverse(mMenuView, menuLeft, y, contentHeight);
-            menuLeft -= mMenuView.getMeasuredWidth();
+            positionChild(mMenuView, menuStart, y, contentHeight, !isLayoutRtl);
+            menuStart += direction * mMenuView.getMeasuredWidth();
         }
 
         if (mIndeterminateProgressView != null &&
                 mIndeterminateProgressView.getVisibility() != GONE) {
-            positionChildInverse(mIndeterminateProgressView, menuLeft, y, contentHeight);
-            menuLeft -= mIndeterminateProgressView.getMeasuredWidth();
+            positionChild(mIndeterminateProgressView, menuStart, y, contentHeight, !isLayoutRtl);
+            menuStart += direction * mIndeterminateProgressView.getMeasuredWidth();
         }
 
         View customView = null;
@@ -1077,51 +1088,64 @@ public class ActionBarView extends AbsActionBarView {
             customView = mCustomNavView;
         }
         if (customView != null) {
+            final int resolvedLayoutDirection = getResolvedLayoutDirection();
             ViewGroup.LayoutParams lp = customView.getLayoutParams();
+            lp.onResolveLayoutDirection(resolvedLayoutDirection);
             final ActionBar.LayoutParams ablp = lp instanceof ActionBar.LayoutParams ?
                     (ActionBar.LayoutParams) lp : null;
-
             final int gravity = ablp != null ? ablp.gravity : DEFAULT_CUSTOM_GRAVITY;
             final int navWidth = customView.getMeasuredWidth();
 
             int topMargin = 0;
             int bottomMargin = 0;
             if (ablp != null) {
-                x += ablp.leftMargin;
-                menuLeft -= ablp.rightMargin;
+                x = next(x, ablp.getMarginStart(), isLayoutRtl);
+                menuStart += direction * ablp.getMarginEnd();
                 topMargin = ablp.topMargin;
                 bottomMargin = ablp.bottomMargin;
             }
 
-            int hgravity = gravity & Gravity.HORIZONTAL_GRAVITY_MASK;
+            int hgravity = gravity & Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK;
             // See if we actually have room to truly center; if not push against left or right.
             if (hgravity == Gravity.CENTER_HORIZONTAL) {
                 final int centeredLeft = ((mRight - mLeft) - navWidth) / 2;
-                if (centeredLeft < x) {
-                    hgravity = Gravity.LEFT;
-                } else if (centeredLeft + navWidth > menuLeft) {
-                    hgravity = Gravity.RIGHT;
+                if (isLayoutRtl) {
+                    final int centeredStart = centeredLeft + navWidth;
+                    final int centeredEnd = centeredLeft;
+                    if (centeredStart > x) {
+                        hgravity = Gravity.RIGHT;
+                    } else if (centeredEnd < menuStart) {
+                        hgravity = Gravity.LEFT;
+                    }
+                } else {
+                    final int centeredStart = centeredLeft;
+                    final int centeredEnd = centeredLeft + navWidth;
+                    if (centeredStart < x) {
+                        hgravity = Gravity.LEFT;
+                    } else if (centeredEnd > menuStart) {
+                        hgravity = Gravity.RIGHT;
+                    }
                 }
-            } else if (gravity == -1) {
-                hgravity = Gravity.LEFT;
+            } else if (gravity == Gravity.NO_GRAVITY) {
+                hgravity = Gravity.START;
             }
 
             int xpos = 0;
-            switch (hgravity) {
+            switch (Gravity.getAbsoluteGravity(hgravity, resolvedLayoutDirection)) {
                 case Gravity.CENTER_HORIZONTAL:
                     xpos = ((mRight - mLeft) - navWidth) / 2;
                     break;
                 case Gravity.LEFT:
-                    xpos = x;
+                    xpos = isLayoutRtl ? menuStart : x;
                     break;
                 case Gravity.RIGHT:
-                    xpos = menuLeft - navWidth;
+                    xpos = isLayoutRtl ? x - navWidth : menuStart - navWidth;
                     break;
             }
 
             int vgravity = gravity & Gravity.VERTICAL_GRAVITY_MASK;
 
-            if (gravity == -1) {
+            if (gravity == Gravity.NO_GRAVITY) {
                 vgravity = Gravity.CENTER_VERTICAL;
             }
 
@@ -1144,7 +1168,7 @@ public class ActionBarView extends AbsActionBarView {
             customView.layout(xpos, ypos, xpos + customWidth,
                     ypos + customView.getMeasuredHeight());
             homeSlop = Math.min(homeSlop, Math.max(xpos - homeRight, 0));
-            x += customWidth;
+            x = next(x, customWidth, isLayoutRtl);
         }
 
         if (mProgressView != null) {
@@ -1290,7 +1314,7 @@ public class ActionBarView extends AbsActionBarView {
             mIconView = (ImageView) findViewById(com.android.internal.R.id.home);
         }
 
-        public int getLeftOffset() {
+        public int getStartOffset() {
             return mUpView.getVisibility() == GONE ? mUpWidth : 0;
         }
 
@@ -1340,25 +1364,50 @@ public class ActionBarView extends AbsActionBarView {
         @Override
         protected void onLayout(boolean changed, int l, int t, int r, int b) {
             final int vCenter = (b - t) / 2;
-            int width = r - l;
+            final boolean isLayoutRtl = isLayoutRtl();
+            final int layoutDirection = getResolvedLayoutDirection();
+            final int width = getWidth();
             int upOffset = 0;
             if (mUpView.getVisibility() != GONE) {
                 final LayoutParams upLp = (LayoutParams) mUpView.getLayoutParams();
                 final int upHeight = mUpView.getMeasuredHeight();
                 final int upWidth = mUpView.getMeasuredWidth();
-                final int upTop = vCenter - upHeight / 2;
-                mUpView.layout(0, upTop, upWidth, upTop + upHeight);
                 upOffset = upLp.leftMargin + upWidth + upLp.rightMargin;
-                width -= upOffset;
-                l += upOffset;
+                final int upTop = vCenter - upHeight / 2;
+                final int upBottom = upTop + upHeight;
+                final int upRight;
+                final int upLeft;
+                if (isLayoutRtl) {
+                    upRight = width;
+                    upLeft = upRight - upWidth;
+                    r -= upOffset;
+                } else {
+                    upRight = upWidth;
+                    upLeft = 0;
+                    l += upOffset;
+                }
+                mUpView.layout(upLeft, upTop, upRight, upBottom);
             }
+
             final LayoutParams iconLp = (LayoutParams) mIconView.getLayoutParams();
+            iconLp.onResolveLayoutDirection(layoutDirection);
             final int iconHeight = mIconView.getMeasuredHeight();
             final int iconWidth = mIconView.getMeasuredWidth();
             final int hCenter = (r - l) / 2;
-            final int iconLeft = upOffset + Math.max(iconLp.leftMargin, hCenter - iconWidth / 2);
             final int iconTop = Math.max(iconLp.topMargin, vCenter - iconHeight / 2);
-            mIconView.layout(iconLeft, iconTop, iconLeft + iconWidth, iconTop + iconHeight);
+            final int iconBottom = iconTop + iconHeight;
+            final int iconLeft;
+            final int iconRight;
+            int marginStart = iconLp.getMarginStart();
+            final int delta = Math.max(marginStart, hCenter - iconWidth / 2);
+            if (isLayoutRtl) {
+                iconRight = width - upOffset - delta;
+                iconLeft = iconRight - iconWidth;
+            } else {
+                iconLeft = upOffset + delta;
+                iconRight = iconLeft + iconWidth;
+            }
+            mIconView.layout(iconLeft, iconTop, iconRight, iconBottom);
         }
     }
 
