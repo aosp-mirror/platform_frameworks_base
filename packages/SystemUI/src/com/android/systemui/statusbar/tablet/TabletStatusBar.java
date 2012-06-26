@@ -201,7 +201,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         public boolean onTouch(View v, MotionEvent event) {
             switch(event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    if (!shouldDisableNavbarGestures()) {
+                    if (!shouldDisableNavbarGestures() && !inKeyguardRestrictedInputMode()) {
                         mHandler.removeCallbacks(mShowSearchPanel);
                         mHandler.postDelayed(mShowSearchPanel, mShowSearchHoldoff);
                     }
