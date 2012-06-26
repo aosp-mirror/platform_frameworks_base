@@ -915,22 +915,23 @@ size_t TextLayoutShaper::shapeFontRun(const SkPaint* paint, bool isRTL) {
 
     // Shape
     assert(mShaperItem.item.length > 0); // Harfbuzz will overwrite other memory if length is 0.
-    ensureShaperItemGlyphArrays(mShaperItem.item.length * 3 / 2);
-    mShaperItem.num_glyphs = mShaperItemGlyphArraySize;
-    while (!HB_ShapeItem(&mShaperItem)) {
+    size_t size = mShaperItem.item.length * 3 / 2;
+    while (!doShaping(size)) {
         // We overflowed our glyph arrays. Resize and retry.
         // HB_ShapeItem fills in shaperItem.num_glyphs with the needed size.
-        ensureShaperItemGlyphArrays(mShaperItem.num_glyphs * 2);
-        mShaperItem.num_glyphs = mShaperItemGlyphArraySize;
+        size = mShaperItem.num_glyphs * 2;
     }
     return baseGlyphCount;
 }
 
-void TextLayoutShaper::ensureShaperItemGlyphArrays(size_t size) {
+bool TextLayoutShaper::doShaping(size_t size) {
     if (size > mShaperItemGlyphArraySize) {
         deleteShaperItemGlyphArrays();
         createShaperItemGlyphArrays(size);
     }
+    mShaperItem.num_glyphs = mShaperItemGlyphArraySize;
+    memset(mShaperItem.offsets, 0, mShaperItem.num_glyphs * sizeof(HB_FixedPoint));
+    return HB_ShapeItem(&mShaperItem);
 }
 
 void TextLayoutShaper::createShaperItemGlyphArrays(size_t size) {

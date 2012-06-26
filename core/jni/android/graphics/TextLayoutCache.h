@@ -242,7 +242,7 @@ private:
     SkTypeface* getCachedTypeface(SkTypeface** typeface, HB_Script script, SkTypeface::Style style);
     HB_Face getCachedHBFace(SkTypeface* typeface);
 
-    void ensureShaperItemGlyphArrays(size_t size);
+    bool doShaping(size_t size);
     void createShaperItemGlyphArrays(size_t size);
     void deleteShaperItemGlyphArrays();
 
