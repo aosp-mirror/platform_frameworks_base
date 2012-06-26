@@ -338,6 +338,8 @@ public interface IActivityManager extends IInterface {
 
     public boolean isIntentSenderTargetedToPackage(IIntentSender sender) throws RemoteException;
 
+    public boolean isIntentSenderAnActivity(IIntentSender sender) throws RemoteException;
+
     public void updatePersistentConfiguration(Configuration values) throws RemoteException;
 
     public long[] getProcessPss(int[] pids) throws RemoteException;
@@ -603,4 +605,5 @@ public interface IActivityManager extends IInterface {
     int FINISH_ACTIVITY_AFFINITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+148;
     int GET_LAUNCHED_FROM_UID_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+149;
     int UNSTABLE_PROVIDER_DIED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+150;
+    int IS_INTENT_SENDER_AN_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+151;
 }
