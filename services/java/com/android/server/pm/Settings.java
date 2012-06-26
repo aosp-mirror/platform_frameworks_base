@@ -2459,6 +2459,7 @@ final class Settings {
             pw.print("    nativeLibraryPath="); pw.println(ps.nativeLibraryPathString);
             pw.print("    versionCode="); pw.println(ps.versionCode);
             if (ps.pkg != null) {
+                pw.print("    applicationInfo="); pw.println(ps.pkg.applicationInfo.toString());
                 pw.print("    flags="); printFlags(pw, ps.pkg.applicationInfo.flags, FLAG_DUMP_SPEC); pw.println();
                 pw.print("    versionName="); pw.println(ps.pkg.mVersionName);
                 pw.print("    dataDir="); pw.println(ps.pkg.applicationInfo.dataDir);
@@ -2591,6 +2592,10 @@ final class Settings {
                 if (ps.realName != null) {
                     pw.print("    compat name=");
                     pw.println(ps.name);
+                }
+                if (ps.pkg != null && ps.pkg.applicationInfo != null) {
+                    pw.print("    applicationInfo=");
+                    pw.println(ps.pkg.applicationInfo.toString());
                 }
                 pw.print("    userId=");
                 pw.println(ps.appId);
