@@ -279,6 +279,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     WindowManagerFuncs mWindowManagerFuncs;
     LocalPowerManager mPowerManager;
     IStatusBarService mStatusBarService;
+    final Object mServiceAquireLock = new Object();
     Vibrator mVibrator; // Vibrator for giving feedback of orientation changes
     SearchManager mSearchManager;
 
@@ -597,6 +598,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
     MyOrientationListener mOrientationListener;
 
+    IStatusBarService getStatusBarService() {
+        synchronized (mServiceAquireLock) {
+            if (mStatusBarService == null) {
+                mStatusBarService = IStatusBarService.Stub.asInterface(
+                        ServiceManager.getService("statusbar"));
+            }
+            return mStatusBarService;
+        }
+    }
+
     /*
      * We always let the sensor be switched on by default except when
      * the user has explicitly disabled sensor based rotation or when the
@@ -790,9 +801,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             showOrHideRecentAppsDialog(RECENT_APPS_BEHAVIOR_SHOW_OR_DISMISS);
         } else if (mLongPressOnHomeBehavior == LONG_PRESS_HOME_RECENT_SYSTEM_UI) {
             try {
-                mStatusBarService.toggleRecentApps();
+                IStatusBarService statusbar = getStatusBarService();
+                if (statusbar != null) {
+                    statusbar.toggleRecentApps();
+                }
             } catch (RemoteException e) {
                 Slog.e(TAG, "RemoteException when showing recent apps", e);
+                // re-acquire status bar service next time it is needed.
+                mStatusBarService = null;
             }
         }
     }
@@ -1752,9 +1768,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mHomeLongPressed = false;
                 if (!homeWasLongPressed) {
                     try {
-                        mStatusBarService.cancelPreloadRecentApps();
+                        IStatusBarService statusbar = getStatusBarService();
+                        if (statusbar != null) {
+                            statusbar.cancelPreloadRecentApps();
+                        }
                     } catch (RemoteException e) {
                         Slog.e(TAG, "RemoteException when showing recent apps", e);
+                        // re-acquire status bar service next time it is needed.
+                        mStatusBarService = null;
                     }
 
                     mHomePressed = false;
@@ -1805,9 +1826,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (down) {
                 if (!mHomePressed && mLongPressOnHomeBehavior == LONG_PRESS_HOME_RECENT_SYSTEM_UI) {
                     try {
-                        mStatusBarService.preloadRecentApps();
+                        IStatusBarService statusbar = getStatusBarService();
+                        if (statusbar != null) {
+                            statusbar.preloadRecentApps();
+                        }
                     } catch (RemoteException e) {
                         Slog.e(TAG, "RemoteException when preloading recent apps", e);
+                        // re-acquire status bar service next time it is needed.
+                        mStatusBarService = null;
                     }
                 }
                 if (repeatCount == 0) {
@@ -2902,10 +2928,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         changes |= FINISH_LAYOUT_REDO_LAYOUT;
 
                         mHandler.post(new Runnable() { public void run() {
-                            if (mStatusBarService != null) {
-                                try {
-                                    mStatusBarService.collapse();
-                                } catch (RemoteException ex) {}
+                            try {
+                                IStatusBarService statusbar = getStatusBarService();
+                                if (statusbar != null) {
+                                    statusbar.collapse();
+                                }
+                            } catch (RemoteException ex) {
+                                // re-acquire status bar service next time it is needed.
+                                mStatusBarService = null;
                             }
                         }});
                     } else if (DEBUG_LAYOUT) {
@@ -4343,18 +4373,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mFocusedApp = mFocusedWindow.getAppToken();
         mHandler.post(new Runnable() {
                 public void run() {
-                    if (mStatusBarService == null) {
-                        mStatusBarService = IStatusBarService.Stub.asInterface(
-                                ServiceManager.getService("statusbar"));
-                    }
-                    if (mStatusBarService != null) {
-                        try {
-                            mStatusBarService.setSystemUiVisibility(visibility, 0xffffffff);
-                            mStatusBarService.topAppWindowChanged(needsMenu);
-                        } catch (RemoteException e) {
-                            // not much to be done
-                            mStatusBarService = null;
+                    try {
+                        IStatusBarService statusbar = getStatusBarService();
+                        if (statusbar != null) {
+                            statusbar.setSystemUiVisibility(visibility, 0xffffffff);
+                            statusbar.topAppWindowChanged(needsMenu);
                         }
+                    } catch (RemoteException e) {
+                        // re-acquire status bar service next time it is needed.
+                        mStatusBarService = null;
                     }
                 }
             });
