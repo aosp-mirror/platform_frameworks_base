@@ -1129,6 +1129,11 @@ final class ActivityStack {
             resumeTopActivityLocked(prev);
         } else {
             checkReadyForSleepLocked();
+            if (topRunningActivityLocked(null) == null) {
+                // If there are no more activities available to run, then
+                // do resume anyway to start something.
+                resumeTopActivityLocked(null);
+            }
         }
         
         if (prev != null) {
@@ -3409,6 +3414,7 @@ final class ActivityStack {
         IApplicationThread sendThumbnail = null;
         boolean booting = false;
         boolean enableScreen = false;
+        boolean activityRemoved = false;
 
         synchronized (mService) {
             ActivityRecord r = ActivityRecord.forToken(token);
@@ -3515,7 +3521,7 @@ final class ActivityStack {
         for (i=0; i<NF; i++) {
             ActivityRecord r = (ActivityRecord)finishes.get(i);
             synchronized (mService) {
-                destroyActivityLocked(r, true, false, "finish-idle");
+                activityRemoved = destroyActivityLocked(r, true, false, "finish-idle");
             }
         }
 
@@ -3535,6 +3541,10 @@ final class ActivityStack {
 
         if (enableScreen) {
             mService.enableScreenAfterBoot();
+        }
+
+        if (activityRemoved) {
+            resumeTopActivityLocked(null);
         }
 
         return res;
@@ -3776,7 +3786,11 @@ final class ActivityStack {
                 || prevState == ActivityState.INITIALIZING) {
             // If this activity is already stopped, we can just finish
             // it right now.
-            return destroyActivityLocked(r, true, true, "finish-imm") ? null : r;
+            boolean activityRemoved = destroyActivityLocked(r, true, true, "finish-imm");
+            if (activityRemoved) {
+                resumeTopActivityLocked(null);
+            }
+            return activityRemoved ? null : r;
         } else {
             // Need to go through the full pause cycle to get this
             // activity into the stopped state and then finish it.
@@ -3840,6 +3854,10 @@ final class ActivityStack {
         }
 
         // Get rid of any pending idle timeouts.
+        removeTimeoutsForActivityLocked(r);
+    }
+
+    private void removeTimeoutsForActivityLocked(ActivityRecord r) {
         mHandler.removeMessages(PAUSE_TIMEOUT_MSG, r);
         mHandler.removeMessages(STOP_TIMEOUT_MSG, r);
         mHandler.removeMessages(IDLE_TIMEOUT_MSG, r);
@@ -3893,6 +3911,7 @@ final class ActivityStack {
 
     final void destroyActivitiesLocked(ProcessRecord owner, boolean oomAdj, String reason) {
         boolean lastIsOpaque = false;
+        boolean activityRemoved = false;
         for (int i=mHistory.size()-1; i>=0; i--) {
             ActivityRecord r = mHistory.get(i);
             if (r.finishing) {
@@ -3916,8 +3935,13 @@ final class ActivityStack {
                 if (DEBUG_SWITCH) Slog.v(TAG, "Destroying " + r + " in state " + r.state
                         + " resumed=" + mResumedActivity
                         + " pausing=" + mPausingActivity);
-                destroyActivityLocked(r, true, oomAdj, reason);
+                if (destroyActivityLocked(r, true, oomAdj, reason)) {
+                    activityRemoved = true;
+                }
             }
+        }
+        if (activityRemoved) {
+            resumeTopActivityLocked(null);
         }
     }
 
@@ -4023,23 +4047,28 @@ final class ActivityStack {
 
     final void activityDestroyed(IBinder token) {
         synchronized (mService) {
-            ActivityRecord r = ActivityRecord.forToken(token);
-            if (r != null) {
-                mHandler.removeMessages(DESTROY_TIMEOUT_MSG, r);
-            }
-            
-            int index = indexOfActivityLocked(r);
-            if (index >= 0) {
-                if (r.state == ActivityState.DESTROYING) {
-                    final long origId = Binder.clearCallingIdentity();
-                    removeActivityFromHistoryLocked(r);
-                    Binder.restoreCallingIdentity(origId);
+            final long origId = Binder.clearCallingIdentity();
+            try {
+                ActivityRecord r = ActivityRecord.forToken(token);
+                if (r != null) {
+                    mHandler.removeMessages(DESTROY_TIMEOUT_MSG, r);
                 }
+
+                int index = indexOfActivityLocked(r);
+                if (index >= 0) {
+                    if (r.state == ActivityState.DESTROYING) {
+                        cleanUpActivityLocked(r, true, true);
+                        removeActivityFromHistoryLocked(r);
+                    }
+                }
+                resumeTopActivityLocked(null);
+            } finally {
+                Binder.restoreCallingIdentity(origId);
             }
         }
     }
     
-    private static void removeHistoryRecordsForAppLocked(ArrayList list, ProcessRecord app) {
+    private void removeHistoryRecordsForAppLocked(ArrayList list, ProcessRecord app) {
         int i = list.size();
         if (localLOGV) Slog.v(
             TAG, "Removing app " + app + " from list " + list
@@ -4052,6 +4081,7 @@ final class ActivityStack {
             if (r.app == app) {
                 if (localLOGV) Slog.v(TAG, "Removing this entry!");
                 list.remove(i);
+                removeTimeoutsForActivityLocked(r);
             }
         }
     }
