@@ -631,6 +631,20 @@ public final class PendingIntent implements Parcelable {
     }
 
     /**
+     * @hide
+     * Check whether this PendingIntent will launch an Activity.
+     */
+    public boolean isActivity() {
+        try {
+            return ActivityManagerNative.getDefault()
+                .isIntentSenderAnActivity(mTarget);
+        } catch (RemoteException e) {
+            // Should never happen.
+            return false;
+        }
+    }
+
+    /**
      * Comparison operator on two PendingIntent objects, such that true
      * is returned then they both represent the same operation from the
      * same package.  This allows you to use {@link #getActivity},

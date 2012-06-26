@@ -125,7 +125,10 @@ public class RemoteViews implements Parcelable, Filter {
      * setting on click extras and setting on click pending intents. The former is enabled,
      * and the latter disabled when this flag is true.
      */
-     private boolean mIsWidgetCollectionChild = false;
+    private boolean mIsWidgetCollectionChild = false;
+
+    private static final OnClickHandler DEFAULT_ON_CLICK_HANDLER = new OnClickHandler();
+    private OnClickHandler mOnClickHandler = DEFAULT_ON_CLICK_HANDLER;
 
     /**
      * This annotation indicates that a subclass of View is alllowed to be used
@@ -149,29 +152,9 @@ public class RemoteViews implements Parcelable, Filter {
         }
     }
 
-    /**
-     * Base class for all actions that can be performed on an 
-     * inflated view.
-     *
-     *  SUBCLASSES MUST BE IMMUTABLE SO CLONE WORKS!!!!!
-     */
-    private abstract static class Action implements Parcelable {
-        public abstract void apply(View root, ViewGroup rootParent) throws ActionException;
-
-        public int describeContents() {
-            return 0;
-        }
-
-        /**
-         * Overridden by each class to report on it's own memory usage
-         */
-        public void updateMemoryUsageEstimate(MemoryUsageCounter counter) {
-            // We currently only calculate Bitmap memory usage, so by default, don't do anything
-            // here
-            return;
-        }
-
-        protected boolean startIntentSafely(View view, PendingIntent pendingIntent,
+    /** @hide */
+    public static class OnClickHandler {
+        public boolean onClickHandler(View view, PendingIntent pendingIntent,
                 Intent fillInIntent) {
             try {
                 // TODO: Unregister this handler if PendingIntent.FLAG_ONE_SHOT?
@@ -192,6 +175,30 @@ public class RemoteViews implements Parcelable, Filter {
                 return false;
             }
             return true;
+        }
+    }
+
+    /**
+     * Base class for all actions that can be performed on an
+     * inflated view.
+     *
+     *  SUBCLASSES MUST BE IMMUTABLE SO CLONE WORKS!!!!!
+     */
+    private abstract static class Action implements Parcelable {
+        public abstract void apply(RemoteViews owner, View root,
+                ViewGroup rootParent) throws ActionException;
+
+        public int describeContents() {
+            return 0;
+        }
+
+        /**
+         * Overridden by each class to report on it's own memory usage
+         */
+        public void updateMemoryUsageEstimate(MemoryUsageCounter counter) {
+            // We currently only calculate Bitmap memory usage, so by default, don't do anything
+            // here
+            return;
         }
 
         public void setBitmapCache(BitmapCache bitmapCache) {
@@ -222,7 +229,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         @Override
-        public void apply(View root, ViewGroup rootParent) {
+        public void apply(RemoteViews owner, View root, ViewGroup rootParent) {
             final View view = root.findViewById(viewId);
             if (!(view instanceof AdapterView<?>)) return;
 
@@ -253,7 +260,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         @Override
-        public void apply(View root, ViewGroup rootParent) {
+        public void apply(RemoteViews owner, View root, ViewGroup rootParent) {
             final View target = root.findViewById(viewId);
             if (target == null) return;
 
@@ -265,6 +272,7 @@ public class RemoteViews implements Parcelable, Filter {
             if (target == root) {
                 target.setTagInternal(com.android.internal.R.id.fillInIntent, fillInIntent);
             } else if (target != null && fillInIntent != null) {
+                final OnClickHandler clicker = owner.mOnClickHandler;
                 OnClickListener listener = new OnClickListener() {
                     public void onClick(View v) {
                         // Insure that this view is a child of an AdapterView
@@ -302,7 +310,7 @@ public class RemoteViews implements Parcelable, Filter {
                         rect.bottom = (int) ((pos[1] + v.getHeight()) * appScale + 0.5f);
 
                         fillInIntent.setSourceBounds(rect);
-                        startIntentSafely(v, pendingIntent, fillInIntent);
+                        clicker.onClickHandler(v, pendingIntent, fillInIntent);
                     }
 
                 };
@@ -334,13 +342,14 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         @Override
-        public void apply(View root, ViewGroup rootParent) {
+        public void apply(RemoteViews owner, View root, ViewGroup rootParent) {
             final View target = root.findViewById(viewId);
             if (target == null) return;
 
             // If the view isn't an AdapterView, setting a PendingIntent template doesn't make sense
             if (target instanceof AdapterView<?>) {
                 AdapterView<?> av = (AdapterView<?>) target;
+                final OnClickHandler clicker = owner.mOnClickHandler;
                 // The PendingIntent template is stored in the view's tag.
                 OnItemClickListener listener = new OnItemClickListener() {
                     public void onItemClick(AdapterView<?> parent, View view,
@@ -380,7 +389,7 @@ public class RemoteViews implements Parcelable, Filter {
 
                             final Intent intent = new Intent();
                             intent.setSourceBounds(rect);
-                            startIntentSafely(view, pendingIntentTemplate, fillInIntent);
+                            clicker.onClickHandler(view, pendingIntentTemplate, fillInIntent);
                         }
                     }
                 };
@@ -417,7 +426,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         @Override
-        public void apply(View root, ViewGroup rootParent) {
+        public void apply(RemoteViews owner, View root, ViewGroup rootParent) {
             final View target = root.findViewById(viewId);
             if (target == null) return;
 
@@ -485,7 +494,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         @Override
-        public void apply(View root, ViewGroup rootParent) {
+        public void apply(RemoteViews owner, View root, ViewGroup rootParent) {
             final View target = root.findViewById(viewId);
             if (target == null) return;
 
@@ -506,6 +515,7 @@ public class RemoteViews implements Parcelable, Filter {
 
             if (target != null) {
                 // If the pendingIntent is null, we clear the onClickListener
+                final OnClickHandler clicker = owner.mOnClickHandler;
                 OnClickListener listener = null;
                 if (pendingIntent != null) {
                     listener = new OnClickListener() {
@@ -525,7 +535,7 @@ public class RemoteViews implements Parcelable, Filter {
     
                             final Intent intent = new Intent();
                             intent.setSourceBounds(rect);
-                            startIntentSafely(v, pendingIntent, intent);
+                            clicker.onClickHandler(v, pendingIntent, intent);
                         }
                     };
                 }
@@ -592,7 +602,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
         
         @Override
-        public void apply(View root, ViewGroup rootParent) {
+        public void apply(RemoteViews owner, View root, ViewGroup rootParent) {
             final View target = root.findViewById(viewId);
             if (target == null) return;
             
@@ -652,7 +662,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         @Override
-        public void apply(View root, ViewGroup rootParent) {
+        public void apply(RemoteViews owner, View root, ViewGroup rootParent) {
             final View view = root.findViewById(viewId);
             if (view == null) return;
 
@@ -776,10 +786,11 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         @Override
-        public void apply(View root, ViewGroup rootParent) throws ActionException {
+        public void apply(RemoteViews owner, View root,
+                ViewGroup rootParent) throws ActionException {
             ReflectionAction ra = new ReflectionAction(viewId, methodName, ReflectionAction.BITMAP,
                     bitmap);
-            ra.apply(root, rootParent);
+            ra.apply(owner, root, rootParent);
         }
 
         @Override
@@ -995,7 +1006,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         @Override
-        public void apply(View root, ViewGroup rootParent) {
+        public void apply(RemoteViews owner, View root, ViewGroup rootParent) {
             final View view = root.findViewById(viewId);
             if (view == null) return;
 
@@ -1097,13 +1108,13 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         @Override
-        public void apply(View root, ViewGroup rootParent) {
+        public void apply(RemoteViews owner, View root, ViewGroup rootParent) {
             final Context context = root.getContext();
             final ViewGroup target = (ViewGroup) root.findViewById(viewId);
             if (target == null) return;
             if (nestedViews != null) {
                 // Inflate nested views and add as children
-                target.addView(nestedViews.apply(context, target));
+                target.addView(nestedViews.apply(owner, context, target));
             } else {
                 // Clear all children when nested views omitted
                 target.removeAllViews();
@@ -1164,7 +1175,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         @Override
-        public void apply(View root, ViewGroup rootParent) {
+        public void apply(RemoteViews owner, View root, ViewGroup rootParent) {
             final Context context = root.getContext();
             final TextView target = (TextView) root.findViewById(viewId);
             if (target == null) return;
@@ -1206,7 +1217,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         @Override
-        public void apply(View root, ViewGroup rootParent) {
+        public void apply(RemoteViews owner, View root, ViewGroup rootParent) {
             final Context context = root.getContext();
             final TextView target = (TextView) root.findViewById(viewId);
             if (target == null) return;
@@ -1250,7 +1261,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         @Override
-        public void apply(View root, ViewGroup rootParent) {
+        public void apply(RemoteViews owner, View root, ViewGroup rootParent) {
             final Context context = root.getContext();
             final View target = root.findViewById(viewId);
             if (target == null) return;
@@ -2088,6 +2099,11 @@ public class RemoteViews implements Parcelable, Filter {
         return this;
     }
 
+    /** @hide */
+    public void setOnClickHandler(OnClickHandler handler) {
+        mOnClickHandler = handler;
+    }
+
     /**
      * Inflates the view hierarchy represented by this object and applies
      * all of the actions.
@@ -2100,6 +2116,10 @@ public class RemoteViews implements Parcelable, Filter {
      * @return The inflated view hierarchy
      */
     public View apply(Context context, ViewGroup parent) {
+        return apply(this, context, parent);
+    }
+
+    View apply(RemoteViews owner, Context context, ViewGroup parent) {
         RemoteViews rvToApply = getRemoteViewsToApply(context);
 
         View result;
@@ -2114,7 +2134,7 @@ public class RemoteViews implements Parcelable, Filter {
 
         result = inflater.inflate(rvToApply.getLayoutId(), parent, false);
 
-        rvToApply.performApply(result, parent);
+        rvToApply.performApply(owner, result, parent);
 
         return result;
     }
@@ -2141,15 +2161,15 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         prepareContext(context);
-        rvToApply.performApply(v, (ViewGroup) v.getParent());
+        rvToApply.performApply(this, v, (ViewGroup) v.getParent());
     }
 
-    private void performApply(View v, ViewGroup parent) {
+    private void performApply(RemoteViews owner, View v, ViewGroup parent) {
         if (mActions != null) {
             final int count = mActions.size();
             for (int i = 0; i < count; i++) {
                 Action a = mActions.get(i);
-                a.apply(v, parent);
+                a.apply(owner, v, parent);
             }
         }
     }
