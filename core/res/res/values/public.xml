@@ -924,8 +924,6 @@
   <java-symbol type="array" name="config_cdma_dun_supported_types" />
 
   <java-symbol type="drawable" name="default_wallpaper" />
-  <java-symbol type="drawable" name="ic_suggestions_add" />
-  <java-symbol type="drawable" name="ic_suggestions_delete" />
   <java-symbol type="drawable" name="indicator_input_error" />
   <java-symbol type="drawable" name="overscroll_edge" />
   <java-symbol type="drawable" name="overscroll_glow" />
