@@ -66,6 +66,81 @@ padding: 5px 0 0;
   <a href="#" onclick="return toggleDiv(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px"
     width="9px" />
+    SDK Tools, Revision 20</a> <em>(June 2012)</em>
+
+  <div class="toggleme">
+  <dl>
+    <dt>Dependencies:</dt>
+    <dd>
+      <ul>
+        <li>Android SDK Platform-tools revision 12 or later.</li>
+        <li>If you are developing in Eclipse with ADT, note that the SDK Tools r20 is designed for
+        use with ADT 20.0.0 and later. If you haven't already, we highly recommend updating your
+        <a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT Plugin</a> to 20.0.0.</li>
+        <li>If you are developing outside Eclipse, you must have
+          <a href="http://ant.apache.org/">Apache Ant</a> 1.8 or later.</li>
+    </ul>
+    </dd>
+    <dt>General notes:</dt>
+    <dd>
+      <ul>
+        <li>Added new Device Monitor application, grouping Android debugging tools into a
+single application, including ddms, traceview, hierarchyviewer and Tracer for GLES. (<a
+href="{@docRoot}tools/gltracer.html">more info</a>)</li>
+        <li>Added new System Trace new tool for tracing Android system activity. This tool allow you
+to capture a slice of system activity, plus additional information tagged from the <strong>Settings
+&gt; Developer Options &gt; Monitoring: Enable traces</strong> or with specific calls added to your
+application code. (<a href="{@docRoot}tools/systrace.html">more info</a>)</li>
+        </li>
+        <li>Build System
+          <ul>
+            <li>Added automatic merging of library project manifest files into the including
+project's manifest. Enable this feature with the {@code manifestmerger.enabled} property.</li>
+            <li>Added automatic ProGuard support for the {@code aapt -G} flag. This change causes
+the build system to generate a temporary ProGuard keep-rules file containing classes that
+are referenced from XML files (such as custom views) and pass this to ProGuard at shrink-time. This
+can make the resulting APK much smaller when using just a small portion of a large library project
+(such as the Android Support library), since the catch-all rules to keep all custom views from the
+default ProGuard configuration file have also been removed.</li>
+            <li>Added two ProGuard configuration files for use in projects: {@code 
+proguard-android-optimize.txt} which enables optimizations and {@code proguard-android.txt} which
+disables them.</li>
+          </ul>
+        </li>
+        <li>SDK Manager
+          <ul>
+            <li>Improved caching to reduce downloading of repository definitions.</li>
+            <li>Added <strong>Tools > Manage Add-on Sites</strong> option to allow deactivation of
+      third-party sites for improved performance (e.g., if one or more sites are temporarily slow to
+      load.)</li>
+            <li>Added settings for the SDK Manager download cache (<strong>SDK Manager > Tools >
+Options</strong>).</li>
+          </ul>
+        </li>
+      </ul>
+    </dd>
+    <dt>Bug fixes:</dt>
+    <dd>
+      <ul>
+        <li>Build
+          <ul>
+            <li>Fixed problem where test projects did not have access to the full classpath of tested
+projects, including Library Projects and third-party jars.</li>
+            <li>Fixed deployment logic so that applications with embedded tests can now be deployed
+and tested like test applications, including code coverage information.</li>
+            <li>Fixed Ant support for testing projects with libraries.</li>
+          </ul>
+        </li>
+      </ul>
+    </dd>
+    </dl>
+  </div>
+</div>
+
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px"
+    width="9px" />
     SDK Tools, Revision 19</a> <em>(April 2012)</em>
 
   <div class="toggleme">
