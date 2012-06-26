@@ -35,6 +35,10 @@ public class AppWindowAnimator {
     // AppWindowToken animations.
     int animLayerAdjustment;
 
+    // Propagated from AppWindowToken.allDrawn, to determine when
+    // the state changes.
+    boolean allDrawn;
+
     // Special surface for thumbnail animation.
     Surface thumbnail;
     int thumbnailTransactionSeq;
