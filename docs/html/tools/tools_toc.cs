@@ -130,6 +130,7 @@ class="en">Tools Help</span></a></div>
       <li><a href="<?cs var:toroot ?>tools/help/adt.html">ADT</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/android.html">android</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/bmgr.html">bmgr</a>
+      <li><a href="<?cs var:toroot ?>tools/help/monitor.html">Device Monitor</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/dmtracedump.html">dmtracedump</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/draw9patch.html">Draw 9-Patch</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/emulator.html">Emulator</a></li>
@@ -153,6 +154,7 @@ class="en">MonkeyRunner</span></a></li>
         </ul>
       </li>
        <li><a href="<?cs var:toroot ?>tools/help/proguard.html">ProGuard</a></li>
+       <li><a href="<?cs var:toroot ?>tools/help/gltracer.html">Tracer for OpenGL ES</a></li>
        <li><a href="<?cs var:toroot ?>tools/help/traceview.html">Traceview</a></li>
        <li><a href="<?cs var:toroot ?>tools/help/zipalign.html">zipalign</a></li>
     </ul>

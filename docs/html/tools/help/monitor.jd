@@ -1,0 +1,24 @@
+page.title=Debug Monitor
+@jd:body
+
+<p>Android Debug Monitor is a stand-alone tool that provides a graphical user interface for
+several Android application debugging and analysis tools. The Monitor tool does not
+require installation of a integrated development environment, such as Eclipse, and encapsulates the
+following tools:</p>
+
+<ul>
+  <li><a href="{@docRoot}tools/debugging/ddms.html">DDMS</a></li>
+  <li><a href="gltracer.html">Tracer for OpenGL ES</a></li>
+  <li><a href="hierarchy-viewer.html">Hierarchy Viewer</a></li>
+  <li><a href="traceview.html">Traceview</a></li>
+  <li>Pixel Perfect magnification viewer</li>
+</ul>
+
+<h2 id="usage">Usage</h2>
+
+<p>To start Debug Monitor, enter the following command from the SDK <code>tools/</code>
+directory:</p>
+  <pre>monitor</pre>
+
+<p>Start an Android emulator or connect an Android device via USB cable, and connect the Debug
+Monitor to the device by selecting it in the <strong>Devices</strong> window.</p>
