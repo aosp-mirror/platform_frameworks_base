@@ -1040,7 +1040,7 @@ public class PowerManagerService extends IPowerManager.Stub
                 mWakeLockState = mLocks.gatherState();
                 // goes in the middle to reduce flicker
                 if ((wl.flags & PowerManager.ON_AFTER_RELEASE) != 0) {
-                    userActivity(SystemClock.uptimeMillis(), -1, false, OTHER_EVENT, false);
+                    userActivity(SystemClock.uptimeMillis(), -1, false, OTHER_EVENT, false, true);
                 }
                 setPowerState(mWakeLockState | mUserState);
             }
@@ -2489,7 +2489,7 @@ public class PowerManagerService extends IPowerManager.Stub
 
     public void userActivityWithForce(long time, boolean noChangeLights, boolean force) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
-        userActivity(time, -1, noChangeLights, OTHER_EVENT, force);
+        userActivity(time, -1, noChangeLights, OTHER_EVENT, force, false);
     }
 
     public void userActivity(long time, boolean noChangeLights) {
@@ -2502,15 +2502,15 @@ public class PowerManagerService extends IPowerManager.Stub
             return;
         }
 
-        userActivity(time, -1, noChangeLights, OTHER_EVENT, false);
+        userActivity(time, -1, noChangeLights, OTHER_EVENT, false, false);
     }
 
     public void userActivity(long time, boolean noChangeLights, int eventType) {
-        userActivity(time, -1, noChangeLights, eventType, false);
+        userActivity(time, -1, noChangeLights, eventType, false, false);
     }
 
     public void userActivity(long time, boolean noChangeLights, int eventType, boolean force) {
-        userActivity(time, -1, noChangeLights, eventType, force);
+        userActivity(time, -1, noChangeLights, eventType, force, false);
     }
 
     /*
@@ -2520,11 +2520,11 @@ public class PowerManagerService extends IPowerManager.Stub
     public void clearUserActivityTimeout(long now, long timeout) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
         Slog.i(TAG, "clearUserActivity for " + timeout + "ms from now");
-        userActivity(now, timeout, false, OTHER_EVENT, false);
+        userActivity(now, timeout, false, OTHER_EVENT, false, false);
     }
 
     private void userActivity(long time, long timeoutOverride, boolean noChangeLights,
-            int eventType, boolean force) {
+            int eventType, boolean force, boolean ignoreIfScreenOff) {
 
         if (((mPokey & POKE_LOCK_IGNORE_TOUCH_EVENTS) != 0) && (eventType == TOUCH_EVENT)) {
             if (false) {
@@ -2546,6 +2546,11 @@ public class PowerManagerService extends IPowerManager.Stub
             // ignore user activity if we are in the process of turning off the screen
             if (isScreenTurningOffLocked()) {
                 Slog.d(TAG, "ignoring user activity while turning off screen");
+                return;
+            }
+            // ignore if the caller doesn't want this to allow the screen to turn
+            // on, and the screen is currently off.
+            if (ignoreIfScreenOff && (mPowerState & SCREEN_ON_BIT) == 0) {
                 return;
             }
             // Disable proximity sensor if if user presses power key while we are in the
