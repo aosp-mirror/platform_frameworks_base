@@ -25,6 +25,8 @@
       </li>
           <li><a href="<?cs var:toroot ?>sdk/exploring.html">
               <span class="en">Exploring the SDK</span></a></li>
+      <li><a href="<?cs var:toroot ?>tools/sdk/ndk/index.html">NDK</a>
+      </li>
     </ul>
   </li>
   
@@ -169,15 +171,6 @@ class="en">MonkeyRunner</span></a></li>
       <!--
       <li><a href="<?cs var:toroot ?>tools/sdk/addons.html"><span class="en">Add-ons</span></a></li>
       -->
-      <li class="nav-section">
-        <div class="nav-section-header">
-        <a href="<?cs var:toroot ?>tools/sdk/ndk/index.html">
-          <span class="en">NDK</span></a>
-        </div>
-        <ul>
-          <li><a href="<?cs var:toroot ?>tools/sdk/ndk/overview.html">What is the NDK?</a></li>
-        </ul>
-      </li>
       <li><a href="<?cs var:toroot ?>tools/revisions/platforms.html"><span
 class="en">Platforms</span></a></li>
     </ul>
