@@ -588,6 +588,7 @@
           </li>
         </ul>
       </li>
+
       <li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot ?>guide/google/play/licensing/index.html">
           <span class="en">Application Licensing</span></a>
@@ -606,8 +607,11 @@
               <span class="en">Licensing Reference</span></a>
           </li>
         </ul>
-      </li>       
-      <li><a href="<?cs var:toroot ?>guide/google/play/filters.html">
+      </li>
+      <li><a href="<?cs var:toroot ?>guide/google/play/services.html">
+          <span class="en">Google Play Services</span></a>
+      </li>
+       <li><a href="<?cs var:toroot ?>guide/google/play/filters.html">
           <span class="en">Filters on Google Play</span></a>
       </li>
       <li><a href="<?cs var:toroot ?>guide/google/play/publishing/multiple-apks.html">
