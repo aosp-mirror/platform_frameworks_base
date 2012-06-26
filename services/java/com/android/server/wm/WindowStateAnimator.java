@@ -120,6 +120,16 @@ class WindowStateAnimator {
     static final int READY_TO_SHOW = 3;
     /** Set when the window has been shown in the screen the first time. */
     static final int HAS_DRAWN = 4;
+    static String drawStateToString(int state) {
+        switch (state) {
+            case NO_SURFACE: return "NO_SURFACE";
+            case DRAW_PENDING: return "DRAW_PENDING";
+            case COMMIT_DRAW_PENDING: return "COMMIT_DRAW_PENDING";
+            case READY_TO_SHOW: return "READY_TO_SHOW";
+            case HAS_DRAWN: return "HAS_DRAWN";
+            default: return Integer.toString(state);
+        }
+    }
     int mDrawState;
 
     /** Was this window last hidden? */
@@ -399,10 +409,19 @@ class WindowStateAnimator {
     }
 
     boolean finishDrawingLocked() {
+        if (DEBUG_STARTING_WINDOW &&
+                mWin.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING) {
+            Slog.v(TAG, "Finishing drawing window " + mWin + ": mDrawState="
+                    + drawStateToString(mDrawState));
+        }
         if (mDrawState == DRAW_PENDING) {
             if (DEBUG_SURFACE_TRACE || DEBUG_ANIM || SHOW_TRANSACTIONS || DEBUG_ORIENTATION)
                 Slog.v(TAG, "finishDrawingLocked: mDrawState=COMMIT_DRAW_PENDING " + this + " in "
                         + mSurface);
+            if (DEBUG_STARTING_WINDOW &&
+                    mWin.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING) {
+                Slog.v(TAG, "Draw state now committed in " + mWin);
+            }
             mDrawState = COMMIT_DRAW_PENDING;
             return true;
         }
@@ -411,11 +430,17 @@ class WindowStateAnimator {
 
     // This must be called while inside a transaction.
     boolean commitFinishDrawingLocked(long currentTime) {
+        if (DEBUG_STARTING_WINDOW &&
+                mWin.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING) {
+            Slog.i(TAG, "commitFinishDrawingLocked: " + mWin + " cur mDrawState="
+                    + drawStateToString(mDrawState));
+        }
         if (mDrawState != COMMIT_DRAW_PENDING) {
             return false;
         }
-        if (DEBUG_SURFACE_TRACE || DEBUG_ANIM)
+        if (DEBUG_SURFACE_TRACE || DEBUG_ANIM) {
             Slog.i(TAG, "commitFinishDrawingLocked: mDrawState=READY_TO_SHOW " + mSurface);
+        }
         mDrawState = READY_TO_SHOW;
         final boolean starting = mWin.mAttrs.type == TYPE_APPLICATION_STARTING;
         final AppWindowToken atoken = mWin.mAppToken;
@@ -1214,7 +1239,8 @@ class WindowStateAnimator {
 
     // This must be called while inside a transaction.
     boolean performShowLocked() {
-        if (DEBUG_VISIBILITY) {
+        if (DEBUG_VISIBILITY || (DEBUG_STARTING_WINDOW &&
+                mWin.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING)) {
             RuntimeException e = null;
             if (!WindowManagerService.HIDE_STACK_CRAWLS) {
                 e = new RuntimeException();
@@ -1223,12 +1249,7 @@ class WindowStateAnimator {
             Slog.v(TAG, "performShow on " + this
                     + ": mDrawState=" + mDrawState + " readyForDisplay="
                     + mWin.isReadyForDisplayIgnoringKeyguard()
-                    + " starting=" + (mWin.mAttrs.type == TYPE_APPLICATION_STARTING), e);
-        }
-        if (mDrawState == READY_TO_SHOW && mWin.isReadyForDisplayIgnoringKeyguard()) {
-            if (SHOW_TRANSACTIONS || DEBUG_ORIENTATION)
-                WindowManagerService.logSurface(mWin, "SHOW (performShowLocked)", null);
-            if (DEBUG_VISIBILITY) Slog.v(TAG, "Showing " + this
+                    + " starting=" + (mWin.mAttrs.type == TYPE_APPLICATION_STARTING)
                     + " during animation: policyVis=" + mWin.mPolicyVisibility
                     + " attHidden=" + mWin.mAttachedHidden
                     + " tok.hiddenRequested="
@@ -1237,7 +1258,24 @@ class WindowStateAnimator {
                     + (mWin.mAppToken != null ? mWin.mAppToken.hidden : false)
                     + " animating=" + mAnimating
                     + " tok animating="
-                    + (mWin.mAppToken != null ? mWin.mAppToken.mAppAnimator.animating : false));
+                    + (mWin.mAppToken != null ? mWin.mAppToken.mAppAnimator.animating : false), e);
+        }
+        if (mDrawState == READY_TO_SHOW && mWin.isReadyForDisplayIgnoringKeyguard()) {
+            if (SHOW_TRANSACTIONS || DEBUG_ORIENTATION)
+                WindowManagerService.logSurface(mWin, "SHOW (performShowLocked)", null);
+            if (DEBUG_VISIBILITY || (DEBUG_STARTING_WINDOW &&
+                    mWin.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING)) {
+                Slog.v(TAG, "Showing " + this
+                        + " during animation: policyVis=" + mWin.mPolicyVisibility
+                        + " attHidden=" + mWin.mAttachedHidden
+                        + " tok.hiddenRequested="
+                        + (mWin.mAppToken != null ? mWin.mAppToken.hiddenRequested : false)
+                        + " tok.hidden="
+                        + (mWin.mAppToken != null ? mWin.mAppToken.hidden : false)
+                        + " animating=" + mAnimating
+                        + " tok animating="
+                        + (mWin.mAppToken != null ? mWin.mAppToken.mAppAnimator.animating : false));
+            }
 
             mService.enableScreenIfNeededLocked();
 
@@ -1425,7 +1463,8 @@ class WindowStateAnimator {
         if (mSurface != null) {
             if (dumpAll) {
                 pw.print(prefix); pw.print("mSurface="); pw.println(mSurface);
-                pw.print(prefix); pw.print("mDrawState="); pw.print(mDrawState);
+                pw.print(prefix); pw.print("mDrawState=");
+                pw.print(drawStateToString(mDrawState));
                 pw.print(" mLastHidden="); pw.println(mLastHidden);
             }
             pw.print(prefix); pw.print("Surface: shown="); pw.print(mSurfaceShown);
