@@ -1162,6 +1162,7 @@ protected:
             SIZE_CALIBRATION_NONE,
             SIZE_CALIBRATION_GEOMETRIC,
             SIZE_CALIBRATION_DIAMETER,
+            SIZE_CALIBRATION_BOX,
             SIZE_CALIBRATION_AREA,
         };
 
@@ -1294,7 +1295,6 @@ private:
 
     float mSizeScale;
 
-    float mOrientationCenter;
     float mOrientationScale;
 
     float mDistanceScale;

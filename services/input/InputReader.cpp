@@ -2620,7 +2620,6 @@ void TouchInputMapper::dump(String8& dump) {
     dump.appendFormat(INDENT4 "GeometricScale: %0.3f\n", mGeometricScale);
     dump.appendFormat(INDENT4 "PressureScale: %0.3f\n", mPressureScale);
     dump.appendFormat(INDENT4 "SizeScale: %0.3f\n", mSizeScale);
-    dump.appendFormat(INDENT4 "OrientationCenter: %0.3f\n", mOrientationCenter);
     dump.appendFormat(INDENT4 "OrientationScale: %0.3f\n", mOrientationScale);
     dump.appendFormat(INDENT4 "DistanceScale: %0.3f\n", mDistanceScale);
     dump.appendFormat(INDENT4 "HaveTilt: %s\n", toString(mHaveTilt));
@@ -3051,7 +3050,6 @@ void TouchInputMapper::configureSurface(nsecs_t when, bool* outResetNeeded) {
         }
 
         // Orientation
-        mOrientationCenter = 0;
         mOrientationScale = 0;
         if (mHaveTilt) {
             mOrientedRanges.haveOrientation = true;
@@ -3067,10 +3065,13 @@ void TouchInputMapper::configureSurface(nsecs_t when, bool* outResetNeeded) {
             if (mCalibration.orientationCalibration
                     == Calibration::ORIENTATION_CALIBRATION_INTERPOLATED) {
                 if (mRawPointerAxes.orientation.valid) {
-                    mOrientationCenter = avg(mRawPointerAxes.orientation.minValue,
-                            mRawPointerAxes.orientation.maxValue);
-                    mOrientationScale = M_PI / (mRawPointerAxes.orientation.maxValue -
-                            mRawPointerAxes.orientation.minValue);
+                    if (mRawPointerAxes.orientation.maxValue > 0) {
+                        mOrientationScale = M_PI_2 / mRawPointerAxes.orientation.maxValue;
+                    } else if (mRawPointerAxes.orientation.minValue < 0) {
+                        mOrientationScale = -M_PI_2 / mRawPointerAxes.orientation.minValue;
+                    } else {
+                        mOrientationScale = 0;
+                    }
                 }
             }
 
@@ -3284,6 +3285,8 @@ void TouchInputMapper::parseCalibration() {
             out.sizeCalibration = Calibration::SIZE_CALIBRATION_GEOMETRIC;
         } else if (sizeCalibrationString == "diameter") {
             out.sizeCalibration = Calibration::SIZE_CALIBRATION_DIAMETER;
+        } else if (sizeCalibrationString == "box") {
+            out.sizeCalibration = Calibration::SIZE_CALIBRATION_BOX;
         } else if (sizeCalibrationString == "area") {
             out.sizeCalibration = Calibration::SIZE_CALIBRATION_AREA;
         } else if (sizeCalibrationString != "default") {
@@ -3403,6 +3406,9 @@ void TouchInputMapper::dumpCalibration(String8& dump) {
         break;
     case Calibration::SIZE_CALIBRATION_DIAMETER:
         dump.append(INDENT4 "touch.size.calibration: diameter\n");
+        break;
+    case Calibration::SIZE_CALIBRATION_BOX:
+        dump.append(INDENT4 "touch.size.calibration: box\n");
         break;
     case Calibration::SIZE_CALIBRATION_AREA:
         dump.append(INDENT4 "touch.size.calibration: area\n");
@@ -3954,6 +3960,7 @@ void TouchInputMapper::cookPointerData() {
         switch (mCalibration.sizeCalibration) {
         case Calibration::SIZE_CALIBRATION_GEOMETRIC:
         case Calibration::SIZE_CALIBRATION_DIAMETER:
+        case Calibration::SIZE_CALIBRATION_BOX:
         case Calibration::SIZE_CALIBRATION_AREA:
             if (mRawPointerAxes.touchMajor.valid && mRawPointerAxes.toolMajor.valid) {
                 touchMajor = in.touchMajor;
@@ -4050,7 +4057,7 @@ void TouchInputMapper::cookPointerData() {
 
             switch (mCalibration.orientationCalibration) {
             case Calibration::ORIENTATION_CALIBRATION_INTERPOLATED:
-                orientation = (in.orientation - mOrientationCenter) * mOrientationScale;
+                orientation = in.orientation * mOrientationScale;
                 break;
             case Calibration::ORIENTATION_CALIBRATION_VECTOR: {
                 int32_t c1 = signExtendNybble((in.orientation & 0xf0) >> 4);
