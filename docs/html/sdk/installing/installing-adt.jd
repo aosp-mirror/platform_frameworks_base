@@ -1,9 +1,9 @@
 page.title=Installing the Eclipse Plugin
 walkthru=1
-adt.zip.version=18.0.0
-adt.zip.download=ADT-18.0.0.zip
-adt.zip.bytes=12834793
-adt.zip.checksum=b446fa157ed97af79d1e21629201efbb
+adt.zip.version=20.0.0
+adt.zip.download=ADT-20.0.0.zip
+adt.zip.bytes=12387628
+adt.zip.checksum=ea0fc934af3b6b89097f0146c7822ed0
 
 @jd:body
 
