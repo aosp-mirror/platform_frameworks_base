@@ -1,0 +1,943 @@
+page.title=GCM Architectural Overview
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>Quickview</h2>
+
+<ul>
+<li>Get an introduction to key GCM terms and concepts.</li>
+<li>Learn the basic features of a GCM application.</li>
+<li>Understand the role of the 3rd-party application server, and how to send messages and process results.</li>
+</ul>
+
+
+<h2>In this document</h2>
+
+<ol class="toc">
+  <li><a href="#intro">Introduction</a> </li>
+  <li><a href="#arch">Architectural Overview</a>
+    <ol>
+      <li><a href="#lifecycle">Lifecycle Flow</a></li>
+      <li><a href="#user">What Does the User See?</a></li>
+    </ol>
+  </li>
+  <li><a href="#writing_apps">Writing Android Applications that use GCM</a>
+    <ol>
+    <li><a href="#manifest">Creating the Manifest</a></li>
+    <li><a href="#registering">Registering for GCM</a></li>
+    <li><a href="#unregistering">Unregistering from GCM</a></li>
+    <li><a href="#handling_intents">Handling Intents sent by GCM</a>
+      <ol>
+        <li><a href="#handling_reg">Handling Registration Results</a></li>
+        <li><a href="#received_data">Handling Received Data</a></li>
+      </ol>
+    </li>
+    <li><a href="#testing">Developing and Testing Your Android Applications</a></li>
+    </ol>
+  </li>
+  <li><a href="#server">Role of  the 3rd-party Application Server</a>
+    <ol class="toc">
+      <li><a href="#send-msg">Sending Messages</a>
+        <ol>
+          <li><a href="#request">Request format</a></li>
+          <li><a href="#response">Response format</a></li>
+        </ol>
+      </li>
+    </ol>
+    <li><a href="#stats">Viewing statistics</a>
+  </li>
+  <li><a href="#example">Examples</a></li>
+</ol>
+
+
+
+</div>
+</div>
+
+<p>Google Cloud Messaging for Android (GCM) is a service that helps
+developers  send data from servers to their Android applications on  Android devices. This could be a lightweight message telling the Android application that there is new data to be fetched from the server (for instance, a movie uploaded by a friend), or it could be a message containing up to 4kb of payload data (so apps like instant messaging can consume the message directly). The GCM service handles all aspects  of queueing of
+  messages and delivery to the target Android application running  on the target
+  device.</p>
+<p class="note"> To jump right into using GCM with your Android
+  applications, see the instructions in <a href="gs.html">Getting Started</a>.</p>
+
+
+
+
+<h2 id="intro">Introduction</h2>
+
+<p>Here are the primary characteristics of Google Cloud 
+Messaging (GCM):</p>
+
+<ul>
+  <li>It allows 3rd-party application servers to send messages to
+their Android applications.</li>
+  <li>GCM makes no guarantees about delivery or the order of messages.</li>
+  <li>An Android application on an Android device doesn't need to be running to receive
+messages. The system will wake up the Android application via Intent broadcast when the  message arrives, as long as the application is set up with the proper
+broadcast receiver and permissions.</li>
+  <li>It does not provide any  built-in user interface or other handling for
+message data. GCM  simply passes raw message data received straight to the
+Android application,  which has full control of how to handle it. For example, the
+application might post a notification, display a custom user interface, or 
+silently sync data.</li>
+  <li>It requires devices running Android 2.2 or higher that also have the
+Google Play Store application installed, or or an emulator running Android 2.2 with Google APIs. However, you are not limited to deploying your
+Android applications through Google Play Store.</li>
+  <li>It uses an existing connection for Google services. For pre-3.0 devices, this requires users to
+set up their Google account on their mobile devices. A Google account is not a requirement on devices running Android 4.0.4 or higher.</li>
+</ul>
+<h2 id="arch">Architectural Overview</h2>
+<p>This section gives an overview of how GCM works. </p>
+<p>This table summarizes the key terms and concepts involved in GCM. It is
+divided into these categories:</p>
+<ul>
+  <li><strong>Components</strong> &mdash; The physical entities that play a role in
+GCM.</li>
+  <li><strong>Credentials</strong> &mdash; The IDs and tokens that are used in
+different stages of GCM to ensure that all parties have been authenticated, and
+that the message is going to the correct place.</li>
+</ul>
+
+<table>
+  <tr>
+    <th colspan="2">Components</th>
+  </tr>
+  <tr>
+    <td width="165"><strong>Mobile Device</strong></td>
+    <td width="1176">The device that is running an Android application that uses
+GCM. This must be a 2.2 Android device that has Google Play Store installed, and it must
+have at least one logged in Google account if the device is running a version lower than Android 4.0.4. Alternatively, for testing you can use an emulator running Android 2.2 with Google APIs.</td>
+  </tr>
+  <tr>
+    <td><strong>3rd-party Application Server</strong></td>
+    <td>An application server that  developers  set up as part of implementing
+GCM in their applications. The 3rd-party application server sends data to an
+Android application on the device via the GCM server.</td>
+  </tr>
+  <tr>
+    <td><strong>GCM Servers</strong></td>
+    <td>The Google servers involved in taking messages from the 3rd-party
+application server and sending them to the device. </td>
+  </tr>
+  <tr>
+    <th colspan="2"><strong>Credentials</strong></th>
+  </tr>
+  <tr>
+    <td><strong>Sender ID</strong></td>
+    <td>A project ID you acquire from the API console, as described in <a href="gs.html#create-proj">Getting Started</a>. The sender
+ID is used in the <a href="#registering">registration process</a> to identify an
+Android application that is permitted to send messages to the device.</td>
+  </tr>
+  <tr>
+    <td><strong>Application ID</strong></td>
+    <td>The Android application that is registering to receive messages. The Android application
+is identified by the package name from the <a href="#manifest">manifest</a>.
+This  ensures that the messages are targeted to the correct Android application.</td>
+  </tr>
+  <tr>
+    <td><strong>Registration ID</strong></td>
+    <td>An ID issued by the GCM servers to the Android application that allows
+it to receive messages. Once the Android application has the registration ID, it sends
+it to the 3rd-party application server, which uses it to identify each device 
+that has registered to receive messages for a given Android application. In other words,
+a registration ID is tied to a particular Android application running on a particular
+device.</td>
+  </tr>
+  <tr>
+    <td><strong>Google User Account</strong></td>
+    <td>For GCM to work, the mobile device must include at least one Google account if the device is running a version lower than Android 4.0.4.</td>
+  </tr>
+  <tr>
+    <td><strong>Sender Auth Token</strong></td>
+    <td>An API key that is saved on the 3rd-party application
+server that gives the application server authorized access to Google services.
+The API key is included in the header of POST requests  that send messages.</td>
+  </tr>
+</table>
+
+<h3 id="lifecycle">Lifecycle Flow</h3>
+
+<p>Here are the primary processes involved in cloud-to-device messaging:</p>
+
+<ul>
+  <li><a href="#register">Enabling GCM</a>. An Android application running on a
+mobile device registers to receive messages.</li>
+  <li><a href="#push-process">Sending a message</a>. A 3rd-party application
+server sends messages to the device.</li>
+  <li><a href="#receiving">Receiving a message</a>. An Android application
+receives a message from a GCM server.</li>
+</ul>
+
+<p>These processes are described in more detail below.</p>
+
+<h4 id="register">Enabling GCM</h4>
+
+<p>This is the sequence of events that occurs when an Android application
+running on a mobile device registers to receive messages:<span
+class="red-text"></span></p>
+
+<ol>
+  <li>The first time the Android application needs to use the messaging service, it
+fires off a registration Intent to a GCM server. 
+    <p>This registration Intent
+(<code>com.google.android.c2dm.intent.REGISTER</code>) includes the sender ID, and the Android application ID.</p>
+<p class="note"><strong>Note:</strong> Because there is no lifecycle method that is called when the application is run for
+the first time, the registration intent should be sent on <code>onCreate()</code>, but only if the application is not registered yet.
+</p>
+  </li>
+  <li>If the registration is successful, the GCM server broadcasts a <code>com.google.android.c2dm.intent.REGISTRATION</code> intent which gives the Android application  a registration
+ID. 
+    <p>The Android application should store this ID for later use (for instance, to check on <code>onCreate()</code> if it is already registered). 
+Note that Google may periodically refresh the registration ID, so you should design your Android application
+with the understanding that the <code>com.google.android.c2dm.intent.REGISTRATION</code> intent may be called
+multiple times. Your Android application needs to be able to respond
+accordingly.</p></li>
+  <li>To complete the registration, the Android application sends the registration ID to
+the application server. The application server typically stores the registration
+ID in a database. </li>
+</ol>
+
+<p>The registration ID lasts until the Android application explicitly unregisters
+itself, or until Google refreshes the registration ID for your Android application.</p>
+
+<p class="note"><strong>Note:</strong> When users uninstall an application, it is not automatically unregistered on GCM. It is only  unregistered when the GCM server tries to send a message to the device and the device answers that the application is uninstalled. At that point, you server should mark the device as unregistered (the server will receive a <code><a href="#unreg_device">NotRegistered</a></code> error).
+  <p>
+Note that it might take a few minutes for the registration ID to be completed removed from the GCM server. So if the 3rd party server sends a message during this time, it will get a valid message ID, even though the message will not be delivered to the device.</p>
+</p>
+
+<h4 id="push-process">Sending a Message</h4>
+
+<p>For an application server to send a  message to an Android application, the following things must be in
+place:</p>
+
+<ul>
+  <li>The Android application has a registration ID that allows it to receive messages
+for a particular device.</li>
+  <li>The 3rd-party application server has stored the registration ID.</li>
+
+
+
+<li>An API key. This is something that the developer must have already
+set up on the application server for the Android application (for more discussion, see
+<a href="#server">Role of the 3rd-party Application Server</a>). Now it will
+get used to send messages to the device. </li>
+</ul>
+
+<p>Here is the sequence of events that occurs when the application server sends a 
+message:</p>
+
+<ol>
+  <li>The application server sends a  message to  GCM servers.</li>
+  <li>Google enqueues and stores the message in case the device is
+offline.</li>
+  <li>When the device is online, Google sends the message to the device. </li>
+  <li>On the device, the system  broadcasts the  message to the specified
+Android application via Intent broadcast with proper permissions, so that only the
+targeted Android application gets the message. This wakes the Android application up. The
+Android application does not need to be running beforehand to receive the message.</li>
+  <li>The Android application processes the message. If the Android application is doing
+non-trivial processing, you may want to grab a {@link android.os.PowerManager.WakeLock} and do any processing in a Service.</li>
+</ol>
+
+<p> An Android application can  unregister GCM if it no longer wants to receive 
+messages.</p>
+
+<h4 id="receiving">Receiving a Message</h4>
+
+<p>This is the sequence of events that occurs when an Android application
+installed on a mobile device receives a message:</p>
+
+<ol>
+  <li>The system receives the incoming message and extracts the raw key/value
+pairs from the message payload, if any.</li>
+  <li>The system passes the key/value pairs to the targeted Android application
+in a <code>com.google.android.c2dm.intent.RECEIVE</code> Intent as a set of
+extras.</li>
+  <li>The Android application extracts the raw data
+from the <code>com.google.android.c2dm.intent.RECEIVE</code><code> </code>Intent by key and processes the data.</li>
+</ol>
+
+<h3 id="user">What Does the User See?</h3>
+
+<p>When mobile device users install Android applications that include GCM, the Google Play Store will inform them that the Android application
+includes GCM. They must approve the use of this feature to install the
+Android application. </p>
+
+<h2 id="writing_apps">Writing Android Applications that Use GCM</h2>
+
+<p>To write Android applications that use GCM, you must have an application
+server that can perform the tasks described in <a href="#server">Role of the
+3rd-party Application Server</a>. This section describes the steps you take to
+create a client application that uses GCM.</p>
+
+<p>Remember that there is no user interface associated with  GCM.
+However you choose to process messages in your Android application is up to you.</p>
+
+<p>There are two primary steps involved in writing a client Android application:</p>
+
+<ul>
+  <li>Creating a manifest that contains the permissions the Android application needs to
+use GCM.</li>
+  <li>Implementing your  code. To use GCM, this implementation must
+include:
+    <ul>
+      <li>Code to start and stop the registration service.</li>
+      <li>Receivers for the <code>com.google.android.c2dm.intent.RECEIVE</code> and <code>com.google.android.c2dm.intent.REGISTRATION</code> intents.</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="manifest">Creating the Manifest</h3>
+
+<p>Every Android application must have an <code>AndroidManifest.xml</code> file (with
+precisely that name) in its root directory. The manifest presents essential
+information about the Android application to the Android system, information the
+system must have before it can run any of the Android application's code (for more
+discussion of the manifest file, see the <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">Android Developers Guide</a>. To use the GCM feature, the
+manifest must include the following:</p>
+
+<ul>
+  <li>The <code>com.google.android.c2dm.permission.RECEIVE</code> permission so the Android application can register and receive messages.</li>
+  <li>The <code>android.permission.INTERNET</code> permission so the Android application can send the registration ID to the 3rd party server.</li>
+  <li>The <code>android.permission.GET_ACCOUNTS</code> permission as GCM requires a Google account (necessary only if if the device is running a version lower than Android 4.0.4)</li>
+  <li>The <code>android.permission.WAKE_LOCK</code> permission so the application can keep the processor from sleeping when a message is received.</li>
+  <li>An <code>applicationPackage + &quot;.permission.C2D_MESSAGE</code> permission to prevent other Android applications from registering and receiving the Android application's
+messages. The permission name must exactly match this pattern&mdash;otherwise the Android application will not receive the messages.</li>
+  <li>A receiver for <code>com.google.android.c2dm.intent.RECEIVE</code> and <code>com.google.android.c2dm.intent.REGISTRATION</code>, with the category set
+as <code>applicationPackage</code>. The receiver should require the <code>com.google.android.c2dm.SEND</code> permission, so that only the GCM
+Framework can send a message to it. Note that both registration and the receiving
+of messages are implemented as <a href="{@docRoot}guide/components/intents-filters.html">Intents</a>.</li>
+  <li>An intent service to handle the intents received by the broadcast receiver.</li>
+  <li>If the GCM feature is critical to the Android application's function, be sure to
+set <code>android:minSdkVersion=&quot;8&quot;</code> in the manifest. This
+ensures that the Android application cannot be installed in an environment in which it
+could not run properly. </li>
+</ul>
+
+<p>Here are excerpts from a manifest that supports GCM:</p>
+
+<pre class="prettyprint pretty-xml">
+&lt;manifest package="com.example.gcm" ...&gt;
+
+    &lt;uses-sdk android:minSdkVersion="8" android:targetSdkVersion="16"/&gt;
+    &lt;uses-permission android:name="android.permission.INTERNET" /&gt;
+    &lt;uses-permission android:name="android.permission.GET_ACCOUNTS" /&gt;
+    &lt;uses-permission android:name="android.permission.WAKE_LOCK" /&gt;
+    &lt;uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" /&gt;
+
+    &lt;permission android:name="com.example.gcm.permission.C2D_MESSAGE" 
+        android:protectionLevel="signature" /&gt;
+    &lt;uses-permission android:name="com.example.gcm.permission.C2D_MESSAGE" /&gt;
+
+    &lt;application ...&gt;
+        &lt;receiver
+            android:name=".MyBroadcastReceiver"
+            android:permission="com.google.android.c2dm.permission.SEND" &gt;
+            &lt;intent-filter&gt;
+                &lt;action android:name="com.google.android.c2dm.intent.RECEIVE" /&gt;
+                &lt;action android:name="com.google.android.c2dm.intent.REGISTRATION" /&gt;
+                &lt;category android:name="com.example.gcm" /&gt;
+            &lt;/intent-filter&gt;
+        &lt;/receiver&gt;
+        &lt;service android:name=".MyIntentService" /&gt;
+    &lt;/application&gt;
+
+&lt;/manifest&gt;
+</pre>
+<h3 id="registering">Registering for GCM</h3>
+
+<p>An Android application needs to register with GCM servers before it can receive messages. To register, the application sends an Intent
+(<code>com.google.android.c2dm.intent.REGISTER</code>), with 2 extra parameters:
+</p>
+
+<ul>
+  <li><code>sender</code> is the project ID of the account authorized to send messages
+to the Android application. </li>
+  <li><code>app</code> is the Android application's ID, set with a <code>PendingIntent</code> to
+allow the registration service to extract Android application information. </li>
+</ul>
+
+<p>For example:</p>
+
+<pre class="prettyprint pretty-java">Intent registrationIntent = new Intent(&quot;com.google.android.c2dm.intent.REGISTER&quot;);
+// sets the app name in the intent
+registrationIntent.putExtra(&quot;app&quot;, PendingIntent.getBroadcast(this, 0, new Intent(), 0));
+registrationIntent.putExtra(&quot;sender&quot;, senderID);
+startService(registrationIntent);</pre>
+
+<p>This intent will be asynchronously sent to the GCM server, and the response will be delivered to
+the application as a <code>com.google.android.c2dm.intent.REGISTRATION</code> intent containing
+the registration ID assigned to the Android application running on that particular device.</p>
+
+<p>Registration is not complete until the Android application sends the registration ID
+to the 3rd-party application server, which in turn will use the registration ID to send
+messages to the application.</p>
+
+<h3 id="unregistering">Unregistering from GCM</h3>
+
+<p>To unregister from GCM, do the following:</p>
+
+<pre class="prettyprint pretty-java">Intent unregIntent = new Intent(&quot;com.google.android.c2dm.intent.UNREGISTER&quot;);
+unregIntent.putExtra(&quot;app&quot;, PendingIntent.getBroadcast(this, 0, new Intent(), 0));
+startService(unregIntent);
+</pre>
+
+<p>Similar to the registration request, this intent is sent asynchronously, and the response comes as a <code>com.google.android.c2dm.intent.REGISTRATION</code> intent.
+
+
+<h3 id="handling_intents">Handling Intents sent by GCM</h3>
+
+<p>As discussed in <a href="#manifest">Creating the Manifest</a>, the manifest
+defines a broadcast receiver for the <code>com.google.android.c2dm.intent.REGISTRATION</code> and <code>com.google.android.c2dm.intent.RECEIVE</code> intents.
+These <a href="{@docRoot}guide/components/intents-filters.html">intents</a> are sent by GCM to indicate that a device was registered (or unregistered), or to deliver messages, respectively.</p>
+
+<p>Handling these intents might require I/O operations (such as network calls to the 3rd party server), and 
+such operations should not be done in the receiver's <code>onReceive()</code> method.
+You may be tempted to spawn a new thread directly, but there are no guarantees that the process will run long enough for the thread to finish the work.  
+Thus the recommended way to handle the intents is to delegate them to a service, such as an {@link android.app.IntentService}. 
+For example:</p>
+
+
+<pre class="prettyprint pretty-java">
+public class MyBroadcastReceiver extends BroadcastReceiver {
+
+    &#64;Override
+    public final void onReceive(Context context, Intent intent) {
+        MyIntentService.runIntentInService(context, intent);
+        setResult(Activity.RESULT_OK, null, null);
+    }
+}
+</pre>
+
+<p>Then in <code>MyIntentService</code>:</p>
+<pre class="prettyprint pretty-java">
+public class MyIntentService extends IntentService {
+
+    private static PowerManager.WakeLock sWakeLock;
+    private static final Object LOCK = MyIntentService.class;
+    
+    static void runIntentInService(Context context, Intent intent) {
+        synchronized(LOCK) {
+            if (sWakeLock == null) {
+                PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+                sWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "my_wakelock");
+            }
+        }
+        sWakeLock.acquire();
+        intent.setClassName(context, MyIntentService.class.getName());
+        context.startService(intent);
+    }
+    
+    &#64;Override
+    public final void onHandleIntent(Intent intent) {
+        try {
+            String action = intent.getAction();
+            if (action.equals("com.google.android.c2dm.intent.REGISTRATION")) {
+                handleRegistration(intent);
+            } else if (action.equals("com.google.android.c2dm.intent.RECEIVE")) {
+                handleMessage(intent);
+            }
+        } finally {
+            synchronized(LOCK) {
+                sWakeLock.release();
+            }
+        }
+    }
+}
+</pre>
+
+<p class="note"><strong>Note:</strong> your application must acquire a wake lock before starting the service&mdash;otherwise the device could be put to sleep before the service is started.</p>
+
+<h4 id="handling_reg">Handling Registration Results</h4>
+
+<p>When a <code>com.google.android.c2dm.intent.REGISTRATION</code> intent is received, it could potentially contain 3 extras: <code>registration_id</code>, <code>error</code>, and <code>unregistered</code>.
+
+<p>When a registration succeeds, <code>registration_id</code> contains the registration ID and the other extras are not set. 
+The application must ensure that the 3rd-party server receives the registration ID. It may do so by saving the registration ID and sending it to the server. 
+If the network is down or there are errors, the application should retry sending the registration ID when the network is up again or the next time it starts.</p>
+
+<p class="note"><strong>Note:</strong> Although the <code>com.google.android.c2dm.intent.REGISTRATION</code> intent is typically received after a request was made by the application, 
+Google may periodically refresh the registration ID. So the application must be prepared to handle it at any time.</p>
+
+<p>When an unregistration succeeds, only the <code>unregistered</code> extra is set, and similar to the registration workflow, 
+the application must contact the 3rd-party server to remove the registration ID (note that the registration ID is not available in the intent, 
+but the application should have saved the registration ID when it got it).<p>
+
+<p>If the application request (be it register or unregister) fails, the <code>error</code> will be set with an error code, and the other extras will not be set. 
+
+Here are the possible error codes:</p>
+
+<table>
+  <tr>
+    <th>Error Code</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>SERVICE_NOT_AVAILABLE</code></td>
+    <td>The device can't read the response, or there was a 500/503 from the
+server that can be retried later. The Android application should use exponential back-off and retry. See <a href="adv.html#retry">Advanced Topics</a> for more information. </td>
+  </tr>
+  <tr>
+    <td><code>ACCOUNT_MISSING</code></td>
+    <td>There is no Google account on the phone.  The Android application should ask the
+user to open the account manager and add a Google account. Fix on the device
+side.</td>
+  </tr>
+  <tr>
+    <td><code>AUTHENTICATION_FAILED</code></td>
+    <td>Bad Google Account password. The Android application should ask the user to enter his/her Google Account
+password, and let the user retry manually later. Fix on the device side.</td>
+  </tr>
+  <tr>
+    <td><code>INVALID_SENDER</code></td>
+    <td>The sender account is not recognized. This must be fixed on the Android application side. The developer must fix the application to provide the right <code>sender</code> extra in the <code>com.google.android.c2dm.intent.REGISTER</code> intent.</td>
+  </tr>
+  <tr>
+    <td><code>PHONE_REGISTRATION_ERROR</code></td>
+    <td> Incorrect phone registration with Google. This
+phone doesn't currently support GCM.</td>
+  </tr>
+  <tr>
+    <td><code>INVALID_PARAMETERS</code></td>
+    <td>The  request sent by the phone does not contain the expected parameters. This phone doesn't currently support GCM.</td>
+  </tr>
+</table>
+
+
+
+
+<p>Here's an example on how to handle the registration in the <code>MyIntentService</code> example:</p>
+
+<pre class="prettyprint pretty-java">
+private void handleRegistration(Intent intent) {
+    String registrationId = intent.getStringExtra("registration_id");
+    String error = intent.getStringExtra("error");
+    String unregistered = intent.getStringExtra("unregistered");       
+    // registration succeeded
+    if (registrationId != null) {
+        // store registration ID on shared preferences
+        // notify 3rd-party server about the registered ID
+    }
+        
+    // unregistration succeeded
+    if (unregistered != null) {
+        // get old registration ID from shared preferences
+        // notify 3rd-party server about the unregistered ID
+    } 
+        
+    // last operation (registration or unregistration) returned an error;
+    if (error != null) {
+        if ("SERVICE_NOT_AVAILABLE".equals(error)) {
+           // optionally retry using exponential back-off
+           // (see <a href="adv.html#retry">Advanced Topics</a>)
+        } else {
+            // Unrecoverable error, log it
+            Log.i(TAG, "Received error: " + error);
+        }
+    }
+}</pre>
+
+<h4 id="received_data">Handling Received Data</h4>
+
+<p>The <code>com.google.android.c2dm.intent.RECEIVE</code> intent is used by GCM to 
+deliver the messages sent by the 3rd-party server to the application running in the device.
+If the server included key-pair values in the <code>data</code> parameter, they are available as 
+extras in this intent, with the keys being the extra names.
+
+<p>Here is an example, again using the <code>MyIntentReceiver</code> class:</p>
+
+<pre class="prettyprint pretty-java">
+private void handleMessage(Intent intent) {
+    // server sent 2 key-value pairs, score and time
+    String score = intent.getExtra("score");
+    String time = intent.getExtra("time");
+    // generates a system notification to display the score and time
+}</pre>
+
+<h3 id="testing">Developing and Testing Your Android Applications</h3>
+
+<p>Here are some guidelines for developing and testing an Android application
+that uses the GCM feature:</p>
+
+<ul>
+  <li>To develop and test your Android applications, you need to run and debug the
+applications on an Android 2.2 system image that includes the necessary
+underlying Google services. </li>
+  <li>To develop and debug on an actual device, you need a device running an
+Android 2.2 system image that includes the Google Play Store application. </li>
+  <li>To develop and test on the Android Emulator, you need to download the
+Android 2.2 version of the Google APIs Add-On into your SDK using the <em>Android
+SDK and AVD Manager</em>. Specifically, you need to download the component named
+&quot;Google APIs by Google Inc, Android API 8&quot;. Then, you need to set up
+an AVD that uses that system image. </li>
+  <li>If the GCM feature is critical to the Android application's function, be sure to
+set <code>android:minSdkVersion=&quot;8&quot;</code> in the manifest. This
+ensures that the Android application cannot be installed in an environment in which it
+could not run properly. </li>
+</ul>
+
+<h2 id="server">Role of the 3rd-party Application Server</h2>
+
+<p>Before you can write client Android applications that use the GCM feature, you must
+have an  application server that meets the following criteria:</p>
+
+<ul>
+  <li>Able to communicate with your client.</li>
+  <li>Able to  fire off HTTPS requests to the GCM server.</li>
+  <li>Able to handle requests and resend then as needed, using <a href="http://en.wikipedia.org/wiki/Exponential_backoff">exponential back-off.</a></li>
+  <li>Able to store the API key and client registration IDs. The
+API key is included in the header of POST requests that send
+messages.</li>
+</ul>
+
+<h3 id="send-msg">Sending Messages</h3>
+<p>This section describes how the 3rd-party application server sends messages to one or more mobile devices. Note the following:</p>
+<ul>
+  <li>A 3rd-party application server can either send messages to a single device or to multiple devices. A message sent to multiple devices simultaneously is called a <em>multicast message</em>.</li>
+  
+  <li>You have 2 choices in how you construct requests and responses: plain text or JSON.</li>
+  <li>However, to send multicast messages, you must use JSON. Plain text will not work.</li>
+</ul>
+<p>Before the 3rd-party application server can send a  message to an
+  Android application, it must have received a registration ID from it.</p>
+<h4 id="request">Request format</h4>
+<p>To send a  message, the application server issues a POST request to <code>https://android.googleapis.com/gcm/send</code>.</p>
+<p>A  message request is made of 2 parts: HTTP header and HTTP body.</p>
+
+<p>The HTTP header must contain the following headers:</p>
+<ul>
+  <li><code>Authorization</code>: key=YOUR_API_KEY</li>
+  <li><code>Content-Type</code>: <code>application/json</code> for JSON; <code>application/x-www-form-urlencoded;charset=UTF-8</code> for plain text.
+  </li>
+</ul>
+
+<p>For example:
+</p>
+<pre>Content-Type:application/json
+Authorization:key=AIzaSyB-1uEai2WiUapxCs2Q0GZYzPu7Udno5aA
+
+{
+  "registration_id" : "APA91bHun4MxP5egoKMwt2KZFBaFUH-1RYqx...",
+  "data" : {
+    ...
+  },
+}</pre>
+<p class="note">
+  <p><strong>Note:</strong> If <code>Content-Type</code> is omitted, the format is assumed to be plain text.</p>
+</p>
+
+<p>The HTTP body content depends on whether you're using JSON or plain text. For JSON, it must contain a string representing a JSON object with the following fields:</p>
+<table>
+  <tr>
+    <th>Field</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>registration_ids</code></td>
+    <td>A string array with the list of devices (registration IDs) receiving the message. It must contain at least 1 and at most 1000 registration IDs. To send a multicast message, you must use JSON. For sending a single message to a single device, you could use a JSON object with just 1 registration id, or plain text (see below). Required.</td>
+  </tr>
+  <tr>
+    <td><code>collapse_key</code></td>
+    <td>An arbitrary string (such as &quot;Updates Available&quot;) that is used to collapse a group of like messages
+when the device is offline, so that only the last message gets sent to the
+client. This is intended to avoid sending too many messages to the phone when it
+comes back online. Note that since there is no guarantee of the order in which
+messages get sent, the &quot;last&quot; message may not actually be the last
+message sent by the application server. See <a href="adv.html#collapsible">Advanced Topics</a> for more discussion of this topic. Optional, unless you are using the <code>time_to_live</code> parameter&mdash;in that case, you must also specify a <code>collapse_key</code>.</td>
+  </tr>
+  <tr>
+    <td><code>data</code></td>
+    <td>A JSON object whose fields represents the key-value pairs of the message's payload data. If present, the payload data it will be
+included in the Intent as application data, with the key being the extra's name. For instance, <code>"data":{"score":"3x1"}</code> would result in an intent extra named <code>score</code> whose value is the string <code>3x1</code>
+There is no limit on the number of key/value pairs, though there is a limit on the total size of the message. Optional.</td>
+  </tr>
+  <tr>
+    <td><code>delay_while_idle</code></td>
+    <td>If included, indicates that the message should not be sent immediately
+if the device is idle. The server will wait for the device to become active, and
+then only the last message for each <code>collapse_key</code> value will be
+sent. Optional. The default value is <code>false</code>, and must be a JSON boolean.</td>
+  </tr>
+  <tr>
+    <td><code>time_to_live</code></td>
+    <td>How long (in seconds) the message should be kept on GCM storage if the device is offline. Optional (default time-to-live is 4 weeks, and must be set as a JSON number). If you use this parameter, you must also specify a <code>collapse_key</code>.</td>
+  </tr>
+</table>
+
+<p>If you are using plain text instead of JSON, the message fields must be set as HTTP parameters sent in the body, and their syntax is slightly different, as described below:
+<table>
+  <tr>
+    <th>Field</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>registration_id</code></td>
+    <td>Must contain the registration ID of the single device receiving the message. Required.</td>
+  </tr>
+  <tr>
+    <td><code>collapse_key</code></td>
+    <td>Same as JSON (see previous table). Optional.</td>
+  </tr>
+  <tr>
+    <td><code>data.&lt;key&gt;</code></td>
+    <td>Payload data, expressed as parameters prefixed with <code>data.</code> and suffixed as the key. For instance, a parameter of <code>data.score=3x1</code> would result in an intent extra named <code>score</code> whose value is the string <code>3x1</code>. There is no limit on the number of key/value parameters, though there is a limit on the total size of the  message. Optional.</td>
+  </tr>
+  <tr>
+    <td><code>delay_while_idle</code></td>
+    <td>Should be represented as <code>1</code> or <code>true</code> for <code>true</code>, anything else for <code>false</code>. Optional. The default value is <code>false</code>.</td>
+  </tr>
+  <tr>
+    <td><code>time_to_live</code></td>
+    <td>Same as JSON (see previous table). Optional.</td>
+  </tr>
+</table>
+
+
+
+  <h4 id="example-requests">Example requests</h4>
+  <p>Here is the smallest possible request (a message without any parameters and just one recipient) using JSON:</p>
+  <pre class="prettyprint pretty-json">{ &quot;registration_ids&quot;: [ &quot;42&quot; ] }</pre>
+  
+  <p>And here the same example using plain text:</p>
+  <pre class="prettyprint">registration_id=42</pre>
+  
+  <p> Here is a message with a payload and 6 recipients:</p>
+  <pre class="prettyprint pretty-HTML">{ "data": {
+    "score": "5x1",
+    "time": "15:10"
+  },
+  "registration_ids": ["4", "8", "15", "16", "23", "42"]
+}</pre>
+  <p>Here is a message with all optional fields set and 6 recipients:</p>
+  <pre class="prettyprint pretty-json">{ "collapse_key": "score_update",
+  "time_to_live": 108,
+  "delay_while_idle": true,
+  "data": {
+    "score": "4x8",
+    "time": "15:16.2342"
+  },
+  "registration_ids":["4", "8", "15", "16", "23", "42"]
+}</pre>
+  <p>And here is the same message using plain-text format (but just 1 recipient):  </p>
+  
+  <pre class="prettyprint">collapse_key=score_update&amp;time_to_live=108&amp;delay_while_idle=1&amp;data.score=4x8&amp;data.time=15:16.2342&amp;registration_id=42
+  </pre>
+
+  <p class="note"><strong>Note:</strong> If your organization has a firewall that restricts the traffic to or from the Internet, you'll need to configure it to allow connectivity with GCM. The ports to open are: 5228, 5229, and 5230. GCM typically only uses 5228, but it sometimes uses 5229 and 5230.
+GCM doesn't provide specific IPs. It changes IPs frequently. We recommend against using ACLs but if you must use them, take a broad approach such as the method suggested in <a href="http://support.google.com/code/bin/answer.py?hl=en&answer=62464">this support link</a>.
+</p>
+
+<h4 id="response">Response format</h4>
+
+<p>There are two possible outcomes when trying to send a message:</p>
+<ul>
+  <li>The message is processed successfully.</li>
+  <li>The GCM server rejects the request.</li>
+</ul>
+
+<p>When the messge is processed successfully, the HTTP response has a 200 status and the body contains more information about the status of the message (including possible errors). When the request is rejected, 
+the HTTP response contains a non-200 status code (such as 400, 401, or 503).</p>
+
+<p>The following table summarizes the statuses that the HTTP response header might contain. Click the troubleshoot link for advice on how to deal with each type of error.</p>
+<table border=1>
+  <tr>
+    <th>Response</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>200</td>
+    <td>Message was processed successfully. The response body will contain more details about the message status, but its format will depend whether the request was JSON or plain text. See <a href="#success">Interpreting a success response</a> for more details.</td>
+  </tr>
+  <tr>
+    <td>400</td>
+    <td><span id="internal-source-marker_0.2">Only applies for JSON requests. Indicates that the request could not be parsed as JSON, or it contained invalid fields (for instance, passing a string where a number was expected). The exact failure reason is described in the response and the problem should be addressed before the request can be retried.</td>
+  </tr>
+  <tr>
+    <td>401</td>
+    <td>There was an error authenticating the sender account. <a href="#auth_error">Troubleshoot</a></td>
+  </tr>
+  <tr>
+    <td>500</td>
+    <td>There was an internal error in the GCM server while trying to process the request. <a href="#internal_error">Troubleshoot</a></td>
+  </tr>
+  <tr>
+    <td>503</td>
+    <td>Indicates that the server is temporarily unavailable (i.e., because of timeouts, etc ). Sender must retry later, honoring any <code>Retry-After</code> header
+      included in the response. Application servers must implement exponential back-off. The GCM server took too long to process the request. <a href="#internal_error">Troubleshoot</a></td>
+  </tr>
+</table>
+
+<h4 id="success">Interpreting a success response</h4>
+<p>When a JSON request is successful (HTTP status code 200), the response body contains a JSON object with the following fields:</p>
+<table>
+  <tr>
+    <th>Field</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>multicast_id</code></td>
+    <td>Unique ID (number) identifying the multicast message.</td>
+  </tr>
+  <tr>
+    <td><code>success</code></td>
+    <td>Number of messages that were processed without an error.</td>
+  </tr>
+  <tr>
+    <td><code>failure</code></td>
+    <td>Number of messages that could not be processed.</td>
+  </tr>
+  <tr>
+    <td><code>canonical_ids</code></td>
+    <td>Number of results that contain a canonical registration ID. See <a href="adv.html#canonical">Advanced Topics</a> for more discussion of this topic.</td>
+  </tr>
+  <tr>
+    <td><code>results</code></td>
+    <td>Array of objects representing the status of the messages processed. The objects are listed in the same order as the request (i.e., for each registration ID in the request, its result is listed in the same index in the response) and they can have these fields:<br>
+      <ul>
+        <li><code>message_id</code>: String representing the message when it was successfully processed.</li>
+        <li><code>registration_id</code>: If set,  means that GCM processed the message but it has another canonical registration ID for that device, so sender should replace the IDs on future requests (otherwise they might be rejected). This field is never set if there is an error in the request.<br />
+        </li>
+        <li><code>error</code>: String describing an error that occurred while processing the message for that recipient. The possible values are the same as documented in the above table, plus &quot;Unavailable&quot;  (meaning GCM servers were busy and could not process the message for that  particular recipient, so it could be retried).</li>
+    </ul></td>
+  </tr>
+</table>
+<p>If the value of <code>failure</code> and <code>canonical_ids</code> is 0, it's not necessary to parse the remainder of the response. Otherwise, we recommend that you iterate through the results field and do the following for each object in that list:</p>
+<ul>
+  <li>If <code>message_id</code> is set, check for <code>registration_id</code>:
+    <ul>
+      <li>If <code>registration_id</code> is set, replace the original ID with the new value (canonical ID) in your server database. Note that the original ID is not part of the result, so you need to obtain it from the list of <code>registration_ids</code> passed in the request (using the same index).</li>
+    </ul>
+  </li>
+  <li>Otherwise, get the value of <code>error</code>:
+    <ul>
+      <li>If it is <code>Unavailable</code>, you could retry to send it in another request.</li>
+      <li>If it is <code>NotRegistered</code>, you should remove the registration ID from your server database because the application was uninstalled from the device.</li>
+      <li>Otherwise, there is something wrong in the registration ID passed in the request; it is probably a non-recoverable error that will also require removing the registration from the server database. See <a href="#error_codes">Interpreting an error response</a> for all possible error values.</li>
+    </ul>
+  </li>
+</ul>
+
+<p>When a plain-text request is successful (HTTP status code 200), the response body contains 1 or 2 lines in the form of key/value pairs.
+The first line is always available and its content is either <code>id=<em>ID of sent message</em></code> or <code>Error=<em>GCM error code</em></code>. The second line, if available, 
+has the format of <code>registration_id=<em>canonical ID</em></code>. The second line is optional, and it can only be sent if the first line is not an error. We recommend handling the plain-text response in a similar way as handling the JSON response:</p>
+<ul>
+  <li>If first line starts with <code>id</code>, check second line:
+    <ul>
+      <li>If second line starts with <code>registration_id</code>, gets its value and replace the registration IDs in your server database.</li>
+    </ul>
+  </li>
+  <li>Otherwise, get the value of <code>Error</code>:
+    <ul>
+      <li>If it is <code>NotRegistered</code>, remove the registration ID from your server database.</li>
+      <li>Otherwise, there is probably a non-recoverable error (<strong>Note: </strong>Plain-text requests will never return <code>Unavailable</code> as the error code, they would have returned a 500 HTTP status instead).</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="error_codes">Interpreting an error response</h4>
+<p>Here are the recommendations for handling the different types of error that might occur when trying to send a message to a device:</p>
+
+<dl>
+<dt id="missing_reg"><strong>Missing Registration ID</strong></dt>
+<dd>Check that the request contains a registration ID (either in the <code>registration_id</code> parameter in a plain text message, or in the <code>registration_ids</code> field in JSON). 
+<br/>Happens when error code is <code>MissingRegistration</code>.</dd>
+<dt id="invalid_reg"><strong>Invalid Registration ID</strong></dt>
+<dd>Check the formatting of the registration ID that you pass to the server. Make sure it matches the registration ID the phone receives in the <code>com.google.android.c2dm.intent.REGISTRATION</code> intent and that you're not truncating it or adding additional characters. 
+<br/>Happens when error code is <code>InvalidRegistration</code>.</dd>
+<dt id="mismatched_sender"><strong>Mismatched Sender</strong></dt>
+<dd>A registration ID is tied to a certain group of senders. When an application registers for GCM usage, it must specify which senders are allowed to send messages. Make sure you're using one of those when trying to send messages to the device. If you switch to a different sender, the existing registration IDs won't work. 
+Happens when error code is <code>MismatchSenderId</code>.</dd>
+<dt id="unreg_device"><strong>Unregistered Device</strong></dt>
+<dd>An existing registration ID may cease to be valid in a number of scenarios, including:
+<ul>
+  <li>If the application manually unregisters by issuing a <span class="prettyprint pretty-java"><code>com.google.android.c2dm.intent.UNREGISTER</code></span><code> </code>intent.</li>
+  <li>If the application is automatically unregistered, which can happen (but is not guaranteed) if the user uninstalls the application.</li>
+  <li>If the registration ID expires. Google might decide to refresh registration IDs. </li>
+</ul>
+For all these cases, you should remove this registration ID from the 3rd-party server and stop using it to send 
+messages. 
+<br/>Happens when error code is <code>NotRegistered</code>.</dd>
+  <dt id="big_msg"><strong>Message Too Big</strong></dt>
+  <dd>The total size of the payload data that is included in a message can't exceed 4096 bytes. Note that this includes both the size of the keys as well as the values. 
+<br/>Happens when error code is <code>MessageTooBig</code>.</dd>
+  <dt id="auth_error"><strong>Authentication Error</strong></dt>
+  <dd>The sender account that you're trying to use to send a message couldn't be authenticated. Possible causes are: request could not be parsed as JSON, or it contained invalid fields (for instance, passing a string where a number was expected).  The exact failure reason is described in the response and the problem should be addressed before the request can be retried. Possible causes are: authorization header missing or with invalid syntax, invalid project ID sent as key, key valid but with GCM service disabled, and so on. Check that the Sender Auth Token you're sending inside the <code>Authorization</code> header is the correct API key associated with your project. 
+<br/>Happens when the HTTP status code is 401.
+  </dd>
+  <dt id="internal_error"><strong>Internal Server Error/Timeout</strong></dt>
+  <dd>The server encountered an error while trying to process the request or couldn't finish in time. You can retry the same request, but you MUST obey the following requirements:  
+<ul>
+  <li>Honor the <code>Retry-After</code> header if it's included in the response from the GCM server.</li>
+  <li>Implement exponential back-off in your retry mechanism. This means an exponentially increasing delay after each failed retry (e.g. if you waited one second before the first retry, wait at least two second before the next one, then 4 seconds and so on). If you're sending multiple messages, delay each one independently by an additional random amount to avoid issuing a new request for all messages at the same time.</li>
+</ul>
+Senders that cause problems risk being blacklisted.
+<br/>Happens when the HTTP status code is 500 or 503; or when the <code>error</code> field of a JSON object in the <code>results</code> array is <code>Unavailable</code>.
+</dd>
+</dl>
+<h4>Example responses</h4>
+<p>This section shows a few examples of responses indicating messages that were processed successfully. See <a href="#example-requests">Example requests</a> for the requests these responses are based on.</p>
+<p> Here is a simple case of a JSON message successfully sent to one recipient without canonical IDs in the response:</p>
+<pre class="prettyprint pretty-json">{ "multicast_id": 108,
+  "success": 1,
+  "failure": 0,
+  "canonical_ids": 0,
+  "results": [
+    { "message_id": "1:08" }
+  ]
+}</pre>
+
+<p>Or if the request was in plain-text format:</p>
+<pre class="prettyprint">id=1:08
+</pre>
+
+<p>Here are JSON results for 6 recipients (IDs 4, 8, 15, 16, 23, and 42 respectively) with 3 messages successfully processed, 1 canonical registration ID returned, and 3 errors:</p>
+<pre class="prettyprint pretty-json">{ "multicast_id": 216,
+  "success": 3,
+  "failure": 3,
+  "canonical_ids": 1,
+  "results": [
+    { "message_id": "1:0408" },
+    { "error": "Unavailable" },
+    { "error": "InvalidRegistration" },
+    { "message_id": "1:1516" },
+    { "message_id": "1:2342", "registration_id": "32" },
+    { "error": "NotRegistered"}
+  ]
+}
+</pre>
+<p> In this example:</p>
+<ul>
+  <li>First message: success, not required.</li>
+  <li>Second message: should be resent (to registration ID 8).</li>
+  <li>Third message: had an unrecoverable error (maybe the value got corrupted in the database).</li>
+  <li>Fourth message: success, nothing required.</li>
+  <li>Fifth message: success, but the registration ID should be updated in the server database (from 23 to 32).</li>
+  <li>Sixth message: registration ID (42) should be removed from the server database because the application was uninstalled from the device.</li>
+</ul>
+<p>Or if just the 4th message above was sent using plain-text format:</p>
+<pre class="prettyprint">Error=InvalidRegistration
+</pre>
+<p>If the 5th message above was also sent using plain-text format:</p>
+<pre class="prettyprint">id=1:2342
+registration_id=32
+</pre>
+
+
+<h3 id="stats">Viewing statistics</h3>
+
+<p>To view  statistics and any error messages for your GCM applications:</p>
+<ol>
+  <li> Go to <code><a href="http://play.google.com/apps/publish">play.google.com/apps/publish</a></code>.</li>
+  <li>Login with your developer account. 
+  <p>You will see a page that has a list of all of your apps.</p></li>
+  <li> Click on the &quot;statistics&quot; link next to the app for which you want to view GCM stats. 
+  <p>Now you are on the statistics page.</p> </li>
+  <li>Go to the drop-down menu and select the GCM metric you want to view. 
+  </li>
+</ol>
+<h2 id="example">Examples</h2>
+<p>See the <a href="demo.html">GCM Demo Application</a> document.</p>
+

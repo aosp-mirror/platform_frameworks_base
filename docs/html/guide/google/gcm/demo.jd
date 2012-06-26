@@ -1,0 +1,259 @@
+page.title=GCM Demo Application
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>Quickview</h2>
+
+<ul>
+<li>Build and run the GCM demo app.</li>
+<li>Understand how to set up both the client and server sides of a GCM app.</li>
+<li>Become familiar with the GCM helper libraries.</li>
+</ul>
+
+
+<h2>In this document</h2>
+
+<ol>
+  <li><a href="#requirements">Requirements</a> </li>
+  <li><a href="#gcm-setup">Setting Up GCM</a></li>
+  <li><a href="#server-setup">Setting Up the Server</a>
+    <ol>
+      <li><a href="#webserver-setup">Using a standard web server</a></li>
+      <li><a href="#appengine-setup">Using App Engine for Java</a></li>
+    </ol>
+  </li>
+  <li><a href="#device-setup">Setting Up the Device</a></li>
+</ol>
+
+</div>
+</div>
+
+<p>The Google Cloud Messaging (GCM) Demo demonstrates how to use the Google Cloud Messaging framework in your Android application. This tutorial walks you through setting up and running the demo.</p>
+
+
+<p>This demo consists of the following pieces: </p>
+<ul>
+  <li>A web server containing a page where you can send messages.</li>
+  <li>An Android application that receives and displays such messages.</li>
+</ul>
+<p>Here is the API reference documentation for the helper libraries on which the demo is based:</p>
+<ul>
+  <li><a href="{@docRoot}guide/google/gcm/client-javadoc/index.html">Client Reference</a></li>
+  <li><a href="{@docRoot}guide/google/gcm/server-javadoc/index.html">Server Reference</a></li>
+</ul>
+<h2 id="requirements">Requirements</h2>
+<p>For the web server:</p>
+<ul>
+  <li> <a href="http://ant.apache.org/">Ant 1.8</a> (it might work with earlier versions, but it's not guaranteed).</li>
+  <li>One of the following:
+    <ul>
+      <li>A running web server compatible with Servlets API version 2.5, such as <a href="http://tomcat.apache.org/">Tomcat 6</a> or <a href="http://jetty.codehaus.org/">Jetty</a>, or</li>
+      <li><a href="http://code.google.com/appengine/">Java App Engine SDK</a> version 1.6 or later.</li>
+    </ul>
+  </li>
+  <li>A Google account registered to use GCM.</li>
+  <li>The API  key for that account.</li>
+</ul>
+<p>For the Android application:</p>
+<ul>
+  <li>Emulator (or device) running Android 2.2 with Google APIs.</li>
+  <li>The Google API project ID of the account registered to use GCM.</li>
+</ul>
+<h2 id="gcm-setup">Setting Up GCM</h2>
+<p>Before proceeding with the server and client setup, it's necessary to register a Google account with the Google API Console, enable Google Cloud Messaging in GCM, and obtain an API key from the <a href="https://code.google.com/apis/console">Google API Console</a>.</p>
+<p>For instructions on how to set up GCM, see <a href="gs.html">Getting Started</a>.</p>
+
+
+<h2 id="server-setup">Setting Up the Server</h2>
+<p>This section describes the different options for setting up a server.</p>
+<h3 id="webserver-setup">Using a standard web server</h3>
+<p>To set up the server using a standard, servlet-compliant web server:</p>
+<ol>
+  <li> From the SDK Manager, install <strong>Extras &gt; Google Cloud Messaging for Android Library</strong>.
+    
+    
+    <p>This creates a <code>gcm</code> directory under <code><em>YOUR_SDK_ROOT</em>/extras/google/</code> containing these subdirectories: <code>gcm-client</code>, <code>gcm-demo-appengine</code>, <code>gcm-demo-client</code>, <code>gcm-demo-server</code>, and <code>gcm-server</code>.</p>
+  </li>
+
+  <li>In a text editor, edit the <code>gcm-demo-server/WebContent/WEB-INF/classes/api.key</code> and replace the existing text with the API key obtained above.</li>
+  <li>In a shell window, go to the <code>gcm-demo-server</code> directory.</li>
+  <li>Generate the server's WAR file by running <code>ant war</code>:</li>
+  
+  <pre class="prettyprint">$ ant war
+
+Buildfile:build.xml
+
+init:
+   [mkdir] Created dir: build/classes
+   [mkdir] Created dir: dist
+
+compile:
+   [javac] Compiling 6 source files to build/classes
+
+war:
+     [war] Building war: <strong>dist/gcm-demo.war</strong>
+
+BUILD SUCCESSFUL
+Total time: 0 seconds
+</pre>
+  
+  <li>Deploy the <code>dist/gcm-demo.war</code> to your running server. For instance, if you're using Jetty, copy <code>gcm-demo.war</code> to the <code>webapps</code> directory of the Jetty installation.</li>
+  <li>Open the server's main page in a browser. The URL depends on the server you're using and your machine's IP address, but it will be something like <code>http://192.168.1.10:8080/gcm-demo/home</code>, where <code>gcm-demo</code> is the application context and <code>/home</code> is the path of the main servlet.
+    
+  </li>
+</ol>
+<p class="note"><strong>Note:</strong> You can get the IP by running <code>ifconfig</code> on Linux or MacOS, or <code>ipconfig</code> on Windows. </p>
+<p><img src="{@docRoot}images/gcm/gcm-demo-homepage.png" class="screenshot" /></p>
+<p> You server is now ready.</p>
+<h3 id="appengine-setup">Using App Engine for Java</h3>
+
+<p>To set up the server using a standard App Engine for Java:</p>
+<ol>
+  <li> From the SDK Manager, install <strong>Extras &gt; Google Cloud Messaging for Android Library</strong>.
+    <p>This creates a <code>gcm</code> directory under <code><em>YOUR_SDK_ROOT</em>/extras/google/</code> containing these subdirectories: <code>gcm-client</code>, <code>gcm-demo-appengine</code>, <code>gcm-demo-client</code>, <code>gcm-demo-server</code>, and <code>gcm-server</code>.</p>
+  </li>
+  <li>In a text editor, edit the <code>gcm-demo-appengine/src/com/google/android/gcm/demo/server/ApiKeyInitializer.java</code> and replace the existing text with the API key obtained above.
+  <p class="note"><strong>Note:</strong> The API key value set in that class will be used just once to create a persistent entity on App Engine. If you deploy the application, you can use App Engine's <code>Datastore Viewer</code> to change it later.</p>
+  
+  </li>
+  <li>In a shell window, go to the <code>gcm-api-server</code> directory.</li>
+  <li>Start the development App Engine server by <code>ant runserver</code>, using the <code>-Dsdk.dir</code> to indicate the location of the App Engine SDK and <code>-Dserver.host</code> to set your server's hostname or IP address:</li>
+
+<pre class="prettyprint">
+$ ant -Dsdk.dir=/opt/google/appengine-java-sdk runserver -Dserver.host=192.168.1.10
+Buildfile: gcm-demo-appengine/build.xml
+
+init:
+    [mkdir] Created dir: gcm-demo-appengine/dist
+
+copyjars:
+
+compile:
+
+datanucleusenhance:
+  [enhance] DataNucleus Enhancer (version 1.1.4) : Enhancement of classes
+  [enhance] DataNucleus Enhancer completed with success for 0 classes. Timings : input=28 ms, enhance=0 ms, total=28 ms. Consult the log for full details
+  [enhance] DataNucleus Enhancer completed and no classes were enhanced. Consult the log for full details
+
+runserver:
+     [java] Jun 15, 2012 8:46:06 PM com.google.apphosting.utils.jetty.JettyLogger info
+     [java] INFO: Logging to JettyLogger(null) via com.google.apphosting.utils.jetty.JettyLogger
+     [java] Jun 15, 2012 8:46:06 PM com.google.apphosting.utils.config.AppEngineWebXmlReader readAppEngineWebXml
+     [java] INFO: Successfully processed gcm-demo-appengine/WebContent/WEB-INF/appengine-web.xml
+     [java] Jun 15, 2012 8:46:06 PM com.google.apphosting.utils.config.AbstractConfigXmlReader readConfigXml
+     [java] INFO: Successfully processed gcm-demo-appengine/WebContent/WEB-INF/web.xml
+     [java] Jun 15, 2012 8:46:09 PM com.google.android.gcm.demo.server.ApiKeyInitializer contextInitialized
+     [java] SEVERE: Created fake key. Please go to App Engine admin console, change its value to your API Key (the entity type is 'Settings' and its field to be changed is 'ApiKey'), then restart the server!
+     [java] Jun 15, 2012 8:46:09 PM com.google.appengine.tools.development.DevAppServerImpl start
+     [java] INFO: The server is running at http://192.168.1.10:8080/
+     [java] Jun 15, 2012 8:46:09 PM com.google.appengine.tools.development.DevAppServerImpl start
+     [java] INFO: The admin console is running at http://192.168.1.10:8080/_ah/admin
+</pre>
+
+  <li>Open the server's main page in a browser. The URL depends on the server you're using and your machine's IP address, but it will be something like <code>http://192.168.1.10:8080/home</code>, where <code>/home</code> is the path of the main servlet.</li>
+  
+  <p class="note"><strong>Note:</strong> You can get the IP by running <code>ifconfig</code> on Linux or MacOS, or <code>ipconfig</code> on Windows.</p>
+  
+  <p><img src="{@docRoot}images/gcm/gcm-demo-homepage-appengine.png" class="screenshot" /></p>
+</ol>
+<p> You server is now ready.</p>
+<h2 id="device-setup">Setting Up the Device</h2>
+<p>To set up the device:</p>
+<ol>
+  <li> From the SDK Manager, install <strong>Extras &gt; Google Cloud Messaging for Android Library</strong>.
+    <p>This creates a <code>gcm</code> directory under <code><em>YOUR_SDK_ROOT</em>/extras/google</code> containing these subdirectories: <code>gcm-client</code>, <code>gcm-demo-appengine</code>, <code>gcm-demo-client</code>, <code>gcm-demo-server</code>, <code>gcm-server</code>, and <code>source.properties</code>.</p>
+  </li>
+  <li>Using a text editor, open  <code>gcm-demo-client/src/com/google/android/gcm/demo/app/CommonUtilities.java</code> and set the proper values for the <code>SENDER_ID</code> and <code>SERVER_URL</code> constants. For example:</li>
+
+<pre class="prettyprint pretty-java">
+static final String SERVER_URL = &quot;http://192.168.1.10:8080/gcm-demo&quot;;
+static final String SENDER_ID = &quot;4815162342&quot;;</pre>
+<p>Note that the <code>SERVER_URL</code> is the URL for the server and the application's context (or just server, if you are using App Engine), and it does not include the forward slash (<code>/</code>). Also note that <code>SENDER_ID</code> is the Google API project ID you obtained in the server setup steps above.</p>
+
+  <li>In a shell window, go to the <code>gcm-demo-client</code> directory.</li>
+  <li>Use the SDK's <code>android</code> tool to generate the <code>ant</code> build files:</li>
+
+<pre class="prettyprint">
+$ android update project --name GCMDemo -p . --target android-16
+Updated project.properties
+Updated local.properties
+Updated file ./build.xml
+Updated file ./proguard-project.txt
+</pre>
+<p>If this command fails becase <code>android-16</code> is not recognized, try a different target (as long as it is at least <code>android-15</code>).</p>
+
+<li>Use <code>ant</code> to build the application's APK file:</li>
+
+ <pre class="prettyprint">
+$ ant clean debug
+Buildfile: build.xml
+
+...
+
+
+-do-debug:
+[zipalign] Running zip align on final apk...
+    [echo] Debug Package: bin/GCMDemo-debug.apk
+[propertyfile] Creating new property file: <strong>bin/build.prop</strong>
+[propertyfile] Updating property file: bin/build.prop
+[propertyfile] Updating property file: bin/build.prop
+[propertyfile] Updating property file: bin/build.prop
+
+-post-build:
+
+debug:
+
+BUILD SUCCESSFUL
+Total time: 3 seconds
+ </pre>
+ 
+<li>Start the Android emulator:</li>
+<pre class="prettyprint">$emulator -avd my_avd
+</pre>
+
+<p> This example assumes there is an AVD (Android Virtual Device) named <code>my_avd</code> previously configured with Android 2.2 and Google APIs level 8. For more information on how to run an Android emulator, see <a href="{@docRoot}tools/devices/index.html">Managing Virtual Devices</a> in the Android Developers Guide.</p>
+
+<li>Make sure there is a Google account added to the emulator. It doesn't have to be any account (like the <code>senderId</code>) in particular. </li>
+
+<p> If the emulator is running Android 4.0.4 or later, this step is optional as GCM does not require an account from this version on.</p>
+
+<li>Install the application in the emulator:</li>
+
+<pre class="prettyprint">
+$ ant installd
+Buildfile: gcm-demo-client/build.xml
+
+-set-mode-check:
+
+-set-debug-files:
+
+install:
+     [echo] Installing gcm-demo-client/bin/GCMDemo-debug.apk onto default emulator or device...
+     [exec] 1719 KB/s (47158 bytes in 0.026s)
+     [exec]   pkg: /data/local/tmp/GCMDemo-debug.apk
+     [exec] Success
+
+installd:
+
+BUILD SUCCESSFUL
+Total time: 3 seconds
+</pre>
+  <li>In the emulator, launch the GCM Demo app. The initial screen should look like this:</li>
+  <p><img src="{@docRoot}images/gcm/gcm-avd-home-auto-reg.png" class="screenshot" /></p>
+<p class="note"><strong>Note:</strong> What happened? When the device received a registration callback intent from GCM, it contacted the server to register itself, using the register servlet and passing the registration ID received from GCM; the server then saved the registration ID to use it to send messages to the phone.</p>
+<li> Now go back to your browser and refresh the page. It will show that there is one device registered:</li>
+
+<p><img src="{@docRoot}images/gcm/gcm-device-reg.png" class="screenshot" /></p>
+
+<li>Click on <strong>Send Message</strong>. The browser should show:</li>
+<p><img src="{@docRoot}images/gcm/gcm-sent-server.png" class="screenshot" /></p>
+
+<p>And in your emulator:</p>
+
+<p><img src="{@docRoot}images/gcm/gcm-avd-first-msg.png" class="screenshot" /></p>
+
+<p class="note"><strong>Note:</strong> What happened? When you clicked the button, the web server sent a message to GCM addressed to your device (more specifically, to the registration ID returned by GCM during the registration step). The device then received the message and displayed in the main activity; it also issued a system notification so the user would be notified even if the demo application was not running.</p>
+</ol>
+
