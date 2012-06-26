@@ -53,6 +53,21 @@ ClockRecoveryLoop::ClockRecoveryLoop(LocalClock* local_clock,
 
     local_clock_can_slew_ = local_clock_->initCheck() &&
                            (local_clock_->setLocalSlew(0) == OK);
+    tgt_correction_ = 0;
+    cur_correction_ = 0;
+
+    // Precompute the max rate at which we are allowed to change the VCXO
+    // control.
+    uint64_t N = 0x10000ull * 1000ull;
+    uint64_t D = local_clock_->getLocalFreq() * kMinFullRangeSlewChange_mSec;
+    LinearTransform::reduce(&N, &D);
+    while ((N > INT32_MAX) || (D > UINT32_MAX)) {
+        N >>= 1;
+        D >>= 1;
+        LinearTransform::reduce(&N, &D);
+    }
+    time_to_cur_slew_.a_to_b_numer = static_cast<int32_t>(N);
+    time_to_cur_slew_.a_to_b_denom = static_cast<uint32_t>(D);
 
     reset(true, true);
 
@@ -85,6 +100,9 @@ const int64_t ClockRecoveryLoop::panic_thresh_ = 50000;
 const int64_t ClockRecoveryLoop::control_thresh_ = 10000;
 const float ClockRecoveryLoop::COmin = -100.0f;
 const float ClockRecoveryLoop::COmax = 100.0f;
+const uint32_t ClockRecoveryLoop::kMinFullRangeSlewChange_mSec = 300;
+const int ClockRecoveryLoop::kSlewChangeStepPeriod_mSec = 10;
+
 
 void ClockRecoveryLoop::reset(bool position, bool frequency) {
     Mutex::Autolock lock(&lock_);
@@ -144,7 +162,7 @@ bool ClockRecoveryLoop::pushDisciplineEvent(int64_t local_time,
     int64_t observed_common;
     int64_t delta;
     float delta_f, dCO;
-    int32_t correction_cur;
+    int32_t tgt_correction;
 
     if (OK != common_clock_->localToCommon(local_time, &observed_common)) {
         // Since we just checked to make certain that this conversion was valid,
@@ -254,23 +272,20 @@ bool ClockRecoveryLoop::pushDisciplineEvent(int64_t local_time,
 
     // Convert PPM to 16-bit int range. Add some guard band (-0.01) so we
     // don't get fp weirdness.
-    correction_cur = CO * 327.66;
+    tgt_correction = CO * 327.66;
 
     // If there was a change in the amt of correction to use, update the
     // system.
-    if (correction_cur_ != correction_cur) {
-        correction_cur_ = correction_cur;
-        applySlew();
-    }
+    setTargetCorrection_l(tgt_correction);
 
-    LOG_TS("clock_loop %lld %f %f %f %d\n", raw_delta, delta_f, CO, CObias, correction_cur);
+    LOG_TS("clock_loop %lld %f %f %f %d\n", raw_delta, delta_f, CO, CObias, tgt_correction);
 
 #ifdef TIME_SERVICE_DEBUG
     diag_thread_->pushDisciplineEvent(
             local_time,
             observed_common,
             nominal_common_time,
-            correction_cur,
+            tgt_correction,
             rtt);
 #endif
 
@@ -298,24 +313,109 @@ void ClockRecoveryLoop::reset_l(bool position, bool frequency) {
         last_delta_valid_ = false;
         last_delta_ = 0;
         last_delta_f_ = 0.0;
-        correction_cur_ = 0x0;
         CO = 0.0f;
         lastCObias = CObias = 0.0f;
-        applySlew();
+        setTargetCorrection_l(0);
+        applySlew_l();
     }
 
     filter_wr_   = 0;
     filter_full_ = false;
 }
 
-void ClockRecoveryLoop::applySlew() {
+void ClockRecoveryLoop::setTargetCorrection_l(int32_t tgt) {
+    // When we make a change to the slew rate, we need to be careful to not
+    // change it too quickly as it can anger some HDMI sinks out there, notably
+    // some Sony panels from the 2010-2011 timeframe.  From experimenting with
+    // some of these sinks, it seems like swinging from one end of the range to
+    // another in less that 190mSec or so can start to cause trouble.  Adding in
+    // a hefty margin, we limit the system to a full range sweep in no less than
+    // 300mSec.
+    if (tgt_correction_ != tgt) {
+        int64_t now = local_clock_->getLocalTime();
+        status_t res;
+
+        tgt_correction_ = tgt;
+
+        // Set up the transformation to figure out what the slew should be at
+        // any given point in time in the future.
+        time_to_cur_slew_.a_zero = now;
+        time_to_cur_slew_.b_zero = cur_correction_;
+
+        // Make sure the sign of the slope is headed in the proper direction.
+        bool needs_increase = (cur_correction_ < tgt_correction_);
+        bool is_increasing  = (time_to_cur_slew_.a_to_b_numer > 0);
+        if (( needs_increase && !is_increasing) ||
+            (!needs_increase &&  is_increasing)) {
+            time_to_cur_slew_.a_to_b_numer = -time_to_cur_slew_.a_to_b_numer;
+        }
+
+        // Finally, figure out when the change will be finished and start the
+        // slew operation.
+        time_to_cur_slew_.doReverseTransform(tgt_correction_,
+                                             &slew_change_end_time_);
+
+        applySlew_l();
+    }
+}
+
+bool ClockRecoveryLoop::applySlew_l() {
+    bool ret = true;
+
+    // If cur == tgt, there is no ongoing sleq rate change and we are already
+    // finished.
+    if (cur_correction_ == tgt_correction_)
+        goto bailout;
+
     if (local_clock_can_slew_) {
-        local_clock_->setLocalSlew(correction_cur_);
+        int64_t now = local_clock_->getLocalTime();
+        int64_t tmp;
+
+        if (now >= slew_change_end_time_) {
+            cur_correction_ = tgt_correction_;
+            next_slew_change_timeout_.setTimeout(-1);
+        } else {
+            time_to_cur_slew_.doForwardTransform(now, &tmp);
+
+            if (tmp > INT16_MAX)
+                cur_correction_ = INT16_MAX;
+            else if (tmp < INT16_MIN)
+                cur_correction_ = INT16_MIN;
+            else
+                cur_correction_ = static_cast<int16_t>(tmp);
+
+            next_slew_change_timeout_.setTimeout(kSlewChangeStepPeriod_mSec);
+            ret = false;
+        }
+
+        local_clock_->setLocalSlew(cur_correction_);
     } else {
+        // Since we are not actually changing the rate of a HW clock, we don't
+        // need to worry to much about changing the slew rate so fast that we
+        // anger any downstream HDMI devices.
+        cur_correction_ = tgt_correction_;
+        next_slew_change_timeout_.setTimeout(-1);
+
         // The SW clock recovery implemented by the common clock class expects
         // values expressed in PPM. CO is in ppm.
         common_clock_->setSlew(local_clock_->getLocalTime(), CO);
     }
+
+bailout:
+    return ret;
+}
+
+int ClockRecoveryLoop::applyRateLimitedSlew() {
+    Mutex::Autolock lock(&lock_);
+
+    int ret = next_slew_change_timeout_.msecTillTimeout();
+    if (!ret) {
+        if (applySlew_l())
+            next_slew_change_timeout_.setTimeout(-1);
+        ret = next_slew_change_timeout_.msecTillTimeout();
+    }
+
+    return ret;
 }
 
 }  // namespace android

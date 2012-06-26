@@ -202,9 +202,11 @@ bool CommonTimeServer::runStateMachine_l() {
     // run the state machine
     while (!exitPending()) {
         struct pollfd pfds[2];
-        int rc;
+        int rc, timeout;
         int eventCnt = 0;
         int64_t wakeupTime;
+        uint32_t t1, t2;
+        bool needHandleTimeout = false;
 
         // We are always interested in our wakeup FD.
         pfds[eventCnt].fd      = mWakeupThreadFD;
@@ -221,10 +223,14 @@ bool CommonTimeServer::runStateMachine_l() {
             eventCnt++;
         }
 
+        t1 = static_cast<uint32_t>(mCurTimeout.msecTillTimeout());
+        t2 = static_cast<uint32_t>(mClockRecovery.applyRateLimitedSlew());
+        timeout = static_cast<int>(t1 < t2 ? t1 : t2);
+
         // Note, we were holding mLock when this function was called.  We
         // release it only while we are blocking and hold it at all other times.
         mLock.unlock();
-        rc          = poll(pfds, eventCnt, mCurTimeout.msecTillTimeout());
+        rc          = poll(pfds, eventCnt, timeout);
         wakeupTime  = mLocalClock.getLocalTime();
         mLock.lock();
 
@@ -238,8 +244,11 @@ bool CommonTimeServer::runStateMachine_l() {
             return false;
         }
 
-        if (rc == 0)
-            mCurTimeout.setTimeout(kInfiniteTimeout);
+        if (rc == 0) {
+            needHandleTimeout = !mCurTimeout.msecTillTimeout();
+            if (needHandleTimeout)
+                mCurTimeout.setTimeout(kInfiniteTimeout);
+        }
 
         // Were we woken up on purpose?  If so, clear the eventfd with a read.
         if (pfds[0].revents)
@@ -336,9 +345,8 @@ bool CommonTimeServer::runStateMachine_l() {
             continue;
         }
 
-        // Did we wakeup with no signalled events across all of our FDs?  If so,
-        // we must have hit our timeout.
-        if (rc == 0) {
+        // Time to handle the timeouts?
+        if (needHandleTimeout) {
             if (!handleTimeout())
                 ALOGE("handleTimeout failed");
             continue;
@@ -1324,29 +1332,6 @@ bool CommonTimeServer::sockaddrMatch(const sockaddr_storage& a1,
         // default to a no-match decision.
         default: return false;
     }
-}
-
-void CommonTimeServer::TimeoutHelper::setTimeout(int msec) {
-    mTimeoutValid = (msec >= 0);
-    if (mTimeoutValid)
-        mEndTime = systemTime() +
-                   (static_cast<nsecs_t>(msec) * 1000000);
-}
-
-int CommonTimeServer::TimeoutHelper::msecTillTimeout() {
-    if (!mTimeoutValid)
-        return kInfiniteTimeout;
-
-    nsecs_t now = systemTime();
-    if (now >= mEndTime)
-        return 0;
-
-    uint64_t deltaMsec = (((mEndTime - now) + 999999) / 1000000);
-
-    if (deltaMsec > static_cast<uint64_t>(MAX_INT))
-        return MAX_INT;
-
-    return static_cast<int>(deltaMsec);
 }
 
 bool CommonTimeServer::shouldPanicNotGettingGoodData() {
