@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 
-<title>/src/ics-mr1/frameworks/base/libs/rs/scriptc/rs_graphics.rsh File Reference</title>
+<title>rs_graphics.rsh File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
 
@@ -27,10 +27,12 @@
   <div class="summary">
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
-<div class="title">/src/ics-mr1/frameworks/base/libs/rs/scriptc/rs_graphics.rsh File Reference</div>  </div>
+<div class="title">rs_graphics.rsh File Reference</div>  </div>
 </div>
 <div class="contents">
-<table class="memberdecls">
+<div class="textblock"><code>#include &quot;<a class="el" href="rs__mesh_8rsh_source.html">rs_mesh.rsh</a>&quot;</code><br/>
+<code>#include &quot;<a class="el" href="rs__program_8rsh_source.html">rs_program.rsh</a>&quot;</code><br/>
+</div><table class="memberdecls">
 <tr><td colspan="2"><h2><a name="func-members"></a>
 Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__graphics_8rsh.html#a9f8deb600729a83c39c5bcaba2152b9c">rsgBindProgramFragment</a> (<a class="el" href="structrs__program__fragment.html">rs_program_fragment</a> pf)</td></tr>
@@ -44,6 +46,8 @@ Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__graphics_8rsh.html#a377b7b394c4bf0881532b1241d4be168">rsgProgramVertexLoadTextureMatrix</a> (const <a class="el" href="structrs__matrix4x4.html">rs_matrix4x4</a> *tex)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__graphics_8rsh.html#a2b767d209b36ffcd2e0fc0cf6f4c5706">rsgProgramVertexGetProjectionMatrix</a> (<a class="el" href="structrs__matrix4x4.html">rs_matrix4x4</a> *proj)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__graphics_8rsh.html#a35ac8c3759e25047e6a458c15520c887">rsgProgramFragmentConstantColor</a> (<a class="el" href="structrs__program__fragment.html">rs_program_fragment</a> pf, float r, float g, float b, float a)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__graphics_8rsh.html#a46208900d16287fde91a5d14ebc830dc">rsgBindConstant</a> (<a class="el" href="structrs__program__fragment.html">rs_program_fragment</a> ps, <a class="el" href="rs__types_8rsh.html#a4f5fce8c1ef282264f9214809524d836">uint</a> slot, <a class="el" href="structrs__allocation.html">rs_allocation</a> c)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__graphics_8rsh.html#a516131032d384bae5be9afa19a257033">rsgBindConstant</a> (<a class="el" href="structrs__program__vertex.html">rs_program_vertex</a> pv, <a class="el" href="rs__types_8rsh.html#a4f5fce8c1ef282264f9214809524d836">uint</a> slot, <a class="el" href="structrs__allocation.html">rs_allocation</a> c)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="rs__types_8rsh.html#a4f5fce8c1ef282264f9214809524d836">uint</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__graphics_8rsh.html#a67f4ed1ca4bba27d5c952ada89cd0717">rsgGetWidth</a> (void)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="rs__types_8rsh.html#a4f5fce8c1ef282264f9214809524d836">uint</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__graphics_8rsh.html#a7e6565cd5d5e44f442a8bf8ba68f4681">rsgGetHeight</a> (void)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__graphics_8rsh.html#a647228d8e15da6ad67a97701d920dcac">rsgAllocationSyncAll</a> (<a class="el" href="structrs__allocation.html">rs_allocation</a> alloc)</td></tr>
@@ -89,6 +93,90 @@ Functions</h2></td></tr>
 <dl><dt><b>Parameters:</b></dt><dd>
   <table class="params">
     <tr><td class="paramname">alloc</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a46208900d16287fde91a5d14ebc830dc"></a><!-- doxytag: member="rs_graphics.rsh::rsgBindConstant" ref="a46208900d16287fde91a5d14ebc830dc" args="(rs_program_fragment ps, uint slot, rs_allocation c)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void rsgBindConstant </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structrs__program__fragment.html">rs_program_fragment</a>&#160;</td>
+          <td class="paramname"><em>ps</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="rs__types_8rsh.html#a4f5fce8c1ef282264f9214809524d836">uint</a>&#160;</td>
+          <td class="paramname"><em>slot</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structrs__allocation.html">rs_allocation</a>&#160;</td>
+          <td class="paramname"><em>c</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Bind a new Allocation object to a ProgramFragment. The Allocation must be a valid constant input for the Program.</p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ps</td><td>program object </td></tr>
+    <tr><td class="paramname">slot</td><td>index of the constant buffer on the program </td></tr>
+    <tr><td class="paramname">c</td><td>constants to bind </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a516131032d384bae5be9afa19a257033"></a><!-- doxytag: member="rs_graphics.rsh::rsgBindConstant" ref="a516131032d384bae5be9afa19a257033" args="(rs_program_vertex pv, uint slot, rs_allocation c)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void rsgBindConstant </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structrs__program__vertex.html">rs_program_vertex</a>&#160;</td>
+          <td class="paramname"><em>pv</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="rs__types_8rsh.html#a4f5fce8c1ef282264f9214809524d836">uint</a>&#160;</td>
+          <td class="paramname"><em>slot</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structrs__allocation.html">rs_allocation</a>&#160;</td>
+          <td class="paramname"><em>c</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Bind a new Allocation object to a ProgramVertex. The Allocation must be a valid constant input for the Program.</p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pv</td><td>program object </td></tr>
+    <tr><td class="paramname">slot</td><td>index of the constant buffer on the program </td></tr>
+    <tr><td class="paramname">c</td><td>constants to bind </td></tr>
   </table>
   </dd>
 </dl>
@@ -1185,7 +1273,7 @@ Functions</h2></td></tr>
 <div class="memdoc">
 <p>This is an overloaded member function, provided for convenience. It differs from the above function only in what argument(s) it accepts. </p>
 
-<p>Definition at line <a class="el" href="rs__graphics_8rsh_source.html#l00380">380</a> of file <a class="el" href="rs__graphics_8rsh_source.html">rs_graphics.rsh</a>.</p>
+<p>Definition at line <a class="el" href="rs__graphics_8rsh_source.html#l00409">409</a> of file <a class="el" href="rs__graphics_8rsh_source.html">rs_graphics.rsh</a>.</p>
 
 </div>
 </div>
