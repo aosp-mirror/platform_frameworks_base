@@ -978,8 +978,8 @@ public class Editor {
                 mSuggestionsPopupWindow.onParentLostFocus();
             }
 
-            // Don't leave us in the middle of a batch edit.
-            mTextView.onEndBatchEdit();
+            // Don't leave us in the middle of a batch edit. Same as in onFocusChanged
+            ensureEndedBatchEdit();
         }
     }
 
