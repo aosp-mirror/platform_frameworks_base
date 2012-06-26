@@ -272,7 +272,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="TextAppearance.EasyCorrectSuggestion" parent="TextAppearance.Suggestion">
-        <item name="android:textUnderlineColor">#ffC8C8C8</item>
+        <item name="android:textUnderlineColor">#88C8C8C8</item>
     </style>
 
     <style name="TextAppearance.MisspelledSuggestion" parent="TextAppearance.Suggestion">
