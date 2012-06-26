@@ -103,7 +103,7 @@
     <FrameLayout
         android:id="@+id/bar_shadow_holder"
         android:layout_width="match_parent"
-        android:layout_height="@*android:dimen/status_bar_height"
+        android:layout_height="@*android:dimen/system_bar_height"
         android:layout_gravity="bottom"
         >
         <!-- lights out shade -->
