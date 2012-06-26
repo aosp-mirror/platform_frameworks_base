@@ -1,0 +1,25 @@
+page.title=Google Cloud Messaging for Android
+@jd:body
+
+
+<p><img src="{@docRoot}images/gcm/gcm-logo.png" /></p>
+<p>Google Cloud Messaging for Android (GCM) is a service that helps developers send data from servers to their Android applications on Android devices. This could be a lightweight message telling the Android application that there is new data to be fetched from the server (for instance, a movie uploaded by a friend), or it could be a message containing up to 4kb of payload data (so apps like instant messaging can consume the message directly). The GCM service handles all aspects of queueing of messages and delivery to the target Android application running on the target device.</p>
+
+<p>To learn more about GCM, read the following documents:</p>
+
+<dl>
+  <dt><strong><a href="{@docRoot}guide/google/gcm/gs.html">Getting Started</a></strong></dt>
+    <dd>Read this document to learn the basic steps involved in developing Android applications based on GCM.</dd>
+  <dt><strong><a href="{@docRoot}guide/google/gcm/gcm.html">Architectural Overview</a></strong></dt>
+    <dd>Read this document for a description of the underlying concepts and architecture in GCM.</dd>
+  <dt><strong><a href="{@docRoot}guide/google/gcm/demo.html">Demo App Tutorial</a></strong></dt>
+    <dd>Read this document to walk through setting up and running the GCM demo app.</dd>
+  <dt><strong><a href="{@docRoot}guide/google/gcm/adv.html">Advanced Topics</a></strong></dt>
+    <dd>Read this document to get a more in-depth understanding of key GCM features.</dd>
+  <dt><a href="{@docRoot}guide/google/gcm/c2dm.html"><strong>Migration</strong></a></dt>
+    <dd>Read this document if you are a C2DM developer moving to GCM.</dd>
+</dl>
+
+<p>GCM also provides helper libraries for <a href="{@docRoot}guide/google/gcm/client-javadoc/index.html"><strong>client</strong></a> and <a href="{@docRoot}guide/google/gcm/server-javadoc/index.html"><strong>server</strong></a> development.</p>
+
+
