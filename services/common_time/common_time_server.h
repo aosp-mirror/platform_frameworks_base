@@ -28,6 +28,7 @@
 #include "clock_recovery.h"
 #include "common_clock.h"
 #include "common_time_server_packets.h"
+#include "utils.h"
 
 #define RTT_LOG_SIZE 30
 
@@ -102,18 +103,6 @@ class CommonTimeServer : public Thread {
         bool logFull;
         int64_t txTimes[RTT_LOG_SIZE];
         int64_t rxTimes[RTT_LOG_SIZE];
-    };
-
-    class TimeoutHelper {
-      public:
-        TimeoutHelper() : mTimeoutValid(false) { }
-
-        void setTimeout(int msec);
-        int msecTillTimeout();
-
-      private:
-        bool        mTimeoutValid;
-        nsecs_t     mEndTime;
     };
 
     bool threadLoop();
@@ -194,7 +183,7 @@ class CommonTimeServer : public Thread {
     bool shouldPanicNotGettingGoodData();
 
     // Helper to keep track of the state machine's current timeout
-    TimeoutHelper mCurTimeout;
+    Timeout mCurTimeout;
 
     // common clock, local clock abstraction, and clock recovery loop
     CommonClock mCommonClock;

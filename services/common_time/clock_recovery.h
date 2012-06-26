@@ -26,6 +26,8 @@
 #include "diag_thread.h"
 #endif
 
+#include "utils.h"
+
 namespace android {
 
 class CommonClock;
@@ -41,6 +43,11 @@ class ClockRecoveryLoop {
                              int64_t nominal_common_time,
                              int64_t data_point_rtt);
     int32_t getLastErrorEstimate();
+
+    // Applies the next step in any ongoing slew change operation.  Returns a
+    // timeout suitable for use with poll/select indicating the number of mSec
+    // until the next change should be applied.
+    int applyRateLimitedSlew();
 
   private:
 
@@ -87,7 +94,8 @@ class ClockRecoveryLoop {
     static uint32_t findMinRTTNdx(DisciplineDataPoint* data, uint32_t count);
 
     void reset_l(bool position, bool frequency);
-    void applySlew();
+    void setTargetCorrection_l(int32_t tgt);
+    bool applySlew_l();
 
     // The local clock HW abstraction we use as the basis for common time.
     LocalClock* local_clock_;
@@ -104,7 +112,11 @@ class ClockRecoveryLoop {
     int32_t last_delta_;
     float last_delta_f_;
     int32_t integrated_error_;
-    int32_t correction_cur_;
+    int32_t tgt_correction_;
+    int32_t cur_correction_;
+    LinearTransform time_to_cur_slew_;
+    int64_t slew_change_end_time_;
+    Timeout next_slew_change_timeout_;
 
     // Contoller Output.
     float CO;
@@ -127,6 +139,15 @@ class ClockRecoveryLoop {
     static const uint32_t kStartupFilterSize = 4;
     DisciplineDataPoint startup_filter_data_[kStartupFilterSize];
     uint32_t startup_filter_wr_;
+
+    // Minimum number of milliseconds over which we allow a full range change
+    // (from rail to rail) of the VCXO control signal.  This is the rate
+    // limiting factor which keeps us from changing the clock rate so fast that
+    // we get in trouble with certain HDMI sinks.
+    static const uint32_t kMinFullRangeSlewChange_mSec;
+
+    // How much time (in msec) to wait 
+    static const int kSlewChangeStepPeriod_mSec;
 
 #ifdef TIME_SERVICE_DEBUG
     sp<DiagThread> diag_thread_;

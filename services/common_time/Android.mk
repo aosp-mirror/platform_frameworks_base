@@ -14,7 +14,8 @@ LOCAL_SRC_FILES := \
     common_time_server_packets.cpp \
     clock_recovery.cpp \
     common_clock.cpp \
-    main.cpp
+    main.cpp \
+    utils.cpp
 
 # Uncomment to enable vesbose logging and debug service.
 #TIME_SERVICE_DEBUG=true
