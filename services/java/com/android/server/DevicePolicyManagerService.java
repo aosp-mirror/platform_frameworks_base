@@ -2118,16 +2118,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
 
             pw.println(" ");
-            pw.print("  mActivePasswordQuality=0x");
-                    pw.println(Integer.toHexString(mActivePasswordQuality));
-            pw.print("  mActivePasswordLength="); pw.println(mActivePasswordLength);
-            pw.print("  mActivePasswordUpperCase="); pw.println(mActivePasswordUpperCase);
-            pw.print("  mActivePasswordLowerCase="); pw.println(mActivePasswordLowerCase);
-            pw.print("  mActivePasswordLetters="); pw.println(mActivePasswordLetters);
-            pw.print("  mActivePasswordNumeric="); pw.println(mActivePasswordNumeric);
-            pw.print("  mActivePasswordSymbols="); pw.println(mActivePasswordSymbols);
-            pw.print("  mActivePasswordNonLetter="); pw.println(mActivePasswordNonLetter);
-            pw.print("  mFailedPasswordAttempts="); pw.println(mFailedPasswordAttempts);
             pw.print("  mPasswordOwner="); pw.println(mPasswordOwner);
         }
     }
