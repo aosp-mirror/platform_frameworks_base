@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 
-<title>/src/ics-mr1/frameworks/base/libs/rs/scriptc/rs_allocation.rsh Source File</title>
+<title>rs_allocation.rsh Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
 
@@ -24,7 +24,7 @@
   </div>
 <div class="header">
   <div class="headertitle">
-<div class="title">/src/ics-mr1/frameworks/base/libs/rs/scriptc/rs_allocation.rsh</div>  </div>
+<div class="title">rs_allocation.rsh</div>  </div>
 </div>
 <div class="contents">
 <a href="rs__allocation_8rsh.html">Go to the documentation of this file.</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
@@ -93,8 +93,34 @@
 <a name="l00143"></a>00143 extern const <span class="keywordtype">void</span> * __attribute__((overloadable))
 <a name="l00144"></a>00144     <a class="code" href="rs__allocation_8rsh.html#a3fd30b4388748601e025bb3566ce0cbc">rsGetElementAt</a>(rs_allocation, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> x, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> y, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> z);
 <a name="l00145"></a>00145 
-<a name="l00146"></a>00146 <span class="preprocessor">#endif</span>
-<a name="l00147"></a>00147 <span class="preprocessor"></span>
+<a name="l00146"></a>00146 <span class="comment">// New API&#39;s</span>
+<a name="l00147"></a>00147 <span class="preprocessor">#if (defined(RS_VERSION) &amp;&amp; (RS_VERSION &gt;= 16))</span>
+<a name="l00148"></a>00148 <span class="preprocessor"></span>
+<a name="l00153"></a>00153 <span class="keyword">extern</span> <span class="keyword">const</span> <span class="keywordtype">void</span> __attribute__((overloadable))
+<a name="l00154"></a>00154     rsAllocationIoSend(rs_allocation a);
+<a name="l00155"></a>00155 
+<a name="l00160"></a>00160 extern const <span class="keywordtype">void</span> __attribute__((overloadable))
+<a name="l00161"></a>00161     rsAllocationIoReceive(rs_allocation a);
+<a name="l00162"></a>00162 
+<a name="l00163"></a>00163 
+<a name="l00169"></a>00169 extern <a class="code" href="structrs__element.html" title="Opaque handle to a Renderscript element.">rs_element</a> __attribute__((overloadable))
+<a name="l00170"></a>00170     rsAllocationGetElement(rs_allocation a);
+<a name="l00171"></a>00171 
+<a name="l00178"></a>00178 extern const <a class="code" href="rs__types_8rsh.html#adb5162dc168ddd471d948faa60b37c5e">float4</a> __attribute__((overloadable))
+<a name="l00179"></a>00179     rsSample(rs_allocation a, <a class="code" href="structrs__sampler.html" title="Opaque handle to a Renderscript sampler object.">rs_sampler</a> s, <span class="keywordtype">float</span> location);
+<a name="l00189"></a>00189 extern const <a class="code" href="rs__types_8rsh.html#adb5162dc168ddd471d948faa60b37c5e">float4</a> __attribute__((overloadable))
+<a name="l00190"></a>00190     rsSample(rs_allocation a, <a class="code" href="structrs__sampler.html" title="Opaque handle to a Renderscript sampler object.">rs_sampler</a> s, <span class="keywordtype">float</span> location, <span class="keywordtype">float</span> lod);
+<a name="l00191"></a>00191 
+<a name="l00198"></a>00198 extern const <a class="code" href="rs__types_8rsh.html#adb5162dc168ddd471d948faa60b37c5e">float4</a> __attribute__((overloadable))
+<a name="l00199"></a>00199     rsSample(rs_allocation a, <a class="code" href="structrs__sampler.html" title="Opaque handle to a Renderscript sampler object.">rs_sampler</a> s, <a class="code" href="rs__types_8rsh.html#a5086d0fcb71f916c936af486ccf0dd41">float2</a> location);
+<a name="l00200"></a>00200 
+<a name="l00210"></a>00210 extern const <a class="code" href="rs__types_8rsh.html#adb5162dc168ddd471d948faa60b37c5e">float4</a> __attribute__((overloadable))
+<a name="l00211"></a>00211     rsSample(rs_allocation a, <a class="code" href="structrs__sampler.html" title="Opaque handle to a Renderscript sampler object.">rs_sampler</a> s, <a class="code" href="rs__types_8rsh.html#a5086d0fcb71f916c936af486ccf0dd41">float2</a> location, <span class="keywordtype">float</span> lod);
+<a name="l00212"></a>00212 
+<a name="l00213"></a>00213 <span class="preprocessor">#endif // (defined(RS_VERSION) &amp;&amp; (RS_VERSION &gt;= 16))</span>
+<a name="l00214"></a>00214 <span class="preprocessor"></span>
+<a name="l00215"></a>00215 <span class="preprocessor">#endif</span>
+<a name="l00216"></a>00216 <span class="preprocessor"></span>
 </pre></div></div>
 </div>
 
