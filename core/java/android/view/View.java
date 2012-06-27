@@ -5704,7 +5704,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         @ViewDebug.IntToString(from = LAYOUT_DIRECTION_RTL, to = "RESOLVED_DIRECTION_RTL")
     })
     public int getResolvedLayoutDirection() {
-        // The layout diretion will be resolved only if needed
+        // The layout direction will be resolved only if needed
         if ((mPrivateFlags2 & LAYOUT_DIRECTION_RESOLVED) != LAYOUT_DIRECTION_RESOLVED) {
             resolveLayoutDirection();
         }
@@ -11466,15 +11466,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // Set resolved depending on layout direction
             switch (getLayoutDirection()) {
                 case LAYOUT_DIRECTION_INHERIT:
-                    // If this is root view, no need to look at parent's layout dir.
-                    if (canResolveLayoutDirection()) {
-                        ViewGroup viewGroup = ((ViewGroup) mParent);
+                    // We cannot resolve yet. LTR is by default and let the resolution happen again
+                    // later to get the correct resolved value
+                    if (!canResolveLayoutDirection()) return;
 
-                        if (viewGroup.getResolvedLayoutDirection() == LAYOUT_DIRECTION_RTL) {
-                            mPrivateFlags2 |= LAYOUT_DIRECTION_RESOLVED_RTL;
-                        }
-                    } else {
-                        // Nothing to do, LTR by default
+                    ViewGroup viewGroup = ((ViewGroup) mParent);
+
+                    // We cannot resolve yet on the parent too. LTR is by default and let the
+                    // resolution happen again later
+                    if (!viewGroup.canResolveLayoutDirection()) return;
+
+                    if (viewGroup.getResolvedLayoutDirection() == LAYOUT_DIRECTION_RTL) {
+                        mPrivateFlags2 |= LAYOUT_DIRECTION_RESOLVED_RTL;
                     }
                     break;
                 case LAYOUT_DIRECTION_RTL:
