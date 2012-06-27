@@ -706,6 +706,16 @@ device.</td>
 </tr>
 
 <tr>
+  <td>Television</td>
+  <td><code>android.hardware.type.television</code></td>
+  <td>The application is designed for a television user experience.</td>
+  <td>>This feature defines "television" to be a typical living room television experience: 
+  displayed on a big screen, where the user is sitting far away and the dominant form of 
+  input is be something like a d-pad, and generally not through touch or a 
+  mouse/pointer-device.</td>
+</tr>
+
+<tr>
   <td rowspan="7">Touchscreen</td>
   <td><code>android.hardware.faketouch</code></td>
   <td>The application uses basic touch interaction events, such as "click down", "click
