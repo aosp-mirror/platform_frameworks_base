@@ -314,20 +314,38 @@ ready to communicate with your Android device.</li>
 
 <h3 id="alt-build">Using the ADK Alternative Build System</h3>
 
-<p>An alternative build and load system is also available for the ADK 2012. This system is command
-line based and intended for production environments where using an IDE environment to load software
-onto accessory hardware may be inconvenient or undesirable.</p>
+<p>An alternative, make file-based build and upload system is also available for the ADK 2012. This
+system is command line based and intended for production environments where using an IDE environment
+to load software onto accessory hardware may be inconvenient or undesirable.</p>
 
-<p>To use the command line based build system:</p>
+<p>To setup the environment:</p>
 <ol>
   <li><a href="#src-download">Download</a> the ADK 2012 source code files.</li>
-  <li>Download and install the <a href="http://www.gnu.org/software/make/">make</a> tool on your
-development system.</li>
-  <li>Update your system’s PATH to include {@code
-&lt;adk-source-download&gt;/external/toolchain/bin}.</li>
-  <li>Open a terminal window, navigate to {@code
-&lt;adk-source-download&gt;/external/toolchain/app} and execute the following command:
-  <pre>$> make</pre></li>
+  <li>In a terminal window, navigate to {@code
+&lt;adk-source-download&gt;/adk2012/board/MakefileBasedBuild}.</li>
+  <li>Execute the following command and follow the instructions:
+    <pre>$> ./setup</pre>
+  </li>
+</ol>
+
+<p>To build a program for your accessory:</p>
+<ol>
+  <li>Place your accessory code in the {@code MakefileBasedBuild/app} directory, including all
+required library files. See the {@code app/main.c} file for an example of the program format.</li>
+  <li>Execute the following command and follow the instructions:
+    <pre>$> ./build</pre>
+  </li>
+</ol>
+
+<p>To load the program on your accessory hardware:</p>
+<ol>
+  <li>Run the build process above and make sure your program compiled successfully.</li>
+  <li>Attach the accessory via USB cable to your development computer.</li>
+  <li>Check which port the accessory is attached to and modify the {@code UART} variable in the
+{@code flash} script to the correct port address. On linux machines, the port address is typically
+{@code /dev/ttyUSB0}.</li>
+  <li>Execute the following command to load the program on the accessory:
+  <pre>$> ./flash</pre></li>
 </ol>
 
 <h2 id="adk-conn">How the ADK Connects with Android Devices</h2>
