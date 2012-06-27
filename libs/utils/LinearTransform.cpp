@@ -114,6 +114,7 @@ static bool linear_transform_s64_to_s64(
         int64_t  basis1,
         int32_t  N,
         uint32_t D,
+        bool     invert_frac,
         int64_t  basis2,
         int64_t* out) {
     uint64_t scaled, res;
@@ -137,8 +138,8 @@ static bool linear_transform_s64_to_s64(
         is_neg = !is_neg;
 
     if (!scale_u64_to_u64(abs_val,
-                          ABS(N),
-                          D,
+                          invert_frac ? D : ABS(N),
+                          invert_frac ? ABS(N) : D,
                           &scaled,
                           is_neg))
         return false; // overflow/undeflow
@@ -191,6 +192,7 @@ bool LinearTransform::doForwardTransform(int64_t a_in, int64_t* b_out) const {
                                        a_zero,
                                        a_to_b_numer,
                                        a_to_b_denom,
+                                       false,
                                        b_zero,
                                        b_out);
 }
@@ -201,8 +203,9 @@ bool LinearTransform::doReverseTransform(int64_t b_in, int64_t* a_out) const {
 
     return linear_transform_s64_to_s64(b_in,
                                        b_zero,
-                                       a_to_b_denom,
                                        a_to_b_numer,
+                                       a_to_b_denom,
+                                       true,
                                        a_zero,
                                        a_out);
 }
