@@ -14,15 +14,15 @@ page.metaDescription=The official site for Android developers. Provides the Andr
             <ul>
                 <li class="item carousel-home">
                     <div class="content-left col-9">
-                        <img src="{@docRoot}images/home/android-jellybean.png" >
+                        <a href="/about/versions/jelly-bean.html"><img src="/images/home/android-jellybean.png" ></a>
                     </div>
                     <div class="content-right col-6">
                     <h1>Jelly Bean now available!</h1>
                     <p>Android 4.1 (Jelly Bean) builds on what's great about Android
                       with improvements to performance and user experience.</p>
-                    <p>New APIs are also available that allow you to build bigger and more
+                    <p>New APIs are also available that allow you to build richer and more
                       interactive notifications, transfer larger
-                    payloads over NFC, discover device services over Wi-Fi, and much more.</p>
+                    payloads through NFC, discover services over Wi-Fi, and much more.</p>
                     <p><a href="/about/versions/jelly-bean.html" class="button">More 
                         about Jelly Bean</a></p>
                     </div>
