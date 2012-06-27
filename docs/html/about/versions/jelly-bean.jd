@@ -32,7 +32,8 @@ page.title=Android 4.1 for Developers
 <p>Welcome to Android 4.1, Jelly Bean!</p>
 
 <p>Android 4.1 is the fastest and smoothest version of Android yet. We’ve made 
-improvements throughout the platform and added great new features for users and developers. This document provides a glimpse of some of the new features and technologies
+improvements throughout the platform and added great new features
+for users and developers. This document provides a glimpse of what's new for developers.
 
 <p>See the <a href="{@docRoot}about/versions/android-4.1.html">Android 4.1 APIs</a> document for a detailed look at the new developer APIs,</p>
 
@@ -92,16 +93,25 @@ improvements throughout the platform and added great new features for users and 
 </div>
 </div>
 
-<h3>Bi-Directional Text Support</h3>
+<h3>Bi-Directional Text and Other Language Support</h3>
 
 <p>Android 4.1 helps you to reach more users through support for <strong>bi-directional text</strong> in TextView and EditText elements. Apps can display text or handle text editing in left-to-right or right-to-left scripts. Apps can make use of new Arabic and Hebrew locales and associated fonts.</p>
+
+<p>Other types of new language support include:</p>
+<ul>
+<li>Additional Indic languages: Kannada, Telugu, and Malayalam</li>
+<li>The new Emoji characters from Unicode version 6.0</li>
+<li>Better glyph support for Japanese users (renders Japanese-specific versions of glyphs when system language is set to Japanese)</li>
+<li>Arabic glyphs optimized for WebViews in addition to the Arabic glyphs for TextViews</li>
+<li>Vertical Text support in WebViews, including Ruby Text and additional Vertical Text glyphs</li>
+<li>Synthetic Bold is now available for all fonts that don't have dedicated bold glyphs</li>
+</ul>
 
 <h3>User-installable keymaps</h3>
 
 <p>The platform now supports <strong>user-installable keyboard maps</strong>, such as for additional international keyboards and special layout types. By default, Android 4.1 includes 27 international keymaps for keyboards, including Dvorak. When users connect a keyboard, they can go to the Settings app and select one or more keymaps that they want to use for that keyboard. When typing, users can switch between keymaps using a shortcut (ctrl-space).</p>
 
 <p>You can create an app to <strong>publish additional keymaps</strong> to the system. The APK would include the keyboard layout resources in it, based on standard Android keymap format. The application can offer additional keyboard layouts to the user by declaring a suitable broadcast receiver for ACTION_QUERY_KEYBOARD_LAYOUTS in its manifest. </p>
-
 </div>
 
 
@@ -139,7 +149,7 @@ style="font-weight:500;">Expandable notifications</span> let you dsplay more typ
 
 </div>
 
-<div style="float:left;margin:52px 30px 0px 0px;width:280px;">
+<div style="float:left;margin:66px 30px 0px 0px;width:280px;">
 <div>
 <img src="{@docRoot}images/jb-appwidgets.png" width="280" height="548">
 </div>
@@ -147,7 +157,7 @@ style="font-weight:500;">Expandable notifications</span> let you dsplay more typ
 style="font-weight:500;">App Widgets</span> can resize automatically to fit the home screen and load different content as their sizes change.</p>
 </div>
 
-<div style="padding-top:34px;clear:right;">
+<div style="padding-top:1px;clear:right;">
 
 
 <h3>Resizable app widgets</h3>
@@ -278,7 +288,7 @@ style="font-weight:500;">App Widgets</span> can resize automatically to fit the 
 
 <p>Android 4.1 supports <strong>multichannel audio</strong> on devices that have hardware multichannel audio out through the <strong>HDMI port</strong>. Multichannel audio lets you deliver rich media experiences to users for applications such as games, music apps, and video players. For devices that do not have the supported hardware, Android automatically downmixes the audio to the number of channels that are supported by the device (usually stereo).</p>
 
-<p>4ndroid 4.1 also adds built-in support for encoding/decoding AAC 5.1 audio.</p>
+<p>Android 4.1 also adds built-in support for encoding/decoding AAC 5.1 audio.</p>
 
 <h3>Audio preprocessing</h3>
 
@@ -299,10 +309,22 @@ style="font-weight:500;">App Widgets</span> can resize automatically to fit the 
 <p>You can now <strong>debug</strong> your Renderscript compute scripts on <strong>x86-based emulator and hardware devices</strong>. You can also define multiple root-style kernels in a single Renderscript source file.</p>
 
 
+<h2 id="browser">Android Browser and WebView</h2>
+
+<p>In Android 4.1, the Android Browser and WebViews include these enhancements:</p>
+<ul>
+<li>Better HTML5 video user experience, including touch-to-play/pause and smooth transition from inline to full screen mode. </li>
+<li>Improved rendering speed and reduced memory usage for better scrolling and zooming performance.</li>
+<li>Improved HTML5/CSS3/Canvas animation performance.</li>
+<li>Improved text input.</li>
+<li>Updated JavaScript Engine (V8) for better JavaScript performance.</li>
+<li>Support for the updated HTML5 Media Capture specification (the "capture" attribute on input type=file elements).</li>
+</ul>
+
+
 <h2 id="google">Google APIs and services</h2>
 
 <p>To extend the capabilities of Android even further, several new services for Android are available.</p>
-
 
 <h3 id="gcm">Google Cloud Messaging for Android</h3>
 
