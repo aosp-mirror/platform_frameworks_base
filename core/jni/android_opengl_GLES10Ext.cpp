@@ -106,6 +106,8 @@ static jint
 android_glQueryMatrixxOES___3II_3II
   (JNIEnv *_env, jobject _this, jintArray mantissa_ref, jint mantissaOffset, jintArray exponent_ref, jint exponentOffset) {
     jint _exception = 0;
+    const char * _exceptionType;
+    const char * _exceptionMessage;
     GLbitfield _returnValue = -1;
     GLfixed *mantissa_base = (GLfixed *) 0;
     jint _mantissaRemaining;
@@ -116,18 +118,21 @@ android_glQueryMatrixxOES___3II_3II
 
     if (!mantissa_ref) {
         _exception = 1;
-        jniThrowException(_env, "java/lang/IllegalArgumentException", "mantissa == null");
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "mantissa == null";
         goto exit;
     }
     if (mantissaOffset < 0) {
         _exception = 1;
-        jniThrowException(_env, "java/lang/IllegalArgumentException", "mantissaOffset < 0");
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "mantissaOffset < 0";
         goto exit;
     }
     _mantissaRemaining = _env->GetArrayLength(mantissa_ref) - mantissaOffset;
     if (_mantissaRemaining < 16) {
         _exception = 1;
-        jniThrowException(_env, "java/lang/IllegalArgumentException", "length - mantissaOffset < 16");
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "length - mantissaOffset < 16 < needed";
         goto exit;
     }
     mantissa_base = (GLfixed *)
@@ -136,18 +141,21 @@ android_glQueryMatrixxOES___3II_3II
 
     if (!exponent_ref) {
         _exception = 1;
-        jniThrowException(_env, "java/lang/IllegalArgumentException", "exponent == null");
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "exponent == null";
         goto exit;
     }
     if (exponentOffset < 0) {
         _exception = 1;
-        jniThrowException(_env, "java/lang/IllegalArgumentException", "exponentOffset < 0");
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "exponentOffset < 0";
         goto exit;
     }
     _exponentRemaining = _env->GetArrayLength(exponent_ref) - exponentOffset;
     if (_exponentRemaining < 16) {
         _exception = 1;
-        jniThrowException(_env, "java/lang/IllegalArgumentException", "length - exponentOffset < 16");
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "length - exponentOffset < 16 < needed";
         goto exit;
     }
     exponent_base = (GLint *)
@@ -168,6 +176,9 @@ exit:
         _env->ReleasePrimitiveArrayCritical(mantissa_ref, mantissa_base,
             _exception ? JNI_ABORT: 0);
     }
+    if (_exception) {
+        jniThrowException(_env, _exceptionType, _exceptionMessage);
+    }
     return _returnValue;
 }
 
@@ -176,6 +187,8 @@ static jint
 android_glQueryMatrixxOES__Ljava_nio_IntBuffer_2Ljava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jobject mantissa_buf, jobject exponent_buf) {
     jint _exception = 0;
+    const char * _exceptionType;
+    const char * _exceptionMessage;
     jarray _mantissaArray = (jarray) 0;
     jarray _exponentArray = (jarray) 0;
     GLbitfield _returnValue = -1;
@@ -187,13 +200,15 @@ android_glQueryMatrixxOES__Ljava_nio_IntBuffer_2Ljava_nio_IntBuffer_2
     mantissa = (GLfixed *)getPointer(_env, mantissa_buf, &_mantissaArray, &_mantissaRemaining);
     if (_mantissaRemaining < 16) {
         _exception = 1;
-        jniThrowException(_env, "java/lang/IllegalArgumentException", "remaining() < 16");
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "remaining() < 16 < needed";
         goto exit;
     }
     exponent = (GLint *)getPointer(_env, exponent_buf, &_exponentArray, &_exponentRemaining);
     if (_exponentRemaining < 16) {
         _exception = 1;
-        jniThrowException(_env, "java/lang/IllegalArgumentException", "remaining() < 16");
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "remaining() < 16 < needed";
         goto exit;
     }
     _returnValue = glQueryMatrixxOES(
@@ -207,6 +222,9 @@ exit:
     }
     if (_exponentArray) {
         releasePointer(_env, _exponentArray, mantissa, _exception ? JNI_FALSE : JNI_TRUE);
+    }
+    if (_exception) {
+        jniThrowException(_env, _exceptionType, _exceptionMessage);
     }
     return _returnValue;
 }
