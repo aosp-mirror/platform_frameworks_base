@@ -467,7 +467,8 @@ final class BluetoothAdapterStateMachine extends StateMachine {
                             mBluetoothService.cleanupAfterFinishDisable();
                             deferMessage(obtainMessage(TURN_COLD));
                             if (mContext.getResources().getBoolean
-                                (com.android.internal.R.bool.config_bluetooth_adapter_quick_switch)) {
+                                (com.android.internal.R.bool.config_bluetooth_adapter_quick_switch) &&
+                                !mBluetoothService.isAirplaneModeOn()) {
                                 deferMessage(obtainMessage(TURN_HOT));
                                 mDelayBroadcastStateOff = true;
                             }
@@ -564,11 +565,9 @@ final class BluetoothAdapterStateMachine extends StateMachine {
                         sendMessageDelayed(TURN_OFF_TIMEOUT, TURN_OFF_TIMEOUT_TIME);
                     }
 
-                    // we turn all the way to PowerOff with AIRPLANE_MODE_ON
                     if (message.what == AIRPLANE_MODE_ON || mBluetoothService.isAirplaneModeOn()) {
                         // We inform all the per process callbacks
                         allProcessesCallback(false);
-                        deferMessage(obtainMessage(AIRPLANE_MODE_ON));
                     }
                     break;
                 case AIRPLANE_MODE_OFF:
@@ -707,8 +706,6 @@ final class BluetoothAdapterStateMachine extends StateMachine {
                     mBluetoothService.switchConnectable(false);
                     sendMessageDelayed(TURN_OFF_TIMEOUT, TURN_OFF_TIMEOUT_TIME);
                     allProcessesCallback(false);
-                    // we turn all the way to PowerOff with AIRPLANE_MODE_ON
-                    deferMessage(obtainMessage(AIRPLANE_MODE_ON));
                     break;
                 case USER_TURN_OFF:
                     Log.w(TAG, "PerProcessState received: " + message.what);
