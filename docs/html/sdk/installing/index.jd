@@ -85,7 +85,7 @@ the SDK tools from the command line.</p>
       <pre>apt-get install ia32-libs</pre>
       </li>
       <li>Next, install Java: <pre>apt-get install sun-java6-jdk</pre></li>
-      <li>The Ubuntu package manager does not currently offer an Eclipse 3.3
+      <li>The Ubuntu package manager does not currently offer an Eclipse 3.6
       version for download, so we recommend that you download Eclipse from
       eclipse.org (<a
       href="http://www.eclipse.org/downloads/">http://www.eclipse.org/
