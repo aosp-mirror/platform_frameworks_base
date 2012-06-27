@@ -136,3 +136,8 @@ for Java, both of which are <em>not</em> supported for Android development. </p>
 
 </div>
 
+<script>
+  if (location.hash == "#Requirements") {
+    $('.reqs').show();
+  }
+</script>
