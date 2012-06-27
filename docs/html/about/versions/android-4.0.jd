@@ -1,6 +1,4 @@
-page.title=Android 4.0 Platform
-sdk.platform.version=4.0
-sdk.platform.apiLevel=14
+page.title=Android 4.1 API Overview
 @jd:body
 
 <div id="qv-wrapper">
@@ -1402,7 +1400,7 @@ href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targe
 
 
 
-<h4>Controls for system UI visibility</h4>
+<h4 id="SystemUI">Controls for system UI visibility</h4>
 
 <p>Since the early days of Android, the system has managed a UI component known as the <em>status
 bar</em>, which resides at the top of handset devices to deliver information such as the carrier

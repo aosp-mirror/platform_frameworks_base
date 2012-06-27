@@ -872,7 +872,7 @@ public abstract class Context {
      *
      * @throws ActivityNotFoundException
      *
-     * @see {@link #startActivity(Intent)}
+     * @see #startActivity(Intent)
      * @see PackageManager#resolveActivity
      */
     public abstract void startActivity(Intent intent, Bundle options);
