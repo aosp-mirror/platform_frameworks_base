@@ -311,26 +311,26 @@
         <li><a href="<?cs var:toroot ?>guide/topics/graphics/hardware-accel.html">
             <span class="en">Hardware Acceleration</span>
           </a></li>
-        <li class="nav-section">
-            <div class="nav-section-header"><a href="<?cs var:toroot ?>guide/topics/graphics/renderscript/index.html">
-              <span class="en">Renderscript</span>
-            </a></div>
-            <ul>
-              <li><a href="<?cs var:toroot ?>guide/topics/graphics/renderscript/graphics.html">
-                    <span class="en">Graphics</span></a>
-                  </li>
-              <li><a href="<?cs var:toroot ?>guide/topics/graphics/renderscript/compute.html">
-                    <span class="en">Compute</span></a>
-                  </li>
-              <li><a href="<?cs var:toroot ?>guide/topics/graphics/renderscript/reference.html">
-                    <span class="en">Runtime API Reference</span></a>
-                  </li>
-             </ul>
-          </li>
        </ul>
     </li><!-- end of graphics and animation-->
 
-            
+   <li class="nav-section">
+            <div class="nav-section-header"><a href="<?cs var:toroot ?>guide/topics/renderscript/index.html">
+              <span class="en">Computation</span>
+            </a></div>
+            <ul>
+              <li><a href="<?cs var:toroot ?>guide/topics/renderscript/compute.html">
+                    <span class="en">Renderscript</span></a>
+                  </li>
+
+              <li><a href="<?cs var:toroot ?>guide/topics/renderscript/advanced.html">
+                    <span class="en">Advanced Renderscript</span></a>
+                  </li>
+              <li><a href="<?cs var:toroot ?>guide/topics/renderscript/reference.html">
+                    <span class="en">Runtime API Reference</span></a>
+              </li>
+             </ul>
+   </li>
       <li class="nav-section">
           <div class="nav-section-header"><a href="<?cs var:toroot ?>guide/topics/media/index.html">
             <span class="en">Media and Camera</span>
