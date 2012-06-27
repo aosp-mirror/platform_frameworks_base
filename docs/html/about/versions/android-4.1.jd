@@ -112,14 +112,18 @@ the content provider does. It's useful when you are interacting with content pro
 app.</p>
 
 
+
 <h3 id="LiveWallpapers">Live Wallpapers</h3>
 
-<p>New intent protocol to directly launch the live wallpaper preview activity, so the user can
-select a specified live wallpaper as the new wallpaper.  This allows live wallpapers to provide an
-easy path for the user to select the wallpaper from its own UI, without forcing the user to leave 
-the app and navigate through the Home wallpaper picker.</p>
+<p>New intent protocol to directly launch the live wallpaper preview activity so you can help
+  users easily select your live wallpaper without forcing them to leave 
+your app and navigate through the Home wallpaper picker.</p>
 
-
+<p>To launch the live wallpaper picker, call {@link android.content.Context#startActivity
+  startActivity()} with an {@link android.content.Intent} using
+{@link android.app.WallpaperManager#ACTION_CHANGE_LIVE_WALLPAPER} and an extra
+that specifies your live wallpaper {@link android.content.ComponentName} as a string in {@link
+android.app.WallpaperManager#EXTRA_LIVE_WALLPAPER_COMPONENT}.</p>
 
 
 
