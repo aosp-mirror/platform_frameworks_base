@@ -1,4 +1,7 @@
-page.title=Renderscript
+page.title=Advanced Renderscript
+parent.title=Computation
+parent.link=index.html
+
 @jd:body
 
   <div id="qv-wrapper">
@@ -6,7 +9,6 @@ page.title=Renderscript
       <h2>In this document</h2>
 
       <ol>
-        <li><a href="#overview">Renderscript Overview</a></li>
         <li><a href="#native">Renderscript Runtime Layer</a></li>
         <li><a href="#reflected">Reflected Layer</a>
           <ol>
@@ -33,86 +35,22 @@ page.title=Renderscript
     </div>
   </div>
 
-  <p>Renderscript offers a high performance 3D graphics rendering and compute API at the native
-  level that you write in C (C99 standard). The main advantages of Renderscript are:</p>
-  <ul>
-    <li>Portability: Renderscript is designed to run on many types of devices with different
-    processor (CPU, GPU, and DSP for instance) architectures. It supports all of these architectures without
-    having to target each device, because the code is compiled and cached on the device
-    at runtime.</li>
+  <p></p>
 
-    <li>Performance: Renderscript provides similar performance to OpenGL with the NDK and also
-    provides a high performance compute API that is not offered by OpenGL.</li>
-
-    <li>Usability: Renderscript simplifies development when possible, such as eliminating JNI glue code
-    and simplifying mesh setup.</li>
-  </ul>
-
-  <p>The main disadvantages are:</p>
-
-  <ul>
-    <li>Development complexity: Renderscript introduces a new set of APIs that you have to learn.
-    Renderscript also allocates memory differently compared to OpenGL with the Android framework APIs.
-    However, these issues are not hard to understand and Renderscript offers many features that
-    make it easier than OpenGL to initialize rendering.</li>
-
-    <li>Debugging visibility: Renderscript can potentially execute (planned feature for later releases)
-    on processors other than the main CPU (such as the GPU), so if this occurs, debugging becomes more difficult.
-    </li>
-  </ul>
-
-
-  <p>For an example of Renderscript in action, install the Renderscript sample applications that
-  are shipped with the SDK in <code>&lt;sdk_root&gt;/samples/android-11/RenderScript</code>.
-  You can also see a typical use of Renderscript with the 3D carousel view in the Android 3.x
-  versions of Google Books and YouTube.</p>
-
-  <h2 id="overview">Renderscript Overview</h2>
-  <p>The Renderscript runtime operates at the native level and still needs to communicate
-with the Android VM, so the way a Renderscript application is setup is different from a pure VM
-application. An application that uses Renderscript is still a traditional Android application that
-runs in the VM, but you write Renderscript code for the parts of your program that require
-it. Using Renderscript can be as simple as offloading a few math calculations or as complicated as
-rendering an entire 3D game. No matter what you use it for, Renderscript remains platform
-independent, so you do not have to target multiple architectures (for example,
-ARM v5, ARM v7, x86).</p>
-
-  <p>The Renderscript system adopts a control and slave architecture where the low-level Renderscript runtime
-  code is controlled by the higher level Android system that runs in a virtual machine (VM). The
-  Android VM still retains all control of memory management and binds memory that it allocates to
-  the Renderscript runtime, so the Renderscript code can access it. The Android framework makes
-asynchronous calls to Renderscript, and the calls are placed in a message queue and processed
-as soon as possible. Figure 1 shows how the Renderscript system is structured.</p>
-
-   <img id="figure1" src="{@docRoot}images/rs_overview.png" />
-  <p class="img-caption"><strong>Figure 1.</strong> Renderscript system overview</p>
-
-  <p>When using Renderscript, there are three layers of APIs that enable communication between the
-  Renderscript runtime and Android framework code:</p>
-
-  <ul>
-    <li>The Renderscript runtime APIs allow you to do the computation or graphics rendering
-    that is required by your application.</li>
-
-    <li>The reflected layer APIs are a set of classes that are reflected from your Renderscript
-runtime code. It is basically a wrapper around the Renderscript code that allows the Android
-framework to interact with the Renderscript runtime. The Android build tools automatically generate the
-classes for this layer during the build process. These classes eliminate the need to write JNI glue
-code, like with the NDK.</li>
-
-    <li>The Android framework APIs, which include the {@link android.renderscript} package, allow you to
-    build your application using traditional Android components such as activities and views. When
-    using Renderscript, this layer calls the reflected layer to access the Renderscript
-    runtime.</li>
-  </ul>
-
- <p></p>
+  <p>Because applications that utilize Renderscript still run inside of the Android VM,
+  you have access to all of the framework APIs that you are familiar with, but can
+  utilize Renderscript when appropriate. To facilitate this interaction between
+  the framework and the Renderscript runtime, an intermediate layer of code is also
+  present to facilitate communication and memory management between the two levels of code.
+  This document goes into more detail about these
+  different layers of code as well as how memory is shared between the Android VM and
+  Renderscript runtime.</p>
 
   <h2 id="native">Renderscript Runtime Layer</h2>
 
   <p>Your Renderscript code is compiled and
   executed in a compact and well-defined runtime layer. The Renderscript runtime APIs offer support for
-intensive computation and graphics rendering that is portable and automatically scalable to the
+intensive computation that is portable and automatically scalable to the
 amount of cores available on a processor.
 </p>
 <p class="note"><strong>Note:</strong> The standard C functions in the NDK must be
@@ -132,16 +70,14 @@ amount of cores available on a processor.
 
   <ul>
 
-    <li>Graphics rendering functions</li>
-
     <li>Memory allocation request features</li>
 
     <li>A large collection of math functions with both scalar and vector typed overloaded versions
     of many common routines. Operations such as adding, multiplying, dot product, and cross product
     are available as well as atomic arithmetic and comparison functions.</li>
 
-    <li>Conversion routines for primitive data types and vectors, matrix routines, date and time
-    routines, and graphics routines.</li>
+    <li>Conversion routines for primitive data types and vectors, matrix routines, and date and time
+    routines</li>
 
     <li>Data types and structures to support the Renderscript system such as Vector types for
     defining two-, three-, or four-vectors.</li>
@@ -149,11 +85,7 @@ amount of cores available on a processor.
     <li>Logging functions</li>
   </ul>
 
-  <p>See the Renderscript runtime API reference for more information on the available functions. The
-  Renderscript header files are automatically included for you, except for the Renderscript graphics header file, which
-  you can include as follows:</p>
-
-<pre>#include "rs_graphics.rsh"</pre>
+  <p>See the Renderscript runtime API reference for more information on the available functions.
 
   <h2 id="reflected">Reflected Layer</h2>
 
@@ -428,14 +360,9 @@ in memory. Each <code>struct</code>'s class defines the following methods and co
         specified memory spaces. The following example allocates memory for a custom data type
         in both the script and vertex memory spaces:</p>
       <pre>
-        ScriptField_Point touchPoints = new ScriptField_Point(glRenderer, 2,
+        ScriptField_Point touchPoints = new ScriptField_Point(myRenderscript, 2,
         Allocation.USAGE_SCRIPT | Allocation.USAGE_GRAPHICS_VERTEX);
       </pre>
-
-      <p>If you modify the memory in one memory space and want to push the updates to the rest of
-        the memory spaces, call <a href="{@docRoot}reference/renderscript/rs__graphics_8rsh.html">
-        <code>rsgAllocationSyncAll()</code></a> in your Renderscript code to
-        synchronize the memory.</p>
     </li>
 
     <li>A static nested class, <code>Item</code>, allows you to create an instance of the
@@ -665,23 +592,22 @@ appropriate layer.</p>
    <code>intPointer</code>, and a pointer to a struct, <code>touchPoints</code>. It also binds the memory to the
   Renderscript:</p>
   <pre>
-private RenderScriptGL glRenderer;
+private RenderScript myRenderscript;
 private ScriptC_example script;
 private Resources resources;
 
-public void init(RenderScriptGL rs, Resources res) {
-    //get the rendering context and resources from the calling method
-    glRenderer = rs;
+public void init(RenderScript rs, Resources res) {
+    myRenderscript = rs;
     resources = res;
 
     //allocate memory for the struct pointer, calling the constructor
-    ScriptField_Point touchPoints = new ScriptField_Point(glRenderer, 2);
+    ScriptField_Point touchPoints = new ScriptField_Point(myRenderscript, 2);
 
     //Create an element manually and allocate memory for the int pointer
-    intPointer = Allocation.createSized(glRenderer, Element.I32(glRenderer), 2);
+    intPointer = Allocation.createSized(myRenderscript, Element.I32(myRenderscript), 2);
 
     //create an instance of the Renderscript, pointing it to the bytecode resource
-    mScript = new ScriptC_example(glRenderer, resources, R.raw.example);
+    mScript = new ScriptC_example(myRenderscript, resources, R.raw.example);
 
     //bind the struct and int pointers to the Renderscript
     mScript.bind_touchPoints(touchPoints);
