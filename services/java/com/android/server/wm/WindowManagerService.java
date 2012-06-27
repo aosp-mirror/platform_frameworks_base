@@ -31,6 +31,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_UNIVERSE_BACKGROUND;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
 import com.android.internal.app.IBatteryStats;
@@ -69,6 +70,7 @@ import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Region;
 import android.os.BatteryStats;
 import android.os.Binder;
@@ -118,6 +120,7 @@ import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceSession;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
 import android.view.WindowManagerPolicy;
@@ -130,6 +133,7 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.ScaleAnimation;
+import android.view.animation.Transformation;
 
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
@@ -495,6 +499,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final Rect mSystemDecorRect = new Rect();
     int mSystemDecorLayer = 0;
+    final Rect mScreenRect = new Rect();
 
     int mPendingLayoutChanges = 0;
     boolean mLayoutNeeded = true;
@@ -836,6 +841,9 @@ public class WindowManagerService extends IWindowManager.Stub
                     android.os.Process.THREAD_PRIORITY_FOREGROUND);
             android.os.Process.setCanSelfBackground(false);
             mPolicy.init(mContext, mService, mService, mPM);
+            mService.mAnimator.mAboveUniverseLayer = mPolicy.getAboveUniverseLayer()
+                    * TYPE_LAYER_MULTIPLIER
+                    + TYPE_LAYER_OFFSET;
 
             synchronized (this) {
                 mRunning = true;
@@ -2656,6 +2664,29 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         return null;
+    }
+
+    public void setUniverseTransformLocked(WindowState window, float alpha,
+            float offx, float offy, float dsdx, float dtdx, float dsdy, float dtdy) {
+        Transformation transform = window.mWinAnimator.mUniverseTransform;
+        transform.setAlpha(alpha);
+        Matrix matrix = transform.getMatrix();
+        matrix.getValues(mTmpFloats);
+        mTmpFloats[Matrix.MTRANS_X] = offx;
+        mTmpFloats[Matrix.MTRANS_Y] = offy;
+        mTmpFloats[Matrix.MSCALE_X] = dsdx;
+        mTmpFloats[Matrix.MSKEW_Y] = dtdx;
+        mTmpFloats[Matrix.MSKEW_X] = dsdy;
+        mTmpFloats[Matrix.MSCALE_Y] = dtdy;
+        matrix.setValues(mTmpFloats);
+        final RectF dispRect = new RectF(0, 0, mCurDisplayWidth, mCurDisplayHeight);
+        matrix.mapRect(dispRect);
+        window.mGivenTouchableRegion.set(0, 0, mCurDisplayWidth, mCurDisplayHeight);
+        window.mGivenTouchableRegion.op((int)dispRect.left, (int)dispRect.top,
+                (int)dispRect.right, (int)dispRect.bottom, Region.Op.DIFFERENCE);
+        window.mTouchableInsets = ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
+        mLayoutNeeded = true;
+        performLayoutAndPlaceSurfacesLocked();
     }
 
     public int relayoutWindow(Session session, IWindow client, int seq,
@@ -7633,7 +7664,7 @@ public class WindowManagerService extends IWindowManager.Stub
     final void rebuildAppWindowListLocked() {
         int NW = mWindows.size();
         int i;
-        int lastWallpaper = -1;
+        int lastBelow = -1;
         int numRemoved = 0;
 
         if (mRebuildTmp.length < NW) {
@@ -7654,17 +7685,19 @@ public class WindowManagerService extends IWindowManager.Stub
                 NW--;
                 numRemoved++;
                 continue;
-            } else if (w.mAttrs.type == WindowManager.LayoutParams.TYPE_WALLPAPER
-                    && lastWallpaper == i-1) {
-                lastWallpaper = i;
+            } else if (lastBelow == i-1) {
+                if (w.mAttrs.type == WindowManager.LayoutParams.TYPE_WALLPAPER
+                        || w.mAttrs.type == WindowManager.LayoutParams.TYPE_UNIVERSE_BACKGROUND) {
+                    lastBelow = i;
+                }
             }
             i++;
         }
 
-        // The wallpaper window(s) typically live at the bottom of the stack,
-        // so skip them before adding app tokens.
-        lastWallpaper++;
-        i = lastWallpaper;
+        // Keep whatever windows were below the app windows still below,
+        // by skipping them.
+        lastBelow++;
+        i = lastBelow;
 
         // First add all of the exiting app tokens...  these are no longer
         // in the main app list, but still have windows shown.  We put them
@@ -7681,7 +7714,7 @@ public class WindowManagerService extends IWindowManager.Stub
             i = reAddAppWindowsLocked(i, mAnimatingAppTokens.get(j));
         }
 
-        i -= lastWallpaper;
+        i -= lastBelow;
         if (i != numRemoved) {
             Slog.w(TAG, "Rebuild removed " + numRemoved
                     + " windows but added " + i);
@@ -7884,9 +7917,12 @@ public class WindowManagerService extends IWindowManager.Stub
             Slog.v(TAG, "performLayout: needed="
                     + mLayoutNeeded + " dw=" + dw + " dh=" + dh);
         }
-        
+
+        WindowStateAnimator universeBackground = null;
+
         mPolicy.beginLayoutLw(dw, dh, mRotation);
         mSystemDecorLayer = mPolicy.getSystemDecorRectLw(mSystemDecorRect);
+        mScreenRect.set(0, 0, dw, dh);
 
         int seq = mLayoutSeq+1;
         if (seq < 0) seq = 0;
@@ -7927,7 +7963,8 @@ public class WindowManagerService extends IWindowManager.Stub
             // if they want.  (We do the normal layout for INVISIBLE
             // windows, since that means "perform layout as normal,
             // just don't display").
-            if (!gone || !win.mHaveFrame || win.mLayoutNeeded) {
+            if (!gone || !win.mHaveFrame || win.mLayoutNeeded
+                    || win.mAttrs.type == TYPE_UNIVERSE_BACKGROUND) {
                 if (!win.mLayoutAttached) {
                     if (initial) {
                         //Slog.i(TAG, "Window " + this + " clearing mContentChanged - initial");
@@ -7945,6 +7982,16 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (topAttached < 0) topAttached = i;
                 }
             }
+            if (win.mViewVisibility == View.VISIBLE
+                    && win.mAttrs.type == TYPE_UNIVERSE_BACKGROUND
+                    && universeBackground == null) {
+                universeBackground = win.mWinAnimator;
+            }
+        }
+
+        if (mAnimator.mUniverseBackground  != universeBackground) {
+            mFocusMayChange = true;
+            mAnimator.mUniverseBackground = universeBackground;
         }
 
         // Now perform layout of attached windows, which usually
@@ -9141,6 +9188,11 @@ public class WindowManagerService extends IWindowManager.Stub
         WindowState result = null;
         WindowState win;
 
+        if (mAnimator.mUniverseBackground != null
+                && mAnimator.mUniverseBackground.mWin.canReceiveKeys()) {
+            return mAnimator.mUniverseBackground.mWin;
+        }
+
         int nextAppIndex = mAppTokens.size()-1;
         WindowToken nextApp = nextAppIndex >= 0
             ? mAppTokens.get(nextAppIndex) : null;
@@ -9756,7 +9808,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.print(" mLayoutSeq="); pw.println(mLayoutSeq);
         if (dumpAll) {
             pw.print("  mSystemDecorRect="); pw.print(mSystemDecorRect.toShortString());
-                    pw.print(" mSystemDecorLayer="); pw.println(mSystemDecorLayer);
+                    pw.print(" mSystemDecorLayer="); pw.print(mSystemDecorLayer);
+                    pw.print(" mScreenRecr="); pw.println(mScreenRect.toShortString());
             if (mLastStatusBarVisibility != 0) {
                 pw.print("  mLastStatusBarVisibility=0x");
                         pw.println(Integer.toHexString(mLastStatusBarVisibility));

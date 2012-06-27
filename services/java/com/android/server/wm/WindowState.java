@@ -1060,6 +1060,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             if (mTouchableInsets != 0 || mGivenInsetsPending) {
                 pw.print(prefix); pw.print("mTouchableInsets="); pw.print(mTouchableInsets);
                         pw.print(" mGivenInsetsPending="); pw.println(mGivenInsetsPending);
+                Region region = new Region();
+                getTouchableRegion(region);
+                pw.print(prefix); pw.print("touchable region="); pw.println(region);
             }
             pw.print(prefix); pw.print("mConfiguration="); pw.println(mConfiguration);
         }

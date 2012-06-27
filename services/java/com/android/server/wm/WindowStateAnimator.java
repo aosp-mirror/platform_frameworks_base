@@ -56,6 +56,10 @@ class WindowStateAnimator {
     final WindowManagerPolicy mPolicy;
     final Context mContext;
 
+    // If this is a universe background window, this is the transformation
+    // it is applying to the rest of the universe.
+    final Transformation mUniverseTransform = new Transformation();
+
     // Currently running animation.
     boolean mAnimating;
     boolean mLocalAnimating;
@@ -845,6 +849,9 @@ class WindowStateAnimator {
             if (appTransformation != null) {
                 tmpMatrix.postConcat(appTransformation.getMatrix());
             }
+            if (mAnimator.mUniverseBackground != null) {
+                tmpMatrix.postConcat(mAnimator.mUniverseBackground.mUniverseTransform.getMatrix());
+            }
             if (screenAnimation) {
                 tmpMatrix.postConcat(
                         mService.mAnimator.mScreenRotationAnimation.getEnterTransformation().getMatrix());
@@ -888,6 +895,9 @@ class WindowStateAnimator {
                 if (appTransformation != null) {
                     mShownAlpha *= appTransformation.getAlpha();
                 }
+                if (mAnimator.mUniverseBackground != null) {
+                    mShownAlpha *= mAnimator.mUniverseBackground.mUniverseTransform.getAlpha();
+                }
                 if (screenAnimation) {
                     mShownAlpha *=
                         mService.mAnimator.mScreenRotationAnimation.getEnterTransformation().getAlpha();
@@ -913,16 +923,64 @@ class WindowStateAnimator {
         if (WindowManagerService.localLOGV) Slog.v(
                 TAG, "computeShownFrameLocked: " + this +
                 " not attached, mAlpha=" + mAlpha);
-        mWin.mShownFrame.set(mWin.mFrame);
-        if (mWin.mXOffset != 0 || mWin.mYOffset != 0) {
-            mWin.mShownFrame.offset(mWin.mXOffset, mWin.mYOffset);
+        if (mAnimator.mUniverseBackground != null &&
+                mWin.mAttrs.type != WindowManager.LayoutParams.TYPE_UNIVERSE_BACKGROUND
+                && mWin.mBaseLayer < mAnimator.mAboveUniverseLayer) {
+            final Rect frame = mWin.mFrame;
+            final float tmpFloats[] = mService.mTmpFloats;
+            final Matrix tmpMatrix = mWin.mTmpMatrix;
+            tmpMatrix.setScale(mWin.mGlobalScale, mWin.mGlobalScale);
+            tmpMatrix.postTranslate(frame.left + mWin.mXOffset, frame.top + mWin.mYOffset);
+            tmpMatrix.postConcat(mAnimator.mUniverseBackground.mUniverseTransform.getMatrix());
+            tmpMatrix.getValues(tmpFloats);
+            mHaveMatrix = true;
+            mDsDx = tmpFloats[Matrix.MSCALE_X];
+            mDtDx = tmpFloats[Matrix.MSKEW_Y];
+            mDsDy = tmpFloats[Matrix.MSKEW_X];
+            mDtDy = tmpFloats[Matrix.MSCALE_Y];
+            float x = tmpFloats[Matrix.MTRANS_X];
+            float y = tmpFloats[Matrix.MTRANS_Y];
+            int w = frame.width();
+            int h = frame.height();
+            mWin.mShownFrame.set(x, y, x+w, y+h);
+            mShownAlpha = mAlpha * mAnimator.mUniverseBackground.mUniverseTransform.getAlpha();
+        } else {
+            mWin.mShownFrame.set(mWin.mFrame);
+            if (mWin.mXOffset != 0 || mWin.mYOffset != 0) {
+                mWin.mShownFrame.offset(mWin.mXOffset, mWin.mYOffset);
+            }
+            mShownAlpha = mAlpha;
+            mHaveMatrix = false;
+            mDsDx = mWin.mGlobalScale;
+            mDtDx = 0;
+            mDsDy = 0;
+            mDtDy = mWin.mGlobalScale;
         }
-        mShownAlpha = mAlpha;
-        mHaveMatrix = false;
-        mDsDx = mWin.mGlobalScale;
-        mDtDx = 0;
-        mDsDy = 0;
-        mDtDy = mWin.mGlobalScale;
+    }
+
+    void applyDecorRect(final Rect decorRect) {
+        final WindowState w = mWin;
+        // Compute the offset of the window in relation to the decor rect.
+        final int offX = w.mXOffset + w.mFrame.left;
+        final int offY = w.mYOffset + w.mFrame.top;
+        // Initialize the decor rect to the entire frame.
+        w.mSystemDecorRect.set(0, 0, w.mFrame.width(), w.mFrame.height());
+        // Intersect with the decor rect, offsetted by window position.
+        w.mSystemDecorRect.intersect(decorRect.left-offX, decorRect.top-offY,
+                decorRect.right-offX, decorRect.bottom-offY);
+        // If size compatibility is being applied to the window, the
+        // surface is scaled relative to the screen.  Also apply this
+        // scaling to the crop rect.  We aren't using the standard rect
+        // scale function because we want to round things to make the crop
+        // always round to a larger rect to ensure we don't crop too
+        // much and hide part of the window that should be seen.
+        if (w.mEnforceSizeCompat && w.mInvGlobalScale != 1.0f) {
+            final float scale = w.mInvGlobalScale;
+            w.mSystemDecorRect.left = (int) (w.mSystemDecorRect.left * scale - 0.5f);
+            w.mSystemDecorRect.top = (int) (w.mSystemDecorRect.top * scale - 0.5f);
+            w.mSystemDecorRect.right = (int) ((w.mSystemDecorRect.right+1) * scale - 0.5f);
+            w.mSystemDecorRect.bottom = (int) ((w.mSystemDecorRect.bottom+1) * scale - 0.5f);
+        }
     }
 
     void updateSurfaceWindowCrop(final boolean recoveringMemory) {
@@ -935,31 +993,21 @@ class WindowStateAnimator {
             w.mSystemDecorRect.set(0, 0, w.mRequestedWidth, w.mRequestedHeight);
         } else if (w.mLayer >= mService.mSystemDecorLayer) {
             // Above the decor layer is easy, just use the entire window.
+            // Unless we have a universe background...  in which case all the
+            // windows need to be cropped by the screen, so they don't cover
+            // the universe background.
+            if (mAnimator.mUniverseBackground == null) {
+                w.mSystemDecorRect.set(0, 0, w.mCompatFrame.width(),
+                        w.mCompatFrame.height());
+            } else {
+                applyDecorRect(mService.mScreenRect);
+            }
+        } else if (w.mAttrs.type == WindowManager.LayoutParams.TYPE_UNIVERSE_BACKGROUND) {
+            // The universe background isn't cropped.
             w.mSystemDecorRect.set(0, 0, w.mCompatFrame.width(),
                     w.mCompatFrame.height());
         } else {
-            final Rect decorRect = mService.mSystemDecorRect;
-            // Compute the offset of the window in relation to the decor rect.
-            final int offX = w.mXOffset + w.mFrame.left;
-            final int offY = w.mYOffset + w.mFrame.top;
-            // Initialize the decor rect to the entire frame.
-            w.mSystemDecorRect.set(0, 0, w.mFrame.width(), w.mFrame.height());
-            // Intersect with the decor rect, offsetted by window position.
-            w.mSystemDecorRect.intersect(decorRect.left-offX, decorRect.top-offY,
-                    decorRect.right-offX, decorRect.bottom-offY);
-            // If size compatibility is being applied to the window, the
-            // surface is scaled relative to the screen.  Also apply this
-            // scaling to the crop rect.  We aren't using the standard rect
-            // scale function because we want to round things to make the crop
-            // always round to a larger rect to ensure we don't crop too
-            // much and hide part of the window that should be seen.
-            if (w.mEnforceSizeCompat && w.mInvGlobalScale != 1.0f) {
-                final float scale = w.mInvGlobalScale;
-                w.mSystemDecorRect.left = (int) (w.mSystemDecorRect.left * scale - 0.5f);
-                w.mSystemDecorRect.top = (int) (w.mSystemDecorRect.top * scale - 0.5f);
-                w.mSystemDecorRect.right = (int) ((w.mSystemDecorRect.right+1) * scale - 0.5f);
-                w.mSystemDecorRect.bottom = (int) ((w.mSystemDecorRect.bottom+1) * scale - 0.5f);
-            }
+            applyDecorRect(mService.mSystemDecorRect);
         }
 
         if (!w.mSystemDecorRect.equals(w.mLastSystemDecorRect)) {
@@ -1443,6 +1491,11 @@ class WindowStateAnimator {
         if (mSurfaceResized || mSurfaceDestroyDeferred) {
             pw.print(prefix); pw.print("mSurfaceResized="); pw.print(mSurfaceResized);
                     pw.print(" mSurfaceDestroyDeferred="); pw.println(mSurfaceDestroyDeferred);
+        }
+        if (mWin.mAttrs.type == WindowManager.LayoutParams.TYPE_UNIVERSE_BACKGROUND) {
+            pw.print(prefix); pw.print("mUniverseTransform=");
+                    mUniverseTransform.printShortString(pw);
+                    pw.println();
         }
         if (mShownAlpha != 1 || mAlpha != 1 || mLastAlpha != 1) {
             pw.print(prefix); pw.print("mShownAlpha="); pw.print(mShownAlpha);

@@ -553,7 +553,14 @@ public interface WindowManagerPolicy {
      * allowed to be in.
      */
     public int getMaxWallpaperLayer();
-    
+
+    /**
+     * Return the window layer at which windows appear above the normal
+     * universe (that is no longer impacted by the universe background
+     * transform).
+     */
+    public int getAboveUniverseLayer();
+
     /**
      * Return true if the policy desires a full unified system nav bar.  Otherwise,
      * it is a phone-style status bar with optional nav bar.

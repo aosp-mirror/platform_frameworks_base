@@ -389,6 +389,20 @@ final class Session extends IWindowSession.Stub
         mService.wallpaperCommandComplete(window, result);
     }
 
+    public void setUniverseTransform(IBinder window, float alpha, float offx, float offy,
+            float dsdx, float dtdx, float dsdy, float dtdy) {
+        synchronized(mService.mWindowMap) {
+            long ident = Binder.clearCallingIdentity();
+            try {
+                mService.setUniverseTransformLocked(
+                        mService.windowForClientLocked(this, window, true),
+                        alpha, offx, offy, dsdx, dtdx, dsdy, dtdy);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+    }
+
     void windowAddedLocked() {
         if (mSurfaceSession == null) {
             if (WindowManagerService.localLOGV) Slog.v(

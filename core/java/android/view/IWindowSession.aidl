@@ -172,4 +172,7 @@ interface IWindowSession {
             int z, in Bundle extras, boolean sync);
     
     void wallpaperCommandComplete(IBinder window, in Bundle result);
+
+    void setUniverseTransform(IBinder window, float alpha, float offx, float offy,
+            float dsdx, float dtdx, float dsdy, float dtdy);
 }

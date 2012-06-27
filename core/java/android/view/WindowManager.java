@@ -437,6 +437,12 @@ public interface WindowManager extends ViewManager {
         public static final int TYPE_NAVIGATION_BAR_PANEL = FIRST_SYSTEM_WINDOW+24;
 
         /**
+         * Window type: Behind the universe of the real windows.
+         * @hide
+         */
+        public static final int TYPE_UNIVERSE_BACKGROUND = FIRST_SYSTEM_WINDOW+25;
+
+        /**
          * End of types of system windows.
          */
         public static final int LAST_SYSTEM_WINDOW      = 2999;
