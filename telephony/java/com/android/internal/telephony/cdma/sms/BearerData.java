@@ -1916,8 +1916,7 @@ public final class BearerData {
                 throw new CodingException("missing MESSAGE_IDENTIFIER subparam");
             }
             if (bData.userData != null) {
-                if (isCmasAlertCategory(serviceCategory) && bData.priorityIndicatorSet
-                        && bData.priority == SmsCbMessage.MESSAGE_PRIORITY_EMERGENCY) {
+                if (isCmasAlertCategory(serviceCategory)) {
                     decodeCmasUserData(bData, serviceCategory);
                 } else if (bData.userData.msgEncoding == UserData.ENCODING_IS91_EXTENDED_PROTOCOL) {
                     if ((foundSubparamMask ^
