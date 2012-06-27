@@ -34,8 +34,8 @@ public class HTML5VideoInline extends HTML5VideoView{
         }
     }
 
-    HTML5VideoInline(int videoLayerId, int position) {
-        init(videoLayerId, position, false);
+    HTML5VideoInline(int videoLayerId, int position, boolean skipPrepare) {
+        init(videoLayerId, position, skipPrepare);
     }
 
     @Override
@@ -84,7 +84,7 @@ public class HTML5VideoInline extends HTML5VideoView{
         return mSurfaceTexture;
     }
 
-    public boolean surfaceTextureDeleted() {
+    public static boolean surfaceTextureDeleted() {
         return (mSurfaceTexture == null);
     }
 
@@ -110,7 +110,9 @@ public class HTML5VideoInline extends HTML5VideoView{
     }
 
     private void setFrameAvailableListener(SurfaceTexture.OnFrameAvailableListener l) {
-        mSurfaceTexture.setOnFrameAvailableListener(l);
+        if (mSurfaceTexture != null) {
+            mSurfaceTexture.setOnFrameAvailableListener(l);
+        }
     }
 
 }

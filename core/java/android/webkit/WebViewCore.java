@@ -562,17 +562,6 @@ public final class WebViewCore {
     }
 
     /**
-     * Notify the webview that we want to display the video layer fullscreen.
-     */
-    protected void enterFullscreenForVideoLayer(int layerId, String url) {
-        if (mWebViewClassic == null) return;
-        Message message = Message.obtain(mWebViewClassic.mPrivateHandler,
-                       WebViewClassic.ENTER_FULLSCREEN_VIDEO, layerId, 0);
-        message.obj = url;
-        message.sendToTarget();
-    }
-
-    /**
      * Notify the webview that we want to exit the video fullscreen.
      * This is called through JNI by webcore.
      */
