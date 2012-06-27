@@ -25,6 +25,7 @@ page.title=Developer Tools
     <li>Enhanced XML editors for Android XML resources</li> 
     <li>Static analysis tools to catch performance, usability, and correctness problems</li> 
     <li>Build support for complex projects, command-line support for CI through Ant. Includes ProGuard and app-signing. </li> 
+    <li>Template-based wizard to create standard Android projects and components.</li> 
   </ul>
 </div>
 
@@ -66,7 +67,7 @@ page.title=Developer Tools
 
   <ul>
     <li>Full Java debugger with on-device debugging and Android-specidic tools</li>
-    <li>Built-in memory analysis, performance/CPU profiling.</li>
+    <li>Built-in memory analysis, performance/CPU profiling, OpenGL ES tracing.</li>
     <li>Graphical tools for debugging and optimizing UI, runtime inspecton of UI structure and performance.</li>
     <li>Runtime graphical analysis of your app's network bandwidth usage.</li> 
   </ul>

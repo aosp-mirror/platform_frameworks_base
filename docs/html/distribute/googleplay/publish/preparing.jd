@@ -62,7 +62,6 @@ Play. </p>
 <ul style="margin-top:-.5em;">
 <li><strong><a href="{@docRoot}tools/publishing/publishing_overview.html">General Publishing Overview</a></strong> &mdash; Start here for an overview of publishing options for Android apps.</li>
 <li><strong><a href="{@docRoot}tools/publishing/preparing.html">Preparing for Release</a></strong> &mdash; Developer documentation on how to build the signed, release-ready APK. This process is the same for all Android apps. </li>
-<li><strong><a href="{@docRoot}distribute/googleplay/publish/publishing.html">Publishing on Google Play</a></strong> &mdash; Publishing process specific to Android apps being published on Google Play.</li>
 </ul>
 </td>
 </tr>
