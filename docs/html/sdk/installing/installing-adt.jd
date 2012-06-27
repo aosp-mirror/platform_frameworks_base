@@ -19,7 +19,7 @@ UI, debug your app, and export signed (or unsigned) app packages (APKs) for dist
 <p>If you will be developing in Eclipse with the ADT Plugin, first make sure that you have a
 suitable version of Eclipse
 installed on your computer as described by the 
-<a href="{@docRoot}tools/sdk/index.html#Requirements">system requirements</a>.</p>
+<a href="{@docRoot}sdk/index.html#Requirements">system requirements</a>.</p>
 
 <p>If you need to install Eclipse, you can download it from <a href=
 "http://www.eclipse.org/downloads/">http://www.eclipse.org/downloads/</a>.
