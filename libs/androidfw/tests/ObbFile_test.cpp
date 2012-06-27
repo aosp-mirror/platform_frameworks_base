@@ -22,6 +22,8 @@
 
 #include <gtest/gtest.h>
 
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <fcntl.h>
 #include <string.h>
 
@@ -43,7 +45,7 @@ protected:
         mFileName = new char[totalLen];
         snprintf(mFileName, totalLen, "%s%s", mExternalStorage, TEST_FILENAME);
 
-        int fd = ::open(mFileName, O_CREAT | O_TRUNC);
+        int fd = ::open(mFileName, O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
         if (fd < 0) {
             FAIL() << "Couldn't create " << mFileName << " for tests";
         }
