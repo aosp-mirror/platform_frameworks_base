@@ -322,6 +322,9 @@ public class SwipeHelper implements Gefingerpoken {
         }
 
         if (!mDragging) {
+            // We are not doing anything, make sure the long press callback
+            // is not still ticking like a bomb waiting to go off.
+            removeLongPressCallback();
             return false;
         }
 
