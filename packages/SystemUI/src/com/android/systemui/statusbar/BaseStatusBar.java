@@ -907,8 +907,13 @@ public abstract class BaseStatusBar extends SystemUI implements
             if (DEBUG) Slog.d(TAG, "contents was " + (contentsUnchanged ? "unchanged" : "changed"));
             if (DEBUG) Slog.d(TAG, "order was " + (orderUnchanged ? "unchanged" : "changed"));
             if (DEBUG) Slog.d(TAG, "notification is " + (isTopAnyway ? "top" : "not top"));
+            final boolean wasExpanded = oldEntry.userExpanded();
             removeNotificationViews(key);
             addNotificationViews(key, notification);
+            if (wasExpanded) {
+                final NotificationData.Entry newEntry = mNotificationData.findByKey(key);
+                expandView(newEntry, true);
+            }
         }
 
         // Update the veto button accordingly (and as a result, whether this row is
