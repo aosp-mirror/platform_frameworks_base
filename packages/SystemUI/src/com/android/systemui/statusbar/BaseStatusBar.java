@@ -913,6 +913,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             if (wasExpanded) {
                 final NotificationData.Entry newEntry = mNotificationData.findByKey(key);
                 expandView(newEntry, true);
+                newEntry.setUserExpanded(true);
             }
         }
 

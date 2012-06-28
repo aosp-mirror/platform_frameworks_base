@@ -65,6 +65,12 @@ public class NotificationData {
         public boolean userExpanded() {
             return NotificationData.getUserExpanded(row);
         }
+        /**
+         * Set the flag indicating that this was manually expanded by the user.
+         */
+        public boolean setUserExpanded(boolean userExpanded) {
+            return NotificationData.setUserExpanded(row, userExpanded);
+        }
     }
     private final ArrayList<Entry> mEntries = new ArrayList<Entry>();
     private final Comparator<Entry> mEntryCmp = new Comparator<Entry>() {
