@@ -8,7 +8,7 @@ base = $(LOCAL_PATH)/../../..
 native = $(LOCAL_PATH)/../../../../native
 
 LOCAL_C_INCLUDES := \
-	$(base)/services/sensorservice \
+	$(native)/services/sensorservice \
 	$(native)/services/surfaceflinger \
 	$(JNI_H_INCLUDE)
 
