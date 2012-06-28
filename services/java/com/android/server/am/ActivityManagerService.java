@@ -5704,12 +5704,19 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         if (killProcesses) {
             // Find any running processes associated with this app.
+            final String pkg = component.getPackageName();
             ArrayList<ProcessRecord> procs = new ArrayList<ProcessRecord>();
-            SparseArray<ProcessRecord> appProcs
-                    = mProcessNames.getMap().get(component.getPackageName());
-            if (appProcs != null) {
-                for (int i=0; i<appProcs.size(); i++) {
-                    procs.add(appProcs.valueAt(i));
+            HashMap<String, SparseArray<ProcessRecord>> pmap = mProcessNames.getMap();
+            for (SparseArray<ProcessRecord> uids : pmap.values()) {
+                for (int i=0; i<uids.size(); i++) {
+                    ProcessRecord proc = uids.valueAt(i);
+                    if (proc.userId != tr.userId) {
+                        continue;
+                    }
+                    if (!proc.pkgList.contains(pkg)) {
+                        continue;
+                    }
+                    procs.add(proc);
                 }
             }
 
@@ -5720,6 +5727,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     Slog.i(TAG, "Killing " + pr.toShortString() + ": remove task");
                     EventLog.writeEvent(EventLogTags.AM_KILL, pr.pid,
                             pr.processName, pr.setAdj, "remove task");
+                    pr.killedBackground = true;
                     Process.killProcessQuiet(pr.pid);
                 } else {
                     pr.waitingToKill = "remove task";
@@ -14634,6 +14642,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 Slog.i(TAG, "Killing " + app.toShortString() + ": " + app.waitingToKill);
                 EventLog.writeEvent(EventLogTags.AM_KILL, app.pid,
                         app.processName, app.setAdj, app.waitingToKill);
+                app.killedBackground = true;
                 Process.killProcessQuiet(app.pid);
                 success = false;
             } else {
