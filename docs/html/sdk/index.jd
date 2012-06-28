@@ -50,8 +50,8 @@ href="http://developer.android.com/sdk/index.html">developer.android.com/sdk/</a
 
 <!-- this appears when viewing the online docs -->
 <div class="online">
-<a class="big button disabled" id="download-button" href="" >Sorry, the SDK does not support
-your OS</a>
+<a class="big button" id="download-button" href="" style="display:none" ></a>
+<p id="not-supported">Choose the SDK package for your OS from the table below.</p>
 
 <p style="margin-top:20px;font-size:12px"><a href='' onclick="
   if ($('.pax').is(':visible')) {
