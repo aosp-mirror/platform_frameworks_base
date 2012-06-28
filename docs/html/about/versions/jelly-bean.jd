@@ -123,21 +123,21 @@ for users and developers. This document provides a glimpse of what's new for dev
 <!-- <img src="{@docRoot}images/jd-notif-cd.png" style="width:200px"> -->
 <img src="{@docRoot}images/jb-notif-ex.png" width="280" height="548">
 </div>
-<p class="image-caption" style="padding:.5em"><span
-style="font-weight:500;">Expandable notifications</span> let you dsplay more types of content in your notifications. Users can expand them with a simple gesture.</p>
+<p class="image-caption" style="padding:.5em">Developers can create custom notification styles
+like those shown in the examples above to display rich content and actions.</p>
 </div>
 
 <h3>Expandable notifications</h3>
 
 <p>Notifications have long been a unique and popular feature on Android. Developers can use them to place important or time-based information in front of users in the notification bar, outside of the app’s normal UI.</p>
 
-<p>Android 4.1 brings a major update to the Android notifications framework. Apps can now display <strong>larger, richer notifications</strong> to users that can be expanded and collapsed with a pinch. Notifications support <strong>new types of content</strong>, including photos, have configurable priority, and can even include multiple actions.</p>
+<p>Android 4.1 brings a major update to the Android notifications framework. Apps can now display <strong>larger, richer notifications</strong> to users that can be expanded and collapsed with a pinch or swipe. Notifications support <strong>new types of content</strong>, including photos, have configurable priority, and can even include multiple actions.</p>
 
 <p>Through an improved <strong>notification builder</strong>, apps can create notifications that use a larger area, up to 256 dp in height. Three <strong>templated notification styles</strong> are available:</p>
 
 <ul>
 <li>BigTextStyle &mdash; a notification that includes a multiline TextView object.</li>
-<li>BigInboxStyle &mdash; a notification the shows any kind of list such as messages, headlines, and so on.</li>
+<li>BigInboxStyle &mdash; a notification that shows any kind of list such as messages, headlines, and so on.</li>
 <li>BigPictureStyle &mdash; a notification that showcases visual content such as a bitmap.</li>
 </ul>
 
