@@ -1658,6 +1658,7 @@ public class TabletStatusBar extends BaseStatusBar implements
 
     @Override
     protected boolean isTopNotification(ViewGroup parent, NotificationData.Entry entry) {
+        if (parent == null || entry == null) return false;
         return parent.indexOfChild(entry.row) == parent.getChildCount()-1;
     }
 
