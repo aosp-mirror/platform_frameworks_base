@@ -443,7 +443,7 @@ public final class WebViewCore {
     }
 
     /**
-     * Notify the browser that the origin has exceeded it's database quota.
+     * Notify the embedding application that the origin has exceeded it's database quota.
      * @param url The URL that caused the overflow.
      * @param databaseIdentifier The identifier of the database.
      * @param quota The current quota for the origin.
@@ -468,12 +468,15 @@ public final class WebViewCore {
     }
 
     /**
-     * Notify the browser that the appcache has exceeded its max size.
+     * Notify the embedding application that the appcache has reached or exceeded its maximum
+     * allowed storage size.
+     *
      * @param requiredStorage is the amount of storage, in bytes, that would be
      * needed in order for the last appcache operation to succeed.
+     * @param maxSize maximum allowed Application Cache database size, in bytes.
      */
-    protected void reachedMaxAppCacheSize(long requiredStorage) {
-        mCallbackProxy.onReachedMaxAppCacheSize(requiredStorage, getUsedQuota(),
+    protected void reachedMaxAppCacheSize(long requiredStorage, long maxSize) {
+        mCallbackProxy.onReachedMaxAppCacheSize(requiredStorage, maxSize,
                 new WebStorage.QuotaUpdater() {
                     @Override
                     public void updateQuota(long newQuota) {
@@ -2137,8 +2140,8 @@ public final class WebViewCore {
         return width;
     }
 
-    // Utility method for exceededDatabaseQuota and reachedMaxAppCacheSize
-    // callbacks. Computes the sum of database quota for all origins.
+    // Utility method for exceededDatabaseQuota callback. Computes the sum
+    // of WebSQL database quota for all origins.
     private long getUsedQuota() {
         WebStorageClassic webStorage = WebStorageClassic.getInstance();
         Collection<WebStorage.Origin> origins = webStorage.getOriginsSync();
