@@ -1236,7 +1236,7 @@ public class PowerManagerService extends IPowerManager.Stub
                     + " mLightSensorKeyboardBrightness=" + mLightSensorKeyboardBrightness);
             pw.println("  mUseSoftwareAutoBrightness=" + mUseSoftwareAutoBrightness);
             pw.println("  mAutoBrightessEnabled=" + mAutoBrightessEnabled);
-            mScreenBrightnessAnimator.dump(pw, "  mScreenBrightnessAnimator: ");
+            mScreenBrightnessAnimator.dump(pw, "mScreenBrightnessAnimator: ");
 
             int N = mLocks.size();
             pw.println();
@@ -2277,8 +2277,9 @@ public class PowerManagerService extends IPowerManager.Stub
                     + ", duration:" + duration + ", current:" + currentValue);
             pw.println("  startSensorValue:" + startSensorValue
                     + " endSensorValue:" + endSensorValue);
-            pw.println("  startSensorValue:" + startSensorValue
-                    + " endSensorValue:" + endSensorValue);
+            pw.println("  startTimeMillis:" + startTimeMillis
+                    + " now:" + SystemClock.elapsedRealtime());
+            pw.println("  currentMask:" + dumpPowerState(currentMask));
         }
 
         public void animateTo(int target, int mask, int animationDuration) {
