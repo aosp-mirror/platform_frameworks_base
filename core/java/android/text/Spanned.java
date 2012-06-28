@@ -30,8 +30,19 @@ extends CharSequence
      * of spans.
      *
      * MARK and POINT are conceptually located <i>between</i> two adjacent characters.
-     * A MARK is "attached" to the character on the left hand side, while a POINT
-     * tends to stick to the character on the right hand side.
+     * A MARK is "attached" to the character before, while a POINT will stick to the character
+     * after. The insertion cursor is conceptually located between the MARK and the POINT.
+     *
+     * As a result, inserting a new character between a MARK and a POINT will leave the MARK
+     * unchanged, while the POINT will be shifted, now located after the inserted character and
+     * still glued to the same character after it.
+     *
+     * Depending on whether the insertion happens at the beginning or the end of a span, the span
+     * will hence be expanded to <i>include</i> the new character (when the span is using a MARK at
+     * its beginning or a POINT at its end) or it will be <i>excluded</i>.
+     *
+     * Note that <i>before</i> and <i>after</i> here refer to offsets in the String, which are
+     * independent from the visual representation of the text (left-to-right or right-to-left).
      */
     public static final int SPAN_POINT_MARK_MASK = 0x33;
     
