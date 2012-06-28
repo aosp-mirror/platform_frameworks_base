@@ -16,11 +16,8 @@
 
 package com.android.systemui.statusbar;
 
-import java.util.ArrayList;
-
 import android.app.ActivityManagerNative;
 import android.app.KeyguardManager;
-import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -51,25 +48,26 @@ import android.view.WindowManager;
 import android.view.WindowManagerImpl;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RemoteViews;
 import android.widget.PopupMenu;
+import android.widget.RemoteViews;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
 import com.android.internal.statusbar.StatusBarNotification;
 import com.android.internal.widget.SizeAdaptiveLayout;
+import com.android.systemui.R;
 import com.android.systemui.SearchPanelView;
 import com.android.systemui.SystemUI;
-import com.android.systemui.recent.RecentsPanelView;
 import com.android.systemui.recent.RecentTasksLoader;
+import com.android.systemui.recent.RecentsPanelView;
 import com.android.systemui.recent.TaskDescription;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
 import com.android.systemui.statusbar.tablet.StatusBarPanel;
 
-import com.android.systemui.R;
+import java.util.ArrayList;
 
 public abstract class BaseStatusBar extends SystemUI implements
     CommandQueue.Callbacks, RecentsPanelView.OnRecentsPanelVisibilityChangedListener {

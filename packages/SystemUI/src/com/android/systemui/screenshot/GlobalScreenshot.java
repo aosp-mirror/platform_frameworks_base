@@ -38,7 +38,6 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.PointF;
-import android.graphics.RectF;
 import android.media.MediaActionSound;
 import android.net.Uri;
 import android.os.AsyncTask;
