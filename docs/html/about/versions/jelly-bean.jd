@@ -121,7 +121,7 @@ for users and developers. This document provides a glimpse of what's new for dev
 <div style="float:right;margin:22px 0px 0px 24px;width:280px;">
 <div>
 <!-- <img src="{@docRoot}images/jd-notif-cd.png" style="width:200px"> -->
-<img src="{@docRoot}images/jb-notif-ex.png" width="280" height="548">
+<img src="{@docRoot}images/jb-notif-ex1.png" width="280" height="548">
 </div>
 <p class="image-caption" style="padding:.5em">Developers can create custom notification styles
 like those shown in the examples above to display rich content and actions.</p>
@@ -146,8 +146,6 @@ like those shown in the examples above to display rich content and actions.</p>
 <p>Apps can add up to three <strong>actions</strong> to a notification, which are displayed below the notification content. The actions let the users respond directly to the information in the notification in alternative ways. such as by email or by phone call, without visiting the app.</p>
 
 <p>With expandable notifications, apps can give more information to the user, effortlessly and on demand. Users remain in control and can long-press any notification to get information about the sender and optionally  disable further notifications from the app.</p>
-
-</div>
 
 <div style="float:left;margin:66px 30px 0px 0px;width:280px;">
 <div>
