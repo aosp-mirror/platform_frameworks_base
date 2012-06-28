@@ -2347,6 +2347,9 @@ final class ActivityStack {
         while (i > 0) {
             i--;
             ActivityRecord candidate = mHistory.get(i);
+            if (candidate.finishing) {
+                continue;
+            }
             if (candidate.task.taskId != task) {
                 break;
             }
@@ -4057,7 +4060,7 @@ final class ActivityStack {
                 int index = indexOfActivityLocked(r);
                 if (index >= 0) {
                     if (r.state == ActivityState.DESTROYING) {
-                        cleanUpActivityLocked(r, true, true);
+                        cleanUpActivityLocked(r, true, false);
                         removeActivityFromHistoryLocked(r);
                     }
                 }
