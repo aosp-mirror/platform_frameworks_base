@@ -36,8 +36,8 @@ import java.util.Map;
  * extractor.setDataSource(...);
  * int numTracks = extractor.getTrackCount();
  * for (int i = 0; i &lt; numTracks; ++i) {
- *   Map%lt;String, Object&gt; format = extractor.getTrackFormat(i);
- *   String mime = (String)format.get("mime");
+ *   MediaFormat format = extractor.getTrackFormat(i);
+ *   String mime = format.getString(MediaFormat.KEY_MIME);
  *   if (weAreInterestedInThisTrack) {
  *     extractor.selectTrack(i);
  *   }
