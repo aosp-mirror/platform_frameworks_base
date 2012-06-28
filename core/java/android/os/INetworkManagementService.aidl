@@ -323,6 +323,27 @@ interface INetworkManagementService
     int getInterfaceTxThrottle(String iface);
 
     /**
+     * Sets idletimer for an interface.
+     *
+     * This either initializes a new idletimer or increases its
+     * reference-counting if an idletimer already exists for given
+     * {@code iface}.
+     *
+     * {@code label} usually represents the network type of {@code iface}.
+     * Caller should ensure that {@code label} for an {@code iface} remains the
+     * same for all calls to addIdleTimer.
+     *
+     * Every {@code addIdleTimer} should be paired with a
+     * {@link removeIdleTimer} to cleanup when the network disconnects.
+     */
+    void addIdleTimer(String iface, int timeout, String label);
+
+    /**
+     * Removes idletimer for an interface.
+     */
+    void removeIdleTimer(String iface);
+
+    /**
      * Sets the name of the default interface in the DNS resolver.
      */
     void setDefaultInterfaceForDns(String iface);

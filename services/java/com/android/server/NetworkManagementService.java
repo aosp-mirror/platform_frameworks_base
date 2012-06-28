@@ -153,6 +153,21 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     /** Set of UIDs with active reject rules. */
     private SparseBooleanArray mUidRejectOnQuota = new SparseBooleanArray();
 
+    private Object mIdleTimerLock = new Object();
+    /** Set of interfaces with active idle timers. */
+    private static class IdleTimerParams {
+        public final int timeout;
+        public final String label;
+        public int networkCount;
+
+        IdleTimerParams(int timeout, String label) {
+            this.timeout = timeout;
+            this.label = label;
+            this.networkCount = 1;
+        }
+    }
+    private HashMap<String, IdleTimerParams> mActiveIdleTimers = Maps.newHashMap();
+
     private volatile boolean mBandwidthControlEnabled;
 
     /**
@@ -1043,6 +1058,51 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             }
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
+        }
+    }
+
+    @Override
+    public void addIdleTimer(String iface, int timeout, String label) {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+
+        if (DBG) Slog.d(TAG, "Adding idletimer");
+
+        synchronized (mIdleTimerLock) {
+            IdleTimerParams params = mActiveIdleTimers.get(iface);
+            if (params != null) {
+                // the interface already has idletimer, update network count
+                params.networkCount++;
+                return;
+            }
+
+            try {
+                mConnector.execute("idletimer", "add", iface, Integer.toString(timeout), label);
+            } catch (NativeDaemonConnectorException e) {
+                throw e.rethrowAsParcelableException();
+            }
+            mActiveIdleTimers.put(iface, new IdleTimerParams(timeout, label));
+        }
+    }
+
+    @Override
+    public void removeIdleTimer(String iface) {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+
+        if (DBG) Slog.d(TAG, "Removing idletimer");
+
+        synchronized (mIdleTimerLock) {
+            IdleTimerParams params = mActiveIdleTimers.get(iface);
+            if (params == null || --(params.networkCount) > 0) {
+                return;
+            }
+
+            try {
+                mConnector.execute("idletimer", "remove", iface,
+                        Integer.toString(params.timeout), params.label);
+            } catch (NativeDaemonConnectorException e) {
+                throw e.rethrowAsParcelableException();
+            }
+            mActiveIdleTimers.remove(iface);
         }
     }
 
