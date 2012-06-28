@@ -1367,7 +1367,9 @@ public class Notification implements Parcelable
         public Builder setStyle(Style style) {
             if (mStyle != style) {
                 mStyle = style;
-                mStyle.setBuilder(this);
+                if (mStyle != null) {
+                    mStyle.setBuilder(this);
+                }
             }
             return this;
         }
@@ -1637,7 +1639,9 @@ public class Notification implements Parcelable
         public void setBuilder(Builder builder) {
             if (mBuilder != builder) {
                 mBuilder = builder;
-                mBuilder.setStyle(this);
+                if (mBuilder != null) {
+                    mBuilder.setStyle(this);
+                }
             }
         }
 
