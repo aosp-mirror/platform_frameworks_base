@@ -1005,8 +1005,11 @@ public abstract class WebSettings {
     }
 
     /**
-     * Sets the maximum size for the Application Caches content. The default is
-     * {@link Long#MAX_VALUE}.
+     * Sets the maximum size for the Application Cache content. The passed size
+     * will be rounded to the nearest value that the database can support, so
+     * this should be viewed as a guide, not a hard limit. Setting the
+     * size to a value less than current database size does not cause the
+     * database to be trimmed. The default size is {@link Long.MAX_VALUE}.
      *
      * @param appCacheMaxSize the maximum size in bytes
      */
