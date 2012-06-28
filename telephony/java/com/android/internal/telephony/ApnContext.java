@@ -50,6 +50,8 @@ public class ApnContext {
 
     String mReason;
 
+    int mRetryCount;
+
     /**
      * user/app requested connection on this APN
      */
@@ -64,6 +66,7 @@ public class ApnContext {
         mApnType = apnType;
         mState = DataConnectionTracker.State.IDLE;
         setReason(Phone.REASON_DATA_ENABLED);
+        setRetryCount(0);
         mDataEnabled = new AtomicBoolean(false);
         mDependencyMet = new AtomicBoolean(true);
         mWaitingApnsPermanentFailureCountDown = new AtomicInteger(0);
@@ -182,6 +185,21 @@ public class ApnContext {
         return mReason;
     }
 
+    public synchronized void setRetryCount(int retryCount) {
+        if (DBG) {
+            log("setRetryCount: " + retryCount);
+        }
+        mRetryCount = retryCount;
+        DataConnection dc = mDataConnection;
+        if (dc != null) {
+            dc.setRetryCount(retryCount);
+        }
+    }
+
+    public synchronized int getRetryCount() {
+        return mRetryCount;
+    }
+
     public boolean isReady() {
         return mDataEnabled.get() && mDependencyMet.get();
     }
@@ -214,8 +232,8 @@ public class ApnContext {
         return "{mApnType=" + mApnType + " mState=" + getState() + " mWaitingApns=" + mWaitingApns +
                 " mWaitingApnsPermanentFailureCountDown=" + mWaitingApnsPermanentFailureCountDown +
                 " mApnSetting=" + mApnSetting + " mDataConnectionAc=" + mDataConnectionAc +
-                " mReason=" + mReason + " mDataEnabled=" + mDataEnabled +
-                " mDependencyMet=" + mDependencyMet + "}";
+                " mReason=" + mReason + " mRetryCount=" + mRetryCount +
+                " mDataEnabled=" + mDataEnabled + " mDependencyMet=" + mDependencyMet + "}";
     }
 
     protected void log(String s) {
