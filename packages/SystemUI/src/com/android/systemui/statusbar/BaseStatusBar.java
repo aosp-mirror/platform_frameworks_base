@@ -577,11 +577,9 @@ public abstract class BaseStatusBar extends SystemUI implements
         View expandedLarge = null;
         Exception exception = null;
         try {
-            oneU.setOnClickHandler(mOnClickHandler);
-            expandedOneU = oneU.apply(mContext, adaptive);
+            expandedOneU = oneU.apply(mContext, adaptive, mOnClickHandler);
             if (large != null) {
-                large.setOnClickHandler(mOnClickHandler);
-                expandedLarge = large.apply(mContext, adaptive);
+                expandedLarge = large.apply(mContext, adaptive, mOnClickHandler);
             }
         }
         catch (RuntimeException e) {
@@ -872,9 +870,9 @@ public abstract class BaseStatusBar extends SystemUI implements
             oldEntry.notification = notification;
             try {
                 // Reapply the RemoteViews
-                contentView.reapply(mContext, oldEntry.expanded);
+                contentView.reapply(mContext, oldEntry.expanded, mOnClickHandler);
                 if (bigContentView != null && oldEntry.getLargeView() != null) {
-                    bigContentView.reapply(mContext, oldEntry.getLargeView());
+                    bigContentView.reapply(mContext, oldEntry.getLargeView(), mOnClickHandler);
                 }
                 // update the contentIntent
                 final PendingIntent contentIntent = notification.notification.contentIntent;
