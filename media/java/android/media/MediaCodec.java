@@ -33,7 +33,7 @@ import java.util.Map;
  * codec.start();
  * ByteBuffer[] inputBuffers = codec.getInputBuffers();
  * ByteBuffer[] outputBuffers = codec.getOutputBuffers();
- * Map<String, Object> format = codec.getOutputFormat();
+ * MediaFormat format = codec.getOutputFormat();
  * for (;;) {
  *   int inputBufferIndex = codec.dequeueInputBuffer(timeoutUs);
  *   if (inputBufferIndex &gt;= 0) {
