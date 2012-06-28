@@ -15,9 +15,8 @@ page.title=Google Play Services
     tedious authentication flows. A few clicks from the user and you're set!
     <br /> <a href="https://developers.google.com/android/google-play-services">Learn more &raquo;</a>
  </li>
-    <li style="border-top: 1px solid #F80;"><h5>Google+ Integration</h5>Google Play Services lets you
-    	read from and write to your user's Google+ activity stream, giving your
-    	app an easy way to integrate with Google+.
+    <li style="border-top: 1px solid #F80;"><h5>Google+ Integration</h5> Google Play services makes it
+        easy for your app to integrate with Sign in with Google+, +1 button, and Google+ history.
     <br /> <a href="https://developers.google.com/android/google-play-services">Learn more &raquo;</a>
     </li>
   </ul>
