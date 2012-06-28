@@ -257,28 +257,34 @@ working with the ADK 2012:</p>
 
 <h3 id="dev-setup">Setting Up the Development Environment</h3>
 
-<p>The ADK 2012 source code repository includes an integrated development environment (IDE) that you
-can use to develop software for and program the ADK 2012 accessory. The following instructions
-explain how to build and run the ADK 2012 IDE.</p>
+<p>The ADK 2012 comes with an integrated development environment (IDE) that you use to develop
+software and program the ADK 2012 accessory. The following instructions explain how to setup and run
+the ADK 2012 IDE.</p>
 
-<p>To set up, build and run the ADK 2012 IDE:</p>
+<p>To set up and run the ADK 2012 IDE:</p>
 
 <ol>
-  <li><a href="#src-download">Download</a> the ADK 2012 source code files.</li>
   <li>Download and install the Java Development Kit 6 or higher from <a
-href="http://java.oracle.com">java.oracle.com</a>.</li>
-  <li>Download and install <a href="http://ant.apache.org/">Apache Ant</a>.</li>
-  <li>In a terminal window, navigate to {@code &lt;adk-source-download&gt;/external/ide/build}
-and execute the following command to build the ADK 2012 IDE:
-<pre>$> ant</pre>
+    href="http://java.oracle.com">java.oracle.com</a>.</li>
+  <li>Download the ADK 2012 IDE for your development platform:
+    <ul>
+      <li><a href="https://dl-ssl.google.com/android/adk/adk2012_ide-win32-20120626.zip">
+          Windows</a></li>
+      <li><a href="https://dl-ssl.google.com/android/adk/adk2012_ide-macosx-20120626.zip">
+          Mac</a></li>
+      <li>Linux
+        <a href="https://dl-ssl.google.com/android/adk/adk2012_ide-linux32-20120626.tgz">32bit</a>,
+        <a href="https://dl-ssl.google.com/android/adk/adk2012_ide-linux64-20120626.tgz">64bit</a>
+      </li>
+    </ul>
   </li>
-  <li>After the build successfully completes, execute the following command to run the ADK 2012
-IDE:
-<pre>$> ant run</pre></li>
+  <li>Unpack the downloaded archive.</li>
+  <li>Run the application by navigating to the unpacked {@code ADK2012_IDE/} folder and execute
+    the {@code arduino} file.</li>
 </ol>
 
-<p>After you have successfully built and run the ADK 2012 IDE, you must configure it to use the 
-ADK 2012 library.</p>
+<p>After you have successfully installed and run the ADK 2012 IDE, you must configure it to use
+the ADK 2012 library.</p>
 
 <p>To configure the ADK 2012 IDE for use with the ADK libraries:</p>
 
