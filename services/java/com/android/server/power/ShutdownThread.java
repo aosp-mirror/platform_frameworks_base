@@ -325,6 +325,9 @@ public final class ShutdownThread extends Thread {
             }
         }
 
+        // Shutdown radios.
+        shutdownRadios(MAX_RADIO_WAIT_TIME);
+
         // Shutdown MountService to ensure media is in a safe state
         IMountShutdownObserver observer = new IMountShutdownObserver.Stub() {
             public void onShutDownComplete(int statusCode) throws RemoteException {
@@ -381,9 +384,9 @@ public final class ShutdownThread extends Thread {
                         INfcAdapter.Stub.asInterface(ServiceManager.checkService("nfc"));
                 final ITelephony phone =
                         ITelephony.Stub.asInterface(ServiceManager.checkService("phone"));
-                final IBluetooth bluetooth =
-                        IBluetooth.Stub.asInterface(ServiceManager.checkService(
-                                BluetoothAdapter.BLUETOOTH_SERVICE));
+                final IBluetoothManager bluetooth =
+                        IBluetoothManager.Stub.asInterface(ServiceManager.checkService(
+                                BluetoothAdapter.BLUETOOTH_MANAGER_SERVICE));
 
                 try {
                     nfcOff = nfc == null ||
@@ -398,8 +401,7 @@ public final class ShutdownThread extends Thread {
                 }
 
                 try {
-                    bluetoothOff = bluetooth == null ||
-                                   bluetooth.getBluetoothState() == BluetoothAdapter.STATE_OFF;
+                    bluetoothOff = bluetooth == null || !bluetooth.isEnabled();
                     if (!bluetoothOff) {
                         Log.w(TAG, "Disabling Bluetooth...");
                         bluetooth.disable(false);  // disable but don't persist new state
@@ -425,8 +427,7 @@ public final class ShutdownThread extends Thread {
                 while (SystemClock.elapsedRealtime() < endTime) {
                     if (!bluetoothOff) {
                         try {
-                            bluetoothOff =
-                                    bluetooth.getBluetoothState() == BluetoothAdapter.STATE_OFF;
+                            bluetoothOff = !bluetooth.isEnabled();
                         } catch (RemoteException ex) {
                             Log.e(TAG, "RemoteException during bluetooth shutdown", ex);
                             bluetoothOff = true;

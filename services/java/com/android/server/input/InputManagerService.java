@@ -57,7 +57,6 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
-import android.server.BluetoothService;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -110,7 +109,6 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
     private final Callbacks mCallbacks;
     private final InputManagerHandler mHandler;
     private boolean mSystemReady;
-    private BluetoothService mBluetoothService;
     private NotificationManager mNotificationManager;
 
     // Persistent data store.  Must be locked each time during use.
@@ -238,11 +236,11 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
         updateShowTouchesFromSettings();
     }
 
-    public void systemReady(BluetoothService bluetoothService) {
+    // TODO(BT) Pass in paramter for bluetooth system
+    public void systemReady() {
         if (DEBUG) {
             Slog.d(TAG, "System ready.");
         }
-        mBluetoothService = bluetoothService;
         mNotificationManager = (NotificationManager)mContext.getSystemService(
                 Context.NOTIFICATION_SERVICE);
         mSystemReady = true;
@@ -1398,9 +1396,9 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
 
     // Native callback.
     private String getDeviceAlias(String uniqueId) {
-        if (mBluetoothService != null &&
-                BluetoothAdapter.checkBluetoothAddress(uniqueId)) {
-            return mBluetoothService.getRemoteAlias(uniqueId);
+        if (BluetoothAdapter.checkBluetoothAddress(uniqueId)) {
+            // TODO(BT) mBluetoothService.getRemoteAlias(uniqueId)
+            return null;
         }
         return null;
     }
