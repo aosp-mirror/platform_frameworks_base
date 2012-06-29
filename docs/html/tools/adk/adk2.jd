@@ -237,7 +237,7 @@ synchronize a local repository:
 <pre>
 $> mkdir android-accessories
 $> cd android-accessories
-$> repo -init -u https://android.googlesource.com/platform/manifest -b android-accessories
+$> repo init -u https://android.googlesource.com/accessories/manifest
 $> repo sync
 </pre>
   </li>
