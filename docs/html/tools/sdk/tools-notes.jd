@@ -86,11 +86,11 @@ padding: 5px 0 0;
       <ul>
         <li>Added new Device Monitor application, grouping Android debugging tools into a
 single application, including ddms, traceview, hierarchyviewer and Tracer for GLES. (<a
-href="{@docRoot}tools/gltracer.html">more info</a>)</li>
+href="{@docRoot}tools/help/gltracer.html">more info</a>)</li>
         <li>Added new System Trace new tool for tracing Android system activity. This tool allow you
 to capture a slice of system activity, plus additional information tagged from the <strong>Settings
 &gt; Developer Options &gt; Monitoring: Enable traces</strong> or with specific calls added to your
-application code. (<a href="{@docRoot}tools/systrace.html">more info</a>)</li>
+application code.</li>
         </li>
         <li>Build System
           <ul>
