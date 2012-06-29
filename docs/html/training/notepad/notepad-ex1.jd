@@ -44,7 +44,7 @@ selections. </em></li>
       In the New Android Project dialog, select <strong>Create project from existing source</strong>.</li>
     <li>
       Click <strong>Browse</strong> and navigate to where you copied the <code>NotepadCodeLab</code> 
-      (downloaded during <a href="{@docRoot}resources/tutorials/notepad/index.html#preparing">setup</a>) 
+      (downloaded during <a href="{@docRoot}training/notepad/index.html#preparing">setup</a>) 
       and select <code>Notepadv1</code>.</li>
     <li>
       The Project Name and other properties should be automatically filled for you. 

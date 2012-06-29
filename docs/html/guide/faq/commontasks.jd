@@ -62,7 +62,7 @@ folder in the SDK.</p>
 <p>Finally, a great way to started with Android development in Eclipse is to
 follow both the <a href="{@docRoot}resources/tutorials/hello-world.html">Hello,
 World</a> and <a
-href="{@docRoot}resources/tutorials/notepad/index.html">Notepad</a> code
+href="{@docRoot}training/notepad/index.html">Notepad</a> code
 tutorials. In particular, the start of the Hello Android tutorial is an
 excellent introduction to creating a new Android application in Eclipse.</p>
 
