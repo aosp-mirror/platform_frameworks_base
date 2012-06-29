@@ -130,7 +130,7 @@ should be up to 30% faster.</li>
       <li>Tracer for GLES
         <ul>
           <li>Added new perspective view and tools for tracing OpenGL calls for an application and
-track the visual results of each call. (<a href="{@docRoot}tools/gltracer.html">more info</a>)</li>
+track the visual results of each call. (<a href="{@docRoot}tools/help/gltracer.html">more info</a>)</li>
         </ul>
       </li>
       <li>Lint
