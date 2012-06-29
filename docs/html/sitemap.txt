@@ -213,7 +213,7 @@ http://developer.android.com/training/basics/firstapp/index.html
 http://developer.android.com/resources/tutorials/views/index.html
 http://developer.android.com/resources/tutorials/localization/index.html
 http://developer.android.com/resources/tutorials/testing/helloandroid_test.html
-http://developer.android.com/resources/tutorials/notepad/index.html
+http://developer.android.com/training/notepad/index.html
 http://developer.android.com/tools/testing/activity_test.html
 http://developer.android.com/resources/samples/get.html
 http://developer.android.com/resources/samples/index.html
@@ -2863,10 +2863,10 @@ http://developer.android.com/reference/org/apache/http/auth/UsernamePasswordCred
 http://developer.android.com/resources/tutorials/views/hello-tablelayout.html
 http://developer.android.com/resources/tutorials/views/hello-relativelayout.html
 http://developer.android.com/reference/org/apache/http/impl/conn/tsccm/package-descr.html
-http://developer.android.com/resources/tutorials/notepad/notepad-ex1.html
-http://developer.android.com/resources/tutorials/notepad/notepad-ex2.html
-http://developer.android.com/resources/tutorials/notepad/notepad-ex3.html
-http://developer.android.com/resources/tutorials/notepad/notepad-extra-credit.html
+http://developer.android.com/training/notepad/notepad-ex1.html
+http://developer.android.com/training/notepad/notepad-ex2.html
+http://developer.android.com/training/notepad/notepad-ex3.html
+http://developer.android.com/training/notepad/notepad-extra-credit.html
 http://developer.android.com/resources/samples/BluetoothChat/res/index.html
 http://developer.android.com/resources/samples/BluetoothChat/src/index.html
 http://developer.android.com/resources/samples/BluetoothChat/AndroidManifest.html
