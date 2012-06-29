@@ -224,7 +224,7 @@ style="font-weight:500;">App Widgets</span> can resize automatically to fit the 
 
 <p>Apps can take advantage of vsync timing for free, through Android’s <strong>animation framework</strong>. The animation framework now uses vsync timing to automatically handle synchronization across animators.</p>
 
-<p>For specialized uses, apps can access vsync timing through APIs exposed by a new Choreographer class. Apps can request invalidation on the next vsync frame &mdash; a good way to schedule animation when the app is not using the animation framework. For more advanced uses, apps can post a calllback that the Choreographer class will run on the next frame. </p>
+<p>For specialized uses, apps can access vsync timing through APIs exposed by a new Choreographer class. Apps can request invalidation on the next vsync frame &mdash; a good way to schedule animation when the app is not using the animation framework. For more advanced uses, apps can post a callback that the Choreographer class will run on the next frame. </p>
 
 <h3>New animation actions and transition types</h3>
 

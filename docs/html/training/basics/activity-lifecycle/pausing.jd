@@ -126,7 +126,7 @@ including when it's created for the first time. As such, you should implement {@
 android.app.Activity#onResume()} to initialize components that you release during {@link
 android.app.Activity#onPause()} and perform any other initializations that must occur each time the
 activity enters the Resumed state (such as begin animations and initialize components only used
-while the actiivty has user focus).</p>
+while the activity has user focus).</p>
 
 <p>The following example of {@link android.app.Activity#onResume()} is the counterpart to
 the {@link android.app.Activity#onPause()} example above, so it initializes the camera that's
