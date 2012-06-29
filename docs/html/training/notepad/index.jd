@@ -83,7 +83,7 @@ previous exercises.</p>
 table lists the
 tutorial examples and describes what each covers. ">
     <tr>
-      <th width="120"><a href="{@docRoot}resources/tutorials/notepad/notepad-ex1.html">Exercise
+      <th width="120"><a href="{@docRoot}training/notepad/notepad-ex1.html">Exercise
 1</a></th>
       <td>Start here. Construct a simple notes list that lets the user add new notes but not
 edit them. Demonstrates the basics of <code>ListActivity</code> and creating
@@ -91,7 +91,7 @@ and handling
       menu options. Uses a SQLite database to store the notes.</td>
     </tr>
     <tr>
-      <th><a href="{@docRoot}resources/tutorials/notepad/notepad-ex2.html">Exercise 2</a></th>
+      <th><a href="{@docRoot}training/notepad/notepad-ex2.html">Exercise 2</a></th>
       <td>Add a second Activity to the
 application. Demonstrates constructing a
 new Activity, adding it to the Android manifest, passing data between the
@@ -100,13 +100,13 @@ invoke another Activity to return a result, using
 <code>startActivityForResult()</code>.</td>
     </tr>
     <tr>
-      <th><a href="{@docRoot}resources/tutorials/notepad/notepad-ex3.html">Exercise 3</a></th>
+      <th><a href="{@docRoot}training/notepad/notepad-ex3.html">Exercise 3</a></th>
       <td>Add handling of life-cycle events to
 the application, to let it
 maintain application state across the life cycle. </td>
     </tr>
     <tr>
-    <th><a href="{@docRoot}resources/tutorials/notepad/notepad-extra-credit.html">Extra
+    <th><a href="{@docRoot}training/notepad/notepad-extra-credit.html">Extra
 Credit</a></th>
     <td>Demonstrates how to use the Eclipse
 debugger and how you can use it to

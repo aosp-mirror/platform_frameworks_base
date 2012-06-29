@@ -516,7 +516,7 @@ how to set up an Android-powered device so you can run and test your application
 <p><strong>Follow the Notepad tutorial</strong></p>
 
 <ul>
-  <li>The <a href="{@docRoot}resources/tutorials/notepad/index.html">
+  <li>The <a href="{@docRoot}training/notepad/index.html">
   Notepad Tutorial</a> shows you how to build a full Android application
   and provides  helpful commentary on the Android system and API. The
   Notepad tutorial helps you bring together the important design
