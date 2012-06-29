@@ -247,6 +247,15 @@ public class DefaultContainerService extends IntentService {
             }
         }
 
+        @Override
+        public void clearDirectory(String path) throws RemoteException {
+            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+
+            final File directory = new File(path);
+            if (directory.exists() && directory.isDirectory()) {
+                eraseFiles(directory);
+            }
+        }
     };
 
     public DefaultContainerService() {
