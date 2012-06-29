@@ -521,37 +521,6 @@ public class KeyguardUpdateMonitor {
         void onDeviceProvisioned();
     }
 
-    // Simple class that allows methods to easily be overwritten
-    public static class InfoCallbackImpl implements InfoCallback {
-        public void onRefreshBatteryInfo(boolean showBatteryInfo, boolean pluggedIn,
-                int batteryLevel) {
-        }
-
-        public void onTimeChanged() {
-        }
-
-        public void onRefreshCarrierInfo(CharSequence plmn, CharSequence spn) {
-        }
-
-        public void onRingerModeChanged(int state) {
-        }
-
-        public void onPhoneStateChanged(int phoneState) {
-        }
-
-        public void onClockVisibilityChanged() {
-        }
-
-        public void onDeviceProvisioned() {
-        }
-
-        public void onDevicePolicyManagerStateChanged() {
-        }
-
-        public void onUserChanged(int userId) {
-        }
-    }
-
     /**
      * Callback to notify of sim state change.
      */
@@ -672,11 +641,5 @@ public class KeyguardUpdateMonitor {
 
     public int getPhoneState() {
         return mPhoneState;
-    }
-
-    public boolean isSimLocked() {
-        return mSimState == IccCard.State.PIN_REQUIRED
-            || mSimState == IccCard.State.PUK_REQUIRED
-            || mSimState == IccCard.State.PERM_DISABLED;
     }
 }

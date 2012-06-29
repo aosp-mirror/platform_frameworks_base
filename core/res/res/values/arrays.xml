@@ -461,7 +461,7 @@
         <item>中文 (繁體)</item>
     </string-array>
 
-    <!-- Resources for GlowPadView in LockScreen -->
+    <!-- Resources for MultiWaveView in LockScreen -->
     <array name="lockscreen_targets_when_silent">
         <item>@drawable/ic_lockscreen_unlock</item>
         <item>@null</item>
