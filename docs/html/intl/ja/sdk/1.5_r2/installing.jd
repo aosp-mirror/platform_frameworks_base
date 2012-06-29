@@ -167,7 +167,7 @@ JKS</pre>
 <p><strong>サンプル コードの参照</strong></p>
 <ul>
   <li><a href="{@docRoot}training/basics/firstapp/index.html">Hello World アプリケーション</a>を構築します（特に Eclipse ユーザーにおすすめです）。</li>
-  <li><a href="{@docRoot}resources/tutorials/notepad/index.html">Notepad チュートリアル</a>に沿って Android アプリケーションを完全に構築します。 </li>
+  <li><a href="{@docRoot}training/notepad/index.html">Notepad チュートリアル</a>に沿って Android アプリケーションを完全に構築します。 </li>
   <li><code><em>&lt;sdk&gt;</em>/platforms/<em>&lt;platfrom&gt;</em>/samples</code> に収められている他のサンプル アプリケーションのいずれかを新しいプロジェクトとして作成し、自分の開発環境でコンパイルし、実行します。</li>
 </ul>
 
