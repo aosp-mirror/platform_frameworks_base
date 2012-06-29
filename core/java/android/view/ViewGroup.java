@@ -404,10 +404,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     // views during a transition when they otherwise would have become gone/invisible
     private ArrayList<View> mVisibilityChangingChildren;
 
-    // Indicates whether this container will use its children layers to draw
-    @ViewDebug.ExportedProperty(category = "drawing")
-    boolean mDrawLayers = true;
-
     // Indicates how many of this container's child subtrees contain transient state
     @ViewDebug.ExportedProperty(category = "layout")
     private int mChildCountWithTransientState = 0;
@@ -2927,45 +2923,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
         return child.draw(canvas, this, drawingTime);
-    }
-
-    /**
-     * 
-     * @param enabled True if children should be drawn with layers, false otherwise.
-     * 
-     * @hide
-     */
-    public void setChildrenLayersEnabled(boolean enabled) {
-        if (enabled != mDrawLayers) {
-            mDrawLayers = enabled;
-            invalidate(true);
-
-            boolean flushLayers = !enabled;
-            AttachInfo info = mAttachInfo;
-            if (info != null && info.mHardwareRenderer != null &&
-                    info.mHardwareRenderer.isEnabled()) {
-                if (!info.mHardwareRenderer.validate()) {
-                    flushLayers = false;
-                }
-            } else {
-                flushLayers = false;
-            }
-
-            // We need to invalidate any child with a layer. For instance,
-            // if a child is backed by a hardware layer and we disable layers
-            // the child is marked as not dirty (flags cleared the last time
-            // the child was drawn inside its layer.) However, that child might
-            // never have created its own display list or have an obsolete
-            // display list. By invalidating the child we ensure the display
-            // list is in sync with the content of the hardware layer.
-            for (int i = 0; i < mChildrenCount; i++) {
-                View child = mChildren[i];
-                if (child.mLayerType != LAYER_TYPE_NONE) {
-                    if (flushLayers) child.flushLayer();
-                    child.invalidate(true);
-                }
-            }
-        }
     }
 
     /**

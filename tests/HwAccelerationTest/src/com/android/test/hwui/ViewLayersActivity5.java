@@ -32,30 +32,40 @@ import android.widget.TextView;
 
 @SuppressWarnings({"UnusedDeclaration"})
 public class ViewLayersActivity5 extends Activity {
+    private final Paint mPaint = new Paint();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
         setContentView(R.layout.view_layers_5);
 
+        mPaint.setColorFilter(new PorterDuffColorFilter(0xff00ff00, PorterDuff.Mode.MULTIPLY));
+
         setupList(R.id.list1);
     }
 
-    public void setLayerDisabled(View v) {
-        ((ViewGroup) findViewById(R.id.list1).getParent()).setChildrenLayersEnabled(false);
+    public void enableLayer(View v) {
+        findViewById(R.id.list1).setLayerType(View.LAYER_TYPE_HARDWARE, mPaint);
+    }
+
+    public void disableLayer(View v) {
+        findViewById(R.id.list1).setLayerType(View.LAYER_TYPE_NONE, null);
     }
     
-    public void setLayerEnabled(View v) {
-        ((ViewGroup) findViewById(R.id.list1).getParent()).setChildrenLayersEnabled(true);
+    public void growLayer(View v) {
+        findViewById(R.id.list1).getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
+        findViewById(R.id.list1).requestLayout();
+    }
+
+    public void shrinkLayer(View v) {
+        findViewById(R.id.list1).getLayoutParams().height = 300;
+        findViewById(R.id.list1).requestLayout();
     }
     
     private void setupList(int listId) {
-        final Paint p = new Paint();
-        p.setColorFilter(new PorterDuffColorFilter(0xff00ff00, PorterDuff.Mode.MULTIPLY));
-
         final ListView list = (ListView) findViewById(listId);
         list.setAdapter(new SimpleListAdapter(this));
-        list.setLayerType(View.LAYER_TYPE_HARDWARE, p);
     }
 
     private static class SimpleListAdapter extends ArrayAdapter<String> {

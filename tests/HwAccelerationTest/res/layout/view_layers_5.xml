@@ -26,16 +26,28 @@
         android:layout_weight="1">
 
         <Button
-            android:onClick="setLayerEnabled"
+            android:onClick="enableLayer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Enable layer" />
 
         <Button
-            android:onClick="setLayerDisabled"
+            android:onClick="disableLayer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Disable layer" />
+
+        <Button
+            android:onClick="shrinkLayer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Shrink layer" />
+
+        <Button
+            android:onClick="growLayer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Grow layer" />
         
     </LinearLayout>
 

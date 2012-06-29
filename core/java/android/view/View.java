@@ -12363,9 +12363,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 canvas.setViewport(width, height);
                 // The dirty rect should always be null for a display list
                 canvas.onPreDraw(null);
-                int layerType = (
-                        !(mParent instanceof ViewGroup) || ((ViewGroup)mParent).mDrawLayers) ?
-                        getLayerType() : LAYER_TYPE_NONE;
+                int layerType = getLayerType();
                 if (!isLayer && layerType != LAYER_TYPE_NONE) {
                     if (layerType == LAYER_TYPE_HARDWARE) {
                         final HardwareLayer layer = getHardwareLayer();
@@ -13072,7 +13070,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         boolean scalingRequired = false;
         boolean caching;
-        int layerType = parent.mDrawLayers ? getLayerType() : LAYER_TYPE_NONE;
+        int layerType = getLayerType();
 
         final boolean hardwareAccelerated = canvas.isHardwareAccelerated();
         if ((flags & ViewGroup.FLAG_CHILDREN_DRAWN_WITH_CACHE) != 0 ||
