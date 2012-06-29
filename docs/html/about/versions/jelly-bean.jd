@@ -330,7 +330,7 @@ style="font-weight:500;">App Widgets</span> can resize automatically to fit the 
 
 <p>GCM handles all the details of <strong>queuing messages and delivering them</strong> efficiently to the targeted Android devices. It supports message <strong>multicasting</strong> and can reach up to 1000 connected devices simultaneously with a single request. It also supports message <strong>payloads</strong>, which means that in addition to sending tickle messages to an app on the device, developers can send up to 4K of data. </p>
 
-<p>Google Cloud Messaging is completely <strong>free for all developers</strong> and sign-up is easy. See the <a href="http://developers.google.com/android/gcm/index.html">Google Cloud Messaging</a> page for registration, downloads, and documentation.</p>
+<p>Google Cloud Messaging is completely <strong>free for all developers</strong> and sign-up is easy. See the <a href="{@docRoot}guide/google/gcm/index.html">Google Cloud Messaging</a> page for registration, downloads, and documentation.</p>
 
 <h3>App Encryption</h3>
 
