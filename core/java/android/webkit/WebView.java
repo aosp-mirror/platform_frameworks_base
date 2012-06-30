@@ -7633,10 +7633,6 @@ public class WebView extends AbsoluteLayout
     // Called by JNI to handle a touch on a node representing an email address,
     // address, or phone number
     private void overrideLoading(String url) {
-        if (getWebViewClient() != null
-                && getWebViewClient().overrideContentDetector(url)) {
-            return;
-        }
         mCallbackProxy.uiOverrideUrlLoading(url);
     }
 
