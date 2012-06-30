@@ -51,7 +51,7 @@ page.title=Migration
 <dd>To use the GCM service, you need to obtain a Simple API Key from Google APIs console page. For more information, see <a href="gs.html">Getting Started</a>. Note that GCM <em>only</em> accepts Simple API Key&mdash;using ClientLogin or OAuth2 tokens will not work.
 </dd>
 <dt><strong>Sender ID</strong></dt>
-<dd>In C2DM, the Sender ID is an email address. In GCM, the Sender ID is a project ID that you acquire from the API console, as described in <a href="https://devsite.googleplex.com/android/gcm/gs.html#create-proj">Getting Started</a>. </dd>
+<dd>In C2DM, the Sender ID is an email address. In GCM, the Sender ID is a project ID that you acquire from the API console, as described in <a href="gs.html#create-proj">Getting Started</a>. </dd>
 
 <dt><strong>JSON format</strong></dt>
 <dd>GCM HTTP requests support JSON format in addition to plain text. For more information, see the <a href="gcm.html#send-msg">Architectural Overview</a>.</dd>
