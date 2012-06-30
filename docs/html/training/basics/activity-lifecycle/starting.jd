@@ -285,6 +285,6 @@ android.app.Activity#onStop} in all situations except one: when you call {@link
 android.app.Activity#finish()} from within the {@link android.app.Activity#onCreate onCreate()}
 method. In some cases, such as when your activity operates as a temporary decision maker to
 launch another activity, you might call {@link android.app.Activity#finish()} from within {@link
-android.app.Activity#onCreate onCreate()} to destory the activity. In this case, the system
+android.app.Activity#onCreate onCreate()} to destroy the activity. In this case, the system
 immediately calls {@link android.app.Activity#onDestroy} without calling any of the other
 lifecycle methods.</p>

@@ -66,7 +66,7 @@ page.title=Developer Tools
 <h3>Powerful Debugging</h3>
 
   <ul>
-    <li>Full Java debugger with on-device debugging and Android-specidic tools</li>
+    <li>Full Java debugger with on-device debugging and Android-specific tools</li>
     <li>Built-in memory analysis, performance/CPU profiling, OpenGL ES tracing.</li>
     <li>Graphical tools for debugging and optimizing UI, runtime inspecton of UI structure and performance.</li>
     <li>Runtime graphical analysis of your app's network bandwidth usage.</li> 
