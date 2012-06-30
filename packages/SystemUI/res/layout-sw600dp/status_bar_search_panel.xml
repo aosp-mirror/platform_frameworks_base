@@ -35,7 +35,6 @@
         prvandroid:targetDrawables="@array/navbar_search_targets"
         prvandroid:targetDescriptions="@array/navbar_search_target_descriptions"
         prvandroid:directionDescriptions="@array/navbar_search_direction_descriptions"
-        prvandroid:handleDrawable="@drawable/navbar_search_handle"
         prvandroid:outerRingDrawable="@drawable/navbar_search_outerring"
         prvandroid:outerRadius="@dimen/navbar_search_outerring_radius"
         prvandroid:innerRadius="@*android:dimen/glowpadview_inner_radius"

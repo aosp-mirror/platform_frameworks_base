@@ -242,8 +242,6 @@
        <item>@drawable/list_divider_holo_dark</item>
        <item>@drawable/list_divider_holo_light</item>
        <item>@drawable/list_divider_holo_light</item>
-       <item>@drawable/ic_lockscreen_chevron_left</item>
-       <item>@drawable/ic_lockscreen_chevron_right</item>
        <item>@drawable/ab_transparent_dark_holo</item>
        <item>@drawable/ab_stacked_transparent_dark_holo</item>
        <item>@drawable/ab_bottom_transparent_dark_holo</item>
@@ -397,13 +395,6 @@
         <item>@string/description_target_unlock</item>
         <item>@string/description_target_search</item>
         <item>@string/description_target_camera</item>
-        <item>@null</item>
-    </array>
-
-    <array name="lockscreen_chevron_drawables">
-        <item>@drawable/ic_lockscreen_chevron_right</item>
-        <item>@null</item>
-        <item>@null</item>
         <item>@null</item>
     </array>
 
