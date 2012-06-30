@@ -4891,9 +4891,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public int getActualAndReportedWindowLeftDelta() {
-        if (mAttachInfo != null) {
-            return mAttachInfo.mActualWindowLeft - mAttachInfo.mWindowLeft; 
-        }
+//        if (mAttachInfo != null) {
+//            return mAttachInfo.mActualWindowLeft - mAttachInfo.mWindowLeft; 
+//        }
         return 0;
     }
 
@@ -4903,9 +4903,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public int getActualAndReportedWindowTopDelta() {
-        if (mAttachInfo != null) {
-            return mAttachInfo.mActualWindowTop - mAttachInfo.mWindowTop;
-        }
+//        if (mAttachInfo != null) {
+//            return mAttachInfo.mActualWindowTop - mAttachInfo.mWindowTop;
+//        }
         return 0;
     }
 

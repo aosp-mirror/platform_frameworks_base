@@ -47,6 +47,7 @@ oneway interface IWindow {
 
     void resized(int w, int h, in Rect contentInsets,
             in Rect visibleInsets, boolean reportDraw, in Configuration newConfig);
+    void moved(int newX, int newY);
     void dispatchAppVisibility(boolean visible);
     void dispatchGetNewSurface();
     void dispatchScreenState(boolean on);

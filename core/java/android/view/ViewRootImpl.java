@@ -2724,6 +2724,7 @@ public final class ViewRootImpl implements ViewParent,
     private final static int MSG_CLEAR_ACCESSIBILITY_FOCUS_HOST = 22;
     private final static int MSG_DISPATCH_DONE_ANIMATING = 23;
     private final static int MSG_INVALIDATE_WORLD = 24;
+    private final static int MSG_WINDOW_MOVED = 25;
 
     final class ViewRootHandler extends Handler {
         @Override
@@ -2775,6 +2776,8 @@ public final class ViewRootImpl implements ViewParent,
                     return "MSG_CLEAR_ACCESSIBILITY_FOCUS_HOST";
                 case MSG_DISPATCH_DONE_ANIMATING:
                     return "MSG_DISPATCH_DONE_ANIMATING";
+                case MSG_WINDOW_MOVED:
+                    return "MSG_WINDOW_MOVED";
             }
             return super.getMessageName(message);
         }
@@ -2819,6 +2822,7 @@ public final class ViewRootImpl implements ViewParent,
                     if (config != null) {
                         updateConfiguration(config, false);
                     }
+                    // TODO: Should left/top stay unchanged and only change the right/bottom?
                     mWinFrame.left = 0;
                     mWinFrame.right = msg.arg1;
                     mWinFrame.top = 0;
@@ -2828,6 +2832,23 @@ public final class ViewRootImpl implements ViewParent,
                     if (msg.what == MSG_RESIZED_REPORT) {
                         mReportNextDraw = true;
                     }
+
+                    if (mView != null) {
+                        forceLayout(mView);
+                    }
+                    requestLayout();
+                }
+                break;
+            case MSG_WINDOW_MOVED:
+                if (mAdded) {
+                    final int w = mWinFrame.width();
+                    final int h = mWinFrame.height();
+                    final int l = msg.arg1;
+                    final int t = msg.arg2;
+                    mWinFrame.left = l;
+                    mWinFrame.right = l + w;
+                    mWinFrame.top = t;
+                    mWinFrame.bottom = t + h;
 
                     if (mView != null) {
                         forceLayout(mView);
@@ -4054,6 +4075,18 @@ public final class ViewRootImpl implements ViewParent,
         mHandler.sendMessage(msg);
     }
 
+    public void dispatchMoved(int newX, int newY) {
+        if (DEBUG_LAYOUT) Log.v(TAG, "Window moved " + this + ": newX=" + newX + " newY=" + newY);
+        if (mTranslator != null) {
+            PointF point = new PointF(newX, newY);
+            mTranslator.translatePointInScreenToAppWindow(point);
+            newX = (int) (point.x + 0.5);
+            newY = (int) (point.y + 0.5);
+        }
+        Message msg = mHandler.obtainMessage(MSG_WINDOW_MOVED, newX, newY);
+        mHandler.sendMessage(msg);
+    }
+
     /**
      * Represents a pending input event that is waiting in a queue.
      *
@@ -4690,6 +4723,14 @@ public final class ViewRootImpl implements ViewParent,
             if (viewAncestor != null) {
                 viewAncestor.dispatchResized(w, h, contentInsets,
                         visibleInsets, reportDraw, newConfig);
+            }
+        }
+
+        @Override
+        public void moved(int newX, int newY) {
+            final ViewRootImpl viewAncestor = mViewAncestor.get();
+            if (viewAncestor != null) {
+                viewAncestor.dispatchMoved(newX, newY);
             }
         }
 

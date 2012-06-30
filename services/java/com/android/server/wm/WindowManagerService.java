@@ -8591,6 +8591,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     winAnimator.setAnimation(a);
                     winAnimator.mAnimDw = w.mLastFrame.left - w.mFrame.left;
                     winAnimator.mAnimDh = w.mLastFrame.top - w.mFrame.top;
+                    try {
+                        w.mClient.moved(w.mFrame.left, w.mFrame.top);
+                    } catch (RemoteException e) {
+                    }
                 }
 
                 //Slog.i(TAG, "Window " + this + " clearing mContentChanged - done placing");
