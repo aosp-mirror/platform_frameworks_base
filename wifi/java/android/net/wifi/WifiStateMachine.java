@@ -697,7 +697,7 @@ public class WifiStateMachine extends StateMachine {
 
         setInitialState(mInitialState);
 
-        setProcessedMessagesSize(100);
+        setLogRecSize(100);
         if (DBG) setDbg(true);
 
         //start the state machine
@@ -1151,7 +1151,7 @@ public class WifiStateMachine extends StateMachine {
     }
 
     @Override
-    protected boolean recordProcessedMessage(Message msg) {
+    protected boolean recordLogRec(Message msg) {
         //Ignore screen on/off & common messages when driver has started
         if (getCurrentState() == mConnectedState || getCurrentState() == mDisconnectedState) {
             switch (msg.what) {
@@ -1651,7 +1651,7 @@ public class WifiStateMachine extends StateMachine {
             handlePostDhcpSetup();
 
             mDhcpStateMachine.sendMessage(DhcpStateMachine.CMD_STOP_DHCP);
-            mDhcpStateMachine.quit();
+            mDhcpStateMachine.doQuit();
             mDhcpStateMachine = null;
         }
 

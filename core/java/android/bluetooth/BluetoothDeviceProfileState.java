@@ -304,6 +304,25 @@ public final class BluetoothDeviceProfileState extends StateMachine {
         }
     }
 
+    @Override
+    protected void onQuitting() {
+        mContext.unregisterReceiver(mBroadcastReceiver);
+        mBroadcastReceiver = null;
+        mAdapter.closeProfileProxy(BluetoothProfile.HEADSET, mHeadsetService);
+        mBluetoothProfileServiceListener = null;
+        mOutgoingHandsfree = null;
+        mPbap = null;
+        mPbapService.close();
+        mPbapService = null;
+        mIncomingHid = null;
+        mOutgoingHid = null;
+        mIncomingHandsfree = null;
+        mOutgoingHandsfree = null;
+        mIncomingA2dp = null;
+        mOutgoingA2dp = null;
+        mBondedDevice = null;
+    }
+
     private class BondedDevice extends State {
         @Override
         public void enter() {
@@ -416,26 +435,6 @@ public final class BluetoothDeviceProfileState extends StateMachine {
                 case TRANSITION_TO_STABLE:
                     // ignore.
                     break;
-                case SM_QUIT_CMD:
-                    mContext.unregisterReceiver(mBroadcastReceiver);
-                    mBroadcastReceiver = null;
-                    mAdapter.closeProfileProxy(BluetoothProfile.HEADSET, mHeadsetService);
-                    mBluetoothProfileServiceListener = null;
-                    mOutgoingHandsfree = null;
-                    mPbap = null;
-                    mPbapService.close();
-                    mPbapService = null;
-                    mIncomingHid = null;
-                    mOutgoingHid = null;
-                    mIncomingHandsfree = null;
-                    mOutgoingHandsfree = null;
-                    mIncomingA2dp = null;
-                    mOutgoingA2dp = null;
-                    mBondedDevice = null;
-                    // There is a problem in the State Machine code
-                    // where things are not cleaned up properly, when quit message
-                    // is handled so return NOT_HANDLED as a workaround.
-                    return NOT_HANDLED;
                 default:
                     return NOT_HANDLED;
             }
@@ -1339,6 +1338,15 @@ public final class BluetoothDeviceProfileState extends StateMachine {
 
     /*package*/ BluetoothDevice getDevice() {
         return mDevice;
+    }
+
+    /**
+     * Quit the state machine, only to be called by BluetoothService.
+     *
+     * @hide
+     */
+    public void doQuit() {
+        this.quit();
     }
 
     private void log(String message) {
