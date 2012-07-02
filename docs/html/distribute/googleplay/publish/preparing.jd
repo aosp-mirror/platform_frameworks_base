@@ -203,15 +203,15 @@ Android devices once it is published. </p>
 
 <p>To get a better understanding of the current device penetration of Android
 platform versions and screen sizes across all Android devices, see the <a
-href="{@docRoot}guide/topics/resources/localization.html">Device Dashboard</a>
+href="{@docRoot}about/dashboards/index.html">Device Dashboard</a>
 charts.</p>
 
 <table>
 <tr>
 <td><p>Related resources:</p>
 <ul style="margin-top:-.5em;">
-<li><strong><a href="{@docRoot}guide/topics/resources/localization.html">Device Dashboard</a></strong> &mdash; A chart showing global percentages of devices by Android version, screen size, and level of OpenGL ES support.</li>
-<li><strong><a href="{@docRoot}guide/topics/resources/localization.html">Android API Levels</a></strong> &mdash; A definition of API Levels and a list of which Android platform versions they are associated with. </li>
+<li><strong><a href="{@docRoot}about/dashboards/index.html">Device Dashboard</a></strong> &mdash; A chart showing global percentages of devices by Android version, screen size, and level of OpenGL ES support.</li>
+<li><strong><a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">Android API Levels</a></strong> &mdash; A definition of API Levels and a list of which Android platform versions they are associated with. </li>
 </ul>
 </td>
 </tr>
