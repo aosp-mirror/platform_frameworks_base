@@ -26,7 +26,10 @@ import android.graphics.Bitmap;
  */
 public class WebHistoryItem implements Cloneable {
 
-    /* package */ WebHistoryItem() {
+    /**
+     * @hide
+     */
+    public WebHistoryItem() {
     }
 
     /**
