@@ -150,8 +150,8 @@ public class StaticLayout extends Layout {
 
         mColumns = COLUMNS_ELLIPSIZE;
         mLines = new int[ArrayUtils.idealIntArraySize(2 * mColumns)];
-        mLineDirections = new Directions[
-                             ArrayUtils.idealIntArraySize(2 * mColumns)];
+        mLineDirections = new Directions[ArrayUtils.idealIntArraySize(2 * mColumns)];
+        // FIXME This is never recycled
         mMeasured = MeasuredText.obtain();
     }
 
@@ -340,7 +340,9 @@ public class StaticLayout extends Layout {
                         w += widths[j - paraStart];
                     }
 
-                    if (w <= width) {
+                    boolean isSpaceOrTab = c == CHAR_SPACE || c == CHAR_TAB;
+
+                    if (w <= width || isSpaceOrTab) {
                         fitWidth = w;
                         fit = j + 1;
 
@@ -353,30 +355,22 @@ public class StaticLayout extends Layout {
                         if (fmBottom > fitBottom)
                             fitBottom = fmBottom;
 
-                        /*
-                         * From the Unicode Line Breaking Algorithm:
-                         * (at least approximately)
-                         *
-                         * .,:; are class IS: breakpoints
-                         *      except when adjacent to digits
-                         * /    is class SY: a breakpoint
-                         *      except when followed by a digit.
-                         * -    is class HY: a breakpoint
-                         *      except when followed by a digit.
-                         *
-                         * Ideographs are class ID: breakpoints when adjacent,
-                         * except for NS (non-starters), which can be broken
-                         * after but not before.
-                         */
-                        if (c == CHAR_SPACE || c == CHAR_TAB ||
-                            ((c == CHAR_DOT || c == CHAR_COMMA ||
-                                    c == CHAR_COLON || c == CHAR_SEMICOLON) &&
-                             (j - 1 < here || !Character.isDigit(chs[j - 1 - paraStart])) &&
-                             (j + 1 >= spanEnd || !Character.isDigit(chs[j + 1 - paraStart]))) ||
-                            ((c == CHAR_SLASH || c == CHAR_HYPHEN) &&
-                             (j + 1 >= spanEnd || !Character.isDigit(chs[j + 1 - paraStart]))) ||
-                            (c >= CHAR_FIRST_CJK && isIdeographic(c, true) &&
-                             j + 1 < spanEnd && isIdeographic(chs[j + 1 - paraStart], false))) {
+                        // From the Unicode Line Breaking Algorithm (at least approximately)
+                        boolean isLineBreak = isSpaceOrTab ||
+                                // .,:; are class IS breakpoints, except when adjacent to digits
+                                ((c == CHAR_DOT || c == CHAR_COMMA ||
+                                c == CHAR_COLON || c == CHAR_SEMICOLON) &&
+                                (j - 1 < here || !Character.isDigit(chs[j - 1 - paraStart])) &&
+                                (j + 1 >= spanEnd || !Character.isDigit(chs[j + 1 - paraStart]))) ||
+                                // / is class SY and - is class HY, except when followed by a digit
+                                ((c == CHAR_SLASH || c == CHAR_HYPHEN) &&
+                                (j + 1 >= spanEnd || !Character.isDigit(chs[j + 1 - paraStart]))) ||
+                                // Ideographs are class ID: breakpoints when adjacent, except for NS
+                                // (non-starters), which can be broken after but not before
+                                (c >= CHAR_FIRST_CJK && isIdeographic(c, true) &&
+                                j + 1 < spanEnd && isIdeographic(chs[j + 1 - paraStart], false));
+
+                        if (isLineBreak) {
                             okWidth = w;
                             ok = j + 1;
 
@@ -396,13 +390,6 @@ public class StaticLayout extends Layout {
                         float currentTextWidth;
 
                         if (ok != here) {
-                            // If it is a space that makes the length exceed width, cut here
-                            if (c == CHAR_SPACE) ok = j + 1;
-
-                            while (ok < spanEnd && chs[ok - paraStart] == CHAR_SPACE) {
-                                ok++;
-                            }
-
                             endPos = ok;
                             above = okAscent;
                             below = okDescent;
@@ -450,10 +437,10 @@ public class StaticLayout extends Layout {
                             spanEnd = here;
                             break;
                         }
-                    }
-                    // FIXME This should be moved in the above else block which changes mLineCount
-                    if (mLineCount >= mMaximumVisibleLineCount) {
-                        break;
+
+                        if (mLineCount >= mMaximumVisibleLineCount) {
+                            break;
+                        }
                     }
                 }
             }
