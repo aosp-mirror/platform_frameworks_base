@@ -947,6 +947,7 @@ package android {
     field public static final int subtitle = 16843473; // 0x10102d1
     field public static final int subtitleTextStyle = 16843513; // 0x10102f9
     field public static final int subtypeExtraValue = 16843674; // 0x101039a
+    field public static final int subtypeId = 16843713; // 0x10103c1
     field public static final int subtypeLocale = 16843673; // 0x1010399
     field public static final int suggestActionMsg = 16843228; // 0x10101dc
     field public static final int suggestActionMsgColumn = 16843229; // 0x10101dd
@@ -26642,6 +26643,7 @@ package android.view.inputmethod {
 
   public final class InputMethodSubtype implements android.os.Parcelable {
     ctor public InputMethodSubtype(int, int, java.lang.String, java.lang.String, java.lang.String, boolean, boolean);
+    ctor public InputMethodSubtype(int, int, java.lang.String, java.lang.String, java.lang.String, boolean, boolean, int);
     method public boolean containsExtraValueKey(java.lang.String);
     method public int describeContents();
     method public java.lang.CharSequence getDisplayName(android.content.Context, java.lang.String, android.content.pm.ApplicationInfo);

@@ -55,13 +55,14 @@ public final class InputMethodSubtype implements Parcelable {
     private final int mSubtypeHashCode;
     private final int mSubtypeIconResId;
     private final int mSubtypeNameResId;
+    private final int mSubtypeId;
     private final String mSubtypeLocale;
     private final String mSubtypeMode;
     private final String mSubtypeExtraValue;
     private volatile HashMap<String, String> mExtraValueHashMapCache;
 
     /**
-     * Constructor.
+     * Constructor with no subtype ID specified, overridesImplicitlyEnabledSubtype not specified.
      * @param nameId Resource ID of the subtype name string. The string resource may have exactly
      * one %s in it. If there is, the %s part will be replaced with the locale's display name by
      * the formatter. Please refer to {@link #getDisplayName} for details.
@@ -87,7 +88,7 @@ public final class InputMethodSubtype implements Parcelable {
     }
 
     /**
-     * Constructor.
+     * Constructor with no subtype ID specified.
      * @param nameId Resource ID of the subtype name string. The string resource may have exactly
      * one %s in it. If there is, the %s part will be replaced with the locale's display name by
      * the formatter. Please refer to {@link #getDisplayName} for details.
@@ -112,6 +113,41 @@ public final class InputMethodSubtype implements Parcelable {
      */
     public InputMethodSubtype(int nameId, int iconId, String locale, String mode, String extraValue,
             boolean isAuxiliary, boolean overridesImplicitlyEnabledSubtype) {
+        this(nameId, iconId, locale, mode, extraValue, isAuxiliary,
+                overridesImplicitlyEnabledSubtype, 0);
+    }
+
+    /**
+     * Constructor.
+     * @param nameId Resource ID of the subtype name string. The string resource may have exactly
+     * one %s in it. If there is, the %s part will be replaced with the locale's display name by
+     * the formatter. Please refer to {@link #getDisplayName} for details.
+     * @param iconId Resource ID of the subtype icon drawable.
+     * @param locale The locale supported by the subtype
+     * @param mode The mode supported by the subtype
+     * @param extraValue The extra value of the subtype. This string is free-form, but the API
+     * supplies tools to deal with a key-value comma-separated list; see
+     * {@link #containsExtraValueKey} and {@link #getExtraValueOf}.
+     * @param isAuxiliary true when this subtype is auxiliary, false otherwise. An auxiliary
+     * subtype will not be shown in the list of enabled IMEs for choosing the current IME in
+     * the Settings even when this subtype is enabled. Please note that this subtype will still
+     * be shown in the list of IMEs in the IME switcher to allow the user to tentatively switch
+     * to this subtype while an IME is shown. The framework will never switch the current IME to
+     * this subtype by {@link android.view.inputmethod.InputMethodManager#switchToLastInputMethod}.
+     * The intent of having this flag is to allow for IMEs that are invoked in a one-shot way as
+     * auxiliary input mode, and return to the previous IME once it is finished (e.g. voice input).
+     * @param overridesImplicitlyEnabledSubtype true when this subtype should be enabled by default
+     * if no other subtypes in the IME are enabled explicitly. Note that a subtype with this
+     * parameter being true will not be shown in the list of subtypes in each IME's subtype enabler.
+     * Having an "automatic" subtype is an example use of this flag.
+     * @param id The unique ID for the subtype. The input method framework keeps track of enabled
+     * subtypes by ID. When the IME package gets upgraded, enabled IDs will stay enabled even if
+     * other attributes are different. If the ID is unspecified or 0,
+     * Arrays.hashCode(new Object[] {locale, mode, extraValue,
+     * isAuxiliary, overridesImplicitlyEnabledSubtype}) will be used instead.
+     */
+    public InputMethodSubtype(int nameId, int iconId, String locale, String mode, String extraValue,
+            boolean isAuxiliary, boolean overridesImplicitlyEnabledSubtype, int id) {
         mSubtypeNameResId = nameId;
         mSubtypeIconResId = iconId;
         mSubtypeLocale = locale != null ? locale : "";
@@ -119,8 +155,11 @@ public final class InputMethodSubtype implements Parcelable {
         mSubtypeExtraValue = extraValue != null ? extraValue : "";
         mIsAuxiliary = isAuxiliary;
         mOverridesImplicitlyEnabledSubtype = overridesImplicitlyEnabledSubtype;
-        mSubtypeHashCode = hashCodeInternal(mSubtypeLocale, mSubtypeMode, mSubtypeExtraValue,
-                mIsAuxiliary, mOverridesImplicitlyEnabledSubtype);
+        // If hashCode() of this subtype is 0 and you want to specify it as an id of this subtype,
+        // just specify 0 as this subtype's id. Then, this subtype's id is treated as 0.
+        mSubtypeHashCode = id != 0 ? id : hashCodeInternal(mSubtypeLocale, mSubtypeMode,
+                mSubtypeExtraValue, mIsAuxiliary, mOverridesImplicitlyEnabledSubtype);
+        mSubtypeId = id;
     }
 
     InputMethodSubtype(Parcel source) {
@@ -135,8 +174,8 @@ public final class InputMethodSubtype implements Parcelable {
         mSubtypeExtraValue = s != null ? s : "";
         mIsAuxiliary = (source.readInt() == 1);
         mOverridesImplicitlyEnabledSubtype = (source.readInt() == 1);
-        mSubtypeHashCode = hashCodeInternal(mSubtypeLocale, mSubtypeMode, mSubtypeExtraValue,
-                mIsAuxiliary, mOverridesImplicitlyEnabledSubtype);
+        mSubtypeHashCode = source.readInt();
+        mSubtypeId = source.readInt();
     }
 
     /**
@@ -288,6 +327,9 @@ public final class InputMethodSubtype implements Parcelable {
     public boolean equals(Object o) {
         if (o instanceof InputMethodSubtype) {
             InputMethodSubtype subtype = (InputMethodSubtype) o;
+            if (subtype.mSubtypeId != 0 || mSubtypeId != 0) {
+                return (subtype.hashCode() == hashCode());
+            }
             return (subtype.hashCode() == hashCode())
                 && (subtype.getNameResId() == getNameResId())
                 && (subtype.getMode().equals(getMode()))
@@ -313,6 +355,8 @@ public final class InputMethodSubtype implements Parcelable {
         dest.writeString(mSubtypeExtraValue);
         dest.writeInt(mIsAuxiliary ? 1 : 0);
         dest.writeInt(mOverridesImplicitlyEnabledSubtype ? 1 : 0);
+        dest.writeInt(mSubtypeHashCode);
+        dest.writeInt(mSubtypeId);
     }
 
     public static final Parcelable.Creator<InputMethodSubtype> CREATOR

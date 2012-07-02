@@ -3761,5 +3761,6 @@
   <public type="attr" name="listPreferredItemPaddingEnd" />
   <public type="attr" name="singleUser" />
   <public type="attr" name="presentationTheme" />
+  <public type="attr" name="subtypeId"/>
 
 </resources>
