@@ -68,7 +68,7 @@ pp.
   <div class="layout-content-col span-4">
     <h4>
       Google Cloud Messaging
-    </h4><img src="{@docRoot}images/gcm-logo.png" width="150px" style="padding:9px;">
+    </h4><img src="{@docRoot}images/gcm/gcm-logo.png" width="150px" style="padding:9px;">
     <p>
       Notify your apps of important events with messages that are lightweight and battery-saving.
     </p><a href="{@docRoot}guide/google/gcm/index.html">Learn more &raquo;</a>
