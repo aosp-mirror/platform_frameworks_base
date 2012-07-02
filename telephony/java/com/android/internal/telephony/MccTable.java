@@ -407,7 +407,7 @@ public final class MccTable
 		table.add(new MccEntry(356,"kn",2));	//Saint Kitts and Nevis
 		table.add(new MccEntry(358,"lc",2));	//Saint Lucia
 		table.add(new MccEntry(360,"vc",2));	//Saint Vincent and the Grenadines
-		table.add(new MccEntry(362,"nl",2));	//Netherlands Antilles
+		table.add(new MccEntry(362,"ai",2));	//Netherlands Antilles
 		table.add(new MccEntry(363,"aw",2));	//Aruba
 		table.add(new MccEntry(364,"bs",2));	//Bahamas (Commonwealth of the)
 		table.add(new MccEntry(365,"ai",3));	//Anguilla
