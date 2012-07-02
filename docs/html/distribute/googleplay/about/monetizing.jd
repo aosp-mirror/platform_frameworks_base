@@ -113,7 +113,7 @@ free apps must remain free (to download) for the life of the app.</p>
 <h2 id="buyer-currency" style="margin-top:1.5em;">Flexible pricing in the currencies of your customers</h2>
 
 <div style="float:right;margin-left:18px;border:1px solid #DDD;">
-<img src="{@docRoot}images/gp-buyer-currency.png" style="width:240px;padding:4px;margin-bottom:0;">
+<img src="{@docRoot}images/gp-buyer-currency.png" style="width:240px;padding:4px;margin-bottom:1em;">
 </div>
 
 <p>Google Play gives you complete control over how you price your products. You
