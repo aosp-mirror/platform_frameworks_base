@@ -183,7 +183,7 @@
     <string name="permgrouplab_systemTools" msgid="4652191644082714048">"系统工具"</string>
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"对系统进行低级访问和控制。"</string>
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"开发工具"</string>
-    <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"只有应用开发人员才需要的功能。"</string>
+    <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"只有应用开发者才需要的功能。"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"存储"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"访问 USB 存储设备。"</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"访问 SD 卡。"</string>
