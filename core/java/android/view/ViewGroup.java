@@ -4100,21 +4100,23 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 final int left = mLeft;
                 final int top = mTop;
 
-                if ((mGroupFlags & FLAG_CLIP_CHILDREN) != FLAG_CLIP_CHILDREN ||
-                        dirty.intersect(0, 0, mRight - left, mBottom - top) ||
-                        (mPrivateFlags & DRAW_ANIMATION) == DRAW_ANIMATION) {
-                    mPrivateFlags &= ~DRAWING_CACHE_VALID;
-
-                    location[CHILD_LEFT_INDEX] = left;
-                    location[CHILD_TOP_INDEX] = top;
-
-                    if (mLayerType != LAYER_TYPE_NONE) {
-                        mPrivateFlags |= INVALIDATED;
-                        mLocalDirtyRect.union(dirty);
+                if ((mGroupFlags & FLAG_CLIP_CHILDREN) == FLAG_CLIP_CHILDREN) {
+                    if (!dirty.intersect(0, 0, mRight - left, mBottom - top)) {
+                        dirty.setEmpty();
                     }
-
-                    return mParent;
                 }
+                mPrivateFlags &= ~DRAWING_CACHE_VALID;
+
+                location[CHILD_LEFT_INDEX] = left;
+                location[CHILD_TOP_INDEX] = top;
+
+                if (mLayerType != LAYER_TYPE_NONE) {
+                    mPrivateFlags |= INVALIDATED;
+                    mLocalDirtyRect.union(dirty);
+                }
+
+                return mParent;
+
             } else {
                 mPrivateFlags &= ~DRAWN & ~DRAWING_CACHE_VALID;
 
