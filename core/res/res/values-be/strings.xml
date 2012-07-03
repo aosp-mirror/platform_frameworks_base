@@ -930,8 +930,8 @@
     <string name="copyUrl" msgid="2538211579596067402">"Скапіяваць URL"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"Выбраць тэкст"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Вылучэнне тэксту"</string>
-    <string name="addToDictionary" msgid="9090375111134433012">"дадаць у слоўнік"</string>
-    <string name="deleteText" msgid="7070985395199629156">"выдаліць"</string>
+    <string name="addToDictionary" msgid="4352161534510057874">"Дадаць у слоўнік"</string>
+    <string name="deleteText" msgid="6979668428458199034">"Выдалiць"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Метад уводу"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Дзеянні з тэкстам"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Месца для захавання на зыходзе"</string>

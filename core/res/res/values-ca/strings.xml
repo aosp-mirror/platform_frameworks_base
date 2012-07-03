@@ -930,8 +930,8 @@
     <string name="copyUrl" msgid="2538211579596067402">"Copia l\'URL"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"Selecciona el text"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Selecció de text"</string>
-    <string name="addToDictionary" msgid="9090375111134433012">"afegeix al diccionari"</string>
-    <string name="deleteText" msgid="7070985395199629156">"suprimeix"</string>
+    <string name="addToDictionary" msgid="4352161534510057874">"Afegeix al diccionari"</string>
+    <string name="deleteText" msgid="6979668428458199034">"Suprimeix"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Mètode d\'entrada"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Accions de text"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"S\'està acabant l\'espai d\'emmagatzematge"</string>

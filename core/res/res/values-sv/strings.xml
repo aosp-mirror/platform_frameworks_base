@@ -930,8 +930,10 @@
     <string name="copyUrl" msgid="2538211579596067402">"Kopiera webbadress"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"Markera text"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Textmarkering"</string>
-    <string name="addToDictionary" msgid="9090375111134433012">"lägg till i ordlista"</string>
-    <string name="deleteText" msgid="7070985395199629156">"ta bort"</string>
+    <!-- no translation found for addToDictionary (4352161534510057874) -->
+    <skip />
+    <!-- no translation found for deleteText (6979668428458199034) -->
+    <skip />
     <string name="inputMethod" msgid="1653630062304567879">"Indatametod"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Textåtgärder"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Lagringsutrymmet börjar ta slut"</string>

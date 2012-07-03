@@ -930,8 +930,8 @@
     <string name="copyUrl" msgid="2538211579596067402">"Kopier webadresse"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"Markér tekst"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Tekstmarkering"</string>
-    <string name="addToDictionary" msgid="9090375111134433012">"føj til ordbog"</string>
-    <string name="deleteText" msgid="7070985395199629156">"slet"</string>
+    <string name="addToDictionary" msgid="4352161534510057874">"Føj til ordbog"</string>
+    <string name="deleteText" msgid="6979668428458199034">"Slet"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Inputmetode"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Teksthandlinger"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Der er snart ikke mere lagerplads"</string>
