@@ -608,7 +608,7 @@ imageView.setOnLongClickListener(new View.OnLongClickListener() {
     ClipData dragData = new ClipData(v.getTag(),ClipData.MIMETYPE_TEXT_PLAIN,item);
 
     // Instantiates the drag shadow builder.
-    View.DrawShadowBuilder myShadow = new MyDragShadowBuilder(imageView);
+    View.DragShadowBuilder myShadow = new MyDragShadowBuilder(imageView);
 
     // Starts the drag
 
