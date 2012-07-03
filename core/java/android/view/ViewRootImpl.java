@@ -76,7 +76,6 @@ import android.widget.Scroller;
 import com.android.internal.R;
 import com.android.internal.policy.PolicyManager;
 import com.android.internal.view.BaseSurfaceHolder;
-import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.RootViewSurfaceTaker;
 
 import java.io.IOException;
@@ -2276,14 +2275,6 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
         return true;
-    }
-
-    @Override
-    public View findViewToTakeAccessibilityFocusFromHover(View child, View descendant) {
-        if (descendant.includeForAccessibility()) {
-            return descendant;
-        }
-        return null;
     }
 
     /**

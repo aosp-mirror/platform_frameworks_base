@@ -295,16 +295,4 @@ public interface ViewParent {
      * @hide
      */
     public void childAccessibilityStateChanged(View child);
-
-    /**
-     * A descendant requests this view to find a candidate to take accessibility
-     * focus from hover.
-     *
-     * @param child The child making the call.
-     * @param descendant The descendant that made the initial request.
-     * @return A view to take accessibility focus.
-     *
-     * @hide
-     */
-    public View findViewToTakeAccessibilityFocusFromHover(View child, View descendant);
 }

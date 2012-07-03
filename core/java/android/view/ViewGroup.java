@@ -624,11 +624,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      *        FOCUS_RIGHT, or 0 for not applicable.
      */
     public View focusSearch(View focused, int direction) {
-        // If we are moving accessibility focus we want to consider all
-        // views no matter if they are on the screen. It is responsibility
-        // of the accessibility service to check whether the result is in
-        // the screen.
-        if (isRootNamespace() && (direction & FOCUS_ACCESSIBILITY) == 0) {
+        if (isRootNamespace()) {
             // root namespace means we should consider ourselves the top of the
             // tree for focus searching; otherwise we could be focus searching
             // into other tabs.  see LocalActivityManager and TabHost for more info
@@ -863,8 +859,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         final int descendantFocusability = getDescendantFocusability();
 
-        if (descendantFocusability != FOCUS_BLOCK_DESCENDANTS
-                || (focusableMode & FOCUSABLES_ACCESSIBILITY) == FOCUSABLES_ACCESSIBILITY) {
+        if (descendantFocusability != FOCUS_BLOCK_DESCENDANTS) {
             final int count = mChildrenCount;
             final View[] children = mChildren;
 
@@ -882,9 +877,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         // among the focusable children would be more interesting.
         if (descendantFocusability != FOCUS_AFTER_DESCENDANTS
                 // No focusable descendants
-                || (focusableCount == views.size())
-                // We are collecting accessibility focusables.
-                || (focusableMode & FOCUSABLES_ACCESSIBILITY) == FOCUSABLES_ACCESSIBILITY) {
+                || (focusableCount == views.size())) {
             super.addFocusables(views, direction, focusableMode);
         }
     }
@@ -1651,20 +1644,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         if (mParent != null) {
             mParent.childAccessibilityStateChanged(child);
         }
-    }
-
-    /**
-     * @hide
-     */
-    @Override
-    public View findViewToTakeAccessibilityFocusFromHover(View child, View descendant) {
-        if (includeForAccessibility() && isActionableForAccessibility()) {
-            return this;
-        }
-        if (mParent != null) {
-            return mParent.findViewToTakeAccessibilityFocusFromHover(this, descendant);
-        }
-        return null;
     }
 
     /**

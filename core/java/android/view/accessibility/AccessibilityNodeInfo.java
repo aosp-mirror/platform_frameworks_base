@@ -1343,12 +1343,6 @@ public class AccessibilityNodeInfo implements Parcelable {
             case View.FOCUS_RIGHT:
             case View.FOCUS_FORWARD:
             case View.FOCUS_BACKWARD:
-            case View.ACCESSIBILITY_FOCUS_DOWN:
-            case View.ACCESSIBILITY_FOCUS_UP:
-            case View.ACCESSIBILITY_FOCUS_LEFT:
-            case View.ACCESSIBILITY_FOCUS_RIGHT:
-            case View.ACCESSIBILITY_FOCUS_FORWARD:
-            case View.ACCESSIBILITY_FOCUS_BACKWARD:
                 return;
             default:
                 throw new IllegalArgumentException("Unknown direction: " + direction);
