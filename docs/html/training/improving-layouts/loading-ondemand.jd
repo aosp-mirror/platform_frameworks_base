@@ -24,7 +24,8 @@ next.link=smooth-scrolling.html
 <!-- other docs (NOT javadocs) -->
 <h2>You should also read</h2>
 <ul>
-  <li><a href="{@docRoot}resources/articles/layout-tricks-stubs.html">Using ViewStubs</a></li>
+  <li><a href="http://android-developers.blogspot.com/2009/03/android-layout-tricks-3-optimize-with.html"
+         >Optimize with stubs (blog post)</a></li>
 </ul>
 
 </div>

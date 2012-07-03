@@ -49,9 +49,6 @@ import com.android.internal.R;
  * <p>
  * Views given to the Gallery should use {@link Gallery.LayoutParams} as their
  * layout parameters type.
- *
- * <p>See the <a href="{@docRoot}resources/tutorials/views/hello-gallery.html">Gallery
- * tutorial</a>.</p>
  * 
  * @attr ref android.R.styleable#Gallery_animationDuration
  * @attr ref android.R.styleable#Gallery_spacing

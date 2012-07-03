@@ -45,8 +45,6 @@ import java.util.List;
  * page. The individual elements are typically controlled using this container object, rather than
  * setting values on the child elements themselves.
  *
- * <p>See the <a href="{@docRoot}resources/tutorials/views/hello-tabwidget.html">Tab Layout
- * tutorial</a>.</p>
  */
 public class TabHost extends FrameLayout implements ViewTreeObserver.OnTouchModeChangeListener {
 

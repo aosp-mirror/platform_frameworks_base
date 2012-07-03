@@ -401,7 +401,7 @@ page.title=Creating a Content Provider
 </p>
 <p>
     The method {@link android.content.UriMatcher#addURI(String, String, int) addURI()} maps an
-    authority and path to an integer value. The method android.content.UriMatcher#match(Uri)
+    authority and path to an integer value. The method {@link android.content.UriMatcher#match(Uri)
     match()} returns the integer value for a URI. A <code>switch</code> statement
     chooses between querying the entire table, and querying for a single record:
 </p>
