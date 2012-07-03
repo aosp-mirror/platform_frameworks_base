@@ -60,7 +60,7 @@ import java.io.PrintWriter;
  *
  * <p>DialogFragment needs to ensure that what is happening with the Fragment
  * and Dialog states remains consistent.  To do this, it watches for dismiss
- * events from the dialog and takes are of removing its own state when they
+ * events from the dialog and takes care of removing its own state when they
  * happen.  This means you should use {@link #show(FragmentManager, String)}
  * or {@link #show(FragmentTransaction, String)} to add an instance of
  * DialogFragment to your UI, as these keep track of how DialogFragment should

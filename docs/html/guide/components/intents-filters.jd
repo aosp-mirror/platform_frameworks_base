@@ -654,8 +654,8 @@ category:
 </p>
 
 <pre>&lt;intent-filter . . . &gt;
-    &lt;action android:name="code android.intent.action.MAIN" /&gt;
-    &lt;category android:name="code android.intent.category.LAUNCHER" /&gt;
+    &lt;action android:name="android.intent.action.MAIN" /&gt;
+    &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
 &lt;/intent-filter&gt;</pre>
 
 
