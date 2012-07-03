@@ -183,7 +183,7 @@ resource type&mdash;for example, the string resource uses the same name.)</p>
 <p>The plus-symbol (<code>+</code>) is needed only when you're defining a resource ID for the
 first time. It tells the SDK tools that the resource ID needs to be created. Thus, when the app is
 compiled, the SDK tools use the ID value, <code>edit_message</code>, to create a new identifier in
-your project's {@code gen/R.java} file that is now assiciated with the {@link
+your project's {@code gen/R.java} file that is now associated with the {@link
 android.widget.EditText} element. Once the resource ID is created, other references to the ID do not
 need the plus symbol. This is the only attribute that may need the plus-symbol. See the sidebox for
 more information about resource objects.</p></dd>
@@ -289,7 +289,7 @@ android:layout_weight}</a> attribute.</p>
 
 <p>The weight value allows you to specify the amount of remaining space each view should consume,
 relative to the amount consumed by sibling views, just like the ingredients in a drink recipe: "2
-parts vodka, 1 part coffee liquer" means two-thirds of the drink is vodka. For example, if you give
+parts vodka, 1 part coffee liqueur" means two-thirds of the drink is vodka. For example, if you give
 one view a weight of 2 and another one a weight of 1, the sum is 3, so the first view gets 2/3 of
 the remaining space and the second view gets the rest. If you give a third view a weight of 1,
 then the first view now gets 1/2 the remaining space, while the remaining two each get 1/4.</p>
