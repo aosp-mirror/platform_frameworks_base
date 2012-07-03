@@ -930,8 +930,10 @@
     <string name="copyUrl" msgid="2538211579596067402">"Kopyahin ang URL"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"Pumili ng teksto"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Pagpili ng teksto"</string>
-    <string name="addToDictionary" msgid="9090375111134433012">"idagdag sa diksyunaryo"</string>
-    <string name="deleteText" msgid="7070985395199629156">"tanggalin"</string>
+    <!-- no translation found for addToDictionary (4352161534510057874) -->
+    <skip />
+    <!-- no translation found for deleteText (6979668428458199034) -->
+    <skip />
     <string name="inputMethod" msgid="1653630062304567879">"Pamamaraan ng pag-input"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Pagkilos ng teksto"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Nauubusan na ang puwang ng storage"</string>
