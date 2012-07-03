@@ -14,6 +14,7 @@ parent.link=manifest-intro.html
              android:<a href="#hwaccel">hardwareAccelerated</a>=["true" | "false"]
              android:<a href="#icon">icon</a>="<i>drawable resource</i>"
              android:<a href="#killrst">killAfterRestore</a>=["true" | "false"]
+             android:<a href="#largeHeap">largeHeap</a>=["true" | "false"]
              android:<a href="#label">label</a>="<i>string resource</i>"
              android:<a href="#logo">logo</a>="<i>drawable resource</i>"
              android:<a href="#space">manageSpaceActivity</a>="<i>string</i>"
@@ -160,6 +161,19 @@ need to use this attribute.
 has finished processing its data during a full-system restore, it will be
 terminated.
 </p></dd>
+
+<dt><a name="largeHeap"></a>{@code android:largeHeap}</dt>
+<dd>Whether your application's processes should be created with a large Dalvik heap. This applies to
+all processes created for the application. It only applies to the first application loaded into a
+process; if you're using a shared user ID to allow multiple applications to use a process, they all
+must use this option consistently or they will have unpredictable results.
+<p>Most apps should not need this and should instead focus on reducing their overall memory usage for
+improved performance. Enabling this also does not guarantee a fixed increase in available memory,
+because some devices are constrained by their total available memory.</p>
+<p>To query the available memory size at runtime, use the methods {@link
+  android.app.ActivityManager#getMemoryClass()} or {@link
+  android.app.ActivityManager#getLargeMemoryClass()}.</p>
+</dd>
 
 <dt><a name="label"></a>{@code android:label}</dt>
 <dd>A user-readable label for the application as a whole, and a default 
