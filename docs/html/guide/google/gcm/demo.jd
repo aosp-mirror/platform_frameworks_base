@@ -74,11 +74,11 @@ page.title=GCM Demo Application
   <li> From the SDK Manager, install <strong>Extras &gt; Google Cloud Messaging for Android Library</strong>.
     
     
-    <p>This creates a <code>gcm</code> directory under <code><em>YOUR_SDK_ROOT</em>/extras/google/</code> containing these subdirectories: <code>gcm-client</code>, <code>gcm-demo-appengine</code>, <code>gcm-demo-client</code>, <code>gcm-demo-server</code>, and <code>gcm-server</code>.</p>
+    <p>This creates a <code>gcm</code> directory under <code><em>YOUR_SDK_ROOT</em>/extras/google/</code> containing these subdirectories: <code>gcm-client</code>, <code>gcm-server</code>, <code>samples/gcm-demo-client</code>, <code>samples/gcm-demo-server</code>, and <code>samples/gcm-demo-appengine</code>.</p>
   </li>
 
-  <li>In a text editor, edit the <code>gcm-demo-server/WebContent/WEB-INF/classes/api.key</code> and replace the existing text with the API key obtained above.</li>
-  <li>In a shell window, go to the <code>gcm-demo-server</code> directory.</li>
+  <li>In a text editor, edit the <code>samples/gcm-demo-server/WebContent/WEB-INF/classes/api.key</code> and replace the existing text with the API key obtained above.</li>
+  <li>In a shell window, go to the <code>samples/gcm-demo-server</code> directory.</li>
   <li>Generate the server's WAR file by running <code>ant war</code>:</li>
   
   <pre class="prettyprint">$ ant war
@@ -112,13 +112,13 @@ Total time: 0 seconds
 <p>To set up the server using a standard App Engine for Java:</p>
 <ol>
   <li> From the SDK Manager, install <strong>Extras &gt; Google Cloud Messaging for Android Library</strong>.
-    <p>This creates a <code>gcm</code> directory under <code><em>YOUR_SDK_ROOT</em>/extras/google/</code> containing these subdirectories: <code>gcm-client</code>, <code>gcm-demo-appengine</code>, <code>gcm-demo-client</code>, <code>gcm-demo-server</code>, and <code>gcm-server</code>.</p>
+    <p>This creates a <code>gcm</code> directory under <code><em>YOUR_SDK_ROOT</em>/extras/google/</code> containing these subdirectories: <code>gcm-client</code>, <code>gcm-server</code>, <code>samples/gcm-demo-client</code>, <code>samples/gcm-demo-server</code>, and <code>samples/gcm-demo-appengine</code>.</p>
   </li>
-  <li>In a text editor, edit the <code>gcm-demo-appengine/src/com/google/android/gcm/demo/server/ApiKeyInitializer.java</code> and replace the existing text with the API key obtained above.
+  <li>In a text editor, edit <code>samples/gcm-demo-appengine/src/com/google/android/gcm/demo/server/ApiKeyInitializer.java</code> and replace the existing text with the API key obtained above.
   <p class="note"><strong>Note:</strong> The API key value set in that class will be used just once to create a persistent entity on App Engine. If you deploy the application, you can use App Engine's <code>Datastore Viewer</code> to change it later.</p>
   
   </li>
-  <li>In a shell window, go to the <code>gcm-api-server</code> directory.</li>
+  <li>In a shell window, go to the <code>samples/gcm-demo-appengine</code> directory.</li>
   <li>Start the development App Engine server by <code>ant runserver</code>, using the <code>-Dsdk.dir</code> to indicate the location of the App Engine SDK and <code>-Dserver.host</code> to set your server's hostname or IP address:</li>
 
 <pre class="prettyprint">
@@ -163,9 +163,9 @@ runserver:
 <p>To set up the device:</p>
 <ol>
   <li> From the SDK Manager, install <strong>Extras &gt; Google Cloud Messaging for Android Library</strong>.
-    <p>This creates a <code>gcm</code> directory under <code><em>YOUR_SDK_ROOT</em>/extras/google</code> containing these subdirectories: <code>gcm-client</code>, <code>gcm-demo-appengine</code>, <code>gcm-demo-client</code>, <code>gcm-demo-server</code>, <code>gcm-server</code>, and <code>source.properties</code>.</p>
+    <p>This creates a <code>gcm</code> directory under <code><em>YOUR_SDK_ROOT</em>/extras/google</code> containing these subdirectories: <code>gcm-client</code>, <code>gcm-server</code>, <code>samples/gcm-demo-client</code>, <code>samples/gcm-demo-server</code>, and <code>samples/gcm-demo-appengine</code>.</p>
   </li>
-  <li>Using a text editor, open  <code>gcm-demo-client/src/com/google/android/gcm/demo/app/CommonUtilities.java</code> and set the proper values for the <code>SENDER_ID</code> and <code>SERVER_URL</code> constants. For example:</li>
+  <li>Using a text editor, open  <code>samples/gcm-demo-client/src/com/google/android/gcm/demo/app/CommonUtilities.java</code> and set the proper values for the <code>SENDER_ID</code> and <code>SERVER_URL</code> constants. For example:</li>
 
 <pre class="prettyprint pretty-java">
 static final String SERVER_URL = &quot;http://192.168.1.10:8080/gcm-demo&quot;;
