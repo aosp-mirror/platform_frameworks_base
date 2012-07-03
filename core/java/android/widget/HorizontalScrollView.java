@@ -47,18 +47,13 @@ import java.util.List;
  * is a {@link LinearLayout} in a horizontal orientation, presenting a horizontal
  * array of top-level items that the user can scroll through.
  *
- * <p>You should never use a HorizontalScrollView with a {@link ListView}, since
- * ListView takes care of its own scrolling.  Most importantly, doing this
- * defeats all of the important optimizations in ListView for dealing with
- * large lists, since it effectively forces the ListView to display its entire
- * list of items to fill up the infinite container supplied by HorizontalScrollView.
- *
  * <p>The {@link TextView} class also
- * takes care of its own scrolling, so does not require a ScrollView, but
+ * takes care of its own scrolling, so does not require a HorizontalScrollView, but
  * using the two together is possible to achieve the effect of a text view
  * within a larger container.
  *
- * <p>HorizontalScrollView only supports horizontal scrolling.
+ * <p>HorizontalScrollView only supports horizontal scrolling. For vertical scrolling,
+ * use either {@link ScrollView} or {@link ListView}.
  *
  * @attr ref android.R.styleable#HorizontalScrollView_fillViewport
  */
