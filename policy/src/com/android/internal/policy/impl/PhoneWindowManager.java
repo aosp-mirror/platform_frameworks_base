@@ -65,7 +65,6 @@ import com.android.internal.telephony.ITelephony;
 import com.android.internal.widget.PointerLocationView;
 
 import android.service.dreams.IDreamManager;
-import android.speech.RecognizerIntent;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
@@ -161,6 +160,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final boolean localLOGV = false;
     static final boolean DEBUG_LAYOUT = false;
     static final boolean DEBUG_INPUT = false;
+    static final boolean DEBUG_STARTING_WINDOW = false;
     static final boolean SHOW_STARTING_ANIMATIONS = true;
     static final boolean SHOW_PROCESSES_ON_ALT_MENU = false;
 
@@ -1479,8 +1479,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         try {
             Context context = mContext;
-            //Log.i(TAG, "addStartingWindow " + packageName + ": nonLocalizedLabel="
-            //        + nonLocalizedLabel + " theme=" + Integer.toHexString(theme));
+            if (DEBUG_STARTING_WINDOW) Slog.d(TAG, "addStartingWindow " + packageName
+                    + ": nonLocalizedLabel=" + nonLocalizedLabel + " theme="
+                    + Integer.toHexString(theme));
             if (theme != context.getThemeResId() || labelRes != 0) {
                 try {
                     context = context.createPackageContext(packageName, 0);
@@ -1547,7 +1548,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 return null;
             }
 
-            if (localLOGV) Log.v(
+            if (DEBUG_STARTING_WINDOW) Slog.d(
                 TAG, "Adding starting window for " + packageName
                 + " / " + appToken + ": "
                 + (view.getParent() != null ? view : null));
@@ -1572,11 +1573,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** {@inheritDoc} */
     public void removeStartingWindow(IBinder appToken, View window) {
-        // RuntimeException e = new RuntimeException();
-        // Log.i(TAG, "remove " + appToken + " " + window, e);
-
-        if (localLOGV) Log.v(
-            TAG, "Removing starting window for " + appToken + ": " + window);
+        if (DEBUG_STARTING_WINDOW) {
+            RuntimeException e = new RuntimeException("here");
+            e.fillInStackTrace();
+            Log.v(TAG, "Removing starting window for " + appToken + ": " + window, e);
+        }
 
         if (window != null) {
             WindowManager wm = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
