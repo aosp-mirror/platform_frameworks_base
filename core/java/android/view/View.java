@@ -4496,11 +4496,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param text The announcement text.
      */
     public void announceForAccessibility(CharSequence text) {
-        if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+        if (AccessibilityManager.getInstance(mContext).isEnabled() && mParent != null) {
             AccessibilityEvent event = AccessibilityEvent.obtain(
                     AccessibilityEvent.TYPE_ANNOUNCEMENT);
+            onInitializeAccessibilityEvent(event);
             event.getText().add(text);
-            sendAccessibilityEventUnchecked(event);
+            event.setContentDescription(null);
+            mParent.requestSendAccessibilityEvent(this, event);
         }
     }
 
