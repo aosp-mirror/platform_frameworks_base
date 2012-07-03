@@ -2291,6 +2291,8 @@ public class WindowManagerService extends IWindowManager.Stub
             if (attrs.type == TYPE_APPLICATION_STARTING &&
                     token.appWindowToken != null) {
                 token.appWindowToken.startingWindow = win;
+                if (DEBUG_STARTING_WINDOW) Slog.v (TAG, "addWindow: " + token.appWindowToken
+                        + " startingWindow=" + win);
             }
 
             boolean imMayMove = true;
@@ -2514,10 +2516,12 @@ public class WindowManagerService extends IWindowManager.Stub
 
         if (atoken != null) {
             if (atoken.startingWindow == win) {
+                if (DEBUG_STARTING_WINDOW) Slog.v(TAG, "Nulling startingWindow " + win);
                 atoken.startingWindow = null;
             } else if (atoken.allAppWindows.size() == 0 && atoken.startingData != null) {
                 // If this is the last window and we had requested a starting
                 // transition window, well there is no point now.
+                if (DEBUG_STARTING_WINDOW) Slog.v(TAG, "Nulling last startingWindow");
                 atoken.startingData = null;
             } else if (atoken.allAppWindows.size() == 1 && atoken.startingView != null) {
                 // If this is the last window except for a starting transition
@@ -7038,6 +7042,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             wtoken.startingData = null;
                             wtoken.startingView = null;
                             wtoken.startingWindow = null;
+                            wtoken.startingDisplayed = false;
                         }
                     }
                     if (view != null) {
@@ -7074,6 +7079,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             wtoken.startingData = null;
                             wtoken.startingView = null;
                             wtoken.startingWindow = null;
+                            wtoken.startingDisplayed = false;
                         }
 
                         try {
