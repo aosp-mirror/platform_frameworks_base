@@ -68,6 +68,7 @@ extern int register_android_graphics_YuvImage(JNIEnv* env);
 
 extern int register_com_google_android_gles_jni_EGLImpl(JNIEnv* env);
 extern int register_com_google_android_gles_jni_GLImpl(JNIEnv* env);
+extern int register_android_opengl_jni_EGL14(JNIEnv* env);
 extern int register_android_opengl_jni_GLES10(JNIEnv* env);
 extern int register_android_opengl_jni_GLES10Ext(JNIEnv* env);
 extern int register_android_opengl_jni_GLES11(JNIEnv* env);
@@ -1105,6 +1106,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_view_TextureView),
     REG_JNI(register_com_google_android_gles_jni_EGLImpl),
     REG_JNI(register_com_google_android_gles_jni_GLImpl),
+    REG_JNI(register_android_opengl_jni_EGL14),
     REG_JNI(register_android_opengl_jni_GLES10),
     REG_JNI(register_android_opengl_jni_GLES10Ext),
     REG_JNI(register_android_opengl_jni_GLES11),
