@@ -455,7 +455,7 @@ String[] mSelectionArgs = {""};
 <p>
     In the next snippet, if the user doesn't enter a word, the selection clause is set to
     <code>null</code>, and the query returns all the words in the provider. If the user enters
-    a word, the selection clause is set to <code>UserDictionary.Words.Word + " = ?"</code> and
+    a word, the selection clause is set to <code>UserDictionary.Words.WORD + " = ?"</code> and
     the first element of selection arguments array is set to the word the user enters.
 </p>
 <pre class="prettyprint">
@@ -477,7 +477,7 @@ if (TextUtils.isEmpty(mSearchString)) {
 
 } else {
     // Constructs a selection clause that matches the word that the user entered.
-    mSelectionClause = " = ?";
+    mSelectionClause = UserDictionary.Words.WORD + " = ?";
 
     // Moves the user's input string to the selection arguments.
     mSelectionArgs[0] = mSearchString;
