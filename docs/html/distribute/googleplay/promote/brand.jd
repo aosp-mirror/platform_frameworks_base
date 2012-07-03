@@ -93,19 +93,19 @@ any way you want, provided that you follow the guidelines described below.</p>
 <div style="clear:both">
   <div style="float:right;width:50%;padding:1.5em;">
     <p>
-      <img alt="Google Play logo" src="{@docRoot}images/brand/google_play_logo_450.png">
+      <img alt="Google Play logo" src="http://www.android.com/images/brand/google_play_logo_450.png">
     </p>
     <p>
     <img alt="Get it on Google Play badge, large" src=
-            "/images/brand/get_it_on_play_logo_large.png"><br>
-            Download: <a href="{@docRoot}images/brand/get_it_on_play_logo_small.png">Small</a> | <a href=
-            "/images/brand/get_it_on_play_logo_large.png">Large</a>
+            "http://www.android.com/images/brand/get_it_on_play_logo_large.png"><br>
+            Download: <a href="http://www.android.com/images/brand/get_it_on_play_logo_small.png">Small</a> | <a href=
+            "http://www.android.com/images/brand/get_it_on_play_logo_large.png">Large</a>
           </p>
           <p>
             <img alt="Android App on Google Play badge, large" src=
-            "/images/brand/android_app_on_play_logo_large.png"><br>
-            Download: <a href="{@docRoot}images/brand/android_app_on_play_logo_small.png">Small</a> |
-            <a href="{@docRoot}images/brand/android_app_on_play_large.png">Large</a>
+            "http://www.android.com/images/brand/android_app_on_play_logo_large.png"><br>
+            Download: <a href="http://www.android.com/images/brand/android_app_on_play_logo_small.png">Small</a> |
+            <a href="http://www.android.com/images/brand/android_app_on_play_large.png">Large</a>
           </p>
   </div> 
         
@@ -140,20 +140,20 @@ any way you want, provided that you follow the guidelines described below.</p>
      <ul>
             <li>When used online, the badge logo should be used to direct users to:
               <ul>
-                <li>The Google Play landing page: <br /><span style="margin-left:1em;"><a href=
-                "http://play.google.com/">play.google.com</a></span>
+                <li>The Google Play landing page: <br />
+                  <span style="margin-left:1em;">http://play.google.com</span>
                 </li>
-                <li>The Google Play Apps landing page: <br /><a href="http://play.google.com/store/apps">
-                 <span style="margin-left:1em;"> play.google.com/store/apps</a></span>
+                <li>The Google Play Apps landing page: <br />
+                 <span style="margin-left:1em;">http://play.google.com/store/apps</span>
                 </li>
                 <li>A list of products that include your company name, for example, <br />
                 <span style="margin-left:1em;">http://play.google.com/store/search?q=<em>yourCompanyName</em></span>
                 </li>
                 <li>A list of products published by you, for example,<br />
-                <span style="margin-left:1em;">play.google.com/store/search?q=<em>publisherName</em>M/span>
+                <span style="margin-left:1em;">http://play.google.com/store/search?q=<em>publisherName</em>M/span>
                 </li>
                 <li>A specific app product details page within Google Play, for example,<br />
-                <span style="margin-left:1em;">play.google.com/store/apps/details?id=<em>packageName</em></span>
+                <span style="margin-left:1em;">http://play.google.com/store/apps/details?id=<em>packageName</em></span>
                 </li>
               </ul>
             </li>

@@ -663,7 +663,7 @@ android.app.Notification#PRIORITY_DEFAULT}, and there's two levels higher and tw
 
 <p>High priority notifications are things that users generally want to respond to quickly,
 such as a new instant message, text message, or impending event reminder. Low priority
-notifications are things like </p>
+notifications are things like expired calendar events or app promotions.</p>
 
 <h3 id="SystemUI">Controls for system UI</h3>
 

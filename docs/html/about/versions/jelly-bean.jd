@@ -141,7 +141,7 @@ like those shown in the examples above to display rich content and actions.</p>
 <li>BigPictureStyle &mdash; a notification that showcases visual content such as a bitmap.</li>
 </ul>
 
-<p>In addition to the templated styles, you can create you own notification styles <strong>using any remote View</strong>.</p>
+<p>In addition to the templated styles, you can create your own notification styles <strong>using any remote View</strong>.</p>
 
 <p>Apps can add up to three <strong>actions</strong> to a notification, which are displayed below the notification content. The actions let the users respond directly to the information in the notification in alternative ways. such as by email or by phone call, without visiting the app.</p>
 
@@ -243,17 +243,17 @@ style="font-weight:500;">App Widgets</span> can resize automatically to fit the 
 
 <p>In Android 4.1, Android Beam makes it easier to share images, videos, or other payloads by <strong>leveraging Bluetooth for the data transfer</strong>. When the user triggers a transfer, Android Beam hands over from NFC to Bluetooth, making it really easy to manage the transfer of a file from one device to another.</p>
 
-<h3>Wi-fi Network Service Discovery</h3>
+<h3>Wi-Fi Network Service Discovery</h3>
 
 <p>Android 4.1 introduces support for multicast <strong>DNS-based service discovery</strong>, which lets applications find and connect to services offered by peer devices over Wi-Fi networks &mdash; including mobile devices, printers, cameras, media players, and others. Developers can take advantage of Wi-Fi network service discovery to build cross-platform or multiplayer games and application experiences.</p>
 
 <p>Using the service discovery API, apps can create and register any kind of service, for any other NSD-enabled device to discover. The service is advertised by multicast across the network using a human-readable string identifier, which lets user more easily identify the type of service.  </p>
 
-<p>Consumer devices can use the API to scan and discover services available from devices connected to the local Wi-Fi network. After discovery, apps can use the API to resolve the service to an IP adress and port through which it can establish a socket connection.</p>
+<p>Consumer devices can use the API to scan and discover services available from devices connected to the local Wi-Fi network. After discovery, apps can use the API to resolve the service to an IP address and port through which it can establish a socket connection.</p>
 
 <p>You can take advantage of this API to build new features into your apps. For example, you could let users connect to a webcam, a printer, or an app on another mobile device that supports Wi-Fi peer-to-peer connections.  </p>
 
-<h3>Wifi-Direct Service Discovery</h3>
+<h3>Wi-Fi Direct Service Discovery</h3>
 
 <p>Ice Cream Sandwich introduced support for Wi-Fi Direct, a technology that lets apps <strong>discover and pair directly</strong>, over a high-bandwidth peer-to-peer connection. Wi-Fi Direct is an ideal way to share media, photos, files and other types of data and sessions, even where there is no cell network or Wi-Fi available.</p>
 

@@ -32,7 +32,7 @@ href="{@docRoot}guide/topics/resources/runtime-changes.html">Handling Runtime Ch
 
 <p>There are a few scenarios in which your activity is destroyed due to normal app behavior, such as
 when the user presses the <em>Back</em> button or your activity signals its own destruction by
-calling {@link android.app.Activity#finish()}. The system may also destory your activity if it's
+calling {@link android.app.Activity#finish()}. The system may also destroy your activity if it's
 currently stopped and hasn't been used in a long time or the foreground activity requires more
 resources so the system must shut down background processes to recover memory.</p>
 
