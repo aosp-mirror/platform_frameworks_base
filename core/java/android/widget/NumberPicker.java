@@ -1417,19 +1417,6 @@ public class NumberPicker extends LinearLayout {
     }
 
     @Override
-    public void addFocusables(ArrayList<View> views, int direction, int focusableMode) {
-        // We do not want the real descendant to be considered focus search
-        // since it is managed by the accessibility node provider.
-        if ((focusableMode & FOCUSABLES_ACCESSIBILITY) == FOCUSABLES_ACCESSIBILITY) {
-            if (isAccessibilityFocusable()) {
-                views.add(this);
-                return;
-            }
-        }
-        super.addFocusables(views, direction, focusableMode);
-    }
-
-    @Override
     public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
         super.onInitializeAccessibilityEvent(event);
         event.setClassName(NumberPicker.class.getName());
@@ -2295,78 +2282,6 @@ public class NumberPicker extends LinearLayout {
                 } return false;
             }
             return super.performAction(virtualViewId, action, arguments);
-        }
-
-        @Override
-        public AccessibilityNodeInfo findAccessibilityFocus(int virtualViewId) {
-            return createAccessibilityNodeInfo(mAccessibilityFocusedView);
-        }
-
-        @Override
-        public AccessibilityNodeInfo accessibilityFocusSearch(int direction, int virtualViewId) {
-            switch (direction) {
-                case View.ACCESSIBILITY_FOCUS_DOWN:
-                case View.ACCESSIBILITY_FOCUS_FORWARD: {
-                    switch (mAccessibilityFocusedView) {
-                        case UNDEFINED: {
-                            return createAccessibilityNodeInfo(View.NO_ID);
-                        }
-                        case View.NO_ID: {
-                            if (hasVirtualDecrementButton()) {
-                                return createAccessibilityNodeInfo(VIRTUAL_VIEW_ID_DECREMENT);
-                            }
-                        }
-                        //$FALL-THROUGH$
-                        case VIRTUAL_VIEW_ID_DECREMENT: {
-                            return createAccessibilityNodeInfo(VIRTUAL_VIEW_ID_INPUT);
-                        }
-                        case VIRTUAL_VIEW_ID_INPUT: {
-                            if (hasVirtualIncrementButton()) {
-                                return createAccessibilityNodeInfo(VIRTUAL_VIEW_ID_INCREMENT);
-                            }
-                        }
-                        //$FALL-THROUGH$
-                        case VIRTUAL_VIEW_ID_INCREMENT: {
-                            View nextFocus = NumberPicker.this.focusSearch(direction);
-                            if (nextFocus != null) {
-                                return nextFocus.createAccessibilityNodeInfo();
-                            }
-                            return null;
-                        }
-                    }
-                } break;
-                case View.ACCESSIBILITY_FOCUS_UP:
-                case View.ACCESSIBILITY_FOCUS_BACKWARD: {
-                    switch (mAccessibilityFocusedView) {
-                        case UNDEFINED: {
-                            return createAccessibilityNodeInfo(View.NO_ID);
-                        }
-                        case View.NO_ID: {
-                            if (hasVirtualIncrementButton()) {
-                                return createAccessibilityNodeInfo(VIRTUAL_VIEW_ID_INCREMENT);
-                            }
-                        }
-                        //$FALL-THROUGH$
-                        case VIRTUAL_VIEW_ID_INCREMENT: {
-                            return createAccessibilityNodeInfo(VIRTUAL_VIEW_ID_INPUT);
-                        }
-                        case VIRTUAL_VIEW_ID_INPUT: {
-                            if (hasVirtualDecrementButton()) {
-                                return createAccessibilityNodeInfo(VIRTUAL_VIEW_ID_DECREMENT);
-                            }
-                        }
-                        //$FALL-THROUGH$
-                        case VIRTUAL_VIEW_ID_DECREMENT: {
-                            View nextFocus = NumberPicker.this.focusSearch(direction);
-                            if (nextFocus != null) {
-                                return nextFocus.createAccessibilityNodeInfo();
-                            }
-                            return null;
-                        }
-                    }
-                } break;
-            }
-            return null;
         }
 
         public void sendAccessibilityEventForVirtualView(int virtualViewId, int eventType) {
