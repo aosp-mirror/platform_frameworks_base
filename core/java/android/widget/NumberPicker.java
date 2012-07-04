@@ -2421,14 +2421,22 @@ public class NumberPicker extends LinearLayout {
             info.setParent((View) getParentForAccessibility());
             info.setEnabled(NumberPicker.this.isEnabled());
             info.setScrollable(true);
+
+            final float applicationScale =
+                getContext().getResources().getCompatibilityInfo().applicationScale;
+
             Rect boundsInParent = mTempRect;
             boundsInParent.set(left, top, right, bottom);
+            boundsInParent.scale(applicationScale);
             info.setBoundsInParent(boundsInParent);
+
             info.setVisibleToUser(isVisibleToUser());
+
             Rect boundsInScreen = boundsInParent;
             int[] locationOnScreen = mTempArray;
             getLocationOnScreen(locationOnScreen);
             boundsInScreen.offset(locationOnScreen[0], locationOnScreen[1]);
+            boundsInScreen.scale(applicationScale);
             info.setBoundsInScreen(boundsInScreen);
 
             if (mAccessibilityFocusedView != View.NO_ID) {
