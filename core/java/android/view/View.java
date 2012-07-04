@@ -4820,10 +4820,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
         Rect bounds = mAttachInfo.mTmpInvalRect;
+        final float applicationScale = mAttachInfo.mApplicationScale;
+
         getDrawingRect(bounds);
+        bounds.scale(applicationScale);
         info.setBoundsInParent(bounds);
 
         getBoundsOnScreen(bounds);
+        bounds.scale(applicationScale);
         info.setBoundsInScreen(bounds);
 
         ViewParent parent = getParentForAccessibility();
