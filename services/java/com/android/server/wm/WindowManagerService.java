@@ -2045,11 +2045,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    // TODO(cmautner):  Move to WindowAnimator.
-    void setWallpaperOffset(final WindowStateAnimator winAnimator, final int left, final int top) {
-        mH.sendMessage(mH.obtainMessage(H.SET_WALLPAPER_OFFSET, left, top, winAnimator));
-    }
-
     void updateWallpaperOffsetLocked(WindowState changingTarget, boolean sync) {
         final int dw = mAppDisplayWidth;
         final int dh = mAppDisplayHeight;
@@ -2084,19 +2079,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     // TODO(cmautner): Don't move this from here, just lock the WindowAnimator.
                     if (winAnimator.mSurfaceX != wallpaper.mShownFrame.left
                             || winAnimator.mSurfaceY != wallpaper.mShownFrame.top) {
-                        Surface.openTransaction();
-                        try {
-                            if (SHOW_TRANSACTIONS) logSurface(wallpaper,
-                                    "POS " + wallpaper.mShownFrame.left
-                                    + ", " + wallpaper.mShownFrame.top, null);
-                            setWallpaperOffset(winAnimator, (int) wallpaper.mShownFrame.left,
+                        winAnimator.setWallpaperOffset((int) wallpaper.mShownFrame.left,
                                 (int) wallpaper.mShownFrame.top);
-                        } catch (RuntimeException e) {
-                            Slog.w(TAG, "Error positioning surface of " + wallpaper
-                                    + " pos=(" + wallpaper.mShownFrame.left
-                                    + "," + wallpaper.mShownFrame.top + ")", e);
-                        }
-                        Surface.closeTransaction();
                     }
                     // We only want to be synchronous with one wallpaper.
                     sync = false;
@@ -6913,8 +6897,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         public static final int ANIMATOR_WHAT_OFFSET = 100000;
         public static final int SET_TRANSPARENT_REGION = ANIMATOR_WHAT_OFFSET + 1;
-        public static final int SET_WALLPAPER_OFFSET = ANIMATOR_WHAT_OFFSET + 2;
-        public static final int CLEAR_PENDING_ACTIONS = ANIMATOR_WHAT_OFFSET + 3;
+        public static final int CLEAR_PENDING_ACTIONS = ANIMATOR_WHAT_OFFSET + 2;
 
         private Session mLastReportedHold;
 
@@ -7400,14 +7383,6 @@ public class WindowManagerService extends IWindowManager.Stub
                                 (Pair<WindowStateAnimator, Region>) msg.obj;
                     final WindowStateAnimator winAnimator = pair.first;
                     winAnimator.setTransparentRegionHint(pair.second);
-                    break;
-                }
-
-                case SET_WALLPAPER_OFFSET: {
-                    final WindowStateAnimator winAnimator = (WindowStateAnimator) msg.obj;
-                    winAnimator.setWallpaperOffset(msg.arg1, msg.arg2);
-
-                    scheduleAnimationLocked();
                     break;
                 }
 
