@@ -34,13 +34,17 @@ import java.util.Calendar;
  *
  * FIXME: implement separate views for hours/minutes/seconds, so
  * proportional fonts don't shake rendering
+ * 
+ * @deprecated It is recommended you use a {@link TextView} and {@link DateFormat}
+ * to implement the same behavior.
  */
-
+@Deprecated
 public class DigitalClock extends TextView {
 
     Calendar mCalendar;
     private final static String m12 = "h:mm:ss aa";
     private final static String m24 = "k:mm:ss";
+    @SuppressWarnings("FieldCanBeLocal") // We must keep a reference to this observer
     private FormatChangeObserver mFormatChangeObserver;
 
     private Runnable mTicker;
@@ -52,17 +56,15 @@ public class DigitalClock extends TextView {
 
     public DigitalClock(Context context) {
         super(context);
-        initClock(context);
+        initClock();
     }
 
     public DigitalClock(Context context, AttributeSet attrs) {
         super(context, attrs);
-        initClock(context);
+        initClock();
     }
 
-    private void initClock(Context context) {
-        Resources r = mContext.getResources();
-
+    private void initClock() {
         if (mCalendar == null) {
             mCalendar = Calendar.getInstance();
         }

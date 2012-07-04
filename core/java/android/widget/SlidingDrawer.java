@@ -78,7 +78,12 @@ import android.view.accessibility.AccessibilityNodeInfo;
  * @attr ref android.R.styleable#SlidingDrawer_orientation
  * @attr ref android.R.styleable#SlidingDrawer_allowSingleTap
  * @attr ref android.R.styleable#SlidingDrawer_animateOnClick
+ * 
+ * @deprecated This class is not supported anymore. It is recommended you
+ * base your own implementation on the source code for the Android Open
+ * Source Project if you must use it in your application.
  */
+@Deprecated
 public class SlidingDrawer extends ViewGroup {
     public static final int ORIENTATION_HORIZONTAL = 0;
     public static final int ORIENTATION_VERTICAL = 1;
