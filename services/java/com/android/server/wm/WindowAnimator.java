@@ -10,17 +10,19 @@ import static com.android.server.wm.WindowManagerService.LayoutFields.SET_WALLPA
 import static com.android.server.wm.WindowManagerService.LayoutFields.SET_FORCE_HIDING_CHANGED;
 
 import static com.android.server.wm.WindowManagerService.H.SET_DIM_PARAMETERS;
+import static com.android.server.wm.WindowManagerService.H.UPDATE_ANIM_PARAMETERS;
 
 import android.content.Context;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.Slog;
-import android.view.Choreographer;
 import android.view.Surface;
 import android.view.WindowManagerPolicy;
 import android.view.animation.Animation;
 
 import com.android.internal.policy.impl.PhoneWindowManager;
+import com.android.server.wm.WindowManagerService.AnimatorToLayoutParams;
+import com.android.server.wm.WindowManagerService.LayoutToAnimatorParams;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -36,21 +38,9 @@ public class WindowAnimator {
     final Context mContext;
     final WindowManagerPolicy mPolicy;
 
-    final Choreographer mChoreographer = Choreographer.getInstance();
-
     ArrayList<WindowStateAnimator> mWinAnimators = new ArrayList<WindowStateAnimator>();
 
     boolean mAnimating;
-
-    static class LayoutToAnimatorParams {
-        boolean mAnimationScheduled;
-        ArrayList<WindowStateAnimator> mWinAnimators = new ArrayList<WindowStateAnimator>();
-        WindowState mWallpaperTarget;
-    }
-    /** Params from WindowManagerService. Do not modify or read without first locking on
-     * either WindowManagerService.mWindowMap or WindowManagerService.mAnimator.and then on
-     * mLayoutToAnim */
-    final LayoutToAnimatorParams mLayoutToAnim = new LayoutToAnimatorParams();
 
     final Runnable mAnimationRunnable;
 
@@ -95,6 +85,8 @@ public class WindowAnimator {
 
     WindowState mWallpaperTarget = null;
 
+    final AnimatorToLayoutParams mAnimToLayout = new AnimatorToLayoutParams();
+
     WindowAnimator(final WindowManagerService service, final Context context,
             final WindowManagerPolicy policy) {
         mService = service;
@@ -118,24 +110,29 @@ public class WindowAnimator {
         mWindowAnimationBackgroundSurface = new DimSurface(mService.mFxSession);
     }
 
+    /** Locked on mAnimToLayout */
+    void updateAnimToLayoutLocked() {
+        final AnimatorToLayoutParams animToLayout = mAnimToLayout;
+        synchronized (animToLayout) {
+            animToLayout.mBulkUpdateParams = mBulkUpdateParams;
+            animToLayout.mPendingLayoutChanges = mPendingLayoutChanges;
+            animToLayout.mWindowDetachedWallpaper = mWindowDetachedWallpaper;
+
+            if (!animToLayout.mUpdateQueued) {
+                animToLayout.mUpdateQueued = true;
+                mService.mH.sendMessage(mService.mH.obtainMessage(UPDATE_ANIM_PARAMETERS));
+            }
+        }
+    }
+
     /** Copy all WindowManagerService params into local params here. Locked on 'this'. */
     private void copyLayoutToAnimParamsLocked() {
-        final LayoutToAnimatorParams layoutToAnim = mLayoutToAnim;
+        final LayoutToAnimatorParams layoutToAnim = mService.mLayoutToAnim;
         synchronized(layoutToAnim) {
             layoutToAnim.mAnimationScheduled = false;
 
             mWinAnimators = new ArrayList<WindowStateAnimator>(layoutToAnim.mWinAnimators);
             mWallpaperTarget = layoutToAnim.mWallpaperTarget;
-        }
-    }
-
-    /** Note that Locked in this case is on mLayoutToAnim */
-    void scheduleAnimationLocked() {
-        final LayoutToAnimatorParams layoutToAnim = mLayoutToAnim;
-        if (!layoutToAnim.mAnimationScheduled) {
-            layoutToAnim.mAnimationScheduled = true;
-            mChoreographer.postCallback(
-                    Choreographer.CALLBACK_ANIMATION, mAnimationRunnable, null);
         }
     }
 
@@ -544,18 +541,12 @@ public class WindowAnimator {
         }
 
         if (mBulkUpdateParams != 0 || mPendingLayoutChanges != 0) {
-            final WindowManagerService.AnimatorToLayoutParams animToLayout = mService.mAnimToLayout;
-            synchronized (animToLayout) {
-                animToLayout.mBulkUpdateParams = mBulkUpdateParams;
-                animToLayout.mPendingLayoutChanges = mPendingLayoutChanges;
-                animToLayout.mWindowDetachedWallpaper = mWindowDetachedWallpaper;
-                mService.setAnimatorParametersLocked();
-            }
+            updateAnimToLayoutLocked();
         }
 
         if (mAnimating) {
-            synchronized (mLayoutToAnim) {
-                scheduleAnimationLocked();
+            synchronized (mService.mLayoutToAnim) {
+                mService.scheduleAnimationLocked();
             }
         } else if (wasAnimating) {
             mService.requestTraversalLocked();

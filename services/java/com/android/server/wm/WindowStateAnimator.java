@@ -1334,7 +1334,7 @@ class WindowStateAnimator {
             if (DEBUG_SURFACE_TRACE || DEBUG_ANIM)
                 Slog.v(TAG, "performShowLocked: mDrawState=HAS_DRAWN in " + this);
             mDrawState = HAS_DRAWN;
-            mService.scheduleAnimationLocked();
+            mService.updateLayoutToAnimationLocked();
 
             int i = mWin.mChildWindows.size();
             while (i > 0) {

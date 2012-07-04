@@ -98,7 +98,7 @@ import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.FloatMath;
 import android.util.Log;
-import android.util.LogPrinter;
+//import android.util.LogPrinter;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseIntArray;
@@ -648,7 +648,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
     final LayoutFields mInnerFields = new LayoutFields();
 
-    /* Parameters being passed from mAnimator into this. 
+    // TODO: Move this into WindowAnimator. For some reason it causes the H class to blow up.
+    /* Parameters being passed from mAnimator into this.
      * Do not modify unless holding (mWindowMap or mAnimator) and mAnimToLayout in that order */
     static class AnimatorToLayoutParams {
         boolean mUpdateQueued;
@@ -656,7 +657,17 @@ public class WindowManagerService extends IWindowManager.Stub
         int mPendingLayoutChanges;
         WindowState mWindowDetachedWallpaper;
     }
-    final AnimatorToLayoutParams mAnimToLayout = new AnimatorToLayoutParams();
+
+    static class LayoutToAnimatorParams {
+        boolean mAnimationScheduled;
+        ArrayList<WindowStateAnimator> mWinAnimators = new ArrayList<WindowStateAnimator>();
+        WindowState mWallpaperTarget;
+        DimAnimator.Parameters mDimParams;
+    }
+    /** Params from WindowManagerService . Do not modify or read without first locking on
+     * either WindowManagerService.mWindowMap or WindowManagerService.mAnimator.and then on
+     * mLayoutToAnim */
+    final LayoutToAnimatorParams mLayoutToAnim = new LayoutToAnimatorParams();
 
     /** The lowest wallpaper target with a detached wallpaper animation on it. */
     WindowState mWindowDetachedWallpaper = null;
@@ -841,7 +852,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public void run() {
             Looper.prepare();
             WindowManagerPolicyThread.set(this, Looper.myLooper());
-            
+
             //Looper.myLooper().setMessageLogging(new LogPrinter(
             //        Log.VERBOSE, "WindowManagerPolicy", Log.LOG_ID_SYSTEM));
             android.os.Process.setThreadPriority(
@@ -1754,7 +1765,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             mWallpaperTarget = oldW;
                             foundW = oldW;
                             foundI = oldI;
-                        } 
+                        }
                         // Now set the upper and lower wallpaper targets
                         // correctly, and make sure that we are positioning
                         // the wallpaper below the lower.
@@ -2140,7 +2151,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
     }
-    
+
     public int addWindow(Session session, IWindow client, int seq,
             WindowManager.LayoutParams attrs, int viewVisibility,
             Rect outContentInsets, InputChannel outInputChannel) {
@@ -3730,6 +3741,7 @@ public class WindowManagerService extends IWindowManager.Stub
         return ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
     }
 
+    @Override
     public Configuration updateOrientationFromAppTokens(
             Configuration currentConfig, IBinder freezeThisOneIfNeeded) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
@@ -5796,7 +5808,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (mAnimator.mScreenRotationAnimation.setRotation(rotation, mFxSession,
                         MAX_ANIMATION_DURATION, mTransitionAnimationScale,
                         mCurDisplayWidth, mCurDisplayHeight)) {
-                    scheduleAnimationLocked();
+                    updateLayoutToAnimationLocked();
                 }
             }
             Surface.setOrientation(0, rotation);
@@ -7213,8 +7225,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         synchronized (mAnimator) {
                             // Since we're holding both mWindowMap and mAnimator we don't need to
                             // hold mAnimator.mLayoutToAnim.
-                            if (mAnimator.mAnimating ||
-                                    mAnimator.mLayoutToAnim.mAnimationScheduled) {
+                            if (mAnimator.mAnimating || mLayoutToAnim.mAnimationScheduled) {
                                 // If we are animating, don't do the gc now but
                                 // delay a bit so we don't interrupt the animation.
                                 mH.sendMessageDelayed(mH.obtainMessage(H.FORCE_GC),
@@ -7332,10 +7343,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 case UPDATE_ANIM_PARAMETERS: {
                     // Used to send multiple changes from the animation side to the layout side.
                     synchronized (mWindowMap) {
-                        synchronized (mAnimToLayout) {
-                            mAnimToLayout.mUpdateQueued = false;
+                        final AnimatorToLayoutParams animToLayout = mAnimator.mAnimToLayout;
+                        synchronized (animToLayout) {
+                            animToLayout.mUpdateQueued = false;
                             boolean doRequest = false;
-                            final int bulkUpdateParams = mAnimToLayout.mBulkUpdateParams;
+                            final int bulkUpdateParams = animToLayout.mBulkUpdateParams;
                             // TODO(cmautner): As the number of bits grows, use masks of bit groups to
                             //  eliminate unnecessary tests.
                             if ((bulkUpdateParams & LayoutFields.SET_UPDATE_ROTATION) != 0) {
@@ -7362,12 +7374,12 @@ public class WindowManagerService extends IWindowManager.Stub
                                 mTurnOnScreen = true;
                             }
 
-                            mPendingLayoutChanges |= mAnimToLayout.mPendingLayoutChanges;
+                            mPendingLayoutChanges |= animToLayout.mPendingLayoutChanges;
                             if (mPendingLayoutChanges != 0) {
                                 doRequest = true;
                             }
 
-                            mWindowDetachedWallpaper = mAnimToLayout.mWindowDetachedWallpaper;
+                            mWindowDetachedWallpaper = animToLayout.mWindowDetachedWallpaper;
 
                             if (doRequest) {
                                 mH.sendEmptyMessage(CLEAR_PENDING_ACTIONS);
@@ -7812,7 +7824,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             if (layerChanged && mAnimator.isDimming(winAnimator)) {
                 // Force an animation pass just to update the mDimAnimator layer.
-                scheduleAnimationLocked();
+                updateLayoutToAnimationLocked();
             }
             if (DEBUG_LAYERS) Slog.v(TAG, "Assign layer " + w + ": "
                     + winAnimator.mAnimLayer);
@@ -9032,7 +9044,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // be enabled, because the window obscured flags have changed.
         enableScreenIfNeededLocked();
 
-        scheduleAnimationLocked();
+        updateLayoutToAnimationLocked();
 
         if (DEBUG_WINDOW_TRACE) {
             Slog.e(TAG, "performLayoutAndPlaceSurfacesLockedInner exit: mPendingLayoutChanges="
@@ -9109,8 +9121,18 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    /** Note that Locked in this case is on mLayoutToAnim */
     void scheduleAnimationLocked() {
-        final WindowAnimator.LayoutToAnimatorParams layoutToAnim = mAnimator.mLayoutToAnim;
+        final LayoutToAnimatorParams layoutToAnim = mLayoutToAnim;
+        if (!layoutToAnim.mAnimationScheduled) {
+            layoutToAnim.mAnimationScheduled = true;
+            mChoreographer.postCallback(
+                    Choreographer.CALLBACK_ANIMATION, mAnimator.mAnimationRunnable, null);
+        }
+    }
+
+    void updateLayoutToAnimationLocked() {
+        final LayoutToAnimatorParams layoutToAnim = mLayoutToAnim;
         synchronized (layoutToAnim) {
             // Copy local params to transfer params.
             ArrayList<WindowStateAnimator> winAnimators = layoutToAnim.mWinAnimators;
@@ -9123,7 +9145,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
             layoutToAnim.mWallpaperTarget = mWallpaperTarget;
-            mAnimator.scheduleAnimationLocked();
+            scheduleAnimationLocked();
         }
     }
 
@@ -9431,7 +9453,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_ORIENTATION) Slog.i(TAG, "**** Dismissing screen rotation animation");
             if (mAnimator.mScreenRotationAnimation.dismiss(mFxSession, MAX_ANIMATION_DURATION,
                     mTransitionAnimationScale, mCurDisplayWidth, mCurDisplayHeight)) {
-                scheduleAnimationLocked();
+                updateLayoutToAnimationLocked();
             } else {
                 mAnimator.mScreenRotationAnimation.kill();
                 mAnimator.mScreenRotationAnimation = null;
@@ -10207,14 +10229,6 @@ public class WindowManagerService extends IWindowManager.Stub
         if (mLayoutRepeatCount >= LAYOUT_REPEAT_THRESHOLD) {
             Slog.v(TAG, "Layouts looping: " + msg + ", mPendingLayoutChanges = 0x" +
                     Integer.toHexString(pendingLayoutChanges));
-        }
-    }
-
-    /** Locked on mAnimToLayout */
-    void setAnimatorParametersLocked() {
-        if (!mAnimToLayout.mUpdateQueued) {
-            mAnimToLayout.mUpdateQueued = true;
-            mH.sendMessage(mH.obtainMessage(H.UPDATE_ANIM_PARAMETERS));
         }
     }
 }
