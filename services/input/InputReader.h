@@ -1630,6 +1630,9 @@ private:
     VelocityControl mWheelXVelocityControl;
     VelocityControl mWheelYVelocityControl;
 
+    // The time the stylus event was processed by any TouchInputMapper
+    static nsecs_t mLastStylusTime;
+
     void sync(nsecs_t when);
 
     bool consumeRawTouches(nsecs_t when, uint32_t policyFlags);
