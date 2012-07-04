@@ -1,12 +1,1 @@
-http://developer.android.com/ja/sdk/1.5_r3/installing.html
-http://developer.android.com/ja/community/index.html
-http://developer.android.com/ja/index.html
-http://developer.android.com/ja/tools/publishing/versioning.html
-http://developer.android.com/ja/tools/publishing/app-signing.html
-http://developer.android.com/ja/tools/publishing/preparing.html
-http://developer.android.com/ja/guide/tutorials/hello-world.html
-http://developer.android.com/ja/guide/components/fundamentals.html
-http://developer.android.com/ja/guide/index.html
-http://developer.android.com/ja/guide/basics/what-is-android.html
-http://developer.android.com/ja/guide/developing/other-ide.html
-http://developer.android.com/ja/guide/developing/eclipse-adt.html
+
