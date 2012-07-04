@@ -907,7 +907,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mWinAnimator.applyAnimationLocked(WindowManagerPolicy.TRANSIT_ENTER, true);
         }
         if (requestAnim) {
-            mService.scheduleAnimationLocked();
+            mService.updateLayoutToAnimationLocked();
         }
         return true;
     }
@@ -950,7 +950,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             }
         }
         if (requestAnim) {
-            mService.scheduleAnimationLocked();
+            mService.updateLayoutToAnimationLocked();
         }
         return true;
     }
