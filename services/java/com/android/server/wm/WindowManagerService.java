@@ -6914,8 +6914,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int ANIMATOR_WHAT_OFFSET = 100000;
         public static final int SET_TRANSPARENT_REGION = ANIMATOR_WHAT_OFFSET + 1;
         public static final int SET_WALLPAPER_OFFSET = ANIMATOR_WHAT_OFFSET + 2;
-        public static final int SET_DIM_PARAMETERS = ANIMATOR_WHAT_OFFSET + 3;
-        public static final int CLEAR_PENDING_ACTIONS = ANIMATOR_WHAT_OFFSET + 4;
+        public static final int CLEAR_PENDING_ACTIONS = ANIMATOR_WHAT_OFFSET + 3;
 
         private Session mLastReportedHold;
 
@@ -7407,13 +7406,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 case SET_WALLPAPER_OFFSET: {
                     final WindowStateAnimator winAnimator = (WindowStateAnimator) msg.obj;
                     winAnimator.setWallpaperOffset(msg.arg1, msg.arg2);
-
-                    scheduleAnimationLocked();
-                    break;
-                }
-
-                case SET_DIM_PARAMETERS: {
-                    mAnimator.mDimParams = (DimAnimator.Parameters) msg.obj;
 
                     scheduleAnimationLocked();
                     break;
@@ -8539,8 +8531,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         width = innerDw;
                         height = innerDh;
                     }
-                    mAnimator.startDimming(winAnimator, w.mExiting ? 0 : w.mAttrs.dimAmount,
-                            width, height);
+                    startDimming(winAnimator, w.mExiting ? 0 : w.mAttrs.dimAmount, width, height);
                 }
             }
         }
@@ -8806,7 +8797,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             if (!mInnerFields.mDimming && mAnimator.isDimming()) {
-                mAnimator.stopDimming();
+                stopDimming();
             }
         } catch (RuntimeException e) {
             Log.wtf(TAG, "Unhandled exception in Window Manager", e);
@@ -9147,6 +9138,22 @@ public class WindowManagerService extends IWindowManager.Stub
             layoutToAnim.mWallpaperTarget = mWallpaperTarget;
             scheduleAnimationLocked();
         }
+    }
+
+    void setAnimDimParams(DimAnimator.Parameters params) {
+        synchronized (mLayoutToAnim) {
+            mLayoutToAnim.mDimParams = params;
+            scheduleAnimationLocked();
+        }
+    }
+
+    void startDimming(final WindowStateAnimator winAnimator, final float target,
+                      final int width, final int height) {
+        setAnimDimParams(new DimAnimator.Parameters(winAnimator, width, height, target));
+    }
+
+    void stopDimming() {
+        setAnimDimParams(null);
     }
 
     boolean reclaimSomeSurfaceMemoryLocked(WindowStateAnimator winAnimator, String operation,

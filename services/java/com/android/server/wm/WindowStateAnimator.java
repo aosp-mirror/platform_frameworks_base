@@ -1104,7 +1104,7 @@ class WindowStateAnimator {
                 mAnimator.mPendingLayoutChanges |=
                         WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
                 if ((w.mAttrs.flags & LayoutParams.FLAG_DIM_BEHIND) != 0) {
-                    mAnimator.startDimming(this, w.mExiting ? 0 : w.mAttrs.dimAmount,
+                    mService.startDimming(this, w.mExiting ? 0 : w.mAttrs.dimAmount,
                             mService.mAppDisplayWidth, mService.mAppDisplayHeight);
                 }
             } catch (RuntimeException e) {

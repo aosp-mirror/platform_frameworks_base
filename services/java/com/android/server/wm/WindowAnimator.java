@@ -9,7 +9,6 @@ import static com.android.server.wm.WindowManagerService.LayoutFields.SET_UPDATE
 import static com.android.server.wm.WindowManagerService.LayoutFields.SET_WALLPAPER_MAY_CHANGE;
 import static com.android.server.wm.WindowManagerService.LayoutFields.SET_FORCE_HIDING_CHANGED;
 
-import static com.android.server.wm.WindowManagerService.H.SET_DIM_PARAMETERS;
 import static com.android.server.wm.WindowManagerService.H.UPDATE_ANIM_PARAMETERS;
 
 import android.content.Context;
@@ -108,6 +107,7 @@ public class WindowAnimator {
         };
 
         mWindowAnimationBackgroundSurface = new DimSurface(mService.mFxSession);
+        mDimAnimator = new DimAnimator(mService.mFxSession);
     }
 
     /** Locked on mAnimToLayout */
@@ -133,6 +133,24 @@ public class WindowAnimator {
 
             mWinAnimators = new ArrayList<WindowStateAnimator>(layoutToAnim.mWinAnimators);
             mWallpaperTarget = layoutToAnim.mWallpaperTarget;
+
+            // Set the new DimAnimator params.
+            DimAnimator.Parameters dimParams = layoutToAnim.mDimParams;
+            if (dimParams == null) {
+                mDimParams = dimParams;
+            } else {
+                final WindowStateAnimator newWinAnimator = dimParams.mDimWinAnimator;
+
+                // Only set dim params on the highest dimmed layer.
+                final WindowStateAnimator existingDimWinAnimator = mDimParams == null
+                        ? null : mDimParams.mDimWinAnimator;
+                // Don't turn on for an unshown surface, or for any layer but the highest dimmed one.
+                if (newWinAnimator.mSurfaceShown &&
+                        (existingDimWinAnimator == null || !existingDimWinAnimator.mSurfaceShown
+                        || existingDimWinAnimator.mAnimLayer < newWinAnimator.mAnimLayer)) {
+                    mDimParams = dimParams;
+                }
+            }
         }
     }
 
@@ -569,28 +587,6 @@ public class WindowAnimator {
         mDh = curHeight;
         mInnerDw = appWidth;
         mInnerDh = appHeight;
-    }
-
-    void startDimming(final WindowStateAnimator winAnimator, final float target,
-                      final int width, final int height) {
-        if (mDimAnimator == null) {
-            mDimAnimator = new DimAnimator(mService.mFxSession);
-        }
-        // Only set dim params on the highest dimmed layer.
-        final WindowStateAnimator dimWinAnimator = mDimParams == null
-                ? null : mDimParams.mDimWinAnimator;
-        // Don't turn on for an unshown surface, or for any layer but the highest dimmed one.
-        if (winAnimator.mSurfaceShown &&
-                (dimWinAnimator == null || !dimWinAnimator.mSurfaceShown
-                || dimWinAnimator.mAnimLayer < winAnimator.mAnimLayer)) {
-            mService.mH.sendMessage(mService.mH.obtainMessage(SET_DIM_PARAMETERS,
-                    new DimAnimator.Parameters(winAnimator, width, height, target)));
-        }
-    }
-
-    // TODO(cmautner): Move into Handler
-    void stopDimming() {
-        mService.mH.sendMessage(mService.mH.obtainMessage(SET_DIM_PARAMETERS, null));
     }
 
     boolean isDimming() {
