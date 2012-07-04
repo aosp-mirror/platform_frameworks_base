@@ -47,7 +47,7 @@ TimePicker</a></li>
 
 <p>A dialog is usually a small window that appears in front of the current Activity.
 The underlying Activity loses focus and the dialog accepts all user interaction. Dialogs are
-normally used for notifications that should interupt the user and to perform short tasks that
+normally used for notifications that should interrupt the user and to perform short tasks that
 directly relate to the application in progress (such as a progress bar or a login prompt).</p>
 
 <p>The {@link android.app.Dialog} class is the base class for creating dialogs. However, you

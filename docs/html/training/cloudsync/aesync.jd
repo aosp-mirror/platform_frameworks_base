@@ -224,8 +224,8 @@ public Task find(Long id) {
     PersistenceManager pm = PMF.get().getPersistenceManager();
     try {
         Query query = pm.newQuery("select from " + Task.class.getName()
-        + " where id==" + id.toString() + " && emailAddress=='" + getUserEmail() + "'");
-        List<Task> list = (List<Task>) query.execute();
+        + " where id==" + id.toString() + " &amp;&amp; emailAddress=='" + getUserEmail() + "'");
+        List&lt;Task> list = (List&lt;Task>) query.execute();
         return list.size() == 0 ? null : list.get(0);
     } catch (RuntimeException e) {
         System.out.println(e);
@@ -273,24 +273,24 @@ like this:</p>
 public void fetchTasks (Long id) {
   // Request is wrapped in an AsyncTask to avoid making a network request
   // on the UI thread.
-    new AsyncTask<Long, Void, List<TaskProxy>>() {
+    new AsyncTask&lt;Long, Void, List&lt;TaskProxy>>() {
         &#64;Override
-        protected List<TaskProxy> doInBackground(Long... arguments) {
-            final List<TaskProxy> list = new ArrayList<TaskProxy>();
+        protected List&lt;TaskProxy> doInBackground(Long... arguments) {
+            final List&lt;TaskProxy> list = new ArrayList&lt;TaskProxy>();
             MyRequestFactory factory = Util.getRequestFactory(mContext,
             MyRequestFactory.class);
             TaskRequest taskRequest = factory.taskNinjaRequest();
 
             if (arguments.length == 0 || arguments[0] == -1) {
-                factory.taskRequest().queryTasks().fire(new Receiver<List<TaskProxy>>() {
+                factory.taskRequest().queryTasks().fire(new Receiver&lt;List&lt;TaskProxy>>() {
                     &#64;Override
-                    public void onSuccess(List<TaskProxy> arg0) {
+                    public void onSuccess(List&lt;TaskProxy> arg0) {
                       list.addAll(arg0);
                     }
                 });
             } else {
                 newTask = true;
-                factory.taskRequest().readTask(arguments[0]).fire(new Receiver<TaskProxy>() {
+                factory.taskRequest().readTask(arguments[0]).fire(new Receiver&lt;TaskProxy>() {
                     &#64;Override
                     public void onSuccess(TaskProxy arg0) {
                       list.add(arg0);
@@ -301,7 +301,7 @@ public void fetchTasks (Long id) {
     }
 
     &#64;Override
-    protected void onPostExecute(List<TaskProxy> result) {
+    protected void onPostExecute(List&lt;TaskProxy> result) {
         TaskNinjaActivity.this.dump(result);
     }
 
@@ -309,7 +309,7 @@ public void fetchTasks (Long id) {
 }
 ...
 
-public void dump (List<TaskProxy> tasks) {
+public void dump (List&lt;TaskProxy> tasks) {
     for (TaskProxy task : tasks) {
         Log.i("Task output", task.getName() + "\n" + task.getNote());
     }
@@ -331,7 +331,7 @@ call its update method.  Once again, this should be done in an
 result looks something like this.</p>
 
 <pre>
-new AsyncTask<Void, Void, Void>() {
+new AsyncTask&lt;Void, Void, Void>() {
     &#64;Override
     protected Void doInBackground(Void... arg0) {
         MyRequestFactory factory = (MyRequestFactory)
