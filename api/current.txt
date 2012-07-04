@@ -27378,7 +27378,7 @@ package android.widget {
     field public static final int LETTERS_ONLY = 5; // 0x5
   }
 
-  public class DigitalClock extends android.widget.TextView {
+  public deprecated class DigitalClock extends android.widget.TextView {
     ctor public DigitalClock(android.content.Context);
     ctor public DigitalClock(android.content.Context, android.util.AttributeSet);
   }
@@ -28520,7 +28520,7 @@ package android.widget {
     method public android.view.View newGroupView(boolean, android.view.ViewGroup);
   }
 
-  public class SlidingDrawer extends android.view.ViewGroup {
+  public deprecated class SlidingDrawer extends android.view.ViewGroup {
     ctor public SlidingDrawer(android.content.Context, android.util.AttributeSet);
     ctor public SlidingDrawer(android.content.Context, android.util.AttributeSet, int);
     method public void animateClose();
@@ -28986,7 +28986,7 @@ package android.widget {
     method public void setTextOn(java.lang.CharSequence);
   }
 
-  public class TwoLineListItem extends android.widget.RelativeLayout {
+  public deprecated class TwoLineListItem extends android.widget.RelativeLayout {
     ctor public TwoLineListItem(android.content.Context);
     ctor public TwoLineListItem(android.content.Context, android.util.AttributeSet);
     ctor public TwoLineListItem(android.content.Context, android.util.AttributeSet, int);
