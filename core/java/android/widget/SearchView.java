@@ -1521,8 +1521,8 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
             } catch (RuntimeException e2 ) {
                 rowNum = -1;
             }
-            Log.w(LOG_TAG, "Search Suggestions cursor at row " + rowNum +
-                            " returned exception" + e.toString());
+            Log.w(LOG_TAG, "Search suggestions cursor at row " + rowNum +
+                            " returned exception.", e);
             return null;
         }
     }
