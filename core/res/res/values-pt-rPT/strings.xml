@@ -930,10 +930,8 @@
     <string name="copyUrl" msgid="2538211579596067402">"Copiar URL"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"Selecionar texto"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Selecção de texto"</string>
-    <!-- no translation found for addToDictionary (4352161534510057874) -->
-    <skip />
-    <!-- no translation found for deleteText (6979668428458199034) -->
-    <skip />
+    <string name="addToDictionary" msgid="4352161534510057874">"Adicionar ao dicionário"</string>
+    <string name="deleteText" msgid="6979668428458199034">"Eliminar"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Método de entrada"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Acções de texto"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Está quase sem espaço de armazenamento"</string>
