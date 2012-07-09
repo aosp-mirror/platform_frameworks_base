@@ -382,7 +382,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     // message looper for SoundPool listener
     private Looper mSoundPoolLooper = null;
     // volume applied to sound played with playSoundEffect()
-    private static int SOUND_EFFECT_VOLUME_DB;
+    private static int sSoundEffectVolumeDb;
     // getActiveStreamType() will return STREAM_NOTIFICATION during this period after a notification
     // stopped
     private static final int NOTIFICATION_VOLUME_DELAY_MS = 5000;
@@ -439,7 +439,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             "ro.config.vc_call_vol_steps",
            MAX_STREAM_VOLUME[AudioSystem.STREAM_VOICE_CALL]);
 
-        SOUND_EFFECT_VOLUME_DB = context.getResources().getInteger(
+        sSoundEffectVolumeDb = context.getResources().getInteger(
                 com.android.internal.R.integer.config_soundEffectVolumeDb);
 
         mVolumePanel = new VolumePanel(context, this);
@@ -2882,7 +2882,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 float volFloat;
                 // use default if volume is not specified by caller
                 if (volume < 0) {
-                    volFloat = (float)Math.pow(10, SOUND_EFFECT_VOLUME_DB/20);
+                    volFloat = (float)Math.pow(10, (float)sSoundEffectVolumeDb/20);
                 } else {
                     volFloat = (float) volume / 1000.0f;
                 }
