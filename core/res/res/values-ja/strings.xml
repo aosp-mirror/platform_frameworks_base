@@ -930,10 +930,8 @@
     <string name="copyUrl" msgid="2538211579596067402">"URLをコピー"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"テキストを選択"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"テキスト選択"</string>
-    <!-- no translation found for addToDictionary (4352161534510057874) -->
-    <skip />
-    <!-- no translation found for deleteText (6979668428458199034) -->
-    <skip />
+    <string name="addToDictionary" msgid="4352161534510057874">"辞書に追加"</string>
+    <string name="deleteText" msgid="6979668428458199034">"削除"</string>
     <string name="inputMethod" msgid="1653630062304567879">"入力方法"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"テキスト操作"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"空き容量わずか"</string>

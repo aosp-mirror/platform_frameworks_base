@@ -930,10 +930,8 @@
     <string name="copyUrl" msgid="2538211579596067402">"Kopiraj URL"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"Odabir teksta"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Odabir teksta"</string>
-    <!-- no translation found for addToDictionary (4352161534510057874) -->
-    <skip />
-    <!-- no translation found for deleteText (6979668428458199034) -->
-    <skip />
+    <string name="addToDictionary" msgid="4352161534510057874">"Dodaj u rječnik"</string>
+    <string name="deleteText" msgid="6979668428458199034">"Izbriši"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Način unosa"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Radnje s tekstom"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Ponestaje prostora za pohranu"</string>

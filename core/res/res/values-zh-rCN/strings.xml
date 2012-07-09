@@ -930,10 +930,8 @@
     <string name="copyUrl" msgid="2538211579596067402">"复制网址"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"选择文字"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"文字选择"</string>
-    <!-- no translation found for addToDictionary (4352161534510057874) -->
-    <skip />
-    <!-- no translation found for deleteText (6979668428458199034) -->
-    <skip />
+    <string name="addToDictionary" msgid="4352161534510057874">"添加到词典"</string>
+    <string name="deleteText" msgid="6979668428458199034">"删除"</string>
     <string name="inputMethod" msgid="1653630062304567879">"输入法"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"文字操作"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"存储空间不足"</string>
