@@ -123,7 +123,7 @@ public class AppWindowAnimator {
             if (w == mService.mInputMethodTarget && !mService.mInputMethodTargetWaitingAnim) {
                 mService.setInputMethodAnimLayerAdjustment(adj);
             }
-            if (w == mService.mWallpaperTarget && mService.mLowerWallpaperTarget == null) {
+            if (w == mAnimator.mWallpaperTarget && mAnimator.mLowerWallpaperTarget == null) {
                 mService.setWallpaperAnimLayerAdjustmentLocked(adj);
             }
         }

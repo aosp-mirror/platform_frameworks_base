@@ -21,7 +21,6 @@ import android.view.WindowManagerPolicy;
 import android.view.animation.Animation;
 
 import com.android.internal.policy.impl.PhoneWindowManager;
-import com.android.server.wm.WindowManagerService.AnimatorToLayoutParams;
 import com.android.server.wm.WindowManagerService.LayoutToAnimatorParams;
 
 import java.io.PrintWriter;
@@ -84,14 +83,26 @@ public class WindowAnimator {
     int mPendingActions;
 
     WindowState mWallpaperTarget = null;
+    AppWindowAnimator mWpAppAnimator = null;
+    WindowState mLowerWallpaperTarget = null;
+    WindowState mUpperWallpaperTarget = null;
 
+    ArrayList<WindowToken> mWallpaperTokens = new ArrayList<WindowToken>();
+
+    /** Parameters being passed from this into mService. */
+    static class AnimatorToLayoutParams {
+        boolean mUpdateQueued;
+        int mBulkUpdateParams;
+        int mPendingLayoutChanges;
+        WindowState mWindowDetachedWallpaper;
+    }
+    /** Do not modify unless holding mService.mWindowMap or this and mAnimToLayout in that order */
     final AnimatorToLayoutParams mAnimToLayout = new AnimatorToLayoutParams();
 
-    WindowAnimator(final WindowManagerService service, final Context context,
-            final WindowManagerPolicy policy) {
+    WindowAnimator(final WindowManagerService service) {
         mService = service;
-        mContext = context;
-        mPolicy = policy;
+        mContext = service.mContext;
+        mPolicy = service.mPolicy;
 
         mAnimationRunnable = new Runnable() {
             @Override
@@ -132,8 +143,18 @@ public class WindowAnimator {
         synchronized(layoutToAnim) {
             layoutToAnim.mAnimationScheduled = false;
 
+            if ((layoutToAnim.mChanges & LayoutToAnimatorParams.WALLPAPER_TOKENS_CHANGED) != 0) {
+                layoutToAnim.mChanges &= ~LayoutToAnimatorParams.WALLPAPER_TOKENS_CHANGED;
+                mWallpaperTokens = new ArrayList<WindowToken>(layoutToAnim.mWallpaperTokens);
+            }
+
             mWinAnimators = new ArrayList<WindowStateAnimator>(layoutToAnim.mWinAnimators);
             mWallpaperTarget = layoutToAnim.mWallpaperTarget;
+            mWpAppAnimator = mWallpaperTarget == null
+                    ? null : mWallpaperTarget.mAppToken == null
+                            ? null : mWallpaperTarget.mAppToken.mAppAnimator;
+            mLowerWallpaperTarget = layoutToAnim.mLowerWallpaperTarget;
+            mUpperWallpaperTarget = layoutToAnim.mUpperWallpaperTarget;
 
             // Set the new DimAnimator params.
             DimAnimator.Parameters dimParams = layoutToAnim.mDimParams;
@@ -156,10 +177,13 @@ public class WindowAnimator {
     }
 
     void hideWallpapersLocked(final WindowState w) {
-        if ((mService.mWallpaperTarget == w && mService.mLowerWallpaperTarget == null)
-                || mService.mWallpaperTarget == null) {
-            for (final WindowToken token : mService.mWallpaperTokens) {
-                for (final WindowState wallpaper : token.windows) {
+        if ((mWallpaperTarget == w && mLowerWallpaperTarget == null) || mWallpaperTarget == null) {
+            final int numTokens = mWallpaperTokens.size();
+            for (int i = numTokens - 1; i >= 0; i--) {
+                final WindowToken token = mWallpaperTokens.get(i);
+                final int numWindows = token.windows.size();
+                for (int j = numWindows - 1; j >= 0; j--) {
+                    final WindowState wallpaper = token.windows.get(j);
                     final WindowStateAnimator winAnimator = wallpaper.mWinAnimator;
                     if (!winAnimator.mLastHidden) {
                         winAnimator.hide();
@@ -245,7 +269,7 @@ public class WindowAnimator {
                             ", nowAnimating=" + nowAnimating);
                 }
 
-                if (wasAnimating && !winAnimator.mAnimating && mService.mWallpaperTarget == win) {
+                if (wasAnimating && !winAnimator.mAnimating && mWallpaperTarget == win) {
                     mBulkUpdateParams |= SET_WALLPAPER_MAY_CHANGE;
                     mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
                     if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
@@ -431,13 +455,12 @@ public class WindowAnimator {
             // don't cause the wallpaper to suddenly disappear.
             int animLayer = windowAnimationBackground.mAnimLayer;
             WindowState win = windowAnimationBackground.mWin;
-            if (windowAnimationBackground != null && mService.mWallpaperTarget == win
-                    || mService.mLowerWallpaperTarget == win
-                    || mService.mUpperWallpaperTarget == win) {
+            if (windowAnimationBackground != null && mWallpaperTarget == win
+                    || mLowerWallpaperTarget == win || mUpperWallpaperTarget == win) {
                 final int N = mWinAnimators.size();
                 for (int i = 0; i < N; i++) {
                     WindowStateAnimator winAnimator = mWinAnimators.get(i);
-                    if (winAnimator.mWin.mIsWallpaper) {
+                    if (winAnimator.mIsWallpaper) {
                         animLayer = winAnimator.mAnimLayer;
                         break;
                     }
