@@ -109,7 +109,8 @@ class HTML5VideoViewProxy extends Handler
             mBaseLayer = layer;
             // Don't do this for full screen mode.
             if (mHTML5VideoView != null
-                && !mHTML5VideoView.isFullScreenMode()) {
+                && !mHTML5VideoView.isFullScreenMode()
+                && !mHTML5VideoView.isReleased()) {
                 int currentVideoLayerId = mHTML5VideoView.getVideoLayerId();
                 SurfaceTexture surfTexture =
                         HTML5VideoInline.getSurfaceTexture(currentVideoLayerId);
@@ -214,7 +215,9 @@ class HTML5VideoViewProxy extends Handler
 
             boolean skipPrepare = false;
             boolean createInlineView = false;
-            if (backFromFullScreenMode && currentVideoLayerId == videoLayerId) {
+            if (backFromFullScreenMode
+                && currentVideoLayerId == videoLayerId
+                && !mHTML5VideoView.isReleased()) {
                 skipPrepare = true;
                 createInlineView = true;
             } else if(backFromFullScreenMode
