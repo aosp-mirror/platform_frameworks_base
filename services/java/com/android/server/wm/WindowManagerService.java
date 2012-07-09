@@ -631,7 +631,7 @@ public class WindowManagerService extends IWindowManager.Stub
         static final int SET_UPDATE_ROTATION                = 1 << 0;
         static final int SET_WALLPAPER_MAY_CHANGE           = 1 << 1;
         static final int SET_FORCE_HIDING_CHANGED           = 1 << 2;
-        static final int CLEAR_ORIENTATION_CHANGE_COMPLETE  = 1 << 3;
+        static final int SET_ORIENTATION_CHANGE_COMPLETE    = 1 << 3;
         static final int SET_TURN_ON_SCREEN                 = 1 << 4;
 
         boolean mWallpaperForceHidingChanged = false;
@@ -7344,7 +7344,8 @@ public class WindowManagerService extends IWindowManager.Stub
                                 mInnerFields.mWallpaperForceHidingChanged = true;
                                 doRequest = true;
                             }
-                            if ((bulkUpdateParams & LayoutFields.CLEAR_ORIENTATION_CHANGE_COMPLETE) != 0) {
+                            if ((bulkUpdateParams & LayoutFields.SET_ORIENTATION_CHANGE_COMPLETE)
+                                    == 0) {
                                 mInnerFields.mOrientationChangeComplete = false;
                             } else {
                                 mInnerFields.mOrientationChangeComplete = true;
