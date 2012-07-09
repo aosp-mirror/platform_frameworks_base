@@ -27,7 +27,6 @@ import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 
 public final class Bitmap implements Parcelable {
-
     /**
      * Indicates that the bitmap was created for an unknown pixel density.
      *
@@ -64,7 +63,7 @@ public final class Bitmap implements Parcelable {
     private boolean mRecycled;
 
     // Package-scoped for fast access.
-    /*package*/ int mDensity = sDefaultDensity = getDefaultDensity();
+    int mDensity = sDefaultDensity = getDefaultDensity();
 
     private static volatile Matrix sScaleMatrix;
 
@@ -78,8 +77,8 @@ public final class Bitmap implements Parcelable {
     public static void setDefaultDensity(int density) {
         sDefaultDensity = density;
     }
-    
-    /*package*/ static int getDefaultDensity() {
+
+    static int getDefaultDensity() {
         if (sDefaultDensity >= 0) {
             return sDefaultDensity;
         }
@@ -95,7 +94,7 @@ public final class Bitmap implements Parcelable {
 
         This can be called from JNI code.
     */
-    /*package*/ Bitmap(int nativeBitmap, byte[] buffer, boolean isMutable, byte[] ninePatchChunk,
+    Bitmap(int nativeBitmap, byte[] buffer, boolean isMutable, byte[] ninePatchChunk,
             int density) {
         this(nativeBitmap, buffer, isMutable, ninePatchChunk, null, density);
     }
@@ -108,7 +107,7 @@ public final class Bitmap implements Parcelable {
 
         This can be called from JNI code.
     */
-    /*package*/ Bitmap(int nativeBitmap, byte[] buffer, boolean isMutable, byte[] ninePatchChunk,
+    Bitmap(int nativeBitmap, byte[] buffer, boolean isMutable, byte[] ninePatchChunk,
             int[] layoutBounds, int density) {
         if (nativeBitmap == 0) {
             throw new RuntimeException("internal error: native bitmap is 0");
@@ -347,11 +346,15 @@ public final class Bitmap implements Parcelable {
     }
 
     /**
-     * Copy the bitmap's pixels into the specified buffer (allocated by the
+     * <p>Copy the bitmap's pixels into the specified buffer (allocated by the
      * caller). An exception is thrown if the buffer is not large enough to
      * hold all of the pixels (taking into account the number of bytes per
      * pixel) or if the Buffer subclass is not one of the support types
-     * (ByteBuffer, ShortBuffer, IntBuffer).
+     * (ByteBuffer, ShortBuffer, IntBuffer).</p>
+     * <p>The content of the bitmap is copied into the buffer as-is. This means
+     * that if this bitmap stores its pixels pre-multiplied
+     * (see {@link #isPremultiplied()}, the values in the buffer will also be
+     * pre-multiplied.</p>
      */
     public void copyPixelsToBuffer(Buffer dst) {
         int elements = dst.remaining();
@@ -382,10 +385,10 @@ public final class Bitmap implements Parcelable {
     }
 
     /**
-     * Copy the pixels from the buffer, beginning at the current position,
+     * <p>Copy the pixels from the buffer, beginning at the current position,
      * overwriting the bitmap's pixels. The data in the buffer is not changed
      * in any way (unlike setPixels(), which converts from unpremultipled 32bit
-     * to whatever the bitmap's native format is.
+     * to whatever the bitmap's native format is.</p>
      */
     public void copyPixelsFromBuffer(Buffer src) {
         checkRecycled("copyPixelsFromBuffer called on recycled bitmap");
@@ -402,7 +405,7 @@ public final class Bitmap implements Parcelable {
             throw new RuntimeException("unsupported Buffer subclass");
         }
 
-        long bufferBytes = (long)elements << shift;
+        long bufferBytes = (long) elements << shift;
         long bitmapBytes = getByteCount();
 
         if (bufferBytes < bitmapBytes) {
@@ -780,6 +783,25 @@ public final class Bitmap implements Parcelable {
         return mIsMutable;
     }
 
+    /**
+     * <p>Indicates whether pixels stored in this bitmaps are stored pre-multiplied.
+     * When a pixel is pre-multiplied, the RGB components have been multiplied by
+     * the alpha component. For instance, if the original color is a 50%
+     * translucent red <code>(128, 255, 0, 0)</code>, the pre-multiplied form is 
+     * <code>(128, 128, 0, 0)</code>.</p>
+     * 
+     * <p>This method always returns false if {@link #getConfig()} is
+     * {@link Bitmap.Config#ALPHA_8} or {@link Bitmap.Config#RGB_565}.</p>
+     * 
+     * @return true if the underlying pixels have been pre-multiplied, false
+     *         otherwise
+     */
+    public final boolean isPremultiplied() {
+        final Config config = getConfig();
+        //noinspection deprecation
+        return config == Config.ARGB_8888 || config == Config.ARGB_4444;
+    }
+
     /** Returns the bitmap's width */
     public final int getWidth() {
         return mWidth == -1 ? mWidth = nativeWidth(mNativeBitmap) : mWidth;
@@ -926,7 +948,7 @@ public final class Bitmap implements Parcelable {
     /**
      * Returns the {@link Color} at the specified location. Throws an exception
      * if x or y are out of bounds (negative or >= to the width or height
-     * respectively).
+     * respectively). The returned color is a non-premultiplied ARGB value.
      *
      * @param x    The x coordinate (0...width-1) of the pixel to return
      * @param y    The y coordinate (0...height-1) of the pixel to return
@@ -944,6 +966,7 @@ public final class Bitmap implements Parcelable {
      * a packed int representing a {@link Color}. The stride parameter allows
      * the caller to allow for gaps in the returned pixels array between
      * rows. For normal packed results, just pass width for the stride value.
+     * The returned colors are non-premultiplied ARGB values.
      *
      * @param pixels   The array to receive the bitmap's colors
      * @param offset   The first index to write into pixels[]
@@ -955,6 +978,7 @@ public final class Bitmap implements Parcelable {
      *                 the bitmap
      * @param width    The number of pixels to read from each row
      * @param height   The number of rows to read
+     *
      * @throws IllegalArgumentException if x, y, width, height exceed the
      *         bounds of the bitmap, or if abs(stride) < width.
      * @throws ArrayIndexOutOfBoundsException if the pixels array is too small
@@ -974,6 +998,7 @@ public final class Bitmap implements Parcelable {
     /**
      * Shared code to check for illegal arguments passed to getPixel()
      * or setPixel()
+     * 
      * @param x x coordinate of the pixel
      * @param y y coordinate of the pixel
      */
@@ -1029,12 +1054,14 @@ public final class Bitmap implements Parcelable {
     }
 
     /**
-     * Write the specified {@link Color} into the bitmap (assuming it is
-     * mutable) at the x,y coordinate.
+     * <p>Write the specified {@link Color} into the bitmap (assuming it is
+     * mutable) at the x,y coordinate. The color must be a
+     * non-premultiplied ARGB value.</p>
      *
      * @param x     The x coordinate of the pixel to replace (0...width-1)
      * @param y     The y coordinate of the pixel to replace (0...height-1)
-     * @param color The {@link Color} to write into the bitmap
+     * @param color The ARGB color to write into the bitmap
+     *
      * @throws IllegalStateException if the bitmap is not mutable
      * @throws IllegalArgumentException if x, y are outside of the bitmap's
      *         bounds.
@@ -1049,8 +1076,9 @@ public final class Bitmap implements Parcelable {
     }
 
     /**
-     * Replace pixels in the bitmap with the colors in the array. Each element
-     * in the array is a packed int prepresenting a {@link Color}
+     * <p>Replace pixels in the bitmap with the colors in the array. Each element
+     * in the array is a packed int prepresenting a non-premultiplied ARGB
+     * {@link Color}.</p>
      *
      * @param pixels   The colors to write to the bitmap
      * @param offset   The index of the first color to read from pixels[]
@@ -1063,6 +1091,7 @@ public final class Bitmap implements Parcelable {
      *                 the bitmap.
      * @param width    The number of colors to copy from pixels[] per row
      * @param height   The number of rows to write to the bitmap
+     *
      * @throws IllegalStateException if the bitmap is not mutable
      * @throws IllegalArgumentException if x, y, width, height are outside of
      *         the bitmap's bounds.
@@ -1070,7 +1099,7 @@ public final class Bitmap implements Parcelable {
      *         to receive the specified number of pixels.
      */
     public void setPixels(int[] pixels, int offset, int stride,
-                          int x, int y, int width, int height) {
+            int x, int y, int width, int height) {
         checkRecycled("Can't call setPixels() on a recycled bitmap");
         if (!isMutable()) {
             throw new IllegalStateException();
