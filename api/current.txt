@@ -8121,6 +8121,7 @@ package android.graphics {
     method public final int getWidth();
     method public final boolean hasAlpha();
     method public final boolean isMutable();
+    method public final boolean isPremultiplied();
     method public final boolean isRecycled();
     method public void prepareToDraw();
     method public void recycle();
