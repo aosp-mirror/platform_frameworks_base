@@ -3,7 +3,6 @@
 package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
-import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
 import static com.android.server.wm.WindowManagerService.LayoutFields.SET_ORIENTATION_CHANGE_COMPLETE;
 import static com.android.server.wm.WindowManagerService.LayoutFields.SET_TURN_ON_SCREEN;
@@ -48,6 +47,7 @@ class WindowStateAnimator {
 
     static final String TAG = "WindowStateAnimator";
 
+    // Unchanging local convenience fields.
     final WindowManagerService mService;
     final WindowState mWin;
     final WindowState mAttachedWindow;
@@ -55,6 +55,7 @@ class WindowStateAnimator {
     final Session mSession;
     final WindowManagerPolicy mPolicy;
     final Context mContext;
+    final boolean mIsWallpaper;
 
     // If this is a universe background window, this is the transformation
     // it is applying to the rest of the universe.
@@ -142,19 +143,22 @@ class WindowStateAnimator {
     int mAttrFlags;
     int mAttrType;
 
-    public WindowStateAnimator(final WindowManagerService service, final WindowState win,
-                               final WindowState attachedWindow) {
+    public WindowStateAnimator(final WindowState win) {
+        final WindowManagerService service = win.mService;
+
         mService = service;
-        mWin = win;
-        mAttachedWindow = attachedWindow;
-        mAnimator = mService.mAnimator;
-        mSession = win.mSession;
-        mPolicy = mService.mPolicy;
-        mContext = mService.mContext;
-        mAttrFlags = win.mAttrs.flags;
-        mAttrType = win.mAttrs.type;
+        mAnimator = service.mAnimator;
+        mPolicy = service.mPolicy;
+        mContext = service.mContext;
         mAnimDw = service.mAppDisplayWidth;
         mAnimDh = service.mAppDisplayHeight;
+
+        mWin = win;
+        mAttachedWindow = win.mAttachedWindow;
+        mSession = win.mSession;
+        mAttrFlags = win.mAttrs.flags;
+        mAttrType = win.mAttrs.type;
+        mIsWallpaper = win.mIsWallpaper;
     }
 
     public void setAnimation(Animation anim) {
@@ -309,7 +313,7 @@ class WindowStateAnimator {
         mAnimLayer = mWin.mLayer;
         if (mWin.mIsImWindow) {
             mAnimLayer += mService.mInputMethodAnimLayerAdjustment;
-        } else if (mWin.mIsWallpaper) {
+        } else if (mIsWallpaper) {
             mAnimLayer += mService.mWallpaperAnimLayerAdjustment;
         }
         if (DEBUG_LAYERS) Slog.v(TAG, "Stepping win " + this
@@ -812,22 +816,21 @@ class WindowStateAnimator {
 
         // Wallpapers are animated based on the "real" window they
         // are currently targeting.
-        if (mWin.mAttrs.type == TYPE_WALLPAPER && mService.mLowerWallpaperTarget == null
-                && mService.mWallpaperTarget != null) {
-            if (mService.mWallpaperTarget.mWinAnimator.mHasLocalTransformation &&
-                    mService.mWallpaperTarget.mWinAnimator.mAnimation != null &&
-                    !mService.mWallpaperTarget.mWinAnimator.mAnimation.getDetachWallpaper()) {
-                attachedTransformation = mService.mWallpaperTarget.mWinAnimator.mTransformation;
+        if (mIsWallpaper && mAnimator.mLowerWallpaperTarget == null
+                && mAnimator.mWallpaperTarget != null) {
+            final WindowStateAnimator wallpaperAnimator = mAnimator.mWallpaperTarget.mWinAnimator;
+            if (wallpaperAnimator.mHasLocalTransformation &&
+                    wallpaperAnimator.mAnimation != null &&
+                    !wallpaperAnimator.mAnimation.getDetachWallpaper()) {
+                attachedTransformation = wallpaperAnimator.mTransformation;
                 if (WindowManagerService.DEBUG_WALLPAPER && attachedTransformation != null) {
                     Slog.v(TAG, "WP target attached xform: " + attachedTransformation);
                 }
             }
-            final AppWindowAnimator wpAppAnimator = mService.mWallpaperTarget.mAppToken == null
-                    ? null : mService.mWallpaperTarget.mAppToken.mAppAnimator;
-            if (wpAppAnimator != null &&
-                    wpAppAnimator.hasTransformation &&
-                    wpAppAnimator.animation != null &&
-                    !wpAppAnimator.animation.getDetachWallpaper()) {
+            final AppWindowAnimator wpAppAnimator = mAnimator.mWpAppAnimator;
+            if (wpAppAnimator != null && wpAppAnimator.hasTransformation
+                    && wpAppAnimator.animation != null
+                    && !wpAppAnimator.animation.getDetachWallpaper()) {
                 appTransformation = wpAppAnimator.transformation;
                 if (WindowManagerService.DEBUG_WALLPAPER && appTransformation != null) {
                     Slog.v(TAG, "WP target app xform: " + appTransformation);
@@ -940,7 +943,7 @@ class WindowStateAnimator {
                 " screen=" + (screenAnimation ? mService.mAnimator.mScreenRotationAnimation.getEnterTransformation().getAlpha()
                         : "null"));
             return;
-        } else if (mWin.mIsWallpaper &&
+        } else if (mIsWallpaper &&
                     (mAnimator.mPendingActions & WindowAnimator.WALLPAPER_ACTION_PENDING) != 0) {
             return;
         }
@@ -1140,7 +1143,7 @@ class WindowStateAnimator {
 
         setSurfaceBoundaries(recoveringMemory);
 
-        if (mWin.mIsWallpaper && !mWin.mWallpaperVisible) {
+        if (mIsWallpaper && !mWin.mWallpaperVisible) {
             // Wallpaper is no longer visible and there is no wp target => hide it.
             hide();
         } else if (w.mAttachedHidden || !w.isReadyForDisplay()) {
@@ -1199,7 +1202,7 @@ class WindowStateAnimator {
                                 + " during relayout");
                         if (showSurfaceRobustlyLocked()) {
                             mLastHidden = false;
-                            if (w.mIsWallpaper) {
+                            if (mIsWallpaper) {
                                 mService.dispatchWallpaperVisibility(w, true);
                             }
                         } else {

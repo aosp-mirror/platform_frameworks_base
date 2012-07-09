@@ -317,7 +317,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mIsFloatingLayer = mIsImWindow || mIsWallpaper;
         }
 
-        mWinAnimator = new WindowStateAnimator(service, this, mAttachedWindow);
+        mWinAnimator = new WindowStateAnimator(this);
         mWinAnimator.mAlpha = a.alpha;
 
         WindowState appWin = this;
