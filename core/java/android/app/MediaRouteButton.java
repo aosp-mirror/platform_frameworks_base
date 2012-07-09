@@ -60,7 +60,7 @@ public class MediaRouteButton extends View {
     }
 
     public MediaRouteButton(Context context, AttributeSet attrs) {
-        this(context, null, com.android.internal.R.attr.mediaRouteButtonStyle);
+        this(context, attrs, com.android.internal.R.attr.mediaRouteButtonStyle);
     }
 
     public MediaRouteButton(Context context, AttributeSet attrs, int defStyleAttr) {
