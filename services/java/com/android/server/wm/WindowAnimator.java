@@ -8,6 +8,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static com.android.server.wm.WindowManagerService.LayoutFields.SET_UPDATE_ROTATION;
 import static com.android.server.wm.WindowManagerService.LayoutFields.SET_WALLPAPER_MAY_CHANGE;
 import static com.android.server.wm.WindowManagerService.LayoutFields.SET_FORCE_HIDING_CHANGED;
+import static com.android.server.wm.WindowManagerService.LayoutFields.SET_ORIENTATION_CHANGE_COMPLETE;
 
 import static com.android.server.wm.WindowManagerService.H.UPDATE_ANIM_PARAMETERS;
 
@@ -506,7 +507,7 @@ public class WindowAnimator {
     private void animateLocked() {
         mPendingLayoutChanges = 0;
         mCurrentTime = SystemClock.uptimeMillis();
-        mBulkUpdateParams = 0;
+        mBulkUpdateParams = SET_ORIENTATION_CHANGE_COMPLETE;
         boolean wasAnimating = mAnimating;
         mAnimating = false;
         if (WindowManagerService.DEBUG_WINDOW_TRACE) {

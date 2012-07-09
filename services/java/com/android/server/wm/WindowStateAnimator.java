@@ -5,7 +5,7 @@ package com.android.server.wm;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
-import static com.android.server.wm.WindowManagerService.LayoutFields.CLEAR_ORIENTATION_CHANGE_COMPLETE;
+import static com.android.server.wm.WindowManagerService.LayoutFields.SET_ORIENTATION_CHANGE_COMPLETE;
 import static com.android.server.wm.WindowManagerService.LayoutFields.SET_TURN_ON_SCREEN;
 
 import android.content.Context;
@@ -1226,7 +1226,7 @@ class WindowStateAnimator {
         if (displayed) {
             if (w.mOrientationChanging) {
                 if (!w.isDrawnLw()) {
-                    mAnimator.mBulkUpdateParams |= CLEAR_ORIENTATION_CHANGE_COMPLETE;
+                    mAnimator.mBulkUpdateParams &= ~SET_ORIENTATION_CHANGE_COMPLETE;
                     if (DEBUG_ORIENTATION) Slog.v(TAG,
                             "Orientation continue waiting for draw in " + w);
                 } else {
