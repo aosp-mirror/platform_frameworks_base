@@ -210,11 +210,19 @@ class AppWidgetServiceImpl {
 
             synchronized (mAppWidgetIds) {
                 ensureStateLoadedLocked();
-                int N = mInstalledProviders.size();
+                // Note: updateProvidersForPackageLocked() may remove providers, so we must copy the
+                // list of installed providers and skip providers that we don't need to update.
+                // Also note that remove the provider does not clear the Provider component data.
+                ArrayList<Provider> installedProviders =
+                        new ArrayList<Provider>(mInstalledProviders);
+                HashSet<ComponentName> removedProviders = new HashSet<ComponentName>();
+                int N = installedProviders.size();
                 for (int i = N - 1; i >= 0; i--) {
-                    Provider p = mInstalledProviders.get(i);
-                    String pkgName = p.info.provider.getPackageName();
-                    updateProvidersForPackageLocked(pkgName);
+                    Provider p = installedProviders.get(i);
+                    ComponentName cn = p.info.provider;
+                    if (!removedProviders.contains(cn)) {
+                        updateProvidersForPackageLocked(cn.getPackageName(), removedProviders);
+                    }
                 }
                 saveStateLocked();
             }
@@ -257,7 +265,7 @@ class AppWidgetServiceImpl {
                         || (extras != null && extras.getBoolean(Intent.EXTRA_REPLACING, false))) {
                     for (String pkgName : pkgList) {
                         // The package was just upgraded
-                        providersModified |= updateProvidersForPackageLocked(pkgName);
+                        providersModified |= updateProvidersForPackageLocked(pkgName, null);
                     }
                 } else {
                     // The package was just added
@@ -1677,7 +1685,13 @@ class AppWidgetServiceImpl {
         return providersAdded;
     }
 
-    boolean updateProvidersForPackageLocked(String pkgName) {
+    /**
+     * Updates all providers with the specified package names, and records any providers that were
+     * pruned.
+     *
+     * @return whether any providers were updated
+     */
+    boolean updateProvidersForPackageLocked(String pkgName, Set<ComponentName> removedProviders) {
         boolean providersUpdated = false;
         HashSet<String> keep = new HashSet<String>();
         Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
@@ -1754,6 +1768,9 @@ class AppWidgetServiceImpl {
             Provider p = mInstalledProviders.get(i);
             if (pkgName.equals(p.info.provider.getPackageName())
                     && !keep.contains(p.info.provider.getClassName())) {
+                if (removedProviders != null) {
+                    removedProviders.add(p.info.provider);
+                }
                 removeProviderLocked(i, p);
                 providersUpdated = true;
             }
