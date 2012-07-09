@@ -17,10 +17,9 @@
 package android.net;
 
 /**
- * 
- *
- * When WebAddress Parser Fails, this exception is thrown
+ * Thrown when parsing a URL fails.
  */
+// See non-public class {@link WebAddress}.
 public class ParseException extends RuntimeException {
     public String response;
 
