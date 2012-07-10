@@ -83,7 +83,7 @@ class MeasuredText {
     }
 
     void setPos(int pos) {
-        mPos = pos;
+        mPos = pos - mTextStart;
     }
 
     /**
