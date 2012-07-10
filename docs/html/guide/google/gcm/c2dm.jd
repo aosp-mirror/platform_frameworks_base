@@ -17,7 +17,11 @@ page.title=Migration
 
 <ol>
 <li><a href="#history">Historical Overview</a></li>
-<li><a href="#diffs">How is GCM Different from C2DM?</a></li>
+<li><a href="#diffs">How is GCM Different from C2DM?</a>
+  <ol>
+    <li><a href="#interop">Relationship between C2DM and GCM</a></li>
+  </ol>
+</li>
 <li><a href="#migrating">Migrating Your Apps</a>
   <ol>
     <li><a href="#client">Client changes</a></li>
@@ -72,6 +76,14 @@ page.title=Migration
 <dd>There may be situations where the server ends up with 2 registration IDs for the same device. If the GCM response contains a registration ID, simply replace the registration ID you have with the one provided. With this feature your application doesn't need to send the device ID to your server anymore. For more information, see <a href="adv.html#canonical">Advanced Topics</a>.</dd>
 </dl>
 <p>GCM also provides helper libraries (<a href="{@docRoot}guide/google/gcm/client-javadoc/index.html">client</a> and <a href="{@docRoot}guide/google/gcm/server-javadoc/index.html">server</a>) to make writing your code easier.</p>
+
+<h3 id="interop">Relationship between C2DM and GCM</h3>
+
+<p>C2DM and GCM are not interoperable. For example, you cannot post notifications from GCM to C2DM registration IDs, nor can you use C2DM registration IDs as GCM registration IDs. From your server-side application, you must keep keep track of whether a registration ID is from C2DM or GCM and use the proper endpoint. </p>
+
+<p>As you transition from C2DM to GCM, your server needs to be aware of whether a given registration ID
+contains an old C2DM sender or a new GCM project ID. This is the approach we recommend: have the new app version (the one that uses GCM) send a bit along with the registration ID. This bit tells your server that this registration ID is for GCM. If you don't get the extra bit, you mark the registration ID as C2DM. Once no more valid registration IDs are marked as C2DM, you can complete the migration.</p>
+
 <h2 id="migrating">Migrating Your Apps</h2>
 <p>This section describes how to move existing C2DM apps to GCM.</p>
 <h3 id="client">Client changes</h3>
