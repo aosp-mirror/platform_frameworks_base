@@ -732,14 +732,16 @@ public final class BridgeContext extends Context {
         for (int i = 0 ; i < attrs.length ; i++) {
             Pair<String, Boolean> attribute = attributes.get(i);
 
-            // look for the value in the given style
-            ResourceValue resValue = mRenderResources.findItemInStyle(style, attribute.getFirst(),
-                    attribute.getSecond());
+            if (attribute != null) {
+                // look for the value in the given style
+                ResourceValue resValue = mRenderResources.findItemInStyle(style,
+                        attribute.getFirst(), attribute.getSecond());
 
-            if (resValue != null) {
-                // resolve it to make sure there are no references left.
-                ta.bridgeSetValue(i, attribute.getFirst(), attribute.getSecond(),
-                        mRenderResources.resolveResValue(resValue));
+                if (resValue != null) {
+                    // resolve it to make sure there are no references left.
+                    ta.bridgeSetValue(i, attribute.getFirst(), attribute.getSecond(),
+                            mRenderResources.resolveResValue(resValue));
+                }
             }
         }
 
