@@ -620,7 +620,7 @@ messages.</li>
 Authorization:key=AIzaSyB-1uEai2WiUapxCs2Q0GZYzPu7Udno5aA
 
 {
-  "registration_id" : "APA91bHun4MxP5egoKMwt2KZFBaFUH-1RYqx...",
+  "registration_ids" : ["APA91bHun4MxP5egoKMwt2KZFBaFUH-1RYqx..."],
   "data" : {
     ...
   },
@@ -874,7 +874,10 @@ messages.
   <li>Implement exponential back-off in your retry mechanism. This means an exponentially increasing delay after each failed retry (e.g. if you waited one second before the first retry, wait at least two second before the next one, then 4 seconds and so on). If you're sending multiple messages, delay each one independently by an additional random amount to avoid issuing a new request for all messages at the same time.</li>
 </ul>
 Senders that cause problems risk being blacklisted.
-<br/>Happens when the HTTP status code is 500 or 503; or when the <code>error</code> field of a JSON object in the <code>results</code> array is <code>Unavailable</code>.
+<br/>Happens when the HTTP status code is 500 or 503, or when the <code>error</code> field of a JSON object in the <code>results</code> array is <code>InternalServerError</code> or <code>Unavailable</code>.</dd>
+
+<dt id="ttl_error"><strong>Invalid Time To Live</strong></dt>
+  <dd>The value for the Time to Live field must be an integer representing a duration in seconds between 0 and 2,419,200 (4 weeks). Happens when error code is <code>InvalidTtl</code>.
 </dd>
 </dl>
 <h4>Example responses</h4>
