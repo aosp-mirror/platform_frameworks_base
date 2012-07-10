@@ -18,6 +18,7 @@ package android.view;
 
 import static android.view.accessibility.AccessibilityNodeInfo.INCLUDE_NOT_IMPORTANT_VIEWS;
 
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -63,6 +64,8 @@ final class AccessibilityInteractionController {
     private final int mMyProcessId;
 
     private final ArrayList<View> mTempArrayList = new ArrayList<View>();
+
+    private final Rect mTempRect = new Rect();
 
     public AccessibilityInteractionController(ViewRootImpl viewRootImpl) {
         Looper looper =  viewRootImpl.mHandler.getLooper();
@@ -207,6 +210,7 @@ final class AccessibilityInteractionController {
         } finally {
             try {
                 mViewRootImpl.mAttachInfo.mIncludeNotImportantViews = false;
+                applyApplicationScaleIfNeeded(infos);
                 callback.setFindAccessibilityNodeInfosResult(infos, interactionId);
                 infos.clear();
             } catch (RemoteException re) {
@@ -287,6 +291,7 @@ final class AccessibilityInteractionController {
         } finally {
             try {
                 mViewRootImpl.mAttachInfo.mIncludeNotImportantViews = false;
+                applyApplicationScaleIfNeeded(info);
                 callback.setFindAccessibilityNodeInfoResult(info, interactionId);
             } catch (RemoteException re) {
                 /* ignore - the other side will time out */
@@ -396,6 +401,7 @@ final class AccessibilityInteractionController {
         } finally {
             try {
                 mViewRootImpl.mAttachInfo.mIncludeNotImportantViews = false;
+                applyApplicationScaleIfNeeded(infos);
                 callback.setFindAccessibilityNodeInfosResult(infos, interactionId);
             } catch (RemoteException re) {
                 /* ignore - the other side will time out */
@@ -502,6 +508,7 @@ final class AccessibilityInteractionController {
         } finally {
             try {
                 mViewRootImpl.mAttachInfo.mIncludeNotImportantViews = false;
+                applyApplicationScaleIfNeeded(focused);
                 callback.setFindAccessibilityNodeInfoResult(focused, interactionId);
             } catch (RemoteException re) {
                 /* ignore - the other side will time out */
@@ -582,6 +589,7 @@ final class AccessibilityInteractionController {
         } finally {
             try {
                 mViewRootImpl.mAttachInfo.mIncludeNotImportantViews = false;
+                applyApplicationScaleIfNeeded(next);
                 callback.setFindAccessibilityNodeInfoResult(next, interactionId);
             } catch (RemoteException re) {
                 /* ignore - the other side will time out */
@@ -676,6 +684,39 @@ final class AccessibilityInteractionController {
         }
         return foundView;
     }
+
+    private void applyApplicationScaleIfNeeded(List<AccessibilityNodeInfo> infos) {
+        if (infos == null) {
+            return;
+        }
+        final float applicationScale = mViewRootImpl.mAttachInfo.mApplicationScale;
+        if (applicationScale != 1.0f) {
+            final int infoCount = infos.size();
+            for (int i = 0; i < infoCount; i++) {
+                AccessibilityNodeInfo info = infos.get(i);
+                applyApplicationScaleIfNeeded(info);
+            }
+        }
+    }
+
+    private void applyApplicationScaleIfNeeded(AccessibilityNodeInfo info) {
+        if (info == null) {
+            return;
+        }
+        final float applicationScale = mViewRootImpl.mAttachInfo.mApplicationScale;
+        if (applicationScale != 1.0f) {
+            Rect bounds = mTempRect;
+
+            info.getBoundsInParent(bounds);
+            bounds.scale(applicationScale);
+            info.setBoundsInParent(bounds);
+
+            info.getBoundsInScreen(bounds);
+            bounds.scale(applicationScale);
+            info.setBoundsInScreen(bounds);
+        }
+    }
+
 
     /**
      * This class encapsulates a prefetching strategy for the accessibility APIs for
