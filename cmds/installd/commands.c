@@ -78,7 +78,7 @@ int install(const char *pkgname, uid_t uid, gid_t gid)
 
 #ifdef HAVE_SELINUX
     if (selinux_android_setfilecon(libdir, pkgname, AID_SYSTEM) < 0) {
-        LOGE("cannot setfilecon dir '%s': %s\n", libdir, strerror(errno));
+        ALOGE("cannot setfilecon dir '%s': %s\n", libdir, strerror(errno));
         unlink(libdir);
         unlink(pkgdir);
         return -errno;
@@ -94,7 +94,7 @@ int install(const char *pkgname, uid_t uid, gid_t gid)
 
 #ifdef HAVE_SELINUX
     if (selinux_android_setfilecon(pkgdir, pkgname, uid) < 0) {
-        LOGE("cannot setfilecon dir '%s': %s\n", pkgdir, strerror(errno));
+        ALOGE("cannot setfilecon dir '%s': %s\n", pkgdir, strerror(errno));
         unlink(libdir);
         unlink(pkgdir);
         return -errno;
@@ -201,7 +201,7 @@ int make_user_data(const char *pkgname, uid_t uid, uid_t persona)
 
 #ifdef HAVE_SELINUX
     if (selinux_android_setfilecon(pkgdir, pkgname, uid) < 0) {
-        LOGE("cannot setfilecon dir '%s': %s\n", pkgdir, strerror(errno));
+        ALOGE("cannot setfilecon dir '%s': %s\n", pkgdir, strerror(errno));
         unlink(pkgdir);
         return -errno;
     }
@@ -405,7 +405,7 @@ int protect(char *pkgname, gid_t gid)
 
 #ifdef HAVE_SELINUX
     if (selinux_android_setfilecon(pkgpath, pkgname, s.st_uid) < 0) {
-        LOGE("cannot setfilecon dir '%s': %s\n", pkgpath, strerror(errno));
+        ALOGE("cannot setfilecon dir '%s': %s\n", pkgpath, strerror(errno));
         return -1;
     }
 #endif
