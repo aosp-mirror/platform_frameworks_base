@@ -73,7 +73,7 @@ import java.util.ArrayList;
  * {@hide}
  */
 public class RetryManager {
-    static public final String LOG_TAG = "RetryManager";
+    static public final String LOG_TAG = "GSM";
     static public final boolean DBG = true;
     static public final boolean VDBG = false;
 
@@ -304,7 +304,6 @@ public class RetryManager {
 
     /**
      * Set retry count to the specified value
-     * and turns off retrying forever.
      */
     public void setRetryCount(int count) {
         mRetryCount = count;
@@ -316,8 +315,15 @@ public class RetryManager {
             mRetryCount = 0;
         }
 
-        mRetryForever = false;
         if (DBG) log("setRetryCount: " + mRetryCount);
+    }
+
+    /**
+     * Set retry forever to the specified value
+     */
+    public void setRetryForever(boolean retryForever) {
+        mRetryForever = retryForever;
+        if (DBG) log("setRetryForever: " + mRetryForever);
     }
 
     /**
@@ -399,6 +405,6 @@ public class RetryManager {
     }
 
     private void log(String s) {
-        Log.d(LOG_TAG, s);
+        Log.d(LOG_TAG, "[RM] " + s);
     }
 }
