@@ -345,28 +345,42 @@ public class LinearLayout extends ViewGroup {
 
     void drawDividersHorizontal(Canvas canvas) {
         final int count = getVirtualChildCount();
+        final boolean isLayoutRtl = isLayoutRtl();
         for (int i = 0; i < count; i++) {
             final View child = getVirtualChildAt(i);
 
             if (child != null && child.getVisibility() != GONE) {
                 if (hasDividerBeforeChildAt(i)) {
                     final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-                    final int left = child.getLeft() - lp.leftMargin - mDividerWidth;
-                    drawVerticalDivider(canvas, left);
+                    final int position;
+                    if (isLayoutRtl) {
+                        position = child.getRight() + lp.rightMargin;
+                    } else {
+                        position = child.getLeft() - lp.leftMargin - mDividerWidth;
+                    }
+                    drawVerticalDivider(canvas, position);
                 }
             }
         }
 
         if (hasDividerBeforeChildAt(count)) {
             final View child = getVirtualChildAt(count - 1);
-            int right = 0;
+            int position;
             if (child == null) {
-                right = getWidth() - getPaddingRight() - mDividerWidth;
+                if (isLayoutRtl) {
+                    position = getPaddingLeft();
+                } else {
+                    position = getWidth() - getPaddingRight() - mDividerWidth;
+                }
             } else {
                 final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-                right = child.getRight() + lp.rightMargin;
+                if (isLayoutRtl) {
+                    position = child.getLeft() - lp.leftMargin - mDividerWidth;
+                } else {
+                    position = child.getRight() + lp.rightMargin;
+                }
             }
-            drawVerticalDivider(canvas, right);
+            drawVerticalDivider(canvas, position);
         }
     }
 
