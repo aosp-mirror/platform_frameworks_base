@@ -143,11 +143,12 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     private static final int MSG_REEVALUATE_REMOTE = 17;
     private static final int MSG_RCC_NEW_PLAYBACK_INFO = 18;
     private static final int MSG_RCC_NEW_VOLUME_OBS = 19;
+    private static final int MSG_SET_FORCE_BT_A2DP_USE = 20;
     // start of messages handled under wakelock
     //   these messages can only be queued, i.e. sent with queueMsgUnderWakeLock(),
     //   and not with sendMsg(..., ..., SENDMSG_QUEUE, ...)
-    private static final int MSG_SET_WIRED_DEVICE_CONNECTION_STATE = 20;
-    private static final int MSG_SET_A2DP_CONNECTION_STATE = 21;
+    private static final int MSG_SET_WIRED_DEVICE_CONNECTION_STATE = 21;
+    private static final int MSG_SET_A2DP_CONNECTION_STATE = 22;
     // end of messages handled under wakelock
 
     // flags for MSG_PERSIST_VOLUME indicating if current and/or last audible volume should be
@@ -1701,7 +1702,13 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     /** @see AudioManager#setBluetoothA2dpOn() */
     public void setBluetoothA2dpOn(boolean on) {
-        setBluetoothA2dpOnInt(on);
+        synchronized (mBluetoothA2dpEnabledLock) {
+            mBluetoothA2dpEnabled = on;
+            sendMsg(mAudioHandler, MSG_SET_FORCE_BT_A2DP_USE, SENDMSG_QUEUE,
+                    AudioSystem.FOR_MEDIA,
+                    mBluetoothA2dpEnabled ? AudioSystem.FORCE_NONE : AudioSystem.FORCE_NO_BT_A2DP,
+                    null, 0);
+        }
     }
 
     /** @see AudioManager#isBluetoothA2dpOn() */
@@ -3049,6 +3056,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     break;
 
                 case MSG_SET_FORCE_USE:
+                case MSG_SET_FORCE_BT_A2DP_USE:
                     setForceUse(msg.arg1, msg.arg2);
                     break;
 
@@ -5290,10 +5298,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     public void setBluetoothA2dpOnInt(boolean on) {
         synchronized (mBluetoothA2dpEnabledLock) {
             mBluetoothA2dpEnabled = on;
-            sendMsg(mAudioHandler, MSG_SET_FORCE_USE, SENDMSG_QUEUE,
-                    AudioSystem.FOR_MEDIA,
-                    mBluetoothA2dpEnabled ? AudioSystem.FORCE_NONE : AudioSystem.FORCE_NO_BT_A2DP,
-                    null, 0);
+            mAudioHandler.removeMessages(MSG_SET_FORCE_BT_A2DP_USE);
+            AudioSystem.setForceUse(AudioSystem.FOR_MEDIA,
+                    mBluetoothA2dpEnabled ? AudioSystem.FORCE_NONE : AudioSystem.FORCE_NO_BT_A2DP);
         }
     }
 
