@@ -230,10 +230,49 @@ public class TelephonyIntents {
      * <p class="note">.
      * This is to pop up a notice to show user that the phone is in emergency callback mode
      * and atacalls and outgoing sms are blocked.
-     * 
+     *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      */
     public static final String ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS
             = "android.intent.action.ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS";
+
+
+    /**
+     * Broadcast Action: A "secret code" has been entered in the dialer. Secret codes are
+     * of the form *#*#<code>#*#*. The intent will have the data URI:</p>
+     *
+     * <p><code>android_secret_code://&lt;code&gt;</code></p>
+     */
+    public static final String SECRET_CODE_ACTION =
+            "android.provider.Telephony.SECRET_CODE";
+
+    /**
+     * Broadcast Action: The Service Provider string(s) have been updated.  Activities or
+     * services that use these strings should update their display.
+     * The intent will have the following extra values:</p>
+     * <ul>
+     *   <li><em>showPlmn</em> - Boolean that indicates whether the PLMN should be shown.</li>
+     *   <li><em>plmn</em> - The operator name of the registered network, as a string.</li>
+     *   <li><em>showSpn</em> - Boolean that indicates whether the SPN should be shown.</li>
+     *   <li><em>spn</em> - The service provider name, as a string.</li>
+     * </ul>
+     * Note that <em>showPlmn</em> may indicate that <em>plmn</em> should be displayed, even
+     * though the value for <em>plmn</em> is null.  This can happen, for example, if the phone
+     * has not registered to a network yet.  In this case the receiver may substitute an
+     * appropriate placeholder string (eg, "No service").
+     *
+     * It is recommended to display <em>plmn</em> before / above <em>spn</em> if
+     * both are displayed.
+     *
+     * <p>Note this is a protected intent that can only be sent
+     * by the system.
+     */
+    public static final String SPN_STRINGS_UPDATED_ACTION =
+            "android.provider.Telephony.SPN_STRINGS_UPDATED";
+
+    public static final String EXTRA_SHOW_PLMN  = "showPlmn";
+    public static final String EXTRA_PLMN       = "plmn";
+    public static final String EXTRA_SHOW_SPN   = "showSpn";
+    public static final String EXTRA_SPN        = "spn";
 }

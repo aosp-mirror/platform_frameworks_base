@@ -19,7 +19,7 @@ package com.android.internal.policy.impl;
 import com.android.internal.R;
 import com.android.internal.policy.impl.KeyguardUpdateMonitor.InfoCallbackImpl;
 import com.android.internal.policy.impl.KeyguardUpdateMonitor.SimStateCallback;
-import com.android.internal.telephony.IccCard.State;
+import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.SlidingTab;
 import com.android.internal.widget.WaveView;
@@ -105,7 +105,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
     };
 
     SimStateCallback mSimStateCallback = new SimStateCallback() {
-        public void onSimStateChanged(State simState) {
+        public void onSimStateChanged(IccCardConstants.State simState) {
             updateTargets();
         }
     };

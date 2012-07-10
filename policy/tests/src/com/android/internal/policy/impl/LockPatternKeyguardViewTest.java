@@ -18,7 +18,7 @@ package com.android.internal.policy.impl;
 
 import android.content.Context;
 import com.android.internal.policy.impl.KeyguardViewCallback;
-import com.android.internal.telephony.IccCard;
+import com.android.internal.telephony.IccCardConstants;
 import android.content.res.Configuration;
 import android.test.AndroidTestCase;
 import android.view.View;
@@ -40,14 +40,14 @@ public class LockPatternKeyguardViewTest extends AndroidTestCase {
 
     private static class MockUpdateMonitor extends KeyguardUpdateMonitor {
 
-        public IccCard.State simState = IccCard.State.READY;
+        public IccCardConstants.State simState = IccCardConstants.State.READY;
 
         private MockUpdateMonitor(Context context) {
             super(context);
         }
 
         @Override
-        public IccCard.State getSimState() {
+        public IccCardConstants.State getSimState() {
             return simState;
         }
     }
@@ -318,7 +318,7 @@ public class LockPatternKeyguardViewTest extends AndroidTestCase {
 
     public void testMenuDoesntGoToUnlockScreenOnWakeWhenPukLocked() {
         // PUK locked
-        mUpdateMonitor.simState = IccCard.State.PUK_REQUIRED;
+        mUpdateMonitor.simState = IccCardConstants.State.PUK_REQUIRED;
 
         // wake by menu
         mLPKV.wakeWhenReadyTq(KeyEvent.KEYCODE_MENU);

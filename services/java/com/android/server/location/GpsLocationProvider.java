@@ -60,6 +60,7 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.location.GpsNetInitiatedHandler;
 import com.android.internal.location.GpsNetInitiatedHandler.GpsNiNotification;
 import com.android.internal.telephony.Phone;
+import com.android.internal.telephony.PhoneConstants;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -1285,8 +1286,8 @@ public class GpsLocationProvider implements LocationProviderInterface {
                 int result = mConnMgr.startUsingNetworkFeature(
                         ConnectivityManager.TYPE_MOBILE, Phone.FEATURE_ENABLE_SUPL);
                 mAGpsDataConnectionIpAddr = ipaddr;
-                if (result == Phone.APN_ALREADY_ACTIVE) {
-                    if (DEBUG) Log.d(TAG, "Phone.APN_ALREADY_ACTIVE");
+                if (result == PhoneConstants.APN_ALREADY_ACTIVE) {
+                    if (DEBUG) Log.d(TAG, "PhoneConstants.APN_ALREADY_ACTIVE");
                     if (mAGpsApn != null) {
                         Log.d(TAG, "mAGpsDataConnectionIpAddr " + mAGpsDataConnectionIpAddr);
                         if (mAGpsDataConnectionIpAddr != 0xffffffff) {
@@ -1300,12 +1301,12 @@ public class GpsLocationProvider implements LocationProviderInterface {
                         native_agps_data_conn_open(mAGpsApn);
                         mAGpsDataConnectionState = AGPS_DATA_CONNECTION_OPEN;
                     } else {
-                        Log.e(TAG, "mAGpsApn not set when receiving Phone.APN_ALREADY_ACTIVE");
+                        Log.e(TAG, "mAGpsApn not set when receiving PhoneConstants.APN_ALREADY_ACTIVE");
                         mAGpsDataConnectionState = AGPS_DATA_CONNECTION_CLOSED;
                         native_agps_data_conn_failed();
                     }
-                } else if (result == Phone.APN_REQUEST_STARTED) {
-                    if (DEBUG) Log.d(TAG, "Phone.APN_REQUEST_STARTED");
+                } else if (result == PhoneConstants.APN_REQUEST_STARTED) {
+                    if (DEBUG) Log.d(TAG, "PhoneConstants.APN_REQUEST_STARTED");
                     // Nothing to do here
                 } else {
                     if (DEBUG) Log.d(TAG, "startUsingNetworkFeature failed");

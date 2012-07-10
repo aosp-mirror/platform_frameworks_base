@@ -17,8 +17,7 @@
 package com.android.internal.policy.impl;
 
 import com.android.internal.R;
-import com.android.internal.telephony.IccCard;
-import com.android.internal.telephony.IccCard.State;
+import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.widget.DigitalClock;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.TransportControlView;
@@ -88,7 +87,7 @@ class KeyguardStatusViewManager implements OnClickListener {
     private int mBatteryLevel = 100;
 
     // last known SIM state
-    protected State mSimState;
+    protected IccCardConstants.State mSimState;
 
     private LockPatternUtils mLockPatternUtils;
     private KeyguardUpdateMonitor mUpdateMonitor;
@@ -435,17 +434,18 @@ class KeyguardStatusViewManager implements OnClickListener {
     /**
      * Determine the current status of the lock screen given the sim state and other stuff.
      */
-    public StatusMode getStatusForIccState(IccCard.State simState) {
+    public StatusMode getStatusForIccState(IccCardConstants.State simState) {
         // Since reading the SIM may take a while, we assume it is present until told otherwise.
         if (simState == null) {
             return StatusMode.Normal;
         }
 
         final boolean missingAndNotProvisioned = (!mUpdateMonitor.isDeviceProvisioned()
-                && (simState == IccCard.State.ABSENT || simState == IccCard.State.PERM_DISABLED));
+                && (simState == IccCardConstants.State.ABSENT ||
+                        simState == IccCardConstants.State.PERM_DISABLED));
 
         // Assume we're NETWORK_LOCKED if not provisioned
-        simState = missingAndNotProvisioned ? State.NETWORK_LOCKED : simState;
+        simState = missingAndNotProvisioned ? IccCardConstants.State.NETWORK_LOCKED : simState;
         switch (simState) {
             case ABSENT:
                 return StatusMode.SimMissing;
@@ -477,7 +477,7 @@ class KeyguardStatusViewManager implements OnClickListener {
      *
      * @param simState
      */
-    private void updateCarrierStateWithSimStatus(State simState) {
+    private void updateCarrierStateWithSimStatus(IccCardConstants.State simState) {
         if (DEBUG) Log.d(TAG, "updateCarrierTextWithSimStatus(), simState = " + simState);
 
         CharSequence carrierText = null;
@@ -663,7 +663,7 @@ class KeyguardStatusViewManager implements OnClickListener {
 
     private SimStateCallback mSimStateCallback = new SimStateCallback() {
 
-        public void onSimStateChanged(State simState) {
+        public void onSimStateChanged(IccCardConstants.State simState) {
             updateCarrierStateWithSimStatus(simState);
         }
     };

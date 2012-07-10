@@ -20,7 +20,7 @@ import com.android.internal.R;
 import com.android.internal.policy.impl.KeyguardUpdateMonitor.InfoCallback;
 import com.android.internal.policy.impl.KeyguardUpdateMonitor.InfoCallbackImpl;
 import com.android.internal.policy.impl.LockPatternKeyguardView.UnlockMode;
-import com.android.internal.telephony.IccCard;
+import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockScreenWidgetCallback;
 import com.android.internal.widget.LockScreenWidgetInterface;
@@ -267,8 +267,8 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
     private boolean stuckOnLockScreenBecauseSimMissing() {
         return mRequiresSim
                 && (!mUpdateMonitor.isDeviceProvisioned())
-                && (mUpdateMonitor.getSimState() == IccCard.State.ABSENT ||
-                    mUpdateMonitor.getSimState() == IccCard.State.PERM_DISABLED);
+                && (mUpdateMonitor.getSimState() == IccCardConstants.State.ABSENT ||
+                    mUpdateMonitor.getSimState() == IccCardConstants.State.PERM_DISABLED);
     }
 
     /**
@@ -289,9 +289,9 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         }
 
         public void goToUnlockScreen() {
-            final IccCard.State simState = mUpdateMonitor.getSimState();
+            final IccCardConstants.State simState = mUpdateMonitor.getSimState();
             if (stuckOnLockScreenBecauseSimMissing()
-                     || (simState == IccCard.State.PUK_REQUIRED
+                     || (simState == IccCardConstants.State.PUK_REQUIRED
                          && !mLockPatternUtils.isPukUnlockScreenEnable())){
                 // stuck on lock screen when sim missing or
                 // puk'd but puk unlock screen is disabled
@@ -757,7 +757,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
     public void wakeWhenReadyTq(int keyCode) {
         if (DEBUG) Log.d(TAG, "onWakeKey");
         if (keyCode == KeyEvent.KEYCODE_MENU && isSecure() && (mMode == Mode.LockScreen)
-                && (mUpdateMonitor.getSimState() != IccCard.State.PUK_REQUIRED)) {
+                && (mUpdateMonitor.getSimState() != IccCardConstants.State.PUK_REQUIRED)) {
             if (DEBUG) Log.d(TAG, "switching screens to unlock screen because wake key was MENU");
             updateScreen(Mode.UnlockScreen, false);
             getCallback().pokeWakelock();
@@ -811,10 +811,10 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
                 secure = mLockPatternUtils.isLockPatternEnabled();
                 break;
             case SimPin:
-                secure = mUpdateMonitor.getSimState() == IccCard.State.PIN_REQUIRED;
+                secure = mUpdateMonitor.getSimState() == IccCardConstants.State.PIN_REQUIRED;
                 break;
             case SimPuk:
-                secure = mUpdateMonitor.getSimState() == IccCard.State.PUK_REQUIRED;
+                secure = mUpdateMonitor.getSimState() == IccCardConstants.State.PUK_REQUIRED;
                 break;
             case Account:
                 secure = true;
@@ -1044,9 +1044,9 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
      * the lock screen (lock or unlock).
      */
     private Mode getInitialMode() {
-        final IccCard.State simState = mUpdateMonitor.getSimState();
+        final IccCardConstants.State simState = mUpdateMonitor.getSimState();
         if (stuckOnLockScreenBecauseSimMissing() ||
-                (simState == IccCard.State.PUK_REQUIRED &&
+                (simState == IccCardConstants.State.PUK_REQUIRED &&
                         !mLockPatternUtils.isPukUnlockScreenEnable())) {
             return Mode.LockScreen;
         } else {
@@ -1062,11 +1062,11 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
      * Given the current state of things, what should the unlock screen be?
      */
     private UnlockMode getUnlockMode() {
-        final IccCard.State simState = mUpdateMonitor.getSimState();
+        final IccCardConstants.State simState = mUpdateMonitor.getSimState();
         UnlockMode currentMode;
-        if (simState == IccCard.State.PIN_REQUIRED) {
+        if (simState == IccCardConstants.State.PIN_REQUIRED) {
             currentMode = UnlockMode.SimPin;
-        } else if (simState == IccCard.State.PUK_REQUIRED) {
+        } else if (simState == IccCardConstants.State.PUK_REQUIRED) {
             currentMode = UnlockMode.SimPuk;
         } else {
             final int mode = mLockPatternUtils.getKeyguardStoredPasswordQuality();
