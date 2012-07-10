@@ -65,47 +65,31 @@ static float4 colortemp(float4 color) {
     return new_color;
 }
 
-//float vignetteCenter = (img_width/2.0, img_height/2.0)
-
 
 static float vignette_dist_mod;
+int2 vignette_half_dims;
 static uchar4 vignette(uchar4 color, uint32_t x, uint32_t y) {
-    x -= gWidth >> 1;
-    y -= gHeight >> 1;
+    int2 xy = {x, y};
+    xy -= vignette_half_dims;
+    xy *= xy;
 
-    uint32_t dist = (x * x + y * y);
-    //float d = sqrt((float)dist) * vignette_dist_mod;
-    float d = vignette_dist_mod * dist;
-
-    //RS_DEBUG(d);
-
+    float d = vignette_dist_mod * (xy.x + xy.y);
     ushort4 c = convert_ushort4(color);
     c *= vignette_table[(int)d];
     c >>= (ushort4)8;
     return convert_uchar4(c);
 }
 
-
-
 void root(uchar4 *out, uint32_t x, uint32_t y) {
     uchar Y = gYuvIn[(y * gWidth) + x];
     uchar *uv = &gYuvIn[gWidth * gHeight];
     uv += (((x>>1)<<1) + (y>>1) * gWidth);
 
-#if 0
-    float4 p = toRGB_F(Y, uv[1], uv[0]);
-    p = crossProcess(p);
-    p = colortemp(p);
-    out->rgba = rsPackColorTo8888(p);
-
-#else
     uchar4 p = rsYuvToRGBA_uchar4(Y, uv[1], uv[0]);
     p = crossProcess_i(p);
     p = vignette(p, x, y);
 
     out->rgba = p;
-#endif
-
     out->a = 0xff;
 }
 
@@ -131,7 +115,6 @@ static void precompute() {
         lumen = clamp(lumen, 0.f, 1.f);
 
         vignette_table[i] = (uchar)(lumen * 255.f + 0.5f);
-        RS_DEBUG(lumen);
     }
 }
 
@@ -142,7 +125,7 @@ void init() {
 void setSize(int w, int h) {
     gWidth = w;
     gHeight = h;
-
+    vignette_half_dims = (int2){w / 2, h / 2};
     vignette_dist_mod = 512.f;
     vignette_dist_mod /= (float)(w*w + h*h) / 4.f;
 

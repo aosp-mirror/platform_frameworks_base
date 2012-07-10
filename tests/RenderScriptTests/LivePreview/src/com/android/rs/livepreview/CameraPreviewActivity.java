@@ -299,12 +299,47 @@ public class CameraPreviewActivity extends Activity
     }
 
 
+    private class ProcessPreviewDataTask extends AsyncTask<byte[], Void, Boolean> {
+        protected Boolean doInBackground(byte[]... datas) {
+            byte[] data = datas[0];
+
+            long t1 = java.lang.System.currentTimeMillis();
+
+            mFilterYuv.execute(data);
+            mFilterYuv.copyOut(mCallbackBitmap);
+
+            long t2 = java.lang.System.currentTimeMillis();
+            mTiming[mTimingSlot++] = t2 - t1;
+            if (mTimingSlot >= mTiming.length) {
+                float total = 0;
+                for (int i=0; i<mTiming.length; i++) {
+                    total += (float)mTiming[i];
+                }
+                total /= mTiming.length;
+                Log.e(TAG, "time + " + total);
+                mTimingSlot = 0;
+            }
+
+            mCamera.addCallbackBuffer(data);
+            mProcessInProgress = false;
+            return true;
+        }
+
+        protected void onPostExecute(Boolean result) {
+            mFormatView.invalidate();
+        }
+
+    }
+
     private long mTiming[] = new long[50];
     private int mTimingSlot = 0;
 
     public void onPreviewFrame(byte[] data, Camera camera) {
         if (mProcessInProgress || mState != STATE_PREVIEW) {
             mCamera.addCallbackBuffer(data);
+            return;
+        }
+        if (data == null) {
             return;
         }
 
@@ -328,33 +363,16 @@ public class CameraPreviewActivity extends Activity
                     Bitmap.createBitmap(
                         mPreviewSize.width, mPreviewSize.height,
                         Bitmap.Config.ARGB_8888);
-            mFormatView.setImageBitmap(mCallbackBitmap);
             mFilterYuv = new RsYuv(mRS, getResources(), mPreviewSize.width, mPreviewSize.height);
             mFormatView.setImageBitmap(mCallbackBitmap);
-        }
-
-        long t1 = java.lang.System.currentTimeMillis();
-
-        mFilterYuv.execute(data);
-        mFilterYuv.copyOut(mCallbackBitmap);
-
-        long t2 = java.lang.System.currentTimeMillis();
-        mTiming[mTimingSlot++] = t2 - t1;
-        if (mTimingSlot >= mTiming.length) {
-            float total = 0;
-            for (int i=0; i<mTiming.length; i++) {
-                total += (float)mTiming[i];
-            }
-            total /= mTiming.length;
-            Log.e(TAG, "time + " + total);
-            mTimingSlot = 0;
         }
 
 
         mFormatView.invalidate();
 
         mCamera.addCallbackBuffer(data);
-        mProcessInProgress = false;
+        mProcessInProgress = true;
+        new ProcessPreviewDataTask().execute(data);
     }
 
 
