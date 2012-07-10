@@ -303,7 +303,8 @@ public abstract class DataConnectionTracker extends Handler {
                                     new HashMap<String, Integer>();
 
     /** Phone.APN_TYPE_* ===> ApnContext */
-    protected ConcurrentHashMap<String, ApnContext> mApnContexts;
+    protected ConcurrentHashMap<String, ApnContext> mApnContexts =
+                                    new ConcurrentHashMap<String, ApnContext>();
 
     /* Currently active APN */
     protected ApnSetting mActiveApn;
@@ -1203,6 +1204,9 @@ public abstract class DataConnectionTracker extends Handler {
     }
 
     protected void resetAllRetryCounts() {
+        for (ApnContext ac : mApnContexts.values()) {
+            ac.setRetryCount(0);
+        }
         for (DataConnection dc : mDataConnections.values()) {
             dc.resetRetryCount();
         }
