@@ -53,6 +53,11 @@ public final class BridgeWindow implements IWindow {
     }
 
     @Override
+    public void moved(int arg0, int arg1) throws RemoteException {
+        // pass for now.
+    }
+
+    @Override
     public void dispatchScreenState(boolean on) throws RemoteException {
         // pass for now.
     }
