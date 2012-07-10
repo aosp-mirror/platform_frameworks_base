@@ -34,14 +34,8 @@ import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
-import android.provider.Telephony;
-import static android.provider.Telephony.Intents.EXTRA_PLMN;
-import static android.provider.Telephony.Intents.EXTRA_SHOW_PLMN;
-import static android.provider.Telephony.Intents.EXTRA_SHOW_SPN;
-import static android.provider.Telephony.Intents.EXTRA_SPN;
-import static android.provider.Telephony.Intents.SPN_STRINGS_UPDATED_ACTION;
 
-import com.android.internal.telephony.IccCard;
+import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.TelephonyIntents;
 
 import android.telephony.TelephonyManager;
@@ -70,7 +64,7 @@ public class KeyguardUpdateMonitor {
 
     private final Context mContext;
 
-    private IccCard.State mSimState = IccCard.State.READY;
+    private IccCardConstants.State mSimState = IccCardConstants.State.READY;
 
     private boolean mDeviceProvisioned;
 
@@ -115,44 +109,44 @@ public class KeyguardUpdateMonitor {
      * the intent and provide a {@link SimCard.State} result.
      */
     private static class SimArgs {
-        public final IccCard.State simState;
+        public final IccCardConstants.State simState;
 
-        SimArgs(IccCard.State state) {
+        SimArgs(IccCardConstants.State state) {
             simState = state;
         }
 
         static SimArgs fromIntent(Intent intent) {
-            IccCard.State state;
+            IccCardConstants.State state;
             if (!TelephonyIntents.ACTION_SIM_STATE_CHANGED.equals(intent.getAction())) {
                 throw new IllegalArgumentException("only handles intent ACTION_SIM_STATE_CHANGED");
             }
-            String stateExtra = intent.getStringExtra(IccCard.INTENT_KEY_ICC_STATE);
-            if (IccCard.INTENT_VALUE_ICC_ABSENT.equals(stateExtra)) {
+            String stateExtra = intent.getStringExtra(IccCardConstants.INTENT_KEY_ICC_STATE);
+            if (IccCardConstants.INTENT_VALUE_ICC_ABSENT.equals(stateExtra)) {
                 final String absentReason = intent
-                    .getStringExtra(IccCard.INTENT_KEY_LOCKED_REASON);
+                    .getStringExtra(IccCardConstants.INTENT_KEY_LOCKED_REASON);
 
-                if (IccCard.INTENT_VALUE_ABSENT_ON_PERM_DISABLED.equals(
+                if (IccCardConstants.INTENT_VALUE_ABSENT_ON_PERM_DISABLED.equals(
                         absentReason)) {
-                    state = IccCard.State.PERM_DISABLED;
+                    state = IccCardConstants.State.PERM_DISABLED;
                 } else {
-                    state = IccCard.State.ABSENT;
+                    state = IccCardConstants.State.ABSENT;
                 }
-            } else if (IccCard.INTENT_VALUE_ICC_READY.equals(stateExtra)) {
-                state = IccCard.State.READY;
-            } else if (IccCard.INTENT_VALUE_ICC_LOCKED.equals(stateExtra)) {
+            } else if (IccCardConstants.INTENT_VALUE_ICC_READY.equals(stateExtra)) {
+                state = IccCardConstants.State.READY;
+            } else if (IccCardConstants.INTENT_VALUE_ICC_LOCKED.equals(stateExtra)) {
                 final String lockedReason = intent
-                        .getStringExtra(IccCard.INTENT_KEY_LOCKED_REASON);
-                if (IccCard.INTENT_VALUE_LOCKED_ON_PIN.equals(lockedReason)) {
-                    state = IccCard.State.PIN_REQUIRED;
-                } else if (IccCard.INTENT_VALUE_LOCKED_ON_PUK.equals(lockedReason)) {
-                    state = IccCard.State.PUK_REQUIRED;
+                        .getStringExtra(IccCardConstants.INTENT_KEY_LOCKED_REASON);
+                if (IccCardConstants.INTENT_VALUE_LOCKED_ON_PIN.equals(lockedReason)) {
+                    state = IccCardConstants.State.PIN_REQUIRED;
+                } else if (IccCardConstants.INTENT_VALUE_LOCKED_ON_PUK.equals(lockedReason)) {
+                    state = IccCardConstants.State.PUK_REQUIRED;
                 } else {
-                    state = IccCard.State.UNKNOWN;
+                    state = IccCardConstants.State.UNKNOWN;
                 }
-            } else if (IccCard.INTENT_VALUE_LOCKED_NETWORK.equals(stateExtra)) {
-                state = IccCard.State.NETWORK_LOCKED;
+            } else if (IccCardConstants.INTENT_VALUE_LOCKED_NETWORK.equals(stateExtra)) {
+                state = IccCardConstants.State.NETWORK_LOCKED;
             } else {
-                state = IccCard.State.UNKNOWN;
+                state = IccCardConstants.State.UNKNOWN;
             }
             return new SimArgs(state);
         }
@@ -253,7 +247,7 @@ public class KeyguardUpdateMonitor {
         }
 
         // take a guess to start
-        mSimState = IccCard.State.READY;
+        mSimState = IccCardConstants.State.READY;
         mBatteryStatus = new BatteryStatus(BATTERY_STATUS_UNKNOWN, 100, 0, 0);
 
         mTelephonyPlmn = getDefaultPlmn();
@@ -266,7 +260,7 @@ public class KeyguardUpdateMonitor {
         filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
         filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
         filter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
-        filter.addAction(SPN_STRINGS_UPDATED_ACTION);
+        filter.addAction(TelephonyIntents.SPN_STRINGS_UPDATED_ACTION);
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
         filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
         filter.addAction(Intent.ACTION_USER_SWITCHED);
@@ -281,7 +275,7 @@ public class KeyguardUpdateMonitor {
                         || Intent.ACTION_TIME_CHANGED.equals(action)
                         || Intent.ACTION_TIMEZONE_CHANGED.equals(action)) {
                     mHandler.sendMessage(mHandler.obtainMessage(MSG_TIME_UPDATE));
-                } else if (SPN_STRINGS_UPDATED_ACTION.equals(action)) {
+                } else if (TelephonyIntents.SPN_STRINGS_UPDATED_ACTION.equals(action)) {
                     mTelephonyPlmn = getTelephonyPlmnFrom(intent);
                     mTelephonySpn = getTelephonySpnFrom(intent);
                     mHandler.sendMessage(mHandler.obtainMessage(MSG_CARRIER_INFO_UPDATE));
@@ -296,7 +290,7 @@ public class KeyguardUpdateMonitor {
                 } else if (TelephonyIntents.ACTION_SIM_STATE_CHANGED.equals(action)) {
                     if (DEBUG_SIM_STATES) {
                         Log.v(TAG, "action " + action + " state" +
-                            intent.getStringExtra(IccCard.INTENT_KEY_ICC_STATE));
+                            intent.getStringExtra(IccCardConstants.INTENT_KEY_ICC_STATE));
                     }
                     mHandler.sendMessage(mHandler.obtainMessage(
                             MSG_SIM_STATE_CHANGE, SimArgs.fromIntent(intent)));
@@ -405,15 +399,14 @@ public class KeyguardUpdateMonitor {
      * Handle {@link #MSG_SIM_STATE_CHANGE}
      */
     private void handleSimStateChange(SimArgs simArgs) {
-        final IccCard.State state = simArgs.simState;
+        final IccCardConstants.State state = simArgs.simState;
 
         if (DEBUG) {
             Log.d(TAG, "handleSimStateChange: intentValue = " + simArgs + " "
                     + "state resolved to " + state.toString());
         }
 
-        if (state != IccCard.State.UNKNOWN && state != mSimState) {
-            if (DEBUG_SIM_STATES) Log.v(TAG, "dispatching state: " + state);
+        if (state != IccCardConstants.State.UNKNOWN && state != mSimState) {
             mSimState = state;
             for (int i = 0; i < mSimStateCallbacks.size(); i++) {
                 mSimStateCallbacks.get(i).onSimStateChanged(state);
@@ -466,12 +459,12 @@ public class KeyguardUpdateMonitor {
     }
 
     /**
-     * @param intent The intent with action {@link Telephony.Intents#SPN_STRINGS_UPDATED_ACTION}
+     * @param intent The intent with action {@link TelephonyIntents#SPN_STRINGS_UPDATED_ACTION}
      * @return The string to use for the plmn, or null if it should not be shown.
      */
     private CharSequence getTelephonyPlmnFrom(Intent intent) {
-        if (intent.getBooleanExtra(EXTRA_SHOW_PLMN, false)) {
-            final String plmn = intent.getStringExtra(EXTRA_PLMN);
+        if (intent.getBooleanExtra(TelephonyIntents.EXTRA_SHOW_PLMN, false)) {
+            final String plmn = intent.getStringExtra(TelephonyIntents.EXTRA_PLMN);
             if (plmn != null) {
                 return plmn;
             } else {
@@ -494,8 +487,8 @@ public class KeyguardUpdateMonitor {
      * @return The string to use for the plmn, or null if it should not be shown.
      */
     private CharSequence getTelephonySpnFrom(Intent intent) {
-        if (intent.getBooleanExtra(EXTRA_SHOW_SPN, false)) {
-            final String spn = intent.getStringExtra(EXTRA_SPN);
+        if (intent.getBooleanExtra(TelephonyIntents.EXTRA_SHOW_SPN, false)) {
+            final String spn = intent.getStringExtra(TelephonyIntents.EXTRA_SPN);
             if (spn != null) {
                 return spn;
             }
@@ -601,7 +594,7 @@ public class KeyguardUpdateMonitor {
      * Callback to notify of sim state change.
      */
     interface SimStateCallback {
-        void onSimStateChanged(IccCard.State simState);
+        void onSimStateChanged(IccCardConstants.State simState);
     }
 
     /**
@@ -646,7 +639,7 @@ public class KeyguardUpdateMonitor {
         mHandler.obtainMessage(MSG_CLOCK_VISIBILITY_CHANGED).sendToTarget();
     }
 
-    public IccCard.State getSimState() {
+    public IccCardConstants.State getSimState() {
         return mSimState;
     }
 
@@ -659,7 +652,7 @@ public class KeyguardUpdateMonitor {
      * through mHandler, this *must* be called from the UI thread.
      */
     public void reportSimUnlocked() {
-        handleSimStateChange(new SimArgs(IccCard.State.READY));
+        handleSimStateChange(new SimArgs(IccCardConstants.State.READY));
     }
 
     public boolean isDevicePluggedIn() {
@@ -725,8 +718,8 @@ public class KeyguardUpdateMonitor {
     }
 
     public boolean isSimLocked() {
-        return mSimState == IccCard.State.PIN_REQUIRED
-            || mSimState == IccCard.State.PUK_REQUIRED
-            || mSimState == IccCard.State.PERM_DISABLED;
+        return mSimState == IccCardConstants.State.PIN_REQUIRED
+            || mSimState == IccCardConstants.State.PUK_REQUIRED
+            || mSimState == IccCardConstants.State.PERM_DISABLED;
     }
 }

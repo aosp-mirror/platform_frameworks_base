@@ -20,12 +20,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.provider.Telephony;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Slog;
 import android.view.View;
 import android.widget.TextView;
+
+import com.android.internal.telephony.TelephonyIntents;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -60,7 +61,7 @@ public class CarrierLabel extends TextView {
         if (!mAttached) {
             mAttached = true;
             IntentFilter filter = new IntentFilter();
-            filter.addAction(Telephony.Intents.SPN_STRINGS_UPDATED_ACTION);
+            filter.addAction(TelephonyIntents.SPN_STRINGS_UPDATED_ACTION);
             getContext().registerReceiver(mIntentReceiver, filter, null, getHandler());
         }
     }
@@ -78,11 +79,11 @@ public class CarrierLabel extends TextView {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (Telephony.Intents.SPN_STRINGS_UPDATED_ACTION.equals(action)) {
-                updateNetworkName(intent.getBooleanExtra(Telephony.Intents.EXTRA_SHOW_SPN, false),
-                        intent.getStringExtra(Telephony.Intents.EXTRA_SPN),
-                        intent.getBooleanExtra(Telephony.Intents.EXTRA_SHOW_PLMN, false),
-                        intent.getStringExtra(Telephony.Intents.EXTRA_PLMN));
+            if (TelephonyIntents.SPN_STRINGS_UPDATED_ACTION.equals(action)) {
+                updateNetworkName(intent.getBooleanExtra(TelephonyIntents.EXTRA_SHOW_SPN, false),
+                        intent.getStringExtra(TelephonyIntents.EXTRA_SPN),
+                        intent.getBooleanExtra(TelephonyIntents.EXTRA_SHOW_PLMN, false),
+                        intent.getStringExtra(TelephonyIntents.EXTRA_PLMN));
             }
         }
     };
@@ -108,7 +109,7 @@ public class CarrierLabel extends TextView {
         setText(str);
     }
 
-    
+
 }
 
 

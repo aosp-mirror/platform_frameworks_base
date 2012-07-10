@@ -23,7 +23,7 @@ LOCAL_SRC_FILES := \
 
 LOCAL_DX_FLAGS := --core-library
 LOCAL_STATIC_JAVA_LIBRARIES := core-tests android-common frameworks-core-util-lib mockwebserver guava littlemock
-LOCAL_JAVA_LIBRARIES := android.test.runner
+LOCAL_JAVA_LIBRARIES := android.test.runner telephony-common
 LOCAL_PACKAGE_NAME := FrameworksCoreTests
 
 LOCAL_CERTIFICATE := platform
