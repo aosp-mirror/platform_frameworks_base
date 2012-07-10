@@ -187,7 +187,7 @@
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Hifadhi"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Fikia hifadhi ya USB."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Fikia kadi ya SD."</string>
-    <string name="permlab_statusBar" msgid="7417192629601890791">"lemaza au rekebisha mwambaa hali"</string>
+    <string name="permlab_statusBar" msgid="7417192629601890791">"zima au rekebisha mwambaa hali"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Inaruhusu programu kulemaza upau wa hali au kuongeza na kutoa ikoni za mfumo."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"mwamba hali"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Inaruhusu programu kuwa upau wa hali."</string>
@@ -391,7 +391,7 @@
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Inaruhusu programu kurekodi sauti kwa kinasa sauti. Idhini hii inaruhusu programu kurekodi sauti wakati wowote bila ya uthibitisho wako."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"chukua picha na video"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Inaruhusu programu kupiga picha na video kwa kamera. Kibali hiki kinaruhusu programu kutumia kamera kwa wakati wowote bila uthibitisho wako."</string>
-    <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"lemaza kompyuta ndogo kabisa"</string>
+    <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"zima kompyuta ndogo kabisa"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"simu iliyolemazwa kabisa"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Inaruhusu programu kulemaza kompyuta yote kibao kabisa. Hii ni hatari sana."</string>
     <string name="permdesc_brick" product="default" msgid="5788903297627283099">"Inaruhusu programu kulemaza simu yote kabisa. Hii ni hatari sana."</string>
@@ -508,7 +508,7 @@
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Inaruhusu programu kuona usanidi wa Bluetooth kwenye simu, na kuunda na kukubali miunganisho kwa vifaa vilivyooanishwa."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"dhibiti Mawasiliano Karibu na Uga"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Inaruhusu programu kuwasiliana na lebo, kadi na wasomaji wa Near Field Communication (NFC)."</string>
-    <string name="permlab_disableKeyguard" msgid="3598496301486439258">"lemaza kufuli la skrini yako"</string>
+    <string name="permlab_disableKeyguard" msgid="3598496301486439258">"zima kufuli la skrini yako"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Inaruhusu programu kulemaza ufunguo wa vitufe na usalama mwingine ambata wa nenosiri. Kwa mfano, simu inalemaza ufunguo wa viitufe inapopokea simu inayoingia, kisha inawezesha upya ufunguo wa vitufe wakati simu inapokamilika."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"soma mipangilio ya usawazishaji"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Inaruhusu programu kusoma mipangilio ya upatanishi wa akaunti. Kwa mfano, huku kunaweza kuamua kama programu ya Watu imepatanishwa na akaunti."</string>
