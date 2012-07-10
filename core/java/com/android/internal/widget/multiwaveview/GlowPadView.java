@@ -214,8 +214,8 @@ public class GlowPadView extends View {
                 mVibrationDuration);
         mFeedbackCount = a.getInt(R.styleable.GlowPadView_feedbackCount,
                 mFeedbackCount);
-        mHandleDrawable = new TargetDrawable(res,
-                a.peekValue(R.styleable.GlowPadView_handleDrawable).resourceId);
+        TypedValue handle = a.peekValue(R.styleable.GlowPadView_handleDrawable);
+        mHandleDrawable = new TargetDrawable(res, handle != null ? handle.resourceId : 0);
         mHandleDrawable.setState(TargetDrawable.STATE_INACTIVE);
         mOuterRing = new TargetDrawable(res,
                 getResourceId(a, R.styleable.GlowPadView_outerRingDrawable));
@@ -717,7 +717,7 @@ public class GlowPadView extends View {
         startBackgroundAnimation(0, 0.0f);
         stopAndHideWaveAnimation();
         hideTargets(animate, false);
-        hideGlow(0, 0, 1.0f, null);
+        hideGlow(0, 0, 0.0f, null);
         Tweener.reset();
     }
 
