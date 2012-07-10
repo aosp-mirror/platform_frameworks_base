@@ -5507,6 +5507,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          */
         static private final int DEFAULT_RELATIVE = Integer.MIN_VALUE;
 
+        private int initialLeftMargin;
+        private int initialRightMargin;
+
+        private int layoutDirection;
+
         /**
          * Creates a new set of layout parameters. The values are extracted from
          * the supplied attributes set and context.
@@ -5545,6 +5550,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                         R.styleable.ViewGroup_MarginLayout_layout_marginEnd, DEFAULT_RELATIVE);
             }
 
+            initialLeftMargin = leftMargin;
+            initialRightMargin = rightMargin;
+
+            // LTR by default
+            layoutDirection = View.LAYOUT_DIRECTION_LTR;
+
             a.recycle();
         }
 
@@ -5570,6 +5581,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             this.bottomMargin = source.bottomMargin;
             this.startMargin = source.startMargin;
             this.endMargin = source.endMargin;
+
+            this.initialLeftMargin = source.leftMargin;
+            this.initialRightMargin = source.rightMargin;
+
+            this.layoutDirection = source.layoutDirection;
         }
 
         /**
@@ -5599,6 +5615,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             topMargin = top;
             rightMargin = right;
             bottomMargin = bottom;
+            initialLeftMargin = left;
+            initialRightMargin = right;
         }
 
         /**
@@ -5624,6 +5642,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             topMargin = top;
             endMargin = end;
             bottomMargin = bottom;
+            initialLeftMargin = 0;
+            initialRightMargin = 0;
         }
 
         /**
@@ -5634,7 +5654,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          * @return the start margin in pixels.
          */
         public int getMarginStart() {
-            return startMargin;
+            if (startMargin != DEFAULT_RELATIVE) return startMargin;
+            switch(layoutDirection) {
+                case View.LAYOUT_DIRECTION_RTL:
+                    return rightMargin;
+                case View.LAYOUT_DIRECTION_LTR:
+                default:
+                    return leftMargin;
+            }
         }
 
         /**
@@ -5645,7 +5672,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          * @return the end margin in pixels.
          */
         public int getMarginEnd() {
-            return endMargin;
+            if (endMargin != DEFAULT_RELATIVE) return endMargin;
+            switch(layoutDirection) {
+                case View.LAYOUT_DIRECTION_RTL:
+                    return leftMargin;
+                case View.LAYOUT_DIRECTION_LTR:
+                default:
+                    return rightMargin;
+            }
         }
 
         /**
@@ -5666,15 +5700,19 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          */
         @Override
         public void onResolveLayoutDirection(int layoutDirection) {
+            this.layoutDirection = layoutDirection;
+
+            if (!isMarginRelative()) return;
+
             switch(layoutDirection) {
                 case View.LAYOUT_DIRECTION_RTL:
-                    leftMargin = (endMargin > DEFAULT_RELATIVE) ? endMargin : leftMargin;
-                    rightMargin = (startMargin > DEFAULT_RELATIVE) ? startMargin : rightMargin;
+                    leftMargin = (endMargin > DEFAULT_RELATIVE) ? endMargin : initialLeftMargin;
+                    rightMargin = (startMargin > DEFAULT_RELATIVE) ? startMargin : initialRightMargin;
                     break;
                 case View.LAYOUT_DIRECTION_LTR:
                 default:
-                    leftMargin = (startMargin > DEFAULT_RELATIVE) ? startMargin : leftMargin;
-                    rightMargin = (endMargin > DEFAULT_RELATIVE) ? endMargin : rightMargin;
+                    leftMargin = (startMargin > DEFAULT_RELATIVE) ? startMargin : initialLeftMargin;
+                    rightMargin = (endMargin > DEFAULT_RELATIVE) ? endMargin : initialRightMargin;
                     break;
             }
         }
