@@ -335,7 +335,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
         }
         int lockSoundDefaultAttenuation = context.getResources().getInteger(
                 com.android.internal.R.integer.config_lockSoundVolumeDb);
-        mLockSoundVolume = (float)Math.pow(10, lockSoundDefaultAttenuation/20);
+        mLockSoundVolume = (float)Math.pow(10, (float)lockSoundDefaultAttenuation/20);
         IntentFilter userFilter = new IntentFilter();
         userFilter.addAction(Intent.ACTION_USER_SWITCHED);
         userFilter.addAction(Intent.ACTION_USER_REMOVED);
