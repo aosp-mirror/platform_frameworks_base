@@ -245,8 +245,8 @@ public class WebChromeClient {
     }
 
    /**
-    * Tell the client that the quota has been reached for the Application Cache
-    * API and request a new quota. The client must respond by invoking the
+    * Notify the host application that the Application Cache has reached the
+    * maximum size. The client must respond by invoking the
     * {@link WebStorage.QuotaUpdater#updateQuota(long) updateQuota(long)}
     * method of the supplied {@link WebStorage.QuotaUpdater} instance. The
     * minimum value that can be set for the new quota is the current quota. The
@@ -255,7 +255,7 @@ public class WebChromeClient {
     * @param requiredStorage The amount of storage required by the Application
     *                        Cache operation that triggered this notification,
     *                        in bytes.
-    * @param quota The quota, in bytes
+    * @param quota the current maximum Application Cache size, in bytes
     * @param quotaUpdater An instance of {@link WebStorage.QuotaUpdater} which
     *                     must be used to inform the WebView of the new quota.
     */
