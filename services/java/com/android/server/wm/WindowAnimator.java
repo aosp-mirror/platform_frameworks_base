@@ -254,7 +254,13 @@ public class WindowAnimator {
         ArrayList<WindowStateAnimator> unForceHiding = null;
         boolean wallpaperInUnForceHiding = false;
 
-        boolean forceHiding = false;
+        // forceHiding states.
+        final int KEYGUARD_NOT_SHOWN     = 0;
+        final int KEYGUARD_ANIMATING_IN  = 1;
+        final int KEYGUARD_SHOWN         = 2;
+        final int KEYGUARD_ANIMATING_OUT = 3;
+        int forceHiding = KEYGUARD_NOT_SHOWN;
+
         for (int i = mWinAnimators.size() - 1; i >= 0; i--) {
             WindowStateAnimator winAnimator = mWinAnimators.get(i);
             WindowState win = winAnimator.mWin;
@@ -291,8 +297,16 @@ public class WindowAnimator {
                         }
                         mService.mFocusMayChange = true;
                     }
-                    if (win.isReadyForDisplay() && winAnimator.mAnimationIsEntrance) {
-                        forceHiding = true;
+                    if (win.isReadyForDisplay()) {
+                        if (nowAnimating) {
+                            if (winAnimator.mAnimationIsEntrance) {
+                                forceHiding = KEYGUARD_ANIMATING_IN;
+                            } else {
+                                forceHiding = KEYGUARD_ANIMATING_OUT;
+                            }
+                        } else {
+                            forceHiding = KEYGUARD_SHOWN;
+                        }
                     }
                     if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(TAG,
                             "Force hide " + forceHiding
@@ -304,9 +318,12 @@ public class WindowAnimator {
                             + " hidden=" + win.mRootToken.hidden
                             + " anim=" + win.mWinAnimator.mAnimation);
                 } else if (mPolicy.canBeForceHidden(win, win.mAttrs)) {
+                    final boolean hideWhenLocked =
+                            (winAnimator.mAttrFlags & FLAG_SHOW_WHEN_LOCKED) == 0;
                     final boolean changed;
-                    if (forceHiding && (!winAnimator.isAnimating()
-                            || (winAnimator.mAttrFlags & FLAG_SHOW_WHEN_LOCKED) == 0)) {
+                    if (((forceHiding == KEYGUARD_ANIMATING_IN)
+                                && (!winAnimator.isAnimating() || hideWhenLocked))
+                            || ((forceHiding == KEYGUARD_SHOWN) && hideWhenLocked)) {
                         changed = win.hideLw(false, false);
                         if (WindowManagerService.DEBUG_VISIBILITY && changed) Slog.v(TAG,
                                 "Now policy hidden: " + win);
