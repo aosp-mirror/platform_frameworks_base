@@ -85,7 +85,7 @@ page.title=GCM: Getting Started
 <p class="note"><strong>Note:</strong> If you need to rotate the key, click  <strong>Generate new key</strong>. A new key  will be created while the old one will still be active for up to 24 hours. If you want to get rid of the old key immediately (for example, if you feel it was compromised), click <strong>Delete key</strong>.</p>
 
 <h2 id="libs">Install the Helper Libraries</h2>
-<p>To perform the steps described in the following sections, you must first install the helper libraries (reference: <a href="{@docRoot}guide/google/gcm/client-javadoc/index.html">client</a> and <a href="{@docRoot}guide/google/gcm/server-javadoc/index.html">server</a>). From the SDK Manager, install <strong>Extras &gt; Google Cloud Messaging for Android Library</strong>. This creates a <code>gcm</code> directory under <code><em>YOUR_SDK_ROOT</em>/extras/google/</code> containing these subdirectories: <code>gcm-client</code>, <code>gcm-demo-appengine</code>, <code>gcm-demo-client</code>, <code>gcm-demo-server</code>, and <code>gcm-server</code>.</p>
+<p>To perform the steps described in the following sections, you must first install the helper libraries (reference: <a href="{@docRoot}guide/google/gcm/client-javadoc/index.html">client</a> and <a href="{@docRoot}guide/google/gcm/server-javadoc/index.html">server</a>). From the SDK Manager, install <strong>Extras &gt; Google Cloud Messaging for Android Library</strong>. This creates a <code>gcm</code> directory under <code><em>YOUR_SDK_ROOT</em>/extras/google/</code> containing these subdirectories: <code>gcm-client</code>, <code>gcm-server</code>, <code>samples/gcm-demo-client</code>, <code>samples/gcm-demo-server</code>, and <code>samples/gcm-demo-appengine</code>.</p>
 <h2 id="android-app">Writing the Android Application</h2>
 <p>This section describes the steps involved in writing an Android application that uses GCM.</p>
 <h4>Step 1: Copy the gcm.jar file into your application classpath</h4>
@@ -104,9 +104,16 @@ page.title=GCM: Getting Started
 <p> This permission must be called <code>my_app_package.permission.C2D_MESSAGE</code> (where <code>my_app_package</code> is the package name of your app as defined by the manifest tag), otherwise it will not  work.</p>
 <p class="note"><strong>Note:</strong> This permission is not required if you are targeting your application to 4.1 or above (i.e., minSdkVersion 16)</p>
 
-  <li>Add the permission to receive GCM messages:</li>
+  <li>Add the following permissions:</li>
 
-<pre class="prettyprint pretty-xml">&lt;uses-permission android:name=&quot;com.google.android.c2dm.permission.RECEIVE&quot; /&gt;</pre>
+<pre class="prettyprint pretty-xml">&lt;!-- App receives GCM messages. --&gt;
+&lt;uses-permission android:name=&quot;com.google.android.c2dm.permission.RECEIVE&quot; /&gt;
+&lt;!-- GCM connects to Google Services. --&gt;
+&lt;uses-permission android:name=&quot;android.permission.INTERNET&quot; /&gt; 
+&lt;!-- GCM requires a Google account. --&gt;
+&lt;uses-permission android:name=&quot;android.permission.GET_ACCOUNTS&quot; /&gt;
+&lt;!-- Keeps the processor from sleeping when a message is received. --&gt;
+&lt;uses-permission android:name=&quot;android.permission.WAKE_LOCK&quot; /&gt;</pre>
 
   <li>Add the following broadcast receiver:</li>
 
@@ -127,7 +134,7 @@ page.title=GCM: Getting Started
  <pre class="prettyprint pretty-xml">&lt;service android:name=&quot;.GCMIntentService&quot; /&gt;</pre>
 
 </ol>
-<p> This intent service will be called by the <code>GCMBroadcastReceiver</code> (which is is provided by GCM library), as shown in the next step. It must be named <code>my_app_package.GCMIntentService</code>, unless you use a subclass of <code>GCMBroadcastReceiver</code> that overrides the method used to name the service.</p>
+<p>This intent service will be called by the <code>GCMBroadcastReceiver</code> (which is is provided by GCM library), as shown in the next step. It must be a subclass of <code>com.google.android.gcm.GCMBaseIntentService</code>, must contain a public constructor, and should be named <code>my_app_package.GCMIntentService</code> (unless you use a subclass of <code>GCMBroadcastReceiver</code> that overrides the method used to name the service).</p>
 <h4><br>
   Step 3: Write the my_app_package.GCMIntentService class</h4>
 <p>Next write the <code>my_app_package.GCMIntentService</code> class, overriding the following callback methods (which are called by <code>GCMBroadcastReceiver</code>):<br>
