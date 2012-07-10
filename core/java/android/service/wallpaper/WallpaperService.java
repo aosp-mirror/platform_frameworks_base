@@ -98,6 +98,7 @@ public abstract class WallpaperService extends Service {
     private static final int MSG_WALLPAPER_OFFSETS = 10020;
     private static final int MSG_WALLPAPER_COMMAND = 10025;
     private static final int MSG_WINDOW_RESIZED = 10030;
+    private static final int MSG_WINDOW_MOVED = 10035;
     private static final int MSG_TOUCH_EVENT = 10040;
     
     private Looper mCallbackLooper;
@@ -259,7 +260,13 @@ public abstract class WallpaperService extends Service {
                         reportDraw ? 1 : 0);
                 mCaller.sendMessage(msg);
             }
-            
+
+            @Override
+            public void moved(int newX, int newY) {
+                Message msg = mCaller.obtainMessageII(MSG_WINDOW_MOVED, newX, newY);
+                mCaller.sendMessage(msg);
+            }
+
             @Override
             public void dispatchAppVisibility(boolean visible) {
                 // We don't do this in preview mode; we'll let the preview
@@ -290,7 +297,8 @@ public abstract class WallpaperService extends Service {
                     }
                 }
             }
-            
+
+            @Override
             public void dispatchWallpaperCommand(String action, int x, int y,
                     int z, Bundle extras, boolean sync) {
                 synchronized (mLock) {
@@ -1043,6 +1051,9 @@ public abstract class WallpaperService extends Service {
                     final boolean reportDraw = message.arg1 != 0;
                     mEngine.updateSurface(true, false, reportDraw);
                     mEngine.doOffsetsChanged(true);
+                } break;
+                case MSG_WINDOW_MOVED: {
+                    // Do nothing. What does it mean for a Wallpaper to move?
                 } break;
                 case MSG_TOUCH_EVENT: {
                     boolean skip = false;
