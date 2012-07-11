@@ -745,6 +745,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             // Here we just need to clean up the Surface Texture which is static.
             if (level > TRIM_MEMORY_UI_HIDDEN) {
                 HTML5VideoInline.cleanupSurfaceTexture();
+                HTML5VideoView.release();
             }
             WebViewClassic.nativeOnTrimMemory(level);
         }

@@ -35,6 +35,7 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener {
     static final int STATE_PREPARED           = 2;
     static final int STATE_PLAYING            = 3;
     static final int STATE_RESETTED           = 4;
+    static final int STATE_RELEASED           = 5;
 
     protected HTML5VideoViewProxy mProxy;
 
@@ -126,7 +127,7 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener {
     }
 
     public void reset() {
-        if (mCurrentState != STATE_RESETTED) {
+        if (mCurrentState < STATE_RESETTED) {
             mPlayer.reset();
         }
         mCurrentState = STATE_RESETTED;
@@ -136,6 +137,18 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener {
         if (mCurrentState == STATE_PREPARED) {
             mPlayer.stop();
         }
+    }
+
+    public static void release() {
+        if (mPlayer != null && mCurrentState != STATE_RELEASED) {
+            mPlayer.release();
+            mPlayer = null;
+        }
+        mCurrentState = STATE_RELEASED;
+    }
+
+    public boolean isReleased() {
+        return mCurrentState == STATE_RELEASED;
     }
 
     public boolean getPauseDuringPreparing() {
