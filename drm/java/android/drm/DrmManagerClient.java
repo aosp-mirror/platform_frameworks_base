@@ -63,6 +63,8 @@ public class DrmManagerClient {
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
 
+    private static final String EXTENDED_INFO_DATA = "extended_info_data";
+
     static {
         // Load the respective library
         System.loadLibrary("drmframework_jni");
@@ -184,8 +186,22 @@ public class DrmManagerClient {
         DrmManagerClient instance = (DrmManagerClient)((WeakReference)thisReference).get();
 
         if (null != instance && null != instance.mInfoHandler) {
+            DrmInfoEvent event = new DrmInfoEvent(uniqueId, infoType, message);
             Message m = instance.mInfoHandler.obtainMessage(
-                InfoHandler.INFO_EVENT_TYPE, uniqueId, infoType, message);
+                    InfoHandler.INFO_EVENT_TYPE, event);
+            instance.mInfoHandler.sendMessage(m);
+        }
+    }
+
+    private static void notify(
+            Object thisReference, int uniqueId, int infoType, String message,
+            HashMap<String, Object> attributes) {
+        DrmManagerClient instance = (DrmManagerClient)((WeakReference)thisReference).get();
+
+        if (null != instance && null != instance.mInfoHandler) {
+            DrmInfoEvent event = new DrmInfoEvent(uniqueId, infoType, message, attributes);
+            Message m = instance.mInfoHandler.obtainMessage(
+                    InfoHandler.INFO_EVENT_TYPE, event);
             instance.mInfoHandler.sendMessage(m);
         }
     }
@@ -198,23 +214,25 @@ public class DrmManagerClient {
         }
 
         public void handleMessage(Message msg) {
-            DrmInfoEvent info = null;
+            DrmInfoEvent info = (DrmInfoEvent) msg.obj;
             DrmErrorEvent error = null;
+            int uniqueId;
+            int eventType;
+            String message;
 
             switch (msg.what) {
             case InfoHandler.INFO_EVENT_TYPE:
-                int uniqueId = msg.arg1;
-                int infoType = msg.arg2;
-                String message = msg.obj.toString();
+                uniqueId = info.getUniqueId();
+                eventType = info.getType();
+                message = info.getMessage();
 
-                switch (infoType) {
+                switch (eventType) {
                 case DrmInfoEvent.TYPE_REMOVE_RIGHTS: {
                     try {
                         DrmUtils.removeFile(message);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    info = new DrmInfoEvent(uniqueId, infoType, message);
                     break;
                 }
                 case DrmInfoEvent.TYPE_ALREADY_REGISTERED_BY_ANOTHER_ACCOUNT:
@@ -222,11 +240,11 @@ public class DrmManagerClient {
                 case DrmInfoEvent.TYPE_WAIT_FOR_RIGHTS:
                 case DrmInfoEvent.TYPE_ACCOUNT_ALREADY_REGISTERED:
                 case DrmInfoEvent.TYPE_RIGHTS_REMOVED: {
-                    info = new DrmInfoEvent(uniqueId, infoType, message);
                     break;
                 }
                 default:
-                    error = new DrmErrorEvent(uniqueId, infoType, message);
+                    info = null;
+                    error = new DrmErrorEvent(uniqueId, eventType, message);
                     break;
                 }
 

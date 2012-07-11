@@ -169,11 +169,49 @@ void JNIOnInfoListener::onInfo(const DrmInfoEvent& event) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     jstring message = env->NewStringUTF(event.getMessage().string());
     ALOGV("JNIOnInfoListener::onInfo => %d | %d | %s", uniqueId, type, event.getMessage().string());
+    const DrmBuffer& drmBuffer = event.getData();
+    if (event.getCount() > 0 || drmBuffer.length > 0) {
+        jclass hashMapClazz = env->FindClass("java/util/HashMap");
+        jmethodID hashMapInitId = env->GetMethodID(hashMapClazz, "<init>", "()V");
+        jmethodID hashMapPutId = env->GetMethodID(hashMapClazz, "put",
+                "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
+        jobject hashMapObject = env->NewObject(hashMapClazz, hashMapInitId);
+        env->DeleteLocalRef(hashMapClazz);
 
-    env->CallStaticVoidMethod(
-            mClass,
-            env->GetStaticMethodID(mClass, "notify", "(Ljava/lang/Object;IILjava/lang/String;)V"),
-            mObject, uniqueId, type, message);
+        if (0 < drmBuffer.length) {
+            jfieldID fid = env->GetStaticFieldID(
+                mClass, "EXTENDED_INFO_DATA", "Ljava/lang/String;");
+            jstring key = (jstring) env->GetStaticObjectField(mClass, fid);
+
+            jbyteArray valueByte = env->NewByteArray(drmBuffer.length);
+            env->SetByteArrayRegion(valueByte, 0, drmBuffer.length, (jbyte*) drmBuffer.data);
+            env->CallObjectMethod(hashMapObject, hashMapPutId, key, valueByte);
+            env->DeleteLocalRef(valueByte);
+            env->DeleteLocalRef(key);
+        }
+        DrmInfoEvent::KeyIterator keyIt = event.keyIterator();
+        while (keyIt.hasNext()) {
+            String8 mapKey = keyIt.next();
+            jstring key = env->NewStringUTF(mapKey.string());
+            jstring value = env->NewStringUTF(event.get(mapKey).string());
+            env->CallObjectMethod(hashMapObject, hashMapPutId, key, value);
+            env->DeleteLocalRef(value);
+            env->DeleteLocalRef(key);
+        }
+        env->CallStaticVoidMethod(
+                mClass,
+                env->GetStaticMethodID(mClass, "notify",
+                        "(Ljava/lang/Object;IILjava/lang/String;Ljava/util/HashMap;)V"),
+                mObject, uniqueId, type, message, hashMapObject);
+        env->DeleteLocalRef(hashMapObject);
+    } else {
+        env->CallStaticVoidMethod(
+                mClass,
+                env->GetStaticMethodID(mClass, "notify",
+                        "(Ljava/lang/Object;IILjava/lang/String;)V"),
+                mObject, uniqueId, type, message);
+    }
+    env->DeleteLocalRef(message);
 }
 
 static Mutex sLock;
