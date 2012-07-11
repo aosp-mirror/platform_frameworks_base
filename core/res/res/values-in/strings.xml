@@ -434,8 +434,8 @@
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"Mengizinkan apl memulai penyediaan CDMA. Apl berbahaya dapat memulai penyediaan CDMA yang tidak perlu."</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"mengontrol pemberitahuan pembaruan lokasi"</string>
     <string name="permdesc_locationUpdates" msgid="1120741557891438876">"Mengizinkan apl mengaktifkan/menonaktifkan pemberitahuan pembaruan lokasi dari radio. Tidak untuk digunakan oleh apl normal."</string>
-    <string name="permlab_checkinProperties" msgid="7855259461268734914">"akses properti lapor masuk"</string>
-    <string name="permdesc_checkinProperties" msgid="4024526968630194128">"Mengizinkan apl membaca/menulis akses ke properti yang diunggah oleh layanan lapor masuk. Tidak untuk digunakan oleh apl normal."</string>
+    <string name="permlab_checkinProperties" msgid="7855259461268734914">"akses properti check in"</string>
+    <string name="permdesc_checkinProperties" msgid="4024526968630194128">"Mengizinkan apl membaca/menulis akses ke properti yang diunggah oleh layanan check in. Tidak untuk digunakan oleh apl normal."</string>
     <string name="permlab_bindGadget" msgid="776905339015863471">"pilih widget"</string>
     <string name="permdesc_bindGadget" msgid="8261326938599049290">"Mengizinkan apl memberi tahu sistem tentang widget mana yang dapat digunakan oleh suatu apl. Apl dengan izin ini dapat memberikan akses ke data pribadi untuk apl lain. Tidak untuk digunakan oleh apl normal."</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"ubah kondisi ponsel"</string>
