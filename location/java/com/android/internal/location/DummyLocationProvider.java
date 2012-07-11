@@ -24,7 +24,7 @@ import android.location.LocationProvider;
  * A DummyLocationProvider may be queried to determine the properties
  * of the provider whcih it shadows, but does not actually provide location
  * data.
- * 
+ *
  * {@hide}
  */
 public class DummyLocationProvider extends LocationProvider {
@@ -86,6 +86,7 @@ public class DummyLocationProvider extends LocationProvider {
      * Returns true if the provider requires access to a
      * data network (e.g., the Internet), false otherwise.
      */
+    @Override
     public boolean requiresNetwork() {
         return mRequiresNetwork;
     }
@@ -95,6 +96,7 @@ public class DummyLocationProvider extends LocationProvider {
      * satellite-based positioning system (e.g., GPS), false
      * otherwise.
      */
+    @Override
     public boolean requiresSatellite() {
         return mRequiresSatellite;
     }
@@ -104,6 +106,7 @@ public class DummyLocationProvider extends LocationProvider {
      * cellular network (e.g., to make use of cell tower IDs), false
      * otherwise.
      */
+    @Override
     public boolean requiresCell() {
         return mRequiresCell;
     }
@@ -113,6 +116,7 @@ public class DummyLocationProvider extends LocationProvider {
      * monetary charge to the user, false if use is free.  It is up to
      * each provider to give accurate information.
      */
+    @Override
     public boolean hasMonetaryCost() {
         return mHasMonetaryCost;
     }
@@ -123,6 +127,7 @@ public class DummyLocationProvider extends LocationProvider {
      * under most circumstances but may occassionally not report it
      * should return true.
      */
+    @Override
     public boolean supportsAltitude() {
         return mSupportsAltitude;
     }
@@ -133,6 +138,7 @@ public class DummyLocationProvider extends LocationProvider {
      * under most circumstances but may occassionally not report it
      * should return true.
      */
+    @Override
     public boolean supportsSpeed() {
         return mSupportsSpeed;
     }
@@ -143,6 +149,7 @@ public class DummyLocationProvider extends LocationProvider {
      * under most circumstances but may occassionally not report it
      * should return true.
      */
+    @Override
     public boolean supportsBearing() {
         return mSupportsBearing;
     }
@@ -153,6 +160,7 @@ public class DummyLocationProvider extends LocationProvider {
      * @return the power requirement for this provider, as one of the
      * constants Criteria.POWER_REQUIREMENT_*.
      */
+    @Override
     public int getPowerRequirement() {
         return mPowerRequirement;
     }
@@ -164,6 +172,7 @@ public class DummyLocationProvider extends LocationProvider {
      * @return the horizontal accuracy for this provider, as one of the
      * constants Criteria.ACCURACY_*.
      */
+    @Override
     public int getAccuracy() {
         return mAccuracy;
     }
