@@ -189,17 +189,9 @@ private:
     SkPaint mShapingPaint;
 
     /**
-     * Skia typefaces cached for shaping
+     * Skia default typeface to be returned if we cannot resolve script
      */
     SkTypeface* mDefaultTypeface;
-    SkTypeface* mArabicTypeface;
-    SkTypeface* mHebrewRegularTypeface;
-    SkTypeface* mHebrewBoldTypeface;
-    SkTypeface* mBengaliTypeface;
-    SkTypeface* mThaiTypeface;
-    SkTypeface* mDevanagariRegularTypeface;
-    SkTypeface* mTamilRegularTypeface;
-    SkTypeface* mTamilBoldTypeface;
 
     /**
      * Cache of Harfbuzz faces
@@ -224,8 +216,8 @@ private:
     void init();
     void unrefTypefaces();
 
-    SkTypeface* typefaceForUnichar(const SkPaint* paint, SkTypeface* typeface,
-        SkUnichar unichar, HB_Script script);
+    SkTypeface* typefaceForScript(const SkPaint* paint, SkTypeface* typeface,
+        HB_Script script);
 
     size_t shapeFontRun(const SkPaint* paint, bool isRTL);
 
@@ -245,6 +237,7 @@ private:
     bool doShaping(size_t size);
     void createShaperItemGlyphArrays(size_t size);
     void deleteShaperItemGlyphArrays();
+    bool isComplexScript(HB_Script script);
 
 }; // TextLayoutShaper
 
