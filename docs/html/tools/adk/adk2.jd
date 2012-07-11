@@ -26,10 +26,12 @@ page.title=Accessory Development Kit 2012 Guide
 
     <h2>See also</h2>
     <ol>
+      <li><a href="https://developers.google.com/events/io/sessions/gooio2012/128/">
+        Google I/O Session Video</a></li>
       <li><a href="aoa.html">Android Open Accessory Protocol</a></li>
       <li><a href="aoa2.html">Android Open Accessory Protocol 2.0</a></li>
-      <li><a href="{@docRoot}guide/topics/connectivity/usb/accessory.html">USB Accessory Dev
-      Guide</a></li>
+      <li><a href="{@docRoot}guide/topics/connectivity/usb/accessory.html">
+        USB Accessory Dev Guide</a></li>
     </ol>
   </div>
 </div>
@@ -231,7 +233,12 @@ source repository. Follow the instructions below to obtain the source material f
 system.</li>
   <li>Download and setup the {@code repo} tool, as described on the <a
 href="http://source.android.com/source/downloading.html#installing-repo">Android open source
-project</a> site.</li>
+project</a> site.
+    <p class="note"><strong>Note:</strong> Developers using Windows must use a Linux compatibility
+package, such as <a href="http://www.cygwin.com/">cygwin</a>, to install and run {@code repo}.
+Within your compatibility environment, you must install {@code curl}, {@code git} and {@code
+python} to be able to download and use the {@code repo} tool.</p>
+  </li>
   <li>In a terminal window, create a new directory for the downloaded source files, initialize and
 synchronize a local repository:
 <pre>
@@ -268,7 +275,7 @@ the ADK 2012 IDE.</p>
     href="http://java.oracle.com">java.oracle.com</a>.</li>
   <li>Download the ADK 2012 IDE for your development platform:
     <ul>
-      <li><a href="https://dl-ssl.google.com/android/adk/adk2012_ide-win32-20120626.zip">
+      <li><a href="https://dl-ssl.google.com/android/adk/adk2012_ide-win32-20120629.zip">
           Windows</a></li>
       <li><a href="https://dl-ssl.google.com/android/adk/adk2012_ide-macosx-20120626.zip">
           Mac</a></li>
