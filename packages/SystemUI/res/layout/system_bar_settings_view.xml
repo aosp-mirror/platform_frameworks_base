@@ -26,16 +26,16 @@
     <!-- Airplane mode -->
     <LinearLayout
             android:id="@+id/airplane"
-            style="@style/StatusBarPanelSettingsRow"
+            style="@style/SystemBarPanelSettingsRow"
             >
         <ImageView
                 android:id="@+id/airplane_icon"
-                style="@style/StatusBarPanelSettingsIcon"
+                style="@style/SystemBarPanelSettingsIcon"
                 android:src="@drawable/ic_sysbar_airplane_on"
                 />
         <TextView
                 android:id="@+id/airplane_label"
-                style="@style/StatusBarPanelSettingsContents"
+                style="@style/SystemBarPanelSettingsContents"
                 android:text="@string/status_bar_settings_airplane"
                 />
         <Switch
@@ -46,39 +46,39 @@
                 android:layout_marginRight="5dp"
                 />
     </LinearLayout>
-    <View style="@style/StatusBarPanelSettingsPanelSeparator" />
+    <View style="@style/SystemBarPanelSettingsPanelSeparator" />
 
     <!-- Network -->
     <LinearLayout
             android:id="@+id/network"
-            style="@style/StatusBarPanelSettingsRow"
+            style="@style/SystemBarPanelSettingsRow"
             >
         <ImageView
                 android:id="@+id/network_icon"
-                style="@style/StatusBarPanelSettingsIcon"
+                style="@style/SystemBarPanelSettingsIcon"
                 android:src="@drawable/ic_sysbar_wifi_on"
                 />
         <TextView
                 android:id="@+id/network_label"
-                style="@style/StatusBarPanelSettingsContents"
+                style="@style/SystemBarPanelSettingsContents"
                 android:text="@string/status_bar_settings_wifi_button"
                 />
     </LinearLayout>
-    <View style="@style/StatusBarPanelSettingsPanelSeparator" />
+    <View style="@style/SystemBarPanelSettingsPanelSeparator" />
 
     <!-- Rotation lock -->
     <LinearLayout
             android:id="@+id/rotate"
-            style="@style/StatusBarPanelSettingsRow"
+            style="@style/SystemBarPanelSettingsRow"
             >
         <ImageView
                 android:id="@+id/rotate_icon"
-                style="@style/StatusBarPanelSettingsIcon"
+                style="@style/SystemBarPanelSettingsIcon"
                 android:src="@drawable/ic_sysbar_rotate_on"
                 />
         <TextView
                 android:id="@+id/rotate_label"
-                style="@style/StatusBarPanelSettingsContents"
+                style="@style/SystemBarPanelSettingsContents"
                 android:text="@string/status_bar_settings_auto_rotation"
                 />
         <Switch
@@ -91,13 +91,13 @@
     </LinearLayout>
     <View
             android:id="@+id/rotate_separator"
-            style="@style/StatusBarPanelSettingsPanelSeparator" />
+            style="@style/SystemBarPanelSettingsPanelSeparator" />
 
     <!-- Brightness -->
-    <LinearLayout style="@style/StatusBarPanelSettingsRow" >
+    <LinearLayout style="@style/SystemBarPanelSettingsRow" >
         <ImageView
                 android:id="@+id/brightness_icon"
-                style="@style/StatusBarPanelSettingsIcon"
+                style="@style/SystemBarPanelSettingsIcon"
                 android:src="@drawable/ic_sysbar_brightness"
                 />
         <com.android.systemui.statusbar.policy.ToggleSlider
@@ -109,20 +109,20 @@
                 systemui:text="@string/status_bar_settings_auto_brightness_label"
                 />
     </LinearLayout>
-    <View style="@style/StatusBarPanelSettingsPanelSeparator" />
+    <View style="@style/SystemBarPanelSettingsPanelSeparator" />
 
     <!-- Notifications / Do not disturb -->
     <LinearLayout
             android:id="@+id/do_not_disturb"
-            style="@style/StatusBarPanelSettingsRow"
+            style="@style/SystemBarPanelSettingsRow"
             >
         <ImageView
                 android:id="@+id/do_not_disturb_icon"
-                style="@style/StatusBarPanelSettingsIcon"
+                style="@style/SystemBarPanelSettingsIcon"
                 android:src="@drawable/ic_notification_open"
                 />
         <TextView
-                style="@style/StatusBarPanelSettingsContents"
+                style="@style/SystemBarPanelSettingsContents"
                 android:text="@string/status_bar_settings_notifications"
                 />
         <Switch
@@ -133,25 +133,25 @@
                 android:layout_marginRight="5dp"
                 />
     </LinearLayout>
-    <View style="@style/StatusBarPanelSettingsPanelSeparator" />
+    <View style="@style/SystemBarPanelSettingsPanelSeparator" />
 
     <!-- Link to settings -->
     <LinearLayout
             android:id="@+id/settings"
-            style="@style/StatusBarPanelSettingsRow"
+            style="@style/SystemBarPanelSettingsRow"
             >
 
         <ImageView
                 android:id="@+id/settings"
-                style="@style/StatusBarPanelSettingsIcon"
+                style="@style/SystemBarPanelSettingsIcon"
                 android:src="@drawable/ic_sysbar_quicksettings"
                 />
         <TextView
-                style="@style/StatusBarPanelSettingsContents"
+                style="@style/SystemBarPanelSettingsContents"
                 android:text="@string/status_bar_settings_settings_button"
                 />
     </LinearLayout>
-    <View style="@style/StatusBarPanelSettingsPanelSeparator" />
+    <View style="@style/SystemBarPanelSettingsPanelSeparator" />
 
 </com.android.systemui.statusbar.tablet.SettingsView>
 

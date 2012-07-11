@@ -17,16 +17,16 @@
 -->
 <resources>
     <!-- size at which Notification icons will be drawn in the status bar -->
-    <dimen name="status_bar_icon_drawing_size">24dip</dimen>
+    <dimen name="system_bar_icon_drawing_size">24dip</dimen>
 
     <!-- opacity at which Notification icons will be drawn in the status bar -->
-    <item type="dimen" name="status_bar_icon_drawing_alpha">100%</item>
+    <item type="dimen" name="system_bar_icon_drawing_alpha">100%</item>
 
     <!-- The width of the view containing non-menu status bar icons -->
-    <dimen name="navigation_key_width">80dip</dimen>
+    <dimen name="system_bar_navigation_key_width">80dip</dimen>
 
     <!-- The width of the view containing the menu status bar icon -->
-    <dimen name="navigation_menu_key_width">80dip</dimen>
+    <dimen name="system_bar_navigation_menu_key_width">80dip</dimen>
 
     <!-- ======================================== -->
     <!-- The following resources were recently moved from sw600dp; there may

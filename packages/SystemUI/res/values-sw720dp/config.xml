@@ -20,7 +20,7 @@
 <!-- These resources are around just to allow their values to be customized
      for different hardware and product builds. -->
 <resources>
-    <integer name="config_maxNotificationIcons">5</integer>
+    <integer name="status_bar_config_maxNotificationIcons">5</integer>
 
     <!-- Whether we're using the tablet-optimized recents interface (we use this
      value at runtime for some things) -->
