@@ -44,6 +44,7 @@ import com.android.internal.telephony.ITelephonyRegistry;
 import com.android.internal.telephony.IPhoneStateListener;
 import com.android.internal.telephony.DefaultPhoneNotifier;
 import com.android.internal.telephony.Phone;
+import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.ServiceStateTracker;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.server.am.BatteryStatsService;
@@ -622,7 +623,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
 
         Intent intent = new Intent(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
-        intent.putExtra(Phone.STATE_KEY, DefaultPhoneNotifier.convertCallState(state).toString());
+        intent.putExtra(PhoneConstants.STATE_KEY,
+                DefaultPhoneNotifier.convertCallState(state).toString());
         if (!TextUtils.isEmpty(incomingNumber)) {
             intent.putExtra(TelephonyManager.EXTRA_INCOMING_NUMBER, incomingNumber);
         }
@@ -637,34 +639,35 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         // status bar takes care of that after taking into account all of the
         // required info.
         Intent intent = new Intent(TelephonyIntents.ACTION_ANY_DATA_CONNECTION_STATE_CHANGED);
-        intent.putExtra(Phone.STATE_KEY, DefaultPhoneNotifier.convertDataState(state).toString());
+        intent.putExtra(PhoneConstants.STATE_KEY,
+                DefaultPhoneNotifier.convertDataState(state).toString());
         if (!isDataConnectivityPossible) {
-            intent.putExtra(Phone.NETWORK_UNAVAILABLE_KEY, true);
+            intent.putExtra(PhoneConstants.NETWORK_UNAVAILABLE_KEY, true);
         }
         if (reason != null) {
-            intent.putExtra(Phone.STATE_CHANGE_REASON_KEY, reason);
+            intent.putExtra(PhoneConstants.STATE_CHANGE_REASON_KEY, reason);
         }
         if (linkProperties != null) {
-            intent.putExtra(Phone.DATA_LINK_PROPERTIES_KEY, linkProperties);
+            intent.putExtra(PhoneConstants.DATA_LINK_PROPERTIES_KEY, linkProperties);
             String iface = linkProperties.getInterfaceName();
             if (iface != null) {
-                intent.putExtra(Phone.DATA_IFACE_NAME_KEY, iface);
+                intent.putExtra(PhoneConstants.DATA_IFACE_NAME_KEY, iface);
             }
         }
         if (linkCapabilities != null) {
-            intent.putExtra(Phone.DATA_LINK_CAPABILITIES_KEY, linkCapabilities);
+            intent.putExtra(PhoneConstants.DATA_LINK_CAPABILITIES_KEY, linkCapabilities);
         }
-        if (roaming) intent.putExtra(Phone.DATA_NETWORK_ROAMING_KEY, true);
+        if (roaming) intent.putExtra(PhoneConstants.DATA_NETWORK_ROAMING_KEY, true);
 
-        intent.putExtra(Phone.DATA_APN_KEY, apn);
-        intent.putExtra(Phone.DATA_APN_TYPE_KEY, apnType);
+        intent.putExtra(PhoneConstants.DATA_APN_KEY, apn);
+        intent.putExtra(PhoneConstants.DATA_APN_TYPE_KEY, apnType);
         mContext.sendStickyBroadcast(intent);
     }
 
     private void broadcastDataConnectionFailed(String reason, String apnType) {
         Intent intent = new Intent(TelephonyIntents.ACTION_DATA_CONNECTION_FAILED);
-        intent.putExtra(Phone.FAILURE_REASON_KEY, reason);
-        intent.putExtra(Phone.DATA_APN_TYPE_KEY, apnType);
+        intent.putExtra(PhoneConstants.FAILURE_REASON_KEY, reason);
+        intent.putExtra(PhoneConstants.DATA_APN_TYPE_KEY, apnType);
         mContext.sendStickyBroadcast(intent);
     }
 
