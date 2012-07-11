@@ -952,7 +952,8 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
 
     private void findBackground(RenderResources resources) {
         if (getParams().isBgColorOverridden() == false) {
-            mWindowBackground = resources.findItemInTheme("windowBackground");
+            mWindowBackground = resources.findItemInTheme("windowBackground",
+                    true /*isFrameworkAttr*/);
             if (mWindowBackground != null) {
                 mWindowBackground = resources.resolveResValue(mWindowBackground);
             }
@@ -1003,7 +1004,8 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             mActionBarSize = DEFAULT_TITLE_BAR_HEIGHT;
 
             // get value from the theme.
-            ResourceValue value = resources.findItemInTheme("actionBarSize");
+            ResourceValue value = resources.findItemInTheme("actionBarSize",
+                    true /*isFrameworkAttr*/);
 
             // resolve it
             value = resources.resolveResValue(value);
@@ -1028,7 +1030,8 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                 mTitleBarSize = DEFAULT_TITLE_BAR_HEIGHT;
 
                 // get value from the theme.
-                ResourceValue value = resources.findItemInTheme("windowTitleSize");
+                ResourceValue value = resources.findItemInTheme("windowTitleSize",
+                        true /*isFrameworkAttr*/);
 
                 // resolve it
                 value = resources.resolveResValue(value);
@@ -1068,11 +1071,20 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
         }
     }
 
+    /**
+     * Looks for a attribute in the current theme. The attribute is in the android
+     * namespace.
+     *
+     * @param resources the render resources
+     * @param name the name of the attribute
+     * @param defaultValue the default value.
+     * @return the value of the attribute or the default one if not found.
+     */
     private boolean getBooleanThemeValue(RenderResources resources,
             String name, boolean defaultValue) {
 
         // get the title bar flag from the current theme.
-        ResourceValue value = resources.findItemInTheme(name);
+        ResourceValue value = resources.findItemInTheme(name, true /*isFrameworkAttr*/);
 
         // because it may reference something else, we resolve it.
         value = resources.resolveResValue(value);
