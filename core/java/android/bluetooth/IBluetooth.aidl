@@ -33,7 +33,7 @@ interface IBluetooth
     int getState();
     boolean enable();
     boolean enableNoAutoConnect();
-    boolean disable(boolean persist);
+    boolean disable();
 
     String getAddress();
     ParcelUuid[] getUuids();

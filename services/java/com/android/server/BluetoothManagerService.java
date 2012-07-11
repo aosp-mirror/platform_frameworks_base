@@ -30,7 +30,6 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     private static final String TAG = "BluetoothManagerService";
     private static final boolean DBG = true;
 
-    private static final boolean ALWAYS_SYNC_NAME_ADDRESS=false; //true; //If true, always load name and address
     private static final String BLUETOOTH_ADMIN_PERM = android.Manifest.permission.BLUETOOTH_ADMIN;
     private static final String BLUETOOTH_PERM = android.Manifest.permission.BLUETOOTH;
     private static final String ACTION_SERVICE_STATE_CHANGED="com.android.bluetooth.btservice.action.STATE_CHANGED";
@@ -94,7 +93,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             String action = intent.getAction();
             if (BluetoothAdapter.ACTION_LOCAL_NAME_CHANGED.equals(action)) {
                 String newName = intent.getStringExtra(BluetoothAdapter.EXTRA_LOCAL_NAME);
-                Log.d(TAG, "Bluetooth Adapter name changed to " + newName);
+                if (DBG) Log.d(TAG, "Bluetooth Adapter name changed to " + newName);
                 if (newName != null) {
                     storeNameAndAddress(newName, null);
                 }
@@ -134,7 +133,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             //Enable
             if (DBG) Log.d(TAG, "Auto-enabling Bluetooth.");
             enable();
-        } else if (ALWAYS_SYNC_NAME_ADDRESS || !isNameAndAddressSet()) {
+        } else if (!isNameAndAddressSet()) {
             //Sync the Bluetooth name and address from the Bluetooth Adapter
             if (DBG) Log.d(TAG,"Retrieving Bluetooth Adapter name and address...");
             getNameAndAddress();
@@ -352,7 +351,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
 
     private void sendBluetoothStateCallback(boolean isUp) {
         int n = mStateChangeCallbacks.beginBroadcast();
-        Log.d(TAG,"Broadcasting onBluetoothStateChange("+isUp+") to " + n + " receivers.");
+        if (DBG) Log.d(TAG,"Broadcasting onBluetoothStateChange("+isUp+") to " + n + " receivers.");
         for (int i=0; i <n;i++) {
             try {
                 mStateChangeCallbacks.getBroadcastItem(i).onBluetoothStateChange(isUp);
@@ -482,10 +481,6 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
 
                         if (name != null && address != null) {
                             storeNameAndAddress(name,address);
-                            Intent i = new Intent(IBluetooth.class.getName());
-                            i.putExtra(EXTRA_ACTION, ACTION_SERVICE_STATE_CHANGED);
-                            i.putExtra(BluetoothAdapter.EXTRA_STATE,BluetoothAdapter.STATE_OFF);
-                            mContext.startService(i);
                             sendBluetoothServiceDownCallback();
                             unbindAndFinish();
                         } else {
@@ -517,41 +512,40 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                         Log.d(TAG, "MESSAGE_ENABLE: mBluetooth = " + mBluetooth +
                             " isConnected = " + isConnected());
                     }
-                    boolean persist =  (1==msg.arg1);
+
+                    boolean persist = (1==msg.arg1);
                     if (persist) {
                         persistBluetoothSetting(true);
                     }
+
                     if (mBluetooth == null) {
-                        //Start bind request
-                        if (!isConnected()) {
-                            //Start bind timeout and bind
-                            Message timeoutMsg=mHandler.obtainMessage(MESSAGE_TIMEOUT_BIND);
-                            mHandler.sendMessageDelayed(timeoutMsg,TIMEOUT_BIND_MS);
-                            /*
-                            Intent i = new Intent(IBluetooth.class.getName());
-                            i.putExtra(EXTRA_ACTION, ACTION_SERVICE_STATE_CHANGED);
-                            i.putExtra(BluetoothAdapter.EXTRA_STATE,BluetoothAdapter.STATE_ON);
-                            mContext.startService(i);
-                            */
-                            mConnection.setGetNameAddressOnly(false);
-                            Intent i = new Intent(IBluetooth.class.getName());
-                            if (!mContext.bindService(i, mConnection,Context.BIND_AUTO_CREATE)) {
-                                mHandler.removeMessages(MESSAGE_TIMEOUT_BIND);
-                                Log.e(TAG, "Fail to bind to: " + IBluetooth.class.getName());
-                            }
+                        //Start bind timeout and bind
+                        Message timeoutMsg=mHandler.obtainMessage(MESSAGE_TIMEOUT_BIND);
+                        mHandler.sendMessageDelayed(timeoutMsg,TIMEOUT_BIND_MS);
+                        mConnection.setGetNameAddressOnly(false);
+                        Intent i = new Intent(IBluetooth.class.getName());
+                        if (!mContext.bindService(i, mConnection,Context.BIND_AUTO_CREATE)) {
+                            mHandler.removeMessages(MESSAGE_TIMEOUT_BIND);
+                            Log.e(TAG, "Fail to bind to: " + IBluetooth.class.getName());
                         }
                     } else {
                         //Check if name and address is loaded if not get it first.
-                        if (ALWAYS_SYNC_NAME_ADDRESS || !isNameAndAddressSet()) {
+                        if (!isNameAndAddressSet()) {
                             try {
                                 if (DBG) Log.d(TAG,"Getting and storing Bluetooth name and address prior to enable.");
                                 storeNameAndAddress(mBluetooth.getName(),mBluetooth.getAddress());
                             } catch (RemoteException e) {Log.e(TAG, "", e);};
                         }
-                        Intent i = new Intent(IBluetooth.class.getName());
-                        i.putExtra(EXTRA_ACTION, ACTION_SERVICE_STATE_CHANGED);
-                        i.putExtra(BluetoothAdapter.EXTRA_STATE,BluetoothAdapter.STATE_ON);
-                        mContext.startService(i);
+
+                        //Enable bluetooth
+                        try {
+                            if(!mBluetooth.enable()) {
+                                Log.e(TAG,"IBluetooth.enable() returned false");
+                            }
+                        } catch (RemoteException e) {
+                            Log.e(TAG,"Unable to call enable()",e);
+                        }
+
                     }
                     // TODO(BT) what if service failed to start:
                     // [fc] fixed: watch for bind timeout and handle accordingly
@@ -573,16 +567,15 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                         }
                         mConnection.setGetNameAddressOnly(false);
                         if (DBG) Log.d(TAG,"Sending off request.");
-                        Intent i = new Intent(IBluetooth.class.getName());
-                        i.putExtra(EXTRA_ACTION, ACTION_SERVICE_STATE_CHANGED);
-                        i.putExtra(BluetoothAdapter.EXTRA_STATE,BluetoothAdapter.STATE_OFF);
-                        mContext.startService(i);
-                    }
-                    // TODO(BT) what if service failed to stop:
-                    // [fc] fixed: watch for disable event and unbind accordingly
-                    // TODO(BT) persist the setting depending on argument
-                    // [fc]: let AdapterServiceHandle
 
+                        try {
+                            if(!mBluetooth.disable()) {
+                                Log.e(TAG,"IBluetooth.disable() returned false");
+                            }
+                        } catch (RemoteException e) {
+                            Log.e(TAG,"Unable to call disable()",e);
+                        }
+                    }
                     break;
                 case MESSAGE_REGISTER_ADAPTER:
                 {
@@ -650,10 +643,13 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                     mCallbacks.finishBroadcast();
 
                     //Do enable request
-                    Intent i = new Intent(IBluetooth.class.getName());
-                    i.putExtra(EXTRA_ACTION, ACTION_SERVICE_STATE_CHANGED);
-                    i.putExtra(BluetoothAdapter.EXTRA_STATE,BluetoothAdapter.STATE_ON);
-                    mContext.startService(i);
+                    try {
+                        if(!mBluetooth.enable()) {
+                            Log.e(TAG,"IBluetooth.enable() returned false");
+                        }
+                    } catch (RemoteException e) {
+                        Log.e(TAG,"Unable to call enable()",e);
+                    }
                 }
                     break;
                 case MESSAGE_TIMEOUT_BIND: {
