@@ -13763,6 +13763,174 @@ package android.nfc.tech {
 
 package android.opengl {
 
+  public class EGL14 {
+    ctor public EGL14();
+    method public static boolean eglBindAPI(int);
+    method public static boolean eglBindTexImage(android.opengl.EGLDisplay, android.opengl.EGLSurface, int);
+    method public static boolean eglChooseConfig(android.opengl.EGLDisplay, int[], int, android.opengl.EGLConfig[], int, int, int[], int);
+    method public static boolean eglCopyBuffers(android.opengl.EGLDisplay, android.opengl.EGLSurface, int);
+    method public static android.opengl.EGLContext eglCreateContext(android.opengl.EGLDisplay, android.opengl.EGLConfig, android.opengl.EGLContext, int[], int);
+    method public static android.opengl.EGLSurface eglCreatePbufferFromClientBuffer(android.opengl.EGLDisplay, int, int, android.opengl.EGLConfig, int[], int);
+    method public static android.opengl.EGLSurface eglCreatePbufferSurface(android.opengl.EGLDisplay, android.opengl.EGLConfig, int[], int);
+    method public static android.opengl.EGLSurface eglCreatePixmapSurface(android.opengl.EGLDisplay, android.opengl.EGLConfig, int, int[], int);
+    method public static android.opengl.EGLSurface eglCreateWindowSurface(android.opengl.EGLDisplay, android.opengl.EGLConfig, java.lang.Object, int[], int);
+    method public static boolean eglDestroyContext(android.opengl.EGLDisplay, android.opengl.EGLContext);
+    method public static boolean eglDestroySurface(android.opengl.EGLDisplay, android.opengl.EGLSurface);
+    method public static boolean eglGetConfigAttrib(android.opengl.EGLDisplay, android.opengl.EGLConfig, int, int[], int);
+    method public static boolean eglGetConfigs(android.opengl.EGLDisplay, android.opengl.EGLConfig[], int, int, int[], int);
+    method public static android.opengl.EGLContext eglGetCurrentContext();
+    method public static android.opengl.EGLDisplay eglGetCurrentDisplay();
+    method public static android.opengl.EGLSurface eglGetCurrentSurface(int);
+    method public static android.opengl.EGLDisplay eglGetDisplay(int);
+    method public static int eglGetError();
+    method public static boolean eglInitialize(android.opengl.EGLDisplay, int[], int, int[], int);
+    method public static boolean eglMakeCurrent(android.opengl.EGLDisplay, android.opengl.EGLSurface, android.opengl.EGLSurface, android.opengl.EGLContext);
+    method public static int eglQueryAPI();
+    method public static boolean eglQueryContext(android.opengl.EGLDisplay, android.opengl.EGLContext, int, int[], int);
+    method public static java.lang.String eglQueryString(android.opengl.EGLDisplay, int);
+    method public static boolean eglQuerySurface(android.opengl.EGLDisplay, android.opengl.EGLSurface, int, int[], int);
+    method public static boolean eglReleaseTexImage(android.opengl.EGLDisplay, android.opengl.EGLSurface, int);
+    method public static boolean eglReleaseThread();
+    method public static boolean eglSurfaceAttrib(android.opengl.EGLDisplay, android.opengl.EGLSurface, int, int);
+    method public static boolean eglSwapBuffers(android.opengl.EGLDisplay, android.opengl.EGLSurface);
+    method public static boolean eglSwapInterval(android.opengl.EGLDisplay, int);
+    method public static boolean eglTerminate(android.opengl.EGLDisplay);
+    method public static boolean eglWaitClient();
+    method public static boolean eglWaitGL();
+    method public static boolean eglWaitNative(int);
+    field public static final int EGL_ALPHA_MASK_SIZE = 12350; // 0x303e
+    field public static final int EGL_ALPHA_SIZE = 12321; // 0x3021
+    field public static final int EGL_BACK_BUFFER = 12420; // 0x3084
+    field public static final int EGL_BAD_ACCESS = 12290; // 0x3002
+    field public static final int EGL_BAD_ALLOC = 12291; // 0x3003
+    field public static final int EGL_BAD_ATTRIBUTE = 12292; // 0x3004
+    field public static final int EGL_BAD_CONFIG = 12293; // 0x3005
+    field public static final int EGL_BAD_CONTEXT = 12294; // 0x3006
+    field public static final int EGL_BAD_CURRENT_SURFACE = 12295; // 0x3007
+    field public static final int EGL_BAD_DISPLAY = 12296; // 0x3008
+    field public static final int EGL_BAD_MATCH = 12297; // 0x3009
+    field public static final int EGL_BAD_NATIVE_PIXMAP = 12298; // 0x300a
+    field public static final int EGL_BAD_NATIVE_WINDOW = 12299; // 0x300b
+    field public static final int EGL_BAD_PARAMETER = 12300; // 0x300c
+    field public static final int EGL_BAD_SURFACE = 12301; // 0x300d
+    field public static final int EGL_BIND_TO_TEXTURE_RGB = 12345; // 0x3039
+    field public static final int EGL_BIND_TO_TEXTURE_RGBA = 12346; // 0x303a
+    field public static final int EGL_BLUE_SIZE = 12322; // 0x3022
+    field public static final int EGL_BUFFER_DESTROYED = 12437; // 0x3095
+    field public static final int EGL_BUFFER_PRESERVED = 12436; // 0x3094
+    field public static final int EGL_BUFFER_SIZE = 12320; // 0x3020
+    field public static final int EGL_CLIENT_APIS = 12429; // 0x308d
+    field public static final int EGL_COLOR_BUFFER_TYPE = 12351; // 0x303f
+    field public static final int EGL_CONFIG_CAVEAT = 12327; // 0x3027
+    field public static final int EGL_CONFIG_ID = 12328; // 0x3028
+    field public static final int EGL_CONFORMANT = 12354; // 0x3042
+    field public static final int EGL_CONTEXT_CLIENT_TYPE = 12439; // 0x3097
+    field public static final int EGL_CONTEXT_CLIENT_VERSION = 12440; // 0x3098
+    field public static final int EGL_CONTEXT_LOST = 12302; // 0x300e
+    field public static final int EGL_CORE_NATIVE_ENGINE = 12379; // 0x305b
+    field public static final int EGL_DEFAULT_DISPLAY = 0; // 0x0
+    field public static final int EGL_DEPTH_SIZE = 12325; // 0x3025
+    field public static final int EGL_DISPLAY_SCALING = 10000; // 0x2710
+    field public static final int EGL_DRAW = 12377; // 0x3059
+    field public static final int EGL_EXTENSIONS = 12373; // 0x3055
+    field public static final int EGL_FALSE = 0; // 0x0
+    field public static final int EGL_GREEN_SIZE = 12323; // 0x3023
+    field public static final int EGL_HEIGHT = 12374; // 0x3056
+    field public static final int EGL_HORIZONTAL_RESOLUTION = 12432; // 0x3090
+    field public static final int EGL_LARGEST_PBUFFER = 12376; // 0x3058
+    field public static final int EGL_LEVEL = 12329; // 0x3029
+    field public static final int EGL_LUMINANCE_BUFFER = 12431; // 0x308f
+    field public static final int EGL_LUMINANCE_SIZE = 12349; // 0x303d
+    field public static final int EGL_MATCH_NATIVE_PIXMAP = 12353; // 0x3041
+    field public static final int EGL_MAX_PBUFFER_HEIGHT = 12330; // 0x302a
+    field public static final int EGL_MAX_PBUFFER_PIXELS = 12331; // 0x302b
+    field public static final int EGL_MAX_PBUFFER_WIDTH = 12332; // 0x302c
+    field public static final int EGL_MAX_SWAP_INTERVAL = 12348; // 0x303c
+    field public static final int EGL_MIN_SWAP_INTERVAL = 12347; // 0x303b
+    field public static final int EGL_MIPMAP_LEVEL = 12419; // 0x3083
+    field public static final int EGL_MIPMAP_TEXTURE = 12418; // 0x3082
+    field public static final int EGL_MULTISAMPLE_RESOLVE = 12441; // 0x3099
+    field public static final int EGL_MULTISAMPLE_RESOLVE_BOX = 12443; // 0x309b
+    field public static final int EGL_MULTISAMPLE_RESOLVE_BOX_BIT = 512; // 0x200
+    field public static final int EGL_MULTISAMPLE_RESOLVE_DEFAULT = 12442; // 0x309a
+    field public static final int EGL_NATIVE_RENDERABLE = 12333; // 0x302d
+    field public static final int EGL_NATIVE_VISUAL_ID = 12334; // 0x302e
+    field public static final int EGL_NATIVE_VISUAL_TYPE = 12335; // 0x302f
+    field public static final int EGL_NONE = 12344; // 0x3038
+    field public static final int EGL_NON_CONFORMANT_CONFIG = 12369; // 0x3051
+    field public static final int EGL_NOT_INITIALIZED = 12289; // 0x3001
+    field public static android.opengl.EGLContext EGL_NO_CONTEXT;
+    field public static android.opengl.EGLDisplay EGL_NO_DISPLAY;
+    field public static android.opengl.EGLSurface EGL_NO_SURFACE;
+    field public static final int EGL_NO_TEXTURE = 12380; // 0x305c
+    field public static final int EGL_OPENGL_API = 12450; // 0x30a2
+    field public static final int EGL_OPENGL_BIT = 8; // 0x8
+    field public static final int EGL_OPENGL_ES2_BIT = 4; // 0x4
+    field public static final int EGL_OPENGL_ES_API = 12448; // 0x30a0
+    field public static final int EGL_OPENGL_ES_BIT = 1; // 0x1
+    field public static final int EGL_OPENVG_API = 12449; // 0x30a1
+    field public static final int EGL_OPENVG_BIT = 2; // 0x2
+    field public static final int EGL_OPENVG_IMAGE = 12438; // 0x3096
+    field public static final int EGL_PBUFFER_BIT = 1; // 0x1
+    field public static final int EGL_PIXEL_ASPECT_RATIO = 12434; // 0x3092
+    field public static final int EGL_PIXMAP_BIT = 2; // 0x2
+    field public static final int EGL_READ = 12378; // 0x305a
+    field public static final int EGL_RED_SIZE = 12324; // 0x3024
+    field public static final int EGL_RENDERABLE_TYPE = 12352; // 0x3040
+    field public static final int EGL_RENDER_BUFFER = 12422; // 0x3086
+    field public static final int EGL_RGB_BUFFER = 12430; // 0x308e
+    field public static final int EGL_SAMPLES = 12337; // 0x3031
+    field public static final int EGL_SAMPLE_BUFFERS = 12338; // 0x3032
+    field public static final int EGL_SINGLE_BUFFER = 12421; // 0x3085
+    field public static final int EGL_SLOW_CONFIG = 12368; // 0x3050
+    field public static final int EGL_STENCIL_SIZE = 12326; // 0x3026
+    field public static final int EGL_SUCCESS = 12288; // 0x3000
+    field public static final int EGL_SURFACE_TYPE = 12339; // 0x3033
+    field public static final int EGL_SWAP_BEHAVIOR = 12435; // 0x3093
+    field public static final int EGL_SWAP_BEHAVIOR_PRESERVED_BIT = 1024; // 0x400
+    field public static final int EGL_TEXTURE_2D = 12383; // 0x305f
+    field public static final int EGL_TEXTURE_FORMAT = 12416; // 0x3080
+    field public static final int EGL_TEXTURE_RGB = 12381; // 0x305d
+    field public static final int EGL_TEXTURE_RGBA = 12382; // 0x305e
+    field public static final int EGL_TEXTURE_TARGET = 12417; // 0x3081
+    field public static final int EGL_TRANSPARENT_BLUE_VALUE = 12341; // 0x3035
+    field public static final int EGL_TRANSPARENT_GREEN_VALUE = 12342; // 0x3036
+    field public static final int EGL_TRANSPARENT_RED_VALUE = 12343; // 0x3037
+    field public static final int EGL_TRANSPARENT_RGB = 12370; // 0x3052
+    field public static final int EGL_TRANSPARENT_TYPE = 12340; // 0x3034
+    field public static final int EGL_TRUE = 1; // 0x1
+    field public static final int EGL_VENDOR = 12371; // 0x3053
+    field public static final int EGL_VERSION = 12372; // 0x3054
+    field public static final int EGL_VERTICAL_RESOLUTION = 12433; // 0x3091
+    field public static final int EGL_VG_ALPHA_FORMAT = 12424; // 0x3088
+    field public static final int EGL_VG_ALPHA_FORMAT_NONPRE = 12427; // 0x308b
+    field public static final int EGL_VG_ALPHA_FORMAT_PRE = 12428; // 0x308c
+    field public static final int EGL_VG_ALPHA_FORMAT_PRE_BIT = 64; // 0x40
+    field public static final int EGL_VG_COLORSPACE = 12423; // 0x3087
+    field public static final int EGL_VG_COLORSPACE_LINEAR = 12426; // 0x308a
+    field public static final int EGL_VG_COLORSPACE_LINEAR_BIT = 32; // 0x20
+    field public static final int EGL_VG_COLORSPACE_sRGB = 12425; // 0x3089
+    field public static final int EGL_WIDTH = 12375; // 0x3057
+    field public static final int EGL_WINDOW_BIT = 4; // 0x4
+  }
+
+  public class EGLConfig extends android.opengl.EGLObjectHandle {
+  }
+
+  public class EGLContext extends android.opengl.EGLObjectHandle {
+  }
+
+  public class EGLDisplay extends android.opengl.EGLObjectHandle {
+  }
+
+  public abstract class EGLObjectHandle {
+    ctor protected EGLObjectHandle(int);
+    method public int getHandle();
+  }
+
+  public class EGLSurface extends android.opengl.EGLObjectHandle {
+  }
+
   public class ETC1 {
     ctor public ETC1();
     method public static void decodeBlock(java.nio.Buffer, java.nio.Buffer);

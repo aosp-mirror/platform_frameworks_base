@@ -18,10 +18,11 @@
 package android.opengl;
 
 /**
- * @hide
+ * Wrapper class for native EGLSurface objects.
+ *
  */
 public class EGLSurface extends EGLObjectHandle {
-    public EGLSurface(int handle) {
+    private EGLSurface(int handle) {
         super(handle);
     }
 
@@ -32,10 +33,5 @@ public class EGLSurface extends EGLObjectHandle {
 
         EGLSurface that = (EGLSurface) o;
         return getHandle() == that.getHandle();
-    }
-
-    @Override
-    public int hashCode() {
-        return getHandle();
     }
 }
