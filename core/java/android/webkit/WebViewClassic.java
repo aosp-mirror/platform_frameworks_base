@@ -7911,7 +7911,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         int functor = 0;
         boolean forceInval = isPictureAfterFirstLayout;
         ViewRootImpl viewRoot = mWebView.getViewRootImpl();
-        if (mWebView.isHardwareAccelerated() && viewRoot != null) {
+        if (mWebView.isHardwareAccelerated()
+                && mWebView.getLayerType() != View.LAYER_TYPE_SOFTWARE
+                && viewRoot != null) {
             functor = nativeGetDrawGLFunction(mNativeClass);
             if (functor != 0) {
                 // force an invalidate if functor attach not successful
