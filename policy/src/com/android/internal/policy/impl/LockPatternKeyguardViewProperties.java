@@ -19,7 +19,7 @@ package com.android.internal.policy.impl;
 import com.android.internal.widget.LockPatternUtils;
 
 import android.content.Context;
-import com.android.internal.telephony.IccCard;
+import com.android.internal.telephony.IccCardConstants;
 
 /**
  * Knows how to create a lock pattern keyguard view, and answer questions about
@@ -55,10 +55,11 @@ public class LockPatternKeyguardViewProperties implements KeyguardViewProperties
     }
 
     private boolean isSimPinSecure() {
-        final IccCard.State simState = mUpdateMonitor.getSimState();
-        return (simState == IccCard.State.PIN_REQUIRED
-                || simState == IccCard.State.PUK_REQUIRED
-                || simState == IccCard.State.PERM_DISABLED);
+        final IccCardConstants.State simState = mUpdateMonitor.getSimState();
+        return (simState == IccCardConstants.State.PIN_REQUIRED
+                || simState == IccCardConstants.State.PUK_REQUIRED
+                || simState == IccCardConstants.State.ABSENT
+                || simState == IccCardConstants.State.PERM_DISABLED);
     }
 
 }

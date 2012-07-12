@@ -16,11 +16,6 @@
 
 package android.net;
 
-import static com.android.internal.telephony.DataConnectionTracker.CMD_SET_POLICY_DATA_ENABLE;
-import static com.android.internal.telephony.DataConnectionTracker.CMD_SET_USER_DATA_ENABLE;
-import static com.android.internal.telephony.DataConnectionTracker.DISABLED;
-import static com.android.internal.telephony.DataConnectionTracker.ENABLED;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -37,9 +32,9 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Slog;
 
-import com.android.internal.telephony.DataConnectionTracker;
+import com.android.internal.telephony.DctConstants;
 import com.android.internal.telephony.ITelephony;
-import com.android.internal.telephony.Phone;
+import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.util.AsyncChannel;
 
@@ -59,7 +54,7 @@ public class MobileDataStateTracker implements NetworkStateTracker {
     private static final boolean DBG = false;
     private static final boolean VDBG = false;
 
-    private Phone.DataState mMobileDataState;
+    private PhoneConstants.DataState mMobileDataState;
     private ITelephony mPhoneService;
 
     private String mApnType;
@@ -108,10 +103,10 @@ public class MobileDataStateTracker implements NetworkStateTracker {
         IntentFilter filter = new IntentFilter();
         filter.addAction(TelephonyIntents.ACTION_ANY_DATA_CONNECTION_STATE_CHANGED);
         filter.addAction(TelephonyIntents.ACTION_DATA_CONNECTION_FAILED);
-        filter.addAction(DataConnectionTracker.ACTION_DATA_CONNECTION_TRACKER_MESSENGER);
+        filter.addAction(DctConstants.ACTION_DATA_CONNECTION_TRACKER_MESSENGER);
 
         mContext.registerReceiver(new MobileDataStateReceiver(), filter);
-        mMobileDataState = Phone.DataState.DISCONNECTED;
+        mMobileDataState = PhoneConstants.DataState.DISCONNECTED;
     }
 
     static class MdstHandler extends Handler {
@@ -180,7 +175,7 @@ public class MobileDataStateTracker implements NetworkStateTracker {
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(TelephonyIntents.
                     ACTION_ANY_DATA_CONNECTION_STATE_CHANGED)) {
-                String apnType = intent.getStringExtra(Phone.DATA_APN_TYPE_KEY);
+                String apnType = intent.getStringExtra(PhoneConstants.DATA_APN_TYPE_KEY);
                 if (VDBG) {
                     log(String.format("Broadcast received: ACTION_ANY_DATA_CONNECTION_STATE_CHANGED"
                         + "mApnType=%s %s received apnType=%s", mApnType,
@@ -191,18 +186,18 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                 }
                 mNetworkInfo.setSubtype(TelephonyManager.getDefault().getNetworkType(),
                         TelephonyManager.getDefault().getNetworkTypeName());
-                Phone.DataState state = Enum.valueOf(Phone.DataState.class,
-                        intent.getStringExtra(Phone.STATE_KEY));
-                String reason = intent.getStringExtra(Phone.STATE_CHANGE_REASON_KEY);
-                String apnName = intent.getStringExtra(Phone.DATA_APN_KEY);
-                mNetworkInfo.setRoaming(intent.getBooleanExtra(Phone.DATA_NETWORK_ROAMING_KEY,
-                        false));
+                PhoneConstants.DataState state = Enum.valueOf(PhoneConstants.DataState.class,
+                        intent.getStringExtra(PhoneConstants.STATE_KEY));
+                String reason = intent.getStringExtra(PhoneConstants.STATE_CHANGE_REASON_KEY);
+                String apnName = intent.getStringExtra(PhoneConstants.DATA_APN_KEY);
+                mNetworkInfo.setRoaming(intent.getBooleanExtra(
+                        PhoneConstants.DATA_NETWORK_ROAMING_KEY, false));
                 if (VDBG) {
                     log(mApnType + " setting isAvailable to " +
-                            intent.getBooleanExtra(Phone.NETWORK_UNAVAILABLE_KEY,false));
+                            intent.getBooleanExtra(PhoneConstants.NETWORK_UNAVAILABLE_KEY,false));
                 }
-                mNetworkInfo.setIsAvailable(!intent.getBooleanExtra(Phone.NETWORK_UNAVAILABLE_KEY,
-                        false));
+                mNetworkInfo.setIsAvailable(!intent.getBooleanExtra(
+                        PhoneConstants.NETWORK_UNAVAILABLE_KEY, false));
 
                 if (DBG) {
                     log("Received state=" + state + ", old=" + mMobileDataState +
@@ -232,13 +227,13 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                             break;
                         case CONNECTED:
                             mLinkProperties = intent.getParcelableExtra(
-                                    Phone.DATA_LINK_PROPERTIES_KEY);
+                                    PhoneConstants.DATA_LINK_PROPERTIES_KEY);
                             if (mLinkProperties == null) {
                                 loge("CONNECTED event did not supply link properties.");
                                 mLinkProperties = new LinkProperties();
                             }
                             mLinkCapabilities = intent.getParcelableExtra(
-                                    Phone.DATA_LINK_CAPABILITIES_KEY);
+                                    PhoneConstants.DATA_LINK_CAPABILITIES_KEY);
                             if (mLinkCapabilities == null) {
                                 loge("CONNECTED event did not supply link capabilities.");
                                 mLinkCapabilities = new LinkCapabilities();
@@ -248,8 +243,9 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                     }
                 } else {
                     // There was no state change. Check if LinkProperties has been updated.
-                    if (TextUtils.equals(reason, Phone.REASON_LINK_PROPERTIES_CHANGED)) {
-                        mLinkProperties = intent.getParcelableExtra(Phone.DATA_LINK_PROPERTIES_KEY);
+                    if (TextUtils.equals(reason, PhoneConstants.REASON_LINK_PROPERTIES_CHANGED)) {
+                        mLinkProperties = intent.getParcelableExtra(
+                                PhoneConstants.DATA_LINK_PROPERTIES_KEY);
                         if (mLinkProperties == null) {
                             loge("No link property in LINK_PROPERTIES change event.");
                             mLinkProperties = new LinkProperties();
@@ -264,7 +260,7 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                 }
             } else if (intent.getAction().
                     equals(TelephonyIntents.ACTION_DATA_CONNECTION_FAILED)) {
-                String apnType = intent.getStringExtra(Phone.DATA_APN_TYPE_KEY);
+                String apnType = intent.getStringExtra(PhoneConstants.DATA_APN_TYPE_KEY);
                 if (!TextUtils.equals(apnType, mApnType)) {
                     if (DBG) {
                         log(String.format(
@@ -273,17 +269,18 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                     }
                     return;
                 }
-                String reason = intent.getStringExtra(Phone.FAILURE_REASON_KEY);
-                String apnName = intent.getStringExtra(Phone.DATA_APN_KEY);
+                String reason = intent.getStringExtra(PhoneConstants.FAILURE_REASON_KEY);
+                String apnName = intent.getStringExtra(PhoneConstants.DATA_APN_KEY);
                 if (DBG) {
                     log("Received " + intent.getAction() +
                                 " broadcast" + reason == null ? "" : "(" + reason + ")");
                 }
                 setDetailedState(DetailedState.FAILED, reason, apnName);
-            } else if (intent.getAction().
-                    equals(DataConnectionTracker.ACTION_DATA_CONNECTION_TRACKER_MESSENGER)) {
+            } else if (intent.getAction().equals(DctConstants
+                    .ACTION_DATA_CONNECTION_TRACKER_MESSENGER)) {
                 if (VDBG) log(mApnType + " got ACTION_DATA_CONNECTION_TRACKER_MESSENGER");
-                mMessenger = intent.getParcelableExtra(DataConnectionTracker.EXTRA_MESSENGER);
+                mMessenger =
+                    intent.getParcelableExtra(DctConstants.EXTRA_MESSENGER);
                 AsyncChannel ac = new AsyncChannel();
                 ac.connect(mContext, MobileDataStateTracker.this.mHandler, mMessenger);
             } else {
@@ -369,7 +366,7 @@ public class MobileDataStateTracker implements NetworkStateTracker {
      */
     public boolean teardown() {
         setTeardownRequested(true);
-        return (setEnableApn(mApnType, false) != Phone.APN_REQUEST_FAILED);
+        return (setEnableApn(mApnType, false) != PhoneConstants.APN_REQUEST_FAILED);
     }
 
     /**
@@ -418,17 +415,17 @@ public class MobileDataStateTracker implements NetworkStateTracker {
         boolean retValue = false; //connected or expect to be?
         setTeardownRequested(false);
         switch (setEnableApn(mApnType, true)) {
-            case Phone.APN_ALREADY_ACTIVE:
+            case PhoneConstants.APN_ALREADY_ACTIVE:
                 // need to set self to CONNECTING so the below message is handled.
                 retValue = true;
                 break;
-            case Phone.APN_REQUEST_STARTED:
+            case PhoneConstants.APN_REQUEST_STARTED:
                 // set IDLE here , avoid the following second FAILED not sent out
                 mNetworkInfo.setDetailedState(DetailedState.IDLE, null, null);
                 retValue = true;
                 break;
-            case Phone.APN_REQUEST_FAILED:
-            case Phone.APN_TYPE_NOT_AVAILABLE:
+            case PhoneConstants.APN_REQUEST_FAILED:
+            case PhoneConstants.APN_TYPE_NOT_AVAILABLE:
                 break;
             default:
                 loge("Error in reconnect - unexpected response.");
@@ -470,7 +467,8 @@ public class MobileDataStateTracker implements NetworkStateTracker {
         if (DBG) log("setUserDataEnable: E enabled=" + enabled);
         final AsyncChannel channel = mDataConnectionTrackerAc;
         if (channel != null) {
-            channel.sendMessage(CMD_SET_USER_DATA_ENABLE, enabled ? ENABLED : DISABLED);
+            channel.sendMessage(DctConstants.CMD_SET_USER_DATA_ENABLE,
+                    enabled ? DctConstants.ENABLED : DctConstants.DISABLED);
             mUserDataEnabled = enabled;
         }
         if (VDBG) log("setUserDataEnable: X enabled=" + enabled);
@@ -481,7 +479,8 @@ public class MobileDataStateTracker implements NetworkStateTracker {
         if (DBG) log("setPolicyDataEnable(enabled=" + enabled + ")");
         final AsyncChannel channel = mDataConnectionTrackerAc;
         if (channel != null) {
-            channel.sendMessage(CMD_SET_POLICY_DATA_ENABLE, enabled ? ENABLED : DISABLED);
+            channel.sendMessage(DctConstants.CMD_SET_POLICY_DATA_ENABLE,
+                    enabled ? DctConstants.ENABLED : DctConstants.DISABLED);
             mPolicyDataEnabled = enabled;
         }
     }
@@ -491,12 +490,12 @@ public class MobileDataStateTracker implements NetworkStateTracker {
      * @param met
      */
     public void setDependencyMet(boolean met) {
-        Bundle bundle = Bundle.forPair(DataConnectionTracker.APN_TYPE_KEY, mApnType);
+        Bundle bundle = Bundle.forPair(DctConstants.APN_TYPE_KEY, mApnType);
         try {
             if (DBG) log("setDependencyMet: E met=" + met);
             Message msg = Message.obtain();
-            msg.what = DataConnectionTracker.CMD_SET_DEPENDENCY_MET;
-            msg.arg1 = (met ? DataConnectionTracker.ENABLED : DataConnectionTracker.DISABLED);
+            msg.what = DctConstants.CMD_SET_DEPENDENCY_MET;
+            msg.arg1 = (met ? DctConstants.ENABLED : DctConstants.DISABLED);
             msg.setData(bundle);
             mDataConnectionTrackerAc.sendMessage(msg);
             if (VDBG) log("setDependencyMet: X met=" + met);
@@ -546,27 +545,27 @@ public class MobileDataStateTracker implements NetworkStateTracker {
         }
 
         loge("Could not " + (enable ? "enable" : "disable") + " APN type \"" + apnType + "\"");
-        return Phone.APN_REQUEST_FAILED;
+        return PhoneConstants.APN_REQUEST_FAILED;
     }
 
     public static String networkTypeToApnType(int netType) {
         switch(netType) {
             case ConnectivityManager.TYPE_MOBILE:
-                return Phone.APN_TYPE_DEFAULT;  // TODO - use just one of these
+                return PhoneConstants.APN_TYPE_DEFAULT;  // TODO - use just one of these
             case ConnectivityManager.TYPE_MOBILE_MMS:
-                return Phone.APN_TYPE_MMS;
+                return PhoneConstants.APN_TYPE_MMS;
             case ConnectivityManager.TYPE_MOBILE_SUPL:
-                return Phone.APN_TYPE_SUPL;
+                return PhoneConstants.APN_TYPE_SUPL;
             case ConnectivityManager.TYPE_MOBILE_DUN:
-                return Phone.APN_TYPE_DUN;
+                return PhoneConstants.APN_TYPE_DUN;
             case ConnectivityManager.TYPE_MOBILE_HIPRI:
-                return Phone.APN_TYPE_HIPRI;
+                return PhoneConstants.APN_TYPE_HIPRI;
             case ConnectivityManager.TYPE_MOBILE_FOTA:
-                return Phone.APN_TYPE_FOTA;
+                return PhoneConstants.APN_TYPE_FOTA;
             case ConnectivityManager.TYPE_MOBILE_IMS:
-                return Phone.APN_TYPE_IMS;
+                return PhoneConstants.APN_TYPE_IMS;
             case ConnectivityManager.TYPE_MOBILE_CBS:
-                return Phone.APN_TYPE_CBS;
+                return PhoneConstants.APN_TYPE_CBS;
             default:
                 sloge("Error mapping networkType " + netType + " to apnType.");
                 return null;

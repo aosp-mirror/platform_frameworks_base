@@ -7,7 +7,7 @@ LOCAL_MODULE_TAGS := tests
 # Include all test java files.
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
-LOCAL_JAVA_LIBRARIES := android.test.runner
+LOCAL_JAVA_LIBRARIES := android.test.runner telephony-common
 LOCAL_PACKAGE_NAME := FrameworkPermissionTests
 
 include $(BUILD_PACKAGE)

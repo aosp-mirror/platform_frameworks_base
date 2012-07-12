@@ -10,6 +10,7 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
 LOCAL_PACKAGE_NAME := WAPPushManager
 
+LOCAL_JAVA_LIBRARIES += telephony-common
 LOCAL_STATIC_JAVA_LIBRARIES += android-common
 
 LOCAL_PROGUARD_FLAGS := -include $(LOCAL_PATH)/proguard.flags
