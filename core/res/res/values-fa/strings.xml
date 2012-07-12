@@ -78,7 +78,7 @@
     <string name="RestrictedOnAllVoice" msgid="3396963652108151260">"تمام سرویس‎های صدا مسدود هستند."</string>
     <string name="RestrictedOnSms" msgid="8314352327461638897">"سرویس پیامک مسدود شده است."</string>
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"سرویس‎‎های صدا/داده مسدود شدند."</string>
-    <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"سرویس های صوتی/پیامک مسدود شده اند"</string>
+    <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"سرویس‌های صوتی/پیامک مسدود شده‌اند"</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"تمام سرویس‌های صدا/داده/ پیامک مسدود هستند."</string>
     <string name="serviceClassVoice" msgid="1258393812335258019">"صوتی"</string>
     <string name="serviceClassData" msgid="872456782077937893">"داده"</string>
@@ -163,7 +163,7 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"بیشتر از 999"</string>
     <string name="safeMode" msgid="2788228061547930246">"حالت ایمن"</string>
     <string name="android_system_label" msgid="6577375335728551336">"سیستم Android"</string>
-    <string name="permgrouplab_costMoney" msgid="5429808217861460401">"سرویس های غیر رایگان"</string>
+    <string name="permgrouplab_costMoney" msgid="5429808217861460401">"سرویس‌های غیر رایگان"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"انجام کارهایی که برای شما هزینه دارد."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"پیام های شما"</string>
     <string name="permgroupdesc_messages" msgid="7821999071003699236">"پیام کوتاه، ایمیل و دیگر پیامها را بخوانید."</string>
@@ -225,8 +225,8 @@
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"به برنامه اجازه می‎دهد تا کارها را حذف کند و برنامه‎های آنها را متوقف کند. برنامه‎های مخرب می‌توانند در اجرای برنامه‎های دیگر اختلال ایجاد ‎کنند."</string>
     <string name="permlab_startAnyActivity" msgid="2918768238045206456">"شروع هر نوع فعالیت"</string>
     <string name="permdesc_startAnyActivity" msgid="997823695343584001">"به برنامه اجازه می‎دهد هر فعالیتی را شروع کند بدون اینکه وضعیت صادرشده یا حفاظت با مجوز در نظر گرفته شود."</string>
-    <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"تنظیم سازگاری با صفحه نمایش"</string>
-    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"به برنامه کاربردی اجازه کنترل حالت سازگاری صفحه نمایش برای برنامه‌های دیگر را می‌دهد. برنامه‌های خرابکار ممکن است باعث کارکرد نادرست دیگر برنامه‌ها شوند."</string>
+    <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"تنظیم سازگاری با صفحهٔ نمایش"</string>
+    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"به برنامه کاربردی اجازه کنترل حالت سازگاری صفحهٔ نمایش برای برنامه‌های دیگر را می‌دهد. برنامه‌های خرابکار ممکن است باعث کارکرد نادرست دیگر برنامه‌ها شوند."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"فعال کردن عیب‌یابی برنامه"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"به برنامه اجازه می‎دهد تا عیب‌یابی را برای برنامه‌ای دیگر فعال کند. برنامه‎های مخرب می‎توانند از آن استفاده کنند تا اجرای برنامه‎های دیگر را متوقف کنند."</string>
     <string name="permlab_changeConfiguration" msgid="4162092185124234480">"تغییر تنظیمات نمایشگر سیستم"</string>
@@ -258,7 +258,7 @@
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"محدود کردن تعداد فرآیندهای در حال اجرا"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"به برنامه اجازه می‎دهد تا حداکثر تعداد پردازشهایی را که اجرا خواهد شد کنترل کند. هرگز برای برنامه‎های عادی لازم نیست."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"بستن اجباری برنامه‌های پس‌زمینه"</string>
-    <string name="permdesc_setAlwaysFinish" msgid="7471310652868841499">"به برنامه اجازه می‎دهد تا به محض اینکه فعالیتها به پس زمینه رفتند تمام شوند. برای برنامه‎های عادی نیازی نیست."</string>
+    <string name="permdesc_setAlwaysFinish" msgid="7471310652868841499">"به برنامه اجازه می‎دهد تا به محض اینکه فعالیتها به پس‌زمینه رفتند تمام شوند. برای برنامه‎های عادی نیازی نیست."</string>
     <string name="permlab_batteryStats" msgid="7863923071360031652">"اصلاح کردن آمار مربوط به باتری"</string>
     <string name="permdesc_batteryStats" msgid="6835186932305744068">"به برنامه اجازه می‎دهد تا آمار جمع آوری شده باتری را تغییر دهد. برای استفاده برنامه‎های عادی نیست."</string>
     <string name="permlab_backup" msgid="470013022865453920">"کنترل نسخه پشتیبان سیستم و بازیابی"</string>
@@ -336,7 +336,7 @@
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"به برنامه اجازه می‎دهد تا داده‎های تنظیم سیستم را تغییر دهد. برنامه‎های مخرب می‎توانند پیکربندی سیستم شما را خراب کنند."</string>
     <string name="permlab_writeSecureSettings" msgid="204676251876718288">"اصلاح کردن تنظیمات سیستم ایمن"</string>
     <string name="permdesc_writeSecureSettings" msgid="8159535613020137391">"به برنامه اجازه می‎دهد داده‎های تنظیمات امنیتی سیستم را تغییر دهد. برای استفاده برنامه‎های عادی نیست."</string>
-    <string name="permlab_writeGservices" msgid="2149426664226152185">"اصلاح کردن نقشه سرویس های Google"</string>
+    <string name="permlab_writeGservices" msgid="2149426664226152185">"اصلاح کردن نقشه سرویس‌های Google"</string>
     <string name="permdesc_writeGservices" msgid="1287309437638380229">"به برنامه اجازه می‎دهد تا نقشه سرویس‌های Google را تغییر دهد. برای استفاده برنامه‎های عادی نیست."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"اجرا هنگام راه‌اندازی"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"به برنامه اجازه می‎دهد تا به محض اتمام راه‎اندازی سیستم خودبخود شروع به کار کند. این کار ممکن است باعث شود مدت زمان بیشتری صرف شدوع به کار رایانه لوحی شود و به برنامه اجازه می‎دهد تا با اجرای همیشگی رایانه لوحی را کند کند."</string>
@@ -432,7 +432,7 @@
     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"راه اندازی مستقیم تنظیم رایانه لوحی CDMA"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"شروع مستقیم راه اندازی تلفن CDMA"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"به برنامه اجازه می‎دهد تا شرایط مقررات CDMA را شروع کند. برنامه‎های مخرب می‎توانند شرایط مقررات CDMA را در مواقع غیرضروری شروع کند."</string>
-    <string name="permlab_locationUpdates" msgid="7785408253364335740">"کنترل اعلان های به روز رسانی مکان"</string>
+    <string name="permlab_locationUpdates" msgid="7785408253364335740">"کنترل اعلان های به‌روزرسانی مکان"</string>
     <string name="permdesc_locationUpdates" msgid="1120741557891438876">"به برنامه اجازه می‎دهد اعلانهای به‎روزرسانی موقعیت مکانی را از رادیو فعال/غیرفعال کند. برای استفاده برنامه‎های عادی نیست."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"دسترسی به مشخصات اعلام ورود"</string>
     <string name="permdesc_checkinProperties" msgid="4024526968630194128">"به برنامه اجازه می‎دهد دسترسی به ویژگیهای بارگذاری شده توسط سرویسهای ورود را بخواند/بنویسد. برای استفاده برنامه‎های عادی مورد نیاز نیست."</string>
@@ -486,8 +486,8 @@
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"به برنامه اجازه می‎دهد تا وضعیت اتصال شبکه را تغییر دهد."</string>
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"تغییر قابلیت اتصال داده با سیم"</string>
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"به برنامه اجازه می‎دهد تا وضعیت اتصال شبکه اتصال داده با سیم را تغییر دهد."</string>
-    <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"تغییر تنظیمات میزان استفاده داده در پس زمینه"</string>
-    <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"به برنامه اجازه می‎دهد تا تنظیم کاربرد داده‎های پس زمینه را تغییر دهد."</string>
+    <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"تغییر تنظیمات میزان استفاده داده در پس‌زمینه"</string>
+    <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"به برنامه اجازه می‎دهد تا تنظیم کاربرد داده‎های پس‌زمینه را تغییر دهد."</string>
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"مشاهده اتصالات Wi-Fi"</string>
     <string name="permdesc_accessWifiState" msgid="5002798077387803726">"به برنامه امکان می‌دهد اطلاعات مربوط به شبکه Wi-Fi را مشاهده کند، به عنوان مثال فعال بودن Wi-Fi و نام دستگاه‌های Wi-Fi متصل."</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"اتصال به Wi-Fi و قطع اتصال از آن"</string>
@@ -674,7 +674,7 @@
     <string name="relationTypeSister" msgid="1735983554479076481">"خواهر"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"همسر"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"سفارشی"</string>
-    <string name="sipAddressTypeHome" msgid="6093598181069359295">"صفحه اصلی"</string>
+    <string name="sipAddressTypeHome" msgid="6093598181069359295">"صفحهٔ اصلی"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"محل کار"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"سایر موارد"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"پین کد را وارد کنید"</string>
@@ -698,7 +698,7 @@
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"دوباره امتحان کنید"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"دوباره امتحان کنید"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"دفعات تلاش برای Face Unlock از حداکثر مجاز بیشتر شد"</string>
-    <string name="lockscreen_plugged_in" msgid="8057762828355572315">"در حال شارژ،<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <string name="lockscreen_plugged_in" msgid="8057762828355572315">"در حال شارژ، <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"شارژ شد."</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"شارژر خود را متصل کنید."</string>
@@ -1237,9 +1237,9 @@
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"برای بازگشایی قفل، بلغزانید."</string>
     <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"برای شنیدن کلیدهای گذرواژه که با صدای بلند خوانده می‌شوند، هدست را وصل کنید."</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"نقطه."</string>
-    <string name="action_bar_home_description" msgid="5293600496601490216">"رفتن به صفحه اصلی"</string>
+    <string name="action_bar_home_description" msgid="5293600496601490216">"رفتن به صفحهٔ اصلی"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"حرکت به بالا"</string>
-    <string name="action_menu_overflow_description" msgid="2295659037509008453">"سایر گزینه ها"</string>
+    <string name="action_menu_overflow_description" msgid="2295659037509008453">"سایر گزینه‌ها"</string>
     <string name="storage_internal" msgid="4891916833657929263">"حافظه داخلی"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"کارت SD"</string>
     <string name="storage_usb" msgid="3017954059538517278">"حافظه USB"</string>
