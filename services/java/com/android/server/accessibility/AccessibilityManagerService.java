@@ -358,8 +358,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                         // We will update when the automation service dies.
                         if (mUiAutomationService == null) {
                             populateTouchExplorationGrantedAccessibilityServicesLocked();
-                            unbindAllServicesLocked();
-                            manageServicesLocked();
+                            handleTouchExplorationGrantedAccessibilityServicesChangedLocked();
                         }
                     }
                 }
@@ -624,7 +623,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         //       enabled accessibility services.
         for (int i = mServices.size() - 1; i >= 0; i--) {
             Service service = mServices.get(i);
-            if (service.mReqeustTouchExplorationMode && service.mIsDefault == isDefault) {
+            if (service.mRequestTouchExplorationMode && service.mIsDefault == isDefault) {
                 service.notifyGesture(gestureId);
                 return true;
             }
@@ -1000,6 +999,22 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 Settings.Secure.TOUCH_EXPLORATION_ENABLED, 0) == 1;
     }
 
+    private void handleTouchExplorationGrantedAccessibilityServicesChangedLocked() {
+        final int serviceCount = mServices.size();
+        for (int i = 0; i < serviceCount; i++) {
+            Service service = mServices.get(i);
+            if (service.mRequestTouchExplorationMode
+                    && mTouchExplorationGrantedServices.contains(service.mComponentName)) {
+                tryEnableTouchExplorationLocked(service);
+                return;
+            }
+        }
+        if (mIsTouchExplorationEnabled) {
+            mMainHandler.obtainMessage(MSG_TOGGLE_TOUCH_EXPLORATION, 0,
+                    0).sendToTarget();
+        }
+    }
+
     private void tryEnableTouchExplorationLocked(final Service service) {
         if (!mIsTouchExplorationEnabled && service.mRequestTouchExplorationMode) {
             final boolean canToggleTouchExploration = mTouchExplorationGrantedServices.contains(
@@ -1163,8 +1178,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         boolean mCanRetrieveScreenContent;
 
-        boolean mReqeustTouchExplorationMode;
-
         boolean mIsAutomation;
 
         final Rect mTempBounds = new Rect();
@@ -1204,7 +1217,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             mIsAutomation = isAutomation;
             if (!isAutomation) {
                 mCanRetrieveScreenContent = accessibilityServiceInfo.getCanRetrieveWindowContent();
-                mReqeustTouchExplorationMode =
+                mRequestTouchExplorationMode =
                     (accessibilityServiceInfo.flags
                             & AccessibilityServiceInfo.FLAG_REQUEST_TOUCH_EXPLORATION_MODE) != 0;
                 mIntent = new Intent().setComponent(mComponentName);
