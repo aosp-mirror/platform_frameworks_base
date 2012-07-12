@@ -59,9 +59,9 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     private final Context mContext;
     private String mAddress;
     private String mName;
-    private ContentResolver mContentResolver;
-    private RemoteCallbackList<IBluetoothManagerCallback> mCallbacks;
-    private RemoteCallbackList<IBluetoothStateChangeCallback> mStateChangeCallbacks;
+    private final ContentResolver mContentResolver;
+    private final RemoteCallbackList<IBluetoothManagerCallback> mCallbacks;
+    private final RemoteCallbackList<IBluetoothStateChangeCallback> mStateChangeCallbacks;
     private IBluetooth mBluetooth;
     private boolean mBinding;
     private boolean mUnbinding;
@@ -121,10 +121,10 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         mContentResolver = context.getContentResolver();
         mCallbacks = new RemoteCallbackList<IBluetoothManagerCallback>();
         mStateChangeCallbacks = new RemoteCallbackList<IBluetoothStateChangeCallback>();
-        IntentFilter mFilter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
-        mFilter.addAction(BluetoothAdapter.ACTION_LOCAL_NAME_CHANGED);
-        registerForAirplaneMode(mFilter);
-        mContext.registerReceiver(mReceiver, mFilter);
+        IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+        filter.addAction(BluetoothAdapter.ACTION_LOCAL_NAME_CHANGED);
+        registerForAirplaneMode(filter);
+        mContext.registerReceiver(mReceiver, filter);
         boolean airplaneModeOn = isAirplaneModeOn();
         boolean bluetoothOn = isBluetoothPersistedStateOn();
         loadStoredNameAndAddress();
@@ -512,8 +512,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                         Log.d(TAG, "MESSAGE_ENABLE: mBluetooth = " + mBluetooth +
                             " isConnected = " + isConnected());
                     }
-
-                    boolean persist = (1==msg.arg1);
+                    boolean persist = (msg.arg1 == 1);
                     if (persist) {
                         persistBluetoothSetting(true);
                     }
@@ -553,7 +552,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                     // [fc]: let AdapterServiceHandle
                 }
                     break;
-                case MESSAGE_AIRPLANE_MODE_ON:;
+                case MESSAGE_AIRPLANE_MODE_ON:
                     if (DBG) {
                         Log.d(TAG, "MESSAGE_AIRPLANE_MODE_ON: mBluetooth = " + mBluetooth +
                                 " isConnected = " + isConnected());
