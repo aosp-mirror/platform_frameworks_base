@@ -225,7 +225,7 @@ in a category view.</p>
 
 <h4>Make navigation between detail views efficient</h4>
 <p>If your users are likely to want to look at multiple items in sequence, allow them to navigate
-between items from within the detail view. Use swipe views or other techniques, such as filmstrips,
+between items from within the detail view. Use swipe views or other techniques, such as thumbnail view controls,
 to achieve this.</p>
 
 <img src="{@docRoot}design/media/app_structure_gmail_swipe.png">
@@ -235,8 +235,8 @@ to achieve this.</p>
 
 <img src="{@docRoot}design/media/app_structure_gallery_filmstrip.png">
 <div class="figure-caption">
-  In addition to supporting swipe gestures to move left or right through images, Gallery provides a
-  filmstrip control that lets people quickly jump to specific images.
+  In addition to supporting swipe gestures to move left or right through pages, Magazines provides a
+  thumbnail view control that lets people quickly jump to specific pages.
 </div>
 
 <h2 id="checklist">Checklist</h2>
