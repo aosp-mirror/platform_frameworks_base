@@ -780,11 +780,12 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         event.checkCode(TetherStatusResult);
         return event.getMessage().endsWith("started");
     }
+
+    // TODO(BT) Remove
     public void startReverseTethering(String iface)
              throws IllegalStateException {
         if (DBG) Slog.d(TAG, "startReverseTethering in");
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         // cmd is "tether start first_start first_stop second_start second_stop ..."
         // an odd number of addrs will fail
         String cmd = "tether start-reverse";
@@ -798,9 +799,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         BluetoothTetheringDataTracker.getInstance().startReverseTether(iface);
 
     }
+
+    // TODO(BT) Remove
     public void stopReverseTethering() throws IllegalStateException {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
             mConnector.doCommand("tether stop-reverse");
         } catch (NativeDaemonConnectorException e) {
