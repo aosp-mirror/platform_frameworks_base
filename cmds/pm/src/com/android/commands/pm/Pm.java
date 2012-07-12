@@ -157,6 +157,11 @@ public final class Pm {
             return;
         }
 
+        if ("trim-caches".equals(op)) {
+            runTrimCaches();
+            return;
+        }
+
         if ("create-user".equals(op)) {
             runCreateUser();
             return;
@@ -1098,7 +1103,7 @@ public final class Pm {
         return obs.result;
     }
 
-    class ClearDataObserver extends IPackageDataObserver.Stub {
+    static class ClearDataObserver extends IPackageDataObserver.Stub {
         boolean finished;
         boolean result;
 
@@ -1272,6 +1277,75 @@ public final class Pm {
         }
     }
 
+    static class ClearCacheObserver extends IPackageDataObserver.Stub {
+        boolean finished;
+        boolean result;
+
+        @Override
+        public void onRemoveCompleted(String packageName, boolean succeeded) throws RemoteException {
+            synchronized (this) {
+                finished = true;
+                result = succeeded;
+                notifyAll();
+            }
+        }
+
+    }
+
+    private void runTrimCaches() {
+        String size = nextArg();
+        if (size == null) {
+            System.err.println("Error: no size specified");
+            showUsage();
+            return;
+        }
+        int len = size.length();
+        long multiplier = 1;
+        if (len > 1) {
+            char c = size.charAt(len-1);
+            if (c == 'K' || c == 'k') {
+                multiplier = 1024L;
+            } else if (c == 'M' || c == 'm') {
+                multiplier = 1024L*1024L;
+            } else if (c == 'G' || c == 'g') {
+                multiplier = 1024L*1024L*1024L;
+            } else {
+                System.err.println("Invalid suffix: " + c);
+                showUsage();
+                return;
+            }
+            size = size.substring(0, len-1);
+        }
+        long sizeVal;
+        try {
+            sizeVal = Long.parseLong(size) * multiplier;
+        } catch (NumberFormatException e) {
+            System.err.println("Error: expected number at: " + size);
+            showUsage();
+            return;
+        }
+        ClearDataObserver obs = new ClearDataObserver();
+        try {
+            mPm.freeStorageAndNotify(sizeVal, obs);
+            synchronized (obs) {
+                while (!obs.finished) {
+                    try {
+                        obs.wait();
+                    } catch (InterruptedException e) {
+                    }
+                }
+            }
+        } catch (RemoteException e) {
+            System.err.println(e.toString());
+            System.err.println(PM_NOT_RUNNING_ERR);
+        } catch (IllegalArgumentException e) {
+            System.err.println("Bad argument: " + e.toString());
+            showUsage();
+        } catch (SecurityException e) {
+            System.err.println("Operation not allowed: " + e.toString());
+        }
+    }
+
     /**
      * Displays the package file for a package.
      * @param pckg
@@ -1373,6 +1447,7 @@ public final class Pm {
         System.err.println("       pm set-install-location [0/auto] [1/internal] [2/external]");
         System.err.println("       pm get-install-location");
         System.err.println("       pm set-permission-enforced PERMISSION [true|false]");
+        System.err.println("       pm trim-caches DESIRED_FREE_SPACE");
         System.err.println("");
         System.err.println("pm list packages: prints all packages, optionally only");
         System.err.println("  those whose package name contains the text in FILTER.  Options:");
@@ -1434,5 +1509,7 @@ public final class Pm {
         System.err.println("    0 [auto]: Let system decide the best location");
         System.err.println("    1 [internal]: Install on internal device storage");
         System.err.println("    2 [external]: Install on external media");
+        System.err.println("");
+        System.err.println("pm trim-caches: trim cache files to reach the given free space.");
     }
 }

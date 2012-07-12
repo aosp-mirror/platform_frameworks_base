@@ -60,6 +60,8 @@
 
 #define APP_SUBDIR             "app/" // sub-directory under ANDROID_DATA
 
+#define MEDIA_SUBDIR           "media/" // sub-directory under ANDROID_DATA
+
 /* other handy constants */
 
 #define PRIVATE_APP_SUBDIR     "app-private/" // sub-directory under ANDROID_DATA
@@ -91,7 +93,35 @@ extern dir_rec_t android_app_dir;
 extern dir_rec_t android_app_private_dir;
 extern dir_rec_t android_data_dir;
 extern dir_rec_t android_asec_dir;
+extern dir_rec_t android_media_dir;
 extern dir_rec_array_t android_system_dirs;
+
+typedef struct cache_dir_struct {
+    struct cache_dir_struct* parent;
+    int32_t childCount;
+    int32_t hiddenCount;
+    int32_t deleted;
+    char name[];
+} cache_dir_t;
+
+typedef struct {
+    cache_dir_t* dir;
+    time_t modTime;
+    char name[];
+} cache_file_t;
+
+typedef struct {
+    size_t numDirs;
+    size_t availDirs;
+    cache_dir_t** dirs;
+    size_t numFiles;
+    size_t availFiles;
+    cache_file_t** files;
+    size_t numCollected;
+    void* memBlocks;
+    int8_t* curMemBlockAvail;
+    int8_t* curMemBlockEnd;
+} cache_t;
 
 /* util.c */
 
@@ -122,6 +152,18 @@ int delete_dir_contents(const char *pathname,
                         const char *ignore);
 
 int delete_dir_contents_fd(int dfd, const char *name);
+
+int lookup_media_dir(char basepath[PATH_MAX], const char *dir);
+
+int64_t data_disk_free();
+
+cache_t* start_cache_collection();
+
+void add_cache_files(cache_t* cache, const char *basepath, const char *cachedir);
+
+void clear_cache_files(cache_t* cache, int64_t free_size);
+
+void finish_cache_collection(cache_t* cache);
 
 int validate_system_app_path(const char* path);
 

@@ -16,6 +16,9 @@
 
 package com.android.server;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -24,6 +27,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageManager;
+import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.FileObserver;
@@ -36,8 +40,10 @@ import android.os.StatFs;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.provider.Settings;
+import android.text.format.Formatter;
 import android.util.EventLog;
 import android.util.Slog;
+import android.util.TimeUtils;
 
 /**
  * This class implements a service to monitor the amount of disk
@@ -71,6 +77,7 @@ public class DeviceStorageMonitorService extends Binder {
     private static final long DEFAULT_CHECK_INTERVAL = MONITOR_INTERVAL*60*1000;
     private static final int DEFAULT_FULL_THRESHOLD_BYTES = 1024*1024; // 1MB
     private long mFreeMem;  // on /data
+    private long mFreeMemAfterLastCacheClear;  // on /data
     private long mLastReportedFreeMem;
     private long mLastReportedFreeMemTime;
     private boolean mLowMemFlag=false;
@@ -95,7 +102,19 @@ public class DeviceStorageMonitorService extends Binder {
     private final CacheFileDeletedObserver mCacheFileDeletedObserver;
     private static final int _TRUE = 1;
     private static final int _FALSE = 0;
+    // This is the raw threshold that has been set at which we consider
+    // storage to be low.
     private long mMemLowThreshold;
+    // This is the threshold at which we start trying to flush caches
+    // to get below the low threshold limit.  It is less than the low
+    // threshold; we will allow storage to get a bit beyond the limit
+    // before flushing and checking if we are actually low.
+    private long mMemCacheStartTrimThreshold;
+    // This is the threshold that we try to get to when deleting cache
+    // files.  This is greater than the low threshold so that we will flush
+    // more files than absolutely needed, to reduce the frequency that
+    // flushing takes place.
+    private long mMemCacheTrimToThreshold;
     private int mMemFullThreshold;
 
     /**
@@ -190,7 +209,7 @@ public class DeviceStorageMonitorService extends Binder {
         try {
             if (localLOGV) Slog.i(TAG, "Clearing cache");
             IPackageManager.Stub.asInterface(ServiceManager.getService("package")).
-                    freeStorageAndNotify(mMemLowThreshold, mClearCacheObserver);
+                    freeStorageAndNotify(mMemCacheTrimToThreshold, mClearCacheObserver);
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to get handle for PackageManger Exception: "+e);
             mClearingCache = false;
@@ -216,24 +235,42 @@ public class DeviceStorageMonitorService extends Binder {
 
             //post intent to NotificationManager to display icon if necessary
             if (mFreeMem < mMemLowThreshold) {
-                if (!mLowMemFlag) {
-                    if (checkCache) {
-                        // See if clearing cache helps
-                        // Note that clearing cache is asynchronous and so we do a
-                        // memory check again once the cache has been cleared.
-                        mThreadStartTime = System.currentTimeMillis();
-                        mClearSucceeded = false;
-                        clearCache();
-                    } else {
+                if (checkCache) {
+                    // We are allowed to clear cache files at this point to
+                    // try to get down below the limit, because this is not
+                    // the initial call after a cache clear has been attempted.
+                    // In this case we will try a cache clear if our free
+                    // space has gone below the cache clear limit.
+                    if (mFreeMem < mMemCacheStartTrimThreshold) {
+                        // We only clear the cache if the free storage has changed
+                        // a significant amount since the last time.
+                        if ((mFreeMemAfterLastCacheClear-mFreeMem)
+                                >= ((mMemLowThreshold-mMemCacheStartTrimThreshold)/4)) {
+                            // See if clearing cache helps
+                            // Note that clearing cache is asynchronous and so we do a
+                            // memory check again once the cache has been cleared.
+                            mThreadStartTime = System.currentTimeMillis();
+                            mClearSucceeded = false;
+                            clearCache();
+                        }
+                    }
+                } else {
+                    // This is a call from after clearing the cache.  Note
+                    // the amount of free storage at this point.
+                    mFreeMemAfterLastCacheClear = mFreeMem;
+                    if (!mLowMemFlag) {
+                        // We tried to clear the cache, but that didn't get us
+                        // below the low storage limit.  Tell the user.
                         Slog.i(TAG, "Running low on memory. Sending notification");
                         sendNotification();
                         mLowMemFlag = true;
+                    } else {
+                        if (localLOGV) Slog.v(TAG, "Running low on memory " +
+                                "notification already sent. do nothing");
                     }
-                } else {
-                    if (localLOGV) Slog.v(TAG, "Running low on memory " +
-                            "notification already sent. do nothing");
                 }
             } else {
+                mFreeMemAfterLastCacheClear = mFreeMem;
                 if (mLowMemFlag) {
                     Slog.i(TAG, "Memory available. Cancelling notification");
                     cancelNotification();
@@ -276,7 +313,7 @@ public class DeviceStorageMonitorService extends Binder {
                               Settings.Secure.SYS_STORAGE_THRESHOLD_PERCENTAGE,
                               DEFAULT_THRESHOLD_PERCENTAGE);
         if(localLOGV) Slog.v(TAG, "Threshold Percentage="+value);
-        value *= mTotalMemory;
+        value = (value*mTotalMemory)/100;
         long maxValue = Settings.Secure.getInt(
                 mContentResolver,
                 Settings.Secure.SYS_STORAGE_THRESHOLD_MAX_BYTES,
@@ -312,8 +349,8 @@ public class DeviceStorageMonitorService extends Binder {
         mSystemFileStats = new StatFs(SYSTEM_PATH);
         mCacheFileStats = new StatFs(CACHE_PATH);
         //initialize total storage on device
-        mTotalMemory = ((long)mDataFileStats.getBlockCount() *
-                        mDataFileStats.getBlockSize())/100L;
+        mTotalMemory = (long)mDataFileStats.getBlockCount() *
+                        mDataFileStats.getBlockSize();
         mStorageLowIntent = new Intent(Intent.ACTION_DEVICE_STORAGE_LOW);
         mStorageLowIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         mStorageOkIntent = new Intent(Intent.ACTION_DEVICE_STORAGE_OK);
@@ -325,6 +362,10 @@ public class DeviceStorageMonitorService extends Binder {
         // cache storage thresholds
         mMemLowThreshold = getMemThreshold();
         mMemFullThreshold = getMemFullThreshold();
+        mMemCacheStartTrimThreshold = ((mMemLowThreshold*3)+mMemFullThreshold)/4;
+        mMemCacheTrimToThreshold = mMemLowThreshold
+                + ((mMemLowThreshold-mMemCacheStartTrimThreshold)*2);
+        mFreeMemAfterLastCacheClear = mTotalMemory;
         checkMemory(true);
 
         mCacheFileDeletedObserver = new CacheFileDeletedObserver();
@@ -434,5 +475,41 @@ public class DeviceStorageMonitorService extends Binder {
         public void onEvent(int event, String path) {
             EventLogTags.writeCacheFileDeleted(path);
         }
+    }
+
+    @Override
+    protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            pw.println("Permission Denial: can't dump " + SERVICE + " from from pid="
+                    + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid());
+            return;
+        }
+
+        pw.println("Current DeviceStorageMonitor state:");
+        pw.print("  mFreeMem="); pw.print(Formatter.formatFileSize(mContext, mFreeMem));
+                pw.print(" mTotalMemory=");
+                pw.println(Formatter.formatFileSize(mContext, mTotalMemory));
+        pw.print("  mFreeMemAfterLastCacheClear=");
+                pw.println(Formatter.formatFileSize(mContext, mFreeMemAfterLastCacheClear));
+        pw.print("  mLastReportedFreeMem=");
+                pw.print(Formatter.formatFileSize(mContext, mLastReportedFreeMem));
+                pw.print(" mLastReportedFreeMemTime=");
+                TimeUtils.formatDuration(mLastReportedFreeMemTime, SystemClock.elapsedRealtime(), pw);
+                pw.println();
+        pw.print("  mLowMemFlag="); pw.print(mLowMemFlag);
+                pw.print(" mMemFullFlag="); pw.println(mMemFullFlag);
+        pw.print("  mClearSucceeded="); pw.print(mClearSucceeded);
+                pw.print(" mClearingCache="); pw.println(mClearingCache);
+        pw.print("  mMemLowThreshold=");
+                pw.print(Formatter.formatFileSize(mContext, mMemLowThreshold));
+                pw.print(" mMemFullThreshold=");
+                pw.println(Formatter.formatFileSize(mContext, mMemFullThreshold));
+        pw.print("  mMemCacheStartTrimThreshold=");
+                pw.print(Formatter.formatFileSize(mContext, mMemCacheStartTrimThreshold));
+                pw.print(" mMemCacheTrimToThreshold=");
+                pw.println(Formatter.formatFileSize(mContext, mMemCacheTrimToThreshold));
     }
 }

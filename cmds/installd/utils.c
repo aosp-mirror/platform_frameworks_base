@@ -16,6 +16,8 @@
 
 #include "installd.h"
 
+#define CACHE_NOISY(x) //x
+
 int create_pkg_path_in_dir(char path[PKG_PATH_MAX],
                                 const dir_rec_t* dir,
                                 const char* pkgname,
@@ -294,6 +296,489 @@ int delete_dir_contents_fd(int dfd, const char *name)
     res = _delete_dir_contents(d, 0);
     closedir(d);
     return res;
+}
+
+int lookup_media_dir(char basepath[PATH_MAX], const char *dir)
+{
+    DIR *d;
+    struct dirent *de;
+    struct stat s;
+    char* dirpos = basepath + strlen(basepath);
+
+    if ((*(dirpos-1)) != '/') {
+        *dirpos = '/';
+        dirpos++;
+    }
+
+    CACHE_NOISY(ALOGI("Looking up %s in %s\n", dir, basepath));
+    // Verify the path won't extend beyond our buffer, to avoid
+    // repeated checking later.
+    if ((dirpos-basepath+strlen(dir)) >= (PATH_MAX-1)) {
+        ALOGW("Path exceeds limit: %s%s", basepath, dir);
+        return -1;
+    }
+
+    // First, can we find this directory with the case that is given?
+    strcpy(dirpos, dir);
+    if (stat(basepath, &s) >= 0) {
+        CACHE_NOISY(ALOGI("Found direct: %s\n", basepath));
+        return 0;
+    }
+
+    // Not found with that case...  search through all entries to find
+    // one that matches regardless of case.
+    *dirpos = 0;
+
+    d = opendir(basepath);
+    if (d == NULL) {
+        return -1;
+    }
+
+    while ((de = readdir(d))) {
+        if (strcasecmp(de->d_name, dir) == 0) {
+            strcpy(dirpos, de->d_name);
+            closedir(d);
+            CACHE_NOISY(ALOGI("Found search: %s\n", basepath));
+            return 0;
+        }
+    }
+
+    ALOGW("Couldn't find %s in %s", dir, basepath);
+    closedir(d);
+    return -1;
+}
+
+int64_t data_disk_free()
+{
+    struct statfs sfs;
+    if (statfs(android_data_dir.path, &sfs) == 0) {
+        return sfs.f_bavail * sfs.f_bsize;
+    } else {
+        ALOGE("Couldn't statfs %s: %s\n", android_data_dir.path, strerror(errno));
+        return -1;
+    }
+}
+
+cache_t* start_cache_collection()
+{
+    cache_t* cache = (cache_t*)calloc(1, sizeof(cache_t));
+    return cache;
+}
+
+#define CACHE_BLOCK_SIZE (512*1024)
+
+static void* _cache_malloc(cache_t* cache, size_t len)
+{
+    len = (len+3)&~3;
+    if (len > (CACHE_BLOCK_SIZE/2)) {
+        // It doesn't make sense to try to put this allocation into one
+        // of our blocks, because it is so big.  Instead, make a new dedicated
+        // block for it.
+        int8_t* res = (int8_t*)malloc(len+sizeof(void*));
+        if (res == NULL) {
+            return NULL;
+        }
+        CACHE_NOISY(ALOGI("Allocated large cache mem block: %p size %d", res, len));
+        // Link it into our list of blocks, not disrupting the current one.
+        if (cache->memBlocks == NULL) {
+            *(void**)res = NULL;
+            cache->memBlocks = res;
+        } else {
+            *(void**)res = *(void**)cache->memBlocks;
+            *(void**)cache->memBlocks = res;
+        }
+        return res + sizeof(void*);
+    }
+    int8_t* res = cache->curMemBlockAvail;
+    int8_t* nextPos = res + len;
+    if (cache->memBlocks == NULL || nextPos > cache->curMemBlockEnd) {
+        int8_t* newBlock = malloc(CACHE_BLOCK_SIZE);
+        if (newBlock == NULL) {
+            return NULL;
+        }
+        CACHE_NOISY(ALOGI("Allocated new cache mem block: %p", newBlock));
+        *(void**)newBlock = cache->memBlocks;
+        cache->memBlocks = newBlock;
+        res = cache->curMemBlockAvail = newBlock + sizeof(void*);
+        cache->curMemBlockEnd = newBlock + CACHE_BLOCK_SIZE;
+        nextPos = res + len;
+    }
+    CACHE_NOISY(ALOGI("cache_malloc: ret %p size %d, block=%p, nextPos=%p",
+            res, len, cache->memBlocks, nextPos));
+    cache->curMemBlockAvail = nextPos;
+    return res;
+}
+
+static void* _cache_realloc(cache_t* cache, void* cur, size_t origLen, size_t len)
+{
+    // This isn't really a realloc, but it is good enough for our purposes here.
+    void* alloc = _cache_malloc(cache, len);
+    if (alloc != NULL && cur != NULL) {
+        memcpy(alloc, cur, origLen < len ? origLen : len);
+    }
+    return alloc;
+}
+
+static void _inc_num_cache_collected(cache_t* cache)
+{
+    cache->numCollected++;
+    if ((cache->numCollected%20000) == 0) {
+        ALOGI("Collected cache so far: %d directories, %d files",
+            cache->numDirs, cache->numFiles);
+    }
+}
+
+static cache_dir_t* _add_cache_dir_t(cache_t* cache, cache_dir_t* parent, const char *name)
+{
+    size_t nameLen = strlen(name);
+    cache_dir_t* dir = (cache_dir_t*)_cache_malloc(cache, sizeof(cache_dir_t)+nameLen+1);
+    if (dir != NULL) {
+        dir->parent = parent;
+        dir->childCount = 0;
+        dir->hiddenCount = 0;
+        dir->deleted = 0;
+        strcpy(dir->name, name);
+        if (cache->numDirs >= cache->availDirs) {
+            size_t newAvail = cache->availDirs < 1000 ? 1000 : cache->availDirs*2;
+            cache_dir_t** newDirs = (cache_dir_t**)_cache_realloc(cache, cache->dirs,
+                    cache->availDirs*sizeof(cache_dir_t*), newAvail*sizeof(cache_dir_t*));
+            if (newDirs == NULL) {
+                ALOGE("Failure growing cache dirs array for %s\n", name);
+                return NULL;
+            }
+            cache->availDirs = newAvail;
+            cache->dirs = newDirs;
+        }
+        cache->dirs[cache->numDirs] = dir;
+        cache->numDirs++;
+        if (parent != NULL) {
+            parent->childCount++;
+        }
+        _inc_num_cache_collected(cache);
+    } else {
+        ALOGE("Failure allocating cache_dir_t for %s\n", name);
+    }
+    return dir;
+}
+
+static cache_file_t* _add_cache_file_t(cache_t* cache, cache_dir_t* dir, time_t modTime,
+        const char *name)
+{
+    size_t nameLen = strlen(name);
+    cache_file_t* file = (cache_file_t*)_cache_malloc(cache, sizeof(cache_file_t)+nameLen+1);
+    if (file != NULL) {
+        file->dir = dir;
+        file->modTime = modTime;
+        strcpy(file->name, name);
+        if (cache->numFiles >= cache->availFiles) {
+            size_t newAvail = cache->availFiles < 1000 ? 1000 : cache->availFiles*2;
+            cache_file_t** newFiles = (cache_file_t**)_cache_realloc(cache, cache->files,
+                    cache->availFiles*sizeof(cache_file_t*), newAvail*sizeof(cache_file_t*));
+            if (newFiles == NULL) {
+                ALOGE("Failure growing cache file array for %s\n", name);
+                return NULL;
+            }
+            cache->availFiles = newAvail;
+            cache->files = newFiles;
+        }
+        CACHE_NOISY(ALOGI("Setting file %p at position %d in array %p", file,
+                cache->numFiles, cache->files));
+        cache->files[cache->numFiles] = file;
+        cache->numFiles++;
+        dir->childCount++;
+        _inc_num_cache_collected(cache);
+    } else {
+        ALOGE("Failure allocating cache_file_t for %s\n", name);
+    }
+    return file;
+}
+
+static int _add_cache_files(cache_t *cache, cache_dir_t *parentDir, const char *dirName,
+        DIR* dir, char *pathBase, char *pathPos, size_t pathAvailLen)
+{
+    struct dirent *de;
+    cache_dir_t* cacheDir = NULL;
+    int dfd;
+
+    CACHE_NOISY(ALOGI("_add_cache_files: parent=%p dirName=%s dir=%p pathBase=%s",
+            parentDir, dirName, dir, pathBase));
+
+    dfd = dirfd(dir);
+
+    if (dfd < 0) return 0;
+
+    // Sub-directories always get added to the data structure, so if they
+    // are empty we will know about them to delete them later.
+    cacheDir = _add_cache_dir_t(cache, parentDir, dirName);
+
+    while ((de = readdir(dir))) {
+        const char *name = de->d_name;
+
+        if (de->d_type == DT_DIR) {
+            int subfd;
+            DIR *subdir;
+
+                /* always skip "." and ".." */
+            if (name[0] == '.') {
+                if (name[1] == 0) continue;
+                if ((name[1] == '.') && (name[2] == 0)) continue;
+            }
+
+            subfd = openat(dfd, name, O_RDONLY | O_DIRECTORY);
+            if (subfd < 0) {
+                ALOGE("Couldn't openat %s: %s\n", name, strerror(errno));
+                continue;
+            }
+            subdir = fdopendir(subfd);
+            if (subdir == NULL) {
+                ALOGE("Couldn't fdopendir %s: %s\n", name, strerror(errno));
+                close(subfd);
+                continue;
+            }
+            if (cacheDir == NULL) {
+                cacheDir = _add_cache_dir_t(cache, parentDir, dirName);
+            }
+            if (cacheDir != NULL) {
+                // Update pathBase for the new path...  this may change dirName
+                // if that is also pointing to the path, but we are done with it
+                // now.
+                size_t finallen = snprintf(pathPos, pathAvailLen, "/%s", name);
+                CACHE_NOISY(ALOGI("Collecting dir %s\n", pathBase));
+                if (finallen < pathAvailLen) {
+                    _add_cache_files(cache, cacheDir, name, subdir, pathBase,
+                            pathPos+finallen, pathAvailLen-finallen);
+                } else {
+                    // Whoops, the final path is too long!  We'll just delete
+                    // this directory.
+                    ALOGW("Cache dir %s truncated in path %s; deleting dir\n",
+                            name, pathBase);
+                    _delete_dir_contents(subdir, NULL);
+                    if (unlinkat(dfd, name, AT_REMOVEDIR) < 0) {
+                        ALOGE("Couldn't unlinkat %s: %s\n", name, strerror(errno));
+                    }
+                }
+            }
+            closedir(subdir);
+        } else if (de->d_type == DT_REG) {
+            // Skip files that start with '.'; they will be deleted if
+            // their entire directory is deleted.  This allows for metadata
+            // like ".nomedia" to remain in the directory until the entire
+            // directory is deleted.
+            if (cacheDir == NULL) {
+                cacheDir = _add_cache_dir_t(cache, parentDir, dirName);
+            }
+            if (name[0] == '.') {
+                cacheDir->hiddenCount++;
+                continue;
+            }
+            if (cacheDir != NULL) {
+                // Build final full path for file...  this may change dirName
+                // if that is also pointing to the path, but we are done with it
+                // now.
+                size_t finallen = snprintf(pathPos, pathAvailLen, "/%s", name);
+                CACHE_NOISY(ALOGI("Collecting file %s\n", pathBase));
+                if (finallen < pathAvailLen) {
+                    struct stat s;
+                    if (stat(pathBase, &s) >= 0) {
+                        _add_cache_file_t(cache, cacheDir, s.st_mtime, name);
+                    } else {
+                        ALOGW("Unable to stat cache file %s; deleting\n", pathBase);
+                        if (unlink(pathBase) < 0) {
+                            ALOGE("Couldn't unlink %s: %s\n", pathBase, strerror(errno));
+                        }
+                    }
+                } else {
+                    // Whoops, the final path is too long!  We'll just delete
+                    // this file.
+                    ALOGW("Cache file %s truncated in path %s; deleting\n",
+                            name, pathBase);
+                    if (unlinkat(dfd, name, 0) < 0) {
+                        *pathPos = 0;
+                        ALOGE("Couldn't unlinkat %s in %s: %s\n", name, pathBase,
+                                strerror(errno));
+                    }
+                }
+            }
+        } else {
+            cacheDir->hiddenCount++;
+        }
+    }
+    return 0;
+}
+
+void add_cache_files(cache_t* cache, const char *basepath, const char *cachedir)
+{
+    DIR *d;
+    struct dirent *de;
+    char dirname[PATH_MAX];
+
+    CACHE_NOISY(ALOGI("add_cache_files: base=%s cachedir=%s\n", basepath, cachedir));
+
+    d = opendir(basepath);
+    if (d == NULL) {
+        return;
+    }
+
+    while ((de = readdir(d))) {
+        if (de->d_type == DT_DIR) {
+            DIR* subdir;
+            const char *name = de->d_name;
+            char* pathpos;
+
+                /* always skip "." and ".." */
+            if (name[0] == '.') {
+                if (name[1] == 0) continue;
+                if ((name[1] == '.') && (name[2] == 0)) continue;
+            }
+
+            strcpy(dirname, basepath);
+            pathpos = dirname + strlen(dirname);
+            if ((*(pathpos-1)) != '/') {
+                *pathpos = '/';
+                pathpos++;
+                *pathpos = 0;
+            }
+            if (cachedir != NULL) {
+                snprintf(pathpos, sizeof(dirname)-(pathpos-dirname), "%s/%s", name, cachedir);
+            } else {
+                snprintf(pathpos, sizeof(dirname)-(pathpos-dirname), "%s", name);
+            }
+            CACHE_NOISY(ALOGI("Adding cache files from dir: %s\n", dirname));
+            subdir = opendir(dirname);
+            if (subdir != NULL) {
+                size_t dirnameLen = strlen(dirname);
+                _add_cache_files(cache, NULL, dirname, subdir, dirname, dirname+dirnameLen,
+                        PATH_MAX - dirnameLen);
+                closedir(subdir);
+            }
+        }
+    }
+
+    closedir(d);
+}
+
+static char *create_dir_path(char path[PATH_MAX], cache_dir_t* dir)
+{
+    char *pos = path;
+    if (dir->parent != NULL) {
+        pos = create_dir_path(path, dir->parent);
+    }
+    // Note that we don't need to worry about going beyond the buffer,
+    // since when we were constructing the cache entries our maximum
+    // buffer size for full paths was PATH_MAX.
+    strcpy(pos, dir->name);
+    pos += strlen(pos);
+    *pos = '/';
+    pos++;
+    *pos = 0;
+    return pos;
+}
+
+static void delete_cache_dir(char path[PATH_MAX], cache_dir_t* dir)
+{
+    if (dir->parent != NULL) {
+        create_dir_path(path, dir);
+        ALOGI("DEL DIR %s\n", path);
+        if (dir->hiddenCount <= 0) {
+            if (rmdir(path)) {
+                ALOGE("Couldn't rmdir %s: %s\n", path, strerror(errno));
+                return;
+            }
+        } else {
+            // The directory contains hidden files so we need to delete
+            // them along with the directory itself.
+            if (delete_dir_contents(path, 1, NULL)) {
+                return;
+            }
+        }
+        dir->parent->childCount--;
+        dir->deleted = 1;
+        if (dir->parent->childCount <= 0) {
+            delete_cache_dir(path, dir->parent);
+        }
+    } else if (dir->hiddenCount > 0) {
+        // This is a root directory, but it has hidden files.  Get rid of
+        // all of those files, but not the directory itself.
+        create_dir_path(path, dir);
+        ALOGI("DEL CONTENTS %s\n", path);
+        delete_dir_contents(path, 0, NULL);
+    }
+}
+
+static int cache_modtime_sort(const void *lhsP, const void *rhsP)
+{
+    const cache_file_t *lhs = *(const cache_file_t**)lhsP;
+    const cache_file_t *rhs = *(const cache_file_t**)rhsP;
+    return lhs->modTime < rhs->modTime ? -1 : (lhs->modTime > rhs->modTime ? 1 : 0);
+}
+
+void clear_cache_files(cache_t* cache, int64_t free_size)
+{
+    size_t i;
+    int skip = 0;
+    char path[PATH_MAX];
+
+    ALOGI("Collected cache files: %d directories, %d files",
+        cache->numDirs, cache->numFiles);
+
+    CACHE_NOISY(ALOGI("Sorting files..."));
+    qsort(cache->files, cache->numFiles, sizeof(cache_file_t*),
+            cache_modtime_sort);
+
+    CACHE_NOISY(ALOGI("Cleaning empty directories..."));
+    for (i=cache->numDirs; i>0; i--) {
+        cache_dir_t* dir = cache->dirs[i-1];
+        if (dir->childCount <= 0 && !dir->deleted) {
+            delete_cache_dir(path, dir);
+        }
+    }
+
+    CACHE_NOISY(ALOGI("Trimming files..."));
+    for (i=0; i<cache->numFiles; i++) {
+        skip++;
+        if (skip > 10) {
+            if (data_disk_free() > free_size) {
+                return;
+            }
+            skip = 0;
+        }
+        cache_file_t* file = cache->files[i];
+        strcpy(create_dir_path(path, file->dir), file->name);
+        ALOGI("DEL (mod %d) %s\n", (int)file->modTime, path);
+        if (unlink(path) < 0) {
+            ALOGE("Couldn't unlink %s: %s\n", path, strerror(errno));
+        }
+        file->dir->childCount--;
+        if (file->dir->childCount <= 0) {
+            delete_cache_dir(path, file->dir);
+        }
+    }
+}
+
+void finish_cache_collection(cache_t* cache)
+{
+    size_t i;
+
+    CACHE_NOISY(ALOGI("clear_cache_files: %d dirs, %d files\n", cache->numDirs, cache->numFiles));
+    CACHE_NOISY(
+        for (i=0; i<cache->numDirs; i++) {
+            cache_dir_t* dir = cache->dirs[i];
+            ALOGI("dir #%d: %p %s parent=%p\n", i, dir, dir->name, dir->parent);
+        })
+    CACHE_NOISY(
+        for (i=0; i<cache->numFiles; i++) {
+            cache_file_t* file = cache->files[i];
+            ALOGI("file #%d: %p %s time=%d dir=%p\n", i, file, file->name,
+                    (int)file->modTime, file->dir);
+        })
+    void* block = cache->memBlocks;
+    while (block != NULL) {
+        void* nextBlock = *(void**)block;
+        CACHE_NOISY(ALOGI("Freeing cache mem block: %p", block));
+        free(block);
+        block = nextBlock;
+    }
+    free(cache);
 }
 
 /**
