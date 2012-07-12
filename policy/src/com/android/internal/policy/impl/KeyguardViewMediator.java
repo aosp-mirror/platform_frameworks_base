@@ -19,7 +19,7 @@ package com.android.internal.policy.impl;
 import static android.provider.Settings.System.SCREEN_OFF_TIMEOUT;
 
 import com.android.internal.policy.impl.KeyguardUpdateMonitor.InfoCallbackImpl;
-import com.android.internal.telephony.IccCard;
+import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.widget.LockPatternUtils;
 
 import android.app.ActivityManagerNative;
@@ -621,10 +621,10 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
         final boolean requireSim = !SystemProperties.getBoolean("keyguard.no_require_sim",
                 false);
         final boolean provisioned = mUpdateMonitor.isDeviceProvisioned();
-        final IccCard.State state = mUpdateMonitor.getSimState();
+        final IccCardConstants.State state = mUpdateMonitor.getSimState();
         final boolean lockedOrMissing = state.isPinLocked()
-                || ((state == IccCard.State.ABSENT
-                || state == IccCard.State.PERM_DISABLED)
+                || ((state == IccCardConstants.State.ABSENT
+                || state == IccCardConstants.State.PERM_DISABLED)
                 && requireSim);
 
         if (!lockedOrMissing && !provisioned) {
@@ -727,7 +727,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     }
 
     /** {@inheritDoc} */
-    public void onSimStateChanged(IccCard.State simState) {
+    public void onSimStateChanged(IccCardConstants.State simState) {
         if (DEBUG) Log.d(TAG, "onSimStateChanged: " + simState);
 
         switch (simState) {

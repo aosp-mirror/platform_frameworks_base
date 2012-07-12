@@ -47,6 +47,7 @@ import android.provider.Settings;
 import android.util.Log;
 
 import com.android.internal.telephony.Phone;
+import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.util.IState;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
@@ -1195,7 +1196,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 boolean retValue = true;
                 if (apnType == ConnectivityManager.TYPE_NONE) return false;
                 if (apnType != mMobileApnReserved) turnOffUpstreamMobileConnection();
-                int result = Phone.APN_REQUEST_FAILED;
+                int result = PhoneConstants.APN_REQUEST_FAILED;
                 String enableString = enableString(apnType);
                 if (enableString == null) return false;
                 try {
@@ -1204,14 +1205,14 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 } catch (Exception e) {
                 }
                 switch (result) {
-                case Phone.APN_ALREADY_ACTIVE:
-                case Phone.APN_REQUEST_STARTED:
+                case PhoneConstants.APN_ALREADY_ACTIVE:
+                case PhoneConstants.APN_REQUEST_STARTED:
                     mMobileApnReserved = apnType;
                     Message m = obtainMessage(CMD_CELL_CONNECTION_RENEW);
                     m.arg1 = ++mCurrentConnectionSequence;
                     sendMessageDelayed(m, CELL_CONNECTION_RENEW_MS);
                     break;
-                case Phone.APN_REQUEST_FAILED:
+                case PhoneConstants.APN_REQUEST_FAILED:
                 default:
                     retValue = false;
                     break;
