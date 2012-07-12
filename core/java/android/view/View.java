@@ -11932,9 +11932,24 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 mHardwareLayer = mAttachInfo.mHardwareRenderer.createHardwareLayer(
                         width, height, isOpaque());
                 mLocalDirtyRect.set(0, 0, width, height);
-            } else if (mHardwareLayer.getWidth() != width || mHardwareLayer.getHeight() != height) {
-                mHardwareLayer.resize(width, height);
-                mLocalDirtyRect.set(0, 0, width, height);
+            } else {
+                if (mHardwareLayer.getWidth() != width || mHardwareLayer.getHeight() != height) {
+                    mHardwareLayer.resize(width, height);
+                    mLocalDirtyRect.set(0, 0, width, height);
+                }
+
+                // This should not be necessary but applications that change
+                // the parameters of their background drawable without calling
+                // this.setBackground(Drawable) can leave the view in a bad state
+                // (for instance isOpaque() returns true, but the background is
+                // not opaque.)
+                computeOpaqueFlags();
+
+                final boolean opaque = isOpaque();
+                if (mHardwareLayer.isOpaque() != opaque) {
+                    mHardwareLayer.setOpaque(opaque);
+                    mLocalDirtyRect.set(0, 0, width, height);
+                }
             }
 
             // The layer is not valid if the underlying GPU resources cannot be allocated
@@ -13993,6 +14008,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @Deprecated
     public void setBackgroundDrawable(Drawable background) {
+        computeOpaqueFlags();
+
         if (background == mBackground) {
             return;
         }
