@@ -43,6 +43,9 @@ page.title=GCM Demo Application
   <li><a href="{@docRoot}guide/google/gcm/client-javadoc/index.html">Client Reference</a></li>
   <li><a href="{@docRoot}guide/google/gcm/server-javadoc/index.html">Server Reference</a></li>
 </ul>
+
+<p>The sections below describe how to download the demo code and helper libraries from the SDK Manager. The demo code and helper libraries are also available at the <a href="http://code.google.com/p/gcm">open source site</a>.
+
 <h2 id="requirements">Requirements</h2>
 <p>For the web server:</p>
 <ul>
@@ -75,6 +78,8 @@ page.title=GCM Demo Application
     
     
     <p>This creates a <code>gcm</code> directory under <code><em>YOUR_SDK_ROOT</em>/extras/google/</code> containing these subdirectories: <code>gcm-client</code>, <code>gcm-server</code>, <code>samples/gcm-demo-client</code>, <code>samples/gcm-demo-server</code>, and <code>samples/gcm-demo-appengine</code>.</p>
+
+<p class="note"><strong>Note:</strong> If you don't see <strong>Extras &gt; Google Cloud Messaging for Android Library</strong> in the SDK Manager, make sure you are running version 20 or higher. Be sure to restart the SDK Manager after updating it.</p>
   </li>
 
   <li>In a text editor, edit the <code>samples/gcm-demo-server/WebContent/WEB-INF/classes/api.key</code> and replace the existing text with the API key obtained above.</li>
