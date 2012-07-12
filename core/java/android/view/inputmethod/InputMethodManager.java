@@ -1648,9 +1648,10 @@ public final class InputMethodManager {
         if (p.mSeq == seq) {
             mFirstPendingEvent = p.mNext;
         } else {
-            PendingEvent prev = p;
+            PendingEvent prev;
             do {
-                p = prev.mNext;
+                prev = p;
+                p = p.mNext;
                 if (p == null) {
                     return null;
                 }
