@@ -872,12 +872,16 @@ static void android_hardware_Camera_stopFaceDetection(JNIEnv *env, jobject thiz)
 static void android_hardware_Camera_enableFocusMoveCallback(JNIEnv *env, jobject thiz, jint enable)
 {
     ALOGV("enableFocusMoveCallback");
+#ifdef ICS_CAMERA_BLOB
+    return;
+#else
     sp<Camera> camera = get_native_camera(env, thiz, NULL);
     if (camera == 0) return;
 
     if (camera->sendCommand(CAMERA_CMD_ENABLE_FOCUS_MOVE_MSG, enable, 0) != NO_ERROR) {
         jniThrowRuntimeException(env, "enable focus move callback failed");
     }
+#endif
 }
 
 //-------------------------------------------------
