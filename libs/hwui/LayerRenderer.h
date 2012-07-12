@@ -61,11 +61,12 @@ public:
             bool isOpaque, GLenum renderTarget, float* transform);
     ANDROID_API static void destroyLayer(Layer* layer);
     ANDROID_API static void destroyLayerDeferred(Layer* layer);
-    ANDROID_API static void flushLayer(Layer* layer);
     ANDROID_API static bool copyLayer(Layer* layer, SkBitmap* bitmap);
 
 private:
     void generateMesh();
+
+    static void flushLayer(Layer* layer);
 
     Layer* mLayer;
 }; // class LayerRenderer

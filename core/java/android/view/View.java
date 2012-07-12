@@ -4798,9 +4798,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Computes whether the given portion of this view is visible to the user. Such a view is
-     * attached, visible, all its predecessors are visible, has an alpha greater than zero, and
-     * the specified portion is not clipped entirely by its predecessors.
+     * Computes whether the given portion of this view is visible to the user.
+     * Such a view is attached, visible, all its predecessors are visible,
+     * has an alpha greater than zero, and the specified portion is not
+     * clipped entirely by its predecessors.
      *
      * @param boundInView the portion of the view to test; coordinates should be relative; may be
      *                    <code>null</code>, and the entire view will be tested in this case.
@@ -4814,22 +4815,26 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     protected boolean isVisibleToUser(Rect boundInView) {
-        Rect visibleRect = mAttachInfo.mTmpInvalRect;
-        Point offset = mAttachInfo.mPoint;
-        // The first two checks are made also made by isShown() which
-        // however traverses the tree up to the parent to catch that.
-        // Therefore, we do some fail fast check to minimize the up
-        // tree traversal.
-        boolean isVisible = mAttachInfo != null
-            && mAttachInfo.mWindowVisibility == View.VISIBLE
-            && getAlpha() > 0
-            && isShown()
-            && getGlobalVisibleRect(visibleRect, offset);
+        if (mAttachInfo != null) {
+            Rect visibleRect = mAttachInfo.mTmpInvalRect;
+            Point offset = mAttachInfo.mPoint;
+            // The first two checks are made also made by isShown() which
+            // however traverses the tree up to the parent to catch that.
+            // Therefore, we do some fail fast check to minimize the up
+            // tree traversal.
+            boolean isVisible = mAttachInfo.mWindowVisibility == View.VISIBLE
+                && getAlpha() > 0
+                && isShown()
+                && getGlobalVisibleRect(visibleRect, offset);
             if (isVisible && boundInView != null) {
                 visibleRect.offset(-offset.x, -offset.y);
-                isVisible &= boundInView.intersect(visibleRect);
+                // isVisible is always true here, use a simple assignment
+                isVisible = boundInView.intersect(visibleRect);
             }
             return isVisible;
+        }
+
+        return false;
     }
 
     /**
@@ -5272,7 +5277,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return Return true if this view applied the insets and it should not
      * continue propagating further down the hierarchy, false otherwise.
      * @see #getFitsSystemWindows()
-     * @see #setFitsSystemWindows()
+     * @see #setFitsSystemWindows(boolean) 
      * @see #setSystemUiVisibility(int)
      */
     protected boolean fitSystemWindows(Rect insets) {
@@ -6464,10 +6469,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public boolean includeForAccessibility() {
         if (mAttachInfo != null) {
-            if (!mAttachInfo.mIncludeNotImportantViews) {
-                return isImportantForAccessibility();
-            }
-            return true;
+            return mAttachInfo.mIncludeNotImportantViews || isImportantForAccessibility();
         }
         return false;
     }
@@ -11899,13 +11901,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
-    // Make sure the HardwareRenderer.validate() was invoked before calling this method
-    void flushLayer() {
-        if (mLayerType == LAYER_TYPE_HARDWARE && mHardwareLayer != null) {
-            mHardwareLayer.flush();
-        }
-    }
-
     /**
      * <p>Returns a hardware layer that can be used to draw this view again
      * without executing its draw method.</p>
@@ -12756,10 +12751,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         if (more) {
             if (!a.willChangeBounds()) {
-                if ((flags & (parent.FLAG_OPTIMIZE_INVALIDATE | parent.FLAG_ANIMATION_DONE)) ==
-                        parent.FLAG_OPTIMIZE_INVALIDATE) {
-                    parent.mGroupFlags |= parent.FLAG_INVALIDATE_REQUIRED;
-                } else if ((flags & parent.FLAG_INVALIDATE_REQUIRED) == 0) {
+                if ((flags & (ViewGroup.FLAG_OPTIMIZE_INVALIDATE | ViewGroup.FLAG_ANIMATION_DONE)) ==
+                        ViewGroup.FLAG_OPTIMIZE_INVALIDATE) {
+                    parent.mGroupFlags |= ViewGroup.FLAG_INVALIDATE_REQUIRED;
+                } else if ((flags & ViewGroup.FLAG_INVALIDATE_REQUIRED) == 0) {
                     // The child need to draw an animation, potentially offscreen, so
                     // make sure we do not cancel invalidate requests
                     parent.mPrivateFlags |= DRAW_ANIMATION;
