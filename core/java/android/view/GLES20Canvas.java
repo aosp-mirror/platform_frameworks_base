@@ -151,6 +151,7 @@ class GLES20Canvas extends HardwareCanvas {
     static native int nCreateTextureLayer(boolean opaque, int[] layerInfo);
     static native int nCreateLayer(int width, int height, boolean isOpaque, int[] layerInfo);
     static native void nResizeLayer(int layerId, int width, int height, int[] layerInfo);
+    static native void nSetOpaqueLayer(int layerId, boolean isOpaque);
     static native void nUpdateTextureLayer(int layerId, int width, int height, boolean opaque,
             SurfaceTexture surface);
     static native void nSetTextureLayerTransform(int layerId, int matrix);

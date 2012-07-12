@@ -769,6 +769,13 @@ static void android_view_GLES20Canvas_resizeLayer(JNIEnv* env, jobject clazz,
     env->ReleaseIntArrayElements(layerInfo, storage, 0);
 }
 
+static void android_view_GLES20Canvas_setOpaqueLayer(JNIEnv* env, jobject clazz,
+        Layer* layer, jboolean isOpaque) {
+    if (layer) {
+        layer->setBlend(!isOpaque);
+    }
+}
+
 static void android_view_GLES20Canvas_updateTextureLayer(JNIEnv* env, jobject clazz,
         Layer* layer, jint width, jint height, jboolean isOpaque, jobject surface) {
     float transform[16];
@@ -969,6 +976,7 @@ static JNINativeMethod gMethods[] = {
     { "nCreateLayerRenderer",    "(I)I",       (void*) android_view_GLES20Canvas_createLayerRenderer },
     { "nCreateLayer",            "(IIZ[I)I",   (void*) android_view_GLES20Canvas_createLayer },
     { "nResizeLayer",            "(III[I)V" ,  (void*) android_view_GLES20Canvas_resizeLayer },
+    { "nSetOpaqueLayer",         "(IZ)V",      (void*) android_view_GLES20Canvas_setOpaqueLayer },
     { "nCreateTextureLayer",     "(Z[I)I",     (void*) android_view_GLES20Canvas_createTextureLayer },
     { "nUpdateTextureLayer",     "(IIIZLandroid/graphics/SurfaceTexture;)V",
             (void*) android_view_GLES20Canvas_updateTextureLayer },

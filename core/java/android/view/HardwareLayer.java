@@ -107,6 +107,13 @@ abstract class HardwareLayer {
     }
 
     /**
+     * Sets whether or not this layer should be considered opaque.
+     * 
+     * @param isOpaque True if the layer is opaque, false otherwise
+     */
+    abstract void setOpaque(boolean isOpaque);
+
+    /**
      * Indicates whether this layer can be rendered.
      * 
      * @return True if the layer can be rendered into, false otherwise

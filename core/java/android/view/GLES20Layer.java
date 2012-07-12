@@ -46,11 +46,6 @@ abstract class GLES20Layer extends HardwareLayer {
     boolean copyInto(Bitmap bitmap) {
         return GLES20Canvas.nCopyLayer(mLayer, bitmap.mNativeBitmap);
     }
-    
-    @Override
-    void update(int width, int height, boolean isOpaque) {
-        super.update(width, height, isOpaque);
-    }
 
     @Override
     void destroy() {

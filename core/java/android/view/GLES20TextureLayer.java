@@ -42,12 +42,6 @@ class GLES20TextureLayer extends GLES20Layer {
         }        
     }
 
-    GLES20TextureLayer(SurfaceTexture surface, boolean isOpaque) {
-        this(isOpaque);
-        mSurface = surface;
-        mSurface.attachToGLContext(mTexture);
-    }
-
     @Override
     boolean isValid() {
         return mLayer != 0 && mTexture != 0;
@@ -90,6 +84,11 @@ class GLES20TextureLayer extends GLES20Layer {
     void update(int width, int height, boolean isOpaque) {
         super.update(width, height, isOpaque);
         GLES20Canvas.nUpdateTextureLayer(mLayer, width, height, isOpaque, mSurface);
+    }
+
+    @Override
+    void setOpaque(boolean isOpaque) {
+        throw new UnsupportedOperationException("Use update(int, int, boolean) instead");
     }
 
     @Override

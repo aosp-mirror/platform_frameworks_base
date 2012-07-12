@@ -71,6 +71,12 @@ class GLES20RenderLayer extends GLES20Layer {
     }
 
     @Override
+    void setOpaque(boolean isOpaque) {
+        mOpaque = isOpaque;
+        GLES20Canvas.nSetOpaqueLayer(mLayer, isOpaque);
+    }
+
+    @Override
     HardwareCanvas getCanvas() {
         return mCanvas;
     }
