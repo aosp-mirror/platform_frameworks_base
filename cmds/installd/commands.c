@@ -26,6 +26,7 @@ dir_rec_t android_data_dir;
 dir_rec_t android_asec_dir;
 dir_rec_t android_app_dir;
 dir_rec_t android_app_private_dir;
+dir_rec_t android_media_dir;
 dir_rec_array_t android_system_dirs;
 
 int install(const char *pkgname, uid_t uid, gid_t gid)
@@ -273,17 +274,6 @@ int delete_cache(const char *pkgname)
     return delete_dir_contents(cachedir, 0, 0);
 }
 
-static int64_t disk_free()
-{
-    struct statfs sfs;
-    if (statfs(android_data_dir.path, &sfs) == 0) {
-        return sfs.f_bavail * sfs.f_bsize;
-    } else {
-        ALOGE("Couldn't statfs %s: %s\n", android_data_dir.path, strerror(errno));
-        return -1;
-    }
-}
-
 /* Try to ensure free_size bytes of storage are available.
  * Returns 0 on success.
  * This is rather simple-minded because doing a full LRU would
@@ -293,57 +283,66 @@ static int64_t disk_free()
  */
 int free_cache(int64_t free_size)
 {
-    const char *name;
-    int dfd, subfd;
+    cache_t* cache;
+    int64_t avail;
     DIR *d;
     struct dirent *de;
-    int64_t avail;
-    char datadir[PKG_PATH_MAX];
+    char tmpdir[PATH_MAX];
+    char *dirpos;
 
-    avail = disk_free();
+    avail = data_disk_free();
     if (avail < 0) return -1;
 
     ALOGI("free_cache(%" PRId64 ") avail %" PRId64 "\n", free_size, avail);
     if (avail >= free_size) return 0;
 
-    if (create_persona_path(datadir, 0)) {
-        ALOGE("couldn't get directory for persona 0");
-        return -1;
+    cache = start_cache_collection();
+
+    // Collect cache files for primary user.
+    if (create_persona_path(tmpdir, 0) == 0) {
+        //ALOGI("adding cache files from %s\n", tmpdir);
+        add_cache_files(cache, tmpdir, "cache");
     }
 
-    d = opendir(datadir);
-    if (d == NULL) {
-        ALOGE("cannot open %s: %s\n", datadir, strerror(errno));
-        return -1;
-    }
-    dfd = dirfd(d);
-
-    while ((de = readdir(d))) {
-        if (de->d_type != DT_DIR) continue;
-        name = de->d_name;
-
-        /* always skip "." and ".." */
-        if (name[0] == '.') {
-            if (name[1] == 0) continue;
-            if ((name[1] == '.') && (name[2] == 0)) continue;
+    // Search for other users and add any cache files from them.
+    snprintf(tmpdir, sizeof(tmpdir), "%s%s", android_data_dir.path,
+            SECONDARY_USER_PREFIX);
+    dirpos = tmpdir + strlen(tmpdir);
+    d = opendir(tmpdir);
+    if (d != NULL) {
+        while ((de = readdir(d))) {
+            if (de->d_type == DT_DIR) {
+                const char *name = de->d_name;
+                    /* always skip "." and ".." */
+                if (name[0] == '.') {
+                    if (name[1] == 0) continue;
+                    if ((name[1] == '.') && (name[2] == 0)) continue;
+                }
+                if ((strlen(name)+(dirpos-tmpdir)) < (sizeof(tmpdir)-1)) {
+                    strcpy(dirpos, name);
+                    //ALOGI("adding cache files from %s\n", tmpdir);
+                    add_cache_files(cache, tmpdir, "cache");
+                } else {
+                    ALOGW("Path exceeds limit: %s%s", tmpdir, name);
+                }
+            }
         }
-
-        subfd = openat(dfd, name, O_RDONLY | O_DIRECTORY);
-        if (subfd < 0) continue;
-
-        delete_dir_contents_fd(subfd, "cache");
-        close(subfd);
-
-        avail = disk_free();
-        if (avail >= free_size) {
-            closedir(d);
-            return 0;
-        }
+        closedir(d);
     }
-    closedir(d);
 
-    /* Fail case - not possible to free space */
-    return -1;
+    // Collect cache files on external storage (if it is mounted as part
+    // of the internal storage).
+    strcpy(tmpdir, android_media_dir.path);
+    if (lookup_media_dir(tmpdir, "Android") == 0
+            && lookup_media_dir(tmpdir, "data") == 0) {
+        //ALOGI("adding cache files from %s\n", tmpdir);
+        add_cache_files(cache, tmpdir, "cache");
+    }
+
+    clear_cache_files(cache, free_size);
+    finish_cache_collection(cache);
+
+    return data_disk_free() >= free_size ? 0 : -1;
 }
 
 int move_dex(const char *src, const char *dst)

@@ -297,6 +297,11 @@ int initialize_globals() {
         return -1;
     }
 
+    // Get the android media directory.
+    if (copy_and_append(&android_media_dir, &android_data_dir, MEDIA_SUBDIR) < 0) {
+        return -1;
+    }
+
     // Take note of the system and vendor directories.
     android_system_dirs.count = 2;
 
