@@ -12922,11 +12922,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mPrivateFlags &= ~INVALIDATED;
         }
 
-        computeScroll();
-
-        final int sx = mScrollX;
-        final int sy = mScrollY;
-
         DisplayList displayList = null;
         Bitmap cache = null;
         boolean hasDisplayList = false;
@@ -12971,6 +12966,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 hasDisplayList = false;
                 useDisplayListProperties = false;
             }
+        }
+
+        int sx = 0;
+        int sy = 0;
+        if (!hasDisplayList) {
+            computeScroll();
+            sx = mScrollX;
+            sy = mScrollY;
         }
 
         final boolean hasNoCache = cache == null || hasDisplayList;
