@@ -45,8 +45,7 @@ namespace uirenderer {
 #define RAD_TO_DEG (180.0f / 3.14159265f)
 #define MIN_ANGLE 0.001f
 
-// TODO: This should be set in properties
-#define ALPHA_THRESHOLD (0x7f / PANEL_BIT_DEPTH)
+#define ALPHA_THRESHOLD 0
 
 #define FILTER(paint) (paint && paint->isFilterBitmap() ? GL_LINEAR : GL_NEAREST)
 
@@ -449,7 +448,7 @@ int OpenGLRenderer::saveLayer(float left, float top, float right, float bottom,
 
 int OpenGLRenderer::saveLayerAlpha(float left, float top, float right, float bottom,
         int alpha, int flags) {
-    if (alpha >= 255 - ALPHA_THRESHOLD) {
+    if (alpha >= 255) {
         return saveLayer(left, top, right, bottom, NULL, flags);
     } else {
         SkPaint paint;
