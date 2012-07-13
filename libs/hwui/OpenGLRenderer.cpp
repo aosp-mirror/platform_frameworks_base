@@ -1149,7 +1149,6 @@ void OpenGLRenderer::setupDrawColor(int color) {
 
 void OpenGLRenderer::setupDrawColor(int color, int alpha) {
     mColorA = alpha / 255.0f;
-    mColorA *= mSnapshot->alpha;
     // Second divide of a by 255 is an optimization, allowing us to simply multiply
     // the rgb values by a instead of also dividing by 255
     const float a = mColorA / 255.0f;
@@ -1179,15 +1178,6 @@ void OpenGLRenderer::setupDrawColor(float r, float g, float b, float a) {
     mColorB = b;
     mColorSet = true;
     mSetShaderColor = mDescription.setColor(r, g, b, a);
-}
-
-void OpenGLRenderer::setupDrawAlpha8Color(float r, float g, float b, float a) {
-    mColorA = a;
-    mColorR = r;
-    mColorG = g;
-    mColorB = b;
-    mColorSet = true;
-    mSetShaderColor = mDescription.setAlpha8Color(r, g, b, a);
 }
 
 void OpenGLRenderer::setupDrawShader() {
@@ -1771,7 +1761,7 @@ void OpenGLRenderer::drawAARect(float left, float top, float right, float bottom
     setupDraw();
     setupDrawNoTexture();
     setupDrawAALine();
-    setupDrawColor(color);
+    setupDrawColor(color, ((color >> 24) & 0xFF) * mSnapshot->alpha);
     setupDrawColorFilter();
     setupDrawShader();
     setupDrawBlending(true, mode);
@@ -2267,7 +2257,7 @@ status_t OpenGLRenderer::drawRect(float left, float top, float right, float bott
 status_t OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count,
         const float* positions, SkPaint* paint) {
     if (text == NULL || count == 0 || mSnapshot->isIgnored() ||
-            (paint->getAlpha() == 0 && paint->getXfermode() == NULL)) {
+            (paint->getAlpha() * mSnapshot->alpha == 0 && paint->getXfermode() == NULL)) {
         return DrawGlInfo::kStatusDone;
     }
 
@@ -2340,7 +2330,7 @@ status_t OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count
 status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
         float x, float y, SkPaint* paint, float length) {
     if (text == NULL || count == 0 || mSnapshot->isIgnored() ||
-            (paint->getAlpha() == 0 && paint->getXfermode() == NULL)) {
+            (paint->getAlpha() * mSnapshot->alpha == 0 && paint->getXfermode() == NULL)) {
         return DrawGlInfo::kStatusDone;
     }
 
@@ -2393,7 +2383,7 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
         const float sx = oldX - shadow->left + mShadowDx;
         const float sy = oldY - shadow->top + mShadowDy;
 
-        const int shadowAlpha = ((mShadowColor >> 24) & 0xFF);
+        const int shadowAlpha = ((mShadowColor >> 24) & 0xFF) * mSnapshot->alpha;
         int shadowColor = mShadowColor;
         if (mShader) {
             shadowColor = 0xffffffff;
@@ -2792,7 +2782,7 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
 
     setupDraw();
     setupDrawNoTexture();
-    setupDrawColor(color);
+    setupDrawColor(color, ((color >> 24) & 0xFF) * mSnapshot->alpha);
     setupDrawShader();
     setupDrawColorFilter();
     setupDrawBlending(mode);
