@@ -537,7 +537,6 @@ private:
     void setupDrawColor(int color, int alpha);
     void setupDrawColor(float r, float g, float b, float a);
     void setupDrawAlpha8Color(int color, int alpha);
-    void setupDrawAlpha8Color(float r, float g, float b, float a);
     void setupDrawShader();
     void setupDrawColorFilter();
     void setupDrawBlending(SkXfermode::Mode mode = SkXfermode::kSrcOver_Mode,
