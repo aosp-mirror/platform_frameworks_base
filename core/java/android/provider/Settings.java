@@ -2585,6 +2585,13 @@ public final class Settings {
         public static final String DEVELOPMENT_SETTINGS_ENABLED = "development_settings_enabled";
 
         /**
+         * When the user has enable the option to have a "bug report" command
+         * in the power menu.
+         * @hide
+         */
+        public static final String BUGREPORT_IN_POWER_MENU = "bugreport_in_power_menu";
+
+        /**
          * Whether ADB is enabled.
          */
         public static final String ADB_ENABLED = "adb_enabled";
@@ -4316,6 +4323,7 @@ public final class Settings {
          */
         public static final String[] SETTINGS_TO_BACKUP = {
             ADB_ENABLED,
+            BUGREPORT_IN_POWER_MENU,
             ALLOW_MOCK_LOCATION,
             PARENTAL_CONTROL_ENABLED,
             PARENTAL_CONTROL_REDIRECT_URL,
