@@ -50,8 +50,9 @@ class WindowStateAnimator {
     // Unchanging local convenience fields.
     final WindowManagerService mService;
     final WindowState mWin;
-    final WindowState mAttachedWindow;
+    final WindowStateAnimator mAttachedWinAnimator;
     final WindowAnimator mAnimator;
+    final AppWindowAnimator mAppAnimator;
     final Session mSession;
     final WindowManagerPolicy mPolicy;
     final Context mContext;
@@ -154,7 +155,9 @@ class WindowStateAnimator {
         mAnimDh = service.mAppDisplayHeight;
 
         mWin = win;
-        mAttachedWindow = win.mAttachedWindow;
+        mAttachedWinAnimator = win.mAttachedWindow == null
+                ? null : win.mAttachedWindow.mWinAnimator;
+        mAppAnimator = win.mAppToken == null ? null : win.mAppToken.mAppAnimator;
         mSession = win.mSession;
         mAttrFlags = win.mAttrs.flags;
         mAttrType = win.mAttrs.type;
@@ -185,20 +188,17 @@ class WindowStateAnimator {
 
     /** Is the window or its container currently animating? */
     boolean isAnimating() {
-        final WindowState attached = mAttachedWindow;
-        final AppWindowToken atoken = mWin.mAppToken;
         return mAnimation != null
-                || (attached != null && attached.mWinAnimator.mAnimation != null)
-                || (atoken != null &&
-                        (atoken.mAppAnimator.animation != null
-                                || atoken.inPendingTransaction));
+                || (mAttachedWinAnimator != null && mAttachedWinAnimator.mAnimation != null)
+                || (mAppAnimator != null &&
+                        (mAppAnimator.animation != null
+                                || mAppAnimator.mAppToken.inPendingTransaction));
     }
 
     /** Is the window animating the DummyAnimation? */
     boolean isDummyAnimation() {
-        final AppWindowToken atoken = mWin.mAppToken;
-        return atoken != null
-                && atoken.mAppAnimator.animation == AppWindowAnimator.sDummyAnimation;
+        return mAppAnimator != null
+                && mAppAnimator.animation == AppWindowAnimator.sDummyAnimation;
     }
 
     /** Is this window currently animating? */
@@ -265,8 +265,8 @@ class WindowStateAnimator {
                 //WindowManagerService.this.dump();
             }
             mHasLocalTransformation = false;
-            if ((!mLocalAnimating || mAnimationIsEntrance) && mWin.mAppToken != null
-                    && mWin.mAppToken.mAppAnimator.animation != null) {
+            if ((!mLocalAnimating || mAnimationIsEntrance) && mAppAnimator != null
+                    && mAppAnimator.animation != null) {
                 // When our app token is animating, we kind-of pretend like
                 // we are as well.  Note the mLocalAnimating mAnimationIsEntrance
                 // part of this check means that we will only do this if
@@ -807,12 +807,10 @@ class WindowStateAnimator {
     void computeShownFrameLocked() {
         final boolean selfTransformation = mHasLocalTransformation;
         Transformation attachedTransformation =
-                (mAttachedWindow != null && mAttachedWindow.mWinAnimator.mHasLocalTransformation)
-                ? mAttachedWindow.mWinAnimator.mTransformation : null;
-        final AppWindowAnimator appAnimator =
-                mWin.mAppToken == null ? null : mWin.mAppToken.mAppAnimator;
-        Transformation appTransformation = (appAnimator != null && appAnimator.hasTransformation)
-                ? appAnimator.transformation : null;
+                (mAttachedWinAnimator != null && mAttachedWinAnimator.mHasLocalTransformation)
+                ? mAttachedWinAnimator.mTransformation : null;
+        Transformation appTransformation = (mAppAnimator != null && mAppAnimator.hasTransformation)
+                ? mAppAnimator.transformation : null;
 
         // Wallpapers are animated based on the "real" window they
         // are currently targeting.
@@ -1309,7 +1307,7 @@ class WindowStateAnimator {
                     + (mWin.mAppToken != null ? mWin.mAppToken.hidden : false)
                     + " animating=" + mAnimating
                     + " tok animating="
-                    + (mWin.mAppToken != null ? mWin.mAppToken.mAppAnimator.animating : false), e);
+                    + (mAppAnimator != null ? mAppAnimator.animating : false), e);
         }
         if (mDrawState == READY_TO_SHOW && mWin.isReadyForDisplayIgnoringKeyguard()) {
             if (SHOW_TRANSACTIONS || DEBUG_ORIENTATION)
@@ -1325,7 +1323,7 @@ class WindowStateAnimator {
                         + (mWin.mAppToken != null ? mWin.mAppToken.hidden : false)
                         + " animating=" + mAnimating
                         + " tok animating="
-                        + (mWin.mAppToken != null ? mWin.mAppToken.mAppAnimator.animating : false));
+                        + (mAppAnimator != null ? mAppAnimator.animating : false));
             }
 
             mService.enableScreenIfNeededLocked();

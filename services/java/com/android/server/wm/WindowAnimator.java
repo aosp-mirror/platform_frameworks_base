@@ -21,6 +21,7 @@ import android.view.WindowManagerPolicy;
 import android.view.animation.Animation;
 
 import com.android.internal.policy.impl.PhoneWindowManager;
+import com.android.server.wm.WindowManagerService.AppWindowAnimParams;
 import com.android.server.wm.WindowManagerService.LayoutToAnimatorParams;
 
 import java.io.PrintWriter;
@@ -87,6 +88,8 @@ public class WindowAnimator {
     WindowState mLowerWallpaperTarget = null;
     WindowState mUpperWallpaperTarget = null;
 
+    ArrayList<AppWindowAnimator> mAppAnimators = new ArrayList<AppWindowAnimator>();
+
     ArrayList<WindowToken> mWallpaperTokens = new ArrayList<WindowToken>();
 
     /** Parameters being passed from this into mService. */
@@ -143,6 +146,11 @@ public class WindowAnimator {
         synchronized(layoutToAnim) {
             layoutToAnim.mAnimationScheduled = false;
 
+            if (!layoutToAnim.mParamsModified) {
+                return;
+            }
+            layoutToAnim.mParamsModified = false;
+
             if ((layoutToAnim.mChanges & LayoutToAnimatorParams.WALLPAPER_TOKENS_CHANGED) != 0) {
                 layoutToAnim.mChanges &= ~LayoutToAnimatorParams.WALLPAPER_TOKENS_CHANGED;
                 mWallpaperTokens = new ArrayList<WindowToken>(layoutToAnim.mWallpaperTokens);
@@ -173,6 +181,16 @@ public class WindowAnimator {
                     mDimParams = dimParams;
                 }
             }
+
+            mAppAnimators.clear();
+            final int N = layoutToAnim.mAppWindowAnimParams.size();
+            for (int i = 0; i < N; i++) {
+                final AppWindowAnimParams params = layoutToAnim.mAppWindowAnimParams.get(i);
+                AppWindowAnimator appAnimator = params.mAppAnimator;
+                appAnimator.mAllAppWinAnimators =
+                        new ArrayList<WindowStateAnimator>(params.mWinAnimators);
+                mAppAnimators.add(appAnimator);
+            }
         }
     }
 
@@ -197,11 +215,10 @@ public class WindowAnimator {
     }
 
     private void updateWindowsAppsAndRotationAnimationsLocked() {
-        final ArrayList<AppWindowToken> appTokens = mService.mAnimatingAppTokens;
         int i;
-        final int NAT = appTokens.size();
+        final int NAT = mAppAnimators.size();
         for (i=0; i<NAT; i++) {
-            final AppWindowAnimator appAnimator = appTokens.get(i).mAppAnimator;
+            final AppWindowAnimator appAnimator = mAppAnimators.get(i);
             final boolean wasAnimating = appAnimator.animation != null
                     && appAnimator.animation != AppWindowAnimator.sDummyAnimation;
             if (appAnimator.stepAnimationLocked(mCurrentTime, mInnerDw, mInnerDh)) {
@@ -373,8 +390,7 @@ public class WindowAnimator {
                     }
                 }
             }
-            final AppWindowAnimator appAnimator =
-                    atoken == null ? null : atoken.mAppAnimator;
+            final AppWindowAnimator appAnimator = winAnimator.mAppAnimator;
             if (appAnimator != null && appAnimator.thumbnail != null) {
                 if (appAnimator.thumbnailTransactionSeq != mAnimTransactionSequence) {
                     appAnimator.thumbnailTransactionSeq = mAnimTransactionSequence;
@@ -438,8 +454,7 @@ public class WindowAnimator {
             // If this window's app token is running a detached wallpaper
             // animation, make a note so we can ensure the wallpaper is
             // displayed behind it.
-            final AppWindowAnimator appAnimator =
-                    win.mAppToken == null ? null : win.mAppToken.mAppAnimator;
+            final AppWindowAnimator appAnimator = winAnimator.mAppAnimator;
             if (appAnimator != null && appAnimator.animation != null
                     && appAnimator.animating) {
                 if ((flags & FLAG_SHOW_WALLPAPER) != 0
@@ -495,18 +510,18 @@ public class WindowAnimator {
     private void testTokenMayBeDrawnLocked() {
         // See if any windows have been drawn, so they (and others
         // associated with them) can now be shown.
-        final ArrayList<AppWindowToken> appTokens = mService.mAnimatingAppTokens;
-        final int NT = appTokens.size();
+        final int NT = mAppAnimators.size();
         for (int i=0; i<NT; i++) {
-            AppWindowToken wtoken = appTokens.get(i);
+            AppWindowAnimator appAnimator = mAppAnimators.get(i);
+            AppWindowToken wtoken = appAnimator.mAppToken;
             final boolean allDrawn = wtoken.allDrawn;
-            if (allDrawn != wtoken.mAppAnimator.allDrawn) {
-                wtoken.mAppAnimator.allDrawn = allDrawn;
+            if (allDrawn != appAnimator.allDrawn) {
+                appAnimator.allDrawn = allDrawn;
                 if (allDrawn) {
                     // The token has now changed state to having all
                     // windows shown...  what to do, what to do?
-                    if (wtoken.mAppAnimator.freezingScreen) {
-                        wtoken.mAppAnimator.showAllWindowsLocked();
+                    if (appAnimator.freezingScreen) {
+                        appAnimator.showAllWindowsLocked();
                         mService.unsetAppFreezingScreenLocked(wtoken, false, true);
                         if (WindowManagerService.DEBUG_ORIENTATION) Slog.i(TAG,
                                 "Setting mOrientationChangeComplete=true because wtoken "
@@ -523,7 +538,7 @@ public class WindowAnimator {
 
                         // We can now show all of the drawn windows!
                         if (!mService.mOpeningApps.contains(wtoken)) {
-                            mAnimating |= wtoken.mAppAnimator.showAllWindowsLocked();
+                            mAnimating |= appAnimator.showAllWindowsLocked();
                         }
                     }
                 }
