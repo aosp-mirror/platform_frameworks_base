@@ -233,9 +233,8 @@ Layer* LayerRenderer::createLayer(uint32_t width, uint32_t height, bool isOpaque
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
             layer->getTexture(), 0);
 
-    glDisable(GL_SCISSOR_TEST);
+    caches.disableScissor();
     glClear(GL_COLOR_BUFFER_BIT);
-    glEnable(GL_SCISSOR_TEST);
 
     glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
 
@@ -431,7 +430,7 @@ bool LayerRenderer::copyLayer(Layer* layer, SkBitmap* bitmap) {
             renderer.OpenGLRenderer::prepareDirty(0.0f, 0.0f,
                     bitmap->width(), bitmap->height(), !layer->isBlend());
 
-            glDisable(GL_SCISSOR_TEST);
+            caches.disableScissor();
             renderer.translate(0.0f, bitmap->height());
             renderer.scale(1.0f, -1.0f);
 
@@ -460,8 +459,6 @@ bool LayerRenderer::copyLayer(Layer* layer, SkBitmap* bitmap) {
         }
 
 error:
-        glEnable(GL_SCISSOR_TEST);
-
 #if DEBUG_OPENGL
         if (error != GL_NO_ERROR) {
             ALOGD("GL error while copying layer into bitmap = 0x%x", error);

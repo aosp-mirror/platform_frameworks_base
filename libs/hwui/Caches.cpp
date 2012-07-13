@@ -74,6 +74,7 @@ void Caches::init() {
 
     mTexCoordsArrayEnabled = false;
 
+    scissorEnabled = false;
     mScissorX = mScissorY = mScissorWidth = mScissorHeight = 0;
 
     glActiveTexture(gTextureUnits[0]);
@@ -352,13 +353,37 @@ void Caches::activeTexture(GLuint textureUnit) {
 }
 
 void Caches::setScissor(GLint x, GLint y, GLint width, GLint height) {
-    if (x != mScissorX || y != mScissorY || width != mScissorWidth || height != mScissorHeight) {
+    if (scissorEnabled && (x != mScissorX || y != mScissorY ||
+            width != mScissorWidth || height != mScissorHeight)) {
+
         glScissor(x, y, width, height);
 
         mScissorX = x;
         mScissorY = y;
         mScissorWidth = width;
         mScissorHeight = height;
+    }
+}
+
+void Caches::enableScissor() {
+    if (!scissorEnabled) {
+        glEnable(GL_SCISSOR_TEST);
+        scissorEnabled = true;
+    }
+}
+
+void Caches::disableScissor() {
+    if (scissorEnabled) {
+        glDisable(GL_SCISSOR_TEST);
+        scissorEnabled = false;
+    }
+}
+
+void Caches::setScissorEnabled(bool enabled) {
+    if (scissorEnabled != enabled) {
+        if (enabled) glEnable(GL_SCISSOR_TEST);
+        else glDisable(GL_SCISSOR_TEST);
+        scissorEnabled = enabled;
     }
 }
 

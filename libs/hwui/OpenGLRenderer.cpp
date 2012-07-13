@@ -157,7 +157,6 @@ void OpenGLRenderer::setViewport(int width, int height) {
     mFirstSnapshot->viewport.set(0, 0, width, height);
 
     glDisable(GL_DITHER);
-    glEnable(GL_SCISSOR_TEST);
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
     glEnableVertexAttribArray(Program::kBindingPosition);
@@ -181,6 +180,7 @@ int OpenGLRenderer::prepareDirty(float left, float top, float right, float botto
     syncState();
 
     if (!opaque) {
+        mCaches.enableScissor();
         mCaches.setScissor(left, mSnapshot->height - bottom, right - left, bottom - top);
         glClear(GL_COLOR_BUFFER_BIT);
         return DrawGlInfo::kStatusDrew;
@@ -250,7 +250,7 @@ void OpenGLRenderer::resume() {
     glViewport(0, 0, snapshot->viewport.getWidth(), snapshot->viewport.getHeight());
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-    glEnable(GL_SCISSOR_TEST);
+    mCaches.enableScissor();
     mCaches.resetScissor();
     dirtyClip();
 
@@ -651,6 +651,7 @@ bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, sp<Snapshot> sna
 #endif
 
     // Clear the FBO, expand the clear region by 1 to get nice bilinear filtering
+    mCaches.enableScissor();
     mCaches.setScissor(clip.left - 1.0f, bounds.getHeight() - clip.bottom - 1.0f,
             clip.getWidth() + 2.0f, clip.getHeight() + 2.0f);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -981,7 +982,7 @@ void OpenGLRenderer::clearLayerRegions() {
         // The list contains bounds that have already been clipped
         // against their initial clip rect, and the current clip
         // is likely different so we need to disable clipping here
-        glDisable(GL_SCISSOR_TEST);
+        mCaches.disableScissor();
 
         Vertex mesh[count * 6];
         Vertex* vertex = mesh;
@@ -1008,8 +1009,6 @@ void OpenGLRenderer::clearLayerRegions() {
         setupDrawVertices(&mesh[0].position[0]);
 
         glDrawArrays(GL_TRIANGLES, 0, count * 6);
-
-        glEnable(GL_SCISSOR_TEST);
     } else {
         for (uint32_t i = 0; i < count; i++) {
             delete mLayers.itemAt(i);
@@ -1088,7 +1087,12 @@ bool OpenGLRenderer::quickReject(float left, float top, float right, float botto
     Rect clipRect(*mSnapshot->clipRect);
     clipRect.snapToPixelBoundaries();
 
-    return !clipRect.intersects(r);
+    bool rejected = !clipRect.intersects(r);
+    if (!isDeferred() && !rejected) {
+        mCaches.setScissorEnabled(!clipRect.contains(r));
+    }
+
+    return rejected;
 }
 
 bool OpenGLRenderer::clipRect(float left, float top, float right, float bottom, SkRegion::Op op) {

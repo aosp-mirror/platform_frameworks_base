@@ -204,6 +204,10 @@ public:
      */
     void resetScissor();
 
+    void enableScissor();
+    void disableScissor();
+    void setScissorEnabled(bool enabled);
+
     /**
      * Returns the mesh used to draw regions. Calling this method will
      * bind a VBO of type GL_ELEMENT_ARRAY_BUFFER that contains the
@@ -221,6 +225,7 @@ public:
     GLenum lastSrcMode;
     GLenum lastDstMode;
     Program* currentProgram;
+    bool scissorEnabled;
 
     // VBO to draw with
     GLuint meshBuffer;
