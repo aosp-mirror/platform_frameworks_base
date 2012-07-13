@@ -870,6 +870,8 @@ public final class ViewRootImpl implements ViewParent,
         if (dirty == null) {
             invalidate();
             return null;
+        } else if (dirty.isEmpty()) {
+            return null;
         }
 
         if (mCurScrollY != 0 || mTranslator != null) {
