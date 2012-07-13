@@ -454,15 +454,18 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        int x = getPaddingLeft();
+        final boolean isLayoutRtl = isLayoutRtl();
+        int x = isLayoutRtl ? r - l - getPaddingRight() : getPaddingLeft();
         final int y = getPaddingTop();
         final int contentHeight = b - t - getPaddingTop() - getPaddingBottom();
         
         if (mClose != null && mClose.getVisibility() != GONE) {
             MarginLayoutParams lp = (MarginLayoutParams) mClose.getLayoutParams();
-            x += lp.leftMargin;
-            x += positionChild(mClose, x, y, contentHeight);
-            x += lp.rightMargin;
+            final int startMargin = (isLayoutRtl ? lp.rightMargin : lp.leftMargin);
+            final int endMargin = (isLayoutRtl ? lp.leftMargin : lp.rightMargin);
+            x = next(x, startMargin, isLayoutRtl);
+            x += positionChild(mClose, x, y, contentHeight, isLayoutRtl);
+            x = next(x, endMargin, isLayoutRtl);
 
             if (mAnimateInOnLayout) {
                 mAnimationMode = ANIMATE_IN;
@@ -473,17 +476,17 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
         }
 
         if (mTitleLayout != null && mCustomView == null && mTitleLayout.getVisibility() != GONE) {
-            x += positionChild(mTitleLayout, x, y, contentHeight);
+            x += positionChild(mTitleLayout, x, y, contentHeight, isLayoutRtl);
         }
         
         if (mCustomView != null) {
-            x += positionChild(mCustomView, x, y, contentHeight);
+            x += positionChild(mCustomView, x, y, contentHeight, isLayoutRtl);
         }
-        
-        x = r - l - getPaddingRight();
+
+        x = isLayoutRtl ? getPaddingLeft() : r - l - getPaddingRight();
 
         if (mMenuView != null) {
-            x -= positionChildInverse(mMenuView, x, y, contentHeight);
+            x += positionChild(mMenuView, x, y, contentHeight, !isLayoutRtl);
         }
     }
 

@@ -219,24 +219,22 @@ public abstract class AbsActionBarView extends ViewGroup {
         return Math.max(0, availableWidth);
     }
 
-    protected int positionChild(View child, int x, int y, int contentHeight) {
-        int childWidth = child.getMeasuredWidth();
-        int childHeight = child.getMeasuredHeight();
-        int childTop = y + (contentHeight - childHeight) / 2;
-
-        child.layout(x, childTop, x + childWidth, childTop + childHeight);
-
-        return childWidth;
+    static protected int next(int x, int val, boolean isRtl) {
+        return isRtl ? x - val : x + val;
     }
 
-    protected int positionChildInverse(View child, int x, int y, int contentHeight) {
+    protected int positionChild(View child, int x, int y, int contentHeight, boolean reverse) {
         int childWidth = child.getMeasuredWidth();
         int childHeight = child.getMeasuredHeight();
         int childTop = y + (contentHeight - childHeight) / 2;
 
-        child.layout(x - childWidth, childTop, x, childTop + childHeight);
+        if (reverse) {
+            child.layout(x - childWidth, childTop, x, childTop + childHeight);
+        } else {
+            child.layout(x, childTop, x + childWidth, childTop + childHeight);
+        }
 
-        return childWidth;
+        return  (reverse ? -childWidth : childWidth);
     }
 
     protected class VisibilityAnimListener implements Animator.AnimatorListener {
