@@ -125,11 +125,11 @@ public:
         return intersect(r.left, r.top, r.right, r.bottom);
     }
 
-    bool contains(float l, float t, float r, float b) {
+    inline bool contains(float l, float t, float r, float b) {
         return l >= left && t >= top && r <= right && b <= bottom;
     }
 
-    bool contains(const Rect& r) {
+    inline bool contains(const Rect& r) {
         return contains(r.left, r.top, r.right, r.bottom);
     }
 
