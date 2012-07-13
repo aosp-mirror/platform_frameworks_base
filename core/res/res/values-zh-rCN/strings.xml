@@ -630,7 +630,7 @@
     <string name="phoneTypeMms" msgid="7254492275502768992">"彩信"</string>
     <string name="eventTypeCustom" msgid="7837586198458073404">"自定义"</string>
     <string name="eventTypeBirthday" msgid="2813379844211390740">"生日"</string>
-    <string name="eventTypeAnniversary" msgid="3876779744518284000">"周年纪念"</string>
+    <string name="eventTypeAnniversary" msgid="3876779744518284000">"周年纪念日"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"其他"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"自定义"</string>
     <string name="emailTypeHome" msgid="449227236140433919">"家用"</string>
