@@ -10,10 +10,8 @@ import android.view.animation.Animation;
 import android.view.animation.Transformation;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 
-/**
- *
- */
 public class AppWindowAnimator {
     static final String TAG = "AppWindowAnimator";
 
@@ -48,12 +46,15 @@ public class AppWindowAnimator {
     Animation thumbnailAnimation;
     final Transformation thumbnailTransformation = new Transformation();
 
+    /** WindowStateAnimator from mAppAnimator.allAppWindows as of last performLayout */
+    ArrayList<WindowStateAnimator> mAllAppWinAnimators;
+
     static final Animation sDummyAnimation = new DummyAnimation();
 
-    public AppWindowAnimator(final WindowManagerService service, final AppWindowToken atoken) {
-        mService = service;
+    public AppWindowAnimator(final AppWindowToken atoken) {
         mAppToken = atoken;
-        mAnimator = service.mAnimator;
+        mService = atoken.service;
+        mAnimator = atoken.mAnimator;
     }
 
     public void setAnimation(Animation anim, boolean initialized) {
@@ -255,9 +256,9 @@ public class AppWindowAnimator {
 
         transformation.clear();
 
-        final int N = mAppToken.windows.size();
+        final int N = mAllAppWinAnimators.size();
         for (int i=0; i<N; i++) {
-            mAppToken.windows.get(i).mWinAnimator.finishExit();
+            mAllAppWinAnimators.get(i).finishExit();
         }
         mAppToken.updateReportedVisibilityLocked();
 
@@ -266,9 +267,9 @@ public class AppWindowAnimator {
 
     boolean showAllWindowsLocked() {
         boolean isAnimating = false;
-        final int NW = mAppToken.allAppWindows.size();
+        final int NW = mAllAppWinAnimators.size();
         for (int i=0; i<NW; i++) {
-            WindowStateAnimator winAnimator = mAppToken.allAppWindows.get(i).mWinAnimator;
+            WindowStateAnimator winAnimator = mAllAppWinAnimators.get(i);
             if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(TAG,
                     "performing show on: " + winAnimator);
             winAnimator.performShowLocked();

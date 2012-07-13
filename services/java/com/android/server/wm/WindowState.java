@@ -317,9 +317,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mIsFloatingLayer = mIsImWindow || mIsWallpaper;
         }
 
-        mWinAnimator = new WindowStateAnimator(this);
-        mWinAnimator.mAlpha = a.alpha;
-
         WindowState appWin = this;
         while (appWin.mAttachedWindow != null) {
             appWin = appWin.mAttachedWindow;
@@ -334,6 +331,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
         mRootToken = appToken;
         mAppToken = appToken.appWindowToken;
+
+        mWinAnimator = new WindowStateAnimator(this);
+        mWinAnimator.mAlpha = a.alpha;
 
         mRequestedWidth = 0;
         mRequestedHeight = 0;

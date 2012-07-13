@@ -104,7 +104,7 @@ class AppWindowToken extends WindowToken {
         appToken = _token;
         mInputApplicationHandle = new InputApplicationHandle(this);
         mAnimator = service.mAnimator;
-        mAppAnimator = new AppWindowAnimator(_service, this);
+        mAppAnimator = new AppWindowAnimator(this);
     }
 
     void sendAppVisibilityToClients() {
