@@ -10128,8 +10128,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @ViewDebug.ExportedProperty(category = "drawing")
     public boolean isOpaque() {
         return (mPrivateFlags & OPAQUE_MASK) == OPAQUE_MASK &&
-                ((mTransformationInfo != null ? mTransformationInfo.mAlpha : 1)
-                        >= 1.0f - ViewConfiguration.ALPHA_THRESHOLD);
+                ((mTransformationInfo != null ? mTransformationInfo.mAlpha : 1.0f) >= 1.0f);
     }
 
     /**
