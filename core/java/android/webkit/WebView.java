@@ -1550,7 +1550,6 @@ public class WebView extends AbsoluteLayout
     @Deprecated
     public void emulateShiftHeld() {
         checkThread();
-        mProvider.emulateShiftHeld();
     }
 
     /**
@@ -1656,7 +1655,6 @@ public class WebView extends AbsoluteLayout
     @Deprecated
     public void debugDump() {
         checkThread();
-        mProvider.debugDump();
     }
 
     /**

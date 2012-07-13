@@ -221,8 +221,6 @@ public interface WebViewProvider {
 
     public WebSettings getSettings();
 
-    public void emulateShiftHeld();
-
     public void setMapTrackballToArrowKeys(boolean setMap);
 
     public void flingScroll(int vx, int vy);
@@ -236,8 +234,6 @@ public interface WebViewProvider {
     public boolean zoomIn();
 
     public boolean zoomOut();
-
-    public void debugDump();
 
     public void dumpViewHierarchyWithProperties(BufferedWriter out, int level);
 
