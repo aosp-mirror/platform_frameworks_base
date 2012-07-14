@@ -630,6 +630,20 @@
         the entire window content and examine all its text except passwords.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_retrieve_window_info">retrieve window info</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_retrieve_window_info">Allows an application to retrieve
+         information about the the windows from the window manager. Malicious apps may
+         retrieve information that is intended for internal system usage.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_filter_events">filter events</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_filter_events">Allows an application to register an input filter
+        which filters the stream of all user events before they are dispatched. Malicious app
+        may control the system UI whtout user intervention.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_shutdown">partial shutdown</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_shutdown">Puts the activity manager into a shutdown

@@ -382,10 +382,6 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     private int mConnectionId = UNDEFINED;
 
-    // TODO: These are a workaround for 6623031. Remove when fixed.
-    private int mActualAndReportedWindowLeftDelta;
-    private int mActualAndReportedWindowTopDelta;
-
     /**
      * Hide constructor from clients.
      */
@@ -432,10 +428,6 @@ public class AccessibilityNodeInfo implements Parcelable {
         final int rootAccessibilityViewId =
             (root != null) ? root.getAccessibilityViewId() : UNDEFINED;
         mSourceNodeId = makeNodeId(rootAccessibilityViewId, virtualDescendantId);
-        if (root != null) {
-            mActualAndReportedWindowLeftDelta = root.getActualAndReportedWindowLeftDelta();
-            mActualAndReportedWindowTopDelta = root.getActualAndReportedWindowTopDelta();
-        }
     }
 
     /**
@@ -833,7 +825,6 @@ public class AccessibilityNodeInfo implements Parcelable {
     public void setBoundsInScreen(Rect bounds) {
         enforceNotSealed();
         mBoundsInScreen.set(bounds.left, bounds.top, bounds.right, bounds.bottom);
-        mBoundsInScreen.offset(mActualAndReportedWindowLeftDelta, mActualAndReportedWindowTopDelta);
     }
 
     /**

@@ -45,7 +45,6 @@ import com.android.server.AttributeCache;
 import com.android.server.EventLogTags;
 import com.android.server.Watchdog;
 import com.android.server.am.BatteryStatsService;
-import com.android.server.input.InputFilter;
 import com.android.server.input.InputManagerService;
 import com.android.server.power.PowerManagerService;
 import com.android.server.power.ShutdownThread;
@@ -107,6 +106,7 @@ import android.view.Choreographer;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.IApplicationToken;
+import android.view.IInputFilter;
 import android.view.IOnKeyguardExitResult;
 import android.view.IRotationWatcher;
 import android.view.IWindow;
@@ -3069,6 +3069,10 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public float getWindowCompatibilityScale(IBinder windowToken) {
+        if (!checkCallingPermission(android.Manifest.permission.RETRIEVE_WINDOW_INFO,
+                "getWindowCompatibilityScale()")) {
+            throw new SecurityException("Requires RETRIEVE_WINDOW_INFO permission.");
+        }
         synchronized (mWindowMap) {
             WindowState windowState = mWindowMap.get(windowToken);
             return (windowState != null) ? windowState.mGlobalScale : 1.0f;
@@ -5190,7 +5194,10 @@ public class WindowManagerService extends IWindowManager.Stub
         ShutdownThread.rebootSafeMode(mContext, true);
     }
 
-    public void setInputFilter(InputFilter filter) {
+    public void setInputFilter(IInputFilter filter) {
+        if (!checkCallingPermission(android.Manifest.permission.FILTER_EVENTS, "setInputFilter()")) {
+            throw new SecurityException("Requires FILTER_EVENTS permission");
+        }
         mInputManager.setInputFilter(filter);
     }
 
@@ -6752,8 +6759,11 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    // TODO: Put this on the IWindowManagerService and guard with a permission.
-    public IBinder getFocusedWindowClientToken() {
+    public IBinder getFocusedWindowToken() {
+        if (!checkCallingPermission(android.Manifest.permission.RETRIEVE_WINDOW_INFO,
+                "getFocusedWindowToken()")) {
+            throw new SecurityException("Requires RETRIEVE_WINDOW_INFO permission.");
+        }
         synchronized (mWindowMap) {
             WindowState windowState = getFocusedWindowLocked();
             if (windowState != null) {
@@ -6763,8 +6773,11 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    // TODO: This is a workaround - remove when 6623031 is fixed.
     public boolean getWindowFrame(IBinder token, Rect outBounds) {
+        if (!checkCallingPermission(android.Manifest.permission.RETRIEVE_WINDOW_INFO,
+                "getWindowFrame()")) {
+            throw new SecurityException("Requires RETRIEVE_WINDOW_INFO permission.");
+        }
         synchronized (mWindowMap) {
             WindowState windowState = mWindowMap.get(token);
             if (windowState != null) {
