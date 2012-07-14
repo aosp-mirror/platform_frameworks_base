@@ -143,8 +143,6 @@ LOCAL_SRC_FILES += \
 	core/java/android/view/accessibility/IAccessibilityManager.aidl \
 	core/java/android/view/accessibility/IAccessibilityManagerClient.aidl \
 	core/java/android/view/IApplicationToken.aidl \
-	core/java/android/view/IInputFilter.aidl \
-	core/java/android/view/IInputFilterHost.aidl \
 	core/java/android/view/IOnKeyguardExitResult.aidl \
 	core/java/android/view/IRotationWatcher.aidl \
 	core/java/android/view/IWindow.aidl \

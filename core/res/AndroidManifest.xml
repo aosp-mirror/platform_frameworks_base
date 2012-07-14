@@ -1223,19 +1223,6 @@
         android:description="@string/permdesc_injectEvents"
         android:protectionLevel="signature" />
 
-    <!-- @hide Allows an application to register an input filter which filters the stream
-         of user events (keys, touch, trackball) before they are dispatched to any window. -->
-    <permission android:name="android.permission.FILTER_EVENTS"
-        android:label="@string/permlab_filter_events"
-        android:description="@string/permdesc_filter_events"
-        android:protectionLevel="signature" />
-
-    <!-- @hide Allows an application to retrieve info for a window from the window manager. -->
-    <permission android:name="android.permission.RETRIEVE_WINDOW_INFO"
-        android:label="@string/permlab_retrieve_window_info"
-        android:description="@string/permdesc_retrieve_window_info"
-        android:protectionLevel="signature" />
-
     <!-- Allows an application to watch and control how activities are
          started globally in the system.  Only for is in debugging
          (usually the monkey command). -->
