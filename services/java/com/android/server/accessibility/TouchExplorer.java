@@ -28,7 +28,6 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.util.Slog;
-import android.view.InputFilter;
 import android.view.MotionEvent;
 import android.view.MotionEvent.PointerCoords;
 import android.view.MotionEvent.PointerProperties;
@@ -38,6 +37,7 @@ import android.view.WindowManagerPolicy;
 import android.view.accessibility.AccessibilityEvent;
 
 import com.android.internal.R;
+import com.android.server.input.InputFilter;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -23,7 +23,6 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Point;
-import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.RemoteException;
@@ -32,11 +31,15 @@ import android.view.Display;
 import android.view.Display_Delegate;
 import android.view.Gravity;
 import android.view.IApplicationToken;
-import android.view.IInputFilter;
 import android.view.IOnKeyguardExitResult;
 import android.view.IRotationWatcher;
 import android.view.IWindowManager;
 import android.view.IWindowSession;
+import android.view.InputChannel;
+import android.view.InputDevice;
+import android.view.InputEvent;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
 
 import java.util.List;
 
@@ -450,29 +453,6 @@ public class BridgeWindowManager implements IWindowManager {
 
     @Override
     public void lockNow() {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public IBinder getFocusedWindowToken() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public boolean getWindowFrame(IBinder token, Rect outBounds) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public float getWindowCompatibilityScale(IBinder windowToken) throws RemoteException {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    @Override
-    public void setInputFilter(IInputFilter filter) throws RemoteException {
         // TODO Auto-generated method stub
     }
 }

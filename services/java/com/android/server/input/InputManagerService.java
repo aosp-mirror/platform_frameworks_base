@@ -42,8 +42,8 @@ import android.content.res.Resources.NotFoundException;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.database.ContentObserver;
-import android.hardware.input.IInputDevicesChangedListener;
 import android.hardware.input.IInputManager;
+import android.hardware.input.IInputDevicesChangedListener;
 import android.hardware.input.InputManager;
 import android.hardware.input.KeyboardLayout;
 import android.os.Binder;
@@ -62,8 +62,6 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Xml;
-import android.view.IInputFilter;
-import android.view.mHost;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputEvent;
@@ -139,7 +137,7 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
 
     // State for the currently installed input filter.
     final Object mInputFilterLock = new Object();
-    IInputFilter mInputFilter; // guarded by mInputFilterLock
+    InputFilter mInputFilter; // guarded by mInputFilterLock
     InputFilterHost mInputFilterHost; // guarded by mInputFilterLock
 
     private static native int nativeInit(InputManagerService service,
@@ -427,9 +425,9 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
      *
      * @param filter The input filter, or null to remove the current filter.
      */
-    public void setInputFilter(IInputFilter filter) {
+    public void setInputFilter(InputFilter filter) {
         synchronized (mInputFilterLock) {
-            final IInputFilter oldFilter = mInputFilter;
+            final InputFilter oldFilter = mInputFilter;
             if (oldFilter == filter) {
                 return; // nothing to do
             }
@@ -438,21 +436,13 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
                 mInputFilter = null;
                 mInputFilterHost.disconnectLocked();
                 mInputFilterHost = null;
-                try {
-                    oldFilter.uninstall();
-                } catch (RemoteException re) {
-                    /* ignore */
-                }
+                oldFilter.uninstall();
             }
 
             if (filter != null) {
                 mInputFilter = filter;
                 mInputFilterHost = new InputFilterHost();
-                try {
-                    filter.install(mInputFilterHost);
-                } catch (RemoteException re) {
-                    /* ignore */
-                }
+                filter.install(mInputFilterHost);
             }
 
             nativeSetInputFilterEnabled(mPtr, filter != null);
@@ -1239,11 +1229,7 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
     final boolean filterInputEvent(InputEvent event, int policyFlags) {
         synchronized (mInputFilterLock) {
             if (mInputFilter != null) {
-                try {
-                    mInputFilter.filterInputEvent(event, policyFlags);
-                } catch (RemoteException e) {
-                    /* ignore */
-                }
+                mInputFilter.filterInputEvent(event, policyFlags);
                 return false;
             }
         }
@@ -1461,7 +1447,7 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
     /**
      * Hosting interface for input filters to call back into the input manager.
      */
-    private final class InputFilterHost extends mHost.Stub {
+    private final class InputFilterHost implements InputFilter.Host {
         private boolean mDisconnected;
 
         public void disconnectLocked() {
