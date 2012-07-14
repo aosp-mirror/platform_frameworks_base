@@ -249,8 +249,9 @@ public:
     PatchCache patchCache;
     TextDropShadowCache dropShadowCache;
     FboCache fboCache;
-    GammaFontRenderer fontRenderer;
     ResourceCache resourceCache;
+
+    GammaFontRenderer* fontRenderer;
 
     // Debug methods
     PFNGLINSERTEVENTMARKEREXTPROC eventMark;
@@ -261,6 +262,7 @@ public:
     PFNGLGETOBJECTLABELEXTPROC getLabel;
 
 private:
+    void initFont();
     void initExtensions();
     void initConstraints();
 

@@ -2277,7 +2277,7 @@ status_t OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count
         y = (int) floorf(y + mSnapshot->transform->getTranslateY() + 0.5f);
     }
 
-    FontRenderer& fontRenderer = mCaches.fontRenderer.getFontRenderer(paint);
+    FontRenderer& fontRenderer = mCaches.fontRenderer->getFontRenderer(paint);
     fontRenderer.setFont(paint, SkTypeface::UniqueID(paint->getTypeface()),
             paint->getTextSize());
 
@@ -2367,7 +2367,7 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     ALOGD("OpenGLRenderer drawText() with FontID=%d", SkTypeface::UniqueID(paint->getTypeface()));
 #endif
 
-    FontRenderer& fontRenderer = mCaches.fontRenderer.getFontRenderer(paint);
+    FontRenderer& fontRenderer = mCaches.fontRenderer->getFontRenderer(paint);
     fontRenderer.setFont(paint, SkTypeface::UniqueID(paint->getTypeface()),
             paint->getTextSize());
 
@@ -2466,7 +2466,7 @@ status_t OpenGLRenderer::drawTextOnPath(const char* text, int bytesCount, int co
         return DrawGlInfo::kStatusDone;
     }
 
-    FontRenderer& fontRenderer = mCaches.fontRenderer.getFontRenderer(paint);
+    FontRenderer& fontRenderer = mCaches.fontRenderer->getFontRenderer(paint);
     fontRenderer.setFont(paint, SkTypeface::UniqueID(paint->getTypeface()),
             paint->getTextSize());
 

@@ -49,6 +49,7 @@ namespace uirenderer {
 
 Caches::Caches(): Singleton<Caches>(), mInitialized(false) {
     init();
+    initFont();
     initExtensions();
     initConstraints();
 
@@ -74,6 +75,7 @@ void Caches::init() {
 
     mTexCoordsArrayEnabled = false;
 
+    glDisable(GL_SCISSOR_TEST);
     scissorEnabled = false;
     mScissorX = mScissorY = mScissorWidth = mScissorHeight = 0;
 
@@ -88,6 +90,10 @@ void Caches::init() {
     currentProgram = NULL;
 
     mInitialized = true;
+}
+
+void Caches::initFont() {
+    fontRenderer = GammaFontRenderer::createRenderer();
 }
 
 void Caches::initExtensions() {
@@ -170,8 +176,8 @@ void Caches::dumpMemoryUsage(String8 &log) {
             arcShapeCache.getSize(), arcShapeCache.getMaxSize());
     log.appendFormat("  TextDropShadowCache  %8d / %8d\n", dropShadowCache.getSize(),
             dropShadowCache.getMaxSize());
-    for (uint32_t i = 0; i < fontRenderer.getFontRendererCount(); i++) {
-        const uint32_t size = fontRenderer.getFontRendererSize(i);
+    for (uint32_t i = 0; i < fontRenderer->getFontRendererCount(); i++) {
+        const uint32_t size = fontRenderer->getFontRendererSize(i);
         log.appendFormat("  FontRenderer %d       %8d / %8d\n", i, size, size);
     }
     log.appendFormat("Other:\n");
@@ -191,8 +197,8 @@ void Caches::dumpMemoryUsage(String8 &log) {
     total += ovalShapeCache.getSize();
     total += rectShapeCache.getSize();
     total += arcShapeCache.getSize();
-    for (uint32_t i = 0; i < fontRenderer.getFontRendererCount(); i++) {
-        total += fontRenderer.getFontRendererSize(i);
+    for (uint32_t i = 0; i < fontRenderer->getFontRendererCount(); i++) {
+        total += fontRenderer->getFontRendererSize(i);
     }
 
     log.appendFormat("Total memory usage:\n");
@@ -245,10 +251,10 @@ void Caches::flush(FlushMode mode) {
             patchCache.clear();
             dropShadowCache.clear();
             gradientCache.clear();
-            fontRenderer.clear();
+            fontRenderer->clear();
             // fall through
         case kFlushMode_Moderate:
-            fontRenderer.flush();
+            fontRenderer->flush();
             textureCache.flush();
             pathCache.clear();
             roundRectShapeCache.clear();

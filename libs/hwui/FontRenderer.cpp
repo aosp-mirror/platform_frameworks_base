@@ -677,10 +677,19 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
     unsigned int stride = glyph.rowBytes();
 
     uint32_t cacheX = 0, bX = 0, cacheY = 0, bY = 0;
-    for (cacheX = startX, bX = 0; cacheX < endX; cacheX++, bX++) {
-        for (cacheY = startY, bY = 0; cacheY < endY; cacheY++, bY++) {
-            uint8_t tempCol = bitmapBuffer[bY * stride + bX];
-            cacheBuffer[cacheY * cacheWidth + cacheX] = mGammaTable[tempCol];
+    if (mGammaTable) {
+        for (cacheX = startX, bX = 0; cacheX < endX; cacheX++, bX++) {
+            for (cacheY = startY, bY = 0; cacheY < endY; cacheY++, bY++) {
+                uint8_t tempCol = bitmapBuffer[bY * stride + bX];
+                cacheBuffer[cacheY * cacheWidth + cacheX] = mGammaTable[tempCol];
+            }
+        }
+    } else {
+        for (cacheX = startX, bX = 0; cacheX < endX; cacheX++, bX++) {
+            for (cacheY = startY, bY = 0; cacheY < endY; cacheY++, bY++) {
+                uint8_t tempCol = bitmapBuffer[bY * stride + bX];
+                cacheBuffer[cacheY * cacheWidth + cacheX] = tempCol;
+            }
         }
     }
 

@@ -24,20 +24,30 @@ namespace android {
 namespace uirenderer {
 
 ///////////////////////////////////////////////////////////////////////////////
-// Constructors/destructor
+// Base class GammaFontRenderer
 ///////////////////////////////////////////////////////////////////////////////
 
-GammaFontRenderer::GammaFontRenderer() {
-    INIT_LOGD("Creating gamma font renderer");
+GammaFontRenderer* GammaFontRenderer::createRenderer() {
+    // Choose the best renderer
+    char property[PROPERTY_VALUE_MAX];
+    if (property_get(PROPERTY_TEXT_GAMMA_SHADER, property, DEFAULT_TEXT_GAMMA_SHADER) > 0) {
+        if (!strcasecmp(property, "true")) {
+            return new ShaderGammaFontRenderer();
+        }
+    }
 
+    return new LookupGammaFontRenderer();
+}
+
+GammaFontRenderer::GammaFontRenderer() {
     // Get the renderer properties
     char property[PROPERTY_VALUE_MAX];
 
     // Get the gamma
-    float gamma = DEFAULT_TEXT_GAMMA;
+    mGamma = DEFAULT_TEXT_GAMMA;
     if (property_get(PROPERTY_TEXT_GAMMA, property, NULL) > 0) {
         INIT_LOGD("  Setting text gamma to %s", property);
-        gamma = atof(property);
+        mGamma = atof(property);
     } else {
         INIT_LOGD("  Using default text gamma of %.2f", DEFAULT_TEXT_GAMMA);
     }
@@ -61,10 +71,29 @@ GammaFontRenderer::GammaFontRenderer() {
         INIT_LOGD("  Using default white black gamma threshold of %d",
                 DEFAULT_TEXT_WHITE_GAMMA_THRESHOLD);
     }
+}
+
+GammaFontRenderer::~GammaFontRenderer() {
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Shader-based renderer
+///////////////////////////////////////////////////////////////////////////////
+
+ShaderGammaFontRenderer::ShaderGammaFontRenderer(): GammaFontRenderer() {
+    INIT_LOGD("Creating shader gamma font renderer");
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Lookup-based renderer
+///////////////////////////////////////////////////////////////////////////////
+
+LookupGammaFontRenderer::LookupGammaFontRenderer(): GammaFontRenderer() {
+    INIT_LOGD("Creating lookup gamma font renderer");
 
     // Compute the gamma tables
-    const float blackGamma = gamma;
-    const float whiteGamma = 1.0f / gamma;
+    const float blackGamma = mGamma;
+    const float whiteGamma = 1.0f / mGamma;
 
     for (uint32_t i = 0; i <= 255; i++) {
         mGammaTable[i] = i;
@@ -81,20 +110,20 @@ GammaFontRenderer::GammaFontRenderer() {
     memset(mRenderersUsageCount, 0, sizeof(uint32_t) * kGammaCount);
 }
 
-GammaFontRenderer::~GammaFontRenderer() {
+LookupGammaFontRenderer::~LookupGammaFontRenderer() {
     for (int i = 0; i < kGammaCount; i++) {
         delete mRenderers[i];
     }
 }
 
-void GammaFontRenderer::clear() {
+void LookupGammaFontRenderer::clear() {
     for (int i = 0; i < kGammaCount; i++) {
         delete mRenderers[i];
         mRenderers[i] = NULL;
     }
 }
 
-void GammaFontRenderer::flush() {
+void LookupGammaFontRenderer::flush() {
     int count = 0;
     int min = -1;
     uint32_t minCount = UINT_MAX;
@@ -122,7 +151,7 @@ void GammaFontRenderer::flush() {
     }
 }
 
-FontRenderer* GammaFontRenderer::getRenderer(Gamma gamma) {
+FontRenderer* LookupGammaFontRenderer::getRenderer(Gamma gamma) {
     FontRenderer* renderer = mRenderers[gamma];
     if (!renderer) {
         renderer = new FontRenderer();
@@ -133,7 +162,7 @@ FontRenderer* GammaFontRenderer::getRenderer(Gamma gamma) {
     return renderer;
 }
 
-FontRenderer& GammaFontRenderer::getFontRenderer(const SkPaint* paint) {
+FontRenderer& LookupGammaFontRenderer::getFontRenderer(const SkPaint* paint) {
     if (paint->getShader() == NULL) {
         uint32_t c = paint->getColor();
         const int r = (c >> 16) & 0xFF;

@@ -24,16 +24,72 @@
 namespace android {
 namespace uirenderer {
 
-struct GammaFontRenderer {
-    GammaFontRenderer();
-    ~GammaFontRenderer();
+class GammaFontRenderer {
+public:
+    virtual ~GammaFontRenderer();
 
-    enum Gamma {
-        kGammaDefault = 0,
-        kGammaBlack = 1,
-        kGammaWhite = 2,
-        kGammaCount = 3
-    };
+    virtual void clear() = 0;
+    virtual void flush() = 0;
+
+    virtual FontRenderer& getFontRenderer(const SkPaint* paint) = 0;
+
+    virtual uint32_t getFontRendererCount() const = 0;
+
+    virtual uint32_t getFontRendererSize(uint32_t fontRenderer) const = 0;
+
+    static GammaFontRenderer* createRenderer();
+
+protected:
+    GammaFontRenderer();
+
+    int mBlackThreshold;
+    int mWhiteThreshold;
+
+    float mGamma;
+};
+
+class ShaderGammaFontRenderer: public GammaFontRenderer {
+public:
+    ~ShaderGammaFontRenderer() {
+        delete mRenderer;
+    }
+
+    void clear() {
+        delete mRenderer;
+    }
+
+    void flush() {
+        if (mRenderer) {
+            mRenderer->flushLargeCaches();
+        }
+    }
+
+    FontRenderer& getFontRenderer(const SkPaint* paint) {
+        if (!mRenderer) {
+            mRenderer = new FontRenderer;
+        }
+        return *mRenderer;
+    }
+
+    uint32_t getFontRendererCount() const {
+        return 1;
+    }
+
+    uint32_t getFontRendererSize(uint32_t fontRenderer) const {
+        return mRenderer->getCacheSize();
+    }
+
+private:
+    ShaderGammaFontRenderer();
+
+    FontRenderer* mRenderer;
+
+    friend class GammaFontRenderer;
+};
+
+class LookupGammaFontRenderer: public GammaFontRenderer {
+public:
+    ~LookupGammaFontRenderer();
 
     void clear();
     void flush();
@@ -54,15 +110,23 @@ struct GammaFontRenderer {
     }
 
 private:
+    LookupGammaFontRenderer();
+
+    enum Gamma {
+        kGammaDefault = 0,
+        kGammaBlack = 1,
+        kGammaWhite = 2,
+        kGammaCount = 3
+    };
+
     FontRenderer* getRenderer(Gamma gamma);
 
     uint32_t mRenderersUsageCount[kGammaCount];
     FontRenderer* mRenderers[kGammaCount];
 
-    int mBlackThreshold;
-    int mWhiteThreshold;
-
     uint8_t mGammaTable[256 * kGammaCount];
+
+    friend class GammaFontRenderer;
 };
 
 }; // namespace uirenderer

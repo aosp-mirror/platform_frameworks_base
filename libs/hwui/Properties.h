@@ -73,6 +73,10 @@ enum DebugLevel {
 #define PROPERTY_TEXT_CACHE_WIDTH "ro.hwui.text_cache_width"
 #define PROPERTY_TEXT_CACHE_HEIGHT "ro.hwui.text_cache_height"
 
+// Indicates whether gamma correction should be applied in the shaders
+// or in lookup tables. Accepted values: true, false
+#define PROPERTY_TEXT_GAMMA_SHADER "ro.hwui.text_gamma_shader"
+
 // Gamma (>= 1.0, <= 10.0)
 #define PROPERTY_TEXT_GAMMA "ro.text_gamma"
 #define PROPERTY_TEXT_BLACK_GAMMA_THRESHOLD "ro.text_gamma.black_threshold"
@@ -91,6 +95,8 @@ enum DebugLevel {
 #define DEFAULT_FBO_CACHE_SIZE 16
 
 #define DEFAULT_TEXTURE_CACHE_FLUSH_RATE 0.6f
+
+#define DEFAULT_TEXT_GAMMA_SHADER "false"
 
 #define DEFAULT_TEXT_GAMMA 1.4f
 #define DEFAULT_TEXT_BLACK_GAMMA_THRESHOLD 64
