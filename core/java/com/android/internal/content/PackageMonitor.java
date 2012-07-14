@@ -111,16 +111,22 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
     
     public void onBeginPackageChanges() {
     }
-    
+
+    /**
+     * Called when a package is really added (and not replaced).
+     */
     public void onPackageAdded(String packageName, int uid) {
     }
-    
+
+    /**
+     * Called when a package is really removed (and not replaced).
+     */
     public void onPackageRemoved(String packageName, int uid) {
     }
-    
+
     public void onPackageUpdateStarted(String packageName, int uid) {
     }
-    
+
     public void onPackageUpdateFinished(String packageName, int uid) {
     }
     
@@ -144,10 +150,16 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
     public static final int PACKAGE_UPDATING = 1;
     public static final int PACKAGE_TEMPORARY_CHANGE = 2;
     public static final int PACKAGE_PERMANENT_CHANGE = 3;
-    
+
+    /**
+     * Called when a package disappears for any reason.
+     */
     public void onPackageDisappeared(String packageName, int reason) {
     }
-    
+
+    /**
+     * Called when a package appears for any reason.
+     */
     public void onPackageAppeared(String packageName, int reason) {
     }
     
