@@ -24,51 +24,51 @@ Tools you are using, refer to the "Installed Packages" listing in the Android SD
 <p>For a summary of all known issues in SDK Tools, see <a
 href="http://tools.android.com/knownissues">http://tools.android.com/knownissues</a>.</p>
 
-<script type="text/javascript">
-function toggleDiv(link) {
-  var toggleable = $(link).parent();
-  if (toggleable.hasClass("closed")) {
-    //$(".toggleme", toggleable).slideDown("fast");
-    toggleable.removeClass("closed");
-    toggleable.addClass("open");
-    $(".toggle-img", toggleable).attr("title", "hide").attr("src", (toRoot + "assets/images/triangle-opened.png"));
-  } else {
-    //$(".toggleme", toggleable).slideUp("fast");
-    toggleable.removeClass("open");
-    toggleable.addClass("closed");
-    $(".toggle-img", toggleable).attr("title", "show").attr("src", (toRoot + "assets/images/triangle-closed.png"));
-  }
-  return false;
-}
-</script>
-<style>
-.toggleable {
-padding: 5px 0 0;
-}
-.toggleme {
-  padding: 10px 0 0 20px;
-}
-.toggleable a {
-  text-decoration:none;
-}
-.toggleme a {
-  text-decoration:underline;
-}
-.toggleable.closed .toggleme {
-  display:none;
-}
-#jd-content .toggle-img {
-  margin:0 5px 3px 0;
-}
-</style>
 
-<div class="toggleable opened">
-  <a href="#" onclick="return toggleDiv(this)">
-    <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px"
-    width="9px" />
-    SDK Tools, Revision 20</a> <em>(June 2012)</em>
+<div class="toggle-content opened">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>SDK Tools, Revision 20.0.1</a> <em>(July 2012)</em>
+  </p>
 
-  <div class="toggleme">
+  <div class="toggle-content-toggleme">
+
+    <dl>
+    <dt>Dependencies:</dt>
+    <dd>
+      <ul>
+        <li>Android SDK Platform-tools revision 12 or later.</li>
+        <li>If you are developing in Eclipse with ADT, note that the SDK Tools r20.0.1 is designed
+        for use with ADT 20.0.1 and later. If you haven't already, update your
+        <a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT Plugin</a> to 20.0.1.</li>
+        <li>If you are developing outside Eclipse, you must have
+          <a href="http://ant.apache.org/">Apache Ant</a> 1.8 or later.</li>
+    </ul>
+    </dd>
+    <dt>Bug fixes:</dt>
+    <dd>
+      <ul>
+        <li>Fixed wrong check on build state that forced repetitive Java code recompilation.</li>
+        <li>Fixed problems with running more than one emulator and running multiple emulators
+with GPU acceleration.</li>
+        <li>Improved resize algorithm for better rendering on scaled emulator windows.</li>
+        <li>Fixed a bug in the {@code lint} check for unprotected broadcast receivers to ignore
+unprotected receivers for default Android actions.</li>
+        <li>Fixed build issue for projects using Renderscript.</li>
+        <li>Fixed memory leak in the emulator.</li>
+      </ul>
+    </dd>
+    </dl>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>SDK Tools, Revision 20</a> <em>(June 2012)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
   <dl>
     <dt>Dependencies:</dt>
     <dd>
@@ -137,13 +137,13 @@ and tested like test applications, including code coverage information.</li>
   </div>
 </div>
 
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px"
-    width="9px" />
-    SDK Tools, Revision 19</a> <em>(April 2012)</em>
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>SDK Tools, Revision 19</a> <em>(April 2012)</em>
+  </p>
 
-  <div class="toggleme">
+  <div class="toggle-content-toggleme">
     <p class="note"><strong>Note:</strong> This update of SDK Tools is only available through
 the <a href="{@docRoot}sdk/exploring.html">Android SDK Manager</a>. Use this tool to
 download and install this update.</p>
@@ -171,13 +171,13 @@ acceleration.</li>
   </div>
 </div>
 
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px"
-    width="9px" />
-    SDK Tools, Revision 18</a> <em>(April 2012)</em>
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>SDK Tools, Revision 18</a> <em>(April 2012)</em>
+  </p>
 
-  <div class="toggleme">
+  <div class="toggle-content-toggleme">
     <p class="caution"><strong>Important:</strong> To download the new Android
     4.0 system components from the Android SDK Manager, you must first update the
     SDK tools to revision 14 or later and restart the Android SDK Manager. If you do not,
@@ -213,13 +213,13 @@ in some cases.</li>
   </div>
 </div>
 
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px"
-    width="9px" />
-    SDK Tools, Revision 17</a> <em>(March 2012)</em>
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>SDK Tools, Revision 17</a> <em>(March 2012)</em>
+  </p>
 
-  <div class="toggleme">
+  <div class="toggle-content-toggleme">
     <p class="caution"><strong>Important:</strong> To download the new Android
     4.0 system components from the Android SDK Manager, you must first update the
     SDK tools to revision 14 or later and restart the Android SDK Manager. If you do not,
@@ -317,13 +317,13 @@ ignore attribute. (<a
   </div>
 </div>
 
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px"
-    width="9px" />
-    SDK Tools, Revision 16</a> <em>(December 2011)</em>
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>SDK Tools, Revision 16</a> <em>(December 2011)</em>
+  </p>
 
-  <div class="toggleme">
+  <div class="toggle-content-toggleme">
     <p class="caution"><strong>Important:</strong> To download the new Android
     4.0 system components from the Android SDK Manager, you must first update the
     SDK tools to revision 14 or later and restart the Android SDK Manager. If you do not,
@@ -367,13 +367,13 @@ ignore attribute. (<a
 </div>
 </div>
 
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px"
-    width="9px" />
-    SDK Tools, Revision 15</a> <em>(October 2011)</em>
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>SDK Tools, Revision 15</a> <em>(October 2011)</em>
+  </p>
 
-  <div class="toggleme">
+  <div class="toggle-content-toggleme">
     <p class="caution"><strong>Important:</strong> To download the new Android
     4.0 system components from the Android SDK Manager, you must first update the
     SDK tools to revision 14 or later and restart the Android SDK Manager. If you do not,
@@ -415,13 +415,13 @@ ignore attribute. (<a
 </div>
 </div>
 
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px"
-    width="9px" />
-    SDK Tools, Revision 14</a> <em>(October 2011)</em>
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>SDK Tools, Revision 14</a> <em>(October 2011)</em>
+  </p>
 
-  <div class="toggleme">
+  <div class="toggle-content-toggleme">
     <p class="note"><strong>Important:</strong> To download the new Android
     4.0 system components from the Android SDK Manager, you must first update the
     SDK tools to revision 14 and restart the Android SDK Manager. If you do not,
@@ -470,12 +470,13 @@ site</a>.</p>
 </div>
 </div>
 
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)">
-        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px"
-        width="9px" />
-SDK Tools, Revision 13</a> <em>(September 2011)</em>
-  <div class="toggleme">
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>SDK Tools, Revision 13</a> <em>(September 2011)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
   <dl>
 <dt>Dependencies:</dt>
 <dd>
@@ -500,11 +501,13 @@ Ant</a> 1.8 or later.</p>
 </div>
 
 
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)">
-        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px" />
-SDK Tools, Revision 12</a> <em>(July 2011)</em>
-  <div class="toggleme">
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>SDK Tools, Revision 12</a> <em>(July 2011)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
   <dl>
 <dt>Dependencies:</dt>
 <dd>
@@ -526,11 +529,13 @@ Ant</a> 1.8 or later.</p>
 </div>
 </div>
 
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)">
-        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px" />
-SDK Tools, Revision 11</a> <em>(May 2011)</em>
-  <div class="toggleme">
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>SDK Tools, Revision 11</a> <em>(May 2011)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
   <dl>
 <dt>Dependencies:</dt>
 <dd>
@@ -552,12 +557,13 @@ Ant</a> 1.8 or later.</p>
 </div>
 
 
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)">
-        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px"
-width="9px" />
-SDK Tools, Revision 10</a> <em>(February 2011)</em>
-  <div class="toggleme">
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>SDK Tools, Revision 10</a> <em>(February 2011)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
   <dl>
 <dt>Dependencies:</dt>
 <dd>
@@ -582,11 +588,13 @@ Ant</a> 1.8 or later.</p>
 
 
 
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)">
-        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px" />
-SDK Tools, Revision 9</a> <em>(January 2011)</em>
-  <div class="toggleme">
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>SDK Tools, Revision 9</a> <em>(January 2011)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
   <dl>
 <dt>Dependencies:</dt>
 <dd>
@@ -639,12 +647,13 @@ resolve the performance issues and it will improve in future releases.</li>
 </div>
 </div>
 
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)">
-        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px" />
-SDK Tools, Revision 8</a> <em>(December 2010)</em>
-  <div class="toggleme">
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>SDK Tools, Revision 8</a> <em>(December 2010)</em>
+  </p>
 
+  <div class="toggle-content-toggleme">
 <dl>
 <dt>Dependencies:</dt>
 <dd>
@@ -706,12 +715,13 @@ documentation. </li>
  </div>
 </div>
 
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)">
-        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px" />
-SDK Tools, Revision 7</a> <em>(September 2010)</em>
-  <div class="toggleme">
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>SDK Tools, Revision 7</a> <em>(September 2010)</em>
+  </p>
 
+  <div class="toggle-content-toggleme">
 <dl>
 <dt>Dependencies:</dt>
 <dd>
@@ -739,12 +749,13 @@ decimal point.</li>
  </div>
 </div>
 
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)">
-        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px" />
-SDK Tools, Revision 6</a> <em>(May 2010)</em>
-  <div class="toggleme">
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>SDK Tools, Revision 6</a> <em>(May 2010)</em>
+  </p>
 
+  <div class="toggle-content-toggleme">
 <dl>
 <dt>Dependencies:</dt>
 <dd>
@@ -769,12 +780,13 @@ provides the equivalent library project support.</p>
  </div>
 </div>
 
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)">
-        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px" />
-SDK Tools, Revision 5</a> <em>(March 2010)</em>
-  <div class="toggleme">
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>SDK Tools, Revision 5</a> <em>(March 2010)</em>
+  </p>
 
+  <div class="toggle-content-toggleme">
 <dl>
 <dt>Dependencies:</dt>
 <dd><ul>
@@ -817,12 +829,13 @@ officially supported. </li>
  </div>
 </div>
 
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)">
-        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px" />
-SDK Tools, Revision 4</a> <em>(December 2009)</em>
-  <div class="toggleme">
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>SDK Tools, Revision 4</a> <em>(December 2009)</em>
+  </p>
 
+  <div class="toggle-content-toggleme">
 <dl>
 <dt>Dependencies:</dt>
 <dd><p>SDK Tools r4 is compatible with ADT 0.9.5 and later, but not
@@ -866,12 +879,13 @@ skin name specified.</li>
  </div>
 </div>
 
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)">
-        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px" />
-SDK Tools, Revision 3</a> <em>(October 2009)</em>
-  <div class="toggleme">
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>SDK Tools, Revision 3</a> <em>(October 2009)</em>
+  </p>
 
+  <div class="toggle-content-toggleme">
 <dl>
 <dt>Dependencies:</dt>
 <dd><p>SDK Tools r3 is compatible with ADT 0.9.4 and later, but not
