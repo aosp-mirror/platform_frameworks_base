@@ -243,6 +243,14 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"앱이 시스템의 내부 상태를 검색할 수 있도록 허용합니다. 이 경우 악성 앱이 이 기능을 이용하여 일반적으로 필요하지 않은 다양한 개인정보와 보안정보를 검색할 수 있습니다."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"화면 콘텐츠 검색"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"앱이 활성 창의 콘텐츠를 검색할 수 있도록 허용합니다. 이 경우 악성 앱이 전체 창의 콘텐츠를 검색하여 비밀번호를 제외한 모든 텍스트를 살펴볼 수 있습니다."</string>
+    <!-- no translation found for permlab_retrieve_window_info (8532295199112519378) -->
+    <skip />
+    <!-- no translation found for permdesc_retrieve_window_info (4998836370424186849) -->
+    <skip />
+    <!-- no translation found for permlab_filter_events (8675535648807427389) -->
+    <skip />
+    <!-- no translation found for permdesc_filter_events (8006236315888347680) -->
+    <skip />
     <string name="permlab_shutdown" msgid="7185747824038909016">"부분 종료"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"작업 관리자를 종료 상태로 설정합니다. 전체 종료를 수행하지는 않습니다."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"애플리케이션 전환 방지"</string>

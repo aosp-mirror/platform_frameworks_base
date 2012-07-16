@@ -243,6 +243,14 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"Permite aplicaţiei să preia starea internă a sistemului. Aplicaţiile rău intenţionate pot să preia o gamă variată de informaţii private şi securizate, de care în mod normal nu ar avea nevoie niciodată."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"preia conţinutul de pe ecran"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Permite aplicaţiei să preia conţinutul ferestrei active. Aplicaţiile rău intenţionate pot să preia întregul conţinut al ferestrei şi să examineze integral textul acesteia, cu excepţia parolelor."</string>
+    <!-- no translation found for permlab_retrieve_window_info (8532295199112519378) -->
+    <skip />
+    <!-- no translation found for permdesc_retrieve_window_info (4998836370424186849) -->
+    <skip />
+    <!-- no translation found for permlab_filter_events (8675535648807427389) -->
+    <skip />
+    <!-- no translation found for permdesc_filter_events (8006236315888347680) -->
+    <skip />
     <string name="permlab_shutdown" msgid="7185747824038909016">"închidere parţială"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Plasează Managerul de activităţi într-o stare de închidere. Nu efectuează o închidere completă."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"împiedicare comutare între aplicaţii"</string>

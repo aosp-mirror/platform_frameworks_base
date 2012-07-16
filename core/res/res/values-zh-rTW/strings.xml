@@ -243,6 +243,14 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"允許應用程式擷取系統內部狀態。請注意，惡意應用程式可能利用此功能異常擷取各類私人資訊和安全性資訊。"</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"擷取螢幕內容"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"允許應用程式擷取使用中的視窗內容。請注意，惡意應用程式可能利用此功能擷取完整視窗內容，並檢視密碼之外的所有文字。"</string>
+    <!-- no translation found for permlab_retrieve_window_info (8532295199112519378) -->
+    <skip />
+    <!-- no translation found for permdesc_retrieve_window_info (4998836370424186849) -->
+    <skip />
+    <!-- no translation found for permlab_filter_events (8675535648807427389) -->
+    <skip />
+    <!-- no translation found for permdesc_filter_events (8006236315888347680) -->
+    <skip />
     <string name="permlab_shutdown" msgid="7185747824038909016">"部分關機"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"讓活動管理員進入關機狀態，而不執行完整的關機程序。"</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"防止切換應用程式"</string>

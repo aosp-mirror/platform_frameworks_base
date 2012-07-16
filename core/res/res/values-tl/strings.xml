@@ -243,6 +243,14 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"Pinapayagan ang app na mabawi ang panloob na katayuan ng system. Maaaring bawiin ng nakakahamak na apps ang iba\'t ibang pribado at secure na impormasyon na hindi kailanman normal na kinakailangan ng mga ito."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"kunin ang nilalaman ng screen"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Pinapayagan ang app na bawiin ang nilalaman ng aktibong window. Maaaring bawiin ng nakakahamak na apps ang kabuuang nilalaman ng window at suriin ang lahat ng teksto nito maliban sa mga password."</string>
+    <!-- no translation found for permlab_retrieve_window_info (8532295199112519378) -->
+    <skip />
+    <!-- no translation found for permdesc_retrieve_window_info (4998836370424186849) -->
+    <skip />
+    <!-- no translation found for permlab_filter_events (8675535648807427389) -->
+    <skip />
+    <!-- no translation found for permdesc_filter_events (8006236315888347680) -->
+    <skip />
     <string name="permlab_shutdown" msgid="7185747824038909016">"bahagyang pag-shutdown"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Inilalagay ang tagapamahala ng aktibidad sa katayuan ng pag-shutdown. Hindi nagsasagawa ng kumpletong pag-shutdown."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"pigilan ang mga paglipat ng app"</string>

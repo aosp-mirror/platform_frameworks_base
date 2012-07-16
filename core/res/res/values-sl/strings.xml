@@ -243,6 +243,14 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"Programu omogoča prejemanje notranjega stanja sistema. Zlonamerni programi lahko na ta način dobijo različne zasebne in varnostne podatke, ki jih običajno ne potrebujejo."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"prenos vsebine zaslona"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Programu omogoča dostop do vsebine aktivnega okna. Zlonamerni programi lahko dobijo vso vsebino okna in pregledajo njeno besedilo razen gesel."</string>
+    <!-- no translation found for permlab_retrieve_window_info (8532295199112519378) -->
+    <skip />
+    <!-- no translation found for permdesc_retrieve_window_info (4998836370424186849) -->
+    <skip />
+    <!-- no translation found for permlab_filter_events (8675535648807427389) -->
+    <skip />
+    <!-- no translation found for permdesc_filter_events (8006236315888347680) -->
+    <skip />
     <string name="permlab_shutdown" msgid="7185747824038909016">"delna zaustavitev"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Upravitelja dejavnosti preklopi v stanje za zaustavitev. Ne izvede celotne zaustavitve."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"preprečevanje preklopa programov"</string>

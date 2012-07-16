@@ -243,6 +243,14 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"Приложение сможет получать данные о внутреннем состоянии системы. Вредоносные программы смогут получать личную и защищенную информацию, к которой у них не должно быть доступа."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"получать доступ к содержанию экрана"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Приложение сможет получать контент активного окна. Вредоносные программы смогут перехватывать такой контент и анализировать любой текст, кроме паролей."</string>
+    <!-- no translation found for permlab_retrieve_window_info (8532295199112519378) -->
+    <skip />
+    <!-- no translation found for permdesc_retrieve_window_info (4998836370424186849) -->
+    <skip />
+    <!-- no translation found for permlab_filter_events (8675535648807427389) -->
+    <skip />
+    <!-- no translation found for permdesc_filter_events (8006236315888347680) -->
+    <skip />
     <string name="permlab_shutdown" msgid="7185747824038909016">"частичное завершение работы"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Завершает работу диспетчера активности. Не выполняет полное завершение работы."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"запретить переключение приложений"</string>

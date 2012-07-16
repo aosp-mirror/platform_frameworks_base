@@ -243,6 +243,14 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"Laat die program toe om die interne status van die stelsel op te haal. Kwaadwillige programme kan \'n verskeidenheid privaat en beveiligde inligting ophaal wat hulle gewoonlik nooit nodig het nie."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"haal skerminhoud op"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Laat die program toe om die inhoud van die aktiewe venster op te haal. Kwaadwillige programme kan die hele venster se inhoud ophaal, en al die teks ondersoek, behalwe wagwoorde."</string>
+    <!-- no translation found for permlab_retrieve_window_info (8532295199112519378) -->
+    <skip />
+    <!-- no translation found for permdesc_retrieve_window_info (4998836370424186849) -->
+    <skip />
+    <!-- no translation found for permlab_filter_events (8675535648807427389) -->
+    <skip />
+    <!-- no translation found for permdesc_filter_events (8006236315888347680) -->
+    <skip />
     <string name="permlab_shutdown" msgid="7185747824038909016">"gedeeltelike afskakeling"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Plaas die aktiwiteitbestuurder in \'n afsluitingstatus. Doen nie \'n volledige afsluiting nie."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"verhoed program-oorskakelings"</string>

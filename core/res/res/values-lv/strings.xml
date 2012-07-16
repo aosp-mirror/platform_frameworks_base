@@ -243,6 +243,14 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"Ļauj lietotnei izgūt sistēmas iekšējo statusu. Ļaunprātīgas lietotnes var izgūt dažādu privātu un drošu informāciju, kas parasti tām nav nepieciešama."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"Ekrāna satura iegūšana"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Ļauj lietotnei izgūt aktīva loga saturu. Ļaunprātīgas lietotnes var izgūt visu loga saturu un pārbaudīt visu tā tekstu, izņemot paroles."</string>
+    <!-- no translation found for permlab_retrieve_window_info (8532295199112519378) -->
+    <skip />
+    <!-- no translation found for permdesc_retrieve_window_info (4998836370424186849) -->
+    <skip />
+    <!-- no translation found for permlab_filter_events (8675535648807427389) -->
+    <skip />
+    <!-- no translation found for permdesc_filter_events (8006236315888347680) -->
+    <skip />
     <string name="permlab_shutdown" msgid="7185747824038909016">"daļēja izslēgšana"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Liek darbību pārvaldniekam pāriet izslēgšanas stāvoklī. Neveic pilnīgu izslēgšanu."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"novērst lietojumprogrammu pārslēgšanu"</string>
