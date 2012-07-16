@@ -19,18 +19,13 @@ package com.android.server;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.ContentQueryMap;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.Signature;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.location.Address;
@@ -46,7 +41,6 @@ import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -58,14 +52,15 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.WorkSource;
 import android.provider.Settings;
+import android.provider.Settings.NameValueTable;
 import android.util.Log;
 import android.util.Slog;
 import android.util.PrintWriterPrinter;
 
 import com.android.internal.content.PackageMonitor;
-import com.android.internal.location.GpsNetInitiatedHandler;
 
 import com.android.server.location.GeocoderProxy;
+import com.android.server.location.GeofenceManager;
 import com.android.server.location.GpsLocationProvider;
 import com.android.server.location.LocationProviderInterface;
 import com.android.server.location.LocationProviderProxy;
@@ -94,9 +89,6 @@ import java.util.Set;
 public class LocationManagerService extends ILocationManager.Stub implements Runnable {
     private static final String TAG = "LocationManagerService";
     private static final boolean LOCAL_LOGV = false;
-
-    // The last time a location was written, by provider name.
-    private HashMap<String,Long> mLastWriteTime = new HashMap<String,Long>();
 
     private static final String ACCESS_FINE_LOCATION =
         android.Manifest.permission.ACCESS_FINE_LOCATION;
@@ -147,7 +139,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     private final static String WAKELOCK_KEY = "LocationManagerService";
     private PowerManager.WakeLock mWakeLock = null;
     private int mPendingBroadcasts;
-    
+
     /**
      * List of all receivers.
      */
@@ -179,13 +171,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
      */
     private final WorkSource mTmpWorkSource = new WorkSource();
 
-    // Proximity listeners
-    private Receiver mProximityReceiver = null;
-    private ILocationListener mProximityListener = null;
-    private HashMap<PendingIntent,ProximityAlert> mProximityAlerts =
-        new HashMap<PendingIntent,ProximityAlert>();
-    private HashSet<ProximityAlert> mProximitiesEntered =
-        new HashSet<ProximityAlert>();
+    GeofenceManager mGeofenceManager;
 
     // Last known location for each provider
     private HashMap<String,Location> mLastKnownLocation =
@@ -266,13 +252,6 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             throw new IllegalStateException("Request for non-existent listener");
         }
 
-        public PendingIntent getPendingIntent() {
-            if (mPendingIntent != null) {
-                return mPendingIntent;
-            }
-            throw new IllegalStateException("Request for non-existent intent");
-        }
-
         public boolean callStatusChangedLocked(String provider, int status, Bundle extras) {
             if (mListener != null) {
                 try {
@@ -280,11 +259,9 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                         // synchronize to ensure incrementPendingBroadcastsLocked()
                         // is called before decrementPendingBroadcasts()
                         mListener.onStatusChanged(provider, status, extras);
-                        if (mListener != mProximityListener) {
-                            // call this after broadcasting so we do not increment
-                            // if we throw an exeption.
-                            incrementPendingBroadcastsLocked();
-                        }
+                        // call this after broadcasting so we do not increment
+                        // if we throw an exeption.
+                        incrementPendingBroadcastsLocked();
                     }
                 } catch (RemoteException e) {
                     return false;
@@ -317,11 +294,9 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                         // synchronize to ensure incrementPendingBroadcastsLocked()
                         // is called before decrementPendingBroadcasts()
                         mListener.onLocationChanged(location);
-                        if (mListener != mProximityListener) {
-                            // call this after broadcasting so we do not increment
-                            // if we throw an exeption.
-                            incrementPendingBroadcastsLocked();
-                        }
+                        // call this after broadcasting so we do not increment
+                        // if we throw an exeption.
+                        incrementPendingBroadcastsLocked();
                     }
                 } catch (RemoteException e) {
                     return false;
@@ -357,11 +332,9 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                         } else {
                             mListener.onProviderDisabled(provider);
                         }
-                        if (mListener != mProximityListener) {
-                            // call this after broadcasting so we do not increment
-                            // if we throw an exeption.
-                            incrementPendingBroadcastsLocked();
-                        }
+                        // call this after broadcasting so we do not increment
+                        // if we throw an exeption.
+                        incrementPendingBroadcastsLocked();
                     }
                 } catch (RemoteException e) {
                     return false;
@@ -402,6 +375,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             }
         }
 
+        @Override
         public void onSendFinished(PendingIntent pendingIntent, Intent intent,
                 int resultCode, String resultData, Bundle resultExtras) {
             synchronized (this) {
@@ -424,6 +398,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         }
     }
 
+    @Override
     public void locationCallbackFinished(ILocationListener listener) {
         //Do not use getReceiver here as that will add the ILocationListener to
         //the receiver list if it is not found.  If it is not found then the
@@ -442,6 +417,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     }
 
     private final class SettingsObserver implements Observer {
+        @Override
         public void update(Observable o, Object arg) {
             synchronized (mLock) {
                 updateProvidersLocked();
@@ -588,7 +564,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     }
 
     void systemReady() {
-        // we defer starting up the service until the system is ready 
+        // we defer starting up the service until the system is ready
         Thread thread = new Thread(null, this, "LocationManagerService");
         thread.start();
     }
@@ -616,20 +592,22 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         // listen for settings changes
         ContentResolver resolver = mContext.getContentResolver();
         Cursor settingsCursor = resolver.query(Settings.Secure.CONTENT_URI, null,
-                "(" + Settings.System.NAME + "=?)",
+                "(" + NameValueTable.NAME + "=?)",
                 new String[]{Settings.Secure.LOCATION_PROVIDERS_ALLOWED},
                 null);
-        mSettings = new ContentQueryMap(settingsCursor, Settings.System.NAME, true, mLocationHandler);
+        mSettings = new ContentQueryMap(settingsCursor, NameValueTable.NAME, true, mLocationHandler);
         SettingsObserver settingsObserver = new SettingsObserver();
         mSettings.addObserver(settingsObserver);
     }
 
+    @Override
     public void run()
     {
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
         Looper.prepare();
         mLocationHandler = new LocationWorkerHandler();
         initialize();
+        mGeofenceManager = new GeofenceManager(mContext);
         Looper.loop();
     }
 
@@ -690,6 +668,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         return true;
     }
 
+    @Override
     public List<String> getAllProviders() {
         try {
             synchronized (mLock) {
@@ -715,6 +694,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         return out;
     }
 
+    @Override
     public List<String> getProviders(Criteria criteria, boolean enabledOnly) {
         try {
             synchronized (mLock) {
@@ -782,6 +762,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     }
 
     private class LpPowerComparator implements Comparator<LocationProviderInterface> {
+        @Override
         public int compare(LocationProviderInterface l1, LocationProviderInterface l2) {
             // Smaller is better
             return (l1.getPowerRequirement() - l2.getPowerRequirement());
@@ -793,6 +774,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     }
 
     private class LpAccuracyComparator implements Comparator<LocationProviderInterface> {
+        @Override
         public int compare(LocationProviderInterface l1, LocationProviderInterface l2) {
             // Smaller is better
             return (l1.getAccuracy() - l2.getAccuracy());
@@ -815,6 +797,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                 (p.supportsSpeed() ? SPEED_SCORE : 0);
         }
 
+        @Override
         public int compare(LocationProviderInterface l1, LocationProviderInterface l2) {
             return (score(l2) - score(l1)); // Bigger is better
          }
@@ -896,6 +879,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
      * @param enabledOnly if true then only a provider that is currently enabled is returned
      * @return name of the provider that best matches the requirements
      */
+    @Override
     public String getBestProvider(Criteria criteria, boolean enabledOnly) {
         List<String> goodProviders = getProviders(criteria, enabledOnly);
         if (!goodProviders.isEmpty()) {
@@ -951,6 +935,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         return null;
     }
 
+    @Override
     public boolean providerMeetsCriteria(String provider, Criteria criteria) {
         LocationProviderInterface p = mProvidersByName.get(provider);
         if (p == null) {
@@ -988,7 +973,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         }
 
         ArrayList<Receiver> deadReceivers = null;
-        
+
         ArrayList<UpdateRecord> records = mRecordsByProvider.get(provider);
         if (records != null) {
             final int N = records.size();
@@ -1010,7 +995,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                 removeUpdatesLocked(deadReceivers.get(i));
             }
         }
-        
+
         if (enabled) {
             p.enable();
             if (listeners > 0) {
@@ -1148,14 +1133,10 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                 }
            }
         }
-        for (ProximityAlert alert : mProximityAlerts.values()) {
-            if (alert.mUid == uid) {
-                return true;
-            }
-        }
         return false;
     }
 
+    @Override
     public void requestLocationUpdates(String provider, Criteria criteria,
         long minTime, float minDistance, boolean singleShot, ILocationListener listener) {
         if (criteria != null) {
@@ -1181,6 +1162,20 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         }
     }
 
+    void validatePackageName(int uid, String packageName) {
+        if (packageName == null) {
+            throw new SecurityException("packageName cannot be null");
+        }
+        String[] packages = mPackageManager.getPackagesForUid(uid);
+        if (packages == null) {
+            throw new SecurityException("invalid UID " + uid);
+        }
+        for (String pkg : packages) {
+            if (packageName.equals(pkg)) return;
+        }
+        throw new SecurityException("invalid package name");
+    }
+
     void validatePendingIntent(PendingIntent intent) {
         if (intent.isTargetedToPackage()) {
             return;
@@ -1193,6 +1188,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         //        + intent);
     }
 
+    @Override
     public void requestLocationUpdatesPI(String provider, Criteria criteria,
             long minTime, float minDistance, boolean singleShot, PendingIntent intent) {
         validatePendingIntent(intent);
@@ -1270,6 +1266,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         }
     }
 
+    @Override
     public void removeUpdates(ILocationListener listener) {
         try {
             synchronized (mLock) {
@@ -1284,6 +1281,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         }
     }
 
+    @Override
     public void removeUpdatesPI(PendingIntent intent) {
         try {
             synchronized (mLock) {
@@ -1370,6 +1368,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         }
     }
 
+    @Override
     public boolean addGpsStatusListener(IGpsStatusListener listener) {
         if (mGpsStatusProvider == null) {
             return false;
@@ -1388,6 +1387,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         return true;
     }
 
+    @Override
     public void removeGpsStatusListener(IGpsStatusListener listener) {
         synchronized (mLock) {
             try {
@@ -1398,6 +1398,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         }
     }
 
+    @Override
     public boolean sendExtraCommand(String provider, String command, Bundle extras) {
         if (provider == null) {
             // throw NullPointerException to remain compatible with previous implementation
@@ -1417,11 +1418,12 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             if (p == null) {
                 return false;
             }
-    
+
             return p.sendExtraCommand(command, extras);
         }
     }
 
+    @Override
     public boolean sendNiResponse(int notifId, int userResponse)
     {
         if (Binder.getCallingUid() != Process.myUid()) {
@@ -1438,223 +1440,11 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         }
     }
 
-    class ProximityAlert {
-        final int  mUid;
-        final double mLatitude;
-        final double mLongitude;
-        final float mRadius;
-        final long mExpiration;
-        final PendingIntent mIntent;
-        final Location mLocation;
-
-        public ProximityAlert(int uid, double latitude, double longitude,
-            float radius, long expiration, PendingIntent intent) {
-            mUid = uid;
-            mLatitude = latitude;
-            mLongitude = longitude;
-            mRadius = radius;
-            mExpiration = expiration;
-            mIntent = intent;
-
-            mLocation = new Location("");
-            mLocation.setLatitude(latitude);
-            mLocation.setLongitude(longitude);
-        }
-
-        long getExpiration() {
-            return mExpiration;
-        }
-
-        PendingIntent getIntent() {
-            return mIntent;
-        }
-
-        boolean isInProximity(double latitude, double longitude, float accuracy) {
-            Location loc = new Location("");
-            loc.setLatitude(latitude);
-            loc.setLongitude(longitude);
-
-            double radius = loc.distanceTo(mLocation);
-            return radius <= Math.max(mRadius,accuracy);
-        }
-        
-        @Override
-        public String toString() {
-            return "ProximityAlert{"
-                    + Integer.toHexString(System.identityHashCode(this))
-                    + " uid " + mUid + mIntent + "}";
-        }
-        
-        void dump(PrintWriter pw, String prefix) {
-            pw.println(prefix + this);
-            pw.println(prefix + "mLatitude=" + mLatitude + " mLongitude=" + mLongitude);
-            pw.println(prefix + "mRadius=" + mRadius + " mExpiration=" + mExpiration);
-            pw.println(prefix + "mIntent=" + mIntent);
-            pw.println(prefix + "mLocation:");
-            mLocation.dump(new PrintWriterPrinter(pw), prefix + "  ");
-        }
-    }
-
-    // Listener for receiving locations to trigger proximity alerts
-    class ProximityListener extends ILocationListener.Stub implements PendingIntent.OnFinished {
-
-        boolean isGpsAvailable = false;
-
-        // Note: this is called with the lock held.
-        public void onLocationChanged(Location loc) {
-
-            // If Gps is available, then ignore updates from NetworkLocationProvider
-            if (loc.getProvider().equals(LocationManager.GPS_PROVIDER)) {
-                isGpsAvailable = true;
-            }
-            if (isGpsAvailable && loc.getProvider().equals(LocationManager.NETWORK_PROVIDER)) {
-                return;
-            }
-
-            // Process proximity alerts
-            long now = System.currentTimeMillis();
-            double latitude = loc.getLatitude();
-            double longitude = loc.getLongitude();
-            float accuracy = loc.getAccuracy();
-            ArrayList<PendingIntent> intentsToRemove = null;
-
-            for (ProximityAlert alert : mProximityAlerts.values()) {
-                PendingIntent intent = alert.getIntent();
-                long expiration = alert.getExpiration();
-
-                if ((expiration == -1) || (now <= expiration)) {
-                    boolean entered = mProximitiesEntered.contains(alert);
-                    boolean inProximity =
-                        alert.isInProximity(latitude, longitude, accuracy);
-                    if (!entered && inProximity) {
-                        if (LOCAL_LOGV) {
-                            Slog.v(TAG, "Entered alert");
-                        }
-                        mProximitiesEntered.add(alert);
-                        Intent enteredIntent = new Intent();
-                        enteredIntent.putExtra(LocationManager.KEY_PROXIMITY_ENTERING, true);
-                        try {
-                            synchronized (this) {
-                                // synchronize to ensure incrementPendingBroadcasts()
-                                // is called before decrementPendingBroadcasts()
-                                intent.send(mContext, 0, enteredIntent, this, mLocationHandler,
-                                        ACCESS_FINE_LOCATION);
-                                // call this after broadcasting so we do not increment
-                                // if we throw an exeption.
-                                incrementPendingBroadcasts();
-                            }
-                        } catch (PendingIntent.CanceledException e) {
-                            if (LOCAL_LOGV) {
-                                Slog.v(TAG, "Canceled proximity alert: " + alert, e);
-                            }
-                            if (intentsToRemove == null) {
-                                intentsToRemove = new ArrayList<PendingIntent>();
-                            }
-                            intentsToRemove.add(intent);
-                        }
-                    } else if (entered && !inProximity) {
-                        if (LOCAL_LOGV) {
-                            Slog.v(TAG, "Exited alert");
-                        }
-                        mProximitiesEntered.remove(alert);
-                        Intent exitedIntent = new Intent();
-                        exitedIntent.putExtra(LocationManager.KEY_PROXIMITY_ENTERING, false);
-                        try {
-                            synchronized (this) {
-                                // synchronize to ensure incrementPendingBroadcasts()
-                                // is called before decrementPendingBroadcasts()
-                                intent.send(mContext, 0, exitedIntent, this, mLocationHandler,
-                                        ACCESS_FINE_LOCATION);
-                                // call this after broadcasting so we do not increment
-                                // if we throw an exeption.
-                                incrementPendingBroadcasts();
-                            }
-                        } catch (PendingIntent.CanceledException e) {
-                            if (LOCAL_LOGV) {
-                                Slog.v(TAG, "Canceled proximity alert: " + alert, e);
-                            }
-                            if (intentsToRemove == null) {
-                                intentsToRemove = new ArrayList<PendingIntent>();
-                            }
-                            intentsToRemove.add(intent);
-                        }
-                    }
-                } else {
-                    // Mark alert for expiration
-                    if (LOCAL_LOGV) {
-                        Slog.v(TAG, "Expiring proximity alert: " + alert);
-                    }
-                    if (intentsToRemove == null) {
-                        intentsToRemove = new ArrayList<PendingIntent>();
-                    }
-                    intentsToRemove.add(alert.getIntent());
-                }
-            }
-
-            // Remove expired alerts
-            if (intentsToRemove != null) {
-                for (PendingIntent i : intentsToRemove) {
-                    ProximityAlert alert = mProximityAlerts.get(i);
-                    mProximitiesEntered.remove(alert);
-                    removeProximityAlertLocked(i);
-                }
-            }
-        }
-
-        // Note: this is called with the lock held.
-        public void onProviderDisabled(String provider) {
-            if (provider.equals(LocationManager.GPS_PROVIDER)) {
-                isGpsAvailable = false;
-            }
-        }
-
-        // Note: this is called with the lock held.
-        public void onProviderEnabled(String provider) {
-            // ignore
-        }
-
-        // Note: this is called with the lock held.
-        public void onStatusChanged(String provider, int status, Bundle extras) {
-            if ((provider.equals(LocationManager.GPS_PROVIDER)) &&
-                (status != LocationProvider.AVAILABLE)) {
-                isGpsAvailable = false;
-            }
-        }
-
-        public void onSendFinished(PendingIntent pendingIntent, Intent intent,
-                int resultCode, String resultData, Bundle resultExtras) {
-            // synchronize to ensure incrementPendingBroadcasts()
-            // is called before decrementPendingBroadcasts()
-            synchronized (this) {
-                decrementPendingBroadcasts();
-            }
-        }
-    }
-
+    @Override
     public void addProximityAlert(double latitude, double longitude,
-        float radius, long expiration, PendingIntent intent) {
+            float radius, long expiration, PendingIntent intent, String packageName) {
         validatePendingIntent(intent);
-        try {
-            synchronized (mLock) {
-                addProximityAlertLocked(latitude, longitude, radius, expiration, intent);
-            }
-        } catch (SecurityException se) {
-            throw se;
-        } catch (IllegalArgumentException iae) {
-            throw iae;
-        } catch (Exception e) {
-            Slog.e(TAG, "addProximityAlert got exception:", e);
-        }
-    }
-
-    private void addProximityAlertLocked(double latitude, double longitude,
-        float radius, long expiration, PendingIntent intent) {
-        if (LOCAL_LOGV) {
-            Slog.v(TAG, "addProximityAlert: latitude = " + latitude +
-                    ", longitude = " + longitude +
-                    ", expiration = " + expiration +
-                    ", intent = " + intent);
-        }
+        validatePackageName(Binder.getCallingUid(), packageName);
 
         // Require ability to access all providers for now
         if (!isAllowedProviderSafe(LocationManager.GPS_PROVIDER) ||
@@ -1662,59 +1452,28 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             throw new SecurityException("Requires ACCESS_FINE_LOCATION permission");
         }
 
-        if (expiration != -1) {
-            expiration += System.currentTimeMillis();
-        }
-        ProximityAlert alert = new ProximityAlert(Binder.getCallingUid(),
-                latitude, longitude, radius, expiration, intent);
-        mProximityAlerts.put(intent, alert);
+        if (LOCAL_LOGV) Slog.v(TAG, "addProximityAlert: lat=" + latitude + ", long=" + longitude +
+                ", radius=" + radius + ", exp=" + expiration + ", intent = " + intent);
 
-        if (mProximityReceiver == null) {
-            mProximityListener = new ProximityListener();
-            mProximityReceiver = new Receiver(mProximityListener);
-
-            for (int i = mProviders.size() - 1; i >= 0; i--) {
-                LocationProviderInterface provider = mProviders.get(i);
-                requestLocationUpdatesLocked(provider.getName(), 1000L, 1.0f,
-                        false, mProximityReceiver);
-            }
-        }
+        mGeofenceManager.addFence(latitude, longitude, radius, expiration, intent,
+                Binder.getCallingUid(), packageName);
     }
 
+    @Override
     public void removeProximityAlert(PendingIntent intent) {
-        try {
-            synchronized (mLock) {
-               removeProximityAlertLocked(intent);
-            }
-        } catch (SecurityException se) {
-            throw se;
-        } catch (IllegalArgumentException iae) {
-            throw iae;
-        } catch (Exception e) {
-            Slog.e(TAG, "removeProximityAlert got exception:", e);
-        }
+        if (intent == null) throw new NullPointerException("pending intent is null");
+
+        if (LOCAL_LOGV) Slog.v(TAG, "removeProximityAlert: intent = " + intent);
+
+        mGeofenceManager.removeFence(intent);
     }
-
-    private void removeProximityAlertLocked(PendingIntent intent) {
-        if (LOCAL_LOGV) {
-            Slog.v(TAG, "removeProximityAlert: intent = " + intent);
-        }
-
-        mProximityAlerts.remove(intent);
-        if (mProximityAlerts.size() == 0) {
-            if (mProximityReceiver != null) {
-                removeUpdatesLocked(mProximityReceiver);
-            }
-            mProximityReceiver = null;
-            mProximityListener = null;
-        }
-     }
 
     /**
      * @return null if the provider does not exist
      * @throws SecurityException if the provider is not allowed to be
      * accessed by the caller
      */
+    @Override
     public Bundle getProviderInfo(String provider) {
         try {
             synchronized (mLock) {
@@ -1752,6 +1511,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         return b;
     }
 
+    @Override
     public boolean isProviderEnabled(String provider) {
         try {
             synchronized (mLock) {
@@ -1765,6 +1525,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         }
     }
 
+    @Override
     public void reportLocation(Location location, boolean passive) {
         if (mContext.checkCallingOrSelfPermission(INSTALL_LOCATION_PROVIDER)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -1787,6 +1548,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         return isAllowedBySettingsLocked(provider);
     }
 
+    @Override
     public Location getLastKnownLocation(String provider) {
         if (LOCAL_LOGV) {
             Slog.v(TAG, "getLastKnownLocation: " + provider);
@@ -1869,7 +1631,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         int status = p.getStatus(extras);
 
         ArrayList<Receiver> deadReceivers = null;
-        
+
         // Broadcast location or status to all listeners
         final int N = records.size();
         for (int i=0; i<N; i++) {
@@ -1912,7 +1674,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                 }
             }
         }
-        
+
         if (deadReceivers != null) {
             for (int i=deadReceivers.size()-1; i>=0; i--) {
                 removeUpdatesLocked(deadReceivers.get(i));
@@ -2024,31 +1786,6 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                                     }
                                 }
                             }
-                            ArrayList<ProximityAlert> removedAlerts = null;
-                            for (ProximityAlert i : mProximityAlerts.values()) {
-                                if (i.mUid == uid) {
-                                    if (queryRestart) {
-                                        setResultCode(Activity.RESULT_OK);
-                                        return;
-                                    }
-                                    if (removedAlerts == null) {
-                                        removedAlerts = new ArrayList<ProximityAlert>();
-                                    }
-                                    if (!removedAlerts.contains(i)) {
-                                        removedAlerts.add(i);
-                                    }
-                                }
-                            }
-                            if (removedRecs != null) {
-                                for (int i=removedRecs.size()-1; i>=0; i--) {
-                                    removeUpdatesLocked(removedRecs.get(i));
-                                }
-                            }
-                            if (removedAlerts != null) {
-                                for (int i=removedAlerts.size()-1; i>=0; i--) {
-                                    removeProximityAlertLocked(removedAlerts.get(i).mIntent);
-                                }
-                            }
                         }
                     }
                 }
@@ -2088,6 +1825,10 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         public void onPackageAdded(String packageName, int uid) {
             // Called by main thread; divert work to LocationWorker.
             Message.obtain(mLocationHandler, MESSAGE_PACKAGE_UPDATED, packageName).sendToTarget();
+        }
+        @Override
+        public void onPackageDisappeared(String packageName, int uid) {
+            mGeofenceManager.removeFence(packageName);
         }
     };
 
@@ -2130,10 +1871,12 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
     // Geocoder
 
+    @Override
     public boolean geocoderIsPresent() {
         return mGeocodeProvider != null;
     }
 
+    @Override
     public String getFromLocation(double latitude, double longitude, int maxResults,
             GeocoderParams params, List<Address> addrs) {
         if (mGeocodeProvider != null) {
@@ -2144,6 +1887,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     }
 
 
+    @Override
     public String getFromLocationName(String locationName,
             double lowerLeftLatitude, double lowerLeftLongitude,
             double upperRightLatitude, double upperRightLongitude, int maxResults,
@@ -2169,9 +1913,10 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         if (mContext.checkCallingPermission(ACCESS_MOCK_LOCATION) !=
             PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires ACCESS_MOCK_LOCATION permission");
-        }            
+        }
     }
 
+    @Override
     public void addTestProvider(String name, boolean requiresNetwork, boolean requiresSatellite,
         boolean requiresCell, boolean hasMonetaryCost, boolean supportsAltitude,
         boolean supportsSpeed, boolean supportsBearing, int powerRequirement, int accuracy) {
@@ -2207,6 +1952,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         Binder.restoreCallingIdentity(identity);
     }
 
+    @Override
     public void removeTestProvider(String provider) {
         checkMockPermissionsSafe();
         synchronized (mLock) {
@@ -2231,6 +1977,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         }
     }
 
+    @Override
     public void setTestProviderLocation(String provider, Location loc) {
         checkMockPermissionsSafe();
         synchronized (mLock) {
@@ -2245,6 +1992,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         }
     }
 
+    @Override
     public void clearTestProviderLocation(String provider) {
         checkMockPermissionsSafe();
         synchronized (mLock) {
@@ -2256,6 +2004,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         }
     }
 
+    @Override
     public void setTestProviderEnabled(String provider, boolean enabled) {
         checkMockPermissionsSafe();
         synchronized (mLock) {
@@ -2278,6 +2027,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         }
     }
 
+    @Override
     public void clearTestProviderEnabled(String provider) {
         checkMockPermissionsSafe();
         synchronized (mLock) {
@@ -2293,6 +2043,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         }
     }
 
+    @Override
     public void setTestProviderStatus(String provider, int status, Bundle extras, long updateTime) {
         checkMockPermissionsSafe();
         synchronized (mLock) {
@@ -2304,6 +2055,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         }
     }
 
+    @Override
     public void clearTestProviderStatus(String provider) {
         checkMockPermissionsSafe();
         synchronized (mLock) {
@@ -2320,7 +2072,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             Slog.d(TAG, log);
         }
     }
-    
+
+    @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -2329,7 +2082,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                     + ", uid=" + Binder.getCallingUid());
             return;
         }
-        
+
         synchronized (mLock) {
             pw.println("Current Location Manager state:");
             pw.println("  sProvidersLoaded=" + sProvidersLoaded);
@@ -2361,36 +2114,20 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                 pw.println("    " + i.getKey() + ":");
                 i.getValue().dump(new PrintWriterPrinter(pw), "      ");
             }
-            if (mProximityAlerts.size() > 0) {
-                pw.println("  Proximity Alerts:");
-                for (Map.Entry<PendingIntent, ProximityAlert> i
-                        : mProximityAlerts.entrySet()) {
-                    pw.println("    " + i.getKey() + ":");
-                    i.getValue().dump(pw, "      ");
-                }
-            }
-            if (mProximitiesEntered.size() > 0) {
-                pw.println("  Proximities Entered:");
-                for (ProximityAlert i : mProximitiesEntered) {
-                    pw.println("    " + i + ":");
-                    i.dump(pw, "      ");
-                }
-            }
-            pw.println("  mProximityReceiver=" + mProximityReceiver);
-            pw.println("  mProximityListener=" + mProximityListener);
+            mGeofenceManager.dump(pw);
             if (mEnabledProviders.size() > 0) {
                 pw.println("  Enabled Providers:");
                 for (String i : mEnabledProviders) {
                     pw.println("    " + i);
                 }
-                
+
             }
             if (mDisabledProviders.size() > 0) {
                 pw.println("  Disabled Providers:");
                 for (String i : mDisabledProviders) {
                     pw.println("    " + i);
                 }
-                
+
             }
             if (mMockProviders.size() > 0) {
                 pw.println("  Mock Providers:");

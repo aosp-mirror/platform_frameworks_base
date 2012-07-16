@@ -54,7 +54,7 @@ interface ILocationManager
     boolean sendExtraCommand(String provider, String command, inout Bundle extras);
 
     void addProximityAlert(double latitude, double longitude, float distance,
-        long expiration, in PendingIntent intent);
+        long expiration, in PendingIntent intent, in String packageName);
     void removeProximityAlert(in PendingIntent intent);
 
     Bundle getProviderInfo(String provider);

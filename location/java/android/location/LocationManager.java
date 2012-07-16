@@ -17,6 +17,7 @@
 package android.location;
 
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Looper;
@@ -52,7 +53,9 @@ import java.util.List;
  */
 public class LocationManager {
     private static final String TAG = "LocationManager";
-    private ILocationManager mService;
+
+    private final Context mContext;
+    private final ILocationManager mService;
     private final HashMap<GpsStatus.Listener, GpsStatusListenerTransport> mGpsStatusListeners =
             new HashMap<GpsStatus.Listener, GpsStatusListenerTransport>();
     private final HashMap<GpsStatus.NmeaListener, GpsStatusListenerTransport> mNmeaListeners =
@@ -193,6 +196,7 @@ public class LocationManager {
             }
         }
 
+        @Override
         public void onLocationChanged(Location location) {
             Message msg = Message.obtain();
             msg.what = TYPE_LOCATION_CHANGED;
@@ -200,6 +204,7 @@ public class LocationManager {
             mListenerHandler.sendMessage(msg);
         }
 
+        @Override
         public void onStatusChanged(String provider, int status, Bundle extras) {
             Message msg = Message.obtain();
             msg.what = TYPE_STATUS_CHANGED;
@@ -213,6 +218,7 @@ public class LocationManager {
             mListenerHandler.sendMessage(msg);
         }
 
+        @Override
         public void onProviderEnabled(String provider) {
             Message msg = Message.obtain();
             msg.what = TYPE_PROVIDER_ENABLED;
@@ -220,6 +226,7 @@ public class LocationManager {
             mListenerHandler.sendMessage(msg);
         }
 
+        @Override
         public void onProviderDisabled(String provider) {
             Message msg = Message.obtain();
             msg.what = TYPE_PROVIDER_DISABLED;
@@ -260,8 +267,9 @@ public class LocationManager {
      * right way to create an instance of this class is using the
      * factory Context.getSystemService.
      */
-    public LocationManager(ILocationManager service) {
+    public LocationManager(Context context, ILocationManager service) {
         mService = service;
+        mContext = context;
     }
 
     private LocationProvider createProvider(String name, Bundle info) {
@@ -1086,8 +1094,8 @@ public class LocationManager {
                 ", intent = " + intent);
         }
         try {
-            mService.addProximityAlert(latitude, longitude, radius,
-                                       expiration, intent);
+            mService.addProximityAlert(latitude, longitude, radius, expiration, intent,
+                    mContext.getPackageName());
         } catch (RemoteException ex) {
             Log.e(TAG, "addProximityAlert: RemoteException", ex);
         }
@@ -1361,6 +1369,7 @@ public class LocationManager {
             mNmeaBuffer = new ArrayList<Nmea>();
         }
 
+        @Override
         public void onGpsStarted() {
             if (mListener != null) {
                 Message msg = Message.obtain();
@@ -1369,6 +1378,7 @@ public class LocationManager {
             }
         }
 
+        @Override
         public void onGpsStopped() {
             if (mListener != null) {
                 Message msg = Message.obtain();
@@ -1377,6 +1387,7 @@ public class LocationManager {
             }
         }
 
+        @Override
         public void onFirstFix(int ttff) {
             if (mListener != null) {
                 mGpsStatus.setTimeToFirstFix(ttff);
@@ -1386,6 +1397,7 @@ public class LocationManager {
             }
         }
 
+        @Override
         public void onSvStatusChanged(int svCount, int[] prns, float[] snrs,
                 float[] elevations, float[] azimuths, int ephemerisMask,
                 int almanacMask, int usedInFixMask) {
@@ -1401,6 +1413,7 @@ public class LocationManager {
             }
         }
 
+        @Override
         public void onNmeaReceived(long timestamp, String nmea) {
             if (mNmeaListener != null) {
                 synchronized (mNmeaBuffer) {

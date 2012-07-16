@@ -361,10 +361,10 @@ class ContextImpl extends Context {
                     return PolicyManager.makeNewLayoutInflater(ctx.getOuterContext());
                 }});
 
-        registerService(LOCATION_SERVICE, new StaticServiceFetcher() {
-                public Object createStaticService() {
+        registerService(LOCATION_SERVICE, new ServiceFetcher() {
+                public Object createService(ContextImpl ctx) {
                     IBinder b = ServiceManager.getService(LOCATION_SERVICE);
-                    return new LocationManager(ILocationManager.Stub.asInterface(b));
+                    return new LocationManager(ctx, ILocationManager.Stub.asInterface(b));
                 }});
 
         registerService(NETWORK_POLICY_SERVICE, new ServiceFetcher() {
