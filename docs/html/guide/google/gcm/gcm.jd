@@ -844,12 +844,14 @@ has the format of <code>registration_id=<em>canonical ID</em></code>. The second
 <dt id="missing_reg"><strong>Missing Registration ID</strong></dt>
 <dd>Check that the request contains a registration ID (either in the <code>registration_id</code> parameter in a plain text message, or in the <code>registration_ids</code> field in JSON). 
 <br/>Happens when error code is <code>MissingRegistration</code>.</dd>
+
 <dt id="invalid_reg"><strong>Invalid Registration ID</strong></dt>
 <dd>Check the formatting of the registration ID that you pass to the server. Make sure it matches the registration ID the phone receives in the <code>com.google.android.c2dm.intent.REGISTRATION</code> intent and that you're not truncating it or adding additional characters. 
 <br/>Happens when error code is <code>InvalidRegistration</code>.</dd>
 <dt id="mismatched_sender"><strong>Mismatched Sender</strong></dt>
 <dd>A registration ID is tied to a certain group of senders. When an application registers for GCM usage, it must specify which senders are allowed to send messages. Make sure you're using one of those when trying to send messages to the device. If you switch to a different sender, the existing registration IDs won't work. 
 Happens when error code is <code>MismatchSenderId</code>.</dd>
+
 <dt id="unreg_device"><strong>Unregistered Device</strong></dt>
 <dd>An existing registration ID may cease to be valid in a number of scenarios, including:
 <ul>
@@ -860,25 +862,64 @@ Happens when error code is <code>MismatchSenderId</code>.</dd>
 For all these cases, you should remove this registration ID from the 3rd-party server and stop using it to send 
 messages. 
 <br/>Happens when error code is <code>NotRegistered</code>.</dd>
+
   <dt id="big_msg"><strong>Message Too Big</strong></dt>
   <dd>The total size of the payload data that is included in a message can't exceed 4096 bytes. Note that this includes both the size of the keys as well as the values. 
 <br/>Happens when error code is <code>MessageTooBig</code>.</dd>
-  <dt id="auth_error"><strong>Authentication Error</strong></dt>
-  <dd>The sender account that you're trying to use to send a message couldn't be authenticated. Possible causes are: request could not be parsed as JSON, or it contained invalid fields (for instance, passing a string where a number was expected).  The exact failure reason is described in the response and the problem should be addressed before the request can be retried. Possible causes are: authorization header missing or with invalid syntax, invalid project ID sent as key, key valid but with GCM service disabled, and so on. Check that the Sender Auth Token you're sending inside the <code>Authorization</code> header is the correct API key associated with your project. 
-<br/>Happens when the HTTP status code is 401.
-  </dd>
-  <dt id="internal_error"><strong>Internal Server Error/Timeout</strong></dt>
-  <dd>The server encountered an error while trying to process the request or couldn't finish in time. You can retry the same request, but you MUST obey the following requirements:  
-<ul>
-  <li>Honor the <code>Retry-After</code> header if it's included in the response from the GCM server.</li>
-  <li>Implement exponential back-off in your retry mechanism. This means an exponentially increasing delay after each failed retry (e.g. if you waited one second before the first retry, wait at least two second before the next one, then 4 seconds and so on). If you're sending multiple messages, delay each one independently by an additional random amount to avoid issuing a new request for all messages at the same time.</li>
-</ul>
-Senders that cause problems risk being blacklisted.
-<br/>Happens when the HTTP status code is 500 or 503, or when the <code>error</code> field of a JSON object in the <code>results</code> array is <code>InternalServerError</code> or <code>Unavailable</code>.</dd>
 
 <dt id="ttl_error"><strong>Invalid Time To Live</strong></dt>
   <dd>The value for the Time to Live field must be an integer representing a duration in seconds between 0 and 2,419,200 (4 weeks). Happens when error code is <code>InvalidTtl</code>.
 </dd>
+
+  <dt id="auth_error"><strong>Authentication Error</strong></dt>
+  <dd>The sender account that you're trying to use to send a message couldn't be authenticated. Possible causes are: <ul>
+<li>Authorization header missing or with invalid syntax.</li>
+<li>Invalid project ID sent as key.</li>
+<li>Key valid but with GCM service disabled.</li>
+<li>Request originated from a server not whitelisted in the Server Key IPs.</li>
+
+</ul>
+Check that the token you're sending inside the <code>Authorization</code> header is the correct API key associated with your project.<br/>
+
+Happens when the HTTP status code is 401.
+
+  <dt id="timeout"><strong>Timeout</strong></dt>
+
+<dd>The server couldn't process the request in time. You should retry the
+same request, but you MUST obey the following requirements:
+
+<ul>
+
+<li>Honor the <code>Retry-After</code> header if it's included in the response from the GCM server.</li>
+        
+        
+<li>Implement exponential back-off in your retry mechanism. This means an
+exponentially increasing delay after each failed retry (e.g. if you waited one
+second before the first retry, wait at least two second before the next one,
+then 4 seconds and so on). If you're sending multiple messages, delay each one
+independently by an additional random amount to avoid issuing a new request for
+all messages at the same time.</li>
+    
+
+Senders that cause problems risk being blacklisted. 
+<br />
+Happens when the HTTP status code is 503, or when the <code>error</code> field of a JSON object in the results array is <code>Unavailable</code>.
+</dd>
+
+<dt id="internal_error"><strong>Internal Server Error</strong></dt>
+
+<dd>
+The server encountered an error while trying to process the request. You
+could retry the same request (obeying the requirements listed in the <strong>Timeout</strong>
+section), but if the error persists, please report the problem in the <a href="https://groups.google.com/forum/?fromgroups#!forum/android-gcm">android-gcm group</a>.
+<br /> 
+Senders that cause problems risk being blacklisted. 
+<br />
+Happens when the HTTP status code is 500, or when the <code>error</code> field of a JSON
+object in the results array is <code>InternalServerError</code>.
+</dd>
+
+
 </dl>
 <h4>Example responses</h4>
 <p>This section shows a few examples of responses indicating messages that were processed successfully. See <a href="#example-requests">Example requests</a> for the requests these responses are based on.</p>

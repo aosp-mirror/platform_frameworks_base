@@ -27,6 +27,7 @@ page.title=GCM Advanced Topics
   <ol>
     <li><a href="#s2s">Send-to-sync messages</a></li>
     <li><a href="#payload">Messages with payload</a></li>
+<li><a href="#which">Which should I use?</a></li>
     </ol>
 </li>
 <li><a href="#ttl">Setting an Expiration Date for a Message</a> </li>
@@ -185,10 +186,22 @@ registerReceiver(mRetryReceiver, filter);
 <p>Note that it might take a while for the registration ID be completely removed from GCM. Thus it is possible that messages sent during step 7 above gets a valid message ID as response, even though the message will not be delivered to the device. Eventually, the registration ID will be removed and the server will get a <code>NotRegistered</code> error, without any further action being required from the 3rd-party server (this scenario happens frequently while an application is being developed and tested).</p>
 
 <h2 id="collapsible">Send-to-Sync  vs. Messages with Payload</h2>
-<p>Every message sent in GCM, regardless of its other characteristics, is either a &quot;send-to-sync&quot; (collapsible) message or a &quot;message with payload&quot; (non-collapsible message).</p>
+
+<p>Every message sent in GCM has the following characteristics:</p>
+<ul>
+  <li>It has a payload limit of 4096 bytes.</li>
+  <li>By default, it is stored by GCM for 4 weeks.</li>
+</ul>
+
+<p>But despite these similarities, messages can behave very differently depending on their particular settings. One major distinction between messages is whether they are collapsed (where each new message replaces the preceding message) or not collapsed (where each individual message is delivered). Every message sent in GCM is either a &quot;send-to-sync&quot; (collapsible) message or a &quot;message with payload&quot; (non-collapsible message). These concepts are described in more detail in the following sections.</p>
+
 <h3 id="s2s"><strong>Send-to-sync messages</strong></h3>
-<p>A send-to-sync (collapsible) message is typically a &quot;tickle&quot; that tells a mobile application to sync data from the server. For example, suppose you have an email application. When a user receives new email on the server, the server pings the mobile application with a &quot;New mail&quot; message. This tells the application to sync to the server to pick up the new email. The server might send this message multiple times as new mail continues to accumulate, before the application has had a chance to sync. But if the user has received 25 new emails, there's no need to preserve every &quot;New mail&quot; message. One  is sufficient. This is a case where you would use the GCM <code>collapse_key</code> parameter. A <em>collapse key</em> is an arbitrary string that is used to collapse a group of like messages when the device is offline, so that only the last message gets sent to the client. For example, &quot;New mail,&quot; &quot;Updates available,&quot; and so on</p>
-<p>GCM allows a maximum of 4 different collapse keys to be used by the GCM server at any given time. In other words, the GCM server can simultaneously store 4 different send-to-sync messages, each with a different collapse key.</p>
+
+<p>A send-to-sync (collapsible) message is often a &quot;tickle&quot; that tells a mobile application to sync data from the server. For example, suppose you have an email application. When a user receives new email on the server, the server pings the mobile application with a &quot;New mail&quot; message. This tells the application to sync to the server to pick up the new email. The server might send this message multiple times as new mail continues to accumulate, before the application has had a chance to sync. But if the user has received 25 new emails, there's no need to preserve every &quot;New mail&quot; message. One is sufficient. Another example would be a sports application that updates users with the latest score. Only the most recent message is relevant, so it makes sense to have each new message replace the preceding message. </p>
+
+<p>The email and sports applications are cases where you would probably use the GCM <code>collapse_key</code> parameter. A <em>collapse key</em> is an arbitrary string that is used to collapse a group of like messages when the device is offline, so that only the most recent message gets sent to the client. For example, &quot;New mail,&quot; &quot;Updates available,&quot; and so on</p>
+<p>GCM allows a maximum of 4 different collapse keys to be used by the GCM server at any given time. In other words, the GCM server can simultaneously store 4 different send-to-sync messages, each with a different collapse key. If you exceed this number GCM will only keep 4 collapse keys, with no guarantees about which ones they will be.</p>
+
 <h3 id="payload">Messages with payload</h3>
 <p>Unlike a send-to-sync message, every &quot;message with payload&quot; (non-collapsible message) is delivered. The payload the message contains can be up to 4K. For example, here is a JSON-formatted message in an IM application in which spectators are discussing a sporting event:</p>
 
@@ -208,9 +221,10 @@ registerReceiver(mRetryReceiver, filter);
   <li><code>total_deleted</code>&mdash;The value  is a string with the number of deleted messages.</li>
 </ul>
 <p>The application should respond by syncing with the server to recover the discarded messages. </p>
-  <p class="note"><strong>Note:</strong> If your application does not need to use non-collapsible messages, collapsible messages are a better choice from a performance standpoint, because they put less of a burden on the device battery.
- 
-</p>
+
+<h3 id="which">Which should I use?</h3>
+  <p>If your application does not need to use non-collapsible messages, collapsible messages are a better choice from a performance standpoint, because they put less of a burden on the device battery.</p>
+
 <h2 dir="ltr" id="ttl">Setting an Expiration Date for a Message</h2>
 <p>The Time to Live (TTL) feature lets  the sender  specify the maximum lifespan of a message using the <code>time_to_live</code> parameter in the send request. The value of this parameter must be a duration from 0 to 2,419,200 seconds, and it corresponds to the maximum period of time for which GCM will store and try to deliver the message. Requests that don't contain this field default to the maximum period of 4 weeks.</p>
 <p>Here are some possible uses for this feature:</p>
