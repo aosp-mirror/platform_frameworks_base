@@ -63,7 +63,7 @@ page.title=GCM: Getting Started
 </div>
 </div>
 
-  <li>Click  <strong>Create new Server key</strong>. The following screen appears:</li><br />
+  <li>Click  <strong>Create new Server key</strong>. Either a server key or a browser key should work. The advantage to using a server key is that it allows you to whitelist IP addresses. The following screen appears:</li><br />
 
 <div style="width:408px;margin:1.5em;">
 <div style="width:410px;border:1px solid #DDD;">
@@ -86,6 +86,9 @@ page.title=GCM: Getting Started
 
 <h2 id="libs">Install the Helper Libraries</h2>
 <p>To perform the steps described in the following sections, you must first install the helper libraries (reference: <a href="{@docRoot}guide/google/gcm/client-javadoc/index.html">client</a> and <a href="{@docRoot}guide/google/gcm/server-javadoc/index.html">server</a>). From the SDK Manager, install <strong>Extras &gt; Google Cloud Messaging for Android Library</strong>. This creates a <code>gcm</code> directory under <code><em>YOUR_SDK_ROOT</em>/extras/google/</code> containing these subdirectories: <code>gcm-client</code>, <code>gcm-server</code>, <code>samples/gcm-demo-client</code>, <code>samples/gcm-demo-server</code>, and <code>samples/gcm-demo-appengine</code>.</p>
+
+<p class="note"><strong>Note:</strong> If you don't see <strong>Extras &gt; Google Cloud Messaging for Android Library</strong> in the SDK Manager, make sure you are running version 20 or higher. Be sure to restart the SDK Manager after updating it.</p>
+
 <h2 id="android-app">Writing the Android Application</h2>
 <p>This section describes the steps involved in writing an Android application that uses GCM.</p>
 <h4>Step 1: Copy the gcm.jar file into your application classpath</h4>
@@ -175,14 +178,14 @@ if (regId.equals("")) {
   <li>Create a servlet (or other server-side mechanism) that can be used by the Android application to send the registration ID received by GCM . The application might also need to send other information&mdash;such as the user's email address or username&mdash;so that the server can associate the registration ID with the user owning the device.</li>
   <li>Similarly, create a servlet used to unregister registration IDs.<br>
     </li>
-  <li>When the server needs to send a message to the device, it can use the <code>com.google.android.gcm.server.Sender</code> helper class from the GCM library. For example:</li>
+<li>When the server needs to send a message to the registration ID, it can use the <code>com.google.android.gcm.server.Sender</code> helper class from the GCM library. For example:</li>
 </ol>
 
 <pre class="prettyprint pretty-java">import com.google.android.gcm.server.*;
 
 Sender sender = new Sender(myApiKey);
-Message message = new Message.Builder(regId).build();
-Result result = sender.send(message, 5);</pre>
+Message message = new Message.Builder().build();
+MulticastResult result = sender.send(message, devices, 5);</pre>
 
 <p> The snippet above does the following:
 <ul>
