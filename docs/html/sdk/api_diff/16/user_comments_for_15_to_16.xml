@@ -142,6 +142,12 @@
   </text>
 </comment>
 <comment>
+  <identifier id="android.R.attr.mediaRouteTypes"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="android.R.attr.parentActivityName"/>
   <text>
     InsertCommentsHere
@@ -1247,12 +1253,6 @@
 </comment>
 <comment>
   <identifier id="android.content.Intent.FILL_IN_CLIP_DATA"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="android.content.Intent.FLAG_ACTIVITY_CLOSE_SYSTEM_DIALOGS"/>
   <text>
     InsertCommentsHere
   </text>
@@ -2501,6 +2501,12 @@
 </comment>
 <comment>
   <identifier id="android.media.MediaRouter.UserRouteInfo"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.media.MediaRouter.VolumeCallback"/>
   <text>
     InsertCommentsHere
   </text>
@@ -4624,6 +4630,18 @@
   </text>
 </comment>
 <comment>
+  <identifier id="android.view.ActionProvider.VisibilityListener"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.view.ActionProvider.isVisible_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="android.view.ActionProvider.onCreateActionView_added(android.view.MenuItem)"/>
   <text>
     InsertCommentsHere
@@ -4631,6 +4649,24 @@
 </comment>
 <comment>
   <identifier id="android.view.ActionProvider.onCreateActionView_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.view.ActionProvider.overridesItemVisibility_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.view.ActionProvider.refreshVisibility_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.view.ActionProvider.setVisibilityListener_added(android.view.ActionProvider.VisibilityListener)"/>
   <text>
     InsertCommentsHere
   </text>
@@ -6214,7 +6250,25 @@
   </text>
 </comment>
 <comment>
+  <identifier id="android.widget.RemoteViews.setTextViewCompoundDrawablesRelative_added(int, int, int, int, int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="android.widget.RemoteViews.setTextViewCompoundDrawables_added(int, int, int, int, int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.widget.RemoteViews.setTextViewTextSize_added(int, int, float)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.widget.RemoteViews.setViewPadding_added(int, int, int, int, int)"/>
   <text>
     InsertCommentsHere
   </text>
