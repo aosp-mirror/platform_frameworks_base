@@ -217,9 +217,6 @@ public class Surface implements Parcelable {
     /** Hide the surface. Equivalent to calling hide(). @hide */
     public static final int SURFACE_HIDDEN    = 0x01;
 
-    /** Enable dithering when compositing this surface @hide */
-    public static final int SURFACE_DITHER    = 0x04;
-
     // The mSurfaceControl will only be present for Surfaces used by the window
     // server or system processes. When this class is parceled we defer to the
     // mSurfaceControl to do the parceling. Otherwise we parcel the

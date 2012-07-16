@@ -697,10 +697,6 @@ class WindowStateAnimator {
                     mSurface.setAlpha(0);
                     mSurfaceShown = false;
                     mSurface.hide();
-                    if ((mWin.mAttrs.flags&WindowManager.LayoutParams.FLAG_DITHER) != 0) {
-                        if (SHOW_TRANSACTIONS) WindowManagerService.logSurface(mWin, "DITHER", null);
-                        mSurface.setFlags(Surface.SURFACE_DITHER, Surface.SURFACE_DITHER);
-                    }
                 } catch (RuntimeException e) {
                     Slog.w(TAG, "Error creating surface in " + w, e);
                     mService.reclaimSomeSurfaceMemoryLocked(this, "create-init", true);
