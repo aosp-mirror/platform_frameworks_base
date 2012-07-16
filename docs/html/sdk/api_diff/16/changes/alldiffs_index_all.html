@@ -178,6 +178,8 @@ Listed as: <span style="color:#069"><strong>Added</strong></span>,  <span style=
 <A HREF="android.view.ActionMode.html" class="hiddenlink" target="rightframe">ActionMode</A><br>
 <!-- Class ActionProvider -->
 <A HREF="android.view.ActionProvider.html" class="hiddenlink" target="rightframe">ActionProvider</A><br>
+<!-- Class ActionProvider.VisibilityListener -->
+<A HREF="pkg_android.view.html#ActionProvider.VisibilityListener" class="hiddenlink" target="rightframe"><b><i>ActionProvider.VisibilityListener</i></b></A><br>
 <!-- Class Activity -->
 <A HREF="android.app.Activity.html" class="hiddenlink" target="rightframe">Activity</A><br>
 <!-- Class ActivityInfo -->
@@ -1083,9 +1085,6 @@ Listed as: <span style="color:#069"><strong>Added</strong></span>,  <span style=
 <!-- Method fitsSystemWindows -->
 <nobr><A HREF="android.view.View.html#android.view.View.fitsSystemWindows_removed()" class="hiddenlink" target="rightframe"><strike>fitsSystemWindows</strike>
 ()</A></nobr><br>
-<!-- Field FLAG_ACTIVITY_CLOSE_SYSTEM_DIALOGS -->
-<nobr><A HREF="android.content.Intent.html#android.content.Intent.FLAG_ACTIVITY_CLOSE_SYSTEM_DIALOGS" class="hiddenlink" target="rightframe">FLAG_ACTIVITY_CLOSE_SYSTEM_DIALOGS</A>
-</nobr><br>
 <!-- Field FLAG_HIGH_PRIORITY -->
 <nobr><A HREF="android.app.Notification.html#android.app.Notification.FLAG_HIGH_PRIORITY" class="hiddenlink" target="rightframe">FLAG_HIGH_PRIORITY</A>
 </nobr><br>
@@ -1986,6 +1985,9 @@ Listed as: <span style="color:#069"><strong>Added</strong></span>,  <span style=
 <!-- Method isVirtual -->
 <nobr><A HREF="android.view.InputDevice.html#android.view.InputDevice.isVirtual_added()" class="hiddenlink" target="rightframe"><b>isVirtual</b>
 ()</A></nobr><br>
+<!-- Method isVisible -->
+<nobr><A HREF="android.view.ActionProvider.html#android.view.ActionProvider.isVisible_added()" class="hiddenlink" target="rightframe"><b>isVisible</b>
+()</A></nobr><br>
 <!-- Method isVisibleToUser -->
 <nobr><A HREF="android.view.accessibility.AccessibilityNodeInfo.html#android.view.accessibility.AccessibilityNodeInfo.isVisibleToUser_added()" class="hiddenlink" target="rightframe"><b>isVisibleToUser</b>
 ()</A></nobr><br>
@@ -2264,6 +2266,11 @@ Listed as: <span style="color:#069"><strong>Added</strong></span>,  <span style=
 <A HREF="pkg_android.media.html#MediaRouter.SimpleCallback" class="hiddenlink" target="rightframe"><b>MediaRouter.SimpleCallback</b></A><br>
 <!-- Class MediaRouter.UserRouteInfo -->
 <A HREF="pkg_android.media.html#MediaRouter.UserRouteInfo" class="hiddenlink" target="rightframe"><b>MediaRouter.UserRouteInfo</b></A><br>
+<!-- Class MediaRouter.VolumeCallback -->
+<A HREF="pkg_android.media.html#MediaRouter.VolumeCallback" class="hiddenlink" target="rightframe"><b>MediaRouter.VolumeCallback</b></A><br>
+<!-- Field mediaRouteTypes -->
+<nobr><A HREF="android.R.attr.html#android.R.attr.mediaRouteTypes" class="hiddenlink" target="rightframe">mediaRouteTypes</A>
+</nobr><br>
 <!-- Class MediaStore.MediaColumns -->
 <A HREF="android.provider.MediaStore.MediaColumns.html" class="hiddenlink" target="rightframe"><i>MediaStore.MediaColumns</i></A><br>
 <!-- Class MediaSyncEvent -->
@@ -2560,6 +2567,9 @@ Listed as: <span style="color:#069"><strong>Added</strong></span>,  <span style=
 <!-- Field ORIENTATION_SQUARE -->
 <nobr><A HREF="android.content.res.Configuration.html#android.content.res.Configuration.ORIENTATION_SQUARE" class="hiddenlink" target="rightframe">ORIENTATION_SQUARE</A>
 </nobr><br>
+<!-- Method overridesItemVisibility -->
+<nobr><A HREF="android.view.ActionProvider.html#android.view.ActionProvider.overridesItemVisibility_added()" class="hiddenlink" target="rightframe"><b>overridesItemVisibility</b>
+()</A></nobr><br>
 <!-- Class PackageInfo -->
 <A NAME="P"></A>
 <br><font size="+2">P</font>&nbsp;
@@ -2853,6 +2863,9 @@ Listed as: <span style="color:#069"><strong>Added</strong></span>,  <span style=
 </nobr><br>
 <!-- Class RecognizerIntent -->
 <A HREF="android.speech.RecognizerIntent.html" class="hiddenlink" target="rightframe">RecognizerIntent</A><br>
+<!-- Method refreshVisibility -->
+<nobr><A HREF="android.view.ActionProvider.html#android.view.ActionProvider.refreshVisibility_added()" class="hiddenlink" target="rightframe"><b>refreshVisibility</b>
+()</A></nobr><br>
 <!-- Method registerOnLoadCanceledListener -->
 <nobr><A HREF="android.content.Loader.html#android.content.Loader.registerOnLoadCanceledListener_added(android.content.Loader.OnLoadCanceledListener<D>)" class="hiddenlink" target="rightframe"><b>registerOnLoadCanceledListener</b>
 (<code>OnLoadCanceledListener&lt;D&gt;</code>)</A></nobr><br>
@@ -3321,6 +3334,12 @@ Listed as: <span style="color:#069"><strong>Added</strong></span>,  <span style=
 <!-- Method setTextViewCompoundDrawables -->
 <nobr><A HREF="android.widget.RemoteViews.html#android.widget.RemoteViews.setTextViewCompoundDrawables_added(int, int, int, int, int)" class="hiddenlink" target="rightframe"><b>setTextViewCompoundDrawables</b>
 (<code>int, int, int, int, int</code>)</A></nobr><br>
+<!-- Method setTextViewCompoundDrawablesRelative -->
+<nobr><A HREF="android.widget.RemoteViews.html#android.widget.RemoteViews.setTextViewCompoundDrawablesRelative_added(int, int, int, int, int)" class="hiddenlink" target="rightframe"><b>setTextViewCompoundDrawablesRelative</b>
+(<code>int, int, int, int, int</code>)</A></nobr><br>
+<!-- Method setTextViewTextSize -->
+<nobr><A HREF="android.widget.RemoteViews.html#android.widget.RemoteViews.setTextViewTextSize_added(int, int, float)" class="hiddenlink" target="rightframe"><b>setTextViewTextSize</b>
+(<code>int, int, float</code>)</A></nobr><br>
 <!-- Method setThumbDrawable -->
 <nobr><A HREF="android.widget.Switch.html#android.widget.Switch.setThumbDrawable_added(android.graphics.drawable.Drawable)" class="hiddenlink" target="rightframe"><b>setThumbDrawable</b>
 (<code>Drawable</code>)</A></nobr><br>
@@ -3369,6 +3388,12 @@ Listed as: <span style="color:#069"><strong>Added</strong></span>,  <span style=
 <!-- Method setVideoScalingMode -->
 <nobr><A HREF="android.media.MediaPlayer.html#android.media.MediaPlayer.setVideoScalingMode_added(int)" class="hiddenlink" target="rightframe"><b>setVideoScalingMode</b>
 (<code>int</code>)</A></nobr><br>
+<!-- Method setViewPadding -->
+<nobr><A HREF="android.widget.RemoteViews.html#android.widget.RemoteViews.setViewPadding_added(int, int, int, int, int)" class="hiddenlink" target="rightframe"><b>setViewPadding</b>
+(<code>int, int, int, int, int</code>)</A></nobr><br>
+<!-- Method setVisibilityListener -->
+<nobr><A HREF="android.view.ActionProvider.html#android.view.ActionProvider.setVisibilityListener_added(android.view.ActionProvider.VisibilityListener)" class="hiddenlink" target="rightframe"><b>setVisibilityListener</b>
+(<code>VisibilityListener</code>)</A></nobr><br>
 <!-- Method setVisibleToUser -->
 <nobr><A HREF="android.view.accessibility.AccessibilityNodeInfo.html#android.view.accessibility.AccessibilityNodeInfo.setVisibleToUser_added(boolean)" class="hiddenlink" target="rightframe"><b>setVisibleToUser</b>
 (<code>boolean</code>)</A></nobr><br>

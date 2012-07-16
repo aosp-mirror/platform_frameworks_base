@@ -1,5 +1,6 @@
 NO DOC BLOCK: android.view.accessibility.AccessibilityNodeProvider Class
 NO DOC BLOCK: android.media.audiofx.AcousticEchoCanceler Class
+NO DOC BLOCK: android.view.ActionProvider.VisibilityListener Interface
 NO DOC BLOCK: android.app.ActivityOptions Class
 NO DOC BLOCK: android.widget.Advanceable Interface
 NO DOC BLOCK: android.media.audiofx.AutomaticGainControl Class
@@ -34,6 +35,7 @@ NO DOC BLOCK: android.media.MediaRouter.RouteGroup Class
 NO DOC BLOCK: android.media.MediaRouter.RouteInfo Class
 NO DOC BLOCK: android.media.MediaRouter.SimpleCallback Class
 NO DOC BLOCK: android.media.MediaRouter.UserRouteInfo Class
+NO DOC BLOCK: android.media.MediaRouter.VolumeCallback Class
 NO DOC BLOCK: android.media.MediaSyncEvent Class
 NO DOC BLOCK: android.nfc.NfcAdapter.CreateBeamUrisCallback Interface
 NO DOC BLOCK: android.media.audiofx.NoiseSuppressor Class
@@ -283,6 +285,7 @@ NO DOC BLOCK: android.view.View Method isScrollContainer()
 NO DOC BLOCK: android.view.ActionMode Method isTitleOptional()
 NO DOC BLOCK: android.animation.LayoutTransition Method isTransitionTypeEnabled(int)
 NO DOC BLOCK: android.view.InputDevice Method isVirtual()
+NO DOC BLOCK: android.view.ActionProvider Method isVisible()
 NO DOC BLOCK: android.view.accessibility.AccessibilityNodeInfo Method isVisibleToUser()
 NO DOC BLOCK: android.database.sqlite.SQLiteDatabase Method isWriteAheadLoggingEnabled()
 NO DOC BLOCK: android.accessibilityservice.AccessibilityServiceInfo Method loadDescription(android.content.pm.PackageManager)
@@ -308,6 +311,7 @@ NO DOC BLOCK: android.widget.CheckedTextView Method onPaddingChanged(int)
 NO DOC BLOCK: android.app.Activity Method onPrepareNavigateUpTaskStack(android.app.TaskStackBuilder)
 NO DOC BLOCK: android.view.View Method onScreenStateChanged(int)
 NO DOC BLOCK: android.view.View Method onWindowSystemUiVisibilityChanged(int)
+NO DOC BLOCK: android.view.ActionProvider Method overridesItemVisibility()
 NO DOC BLOCK: android.view.View Method performAccessibilityAction(int, android.os.Bundle)
 NO DOC BLOCK: android.view.View.AccessibilityDelegate Method performAccessibilityAction(android.view.View, int, android.os.Bundle)
 NO DOC BLOCK: android.view.accessibility.AccessibilityNodeInfo Method performAction(int, android.os.Bundle)
@@ -324,6 +328,7 @@ NO DOC BLOCK: android.database.sqlite.SQLiteQueryBuilder Method query(android.da
 NO DOC BLOCK: android.database.sqlite.SQLiteDatabase Method queryWithFactory(android.database.sqlite.SQLiteDatabase.CursorFactory, boolean, java.lang.String, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String, java.lang.String, java.lang.String, java.lang.String, android.os.CancellationSignal)
 NO DOC BLOCK: android.database.sqlite.SQLiteDatabase Method rawQuery(java.lang.String, java.lang.String[], android.os.CancellationSignal)
 NO DOC BLOCK: android.database.sqlite.SQLiteDatabase Method rawQueryWithFactory(android.database.sqlite.SQLiteDatabase.CursorFactory, java.lang.String, java.lang.String[], java.lang.String, android.os.CancellationSignal)
+NO DOC BLOCK: android.view.ActionProvider Method refreshVisibility()
 NO DOC BLOCK: android.content.Loader Method registerOnLoadCanceledListener(android.content.Loader.OnLoadCanceledListener<D>)
 NO DOC BLOCK: android.drm.DrmManagerClient Method release()
 NO DOC BLOCK: android.net.wifi.p2p.WifiP2pManager Method removeLocalService(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.nsd.WifiP2pServiceInfo, android.net.wifi.p2p.WifiP2pManager.ActionListener)
@@ -388,6 +393,8 @@ NO DOC BLOCK: android.view.TextureView Method setSurfaceTexture(android.graphics
 NO DOC BLOCK: android.widget.Switch Method setSwitchMinWidth(int)
 NO DOC BLOCK: android.widget.Switch Method setSwitchPadding(int)
 NO DOC BLOCK: android.widget.RemoteViews Method setTextViewCompoundDrawables(int, int, int, int, int)
+NO DOC BLOCK: android.widget.RemoteViews Method setTextViewCompoundDrawablesRelative(int, int, int, int, int)
+NO DOC BLOCK: android.widget.RemoteViews Method setTextViewTextSize(int, int, float)
 NO DOC BLOCK: android.widget.Switch Method setThumbDrawable(android.graphics.drawable.Drawable)
 NO DOC BLOCK: android.widget.Switch Method setThumbResource(int)
 NO DOC BLOCK: android.widget.Switch Method setThumbTextPadding(int)
@@ -400,6 +407,8 @@ NO DOC BLOCK: android.net.wifi.p2p.WifiP2pManager Method setUpnpServiceResponseL
 NO DOC BLOCK: android.app.Notification.Builder Method setUsesChronometer(boolean)
 NO DOC BLOCK: android.renderscript.Script Method setVar(int, android.renderscript.FieldPacker, android.renderscript.Element, int[])
 NO DOC BLOCK: android.media.MediaPlayer Method setVideoScalingMode(int)
+NO DOC BLOCK: android.widget.RemoteViews Method setViewPadding(int, int, int, int, int)
+NO DOC BLOCK: android.view.ActionProvider Method setVisibilityListener(android.view.ActionProvider.VisibilityListener)
 NO DOC BLOCK: android.view.accessibility.AccessibilityNodeInfo Method setVisibleToUser(boolean)
 NO DOC BLOCK: android.widget.CalendarView Method setWeekDayTextAppearance(int)
 NO DOC BLOCK: android.widget.CalendarView Method setWeekNumberColor(int)
@@ -485,7 +494,6 @@ NO DOC BLOCK: android.app.WallpaperManager Field EXTRA_LIVE_WALLPAPER_COMPONENT
 NO DOC BLOCK: android.speech.RecognizerIntent Field EXTRA_SECURE
 NO DOC BLOCK: android.content.pm.PackageManager Field FEATURE_TELEVISION
 NO DOC BLOCK: android.content.Intent Field FILL_IN_CLIP_DATA
-NO DOC BLOCK: android.content.Intent Field FLAG_ACTIVITY_CLOSE_SYSTEM_DIALOGS
 NO DOC BLOCK: android.accessibilityservice.AccessibilityServiceInfo Field FLAG_INCLUDE_NOT_IMPORTANT_VIEWS
 NO DOC BLOCK: android.content.pm.ServiceInfo Field FLAG_ISOLATED_PROCESS
 NO DOC BLOCK: android.content.Intent Field FLAG_RECEIVER_FOREGROUND
@@ -538,6 +546,7 @@ NO DOC BLOCK: android.app.ActivityManager.RunningAppProcessInfo Field lastTrimLe
 NO DOC BLOCK: android.media.MediaPlayer Field MEDIA_MIMETYPE_TEXT_SUBRIP
 NO DOC BLOCK: android.content.Context Field MEDIA_ROUTER_SERVICE
 NO DOC BLOCK: android.R.attr Field mediaRouteButtonStyle
+NO DOC BLOCK: android.R.attr Field mediaRouteTypes
 NO DOC BLOCK: android.provider.CalendarContract.RemindersColumns Field METHOD_ALARM
 NO DOC BLOCK: android.content.ClipDescription Field MIMETYPE_TEXT_HTML
 NO DOC BLOCK: android.content.Context Field MODE_ENABLE_WRITE_AHEAD_LOGGING
