@@ -637,28 +637,6 @@ static void Surface_show(
     }
 }
 
-static void Surface_freeze(
-        JNIEnv* env, jobject clazz)
-{
-    const sp<SurfaceControl>& surface(getSurfaceControl(env, clazz));
-    if (surface == 0) return;
-    status_t err = surface->freeze();
-    if (err<0 && err!=NO_INIT) {
-        doThrowIAE(env);
-    }
-}
-
-static void Surface_unfreeze(
-        JNIEnv* env, jobject clazz)
-{
-    const sp<SurfaceControl>& surface(getSurfaceControl(env, clazz));
-    if (surface == 0) return;
-    status_t err = surface->unfreeze();
-    if (err<0 && err!=NO_INIT) {
-        doThrowIAE(env);
-    }
-}
-
 static void Surface_setFlags(
         JNIEnv* env, jobject clazz, jint flags, jint mask)
 {
@@ -712,18 +690,6 @@ static void Surface_setMatrix(
     const sp<SurfaceControl>& surface(getSurfaceControl(env, clazz));
     if (surface == 0) return;
     status_t err = surface->setMatrix(dsdx, dtdx, dsdy, dtdy);
-    if (err<0 && err!=NO_INIT) {
-        doThrowIAE(env);
-    }
-}
-
-static void Surface_setFreezeTint(
-        JNIEnv* env, jobject clazz,
-        jint tint)
-{
-    const sp<SurfaceControl>& surface(getSurfaceControl(env, clazz));
-    if (surface == 0) return;
-    status_t err = surface->setFreezeTint(tint);
     if (err<0 && err!=NO_INIT) {
         doThrowIAE(env);
     }
@@ -881,13 +847,10 @@ static JNINativeMethod gSurfaceMethods[] = {
     {"setSize",             "(II)V",(void*)Surface_setSize },
     {"hide",                "()V",  (void*)Surface_hide },
     {"show",                "()V",  (void*)Surface_show },
-    {"freeze",              "()V",  (void*)Surface_freeze },
-    {"unfreeze",            "()V",  (void*)Surface_unfreeze },
     {"setFlags",            "(II)V",(void*)Surface_setFlags },
     {"setTransparentRegionHint","(Landroid/graphics/Region;)V", (void*)Surface_setTransparentRegion },
     {"setAlpha",            "(F)V", (void*)Surface_setAlpha },
     {"setMatrix",           "(FFFF)V",  (void*)Surface_setMatrix },
-    {"setFreezeTint",       "(I)V",  (void*)Surface_setFreezeTint },
     {"readFromParcel",      "(Landroid/os/Parcel;)V", (void*)Surface_readFromParcel },
     {"writeToParcel",       "(Landroid/os/Parcel;I)V", (void*)Surface_writeToParcel },
     {"isConsumerRunningBehind", "()Z", (void*)Surface_isConsumerRunningBehind },
