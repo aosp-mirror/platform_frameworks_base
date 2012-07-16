@@ -44,8 +44,7 @@ use the Android SDK Manager to download the platform into your SDK.</p>
 
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-closed.png"
-class="toggle-content-img" alt="" />
-    <strong>Table of Contents</strong>
+class="toggle-content-img" alt="" /><strong>Table of Contents</strong>
   </a></p>
 
   <div class="toggle-content-toggleme" style="padding-left:2em;">
