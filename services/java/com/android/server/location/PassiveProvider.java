@@ -16,16 +16,22 @@
 
 package com.android.server.location;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+
+import com.android.internal.location.ProviderProperties;
+import com.android.internal.location.ProviderRequest;
+
 import android.location.Criteria;
 import android.location.ILocationManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationProvider;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.WorkSource;
 import android.util.Log;
+
 
 /**
  * A passive location provider reports locations received from other providers
@@ -35,103 +41,63 @@ import android.util.Log;
  * {@hide}
  */
 public class PassiveProvider implements LocationProviderInterface {
-
     private static final String TAG = "PassiveProvider";
 
+    private static final ProviderProperties PROPERTIES = new ProviderProperties(
+            false, false, false, false, false, false, false,
+            Criteria.POWER_LOW, Criteria.ACCURACY_COARSE);
+
     private final ILocationManager mLocationManager;
-    private boolean mTracking;
+    private boolean mReportLocation;
 
     public PassiveProvider(ILocationManager locationManager) {
         mLocationManager = locationManager;
     }
 
+    @Override
     public String getName() {
         return LocationManager.PASSIVE_PROVIDER;
     }
 
-    public boolean requiresNetwork() {
-        return false;
+    @Override
+    public ProviderProperties getProperties() {
+        return PROPERTIES;
     }
 
-    public boolean requiresSatellite() {
-        return false;
-    }
-
-    public boolean requiresCell() {
-        return false;
-    }
-
-    public boolean hasMonetaryCost() {
-        return false;
-    }
-
-    public boolean supportsAltitude() {
-        return false;
-    }
-
-    public boolean supportsSpeed() {
-        return false;
-    }
-
-    public boolean supportsBearing() {
-        return false;
-    }
-
-    public int getPowerRequirement() {
-        return -1;
-    }
-
-    public boolean meetsCriteria(Criteria criteria) {
-        // We do not want to match the special passive provider based on criteria.
-        return false;
-    }
-
-    public int getAccuracy() {
-        return -1;
-    }
-
+    @Override
     public boolean isEnabled() {
         return true;
     }
 
+    @Override
     public void enable() {
     }
 
+    @Override
     public void disable() {
     }
 
+    @Override
     public int getStatus(Bundle extras) {
-        if (mTracking) {
+        if (mReportLocation) {
             return LocationProvider.AVAILABLE;
         } else {
             return LocationProvider.TEMPORARILY_UNAVAILABLE;
         }
     }
 
+    @Override
     public long getStatusUpdateTime() {
         return -1;
     }
 
-    public String getInternalState() {
-        return null;
-    }
-
-    public void enableLocationTracking(boolean enable) {
-        mTracking = enable;
-    }
-
-    public boolean requestSingleShotFix() {
-        return false;
-    }
-
-    public void setMinTime(long minTime, WorkSource ws) {
-    }
-
-    public void updateNetworkState(int state, NetworkInfo info) {
+    @Override
+    public void setRequest(ProviderRequest request, WorkSource source) {
+        mReportLocation = request.reportLocation;
     }
 
     public void updateLocation(Location location) {
-        if (mTracking) {
+        if (mReportLocation) {
             try {
                 // pass the location back to the location manager
                 mLocationManager.reportLocation(location, true);
@@ -141,13 +107,13 @@ public class PassiveProvider implements LocationProviderInterface {
         }
     }
 
+    @Override
     public boolean sendExtraCommand(String command, Bundle extras) {
         return false;
     }
 
-    public void addListener(int uid) {
-    }
-
-    public void removeListener(int uid) {
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("mReportLocaiton=" + mReportLocation);
     }
 }

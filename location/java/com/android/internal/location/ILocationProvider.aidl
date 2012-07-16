@@ -14,40 +14,31 @@
  * limitations under the License.
  */
 
-package android.location;
+package com.android.internal.location;
 
-import android.location.Criteria;
 import android.location.Location;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.WorkSource;
 
+import com.android.internal.location.ProviderProperties;
+import com.android.internal.location.ProviderRequest;
+
 /**
  * Binder interface for services that implement location providers.
- *
- * {@hide}
+ * <p>Use {@link LocationProviderBase} as a helper to implement this
+ * interface.
+ * @hide
  */
 interface ILocationProvider {
-    boolean requiresNetwork();
-    boolean requiresSatellite();
-    boolean requiresCell();
-    boolean hasMonetaryCost();
-    boolean supportsAltitude();
-    boolean supportsSpeed();
-    boolean supportsBearing();
-    int getPowerRequirement();
-    boolean meetsCriteria(in Criteria criteria);
-    int getAccuracy();
     void enable();
     void disable();
+
+    void setRequest(in ProviderRequest request, in WorkSource ws);
+
+    // --- deprecated (but still supported) ---
+    ProviderProperties getProperties();
     int getStatus(out Bundle extras);
     long getStatusUpdateTime();
-    String getInternalState();
-    void enableLocationTracking(boolean enable);
-    void setMinTime(long minTime, in WorkSource ws);
-    void updateNetworkState(int state, in NetworkInfo info);
-    void updateLocation(in Location location);
     boolean sendExtraCommand(String command, inout Bundle extras);
-    void addListener(int uid);
-    void removeListener(int uid);
 }

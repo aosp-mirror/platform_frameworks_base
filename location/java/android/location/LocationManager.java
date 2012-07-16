@@ -25,14 +25,14 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.os.Handler;
 import android.os.Message;
-import android.os.SystemClock;
 import android.util.Log;
 
-import com.android.internal.location.DummyLocationProvider;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import com.android.internal.location.ProviderProperties;
 
 /**
  * This class provides access to the system location services.  These
@@ -71,7 +71,9 @@ public class LocationManager {
      *
      * Requires either of the permissions android.permission.ACCESS_COARSE_LOCATION
      * or android.permission.ACCESS_FINE_LOCATION.
+     * @deprecated use the {@link Criteria} class instead
      */
+    @Deprecated
     public static final String NETWORK_PROVIDER = "network";
 
     /**
@@ -87,7 +89,9 @@ public class LocationManager {
      * <ul>
      * <li> satellites - the number of satellites used to derive the fix
      * </ul>
+     * @deprecated use the {@link Criteria} class instead
      */
+    @Deprecated
     public static final String GPS_PROVIDER = "gps";
 
     /**
@@ -100,8 +104,20 @@ public class LocationManager {
      *
      * Requires the permission android.permission.ACCESS_FINE_LOCATION, although if the GPS
      * is not enabled this provider might only return coarse fixes.
+     * @deprecated use the {@link Criteria} class instead
      */
+    @Deprecated
     public static final String PASSIVE_PROVIDER = "passive";
+
+    /**
+     * Name of the Fused location provider.<p>
+     * This provider combines inputs for all possible location sources
+     * to provide the best possible Location fix.<p>
+     *
+     * Requires the permission android.permission.ACCESS_FINE_LOCATION.
+     * @hide
+     */
+    public static final String FUSED_PROVIDER = "fused";
 
     /**
      * Key used for the Bundle extra holding a boolean indicating whether
@@ -112,13 +128,17 @@ public class LocationManager {
     /**
      * Key used for a Bundle extra holding an Integer status value
      * when a status change is broadcast using a PendingIntent.
+     * @deprecated use the {@link Criteria} class instead
      */
+    @Deprecated
     public static final String KEY_STATUS_CHANGED = "status";
 
     /**
      * Key used for a Bundle extra holding an Boolean status value
      * when a provider enabled/disabled event is broadcast using a PendingIntent.
+     * @deprecated use the {@link Criteria} class instead
      */
+    @Deprecated
     public static final String KEY_PROVIDER_ENABLED = "providerEnabled";
 
     /**
@@ -141,7 +161,9 @@ public class LocationManager {
     /**
      * Broadcast intent action when the configured location providers
      * change.
+     * @deprecated use the {@link Criteria} class instead
      */
+    @Deprecated
     public static final String PROVIDERS_CHANGED_ACTION =
         "android.location.PROVIDERS_CHANGED";
 
@@ -274,19 +296,8 @@ public class LocationManager {
         mContext = context;
     }
 
-    private LocationProvider createProvider(String name, Bundle info) {
-        DummyLocationProvider provider =
-            new DummyLocationProvider(name, mService);
-        provider.setRequiresNetwork(info.getBoolean("network"));
-        provider.setRequiresSatellite(info.getBoolean("satellite"));
-        provider.setRequiresCell(info.getBoolean("cell"));
-        provider.setHasMonetaryCost(info.getBoolean("cost"));
-        provider.setSupportsAltitude(info.getBoolean("altitude"));
-        provider.setSupportsSpeed(info.getBoolean("speed"));
-        provider.setSupportsBearing(info.getBoolean("bearing"));
-        provider.setPowerRequirement(info.getInt("power"));
-        provider.setAccuracy(info.getInt("accuracy"));
-        return provider;
+    private LocationProvider createProvider(String name, ProviderProperties properties) {
+        return new LocationProvider(name, properties);
     }
 
     /**
@@ -295,15 +306,14 @@ public class LocationManager {
      * accessed by the calling activity or are currently disabled.
      *
      * @return list of Strings containing names of the providers
+     * @deprecated use the {@link Criteria} class instead
      */
+    @Deprecated
     public List<String> getAllProviders() {
-        if (false) {
-            Log.d(TAG, "getAllProviders");
-        }
         try {
             return mService.getAllProviders();
-        } catch (RemoteException ex) {
-            Log.e(TAG, "getAllProviders: RemoteException", ex);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException", e);
         }
         return null;
     }
@@ -315,12 +325,16 @@ public class LocationManager {
      * @param enabledOnly if true then only the providers which are currently
      * enabled are returned.
      * @return list of Strings containing names of the providers
+     * @deprecated The {@link LocationProvider} class is deprecated. So
+     * use the {@link Criteria} class to request location instead of
+     * enumerating providers.
      */
+    @Deprecated
     public List<String> getProviders(boolean enabledOnly) {
         try {
             return mService.getProviders(null, enabledOnly);
-        } catch (RemoteException ex) {
-            Log.e(TAG, "getProviders: RemoteException", ex);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException", e);
         }
         return null;
     }
@@ -332,22 +346,24 @@ public class LocationManager {
      * @param name the provider name
      * @return a LocationProvider, or null
      *
-     * @throws IllegalArgumentException if name is null
+     * @throws IllegalArgumentException if name is null or does not exisit
      * @throws SecurityException if the caller is not permitted to access the
      * given provider.
+     * @deprecated The {@link LocationProvider} class is deprecated. So
+     * use the {@link Criteria} class to request location instead of
+     * enumerating providers.
      */
+    @Deprecated
     public LocationProvider getProvider(String name) {
-        if (name == null) {
-            throw new IllegalArgumentException("name==null");
-        }
+        checkProvider(name);
         try {
-            Bundle info = mService.getProviderInfo(name);
-            if (info == null) {
+            ProviderProperties properties = mService.getProviderProperties(name);
+            if (properties == null) {
                 return null;
             }
-            return createProvider(name, info);
-        } catch (RemoteException ex) {
-            Log.e(TAG, "getProvider: RemoteException", ex);
+            return createProvider(name, properties);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException", e);
         }
         return null;
     }
@@ -361,15 +377,17 @@ public class LocationManager {
      * @param enabledOnly if true then only the providers which are currently
      * enabled are returned.
      * @return list of Strings containing names of the providers
+     * @deprecated The {@link LocationProvider} class is deprecated. So
+     * use the {@link Criteria} class to request location instead of
+     * enumerating providers.
      */
+    @Deprecated
     public List<String> getProviders(Criteria criteria, boolean enabledOnly) {
-        if (criteria == null) {
-            throw new IllegalArgumentException("criteria==null");
-        }
+        checkCriteria(criteria);
         try {
             return mService.getProviders(criteria, enabledOnly);
-        } catch (RemoteException ex) {
-            Log.e(TAG, "getProviders: RemoteException", ex);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException", e);
         }
         return null;
     }
@@ -395,15 +413,15 @@ public class LocationManager {
      * @param criteria the criteria that need to be matched
      * @param enabledOnly if true then only a provider that is currently enabled is returned
      * @return name of the provider that best matches the requirements
+     * @deprecated using an explicit provider doesn't allow fused location
      */
+    @Deprecated
     public String getBestProvider(Criteria criteria, boolean enabledOnly) {
-        if (criteria == null) {
-            throw new IllegalArgumentException("criteria==null");
-        }
+        checkCriteria(criteria);
         try {
             return mService.getBestProvider(criteria, enabledOnly);
-        } catch (RemoteException ex) {
-            Log.e(TAG, "getBestProvider: RemoteException", ex);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException", e);
         }
         return null;
     }
@@ -480,16 +498,17 @@ public class LocationManager {
      * @throws IllegalArgumentException if listener is null
      * @throws RuntimeException if the calling thread has no Looper
      * @throws SecurityException if no suitable permission is present for the provider.
+     * @deprecated use the {@link LocationRequest} class instead
      */
-    public void requestLocationUpdates(String provider,
-        long minTime, float minDistance, LocationListener listener) {
-        if (provider == null) {
-            throw new IllegalArgumentException("provider==null");
-        }
-        if (listener == null) {
-            throw new IllegalArgumentException("listener==null");
-        }
-        _requestLocationUpdates(provider, null, minTime, minDistance, false, listener, null);
+    @Deprecated
+    public void requestLocationUpdates(String provider, long minTime, float minDistance,
+            LocationListener listener) {
+        checkProvider(provider);
+        checkListener(listener);
+
+        LocationRequest request = LocationRequest.createFromDeprecatedProvider(
+                provider, minTime, minDistance, false);
+        requestLocationUpdates(request, listener, null, null);
     }
 
     /**
@@ -564,17 +583,17 @@ public class LocationManager {
      * @throws IllegalArgumentException if provider is null or doesn't exist
      * @throws IllegalArgumentException if listener is null
      * @throws SecurityException if no suitable permission is present for the provider.
+     * @deprecated use the {@link LocationRequest} class instead
      */
-    public void requestLocationUpdates(String provider,
-        long minTime, float minDistance, LocationListener listener,
-        Looper looper) {
-        if (provider == null) {
-            throw new IllegalArgumentException("provider==null");
-        }
-        if (listener == null) {
-            throw new IllegalArgumentException("listener==null");
-        }
-        _requestLocationUpdates(provider, null, minTime, minDistance, false, listener, looper);
+    @Deprecated
+    public void requestLocationUpdates(String provider, long minTime, float minDistance,
+            LocationListener listener, Looper looper) {
+        checkProvider(provider);
+        checkListener(listener);
+
+        LocationRequest request = LocationRequest.createFromDeprecatedProvider(
+                provider, minTime, minDistance, false);
+        requestLocationUpdates(request, listener, looper, null);
     }
 
     /**
@@ -639,39 +658,17 @@ public class LocationManager {
      * @throws IllegalArgumentException if criteria is null
      * @throws IllegalArgumentException if listener is null
      * @throws SecurityException if no suitable permission is present for the provider.
+     * @deprecated use the {@link LocationRequest} class instead
      */
-    public void requestLocationUpdates(long minTime, float minDistance,
-            Criteria criteria, LocationListener listener, Looper looper) {
-        if (criteria == null) {
-            throw new IllegalArgumentException("criteria==null");
-        }
-        if (listener == null) {
-            throw new IllegalArgumentException("listener==null");
-        }
-        _requestLocationUpdates(null, criteria, minTime, minDistance, false, listener, looper);
-    }
+    @Deprecated
+    public void requestLocationUpdates(long minTime, float minDistance, Criteria criteria,
+            LocationListener listener, Looper looper) {
+        checkCriteria(criteria);
+        checkListener(listener);
 
-    private void _requestLocationUpdates(String provider, Criteria criteria, long minTime,
-            float minDistance, boolean singleShot, LocationListener listener, Looper looper) {
-        if (minTime < 0L) {
-            minTime = 0L;
-        }
-        if (minDistance < 0.0f) {
-            minDistance = 0.0f;
-        }
-
-        try {
-            synchronized (mListeners) {
-                ListenerTransport transport = mListeners.get(listener);
-                if (transport == null) {
-                    transport = new ListenerTransport(listener, looper);
-                }
-                mListeners.put(listener, transport);
-                mService.requestLocationUpdates(provider, criteria, minTime, minDistance, singleShot, transport);
-            }
-        } catch (RemoteException ex) {
-            Log.e(TAG, "requestLocationUpdates: DeadObjectException", ex);
-        }
+        LocationRequest request = LocationRequest.createFromDeprecatedCriteria(
+                criteria, minTime, minDistance, false);
+        requestLocationUpdates(request, listener, looper, null);
     }
 
     /**
@@ -749,16 +746,17 @@ public class LocationManager {
      * on this device
      * @throws IllegalArgumentException if intent is null
      * @throws SecurityException if no suitable permission is present for the provider.
+     * @deprecated use the {@link LocationRequest} class instead
      */
-    public void requestLocationUpdates(String provider,
-            long minTime, float minDistance, PendingIntent intent) {
-        if (provider == null) {
-            throw new IllegalArgumentException("provider==null");
-        }
-        if (intent == null) {
-            throw new IllegalArgumentException("intent==null");
-        }
-        _requestLocationUpdates(provider, null, minTime, minDistance, false, intent);
+    @Deprecated
+    public void requestLocationUpdates(String provider, long minTime, float minDistance,
+            PendingIntent intent) {
+        checkProvider(provider);
+        checkPendingIntent(intent);
+
+        LocationRequest request = LocationRequest.createFromDeprecatedProvider(
+                provider, minTime, minDistance, false);
+        requestLocationUpdates(request, null, null, intent);
     }
 
     /**
@@ -825,32 +823,17 @@ public class LocationManager {
      * @throws IllegalArgumentException if criteria is null
      * @throws IllegalArgumentException if intent is null
      * @throws SecurityException if no suitable permission is present for the provider.
+     * @deprecated use the {@link LocationRequest} class instead
      */
+    @Deprecated
     public void requestLocationUpdates(long minTime, float minDistance, Criteria criteria,
             PendingIntent intent) {
-        if (criteria == null) {
-            throw new IllegalArgumentException("criteria==null");
-        }
-        if (intent == null) {
-            throw new IllegalArgumentException("intent==null");
-        }
-        _requestLocationUpdates(null, criteria, minTime, minDistance, false, intent);
-    }
+        checkCriteria(criteria);
+        checkPendingIntent(intent);
 
-    private void _requestLocationUpdates(String provider, Criteria criteria,
-            long minTime, float minDistance, boolean singleShot, PendingIntent intent) {
-        if (minTime < 0L) {
-            minTime = 0L;
-        }
-        if (minDistance < 0.0f) {
-            minDistance = 0.0f;
-        }
-
-        try {
-            mService.requestLocationUpdatesPI(provider, criteria, minTime, minDistance, singleShot, intent);
-        } catch (RemoteException ex) {
-            Log.e(TAG, "requestLocationUpdates: RemoteException", ex);
-        }
+        LocationRequest request = LocationRequest.createFromDeprecatedCriteria(
+                criteria, minTime, minDistance, false);
+        requestLocationUpdates(request, null, null, intent);
     }
 
     /**
@@ -879,15 +862,16 @@ public class LocationManager {
      * @throws IllegalArgumentException if provider is null or doesn't exist
      * @throws IllegalArgumentException if listener is null
      * @throws SecurityException if no suitable permission is present for the provider
+     * @deprecated use the {@link LocationRequest} class instead
      */
+    @Deprecated
     public void requestSingleUpdate(String provider, LocationListener listener, Looper looper) {
-        if (provider == null) {
-            throw new IllegalArgumentException("provider==null");
-        }
-        if (listener == null) {
-            throw new IllegalArgumentException("listener==null");
-        }
-        _requestLocationUpdates(provider, null, 0L, 0.0f, true, listener, looper);
+        checkProvider(provider);
+        checkListener(listener);
+
+        LocationRequest request = LocationRequest.createFromDeprecatedProvider(
+                provider, 0, 0, true);
+        requestLocationUpdates(request, listener, looper, null);
     }
 
     /**
@@ -918,15 +902,16 @@ public class LocationManager {
      * @throws IllegalArgumentException if listener is null
      * @throws SecurityException if no suitable permission is present to access
      * the location services
+     * @deprecated use the {@link LocationRequest} class instead
      */
+    @Deprecated
     public void requestSingleUpdate(Criteria criteria, LocationListener listener, Looper looper) {
-        if (criteria == null) {
-            throw new IllegalArgumentException("criteria==null");
-        }
-        if (listener == null) {
-            throw new IllegalArgumentException("listener==null");
-        }
-        _requestLocationUpdates(null, criteria, 0L, 0.0f, true, listener, looper);
+        checkCriteria(criteria);
+        checkListener(listener);
+
+        LocationRequest request = LocationRequest.createFromDeprecatedCriteria(
+                criteria, 0, 0, true);
+        requestLocationUpdates(request, listener, looper, null);
     }
 
     /**
@@ -951,15 +936,16 @@ public class LocationManager {
      * @throws IllegalArgumentException if provider is null or doesn't exist
      * @throws IllegalArgumentException if intent is null
      * @throws SecurityException if no suitable permission is present for the provider
+     * @deprecated use the {@link LocationRequest} class instead
      */
+    @Deprecated
     public void requestSingleUpdate(String provider, PendingIntent intent) {
-        if (provider == null) {
-            throw new IllegalArgumentException("provider==null");
-        }
-        if (intent == null) {
-            throw new IllegalArgumentException("intent==null");
-        }
-        _requestLocationUpdates(provider, null, 0L, 0.0f, true, intent);
+        checkProvider(provider);
+        checkPendingIntent(intent);
+
+        LocationRequest request = LocationRequest.createFromDeprecatedProvider(
+                provider, 0, 0, true);
+        requestLocationUpdates(request, null, null, intent);
     }
 
     /**
@@ -986,15 +972,54 @@ public class LocationManager {
      * @throws IllegalArgumentException if provider is null or doesn't exist
      * @throws IllegalArgumentException if intent is null
      * @throws SecurityException if no suitable permission is present for the provider
+     * @deprecated use the {@link LocationRequest} class instead
      */
+    @Deprecated
     public void requestSingleUpdate(Criteria criteria, PendingIntent intent) {
-        if (criteria == null) {
-            throw new IllegalArgumentException("criteria==null");
+        checkCriteria(criteria);
+        checkPendingIntent(intent);
+
+        LocationRequest request = LocationRequest.createFromDeprecatedCriteria(
+                criteria, 0, 0, true);
+        requestLocationUpdates(request, null, null, intent);
+    }
+
+    public void requestLocationUpdates(LocationRequest request, LocationListener listener,
+            Looper looper) {
+        checkListener(listener);
+        requestLocationUpdates(request, listener, looper, null);
+    }
+
+    public void requestLocationUpdates(LocationRequest request, PendingIntent intent) {
+        checkPendingIntent(intent);
+        requestLocationUpdates(request, null, null, intent);
+    }
+
+    private ListenerTransport wrapListener(LocationListener listener, Looper looper) {
+        if (listener == null) return null;
+        synchronized (mListeners) {
+            ListenerTransport transport = mListeners.get(listener);
+            if (transport == null) {
+                transport = new ListenerTransport(listener, looper);
+            }
+            mListeners.put(listener, transport);
+            return transport;
         }
-        if (intent == null) {
-            throw new IllegalArgumentException("intent==null");
-        }
-        _requestLocationUpdates(null, criteria, 0L, 0.0f, true, intent);
+    }
+
+    private void requestLocationUpdates(LocationRequest request, LocationListener listener,
+            Looper looper, PendingIntent intent) {
+
+        String packageName = mContext.getPackageName();
+
+        // wrap the listener class
+        ListenerTransport transport = wrapListener(listener, looper);
+
+        try {
+            mService.requestLocationUpdates(request, transport, intent, packageName);
+       } catch (RemoteException e) {
+           Log.e(TAG, "RemoteException", e);
+       }
     }
 
     /**
@@ -1006,19 +1031,19 @@ public class LocationManager {
      * @throws IllegalArgumentException if listener is null
      */
     public void removeUpdates(LocationListener listener) {
-        if (listener == null) {
-            throw new IllegalArgumentException("listener==null");
+        checkListener(listener);
+        String packageName = mContext.getPackageName();
+
+        ListenerTransport transport;
+        synchronized (mListeners) {
+            transport = mListeners.remove(listener);
         }
-        if (false) {
-            Log.d(TAG, "removeUpdates: listener = " + listener);
-        }
+        if (transport == null) return;
+
         try {
-            ListenerTransport transport = mListeners.remove(listener);
-            if (transport != null) {
-                mService.removeUpdates(transport);
-            }
-        } catch (RemoteException ex) {
-            Log.e(TAG, "removeUpdates: DeadObjectException", ex);
+            mService.removeUpdates(transport, null, packageName);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException", e);
         }
     }
 
@@ -1031,16 +1056,13 @@ public class LocationManager {
      * @throws IllegalArgumentException if intent is null
      */
     public void removeUpdates(PendingIntent intent) {
-        if (intent == null) {
-            throw new IllegalArgumentException("intent==null");
-        }
-        if (false) {
-            Log.d(TAG, "removeUpdates: intent = " + intent);
-        }
+        checkPendingIntent(intent);
+        String packageName = mContext.getPackageName();
+
         try {
-            mService.removeUpdatesPI(intent);
-        } catch (RemoteException ex) {
-            Log.e(TAG, "removeUpdates: RemoteException", ex);
+            mService.removeUpdates(null, intent, packageName);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException", e);
         }
     }
 
@@ -1086,20 +1108,31 @@ public class LocationManager {
      *
      * @throws SecurityException if no permission exists for the required
      * providers.
+     * @deprecated use the {@link LocationRequest} class instead
      */
-    public void addProximityAlert(double latitude, double longitude,
-        float radius, long expiration, PendingIntent intent) {
-        if (false) {
-            Log.d(TAG, "addProximityAlert: latitude = " + latitude +
-                ", longitude = " + longitude + ", radius = " + radius +
-                ", expiration = " + expiration +
-                ", intent = " + intent);
-        }
+    @Deprecated
+    public void addProximityAlert(double latitude, double longitude, float radius, long expiration,
+            PendingIntent intent) {
+        checkPendingIntent(intent);
+        if (expiration < 0) expiration = Long.MAX_VALUE;
+
+        Geofence fence = Geofence.createCircle(latitude, longitude, radius);
+        LocationRequest request = new LocationRequest().setExpireIn(expiration);
         try {
-            mService.addProximityAlert(latitude, longitude, radius, expiration, intent,
-                    mContext.getPackageName());
-        } catch (RemoteException ex) {
-            Log.e(TAG, "addProximityAlert: RemoteException", ex);
+            mService.requestGeofence(request, fence, intent, mContext.getPackageName());
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException", e);
+        }
+    }
+
+    public void requestGeofence(LocationRequest request, Geofence fence, PendingIntent intent) {
+        checkPendingIntent(intent);
+        checkGeofence(fence);
+
+        try {
+            mService.requestGeofence(request, fence, intent, mContext.getPackageName());
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException", e);
         }
     }
 
@@ -1108,15 +1141,40 @@ public class LocationManager {
      *
      * @param intent the PendingIntent that no longer needs to be notified of
      * proximity alerts
+     * @deprecated use the {@link LocationRequest} class instead
      */
+    @Deprecated
     public void removeProximityAlert(PendingIntent intent) {
-        if (false) {
-            Log.d(TAG, "removeProximityAlert: intent = " + intent);
-        }
+        checkPendingIntent(intent);
+        String packageName = mContext.getPackageName();
+
         try {
-            mService.removeProximityAlert(intent);
-        } catch (RemoteException ex) {
-            Log.e(TAG, "removeProximityAlert: RemoteException", ex);
+            mService.removeGeofence(null, intent, packageName);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException", e);
+        }
+    }
+
+    public void removeGeofence(Geofence fence, PendingIntent intent) {
+        checkPendingIntent(intent);
+        checkGeofence(fence);
+        String packageName = mContext.getPackageName();
+
+        try {
+            mService.removeGeofence(fence, intent, packageName);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException", e);
+        }
+    }
+
+    public void removeAllGeofences(PendingIntent intent) {
+        checkPendingIntent(intent);
+        String packageName = mContext.getPackageName();
+
+        try {
+            mService.removeGeofence(null, intent, packageName);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException", e);
         }
     }
 
@@ -1130,18 +1188,29 @@ public class LocationManager {
      *
      * @throws SecurityException if no suitable permission is present for the provider.
      * @throws IllegalArgumentException if provider is null
+     * @deprecated use the {@link LocationRequest} class instead
      */
+    @Deprecated
     public boolean isProviderEnabled(String provider) {
-        if (provider == null) {
-            throw new IllegalArgumentException("provider==null");
-        }
+        checkProvider(provider);
+
         try {
             return mService.isProviderEnabled(provider);
-        } catch (RemoteException ex) {
-            Log.e(TAG, "isProviderEnabled: RemoteException", ex);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException", e);
             return false;
         }
     }
+
+    public Location getLastLocation(LocationRequest request) {
+        try {
+            return mService.getLastLocation(request);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException", e);
+            return null;
+        }
+    }
+
 
     /**
      * Returns a Location indicating the data from the last known
@@ -1157,15 +1226,49 @@ public class LocationManager {
      *
      * @throws SecurityException if no suitable permission is present for the provider.
      * @throws IllegalArgumentException if provider is null or doesn't exist
+     * @deprecated use the {@link LocationRequest} class instead
      */
+    @Deprecated
     public Location getLastKnownLocation(String provider) {
-        if (provider == null) {
-            throw new IllegalArgumentException("provider==null");
-        }
+        checkProvider(provider);
+
+        LocationRequest request = LocationRequest.createFromDeprecatedProvider(
+                provider, 0, 0, true);
+
         try {
-            return mService.getLastKnownLocation(provider);
-        } catch (RemoteException ex) {
-            Log.e(TAG, "getLastKnowLocation: RemoteException", ex);
+            return mService.getLastLocation(request);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException", e);
+            return null;
+        }
+    }
+
+    /**
+     * Return the last know Location that satisfies the given
+     * criteria. This can be done without starting the provider.
+     * Note that this location could
+     * be out-of-date, for example if the device was turned off and
+     * moved to another location.
+     *
+     * <p> If no location is found that satisfies the criteria, null is returned
+     *
+     * @param criteria location criteria
+     * @return the last known location that satisfies criteria, or null
+     *
+     * @throws SecurityException if no suitable permission is present
+     * @throws IllegalArgumentException if criteria is null
+     * @deprecated use the {@link LocationRequest} class instead
+     */
+    @Deprecated
+    public Location getLastKnownLocation(Criteria criteria) {
+        checkCriteria(criteria);
+
+        LocationRequest request = LocationRequest.createFromDeprecatedCriteria(
+                criteria, 0, 0, true);
+        try {
+            return mService.getLastLocation(request);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException", e);
             return null;
         }
     }
@@ -1190,16 +1293,23 @@ public class LocationManager {
      * or the {@link android.provider.Settings.Secure#ALLOW_MOCK_LOCATION
      * Settings.Secure.ALLOW_MOCK_LOCATION} system setting is not enabled
      * @throws IllegalArgumentException if a provider with the given name already exists
+     * @deprecated use the {@link LocationRequest} class instead
      */
+    @Deprecated
     public void addTestProvider(String name, boolean requiresNetwork, boolean requiresSatellite,
-        boolean requiresCell, boolean hasMonetaryCost, boolean supportsAltitude,
-        boolean supportsSpeed, boolean supportsBearing, int powerRequirement, int accuracy) {
+            boolean requiresCell, boolean hasMonetaryCost, boolean supportsAltitude,
+            boolean supportsSpeed, boolean supportsBearing, int powerRequirement, int accuracy) {
+        ProviderProperties properties = new ProviderProperties(requiresNetwork,
+                requiresSatellite, requiresCell, hasMonetaryCost, supportsAltitude, supportsSpeed,
+                supportsBearing, powerRequirement, accuracy);
+        if (name.matches(LocationProvider.BAD_CHARS_REGEX)) {
+            throw new IllegalArgumentException("provider name contains illegal character: " + name);
+        }
+
         try {
-            mService.addTestProvider(name, requiresNetwork, requiresSatellite, requiresCell,
-                hasMonetaryCost, supportsAltitude, supportsSpeed, supportsBearing, powerRequirement,
-                accuracy);
-        } catch (RemoteException ex) {
-            Log.e(TAG, "addTestProvider: RemoteException", ex);
+            mService.addTestProvider(name, properties);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException", e);
         }
     }
 
@@ -1212,12 +1322,14 @@ public class LocationManager {
      * or the {@link android.provider.Settings.Secure#ALLOW_MOCK_LOCATION
      * Settings.Secure.ALLOW_MOCK_LOCATION}} system setting is not enabled
      * @throws IllegalArgumentException if no provider with the given name exists
+     * @deprecated use the {@link LocationRequest} class instead
      */
+    @Deprecated
     public void removeTestProvider(String provider) {
         try {
             mService.removeTestProvider(provider);
-        } catch (RemoteException ex) {
-            Log.e(TAG, "removeTestProvider: RemoteException", ex);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException", e);
         }
     }
 
@@ -1236,23 +1348,27 @@ public class LocationManager {
      * Settings.Secure.ALLOW_MOCK_LOCATION}} system setting is not enabled
      * @throws IllegalArgumentException if no provider with the given name exists
      * @throws IllegalArgumentException if the location is incomplete
+     * @deprecated use the {@link LocationRequest} class instead
      */
+    @Deprecated
     public void setTestProviderLocation(String provider, Location loc) {
         if (!loc.isComplete()) {
+            IllegalArgumentException e = new IllegalArgumentException(
+                    "Incomplete location object, missing timestamp or accuracy? " + loc);
             if (mContext.getApplicationInfo().targetSdkVersion <= Build.VERSION_CODES.JELLY_BEAN) {
-                // for backwards compatibility, allow mock locations that are incomplete
-                Log.w(TAG, "Incomplete Location object", new Throwable());
+                // just log on old platform (for backwards compatibility)
+                Log.w(TAG, e);
                 loc.makeComplete();
             } else {
-                throw new IllegalArgumentException(
-                        "Location object not complete. Missing timestamps or accuracy?");
+                // really throw it!
+                throw e;
             }
         }
 
         try {
             mService.setTestProviderLocation(provider, loc);
-        } catch (RemoteException ex) {
-            Log.e(TAG, "setTestProviderLocation: RemoteException", ex);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException", e);
         }
     }
 
@@ -1265,12 +1381,14 @@ public class LocationManager {
      * or the {@link android.provider.Settings.Secure#ALLOW_MOCK_LOCATION
      * Settings.Secure.ALLOW_MOCK_LOCATION}} system setting is not enabled
      * @throws IllegalArgumentException if no provider with the given name exists
+     * @deprecated use the {@link LocationRequest} class instead
      */
+    @Deprecated
     public void clearTestProviderLocation(String provider) {
         try {
             mService.clearTestProviderLocation(provider);
-        } catch (RemoteException ex) {
-            Log.e(TAG, "clearTestProviderLocation: RemoteException", ex);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException", e);
         }
     }
 
@@ -1285,12 +1403,14 @@ public class LocationManager {
      * or the {@link android.provider.Settings.Secure#ALLOW_MOCK_LOCATION
      * Settings.Secure.ALLOW_MOCK_LOCATION}} system setting is not enabled
      * @throws IllegalArgumentException if no provider with the given name exists
+     * @deprecated use the {@link LocationRequest} class instead
      */
+    @Deprecated
     public void setTestProviderEnabled(String provider, boolean enabled) {
         try {
             mService.setTestProviderEnabled(provider, enabled);
-        } catch (RemoteException ex) {
-            Log.e(TAG, "setTestProviderEnabled: RemoteException", ex);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException", e);
         }
     }
 
@@ -1303,14 +1423,15 @@ public class LocationManager {
      * or the {@link android.provider.Settings.Secure#ALLOW_MOCK_LOCATION
      * Settings.Secure.ALLOW_MOCK_LOCATION}} system setting is not enabled
      * @throws IllegalArgumentException if no provider with the given name exists
+     * @deprecated use the {@link LocationRequest} class instead
      */
+    @Deprecated
     public void clearTestProviderEnabled(String provider) {
         try {
             mService.clearTestProviderEnabled(provider);
-        } catch (RemoteException ex) {
-            Log.e(TAG, "clearTestProviderEnabled: RemoteException", ex);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException", e);
         }
-
     }
 
     /**
@@ -1326,12 +1447,14 @@ public class LocationManager {
      * or the {@link android.provider.Settings.Secure#ALLOW_MOCK_LOCATION
      * Settings.Secure.ALLOW_MOCK_LOCATION}} system setting is not enabled
      * @throws IllegalArgumentException if no provider with the given name exists
+     * @deprecated use the {@link LocationRequest} class instead
      */
+    @Deprecated
     public void setTestProviderStatus(String provider, int status, Bundle extras, long updateTime) {
         try {
             mService.setTestProviderStatus(provider, status, extras, updateTime);
-        } catch (RemoteException ex) {
-            Log.e(TAG, "setTestProviderStatus: RemoteException", ex);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException", e);
         }
     }
 
@@ -1344,12 +1467,14 @@ public class LocationManager {
      * or the {@link android.provider.Settings.Secure#ALLOW_MOCK_LOCATION
      * Settings.Secure.ALLOW_MOCK_LOCATION}} system setting is not enabled
      * @throws IllegalArgumentException if no provider with the given name exists
+     * @deprecated use the {@link LocationRequest} class instead
      */
+    @Deprecated
     public void clearTestProviderStatus(String provider) {
         try {
             mService.clearTestProviderStatus(provider);
-        } catch (RemoteException ex) {
-            Log.e(TAG, "clearTestProviderStatus: RemoteException", ex);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException", e);
         }
     }
 
@@ -1587,7 +1712,9 @@ public class LocationManager {
      * The provider may optionally fill the extras Bundle with results from the command.
      *
      * @return true if the command succeeds.
+     * @deprecated use the {@link LocationRequest} class instead
      */
+    @Deprecated
     public boolean sendExtraCommand(String provider, String command, Bundle extras) {
         try {
             return mService.sendExtraCommand(provider, command, extras);
@@ -1612,4 +1739,41 @@ public class LocationManager {
         }
     }
 
+    private static void checkProvider(String provider) {
+        if (provider == null) {
+            throw new IllegalArgumentException("invalid provider: " + provider);
+        }
+    }
+
+    private static void checkCriteria(Criteria criteria) {
+        if (criteria == null) {
+            throw new IllegalArgumentException("invalid criteria: " + criteria);
+        }
+    }
+    private static void checkListener(LocationListener listener) {
+        if (listener == null) {
+            throw new IllegalArgumentException("invalid listener: " + listener);
+        }
+    }
+
+    private void checkPendingIntent(PendingIntent intent) {
+        if (intent == null) {
+            throw new IllegalArgumentException("invalid pending intent: " + intent);
+        }
+        if (!intent.isTargetedToPackage()) {
+            IllegalArgumentException e = new IllegalArgumentException(
+                    "pending intent msut be targeted to package");
+            if (mContext.getApplicationInfo().targetSdkVersion > Build.VERSION_CODES.JELLY_BEAN) {
+                throw e;
+            } else {
+                Log.w(TAG, e);
+            }
+        }
+    }
+
+    private static void checkGeofence(Geofence fence) {
+        if (fence == null) {
+            throw new IllegalArgumentException("invalid geofence: " + fence);
+        }
+    }
 }
