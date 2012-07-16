@@ -123,6 +123,9 @@ public:
     virtual status_t drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int32_t* yDivs,
             const uint32_t* colors, uint32_t width, uint32_t height, int8_t numColors,
             float left, float top, float right, float bottom, SkPaint* paint);
+    status_t drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int32_t* yDivs,
+            const uint32_t* colors, uint32_t width, uint32_t height, int8_t numColors,
+            float left, float top, float right, float bottom, int alpha, SkXfermode::Mode mode);
     virtual status_t drawColor(int color, SkXfermode::Mode mode);
     virtual status_t drawRect(float left, float top, float right, float bottom, SkPaint* paint);
     virtual status_t drawRoundRect(float left, float top, float right, float bottom,
@@ -212,6 +215,54 @@ protected:
      * @param rect The bounds of the layer
      */
     void drawTextureLayer(Layer* layer, const Rect& rect);
+
+    /**
+     * Gets the alpha and xfermode out of a paint object. If the paint is null
+     * alpha will be 255 and the xfermode will be SRC_OVER.
+     *
+     * @param paint The paint to extract values from
+     * @param alpha Where to store the resulting alpha
+     * @param mode Where to store the resulting xfermode
+     */
+    inline void getAlphaAndMode(SkPaint* paint, int* alpha, SkXfermode::Mode* mode);
+
+    /**
+     * Gets the alpha and xfermode out of a paint object. If the paint is null
+     * alpha will be 255 and the xfermode will be SRC_OVER. This method does
+     * not multiply the paint's alpha by the current snapshot's alpha.
+     *
+     * @param paint The paint to extract values from
+     * @param alpha Where to store the resulting alpha
+     * @param mode Where to store the resulting xfermode
+     */
+    static inline void getAlphaAndModeDirect(SkPaint* paint, int* alpha, SkXfermode::Mode* mode) {
+        if (paint) {
+            *mode = getXfermode(paint->getXfermode());
+
+            // Skia draws using the color's alpha channel if < 255
+            // Otherwise, it uses the paint's alpha
+            int color = paint->getColor();
+            *alpha = (color >> 24) & 0xFF;
+            if (*alpha == 255) {
+                *alpha = paint->getAlpha();
+            }
+        } else {
+            *mode = SkXfermode::kSrcOver_Mode;
+            *alpha = 255;
+        }
+    }
+
+    /**
+     * Safely retrieves the mode from the specified xfermode. If the specified
+     * xfermode is null, the mode is assumed to be SkXfermode::kSrcOver_Mode.
+     */
+    static inline SkXfermode::Mode getXfermode(SkXfermode* mode) {
+        SkXfermode::Mode resultMode;
+        if (!SkXfermode::AsMode(mode, &resultMode)) {
+            resultMode = SkXfermode::kSrcOver_Mode;
+        }
+        return resultMode;
+    }
 
 private:
     /**
@@ -471,16 +522,6 @@ private:
     void resetDrawTextureTexCoords(float u1, float v1, float u2, float v2);
 
     /**
-     * Gets the alpha and xfermode out of a paint object. If the paint is null
-     * alpha will be 255 and the xfermode will be SRC_OVER.
-     *
-     * @param paint The paint to extract values from
-     * @param alpha Where to store the resulting alpha
-     * @param mode Where to store the resulting xfermode
-     */
-    inline void getAlphaAndMode(SkPaint* paint, int* alpha, SkXfermode::Mode* mode);
-
-    /**
      * Binds the specified texture. The texture unit must have been selected
      * prior to calling this method.
      */
@@ -502,12 +543,6 @@ private:
      */
     inline void chooseBlending(bool blend, SkXfermode::Mode mode, ProgramDescription& description,
             bool swapSrcDst = false);
-
-    /**
-     * Safely retrieves the mode from the specified xfermode. If the specified
-     * xfermode is null, the mode is assumed to be SkXfermode::kSrcOver_Mode.
-     */
-    inline SkXfermode::Mode getXfermode(SkXfermode* mode);
 
     /**
      * Use the specified program with the current GL context. If the program is already
