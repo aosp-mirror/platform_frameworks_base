@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.server.input;
-
-import com.android.server.wm.WindowManagerService;
+package android.view;
 
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.RemoteException;
+import android.view.IInputFilter;
 import android.view.InputEvent;
 import android.view.InputEventConsistencyVerifier;
 import android.view.KeyEvent;
@@ -94,14 +94,13 @@ import android.view.WindowManagerPolicy;
  * It may be prudent to disable automatic key repeating for synthetic key events
  * by setting the {@link WindowManagerPolicy#FLAG_DISABLE_KEY_REPEAT} policy flag.
  * </p>
+ *
+ * @hide
  */
-public abstract class InputFilter {
+public abstract class InputFilter extends IInputFilter.Stub {
     private static final int MSG_INSTALL = 1;
     private static final int MSG_UNINSTALL = 2;
     private static final int MSG_INPUT_EVENT = 3;
-
-    private final H mH;
-    private Host mHost;
 
     // Consistency verifiers for debugging purposes.
     private final InputEventConsistencyVerifier mInboundInputEventConsistencyVerifier =
@@ -114,6 +113,10 @@ public abstract class InputFilter {
                     new InputEventConsistencyVerifier(this,
                             InputEventConsistencyVerifier.FLAG_RAW_DEVICE_INPUT,
                             "InputFilter#OutboundInputEventConsistencyVerifier") : null;
+
+    private final H mH;
+
+    private IInputFilterHost mHost;
 
     /**
      * Creates the input filter.
@@ -130,7 +133,7 @@ public abstract class InputFilter {
      *
      * @param host The input filter host environment.
      */
-    final void install(Host host) {
+    public final void install(IInputFilterHost host) {
         mH.obtainMessage(MSG_INSTALL, host).sendToTarget();
     }
 
@@ -138,7 +141,7 @@ public abstract class InputFilter {
      * Called when the input filter is uninstalled.
      * This method is guaranteed to be non-reentrant.
      */
-    final void uninstall() {
+    public final void uninstall() {
         mH.obtainMessage(MSG_UNINSTALL).sendToTarget();
     }
 
@@ -149,7 +152,7 @@ public abstract class InputFilter {
      *
      * @param event The input event to enqueue.
      */
-    final void filterInputEvent(InputEvent event, int policyFlags) {
+    final public void filterInputEvent(InputEvent event, int policyFlags) {
         mH.obtainMessage(MSG_INPUT_EVENT, policyFlags, 0, event).sendToTarget();
     }
 
@@ -170,7 +173,11 @@ public abstract class InputFilter {
         if (mOutboundInputEventConsistencyVerifier != null) {
             mOutboundInputEventConsistencyVerifier.onInputEvent(event, 0);
         }
-        mHost.sendInputEvent(event, policyFlags);
+        try {
+            mHost.sendInputEvent(event, policyFlags);
+        } catch (RemoteException re) {
+            /* ignore */
+        }
     }
 
     /**
@@ -218,7 +225,7 @@ public abstract class InputFilter {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_INSTALL:
-                    mHost = (Host)msg.obj;
+                    mHost = (IInputFilterHost) msg.obj;
                     if (mInboundInputEventConsistencyVerifier != null) {
                         mInboundInputEventConsistencyVerifier.reset();
                     }
@@ -250,9 +257,5 @@ public abstract class InputFilter {
                 }
             }
         }
-    }
-
-    interface Host {
-        public void sendInputEvent(InputEvent event, int policyFlags);
     }
 }
