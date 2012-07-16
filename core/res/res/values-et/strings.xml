@@ -243,6 +243,14 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"Võimaldab rakendusel teada saada süsteemi sisemist olekut. Pahatahtlikud rakendused võivad hankida mitmesugust privaatset ja turvateavet, mida neil tavaliselt kunagi vaja ei lähe."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"ekraanisisu taastamine"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Võimaldab rakendusel kätte saada aktiivse akna sisu. Pahatahtlikud rakendused võivad hankida kogu akna sisu ja uurida kogu selle teksti, välja arvatud paroole."</string>
+    <!-- no translation found for permlab_retrieve_window_info (8532295199112519378) -->
+    <skip />
+    <!-- no translation found for permdesc_retrieve_window_info (4998836370424186849) -->
+    <skip />
+    <!-- no translation found for permlab_filter_events (8675535648807427389) -->
+    <skip />
+    <!-- no translation found for permdesc_filter_events (8006236315888347680) -->
+    <skip />
     <string name="permlab_shutdown" msgid="7185747824038909016">"osaline väljalülitamine"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Lülitab tegevushalduri väljalülitusolekusse. Ei lülita lõplikult välja."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"väldi rakenduste ümberlülitamist"</string>

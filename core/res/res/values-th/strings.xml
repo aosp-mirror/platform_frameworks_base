@@ -243,6 +243,14 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"อนุญาตให้แอปพลิเคชันเรียกดูสถานะภายในของระบบ แอปพลิเคชันที่เป็นอันตรายอาจเรียกดูข้อมูลส่วนบุคคลและข้อมูลที่ต้องรักษาความปลอดภัยหลากหลายประเภทที่ปกติแล้วไม่จำเป็นต้องใช้แต่อย่างใด"</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"ดึงเนื้อหาหน้าจอ"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"อนุญาตให้แอปพลิเคชันดึงเนื้อหาของหน้าต่างที่ใช้งานอยู่ แอปพลิเคชันที่เป็นอันตรายอาจดึงเนื้อหาจากหน้าต่างทั้งหมดและตรวจสอบข้อความทั้งหมดยกเว้นรหัสผ่าน"</string>
+    <!-- no translation found for permlab_retrieve_window_info (8532295199112519378) -->
+    <skip />
+    <!-- no translation found for permdesc_retrieve_window_info (4998836370424186849) -->
+    <skip />
+    <!-- no translation found for permlab_filter_events (8675535648807427389) -->
+    <skip />
+    <!-- no translation found for permdesc_filter_events (8006236315888347680) -->
+    <skip />
     <string name="permlab_shutdown" msgid="7185747824038909016">"ปิดการทำงานบางส่วน"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"กำหนดให้ตัวจัดการกิจกรรมอยู่ในสถานะปิดระบบ โดยไม่ได้ปิดระบบอย่างสมบูรณ์"</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"ป้องกันการเปลี่ยนแอปพลิเคชัน"</string>
@@ -1237,7 +1245,7 @@
     <string name="description_direction_left" msgid="7207478719805562165">"เลื่อนไปทางซ้ายเพื่อ <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>"</string>
     <string name="description_direction_right" msgid="8034433242579600980">"เลื่อนไปทางขวาเพื่อ <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>"</string>
     <string name="description_target_unlock" msgid="2228524900439801453">"ปลดล็อก"</string>
-    <string name="description_target_camera" msgid="969071997552486814">"กล้องถ่ายรูป"</string>
+    <string name="description_target_camera" msgid="969071997552486814">"กล้อง"</string>
     <string name="description_target_silent" msgid="893551287746522182">"ปิดเสียง"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"เปิดเสียง"</string>
     <string name="description_target_search" msgid="3091587249776033139">"ค้นหา"</string>

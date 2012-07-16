@@ -243,6 +243,14 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"Дозволяє програмі отримувати дані про внутрішній стан системи. Шкідливі програми можуть отримувати значну кількість особистої та конфіденційної інформації, яка для них не призначена."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"отримувати вміст екрана"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Дозволяє програмі отримувати вміст активного вікна. Шкідливі програми можуть отримувати весь вміст вікна та вивчати весь його текст, окрім паролів."</string>
+    <!-- no translation found for permlab_retrieve_window_info (8532295199112519378) -->
+    <skip />
+    <!-- no translation found for permdesc_retrieve_window_info (4998836370424186849) -->
+    <skip />
+    <!-- no translation found for permlab_filter_events (8675535648807427389) -->
+    <skip />
+    <!-- no translation found for permdesc_filter_events (8006236315888347680) -->
+    <skip />
     <string name="permlab_shutdown" msgid="7185747824038909016">"частк. заверш. роб."</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Переводить диспетчер дій у стан завершення роботи. Не виконує повне завершення роботи."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"запобіг. зміні програм"</string>

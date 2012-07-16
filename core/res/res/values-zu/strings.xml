@@ -243,6 +243,14 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"Ivumela insiza ukuthi ithole kabusha ingaphakathi lesistimu. izinsiza ezinobungozi zingathola kabusha inqwaba yolwazi oluyimfihlo noluvikelekile ezingajwayele ukuthi ziludinge."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"letha okuqukethwe kwesikrini"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Ivumela insiza ukuthi ithole okuqukethe kwi-Window. Izinsiza ezinobungozi zingathola kabush iwindi eliphelele bese ibheka konke okuqukethwe ngaphandle kwaaaphasiwedi."</string>
+    <!-- no translation found for permlab_retrieve_window_info (8532295199112519378) -->
+    <skip />
+    <!-- no translation found for permdesc_retrieve_window_info (4998836370424186849) -->
+    <skip />
+    <!-- no translation found for permlab_filter_events (8675535648807427389) -->
+    <skip />
+    <!-- no translation found for permdesc_filter_events (8006236315888347680) -->
+    <skip />
     <string name="permlab_shutdown" msgid="7185747824038909016">"ukuvala shaqa kwengxenye"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Ibeka imeneja yomsebenzi kwisimo sokuvala shaqa. Ayenzi ukuvala shaqa okuphelele."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"gwema ukushintsha kohlelo lokusebenza"</string>

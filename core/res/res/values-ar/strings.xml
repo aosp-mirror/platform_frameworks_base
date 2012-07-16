@@ -243,6 +243,14 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"للسماح للتطبيق باسترداد الحالة الداخلية للنظام. قد تسترد التطبيقات الضارة مجموعة كبيرة من المعلومات الخاصة والآمنة التي لا حاجة لها في العادة على الإطلاق."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"استرداد محتوى الشاشة"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"للسماح للتطبيق باسترداد محتوى النافذة النشطة. يمكن للبرامج الضارة استرداد محتوى النافذة بالكامل وفحص جميع النصوص الموجودة بها باستثناء كلمات المرور."</string>
+    <!-- no translation found for permlab_retrieve_window_info (8532295199112519378) -->
+    <skip />
+    <!-- no translation found for permdesc_retrieve_window_info (4998836370424186849) -->
+    <skip />
+    <!-- no translation found for permlab_filter_events (8675535648807427389) -->
+    <skip />
+    <!-- no translation found for permdesc_filter_events (8006236315888347680) -->
+    <skip />
     <string name="permlab_shutdown" msgid="7185747824038909016">"إيقاف تشغيل جزئي"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"لوضع مدير الأنشطة في حالة إيقاف التشغيل. لا يتم تنفيذ إيقاف تشغيل كامل."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"منع التبديل بين التطبيقات"</string>
