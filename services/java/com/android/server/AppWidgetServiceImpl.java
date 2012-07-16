@@ -819,7 +819,10 @@ class AppWidgetServiceImpl {
             return;
         }
 
-        int bitmapMemoryUsage = views.estimateMemoryUsage();
+        int bitmapMemoryUsage = 0;
+        if (views != null) {
+            bitmapMemoryUsage = views.estimateMemoryUsage();
+        }
         if (bitmapMemoryUsage > mMaxWidgetBitmapMemory) {
             throw new IllegalArgumentException("RemoteViews for widget update exceeds maximum" +
                     " bitmap memory usage (used: " + bitmapMemoryUsage + ", max: " +
