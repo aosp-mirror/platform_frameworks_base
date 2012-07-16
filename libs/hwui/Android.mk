@@ -41,6 +41,8 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 
 	LOCAL_CFLAGS += -DUSE_OPENGL_RENDERER -DGL_GLEXT_PROTOTYPES
 	LOCAL_CFLAGS += -fvisibility=hidden
+	# Uncomment the following line to use `perf`
+	# LOCAL_CFLAGS +=  -fno-omit-frame-pointer -marm -mapcs
 	LOCAL_MODULE_CLASS := SHARED_LIBRARIES
 	LOCAL_SHARED_LIBRARIES := libcutils libutils libGLESv2 libskia libui
 	LOCAL_MODULE := libhwui
