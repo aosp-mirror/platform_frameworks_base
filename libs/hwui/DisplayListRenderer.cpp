@@ -486,7 +486,8 @@ void DisplayList::output(OpenGLRenderer& renderer, uint32_t level) {
                 float top = getFloat();
                 float right = getFloat();
                 float bottom = getFloat();
-                SkPaint* paint = getPaint(renderer);
+                int alpha = getInt();
+                SkXfermode::Mode mode = (SkXfermode::Mode) getInt();
                 ALOGD("%s%s %.2f, %.2f, %.2f, %.2f", (char*) indent, OP_NAMES[op],
                         left, top, right, bottom);
             }
@@ -1089,11 +1090,14 @@ status_t DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flag
                 float top = getFloat();
                 float right = getFloat();
                 float bottom = getFloat();
-                SkPaint* paint = getPaint(renderer);
+
+                int alpha = getInt();
+                SkXfermode::Mode mode = (SkXfermode::Mode) getInt();
 
                 DISPLAY_LIST_LOGD("%s%s", (char*) indent, OP_NAMES[op]);
                 drawGlStatus |= renderer.drawPatch(bitmap, xDivs, yDivs, colors,
-                        xDivsCount, yDivsCount, numColors, left, top, right, bottom, paint);
+                        xDivsCount, yDivsCount, numColors, left, top, right, bottom,
+                        alpha, mode);
             }
             break;
             case DrawColor: {
@@ -1570,6 +1574,10 @@ status_t DisplayListRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, in
 status_t DisplayListRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs,
         const int32_t* yDivs, const uint32_t* colors, uint32_t width, uint32_t height,
         int8_t numColors, float left, float top, float right, float bottom, SkPaint* paint) {
+    int alpha;
+    SkXfermode::Mode mode;
+    OpenGLRenderer::getAlphaAndModeDirect(paint, &alpha, &mode);
+
     const bool reject = quickReject(left, top, right, bottom);
     uint32_t* location = addOp(DisplayList::DrawPatch, reject);
     addBitmap(bitmap);
@@ -1577,7 +1585,8 @@ status_t DisplayListRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs,
     addInts(yDivs, height);
     addUInts(colors, numColors);
     addBounds(left, top, right, bottom);
-    addPaint(paint);
+    addInt(alpha);
+    addInt(mode);
     addSkip(location);
     return DrawGlInfo::kStatusDone;
 }

@@ -1677,9 +1677,22 @@ status_t OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
 status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int32_t* yDivs,
         const uint32_t* colors, uint32_t width, uint32_t height, int8_t numColors,
         float left, float top, float right, float bottom, SkPaint* paint) {
+    int alpha;
+    SkXfermode::Mode mode;
+    getAlphaAndModeDirect(paint, &alpha, &mode);
+
+    return drawPatch(bitmap, xDivs, yDivs, colors, width, height, numColors,
+            left, top, right, bottom, alpha, mode);
+}
+
+status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int32_t* yDivs,
+        const uint32_t* colors, uint32_t width, uint32_t height, int8_t numColors,
+        float left, float top, float right, float bottom, int alpha, SkXfermode::Mode mode) {
     if (quickReject(left, top, right, bottom)) {
         return DrawGlInfo::kStatusDone;
     }
+
+    alpha *= mSnapshot->alpha;
 
     mCaches.activeTexture(0);
     Texture* texture = mCaches.textureCache.get(bitmap);
@@ -1687,10 +1700,6 @@ status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const
     const AutoTexture autoCleanup(texture);
     texture->setWrap(GL_CLAMP_TO_EDGE, true);
     texture->setFilter(GL_LINEAR, true);
-
-    int alpha;
-    SkXfermode::Mode mode;
-    getAlphaAndMode(paint, &alpha, &mode);
 
     const Patch* mesh = mCaches.patchCache.get(bitmap->width(), bitmap->height(),
             right - left, bottom - top, xDivs, yDivs, colors, width, height, numColors);
@@ -2921,29 +2930,8 @@ void OpenGLRenderer::resetDrawTextureTexCoords(float u1, float v1, float u2, flo
 }
 
 void OpenGLRenderer::getAlphaAndMode(SkPaint* paint, int* alpha, SkXfermode::Mode* mode) {
-    if (paint) {
-        *mode = getXfermode(paint->getXfermode());
-
-        // Skia draws using the color's alpha channel if < 255
-        // Otherwise, it uses the paint's alpha
-        int color = paint->getColor();
-        *alpha = (color >> 24) & 0xFF;
-        if (*alpha == 255) {
-            *alpha = paint->getAlpha();
-        }
-    } else {
-        *mode = SkXfermode::kSrcOver_Mode;
-        *alpha = 255;
-    }
+    getAlphaAndModeDirect(paint, alpha,  mode);
     *alpha *= mSnapshot->alpha;
-}
-
-SkXfermode::Mode OpenGLRenderer::getXfermode(SkXfermode* mode) {
-    SkXfermode::Mode resultMode;
-    if (!SkXfermode::AsMode(mode, &resultMode)) {
-        resultMode = SkXfermode::kSrcOver_Mode;
-    }
-    return resultMode;
 }
 
 }; // namespace uirenderer
