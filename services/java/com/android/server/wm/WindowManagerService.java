@@ -9415,12 +9415,6 @@ public class WindowManagerService extends IWindowManager.Stub
             mAnimator.mScreenRotationAnimation = new ScreenRotationAnimation(mContext,
                     mFxSession, inTransaction, mCurDisplayWidth, mCurDisplayHeight,
                     mDisplay.getRotation());
-
-            if (!mAnimator.mScreenRotationAnimation.hasScreenshot()) {
-                Surface.freezeDisplay(0);
-            }
-        } else {
-            Surface.freezeDisplay(0);
         }
     }
 
@@ -9463,7 +9457,6 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             updateRotation = true;
         }
-        Surface.unfreezeDisplay(0);
 
         mInputMonitor.thawInputDispatchingLw();
 
