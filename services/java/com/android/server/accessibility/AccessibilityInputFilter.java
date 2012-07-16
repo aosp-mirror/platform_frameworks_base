@@ -16,13 +16,12 @@
 
 package com.android.server.accessibility;
 
-import com.android.server.input.InputFilter;
-
 import android.content.Context;
 import android.os.PowerManager;
 import android.util.Slog;
 import android.view.InputDevice;
 import android.view.InputEvent;
+import android.view.InputFilter;
 import android.view.MotionEvent;
 import android.view.WindowManagerPolicy;
 import android.view.accessibility.AccessibilityEvent;

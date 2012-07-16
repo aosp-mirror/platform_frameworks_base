@@ -1678,6 +1678,30 @@ public final class ViewRootImpl implements ViewParent,
                     layoutRequested = true;
                 }
             }
+        } else {
+            // Not the first pass and no window/insets/visibility change but the window
+            // may have moved and we need check that and if so to update the left and right
+            // in the attach info. We translate only the window frame since on window move
+            // the window manager tells us only for the new frame but the insets are the
+            // same and we do not want to translate them more than once.
+
+            // TODO: Well, we are checking whether the frame has changed similarly
+            // to how this is done for the insets. This is however incorrect since
+            // the insets and the frame are translated. For example, the old frame
+            // was (1, 1 - 1, 1) and was translated to say (2, 2 - 2, 2), now the new
+            // reported frame is (2, 2 - 2, 2) which implies no change but this is not
+            // true since we are comparing a not translated value to a translated one.
+            // This scenario is rare but we may want to fix that.
+
+            final boolean windowMoved = (attachInfo.mWindowLeft != frame.left
+                    || attachInfo.mWindowTop != frame.top);
+            if (windowMoved) {
+                if (mTranslator != null) {
+                    mTranslator.translateRectInScreenToAppWinFrame(frame);
+                }
+                attachInfo.mWindowLeft = frame.left;
+                attachInfo.mWindowTop = frame.top;
+            }
         }
 
         final boolean didLayout = layoutRequested && !mStopped;
@@ -5214,15 +5238,13 @@ public final class ViewRootImpl implements ViewParent,
 
         @Override
         public void findAccessibilityNodeInfoByAccessibilityId(long accessibilityNodeId,
-                int windowLeft, int windowTop, int interactionId,
-                IAccessibilityInteractionConnectionCallback callback, int flags,
+                int interactionId, IAccessibilityInteractionConnectionCallback callback, int flags,
                 int interrogatingPid, long interrogatingTid) {
             ViewRootImpl viewRootImpl = mViewRootImpl.get();
             if (viewRootImpl != null && viewRootImpl.mView != null) {
                 viewRootImpl.getAccessibilityInteractionController()
                     .findAccessibilityNodeInfoByAccessibilityIdClientThread(accessibilityNodeId,
-                            windowLeft, windowTop, interactionId, callback, flags, interrogatingPid,
-                            interrogatingTid);
+                            interactionId, callback, flags, interrogatingPid, interrogatingTid);
             } else {
                 // We cannot make the call and notify the caller so it does not wait.
                 try {
@@ -5255,15 +5277,13 @@ public final class ViewRootImpl implements ViewParent,
 
         @Override
         public void findAccessibilityNodeInfoByViewId(long accessibilityNodeId, int viewId,
-                int windowLeft, int windowTop, int interactionId,
-                IAccessibilityInteractionConnectionCallback callback, int flags,
+                int interactionId, IAccessibilityInteractionConnectionCallback callback, int flags,
                 int interrogatingPid, long interrogatingTid) {
             ViewRootImpl viewRootImpl = mViewRootImpl.get();
             if (viewRootImpl != null && viewRootImpl.mView != null) {
                 viewRootImpl.getAccessibilityInteractionController()
                     .findAccessibilityNodeInfoByViewIdClientThread(accessibilityNodeId, viewId,
-                            windowLeft, windowTop, interactionId, callback, flags, interrogatingPid,
-                            interrogatingTid);
+                            interactionId, callback, flags, interrogatingPid, interrogatingTid);
             } else {
                 // We cannot make the call and notify the caller so it does not wait.
                 try {
@@ -5276,15 +5296,13 @@ public final class ViewRootImpl implements ViewParent,
 
         @Override
         public void findAccessibilityNodeInfosByText(long accessibilityNodeId, String text,
-                int windowLeft, int windowTop, int interactionId,
-                IAccessibilityInteractionConnectionCallback callback, int flags,
+                int interactionId, IAccessibilityInteractionConnectionCallback callback, int flags,
                 int interrogatingPid, long interrogatingTid) {
             ViewRootImpl viewRootImpl = mViewRootImpl.get();
             if (viewRootImpl != null && viewRootImpl.mView != null) {
                 viewRootImpl.getAccessibilityInteractionController()
                     .findAccessibilityNodeInfosByTextClientThread(accessibilityNodeId, text,
-                            windowLeft, windowTop, interactionId, callback, flags, interrogatingPid,
-                            interrogatingTid);
+                            interactionId, callback, flags, interrogatingPid, interrogatingTid);
             } else {
                 // We cannot make the call and notify the caller so it does not wait.
                 try {
@@ -5296,15 +5314,14 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         @Override
-        public void findFocus(long accessibilityNodeId, int focusType, int windowLeft,
-                int windowTop, int interactionId,
+        public void findFocus(long accessibilityNodeId, int focusType, int interactionId,
                 IAccessibilityInteractionConnectionCallback callback, int flags,
                 int interrogatingPid, long interrogatingTid) {
             ViewRootImpl viewRootImpl = mViewRootImpl.get();
             if (viewRootImpl != null && viewRootImpl.mView != null) {
                 viewRootImpl.getAccessibilityInteractionController()
-                    .findFocusClientThread(accessibilityNodeId, focusType, windowLeft, windowTop,
-                            interactionId, callback, flags, interrogatingPid, interrogatingTid);
+                    .findFocusClientThread(accessibilityNodeId, focusType, interactionId, callback,
+                            flags, interrogatingPid, interrogatingTid);
             } else {
                 // We cannot make the call and notify the caller so it does not wait.
                 try {
@@ -5316,15 +5333,14 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         @Override
-        public void focusSearch(long accessibilityNodeId, int direction, int windowLeft,
-                int windowTop, int interactionId,
+        public void focusSearch(long accessibilityNodeId, int direction, int interactionId,
                 IAccessibilityInteractionConnectionCallback callback, int flags,
                 int interrogatingPid, long interrogatingTid) {
             ViewRootImpl viewRootImpl = mViewRootImpl.get();
             if (viewRootImpl != null && viewRootImpl.mView != null) {
                 viewRootImpl.getAccessibilityInteractionController()
-                    .focusSearchClientThread(accessibilityNodeId, direction, windowLeft, windowTop,
-                            interactionId, callback, flags, interrogatingPid, interrogatingTid);
+                    .focusSearchClientThread(accessibilityNodeId, direction, interactionId,
+                            callback, flags, interrogatingPid, interrogatingTid);
             } else {
                 // We cannot make the call and notify the caller so it does not wait.
                 try {
