@@ -48,11 +48,10 @@ the Android 4.0.x system components will not be available for download.</p>
 
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png"
-class="toggle-content-img" alt="" />
-    Revision 3</a> <em>(March 2012)</em>
-  </a></p>
+class="toggle-content-img" alt="" />Revision 3</a> <em>(March 2012)</em>
+  </p>
 
-  <div class="toggle-content-toggleme" style="padding-left:2em;">
+  <div class="toggle-content-toggleme">
 
     <p>Maintenance update. The system version is 4.0.4.</p>
     <p class="note"><strong>Note:</strong> This system image includes support for emulator
@@ -70,11 +69,10 @@ hardware graphics acceleration when used with SDK Tools r17 or higher.
 
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-closed.png"
-class="toggle-content-img" alt="" />
-    Revision 2</a> <em>(January 2012)</em>
-  </a></p>
+class="toggle-content-img" alt="" />Revision 2</a> <em>(January 2012)</em>
+  </p>
 
-  <div class="toggle-content-toggleme" style="padding-left:2em;">
+  <div class="toggle-content-toggleme">
 
     <p>Maintenance update. The system version is 4.0.3.</p>
     <dl>
@@ -89,11 +87,10 @@ class="toggle-content-img" alt="" />
 
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-closed.png"
-class="toggle-content-img" alt="" />
-    Revision 1</a> <em>(December 2011)</em>
-  </a></p>
+class="toggle-content-img" alt="" />Revision 1</a> <em>(December 2011)</em>
+  </p>
 
-  <div class="toggle-content-toggleme" style="padding-left:2em;">
+  <div class="toggle-content-toggleme">
 
     <p>Initial release. The system version is 4.0.3.</p>
     <dl>
@@ -169,11 +166,10 @@ the one for the WXGA720 skin, we recommend that you primarily use the traditiona
 
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-closed.png"
-class="toggle-content-img" alt="" />
-    Android 4.0, Revision 2</a> <em>(December 2011)</em>
-  </a></p>
+class="toggle-content-img" alt="" />Android 4.0, Revision 2</a> <em>(December 2011)</em>
+  </p>
 
-  <div class="toggle-content-toggleme" style="padding-left:2em;">
+  <div class="toggle-content-toggleme">
     <p>Maintenance update. The system version is 4.0.2.</p>
     <dl>
       <dt>Dependencies:</dt>
@@ -186,11 +182,10 @@ class="toggle-content-img" alt="" />
 
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-closed.png"
-class="toggle-content-img" alt="" />
-    Android 4.0, Revision 1</a> <em>(October 2011)</em>
-  </a></p>
+class="toggle-content-img" alt="" />Android 4.0, Revision 1</a> <em>(October 2011)</em>
+  </p>
 
-  <div class="toggle-content-toggleme" style="padding-left:2em;">
+  <div class="toggle-content-toggleme">
     <p>Initial release. The system version is 4.0.1.</p>
     <dl>
       <dt>Dependencies:</dt>
@@ -264,11 +259,10 @@ the one for the WXGA720 skin, we recommend that you primarily use the traditiona
 
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-closed.png"
-class="toggle-content-img" alt="" />
-    Android 3.2, Revision 1</a> <em>(July 2011)</em>
-  </a></p>
+class="toggle-content-img" alt="" />Android 3.2, Revision 1</a> <em>(July 2011)</em>
+  </p>
 
-  <div class="toggle-content-toggleme" style="padding-left:2em;">
+  <div class="toggle-content-toggleme">
 
 <dl>
 <dt>Initial release. SDK Tools r12 or higher is recommended.</dt>
@@ -319,11 +313,10 @@ Screens</a>.</p>
 
 <p><a href="#" onclick="return toggleContent(this)">
   <img src="{@docRoot}assets/images/triangle-closed.png"
-class="toggle-content-img" alt="" />
-  Android 3.1, Revision 3</a> <em>(July 2011)</em>
-</a></p>
+class="toggle-content-img" alt="" />Android 3.1, Revision 3</a> <em>(July 2011)</em>
+</p>
 
-<div class="toggle-content-toggleme" style="padding-left:2em;">
+<div class="toggle-content-toggleme">
 
 <dl>
 <dt>Dependencies:</dt>
@@ -348,11 +341,10 @@ ADT 12.</p>
 
 <p><a href="#" onclick="return toggleContent(this)">
   <img src="{@docRoot}assets/images/triangle-closed.png"
-class="toggle-content-img" alt="" />
-  Android 3.1, Revision 2</a> <em>(May 2011)</em>
-</a></p>
+class="toggle-content-img" alt="" />Android 3.1, Revision 2</a> <em>(May 2011)</em>
+</p>
 
-<div class="toggle-content-toggleme" style="padding-left:2em;">
+<div class="toggle-content-toggleme">
 
 <dl>
 <dt>Dependencies:</dt>
@@ -375,11 +367,10 @@ running in ADT.</p>
 
 <p><a href="#" onclick="return toggleContent(this)">
   <img src="{@docRoot}assets/images/triangle-closed.png"
-class="toggle-content-img" alt="" />
-  Android 3.1, Revision 1</a> <em>(May 2011)</em>
-</a></p>
+class="toggle-content-img" alt="" />Android 3.1, Revision 1</a> <em>(May 2011)</em>
+</p>
 
-<div class="toggle-content-toggleme" style="padding-left:2em;">
+<div class="toggle-content-toggleme">
 
 <dl>
 <dt>Dependencies:</dt>
@@ -425,11 +416,10 @@ Screens</a>.</p>
 
 <p><a href="#" onclick="return toggleContent(this)">
   <img src="{@docRoot}assets/images/triangle-closed.png"
-class="toggle-content-img" alt="" />
-  Android 3.0, Revision 2</a> <em>(July 2011)</em>
-</a></p>
+class="toggle-content-img" alt="" />Android 3.0, Revision 2</a> <em>(July 2011)</em>
+</p>
 
-<div class="toggle-content-toggleme" style="padding-left:2em;">
+<div class="toggle-content-toggleme">
 
 <dl>
 <dt>Dependencies:</dt>
@@ -452,11 +442,11 @@ ADT 12.</p>
 <div class="toggle-content closed">
 
 <p><a href="#" onclick="return toggleContent(this)">
-  <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt="" />
-  Android 3.0, Revision 1</a> <em>(February 2011)</em>
-</a></p>
+  <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" 
+       alt="" />Android 3.0, Revision 1</a> <em>(February 2011)</em>
+</p>
 
-<div class="toggle-content-toggleme" style="padding-left:2em;">
+<div class="toggle-content-toggleme">
     
 <dl>
 <dt>Dependencies:</dt>
@@ -510,11 +500,11 @@ the "Installed Packages" listing in the Android SDK and AVD Manager.</p>
 <div class="toggle-content closed" >
 
 <p><a href="#" onclick="return toggleContent(this)">
-  <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt="" />
-        Android 2.3.4, Revision 1</a> <em>(May 2011)</em>
-</a></p>
+  <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" 
+       alt="" />Android 2.3.4, Revision 1</a> <em>(May 2011)</em>
+</p>
 
-  <div class="toggle-content-toggleme" style="padding-left:2em;">
+  <div class="toggle-content-toggleme">
     <dl>
       <dt>Dependencies:</dt>
       <dd>
@@ -571,11 +561,10 @@ emulator skins are:</p>
 
 <p><a href="#" onclick="return toggleContent(this)">
   <img src="{@docRoot}assets/images/triangle-closed.png"
-class="toggle-content-img" alt="" />
-  Android 2.3.3, Revision 2</a> <em>(July 2011)</em>
-</a></p>
+class="toggle-content-img" alt="" />Android 2.3.3, Revision 2</a> <em>(July 2011)</em>
+</p>
 
-<div class="toggle-content-toggleme" style="padding-left:2em;">
+<div class="toggle-content-toggleme">
 
 <dl>
 <dt>Dependencies:</dt>
@@ -599,11 +588,10 @@ ADT 12.</p>
 
 <p><a href="#" onclick="return toggleContent(this)">
   <img src="{@docRoot}assets/images/triangle-closed.png"
-class="toggle-content-img" alt="" />
-  Android 2.3.3, Revision 1</a> <em>(February 2011)</em>
-</a></p>
+class="toggle-content-img" alt="" />Android 2.3.3, Revision 1</a> <em>(February 2011)</em>
+</p>
 
-<div class="toggle-content-toggleme" style="padding-left:2em;">
+<div class="toggle-content-toggleme">
 <dl>
 <dt>Dependencies:</dt>
 <dd>
@@ -667,11 +655,11 @@ the "Installed Packages" listing in the Android SDK and AVD Manager.</p>
 <div class="toggle-content closed" >
 
 <p><a href="#" onclick="return toggleContent(this)">
-  <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt="" />
-        Android 2.3, Revision 1</a> <em>(December 2010)</em>
-</a></p>
+  <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" 
+       alt="" />Android 2.3, Revision 1</a> <em>(December 2010)</em>
+</p>
 
-  <div class="toggle-content-toggleme" style="padding-left:2em;">
+  <div class="toggle-content-toggleme">
     <dl>
       <dt>Dependencies:</dt>
       <dd>
@@ -724,11 +712,10 @@ emulator skins are:</p>
 
 <p><a href="#" onclick="return toggleContent(this)">
   <img src="{@docRoot}assets/images/triangle-closed.png"
-class="toggle-content-img" alt="" />
-  Android {@sdkPlatformVersion}, Revision 3</a> <em>(July 2011)</em>
-</a></p>
+class="toggle-content-img" alt="" />Android {@sdkPlatformVersion}, Revision 3</a> <em>(July 2011)</em>
+</p>
 
-<div class="toggle-content-toggleme" style="padding-left:2em;">
+<div class="toggle-content-toggleme">
 
 <dl>
 <dt>Dependencies:</dt>
@@ -752,11 +739,10 @@ ADT 12.</p>
 
 <p><a href="#" onclick="return toggleContent(this)">
   <img src="{@docRoot}assets/images/triangle-closed.png"
-class="toggle-content-img" alt="" />
-  Android {@sdkPlatformVersion}, Revision 2</a> <em>(July 2010)</em>
-</a></p>
+class="toggle-content-img" alt="" />Android {@sdkPlatformVersion}, Revision 2</a> <em>(July 2010)</em>
+</p>
 
-<div class="toggle-content-toggleme" style="padding-left:2em;">
+<div class="toggle-content-toggleme">
 <dt>Dependencies:</dt>
 <dd>
 <p>Requires SDK Tools r6 or higher.</p>
@@ -781,11 +767,9 @@ Backup</a>.</li>
 
 <p><a href="#" onclick="return toggleContent(this)">
   <img src="{@docRoot}assets/images/triangle-closed.png"
-class="toggle-content-img" alt="" />
-  Android {@sdkPlatformVersion}, Revision 1</a> <em>(May 2010)</em>
-</a></p>
+class="toggle-content-img" alt="" />Android {@sdkPlatformVersion}, Revision 1</a> <em>(May 2010)</em></p>
 
-<div class="toggle-content-toggleme" style="padding-left:2em;">
+<div class="toggle-content-toggleme">
 <dl>
 <dt>Dependencies:</dt>
 <dd>
