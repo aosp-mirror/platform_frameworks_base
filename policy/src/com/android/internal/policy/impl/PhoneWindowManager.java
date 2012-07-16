@@ -2375,16 +2375,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (mNavigationBarOnBottom) {
                 // It's a system nav bar or a portrait screen; nav bar goes on bottom.
                 int top = displayHeight - mNavigationBarHeightForRotation[displayRotation];
-                if (mHdmiPlugged) {
-                    // Move the nav bar up if the external display is the same aspect ratio
-                    // but shorter.  This avoids clipping on the external display.
-                    boolean sameAspect = mExternalDisplayHeight > 0 && displayHeight > 0
-                        && ((float) mExternalDisplayWidth / mExternalDisplayHeight > 1)
-                        == ((float) displayWidth / displayHeight > 1);
-                    if (sameAspect && top > mExternalDisplayHeight) {
-                        top = mExternalDisplayHeight;
-                    }
-                }
                 mTmpNavigationFrame.set(0, top, displayWidth, displayHeight);
                 mStableBottom = mStableFullscreenBottom = mTmpNavigationFrame.top;
                 if (navVisible) {
@@ -2404,11 +2394,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             } else {
                 // Landscape screen; nav bar goes to the right.
                 int left = displayWidth - mNavigationBarWidthForRotation[displayRotation];
-                if (mHdmiPlugged) {
-                    if (left > mExternalDisplayWidth) {
-                        left = mExternalDisplayWidth;
-                    }
-                }
                 mTmpNavigationFrame.set(left, 0, displayWidth, displayHeight);
                 mStableRight = mStableFullscreenRight = mTmpNavigationFrame.left;
                 if (navVisible) {
