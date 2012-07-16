@@ -216,9 +216,6 @@ public class Surface implements Parcelable {
     
     /** Hide the surface. Equivalent to calling hide(). @hide */
     public static final int SURFACE_HIDDEN    = 0x01;
-    
-    /** Freeze the surface. Equivalent to calling freeze(). @hide */
-    public static final int SURFACE_FROZEN     = 0x02;
 
     /** Enable dithering when compositing this surface @hide */
     public static final int SURFACE_DITHER    = 0x04;
@@ -486,12 +483,6 @@ public class Surface implements Parcelable {
     public native   void setAlpha(float alpha);
     /** @hide */
     public native   void setMatrix(float dsdx, float dtdx, float dsdy, float dtdy);
-    /** @hide */
-    public native   void freeze();
-    /** @hide */
-    public native   void unfreeze();
-    /** @hide */
-    public native   void setFreezeTint(int tint);
     /** @hide */
     public native   void setFlags(int flags, int mask);
     /** @hide */
