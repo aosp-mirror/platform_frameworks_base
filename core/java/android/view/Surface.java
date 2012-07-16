@@ -413,22 +413,6 @@ public class Surface implements Parcelable {
     /*
      * set display parameters & screenshots
      */
-    
-    /**
-     * Freezes the specified display, No updating of the screen will occur
-     * until unfreezeDisplay() is called. Everything else works as usual though,
-     * in particular transactions.
-     * @param display
-     * @hide
-     */
-    public static native   void freezeDisplay(int display);
-
-    /**
-     * resume updating the specified display.
-     * @param display
-     * @hide
-     */
-    public static native   void unfreezeDisplay(int display);
 
     /**
      * set the orientation of the given display.

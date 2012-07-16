@@ -481,24 +481,6 @@ static void Surface_setOrientation(
     }
 }
 
-static void Surface_freezeDisplay(
-        JNIEnv* env, jobject clazz, jint display)
-{
-    int err = SurfaceComposerClient::freezeDisplay(display, 0);
-    if (err < 0) {
-        doThrowIAE(env);
-    }
-}
-
-static void Surface_unfreezeDisplay(
-        JNIEnv* env, jobject clazz, jint display)
-{
-    int err = SurfaceComposerClient::unfreezeDisplay(display, 0);
-    if (err < 0) {
-        doThrowIAE(env);
-    }
-}
-
 class ScreenshotPixelRef : public SkPixelRef {
 public:
     ScreenshotPixelRef(SkColorTable* ctable) {
@@ -892,8 +874,6 @@ static JNINativeMethod gSurfaceMethods[] = {
     {"openTransaction",     "()V",  (void*)Surface_openTransaction },
     {"closeTransaction",    "()V",  (void*)Surface_closeTransaction },
     {"setOrientation",      "(III)V", (void*)Surface_setOrientation },
-    {"freezeDisplay",       "(I)V", (void*)Surface_freezeDisplay },
-    {"unfreezeDisplay",     "(I)V", (void*)Surface_unfreezeDisplay },
     {"screenshot",          "(II)Landroid/graphics/Bitmap;", (void*)Surface_screenshotAll },
     {"screenshot",          "(IIII)Landroid/graphics/Bitmap;", (void*)Surface_screenshot },
     {"setLayer",            "(I)V", (void*)Surface_setLayer },
