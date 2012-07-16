@@ -538,7 +538,9 @@ public interface WindowManager extends ViewManager {
         public static final int FLAG_FORCE_NOT_FULLSCREEN   = 0x00000800;
         
         /** Window flag: turn on dithering when compositing this window to
-         *  the screen. */
+         *  the screen.
+         * @deprecated This flag is no longer used. */
+        @Deprecated
         public static final int FLAG_DITHER             = 0x00001000;
         
         /** Window flag: don't allow screen shots while this window is
@@ -726,7 +728,6 @@ public interface WindowManager extends ViewManager {
          * @see #FLAG_LAYOUT_NO_LIMITS
          * @see #FLAG_FULLSCREEN
          * @see #FLAG_FORCE_NOT_FULLSCREEN
-         * @see #FLAG_DITHER
          * @see #FLAG_SECURE
          * @see #FLAG_SCALED
          * @see #FLAG_IGNORE_CHEEK_PRESSES

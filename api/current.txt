@@ -25210,7 +25210,7 @@ package android.view {
     field public static final deprecated int FLAG_BLUR_BEHIND = 4; // 0x4
     field public static final int FLAG_DIM_BEHIND = 2; // 0x2
     field public static final int FLAG_DISMISS_KEYGUARD = 4194304; // 0x400000
-    field public static final int FLAG_DITHER = 4096; // 0x1000
+    field public static final deprecated int FLAG_DITHER = 4096; // 0x1000
     field public static final int FLAG_FORCE_NOT_FULLSCREEN = 2048; // 0x800
     field public static final int FLAG_FULLSCREEN = 1024; // 0x400
     field public static final int FLAG_HARDWARE_ACCELERATED = 16777216; // 0x1000000
