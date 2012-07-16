@@ -1230,7 +1230,7 @@
     <string name="description_direction_left" msgid="7207478719805562165">"เลื่อนไปทางซ้ายเพื่อ <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>"</string>
     <string name="description_direction_right" msgid="8034433242579600980">"เลื่อนไปทางขวาเพื่อ <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>"</string>
     <string name="description_target_unlock" msgid="2228524900439801453">"ปลดล็อก"</string>
-    <string name="description_target_camera" msgid="969071997552486814">"กล้องถ่ายรูป"</string>
+    <string name="description_target_camera" msgid="969071997552486814">"กล้อง"</string>
     <string name="description_target_silent" msgid="893551287746522182">"ปิดเสียง"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"เปิดเสียง"</string>
     <string name="description_target_search" msgid="3091587249776033139">"ค้นหา"</string>
