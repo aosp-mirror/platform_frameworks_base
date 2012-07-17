@@ -168,20 +168,23 @@ signature that calling the method can't alter the object's state.</p>
 usually inline the access, and if you need to restrict or debug field access
 you can add the code at any time.</p>
 
-<p>On Android, this is a bad idea.  Virtual method calls are expensive,
-much more so than instance field lookups.  It's reasonable to follow
+<p>On Android, this can be a bad idea.  Virtual method calls can be more
+expensive than instance field lookups.  It's reasonable to follow
 common object-oriented programming practices and have getters and setters
-in the public interface, but within a class you should always access
+in the public interface, but within a class you might want to access
 fields directly.</p>
 
 <p>Without a JIT, direct field access is about 3x faster than invoking a
-trivial getter. With the JIT (where direct field access is as cheap as
-accessing a local), direct field access is about 7x faster than invoking a
-trivial getter. This is true in Froyo, but will improve in the future when
-the JIT inlines getter methods.</p>
+trivial getter (one that simply returns the value of a field, without
+any dereferencing or array indexing). With the Froyo JIT, direct field
+access was about 7x faster than invoking a trivial getter. Since
+Gingerbread, though, the JIT inlines trivial getter methods, making
+that particular optimization obsolete. Manual inlining guided by
+profiling can still be a useful technique in general, though.</a>
 
 <p>Note that if you're using ProGuard, you can have the best
-of both worlds because ProGuard can inline accessors for you.</p>
+of both worlds even with non-trival accessors, because ProGuard can inline
+for you.</p>
 
 <a name="use_final" id="use_final"></a>
 <h2>Use Static Final For Constants</h2>
