@@ -150,11 +150,14 @@ public final class BluetoothSocket implements Closeable {
         } else {
             mAddress = device.getAddress();
         }
+
+        //TODO(BT)
+        /*
         if (fd == -1) {
             initSocketNative();
         } else {
             initSocketFromFdNative(fd);
-        }
+        }*/
         mInputStream = new BluetoothInputStream(this);
         mOutputStream = new BluetoothOutputStream(this);
         mSocketState = SocketState.INIT;
@@ -227,6 +230,8 @@ public final class BluetoothSocket implements Closeable {
      */
     public void close() throws IOException {
         // abort blocking operations on the socket
+        //TODO(BT)
+        /*
         mLock.readLock().lock();
         try {
             if (mSocketState == SocketState.CLOSED) return;
@@ -248,7 +253,7 @@ public final class BluetoothSocket implements Closeable {
             }
         } finally {
             mLock.writeLock().unlock();
-        }
+        }*/
     }
 
     /**
@@ -296,13 +301,16 @@ public final class BluetoothSocket implements Closeable {
      * so that BluetoothAdapter can check the error code for EADDRINUSE
      */
     /*package*/ int bindListen() {
+        return -1;
+        //TODO(BT)
+        /*
         mLock.readLock().lock();
         try {
             if (mSocketState == SocketState.CLOSED) return EBADFD;
             return bindListenNative();
         } finally {
             mLock.readLock().unlock();
-        }
+        }*/
     }
 
     /*package*/ BluetoothSocket accept(int timeout) throws IOException {
@@ -388,9 +396,11 @@ public final class BluetoothSocket implements Closeable {
             channel = -1;
 
             boolean inProgress = false;
+            //TODO(BT)
+            /*
             try {
                 inProgress = service.fetchRemoteUuids(device.getAddress(), uuid, this);
-            } catch (RemoteException e) {Log.e(TAG, "", e);}
+            } catch (RemoteException e) {Log.e(TAG, "", e);}*/
 
             if (!inProgress) throw new IOException("Unable to start Service Discovery");
 

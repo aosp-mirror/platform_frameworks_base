@@ -146,11 +146,13 @@ public final class BluetoothHealth implements BluetoothProfile {
                 new BluetoothHealthAppConfiguration(name, dataType, role, channelType);
 
         if (mService != null) {
+            //TODO(BT
+            /*
             try {
                 result = mService.registerAppConfiguration(config, wrapper);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
-            }
+            }*/
         } else {
             Log.w(TAG, "Proxy not attached to service");
             if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
@@ -170,11 +172,13 @@ public final class BluetoothHealth implements BluetoothProfile {
     public boolean unregisterAppConfiguration(BluetoothHealthAppConfiguration config) {
         boolean result = false;
         if (mService != null && isEnabled() && config != null) {
+            //TODO(BT
+            /*
             try {
                 result = mService.unregisterAppConfiguration(config);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
-            }
+            }*/
         } else {
             Log.w(TAG, "Proxy not attached to service");
             if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
@@ -199,11 +203,13 @@ public final class BluetoothHealth implements BluetoothProfile {
             BluetoothHealthAppConfiguration config) {
         if (mService != null && isEnabled() && isValidDevice(device) &&
                 config != null) {
+            //TODO(BT
+            /*
             try {
                 return mService.connectChannelToSource(device, config);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
-            }
+            }*/
         } else {
             Log.w(TAG, "Proxy not attached to service");
             if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
@@ -228,11 +234,13 @@ public final class BluetoothHealth implements BluetoothProfile {
             BluetoothHealthAppConfiguration config, int channelType) {
         if (mService != null && isEnabled() && isValidDevice(device) &&
                 config != null) {
+            //TODO(BT
+            /*
             try {
                 return mService.connectChannelToSink(device, config, channelType);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
-            }
+            }*/
         } else {
             Log.w(TAG, "Proxy not attached to service");
             if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
@@ -257,11 +265,13 @@ public final class BluetoothHealth implements BluetoothProfile {
             BluetoothHealthAppConfiguration config, int channelId) {
         if (mService != null && isEnabled() && isValidDevice(device) &&
                 config != null) {
+            //TODO(BT
+            /*
             try {
                 return mService.disconnectChannel(device, config, channelId);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
-            }
+            }*/
         } else {
             Log.w(TAG, "Proxy not attached to service");
             if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
@@ -286,11 +296,13 @@ public final class BluetoothHealth implements BluetoothProfile {
             BluetoothHealthAppConfiguration config) {
         if (mService != null && isEnabled() && isValidDevice(device) &&
                 config != null) {
+            //TODO(BT
+            /*
             try {
                 return mService.getMainChannelFd(device, config);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
-            }
+            }*/
         } else {
             Log.w(TAG, "Proxy not attached to service");
             if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
@@ -316,11 +328,13 @@ public final class BluetoothHealth implements BluetoothProfile {
     @Override
     public int getConnectionState(BluetoothDevice device) {
         if (mService != null && isEnabled() && isValidDevice(device)) {
+            //TODO(BT
+            /*
             try {
                 return mService.getHealthDeviceConnectionState(device);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
-            }
+            }*/
         } else {
             Log.w(TAG, "Proxy not attached to service");
             if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
@@ -344,12 +358,14 @@ public final class BluetoothHealth implements BluetoothProfile {
     @Override
     public List<BluetoothDevice> getConnectedDevices() {
         if (mService != null && isEnabled()) {
+            //TODO(BT
+            /*
             try {
                 return mService.getConnectedHealthDevices();
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return new ArrayList<BluetoothDevice>();
-            }
+            }*/
         }
         if (mService == null) Log.w(TAG, "Proxy not attached to service");
         return new ArrayList<BluetoothDevice>();
@@ -376,12 +392,14 @@ public final class BluetoothHealth implements BluetoothProfile {
     @Override
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
         if (mService != null && isEnabled()) {
+            //TODO(BT
+            /*
             try {
                 return mService.getHealthDevicesMatchingConnectionStates(states);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return new ArrayList<BluetoothDevice>();
-            }
+            }*/
         }
         if (mService == null) Log.w(TAG, "Proxy not attached to service");
         return new ArrayList<BluetoothDevice>();

@@ -165,12 +165,14 @@ public final class BluetoothPan implements BluetoothProfile {
         if (DBG) log("connect(" + device + ")");
         if (mService != null && isEnabled() &&
             isValidDevice(device)) {
+            //TODO(BT
+            /*
             try {
                 return mService.connectPanDevice(device);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return false;
-            }
+            }*/
         }
         if (mService == null) Log.w(TAG, "Proxy not attached to service");
         return false;
@@ -206,12 +208,14 @@ public final class BluetoothPan implements BluetoothProfile {
         if (DBG) log("disconnect(" + device + ")");
         if (mService != null && isEnabled() &&
             isValidDevice(device)) {
+            //TODO(BT
+            /*
             try {
                 return mService.disconnectPanDevice(device);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return false;
-            }
+            }*/
         }
         if (mService == null) Log.w(TAG, "Proxy not attached to service");
         return false;
@@ -223,12 +227,14 @@ public final class BluetoothPan implements BluetoothProfile {
     public List<BluetoothDevice> getConnectedDevices() {
         if (DBG) log("getConnectedDevices()");
         if (mService != null && isEnabled()) {
+            //TODO(BT
+            /*
             try {
                 return mService.getConnectedPanDevices();
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return new ArrayList<BluetoothDevice>();
-            }
+            }*/
         }
         if (mService == null) Log.w(TAG, "Proxy not attached to service");
         return new ArrayList<BluetoothDevice>();
@@ -240,12 +246,14 @@ public final class BluetoothPan implements BluetoothProfile {
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
         if (DBG) log("getDevicesMatchingStates()");
         if (mService != null && isEnabled()) {
+            //TODO(BT
+            /*
             try {
                 return mService.getPanDevicesMatchingConnectionStates(states);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return new ArrayList<BluetoothDevice>();
-            }
+            }*/
         }
         if (mService == null) Log.w(TAG, "Proxy not attached to service");
         return new ArrayList<BluetoothDevice>();
@@ -258,12 +266,14 @@ public final class BluetoothPan implements BluetoothProfile {
         if (DBG) log("getState(" + device + ")");
         if (mService != null && isEnabled()
             && isValidDevice(device)) {
+            //TODO(BT
+            /*
             try {
                 return mService.getPanDeviceConnectionState(device);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return BluetoothProfile.STATE_DISCONNECTED;
-            }
+            }*/
         }
         if (mService == null) Log.w(TAG, "Proxy not attached to service");
         return BluetoothProfile.STATE_DISCONNECTED;
@@ -271,21 +281,26 @@ public final class BluetoothPan implements BluetoothProfile {
 
     public void setBluetoothTethering(boolean value) {
         if (DBG) log("setBluetoothTethering(" + value + ")");
+        //TODO(BT
+        /*
         try {
             mService.setBluetoothTethering(value);
         } catch (RemoteException e) {
             Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
-        }
+        }*/
     }
 
     public boolean isTetheringOn() {
         if (DBG) log("isTetheringOn()");
+        //TODO(BT
+        /*
         try {
             return mService.isTetheringOn();
         } catch (RemoteException e) {
             Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
             return false;
-        }
+        }*/
+        return false;
     }
 
     private boolean isEnabled() {

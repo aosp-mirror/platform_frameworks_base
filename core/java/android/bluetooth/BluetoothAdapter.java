@@ -367,10 +367,12 @@ public final class BluetoothAdapter {
      */
     public static synchronized BluetoothAdapter getDefaultAdapter() {
         if (sAdapter == null) {
-            IBinder b = ServiceManager.getService(BluetoothAdapter.BLUETOOTH_SERVICE);
+            IBinder b = ServiceManager.getService("bluetooth");
             if (b != null) {
                 IBluetooth service = IBluetooth.Stub.asInterface(b);
                 sAdapter = new BluetoothAdapter(service);
+            } else {
+                Log.e(TAG, "Bluetooth binder is null");
             }
         }
         return sAdapter;
@@ -378,9 +380,8 @@ public final class BluetoothAdapter {
 
     /**
      * Use {@link #getDefaultAdapter} to get the BluetoothAdapter instance.
-     * @hide
      */
-    public BluetoothAdapter(IBluetooth service) {
+    BluetoothAdapter(IBluetooth service) {
         if (service == null) {
             throw new IllegalArgumentException("service is null");
         }
@@ -450,8 +451,9 @@ public final class BluetoothAdapter {
      * @return current state of Bluetooth adapter
      */
     public int getState() {
+        if (mService == null) return STATE_OFF;
         try {
-            return mService.getBluetoothState();
+            return mService.getState();
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return STATE_OFF;
     }
@@ -516,7 +518,7 @@ public final class BluetoothAdapter {
      */
     public boolean disable() {
         try {
-            return mService.disable(true);
+            return mService.disable();
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
     }
@@ -774,10 +776,10 @@ public final class BluetoothAdapter {
      */
     public Set<BluetoothDevice> getBondedDevices() {
         if (getState() != STATE_ON) {
-            return toDeviceSet(new String[0]);
+            return toDeviceSet(new BluetoothDevice[0]);
         }
         try {
-            return toDeviceSet(mService.listBonds());
+            return toDeviceSet(mService.getBondedDevices());
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return null;
     }
@@ -999,7 +1001,6 @@ public final class BluetoothAdapter {
     private BluetoothServerSocket createNewRfcommSocketAndRecord(String name, UUID uuid,
             boolean auth, boolean encrypt) throws IOException {
         RfcommChannelPicker picker = new RfcommChannelPicker(uuid);
-
         BluetoothServerSocket socket;
         int channel;
         int errno;
@@ -1031,10 +1032,11 @@ public final class BluetoothAdapter {
         }
 
         int handle = -1;
-        try {
+        //TODO(BT):
+        /*try {
             handle = mService.addRfcommServiceRecord(name, new ParcelUuid(uuid), channel,
                     new Binder());
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
+        } catch (RemoteException e) {Log.e(TAG, "", e);}*/
         if (handle == -1) {
             try {
                 socket.close();
@@ -1047,11 +1049,13 @@ public final class BluetoothAdapter {
                     public void handleMessage(Message msg) {
                         /* handle socket closing */
                         int handle = msg.what;
+                        // TODO(BT):
+                        /*                       
                         try {
                             if (DBG) Log.d(TAG, "Removing service record " +
-                                           Integer.toHexString(handle));
-                            mService.removeServiceRecord(handle);
+                                           Integer.toHexString(handle));                        
                         } catch (RemoteException e) {Log.e(TAG, "", e);}
+                        */
                     }
                 };
         }
@@ -1134,6 +1138,8 @@ public final class BluetoothAdapter {
      */
     public Pair<byte[], byte[]> readOutOfBandData() {
         if (getState() != STATE_ON) return null;
+        //TODO(BT
+        /*
         try {
             byte[] hash;
             byte[] randomizer;
@@ -1151,7 +1157,7 @@ public final class BluetoothAdapter {
             }
             return new Pair<byte[], byte[]>(hash, randomizer);
 
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
+        } catch (RemoteException e) {Log.e(TAG, "", e);}*/
         return null;
     }
 
@@ -1276,12 +1282,14 @@ public final class BluetoothAdapter {
                                                    BluetoothStateChangeCallback callback) {
         if (callback == null) return false;
 
+        //TODO(BT)
+        /*
         try {
             return mService.changeApplicationBluetoothState(on, new
                     StateChangeCallbackWrapper(callback), new Binder());
         } catch (RemoteException e) {
             Log.e(TAG, "changeBluetoothState", e);
-        }
+        }*/
         return false;
     }
 
@@ -1309,12 +1317,9 @@ public final class BluetoothAdapter {
         }
     }
 
-    private Set<BluetoothDevice> toDeviceSet(String[] addresses) {
-        Set<BluetoothDevice> devices = new HashSet<BluetoothDevice>(addresses.length);
-        for (int i = 0; i < addresses.length; i++) {
-            devices.add(getRemoteDevice(addresses[i]));
-        }
-        return Collections.unmodifiableSet(devices);
+    private Set<BluetoothDevice> toDeviceSet(BluetoothDevice[] devices) {
+        Set<BluetoothDevice> deviceSet = new HashSet<BluetoothDevice>(Arrays.asList(devices));
+        return Collections.unmodifiableSet(deviceSet);
     }
 
     /**
