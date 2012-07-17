@@ -18,6 +18,7 @@ package android.app;
 
 import com.android.internal.policy.PolicyManager;
 
+import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -292,6 +293,11 @@ class ContextImpl extends Context {
         registerService(MEDIA_ROUTER_SERVICE, new ServiceFetcher() {
                 public Object createService(ContextImpl ctx) {
                     return new MediaRouter(ctx);
+                }});
+
+        registerService(BLUETOOTH_SERVICE, new ServiceFetcher() {
+                public Object createService(ContextImpl ctx) {
+                    return BluetoothAdapter.getDefaultAdapter();
                 }});
 
         registerService(CLIPBOARD_SERVICE, new ServiceFetcher() {

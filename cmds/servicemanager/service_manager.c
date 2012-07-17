@@ -33,6 +33,7 @@ static struct {
     { AID_MEDIA, "media.audio_policy" },
     { AID_DRM,   "drm.drmManager" },
     { AID_NFC,   "nfc" },
+    { AID_BLUETOOTH, "bluetooth" },
     { AID_RADIO, "radio.phone" },
     { AID_RADIO, "radio.sms" },
     { AID_RADIO, "radio.phonesubinfo" },
