@@ -34,7 +34,7 @@ page.title=Developer Tools
     
   <ul>
     <li>Build rich Android UI with drag and drop. 
-    <li>Vsualize your UI on tablets, phones, and other devices. Switch themes, locales, even plaform versions instantly, without building.</li>
+    <li>Visualize your UI on tablets, phones, and other devices. Switch themes, locales, even platform versions instantly, without building.</li>
     <li>Visual refactoring lets you extracts layout for inclusion, convert layouts, extract styles</li>
     <li>Editor support for working with custom UI components</li>
   </ul>
