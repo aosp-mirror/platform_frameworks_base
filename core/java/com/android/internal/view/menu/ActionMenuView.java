@@ -489,8 +489,10 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
 
     @Override
     protected LayoutParams generateLayoutParams(ViewGroup.LayoutParams p) {
-        if (p instanceof LayoutParams) {
-            LayoutParams result = new LayoutParams((LayoutParams) p);
+        if (p != null) {
+            final LayoutParams result = p instanceof LayoutParams
+                    ? new LayoutParams((LayoutParams) p)
+                    : new LayoutParams(p);
             if (result.gravity <= Gravity.NO_GRAVITY) {
                 result.gravity = Gravity.CENTER_VERTICAL;
             }
@@ -561,6 +563,10 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
 
         public LayoutParams(Context c, AttributeSet attrs) {
             super(c, attrs);
+        }
+
+        public LayoutParams(ViewGroup.LayoutParams other) {
+            super(other);
         }
 
         public LayoutParams(LayoutParams other) {
