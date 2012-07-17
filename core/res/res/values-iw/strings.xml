@@ -243,14 +243,10 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"מאפשר ליישום לאחזר את המצב הפנימי של המערכת. יישומים זדוניים עלולים לאחזר מגוון רחב של מידע אישי ונתוני אבטחה, שעל פי רוב לעולם לא יזדקקו להם."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"אחזר את תוכן המסך"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"מאפשר ליישום לאחזר את התוכן של החלון הפעיל. יישומים זדוניים עלולים לאחזר את תוכן החלון כולו ולבחון את כל הטקסט שבו, מלבד סיסמאות."</string>
-    <!-- no translation found for permlab_retrieve_window_info (8532295199112519378) -->
-    <skip />
-    <!-- no translation found for permdesc_retrieve_window_info (4998836370424186849) -->
-    <skip />
-    <!-- no translation found for permlab_filter_events (8675535648807427389) -->
-    <skip />
-    <!-- no translation found for permdesc_filter_events (8006236315888347680) -->
-    <skip />
+    <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"אחזר מידע חלון"</string>
+    <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"מאפשר ליישום לאחזר מידע לגבי החלונות ממנהל החלונות. יישומים זדוניים עשויים לאחזר מידע המיועד לשימוש מערכת פנימי."</string>
+    <string name="permlab_filter_events" msgid="8675535648807427389">"סנן אירועים"</string>
+    <string name="permdesc_filter_events" msgid="8006236315888347680">"מאפשר ליישום לרשום מסנן קלט שמסנן את הזרם של כל אירועי המשתמש לפני שהם נשלחים. יישום זדוני עשוי לשלוט ב-UI של המערכת ללא התערבות משתמש."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"כיבוי חלקי"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"מעביר את מנהל הפעילויות למצב כיבוי. לא מבצע כיבוי מלא."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"מנע החלפת יישומים"</string>
