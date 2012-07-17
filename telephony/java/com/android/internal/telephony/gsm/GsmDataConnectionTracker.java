@@ -2374,7 +2374,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         }
 
         String operator = mPhone.mIccRecords.getOperatorNumeric();
-        int networkType = mPhone.getServiceState().getNetworkType();
+        int radioTech = mPhone.getServiceState().getRilRadioTechnology();
 
         if (canSetPreferApn && mPreferredApn != null &&
                 mPreferredApn.canHandleType(requestedApnType)) {
@@ -2383,7 +2383,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                         + mPreferredApn.numeric + ":" + mPreferredApn);
             }
             if (mPreferredApn.numeric.equals(operator)) {
-                if (mPreferredApn.bearer == 0 || mPreferredApn.bearer == networkType) {
+                if (mPreferredApn.bearer == 0 || mPreferredApn.bearer == radioTech) {
                     apnList.add(mPreferredApn);
                     if (DBG) log("buildWaitingApns: X added preferred apnList=" + apnList);
                     return apnList;
@@ -2401,7 +2401,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         if (mAllApns != null) {
             for (ApnSetting apn : mAllApns) {
                 if (apn.canHandleType(requestedApnType)) {
-                    if (apn.bearer == 0 || apn.bearer == networkType) {
+                    if (apn.bearer == 0 || apn.bearer == radioTech) {
                         if (DBG) log("apn info : " +apn.toString());
                         apnList.add(apn);
                     }
