@@ -3550,7 +3550,8 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      * See {@link WebView#setFindListener(WebView.FindListener)}.
      * @hide
      */
-     public void setFindListener(WebView.FindListener listener) {
+     @Override
+    public void setFindListener(WebView.FindListener listener) {
          mFindListener = listener;
      }
 
@@ -3573,6 +3574,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         return findAllBody(find, false);
     }
 
+    @Override
     public void findAllAsync(String find) {
         findAllBody(find, true);
     }
@@ -3611,6 +3613,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      *             If false and text is non-null, perform a find all.
      * @return boolean True if the find dialog is shown, false otherwise.
      */
+    @Override
     public boolean showFindDialog(String text, boolean showIme) {
         FindActionModeCallback callback = new FindActionModeCallback(mContext);
         if (mWebView.getParent() == null || mWebView.startActionMode(callback) == null) {
@@ -5235,14 +5238,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * See {@link WebView#emulateShiftHeld()}
-     */
-    @Override
-    @Deprecated
-    public void emulateShiftHeld() {
-    }
-
-    /**
      * Select all of the text in this WebView.
      *
      * This is an implementation detail.
@@ -6487,6 +6482,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     private DrawData mDelaySetPicture;
     private DrawData mLoadedPicture;
 
+    @Override
     public void setMapTrackballToArrowKeys(boolean setMap) {
         mMapTrackballToArrowKeys = setMap;
     }
@@ -6713,6 +6709,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         }
     }
 
+    @Override
     public void flingScroll(int vx, int vy) {
         mScroller.fling(getScrollX(), getScrollY(), vx, vy, 0, computeMaxScrollX(), 0,
                 computeMaxScrollY(), mOverflingDistance, mOverflingDistance);
@@ -8448,14 +8445,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     public void setBackgroundColor(int color) {
         mBackgroundColor = color;
         mWebViewCore.sendMessage(EventHub.SET_BACKGROUND_COLOR, color);
-    }
-
-    /**
-     * See {@link WebView#debugDump()}
-     */
-    @Override
-    @Deprecated
-    public void debugDump() {
     }
 
     /**
