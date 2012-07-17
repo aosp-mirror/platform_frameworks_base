@@ -159,6 +159,9 @@ const char* gFS_Uniforms_ColorOp[4] = {
         // PorterDuff
         "uniform vec4 colorBlend;\n"
 };
+const char* gFS_Uniforms_Gamma =
+        "uniform float gamma;\n";
+
 const char* gFS_Main =
         "\nvoid main(void) {\n"
         "    lowp vec4 fragColor;\n";
@@ -184,9 +187,17 @@ const char* gFS_Fast_SingleA8Texture =
         "\nvoid main(void) {\n"
         "    gl_FragColor = texture2D(sampler, outTexCoords);\n"
         "}\n\n";
+const char* gFS_Fast_SingleA8Texture_ApplyGamma =
+        "\nvoid main(void) {\n"
+        "    gl_FragColor = vec4(0.0, 0.0, 0.0, pow(texture2D(sampler, outTexCoords).a, gamma));\n"
+        "}\n\n";
 const char* gFS_Fast_SingleModulateA8Texture =
         "\nvoid main(void) {\n"
         "    gl_FragColor = color * texture2D(sampler, outTexCoords).a;\n"
+        "}\n\n";
+const char* gFS_Fast_SingleModulateA8Texture_ApplyGamma =
+        "\nvoid main(void) {\n"
+        "    gl_FragColor = color * pow(texture2D(sampler, outTexCoords).a, gamma);\n"
         "}\n\n";
 const char* gFS_Fast_SingleGradient =
         "\nvoid main(void) {\n"
@@ -202,6 +213,8 @@ const char* gFS_Main_FetchColor =
         "    fragColor = color;\n";
 const char* gFS_Main_ModulateColor =
         "    fragColor *= color.a;\n";
+const char* gFS_Main_ModulateColor_ApplyGamma =
+        "    fragColor *= pow(color.a, gamma);\n";
 const char* gFS_Main_AccountForAA =
         "    if (widthProportion < boundaryWidth) {\n"
         "        fragColor *= (widthProportion * inverseBoundaryWidth);\n"
@@ -517,6 +530,9 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
     if (description.hasBitmap && description.isPoint) {
         shader.append(gFS_Header_Uniforms_PointHasBitmap);
     }
+    if (description.hasGammaCorrection) {
+        shader.append(gFS_Uniforms_Gamma);
+    }
 
     // Optimization for common cases
     if (!description.isAA && !blendFramebuffer &&
@@ -544,9 +560,17 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
             fast = true;
         } else if (singleA8Texture) {
             if (!description.modulate) {
-                shader.append(gFS_Fast_SingleA8Texture);
+                if (description.hasGammaCorrection) {
+                    shader.append(gFS_Fast_SingleA8Texture_ApplyGamma);
+                } else {
+                    shader.append(gFS_Fast_SingleA8Texture);
+                }
             } else {
-                shader.append(gFS_Fast_SingleModulateA8Texture);
+                if (description.hasGammaCorrection) {
+                    shader.append(gFS_Fast_SingleModulateA8Texture_ApplyGamma);
+                } else {
+                    shader.append(gFS_Fast_SingleModulateA8Texture);
+                }
             }
             fast = true;
         } else if (singleGradient) {
@@ -643,7 +667,11 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
             }
         }
         if (description.modulate && applyModulate) {
-            shader.append(gFS_Main_ModulateColor);
+            if (description.hasGammaCorrection) {
+                shader.append(gFS_Main_ModulateColor_ApplyGamma);
+            } else {
+                shader.append(gFS_Main_ModulateColor);
+            }
         }
         // Apply the color op if needed
         shader.append(gFS_Main_ApplyColorOp[description.colorOp]);

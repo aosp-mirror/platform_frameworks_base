@@ -77,6 +77,8 @@ namespace uirenderer {
 #define PROGRAM_HAS_EXTERNAL_TEXTURE_SHIFT 38
 #define PROGRAM_HAS_TEXTURE_TRANSFORM_SHIFT 39
 
+#define PROGRAM_HAS_GAMMA_CORRECTION 40
+
 ///////////////////////////////////////////////////////////////////////////////
 // Types
 ///////////////////////////////////////////////////////////////////////////////
@@ -146,6 +148,9 @@ struct ProgramDescription {
     bool isPoint;
     float pointSize;
 
+    bool hasGammaCorrection;
+    float gamma;
+
     /**
      * Resets this description. All fields are reset back to the default
      * values they hold after building a new instance.
@@ -180,6 +185,9 @@ struct ProgramDescription {
 
         isPoint = false;
         pointSize = 0.0f;
+
+        hasGammaCorrection = false;
+        gamma = 2.2f;
     }
 
     /**
@@ -246,6 +254,7 @@ struct ProgramDescription {
         if (isAA) key |= programid(0x1) << PROGRAM_HAS_AA_SHIFT;
         if (hasExternalTexture) key |= programid(0x1) << PROGRAM_HAS_EXTERNAL_TEXTURE_SHIFT;
         if (hasTextureTransform) key |= programid(0x1) << PROGRAM_HAS_TEXTURE_TRANSFORM_SHIFT;
+        if (hasGammaCorrection) key |= programid(0x1) << PROGRAM_HAS_GAMMA_CORRECTION;
         return key;
     }
 
@@ -261,7 +270,7 @@ struct ProgramDescription {
     }
 
 private:
-    inline uint32_t getEnumForWrap(GLenum wrap) const {
+    static inline uint32_t getEnumForWrap(GLenum wrap) {
         switch (wrap) {
             case GL_CLAMP_TO_EDGE:
                 return 0;

@@ -65,6 +65,9 @@
 // Turn on to enable additional debugging in the font renderers
 #define DEBUG_FONT_RENDERER 0
 
+// Force gamma correction in shaders
+#define DEBUG_FONT_RENDERER_FORCE_SHADER_GAMMA 0
+
 // Turn on to dump display list state
 #define DEBUG_DISPLAY_LIST 0
 

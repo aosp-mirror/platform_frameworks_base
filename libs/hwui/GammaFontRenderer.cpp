@@ -24,6 +24,18 @@ namespace android {
 namespace uirenderer {
 
 ///////////////////////////////////////////////////////////////////////////////
+// Utils
+///////////////////////////////////////////////////////////////////////////////
+
+static int luminance(const SkPaint* paint) {
+    uint32_t c = paint->getColor();
+    const int r = (c >> 16) & 0xFF;
+    const int g = (c >>  8) & 0xFF;
+    const int b = (c      ) & 0xFF;
+    return (r * 2 + g * 5 + b) >> 3;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Base class GammaFontRenderer
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -36,7 +48,11 @@ GammaFontRenderer* GammaFontRenderer::createRenderer() {
         }
     }
 
+#if DEBUG_FONT_RENDERER_FORCE_SHADER_GAMMA
+    return new ShaderGammaFontRenderer();
+#else
     return new LookupGammaFontRenderer();
+#endif
 }
 
 GammaFontRenderer::GammaFontRenderer() {
@@ -82,6 +98,29 @@ GammaFontRenderer::~GammaFontRenderer() {
 
 ShaderGammaFontRenderer::ShaderGammaFontRenderer(): GammaFontRenderer() {
     INIT_LOGD("Creating shader gamma font renderer");
+    mRenderer = NULL;
+}
+
+void ShaderGammaFontRenderer::describe(ProgramDescription& description,
+        const SkPaint* paint) const {
+    if (paint->getShader() == NULL) {
+        const int l = luminance(paint);
+
+        if (l <= mBlackThreshold) {
+            description.hasGammaCorrection = true;
+            description.gamma = mGamma;
+        } else if (l >= mWhiteThreshold) {
+            description.hasGammaCorrection = true;
+            description.gamma = 1.0f / mGamma;
+        }
+    }
+}
+
+void ShaderGammaFontRenderer::setupProgram(ProgramDescription& description,
+        Program* program) const {
+    if (description.hasGammaCorrection) {
+        glUniform1f(program->getUniform("gamma"), description.gamma);
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -164,15 +203,11 @@ FontRenderer* LookupGammaFontRenderer::getRenderer(Gamma gamma) {
 
 FontRenderer& LookupGammaFontRenderer::getFontRenderer(const SkPaint* paint) {
     if (paint->getShader() == NULL) {
-        uint32_t c = paint->getColor();
-        const int r = (c >> 16) & 0xFF;
-        const int g = (c >>  8) & 0xFF;
-        const int b = (c      ) & 0xFF;
-        const int luminance = (r * 2 + g * 5 + b) >> 3;
+        const int l = luminance(paint);
 
-        if (luminance <= mBlackThreshold) {
+        if (l <= mBlackThreshold) {
             return *getRenderer(kGammaBlack);
-        } else if (luminance >= mWhiteThreshold) {
+        } else if (l >= mWhiteThreshold) {
             return *getRenderer(kGammaWhite);
         }
     }

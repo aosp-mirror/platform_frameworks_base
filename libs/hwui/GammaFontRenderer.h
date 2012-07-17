@@ -20,6 +20,7 @@
 #include <SkPaint.h>
 
 #include "FontRenderer.h"
+#include "Program.h"
 
 namespace android {
 namespace uirenderer {
@@ -34,8 +35,10 @@ public:
     virtual FontRenderer& getFontRenderer(const SkPaint* paint) = 0;
 
     virtual uint32_t getFontRendererCount() const = 0;
-
     virtual uint32_t getFontRendererSize(uint32_t fontRenderer) const = 0;
+
+    virtual void describe(ProgramDescription& description, const SkPaint* paint) const = 0;
+    virtual void setupProgram(ProgramDescription& description, Program* program) const = 0;
 
     static GammaFontRenderer* createRenderer();
 
@@ -79,6 +82,9 @@ public:
         return mRenderer->getCacheSize();
     }
 
+    void describe(ProgramDescription& description, const SkPaint* paint) const;
+    void setupProgram(ProgramDescription& description, Program* program) const;
+
 private:
     ShaderGammaFontRenderer();
 
@@ -107,6 +113,12 @@ public:
         if (!renderer) return 0;
 
         return renderer->getCacheSize();
+    }
+
+    void describe(ProgramDescription& description, const SkPaint* paint) const {
+    }
+
+    void setupProgram(ProgramDescription& description, Program* program) const {
     }
 
 private:

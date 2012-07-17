@@ -572,6 +572,7 @@ private:
     void setupDrawColor(int color, int alpha);
     void setupDrawColor(float r, float g, float b, float a);
     void setupDrawAlpha8Color(int color, int alpha);
+    void setupDrawTextGamma(const SkPaint* paint);
     void setupDrawShader();
     void setupDrawColorFilter();
     void setupDrawBlending(SkXfermode::Mode mode = SkXfermode::kSrcOver_Mode,
@@ -596,6 +597,7 @@ private:
     void setupDrawExternalTexture(GLuint texture);
     void setupDrawTextureTransform();
     void setupDrawTextureTransformUniforms(mat4& transform);
+    void setupDrawTextGammaUniforms();
     void setupDrawMesh(GLvoid* vertices, GLvoid* texCoords = NULL, GLuint vbo = 0);
     void setupDrawMeshIndices(GLvoid* vertices, GLvoid* texCoords);
     void setupDrawVertices(GLvoid* vertices);
