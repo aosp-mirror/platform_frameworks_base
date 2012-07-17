@@ -102,6 +102,7 @@ public:
     virtual     float       masterVolume() const;
     virtual     float       masterVolumeSW() const;
     virtual     bool        masterMute() const;
+    virtual     bool        masterMuteSW() const;
 
     virtual     status_t    setStreamVolume(int stream, float value, int output);
     virtual     status_t    setStreamMute(int stream, bool muted);
@@ -193,6 +194,8 @@ public:
         AUDIO_SET_VOICE_VOLUME,
         AUDIO_SET_PARAMETER,
         AUDIO_HW_GET_MASTER_VOLUME,
+        AUDIO_HW_SET_MASTER_MUTE,
+        AUDIO_HW_GET_MASTER_MUTE,
     };
 
     // record interface
@@ -1506,6 +1509,12 @@ private:
         MVS_FULL,
     };
 
+    enum master_mute_support {
+        MMS_NONE,
+        MMS_SETONLY,
+        MMS_FULL,
+    };
+
     mutable     Mutex                               mLock;
 
                 DefaultKeyedVector< pid_t, wp<Client> >     mClients;
@@ -1521,7 +1530,10 @@ private:
                 float                               mMasterVolume;
                 float                               mMasterVolumeSW;
                 master_volume_support               mMasterVolumeSupportLvl;
+
                 bool                                mMasterMute;
+                bool                                mMasterMuteSW;
+                master_mute_support                 mMasterMuteSupportLvl;
 
                 DefaultKeyedVector< int, sp<RecordThread> >    mRecordThreads;
 
