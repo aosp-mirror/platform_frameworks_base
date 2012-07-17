@@ -1174,6 +1174,10 @@ void OpenGLRenderer::setupDrawAlpha8Color(int color, int alpha) {
     mSetShaderColor = mDescription.setAlpha8Color(mColorR, mColorG, mColorB, mColorA);
 }
 
+void OpenGLRenderer::setupDrawTextGamma(const SkPaint* paint) {
+    mCaches.fontRenderer->describe(mDescription, paint);
+}
+
 void OpenGLRenderer::setupDrawColor(float r, float g, float b, float a) {
     mColorA = a;
     mColorR = r;
@@ -1299,6 +1303,10 @@ void OpenGLRenderer::setupDrawColorFilterUniforms() {
     if (mColorFilter) {
         mColorFilter->setupProgram(mCaches.currentProgram);
     }
+}
+
+void OpenGLRenderer::setupDrawTextGammaUniforms() {
+    mCaches.fontRenderer->setupProgram(mDescription, mCaches.currentProgram);
 }
 
 void OpenGLRenderer::setupDrawSimpleMesh() {
@@ -2302,6 +2310,7 @@ status_t OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count
 
     mCaches.activeTexture(0);
     setupDraw();
+    setupDrawTextGamma(paint);
     setupDrawDirtyRegionsDisabled();
     setupDrawWithTexture(true);
     setupDrawAlpha8Color(paint->getColor(), alpha);
@@ -2314,6 +2323,7 @@ status_t OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count
     setupDrawPureColorUniforms();
     setupDrawColorFilterUniforms();
     setupDrawShaderUniforms(pureTranslate);
+    setupDrawTextGammaUniforms();
 
     const Rect* clip = pureTranslate ? mSnapshot->clipRect : &mSnapshot->getLocalClip();
     Rect bounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
@@ -2387,6 +2397,8 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     if (CC_UNLIKELY(mHasShadow)) {
         mCaches.activeTexture(0);
 
+        // NOTE: The drop shadow will not perform gamma correction
+        //       if shader-based correction is enabled
         mCaches.dropShadowCache.setFontRenderer(fontRenderer);
         const ShadowTexture* shadow = mCaches.dropShadowCache.get(
                 paint, text, bytesCount, count, mShadowRadius);
@@ -2427,6 +2439,7 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     // The font renderer will always use texture unit 0
     mCaches.activeTexture(0);
     setupDraw();
+    setupDrawTextGamma(paint);
     setupDrawDirtyRegionsDisabled();
     setupDrawWithTexture(true);
     setupDrawAlpha8Color(paint->getColor(), alpha);
@@ -2441,6 +2454,7 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     setupDrawPureColorUniforms();
     setupDrawColorFilterUniforms();
     setupDrawShaderUniforms(pureTranslate);
+    setupDrawTextGammaUniforms();
 
     const Rect* clip = pureTranslate ? mSnapshot->clipRect : &mSnapshot->getLocalClip();
     Rect bounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
@@ -2485,6 +2499,7 @@ status_t OpenGLRenderer::drawTextOnPath(const char* text, int bytesCount, int co
 
     mCaches.activeTexture(0);
     setupDraw();
+    setupDrawTextGamma(paint);
     setupDrawDirtyRegionsDisabled();
     setupDrawWithTexture(true);
     setupDrawAlpha8Color(paint->getColor(), alpha);
@@ -2497,6 +2512,7 @@ status_t OpenGLRenderer::drawTextOnPath(const char* text, int bytesCount, int co
     setupDrawPureColorUniforms();
     setupDrawColorFilterUniforms();
     setupDrawShaderUniforms(false);
+    setupDrawTextGammaUniforms();
 
     const Rect* clip = &mSnapshot->getLocalClip();
     Rect bounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
