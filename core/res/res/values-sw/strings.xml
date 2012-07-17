@@ -243,14 +243,10 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"Inaruhusu programu kutoa hali ya ndani ya mfumo. Programu hasidi zinaweza kutoa aina nyingi za taarifa za faragha na salama ambazo kwa kawaida hazihitaji."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"epua maudhui ya skrini"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Inaruhusu programu kutoa maudhui ya dirisha amilifu. Programu hasidi zinaweza kutoa maudhui yote ya dirisha na kuchunguza maandishi yake yote isipokuwa nenosiri."</string>
-    <!-- no translation found for permlab_retrieve_window_info (8532295199112519378) -->
-    <skip />
-    <!-- no translation found for permdesc_retrieve_window_info (4998836370424186849) -->
-    <skip />
-    <!-- no translation found for permlab_filter_events (8675535648807427389) -->
-    <skip />
-    <!-- no translation found for permdesc_filter_events (8006236315888347680) -->
-    <skip />
+    <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"okoa maelezo ya dirisha"</string>
+    <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Huruhusu programu kuokoa maelezo kuhusu madirisha kutoka kwenye kidhibiti dirisha. Huenda programu hasidi ikaokoa maelezo ambayo yamekusudiwa kwa matumizi ya mfumo wa ndani."</string>
+    <string name="permlab_filter_events" msgid="8675535648807427389">"chuja matukio"</string>
+    <string name="permdesc_filter_events" msgid="8006236315888347680">"Huruhusu programu kusajili kichujio ingizo kinachochuja mkondo wa matukio ya mtumiaji kabla ya kutumwa. Huenda programu hasidi zikadhibiti mfumo wa UI bila mtumiaji kuingilia kati."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"Zima nusu"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Huweka kisimamia shughuli katika hali ya kuzima. Haiadhiri uzimaji kamili"</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"zuia swichi za app"</string>
