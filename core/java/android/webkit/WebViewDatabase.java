@@ -23,7 +23,7 @@ import android.content.Context;
  * application has stored any of the following types of browsing data and
  * to clear any such stored data for all WebViews in the application.
  * <ul>
- *  <li>Username/password pairs entered into web forms</li>
+ *  <li>Username/password pairs for web forms</li>
  *  <li>HTTP authentication username/password pairs</li>
  *  <li>Data entered into text fields (e.g. for autocomplete suggestions)</li>
  * </ul>
@@ -43,18 +43,23 @@ public class WebViewDatabase {
     }
 
     /**
-     * Gets whether there are any username/password combinations
-     * from web pages saved.
+     * Gets whether there are any saved username/password pairs for web forms.
+     * Note that these are unrelated to HTTP authentication credentials.
      *
-     * @return true if there are any username/passwords used in web
-     *         forms saved
+     * @return true if there are any saved username/password pairs
+     * @see WebView#savePassword
+     * @see clearUsernamePassword
      */
     public boolean hasUsernamePassword() {
         throw new MustOverrideException();
     }
 
     /**
-     * Clears any username/password combinations saved from web forms.
+     * Clears any saved username/password pairs for web forms.
+     * Note that these are unrelated to HTTP authentication credentials.
+     *
+     * @see WebView#savePassword
+     * @see hasUsernamePassword
      */
     public void clearUsernamePassword() {
         throw new MustOverrideException();
