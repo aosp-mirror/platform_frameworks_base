@@ -122,6 +122,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
         public static final int InterfaceChange           = 600;
         public static final int BandwidthControl          = 601;
+        public static final int InterfaceClassActivity    = 613;
     }
 
     /**
