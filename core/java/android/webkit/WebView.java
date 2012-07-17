@@ -724,9 +724,9 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Restores the state of this WebView from the given map used in
-     * {@link android.app.Activity#onRestoreInstanceState}. This method should
-     * be called to restore the state of this WebView before using the object. If
+     * Restores the state of this WebView from the given Bundle. This method is
+     * intended for use in {@link android.app.Activity#onRestoreInstanceState}
+     * and should be called to restore the state of this WebView. If
      * it is called after this WebView has had a chance to build state (load
      * pages, create a back/forward list, etc.) there may be undesirable
      * side-effects. Please note that this method no longer restores the
