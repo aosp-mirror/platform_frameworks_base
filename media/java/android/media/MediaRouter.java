@@ -126,6 +126,15 @@ public class MediaRouter {
                 sStatic.mDefaultAudio.mNameResId = name;
                 dispatchRouteChanged(sStatic.mDefaultAudio);
             }
+
+            boolean a2dpEnabled;
+            try {
+                a2dpEnabled = mAudioService.isBluetoothA2dpOn();
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error querying Bluetooth A2DP state", e);
+                a2dpEnabled = false;
+            }
+
             if (!TextUtils.equals(newRoutes.mBluetoothName, mCurRoutesInfo.mBluetoothName)) {
                 mCurRoutesInfo.mBluetoothName = newRoutes.mBluetoothName;
                 if (mCurRoutesInfo.mBluetoothName != null) {
@@ -135,13 +144,6 @@ public class MediaRouter {
                         info.mSupportedTypes = ROUTE_TYPE_LIVE_AUDIO;
                         sStatic.mBluetoothA2dpRoute = info;
                         addRoute(sStatic.mBluetoothA2dpRoute);
-                        try {
-                            if (mAudioService.isBluetoothA2dpOn()) {
-                                selectRouteStatic(ROUTE_TYPE_LIVE_AUDIO, mBluetoothA2dpRoute);
-                            }
-                        } catch (RemoteException e) {
-                            Log.e(TAG, "Error selecting Bluetooth A2DP route", e);
-                        }
                     } else {
                         sStatic.mBluetoothA2dpRoute.mName = mCurRoutesInfo.mBluetoothName;
                         dispatchRouteChanged(sStatic.mBluetoothA2dpRoute);
@@ -149,6 +151,16 @@ public class MediaRouter {
                 } else if (sStatic.mBluetoothA2dpRoute != null) {
                     removeRoute(sStatic.mBluetoothA2dpRoute);
                     sStatic.mBluetoothA2dpRoute = null;
+                }
+            }
+
+            if (mBluetoothA2dpRoute != null) {
+                if (mCurRoutesInfo.mMainType != AudioRoutesInfo.MAIN_SPEAKER &&
+                        mSelectedRoute == mBluetoothA2dpRoute) {
+                    selectRouteStatic(ROUTE_TYPE_LIVE_AUDIO, mDefaultAudio);
+                } else if (mCurRoutesInfo.mMainType == AudioRoutesInfo.MAIN_SPEAKER &&
+                        mSelectedRoute == mDefaultAudio && a2dpEnabled) {
+                    selectRouteStatic(ROUTE_TYPE_LIVE_AUDIO, mBluetoothA2dpRoute);
                 }
             }
         }
