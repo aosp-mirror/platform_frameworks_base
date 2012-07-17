@@ -141,7 +141,9 @@ selected data or text.</p>
 </ul>
 <p>Use CABs whenever you allow the user to select data via long press. You can control the action
 content of a CAB in order to insert the actions you would like the user to be able to perform.</p>
-<p>For more information, refer to the "Selection" pattern.</p>
+<p>For more information, refer to the <a href="{@docRoot}design/patterns/selection.html">Selection
+pattern</a>.</p>
+
 <h2 id="elements">Action Bar Elements</h2>
 
 <h4>Tabs</h4>
