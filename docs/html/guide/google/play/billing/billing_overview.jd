@@ -353,8 +353,9 @@ pertains to.</p>
 
 <p>The <code>RESTORE_TRANSACTIONS</code> request type also triggers a
 <code>PURCHASE_STATE_CHANGED</code> broadcast intent, which contains the same type of transaction
-information that is sent during a purchase request, although you do not need to respond to this
-intent with a <code>CONFIRM_NOTIFICATIONS</code> message.</p>
+information that is sent during a purchase request. Unlike with a purchase request, however, the transactions
+are given without any associated notification IDs, so you do not need to respond to this
+intent with a <code>CONFIRM_NOTIFICATIONS</code> message. </p>
 
 <p class="note"><strong>Note:</strong> You should use the <code>RESTORE_TRANSACTIONS</code> request
 type only when your application is installed for the first time on a device or when your

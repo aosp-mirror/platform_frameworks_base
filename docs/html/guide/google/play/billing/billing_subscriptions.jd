@@ -241,9 +241,10 @@ store the token locally or pass it to your backend servers, which can then use
 it to validate or cancel the subscription remotely using the <a
 href="#play-dev-api">Google Play Android Developer API</a>.</p>
 
-<p>In the case of billing errors, such as could happen if the customer’s credit
-card becomes invalid, Google Play notifies your app of the change in purchase
-state.</p>
+<p>If a recurring payment fails, such as could happen if the customer’s credit
+card has become invalid, the subscription does not renew. Google Play notifies your
+app at the end of the active cycle that the purchase state of the subscription is now "Expired".
+Your app does not need to grant the user further access to the subscription content.</p>
 
 <p>As a best practice, we recommend that your app includes business logic to
 notify your backend servers of subscription purchases, tokens, and any billing
@@ -626,13 +627,13 @@ purchased subscriptions at launch or prior to granting access to subscriber
 content.</p>
 
 <p>With In-app Billing, you validate a subscription by keeping track of its
-purchase state, such as purchased or cancelled, and then checking the state
-whenever needed. Google Play provides two ways to let you know when the purchase
+purchase state and then checking the state whenever needed. Google Play 
+provides two ways to let you know when the purchase
 state of a subscription changes:</p>
 
 <ul>
   <li><em>In-app Billing Notifications</em>. Google Play pushes a notification
-  to your app whenever  the purchase state of a subscription changes. Your app can
+  to your app to indicate a change in the purchase state of a subscription. Your app can
   store the most recent purchase state for a given purchase token and then check
   that state at run time, as needed.</li>
   <li><em>Google Play Android Developer API</em>. You can use this HTTP-based
@@ -689,7 +690,8 @@ values for subscription purchases, as received with a
 <td>Purchased successfully</td><td><code>0</code></td><td>Sent at original purchase only (not at recurring billing cycles).</td></tr>
 <td>Cancelled</td><td><code>1</code></td><td>Sent at original purchase only if the purchase has failed for some reason. </td></tr>
 <td>Refunded</td><td><code>2</code></td><td>The purchase was refunded.</code></td></tr>
-<td>Subscription expired</td><td><code>3</code></td><td>Sent if a subscription expires because of non-payment or user cancelation.</td></tr>
+<td>Subscription expired</td><td><code>3</code></td><td>Sent at the end of a billing cycle to indicate that the subscription expired without renewal because of non-payment or user-cancellation. Your app does not need to grant continued access to the subscription content. 
+</td></tr>
 </table>
 
 
@@ -718,7 +720,7 @@ startActivity(intent);</pre>
 <p>For more information, see 
   <a href="{@docRoot}distribute/googleplay/promote/linking.html">Linking to Your Products</a>.</p>
 
-<h3 id="purchase-state-changes">Recurring billing and changes in purchase state</h3>
+<h3 id="purchase-state-changes">Recurring billing, cancellation, and changes in purchase state</h3>
 
 <p>Google Play notifies your app when the user completes the purchase of a
 subscription, but the purchase state does not change over time, provided that
@@ -729,6 +731,19 @@ non-payment or user cancellation</em>. </p>
 <p>Over the life of a subscription, your app does not need to initiate any
 recurring billing events &mdash; those are all handled by Google Play and they
 are transparent to your application if billing is successful.</p>
+
+<p>When the user cancels a subscription during an active billing cycle, Google
+Play <em>does not</em> notify your app immediately of the change in purchase
+state. Instead, it waits until the end of the active billing cycle and then
+notifies your app that the purchase state has changed to "Expired". </p>
+
+<p>Similarly, if payment for the next billing cycle fails, Google Play waits
+until the end of the active billing cycle and then notifies your app at that time that the
+purchase state has changed to "Expired".</p>
+
+<p>Your app can handle user cancellation and non-payment in the same way, since both cause
+a change to the same "Expired" purchase state. Once the purchase state has become "Expired",
+your app does not need to grant further access to the subscription content.</p>
 
 <h3 id="modifying">Modifying your app for subscriptions</h3>
 

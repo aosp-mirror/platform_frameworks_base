@@ -450,9 +450,7 @@ Google Play Android Developer API</a> for more information.</p>
 <p>The In-app Billing API is versioned, with each version offering
 additional features to your app. At run time, your app can query the Google Play app to determine
 what version of the API it supports and what features are available. Typically, the Google Play app
-will be updated and will support the latest version of the API. For a summary of versions see
-<a href="{@docRoot}guide/google/play/billing/billing_reference.html#billing-versions">In-app Billing
-API Versions</a>.</p>
+will be updated and will support the latest version of the API. 
 
 <p>The sections below list the supported versions of the In-app Billing API.
 Versions are specified in the <code>API_VERSION</code> key of the Bundle object
