@@ -487,7 +487,16 @@ bool CommonTimeServer::setupSocket_l() {
             goto bailout;
         }
     } else
-    if (ntohl(ipv4_addr->sin_addr.s_addr) != 0xFFFFFFFF) {
+    if (ntohl(ipv4_addr->sin_addr.s_addr) == 0xFFFFFFFF) {
+        // If the master election address is the broadcast address, then enable
+        // the broadcast socket option
+        const int one = 1;
+        rc = setsockopt(mSocket, SOL_SOCKET, SO_BROADCAST, &one, sizeof(one));
+        if (rc == -1) {
+            LOGE("Failed to enable broadcast (errno = %d)", errno);
+            goto bailout;
+        }
+    } else {
         // If the master election address is neither broadcast, nor multicast,
         // then we are misconfigured.  The config API layer should prevent this
         // from ever happening.
