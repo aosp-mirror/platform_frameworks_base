@@ -24,12 +24,9 @@
 
     Han languages (Chinese, Japanese, and Korean) share a common range of unicode characters;
     their ordering in the fallback or vendor files gives priority to the first in the list.
-    Locale-specific ordering can be configured by adding language and region codes to the end
-    of the filename (e.g. /system/etc/fallback_fonts-ja.xml). When no region code is used,
-    as with this example, all regions are matched. Use separate files for each supported locale.
-    The standard fallback file (fallback_fonts.xml) is used when a locale does not have its own
-    file. All fallback files must contain the same complete set of fonts; only their ordering
-    can differ.
+    Language-specific ordering can be configured by adding a BCP 47-style "lang" attribute to
+    a "file" element; fonts matching the language of text being drawn will be prioritised over
+    all others.
 -->
 <familyset>
     <family>
@@ -106,7 +103,7 @@
     </family>
     <family>
         <fileset>
-            <file>MTLmr3m.ttf</file>
+            <file lang="ja">MTLmr3m.ttf</file>
         </fileset>
     </family>
     <!--
