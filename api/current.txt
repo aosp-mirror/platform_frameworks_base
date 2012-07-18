@@ -26615,6 +26615,7 @@ package android.webkit {
     method public boolean getLightTouchEnabled();
     method public boolean getLoadWithOverviewMode();
     method public synchronized boolean getLoadsImagesAutomatically();
+    method public boolean getMediaPlaybackRequiresUserGesture();
     method public synchronized int getMinimumFontSize();
     method public synchronized int getMinimumLogicalFontSize();
     method public deprecated boolean getNavDump();
@@ -26664,6 +26665,7 @@ package android.webkit {
     method public void setLightTouchEnabled(boolean);
     method public void setLoadWithOverviewMode(boolean);
     method public synchronized void setLoadsImagesAutomatically(boolean);
+    method public void setMediaPlaybackRequiresUserGesture(boolean);
     method public synchronized void setMinimumFontSize(int);
     method public synchronized void setMinimumLogicalFontSize(int);
     method public deprecated void setNavDump(boolean);

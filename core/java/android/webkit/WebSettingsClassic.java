@@ -116,6 +116,7 @@ public class WebSettingsClassic extends WebSettings {
     private boolean         mNeedInitialFocus = true;
     private boolean         mNavDump = false;
     private boolean         mSupportZoom = true;
+    private boolean         mMediaPlaybackRequiresUserGesture = true;
     private boolean         mBuiltInZoomControls = false;
     private boolean         mDisplayZoomControls = true;
     private boolean         mAllowFileAccess = true;
@@ -456,6 +457,25 @@ public class WebSettingsClassic extends WebSettings {
     @Override
     public boolean supportZoom() {
         return mSupportZoom;
+    }
+
+    /**
+     * @see android.webkit.WebSettings#setMediaPlaybackRequiresUserGesture(boolean)
+     */
+    @Override
+    public void setMediaPlaybackRequiresUserGesture(boolean support) {
+        if (mMediaPlaybackRequiresUserGesture != support) {
+            mMediaPlaybackRequiresUserGesture = support;
+            postSync();
+        }
+    }
+
+    /**
+     * @see android.webkit.WebSettings#getMediaPlaybackRequiresUserGesture()
+     */
+    @Override
+    public boolean getMediaPlaybackRequiresUserGesture() {
+        return mMediaPlaybackRequiresUserGesture;
     }
 
     /**

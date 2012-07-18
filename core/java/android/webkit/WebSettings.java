@@ -199,6 +199,26 @@ public abstract class WebSettings {
     }
 
     /**
+     * Sets whether the WebView requires a user gesture to play media.
+     * The default is true.
+     *
+     * @param require whether the WebView requires a user gesture to play media
+     */
+    public void setMediaPlaybackRequiresUserGesture(boolean require) {
+        throw new MustOverrideException();
+    }
+
+    /**
+     * Gets whether the WebView requires a user gesture to play media.
+     *
+     * @return true if the WebView requires a user gesture to play media
+     * @see #setMediaPlaybackRequiresUserGesture
+     */
+    public boolean getMediaPlaybackRequiresUserGesture() {
+        throw new MustOverrideException();
+    }
+
+    /**
      * Sets whether the WebView should use its built-in zoom mechanisms. The
      * built-in zoom mechanisms comprise on-screen zoom controls, which are
      * displayed over the WebView's content, and the use of a pinch gesture to
