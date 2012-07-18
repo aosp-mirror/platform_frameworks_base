@@ -230,7 +230,13 @@ Android platform.</p>
 <table>
   <tr><th>Platform Version</th><th>API Level</th><th>VERSION_CODE</th><th>Notes</th></tr>
  
-     <tr><td><a href="{@docRoot}about/versions/android-4.0.3.html">Android 4.0.3</a></td>
+    <tr><td><a href="{@docRoot}about/versions/android-4.1.html">Android 4.1, 4.1.1</a></td>
+    <td><a href="{@docRoot}sdk/api_diff/16/changes.html" title="Diff Report">16</a></td>
+    <td>{@link android.os.Build.VERSION_CODES#JELLY_BEAN}</td>
+    <td><a href="{@docRoot}about/versions/jelly-bean.html">Platform
+Highlights</a></td></tr>
+
+    <tr><td><a href="{@docRoot}about/versions/android-4.0.3.html">Android 4.0.3, 4.0.4</a></td>
     <td><a href="{@docRoot}sdk/api_diff/15/changes.html" title="Diff Report">15</a></td>
     <td>{@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH_MR1}</td>
     <td rowspan="2"><a href="{@docRoot}about/versions/android-4.0-highlights.html">Platform
