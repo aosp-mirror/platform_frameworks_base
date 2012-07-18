@@ -96,11 +96,6 @@
     </family>
     <family>
         <fileset>
-            <file>Lohit-Telugu.ttf</file>
-        </fileset>
-    </family>
-    <family>
-        <fileset>
             <file>AndroidEmoji.ttf</file>
         </fileset>
     </family>
@@ -112,6 +107,15 @@
     <family>
         <fileset>
             <file>MTLmr3m.ttf</file>
+        </fileset>
+    </family>
+    <!--
+        Fonts below this point have problematic glyphs and should not be moved
+        higher in the fallback list until those glyphs have been fixed.
+    -->
+    <family>
+        <fileset>
+            <file>Lohit-Telugu.ttf</file> <!-- masks U+FFBC-10007 -->
         </fileset>
     </family>
 </familyset>
