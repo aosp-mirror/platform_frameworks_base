@@ -1541,7 +1541,7 @@ status_t DisplayListRenderer::drawBitmap(SkBitmap* bitmap, float srcLeft, float 
 
 status_t DisplayListRenderer::drawBitmapData(SkBitmap* bitmap, float left, float top,
         SkPaint* paint) {
-    const bool reject = quickReject(left, top, left + bitmap->width(), bitmap->height());
+    const bool reject = quickReject(left, top, left + bitmap->width(), top + bitmap->height());
     uint32_t* location = addOp(DisplayList::DrawBitmapData, reject);
     addBitmapData(bitmap);
     addPoint(left, top);
@@ -1643,7 +1643,10 @@ status_t DisplayListRenderer::drawPath(SkPath* path, SkPaint* paint) {
     uint32_t width, height;
     computePathBounds(path, paint, left, top, offset, width, height);
 
-    const bool reject = quickReject(left - offset, top - offset, width, height);
+    left -= offset;
+    top -= offset;
+
+    const bool reject = quickReject(left, top, left + width, top + height);
     uint32_t* location = addOp(DisplayList::DrawPath, reject);
     addPath(path);
     addPaint(paint);
