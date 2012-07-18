@@ -726,7 +726,7 @@ void TextLayoutShaper::computeRunValues(const SkPaint* paint, const UChar* chars
                 // set in the mFontRec.
                 outPos->add(x + xo + yo * skewX);
                 outPos->add(yo);
-#ifdef DEBUG_GLYPHS
+#if DEBUG_GLYPHS
                 ALOGD("         -- hb adv[%d] = %f, log_cluster[%d] = %d",
                         index, HBFixedToFloat(mShaperItem.advances[index]),
                         index, mShaperItem.log_clusters[index]);
