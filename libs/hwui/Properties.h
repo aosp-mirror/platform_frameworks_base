@@ -74,13 +74,28 @@ enum DebugLevel {
 #define PROPERTY_TEXT_CACHE_HEIGHT "ro.hwui.text_cache_height"
 
 // Indicates whether gamma correction should be applied in the shaders
-// or in lookup tables. Accepted values: true, false
-#define PROPERTY_TEXT_GAMMA_SHADER "ro.hwui.text_gamma_shader"
+// or in lookup tables. Accepted values:
+//
+//     - "lookup3", correction based on lookup tables. Gamma correction
+//        is different for black and white text (see thresholds below)
+//
+//     - "lookup", correction based on a single lookup table
+//
+//     - "shader3", correction applied by a GLSL shader. Gamma correction
+//        is different for black and white text (see thresholds below)
+//
+//     - "shader", correction applied by a GLSL shader
+//
+// See PROPERTY_TEXT_GAMMA, PROPERTY_TEXT_BLACK_GAMMA_THRESHOLD and
+// PROPERTY_TEXT_WHITE_GAMMA_THRESHOLD for more control.
+#define PROPERTY_TEXT_GAMMA_SHADER "hwui.text_gamma_correction"
 
 // Gamma (>= 1.0, <= 10.0)
-#define PROPERTY_TEXT_GAMMA "ro.text_gamma"
-#define PROPERTY_TEXT_BLACK_GAMMA_THRESHOLD "ro.text_gamma.black_threshold"
-#define PROPERTY_TEXT_WHITE_GAMMA_THRESHOLD "ro.text_gamma.white_threshold"
+#define PROPERTY_TEXT_GAMMA "hwui.text_gamma"
+// Luminance threshold below which black gamma correction is applied. Range: [0..255]
+#define PROPERTY_TEXT_BLACK_GAMMA_THRESHOLD "hwui.text_gamma.black_threshold"
+// Lumincance threshold above which white gamma correction is applied. Range: [0..255]
+#define PROPERTY_TEXT_WHITE_GAMMA_THRESHOLD "hwui.text_gamma.white_threshold"
 
 // Converts a number of mega-bytes into bytes
 #define MB(s) s * 1024 * 1024
