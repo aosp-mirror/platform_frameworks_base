@@ -852,11 +852,13 @@ status_t DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flag
 #endif
 
     renderer.startMark(mName.string());
+
     int restoreTo = renderer.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
     DISPLAY_LIST_LOGD("%s%s %d %d", indent, "Save",
             SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag, restoreTo);
     setViewProperties(renderer, level);
-    if (renderer.quickReject(0, 0, mWidth, mHeight)) {
+
+    if (renderer.quickRejectNoScissor(0, 0, mWidth, mHeight)) {
         DISPLAY_LIST_LOGD("%s%s %d", (char*) indent, "RestoreToCount", restoreTo);
         renderer.restoreToCount(restoreTo);
         renderer.endMark();
@@ -865,6 +867,7 @@ status_t DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flag
 
     DisplayListLogBuffer& logBuffer = DisplayListLogBuffer::getInstance();
     int saveCount = renderer.getSaveCount() - 1;
+
     while (!mReader.eof()) {
         int op = mReader.readInt();
         if (op & OP_MAY_BE_SKIPPED_MASK) {
@@ -879,6 +882,10 @@ status_t DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flag
             }
         }
         logBuffer.writeCommand(level, op);
+
+#if DEBUG_DISPLAY_LIST_OPS_AS_EVENTS
+        Caches::getInstance().eventMark(strlen(OP_NAMES[op]), OP_NAMES[op]);
+#endif
 
         switch (op) {
             case DrawGLFunction: {

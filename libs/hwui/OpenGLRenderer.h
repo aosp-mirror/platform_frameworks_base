@@ -105,6 +105,7 @@ public:
 
     ANDROID_API const Rect& getClipBounds();
     ANDROID_API bool quickReject(float left, float top, float right, float bottom);
+    bool quickRejectNoScissor(float left, float top, float right, float bottom);
     virtual bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
     virtual Rect* getClipRect();
 

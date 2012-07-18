@@ -313,6 +313,7 @@ status_t OpenGLRenderer::callDrawGLFunction(Functor* functor, Rect& dirty) {
     interrupt();
     detachFunctor(functor);
 
+    mCaches.enableScissor();
     if (mDirtyClip) {
         setScissorFromClip();
     }
@@ -982,7 +983,7 @@ void OpenGLRenderer::clearLayerRegions() {
         // The list contains bounds that have already been clipped
         // against their initial clip rect, and the current clip
         // is likely different so we need to disable clipping here
-        mCaches.disableScissor();
+        bool scissorChanged = mCaches.disableScissor();
 
         Vertex mesh[count * 6];
         Vertex* vertex = mesh;
@@ -1009,6 +1010,8 @@ void OpenGLRenderer::clearLayerRegions() {
         setupDrawVertices(&mesh[0].position[0]);
 
         glDrawArrays(GL_TRIANGLES, 0, count * 6);
+
+        if (scissorChanged) mCaches.enableScissor();
     } else {
         for (uint32_t i = 0; i < count; i++) {
             delete mLayers.itemAt(i);
@@ -1065,14 +1068,29 @@ void OpenGLRenderer::setScissorFromClip() {
     Rect clip(*mSnapshot->clipRect);
     clip.snapToPixelBoundaries();
 
-    mCaches.setScissor(clip.left, mSnapshot->height - clip.bottom,
-            clip.getWidth(), clip.getHeight());
-
-    mDirtyClip = false;
+    if (mCaches.setScissor(clip.left, mSnapshot->height - clip.bottom,
+            clip.getWidth(), clip.getHeight())) {
+        mDirtyClip = false;
+    }
 }
 
 const Rect& OpenGLRenderer::getClipBounds() {
     return mSnapshot->getLocalClip();
+}
+
+bool OpenGLRenderer::quickRejectNoScissor(float left, float top, float right, float bottom) {
+    if (mSnapshot->isIgnored()) {
+        return true;
+    }
+
+    Rect r(left, top, right, bottom);
+    mSnapshot->transform->mapRect(r);
+    r.snapToPixelBoundaries();
+
+    Rect clipRect(*mSnapshot->clipRect);
+    clipRect.snapToPixelBoundaries();
+
+    return !clipRect.intersects(r);
 }
 
 bool OpenGLRenderer::quickReject(float left, float top, float right, float bottom) {
@@ -1112,6 +1130,8 @@ Rect* OpenGLRenderer::getClipRect() {
 ///////////////////////////////////////////////////////////////////////////////
 
 void OpenGLRenderer::setupDraw(bool clear) {
+    // TODO: It would be best if we could do this before quickReject()
+    //       changes the scissor test state
     if (clear) clearLayerRegions();
     if (mDirtyClip) {
         setScissorFromClip();
