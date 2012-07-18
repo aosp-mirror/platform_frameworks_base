@@ -24103,6 +24103,7 @@ package android.view {
     method protected boolean fitSystemWindows(android.graphics.Rect);
     method public android.view.View focusSearch(int);
     method public void forceLayout();
+    method public static int generateViewId();
     method public android.view.accessibility.AccessibilityNodeProvider getAccessibilityNodeProvider();
     method public float getAlpha();
     method public android.view.animation.Animation getAnimation();
