@@ -144,7 +144,7 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Ringelyd på"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Avslutter…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Nettbrettet slås av."</string>
-    <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Telefonen vil bli slått av."</string>
+    <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Telefonen kommer til å slås av."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Vil du slå av?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Start på nytt i sikker modus"</string>
     <string name="reboot_safemode_confirm" msgid="55293944502784668">"Ønsker du å starte på nytt i sikker modus? Dette deaktiverer alle tredjepartsprogrammene du har installert. De gjenopprettes når du starter på nytt."</string>
@@ -474,7 +474,7 @@
     <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"Lar appen bruke kontoadministratoren sine rettigheter til kontoautentisering, herunder oppretting av kontoer samt innhenting og angivelse av passord."</string>
     <string name="permlab_manageAccounts" msgid="4983126304757177305">"legger til eller fjerner kontoer"</string>
     <string name="permdesc_manageAccounts" msgid="8698295625488292506">"Lar appen utføre handlinger som å legge til og fjerne kontoer samt slette passord."</string>
-    <string name="permlab_useCredentials" msgid="235481396163877642">"bruker kontoer på enheten"</string>
+    <string name="permlab_useCredentials" msgid="235481396163877642">"bruke kontoer på enheten"</string>
     <string name="permdesc_useCredentials" msgid="7984227147403346422">"Lar appen be om autentiseringstokener."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"ser nettverkstilkoblinger"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Lar appen se informasjon om nettverkstilkoblinger, slik som hvilke nettverk som finnes og er tilkoblet."</string>
