@@ -7,8 +7,7 @@
     that in your makefile, this directory should be referenced as $(TARGET_COPY_OUT_VENDOR)/etc/:
 
         PRODUCT_COPY_FILES += \
-            frameworks/base/data/fonts/vendor_fonts.xml:$(TARGET_COPY_OUT_VENDOR)/etc/fallback_fonts.xml \
-            frameworks/base/data/fonts/vendor_fonts-ja.xml:$(TARGET_COPY_OUT_VENDOR)/etc/fallback_fonts-ja.xml
+            frameworks/base/data/fonts/vendor_fonts.xml:$(TARGET_COPY_OUT_VENDOR)/etc/fallback_fonts.xml
 
     For example, vendors might want to build configurations for locales that are
     better served by fonts which either handle glyphs not supported in the default fonts or which
@@ -32,32 +31,9 @@
 
     Han languages (Chinese, Japanese, and Korean) share a common range of unicode characters;
     their ordering in the fallback or vendor files gives priority to the first in the list.
-    Locale-specific ordering can be configured by adding language and region codes to the end
-    of the filename (e.g. /vendor/etc/fallback_fonts-ja.xml). When no region code is used,
-    as with this example, all regions are matched. Use separate files for each supported locale.
-    The standard fallback file (fallback_fonts.xml) is used when a locale does not have its own
-    file. All fallback files must contain the same complete set of fonts; only their ordering
-    can differ. For example, on a device supporting Japanese, but with English as the default,
-    /vendor/etc/fallback_fonts.xml might contain:
-
-        <familyset>
-            <family>
-                <fileset>
-                    <file>DroidSansJapanese.ttf</file>
-                </fileset>
-            </family>
-        </familyset>
-
-    placing the Japanese font at the end of the fallback sequence for English, with a corresponding
-    /system/vendor/etc/fallback_fonts-ja.xml, placing it at the front of the list.
-
-        <familyset>
-            <family order="0">
-                <fileset>
-                    <file>DroidSansJapanese.ttf</file>
-                </fileset>
-            </family>
-        </familyset>
+    Language-specific ordering can be configured by adding a BCP 47-style "lang" attribute to
+    a "file" element; fonts matching the language of text being drawn will be prioritised over
+    all others.
 
     The sample configuration below is an example of how one might provide two families of fonts
     that get inserted at the first and second (0  and 1) position in the overall fallback fonts.
@@ -82,4 +58,4 @@
         </fileset>
     </family>
 </familyset>
--->
+--->

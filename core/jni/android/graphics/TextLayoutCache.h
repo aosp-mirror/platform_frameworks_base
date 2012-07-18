@@ -32,7 +32,7 @@
 #include <SkTemplates.h>
 #include <SkUtils.h>
 #include <SkAutoKern.h>
-#include "SkTypeface_android.h"
+#include <SkLanguage.h>
 
 #include <unicode/ubidi.h>
 #include <unicode/ushape.h>
@@ -102,6 +102,8 @@ private:
     SkScalar textScaleX;
     uint32_t flags;
     SkPaint::Hinting hinting;
+    SkPaint::FontVariant variant;
+    SkLanguage language;
 
     inline const UChar* getText() const { return text ? text : textCopy.string(); }
 
