@@ -17,13 +17,10 @@
 package com.android.internal.policy.impl;
 
 import com.android.internal.R;
-import com.android.internal.policy.impl.KeyguardUpdateMonitor.InfoCallback;
-import com.android.internal.policy.impl.KeyguardUpdateMonitor.InfoCallbackImpl;
-import com.android.internal.policy.impl.LockPatternKeyguardView.UnlockMode;
+import com.android.internal.policy.impl.KeyguardUpdateMonitor.BatteryStatus;
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockScreenWidgetCallback;
-import com.android.internal.widget.LockScreenWidgetInterface;
 import com.android.internal.widget.TransportControlView;
 
 import android.accounts.Account;
@@ -40,10 +37,8 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.PixelFormat;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -449,9 +444,8 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         mWindowController = controller;
         mSuppressBiometricUnlock = sIsFirstAppearanceAfterBoot;
         sIsFirstAppearanceAfterBoot = false;
-        mPluggedIn = mUpdateMonitor.isDevicePluggedIn();
         mScreenOn = ((PowerManager)context.getSystemService(Context.POWER_SERVICE)).isScreenOn();
-        mUpdateMonitor.registerInfoCallback(mInfoCallback);
+        mUpdateMonitor.registerCallback(mInfoCallback);
 
         /**
          * We'll get key events the current screen doesn't use. see
@@ -692,17 +686,17 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         post(mRecreateRunnable);
     }
 
-    InfoCallbackImpl mInfoCallback = new InfoCallbackImpl() {
+    KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
 
         @Override
-        public void onRefreshBatteryInfo(boolean showBatteryInfo, boolean pluggedIn,
-                int batteryLevel) {
+        public void onRefreshBatteryInfo(BatteryStatus status) {
             // When someone plugs in or unplugs the device, we hide the biometric sensor area and
             // suppress its startup for the next onScreenTurnedOn().  Since plugging/unplugging
             // causes the screen to turn on, the biometric unlock would start if it wasn't
             // suppressed.
             //
             // However, if the biometric unlock is already running, we do not want to interrupt it.
+            final boolean pluggedIn = status.isPluggedIn();
             if (mBiometricUnlock != null && mPluggedIn != pluggedIn
                     && !mBiometricUnlock.isRunning()) {
                 mBiometricUnlock.stop();
@@ -732,7 +726,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         }
 
         @Override
-        public void onUserChanged(int userId) {
+        public void onUserSwitched(int userId) {
             if (mBiometricUnlock != null) {
                 mBiometricUnlock.stop();
             }

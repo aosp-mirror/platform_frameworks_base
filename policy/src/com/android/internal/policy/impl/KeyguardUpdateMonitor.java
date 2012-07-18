@@ -57,37 +57,13 @@ import java.util.ArrayList;
  */
 public class KeyguardUpdateMonitor {
 
-    static private final String TAG = "KeyguardUpdateMonitor";
-    static private final boolean DEBUG = false;
-
-    /* package */ static final int LOW_BATTERY_THRESHOLD = 20;
-
-    private final Context mContext;
-
-    private IccCardConstants.State mSimState = IccCardConstants.State.READY;
-
-    private boolean mDeviceProvisioned;
-
-    private BatteryStatus mBatteryStatus;
-
-    private CharSequence mTelephonyPlmn;
-    private CharSequence mTelephonySpn;
-
-    private int mFailedAttempts = 0;
-    private int mFailedBiometricUnlockAttempts = 0;
+    private static final String TAG = "KeyguardUpdateMonitor";
+    private static final boolean DEBUG = false;
+    private static final boolean DEBUG_SIM_STATES = DEBUG || false;
     private static final int FAILED_BIOMETRIC_UNLOCK_ATTEMPTS_BEFORE_BACKUP = 3;
+    private static final int LOW_BATTERY_THRESHOLD = 20;
 
-    private boolean mClockVisible;
-
-    private Handler mHandler;
-
-    private ArrayList<InfoCallback> mInfoCallbacks = Lists.newArrayList();
-    private ArrayList<SimStateCallback> mSimStateCallbacks = Lists.newArrayList();
-    private ContentObserver mContentObserver;
-    private int mRingMode;
-    private int mPhoneState;
-
-    // messages for the handler
+    // Callback messages
     private static final int MSG_TIME_UPDATE = 301;
     private static final int MSG_BATTERY_UPDATE = 302;
     private static final int MSG_CARRIER_INFO_UPDATE = 303;
@@ -97,9 +73,118 @@ public class KeyguardUpdateMonitor {
     private static final int MSG_CLOCK_VISIBILITY_CHANGED = 307;
     private static final int MSG_DEVICE_PROVISIONED = 308;
     protected static final int MSG_DPM_STATE_CHANGED = 309;
-    protected static final int MSG_USER_CHANGED = 310;
+    protected static final int MSG_USER_SWITCHED = 310;
+    protected static final int MSG_USER_REMOVED = 311;
 
-    protected static final boolean DEBUG_SIM_STATES = DEBUG || false;
+    private final Context mContext;
+
+    // Telephony state
+    private IccCardConstants.State mSimState = IccCardConstants.State.READY;
+    private CharSequence mTelephonyPlmn;
+    private CharSequence mTelephonySpn;
+    private int mRingMode;
+    private int mPhoneState;
+
+    private boolean mDeviceProvisioned;
+
+    private BatteryStatus mBatteryStatus;
+
+    private int mFailedAttempts = 0;
+    private int mFailedBiometricUnlockAttempts = 0;
+
+    private boolean mClockVisible;
+
+    private ArrayList<KeyguardUpdateMonitorCallback> mCallbacks = Lists.newArrayList();
+    private ContentObserver mContentObserver;
+
+    private final Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_TIME_UPDATE:
+                    handleTimeUpdate();
+                    break;
+                case MSG_BATTERY_UPDATE:
+                    handleBatteryUpdate((BatteryStatus) msg.obj);
+                    break;
+                case MSG_CARRIER_INFO_UPDATE:
+                    handleCarrierInfoUpdate();
+                    break;
+                case MSG_SIM_STATE_CHANGE:
+                    handleSimStateChange((SimArgs) msg.obj);
+                    break;
+                case MSG_RINGER_MODE_CHANGED:
+                    handleRingerModeChange(msg.arg1);
+                    break;
+                case MSG_PHONE_STATE_CHANGED:
+                    handlePhoneStateChanged((String)msg.obj);
+                    break;
+                case MSG_CLOCK_VISIBILITY_CHANGED:
+                    handleClockVisibilityChanged();
+                    break;
+                case MSG_DEVICE_PROVISIONED:
+                    handleDeviceProvisioned();
+                    break;
+                case MSG_DPM_STATE_CHANGED:
+                    handleDevicePolicyManagerStateChanged();
+                    break;
+                case MSG_USER_SWITCHED:
+                    handleUserSwitched(msg.arg1);
+                    break;
+                case MSG_USER_REMOVED:
+                    handleUserRemoved(msg.arg1);
+                    break;
+            }
+        }
+    };
+
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (DEBUG) Log.d(TAG, "received broadcast " + action);
+
+            if (Intent.ACTION_TIME_TICK.equals(action)
+                    || Intent.ACTION_TIME_CHANGED.equals(action)
+                    || Intent.ACTION_TIMEZONE_CHANGED.equals(action)) {
+                mHandler.sendMessage(mHandler.obtainMessage(MSG_TIME_UPDATE));
+            } else if (TelephonyIntents.SPN_STRINGS_UPDATED_ACTION.equals(action)) {
+                mTelephonyPlmn = getTelephonyPlmnFrom(intent);
+                mTelephonySpn = getTelephonySpnFrom(intent);
+                mHandler.sendMessage(mHandler.obtainMessage(MSG_CARRIER_INFO_UPDATE));
+            } else if (Intent.ACTION_BATTERY_CHANGED.equals(action)) {
+                final int status = intent.getIntExtra(EXTRA_STATUS, BATTERY_STATUS_UNKNOWN);
+                final int plugged = intent.getIntExtra(EXTRA_PLUGGED, 0);
+                final int level = intent.getIntExtra(EXTRA_LEVEL, 0);
+                final int health = intent.getIntExtra(EXTRA_HEALTH, BATTERY_HEALTH_UNKNOWN);
+                final Message msg = mHandler.obtainMessage(
+                        MSG_BATTERY_UPDATE, new BatteryStatus(status, level, plugged, health));
+                mHandler.sendMessage(msg);
+            } else if (TelephonyIntents.ACTION_SIM_STATE_CHANGED.equals(action)) {
+                if (DEBUG_SIM_STATES) {
+                    Log.v(TAG, "action " + action + " state" +
+                        intent.getStringExtra(IccCardConstants.INTENT_KEY_ICC_STATE));
+                }
+                mHandler.sendMessage(mHandler.obtainMessage(
+                        MSG_SIM_STATE_CHANGE, SimArgs.fromIntent(intent)));
+            } else if (AudioManager.RINGER_MODE_CHANGED_ACTION.equals(action)) {
+                mHandler.sendMessage(mHandler.obtainMessage(MSG_RINGER_MODE_CHANGED,
+                        intent.getIntExtra(AudioManager.EXTRA_RINGER_MODE, -1), 0));
+            } else if (TelephonyManager.ACTION_PHONE_STATE_CHANGED.equals(action)) {
+                String state = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
+                mHandler.sendMessage(mHandler.obtainMessage(MSG_PHONE_STATE_CHANGED, state));
+            } else if (DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED
+                    .equals(action)) {
+                mHandler.sendMessage(mHandler.obtainMessage(MSG_DPM_STATE_CHANGED));
+            } else if (Intent.ACTION_USER_SWITCHED.equals(action)) {
+                mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_SWITCHED,
+                        intent.getIntExtra(Intent.EXTRA_USERID, 0), 0));
+            } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
+                mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_REMOVED,
+                        intent.getIntExtra(Intent.EXTRA_USERID, 0), 0));
+            }
+        }
+    };
 
     /**
      * When we receive a
@@ -156,7 +241,7 @@ public class KeyguardUpdateMonitor {
         }
     }
 
-    private static class BatteryStatus {
+    /* package */ static class BatteryStatus {
         public final int status;
         public final int level;
         public final int plugged;
@@ -168,48 +253,37 @@ public class KeyguardUpdateMonitor {
             this.health = health;
         }
 
+        /**
+         * Determine whether the device is plugged in (USB or power).
+         * @return true if the device is plugged in.
+         */
+        boolean isPluggedIn() {
+            return plugged == BatteryManager.BATTERY_PLUGGED_AC
+                    || plugged == BatteryManager.BATTERY_PLUGGED_USB;
+        }
+
+        /**
+         * Whether or not the device is charged. Note that some devices never return 100% for
+         * battery level, so this allows either battery level or status to determine if the
+         * battery is charged.
+         * @return true if the device is charged
+         */
+        public boolean isCharged() {
+            return status == BATTERY_STATUS_FULL || level >= 100;
+        }
+
+        /**
+         * Whether battery is low and needs to be charged.
+         * @return true if battery is low
+         */
+        public boolean isBatteryLow() {
+            return level < LOW_BATTERY_THRESHOLD;
+        }
+
     }
 
     public KeyguardUpdateMonitor(Context context) {
         mContext = context;
-
-        mHandler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                switch (msg.what) {
-                    case MSG_TIME_UPDATE:
-                        handleTimeUpdate();
-                        break;
-                    case MSG_BATTERY_UPDATE:
-                        handleBatteryUpdate((BatteryStatus) msg.obj);
-                        break;
-                    case MSG_CARRIER_INFO_UPDATE:
-                        handleCarrierInfoUpdate();
-                        break;
-                    case MSG_SIM_STATE_CHANGE:
-                        handleSimStateChange((SimArgs) msg.obj);
-                        break;
-                    case MSG_RINGER_MODE_CHANGED:
-                        handleRingerModeChange(msg.arg1);
-                        break;
-                    case MSG_PHONE_STATE_CHANGED:
-                        handlePhoneStateChanged((String)msg.obj);
-                        break;
-                    case MSG_CLOCK_VISIBILITY_CHANGED:
-                        handleClockVisibilityChanged();
-                        break;
-                    case MSG_DEVICE_PROVISIONED:
-                        handleDeviceProvisioned();
-                        break;
-                    case MSG_DPM_STATE_CHANGED:
-                        handleDevicePolicyManagerStateChanged();
-                        break;
-                    case MSG_USER_CHANGED:
-                        handleUserChanged(msg.arg1);
-                        break;
-                }
-            }
-        };
 
         mDeviceProvisioned = Settings.Secure.getInt(
                 mContext.getContentResolver(), Settings.Secure.DEVICE_PROVISIONED, 0) != 0;
@@ -217,42 +291,15 @@ public class KeyguardUpdateMonitor {
         // Since device can't be un-provisioned, we only need to register a content observer
         // to update mDeviceProvisioned when we are...
         if (!mDeviceProvisioned) {
-            mContentObserver = new ContentObserver(mHandler) {
-                @Override
-                public void onChange(boolean selfChange) {
-                    super.onChange(selfChange);
-                    mDeviceProvisioned = Settings.Secure.getInt(mContext.getContentResolver(),
-                        Settings.Secure.DEVICE_PROVISIONED, 0) != 0;
-                    if (mDeviceProvisioned) {
-                        mHandler.sendMessage(mHandler.obtainMessage(MSG_DEVICE_PROVISIONED));
-                    }
-                    if (DEBUG) Log.d(TAG, "DEVICE_PROVISIONED state = " + mDeviceProvisioned);
-                }
-            };
-
-            mContext.getContentResolver().registerContentObserver(
-                    Settings.Secure.getUriFor(Settings.Secure.DEVICE_PROVISIONED),
-                    false, mContentObserver);
-
-            // prevent a race condition between where we check the flag and where we register the
-            // observer by grabbing the value once again...
-            boolean provisioned = Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.DEVICE_PROVISIONED, 0) != 0;
-            if (provisioned != mDeviceProvisioned) {
-                mDeviceProvisioned = provisioned;
-                if (mDeviceProvisioned) {
-                    mHandler.sendMessage(mHandler.obtainMessage(MSG_DEVICE_PROVISIONED));
-                }
-            }
+            watchForDeviceProvisioning();
         }
 
-        // take a guess to start
-        mSimState = IccCardConstants.State.READY;
+        // Take a guess at initial SIM state, battery status and PLMN until we get an update
+        mSimState = IccCardConstants.State.NOT_READY;
         mBatteryStatus = new BatteryStatus(BATTERY_STATUS_UNKNOWN, 100, 0, 0);
-
         mTelephonyPlmn = getDefaultPlmn();
 
-        // setup receiver
+        // Watch for interesting updates
         final IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_TIME_TICK);
         filter.addAction(Intent.ACTION_TIME_CHANGED);
@@ -265,67 +312,72 @@ public class KeyguardUpdateMonitor {
         filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(Intent.ACTION_USER_REMOVED);
-        context.registerReceiver(new BroadcastReceiver() {
+        context.registerReceiver(mBroadcastReceiver, filter);
+    }
 
-            public void onReceive(Context context, Intent intent) {
-                final String action = intent.getAction();
-                if (DEBUG) Log.d(TAG, "received broadcast " + action);
-
-                if (Intent.ACTION_TIME_TICK.equals(action)
-                        || Intent.ACTION_TIME_CHANGED.equals(action)
-                        || Intent.ACTION_TIMEZONE_CHANGED.equals(action)) {
-                    mHandler.sendMessage(mHandler.obtainMessage(MSG_TIME_UPDATE));
-                } else if (TelephonyIntents.SPN_STRINGS_UPDATED_ACTION.equals(action)) {
-                    mTelephonyPlmn = getTelephonyPlmnFrom(intent);
-                    mTelephonySpn = getTelephonySpnFrom(intent);
-                    mHandler.sendMessage(mHandler.obtainMessage(MSG_CARRIER_INFO_UPDATE));
-                } else if (Intent.ACTION_BATTERY_CHANGED.equals(action)) {
-                    final int status = intent.getIntExtra(EXTRA_STATUS, BATTERY_STATUS_UNKNOWN);
-                    final int plugged = intent.getIntExtra(EXTRA_PLUGGED, 0);
-                    final int level = intent.getIntExtra(EXTRA_LEVEL, 0);
-                    final int health = intent.getIntExtra(EXTRA_HEALTH, BATTERY_HEALTH_UNKNOWN);
-                    final Message msg = mHandler.obtainMessage(
-                            MSG_BATTERY_UPDATE, new BatteryStatus(status, level, plugged, health));
-                    mHandler.sendMessage(msg);
-                } else if (TelephonyIntents.ACTION_SIM_STATE_CHANGED.equals(action)) {
-                    if (DEBUG_SIM_STATES) {
-                        Log.v(TAG, "action " + action + " state" +
-                            intent.getStringExtra(IccCardConstants.INTENT_KEY_ICC_STATE));
-                    }
-                    mHandler.sendMessage(mHandler.obtainMessage(
-                            MSG_SIM_STATE_CHANGE, SimArgs.fromIntent(intent)));
-                } else if (AudioManager.RINGER_MODE_CHANGED_ACTION.equals(action)) {
-                    mHandler.sendMessage(mHandler.obtainMessage(MSG_RINGER_MODE_CHANGED,
-                            intent.getIntExtra(AudioManager.EXTRA_RINGER_MODE, -1), 0));
-                } else if (TelephonyManager.ACTION_PHONE_STATE_CHANGED.equals(action)) {
-                    String state = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
-                    mHandler.sendMessage(mHandler.obtainMessage(MSG_PHONE_STATE_CHANGED, state));
-                } else if (DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED
-                        .equals(action)) {
-                    mHandler.sendMessage(mHandler.obtainMessage(MSG_DPM_STATE_CHANGED));
-                } else if (Intent.ACTION_USER_SWITCHED.equals(action)) {
-                    mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_CHANGED,
-                            intent.getIntExtra(Intent.EXTRA_USERID, 0), 0));
+    private void watchForDeviceProvisioning() {
+        mContentObserver = new ContentObserver(mHandler) {
+            @Override
+            public void onChange(boolean selfChange) {
+                super.onChange(selfChange);
+                mDeviceProvisioned = Settings.Secure.getInt(mContext.getContentResolver(),
+                    Settings.Secure.DEVICE_PROVISIONED, 0) != 0;
+                if (mDeviceProvisioned) {
+                    mHandler.sendMessage(mHandler.obtainMessage(MSG_DEVICE_PROVISIONED));
                 }
+                if (DEBUG) Log.d(TAG, "DEVICE_PROVISIONED state = " + mDeviceProvisioned);
             }
-        }, filter);
+        };
+
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.DEVICE_PROVISIONED),
+                false, mContentObserver);
+
+        // prevent a race condition between where we check the flag and where we register the
+        // observer by grabbing the value once again...
+        boolean provisioned = Settings.Secure.getInt(mContext.getContentResolver(),
+            Settings.Secure.DEVICE_PROVISIONED, 0) != 0;
+        if (provisioned != mDeviceProvisioned) {
+            mDeviceProvisioned = provisioned;
+            if (mDeviceProvisioned) {
+                mHandler.sendMessage(mHandler.obtainMessage(MSG_DEVICE_PROVISIONED));
+            }
+        }
     }
 
+    /**
+     * Handle {@link #MSG_DPM_STATE_CHANGED}
+     */
     protected void handleDevicePolicyManagerStateChanged() {
-        for (int i = 0; i < mInfoCallbacks.size(); i++) {
-            mInfoCallbacks.get(i).onDevicePolicyManagerStateChanged();
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            mCallbacks.get(i).onDevicePolicyManagerStateChanged();
         }
     }
 
-    protected void handleUserChanged(int userId) {
-        for (int i = 0; i < mInfoCallbacks.size(); i++) {
-            mInfoCallbacks.get(i).onUserChanged(userId);
+    /**
+     * Handle {@link #MSG_USER_SWITCHED}
+     */
+    protected void handleUserSwitched(int userId) {
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            mCallbacks.get(i).onUserSwitched(userId);
         }
     }
 
+    /**
+     * Handle {@link #MSG_USER_SWITCHED}
+     */
+    protected void handleUserRemoved(int userId) {
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            mCallbacks.get(i).onUserRemoved(userId);
+        }
+    }
+
+    /**
+     * Handle {@link #MSG_DEVICE_PROVISIONED}
+     */
     protected void handleDeviceProvisioned() {
-        for (int i = 0; i < mInfoCallbacks.size(); i++) {
-            mInfoCallbacks.get(i).onDeviceProvisioned();
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            mCallbacks.get(i).onDeviceProvisioned();
         }
         if (mContentObserver != null) {
             // We don't need the observer anymore...
@@ -334,6 +386,9 @@ public class KeyguardUpdateMonitor {
         }
     }
 
+    /**
+     * Handle {@link #MSG_PHONE_STATE_CHANGED}
+     */
     protected void handlePhoneStateChanged(String newState) {
         if (DEBUG) Log.d(TAG, "handlePhoneStateChanged(" + newState + ")");
         if (TelephonyManager.EXTRA_STATE_IDLE.equals(newState)) {
@@ -343,16 +398,19 @@ public class KeyguardUpdateMonitor {
         } else if (TelephonyManager.EXTRA_STATE_RINGING.equals(newState)) {
             mPhoneState = TelephonyManager.CALL_STATE_RINGING;
         }
-        for (int i = 0; i < mInfoCallbacks.size(); i++) {
-            mInfoCallbacks.get(i).onPhoneStateChanged(mPhoneState);
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            mCallbacks.get(i).onPhoneStateChanged(mPhoneState);
         }
     }
 
+    /**
+     * Handle {@link #MSG_RINGER_MODE_CHANGED}
+     */
     protected void handleRingerModeChange(int mode) {
         if (DEBUG) Log.d(TAG, "handleRingerModeChange(" + mode + ")");
         mRingMode = mode;
-        for (int i = 0; i < mInfoCallbacks.size(); i++) {
-            mInfoCallbacks.get(i).onRingerModeChanged(mode);
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            mCallbacks.get(i).onRingerModeChanged(mode);
         }
     }
 
@@ -361,24 +419,21 @@ public class KeyguardUpdateMonitor {
      */
     private void handleTimeUpdate() {
         if (DEBUG) Log.d(TAG, "handleTimeUpdate");
-        for (int i = 0; i < mInfoCallbacks.size(); i++) {
-            mInfoCallbacks.get(i).onTimeChanged();
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            mCallbacks.get(i).onTimeChanged();
         }
     }
 
     /**
      * Handle {@link #MSG_BATTERY_UPDATE}
      */
-    private void handleBatteryUpdate(BatteryStatus batteryStatus) {
+    private void handleBatteryUpdate(BatteryStatus status) {
         if (DEBUG) Log.d(TAG, "handleBatteryUpdate");
-        final boolean batteryUpdateInteresting =
-                isBatteryUpdateInteresting(mBatteryStatus, batteryStatus);
-        mBatteryStatus = batteryStatus;
+        final boolean batteryUpdateInteresting = isBatteryUpdateInteresting(mBatteryStatus, status);
+        mBatteryStatus = status;
         if (batteryUpdateInteresting) {
-            for (int i = 0; i < mInfoCallbacks.size(); i++) {
-                // TODO: pass BatteryStatus object to onRefreshBatteryInfo() instead...
-                mInfoCallbacks.get(i).onRefreshBatteryInfo(
-                    shouldShowBatteryInfo(),isPluggedIn(batteryStatus), batteryStatus.level);
+            for (int i = 0; i < mCallbacks.size(); i++) {
+                mCallbacks.get(i).onRefreshBatteryInfo(status);
             }
         }
     }
@@ -390,8 +445,8 @@ public class KeyguardUpdateMonitor {
         if (DEBUG) Log.d(TAG, "handleCarrierInfoUpdate: plmn = " + mTelephonyPlmn
             + ", spn = " + mTelephonySpn);
 
-        for (int i = 0; i < mInfoCallbacks.size(); i++) {
-            mInfoCallbacks.get(i).onRefreshCarrierInfo(mTelephonyPlmn, mTelephonySpn);
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            mCallbacks.get(i).onRefreshCarrierInfo(mTelephonyPlmn, mTelephonySpn);
         }
     }
 
@@ -408,31 +463,25 @@ public class KeyguardUpdateMonitor {
 
         if (state != IccCardConstants.State.UNKNOWN && state != mSimState) {
             mSimState = state;
-            for (int i = 0; i < mSimStateCallbacks.size(); i++) {
-                mSimStateCallbacks.get(i).onSimStateChanged(state);
+            for (int i = 0; i < mCallbacks.size(); i++) {
+                mCallbacks.get(i).onSimStateChanged(state);
             }
         }
     }
 
+    /**
+     * Handle {@link #MSG_CLOCK_VISIBILITY_CHANGED}
+     */
     private void handleClockVisibilityChanged() {
         if (DEBUG) Log.d(TAG, "handleClockVisibilityChanged()");
-        for (int i = 0; i < mInfoCallbacks.size(); i++) {
-            mInfoCallbacks.get(i).onClockVisibilityChanged();
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            mCallbacks.get(i).onClockVisibilityChanged();
         }
     }
 
-    /**
-     * @param pluggedIn state from {@link android.os.BatteryManager#EXTRA_PLUGGED}
-     * @return Whether the device is considered "plugged in."
-     */
-    private static boolean isPluggedIn(BatteryStatus status) {
-        return status.plugged == BatteryManager.BATTERY_PLUGGED_AC
-                || status.plugged == BatteryManager.BATTERY_PLUGGED_USB;
-    }
-
     private static boolean isBatteryUpdateInteresting(BatteryStatus old, BatteryStatus current) {
-        final boolean nowPluggedIn = isPluggedIn(current);
-        final boolean wasPluggedIn = isPluggedIn(old);
+        final boolean nowPluggedIn = current.isPluggedIn();
+        final boolean wasPluggedIn = old.isPluggedIn();
         final boolean stateChangedWhilePluggedIn =
             wasPluggedIn == true && nowPluggedIn == true
             && (old.status != current.status);
@@ -448,14 +497,10 @@ public class KeyguardUpdateMonitor {
         }
 
         // change where battery needs charging
-        if (!nowPluggedIn && isBatteryLow(current) && current.level != old.level) {
+        if (!nowPluggedIn && current.isBatteryLow() && current.level != old.level) {
             return true;
         }
         return false;
-    }
-
-    private static boolean isBatteryLow(BatteryStatus status) {
-        return status.level < LOW_BATTERY_THRESHOLD;
     }
 
     /**
@@ -465,11 +510,7 @@ public class KeyguardUpdateMonitor {
     private CharSequence getTelephonyPlmnFrom(Intent intent) {
         if (intent.getBooleanExtra(TelephonyIntents.EXTRA_SHOW_PLMN, false)) {
             final String plmn = intent.getStringExtra(TelephonyIntents.EXTRA_PLMN);
-            if (plmn != null) {
-                return plmn;
-            } else {
-                return getDefaultPlmn();
-            }
+            return (plmn != null) ? plmn : getDefaultPlmn();
         }
         return null;
     }
@@ -478,8 +519,7 @@ public class KeyguardUpdateMonitor {
      * @return The default plmn (no service)
      */
     private CharSequence getDefaultPlmn() {
-        return mContext.getResources().getText(
-                        R.string.lockscreen_carrier_default);
+        return mContext.getResources().getText(R.string.lockscreen_carrier_default);
     }
 
     /**
@@ -497,104 +537,12 @@ public class KeyguardUpdateMonitor {
     }
 
     /**
-     * Remove the given observer from being registered from any of the kinds
-     * of callbacks.
-     * @param observer The observer to remove (an instance of {@link ConfigurationChangeCallback},
-     *   {@link InfoCallback} or {@link SimStateCallback}
+     * Remove the given observer's callback.
+     *
+     * @param observer The observer to remove
      */
     public void removeCallback(Object observer) {
-        mInfoCallbacks.remove(observer);
-        mSimStateCallbacks.remove(observer);
-    }
-
-    /**
-     * Callback for general information relevant to lock screen.
-     */
-    interface InfoCallback {
-        void onRefreshBatteryInfo(boolean showBatteryInfo, boolean pluggedIn, int batteryLevel);
-        void onTimeChanged();
-
-        /**
-         * @param plmn The operator name of the registered network.  May be null if it shouldn't
-         *   be displayed.
-         * @param spn The service provider name.  May be null if it shouldn't be displayed.
-         */
-        void onRefreshCarrierInfo(CharSequence plmn, CharSequence spn);
-
-        /**
-         * Called when the ringer mode changes.
-         * @param state the current ringer state, as defined in
-         * {@link AudioManager#RINGER_MODE_CHANGED_ACTION}
-         */
-        void onRingerModeChanged(int state);
-
-        /**
-         * Called when the phone state changes. String will be one of:
-         * {@link TelephonyManager#EXTRA_STATE_IDLE}
-         * {@link TelephonyManager@EXTRA_STATE_RINGING}
-         * {@link TelephonyManager#EXTRA_STATE_OFFHOOK
-         */
-        void onPhoneStateChanged(int phoneState);
-
-        /**
-         * Called when visibility of lockscreen clock changes, such as when
-         * obscured by a widget.
-         */
-        void onClockVisibilityChanged();
-
-        /**
-         * Called when the device becomes provisioned
-         */
-        void onDeviceProvisioned();
-
-        /**
-         * Called when the device policy changes.
-         * See {@link DevicePolicyManager#ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED}
-         */
-        void onDevicePolicyManagerStateChanged();
-
-        /**
-         * Called when the user changes.
-         */
-        void onUserChanged(int userId);
-    }
-
-    // Simple class that allows methods to easily be overwritten
-    public static class InfoCallbackImpl implements InfoCallback {
-        public void onRefreshBatteryInfo(boolean showBatteryInfo, boolean pluggedIn,
-                int batteryLevel) {
-        }
-
-        public void onTimeChanged() {
-        }
-
-        public void onRefreshCarrierInfo(CharSequence plmn, CharSequence spn) {
-        }
-
-        public void onRingerModeChanged(int state) {
-        }
-
-        public void onPhoneStateChanged(int phoneState) {
-        }
-
-        public void onClockVisibilityChanged() {
-        }
-
-        public void onDeviceProvisioned() {
-        }
-
-        public void onDevicePolicyManagerStateChanged() {
-        }
-
-        public void onUserChanged(int userId) {
-        }
-    }
-
-    /**
-     * Callback to notify of sim state change.
-     */
-    interface SimStateCallback {
-        void onSimStateChanged(IccCardConstants.State simState);
+        mCallbacks.remove(observer);
     }
 
     /**
@@ -602,35 +550,20 @@ public class KeyguardUpdateMonitor {
      * (see {@link InfoCallback}.
      * @param callback The callback.
      */
-    public void registerInfoCallback(InfoCallback callback) {
-        if (!mInfoCallbacks.contains(callback)) {
-            mInfoCallbacks.add(callback);
+    public void registerCallback(KeyguardUpdateMonitorCallback callback) {
+        if (!mCallbacks.contains(callback)) {
+            mCallbacks.add(callback);
             // Notify listener of the current state
-            callback.onRefreshBatteryInfo(shouldShowBatteryInfo(),isPluggedIn(mBatteryStatus),
-                    mBatteryStatus.level);
+            callback.onRefreshBatteryInfo(mBatteryStatus);
             callback.onTimeChanged();
             callback.onRingerModeChanged(mRingMode);
             callback.onPhoneStateChanged(mPhoneState);
             callback.onRefreshCarrierInfo(mTelephonyPlmn, mTelephonySpn);
             callback.onClockVisibilityChanged();
-        } else {
-            if (DEBUG) Log.e(TAG, "Object tried to add another INFO callback",
-                    new Exception("Whoops"));
-        }
-    }
-
-    /**
-     * Register to be notified of sim state changes.
-     * @param callback The callback.
-     */
-    public void registerSimStateCallback(SimStateCallback callback) {
-        if (!mSimStateCallbacks.contains(callback)) {
-            mSimStateCallbacks.add(callback);
-            // Notify listener of the current state
             callback.onSimStateChanged(mSimState);
         } else {
-            if (DEBUG) Log.e(TAG, "Object tried to add another SIM callback",
-                    new Exception("Whoops"));
+            if (DEBUG) Log.e(TAG, "Object tried to add another callback",
+                    new Exception("Called by"));
         }
     }
 
@@ -653,23 +586,6 @@ public class KeyguardUpdateMonitor {
      */
     public void reportSimUnlocked() {
         handleSimStateChange(new SimArgs(IccCardConstants.State.READY));
-    }
-
-    public boolean isDevicePluggedIn() {
-        return isPluggedIn(mBatteryStatus);
-    }
-
-    public boolean isDeviceCharged() {
-        return mBatteryStatus.status == BATTERY_STATUS_FULL
-                || mBatteryStatus.level >= 100; // in case particular device doesn't flag it
-    }
-
-    public int getBatteryLevel() {
-        return mBatteryStatus.level;
-    }
-
-    public boolean shouldShowBatteryInfo() {
-        return isPluggedIn(mBatteryStatus) || isBatteryLow(mBatteryStatus);
     }
 
     public CharSequence getTelephonyPlmn() {
