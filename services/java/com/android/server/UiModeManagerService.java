@@ -308,7 +308,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
             /* if new location is older than the current one, the devices hasn't
              * moved.
              */
-            if (location.getTime() < mLocation.getTime()) {
+            if (location.getElapsedRealtimeNano() < mLocation.getElapsedRealtimeNano()) {
                 return false;
             }
 
@@ -764,7 +764,8 @@ class UiModeManagerService extends IUiModeManager.Stub {
                         mLocationManager.getLastKnownLocation(providers.next());
                 // pick the most recent location
                 if (location == null || (lastKnownLocation != null &&
-                        location.getTime() < lastKnownLocation.getTime())) {
+                        location.getElapsedRealtimeNano() <
+                        lastKnownLocation.getElapsedRealtimeNano())) {
                     location = lastKnownLocation;
                 }
             }
@@ -781,6 +782,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
                 location.setLatitude(0);
                 location.setAccuracy(417000.0f);
                 location.setTime(System.currentTimeMillis());
+                location.setElapsedRealtimeNano(SystemClock.elapsedRealtimeNano());
             }
             synchronized (mLock) {
                 mLocation = location;

@@ -1532,6 +1532,11 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             throw new SecurityException("Requires INSTALL_LOCATION_PROVIDER permission");
         }
 
+        if (!location.isComplete()) {
+            Log.w(TAG, "Dropping incomplete location: " + location);
+            return;
+        }
+
         mLocationHandler.removeMessages(MESSAGE_LOCATION_CHANGED, location);
         Message m = Message.obtain(mLocationHandler, MESSAGE_LOCATION_CHANGED, location);
         m.arg1 = (passive ? 1 : 0);
@@ -1588,7 +1593,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
         // Check whether sufficient time has passed
         long minTime = record.mMinTime;
-        if (loc.getTime() - lastLoc.getTime() < minTime - MAX_PROVIDER_SCHEDULING_JITTER) {
+        long delta = (loc.getElapsedRealtimeNano() - lastLoc.getElapsedRealtimeNano()) / 1000000L;
+        if (delta < minTime - MAX_PROVIDER_SCHEDULING_JITTER) {
             return false;
         }
 

@@ -10504,6 +10504,7 @@ package android.location {
     method public float getAccuracy();
     method public double getAltitude();
     method public float getBearing();
+    method public long getElapsedRealtimeNano();
     method public android.os.Bundle getExtras();
     method public double getLatitude();
     method public double getLongitude();
@@ -10523,6 +10524,7 @@ package android.location {
     method public void setAccuracy(float);
     method public void setAltitude(double);
     method public void setBearing(float);
+    method public void setElapsedRealtimeNano(long);
     method public void setExtras(android.os.Bundle);
     method public void setLatitude(double);
     method public void setLongitude(double);

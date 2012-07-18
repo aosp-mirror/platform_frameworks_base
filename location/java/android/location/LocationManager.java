@@ -19,11 +19,13 @@ package android.location;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemClock;
 import android.util.Log;
 
 import com.android.internal.location.DummyLocationProvider;
@@ -1220,8 +1222,11 @@ public class LocationManager {
     }
 
     /**
-     * Sets a mock location for the given provider.  This location will be used in place
-     * of any actual location from the provider.
+     * Sets a mock location for the given provider.
+     * <p>This location will be used in place of any actual location from the provider.
+     * The location object must have a minimum number of fields set to be
+     * considered a valid LocationProvider Location, as per documentation
+     * on {@link Location} class.
      *
      * @param provider the provider name
      * @param loc the mock location
@@ -1230,8 +1235,20 @@ public class LocationManager {
      * or the {@link android.provider.Settings.Secure#ALLOW_MOCK_LOCATION
      * Settings.Secure.ALLOW_MOCK_LOCATION}} system setting is not enabled
      * @throws IllegalArgumentException if no provider with the given name exists
+     * @throws IllegalArgumentException if the location is incomplete
      */
     public void setTestProviderLocation(String provider, Location loc) {
+        if (!loc.isComplete()) {
+            if (mContext.getApplicationInfo().targetSdkVersion <= Build.VERSION_CODES.JELLY_BEAN) {
+                // for backwards compatibility, allow mock locations that are incomplete
+                Log.w(TAG, "Incomplete Location object", new Throwable());
+                loc.makeComplete();
+            } else {
+                throw new IllegalArgumentException(
+                        "Location object not complete. Missing timestamps or accuracy?");
+            }
+        }
+
         try {
             mService.setTestProviderLocation(provider, loc);
         } catch (RemoteException ex) {

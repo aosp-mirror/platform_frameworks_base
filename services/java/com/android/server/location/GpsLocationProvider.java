@@ -1078,6 +1078,9 @@ public class GpsLocationProvider implements LocationProviderInterface {
                 mLocation.setLatitude(latitude);
                 mLocation.setLongitude(longitude);
                 mLocation.setTime(timestamp);
+                // It would be nice to push the elapsed real-time timestamp
+                // further down the stack, but this is still useful
+                mLocation.setElapsedRealtimeNano(SystemClock.elapsedRealtimeNano());
             }
             if ((flags & LOCATION_HAS_ALTITUDE) == LOCATION_HAS_ALTITUDE) {
                 mLocation.setAltitude(altitude);
