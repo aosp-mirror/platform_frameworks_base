@@ -197,15 +197,15 @@ public:
     /**
      * Sets the scissor for the current surface.
      */
-    void setScissor(GLint x, GLint y, GLint width, GLint height);
+    bool setScissor(GLint x, GLint y, GLint width, GLint height);
 
     /**
      * Resets the scissor state.
      */
     void resetScissor();
 
-    void enableScissor();
-    void disableScissor();
+    bool enableScissor();
+    bool disableScissor();
     void setScissorEnabled(bool enabled);
 
     /**
