@@ -917,8 +917,8 @@
     <string name="relative_time" msgid="1818557177829411417">"<xliff:g id="DATE">%1$s</xliff:g>، <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="noon" msgid="7245353528818587908">"ظهر"</string>
     <string name="Noon" msgid="3342127745230013127">"ظهر"</string>
-    <string name="midnight" msgid="7166259508850457595">"نیمه شب"</string>
-    <string name="Midnight" msgid="5630806906897892201">"نیمه شب"</string>
+    <string name="midnight" msgid="7166259508850457595">"نیمه‌شب"</string>
+    <string name="Midnight" msgid="5630806906897892201">"نیمه‌شب"</string>
     <string name="elapsed_time_short_format_mm_ss" msgid="4431555943828711473">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss" msgid="1846071997616654124">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll" msgid="6876518925844129331">"انتخاب همه"</string>
@@ -1182,7 +1182,7 @@
     <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"حافظه در حال حاضر توسط رایانه دیگری استفاده می‌شود."</string>
     <string name="media_shared" product="default" msgid="5706130568133540435">"کارت SD در حال حاضر توسط یک رایانه در حال استفاده است."</string>
     <string name="media_unknown_state" msgid="729192782197290385">"رسانه خارجی در حالت ناشناس است."</string>
-    <string name="share" msgid="1778686618230011964">"اشتراک گذاری"</string>
+    <string name="share" msgid="1778686618230011964">"اشتراک‌گذاری"</string>
     <string name="find" msgid="4808270900322985960">"یافتن"</string>
     <string name="websearch" msgid="4337157977400211589">"جستجوی وب"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"درخواست موقعیت مکانی از <xliff:g id="NAME">%s</xliff:g>"</string>
