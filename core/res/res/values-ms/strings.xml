@@ -243,14 +243,10 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"Membenarkan apl untuk mendapatkan semula keadaan dalaman sistem. Apl hasad boleh mendapatkan pelbagai maklumat peribadi dan selamat yang biasanya tidak ia perlukan."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"dapatkan semula kandungan skrin"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Membenarkan apl untuk mendapatkan kandungan tetingkap aktif. Apl hasad boleh mengambil keseluruhan kandungan tetingkap dan memeriksa semua teks kecuali kata laluan."</string>
-    <!-- no translation found for permlab_retrieve_window_info (8532295199112519378) -->
-    <skip />
-    <!-- no translation found for permdesc_retrieve_window_info (4998836370424186849) -->
-    <skip />
-    <!-- no translation found for permlab_filter_events (8675535648807427389) -->
-    <skip />
-    <!-- no translation found for permdesc_filter_events (8006236315888347680) -->
-    <skip />
+    <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"dapatkan maklumat tetingkap"</string>
+    <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Membolehkan aplikasi mendapatkan maklumat tentang tetingkap dari pengurus tetingkap. Apl hasad boleh mendapatkan maklumat yang bertujuan untuk penggunaan sistem dalaman."</string>
+    <string name="permlab_filter_events" msgid="8675535648807427389">"tapis acara"</string>
+    <string name="permdesc_filter_events" msgid="8006236315888347680">"Membenarkan aplikasi mendaftarkan penapis input yang menapis strim semua acara pengguna sebelum dihantar. Apl hasad mungkin mengawal UI sistem tanpa campur tangan pengguna."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"penutupan separa"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Meletakkan pengurus aktiviti dalam keadaan tutup. Tidak melaksanakan penutupan lengkap."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"halang pertukaran apl"</string>
