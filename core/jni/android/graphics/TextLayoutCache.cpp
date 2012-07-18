@@ -308,11 +308,12 @@ TextLayoutValue::TextLayoutValue(size_t contextCount) :
     // Give a hint for advances and glyphs vectors size
     mAdvances.setCapacity(contextCount);
     mGlyphs.setCapacity(contextCount);
+    mPos.setCapacity(contextCount * 2);
 }
 
 size_t TextLayoutValue::getSize() const {
     return sizeof(TextLayoutValue) + sizeof(jfloat) * mAdvances.capacity() +
-            sizeof(jchar) * mGlyphs.capacity();
+            sizeof(jchar) * mGlyphs.capacity() + sizeof(jfloat) * mPos.capacity();
 }
 
 void TextLayoutValue::setElapsedTime(uint32_t time) {
@@ -329,13 +330,9 @@ TextLayoutShaper::TextLayoutShaper() : mShaperItemGlyphArraySize(0) {
     mFontRec.klass = &harfbuzzSkiaClass;
     mFontRec.userData = 0;
 
-    // The values which harfbuzzSkiaClass returns are already scaled to
-    // pixel units, so we just set all these to one to disable further
-    // scaling.
-    mFontRec.x_ppem = 1;
-    mFontRec.y_ppem = 1;
-    mFontRec.x_scale = 1;
-    mFontRec.y_scale = 1;
+    // Note that the scaling values (x_ and y_ppem, x_ and y_scale) will be set
+    // below, when the paint transform and em unit of the actual shaping font
+    // are known.
 
     memset(&mShaperItem, 0, sizeof(mShaperItem));
 
@@ -360,7 +357,7 @@ void TextLayoutShaper::computeValues(TextLayoutValue* value, const SkPaint* pain
         size_t start, size_t count, size_t contextCount, int dirFlags) {
 
     computeValues(paint, chars, start, count, contextCount, dirFlags,
-            &value->mAdvances, &value->mTotalAdvance, &value->mGlyphs);
+            &value->mAdvances, &value->mTotalAdvance, &value->mGlyphs, &value->mPos);
 #if DEBUG_ADVANCES
     ALOGD("Advances - start = %d, count = %d, contextCount = %d, totalAdvance = %f", start, count,
             contextCount, value->mTotalAdvance);
@@ -370,9 +367,9 @@ void TextLayoutShaper::computeValues(TextLayoutValue* value, const SkPaint* pain
 void TextLayoutShaper::computeValues(const SkPaint* paint, const UChar* chars,
         size_t start, size_t count, size_t contextCount, int dirFlags,
         Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance,
-        Vector<jchar>* const outGlyphs) {
+        Vector<jchar>* const outGlyphs, Vector<jfloat>* const outPos) {
+        *outTotalAdvance = 0;
         if (!count) {
-            *outTotalAdvance = 0;
             return;
         }
 
@@ -437,6 +434,7 @@ void TextLayoutShaper::computeValues(const SkPaint* paint, const UChar* chars,
                                 ALOGW("Visual run is not valid");
                                 outGlyphs->clear();
                                 outAdvances->clear();
+                                outPos->clear();
                                 *outTotalAdvance = 0;
                                 isRTL = (paraDir == 1);
                                 useSingleRun = true;
@@ -459,15 +457,13 @@ void TextLayoutShaper::computeValues(const SkPaint* paint, const UChar* chars,
 
                             lengthRun = endRun - startRun;
                             isRTL = (runDir == UBIDI_RTL);
-                            jfloat runTotalAdvance = 0;
 #if DEBUG_GLYPHS
                             ALOGD("Processing Bidi Run = %d -- run-start = %d, run-len = %d, isRTL = %d",
                                     i, startRun, lengthRun, isRTL);
 #endif
                             computeRunValues(paint, chars + startRun, lengthRun, isRTL,
-                                    outAdvances, &runTotalAdvance, outGlyphs);
+                                    outAdvances, outTotalAdvance, outGlyphs, outPos);
 
-                            *outTotalAdvance += runTotalAdvance;
                         }
                     }
                 } else {
@@ -490,7 +486,7 @@ void TextLayoutShaper::computeValues(const SkPaint* paint, const UChar* chars,
                     "-- run-start = %d, run-len = %d, isRTL = %d", start, count, isRTL);
 #endif
             computeRunValues(paint, chars + start, count, isRTL,
-                    outAdvances, outTotalAdvance, outGlyphs);
+                    outAdvances, outTotalAdvance, outGlyphs, outPos);
         }
 
 #if DEBUG_GLYPHS
@@ -512,10 +508,9 @@ static void logGlyphs(HB_ShaperItem shaperItem) {
 void TextLayoutShaper::computeRunValues(const SkPaint* paint, const UChar* chars,
         size_t count, bool isRTL,
         Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance,
-        Vector<jchar>* const outGlyphs) {
+        Vector<jchar>* const outGlyphs, Vector<jfloat>* const outPos) {
     if (!count) {
         // We cannot shape an empty run.
-        *outTotalAdvance = 0;
         return;
     }
 
@@ -615,7 +610,8 @@ void TextLayoutShaper::computeRunValues(const SkPaint* paint, const UChar* chars
 
     // Define shaping paint properties
     mShapingPaint.setTextSize(paint->getTextSize());
-    mShapingPaint.setTextSkewX(paint->getTextSkewX());
+    float skewX = paint->getTextSkewX();
+    mShapingPaint.setTextSkewX(skewX);
     mShapingPaint.setTextScaleX(paint->getTextScaleX());
     mShapingPaint.setFlags(paint->getFlags());
     mShapingPaint.setHinting(paint->getHinting());
@@ -624,7 +620,7 @@ void TextLayoutShaper::computeRunValues(const SkPaint* paint, const UChar* chars
     // into the shaperItem
     ssize_t indexFontRun = isRTL ? mShaperItem.stringLength - 1 : 0;
     unsigned numCodePoints = 0;
-    jfloat totalAdvance = 0;
+    jfloat totalAdvance = *outTotalAdvance;
     while ((isRTL) ?
             hb_utf16_script_run_prev(&numCodePoints, &mShaperItem.item, mShaperItem.string,
                     mShaperItem.stringLength, &indexFontRun):
@@ -692,7 +688,6 @@ void TextLayoutShaper::computeRunValues(const SkPaint* paint, const UChar* chars
             currentAdvance = HBFixedToFloat(mShaperItem.advances[i]);
             totalFontRunAdvance += currentAdvance;
         }
-        totalAdvance += totalFontRunAdvance;
 
 #if DEBUG_ADVANCES
         ALOGD("Returned advances");
@@ -717,6 +712,30 @@ void TextLayoutShaper::computeRunValues(const SkPaint* paint, const UChar* chars
                 outGlyphs->add(glyph);
             }
         }
+
+        // Get glyph positions (and reverse them in place if RTL)
+        if (outPos) {
+            size_t countGlyphs = mShaperItem.num_glyphs;
+            jfloat x = totalAdvance;
+            for (size_t i = 0; i < countGlyphs; i++) {
+                size_t index = (!isRTL) ? i : countGlyphs - 1 - i;
+                float xo = HBFixedToFloat(mShaperItem.offsets[index].x);
+                float yo = HBFixedToFloat(mShaperItem.offsets[index].y);
+                // Apply skewX component of transform to position offsets. Note
+                // that scale has already been applied through x_ and y_scale
+                // set in the mFontRec.
+                outPos->add(x + xo + yo * skewX);
+                outPos->add(yo);
+#ifdef DEBUG_GLYPHS
+                ALOGD("         -- hb adv[%d] = %f, log_cluster[%d] = %d",
+                        index, HBFixedToFloat(mShaperItem.advances[index]),
+                        index, mShaperItem.log_clusters[index]);
+#endif
+                x += HBFixedToFloat(mShaperItem.advances[index]);
+            }
+        }
+
+        totalAdvance += totalFontRunAdvance;
     }
 
     *outTotalAdvance = totalAdvance;
@@ -806,6 +825,19 @@ size_t TextLayoutShaper::shapeFontRun(const SkPaint* paint, bool isRTL) {
 
     mShapingPaint.setTypeface(typeface);
     mShaperItem.face = getCachedHBFace(typeface);
+
+    int textSize = paint->getTextSize();
+    float scaleX = paint->getTextScaleX();
+    mFontRec.x_ppem = floor(scaleX * textSize + 0.5);
+    mFontRec.y_ppem = textSize;
+    uint32_t unitsPerEm = SkFontHost::GetUnitsPerEm(typeface->uniqueID());
+    // x_ and y_scale are the conversion factors from font design space
+    // (unitsPerEm) to 1/64th of device pixels in 16.16 format.
+    const int kDevicePixelFraction = 64;
+    const int kMultiplyFor16Dot16 = 1 << 16;
+    float emScale = kDevicePixelFraction * kMultiplyFor16Dot16 / (float)unitsPerEm;
+    mFontRec.x_scale = emScale * scaleX * textSize;
+    mFontRec.y_scale = emScale * textSize;
 
 #if DEBUG_GLYPHS
     ALOGD("Run typeface = %p, uniqueID = %d, hb_face = %p",

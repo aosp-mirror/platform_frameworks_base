@@ -766,13 +766,62 @@ public:
         if (value == NULL) {
             return;
         }
-        doDrawGlyphs(canvas, value->getGlyphs(), 0, value->getGlyphsCount(), x, y, flags, paint);
+        SkPaint::Align align = paint->getTextAlign();
+        if (align == SkPaint::kCenter_Align) {
+            x -= 0.5 * value->getTotalAdvance();
+        } else if (align == SkPaint::kRight_Align) {
+            x -= value->getTotalAdvance();
+        }
+        paint->setTextAlign(SkPaint::kLeft_Align);
+        doDrawGlyphsPos(canvas, value->getGlyphs(), value->getPos(), 0, value->getGlyphsCount(), x, y, flags, paint);
+        doDrawTextDecorations(canvas, x, y, value->getTotalAdvance(), paint);
+        paint->setTextAlign(align);
     }
+
+// Same values used by Skia
+#define kStdStrikeThru_Offset   (-6.0f / 21.0f)
+#define kStdUnderline_Offset    (1.0f / 9.0f)
+#define kStdUnderline_Thickness (1.0f / 18.0f)
+
+static void doDrawTextDecorations(SkCanvas* canvas, jfloat x, jfloat y, jfloat length, SkPaint* paint) {
+    uint32_t flags = paint->getFlags();
+    if (flags & (SkPaint::kUnderlineText_Flag | SkPaint::kStrikeThruText_Flag)) {
+        SkScalar left = SkFloatToScalar(x);
+        SkScalar right = SkFloatToScalar(x + length);
+        float textSize = paint->getTextSize();
+        float strokeWidth = fmax(textSize * kStdUnderline_Thickness, 1.0f);
+        if (flags & SkPaint::kUnderlineText_Flag) {
+            SkScalar top = SkFloatToScalar(y + textSize * kStdUnderline_Offset
+                    - 0.5f * strokeWidth);
+            SkScalar bottom = SkFloatToScalar(y + textSize * kStdUnderline_Offset
+                    + 0.5f * strokeWidth);
+            canvas->drawRectCoords(left, top, right, bottom, *paint);
+        }
+        if (flags & SkPaint::kStrikeThruText_Flag) {
+            SkScalar top = SkFloatToScalar(y + textSize * kStdStrikeThru_Offset
+                    - 0.5f * strokeWidth);
+            SkScalar bottom = SkFloatToScalar(y + textSize * kStdStrikeThru_Offset
+                    + 0.5f * strokeWidth);
+            canvas->drawRectCoords(left, top, right, bottom, *paint);
+        }
+    }
+}
 
     static void doDrawGlyphs(SkCanvas* canvas, const jchar* glyphArray, int index, int count,
             jfloat x, jfloat y, int flags, SkPaint* paint) {
         // Beware: this needs Glyph encoding (already done on the Paint constructor)
         canvas->drawText(glyphArray + index * 2, count * 2, x, y, *paint);
+    }
+
+    static void doDrawGlyphsPos(SkCanvas* canvas, const jchar* glyphArray, const jfloat* posArray,
+            int index, int count, jfloat x, jfloat y, int flags, SkPaint* paint) {
+        SkPoint* posPtr = new SkPoint[count];
+        for (int indx = 0; indx < count; indx++) {
+            posPtr[indx].fX = SkFloatToScalar(x + posArray[indx * 2]);
+            posPtr[indx].fY = SkFloatToScalar(y + posArray[indx * 2 + 1]);
+        }
+        canvas->drawPosText(glyphArray, count << 1, posPtr, *paint);
+        delete[] posPtr;
     }
 
     static void drawTextRun___CIIIIFFIPaint(

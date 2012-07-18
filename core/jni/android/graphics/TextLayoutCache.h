@@ -130,6 +130,8 @@ public:
     inline jfloat getTotalAdvance() const { return mTotalAdvance; }
     inline const jchar* getGlyphs() const { return mGlyphs.array(); }
     inline size_t getGlyphsCount() const { return mGlyphs.size(); }
+    inline const jfloat* getPos() const { return mPos.array(); }
+    inline size_t getPosCount() const { return mPos.size(); }
 
     /**
      * Advances vector
@@ -145,6 +147,11 @@ public:
      * Glyphs vector
      */
     Vector<jchar> mGlyphs;
+
+    /**
+     * Pos vector (2 * i is x pos, 2 * i + 1 is y pos, same as drawPosText)
+     */
+    Vector<jfloat> mPos;
 
     /**
      * Get the size of the Cache entry
@@ -224,12 +231,12 @@ private:
     void computeValues(const SkPaint* paint, const UChar* chars,
             size_t start, size_t count, size_t contextCount, int dirFlags,
             Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance,
-            Vector<jchar>* const outGlyphs);
+            Vector<jchar>* const outGlyphs, Vector<jfloat>* const outPos);
 
     void computeRunValues(const SkPaint* paint, const UChar* chars,
             size_t count, bool isRTL,
             Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance,
-            Vector<jchar>* const outGlyphs);
+            Vector<jchar>* const outGlyphs, Vector<jfloat>* const outPos);
 
     SkTypeface* getCachedTypeface(SkTypeface** typeface, HB_Script script, SkTypeface::Style style);
     HB_Face getCachedHBFace(SkTypeface* typeface);
