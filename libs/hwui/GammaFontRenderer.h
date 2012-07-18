@@ -79,23 +79,71 @@ public:
     }
 
     uint32_t getFontRendererSize(uint32_t fontRenderer) const {
-        return mRenderer->getCacheSize();
+        return mRenderer ? mRenderer->getCacheSize() : 0;
     }
 
     void describe(ProgramDescription& description, const SkPaint* paint) const;
     void setupProgram(ProgramDescription& description, Program* program) const;
 
 private:
-    ShaderGammaFontRenderer();
+    ShaderGammaFontRenderer(bool multiGamma);
 
     FontRenderer* mRenderer;
+    bool mMultiGamma;
 
     friend class GammaFontRenderer;
 };
 
 class LookupGammaFontRenderer: public GammaFontRenderer {
 public:
-    ~LookupGammaFontRenderer();
+    ~LookupGammaFontRenderer() {
+        delete mRenderer;
+    }
+
+    void clear() {
+        delete mRenderer;
+    }
+
+    void flush() {
+        if (mRenderer) {
+            mRenderer->flushLargeCaches();
+        }
+    }
+
+    FontRenderer& getFontRenderer(const SkPaint* paint) {
+        if (!mRenderer) {
+            mRenderer = new FontRenderer;
+            mRenderer->setGammaTable(&mGammaTable[0]);
+        }
+        return *mRenderer;
+    }
+
+    uint32_t getFontRendererCount() const {
+        return 1;
+    }
+
+    uint32_t getFontRendererSize(uint32_t fontRenderer) const {
+        return mRenderer ? mRenderer->getCacheSize() : 0;
+    }
+
+    void describe(ProgramDescription& description, const SkPaint* paint) const {
+    }
+
+    void setupProgram(ProgramDescription& description, Program* program) const {
+    }
+
+private:
+    LookupGammaFontRenderer();
+
+    FontRenderer* mRenderer;
+    uint8_t mGammaTable[256];
+
+    friend class GammaFontRenderer;
+};
+
+class Lookup3GammaFontRenderer: public GammaFontRenderer {
+public:
+    ~Lookup3GammaFontRenderer();
 
     void clear();
     void flush();
@@ -122,7 +170,7 @@ public:
     }
 
 private:
-    LookupGammaFontRenderer();
+    Lookup3GammaFontRenderer();
 
     enum Gamma {
         kGammaDefault = 0,

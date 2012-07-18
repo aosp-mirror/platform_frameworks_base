@@ -43,16 +43,16 @@ GammaFontRenderer* GammaFontRenderer::createRenderer() {
     // Choose the best renderer
     char property[PROPERTY_VALUE_MAX];
     if (property_get(PROPERTY_TEXT_GAMMA_SHADER, property, DEFAULT_TEXT_GAMMA_SHADER) > 0) {
-        if (!strcasecmp(property, "true")) {
-            return new ShaderGammaFontRenderer();
+        if (!strcasecmp(property, "shader")) {
+            return new ShaderGammaFontRenderer(false);
+        } else if (!strcasecmp(property, "shader3")) {
+            return new ShaderGammaFontRenderer(true);
+        } else if (!strcasecmp(property, "lookup")) {
+            return new LookupGammaFontRenderer();
         }
     }
 
-#if DEBUG_FONT_RENDERER_FORCE_SHADER_GAMMA
-    return new ShaderGammaFontRenderer();
-#else
-    return new LookupGammaFontRenderer();
-#endif
+    return new Lookup3GammaFontRenderer();
 }
 
 GammaFontRenderer::GammaFontRenderer() {
@@ -96,20 +96,26 @@ GammaFontRenderer::~GammaFontRenderer() {
 // Shader-based renderer
 ///////////////////////////////////////////////////////////////////////////////
 
-ShaderGammaFontRenderer::ShaderGammaFontRenderer(): GammaFontRenderer() {
+ShaderGammaFontRenderer::ShaderGammaFontRenderer(bool multiGamma): GammaFontRenderer() {
     INIT_LOGD("Creating shader gamma font renderer");
     mRenderer = NULL;
+    mMultiGamma = multiGamma;
 }
 
 void ShaderGammaFontRenderer::describe(ProgramDescription& description,
         const SkPaint* paint) const {
     if (paint->getShader() == NULL) {
-        const int l = luminance(paint);
+        if (mMultiGamma) {
+            const int l = luminance(paint);
 
-        if (l <= mBlackThreshold) {
-            description.hasGammaCorrection = true;
-            description.gamma = mGamma;
-        } else if (l >= mWhiteThreshold) {
+            if (l <= mBlackThreshold) {
+                description.hasGammaCorrection = true;
+                description.gamma = mGamma;
+            } else if (l >= mWhiteThreshold) {
+                description.hasGammaCorrection = true;
+                description.gamma = 1.0f / mGamma;
+            }
+        } else {
             description.hasGammaCorrection = true;
             description.gamma = 1.0f / mGamma;
         }
@@ -131,16 +137,32 @@ LookupGammaFontRenderer::LookupGammaFontRenderer(): GammaFontRenderer() {
     INIT_LOGD("Creating lookup gamma font renderer");
 
     // Compute the gamma tables
+    const float gamma = 1.0f / mGamma;
+
+    for (uint32_t i = 0; i <= 255; i++) {
+        mGammaTable[i] = uint8_t((float)::floor(pow(i / 255.0f, gamma) * 255.0f + 0.5f));
+    }
+
+    mRenderer = NULL;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Lookup-based renderer, using 3 different correction tables
+///////////////////////////////////////////////////////////////////////////////
+
+Lookup3GammaFontRenderer::Lookup3GammaFontRenderer(): GammaFontRenderer() {
+    INIT_LOGD("Creating lookup3 gamma font renderer");
+
+    // Compute the gamma tables
     const float blackGamma = mGamma;
     const float whiteGamma = 1.0f / mGamma;
 
     for (uint32_t i = 0; i <= 255; i++) {
-        mGammaTable[i] = i;
-
         const float v = i / 255.0f;
         const float black = pow(v, blackGamma);
         const float white = pow(v, whiteGamma);
 
+        mGammaTable[i] = i;
         mGammaTable[256 + i] = uint8_t((float)::floor(black * 255.0f + 0.5f));
         mGammaTable[512 + i] = uint8_t((float)::floor(white * 255.0f + 0.5f));
     }
@@ -149,20 +171,20 @@ LookupGammaFontRenderer::LookupGammaFontRenderer(): GammaFontRenderer() {
     memset(mRenderersUsageCount, 0, sizeof(uint32_t) * kGammaCount);
 }
 
-LookupGammaFontRenderer::~LookupGammaFontRenderer() {
+Lookup3GammaFontRenderer::~Lookup3GammaFontRenderer() {
     for (int i = 0; i < kGammaCount; i++) {
         delete mRenderers[i];
     }
 }
 
-void LookupGammaFontRenderer::clear() {
+void Lookup3GammaFontRenderer::clear() {
     for (int i = 0; i < kGammaCount; i++) {
         delete mRenderers[i];
         mRenderers[i] = NULL;
     }
 }
 
-void LookupGammaFontRenderer::flush() {
+void Lookup3GammaFontRenderer::flush() {
     int count = 0;
     int min = -1;
     uint32_t minCount = UINT_MAX;
@@ -190,7 +212,7 @@ void LookupGammaFontRenderer::flush() {
     }
 }
 
-FontRenderer* LookupGammaFontRenderer::getRenderer(Gamma gamma) {
+FontRenderer* Lookup3GammaFontRenderer::getRenderer(Gamma gamma) {
     FontRenderer* renderer = mRenderers[gamma];
     if (!renderer) {
         renderer = new FontRenderer();
@@ -201,7 +223,7 @@ FontRenderer* LookupGammaFontRenderer::getRenderer(Gamma gamma) {
     return renderer;
 }
 
-FontRenderer& LookupGammaFontRenderer::getFontRenderer(const SkPaint* paint) {
+FontRenderer& Lookup3GammaFontRenderer::getFontRenderer(const SkPaint* paint) {
     if (paint->getShader() == NULL) {
         const int l = luminance(paint);
 
