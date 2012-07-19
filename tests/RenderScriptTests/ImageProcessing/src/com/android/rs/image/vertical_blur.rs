@@ -3,28 +3,8 @@
 
 #include "ip.rsh"
 
-static float inBlack;
-static float outBlack;
-static float inWhite;
-static float outWhite;
-static float3 gamma;
 static float saturation;
-
-static float inWMinInB;
-static float outWMinOutB;
-static float overInWMinInB;
 static rs_matrix3x3 colorMat;
-
-void setLevels(float iBlk, float oBlk, float iWht, float oWht) {
-    inBlack = iBlk;
-    outBlack = oBlk;
-    inWhite = iWht;
-    outWhite = oWht;
-
-    inWMinInB = inWhite - inBlack;
-    outWMinOutB = outWhite - outBlack;
-    overInWMinInB = 1.f / inWMinInB;
-}
 
 void setSaturation(float sat) {
     saturation = sat;
@@ -52,10 +32,6 @@ void setSaturation(float sat) {
     rsMatrixSet(&colorMat, 2, 2, oneMinusS * bWeight + saturation);
 }
 
-void setGamma(float g) {
-    gamma = (float3)g;
-}
-
 void root(uchar4 *out, const void *usrData, uint32_t x, uint32_t y) {
     const FilterStruct *fs = (const FilterStruct *)usrData;
     float3 blurredPixel = 0;
@@ -76,12 +52,8 @@ void root(uchar4 *out, const void *usrData, uint32_t x, uint32_t y) {
     }
 
     float3 temp = rsMatrixMultiply(&colorMat, blurredPixel);
-    temp = (clamp(temp, 0.f, 255.f) - inBlack) * overInWMinInB;
-    if (gamma.x != 1.0f)
-        temp = pow(temp, (float3)gamma);
-    temp = clamp(temp * outWMinOutB + outBlack, 0.f, 255.f);
-
+    temp = clamp(temp, 0.f, 255.f);
     out->xyz = convert_uchar3(temp);
-    //output->w = input->w;
+    out->w = 0xff;
 }
 
