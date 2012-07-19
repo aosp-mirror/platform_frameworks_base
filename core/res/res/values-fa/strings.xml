@@ -44,7 +44,7 @@
     <string name="passwordIncorrect" msgid="7612208839450128715">"رمز ورود اشتباه است."</string>
     <string name="mmiComplete" msgid="8232527495411698359">"MMI کامل شد."</string>
     <string name="badPin" msgid="9015277645546710014">"پین قدیمی که نوشته‎اید صحیح نیست."</string>
-    <string name="badPuk" msgid="5487257647081132201">"PUK که نوشته اید صحیح نیست."</string>
+    <string name="badPuk" msgid="5487257647081132201">"PUK که نوشته‌اید صحیح نیست."</string>
     <string name="mismatchPin" msgid="609379054496863419">"پین‎هایی که وارد کرده‎اید با یکدیگر مطابقت ندارند."</string>
     <string name="invalidPin" msgid="3850018445187475377">"یک پین بنویسید که 4 تا 8 رقم باشد."</string>
     <string name="invalidPuk" msgid="8761456210898036513">"یک PUK با 8 رقم یا بیشتر تایپ کنید."</string>
@@ -147,7 +147,7 @@
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"گوشی شما خاموش می‌شود."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"آیا می‎خواهید تلفن خاموش شود؟"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"راه‌اندازی مجدد در حالت امن"</string>
-    <string name="reboot_safemode_confirm" msgid="55293944502784668">"آیا می‌خواهید با حالت امن راه‌اندازی مجدد کنید؟ با این کار کلیه برنامه‌های شخص ثالثی که نصب کرده‌اید غیرفعال می‌شوند. با راه‌اندازی دوباره سیستم این برنامه‌ها دوباره بازیابی می‌شوند."</string>
+    <string name="reboot_safemode_confirm" msgid="55293944502784668">"آیا می‌خواهید با حالت امن راه‌اندازی مجدد کنید؟ با این کار همهٔ برنامه‌های شخص ثالثی که نصب کرده‌اید غیرفعال می‌شوند. با راه‌اندازی دوباره سیستم این برنامه‌ها دوباره بازیابی می‌شوند."</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"اخیر"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"برنامه‎های جدید موجود نیست."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"گزینه‌های رایانه لوحی"</string>
@@ -563,7 +563,7 @@
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"تنظیم پروکسی جهانی دستگاه"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"پروکسی جهانی دستگاه مورد نظر را جهت استفاده هنگام فعال بودن خط مشی تنظیم کنید. فقط اولین سرپرست دستگاه پروکسی جهانی مفید را تنظیم می‌کند."</string>
     <string name="policylab_expirePassword" msgid="885279151847254056">"تنظیم زمان انقضای رمز ورود قفل صفحه"</string>
-    <string name="policydesc_expirePassword" msgid="1729725226314691591">"کنترل کنید چند وقت یکبار باید گذرواژه صفحه قفل عوض شود."</string>
+    <string name="policydesc_expirePassword" msgid="1729725226314691591">"کنترل کنید چند وقت یک بار باید گذرواژه صفحه قفل عوض شود."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"تنظیم رمزگذاری حافظه"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"باید اطلاعات ذخیره شده برنامه رمزگذاری شود."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"غیر فعال کردن دوربین ها"</string>
@@ -728,7 +728,7 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"گذرواژه خود را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه تایپ کرده‌اید. "\n\n"پس از <xliff:g id="NUMBER_1">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"پین را<xliff:g id="NUMBER_0">%d</xliff:g>  بار اشتباه تایپ کرده‎اید. "\n\n"پس از <xliff:g id="NUMBER_1">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه کشیده‎اید. بعد از <xliff:g id="NUMBER_1">%d</xliff:g> تلاش ناموفق، از شما خواسته می‎شود که برای بازگشایی قفل رایانه لوحی خود به Google وارد شوید."\n\n" لطفاً پس از <xliff:g id="NUMBER_2">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه کشیده اید. پس از <xliff:g id="NUMBER_1">%d</xliff:g> تلاش ناموفق دیگر از شما خواسته می‎شود که برای بازگشایی قفل گوشی خود به برنامه Google وارد شوید."\n\n" لطفاً پس از <xliff:g id="NUMBER_2">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه کشیده‌اید. پس از <xliff:g id="NUMBER_1">%d</xliff:g> تلاش ناموفق دیگر از شما خواسته می‎شود که برای بازگشایی قفل گوشی خود به برنامه Google وارد شوید."\n\n" لطفاً پس از <xliff:g id="NUMBER_2">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"شما به اشتباه <xliff:g id="NUMBER_0">%d</xliff:g> بار اقدام به باز کردن قفل رایانه لوحی کرده‌اید. پس از <xliff:g id="NUMBER_1">%d</xliff:g> تلاش ناموفق دیگر، رایانه لوحی به پیش‌فرض کارخانه بازنشانی می‌شود و تمام داده‌های کاربر از دست خواهد رفت."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"شما به اشتباه <xliff:g id="NUMBER_0">%d</xliff:g> بار اقدام به باز کردن قفل تلفن کرده‌اید. پس از<xliff:g id="NUMBER_1">%d</xliff:g> تلاش ناموفق دیگر، تلفن به پیش‌فرض کارخانه بازنشانی می‌شود و تمام داده‌های کاربر از دست خواهد رفت."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"شما به اشتباه اقدام به باز کردن قفل <xliff:g id="NUMBER">%d</xliff:g> رایانه لوحی کرده‌اید. رایانه لوحی در حال حاضر به پیش‌فرض کارخانه بازنشانی می‌شود."</string>
@@ -762,7 +762,7 @@
     <string name="hour_cap_ampm" msgid="2083465992940444366">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"تست کارخانه انجام نشد"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"عملکرد FACTORY_TEST تنها برای بسته‌های نصب شده در /system/app پشتیبانی می‌شود."</string>
-    <string name="factorytest_no_action" msgid="872991874799998561">"بسته ای یافت نشد که عملکرد FACTORY_TEST را ارائه کند."</string>
+    <string name="factorytest_no_action" msgid="872991874799998561">"بسته‌ای یافت نشد که عملکرد FACTORY_TEST را ارائه کند."</string>
     <string name="factorytest_reboot" msgid="6320168203050791643">"راه اندازی مجدد"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"صفحه در \"<xliff:g id="TITLE">%s</xliff:g>\" می‎گوید:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"جاوا اسکریپت"</string>
@@ -1080,7 +1080,7 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"در صورت فعال کردن حافظهٔ USB، برخی از برنامه‎هایی که از آن‌ها استفاده می‎کنید متوقف می‎شوند و تا زمانی که حافظهٔ USB را غیرفعال نکنید امکان استفاده از آن‌ها وجود نخواهد داشت."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"راه‌اندازی USB ناموفق بود."</string>
     <string name="dlg_ok" msgid="7376953167039865701">"تأیید"</string>
-    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"متصل شده به عنوان دستگاه رسانه ای"</string>
+    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"متصل شده به عنوان دستگاه رسانه‌ای"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"متصل شده به عنوان دوربین"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"متصل شده به عنوان نصب کننده"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"به یک وسیله جانبی USB وصل شده است"</string>
@@ -1112,8 +1112,8 @@
     <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"کارت SD آسیب دیده"</string>
     <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="1795917578395333280">"حافظهٔ USB خراب است. سعی کنید آنرا دوباره فرمت کنید."</string>
     <string name="ext_media_unmountable_notification_message" product="default" msgid="1753898567525568253">"کارت SD خراب است. سعی کنید آنرا دوباره فرمت کنید."</string>
-    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"حافظهٔ USB به صورت غیر منتظره جدا شد"</string>
-    <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"کارت SD به صورت غیر منتظره ای جدا شد"</string>
+    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"حافظهٔ USB به صورت غیرمنتظره جدا شد"</string>
+    <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"کارت SD به صورت غیرمنتظره‌ای جدا شد"</string>
     <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"اتصال حافظهٔ USB را قبل از بیرون آوردن قطع کنید تا سبب از بین رفتن داده‌ها نشود."</string>
     <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"کارت SD را قبل از بیرون آوردن جدا کنید تا سبب از بین رفتن داده‌ها نشود."</string>
     <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"حافظهٔ USB را می‌توانید با ایمنی جدا کنید"</string>
