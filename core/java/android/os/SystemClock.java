@@ -46,15 +46,16 @@ package android.os;
  *     such as {@link Thread#sleep(long) Thread.sleep(millls)},
  *     {@link Object#wait(long) Object.wait(millis)}, and
  *     {@link System#nanoTime System.nanoTime()}.  This clock is guaranteed
- *     to be monotonic, and is the recommended basis for the general purpose
- *     interval timing of user interface events, performance measurements,
- *     and anything else that does not need to measure elapsed time during
- *     device sleep.  Most methods that accept a timestamp value expect the
- *     {@link #uptimeMillis} clock.
+ *     to be monotonic, and is suitable for interval timing when the
+ *     interval does not span device sleep.  Most methods that accept a
+ *     timestamp value currently expect the {@link #uptimeMillis} clock.
  *
- *     <li> <p> {@link #elapsedRealtime} is counted in milliseconds since the
- *     system was booted, including deep sleep.  This clock should be used
- *     when measuring time intervals that may span periods of system sleep.
+ *     <li> <p> {@link #elapsedRealtime} and {@link #elapsedRealtimeNano}
+ *     return the time since the system was booted, and include deep sleep.
+ *     This clock is guaranteed to be monotonic, and continues to tick even
+ *     when the CPU is in power saving modes, so is the recommend basis
+ *     for general purpose interval timing.
+ *
  * </ul>
  *
  * There are several mechanisms for controlling the timing of events:
@@ -150,7 +151,14 @@ public final class SystemClock {
      * @return elapsed milliseconds since boot.
      */
     native public static long elapsedRealtime();
-    
+
+    /**
+     * Returns nanoseconds since boot, including time spent in sleep.
+     *
+     * @return elapsed nanoseconds since boot.
+     */
+    public static native long elapsedRealtimeNano();
+
     /**
      * Returns milliseconds running in the current thread.
      * 
