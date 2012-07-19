@@ -333,16 +333,12 @@ public class WebView extends AbsoluteLayout
     @Deprecated
     public interface PictureListener {
         /**
-         * Notifies the listener that the picture has changed.
+         * Used to provide notification that the WebView's picture has changed.
+         * See {@link WebView#capturePicture} for details of the picture.
          *
          * @param view the WebView that owns the picture
          * @param picture the new picture
-         * @deprecated Due to internal changes, the picture does not include
-         *             composited layers such as fixed position elements or
-         *             scrollable divs. While the PictureListener API can still
-         *             be used to detect changes in the WebView content, you
-         *             are advised against its usage until a replacement is
-         *             provided in a future Android release.
+         * @deprecated Deprecated due to internal changes.
          */
         @Deprecated
         public void onNewPicture(WebView view, Picture picture);
@@ -987,13 +983,18 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Gets a new picture that captures the current display of this WebView.
-     * This is a copy of the display, and will be unaffected if this WebView
-     * later loads a different URL.
+     * Gets a new picture that captures the current contents of this WebView.
+     * The picture is of the entire document being displayed, and is not
+     * limited to the area currently displayed by this WebView. Also, the
+     * picture is a static copy and is unaffected by later changes to the
+     * content being displayed.
+     * <p>
+     * Note that due to internal changes, for API levels between
+     * {@link android.os.Build.VERSION_CODES#HONEYCOMB} and
+     * {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH} inclusive, the
+     * picture does not include fixed position elements or scrollable divs.
      *
-     * @return a picture containing the current contents of this WebView. Note
-     *         this picture is of the entire document, and is not restricted to
-     *         the bounds of the view.
+     * @return a picture that captures the current contents of this WebView
      */
     public Picture capturePicture() {
         checkThread();
