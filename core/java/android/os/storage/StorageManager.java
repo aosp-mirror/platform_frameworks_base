@@ -289,7 +289,7 @@ public class StorageManager
      * Constructs a StorageManager object through which an application can
      * can communicate with the systems mount service.
      * 
-     * @param tgtLooper The {@android.os.Looper} which events will be received on.
+     * @param tgtLooper The {@link android.os.Looper} which events will be received on.
      *
      * <p>Applications can get instance of this class by calling
      * {@link android.content.Context#getSystemService(java.lang.String)} with an argument

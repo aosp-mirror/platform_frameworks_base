@@ -295,7 +295,7 @@ final public class MediaExtractor {
      * Returns true iff we are caching data and the cache has reached the
      * end of the data stream (for now, a future seek may of course restart
      * the fetching of data).
-     * This API only returns a meaningful result if {link #getCachedDuration}
+     * This API only returns a meaningful result if {@link #getCachedDuration}
      * indicates the presence of a cache, i.e. does NOT return -1.
      */
     public native boolean hasCacheReachedEndOfStream();

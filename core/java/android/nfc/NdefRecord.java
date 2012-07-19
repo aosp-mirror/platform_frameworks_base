@@ -70,7 +70,7 @@ import java.util.Locale;
  * indicate location with an NDEF message, provide support for chunking of
  * NDEF records, and to pack optional fields. This class does not expose
  * those details. To write an NDEF Record as binary you must first put it
- * into an @{link NdefMessage}, then call {@link NdefMessage#toByteArray()}.
+ * into an {@link NdefMessage}, then call {@link NdefMessage#toByteArray()}.
  * <p class="note">
  * {@link NdefMessage} and {@link NdefRecord} implementations are
  * always available, even on Android devices that do not have NFC hardware.

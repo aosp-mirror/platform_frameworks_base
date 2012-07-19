@@ -1590,7 +1590,7 @@ public class WifiStateMachine extends StateMachine {
 
     /**
      * Record the detailed state of a network.
-     * @param state the new @{code DetailedState}
+     * @param state the new {@code DetailedState}
      */
     private void setNetworkDetailedState(NetworkInfo.DetailedState state) {
         if (DBG) {

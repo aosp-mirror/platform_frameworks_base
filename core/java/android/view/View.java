@@ -2362,7 +2362,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * with a stable layout.  (Note that you should avoid using
      * {@link #SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION} by itself.)
      *
-     * If you have set the window flag {@ WindowManager.LayoutParams#FLAG_FULLSCREEN}
+     * If you have set the window flag {@link WindowManager.LayoutParams#FLAG_FULLSCREEN}
      * to hide the status bar (instead of using {@link #SYSTEM_UI_FLAG_FULLSCREEN}),
      * then a hidden status bar will be considered a "stable" state for purposes
      * here.  This allows your UI to continually hide the status bar, while still
