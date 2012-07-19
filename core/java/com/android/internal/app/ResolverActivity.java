@@ -371,7 +371,8 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
 
     void showAppDetails(ResolveInfo ri) {
         Intent in = new Intent().setAction("android.settings.APPLICATION_DETAILS_SETTINGS")
-                .setData(Uri.fromParts("package", ri.activityInfo.packageName, null));
+                .setData(Uri.fromParts("package", ri.activityInfo.packageName, null))
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
         startActivity(in);
     }
 
