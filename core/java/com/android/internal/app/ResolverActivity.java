@@ -76,6 +76,7 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
     private int mIconDpi;
     private int mIconSize;
     private int mMaxColumns;
+    private int mLastSelected = GridView.INVALID_POSITION;
 
     private boolean mRegistered;
     private final PackageMonitor mPackageMonitor = new PackageMonitor() {
@@ -247,6 +248,7 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
         if (mAlwaysUseOption) {
             final int checkedPos = mGrid.getCheckedItemPosition();
             final boolean enabled = checkedPos != GridView.INVALID_POSITION;
+            mLastSelected = checkedPos;
             mAlwaysButton.setEnabled(enabled);
             mOnceButton.setEnabled(enabled);
             if (enabled) {
@@ -257,14 +259,15 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        if (mAlwaysUseOption) {
-            final int checkedPos = mGrid.getCheckedItemPosition();
-            final boolean enabled = checkedPos != GridView.INVALID_POSITION;
-            mAlwaysButton.setEnabled(enabled);
-            mOnceButton.setEnabled(enabled);
-            if (enabled) {
+        final int checkedPos = mGrid.getCheckedItemPosition();
+        final boolean hasValidSelection = checkedPos != GridView.INVALID_POSITION;
+        if (!hasValidSelection || (mAlwaysUseOption && mLastSelected != checkedPos)) {
+            mAlwaysButton.setEnabled(hasValidSelection);
+            mOnceButton.setEnabled(hasValidSelection);
+            if (hasValidSelection) {
                 mGrid.smoothScrollToPosition(checkedPos);
             }
+            mLastSelected = checkedPos;
         } else {
             startSelected(position, false);
         }
