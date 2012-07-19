@@ -13,10 +13,10 @@ header.hide=1
     <img src="/images/home/google-play.png">
   </div>
   <div class="copy" style="position:relative;left:480px;width:360;">
-    <h1>Your Apps on Google Play</h1>
+    <h1 style="margin-bottom:10px;">Your Apps on Google Play</h1>
     <p>The most visited store in the world for Android apps.  Cloud-connected and always synced, it's never been easier for users to find and download your apps.</p>
     
-    <p><a class="landing-page-link" href="http://youtu.be/g5SzWc8-X0M">Watch a video</a></p>
+    <p><a class="button" href="https://play.google.com/apps/publish/">Go to Developer Console &raquo;</a></p>
   </div>    </div>
 </div>
 <div class="distribute-features col-13" style="clear:both;margin-top:246px;">
