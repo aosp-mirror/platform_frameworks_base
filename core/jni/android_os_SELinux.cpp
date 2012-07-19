@@ -90,14 +90,14 @@ namespace android {
     int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
 
     if (env->ExceptionOccurred() != NULL) {
-      LOGE("There was an issue with retrieving the file descriptor");
+      ALOGE("There was an issue with retrieving the file descriptor");
       goto bail;
     }
 
     if (getpeercon(fd, &context) == -1)
       goto bail;
 
-    LOGV("getPeerCon: Successfully retrived context of peer socket '%s'", context);
+    ALOGV("getPeerCon: Successfully retrived context of peer socket '%s'", context);
 
     securityString = env->NewStringUTF(context);
 
@@ -139,7 +139,7 @@ namespace android {
     if ((ret = setfscreatecon(securityContext)) == -1)
       goto bail;
 
-    LOGV("setFSCreateCon: set new security context to '%s' ", context == NULL ? "default", context);
+    ALOGV("setFSCreateCon: set new security context to '%s' ", context == NULL ? "default", context);
 
   bail:
     if (constant_securityContext != NULL)
@@ -185,7 +185,7 @@ namespace android {
     if ((ret = setfilecon(objectPath, newCon)) == -1)
       goto bail;
 
-    LOGV("setFileCon: Succesfully set security context '%s' for '%s'", newCon, objectPath);
+    ALOGV("setFileCon: Succesfully set security context '%s' for '%s'", newCon, objectPath);
 
   bail:
     env->ReleaseStringUTFChars(path, objectPath);
@@ -224,7 +224,7 @@ namespace android {
     if (getfilecon(objectPath, &context) == -1)
       goto bail;
 
-    LOGV("getFileCon: Successfully retrived context '%s' for file '%s'", context, objectPath);
+    ALOGV("getFileCon: Successfully retrived context '%s' for file '%s'", context, objectPath);
 
     securityString = env->NewStringUTF(context);
 
@@ -259,7 +259,7 @@ namespace android {
     if (getcon(&context) == -1)
       goto bail;
 
-    LOGV("getCon: Successfully retrieved context '%s'", context);
+    ALOGV("getCon: Successfully retrieved context '%s'", context);
 
     securityString = env->NewStringUTF(context);
 
@@ -295,7 +295,7 @@ namespace android {
     if (getpidcon(checkPid, &context) == -1)
       goto bail;
 
-    LOGV("getPidCon: Successfully retrived context '%s' for pid '%d'", context, checkPid);
+    ALOGV("getPidCon: Successfully retrived context '%s' for pid '%d'", context, checkPid);
 
     securityString = env->NewStringUTF(context);
 
@@ -442,7 +442,7 @@ namespace android {
 
     accessGranted = selinux_check_access(myscon, mytcon, mytclass, myperm, NULL);
 
-    LOGV("selinux_check_access returned %d", accessGranted);
+    ALOGV("selinux_check_access returned %d", accessGranted);
 
     env->ReleaseStringUTFChars(scon, const_scon);
     env->ReleaseStringUTFChars(tcon, const_tcon);
