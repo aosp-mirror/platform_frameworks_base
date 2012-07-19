@@ -2708,7 +2708,12 @@ public class Activity extends ContextThemeWrapper
         // metadata is available.
         Intent upIntent = getParentActivityIntent();
         if (upIntent != null) {
-            if (shouldUpRecreateTask(upIntent)) {
+            if (mActivityInfo.taskAffinity == null) {
+                // Activities with a null affinity are special; they really shouldn't
+                // specify a parent activity intent in the first place. Just finish
+                // the current activity and call it a day.
+                finish();
+            } else if (shouldUpRecreateTask(upIntent)) {
                 TaskStackBuilder b = TaskStackBuilder.create(this);
                 onCreateNavigateUpTaskStack(b);
                 onPrepareNavigateUpTaskStack(b);
