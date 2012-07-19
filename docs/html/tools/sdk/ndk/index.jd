@@ -1,16 +1,16 @@
 ndk=true
 
-ndk.win_download=android-ndk-r8-windows.zip
-ndk.win_bytes=109928336
-ndk.win_checksum=37b1a2576f28752fcc09e1b9c07e3f14
+ndk.win_download=android-ndk-r8b-windows.zip
+ndk.win_bytes=188724991
+ndk.win_checksum=6d290d4f2729ef2063c5ae5b1e335622
 
-ndk.mac_download=android-ndk-r8-darwin-x86.tar.bz2
-ndk.mac_bytes=96650992
-ndk.mac_checksum=81ce5de731f945692123b377afe0bad9
+ndk.mac_download=android-ndk-r8b-darwin-x86.tar.bz2
+ndk.mac_bytes=181255568
+ndk.mac_checksum=94fe392194ea41f8a70cfce0dee3870f
 
-ndk.linux_download=android-ndk-r8-linux-x86.tar.bz2
-ndk.linux_bytes=88310791
-ndk.linux_checksum=5c9afc9695ad67c61f82fbf896803c05
+ndk.linux_download=android-ndk-r8b-linux-x86.tar.bz2
+ndk.linux_bytes=160466240
+ndk.linux_checksum=6694ccc04d543500f0661a75f6c46526
 
 page.title=Android NDK
 
@@ -41,7 +41,7 @@ page.title=Android NDK
       </ol>
     </div>
   </div>
-  
+
   <p>The NDK is a toolset that allows you to implement parts
   of your app using native-code languages such as C and C++. For certain types of apps,
   this can be helpful so that you may reuse existing code libraries written in these
@@ -62,12 +62,12 @@ page.title=Android NDK
 
 <h2 id="Downloads">Downloads</h2>
 
-  
+
 <script>
 $('#Downloads').after($('#download-table'));
 </script>
-  
-  
+
+
 <h2 id="Revisions">Revisions</h2>
 
 <p>The sections below provide information and notes about successive releases of
@@ -115,12 +115,204 @@ padding: 5px 0 0;
 <div class="toggleable open">
   <a href="#" onclick="return toggleDiv(this)"><img src=
   "{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px" width="9px">
+  Android NDK, Revision 8b</a> <em>(July 2012)</em>
+
+  <div class="toggleme">
+    <p>The main features of this release are a new GNU Compiler Collection (GCC) 4.6 toolchain and
+GNU Debugger (GDB) 7.3.x which adds debugging support for the Android 4.1 (API Level 16) system
+image.</p>
+
+    <dl>
+      <dt>Important bug fixes:</dt>
+
+      <dd>
+        <ul>
+          <li>Fixed {@code LOCAL_SHORT_COMMANDS} issues on Mac OS, Windows Cygwin environments for
+static libraries. List file generation is faster, and it is not regenerated to avoid repeated
+project rebuilds.</li>
+          <li>Fixed several issues in {@code ndk-gdb}:
+            <ul>
+              <li>Updated tool to pass flags {@code -e}, {@code -d} and {@code -s} to adb more
+consistently.</li>
+              <li>Updated tool to accept device serial names containing spaces.</li>
+              <li>Updated tool to retrieve {@code /system/bin/link} information, so {@code gdb} on
+the host can set a breakpoint in {@code __dl_rtld_db_dlactivity} and be aware of linker activity
+(e.g., rescan {@code solib} symbols when {@code dlopen()} is called).</li>
+            </ul>
+          </li>
+          <li>Fixed {@code ndk-build clean} on Windows, which was failing to remove
+{@code ./libs/*/lib*.so}.</li>
+          <li>Fixed {@code ndk-build.cmd} to return a non-zero {@code ERRORLEVEL} when {@code make}
+fails.</li>
+          <li>Fixed {@code libc.so} to stop incorrectly exporting the {@code __exidx_start} and
+{@code __exidx_end} symbols.</li>
+          <li>Fixed {@code SEGV} when unwinding the stack past {@code __libc_init} for ARM and
+MIPS.</li>
+        </ul>
+      </dd>
+    </dl>
+
+    <dl>
+      <dt>Important changes:</dt>
+
+      <dd>
+        <ul>
+          <li>Added GCC 4.6 toolchain ({@code binutils} 2.21 with {@code gold} and GDB 7.3.x) to
+co-exist with the original GCC 4.4.3 toolchain ({@code binutils} 2.19 and GDB 6.6).</p>
+            <ul>
+              <li>GCC 4.6 is now the default toolchain. You may set {@code
+NDK_TOOLCHAIN_VERSION=4.4.3} in {@code Android.mk} to select the original one.</li>
+              <li>Support for the {@code gold} linker is only available for ARM and x86
+architectures on Linux and Mac OS hosts. This support is disabled by default. Add {@code
+LOCAL_C_FLAGS += -fuse-ld=gold} in {@code Android.mk} to enable it.</li>
+              <li>Programs compiled with {@code -fPIE} require the new {@code GDB} for debugging,
+including binaries in Android 4.1 (API Level 16) system images.</li>
+              <li>The {@code binutils} 2.21 {@code ld} tool contains back-ported fixes from
+version 2.22:
+                <ul>
+                  <li>Fixed {@code ld --gc-sections}, which incorrectly retains zombie references to
+external libraries. (<a href="http://sourceware.org/bugzilla/show_bug.cgi?id=13177">more
+info</a>).</li>
+                  <li>Fixed ARM {@code strip} command to preserve the original {@code p_align} and
+{@code p_flags} in {@code GNU_RELRO} section if they are valid. Without this fix, programs
+built with {@code -fPIE} could not be debugged. (<a
+href="http://sourceware.org/cgi-bin/cvsweb.cgi/src/bfd/elf.c.diff?cvsroot=src&r1=1.552&r2=1.553">more info</a>)</li>
+                </ul>
+              </li>
+              <li>Disabled {@code sincos()} optimization for compatibility with older
+                platforms.</li>
+            </ul>
+          </li>
+
+          <li>Updated build options to enable the Never eXecute (NX) bit and {@code relro}/{@code
+bind_now} protections by default:
+            <ul>
+              <li>Added {@code --noexecstack} to assembler and {@code -z noexecstack} to linker
+that provides NX protection against buffer overflow attacks by enabling NX bit on stack and
+heap.</li>
+              <li>Added {@code -z relro} and  {@code -z now} to linker for hardening of internal
+data sections after linking to guard against security vulnerabilities caused by memory corruption.
+(more info: <a href="http://www.akkadia.org/drepper/nonselsec.pdf">1</a>,
+<a href="http://tk-blog.blogspot.com/2009/02/relro-not-so-well-known-memory.html">2</a>)</li>
+
+              <li>These features can be disabled using the following options:
+                <ol>
+                  <li>Disable NX protection by setting the {@code --execstack} option for the
+assembler and {@code -z execstack} for the linker.</li>
+                  <li>Disable hardening of internal data by setting the {@code -z norelro} and
+{@code -z lazy} options for the linker.</li>
+                  <li>Disable these protections in the NDK {@code jni/Android.mk} by setting the
+following options:
+<pre>
+LOCAL_DISABLE_NO_EXECUTE=true  # disable "--noexecstack" and "-z noexecstack"
+DISABLE_RELRO=true             # disable "-z relro" and "-z now"</li>
+</pre>
+                </ol>
+                <p>See {@code docs/ANDROID-MK.html} for more details.</p>
+              </li>
+            </ul>
+          </li>
+
+          <li>Added branding for Android executables with the {@code .note.ABI-tag} section (in
+{@code crtbegin_static/dynamic.o}) so that debugging tools can act accordingly. The structure
+member and values are defined as follows:</p>
+<pre>
+static const struct {
+  int32_t namesz;  /* = 4,  sizeof ("GNU") */
+  int32_t descsz;  /* = 6 * sizeof(int32_t) */
+  int32_t type;    /* = 1 */
+  char  name[sizeof "GNU"];  /* = "GNU" */
+  int32_t os;      /* = 0 */
+  int32_t major;   /* = 2 */
+  int32_t minor;   /* = 6 */
+  int32_t teeny;   /* = 15 */
+  int32_t os_variant;  /* = 1 */
+  int32_t android_api; /* = 3, 4, 5, 8, 9, 14 */
+}</pre>
+          </li>
+        </ul>
+      </dd>
+    </dl>
+
+    <dl>
+      <dt>Other bug fixes:</dt>
+
+      <dd>
+        <ul>
+          <li>Fixed {@code mips-linux-gnu} relocation truncated to fit {@code R_MIPS_TLS_LDM} issue.
+            (<a href="http://sourceware.org/bugzilla/show_bug.cgi?id=12637">more info</a>)</li>
+          <li>Fixed {@code ld} tool segfaults when using {@code --gc-sections}.
+            (<a href="http://sourceware.org/bugzilla/show_bug.cgi?id=12845">more info</a>)
+          </li>
+          <li>Fixed MIPS {@code GOT_PAGE} counting issue.
+            (<a href="http://sourceware.org/ml/binutils/2011-05/msg00198.html">more info</a>)</li>
+          <li>Fixed follow warning symbol link for {@code mips_elf_count_got_symbols}.</li>
+          <li>Fixed follow warning symbol link for {@code mips_elf_allocate_lazy_stub}.</li>
+          <li>Moved MIPS {@code .dynamic} to the data segment, so that it is writable.</li>
+          <li>Replaced hard-coded values for symbols with correct segment sizes for MIPS.</li>
+          <li>Removed the {@code -mno-shared} option from the defaults in the MIPS toolchain.
+The default for Android toolchain is {@code -fPIC} (or {@code -fpic} if supported). If you do not
+explicitly specify {@code -mshared}, {@code -fpic}, {@code -fPIC}, {@code -fpie}, or {@code -fPIE},
+the MIPS compiler adds {@code -mno-shared} that turns off PIC. Fixed compiler not to add
+{@code -mno-shared} in this case.</li>
+          <li>Fixed wrong package names in samples {@code hello-jni} and {@code two-libs} so that
+the {@code tests} project underneath it can compile.</li>
+        </ul>
+      </dd>
+    </dl>
+
+    <dl>
+      <dt>Other Changes:</dt>
+
+      <dd>
+        <ul>
+          <li>Changed locations of binaries:
+            <ul>
+              <li>Moved {@code gdbserver} from
+{@code toolchain/&lt;arch-os-ver&gt;/prebuilt/gdbserver} to
+{@code prebuilt/android-&lt;arch&gt;/gdbserver/gdbserver}.</li>
+              <li>Renamed x86 toolchain prefix from {@code i686-android-linux-} to
+{@code i686-linux-android-}.</li>
+              <li>Moved {@code sources/cxx-stl/gnu-libstdc++/include} and {@code lib} to
+{@code sources/cxx-stl/gnu-libstdc++/4.6} when compiled with GCC 4.6, or
+{@code sources/cxx-stl/gnu-libstdc++/4.4.3} when compiled with GCC 4.4.3.</li>
+              <li>Moved {@code libbfd.a} and {@code libintl.a} from {@code lib/} to {@code
+lib32/}.</li>
+            </ul>
+          </li>
+
+          <li>Added and improved various scripts in the rebuild and test NDK toolchain:
+            <ul>
+              <li>Added {@code build-mingw64-toolchain.sh} to generate a new Linux-hosted toolchain
+that generates Win32 and Win64 executables.</li>
+              <li>Improved speed of {@code download-toolchain-sources.sh} by using the {@code
+clone} command and only using {@code checkout} for the directories that are needed to build the NDK
+toolchain binaries.</li>
+              <li>Added {@code build-host-gcc.sh} and {@code build-host-gdb.sh} scripts.</li>
+              <li>Added {@code tests/check-release.sh} to check the content of a given NDK
+installation directory, or an existing NDK package.</li>
+              <li>Rewrote the {@code tests/standalone/run.sh} standalone tests .</li>
+            </ul>
+          </li>
+          <li>Removed {@code if_dl.h} header from all platforms and architectures. The {@code
+AF_LINK} and {@code sockaddr_dl} elements it describes are specific to BSD (i.e., they don't exist
+in Linux).</li>
+        </ul>
+      </dd>
+    </dl>
+
+  </div>
+</div>
+
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)"><img src=
+  "{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px">
   Android NDK, Revision 8</a> <em>(May 2012)</em>
 
   <div class="toggleme">
     <p>This release of the NDK includes support for MIPS ABI and a few additional fixes.</p>
 
-    </dl>
+    <dl>
       <dt>New features:</dt>
 
       <dd>
@@ -910,7 +1102,7 @@ float AMotionEvent_getHistoricalRawY(const AInputEvent* motion_event,
                 as well as control over platform audio effects</li>
 
                 <li>Access to assets packaged in an <code>.apk</code> file.</li>
-                
+
               </ul>
             </li>
 
@@ -927,7 +1119,7 @@ float AMotionEvent_getHistoricalRawY(const AInputEvent* motion_event,
             <li>Provides a default C++ STL implementation (based on STLport) as a helper module. It can be used either
             as a static or shared library (details and usage examples are in sources/android/stlport/README). Prebuilt
             binaries for STLport (static or shared) and GNU libstdc++ (static only) are also provided if you choose to
-            compile against those libraries instead of the default C++ STL implementation. 
+            compile against those libraries instead of the default C++ STL implementation.
             C++ Exceptions and RTTI are not supported in the default STL implementation. For more information, see
             docs/CPLUSPLUS-SUPPORT.HTML.</li>
 
@@ -938,8 +1130,8 @@ float AMotionEvent_getHistoricalRawY(const AInputEvent* motion_event,
 
             <li>Adds an EGL library that lets you create and manage OpenGL ES textures and
               services.</li>
-                
-            <li>Adds new sample applications, <code>native-plasma</code> and <code>native-activity</code>, 
+
+            <li>Adds new sample applications, <code>native-plasma</code> and <code>native-activity</code>,
             to demonstrate how to write a native activity.</li>
 
             <li>Includes many bugfixes and other small improvements; see docs/CHANGES.html for a more
@@ -1103,25 +1295,25 @@ float AMotionEvent_getHistoricalRawY(const AInputEvent* motion_event,
       </dl>
     </div>
   </div>
-  
-  
-  
-  
-  
+
+
+
+
+
 <!-- ####################### END OF RELEASE NOTES ####################### -->
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1287,32 +1479,32 @@ later)</li>
     android:minSdkVersion="8" /&gt;</code> attribute value in its manifest.</li>
   </ul>
 
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
 
 
 
-  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   <h2 id="Installing">Installing the NDK</h2>
   <p>Installing the NDK on your development computer is straightforward and involves extracting the
   NDK from its download package.</p>
@@ -1339,7 +1531,7 @@ Software Requirements</a>
 
   <p>You are now ready to start working with the NDK.</p>
 
-  
+
 <h2 id="GetStarted">Getting Started with the NDK</h2>
 
 <p>Once you've installed the NDK successfully, take a few minutes to read the documentation
@@ -1402,13 +1594,13 @@ included with the NDK package.</p>
     to use them or any other framework API, you can still write JNI code to do so.</p>
   </li>
 </ul>
-  
-  
-  
-  
-  
+
+
+
+
+
   <h2 id="Contents">Contents of the NDK</h2>
-  
+
   <p>The NDK contains the APIs, documentation, and sample
   applications that help you write your native code. Specifically:</p>
 
@@ -1478,9 +1670,9 @@ information)</li>
     <li>libjnigraphics (Pixel buffer access) header (for Android 2.2 and above).</li>
 
     <li>A Minimal set of headers for C++ support</li>
-    
+
     <li>OpenSL ES native audio libraries</li>
-    
+
     <li>Android native application APIS</li>
   </ul>
 
@@ -1510,13 +1702,13 @@ information)</li>
     system</li>
 
     <li>OVERVIEW.HTML &mdash; provides an overview of the NDK capabilities and usage</li>
-    
+
     <li>ANDROID-MK.HTML &mdash; describes the use of the Android.mk file, which defines the native
     sources you want to compile</li>
-    
+
     <li>APPLICATION-MK.HTML &mdash; describes the use of the Application.mk file, which describes
-    the native sources required by your Android application</li>    
-    <li>CPLUSPLUS-SUPPORT.HTML &mdash; describes the C++ support provided in the Android NDK</li>    
+    the native sources required by your Android application</li>
+    <li>CPLUSPLUS-SUPPORT.HTML &mdash; describes the C++ support provided in the Android NDK</li>
     <li>CPU-ARCH-ABIS.HTML &mdash; a description of supported CPU architectures and how to target
     them.</li>
 
@@ -1527,15 +1719,15 @@ information)</li>
     <li>CHANGES.HTML &mdash; a complete list of changes to the NDK across all releases.</li>
 
     <li>DEVELOPMENT.HTML &mdash; describes how to modify the NDK and generate release packages for it</li>
-    
+
     <li>HOWTO.HTML &mdash; information about common tasks associated with NDK development</li>
-    
+
     <li>IMPORT-MODULE.HTML &mdash; describes how to share and reuse modules</li>
-    
+
     <li>LICENSES.HTML  &mdash; information about the various open source licenses that govern the Android NDK</li>
- 
+
     <li>NATIVE-ACTIVITY.HTML &mdash; describes how to implement native activities</li>
-    
+
     <li>NDK-BUILD.HTML &mdash; describes the usage of the ndk-build script</li>
 
     <li>NDK-GDB.HTML &mdash; describes how to use the native code debugger</li>
@@ -1544,13 +1736,13 @@ information)</li>
 
     <li>STANDALONE-TOOLCHAIN.HTML &mdash; describes how to use Android NDK toolchain as a standalone
     compiler (still in beta).</li>
-    
+
     <li>SYSTEM-ISSUES.HTML &mdash; known issues in the Android system images that you should be
     aware of, if you are developing using the NDK.</li>
 
     <li>STABLE-APIS.HTML &mdash; a complete list of the stable APIs exposed by headers in the
     NDK.</li>
-    
+
   </ul>
 
   <p>Additionally, the package includes detailed information about the "bionic" C library provided
@@ -1562,10 +1754,10 @@ information)</li>
     offers.</li>
   </ul>
 
-  
-  
-  
-  
+
+
+
+
 <h3 id="Samples">Sample apps</h3>
 
 <p>The NDK includes sample applications that illustrate how to use native code in your Android
@@ -1624,10 +1816,10 @@ information)</li>
     <li>If you are developing with Ant, use the <code>android</code> tool to create the build file
     for each of the sample projects at <code>&lt;ndk&gt;/samples/&lt;name&gt;/</code>.
     Then set up an AVD, if necessary, build your project in the usual way, and run it in the
-    emulator.</li>    
-    
+    emulator.</li>
+
   </ul>
-  
+
   <p>For more information about developing with the Android SDK tools and what
   you need to do to create, build, and run your applications, see
   the <a href="{@docRoot}tools/workflow/index.html">Overview</a>
