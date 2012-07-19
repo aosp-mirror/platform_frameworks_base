@@ -474,8 +474,8 @@
     <string name="permlab_getAccounts" msgid="1086795467760122114">"pata akaunti kwenye kifaa"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Inaruhusu programu kupata orodha ya akaunti zinazojulikana kwa kompyuta kibao. Hii inaweza kujumuisha akaunti zozote zilizoundwa na programu ambazo umesakinisha."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Inaruhusu programu kupata orodha ya akaunti zinazojulikana kwa simu. Hii inaweza kujumuisha akaunti zozote zilizoundwa na programu ambazo umesakinisha."</string>
-    <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"unda akaunti na weka manenosiri"</string>
-    <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"Inaruhusu programu kutumia uwezo wa uthibitishaji akaunti wa KidhibitiAkaunti, pamoja na kuunda akaunti na kupata na kuweka nywila zao."</string>
+    <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"fungua akaunti na weka manenosiri"</string>
+    <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"Inaruhusu programu kutumia uwezo wa uthibitishaji akaunti wa KidhibitiAkaunti, ikiwa ni pamoja na kufungua akaunti na kupata na kuweka manenosiri ya akaunti hizo."</string>
     <string name="permlab_manageAccounts" msgid="4983126304757177305">"ongeza au uondoe akaunti"</string>
     <string name="permdesc_manageAccounts" msgid="8698295625488292506">"Inaruhusu programu kutekeleza shughuli kama vile kuongeza na kutoa akaunti, na kufuta manenosiri yazo."</string>
     <string name="permlab_useCredentials" msgid="235481396163877642">"tumia akaunti kwenye kifaa"</string>
@@ -741,7 +741,7 @@
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Jina la mtumiaji (barua pepe)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Nenosiri"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Ingia"</string>
-    <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Jina batili la mtumiaji au nywila"</string>
+    <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Jina la mtumiaji au nenosiri batili."</string>
     <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"Umesahau jina lako la mtumiaji au nenosiri?"\n"Tembela "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"Inakagua..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Fungua"</string>
