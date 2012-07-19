@@ -48,8 +48,6 @@ defaults.</li>
 
 <h2>See also</h2>
   <ol>
-  <li><a
-href="{@docRoot}resources/tutorials/localization/index.html">Hello, L10N Tutorial</a></li>
     <li><a href="{@docRoot}guide/topics/resources/providing-resources.html">Providing Resources</a></li>
     <li><a href="{@docRoot}guide/topics/ui/declaring-layout.html">Layouts</a></li>
     <li><a href="{@docRoot}reference/android/app/Activity.html#ActivityLifecycle">Activity Lifecycle</a></li>
@@ -87,11 +85,8 @@ programmatically. This document does not cover how to  localize your Java code.
 </li>
 </ul>
 
-<p>The <a
-href="{@docRoot}resources/tutorials/localization/index.html">Hello, L10N
-</a> tutorial takes you through the steps of creating a simple localized
-application that uses  locale-specific resources in the way described in this
-document. </p>
+<p>For a short guide to localizing strings in your app, see the training lesson, <a
+href="{@docRoot}training/basics/supporting-devices/languages.html">Supporting Different Languages</a>. </p>
 
 
 <h2 id="resource-switching">Overview: Resource-Switching in Android</h2>
