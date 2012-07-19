@@ -63,14 +63,12 @@ nativeClassInit(JNIEnv *_env, jclass glImplClass)
 
 
 static void *
-getPointer(JNIEnv *_env, jobject buffer, jarray *array, jint *remaining)
+getPointer(JNIEnv *_env, jobject buffer, jarray *array, jint *remaining, jint *offset)
 {
     jint position;
     jint limit;
     jint elementSizeShift;
     jlong pointer;
-    jint offset;
-    void *data;
 
     position = _env->GetIntField(buffer, positionID);
     limit = _env->GetIntField(buffer, limitID);
@@ -85,11 +83,10 @@ getPointer(JNIEnv *_env, jobject buffer, jarray *array, jint *remaining)
 
     *array = (jarray) _env->CallStaticObjectMethod(nioAccessClass,
             getBaseArrayID, buffer);
-    offset = _env->CallStaticIntMethod(nioAccessClass,
+    *offset = _env->CallStaticIntMethod(nioAccessClass,
             getBaseArrayOffsetID, buffer);
-    data = _env->GetPrimitiveArrayCritical(*array, (jboolean *) 0);
 
-    return (void *) ((char *) data + offset);
+    return NULL;
 }
 
 
@@ -190,26 +187,36 @@ android_glQueryMatrixxOES__Ljava_nio_IntBuffer_2Ljava_nio_IntBuffer_2
     const char * _exceptionType;
     const char * _exceptionMessage;
     jarray _mantissaArray = (jarray) 0;
+    jint _mantissaBufferOffset = (jint) 0;
     jarray _exponentArray = (jarray) 0;
+    jint _exponentBufferOffset = (jint) 0;
     GLbitfield _returnValue = -1;
     jint _mantissaRemaining;
     GLfixed *mantissa = (GLfixed *) 0;
     jint _exponentRemaining;
     GLint *exponent = (GLint *) 0;
 
-    mantissa = (GLfixed *)getPointer(_env, mantissa_buf, &_mantissaArray, &_mantissaRemaining);
+    mantissa = (GLfixed *)getPointer(_env, mantissa_buf, &_mantissaArray, &_mantissaRemaining, &_mantissaBufferOffset);
     if (_mantissaRemaining < 16) {
         _exception = 1;
         _exceptionType = "java/lang/IllegalArgumentException";
         _exceptionMessage = "remaining() < 16 < needed";
         goto exit;
     }
-    exponent = (GLint *)getPointer(_env, exponent_buf, &_exponentArray, &_exponentRemaining);
+    exponent = (GLint *)getPointer(_env, exponent_buf, &_exponentArray, &_exponentRemaining, &_exponentBufferOffset);
     if (_exponentRemaining < 16) {
         _exception = 1;
         _exceptionType = "java/lang/IllegalArgumentException";
         _exceptionMessage = "remaining() < 16 < needed";
         goto exit;
+    }
+    if (mantissa == NULL) {
+        char * _mantissaBase = (char *)_env->GetPrimitiveArrayCritical(_mantissaArray, (jboolean *) 0);
+        mantissa = (GLfixed *) (_mantissaBase + _mantissaBufferOffset);
+    }
+    if (exponent == NULL) {
+        char * _exponentBase = (char *)_env->GetPrimitiveArrayCritical(_exponentArray, (jboolean *) 0);
+        exponent = (GLint *) (_exponentBase + _exponentBufferOffset);
     }
     _returnValue = glQueryMatrixxOES(
         (GLfixed *)mantissa,
@@ -217,11 +224,11 @@ android_glQueryMatrixxOES__Ljava_nio_IntBuffer_2Ljava_nio_IntBuffer_2
     );
 
 exit:
-    if (_mantissaArray) {
-        releasePointer(_env, _mantissaArray, exponent, _exception ? JNI_FALSE : JNI_TRUE);
-    }
     if (_exponentArray) {
-        releasePointer(_env, _exponentArray, mantissa, _exception ? JNI_FALSE : JNI_TRUE);
+        releasePointer(_env, _exponentArray, exponent, _exception ? JNI_FALSE : JNI_TRUE);
+    }
+    if (_mantissaArray) {
+        releasePointer(_env, _mantissaArray, mantissa, _exception ? JNI_FALSE : JNI_TRUE);
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
