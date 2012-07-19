@@ -39,9 +39,6 @@ namespace uirenderer {
     #define EXT_LOGD(...)
 #endif
 
-// Vendor strings
-#define VENDOR_IMG "Imagination Technologies"
-
 ///////////////////////////////////////////////////////////////////////////////
 // Classes
 ///////////////////////////////////////////////////////////////////////////////
@@ -69,10 +66,6 @@ public:
         mHasDebugMarker = hasExtension("GL_EXT_debug_marker");
         mHasDebugLabel = hasExtension("GL_EXT_debug_label");
 
-        const char* vendor = (const char*) glGetString(GL_VENDOR);
-        EXT_LOGD("Vendor: %s", vendor);
-        mNeedsHighpTexCoords = strcmp(vendor, VENDOR_IMG) == 0;
-
         // We don't need to copy the string, the OpenGL ES spec
         // guarantees the result of glGetString to point to a
         // static string as long as our OpenGL context is valid
@@ -81,7 +74,6 @@ public:
 
     inline bool hasNPot() const { return mHasNPot; }
     inline bool hasFramebufferFetch() const { return mHasFramebufferFetch; }
-    inline bool needsHighpTexCoords() const { return mNeedsHighpTexCoords; }
     inline bool hasDiscardFramebuffer() const { return mHasDiscardFramebuffer; }
     inline bool hasDebugMarker() const { return mHasDebugMarker; }
     inline bool hasDebugLabel() const { return mHasDebugLabel; }
@@ -101,7 +93,6 @@ private:
     const char* mExtensions;
 
     bool mHasNPot;
-    bool mNeedsHighpTexCoords;
     bool mHasFramebufferFetch;
     bool mHasDiscardFramebuffer;
     bool mHasDebugMarker;

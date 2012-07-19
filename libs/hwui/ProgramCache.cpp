@@ -65,27 +65,19 @@ const char* gVS_Header_Varyings_HasTexture =
 const char* gVS_Header_Varyings_IsAA =
         "varying float widthProportion;\n"
         "varying float lengthProportion;\n";
-const char* gVS_Header_Varyings_HasBitmap[2] = {
-        // Default precision
-        "varying vec2 outBitmapTexCoords;\n",
-        // High precision
-        "varying highp vec2 outBitmapTexCoords;\n"
-};
-const char* gVS_Header_Varyings_PointHasBitmap[2] = {
-        // Default precision
-        "varying vec2 outPointBitmapTexCoords;\n",
-        // High precision
-        "varying highp vec2 outPointBitmapTexCoords;\n"
-};
+const char* gVS_Header_Varyings_HasBitmap =
+        "varying highp vec2 outBitmapTexCoords;\n";
+const char* gVS_Header_Varyings_PointHasBitmap =
+        "varying highp vec2 outPointBitmapTexCoords;\n";
 // TODO: These values are used to sample from textures,
 //       they may need to be highp
 const char* gVS_Header_Varyings_HasGradient[3] = {
         // Linear
-        "varying vec2 linear;\n",
+        "varying highp vec2 linear;\n",
         // Circular
-        "varying vec2 circular;\n",
+        "varying highp vec2 circular;\n",
         // Sweep
-        "varying vec2 sweep;\n"
+        "varying highp vec2 sweep;\n"
 };
 const char* gVS_Main =
         "\nvoid main(void) {\n";
@@ -169,7 +161,7 @@ const char* gFS_Main =
         "    lowp vec4 fragColor;\n";
 
 const char* gFS_Main_PointBitmapTexCoords =
-        "    vec2 outBitmapTexCoords = outPointBitmapTexCoords + "
+        "    highp vec2 outBitmapTexCoords = outPointBitmapTexCoords + "
         "((gl_PointCoord - vec2(0.5, 0.5)) * textureDimension * vec2(pointSize, pointSize));\n";
 
 // Fast cases
@@ -244,10 +236,10 @@ const char* gFS_Main_FetchGradient[3] = {
         // Linear
         "    vec4 gradientColor = texture2D(gradientSampler, linear);\n",
         // Circular
-        "    float index = length(circular);\n"
+        "    highp float index = length(circular);\n"
         "    vec4 gradientColor = texture2D(gradientSampler, vec2(index, 0.5));\n",
         // Sweep
-        "    float index = atan(sweep.y, sweep.x) * 0.15915494309; // inv(2 * PI)\n"
+        "    highp float index = atan(sweep.y, sweep.x) * 0.15915494309; // inv(2 * PI)\n"
         "    vec4 gradientColor = texture2D(gradientSampler, vec2(index - floor(index), 0.5));\n"
 };
 const char* gFS_Main_FetchBitmap =
@@ -441,10 +433,9 @@ String8 ProgramCache::generateVertexShader(const ProgramDescription& description
         shader.append(gVS_Header_Varyings_HasGradient[description.gradientType]);
     }
     if (description.hasBitmap) {
-        int index = Caches::getInstance().extensions.needsHighpTexCoords() ? 1 : 0;
         shader.append(description.isPoint ?
-                gVS_Header_Varyings_PointHasBitmap[index] :
-                gVS_Header_Varyings_HasBitmap[index]);
+                gVS_Header_Varyings_PointHasBitmap :
+                gVS_Header_Varyings_HasBitmap);
     }
 
     // Begin the shader
@@ -503,10 +494,9 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
         shader.append(gVS_Header_Varyings_HasGradient[description.gradientType]);
     }
     if (description.hasBitmap) {
-        int index = Caches::getInstance().extensions.needsHighpTexCoords() ? 1 : 0;
         shader.append(description.isPoint ?
-                gVS_Header_Varyings_PointHasBitmap[index] :
-                gVS_Header_Varyings_HasBitmap[index]);
+                gVS_Header_Varyings_PointHasBitmap :
+                gVS_Header_Varyings_HasBitmap);
     }
 
     // Uniforms
@@ -706,13 +696,13 @@ void ProgramCache::generateBlend(String8& shader, const char* name, SkXfermode::
 }
 
 void ProgramCache::generateTextureWrap(String8& shader, GLenum wrapS, GLenum wrapT) {
-    shader.append("\nvec2 wrap(vec2 texCoords) {\n");
+    shader.append("\nhighp vec2 wrap(highp vec2 texCoords) {\n");
     if (wrapS == GL_MIRRORED_REPEAT) {
-        shader.append("    float xMod2 = mod(texCoords.x, 2.0);\n");
+        shader.append("    highp float xMod2 = mod(texCoords.x, 2.0);\n");
         shader.append("    if (xMod2 > 1.0) xMod2 = 2.0 - xMod2;\n");
     }
     if (wrapT == GL_MIRRORED_REPEAT) {
-        shader.append("    float yMod2 = mod(texCoords.y, 2.0);\n");
+        shader.append("    highp float yMod2 = mod(texCoords.y, 2.0);\n");
         shader.append("    if (yMod2 > 1.0) yMod2 = 2.0 - yMod2;\n");
     }
     shader.append("    return vec2(");
