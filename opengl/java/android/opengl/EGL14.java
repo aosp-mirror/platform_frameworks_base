@@ -24,10 +24,10 @@ import android.view.Surface;
 import android.view.SurfaceView;
 import android.view.SurfaceHolder;
 
-
 /**
-* @hide
-*/
+ * EGL 1.4
+ *
+ */
 public class EGL14 {
 
 public static final int EGL_DEFAULT_DISPLAY            = 0;
@@ -150,18 +150,18 @@ public static final int EGL_CORE_NATIVE_ENGINE             = 0x305B;
     static {
         _nativeClassInit();
     }
-    /* @hide C function EGLint eglGetError ( void ) */
+    // C function EGLint eglGetError ( void )
 
     public static native int eglGetError(
     );
 
-    /* @hide C function EGLDisplay eglGetDisplay ( EGLNativeDisplayType display_id ) */
+    // C function EGLDisplay eglGetDisplay ( EGLNativeDisplayType display_id )
 
     public static native EGLDisplay eglGetDisplay(
         int display_id
     );
 
-    /* @hide C function EGLBoolean eglInitialize ( EGLDisplay dpy, EGLint *major, EGLint *minor ) */
+    // C function EGLBoolean eglInitialize ( EGLDisplay dpy, EGLint *major, EGLint *minor )
 
     public static native boolean eglInitialize(
         EGLDisplay dpy,
@@ -171,7 +171,7 @@ public static final int EGL_CORE_NATIVE_ENGINE             = 0x305B;
         int minorOffset
     );
 
-    /* @hide C function EGLBoolean eglTerminate ( EGLDisplay dpy ) */
+    // C function EGLBoolean eglTerminate ( EGLDisplay dpy )
 
     public static native boolean eglTerminate(
         EGLDisplay dpy
@@ -183,7 +183,7 @@ public static final int EGL_CORE_NATIVE_ENGINE             = 0x305B;
         EGLDisplay dpy,
         int name
     );
-    /* @hide C function EGLBoolean eglGetConfigs ( EGLDisplay dpy, EGLConfig *configs, EGLint config_size, EGLint *num_config ) */
+    // C function EGLBoolean eglGetConfigs ( EGLDisplay dpy, EGLConfig *configs, EGLint config_size, EGLint *num_config )
 
     public static native boolean eglGetConfigs(
         EGLDisplay dpy,
@@ -194,7 +194,7 @@ public static final int EGL_CORE_NATIVE_ENGINE             = 0x305B;
         int num_configOffset
     );
 
-    /* @hide C function EGLBoolean eglChooseConfig ( EGLDisplay dpy, const EGLint *attrib_list, EGLConfig *configs, EGLint config_size, EGLint *num_config ) */
+    // C function EGLBoolean eglChooseConfig ( EGLDisplay dpy, const EGLint *attrib_list, EGLConfig *configs, EGLint config_size, EGLint *num_config )
 
     public static native boolean eglChooseConfig(
         EGLDisplay dpy,
@@ -207,7 +207,7 @@ public static final int EGL_CORE_NATIVE_ENGINE             = 0x305B;
         int num_configOffset
     );
 
-    /* @hide C function EGLBoolean eglGetConfigAttrib ( EGLDisplay dpy, EGLConfig config, EGLint attribute, EGLint *value ) */
+    // C function EGLBoolean eglGetConfigAttrib ( EGLDisplay dpy, EGLConfig config, EGLint attribute, EGLint *value )
 
     public static native boolean eglGetConfigAttrib(
         EGLDisplay dpy,
@@ -265,7 +265,7 @@ public static final int EGL_CORE_NATIVE_ENGINE             = 0x305B;
 
         return surface;
     }
-    /* @hide C function EGLSurface eglCreatePbufferSurface ( EGLDisplay dpy, EGLConfig config, const EGLint *attrib_list ) */
+    // C function EGLSurface eglCreatePbufferSurface ( EGLDisplay dpy, EGLConfig config, const EGLint *attrib_list )
 
     public static native EGLSurface eglCreatePbufferSurface(
         EGLDisplay dpy,
@@ -274,7 +274,7 @@ public static final int EGL_CORE_NATIVE_ENGINE             = 0x305B;
         int offset
     );
 
-    /* @hide C function EGLSurface eglCreatePixmapSurface ( EGLDisplay dpy, EGLConfig config, EGLNativePixmapType pixmap, const EGLint *attrib_list ) */
+    // C function EGLSurface eglCreatePixmapSurface ( EGLDisplay dpy, EGLConfig config, EGLNativePixmapType pixmap, const EGLint *attrib_list )
 
     public static native EGLSurface eglCreatePixmapSurface(
         EGLDisplay dpy,
@@ -284,14 +284,14 @@ public static final int EGL_CORE_NATIVE_ENGINE             = 0x305B;
         int offset
     );
 
-    /* @hide C function EGLBoolean eglDestroySurface ( EGLDisplay dpy, EGLSurface surface ) */
+    // C function EGLBoolean eglDestroySurface ( EGLDisplay dpy, EGLSurface surface )
 
     public static native boolean eglDestroySurface(
         EGLDisplay dpy,
         EGLSurface surface
     );
 
-    /* @hide C function EGLBoolean eglQuerySurface ( EGLDisplay dpy, EGLSurface surface, EGLint attribute, EGLint *value ) */
+    // C function EGLBoolean eglQuerySurface ( EGLDisplay dpy, EGLSurface surface, EGLint attribute, EGLint *value )
 
     public static native boolean eglQuerySurface(
         EGLDisplay dpy,
@@ -301,28 +301,28 @@ public static final int EGL_CORE_NATIVE_ENGINE             = 0x305B;
         int offset
     );
 
-    /* @hide C function EGLBoolean eglBindAPI ( EGLenum api ) */
+    // C function EGLBoolean eglBindAPI ( EGLenum api )
 
     public static native boolean eglBindAPI(
         int api
     );
 
-    /* @hide C function EGLenum eglQueryAPI ( void ) */
+    // C function EGLenum eglQueryAPI ( void )
 
     public static native int eglQueryAPI(
     );
 
-    /* @hide C function EGLBoolean eglWaitClient ( void ) */
+    // C function EGLBoolean eglWaitClient ( void )
 
     public static native boolean eglWaitClient(
     );
 
-    /* @hide C function EGLBoolean eglReleaseThread ( void ) */
+    // C function EGLBoolean eglReleaseThread ( void )
 
     public static native boolean eglReleaseThread(
     );
 
-    /* @hide C function EGLSurface eglCreatePbufferFromClientBuffer ( EGLDisplay dpy, EGLenum buftype, EGLClientBuffer buffer, EGLConfig config, const EGLint *attrib_list ) */
+    // C function EGLSurface eglCreatePbufferFromClientBuffer ( EGLDisplay dpy, EGLenum buftype, EGLClientBuffer buffer, EGLConfig config, const EGLint *attrib_list )
 
     public static native EGLSurface eglCreatePbufferFromClientBuffer(
         EGLDisplay dpy,
@@ -333,7 +333,7 @@ public static final int EGL_CORE_NATIVE_ENGINE             = 0x305B;
         int offset
     );
 
-    /* @hide C function EGLBoolean eglSurfaceAttrib ( EGLDisplay dpy, EGLSurface surface, EGLint attribute, EGLint value ) */
+    // C function EGLBoolean eglSurfaceAttrib ( EGLDisplay dpy, EGLSurface surface, EGLint attribute, EGLint value )
 
     public static native boolean eglSurfaceAttrib(
         EGLDisplay dpy,
@@ -342,7 +342,7 @@ public static final int EGL_CORE_NATIVE_ENGINE             = 0x305B;
         int value
     );
 
-    /* @hide C function EGLBoolean eglBindTexImage ( EGLDisplay dpy, EGLSurface surface, EGLint buffer ) */
+    // C function EGLBoolean eglBindTexImage ( EGLDisplay dpy, EGLSurface surface, EGLint buffer )
 
     public static native boolean eglBindTexImage(
         EGLDisplay dpy,
@@ -350,7 +350,7 @@ public static final int EGL_CORE_NATIVE_ENGINE             = 0x305B;
         int buffer
     );
 
-    /* @hide C function EGLBoolean eglReleaseTexImage ( EGLDisplay dpy, EGLSurface surface, EGLint buffer ) */
+    // C function EGLBoolean eglReleaseTexImage ( EGLDisplay dpy, EGLSurface surface, EGLint buffer )
 
     public static native boolean eglReleaseTexImage(
         EGLDisplay dpy,
@@ -358,14 +358,14 @@ public static final int EGL_CORE_NATIVE_ENGINE             = 0x305B;
         int buffer
     );
 
-    /* @hide C function EGLBoolean eglSwapInterval ( EGLDisplay dpy, EGLint interval ) */
+    // C function EGLBoolean eglSwapInterval ( EGLDisplay dpy, EGLint interval )
 
     public static native boolean eglSwapInterval(
         EGLDisplay dpy,
         int interval
     );
 
-    /* @hide C function EGLContext eglCreateContext ( EGLDisplay dpy, EGLConfig config, EGLContext share_context, const EGLint *attrib_list ) */
+    // C function EGLContext eglCreateContext ( EGLDisplay dpy, EGLConfig config, EGLContext share_context, const EGLint *attrib_list )
 
     public static native EGLContext eglCreateContext(
         EGLDisplay dpy,
@@ -375,14 +375,14 @@ public static final int EGL_CORE_NATIVE_ENGINE             = 0x305B;
         int offset
     );
 
-    /* @hide C function EGLBoolean eglDestroyContext ( EGLDisplay dpy, EGLContext ctx ) */
+    // C function EGLBoolean eglDestroyContext ( EGLDisplay dpy, EGLContext ctx )
 
     public static native boolean eglDestroyContext(
         EGLDisplay dpy,
         EGLContext ctx
     );
 
-    /* @hide C function EGLBoolean eglMakeCurrent ( EGLDisplay dpy, EGLSurface draw, EGLSurface read, EGLContext ctx ) */
+    // C function EGLBoolean eglMakeCurrent ( EGLDisplay dpy, EGLSurface draw, EGLSurface read, EGLContext ctx )
 
     public static native boolean eglMakeCurrent(
         EGLDisplay dpy,
@@ -391,23 +391,23 @@ public static final int EGL_CORE_NATIVE_ENGINE             = 0x305B;
         EGLContext ctx
     );
 
-    /* @hide C function EGLContext eglGetCurrentContext ( void ) */
+    // C function EGLContext eglGetCurrentContext ( void )
 
     public static native EGLContext eglGetCurrentContext(
     );
 
-    /* @hide C function EGLSurface eglGetCurrentSurface ( EGLint readdraw ) */
+    // C function EGLSurface eglGetCurrentSurface ( EGLint readdraw )
 
     public static native EGLSurface eglGetCurrentSurface(
         int readdraw
     );
 
-    /* @hide C function EGLDisplay eglGetCurrentDisplay ( void ) */
+    // C function EGLDisplay eglGetCurrentDisplay ( void )
 
     public static native EGLDisplay eglGetCurrentDisplay(
     );
 
-    /* @hide C function EGLBoolean eglQueryContext ( EGLDisplay dpy, EGLContext ctx, EGLint attribute, EGLint *value ) */
+    // C function EGLBoolean eglQueryContext ( EGLDisplay dpy, EGLContext ctx, EGLint attribute, EGLint *value )
 
     public static native boolean eglQueryContext(
         EGLDisplay dpy,
@@ -417,25 +417,25 @@ public static final int EGL_CORE_NATIVE_ENGINE             = 0x305B;
         int offset
     );
 
-    /* @hide C function EGLBoolean eglWaitGL ( void ) */
+    // C function EGLBoolean eglWaitGL ( void )
 
     public static native boolean eglWaitGL(
     );
 
-    /* @hide C function EGLBoolean eglWaitNative ( EGLint engine ) */
+    // C function EGLBoolean eglWaitNative ( EGLint engine )
 
     public static native boolean eglWaitNative(
         int engine
     );
 
-    /* @hide C function EGLBoolean eglSwapBuffers ( EGLDisplay dpy, EGLSurface surface ) */
+    // C function EGLBoolean eglSwapBuffers ( EGLDisplay dpy, EGLSurface surface )
 
     public static native boolean eglSwapBuffers(
         EGLDisplay dpy,
         EGLSurface surface
     );
 
-    /* @hide C function EGLBoolean eglCopyBuffers ( EGLDisplay dpy, EGLSurface surface, EGLNativePixmapType target ) */
+    // C function EGLBoolean eglCopyBuffers ( EGLDisplay dpy, EGLSurface surface, EGLNativePixmapType target )
 
     public static native boolean eglCopyBuffers(
         EGLDisplay dpy,

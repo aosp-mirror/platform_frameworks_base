@@ -18,10 +18,11 @@
 package android.opengl;
 
 /**
- * @hide
+ * Wrapper class for native EGLContext objects.
+ *
  */
 public class EGLContext extends EGLObjectHandle {
-    public EGLContext(int handle) {
+    private EGLContext(int handle) {
         super(handle);
     }
 
@@ -32,10 +33,5 @@ public class EGLContext extends EGLObjectHandle {
 
         EGLContext that = (EGLContext) o;
         return getHandle() == that.getHandle();
-    }
-
-    @Override
-    public int hashCode() {
-        return getHandle();
     }
 }

@@ -18,10 +18,11 @@
 package android.opengl;
 
 /**
- * @hide
+ * Wrapper class for native EGLDisplay objects.
+ *
  */
 public class EGLDisplay extends EGLObjectHandle {
-    public EGLDisplay(int handle) {
+    private EGLDisplay(int handle) {
         super(handle);
     }
 
@@ -32,10 +33,5 @@ public class EGLDisplay extends EGLObjectHandle {
 
         EGLDisplay that = (EGLDisplay) o;
         return getHandle() == that.getHandle();
-    }
-
-    @Override
-    public int hashCode() {
-        return getHandle();
     }
 }
