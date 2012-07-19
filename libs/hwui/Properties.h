@@ -88,7 +88,8 @@ enum DebugLevel {
 //
 // See PROPERTY_TEXT_GAMMA, PROPERTY_TEXT_BLACK_GAMMA_THRESHOLD and
 // PROPERTY_TEXT_WHITE_GAMMA_THRESHOLD for more control.
-#define PROPERTY_TEXT_GAMMA_SHADER "hwui.text_gamma_correction"
+#define PROPERTY_TEXT_GAMMA_METHOD "hwui.text_gamma_correction"
+#define DEFAULT_TEXT_GAMMA_METHOD "lookup"
 
 // Gamma (>= 1.0, <= 10.0)
 #define PROPERTY_TEXT_GAMMA "hwui.text_gamma"
@@ -110,8 +111,6 @@ enum DebugLevel {
 #define DEFAULT_FBO_CACHE_SIZE 16
 
 #define DEFAULT_TEXTURE_CACHE_FLUSH_RATE 0.6f
-
-#define DEFAULT_TEXT_GAMMA_SHADER "false"
 
 #define DEFAULT_TEXT_GAMMA 1.4f
 #define DEFAULT_TEXT_BLACK_GAMMA_THRESHOLD 64
