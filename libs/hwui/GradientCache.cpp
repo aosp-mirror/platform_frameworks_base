@@ -117,7 +117,7 @@ void GradientCache::clear() {
 Texture* GradientCache::addLinearGradient(GradientCacheEntry& gradient,
         uint32_t* colors, float* positions, int count, SkShader::TileMode tileMode) {
     SkBitmap bitmap;
-    bitmap.setConfig(SkBitmap::kARGB_8888_Config, 1024, 1);
+    bitmap.setConfig(SkBitmap::kARGB_8888_Config, 256 * (count - 1), 1);
     bitmap.allocPixels();
     bitmap.eraseColor(0);
 
