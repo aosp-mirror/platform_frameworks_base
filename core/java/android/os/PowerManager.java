@@ -542,14 +542,18 @@ public final class PowerManager {
 
         private void acquireLocked() {
             if (!mRefCounted || mCount++ == 0) {
+                // Do this even if the wake lock is already thought to be held (mHeld == true)
+                // because non-reference counted wake locks are not always properly released.
+                // For example, the keyguard's wake lock might be forcibly released by the
+                // power manager without the keyguard knowing.  A subsequent call to acquire
+                // should immediately acquire the wake lock once again despite never having
+                // been explicitly released by the keyguard.
                 mHandler.removeCallbacks(mReleaser);
-                if (!mHeld) {
-                    try {
-                        mService.acquireWakeLock(mFlags, mToken, mTag, mWorkSource);
-                    } catch (RemoteException e) {
-                    }
-                    mHeld = true;
+                try {
+                    mService.acquireWakeLock(mFlags, mToken, mTag, mWorkSource);
+                } catch (RemoteException e) {
                 }
+                mHeld = true;
             }
         }
 
