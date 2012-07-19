@@ -1783,6 +1783,7 @@ void OpenGLRenderer::drawAARect(float left, float top, float right, float bottom
         int color, SkXfermode::Mode mode) {
     float inverseScaleX = 1.0f;
     float inverseScaleY = 1.0f;
+
     // The quad that we use needs to account for scaling.
     if (CC_UNLIKELY(!mSnapshot->transform->isPureTranslate())) {
         Matrix4 *mat = mSnapshot->transform;
@@ -1798,24 +1799,6 @@ void OpenGLRenderer::drawAARect(float left, float top, float right, float bottom
         inverseScaleY = (scaleY != 0) ? (inverseScaleY / scaleY) : 0;
     }
 
-    setupDraw();
-    setupDrawNoTexture();
-    setupDrawAALine();
-    setupDrawColor(color, ((color >> 24) & 0xFF) * mSnapshot->alpha);
-    setupDrawColorFilter();
-    setupDrawShader();
-    setupDrawBlending(true, mode);
-    setupDrawProgram();
-    setupDrawModelViewIdentity(true);
-    setupDrawColorUniforms();
-    setupDrawColorFilterUniforms();
-    setupDrawShaderIdentityUniforms();
-
-    AAVertex rects[4];
-    AAVertex* aaVertices = &rects[0];
-    void* widthCoords = ((GLbyte*) aaVertices) + gVertexAAWidthOffset;
-    void* lengthCoords = ((GLbyte*) aaVertices) + gVertexAALengthOffset;
-
     float boundarySizeX = .5 * inverseScaleX;
     float boundarySizeY = .5 * inverseScaleY;
 
@@ -1825,32 +1808,51 @@ void OpenGLRenderer::drawAARect(float left, float top, float right, float bottom
     top -= boundarySizeY;
     bottom += boundarySizeY;
 
-    float width = right - left;
-    float height = bottom - top;
-
-    int widthSlot;
-    int lengthSlot;
-
-    float boundaryWidthProportion = (width != 0) ? (2 * boundarySizeX) / width : 0;
-    float boundaryHeightProportion = (height != 0) ? (2 * boundarySizeY) / height : 0;
-    setupDrawAALine((void*) aaVertices, widthCoords, lengthCoords,
-            boundaryWidthProportion, widthSlot, lengthSlot);
-
-    int boundaryLengthSlot = mCaches.currentProgram->getUniform("boundaryLength");
-    int inverseBoundaryLengthSlot = mCaches.currentProgram->getUniform("inverseBoundaryLength");
-    glUniform1f(boundaryLengthSlot, boundaryHeightProportion);
-    glUniform1f(inverseBoundaryLengthSlot, (1.0f / boundaryHeightProportion));
-
     if (!quickReject(left, top, right, bottom)) {
+        setupDraw();
+        setupDrawNoTexture();
+        setupDrawAALine();
+        setupDrawColor(color, ((color >> 24) & 0xFF) * mSnapshot->alpha);
+        setupDrawColorFilter();
+        setupDrawShader();
+        setupDrawBlending(true, mode);
+        setupDrawProgram();
+        setupDrawModelViewIdentity(true);
+        setupDrawColorUniforms();
+        setupDrawColorFilterUniforms();
+        setupDrawShaderIdentityUniforms();
+
+        AAVertex rects[4];
+        AAVertex* aaVertices = &rects[0];
+        void* widthCoords = ((GLbyte*) aaVertices) + gVertexAAWidthOffset;
+        void* lengthCoords = ((GLbyte*) aaVertices) + gVertexAALengthOffset;
+
+        int widthSlot;
+        int lengthSlot;
+
+        float width = right - left;
+        float height = bottom - top;
+
+        float boundaryWidthProportion = (width != 0) ? (2 * boundarySizeX) / width : 0;
+        float boundaryHeightProportion = (height != 0) ? (2 * boundarySizeY) / height : 0;
+        setupDrawAALine((void*) aaVertices, widthCoords, lengthCoords,
+                boundaryWidthProportion, widthSlot, lengthSlot);
+
+        int boundaryLengthSlot = mCaches.currentProgram->getUniform("boundaryLength");
+        int inverseBoundaryLengthSlot = mCaches.currentProgram->getUniform("inverseBoundaryLength");
+        glUniform1f(boundaryLengthSlot, boundaryHeightProportion);
+        glUniform1f(inverseBoundaryLengthSlot, (1.0f / boundaryHeightProportion));
+
         AAVertex::set(aaVertices++, left, bottom, 1, 1);
         AAVertex::set(aaVertices++, left, top, 1, 0);
         AAVertex::set(aaVertices++, right, bottom, 0, 1);
         AAVertex::set(aaVertices++, right, top, 0, 0);
         dirtyLayer(left, top, right, bottom, *mSnapshot->transform);
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    }
 
-    finishDrawAALine(widthSlot, lengthSlot);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+        finishDrawAALine(widthSlot, lengthSlot);
+    }
 }
 
 /**
@@ -1922,6 +1924,9 @@ status_t OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
     }
 
     getAlphaAndMode(paint, &alpha, &mode);
+
+    mCaches.enableScissor();
+
     setupDraw();
     setupDrawNoTexture();
     if (isAA) {
@@ -2052,7 +2057,7 @@ status_t OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
         const float top = fmin(p1.y, fmin(p2.y, fmin(p3.y, p4.y)));
         const float bottom = fmax(p1.y, fmax(p2.y, fmax(p3.y, p4.y)));
 
-        if (!quickReject(left, top, right, bottom)) {
+        if (!quickRejectNoScissor(left, top, right, bottom)) {
             if (!isAA) {
                 if (prevVertex != NULL) {
                     // Issue two repeat vertices to create degenerate triangles to bridge
@@ -2156,6 +2161,10 @@ status_t OpenGLRenderer::drawPoints(float* points, int count, SkPaint* paint) {
 
     TextureVertex pointsData[verticesCount];
     TextureVertex* vertex = &pointsData[0];
+
+    // TODO: We should optimize this method to not generate vertices for points
+    // that lie outside of the clip.
+    mCaches.enableScissor();
 
     setupDraw();
     setupDrawNoTexture();
