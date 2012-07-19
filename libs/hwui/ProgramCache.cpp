@@ -77,6 +77,8 @@ const char* gVS_Header_Varyings_PointHasBitmap[2] = {
         // High precision
         "varying highp vec2 outPointBitmapTexCoords;\n"
 };
+// TODO: These values are used to sample from textures,
+//       they may need to be highp
 const char* gVS_Header_Varyings_HasGradient[3] = {
         // Linear
         "varying vec2 linear;\n",
