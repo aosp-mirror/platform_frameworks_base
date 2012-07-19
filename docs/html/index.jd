@@ -43,11 +43,11 @@ that are beautiful and easy to use.</p>
                         <img src="{@docRoot}images/home/google-io.png">
                         </div>
                         <div class="content-right col-5">
-                        <h1>Watch Android at <br/>Google I/O!</h1>
-                        <p>See the keynote and more than 40 Android developer sessions streamed live from Moscone Center in San Francisco.</p>
-                        <p>Begins June 27, 9AM PDT (UTC-7).</p>
-                        <p><a href="https://developers.google.com/events/io/sessions#android"
-class="button">See the Android Sessions</a></p>
+                        <h1>Android videos<br/> from Google I/O!</h1>
+                        <p>If you couldn't make it to Google I/O this year or want to review some of the material,
+                          all of the Android sessions are now available for viewing online.</p>
+                        <p><a href="http://www.youtube.com/playlist?list=PL4C6BCDE45E05F49E&feature=plcp"
+class="button">Watch the Android sessions</a></p>
                         </div>
                 </li>
                 <li class="item carousel-home">
@@ -66,7 +66,6 @@ class="button">See the Android Sessions</a></p>
         </div>
     </div>
     <!-- /End slideshow -->
-    
     
     
 </div>
