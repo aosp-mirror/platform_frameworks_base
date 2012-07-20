@@ -82,16 +82,19 @@ public class WebViewDatabase {
     }
 
     /**
-     * Gets whether there is any previously-entered form data saved.
+     * Gets whether there is any saved data for web forms.
      *
-     * @return true if there is form data saved
+     * @return whether there is any saved data for web forms
+     * @see clearFormData
      */
     public boolean hasFormData() {
         throw new MustOverrideException();
     }
 
     /**
-     * Clears any stored previously-entered form data.
+     * Clears any saved data for web forms.
+     *
+     * @see hasFormData
      */
     public void clearFormData() {
         throw new MustOverrideException();

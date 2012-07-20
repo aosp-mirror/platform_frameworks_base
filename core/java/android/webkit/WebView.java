@@ -1258,8 +1258,10 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Makes sure that clearing the form data removes the adapter from the
-     * currently focused textfield if there is one.
+     * Removes the autocomplete popup from the currently focused form field, if
+     * present. Note this only affects the display of the autocomplete popup,
+     * it does not remove any saved form data from this WebView's store. To do
+     * that, use {@link WebViewDatabase#clearFormData}.
      */
     public void clearFormData() {
         checkThread();
