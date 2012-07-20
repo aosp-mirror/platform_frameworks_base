@@ -17,6 +17,8 @@
 #ifndef ANDROID_HWUI_GRADIENT_CACHE_H
 #define ANDROID_HWUI_GRADIENT_CACHE_H
 
+#include <GLES2/gl2.h>
+
 #include <SkShader.h>
 
 #include <utils/Mutex.h>
@@ -151,6 +153,8 @@ private:
 
     uint32_t mSize;
     uint32_t mMaxSize;
+
+    GLint mMaxTextureSize;
 
     Vector<SkShader*> mGarbage;
     mutable Mutex mLock;

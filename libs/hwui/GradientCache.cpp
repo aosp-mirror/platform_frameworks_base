@@ -16,8 +16,6 @@
 
 #define LOG_TAG "OpenGLRenderer"
 
-#include <GLES2/gl2.h>
-
 #include <SkCanvas.h>
 #include <SkGradientShader.h>
 
@@ -44,6 +42,8 @@ GradientCache::GradientCache():
     } else {
         INIT_LOGD("  Using default gradient cache size of %.2fMB", DEFAULT_GRADIENT_CACHE_SIZE);
     }
+
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mMaxTextureSize);
 
     mCache.setOnEntryRemovedListener(this);
 }
@@ -116,8 +116,11 @@ void GradientCache::clear() {
 
 Texture* GradientCache::addLinearGradient(GradientCacheEntry& gradient,
         uint32_t* colors, float* positions, int count, SkShader::TileMode tileMode) {
+    int width = 256 * (count - 1);
+    width = width < mMaxTextureSize ? width : mMaxTextureSize;
+
     SkBitmap bitmap;
-    bitmap.setConfig(SkBitmap::kARGB_8888_Config, 256 * (count - 1), 1);
+    bitmap.setConfig(SkBitmap::kARGB_8888_Config, width, 1);
     bitmap.allocPixels();
     bitmap.eraseColor(0);
 
