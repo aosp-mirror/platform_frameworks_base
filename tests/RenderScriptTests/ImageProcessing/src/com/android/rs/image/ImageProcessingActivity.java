@@ -140,6 +140,9 @@ public class ImageProcessingActivity extends Activity
         case 5:
             mTest = new Greyscale();
             break;
+        case 6:
+            mTest = new Grain();
+            break;
         }
 
         mTest.createBaseTest(this, mBitmapIn);
@@ -152,13 +155,14 @@ public class ImageProcessingActivity extends Activity
     }
 
     void setupTests() {
-        mTestNames = new String[6];
+        mTestNames = new String[7];
         mTestNames[0] = "Levels Vec3 Relaxed";
         mTestNames[1] = "Levels Vec4 Relaxed";
         mTestNames[2] = "Levels Vec3 Full";
         mTestNames[3] = "Levels Vec4 Full";
         mTestNames[4] = "Blur radius 25";
         mTestNames[5] = "Greyscale";
+        mTestNames[6] = "Grain";
         mTestSpinner.setAdapter(new ArrayAdapter<String>(
             this, R.layout.spinner_layout, mTestNames));
     }
