@@ -355,6 +355,9 @@ public final class InputMethodManager {
                 }
                 case MSG_BIND: {
                     final InputBindResult res = (InputBindResult)msg.obj;
+                    if (DEBUG) {
+                        Log.i(TAG, "handleMessage: MSG_BIND " + res.sequence + "," + res.id);
+                    }
                     synchronized (mH) {
                         if (mBindSequence < 0 || mBindSequence != res.sequence) {
                             Log.w(TAG, "Ignoring onBind: cur seq=" + mBindSequence
@@ -371,6 +374,9 @@ public final class InputMethodManager {
                 }
                 case MSG_UNBIND: {
                     final int sequence = msg.arg1;
+                    if (DEBUG) {
+                        Log.i(TAG, "handleMessage: MSG_UNBIND " + sequence);
+                    }
                     boolean startInput = false;
                     synchronized (mH) {
                         if (mBindSequence == sequence) {
@@ -403,6 +409,9 @@ public final class InputMethodManager {
                 }
                 case MSG_SET_ACTIVE: {
                     final boolean active = msg.arg1 != 0;
+                    if (DEBUG) {
+                        Log.i(TAG, "handleMessage: MSG_SET_ACTIVE " + active + ", was " + mActive);
+                    }
                     synchronized (mH) {
                         mActive = active;
                         mFullscreenMode = false;
@@ -420,7 +429,16 @@ public final class InputMethodManager {
                             // Check focus again in case that "onWindowFocus" is called before
                             // handling this message.
                             if (mServedView != null && mServedView.hasWindowFocus()) {
-                                checkFocus(mHasBeenInactive);
+                                // "finishComposingText" has been already called above. So we
+                                // should not call mServedInputConnection.finishComposingText here.
+                                // Also, please note that this handler thread could be different
+                                // from a thread that created mServedView. That could happen
+                                // the current activity is running in the system process.
+                                // In that case, we really should not call
+                                // mServedInputConnection.finishComposingText.
+                                if (checkFocusNoStartInput(mHasBeenInactive, false)) {
+                                    startInputInner(null, 0, 0, 0);
+                                }
                             }
                         }
                     }
@@ -1231,20 +1249,16 @@ public final class InputMethodManager {
         }
     }
 
-    private void checkFocus(boolean forceNewFocus) {
-        if (checkFocusNoStartInput(forceNewFocus)) {
-            startInputInner(null, 0, 0, 0);
-        }
-    }
-
     /**
      * @hide
      */
     public void checkFocus() {
-        checkFocus(false);
+        if (checkFocusNoStartInput(false, true)) {
+            startInputInner(null, 0, 0, 0);
+        }
     }
 
-    private boolean checkFocusNoStartInput(boolean forceNewFocus) {
+    private boolean checkFocusNoStartInput(boolean forceNewFocus, boolean finishComposingText) {
         // This is called a lot, so short-circuit before locking.
         if (mServedView == mNextServedView && !forceNewFocus) {
             return false;
@@ -1278,7 +1292,7 @@ public final class InputMethodManager {
             mServedConnecting = true;
         }
 
-        if (ic != null) {
+        if (finishComposingText && ic != null) {
             ic.finishComposingText();
         }
 
@@ -1323,7 +1337,7 @@ public final class InputMethodManager {
             controlFlags |= CONTROL_WINDOW_FIRST;
         }
         
-        if (checkFocusNoStartInput(forceNewFocus)) {
+        if (checkFocusNoStartInput(forceNewFocus, true)) {
             // We need to restart input on the current focus view.  This
             // should be done in conjunction with telling the system service
             // about the window gaining focus, to help make the transition
