@@ -64,15 +64,7 @@ public interface WindowManager extends ViewManager {
      * @param view The view to be removed.
      */
     public void removeViewImmediate(View view);
-    
-    /**
-     * Return true if this window manager is configured to request hardware
-     * accelerated windows.  This does <em>not</em> guarantee that they will
-     * actually be accelerated, since that depends on the device supporting them.
-     * @hide
-     */
-    public boolean isHardwareAccelerated();
-    
+
     public static class LayoutParams extends ViewGroup.LayoutParams
             implements Parcelable {
         /**
