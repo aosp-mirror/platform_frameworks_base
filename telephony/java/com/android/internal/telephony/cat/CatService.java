@@ -169,8 +169,11 @@ public class CatService extends Handler implements AppInterface {
             } catch (ClassCastException e) {
                 // for error handling : cast exception
                 CatLog.d(this, "Fail to parse proactive command");
-                sendTerminalResponse(mCurrntCmd.mCmdDet, ResultCode.CMD_DATA_NOT_UNDERSTOOD,
+                // Don't send Terminal Resp if command detail is not available
+                if (mCurrntCmd != null) {
+                    sendTerminalResponse(mCurrntCmd.mCmdDet, ResultCode.CMD_DATA_NOT_UNDERSTOOD,
                                      false, 0x00, null);
+                }
                 break;
             }
             if (cmdParams != null) {
