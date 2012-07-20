@@ -238,6 +238,11 @@ class CommonTimeServer : public Thread {
     // interface AND currently active common clock clients.
     bool mCommonClockHasClients;
 
+    // Internal logs used for dumpsys.
+    LogRing                 mStateChangeLog;
+    LogRing                 mElectionLog;
+    LogRing                 mBadPktLog;
+
     // Configuration info
     struct sockaddr_storage mMasterElectionEP;          // Endpoint over which we conduct master election
     String8                 mBindIface;                 // Endpoint for the service to bind to.

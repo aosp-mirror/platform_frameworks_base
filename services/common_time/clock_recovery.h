@@ -108,8 +108,8 @@ class ClockRecoveryLoop {
 
     // parameters maintained while running and reset during a reset
     // of the frequency correction.
-    bool    last_delta_valid_;
-    int32_t last_delta_;
+    bool    last_error_est_valid_;
+    int32_t last_error_est_usec_;
     float last_delta_f_;
     int32_t integrated_error_;
     int32_t tgt_correction_;
