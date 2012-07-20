@@ -1674,9 +1674,6 @@ public class InputMethodService extends AbstractInputMethodService {
     /**
      * Show the input method. This is a call back to the
      * IMF to handle showing the input method.
-     * Close this input method's soft input area, removing it from the display.
-     * The input method will continue running, but the user can no longer use
-     * it to generate input by touching the screen.
      * @param flags Provides additional operating flags.  Currently may be
      * 0 or have the {@link InputMethodManager#SHOW_FORCED
      * InputMethodManager.} bit set.
