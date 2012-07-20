@@ -19,7 +19,7 @@
     android:layout_height="?android:attr/listPreferredItemHeight"
     android:paddingTop="2dip"
     android:paddingBottom="2dip"
-    android:paddingLeft="?android:attr/expandableListPreferredItemPaddingLeft"
+    android:paddingStart="?android:attr/expandableListPreferredItemPaddingLeft"
     android:mode="twoLine"
 >
 
@@ -34,7 +34,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@android:id/text1"
-        android:layout_alignLeft="@android:id/text1"
+        android:layout_alignStart="@android:id/text1"
         android:textAppearance="?android:attr/textAppearanceSmall"
     />
 

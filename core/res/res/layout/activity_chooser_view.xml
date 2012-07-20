@@ -38,8 +38,8 @@
             android:layout_gravity="center"
             android:layout_marginTop="2dip"
             android:layout_marginBottom="2dip"
-            android:layout_marginLeft="12dip"
-            android:layout_marginRight="12dip"
+            android:layout_marginStart="12dip"
+            android:layout_marginEnd="12dip"
             android:scaleType="fitCenter"
             android:adjustViewBounds="true" />
 
@@ -60,8 +60,8 @@
             android:layout_gravity="center"
             android:layout_marginTop="2dip"
             android:layout_marginBottom="2dip"
-            android:layout_marginLeft="12dip"
-            android:layout_marginRight="12dip"
+            android:layout_marginStart="12dip"
+            android:layout_marginEnd="12dip"
             android:scaleType="fitCenter"
             android:adjustViewBounds="true" />
 

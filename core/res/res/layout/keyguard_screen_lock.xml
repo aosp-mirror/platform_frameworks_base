@@ -34,8 +34,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginBottom="15dip"
-        android:layout_marginLeft="15dip"
-        android:layout_marginRight="15dip"
+        android:layout_marginStart="15dip"
+        android:layout_marginEnd="15dip"
         android:paddingTop="20dip"
         android:paddingBottom="20dip"
         android:background="@android:drawable/popup_full_dark"
@@ -108,7 +108,7 @@
             <ImageView android:id="@+id/batteryInfoIcon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="6dip"
+                android:layout_marginEnd="6dip"
                 android:baselineAligned="true"
                 android:gravity="center"
             />
@@ -143,7 +143,7 @@
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="6dip"
+                android:layout_marginEnd="6dip"
                 android:baselineAligned="true"
                 android:src="@android:drawable/ic_lock_idle_alarm"
                 android:gravity="center"
@@ -177,7 +177,7 @@
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="6dip"
+                android:layout_marginEnd="6dip"
                 android:baselineAligned="true"
                 android:src="@android:drawable/ic_lock_idle_lock"
                 android:gravity="center"

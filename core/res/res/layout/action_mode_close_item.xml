@@ -18,12 +18,12 @@
         android:id="@+id/action_mode_close_button"
         android:focusable="true"
         android:clickable="true"
-        android:paddingLeft="8dip"
+        android:paddingStart="8dip"
         android:contentDescription="@string/action_mode_done"
         style="?android:attr/actionModeCloseButtonStyle"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_marginRight="16dip">
+        android:layout_marginEnd="16dip">
     <ImageView android:layout_width="wrap_content"
                android:layout_height="wrap_content"
                android:layout_gravity="center"

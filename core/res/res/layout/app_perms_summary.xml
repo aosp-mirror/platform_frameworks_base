@@ -26,8 +26,8 @@
         android:id="@+id/no_permissions"
         android:text="@string/no_permissions"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:paddingLeft="16dip"
-        android:paddingRight="12dip"
+        android:paddingStart="16dip"
+        android:paddingEnd="12dip"
         android:visibility="gone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
@@ -37,8 +37,8 @@
         android:id="@+id/dangerous_perms_list"
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:paddingLeft="16dip"
-        android:paddingRight="12dip"
+        android:paddingStart="16dip"
+        android:paddingEnd="12dip"
         android:layout_height="wrap_content" />
 
     <!-- Clickable area letting user display additional permissions. -->
@@ -62,7 +62,7 @@
             android:layout_height="wrap_content"
             android:paddingTop="16dip"
             android:paddingBottom="12dip"
-            android:paddingLeft="16dip"
+            android:paddingStart="16dip"
             android:duplicateParentState="true"
             android:background="?android:attr/selectableItemBackground">
 
@@ -72,7 +72,7 @@
                 android:duplicateParentState="true"
                 android:layout_alignTop="@+id/show_more_icon"
                 android:layout_gravity="center_vertical"
-                android:paddingLeft="36dip"
+                android:paddingStart="36dip"
                 android:layout_weight="1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
@@ -81,7 +81,7 @@
                 android:id="@id/show_more_icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="12dip" />
+                android:layout_marginEnd="12dip" />
 
         </LinearLayout>
 
@@ -96,8 +96,8 @@
     <LinearLayout
         android:id="@+id/non_dangerous_perms_list"
         android:orientation="vertical"
-        android:paddingLeft="16dip"
-        android:paddingRight="12dip"
+        android:paddingStart="16dip"
+        android:paddingEnd="12dip"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 

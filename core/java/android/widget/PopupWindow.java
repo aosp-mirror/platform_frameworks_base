@@ -835,7 +835,7 @@ public class PopupWindow {
        
         preparePopup(p);
         if (gravity == Gravity.NO_GRAVITY) {
-            gravity = Gravity.TOP | Gravity.LEFT;
+            gravity = Gravity.TOP | Gravity.START;
         }
         p.gravity = gravity;
         p.x = x;
@@ -1003,7 +1003,7 @@ public class PopupWindow {
         // screen. The view is then positioned to the appropriate location
         // by setting the x and y offsets to match the anchor's bottom
         // left corner
-        p.gravity = Gravity.LEFT | Gravity.TOP;
+        p.gravity = Gravity.START | Gravity.TOP;
         p.width = mLastWidth = mWidth;
         p.height = mLastHeight = mHeight;
         if (mBackground != null) {
@@ -1100,7 +1100,7 @@ public class PopupWindow {
         
         boolean onTop = false;
 
-        p.gravity = Gravity.LEFT | Gravity.TOP;
+        p.gravity = Gravity.START | Gravity.TOP;
         
         anchor.getLocationOnScreen(mScreenLocation);
         final Rect displayFrame = new Rect();
@@ -1134,7 +1134,7 @@ public class PopupWindow {
             onTop = (displayFrame.bottom - mScreenLocation[1] - anchor.getHeight() - yoff) <
                     (mScreenLocation[1] - yoff - displayFrame.top);
             if (onTop) {
-                p.gravity = Gravity.LEFT | Gravity.BOTTOM;
+                p.gravity = Gravity.START | Gravity.BOTTOM;
                 p.y = root.getHeight() - mDrawingLocation[1] + yoff;
             } else {
                 p.y = mDrawingLocation[1] + anchor.getHeight() + yoff;

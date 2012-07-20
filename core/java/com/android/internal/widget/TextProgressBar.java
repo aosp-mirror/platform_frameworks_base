@@ -155,7 +155,7 @@ public class TextProgressBar extends RelativeLayout implements OnChronometerTick
             // Calculate any adjustment based on gravity
             int adjustLeft = 0;
             int textWidth = mChronometer.getWidth();
-            if (mChronometerGravity == Gravity.RIGHT) {
+            if (mChronometerGravity == Gravity.END) {
                 adjustLeft = -textWidth;
             } else if (mChronometerGravity == Gravity.CENTER_HORIZONTAL) {
                 adjustLeft = -(textWidth / 2);

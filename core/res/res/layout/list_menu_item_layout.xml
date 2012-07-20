@@ -26,8 +26,8 @@
         android:layout_weight="1"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:layout_marginLeft="?android:attr/listPreferredItemPaddingLeft"
-        android:layout_marginRight="?android:attr/listPreferredItemPaddingRight"
+        android:layout_marginStart="?android:attr/listPreferredItemPaddingLeft"
+        android:layout_marginEnd="?android:attr/listPreferredItemPaddingRight"
         android:duplicateParentState="true">
         
         <TextView 
@@ -35,7 +35,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
             android:textAppearance="?android:attr/textAppearanceListItemSmall"
             android:singleLine="true"
             android:duplicateParentState="true"
@@ -47,7 +47,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/title"
-            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:singleLine="true"
             android:duplicateParentState="true" />

@@ -39,11 +39,11 @@
             <include layout="@layout/keyguard_screen_status_land"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="50dip"
+                android:layout_marginStart="50dip"
                 android:layout_marginTop="50dip"
-                android:layout_marginRight="64dip"
+                android:layout_marginEnd="64dip"
                 android:layout_alignParentTop="true"
-                android:layout_alignParentLeft="true"/>
+                android:layout_alignParentStart="true"/>
 
             <!-- Music transport control -->
             <include android:id="@+id/transport"
@@ -85,8 +85,8 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:layout_below="@id/lockPattern"
-                android:layout_alignLeft="@id/lockPattern"
-                android:layout_alignRight="@id/lockPattern"
+                android:layout_alignStart="@id/lockPattern"
+                android:layout_alignEnd="@id/lockPattern"
                 style="?android:attr/buttonBarStyle"
                 android:gravity="center"
                 android:weightSum="2">
@@ -139,7 +139,7 @@
                 android:layout_height="wrap_content"
                 android:padding="5dip"
                 android:layout_alignParentTop="true"
-                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
                 android:src="@drawable/ic_facial_backup"
             />
 

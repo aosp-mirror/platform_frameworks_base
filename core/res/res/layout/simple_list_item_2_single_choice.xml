@@ -19,8 +19,8 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:paddingLeft="16dip"
-    android:paddingRight="12dip"
+    android:paddingStart="16dip"
+    android:paddingEnd="12dip"
     android:minHeight="?android:attr/listPreferredItemHeightSmall">
     <LinearLayout
         android:layout_width="wrap_content"
@@ -33,7 +33,7 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="?android:attr/textColorAlertDialogListItem"
-            android:gravity="center_vertical|left"
+            android:gravity="center_vertical|start"
             android:singleLine="true"
             android:ellipsize="marquee"
         />
@@ -42,7 +42,7 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="?android:attr/textColorAlertDialogListItem"
-            android:gravity="center_vertical|left"
+            android:gravity="center_vertical|start"
             android:singleLine="true"
             android:ellipsize="marquee"
         />
@@ -51,7 +51,7 @@
         android:id="@+id/radio"
         android:layout_width="35dip"
         android:layout_height="wrap_content"
-        android:paddingRight="12dip"
+        android:paddingEnd="12dip"
         android:gravity="center_vertical"
         android:focusable="false"
         android:clickable="false"

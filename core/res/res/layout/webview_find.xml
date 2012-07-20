@@ -27,7 +27,7 @@
         android:inputType="text"
         android:hint="@string/find_on_page"
         android:imeOptions="actionDone|flagNoExtractUi|flagNoFullscreen"
-        android:layout_marginRight="10dip"
+        android:layout_marginEnd="10dip"
         />
     <TextView android:id="@+id/matches"
         android:layout_width="wrap_content"

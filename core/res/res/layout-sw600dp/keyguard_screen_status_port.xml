@@ -24,7 +24,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dip"
-        android:gravity="right"
+        android:gravity="end"
         >
 
     <TextView
@@ -68,7 +68,7 @@
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@color/lockscreen_clock_foreground"
             android:layout_marginBottom="6dip"
-            android:layout_alignLeft="@id/timeDisplayBackground"
+            android:layout_alignStart="@id/timeDisplayBackground"
             android:layout_alignTop="@id/timeDisplayBackground"
             />
 
@@ -92,7 +92,7 @@
             android:id="@+id/alarm_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="16dip"
+            android:layout_marginStart="16dip"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:drawablePadding="4dip"
             android:textSize="16sp"/>

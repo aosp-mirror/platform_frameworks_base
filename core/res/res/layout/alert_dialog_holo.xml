@@ -22,8 +22,8 @@
     android:id="@+id/parentPanel"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginLeft="8dip"
-    android:layout_marginRight="8dip"
+    android:layout_marginStart="8dip"
+    android:layout_marginEnd="8dip"
     android:orientation="vertical">
 
     <LinearLayout android:id="@+id/topPanel"
@@ -39,14 +39,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center_vertical|left"
+            android:gravity="center_vertical|start"
             android:minHeight="@dimen/alert_dialog_title_height"
-            android:layout_marginLeft="16dip"
-            android:layout_marginRight="16dip">
+            android:layout_marginStart="16dip"
+            android:layout_marginEnd="16dip">
             <ImageView android:id="@+id/icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingRight="8dip"
+                android:paddingEnd="8dip"
                 android:src="@null" />
             <com.android.internal.widget.DialogTitle android:id="@+id/alertTitle"
                 style="?android:attr/windowTitleStyle"
@@ -76,8 +76,8 @@
                 style="?android:attr/textAppearanceMedium"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingLeft="16dip"
-                android:paddingRight="16dip"
+                android:paddingStart="16dip"
+                android:paddingEnd="16dip"
                 android:paddingTop="8dip"
                 android:paddingBottom="8dip"/>
         </ScrollView>
@@ -109,7 +109,7 @@
             android:measureWithLargestChild="true">
             <Button android:id="@+id/button2"
                 android:layout_width="wrap_content"
-                android:layout_gravity="left"
+                android:layout_gravity="start"
                 android:layout_weight="1"
                 android:maxLines="2"
                 style="?android:attr/buttonBarButtonStyle"
@@ -127,7 +127,7 @@
                 android:layout_height="wrap_content" />
             <Button android:id="@+id/button1"
                 android:layout_width="wrap_content"
-                android:layout_gravity="right"
+                android:layout_gravity="end"
                 android:layout_weight="1"
                 android:maxLines="2"
                 android:minHeight="@dimen/alert_dialog_button_bar_height"

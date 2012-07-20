@@ -22,13 +22,13 @@
     android:layout_height="wrap_content"
     android:minHeight="?android:attr/listPreferredItemHeight"
     android:gravity="center_vertical"
-    android:paddingRight="?android:attr/scrollbarSize">
+    android:paddingEnd="?android:attr/scrollbarSize">
 
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16sp"
-        android:layout_marginRight="6sp"
+        android:layout_marginStart="16sp"
+        android:layout_marginEnd="6sp"
         android:layout_marginTop="6sp"
         android:layout_marginBottom="6sp"
         android:layout_weight="1">
@@ -44,7 +44,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@android:id/title"
-            android:layout_alignLeft="@android:id/title"
+            android:layout_alignStart="@android:id/title"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="?android:attr/textColorSecondary"
             android:maxLines="2" />

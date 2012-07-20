@@ -51,8 +51,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginRight="6dip"
-            android:layout_marginLeft="6dip"
+            android:layout_marginEnd="6dip"
+            android:layout_marginStart="6dip"
             android:gravity="center_vertical"
             android:background="@android:drawable/edit_text">
 
@@ -72,7 +72,7 @@
                 android:src="@android:drawable/ic_input_delete"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="-3dip"
+                android:layout_marginEnd="-3dip"
                 android:layout_marginBottom="-3dip"
             />
         </LinearLayout>

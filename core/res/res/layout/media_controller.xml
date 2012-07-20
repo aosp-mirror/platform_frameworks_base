@@ -44,11 +44,11 @@
             android:textSize="14sp"
             android:textStyle="bold"
             android:paddingTop="4dip"
-            android:paddingLeft="4dip"
+            android:paddingStart="4dip"
             android:layout_gravity="center_horizontal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingRight="4dip" />
+            android:paddingEnd="4dip" />
 
         <SeekBar
             android:id="@+id/mediacontroller_progress"
@@ -56,18 +56,18 @@
             android:layout_width="0dip"
             android:layout_weight="1"
             android:layout_height="32dip"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentRight="true" />
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true" />
 
         <TextView android:id="@+id/time"
             android:textSize="14sp"
             android:textStyle="bold"
             android:paddingTop="4dip"
-            android:paddingRight="4dip"
+            android:paddingEnd="4dip"
             android:layout_gravity="center_horizontal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingLeft="4dip" />
+            android:paddingStart="4dip" />
     </LinearLayout>
 
 </LinearLayout>

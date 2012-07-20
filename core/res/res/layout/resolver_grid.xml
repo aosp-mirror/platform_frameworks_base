@@ -48,7 +48,7 @@
         android:measureWithLargestChild="true">
         <Button android:id="@+id/button_always"
                 android:layout_width="wrap_content"
-                android:layout_gravity="right"
+                android:layout_gravity="end"
                 android:layout_weight="1"
                 android:maxLines="2"
                 android:minHeight="@dimen/alert_dialog_button_bar_height"
@@ -60,7 +60,7 @@
                 android:onClick="onButtonClick" />
         <Button android:id="@+id/button_once"
                 android:layout_width="wrap_content"
-                android:layout_gravity="left"
+                android:layout_gravity="start"
                 android:layout_weight="1"
                 android:maxLines="2"
                 style="?android:attr/buttonBarButtonStyle"

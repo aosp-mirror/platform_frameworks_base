@@ -21,14 +21,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:paddingLeft="16dip"
-    android:paddingRight="16dip">
+    android:paddingStart="16dip"
+    android:paddingEnd="16dip">
 
     <TextView android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:layout_gravity="left"
+        android:layout_gravity="start"
         android:text="@string/add_account_label"
         android:paddingTop="16dip"
         android:paddingBottom="16dip"

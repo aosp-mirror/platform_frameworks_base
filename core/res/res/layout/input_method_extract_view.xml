@@ -38,8 +38,8 @@
             android:id="@+id/inputExtractAccessories"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:paddingLeft="8dip"
-            android:paddingRight="8dip"
+            android:paddingStart="8dip"
+            android:paddingEnd="8dip"
         >
         
         <android.inputmethodservice.ExtractButton android:id="@+id/inputExtractAction"

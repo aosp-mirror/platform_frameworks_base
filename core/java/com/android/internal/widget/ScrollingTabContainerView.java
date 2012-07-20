@@ -363,7 +363,7 @@ public class ScrollingTabContainerView extends HorizontalScrollView
             mTab = tab;
 
             if (forList) {
-                setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
+                setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
             }
 
             update();

@@ -21,21 +21,21 @@
     android:minHeight="48dp"
     android:background="?android:attr/activatedBackgroundIndicator"
     android:gravity="center_vertical"
-    android:paddingRight="?android:attr/scrollbarSize">
+    android:paddingEnd="?android:attr/scrollbarSize">
 
     <ImageView
         android:id="@+id/icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="6dip"
-        android:layout_marginRight="6dip"
+        android:layout_marginStart="6dip"
+        android:layout_marginEnd="6dip"
         android:layout_gravity="center" />
 
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="2dip"
-        android:layout_marginRight="6dip"
+        android:layout_marginStart="2dip"
+        android:layout_marginEnd="6dip"
         android:layout_marginTop="6dip"
         android:layout_marginBottom="6dip"
         android:layout_weight="1">
@@ -52,7 +52,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@android:id/title"
-            android:layout_alignLeft="@android:id/title"
+            android:layout_alignStart="@android:id/title"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:ellipsize="end"
             android:maxLines="2" />

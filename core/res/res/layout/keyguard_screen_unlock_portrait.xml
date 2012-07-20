@@ -30,8 +30,8 @@
     <com.android.internal.widget.DigitalClock android:id="@+id/time"
         android:layout_marginTop="@dimen/keyguard_lockscreen_status_line_clockfont_top_margin"
         android:layout_marginBottom="@dimen/keyguard_lockscreen_status_line_clockfont_bottom_margin"
-        android:layout_marginRight="@dimen/keyguard_lockscreen_status_line_font_right_margin"
-        android:layout_gravity="right">
+        android:layout_marginEnd="@dimen/keyguard_lockscreen_status_line_font_right_margin"
+        android:layout_gravity="end">
 
         <!-- Because we can't have multi-tone fonts, we render two TextViews, one on
         top of the other. Hence the redundant layout... -->
@@ -59,8 +59,8 @@
 
     <LinearLayout
         android:orientation="horizontal"
-        android:layout_gravity="right"
-        android:layout_marginRight="@dimen/keyguard_lockscreen_status_line_font_right_margin">
+        android:layout_gravity="end"
+        android:layout_marginEnd="@dimen/keyguard_lockscreen_status_line_font_right_margin">
 
         <TextView
             android:id="@+id/date"
@@ -76,7 +76,7 @@
             android:id="@+id/alarm_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="16dip"
+            android:layout_marginStart="16dip"
             android:singleLine="true"
             android:ellipsize="marquee"
             android:textAppearance="?android:attr/textAppearanceMedium"
@@ -89,8 +89,8 @@
 
     <TextView
         android:id="@+id/status1"
-        android:layout_gravity="right"
-        android:layout_marginRight="@dimen/keyguard_lockscreen_status_line_font_right_margin"
+        android:layout_gravity="end"
+        android:layout_marginEnd="@dimen/keyguard_lockscreen_status_line_font_right_margin"
         android:singleLine="true"
         android:ellipsize="marquee"
         android:textAppearance="?android:attr/textAppearanceMedium"
@@ -108,9 +108,9 @@
         android:id="@+id/lockPattern"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginRight="8dip"
+        android:layout_marginEnd="8dip"
         android:layout_marginBottom="4dip"
-        android:layout_marginLeft="8dip"
+        android:layout_marginStart="8dip"
         android:layout_gravity="center_horizontal"
      />
 
@@ -196,7 +196,7 @@
             android:layout_height="wrap_content"
             android:padding="5dip"
             android:layout_alignParentTop="true"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
             android:src="@drawable/ic_facial_backup"
         />
 

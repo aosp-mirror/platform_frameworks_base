@@ -22,8 +22,8 @@
     android:textAppearance="?android:attr/textAppearanceLarge"
     android:textColor="?android:attr/textColorAlertDialogListItem"
     android:gravity="center_vertical"
-    android:paddingLeft="12dip"
-    android:paddingRight="7dip"
+    android:paddingStart="12dip"
+    android:paddingEnd="7dip"
     android:checkMark="?android:attr/listChoiceIndicatorSingle"
     android:ellipsize="marquee"
 />

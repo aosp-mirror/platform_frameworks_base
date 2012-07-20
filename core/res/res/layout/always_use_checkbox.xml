@@ -20,8 +20,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingLeft="14dip"
-    android:paddingRight="15dip"
+    android:paddingStart="14dip"
+    android:paddingEnd="15dip"
     android:orientation="vertical">
     
     <CheckBox
@@ -36,7 +36,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:paddingLeft="36dip"
+        android:paddingStart="36dip"
         android:visibility="gone"
         android:text="@string/clearDefaultHintMsg" />
 </LinearLayout>

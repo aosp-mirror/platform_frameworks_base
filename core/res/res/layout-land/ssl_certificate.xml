@@ -23,7 +23,7 @@
         android:id="@+id/body"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="left"
+        android:gravity="start"
         android:orientation="vertical" >
 
         <!-- Placeholder for the success message or one or more warnings -->
@@ -43,8 +43,8 @@
             android:scaleType="fitXY"
             android:layout_weight="1"
             android:gravity="fill_horizontal"
-            android:layout_marginLeft="20dip"
-            android:layout_marginRight="20dip"/>
+            android:layout_marginStart="20dip"
+            android:layout_marginEnd="20dip"/>
 
         <TableLayout
             android:layout_width="match_parent"
@@ -60,8 +60,8 @@
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"
                 android:layout_marginTop="12dip"
-                android:layout_marginLeft="20dip"
-                android:layout_marginRight="20dip"
+                android:layout_marginStart="20dip"
+                android:layout_marginEnd="20dip"
                 android:layout_marginBottom="7dip" />
 
             <!-- Common name: -->
@@ -69,12 +69,12 @@
                 <TextView
                     android:id="@+id/to_common_header"
                     android:text="@string/common_name"
-                    android:layout_marginLeft="20dip" />
+                    android:layout_marginStart="20dip" />
 
                 <TextView
                     android:id="@+id/to_common"
-                    android:layout_marginLeft="10dip"
-                    android:layout_marginRight="20dip"
+                    android:layout_marginStart="10dip"
+                    android:layout_marginEnd="20dip"
                     android:layout_marginBottom="7dip" />
             </TableRow>
 
@@ -83,12 +83,12 @@
                 <TextView
                     android:id="@+id/to_org_header"
                     android:text="@string/org_name"
-                    android:layout_marginLeft="20dip" />
+                    android:layout_marginStart="20dip" />
 
                 <TextView
                     android:id="@+id/to_org"
-                    android:layout_marginLeft="10dip"
-                    android:layout_marginRight="20dip"
+                    android:layout_marginStart="10dip"
+                    android:layout_marginEnd="20dip"
                     android:layout_marginBottom="7dip" />
             </TableRow>
 
@@ -97,12 +97,12 @@
                 <TextView
                     android:id="@+id/to_org_unit_header"
                     android:text="@string/org_unit"
-                    android:layout_marginLeft="20dip" />
+                    android:layout_marginStart="20dip" />
 
                 <TextView
                     android:id="@+id/to_org_unit"
-                    android:layout_marginLeft="10dip"
-                    android:layout_marginRight="20dip"
+                    android:layout_marginStart="10dip"
+                    android:layout_marginEnd="20dip"
                     android:layout_marginBottom="7dip" />
             </TableRow>
 
@@ -111,12 +111,12 @@
                 <TextView
                     android:id="@+id/serial_number_header"
                     android:text="@string/serial_number"
-                    android:layout_marginLeft="20dip" />
+                    android:layout_marginStart="20dip" />
 
                 <TextView
                     android:id="@+id/serial_number"
-                    android:layout_marginLeft="10dip"
-                    android:layout_marginRight="20dip"
+                    android:layout_marginStart="10dip"
+                    android:layout_marginEnd="20dip"
                     android:layout_marginBottom="7dip" />
             </TableRow>
 
@@ -128,8 +128,8 @@
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"
                 android:layout_marginTop="12dip"
-                android:layout_marginLeft="20dip"
-                android:layout_marginRight="20dip"
+                android:layout_marginStart="20dip"
+                android:layout_marginEnd="20dip"
                 android:layout_marginBottom="7dip" />
 
             <!-- Common name: -->
@@ -137,12 +137,12 @@
                 <TextView
                     android:id="@+id/by_common_header"
                     android:text="@string/common_name"
-                    android:layout_marginLeft="20dip" />
+                    android:layout_marginStart="20dip" />
 
                 <TextView
                     android:id="@+id/by_common"
-                    android:layout_marginLeft="10dip"
-                    android:layout_marginRight="20dip"
+                    android:layout_marginStart="10dip"
+                    android:layout_marginEnd="20dip"
                     android:layout_marginBottom="7dip" />
             </TableRow>
 
@@ -151,12 +151,12 @@
                 <TextView
                     android:id="@+id/by_org_header"
                     android:text="@string/org_name"
-                    android:layout_marginLeft="20dip" />
+                    android:layout_marginStart="20dip" />
 
                 <TextView
                     android:id="@+id/by_org"
-                    android:layout_marginLeft="10dip"
-                    android:layout_marginRight="20dip"
+                    android:layout_marginStart="10dip"
+                    android:layout_marginEnd="20dip"
                     android:layout_marginBottom="7dip" />
             </TableRow>
 
@@ -165,12 +165,12 @@
                 <TextView
                     android:id="@+id/by_org_unit_header"
                     android:text="@string/org_unit"
-                    android:layout_marginLeft="20dip" />
+                    android:layout_marginStart="20dip" />
 
                 <TextView
                     android:id="@+id/by_org_unit"
-                    android:layout_marginLeft="10dip"
-                    android:layout_marginRight="20dip"
+                    android:layout_marginStart="10dip"
+                    android:layout_marginEnd="20dip"
                     android:layout_marginBottom="7dip" />
             </TableRow>
 
@@ -182,8 +182,8 @@
                 android:text="@string/validity_period"
                 android:textStyle="bold"
                 android:layout_marginTop="12dip"
-                android:layout_marginLeft="20dip"
-                android:layout_marginRight="20dip"
+                android:layout_marginStart="20dip"
+                android:layout_marginEnd="20dip"
                 android:layout_marginBottom="7dip" />
 
             <!-- Issued On: -->
@@ -193,14 +193,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/issued_on"
-                    android:layout_marginLeft="20dip" />
+                    android:layout_marginStart="20dip" />
 
                 <TextView
                     android:id="@+id/issued_on"
                     android:layout_height="wrap_content"
                     android:layout_width="match_parent"
-                    android:layout_marginLeft="10dip"
-                    android:layout_marginRight="20dip"
+                    android:layout_marginStart="10dip"
+                    android:layout_marginEnd="20dip"
                     android:layout_marginBottom="7dip" />
 
             </TableRow>
@@ -212,14 +212,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/expires_on"
-                    android:layout_marginLeft="20dip" />
+                    android:layout_marginStart="20dip" />
 
                 <TextView
                     android:id="@+id/expires_on"
                     android:layout_height="wrap_content"
                     android:layout_width="match_parent"
-                    android:layout_marginLeft="10dip"
-                    android:layout_marginRight="20dip"
+                    android:layout_marginStart="10dip"
+                    android:layout_marginEnd="20dip"
                     android:layout_marginBottom="7dip" />
             </TableRow>
 
@@ -231,8 +231,8 @@
                 android:text="@string/fingerprints"
                 android:textStyle="bold"
                 android:layout_marginTop="12dip"
-                android:layout_marginLeft="20dip"
-                android:layout_marginRight="20dip"
+                android:layout_marginStart="20dip"
+                android:layout_marginEnd="20dip"
                 android:layout_marginBottom="7dip" />
 
             <!-- SHA-256 fingerprint: -->
@@ -242,14 +242,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/sha256_fingerprint"
-                    android:layout_marginLeft="20dip" />
+                    android:layout_marginStart="20dip" />
 
                 <TextView
                     android:id="@+id/sha256_fingerprint"
                     android:layout_height="wrap_content"
                     android:layout_width="match_parent"
-                    android:layout_marginLeft="10dip"
-                    android:layout_marginRight="20dip"
+                    android:layout_marginStart="10dip"
+                    android:layout_marginEnd="20dip"
                     android:layout_marginBottom="7dip" />
 
             </TableRow>
@@ -261,14 +261,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/sha1_fingerprint"
-                    android:layout_marginLeft="20dip" />
+                    android:layout_marginStart="20dip" />
 
                 <TextView
                     android:id="@+id/sha1_fingerprint"
                     android:layout_height="wrap_content"
                     android:layout_width="match_parent"
-                    android:layout_marginLeft="10dip"
-                    android:layout_marginRight="20dip"
+                    android:layout_marginStart="10dip"
+                    android:layout_marginEnd="20dip"
                     android:layout_marginBottom="7dip" />
 
             </TableRow>

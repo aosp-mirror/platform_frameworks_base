@@ -21,5 +21,5 @@
     android:textAppearance="?android:attr/textAppearanceListItemSmall"
     android:gravity="center_vertical"
     android:drawablePadding="14dip"
-    android:paddingLeft="16dip"
-    android:paddingRight="16dip" />
+    android:paddingStart="16dip"
+    android:paddingEnd="16dip" />

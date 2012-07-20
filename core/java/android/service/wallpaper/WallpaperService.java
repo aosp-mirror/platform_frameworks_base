@@ -607,7 +607,7 @@ public abstract class WallpaperService extends Service {
 
                     if (!mCreated) {
                         mLayout.type = mIWallpaperEngine.mWindowType;
-                        mLayout.gravity = Gravity.LEFT|Gravity.TOP;
+                        mLayout.gravity = Gravity.START|Gravity.TOP;
                         mLayout.setTitle(WallpaperService.this.getClass().getName());
                         mLayout.windowAnimations =
                                 com.android.internal.R.style.Animation_Wallpaper;

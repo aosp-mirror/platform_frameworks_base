@@ -64,14 +64,14 @@
             android:layout_width="150dip"
             android:layout_height="wrap_content"
             android:layout_margin="5dip"
-            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
             android:text="@string/back_button_label"
         />
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true">
+            android:layout_alignParentEnd="true">
 
             <Button android:id="@+id/skip_button"
                 android:layout_width="150dip"

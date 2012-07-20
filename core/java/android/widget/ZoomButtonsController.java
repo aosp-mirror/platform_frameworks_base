@@ -242,7 +242,7 @@ public class ZoomButtonsController implements View.OnTouchListener {
     private FrameLayout createContainer() {
         LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         // Controls are positioned BOTTOM | CENTER with respect to the owner view.
-        lp.gravity = Gravity.TOP | Gravity.LEFT;
+        lp.gravity = Gravity.TOP | Gravity.START;
         lp.flags = LayoutParams.FLAG_NOT_TOUCHABLE |
                 LayoutParams.FLAG_NOT_FOCUSABLE |
                 LayoutParams.FLAG_LAYOUT_NO_LIMITS |

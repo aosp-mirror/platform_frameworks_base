@@ -26,8 +26,8 @@
         />
     <ImageView android:id="@+id/zoomMagnify"
         android:focusable="true"
-        android:layout_gravity="bottom|right"
-        android:paddingRight="2dip"
+        android:layout_gravity="bottom|end"
+        android:paddingEnd="2dip"
         android:src="@drawable/btn_zoom_page"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

@@ -26,8 +26,8 @@
     android:orientation="vertical"
     android:paddingTop="9dip"
     android:paddingBottom="3dip"
-    android:paddingLeft="3dip"
-    android:paddingRight="1dip">
+    android:paddingStart="3dip"
+    android:paddingEnd="1dip">
 
     <LinearLayout android:id="@+id/topPanel"
         android:layout_width="match_parent"
@@ -41,14 +41,14 @@
             android:gravity="center_vertical"
             android:layout_marginTop="6dip"
             android:layout_marginBottom="9dip"
-            android:layout_marginLeft="10dip"
-            android:layout_marginRight="10dip">
+            android:layout_marginStart="10dip"
+            android:layout_marginEnd="10dip">
             <ImageView android:id="@+id/icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="top"
                 android:paddingTop="6dip"
-                android:paddingRight="10dip"
+                android:paddingEnd="10dip"
                 android:src="@drawable/ic_dialog_info" />
             <com.android.internal.widget.DialogTitle android:id="@+id/alertTitle"
                 style="?android:attr/textAppearanceLarge"
@@ -77,8 +77,8 @@
             android:layout_height="wrap_content"
             android:paddingTop="2dip"
             android:paddingBottom="12dip"
-            android:paddingLeft="14dip"
-            android:paddingRight="10dip"
+            android:paddingStart="14dip"
+            android:paddingEnd="10dip"
             android:overScrollMode="ifContentScrolls">
             <TextView android:id="@+id/message"
                 style="?android:attr/textAppearanceMedium"
@@ -110,8 +110,8 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:paddingTop="4dip"
-            android:paddingLeft="2dip"
-            android:paddingRight="2dip"
+            android:paddingStart="2dip"
+            android:paddingEnd="2dip"
             android:measureWithLargestChild="true">
             <LinearLayout android:id="@+id/leftSpacer"
                 android:layout_weight="0.25"
@@ -121,7 +121,7 @@
                 android:visibility="gone" />
             <Button android:id="@+id/button1"
                 android:layout_width="0dip"
-                android:layout_gravity="left"
+                android:layout_gravity="start"
                 android:layout_weight="1"
                 style="?android:attr/buttonBarButtonStyle"
                 android:maxLines="2"
@@ -135,7 +135,7 @@
                 android:layout_height="wrap_content" />
             <Button android:id="@+id/button2"
                 android:layout_width="0dip"
-                android:layout_gravity="right"
+                android:layout_gravity="end"
                 android:layout_weight="1"
                 style="?android:attr/buttonBarButtonStyle"
                 android:maxLines="2"

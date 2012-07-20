@@ -55,7 +55,7 @@ import android.widget.RemoteViews.RemoteView;
  */
 @RemoteView
 public class FrameLayout extends ViewGroup {
-    private static final int DEFAULT_CHILD_GRAVITY = Gravity.TOP | Gravity.LEFT;
+    private static final int DEFAULT_CHILD_GRAVITY = Gravity.TOP | Gravity.START;
 
     @ViewDebug.ExportedProperty(category = "measurement")
     boolean mMeasureAllChildren = false;

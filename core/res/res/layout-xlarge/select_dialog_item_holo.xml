@@ -30,7 +30,7 @@
     android:textAppearance="?android:attr/textAppearanceMedium"
     android:textColor="?android:attr/textColorAlertDialogListItem"
     android:gravity="center_vertical"
-    android:paddingLeft="16dip"
-    android:paddingRight="16dip"
+    android:paddingStart="16dip"
+    android:paddingEnd="16dip"
     android:ellipsize="marquee"
 />

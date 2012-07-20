@@ -34,16 +34,16 @@
             android:orientation="vertical"
             android:layout_width="0px"
             android:layout_height="match_parent"
-            android:layout_marginRight="@dimen/preference_screen_side_margin_negative"
-            android:layout_marginLeft="@dimen/preference_screen_side_margin"
+            android:layout_marginEnd="@dimen/preference_screen_side_margin_negative"
+            android:layout_marginStart="@dimen/preference_screen_side_margin"
             android:layout_weight="@integer/preferences_left_pane_weight">
 
             <ListView android:id="@android:id/list"
                 android:layout_width="match_parent"
                 android:layout_height="0px"
                 android:layout_weight="1"
-                android:paddingLeft="@dimen/preference_screen_header_padding_side"
-                android:paddingRight="@dimen/preference_screen_header_padding_side"
+                android:paddingStart="@dimen/preference_screen_header_padding_side"
+                android:paddingEnd="@dimen/preference_screen_header_padding_side"
                 android:paddingTop="@dimen/preference_screen_header_vertical_padding"
                 android:paddingBottom="@dimen/preference_screen_header_vertical_padding"
                 android:clipToPadding="false"
@@ -92,14 +92,14 @@
             android:layout_width="150dip"
             android:layout_height="wrap_content"
             android:layout_margin="5dip"
-            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
             android:text="@string/back_button_label"
         />
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true">
+            android:layout_alignParentEnd="true">
 
             <Button android:id="@+id/skip_button"
                 android:layout_width="150dip"

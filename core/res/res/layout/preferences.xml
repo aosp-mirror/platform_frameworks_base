@@ -19,7 +19,7 @@
 <ImageView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginRight="4dip"
+    android:layout_marginEnd="4dip"
     android:layout_gravity="center_vertical"
     android:background="@drawable/btn_circle"
     android:src="@drawable/ic_btn_round_more" />

@@ -8,7 +8,7 @@
         android:layout_gravity="center_vertical"
         android:layout_weight="1"
         android:orientation="vertical"
-        android:paddingLeft="16dp"
+        android:paddingStart="16dp"
         >
         <TextView android:id="@+id/title"
             android:textAppearance="@style/TextAppearance.StatusBar.EventContent.Title"
@@ -43,8 +43,8 @@
         android:layout_gravity="bottom"
         android:layout_marginBottom="13dip"
         android:scaleType="center"
-        android:layout_marginRight="4dip"
-        android:layout_marginLeft="16dip"
+        android:layout_marginEnd="4dip"
+        android:layout_marginStart="16dip"
         />
 </LinearLayout>
 
