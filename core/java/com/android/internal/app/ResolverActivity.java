@@ -261,7 +261,7 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         final int checkedPos = mGrid.getCheckedItemPosition();
         final boolean hasValidSelection = checkedPos != GridView.INVALID_POSITION;
-        if (!hasValidSelection || (mAlwaysUseOption && mLastSelected != checkedPos)) {
+        if (mAlwaysUseOption && (!hasValidSelection || mLastSelected != checkedPos)) {
             mAlwaysButton.setEnabled(hasValidSelection);
             mOnceButton.setEnabled(hasValidSelection);
             if (hasValidSelection) {
