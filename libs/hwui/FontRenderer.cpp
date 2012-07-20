@@ -288,13 +288,13 @@ void Font::render(SkPaint* paint, const char *text, uint32_t start, uint32_t len
 }
 
 void Font::measure(SkPaint* paint, const char* text, uint32_t start, uint32_t len,
-        int numGlyphs, Rect *bounds) {
+        int numGlyphs, Rect *bounds, const float* positions) {
     if (bounds == NULL) {
         ALOGE("No return rectangle provided to measure text");
         return;
     }
     bounds->set(1e6, -1e6, -1e6, 1e6);
-    render(paint, text, start, len, numGlyphs, 0, 0, MEASURE, NULL, 0, 0, bounds, NULL);
+    render(paint, text, start, len, numGlyphs, 0, 0, MEASURE, NULL, 0, 0, bounds, positions);
 }
 
 void Font::render(SkPaint* paint, const char* text, uint32_t start, uint32_t len,
@@ -1008,7 +1008,7 @@ void FontRenderer::setFont(SkPaint* paint, uint32_t fontId, float fontSize) {
 }
 
 FontRenderer::DropShadow FontRenderer::renderDropShadow(SkPaint* paint, const char *text,
-        uint32_t startIndex, uint32_t len, int numGlyphs, uint32_t radius) {
+        uint32_t startIndex, uint32_t len, int numGlyphs, uint32_t radius, const float* positions) {
     checkInit();
 
     if (!mCurrentFont) {
@@ -1026,7 +1026,7 @@ FontRenderer::DropShadow FontRenderer::renderDropShadow(SkPaint* paint, const ch
     mBounds = NULL;
 
     Rect bounds;
-    mCurrentFont->measure(paint, text, startIndex, len, numGlyphs, &bounds);
+    mCurrentFont->measure(paint, text, startIndex, len, numGlyphs, &bounds, positions);
 
     uint32_t paddedWidth = (uint32_t) (bounds.right - bounds.left) + 2 * radius;
     uint32_t paddedHeight = (uint32_t) (bounds.top - bounds.bottom) + 2 * radius;
@@ -1040,7 +1040,7 @@ FontRenderer::DropShadow FontRenderer::renderDropShadow(SkPaint* paint, const ch
     int penY = radius - bounds.bottom;
 
     mCurrentFont->render(paint, text, startIndex, len, numGlyphs, penX, penY,
-            dataBuffer, paddedWidth, paddedHeight);
+            Font::BITMAP, dataBuffer, paddedWidth, paddedHeight, NULL, positions);
     blurImage(dataBuffer, paddedWidth, paddedHeight, radius);
 
     DropShadow image;

@@ -498,6 +498,24 @@ private:
     void drawTextDecorations(const char* text, int bytesCount, float length,
             float x, float y, SkPaint* paint);
 
+   /**
+     * Draws shadow layer on text (with optional positions).
+     *
+     * @param paint The paint to draw the shadow with
+     * @param text The text to draw
+     * @param bytesCount The number of bytes in the text
+     * @param count The number of glyphs in the text
+     * @param positions The x, y positions of individual glyphs (or NULL)
+     * @param fontRenderer The font renderer object
+     * @param alpha The alpha value for drawing the shadow
+     * @param mode The xfermode for drawing the shadow
+     * @param x The x coordinate where the shadow will be drawn
+     * @param y The y coordinate where the shadow will be drawn
+     */
+    void drawTextShadow(SkPaint* paint, const char* text, int bytesCount, int count,
+            const float* positions, FontRenderer& fontRenderer, int alpha, SkXfermode::Mode mode,
+            float x, float y);
+
     /**
      * Draws a path texture. Path textures are alpha8 bitmaps that need special
      * compositing to apply colors/filters/etc.
@@ -507,7 +525,7 @@ private:
      * @param y The y coordinate where the texture will be drawn
      * @param paint The paint to draw the texture with
      */
-    void drawPathTexture(const PathTexture* texture, float x, float y, SkPaint* paint);
+     void drawPathTexture(const PathTexture* texture, float x, float y, SkPaint* paint);
 
     /**
      * Resets the texture coordinates stored in mMeshVertices. Setting the values

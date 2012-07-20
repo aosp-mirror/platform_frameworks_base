@@ -35,8 +35,9 @@ struct ShadowText {
     ShadowText(): radius(0), len(0), textSize(0.0f), typeface(NULL) {
     }
 
-    ShadowText(SkPaint* paint, uint32_t radius, uint32_t len, const char* srcText):
-            radius(radius), len(len) {
+    ShadowText(SkPaint* paint, uint32_t radius, uint32_t len, const char* srcText,
+            const float* positions):
+            radius(radius), len(len), positions(positions) {
         // TODO: Propagate this through the API, we should not cast here
         text = (const char16_t*) srcText;
 
@@ -66,11 +67,18 @@ struct ShadowText {
     uint32_t italicStyle;
     uint32_t scaleX;
     const char16_t* text;
+    const float* positions;
     String16 str;
+    Vector<float> positionsCopy;
 
     void copyTextLocally() {
         str.setTo((const char16_t*) text, len >> 1);
         text = str.string();
+        if (positions != NULL) {
+            positionsCopy.clear();
+            positionsCopy.appendArray(positions, len);
+            positions = positionsCopy.array();
+        }
     }
 
     bool operator<(const ShadowText& rhs) const {
@@ -81,7 +89,12 @@ struct ShadowText {
                         LTE_INT(flags) {
                             LTE_INT(italicStyle) {
                                 LTE_INT(scaleX) {
-                                    return memcmp(text, rhs.text, len) < 0;
+                                    int cmp = memcmp(text, rhs.text, len);
+                                    if (cmp < 0) return true;
+                                    if (cmp == 0 && rhs.positions != NULL) {
+                                        if (positions == NULL) return true;
+                                        return memcmp(positions, rhs.positions, len << 2) < 0;
+                                    }
                                 }
                             }
                         }
@@ -117,7 +130,7 @@ public:
     void operator()(ShadowText& text, ShadowTexture*& texture);
 
     ShadowTexture* get(SkPaint* paint, const char* text, uint32_t len,
-            int numGlyphs, uint32_t radius);
+            int numGlyphs, uint32_t radius, const float* positions);
 
     /**
      * Clears the cache. This causes all textures to be deleted.

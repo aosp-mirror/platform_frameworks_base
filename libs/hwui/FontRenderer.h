@@ -185,7 +185,7 @@ protected:
             uint32_t bitmapW, uint32_t bitmapH, Rect *bounds, const float* positions);
 
     void measure(SkPaint* paint, const char* text, uint32_t start, uint32_t len,
-            int numGlyphs, Rect *bounds);
+            int numGlyphs, Rect *bounds, const float* positions);
 
     Font(FontRenderer* state, uint32_t fontId, float fontSize, int flags, uint32_t italicStyle,
             uint32_t scaleX, SkPaint::Style style, uint32_t strokeWidth);
@@ -274,7 +274,7 @@ public:
     // After renderDropShadow returns, the called owns the memory in DropShadow.image
     // and is responsible for releasing it when it's done with it
     DropShadow renderDropShadow(SkPaint* paint, const char *text, uint32_t startIndex,
-            uint32_t len, int numGlyphs, uint32_t radius);
+            uint32_t len, int numGlyphs, uint32_t radius, const float* positions);
 
     GLuint getTexture(bool linearFiltering = false) {
         checkInit();

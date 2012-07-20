@@ -102,13 +102,13 @@ void TextDropShadowCache::clear() {
 }
 
 ShadowTexture* TextDropShadowCache::get(SkPaint* paint, const char* text, uint32_t len,
-        int numGlyphs, uint32_t radius) {
-    ShadowText entry(paint, radius, len, text);
+        int numGlyphs, uint32_t radius, const float* positions) {
+    ShadowText entry(paint, radius, len, text, positions);
     ShadowTexture* texture = mCache.get(entry);
 
     if (!texture) {
         FontRenderer::DropShadow shadow = mRenderer->renderDropShadow(paint, text, 0,
-                len, numGlyphs, radius);
+                len, numGlyphs, radius, positions);
 
         texture = new ShadowTexture;
         texture->left = shadow.penX;
