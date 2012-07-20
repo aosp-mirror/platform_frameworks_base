@@ -244,9 +244,9 @@
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"epua maudhui ya skrini"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Inaruhusu programu kutoa maudhui ya dirisha amilifu. Programu hasidi zinaweza kutoa maudhui yote ya dirisha na kuchunguza maandishi yake yote isipokuwa nenosiri."</string>
     <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"okoa maelezo ya dirisha"</string>
-    <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Huruhusu programu kuokoa maelezo kuhusu madirisha kutoka kwenye kidhibiti dirisha. Huenda programu hasidi ikaokoa maelezo ambayo yamekusudiwa kwa matumizi ya mfumo wa ndani."</string>
+    <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Huruhusu programu kuokoa maelezo kuhusu madirisha kutoka kwenye kidhibiti dirisha. Huenda programu hasidi ikakusanya maelezo ambayo yamekusudiwa kwa matumizi ya mfumo wa ndani."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"chuja matukio"</string>
-    <string name="permdesc_filter_events" msgid="8006236315888347680">"Huruhusu programu kusajili kichujio ingizo kinachochuja mkondo wa matukio ya mtumiaji kabla ya kutumwa. Huenda programu hasidi zikadhibiti mfumo wa UI bila mtumiaji kuingilia kati."</string>
+    <string name="permdesc_filter_events" msgid="8006236315888347680">"Huruhusu programu kusajili kichujio ingizo kinachochuja mkondo wa matukio ya mtumiaji kabla ya kutumwa. Huenda programu hasidi ikadhibiti mfumo wa UI bila mtumiaji kuingilia kati."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"Zima nusu"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Huweka kisimamia shughuli katika hali ya kuzima. Haiadhiri uzimaji kamili"</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"zuia swichi za app"</string>
@@ -905,7 +905,7 @@
     <string name="day" msgid="8144195776058119424">"siku"</string>
     <string name="days" msgid="4774547661021344602">"siku"</string>
     <string name="hour" msgid="2126771916426189481">"saa"</string>
-    <string name="hours" msgid="894424005266852993">"masaa"</string>
+    <string name="hours" msgid="894424005266852993">"saa"</string>
     <string name="minute" msgid="9148878657703769868">"dakika"</string>
     <string name="minutes" msgid="5646001005827034509">"Dakika"</string>
     <string name="second" msgid="3184235808021478">"sekunde"</string>
