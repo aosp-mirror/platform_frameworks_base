@@ -88,6 +88,6 @@ void filter() {
 
     fs.ain = rsGetAllocation(ScratchPixel2);
     rsForEach(vBlurScript, fs.ain, rsGetAllocation(OutPixel), &fs, sizeof(fs));
-    rsSendToClientBlocking(CMD_FINISHED);
+    //rsSendToClientBlocking(CMD_FINISHED);
 }
 

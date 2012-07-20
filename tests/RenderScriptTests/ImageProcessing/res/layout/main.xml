@@ -50,8 +50,12 @@
                         android:textSize="8pt"
                         android:text="@string/saturation"/>
             </LinearLayout>
+            <Spinner
+                android:id="@+id/filterselection"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"/>
             <TextView
-                android:id="@+id/inSaturationText"
+                android:id="@+id/slider1Text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="8pt"
@@ -59,13 +63,13 @@
                 android:layout_marginTop="15sp"
                 android:text="@string/saturation"/>
              <SeekBar
-                android:id="@+id/inSaturation"
+                android:id="@+id/slider1"
                 android:layout_marginLeft="10sp"
                 android:layout_marginRight="10sp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
             <TextView
-                android:id="@+id/inGammaText"
+                android:id="@+id/slider2Text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="8pt"
@@ -73,13 +77,13 @@
                 android:layout_marginTop="15sp"
                 android:text="@string/gamma"/>
             <SeekBar
-                android:id="@+id/inGamma"
+                android:id="@+id/slider2"
                 android:layout_marginLeft="10sp"
                 android:layout_marginRight="10sp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
             <TextView
-                android:id="@+id/outWhiteText"
+                android:id="@+id/slider3Text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10sp"
@@ -87,13 +91,13 @@
                 android:textSize="8pt"
                 android:text="@string/out_white"/>
             <SeekBar
-                android:id="@+id/outWhite"
+                android:id="@+id/slider3"
                 android:layout_marginLeft="10sp"
                 android:layout_marginRight="10sp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
             <TextView
-                android:id="@+id/inWhiteText"
+                android:id="@+id/slider4Text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="8pt"
@@ -101,49 +105,21 @@
                 android:layout_marginTop="15sp"
                 android:text="@string/in_white"/>
             <SeekBar
-                android:id="@+id/inWhite"
+                android:id="@+id/slider4"
                 android:layout_marginLeft="10sp"
                 android:layout_marginRight="10sp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
             <TextView
-                android:id="@+id/outBlackText"
+                android:id="@+id/slider5Text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="8pt"
                 android:layout_marginLeft="10sp"
                 android:layout_marginTop="15sp"
-                android:text="@string/out_black"/>
+                android:text="@string/in_white"/>
             <SeekBar
-                android:id="@+id/outBlack"
-                android:layout_marginLeft="10sp"
-                android:layout_marginRight="10sp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-            <TextView
-                android:id="@+id/inBlackText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="8pt"
-                android:layout_marginLeft="10sp"
-                android:layout_marginTop="15sp"
-                android:text="@string/in_black"/>
-            <SeekBar
-                android:id="@+id/inBlack"
-                android:layout_marginLeft="10sp"
-                android:layout_marginRight="10sp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-            <TextView
-                android:id="@+id/blurText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="8pt"
-                 android:layout_marginLeft="10sp"
-                android:layout_marginTop="15sp"
-                android:text="@string/blur_description"/>
-            <SeekBar
-                android:id="@+id/radius"
+                android:id="@+id/slider5"
                 android:layout_marginLeft="10sp"
                 android:layout_marginRight="10sp"
                 android:layout_width="match_parent"
