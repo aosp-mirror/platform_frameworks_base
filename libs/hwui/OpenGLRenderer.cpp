@@ -2303,6 +2303,44 @@ status_t OpenGLRenderer::drawRect(float left, float top, float right, float bott
     return DrawGlInfo::kStatusDrew;
 }
 
+void OpenGLRenderer::drawTextShadow(SkPaint* paint, const char* text, int bytesCount, int count,
+        const float* positions, FontRenderer& fontRenderer, int alpha, SkXfermode::Mode mode,
+        float x, float y) {
+    mCaches.activeTexture(0);
+
+    // NOTE: The drop shadow will not perform gamma correction
+    //       if shader-based correction is enabled
+    mCaches.dropShadowCache.setFontRenderer(fontRenderer);
+    const ShadowTexture* shadow = mCaches.dropShadowCache.get(
+            paint, text, bytesCount, count, mShadowRadius, positions);
+    const AutoTexture autoCleanup(shadow);
+
+    const float sx = x - shadow->left + mShadowDx;
+    const float sy = y - shadow->top + mShadowDy;
+
+    const int shadowAlpha = ((mShadowColor >> 24) & 0xFF) * mSnapshot->alpha;
+    int shadowColor = mShadowColor;
+    if (mShader) {
+        shadowColor = 0xffffffff;
+    }
+
+    setupDraw();
+    setupDrawWithTexture(true);
+    setupDrawAlpha8Color(shadowColor, shadowAlpha < 255 ? shadowAlpha : alpha);
+    setupDrawColorFilter();
+    setupDrawShader();
+    setupDrawBlending(true, mode);
+    setupDrawProgram();
+    setupDrawModelView(sx, sy, sx + shadow->width, sy + shadow->height);
+    setupDrawTexture(shadow->id);
+    setupDrawPureColorUniforms();
+    setupDrawColorFilterUniforms();
+    setupDrawShaderUniforms();
+    setupDrawMesh(NULL, (GLvoid*) gMeshTextureOffset);
+
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
+}
+
 status_t OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count,
         const float* positions, SkPaint* paint) {
     if (text == NULL || count == 0 || mSnapshot->isIgnored() ||
@@ -2330,6 +2368,11 @@ status_t OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count
     int alpha;
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
+
+    if (CC_UNLIKELY(mHasShadow)) {
+        drawTextShadow(paint, text, bytesCount, count, positions, fontRenderer, alpha, mode,
+                0.0f, 0.0f);
+    }
 
     // Pick the appropriate texture filtering
     bool linearFilter = mSnapshot->transform->changesBounds();
@@ -2424,39 +2467,7 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     getAlphaAndMode(paint, &alpha, &mode);
 
     if (CC_UNLIKELY(mHasShadow)) {
-        mCaches.activeTexture(0);
-
-        // NOTE: The drop shadow will not perform gamma correction
-        //       if shader-based correction is enabled
-        mCaches.dropShadowCache.setFontRenderer(fontRenderer);
-        const ShadowTexture* shadow = mCaches.dropShadowCache.get(
-                paint, text, bytesCount, count, mShadowRadius);
-        const AutoTexture autoCleanup(shadow);
-
-        const float sx = oldX - shadow->left + mShadowDx;
-        const float sy = oldY - shadow->top + mShadowDy;
-
-        const int shadowAlpha = ((mShadowColor >> 24) & 0xFF) * mSnapshot->alpha;
-        int shadowColor = mShadowColor;
-        if (mShader) {
-            shadowColor = 0xffffffff;
-        }
-
-        setupDraw();
-        setupDrawWithTexture(true);
-        setupDrawAlpha8Color(shadowColor, shadowAlpha < 255 ? shadowAlpha : alpha);
-        setupDrawColorFilter();
-        setupDrawShader();
-        setupDrawBlending(true, mode);
-        setupDrawProgram();
-        setupDrawModelView(sx, sy, sx + shadow->width, sy + shadow->height);
-        setupDrawTexture(shadow->id);
-        setupDrawPureColorUniforms();
-        setupDrawColorFilterUniforms();
-        setupDrawShaderUniforms();
-        setupDrawMesh(NULL, (GLvoid*) gMeshTextureOffset);
-
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
+        drawTextShadow(paint, text, bytesCount, count, NULL, fontRenderer, alpha, mode, oldX, oldY);
     }
 
     // Pick the appropriate texture filtering
