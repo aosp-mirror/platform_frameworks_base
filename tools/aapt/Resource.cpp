@@ -2210,7 +2210,7 @@ struct NamespaceAttributePair {
 
 status_t
 writeProguardForXml(ProguardKeepSet* keep, const sp<AaptFile>& layoutFile,
-        const char* startTag, const KeyedVector<String8, NamespaceAttributePair>* tagAttrPairs)
+        const char* startTag, const KeyedVector<String8, Vector<NamespaceAttributePair> >* tagAttrPairs)
 {
     status_t err;
     ResXMLTree tree;
@@ -2254,17 +2254,21 @@ writeProguardForXml(ProguardKeepSet* keep, const sp<AaptFile>& layoutFile,
         } else if (tagAttrPairs != NULL) {
             ssize_t tagIndex = tagAttrPairs->indexOfKey(tag);
             if (tagIndex >= 0) {
-                const NamespaceAttributePair& nsAttr = tagAttrPairs->valueAt(tagIndex);
-                ssize_t attrIndex = tree.indexOfAttribute(nsAttr.ns, nsAttr.attr);
-                if (attrIndex < 0) {
-                    // fprintf(stderr, "%s:%d: <%s> does not have attribute %s:%s.\n",
-                    //        layoutFile->getPrintableSource().string(), tree.getLineNumber(),
-                    //        tag.string(), nsAttr.ns, nsAttr.attr);
-                } else {
-                    size_t len;
-                    addProguardKeepRule(keep,
-                                        String8(tree.getAttributeStringValue(attrIndex, &len)), NULL,
-                                        layoutFile->getPrintableSource(), tree.getLineNumber());
+                const Vector<NamespaceAttributePair>& nsAttrVector = tagAttrPairs->valueAt(tagIndex);
+                for (size_t i = 0; i < nsAttrVector.size(); i++) {
+                    const NamespaceAttributePair& nsAttr = nsAttrVector[i];
+
+                    ssize_t attrIndex = tree.indexOfAttribute(nsAttr.ns, nsAttr.attr);
+                    if (attrIndex < 0) {
+                        // fprintf(stderr, "%s:%d: <%s> does not have attribute %s:%s.\n",
+                        //        layoutFile->getPrintableSource().string(), tree.getLineNumber(),
+                        //        tag.string(), nsAttr.ns, nsAttr.attr);
+                    } else {
+                        size_t len;
+                        addProguardKeepRule(keep,
+                                            String8(tree.getAttributeStringValue(attrIndex, &len)), NULL,
+                                            layoutFile->getPrintableSource(), tree.getLineNumber());
+                    }
                 }
             }
         }
@@ -2280,9 +2284,18 @@ writeProguardForXml(ProguardKeepSet* keep, const sp<AaptFile>& layoutFile,
     return NO_ERROR;
 }
 
-static void addTagAttrPair(KeyedVector<String8, NamespaceAttributePair>* dest,
+static void addTagAttrPair(KeyedVector<String8, Vector<NamespaceAttributePair> >* dest,
         const char* tag, const char* ns, const char* attr) {
-    dest->add(String8(tag), NamespaceAttributePair(ns, attr));
+    String8 tagStr(tag);
+    ssize_t index = dest->indexOfKey(tagStr);
+
+    if (index < 0) {
+        Vector<NamespaceAttributePair> vector;
+        vector.add(NamespaceAttributePair(ns, attr));
+        dest->add(tagStr, vector);
+    } else {
+        dest->editValueAt(index).add(NamespaceAttributePair(ns, attr));
+    }
 }
 
 status_t
@@ -2291,13 +2304,13 @@ writeProguardForLayouts(ProguardKeepSet* keep, const sp<AaptAssets>& assets)
     status_t err;
 
     // tag:attribute pairs that should be checked in layout files.
-    KeyedVector<String8, NamespaceAttributePair> kLayoutTagAttrPairs;
+    KeyedVector<String8, Vector<NamespaceAttributePair> > kLayoutTagAttrPairs;
     addTagAttrPair(&kLayoutTagAttrPairs, "view", NULL, "class");
     addTagAttrPair(&kLayoutTagAttrPairs, "fragment", NULL, "class");
     addTagAttrPair(&kLayoutTagAttrPairs, "fragment", RESOURCES_ANDROID_NAMESPACE, "name");
 
     // tag:attribute pairs that should be checked in xml files.
-    KeyedVector<String8, NamespaceAttributePair> kXmlTagAttrPairs;
+    KeyedVector<String8, Vector<NamespaceAttributePair> > kXmlTagAttrPairs;
     addTagAttrPair(&kXmlTagAttrPairs, "PreferenceScreen", RESOURCES_ANDROID_NAMESPACE, "fragment");
     addTagAttrPair(&kXmlTagAttrPairs, "header", RESOURCES_ANDROID_NAMESPACE, "fragment");
 
@@ -2307,7 +2320,7 @@ writeProguardForLayouts(ProguardKeepSet* keep, const sp<AaptAssets>& assets)
         const sp<AaptDir>& d = dirs.itemAt(k);
         const String8& dirName = d->getLeaf();
         const char* startTag = NULL;
-        const KeyedVector<String8, NamespaceAttributePair>* tagAttrPairs = NULL;
+        const KeyedVector<String8, Vector<NamespaceAttributePair> >* tagAttrPairs = NULL;
         if ((dirName == String8("layout")) || (strncmp(dirName.string(), "layout-", 7) == 0)) {
             tagAttrPairs = &kLayoutTagAttrPairs;
         } else if ((dirName == String8("xml")) || (strncmp(dirName.string(), "xml-", 4) == 0)) {
@@ -2339,6 +2352,7 @@ writeProguardForLayouts(ProguardKeepSet* keep, const sp<AaptAssets>& assets)
     if (overlay.get()) {
         return writeProguardForLayouts(keep, overlay);
     }
+
     return NO_ERROR;
 }
 
