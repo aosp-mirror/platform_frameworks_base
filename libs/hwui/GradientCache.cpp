@@ -120,7 +120,7 @@ Texture* GradientCache::addLinearGradient(GradientCacheEntry& gradient,
     width = width < mMaxTextureSize ? width : mMaxTextureSize;
 
     SkBitmap bitmap;
-    bitmap.setConfig(SkBitmap::kARGB_8888_Config, width, 1);
+    bitmap.setConfig(SkBitmap::kARGB_8888_Config, width, 4);
     bitmap.allocPixels();
     bitmap.eraseColor(0);
 
@@ -137,7 +137,7 @@ Texture* GradientCache::addLinearGradient(GradientCacheEntry& gradient,
     p.setStyle(SkPaint::kStrokeAndFill_Style);
     p.setShader(localShader)->unref();
 
-    canvas.drawRectCoords(0.0f, 0.0f, bitmap.width(), 1.0f, p);
+    canvas.drawRectCoords(0.0f, 0.0f, bitmap.width(), 4.0f, p);
 
     // Asume the cache is always big enough
     const uint32_t size = bitmap.rowBytes() * bitmap.height();
