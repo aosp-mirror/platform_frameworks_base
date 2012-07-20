@@ -6387,7 +6387,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             case IMPORTANT_FOR_ACCESSIBILITY_NO:
                 return false;
             case IMPORTANT_FOR_ACCESSIBILITY_AUTO:
-                return isActionableForAccessibility() || hasListenersForAccessibility();
+                return isActionableForAccessibility() || hasListenersForAccessibility()
+                        || getAccessibilityNodeProvider() != null;
             default:
                 throw new IllegalArgumentException("Unknow important for accessibility mode: "
                         + mode);
