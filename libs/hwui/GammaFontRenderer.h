@@ -59,6 +59,7 @@ public:
 
     void clear() {
         delete mRenderer;
+        mRenderer = NULL;
     }
 
     void flush() {

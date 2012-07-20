@@ -697,8 +697,7 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
 }
 
 CacheTexture* FontRenderer::createCacheTexture(int width, int height, bool allocate) {
-    uint8_t* textureMemory = NULL;
-    CacheTexture* cacheTexture = new CacheTexture(textureMemory, width, height);
+    CacheTexture* cacheTexture = new CacheTexture(width, height);
 
     if (allocate) {
         allocateTextureMemory(cacheTexture);

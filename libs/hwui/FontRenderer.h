@@ -61,9 +61,8 @@ class FontRenderer;
 
 class CacheTexture {
 public:
-    CacheTexture() { }
-    CacheTexture(uint8_t* texture, uint16_t width, uint16_t height) :
-            mTexture(texture), mTextureId(0), mWidth(width), mHeight(height),
+    CacheTexture(uint16_t width, uint16_t height) :
+            mTexture(NULL), mTextureId(0), mWidth(width), mHeight(height),
             mLinearFiltering(false) { }
     ~CacheTexture() {
         if (mTexture) {
