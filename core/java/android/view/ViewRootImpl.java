@@ -251,8 +251,6 @@ public final class ViewRootImpl implements ViewParent,
 
     CompatibilityInfoHolder mCompatibilityInfo;
 
-    /*package*/ int mAddNesting;
-
     // These are accessed by multiple threads.
     final Rect mWinFrame; // frame given by window manager.
 

@@ -217,15 +217,10 @@ public class WindowManagerImpl implements WindowManager {
     }
 
     public void addView(View view, ViewGroup.LayoutParams params) {
-        addView(view, params, null, false);
+        addView(view, params, null);
     }
     
     public void addView(View view, ViewGroup.LayoutParams params, CompatibilityInfoHolder cih) {
-        addView(view, params, cih, false);
-    }
-    
-    private void addView(View view, ViewGroup.LayoutParams params,
-            CompatibilityInfoHolder cih, boolean nest) {
         if (false) Log.v("WindowManager", "addView view=" + view);
 
         if (!(params instanceof WindowManager.LayoutParams)) {
@@ -256,25 +251,10 @@ public class WindowManagerImpl implements WindowManager {
                 SystemProperties.addChangeCallback(mSystemPropertyUpdater);
             }
 
-            // Here's an odd/questionable case: if someone tries to add a
-            // view multiple times, then we simply bump up a nesting count
-            // and they need to remove the view the corresponding number of
-            // times to have it actually removed from the window manager.
-            // This is useful specifically for the notification manager,
-            // which can continually add/remove the same view as a
-            // notification gets updated.
             int index = findViewLocked(view, false);
             if (index >= 0) {
-                if (!nest) {
-                    throw new IllegalStateException("View " + view
-                            + " has already been added to the window manager.");
-                }
-                root = mRoots[index];
-                root.mAddNesting++;
-                // Update layout parameters.
-                view.setLayoutParams(wparams);
-                root.setLayoutParams(wparams, true);
-                return;
+                throw new IllegalStateException("View " + view
+                        + " has already been added to the window manager.");
             }
             
             // If this is a panel window, then find the window it is being
@@ -290,7 +270,6 @@ public class WindowManagerImpl implements WindowManager {
             }
             
             root = new ViewRootImpl(view.getContext());
-            root.mAddNesting = 1;
             if (cih == null) {
                 root.mCompatibilityInfo = new CompatibilityInfoHolder();
             } else {
@@ -345,53 +324,29 @@ public class WindowManagerImpl implements WindowManager {
     }
 
     public void removeView(View view) {
-        synchronized (this) {
-            int index = findViewLocked(view, true);
-            View curView = removeViewLocked(index);
-            if (curView == view) {
-                return;
-            }
-            
-            throw new IllegalStateException("Calling with view " + view
-                    + " but the ViewAncestor is attached to " + curView);
-        }
+        removeView(view, false);
     }
 
     public void removeViewImmediate(View view) {
+        removeView(view, true);
+    }
+
+    private void removeView(View view, boolean immediate) {
         synchronized (this) {
             int index = findViewLocked(view, true);
-            ViewRootImpl root = mRoots[index];
-            View curView = root.getView();
-            
-            root.mAddNesting = 0;
-
-            if (view != null) {
-                InputMethodManager imm = InputMethodManager.getInstance(view.getContext());
-                if (imm != null) {
-                    imm.windowDismissed(mViews[index].getWindowToken());
-                }
-            }
-
-            root.die(true);
-            finishRemoveViewLocked(curView, index);
+            View curView = removeViewLocked(index, immediate);
             if (curView == view) {
                 return;
             }
-            
+
             throw new IllegalStateException("Calling with view " + view
                     + " but the ViewAncestor is attached to " + curView);
         }
     }
-    
-    View removeViewLocked(int index) {
+
+    View removeViewLocked(int index, boolean immediate) {
         ViewRootImpl root = mRoots[index];
         View view = root.getView();
-
-        // Don't really remove until we have matched all calls to add().
-        root.mAddNesting--;
-        if (root.mAddNesting > 0) {
-            return view;
-        }
 
         if (view != null) {
             InputMethodManager imm = InputMethodManager.getInstance(view.getContext());
@@ -399,12 +354,8 @@ public class WindowManagerImpl implements WindowManager {
                 imm.windowDismissed(mViews[index].getWindowToken());
             }
         }
-        root.die(false);
-        finishRemoveViewLocked(view, index);
-        return view;
-    }
-    
-    void finishRemoveViewLocked(View view, int index) {
+        root.die(immediate);
+
         final int count = mViews.length;
 
         // remove it from the list
@@ -426,6 +377,7 @@ public class WindowManagerImpl implements WindowManager {
             // func doesn't allow null...  does it matter if we clear them?
             //view.setLayoutParams(null);
         }
+        return view;
     }
 
     public void closeAll(IBinder token, String who, String what) {
@@ -440,8 +392,7 @@ public class WindowManagerImpl implements WindowManager {
                 //        + " view " + mRoots[i].getView());
                 if (token == null || mParams[i].token == token) {
                     ViewRootImpl root = mRoots[i];
-                    root.mAddNesting = 1;
-                    
+
                     //Log.i("foo", "Force closing " + root);
                     if (who != null) {
                         WindowLeaked leak = new WindowLeaked(
@@ -451,7 +402,7 @@ public class WindowManagerImpl implements WindowManager {
                         Log.e("WindowManager", leak.getMessage(), leak);
                     }
 
-                    removeViewLocked(i);
+                    removeViewLocked(i, false);
                     i--;
                     count--;
                 }
