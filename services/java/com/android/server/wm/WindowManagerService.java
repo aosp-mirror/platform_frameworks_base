@@ -6738,7 +6738,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // Determine whether a hard keyboard is available and enabled.
             boolean hardKeyboardAvailable = false;
             if (!mForceDisableHardwareKeyboard) {
-                mHardKeyboardAvailable = config.keyboard != Configuration.KEYBOARD_NOKEYS;
+                hardKeyboardAvailable = config.keyboard != Configuration.KEYBOARD_NOKEYS;
             }
             if (hardKeyboardAvailable != mHardKeyboardAvailable) {
                 mHardKeyboardAvailable = hardKeyboardAvailable;
