@@ -489,7 +489,8 @@ class ContextImpl extends Context {
 
         registerService(WINDOW_SERVICE, new ServiceFetcher() {
                 public Object getService(ContextImpl ctx) {
-                    return WindowManagerImpl.getDefault(ctx.mPackageInfo.mCompatibilityInfo);
+                    return WindowManagerImpl.getDefault().makeCompatible(
+                            ctx.mPackageInfo.mCompatibilityInfo);
                 }});
     }
 

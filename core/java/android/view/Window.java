@@ -18,7 +18,6 @@ package android.view;
 
 import android.app.Application;
 import android.content.Context;
-import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
@@ -27,7 +26,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.SystemProperties;
-import android.util.Slog;
 import android.view.accessibility.AccessibilityEvent;
 
 /**
@@ -119,6 +117,8 @@ public abstract class Window {
      */
     public static final int ID_ANDROID_CONTENT = com.android.internal.R.id.content;
 
+    private static final String PROPERTY_HARDWARE_UI = "persist.sys.ui.hw";
+
     private final Context mContext;
     
     private TypedArray mWindowStyle;
@@ -126,6 +126,7 @@ public abstract class Window {
     private WindowManager mWindowManager;
     private IBinder mAppToken;
     private String mAppName;
+    private boolean mHardwareAccelerated;
     private Window mContainer;
     private Window mActiveChild;
     private boolean mIsActive = false;
@@ -471,80 +472,63 @@ public abstract class Window {
             boolean hardwareAccelerated) {
         mAppToken = appToken;
         mAppName = appName;
+        mHardwareAccelerated = hardwareAccelerated
+                || SystemProperties.getBoolean(PROPERTY_HARDWARE_UI, false);
         if (wm == null) {
             wm = WindowManagerImpl.getDefault();
         }
-        mWindowManager = new LocalWindowManager(wm, hardwareAccelerated);
+        mWindowManager = ((WindowManagerImpl)wm).makeLocal(this);
     }
 
-    static CompatibilityInfoHolder getCompatInfo(Context context) {
-        Application app = (Application)context.getApplicationContext();
-        return app != null ? app.mLoadedApk.mCompatibilityInfo : new CompatibilityInfoHolder();
+    CompatibilityInfoHolder getCompatibilityInfo() {
+        Application app = (Application)mContext.getApplicationContext();
+        return app != null ? app.mLoadedApk.mCompatibilityInfo : null;
     }
 
-    private class LocalWindowManager extends WindowManagerImpl.CompatModeWrapper {
-        private static final String PROPERTY_HARDWARE_UI = "persist.sys.ui.hw";
-
-        private final boolean mHardwareAccelerated;
-
-        LocalWindowManager(WindowManager wm, boolean hardwareAccelerated) {
-            super(wm, getCompatInfo(mContext));
-            mHardwareAccelerated = hardwareAccelerated ||
-                    SystemProperties.getBoolean(PROPERTY_HARDWARE_UI, false);
-        }
-
-        public boolean isHardwareAccelerated() {
-            return mHardwareAccelerated;
-        }
-        
-        public final void addView(View view, ViewGroup.LayoutParams params) {
-            // Let this throw an exception on a bad params.
-            WindowManager.LayoutParams wp = (WindowManager.LayoutParams)params;
-            CharSequence curTitle = wp.getTitle();
-            if (wp.type >= WindowManager.LayoutParams.FIRST_SUB_WINDOW &&
-                wp.type <= WindowManager.LayoutParams.LAST_SUB_WINDOW) {
-                if (wp.token == null) {
-                    View decor = peekDecorView();
-                    if (decor != null) {
-                        wp.token = decor.getWindowToken();
-                    }
+    void adjustLayoutParamsForSubWindow(WindowManager.LayoutParams wp) {
+        CharSequence curTitle = wp.getTitle();
+        if (wp.type >= WindowManager.LayoutParams.FIRST_SUB_WINDOW &&
+            wp.type <= WindowManager.LayoutParams.LAST_SUB_WINDOW) {
+            if (wp.token == null) {
+                View decor = peekDecorView();
+                if (decor != null) {
+                    wp.token = decor.getWindowToken();
                 }
-                if (curTitle == null || curTitle.length() == 0) {
-                    String title;
-                    if (wp.type == WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA) {
-                        title="Media";
-                    } else if (wp.type == WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY) {
-                        title="MediaOvr";
-                    } else if (wp.type == WindowManager.LayoutParams.TYPE_APPLICATION_PANEL) {
-                        title="Panel";
-                    } else if (wp.type == WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL) {
-                        title="SubPanel";
-                    } else if (wp.type == WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG) {
-                        title="AtchDlg";
-                    } else {
-                        title=Integer.toString(wp.type);
-                    }
-                    if (mAppName != null) {
-                        title += ":" + mAppName;
-                    }
-                    wp.setTitle(title);
-                }
-            } else {
-                if (wp.token == null) {
-                    wp.token = mContainer == null ? mAppToken : mContainer.mAppToken;
-                }
-                if ((curTitle == null || curTitle.length() == 0)
-                        && mAppName != null) {
-                    wp.setTitle(mAppName);
-                }
-           }
-            if (wp.packageName == null) {
-                wp.packageName = mContext.getPackageName();
             }
-            if (mHardwareAccelerated) {
-                wp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
+            if (curTitle == null || curTitle.length() == 0) {
+                String title;
+                if (wp.type == WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA) {
+                    title="Media";
+                } else if (wp.type == WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY) {
+                    title="MediaOvr";
+                } else if (wp.type == WindowManager.LayoutParams.TYPE_APPLICATION_PANEL) {
+                    title="Panel";
+                } else if (wp.type == WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL) {
+                    title="SubPanel";
+                } else if (wp.type == WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG) {
+                    title="AtchDlg";
+                } else {
+                    title=Integer.toString(wp.type);
+                }
+                if (mAppName != null) {
+                    title += ":" + mAppName;
+                }
+                wp.setTitle(title);
             }
-            super.addView(view, params);
+        } else {
+            if (wp.token == null) {
+                wp.token = mContainer == null ? mAppToken : mContainer.mAppToken;
+            }
+            if ((curTitle == null || curTitle.length() == 0)
+                    && mAppName != null) {
+                wp.setTitle(mAppName);
+            }
+        }
+        if (wp.packageName == null) {
+            wp.packageName = mContext.getPackageName();
+        }
+        if (mHardwareAccelerated) {
+            wp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
         }
     }
 

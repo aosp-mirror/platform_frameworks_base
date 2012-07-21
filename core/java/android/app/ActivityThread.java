@@ -70,6 +70,7 @@ import android.util.Log;
 import android.util.LogPrinter;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
+import android.view.CompatibilityInfoHolder;
 import android.view.Display;
 import android.view.HardwareRenderer;
 import android.view.View;
@@ -1527,7 +1528,9 @@ public final class ActivityThread {
             dm = new DisplayMetrics();
             mDisplayMetrics.put(ci, dm);
         }
-        Display d = WindowManagerImpl.getDefault(ci).getDefaultDisplay();
+        CompatibilityInfoHolder cih = new CompatibilityInfoHolder();
+        cih.set(ci);
+        Display d = WindowManagerImpl.getDefault().makeCompatible(cih).getDefaultDisplay();
         d.getMetrics(dm);
         //Slog.i("foo", "New metrics: w=" + metrics.widthPixels + " h="
         //        + metrics.heightPixels + " den=" + metrics.density

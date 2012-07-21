@@ -164,8 +164,9 @@ public final class Choreographer {
         mHandler = new FrameHandler(looper);
         mDisplayEventReceiver = USE_VSYNC ? new FrameDisplayEventReceiver(looper) : null;
         mLastFrameTimeNanos = Long.MIN_VALUE;
-        mFrameIntervalNanos = (long)(1000000000 /
-                new Display(Display.DEFAULT_DISPLAY, null).getRefreshRate());
+
+        Display d = WindowManagerImpl.getDefault().getDefaultDisplay();
+        mFrameIntervalNanos = (long)(1000000000 / d.getRefreshRate());
 
         mCallbackQueues = new CallbackQueue[CALLBACK_LAST + 1];
         for (int i = 0; i <= CALLBACK_LAST; i++) {

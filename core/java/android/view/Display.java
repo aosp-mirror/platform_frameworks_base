@@ -450,13 +450,5 @@ public class Display {
     private static final Object sStaticInit = new Object();
     private static boolean sInitialized = false;
     private static IWindowManager sWindowManager;
-
-    /**
-     * Returns a display object which uses the metric's width/height instead.
-     * @hide
-     */
-    public static Display createCompatibleDisplay(int displayId, CompatibilityInfoHolder compat) {
-        return new Display(displayId, compat);
-    }
 }
 
