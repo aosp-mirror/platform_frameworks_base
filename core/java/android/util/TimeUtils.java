@@ -18,8 +18,10 @@ package android.util;
 
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
+import android.text.format.DateUtils;
 
-import libcore.util.ZoneInfoDB;
+import com.android.internal.util.XmlUtils;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -28,10 +30,10 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.TimeZone;
 import java.util.Date;
+import java.util.TimeZone;
 
-import com.android.internal.util.XmlUtils;
+import libcore.util.ZoneInfoDB;
 
 /**
  * A class containing utility methods related to time zones.
@@ -245,6 +247,8 @@ public class TimeUtils {
     private static final Object sFormatSync = new Object();
     private static char[] sFormatStr = new char[HUNDRED_DAY_FIELD_LEN+5];
 
+    private static final long LARGEST_DURATION = (1000 * DateUtils.DAY_IN_MILLIS) - 1;
+
     static private int accumField(int amt, int suffix, boolean always, int zeropad) {
         if (amt > 99 || (always && zeropad >= 3)) {
             return 3+suffix;
@@ -305,6 +309,10 @@ public class TimeUtils {
         } else {
             prefix = '-';
             duration = -duration;
+        }
+
+        if (duration > LARGEST_DURATION) {
+            duration = LARGEST_DURATION;
         }
 
         int millis = (int)(duration%1000);
