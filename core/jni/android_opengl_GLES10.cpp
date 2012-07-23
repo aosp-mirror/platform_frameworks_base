@@ -3679,7 +3679,7 @@ android_glTexImage2D__IIIIIIIILjava_nio_Buffer_2
     if (pixels_buf) {
         pixels = (GLvoid *)getPointer(_env, pixels_buf, &_array, &_remaining, &_bufferOffset);
     }
-    if (pixels == NULL) {
+    if (pixels_buf && pixels == NULL) {
         char * _pixelsBase = (char *)_env->GetPrimitiveArrayCritical(_array, (jboolean *) 0);
         pixels = (GLvoid *) (_pixelsBase + _bufferOffset);
     }
@@ -3733,7 +3733,7 @@ android_glTexSubImage2D__IIIIIIIILjava_nio_Buffer_2
     if (pixels_buf) {
         pixels = (GLvoid *)getPointer(_env, pixels_buf, &_array, &_remaining, &_bufferOffset);
     }
-    if (pixels == NULL) {
+    if (pixels_buf && pixels == NULL) {
         char * _pixelsBase = (char *)_env->GetPrimitiveArrayCritical(_array, (jboolean *) 0);
         pixels = (GLvoid *) (_pixelsBase + _bufferOffset);
     }

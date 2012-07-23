@@ -150,7 +150,7 @@ android_glBufferData__IILjava_nio_Buffer_2I
             goto exit;
         }
     }
-    if (data == NULL) {
+    if (data_buf && data == NULL) {
         char * _dataBase = (char *)_env->GetPrimitiveArrayCritical(_array, (jboolean *) 0);
         data = (GLvoid *) (_dataBase + _bufferOffset);
     }
