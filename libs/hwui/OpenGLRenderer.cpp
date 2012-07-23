@@ -2421,8 +2421,8 @@ status_t OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count
     return DrawGlInfo::kStatusDrew;
 }
 
-status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
-        float x, float y, SkPaint* paint, float length) {
+status_t OpenGLRenderer::drawGeneralText(const char* text, int bytesCount, int count,
+        float x, float y, const float* positions, SkPaint* paint, float length) {
     if (text == NULL || count == 0 || mSnapshot->isIgnored() ||
             (paint->getAlpha() * mSnapshot->alpha == 0 && paint->getXfermode() == NULL)) {
         return DrawGlInfo::kStatusDone;
@@ -2455,7 +2455,8 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     }
 
 #if DEBUG_GLYPHS
-    ALOGD("OpenGLRenderer drawText() with FontID=%d", SkTypeface::UniqueID(paint->getTypeface()));
+    ALOGD("OpenGLRenderer drawGeneralText() with FontID=%d",
+            SkTypeface::UniqueID(paint->getTypeface()));
 #endif
 
     FontRenderer& fontRenderer = mCaches.fontRenderer->getFontRenderer(paint);
@@ -2467,7 +2468,8 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     getAlphaAndMode(paint, &alpha, &mode);
 
     if (CC_UNLIKELY(mHasShadow)) {
-        drawTextShadow(paint, text, bytesCount, count, NULL, fontRenderer, alpha, mode, oldX, oldY);
+        drawTextShadow(paint, text, bytesCount, count, positions, fontRenderer, alpha, mode,
+                oldX, oldY);
     }
 
     // Pick the appropriate texture filtering
@@ -2505,8 +2507,16 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     const bool hasActiveLayer = false;
 #endif
 
-    if (fontRenderer.renderText(paint, clip, text, 0, bytesCount, count, x, y,
-            hasActiveLayer ? &bounds : NULL)) {
+    bool status;
+    if (positions != NULL) {
+        status = fontRenderer.renderPosText(paint, clip, text, 0, bytesCount, count, x, y,
+            positions, hasActiveLayer ? &bounds : NULL);
+    } else {
+        // TODO: would it be okay to call renderPosText with null positions?
+        status = fontRenderer.renderText(paint, clip, text, 0, bytesCount, count, x, y,
+            hasActiveLayer ? &bounds : NULL);
+    }
+    if (status) {
 #if RENDER_LAYERS_AS_REGIONS
         if (hasActiveLayer) {
             if (!pureTranslate) {

@@ -61,9 +61,9 @@ const char* DisplayList::OP_NAMES[] = {
     "DrawPath",
     "DrawLines",
     "DrawPoints",
-    "DrawText",
     "DrawTextOnPath",
     "DrawPosText",
+    "DrawGeneralText",
     "ResetShader",
     "SetupShader",
     "ResetColorFilter",
@@ -572,17 +572,6 @@ void DisplayList::output(OpenGLRenderer& renderer, uint32_t level) {
                 ALOGD("%s%s", (char*) indent, OP_NAMES[op]);
             }
             break;
-            case DrawText: {
-                getText(&text);
-                int32_t count = getInt();
-                float x = getFloat();
-                float y = getFloat();
-                SkPaint* paint = getPaint(renderer);
-                float length = getFloat();
-                ALOGD("%s%s %s, %d, %d, %.2f, %.2f, %p, %.2f", (char*) indent, OP_NAMES[op],
-                        text.text(), text.length(), count, x, y, paint, length);
-            }
-            break;
             case DrawTextOnPath: {
                 getText(&text);
                 int32_t count = getInt();
@@ -603,6 +592,17 @@ void DisplayList::output(OpenGLRenderer& renderer, uint32_t level) {
                 ALOGD("%s%s %s, %d, %d, %p", (char*) indent, OP_NAMES[op],
                         text.text(), text.length(), count, paint);
             }
+            break;
+            case DrawGeneralText: {
+                getText(&text);
+                int count = getInt();
+                int positionsCount = 0;
+                float* positions = getFloats(positionsCount);
+                SkPaint* paint = getPaint(renderer);
+                ALOGD("%s%s %s, %d, %d, %p", (char*) indent, OP_NAMES[op],
+                        text.text(), text.length(), count, paint);
+            }
+            break;
             case ResetShader: {
                 ALOGD("%s%s", (char*) indent, OP_NAMES[op]);
             }
@@ -1196,19 +1196,6 @@ status_t DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flag
                 drawGlStatus |= renderer.drawPoints(points, count, paint);
             }
             break;
-            case DrawText: {
-                getText(&text);
-                int32_t count = getInt();
-                float x = getFloat();
-                float y = getFloat();
-                SkPaint* paint = getPaint(renderer);
-                float length = getFloat();
-                DISPLAY_LIST_LOGD("%s%s %s, %d, %d, %.2f, %.2f, %p, %.2f", (char*) indent,
-                        OP_NAMES[op], text.text(), text.length(), count, x, y, paint, length);
-                drawGlStatus |= renderer.drawText(text.text(), text.length(), count, x, y,
-                        paint, length);
-            }
-            break;
             case DrawTextOnPath: {
                 getText(&text);
                 int32_t count = getInt();
@@ -1232,6 +1219,21 @@ status_t DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flag
                         OP_NAMES[op], text.text(), text.length(), count, paint);
                 drawGlStatus |= renderer.drawPosText(text.text(), text.length(), count,
                         positions, paint);
+            }
+            break;
+            case DrawGeneralText: {
+                getText(&text);
+                int32_t count = getInt();
+                float x = getFloat();
+                float y = getFloat();
+                int32_t positionsCount = 0;
+                float* positions = getFloats(positionsCount);
+                SkPaint* paint = getPaint(renderer);
+                float length = getFloat();
+                DISPLAY_LIST_LOGD("%s%s %s, %d, %d, %.2f, %.2f, %p, %.2f", (char*) indent,
+                        OP_NAMES[op], text.text(), text.length(), count, x, y, paint, length);
+                drawGlStatus |= renderer.drawGeneralText(text.text(), text.length(), count,
+                        x, y, positions, paint, length);
             }
             break;
             case ResetShader: {
@@ -1684,37 +1686,6 @@ status_t DisplayListRenderer::drawPoints(float* points, int count, SkPaint* pain
     return DrawGlInfo::kStatusDone;
 }
 
-status_t DisplayListRenderer::drawText(const char* text, int bytesCount, int count,
-        float x, float y, SkPaint* paint, float length) {
-    if (!text || count <= 0) return DrawGlInfo::kStatusDone;
-
-    // TODO: We should probably make a copy of the paint instead of modifying
-    //       it; modifying the paint will change its generationID the first
-    //       time, which might impact caches. More investigation needed to
-    //       see if it matters.
-    //       If we make a copy, then drawTextDecorations() should *not* make
-    //       its own copy as it does right now.
-    // Beware: this needs Glyph encoding (already done on the Paint constructor)
-    paint->setAntiAlias(true);
-    if (length < 0.0f) length = paint->measureText(text, bytesCount);
-
-    bool reject = false;
-    if (CC_LIKELY(paint->getTextAlign() == SkPaint::kLeft_Align)) {
-        SkPaint::FontMetrics metrics;
-        paint->getFontMetrics(&metrics, 0.0f);
-        reject = quickReject(x, y + metrics.fTop, x + length, y + metrics.fBottom);
-    }
-
-    uint32_t* location = addOp(DisplayList::DrawText, reject);
-    addText(text, bytesCount);
-    addInt(count);
-    addPoint(x, y);
-    addPaint(paint);
-    addFloat(length);
-    addSkip(location);
-    return DrawGlInfo::kStatusDone;
-}
-
 status_t DisplayListRenderer::drawTextOnPath(const char* text, int bytesCount, int count,
         SkPath* path, float hOffset, float vOffset, SkPaint* paint) {
     if (!text || count <= 0) return DrawGlInfo::kStatusDone;
@@ -1738,6 +1709,39 @@ status_t DisplayListRenderer::drawPosText(const char* text, int bytesCount, int 
     addFloats(positions, count * 2);
     paint->setAntiAlias(true);
     addPaint(paint);
+    return DrawGlInfo::kStatusDone;
+}
+
+status_t DisplayListRenderer::drawGeneralText(const char* text, int bytesCount, int count,
+        float x, float y, const float* positions, SkPaint* paint, float length) {
+    if (!text || count <= 0) return DrawGlInfo::kStatusDone;
+
+    // TODO: We should probably make a copy of the paint instead of modifying
+    //       it; modifying the paint will change its generationID the first
+    //       time, which might impact caches. More investigation needed to
+    //       see if it matters.
+    //       If we make a copy, then drawTextDecorations() should *not* make
+    //       its own copy as it does right now.
+    // Beware: this needs Glyph encoding (already done on the Paint constructor)
+    paint->setAntiAlias(true);
+    if (length < 0.0f) length = paint->measureText(text, bytesCount);
+
+    bool reject = false;
+    if (CC_LIKELY(paint->getTextAlign() == SkPaint::kLeft_Align)) {
+        SkPaint::FontMetrics metrics;
+        paint->getFontMetrics(&metrics, 0.0f);
+        reject = quickReject(x, y + metrics.fTop, x + length, y + metrics.fBottom);
+    }
+
+    uint32_t* location = addOp(DisplayList::DrawGeneralText, reject);
+    addText(text, bytesCount);
+    addInt(count);
+    addFloat(x);
+    addFloat(y);
+    addFloats(positions, count * 2);
+    addPaint(paint);
+    addFloat(length);
+    addSkip(location);
     return DrawGlInfo::kStatusDone;
 }
 

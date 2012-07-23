@@ -528,8 +528,11 @@ static void renderText(OpenGLRenderer* renderer, const jchar* text, int count,
     }
     const jchar* glyphs = value->getGlyphs();
     size_t glyphsCount = value->getGlyphsCount();
+    jfloat totalAdvance = value->getTotalAdvance();
+    const float* positions = value->getPos();
     int bytesCount = glyphsCount * sizeof(jchar);
-    renderer->drawText((const char*) glyphs, bytesCount, glyphsCount, x, y, paint);
+    renderer->drawGeneralText((const char*) glyphs, bytesCount, glyphsCount, x, y,
+            positions, paint, totalAdvance);
 }
 
 static void renderTextOnPath(OpenGLRenderer* renderer, const jchar* text, int count,
@@ -556,8 +559,11 @@ static void renderTextRun(OpenGLRenderer* renderer, const jchar* text,
     }
     const jchar* glyphs = value->getGlyphs();
     size_t glyphsCount = value->getGlyphsCount();
+    jfloat totalAdvance = value->getTotalAdvance();
+    const float* positions = value->getPos();
     int bytesCount = glyphsCount * sizeof(jchar);
-    renderer->drawText((const char*) glyphs, bytesCount, glyphsCount, x, y, paint);
+    renderer->drawGeneralText((const char*) glyphs, bytesCount, glyphsCount, x, y,
+            positions, paint, totalAdvance);
 }
 
 static void android_view_GLES20Canvas_drawTextArray(JNIEnv* env, jobject clazz,
