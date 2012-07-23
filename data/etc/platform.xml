@@ -163,6 +163,12 @@
     <assign-permission name="android.permission.FORCE_STOP_PACKAGES" uid="shell" />
     <assign-permission name="android.permission.STOP_APP_SWITCHES" uid="shell" />
     <assign-permission name="android.permission.ACCESS_CONTENT_PROVIDERS_EXTERNALLY" uid="shell" />
+    <assign-permission name="android.permission.GRANT_REVOKE_PERMISSIONS" uid="shell" />
+    <assign-permission name="android.permission.SET_KEYBOARD_LAYOUT" uid="shell" />
+    <assign-permission name="android.permission.GET_DETAILED_TASKS" uid="shell" />
+    <assign-permission name="android.permission.SET_SCREEN_COMPATIBILITY" uid="shell" />
+    <assign-permission name="android.permission.READ_EXTERNAL_STORAGE" uid="shell" />
+    <assign-permission name="android.permission.WRITE_EXTERNAL_STORAGE" uid="shell" />
 
     <assign-permission name="android.permission.MODIFY_AUDIO_SETTINGS" uid="media" />
     <assign-permission name="android.permission.ACCESS_DRM" uid="media" />
