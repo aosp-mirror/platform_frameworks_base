@@ -79,6 +79,7 @@ import com.android.systemui.UniverseBackground;
 import com.android.systemui.recent.RecentTasksLoader;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.RotationToggle;
@@ -241,6 +242,9 @@ public class PhoneStatusBar extends BaseStatusBar {
     int mSystemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE;
 
     DisplayMetrics mDisplayMetrics = new DisplayMetrics();
+
+    // XXX: gesture research
+    private GestureRecorder mGestureRec = new GestureRecorder("/sdcard/statusbar_gestures.dat");
 
     private int mNavigationIconHints = 0;
     private final Animator.AnimatorListener mMakeIconsInvisible = new AnimatorListenerAdapter() {
@@ -1570,6 +1574,8 @@ public class PhoneStatusBar extends BaseStatusBar {
             }
         }
 
+        mGestureRec.add(event);
+
         if ((mDisabled & StatusBarManager.DISABLE_EXPAND) != 0) {
             return false;
         }
@@ -1604,6 +1610,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                 if (x >= edgeBorder && x < mDisplayMetrics.widthPixels - edgeBorder) {
                     prepareTracking(y, !mExpanded);// opening if we're not already fully visible
                     trackMovement(event);
+                    mGestureRec.tag("tracking", mExpanded ? "expanded" : "collapsed");
                 }
             }
         } else if (mTracking) {
@@ -1654,6 +1661,8 @@ public class PhoneStatusBar extends BaseStatusBar {
                     mFlingY = y;
                 }
                 mFlingVelocity = vel;
+                mGestureRec.tag("fling " + ((mFlingVelocity > 0) ? "open" : "closed"),
+                                "v=" + mFlingVelocity);
                 mHandler.post(mPerformFling);
             }
 
@@ -1937,6 +1946,9 @@ public class PhoneStatusBar extends BaseStatusBar {
                     });
             }
         }
+
+        pw.print("  status bar gestures: ");
+        mGestureRec.dump(fd, pw, args);
 
         mNetworkController.dump(fd, pw, args);
     }
