@@ -24,6 +24,7 @@ position:absolute;top:50%;left:0;width:100%;z-index:-1;text-align:center;display
   </div>
 </div>
 
+
 <div class="wrap">
    <!-- Slideshow -->
    <div class="slideshow-container slideshow-develop col-16">
@@ -31,6 +32,24 @@ position:absolute;top:50%;left:0;width:100%;z-index:-1;text-align:center;display
        <a href="" class="slideshow-next">Next</a>
        <div class="frame">
            <ul>
+               <li class="item carousel-home">
+                 <div class="col-8">
+                   <img
+src="http://4.bp.blogspot.com/-g05If_eKKRQ/UAcrVLI-OYI/AAAAAAAAAr8/AWvunVb5S-w/s320/nexus7.png"
+class="play no-shadow no-transform" />
+                 </div>
+                <div class="content-right col-6">
+                  <p class="title-intro">From the blog:</p>
+                  <h2>Getting Your App Ready for Jelly Bean and Nexus 7</h2>
+                  <p>For many people, their first taste of Jelly Bean will be on the beautiful 
+                    Nexus 7. While most applications will run just fine on Nexus 7, who wants 
+                    their app to be just fine? Here are some tips for optimizing your application 
+                    to make the most of this device.</p>
+                  <p><a
+href="http://android-developers.blogspot.com/2012/07/getting-your-app-ready-for-jelly-bean.html" class="button">Read
+more</a></p>
+                </div>            
+              </li>
                <li class="item carousel-home">
                  <div class="col-8">
                    <img
@@ -93,6 +112,12 @@ a').click();return false;">Watch the latest review</a></p>
 			<div class="feed-frame">
                                 <!-- DEVELOPER NEWS -->
 				<ul>
+					<li><a href="http://android-developers.blogspot.com/2012/06/android-sdk-tools-revision-20.html">
+                                          <div class="feed-image" style="background:url('http://1.bp.blogspot.com/-Kp1qE5du6l8/T-xurIjfPgI/AAAAAAAABAM/kuWQwPgi0rw/s640/newactivity+(1).png') no-repeat 0 0">
+                                          </div>
+                                          <h4>Android SDK Tools, Revision 20</h4>
+                                          <p>Along with the preview of the Android 4.1 (Jelly Bean) platform, we launched Android SDK Tools R20 and ADT 20.0.0. Here are a few things...</p>
+					</a></li>
 					<li><a href="http://android-developers.blogspot.com/2012/04/faster-emulator-with-better-hardware.html">
                                           <div class="feed-image" style="background:url('../images/emulator-wvga800l.png') no-repeat 0 0">
                                           </div>
@@ -112,13 +137,7 @@ a').click();return false;">Watch the latest review</a></p>
                                           <h4>Accessibility</h4>
                                           <p>We recently published some new resources to help developers make their Android applications more accessible... </p>
 					</a></li>
-					<li><a href="http://android-developers.blogspot.com/2012/04/new-seller-countries-in-google-play.html">
-                                          <div class="feed-image" style="background:url('http://developer.android.com/images/home/play_logo.png') no-repeat 0 0" >
-                                          </div>
-                                          <h4>New Seller Countries in Google Play</h4>
-                                          <p>Over the past year we’ve been working to expand the list of 
-                                            countries and currencies from which Android developers...</p>
-					</a></li>
+                                      
 				</ul>
                                 <!-- FEATURED DOCS -->
 				<ul>
@@ -294,7 +313,7 @@ function renderDevelopersLivePlaylist(data) {
  */
 var playlists = {
   'googleio' : {
-    'ids': ["734A052F802C96B9"]
+    'ids': ["4C6BCDE45E05F49E"]
   },
   'fridayreview' : {
     'ids': ["B7B9B23D864A55C3"]
