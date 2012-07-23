@@ -1370,6 +1370,7 @@ public class ActionBarView extends AbsActionBarView {
             int upOffset = 0;
             if (mUpView.getVisibility() != GONE) {
                 final LayoutParams upLp = (LayoutParams) mUpView.getLayoutParams();
+                upLp.onResolveLayoutDirection(layoutDirection);
                 final int upHeight = mUpView.getMeasuredHeight();
                 final int upWidth = mUpView.getMeasuredWidth();
                 upOffset = upLp.leftMargin + upWidth + upLp.rightMargin;
