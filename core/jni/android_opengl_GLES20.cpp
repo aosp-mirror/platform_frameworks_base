@@ -1536,6 +1536,162 @@ android_glGetActiveAttrib__IIILjava_nio_IntBuffer_2Ljava_nio_IntBuffer_2Ljava_ni
     }
 }
 
+/* void glGetActiveAttrib ( GLuint program, GLuint index, GLsizei bufsize, GLsizei *length, GLint *size, GLenum *type, char *name ) */
+static jstring
+android_glGetActiveAttrib1
+  (JNIEnv *_env, jobject _this, jint program, jint index, jintArray size_ref, jint sizeOffset, jintArray type_ref, jint typeOffset) {
+    jint _exception = 0;
+    const char * _exceptionType;
+    const char * _exceptionMessage;
+    GLint *size_base = (GLint *) 0;
+    jint _sizeRemaining;
+    GLint *size = (GLint *) 0;
+    GLenum *type_base = (GLenum *) 0;
+    jint _typeRemaining;
+    GLenum *type = (GLenum *) 0;
+
+    jstring result = 0;
+
+    GLint len = 0;
+    glGetProgramiv((GLuint)program, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &len);
+    if (!len) {
+        return _env->NewStringUTF("");
+    }
+    char* buf = (char*) malloc(len);
+
+    if (buf == NULL) {
+        jniThrowException(_env, "java/lang/IllegalArgumentException", "out of memory");
+        return NULL;
+    }
+    if (!size_ref) {
+        _exception = 1;
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "size == null";
+        goto exit;
+    }
+    if (sizeOffset < 0) {
+        _exception = 1;
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "sizeOffset < 0";
+        goto exit;
+    }
+    _sizeRemaining = _env->GetArrayLength(size_ref) - sizeOffset;
+    size_base = (GLint *)
+        _env->GetPrimitiveArrayCritical(size_ref, (jboolean *)0);
+    size = size_base + sizeOffset;
+
+    if (!type_ref) {
+        _exception = 1;
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "type == null";
+        goto exit;
+    }
+    if (typeOffset < 0) {
+        _exception = 1;
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "typeOffset < 0";
+        goto exit;
+    }
+    _typeRemaining = _env->GetArrayLength(type_ref) - typeOffset;
+    type_base = (GLenum *)
+        _env->GetPrimitiveArrayCritical(type_ref, (jboolean *)0);
+    type = type_base + typeOffset;
+
+    glGetActiveAttrib(
+        (GLuint)program,
+        (GLuint)index,
+        (GLsizei)len,
+        NULL,
+        (GLint *)size,
+        (GLenum *)type,
+        (char *)buf
+    );
+exit:
+    if (type_base) {
+        _env->ReleasePrimitiveArrayCritical(type_ref, type_base,
+            _exception ? JNI_ABORT: 0);
+    }
+    if (size_base) {
+        _env->ReleasePrimitiveArrayCritical(size_ref, size_base,
+            _exception ? JNI_ABORT: 0);
+    }
+    if (_exception != 1) {
+        result = _env->NewStringUTF(buf);
+    }
+    if (buf) {
+        free(buf);
+    }
+    if (_exception) {
+        jniThrowException(_env, _exceptionType, _exceptionMessage);
+    }
+    if (result == 0) {
+        result = _env->NewStringUTF("");
+    }
+
+    return result;
+}
+
+/* void glGetActiveAttrib ( GLuint program, GLuint index, GLsizei bufsize, GLsizei *length, GLint *size, GLenum *type, char *name ) */
+static jstring
+android_glGetActiveAttrib2
+  (JNIEnv *_env, jobject _this, jint program, jint index, jobject size_buf, jobject type_buf) {
+    jarray _sizeArray = (jarray) 0;
+    jint _sizeBufferOffset = (jint) 0;
+    jarray _typeArray = (jarray) 0;
+    jint _typeBufferOffset = (jint) 0;
+    jint _lengthRemaining;
+    GLsizei *length = (GLsizei *) 0;
+    jint _sizeRemaining;
+    GLint *size = (GLint *) 0;
+    jint _typeRemaining;
+    GLenum *type = (GLenum *) 0;
+
+    jstring result = 0;
+
+    GLint len = 0;
+    glGetProgramiv((GLuint)program, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &len);
+    if (!len) {
+        return _env->NewStringUTF("");
+    }
+    char* buf = (char*) malloc(len);
+
+    if (buf == NULL) {
+        jniThrowException(_env, "java/lang/IllegalArgumentException", "out of memory");
+        return NULL;
+    }
+
+    size = (GLint *)getPointer(_env, size_buf, &_sizeArray, &_sizeRemaining, &_sizeBufferOffset);
+    type = (GLenum *)getPointer(_env, type_buf, &_typeArray, &_typeRemaining, &_typeBufferOffset);
+    if (size == NULL) {
+        char * _sizeBase = (char *)_env->GetPrimitiveArrayCritical(_sizeArray, (jboolean *) 0);
+        size = (GLint *) (_sizeBase + _sizeBufferOffset);
+    }
+    if (type == NULL) {
+        char * _typeBase = (char *)_env->GetPrimitiveArrayCritical(_typeArray, (jboolean *) 0);
+        type = (GLenum *) (_typeBase + _typeBufferOffset);
+    }
+    glGetActiveAttrib(
+        (GLuint)program,
+        (GLuint)index,
+        (GLsizei)len,
+        NULL,
+        (GLint *)size,
+        (GLenum *)type,
+        (char *)buf
+    );
+
+    if (_typeArray) {
+        releasePointer(_env, _typeArray, type, JNI_TRUE);
+    }
+    if (_sizeArray) {
+        releasePointer(_env, _sizeArray, size, JNI_TRUE);
+    }
+    result = _env->NewStringUTF(buf);
+    if (buf) {
+        free(buf);
+    }
+    return result;
+}
 /* void glGetActiveUniform ( GLuint program, GLuint index, GLsizei bufsize, GLsizei *length, GLint *size, GLenum *type, char *name ) */
 static void
 android_glGetActiveUniform__III_3II_3II_3II_3BI
@@ -1708,6 +1864,163 @@ android_glGetActiveUniform__IIILjava_nio_IntBuffer_2Ljava_nio_IntBuffer_2Ljava_n
     }
 }
 
+/* void glGetActiveUniform ( GLuint program, GLuint index, GLsizei bufsize, GLsizei *length, GLint *size, GLenum *type, char *name ) */
+static jstring
+android_glGetActiveUniform1
+  (JNIEnv *_env, jobject _this, jint program, jint index, jintArray size_ref, jint sizeOffset, jintArray type_ref, jint typeOffset) {
+    jint _exception = 0;
+    const char * _exceptionType;
+    const char * _exceptionMessage;
+
+    GLint *size_base = (GLint *) 0;
+    jint _sizeRemaining;
+    GLint *size = (GLint *) 0;
+
+    GLenum *type_base = (GLenum *) 0;
+    jint _typeRemaining;
+    GLenum *type = (GLenum *) 0;
+
+    jstring result = 0;
+
+    GLint len = 0;
+    glGetProgramiv((GLuint)program, GL_ACTIVE_UNIFORM_MAX_LENGTH, &len);
+    if (!len) {
+        return _env->NewStringUTF("");
+    }
+    char* buf = (char*) malloc(len);
+
+    if (buf == NULL) {
+        jniThrowException(_env, "java/lang/IllegalArgumentException", "out of memory");
+        return NULL;
+    }
+
+    if (!size_ref) {
+        _exception = 1;
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "size == null";
+        goto exit;
+    }
+    if (sizeOffset < 0) {
+        _exception = 1;
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "sizeOffset < 0";
+        goto exit;
+    }
+    _sizeRemaining = _env->GetArrayLength(size_ref) - sizeOffset;
+    size_base = (GLint *)
+        _env->GetPrimitiveArrayCritical(size_ref, (jboolean *)0);
+    size = size_base + sizeOffset;
+
+    if (!type_ref) {
+        _exception = 1;
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "type == null";
+        goto exit;
+    }
+    if (typeOffset < 0) {
+        _exception = 1;
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "typeOffset < 0";
+        goto exit;
+    }
+    _typeRemaining = _env->GetArrayLength(type_ref) - typeOffset;
+    type_base = (GLenum *)
+        _env->GetPrimitiveArrayCritical(type_ref, (jboolean *)0);
+    type = type_base + typeOffset;
+
+    glGetActiveUniform(
+        (GLuint)program,
+        (GLuint)index,
+        (GLsizei)len,
+        NULL,
+        (GLint *)size,
+        (GLenum *)type,
+        (char *)buf
+    );
+
+exit:
+    if (type_base) {
+        _env->ReleasePrimitiveArrayCritical(type_ref, type_base,
+            _exception ? JNI_ABORT: 0);
+    }
+    if (size_base) {
+        _env->ReleasePrimitiveArrayCritical(size_ref, size_base,
+            _exception ? JNI_ABORT: 0);
+    }
+    if (_exception != 1) {
+        result = _env->NewStringUTF(buf);
+    }
+    if (buf) {
+        free(buf);
+    }
+    if (_exception) {
+        jniThrowException(_env, _exceptionType, _exceptionMessage);
+    }
+    if (result == 0) {
+        result = _env->NewStringUTF("");
+    }
+    return result;
+}
+
+/* void glGetActiveUniform ( GLuint program, GLuint index, GLsizei bufsize, GLsizei *length, GLint *size, GLenum *type, char *name ) */
+static jstring
+android_glGetActiveUniform2
+  (JNIEnv *_env, jobject _this, jint program, jint index, jobject size_buf, jobject type_buf) {
+    jarray _sizeArray = (jarray) 0;
+    jint _sizeBufferOffset = (jint) 0;
+    jarray _typeArray = (jarray) 0;
+    jint _typeBufferOffset = (jint) 0;
+    jint _sizeRemaining;
+    GLint *size = (GLint *) 0;
+    jint _typeRemaining;
+    GLenum *type = (GLenum *) 0;
+
+    jstring result = 0;
+    GLint len = 0;
+    glGetProgramiv((GLuint)program, GL_ACTIVE_UNIFORM_MAX_LENGTH, &len);
+    if (!len) {
+        return _env->NewStringUTF("");
+    }
+    char* buf = (char*) malloc(len);
+
+    if (buf == NULL) {
+        jniThrowException(_env, "java/lang/IllegalArgumentException", "out of memory");
+        return NULL;
+    }
+
+    size = (GLint *)getPointer(_env, size_buf, &_sizeArray, &_sizeRemaining, &_sizeBufferOffset);
+    type = (GLenum *)getPointer(_env, type_buf, &_typeArray, &_typeRemaining, &_typeBufferOffset);
+
+    if (size == NULL) {
+        char * _sizeBase = (char *)_env->GetPrimitiveArrayCritical(_sizeArray, (jboolean *) 0);
+        size = (GLint *) (_sizeBase + _sizeBufferOffset);
+    }
+    if (type == NULL) {
+        char * _typeBase = (char *)_env->GetPrimitiveArrayCritical(_typeArray, (jboolean *) 0);
+        type = (GLenum *) (_typeBase + _typeBufferOffset);
+    }
+    glGetActiveUniform(
+        (GLuint)program,
+        (GLuint)index,
+        len,
+        NULL,
+        (GLint *)size,
+        (GLenum *)type,
+        (char *)buf
+    );
+
+    if (_typeArray) {
+        releasePointer(_env, _typeArray, type, JNI_TRUE);
+    }
+    if (_sizeArray) {
+        releasePointer(_env, _sizeArray, size, JNI_TRUE);
+    }
+    result = _env->NewStringUTF(buf);
+    if (buf) {
+        free(buf);
+    }
+    return result;
+}
 /* void glGetAttachedShaders ( GLuint program, GLsizei maxcount, GLsizei *count, GLuint *shaders ) */
 static void
 android_glGetAttachedShaders__II_3II_3II
@@ -3336,6 +3649,23 @@ android_glGetShaderSource__IILjava_nio_IntBuffer_2B
     }
 }
 
+/* void glGetShaderSource ( GLuint shader, GLsizei bufsize, GLsizei *length, char *source ) */
+static jstring android_glGetShaderSource(JNIEnv *_env, jobject, jint shader) {
+    GLint shaderLen = 0;
+    glGetShaderiv((GLuint)shader, GL_SHADER_SOURCE_LENGTH, &shaderLen);
+    if (!shaderLen) {
+        return _env->NewStringUTF("");
+    }
+    char* buf = (char*) malloc(shaderLen);
+    if (buf == NULL) {
+        jniThrowException(_env, "java/lang/IllegalArgumentException", "out of memory");
+        return NULL;
+    }
+    glGetShaderSource(shader, shaderLen, NULL, buf);
+    jstring result = _env->NewStringUTF(buf);
+    free(buf);
+    return result;
+}
 /* const GLubyte * glGetString ( GLenum name ) */
 static jstring android_glGetString(JNIEnv* _env, jobject, jint name) {
     const char* chars = (const char*) glGetString((GLenum) name);
@@ -5751,8 +6081,12 @@ static JNINativeMethod methods[] = {
 {"glGenTextures", "(ILjava/nio/IntBuffer;)V", (void *) android_glGenTextures__ILjava_nio_IntBuffer_2 },
 {"glGetActiveAttrib", "(III[II[II[II[BI)V", (void *) android_glGetActiveAttrib__III_3II_3II_3II_3BI },
 {"glGetActiveAttrib", "(IIILjava/nio/IntBuffer;Ljava/nio/IntBuffer;Ljava/nio/IntBuffer;B)V", (void *) android_glGetActiveAttrib__IIILjava_nio_IntBuffer_2Ljava_nio_IntBuffer_2Ljava_nio_IntBuffer_2B },
+{"glGetActiveAttrib", "(II[II[II)Ljava/lang/String;", (void *) android_glGetActiveAttrib1 },
+{"glGetActiveAttrib", "(IILjava/nio/IntBuffer;Ljava/nio/IntBuffer;)Ljava/lang/String;", (void *) android_glGetActiveAttrib2 },
 {"glGetActiveUniform", "(III[II[II[II[BI)V", (void *) android_glGetActiveUniform__III_3II_3II_3II_3BI },
+{"glGetActiveUniform", "(II[II[II)Ljava/lang/String;", (void *) android_glGetActiveUniform1 },
 {"glGetActiveUniform", "(IIILjava/nio/IntBuffer;Ljava/nio/IntBuffer;Ljava/nio/IntBuffer;B)V", (void *) android_glGetActiveUniform__IIILjava_nio_IntBuffer_2Ljava_nio_IntBuffer_2Ljava_nio_IntBuffer_2B },
+{"glGetActiveUniform", "(IILjava/nio/IntBuffer;Ljava/nio/IntBuffer;)Ljava/lang/String;", (void *) android_glGetActiveUniform2 },
 {"glGetAttachedShaders", "(II[II[II)V", (void *) android_glGetAttachedShaders__II_3II_3II },
 {"glGetAttachedShaders", "(IILjava/nio/IntBuffer;Ljava/nio/IntBuffer;)V", (void *) android_glGetAttachedShaders__IILjava_nio_IntBuffer_2Ljava_nio_IntBuffer_2 },
 {"glGetAttribLocation", "(ILjava/lang/String;)I", (void *) android_glGetAttribLocation__ILjava_lang_String_2 },
@@ -5779,6 +6113,7 @@ static JNINativeMethod methods[] = {
 {"glGetShaderPrecisionFormat", "(IILjava/nio/IntBuffer;Ljava/nio/IntBuffer;)V", (void *) android_glGetShaderPrecisionFormat__IILjava_nio_IntBuffer_2Ljava_nio_IntBuffer_2 },
 {"glGetShaderSource", "(II[II[BI)V", (void *) android_glGetShaderSource__II_3II_3BI },
 {"glGetShaderSource", "(IILjava/nio/IntBuffer;B)V", (void *) android_glGetShaderSource__IILjava_nio_IntBuffer_2B },
+{"glGetShaderSource", "(I)Ljava/lang/String;", (void *) android_glGetShaderSource },
 {"glGetString", "(I)Ljava/lang/String;", (void *) android_glGetString },
 {"glGetTexParameterfv", "(II[FI)V", (void *) android_glGetTexParameterfv__II_3FI },
 {"glGetTexParameterfv", "(IILjava/nio/FloatBuffer;)V", (void *) android_glGetTexParameterfv__IILjava_nio_FloatBuffer_2 },

@@ -829,6 +829,25 @@ public class GLES20 {
         byte name
     );
 
+    // C function void glGetActiveAttrib ( GLuint program, GLuint index, GLsizei bufsize, GLsizei *length, GLint *size, GLenum *type, char *name )
+
+    public static native String glGetActiveAttrib(
+        int program,
+        int index,
+        int[] size,
+        int sizeOffset,
+        int[] type,
+        int typeOffset
+    );
+
+    // C function void glGetActiveAttrib ( GLuint program, GLuint index, GLsizei bufsize, GLsizei *length, GLint *size, GLenum *type, char *name )
+
+    public static native String glGetActiveAttrib(
+        int program,
+        int index,
+        java.nio.IntBuffer size,
+        java.nio.IntBuffer type
+    );
     // C function void glGetActiveUniform ( GLuint program, GLuint index, GLsizei bufsize, GLsizei *length, GLint *size, GLenum *type, char *name )
 
     public static native void glGetActiveUniform(
@@ -856,7 +875,25 @@ public class GLES20 {
         java.nio.IntBuffer type,
         byte name
     );
+    // C function void glGetActiveUniform ( GLuint program, GLuint index, GLsizei bufsize, GLsizei *length, GLint *size, GLenum *type, char *name )
 
+    public static native String glGetActiveUniform(
+        int program,
+        int index,
+        int[] size,
+        int sizeOffset,
+        int[] type,
+        int typeOffset
+    );
+
+    // C function void glGetActiveUniform ( GLuint program, GLuint index, GLsizei bufsize, GLsizei *length, GLint *size, GLenum *type, char *name )
+
+    public static native String glGetActiveUniform(
+        int program,
+        int index,
+        java.nio.IntBuffer size,
+        java.nio.IntBuffer type
+    );
     // C function void glGetAttachedShaders ( GLuint program, GLsizei maxcount, GLsizei *count, GLuint *shaders )
 
     public static native void glGetAttachedShaders(
@@ -1105,6 +1142,11 @@ public class GLES20 {
         byte source
     );
 
+    // C function void glGetShaderSource ( GLuint shader, GLsizei bufsize, GLsizei *length, char *source )
+
+    public static native String glGetShaderSource(
+        int shader
+    );
 /*
  * Copyright (C) 2009 The Android Open Source Project
  *
