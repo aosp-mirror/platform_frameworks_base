@@ -161,10 +161,10 @@ MIPS.</li>
 co-exist with the original GCC 4.4.3 toolchain ({@code binutils} 2.19 and GDB 6.6).</p>
             <ul>
               <li>GCC 4.6 is now the default toolchain. You may set {@code
-NDK_TOOLCHAIN_VERSION=4.4.3} in {@code Android.mk} to select the original one.</li>
+NDK_TOOLCHAIN_VERSION=4.4.3} in {@code Application.mk} to select the original one.</li>
               <li>Support for the {@code gold} linker is only available for ARM and x86
 architectures on Linux and Mac OS hosts. This support is disabled by default. Add {@code
-LOCAL_C_FLAGS += -fuse-ld=gold} in {@code Android.mk} to enable it.</li>
+LOCAL_LDLIBS += -fuse-ld=gold} in {@code Android.mk} to enable it.</li>
               <li>Programs compiled with {@code -fPIE} require the new {@code GDB} for debugging,
 including binaries in Android 4.1 (API Level 16) system images.</li>
               <li>The {@code binutils} 2.21 {@code ld} tool contains back-ported fixes from
