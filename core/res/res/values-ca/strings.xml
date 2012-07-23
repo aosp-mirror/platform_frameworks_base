@@ -246,7 +246,7 @@
     <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"recupera informació de les finestres"</string>
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Permet que una aplicació recuperi informació sobre les finestres del gestor de finestres. Aplicacions malicioses podrien recuperar informació dirigida a la utilització per part del sistema intern."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"filtra els esdeveniments"</string>
-    <string name="permdesc_filter_events" msgid="8006236315888347680">"Permet que una aplicació registre un filtre d\'entrada per a l\'emissió de tots els esdeveniments d\'usuari abans no s\'enviïn. Aplicacions malicioses podrien controlar la IU del sistema sense la intervenció de l\'usuari."</string>
+    <string name="permdesc_filter_events" msgid="8006236315888347680">"Permet que una aplicació registri un filtre d\'entrada per a l\'emissió de tots els esdeveniments d\'usuari abans no s\'enviïn. Aplicacions malicioses podrien controlar la IU del sistema sense la intervenció de l\'usuari."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"apagar parcialment"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Posa el gestor d\'activitats en estat d\'apagada. No fa una apagada completa."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"impedir els canvis d\'aplicació"</string>
