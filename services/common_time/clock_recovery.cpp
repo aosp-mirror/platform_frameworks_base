@@ -225,6 +225,9 @@ bool ClockRecoveryLoop::pushDisciplineEvent(int64_t local_time,
     if (current_point == min_rtt || rtt < control_thresh_) {
         delta_f = delta = nominal_common_time - observed_common;
 
+        last_error_est_valid_ = true;
+        last_error_est_usec_ = delta;
+
         // Compute the error then clamp to the panic threshold.  If we ever
         // exceed this amt of error, its time to panic and reset the system.
         // Given that the error in the measurement of the error could be as
@@ -258,7 +261,6 @@ bool ClockRecoveryLoop::pushDisciplineEvent(int64_t local_time,
 
     // Save error terms for later.
     last_delta_f_ = delta_f;
-    last_delta_ = delta;
 
     // Clamp CO to +/- 100ppm.
     if (CO < COmin)
@@ -295,8 +297,8 @@ bool ClockRecoveryLoop::pushDisciplineEvent(int64_t local_time,
 int32_t ClockRecoveryLoop::getLastErrorEstimate() {
     Mutex::Autolock lock(&lock_);
 
-    if (last_delta_valid_)
-        return last_delta_;
+    if (last_error_est_valid_)
+        return last_error_est_usec_;
     else
         return ICommonClock::kErrorEstimateUnknown;
 }
@@ -310,8 +312,8 @@ void ClockRecoveryLoop::reset_l(bool position, bool frequency) {
     }
 
     if (frequency) {
-        last_delta_valid_ = false;
-        last_delta_ = 0;
+        last_error_est_valid_ = false;
+        last_error_est_usec_ = 0;
         last_delta_f_ = 0.0;
         CO = 0.0f;
         lastCObias = CObias = 0.0f;

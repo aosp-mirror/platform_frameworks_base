@@ -20,6 +20,8 @@
 #include <stdint.h>
 #include <unistd.h>
 
+#include <utils/String8.h>
+#include <utils/threads.h>
 #include <utils/Timers.h>
 
 namespace android {
@@ -41,6 +43,39 @@ class Timeout {
     // The systemTime() at which the timeout will be complete, or 0 if no
     // timeout is currently scheduled.
     nsecs_t mSystemEndTime;
+};
+
+class LogRing {
+  public:
+    LogRing(const char* header, size_t entries);
+    ~LogRing();
+
+    // Send a log message to logcat as well as storing it in the ring buffer.
+    void log(int prio, const char* tag, const char* fmt, ...);
+
+    // Add a log message the ring buffer, do not send the message to logcat.
+    void log(const char* fmt, ...);
+
+    // Dump the log to an fd (dumpsys style)
+    void dumpLog(int fd);
+
+  private:
+    class Entry {
+      public:
+        uint32_t count;
+        struct timeval first_ts;
+        struct timeval last_ts;
+        String8 s;
+    };
+
+    Mutex  mLock;
+    Entry* mRingBuffer;
+    size_t mSize;
+    size_t mWr;
+    bool   mIsFull;
+    const char* mHeader;
+
+    void internalLog(int prio, const char* tag, const char* fmt, va_list va);
 };
 
 }  // namespace android

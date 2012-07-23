@@ -354,6 +354,9 @@ status_t CommonTimeServer::dumpClockInterface(int fd,
 
         dump_printf("Active Clients : %u\n", activeClients);
         mClient_PacketRTTLog.dumpLog(fd, mCommonClock);
+        mStateChangeLog.dumpLog(fd);
+        mElectionLog.dumpLog(fd);
+        mBadPktLog.dumpLog(fd);
     }
 
     return NO_ERROR;
