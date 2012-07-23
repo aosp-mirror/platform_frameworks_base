@@ -2988,7 +2988,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      *
      * @param enabled True to enable static transformations on children, false otherwise.
      *
-     * @see #FLAG_SUPPORT_STATIC_TRANSFORMATIONS
+     * @see #getChildStaticTransformation(View, android.view.animation.Transformation)
      */
     protected void setStaticTransformationsEnabled(boolean enabled) {
         setBooleanFlag(FLAG_SUPPORT_STATIC_TRANSFORMATIONS, enabled);
@@ -2998,7 +2998,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * Sets  <code>t</code> to be the static transformation of the child, if set, returning a
      * boolean to indicate whether a static transform was set. The default implementation
      * simply returns <code>false</code>; subclasses may override this method for different
-     * behavior.
+     * behavior. {@link #setStaticTransformationsEnabled(boolean)} must be set to true
+     * for this method to be called.
      *
      * @param child The child view whose static transform is being requested
      * @param t The Transformation which will hold the result
@@ -3962,11 +3963,27 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             final int[] location = attachInfo.mInvalidateChildLocation;
             location[CHILD_LEFT_INDEX] = child.mLeft;
             location[CHILD_TOP_INDEX] = child.mTop;
-            if (!childMatrix.isIdentity()) {
+            if (!childMatrix.isIdentity() ||
+                    (mGroupFlags & ViewGroup.FLAG_SUPPORT_STATIC_TRANSFORMATIONS) != 0) {
                 RectF boundingRect = attachInfo.mTmpTransformRect;
                 boundingRect.set(dirty);
-                //boundingRect.inset(-0.5f, -0.5f);
-                childMatrix.mapRect(boundingRect);
+                Matrix transformMatrix;
+                if ((mGroupFlags & ViewGroup.FLAG_SUPPORT_STATIC_TRANSFORMATIONS) != 0) {
+                    Transformation t = attachInfo.mTmpTransformation;
+                    boolean transformed = getChildStaticTransformation(child, t);
+                    if (transformed) {
+                        transformMatrix = attachInfo.mTmpMatrix;
+                        transformMatrix.set(t.getMatrix());
+                        if (!childMatrix.isIdentity()) {
+                            transformMatrix.preConcat(childMatrix);
+                        }
+                    } else {
+                        transformMatrix = childMatrix;
+                    }
+                } else {
+                    transformMatrix = childMatrix;
+                }
+                transformMatrix.mapRect(boundingRect);
                 dirty.set((int) (boundingRect.left - 0.5f),
                         (int) (boundingRect.top - 0.5f),
                         (int) (boundingRect.right + 0.5f),

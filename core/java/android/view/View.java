@@ -12877,7 +12877,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         // to call invalidate() successfully when doing animations
         mPrivateFlags |= DRAWN;
 
-        if (!concatMatrix && canvas.quickReject(mLeft, mTop, mRight, mBottom, Canvas.EdgeType.BW) &&
+        if (!concatMatrix && (flags & ViewGroup.FLAG_SUPPORT_STATIC_TRANSFORMATIONS) == 0 &&
+                canvas.quickReject(mLeft, mTop, mRight, mBottom, Canvas.EdgeType.BW) &&
                 (mPrivateFlags & DRAW_ANIMATION) == 0) {
             mPrivateFlags2 |= VIEW_QUICK_REJECTED;
             return more;
@@ -17294,6 +17295,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * Temporary for use in computing hit areas with transformed views
          */
         final RectF mTmpTransformRect = new RectF();
+
+        /**
+         * Temporary for use in transforming invalidation rect
+         */
+        final Matrix mTmpMatrix = new Matrix();
+
+        /**
+         * Temporary for use in transforming invalidation rect
+         */
+        final Transformation mTmpTransformation = new Transformation();
 
         /**
          * Temporary list for use in collecting focusable descendents of a view.
