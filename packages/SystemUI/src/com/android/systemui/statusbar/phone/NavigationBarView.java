@@ -22,6 +22,7 @@ import android.animation.ObjectAnimator;
 import android.app.StatusBarManager;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
@@ -431,13 +432,14 @@ public class NavigationBarView extends LinearLayout {
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("NavigationBarView {");
         final Rect r = new Rect();
+        final Point size = new Point();
+        mDisplay.getRealSize(size);
 
         pw.println(String.format("      this: " + PhoneStatusBar.viewInfo(this)
                         + " " + visibilityToString(getVisibility())));
 
         getWindowVisibleDisplayFrame(r);
-        final boolean offscreen = r.right > mDisplay.getRawWidth()
-            || r.bottom > mDisplay.getRawHeight();
+        final boolean offscreen = r.right > size.x || r.bottom > size.y;
         pw.println("      window: " 
                 + r.toShortString()
                 + " " + visibilityToString(getWindowVisibility())

@@ -36,6 +36,7 @@ import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
+import android.graphics.Point;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -49,6 +50,7 @@ import android.util.Pair;
 import android.util.Slog;
 import android.util.TypedValue;
 import android.util.Xml;
+import android.view.Display;
 import android.view.WindowManager;
 import android.widget.RemoteViews;
 
@@ -188,11 +190,12 @@ class AppWidgetServiceImpl {
 
     void computeMaximumWidgetBitmapMemory() {
         WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-        int height = wm.getDefaultDisplay().getRawHeight();
-        int width = wm.getDefaultDisplay().getRawWidth();
+        Display display = wm.getDefaultDisplay();
+        Point size = new Point();
+        display.getRealSize(size);
         // Cap memory usage at 1.5 times the size of the display
         // 1.5 * 4 bytes/pixel * w * h ==> 6 * w * h
-        mMaxWidgetBitmapMemory = 6 * width * height;
+        mMaxWidgetBitmapMemory = 6 * size.x * size.y;
     }
 
     public void systemReady(boolean safeMode) {

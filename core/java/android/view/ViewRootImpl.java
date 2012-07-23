@@ -331,7 +331,7 @@ public final class ViewRootImpl implements ViewParent,
             if (!mInitialized) {
                 try {
                     InputMethodManager imm = InputMethodManager.getInstance(mainLooper);
-                    IWindowManager windowManager = Display.getWindowManager();
+                    IWindowManager windowManager = WindowManagerImpl.getWindowManagerService();
                     sWindowSession = windowManager.openSession(
                             imm.getClient(), imm.getInputContext());
                     float animatorScale = windowManager.getAnimationScale(2);
