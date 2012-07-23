@@ -468,7 +468,13 @@ public class SmsMessage extends SmsMessageBase {
      *  {@link com.android.internal.telephony.cdma.sms.SmsEnvelope#MESSAGE_TYPE_ACKNOWLEDGE},
     */
     /* package */ int getMessageType() {
-        return mEnvelope.messageType;
+        // NOTE: mEnvelope.messageType is not set correctly for cell broadcasts with some RILs.
+        // Use the service category parameter to detect CMAS and other cell broadcast messages.
+        if (mEnvelope.serviceCategory != 0) {
+            return SmsEnvelope.MESSAGE_TYPE_BROADCAST;
+        } else {
+            return SmsEnvelope.MESSAGE_TYPE_POINT_TO_POINT;
+        }
     }
 
     /**
