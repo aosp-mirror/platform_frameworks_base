@@ -651,8 +651,8 @@ message sent by the application server. See <a href="adv.html#collapsible">Advan
   <tr>
     <td><code>data</code></td>
     <td>A JSON object whose fields represents the key-value pairs of the message's payload data. If present, the payload data it will be
-included in the Intent as application data, with the key being the extra's name. For instance, <code>"data":{"score":"3x1"}</code> would result in an intent extra named <code>score</code> whose value is the string <code>3x1</code>
-There is no limit on the number of key/value pairs, though there is a limit on the total size of the message. Optional.</td>
+included in the Intent as application data, with the key being the extra's name. For instance, <code>"data":{"score":"3x1"}</code> would result in an intent extra named <code>score</code> whose value is the string <code>3x1</code>. 
+There is no limit on the number of key/value pairs, though there is a limit on the total size of the message (4kb). Note that the values <em>must be enclosed by strings</em>. If you want to include objects or other non-string data types (such as integers or booleans), you have to do the conversion to string yourself. Optional.</td>
   </tr>
   <tr>
     <td><code>delay_while_idle</code></td>
