@@ -197,18 +197,18 @@ public abstract class HardwareRenderer {
     /**
      * Initializes the hardware renderer for the specified surface.
      * 
-     * @param holder The holder for the surface to hardware accelerate.
+     * @param surface The surface to hardware accelerate
      * 
      * @return True if the initialization was successful, false otherwise.
      */
-    abstract boolean initialize(SurfaceHolder holder) throws Surface.OutOfResourcesException;
+    abstract boolean initialize(Surface surface) throws Surface.OutOfResourcesException;
     
     /**
      * Updates the hardware renderer for the specified surface.
-     * 
-     * @param holder The holder for the surface to hardware accelerate
+     *
+     * @param surface The surface to hardware accelerate
      */
-    abstract void updateSurface(SurfaceHolder holder) throws Surface.OutOfResourcesException;
+    abstract void updateSurface(Surface surface) throws Surface.OutOfResourcesException;
 
     /**
      * Destroys the layers used by the specified view hierarchy.
@@ -228,10 +228,10 @@ public abstract class HardwareRenderer {
     /**
      * This method should be invoked whenever the current hardware renderer
      * context should be reset.
-     * 
-     * @param holder The holder for the surface to hardware accelerate
+     *
+     * @param surface The surface to hardware accelerate
      */
-    abstract void invalidate(SurfaceHolder holder);
+    abstract void invalidate(Surface surface);
 
     /**
      * This method should be invoked to ensure the hardware renderer is in
@@ -474,14 +474,14 @@ public abstract class HardwareRenderer {
      *
      * @param width The width of the drawing surface.
      * @param height The height of the drawing surface.
-     * @param holder The target surface
+     * @param surface The surface to hardware accelerate
      */
-    void initializeIfNeeded(int width, int height, SurfaceHolder holder)
+    void initializeIfNeeded(int width, int height, Surface surface)
             throws Surface.OutOfResourcesException {
         if (isRequested()) {
             // We lost the gl context, so recreate it.
             if (!isEnabled()) {
-                if (initialize(holder)) {
+                if (initialize(surface)) {
                     setup(width, height);
                 }
             }
@@ -742,10 +742,10 @@ public abstract class HardwareRenderer {
         }
 
         @Override
-        boolean initialize(SurfaceHolder holder) throws Surface.OutOfResourcesException {
+        boolean initialize(Surface surface) throws Surface.OutOfResourcesException {
             if (isRequested() && !isEnabled()) {
                 initializeEgl();
-                mGl = createEglSurface(holder);
+                mGl = createEglSurface(surface);
                 mDestroyed = false;
 
                 if (mGl != null) {
@@ -771,9 +771,9 @@ public abstract class HardwareRenderer {
         }
         
         @Override
-        void updateSurface(SurfaceHolder holder) throws Surface.OutOfResourcesException {
+        void updateSurface(Surface surface) throws Surface.OutOfResourcesException {
             if (isRequested() && isEnabled()) {
-                createEglSurface(holder);
+                createEglSurface(surface);
             }
         }
 
@@ -888,7 +888,7 @@ public abstract class HardwareRenderer {
             Log.d(LOG_TAG, "  SURFACE_TYPE = 0x" + Integer.toHexString(value[0]));
         }
 
-        GL createEglSurface(SurfaceHolder holder) throws Surface.OutOfResourcesException {
+        GL createEglSurface(Surface surface) throws Surface.OutOfResourcesException {
             // Check preconditions.
             if (sEgl == null) {
                 throw new RuntimeException("egl not initialized");
@@ -908,7 +908,7 @@ public abstract class HardwareRenderer {
             destroySurface();
 
             // Create an EGL surface we can render into.
-            if (!createSurface(holder)) {
+            if (!createSurface(surface)) {
                 return null;
             }
 
@@ -982,7 +982,7 @@ public abstract class HardwareRenderer {
         }
 
         @Override
-        void invalidate(SurfaceHolder holder) {
+        void invalidate(Surface surface) {
             // Cancels any existing buffer to ensure we'll get a buffer
             // of the right size before we call eglSwapBuffers
             sEgl.eglMakeCurrent(sEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
@@ -993,8 +993,8 @@ public abstract class HardwareRenderer {
                 setEnabled(false);
             }
 
-            if (holder.getSurface().isValid()) {
-                if (!createSurface(holder)) {
+            if (surface.isValid()) {
+                if (!createSurface(surface)) {
                     return;
                 }
 
@@ -1006,8 +1006,8 @@ public abstract class HardwareRenderer {
             }
         }
 
-        private boolean createSurface(SurfaceHolder holder) {
-            mEglSurface = sEgl.eglCreateWindowSurface(sEglDisplay, sEglConfig, holder, null);
+        private boolean createSurface(Surface surface) {
+            mEglSurface = sEgl.eglCreateWindowSurface(sEglDisplay, sEglConfig, surface, null);
 
             if (mEglSurface == null || mEglSurface == EGL_NO_SURFACE) {
                 int error = sEgl.eglGetError();

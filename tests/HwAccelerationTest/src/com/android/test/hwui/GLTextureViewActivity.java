@@ -22,7 +22,6 @@ import android.app.Activity;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 import android.graphics.SurfaceTexture;
 import android.opengl.GLUtils;
 import android.os.Bundle;
@@ -278,7 +277,7 @@ public class GLTextureViewActivity extends Activity implements TextureView.Surfa
             return texture;
         }
         
-        private int buildProgram(String vertex, String fragment) {
+        private static int buildProgram(String vertex, String fragment) {
             int vertexShader = buildShader(vertex, GL_VERTEX_SHADER);
             if (vertexShader == 0) return 0;
 
@@ -309,7 +308,7 @@ public class GLTextureViewActivity extends Activity implements TextureView.Surfa
             return program;
         }
         
-        private int buildShader(String source, int type) {
+        private static int buildShader(String source, int type) {
             int shader = glCreateShader(type);
 
             glShaderSource(shader, source);
@@ -337,7 +336,7 @@ public class GLTextureViewActivity extends Activity implements TextureView.Surfa
             }
         }
 
-        private void checkGlError() {
+        private static void checkGlError() {
             int error = glGetError();
             if (error != GL_NO_ERROR) {
                 Log.w(LOG_TAG, "GL error = 0x" + Integer.toHexString(error));
@@ -420,7 +419,7 @@ public class GLTextureViewActivity extends Activity implements TextureView.Surfa
             return null;
         }
         
-        private int[] getConfig() {
+        private static int[] getConfig() {
             return new int[] {
                     EGL10.EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
                     EGL10.EGL_RED_SIZE, 8,
