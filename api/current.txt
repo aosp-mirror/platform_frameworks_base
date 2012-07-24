@@ -660,8 +660,10 @@ package android {
     field public static final int listPreferredItemHeight = 16842829; // 0x101004d
     field public static final int listPreferredItemHeightLarge = 16843654; // 0x1010386
     field public static final int listPreferredItemHeightSmall = 16843655; // 0x1010387
+    field public static final int listPreferredItemPaddingEnd = 16843710; // 0x10103be
     field public static final int listPreferredItemPaddingLeft = 16843683; // 0x10103a3
     field public static final int listPreferredItemPaddingRight = 16843684; // 0x10103a4
+    field public static final int listPreferredItemPaddingStart = 16843709; // 0x10103bd
     field public static final int listSelector = 16843003; // 0x10100fb
     field public static final int listSeparatorTextViewStyle = 16843272; // 0x1010208
     field public static final int listViewStyle = 16842868; // 0x1010074

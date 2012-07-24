@@ -31,8 +31,8 @@
                   android:layout_weight="1"
                   android:orientation="vertical"
                   android:gravity="start|center_vertical"
-                  android:paddingStart="?android:attr/listPreferredItemPaddingLeft"
-                  android:paddingEnd="?android:attr/listPreferredItemPaddingRight">
+                  android:paddingStart="?android:attr/listPreferredItemPaddingStart"
+                  android:paddingEnd="?android:attr/listPreferredItemPaddingEnd">
 
         <TextView android:id="@android:id/text1"
                   android:layout_width="match_parent"
