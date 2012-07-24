@@ -83,6 +83,8 @@ public class EGLImpl implements EGL10 {
         } else if (native_window instanceof SurfaceHolder) {
             SurfaceHolder holder = (SurfaceHolder)native_window;
             sur = holder.getSurface();
+        } else if (native_window instanceof Surface) {
+            sur = (Surface) native_window;
         }
 
         int eglSurfaceId;
@@ -94,8 +96,7 @@ public class EGLImpl implements EGL10 {
         } else {
             throw new java.lang.UnsupportedOperationException(
                 "eglCreateWindowSurface() can only be called with an instance of " +
-                "SurfaceView, SurfaceHolder or SurfaceTexture at the moment, " + 
-                "this will be fixed later.");
+                "Surface, SurfaceView, SurfaceHolder or SurfaceTexture at the moment.");
         }
 
         if (eglSurfaceId == 0) {

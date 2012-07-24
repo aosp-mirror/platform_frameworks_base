@@ -1500,7 +1500,8 @@ public final class ViewRootImpl implements ViewParent,
 
                         if (mAttachInfo.mHardwareRenderer != null) {
                             try {
-                                hwInitialized = mAttachInfo.mHardwareRenderer.initialize(mHolder);
+                                hwInitialized = mAttachInfo.mHardwareRenderer.initialize(
+                                        mHolder.getSurface());
                             } catch (Surface.OutOfResourcesException e) {
                                 Log.e(TAG, "OutOfResourcesException initializing HW surface", e);
                                 try {
@@ -1533,7 +1534,7 @@ public final class ViewRootImpl implements ViewParent,
                         mSurfaceHolder == null && mAttachInfo.mHardwareRenderer != null) {
                     mFullRedrawNeeded = true;
                     try {
-                        mAttachInfo.mHardwareRenderer.updateSurface(mHolder);
+                        mAttachInfo.mHardwareRenderer.updateSurface(mHolder.getSurface());
                     } catch (Surface.OutOfResourcesException e) {
                         Log.e(TAG, "OutOfResourcesException updating HW surface", e);
                         try {
@@ -1624,7 +1625,7 @@ public final class ViewRootImpl implements ViewParent,
                         mHeight != mAttachInfo.mHardwareRenderer.getHeight()) {
                     mAttachInfo.mHardwareRenderer.setup(mWidth, mHeight);
                     if (!hwInitialized) {
-                        mAttachInfo.mHardwareRenderer.invalidate(mHolder);
+                        mAttachInfo.mHardwareRenderer.invalidate(mHolder.getSurface());
                     }
                 }
             }
@@ -2887,7 +2888,7 @@ public final class ViewRootImpl implements ViewParent,
                             mFullRedrawNeeded = true;
                             try {
                                 mAttachInfo.mHardwareRenderer.initializeIfNeeded(mWidth, mHeight,
-                                        mHolder);
+                                        mHolder.getSurface());
                             } catch (Surface.OutOfResourcesException e) {
                                 Log.e(TAG, "OutOfResourcesException locking surface", e);
                                 try {
