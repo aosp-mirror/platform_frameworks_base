@@ -30,8 +30,8 @@ import android.widget.TimePicker.OnTimeChangedListener;
 /**
  * A dialog that prompts the user for the time of day using a {@link TimePicker}.
  *
- * <p>See the <a href="{@docRoot}resources/tutorials/views/hello-timepicker.html">Time Picker
- * tutorial</a>.</p>
+ * <p>See the <a href="{@docRoot}guide/topics/ui/controls/pickers.html">Pickers</a>
+ * guide.</p>
  */
 public class TimePickerDialog extends AlertDialog
         implements OnClickListener, OnTimeChangedListener {

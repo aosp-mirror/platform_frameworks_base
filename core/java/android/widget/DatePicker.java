@@ -53,8 +53,8 @@ import java.util.TimeZone;
  * displayed. Also the minimal and maximal date from which dates to be selected
  * can be customized.
  * <p>
- * See the <a href="{@docRoot}resources/tutorials/views/hello-datepicker.html">Date
- * Picker tutorial</a>.
+ * See the <a href="{@docRoot}guide/topics/ui/controls/pickers.html">Pickers</a>
+ * guide.
  * </p>
  * <p>
  * For a dialog using this view, see {@link android.app.DatePickerDialog}.

@@ -56,8 +56,8 @@ import static android.util.Log.d;
  * {@link #ALIGN_PARENT_BOTTOM}.
  * </p>
  *
- * <p>See the <a href="{@docRoot}resources/tutorials/views/hello-relativelayout.html">Relative
- * Layout tutorial</a>.</p>
+ * <p>See the <a href="{@docRoot}guide/topics/ui/layout/relative.html">Relative
+ * Layout</a> guide.</p>
  *
  * <p>
  * Also see {@link android.widget.RelativeLayout.LayoutParams RelativeLayout.LayoutParams} for
