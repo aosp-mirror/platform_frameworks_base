@@ -18,7 +18,7 @@ next.link=starting-activity.html
 <h2>This lesson teaches you to</h2>
 
 <ol>
-  <li><a href="#LinearLayout">Use a Linear Layout</a></li>
+  <li><a href="#LinearLayout">Create a Linear Layout</a></li>
   <li><a href="#TextInput">Add a Text Field</a></li>
   <li><a href="#Strings">Add String Resources</a></li>
   <li><a href="#Button">Add a Button</a></li>
@@ -28,10 +28,9 @@ next.link=starting-activity.html
 
 <h2>You should also read</h2>
 <ul>
-  <li><a href="{@docRoot}guide/topics/ui/declaring-layout.html">XML Layouts</a></li>
+  <li><a href="{@docRoot}guide/topics/ui/declaring-layout.html">Layouts</a></li>
 </ul>
- 
- 
+
 </div> 
 </div> 
 
@@ -39,63 +38,68 @@ next.link=starting-activity.html
 
 <p>The graphical user interface for an Android app is built using a hierarchy of {@link
 android.view.View} and {@link android.view.ViewGroup} objects. {@link android.view.View} objects are
-usually UI widgets such as a button or text field and {@link android.view.ViewGroup} objects are
+usually UI widgets such as <a href="{@docRoot}guide/topics/ui/controls/button.html">buttons</a> or
+<a href="{@docRoot}guide/topics/ui/controls/text.html">text fields</a> and {@link
+android.view.ViewGroup} objects are
 invisible view containers that define how the child views are laid out, such as in a
 grid or a vertical list.</p>
 
 <p>Android provides an XML vocabulary that corresponds to the subclasses of {@link
-android.view.View} and {@link android.view.ViewGroup} so you can define your UI in XML with a
-hierarchy of view elements.</p>
+android.view.View} and {@link android.view.ViewGroup} so you can define your UI in XML using
+a hierarchy of UI elements.</p>
 
 
 <div class="sidebox-wrapper">
 <div class="sidebox">
   <h2>Alternative Layouts</h2>
-  <p>Separating the UI layout into XML files is important for several reasons,
-but it's especially important on Android because it allows you to define alternative layouts for
+  <p>Declaring your UI layout in XML rather than runtime code is useful for several reasons,
+but it's especially important so you can create different layouts for
 different screen sizes. For example, you can create two versions of a layout and tell
 the system to use one on "small" screens and the other on "large" screens. For more information,
 see the class about <a
 href="{@docRoot}training/basics/supporting-devices/index.html">Supporting Different
-Hardware</a>.</p>
+Devices</a>.</p>
 </div>
 </div>
 
-<img src="{@docRoot}images/viewgroup.png" alt="" width="440" />
+<img src="{@docRoot}images/viewgroup.png" alt="" width="400" />
 <p class="img-caption"><strong>Figure 1.</strong> Illustration of how {@link
-android.view.ViewGroup} objects form branches in the layout and contain {@link
+android.view.ViewGroup} objects form branches in the layout and contain other {@link
 android.view.View} objects.</p>
 
-<p>In this lesson, you'll create a layout in XML that includes a text input field and a
+<p>In this lesson, you'll create a layout in XML that includes a text field and a
 button. In the following lesson, you'll respond when the button is pressed by sending the
 content of the text field to another activity.</p>
 
 
 
-<h2 id="LinearLayout">Use a Linear Layout</h2>
+<h2 id="LinearLayout">Create a Linear Layout</h2>
 
-<p>Open the <code>main.xml</code> file from the <code>res/layout/</code>
-directory (every new Android project includes this file by default).</p>
+<p>Open the <code>activity_main.xml</code> file from the <code>res/layout/</code>
+directory.</p>
 
 <p class="note"><strong>Note:</strong> In Eclipse, when you open a layout file, you’re first shown
-the ADT Layout Editor. This is an editor that helps you build layouts using WYSIWYG tools. For this
-lesson, you’re going to work directly with the XML, so click the <em>main.xml</em> tab at
+the Graphical Layout editor. This is an editor that helps you build layouts using WYSIWYG tools. For this
+lesson, you’re going to work directly with the XML, so click the <em>activity_main.xml</em> tab at
 the bottom of the screen to open the XML editor.</p>
 
-<p>By default, the <code>main.xml</code> file includes a layout with a {@link
-android.widget.LinearLayout} root view group and a {@link android.widget.TextView} child view.
-You’re going to re-use the {@link android.widget.LinearLayout} in this lesson, but change its
-contents and layout orientation.</p>
+<p>The BlankActivity template you used to start this project creates the
+<code>activity_main.xml</code> file with a {@link
+android.widget.RelativeLayout} root view and a {@link android.widget.TextView} child view.</p>
 
-<p>First, delete the {@link android.widget.TextView} element and change the value
+<p>First, delete the {@link android.widget.TextView &lt;TextView>} element and change the {@link
+  android.widget.RelativeLayout &lt;RelativeLayout>} element to {@link
+  android.widget.LinearLayout &lt;LinearLayout>}. Then add the
 <a href="{@docRoot}reference/android/widget/LinearLayout.html#attr_android:orientation">{@code
-android:orientation}</a> to be <code>"horizontal"</code>. The result looks like this:</p>
+android:orientation}</a> attribute and set it to <code>"horizontal"</code>.
+The result looks like this:</p>
 
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?>
 &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:orientation="horizontal" >
 &lt;/LinearLayout>
 </pre>
@@ -116,26 +120,18 @@ android:layout_height}</a>, are required for all views in order to specify their
 <p>Because the {@link android.widget.LinearLayout} is the root view in the layout, it should fill
 the entire screen area that's
 available to the app by setting the width and height to
-<code>"fill_parent"</code>.</p>
-
-<p class="note"><strong>Note:</strong> Beginning with Android 2.2 (API level 8),
-<code>"fill_parent"</code> has been renamed <code>"match_parent"</code> to better reflect the
-behavior. The reason is that if you set a view to <code>"fill_parent"</code> it does not expand to
-fill the remaining space after sibling views are considered, but instead expands to
-<em>match</em> the size of the parent view no matter what&mdash;it will overlap any sibling
-views.</p>
+<code>"match_parent"</code>. This value declares that the view should expand its width
+or height to <em>match</em> the width or height of the parent view.</p>
 
 <p>For more information about layout properties, see the <a
-href="{@docRoot}guide/topics/ui/declaring-layout.html">XML Layout</a> guide.</p>
+href="{@docRoot}guide/topics/ui/declaring-layout.html">Layout</a> guide.</p>
 
 
 
 <h2 id="TextInput">Add a Text Field</h2>
 
 <p>To create a user-editable text field, add an {@link android.widget.EditText
-&lt;EditText>} element inside the {@link android.widget.LinearLayout &lt;LinearLayout>}. The {@link
-android.widget.EditText} class is a subclass of {@link android.view.View} that displays an editable
-text field.</p>
+&lt;EditText>} element inside the {@link android.widget.LinearLayout &lt;LinearLayout>}.</p>
 
 <p>Like every {@link android.view.View} object, you must define certain XML attributes to specify
 the {@link android.widget.EditText} object's properties. Here’s how you should declare it
@@ -164,6 +160,8 @@ href="{@docRoot}reference/android/view/View.html#attr_android:id">{@code android
 which allows you to reference that view from other code.</p>
   <p>The SDK tools generate the {@code R.java} each time you compile your app. You should never
 modify this file by hand.</p>
+  <p>For more information, read the guide to <a
+href="{@docRoot}guide/topics/resources/providing-resources.html">Providing Resources</a>.</p>
 </div>
 </div>
 
@@ -175,17 +173,18 @@ modify this file by hand.</p>
 from your app code, such as to read and manipulate the object (you'll see this in the next
 lesson).
 
-<p>The at-symbol (<code>&#64;</code>) is required when you want to refer to a resource object from
-XML, followed by the resource type ({@code id} in this case), then the resource name ({@code
-edit_message}). (Other resources can use the same name as long as they are not the same
-resource type&mdash;for example, the string resource uses the same name.)</p>
+<p>The at sign (<code>&#64;</code>) is required when you're referring to any resource object from
+XML. It is followed by the resource type ({@code id} in this case), a slash, then the resource name
+({@code edit_message}).</p>
 
-<p>The plus-symbol (<code>+</code>) is needed only when you're defining a resource ID for the
-first time. It tells the SDK tools that the resource ID needs to be created. Thus, when the app is
-compiled, the SDK tools use the ID value, <code>edit_message</code>, to create a new identifier in
-your project's {@code gen/R.java} file that is now associated with the {@link
-android.widget.EditText} element. Once the resource ID is created, other references to the ID do not
-need the plus symbol. This is the only attribute that may need the plus-symbol. See the sidebox for
+<p>The plus sign (<code>+</code>) before the resource type is needed only when you're defining a
+resource ID for the first time. When you compile the app,
+the SDK tools use the ID name to create a new resource ID in
+your project's {@code gen/R.java} file that refers to the {@link
+android.widget.EditText} element. Once the resource ID is declared once this way,
+other references to the ID do not
+need the plus sign. Using the plus sign is necessary only when specifying a new resource ID and not
+needed for concrete resources such as strings or layouts. See the sidebox for
 more information about resource objects.</p></dd>
 
 <dt><a
@@ -195,39 +194,42 @@ href="{@docRoot}reference/android/view/View.html#attr_android:layout_height">{@c
 android:layout_height}</a></dt>
 <dd>Instead of using specific sizes for the width and height, the <code>"wrap_content"</code> value
 specifies that the view should be only as big as needed to fit the contents of the view. If you
-were to instead use <code>"fill_parent"</code>, then the {@link android.widget.EditText}
-element would fill the screen, because it'd match the size of the parent {@link
+were to instead use <code>"match_parent"</code>, then the {@link android.widget.EditText}
+element would fill the screen, because it would match the size of the parent {@link
 android.widget.LinearLayout}. For more information, see the <a
-href="{@docRoot}guide/topics/ui/declaring-layout.html">XML Layouts</a> guide.</dd>
+href="{@docRoot}guide/topics/ui/declaring-layout.html">Layouts</a> guide.</dd>
 
 <dt><a
 href="{@docRoot}reference/android/widget/TextView.html#attr_android:hint">{@code
 android:hint}</a></dt>
 <dd>This is a default string to display when the text field is empty. Instead of using a hard-coded
-string as the value, the {@code "@string/edit_message"} value refers to a string resource defined
-in a separate file. Because this value refers to an existing resource, it does not need the
-plus-symbol. However, because you haven't defined the string resource yet, you’ll see a compiler
-error when you add the {@code "@string/edit_message"} value. You'll fix this in the next section by
-defining the string resource.</dd>
+string as the value, the {@code "@string/edit_message"} value refers to a string resource defined in
+a separate file. Because this refers to a concrete resource (not just an identifier), it does not
+need the plus sign. However, because you haven't defined the string resource yet, you’ll see a
+compiler error at first. You'll fix this in the next section by defining the string.
+<p class="note"><strong>Note:</strong> This string resource has the same name as the element ID:
+{@code edit_message}. However, references
+to resources are always scoped by the resource type (such as {@code id} or {@code string}), so using
+the same name does not cause collisions.</p>
+</dd>
 </dl>
 
 
 
 <h2 id="Strings">Add String Resources</h2>
 
-<p>When you need to add text in the user interface, you should always specify each string of text in
-a resource file. String resources allow you to maintain a single location for all string
-values, which makes it easier to find and update text. Externalizing the strings also allows you to
+<p>When you need to add text in the user interface, you should always specify each string as
+a resource. String resources allow you to manage all UI text in a single location,
+which makes it easier to find and update text. Externalizing the strings also allows you to
 localize your app to different languages by providing alternative definitions for each
-string.</p>
+string resource.</p>
 
 <p>By default, your Android project includes a string resource file at
-<code>res/values/strings.xml</code>. Open this file, delete the existing <code>"hello"</code>
-string, and add one for the
-<code>"edit_message"</code> string used by the {@link android.widget.EditText &lt;EditText>}
-element.</p>
+<code>res/values/strings.xml</code>. Open this file and delete the {@code &lt;string>} element
+named <code>"hello_world"</code>. Then add a new one named
+<code>"edit_message"</code> and set the value to "Enter a message."</p>
 
-<p>While you’re in this file, also add a string for the button you’ll soon add, called
+<p>While you’re in this file, also add a "Send" string for the button you’ll soon add, called
 <code>"button_send"</code>.</p>
 
 <p>The result for <code>strings.xml</code> looks like this:</p>
@@ -238,12 +240,14 @@ element.</p>
     &lt;string name="app_name">My First App&lt;/string>
     &lt;string name="edit_message">Enter a message&lt;/string>
     &lt;string name="button_send">Send&lt;/string>
+    &lt;string name="menu_settings">Settings&lt;/string>
+    &lt;string name="title_activity_main">MainActivity&lt;/string>
 &lt;/resources>
 </pre>
 
-<p>For more information about using string resources to localize your app for several languages,
+<p>For more information about using string resources to localize your app for other languages,
 see the <a
-href="{@docRoot}training/basics/supporting-devices/index.html">Supporting Various Devices</a>
+href="{@docRoot}training/basics/supporting-devices/index.html">Supporting Different Devices</a>
 class.</p>
 
 
@@ -280,23 +284,26 @@ android.widget.Button} widgets have their widths set to
 <code>"wrap_content"</code>.</p>
 
 <p>This works fine for the button, but not as well for the text field, because the user might type
-something longer and there's extra space left on the screen. So, it'd be nice to fill that width
-using the text field.
-{@link android.widget.LinearLayout} enables such a design with the <em>weight</em> property, which
+something longer. So, it would be nice to fill the unused screen width
+with the text field. You can do this inside a
+{@link android.widget.LinearLayout} with the <em>weight</em> property, which
 you can specify using the <a
 href="{@docRoot}reference/android/widget/LinearLayout.LayoutParams.html#weight">{@code
 android:layout_weight}</a> attribute.</p>
 
-<p>The weight value allows you to specify the amount of remaining space each view should consume,
-relative to the amount consumed by sibling views, just like the ingredients in a drink recipe: "2
+<p>The weight value is a number that specifies the amount of remaining space each view should
+consume,
+relative to the amount consumed by sibling views. This works kind of like the 
+amount of ingredients in a drink recipe: "2
 parts vodka, 1 part coffee liqueur" means two-thirds of the drink is vodka. For example, if you give
-one view a weight of 2 and another one a weight of 1, the sum is 3, so the first view gets 2/3 of
-the remaining space and the second view gets the rest. If you give a third view a weight of 1,
-then the first view now gets 1/2 the remaining space, while the remaining two each get 1/4.</p>
+one view a weight of 2 and another one a weight of 1, the sum is 3, so the first view fills 2/3 of
+the remaining space and the second view fills the rest. If you add a third view and give it a weight
+of 1, then the first view (with weight of 2) now gets 1/2 the remaining space, while the remaining
+two each get 1/4.</p>
 
 <p>The default weight for all views is 0, so if you specify any weight value
-greater than 0 to only one view, then that view fills whatever space remains after each view is
-given the space it requires. So, to fill the remaining space with the {@link
+greater than 0 to only one view, then that view fills whatever space remains after all views are
+given the space they require. So, to fill the remaining space in your layout with the {@link
 android.widget.EditText} element, give it a weight of 1 and leave the button with no weight.</p>
 
 <pre>
@@ -331,8 +338,9 @@ android.widget.LinearLayout}.</p>
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?>
 &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:orientation="horizontal">
     &lt;EditText android:id="@+id/edit_message"
         android:layout_weight="1"
@@ -351,7 +359,8 @@ that the SDK tools generated when you created the project, so you can now run th
 results:</p>
 
 <ul>
-  <li>In Eclipse, click <strong>Run</strong> from the toolbar.</li>
+  <li>In Eclipse, click Run <img src="{@docRoot}images/tools/eclipse-run.png" 
+                                 style="vertical-align:baseline;margin:0" /> from the toolbar.</li>
   <li>Or from a command line, change directories to the root of your Android project and
 execute:
 <pre>

@@ -4,8 +4,9 @@ walkthru=1
 @jd:body
 
 
-<p>The Android SDK separates different parts of the SDK into separately downloadable packages. The
-SDK starter package that you've installed includes only the SDK Tools. To develop an Android app,
+<p>The Android SDK separates tools, platforms, and other components into packages you can
+  download using the Android SDK Manager. The original
+SDK package you've downloaded includes only the SDK Tools. To develop an Android app,
 you also need to download at least one Android platform and the latest SDK Platform-tools.</p>
 
 <p>You can update and install SDK packages at any time using the Android SDK Manager.</p>
@@ -48,28 +49,32 @@ you keep this up to date.</dd>
   <dd><strong>Required.</strong> You must install this package when you install the SDK for
 the first time.</dd>
   <dt>SDK Platform</dt>
-  <dd><strong>Required.</strong>You need to download <strong
-style="color:red">at least one platform</strong> into your environment so you're
-able to compile your application. In order to provide the best user experience on the latest
-devices, we recommend that you use the latest platform version as your build target. You'll
-still be able to run your app on older versions, but you must build against the latest version
-in order to use new features when running on devices with the latest version of Android.</dd>
+  <dd><strong>Required.</strong>You must download <em>at least one platform</em> into your
+environment so you're able to compile your application. In order to provide the best user experience
+on the latest devices, we recommend that you use the latest platform version as your build target.
+You'll still be able to run your app on older versions, but you must build against the latest
+version in order to use new features when running on devices with the latest version of Android.
+  <p>To get started, download the latest Android version, plus the lowest version you plan
+  to support (we recommend Android 2.2 for your lowest version).</p></dd>
   <dt>System Image</dt>
   <dd>Recommended. Although you might have one or more Android-powered devices on which to test
  your app, it's unlikely you have a device for every version of Android your app supports. It's
-a good practice to download a system image for each version of Android you support and use them
-to test your app on the Android emulator.</dd>
+a good practice to download system images for all versions of Android your app supports and test
+your app running on them with the <a href="{@docRoot}tools/devices/emulator.html">Android emulator</a>.</dd>
+  <dt>Android Support</dt>
+  <dd>Recommended. Includes a static library that allows you to use some of the latest
+Android APIs (such as <a href="{@docRoot}guide/components/fragments.html">fragments</a>,
+plus others not included in the framework at all) on devices running
+a platform version as old as Android 1.6. All of the activity templates available when creating
+a new project with the <a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT Plugin</a>
+require this. For more information, read <a
+href="{@docRoot}tools/extras/support-library.html">Support Library</a>.</dd>
   <dt>SDK Samples</dt>
   <dd>Recommended. The samples give you source code that you can use to learn about
 Android, load as a project and run, or reuse in your own app. Note that multiple
 samples packages are available &mdash; one for each Android platform version. When
 you are choosing a samples package to download, select the one whose API Level
 matches the API Level of the Android platform that you plan to use.</dd>
-  <dt>Android Support</dt>
-  <dd>Recommended. The APIs available in this static library allow you to use a variety of new
-framework features (including some not available in even the latest version) on devices running
-a platform version as old as Android 1.6. For more information, read <a
-href="{@docRoot}tools/extras/support-library.html">Support Library</a>.</dd>
 </dl>
 
 
