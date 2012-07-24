@@ -56,7 +56,7 @@ page.title=GCM Architectural Overview
 </div>
 </div>
 
-<p>Google Cloud Messaging for Android (GCM) is a service that helps
+<p>Google Cloud Messaging for Android (GCM) is a free service that helps
 developers  send data from servers to their Android applications on  Android devices. This could be a lightweight message telling the Android application that there is new data to be fetched from the server (for instance, a movie uploaded by a friend), or it could be a message containing up to 4kb of payload data (so apps like instant messaging can consume the message directly). The GCM service handles all aspects  of queueing of
   messages and delivery to the target Android application running  on the target
   device.</p>
@@ -545,7 +545,8 @@ private void handleRegistration(Intent intent) {
 <p>The <code>com.google.android.c2dm.intent.RECEIVE</code> intent is used by GCM to 
 deliver the messages sent by the 3rd-party server to the application running in the device.
 If the server included key-pair values in the <code>data</code> parameter, they are available as 
-extras in this intent, with the keys being the extra names.
+extras in this intent, with the keys being the extra names. GCM also includes an  extra called 
+<code>from</code> which contains the sender ID as an string.
 
 <p>Here is an example, again using the <code>MyIntentReceiver</code> class:</p>
 
@@ -651,8 +652,9 @@ message sent by the application server. See <a href="adv.html#collapsible">Advan
   <tr>
     <td><code>data</code></td>
     <td>A JSON object whose fields represents the key-value pairs of the message's payload data. If present, the payload data it will be
-included in the Intent as application data, with the key being the extra's name. For instance, <code>"data":{"score":"3x1"}</code> would result in an intent extra named <code>score</code> whose value is the string <code>3x1</code>
-There is no limit on the number of key/value pairs, though there is a limit on the total size of the message. Optional.</td>
+included in the Intent as application data, with the key being the extra's name. For instance, <code>"data":{"score":"3x1"}</code> would result in an intent extra named <code>score</code> whose value is the string <code>3x1</code>. 
+There is no limit on the number of key/value pairs, though there is a limit on the total size of the message (4kb). Note that the values <em>must be enclosed by strings</em>. If you want to include objects or other non-string data types (such as integers or booleans), you have to do the conversion to string yourself. Also note that the key cannot be a reserved word ("from" or any word starting with "google."). Optional.</td>
+
   </tr>
   <tr>
     <td><code>delay_while_idle</code></td>
@@ -683,7 +685,7 @@ sent. Optional. The default value is <code>false</code>, and must be a JSON bool
   </tr>
   <tr>
     <td><code>data.&lt;key&gt;</code></td>
-    <td>Payload data, expressed as parameters prefixed with <code>data.</code> and suffixed as the key. For instance, a parameter of <code>data.score=3x1</code> would result in an intent extra named <code>score</code> whose value is the string <code>3x1</code>. There is no limit on the number of key/value parameters, though there is a limit on the total size of the  message. Optional.</td>
+    <td>Payload data, expressed as parameters prefixed with <code>data.</code> and suffixed as the key. For instance, a parameter of <code>data.score=3x1</code> would result in an intent extra named <code>score</code> whose value is the string <code>3x1</code>. There is no limit on the number of key/value parameters, though there is a limit on the total size of the  message. Note that the key cannot be a reserved word ("from" or any word starting with "google."). Optional.</td>
   </tr>
   <tr>
     <td><code>delay_while_idle</code></td>
@@ -879,8 +881,20 @@ messages.
 <li>Request originated from a server not whitelisted in the Server Key IPs.</li>
 
 </ul>
-Check that the token you're sending inside the <code>Authorization</code> header is the correct API key associated with your project.<br/>
+Check that the token you're sending inside the <code>Authorization</code> header is the correct API key associated with your project. You can check the validity of your API key by running the following command:<br/>
 
+<pre># api_key=YOUR_API_KEY
+
+# curl --header "Authorization: key=$api_key" --header Content-Type:"application/json" https://android.googleapis.com/gcm/send  -d "{\"registration_ids\":[\"ABC\"]}"</pre>
+
+
+If you receive a 401 HTTP status code, your API key is not valid. Otherwise you should see something like this:<br/>
+
+<pre>
+{"multicast_id":6782339717028231855,"success":0,"failure":1,"canonical_ids":0,"results":[{"error":"InvalidRegistration"}]}
+</pre>
+If you want to confirm the validity of a registration ID, you can do so by replacing "ABC" with the registration ID.
+<br/>
 Happens when the HTTP status code is 401.
 
   <dt id="timeout"><strong>Timeout</strong></dt>
@@ -974,7 +988,7 @@ registration_id=32
 
 <p>To view  statistics and any error messages for your GCM applications:</p>
 <ol>
-  <li> Go to <code><a href="http://play.google.com/apps/publish">play.google.com/apps/publish</a></code>.</li>
+  <li> Go to the <code><a href="http://play.google.com/apps/publish">Android Developer Console</a></code>.</li>
   <li>Login with your developer account. 
   <p>You will see a page that has a list of all of your apps.</p></li>
   <li> Click on the &quot;statistics&quot; link next to the app for which you want to view GCM stats. 
@@ -982,6 +996,8 @@ registration_id=32
   <li>Go to the drop-down menu and select the GCM metric you want to view. 
   </li>
 </ol>
+<p class="note"><strong>Note:</strong> Stats on the Google API Console are not enabled for GCM. You must use the <a href="http://play.google.com/apps/publish">Android Developer Console</a>.</p>
+
 <h2 id="example">Examples</h2>
 <p>See the <a href="demo.html">GCM Demo Application</a> document.</p>
 
