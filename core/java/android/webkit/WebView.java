@@ -599,13 +599,17 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Sets the HTTP authentication credentials for a given host and realm.
+     * Stores HTTP authentication credentials for a given host and realm. This
+     * method is intended to be used with
+     * {@link WebViewClient#onReceivedHttpAuthRequest}.
      *
-     * @param host the host for the credentials
-     * @param realm the realm for the credentials
-     * @param username the username for the password. If it is null, it means
-     *                 password can't be saved.
+     * @param host the host to which the credentials apply
+     * @param realm the realm to which the credentials apply
+     * @param username the username
      * @param password the password
+     * @see getHttpAuthUsernamePassword
+     * @see WebViewDatabase#hasHttpAuthUsernamePassword
+     * @see WebViewDatabase#clearHttpAuthUsernamePassword
      */
     public void setHttpAuthUsernamePassword(String host, String realm,
             String username, String password) {
@@ -614,13 +618,18 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Retrieves the HTTP authentication username and password for a given
-     * host and realm pair
+     * Retrieves HTTP authentication credentials for a given host and realm.
+     * This method is intended to be used with
+     * {@link WebViewClient#onReceivedHttpAuthRequest}.
      *
-     * @param host the host for which the credentials apply
-     * @param realm the realm for which the credentials apply
-     * @return String[] if found. String[0] is username, which can be null and
-     *         String[1] is password. Return null if it can't find anything.
+     * @param host the host to which the credentials apply
+     * @param realm the realm to which the credentials apply
+     * @return the credentials as a String array, if found. The first element
+     *         is the username and the second element is the password. Null if
+     *         no credentials are found.
+     * @see setHttpAuthUsernamePassword
+     * @see WebViewDatabase#hasHttpAuthUsernamePassword
+     * @see WebViewDatabase#clearHttpAuthUsernamePassword
      */
     public String[] getHttpAuthUsernamePassword(String host, String realm) {
         checkThread();

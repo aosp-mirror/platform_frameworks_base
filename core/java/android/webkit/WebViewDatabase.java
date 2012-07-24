@@ -66,16 +66,23 @@ public class WebViewDatabase {
     }
 
     /**
-     * Gets whether there are any HTTP authentication username/password combinations saved.
+     * Gets whether there are any saved credentials for HTTP authentication.
      *
-     * @return true if there are any HTTP authentication username/passwords saved
+     * @return whether there are any saved credentials
+     * @see Webview#getHttpAuthUsernamePassword
+     * @see Webview#setHttpAuthUsernamePassword
+     * @see clearHttpAuthUsernamePassword
      */
     public boolean hasHttpAuthUsernamePassword() {
         throw new MustOverrideException();
     }
 
     /**
-     * Clears any HTTP authentication username/passwords that are saved.
+     * Clears any saved credentials for HTTP authentication.
+     *
+     * @see Webview#getHttpAuthUsernamePassword
+     * @see Webview#setHttpAuthUsernamePassword
+     * @see hasHttpAuthUsernamePassword
      */
     public void clearHttpAuthUsernamePassword() {
         throw new MustOverrideException();
