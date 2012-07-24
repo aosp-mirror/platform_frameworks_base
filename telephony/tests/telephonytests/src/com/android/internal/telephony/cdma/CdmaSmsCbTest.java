@@ -635,7 +635,7 @@ public class CdmaSmsCbTest extends AndroidTestCase {
         assertEquals(CdmaSmsCbProgramData.OPERATION_ADD_CATEGORY, programData.getOperation());
         assertEquals(SmsEnvelope.SERVICE_CATEGORY_CMAS_EXTREME_THREAT, programData.getCategory());
         assertEquals(CAT_EXTREME_THREAT, programData.getCategoryName());
-        assertEquals("en", programData.getLanguageCode());
+        assertEquals(BearerData.LANGUAGE_ENGLISH, programData.getLanguage());
         assertEquals(100, programData.getMaxMessages());
         assertEquals(CdmaSmsCbProgramData.ALERT_OPTION_DEFAULT_ALERT, programData.getAlertOption());
     }
@@ -692,7 +692,7 @@ public class CdmaSmsCbTest extends AndroidTestCase {
         assertEquals(CdmaSmsCbProgramData.OPERATION_DELETE_CATEGORY, programData.getOperation());
         assertEquals(SmsEnvelope.SERVICE_CATEGORY_CMAS_SEVERE_THREAT, programData.getCategory());
         assertEquals(CAT_SEVERE_THREAT, programData.getCategoryName());
-        assertEquals("en", programData.getLanguageCode());
+        assertEquals(BearerData.LANGUAGE_ENGLISH, programData.getLanguage());
         assertEquals(0, programData.getMaxMessages());
         assertEquals(CdmaSmsCbProgramData.ALERT_OPTION_NO_ALERT, programData.getAlertOption());
 
@@ -701,7 +701,7 @@ public class CdmaSmsCbTest extends AndroidTestCase {
         assertEquals(SmsEnvelope.SERVICE_CATEGORY_CMAS_CHILD_ABDUCTION_EMERGENCY,
                 programData.getCategory());
         assertEquals(CAT_AMBER_ALERTS, programData.getCategoryName());
-        assertEquals("en", programData.getLanguageCode());
+        assertEquals(BearerData.LANGUAGE_ENGLISH, programData.getLanguage());
         assertEquals(0, programData.getMaxMessages());
         assertEquals(CdmaSmsCbProgramData.ALERT_OPTION_NO_ALERT, programData.getAlertOption());
     }

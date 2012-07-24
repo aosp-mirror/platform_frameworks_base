@@ -339,6 +339,22 @@ public abstract class SMSDispatcher extends Handler {
     }
 
     /**
+     * Grabs a wake lock and sends intent as an ordered broadcast.
+     * Used for setting a custom result receiver for CDMA SCPD.
+     *
+     * @param intent intent to broadcast
+     * @param permission Receivers are required to have this permission
+     * @param resultReceiver the result receiver to use
+     */
+    public void dispatch(Intent intent, String permission, BroadcastReceiver resultReceiver) {
+        // Hold a wake lock for WAKE_LOCK_TIMEOUT seconds, enough to give any
+        // receivers time to take their own wake locks.
+        mWakeLock.acquire(WAKE_LOCK_TIMEOUT);
+        mContext.sendOrderedBroadcast(intent, permission, resultReceiver,
+                this, Activity.RESULT_OK, null, null);
+    }
+
+    /**
      * Called when SMS send completes. Broadcasts a sentIntent on success.
      * On failure, either sets up retries or broadcasts a sentIntent with
      * the failure in the result code.
