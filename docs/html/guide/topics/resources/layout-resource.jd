@@ -161,11 +161,10 @@ included layout. Only effective if <code>android:layout_height</code> is also de
 supported by the root element in the included layout and they will override those defined in the
 root element.</p>
 
-      <p class="caution"><strong>Caution:</strong> If you want to override the layout dimensions,
-you must override both <code>android:layout_height</code> and
-<code>android:layout_width</code>&mdash;you cannot override only the height or only the width.
-If you override only one, it will not take effect. (Other layout properties, such as weight,
-are still inherited from the source layout.)</p>
+    <p class="caution"><strong>Caution:</strong> If you want to override layout attributes using
+      the <code>&lt;include&gt;</code> tag, you must override both
+      <code>android:layout_height</code> and <code>android:layout_width</code> in order for
+      other layout attributes to take effect.</p>
 
     <p>Another way to include a layout is to use {@link android.view.ViewStub}. It is a lightweight
 View that consumes no layout space until you explicitly inflate it, at which point, it includes a
