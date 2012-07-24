@@ -107,6 +107,7 @@
       <li><a href="<?cs var:toroot ?>tools/debugging/debugging-projects-cmdline.html"><span class="en">From Other IDEs</span></a></li>
       <li><a href="<?cs var:toroot ?>tools/debugging/ddms.html"><span class="en">Using DDMS</span></a></li>
       <li><a href="<?cs var:toroot ?>tools/debugging/debugging-log.html"><span class="en">Reading and Writing Logs</span></a></li>
+      <li><a href="<?cs var:toroot ?>tools/debugging/improving-w-lint.html"><span class="en">Improving Your Code with lint</span></a></li>
       <li><a href="<?cs var:toroot ?>tools/debugging/debugging-ui.html"><span class="en">Optimizing your UI</span></a></li>
       <li><a href="<?cs var:toroot ?>tools/debugging/debugging-tracing.html"><span class="en">Profiling with Traceview and dmtracedump</span></a></li>
       <li><a href="<?cs var:toroot ?>tools/debugging/debugging-devtools.html"><span class="en">Using the Dev Tools App</span></a></li>
@@ -137,7 +138,7 @@ class="en">Tools Help</span></a></div>
       <li><a href="<?cs var:toroot ?>tools/help/etc1tool.html">etc1tool</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/hierarchy-viewer.html">Hierarchy Viewer</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/hprof-conv.html">hprof-conv</a></li>
-      <li><a href="<?cs var:toroot ?>tools/help/layoutopt.html">layoutopt</a></li>
+      <li><a href="<?cs var:toroot ?>tools/help/lint.html">lint</span></a></li>
       <li><a href="<?cs var:toroot ?>tools/help/logcat.html">logcat</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/mksdcard.html">mksdcard</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/monkey.html">monkey</a></li>
