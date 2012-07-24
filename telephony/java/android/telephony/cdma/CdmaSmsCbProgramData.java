@@ -81,8 +81,8 @@ public class CdmaSmsCbProgramData implements Parcelable {
     /** Service category to modify. */
     private final int mCategory;
 
-    /** Language used for service category name (ISO 639 two character code). */
-    private final String mLanguage;
+    /** Language used for service category name (defined in BearerData.LANGUAGE_*). */
+    private final int mLanguage;
 
     /** Maximum number of messages to store for this service category. */
     private final int mMaxMessages;
@@ -94,7 +94,7 @@ public class CdmaSmsCbProgramData implements Parcelable {
     private final String mCategoryName;
 
     /** Create a new CdmaSmsCbProgramData object with the specified values. */
-    public CdmaSmsCbProgramData(int operation, int category, String language, int maxMessages,
+    public CdmaSmsCbProgramData(int operation, int category, int language, int maxMessages,
             int alertOption, String categoryName) {
         mOperation = operation;
         mCategory = category;
@@ -108,7 +108,7 @@ public class CdmaSmsCbProgramData implements Parcelable {
     CdmaSmsCbProgramData(Parcel in) {
         mOperation = in.readInt();
         mCategory = in.readInt();
-        mLanguage = in.readString();
+        mLanguage = in.readInt();
         mMaxMessages = in.readInt();
         mAlertOption = in.readInt();
         mCategoryName = in.readString();
@@ -124,7 +124,7 @@ public class CdmaSmsCbProgramData implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mOperation);
         dest.writeInt(mCategory);
-        dest.writeString(mLanguage);
+        dest.writeInt(mLanguage);
         dest.writeInt(mMaxMessages);
         dest.writeInt(mAlertOption);
         dest.writeString(mCategoryName);
@@ -147,10 +147,10 @@ public class CdmaSmsCbProgramData implements Parcelable {
     }
 
     /**
-     * Returns the ISO-639-1 language code for the service category name, or null if not present.
-     * @return a two-digit ISO-639-1 language code, e.g. "en" for English
+     * Returns the CDMA language code for this service category.
+     * @return one of the language values defined in BearerData.LANGUAGE_*
      */
-    public String getLanguageCode() {
+    public int getLanguage() {
         return mLanguage;
     }
 
@@ -171,7 +171,7 @@ public class CdmaSmsCbProgramData implements Parcelable {
     }
 
     /**
-     * Returns the service category name, in the language specified by {@link #getLanguageCode()}.
+     * Returns the service category name, in the language specified by {@link #getLanguage()}.
      * @return an optional service category name
      */
     public String getCategoryName() {
