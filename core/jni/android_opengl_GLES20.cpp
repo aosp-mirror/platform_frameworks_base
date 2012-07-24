@@ -289,7 +289,7 @@ android_glBufferData__IILjava_nio_Buffer_2I
             goto exit;
         }
     }
-    if (data == NULL) {
+    if (data_buf && data == NULL) {
         char * _dataBase = (char *)_env->GetPrimitiveArrayCritical(_array, (jboolean *) 0);
         data = (GLvoid *) (_dataBase + _bufferOffset);
     }
@@ -4536,7 +4536,7 @@ android_glTexImage2D__IIIIIIIILjava_nio_Buffer_2
     if (pixels_buf) {
         pixels = (GLvoid *)getPointer(_env, pixels_buf, &_array, &_remaining, &_bufferOffset);
     }
-    if (pixels == NULL) {
+    if (pixels_buf && pixels == NULL) {
         char * _pixelsBase = (char *)_env->GetPrimitiveArrayCritical(_array, (jboolean *) 0);
         pixels = (GLvoid *) (_pixelsBase + _bufferOffset);
     }
@@ -4766,7 +4766,7 @@ android_glTexSubImage2D__IIIIIIIILjava_nio_Buffer_2
     if (pixels_buf) {
         pixels = (GLvoid *)getPointer(_env, pixels_buf, &_array, &_remaining, &_bufferOffset);
     }
-    if (pixels == NULL) {
+    if (pixels_buf && pixels == NULL) {
         char * _pixelsBase = (char *)_env->GetPrimitiveArrayCritical(_array, (jboolean *) 0);
         pixels = (GLvoid *) (_pixelsBase + _bufferOffset);
     }
