@@ -653,7 +653,7 @@ message sent by the application server. See <a href="adv.html#collapsible">Advan
     <td><code>data</code></td>
     <td>A JSON object whose fields represents the key-value pairs of the message's payload data. If present, the payload data it will be
 included in the Intent as application data, with the key being the extra's name. For instance, <code>"data":{"score":"3x1"}</code> would result in an intent extra named <code>score</code> whose value is the string <code>3x1</code>. 
-There is no limit on the number of key/value pairs, though there is a limit on the total size of the message (4kb). Note that the values <em>must be enclosed by strings</em>. If you want to include objects or other non-string data types (such as integers or booleans), you have to do the conversion to string yourself. Also note that the key cannot be a reserved word ("from" or any word starting with "google."). Optional.</td>
+There is no limit on the number of key/value pairs, though there is a limit on the total size of the message (4kb). Note that the values <em>must be enclosed by strings</em>. If you want to include objects or other non-string data types (such as integers or booleans), you have to do the conversion to string yourself. Also note that the key cannot be a reserved word (<code>from</code> or any word starting with <code>google.</code>). Optional.</td>
 
   </tr>
   <tr>
@@ -685,7 +685,7 @@ sent. Optional. The default value is <code>false</code>, and must be a JSON bool
   </tr>
   <tr>
     <td><code>data.&lt;key&gt;</code></td>
-    <td>Payload data, expressed as parameters prefixed with <code>data.</code> and suffixed as the key. For instance, a parameter of <code>data.score=3x1</code> would result in an intent extra named <code>score</code> whose value is the string <code>3x1</code>. There is no limit on the number of key/value parameters, though there is a limit on the total size of the  message. Note that the key cannot be a reserved word ("from" or any word starting with "google."). Optional.</td>
+    <td>Payload data, expressed as parameters prefixed with <code>data.</code> and suffixed as the key. For instance, a parameter of <code>data.score=3x1</code> would result in an intent extra named <code>score</code> whose value is the string <code>3x1</code>. There is no limit on the number of key/value parameters, though there is a limit on the total size of the  message. Note that the key cannot be a reserved word (<code>from</code> or any word starting with <code>google.</code>). Optional.</td>
   </tr>
   <tr>
     <td><code>delay_while_idle</code></td>
@@ -697,7 +697,7 @@ sent. Optional. The default value is <code>false</code>, and must be a JSON bool
   </tr>
 </table>
 
-
+<p>If you want to test your request (either JSON or plain text) without delivering the message to the devices, you can set an optional HTTP parameter called <code>dry_run</code> with the value <code>true</code>. The result will be almost identical to running the request without this parameter, except that the message will not be delivered to the devices. Consequently, the response will contain fake IDs for the message and multicast fields (see <a href="#response">Response format</a>).</p>
 
   <h4 id="example-requests">Example requests</h4>
   <p>Here is the smallest possible request (a message without any parameters and just one recipient) using JSON:</p>
@@ -883,9 +883,11 @@ messages.
 </ul>
 Check that the token you're sending inside the <code>Authorization</code> header is the correct API key associated with your project. You can check the validity of your API key by running the following command:<br/>
 
+
 <pre># api_key=YOUR_API_KEY
 
 # curl --header "Authorization: key=$api_key" --header Content-Type:"application/json" https://android.googleapis.com/gcm/send  -d "{\"registration_ids\":[\"ABC\"]}"</pre>
+
 
 
 If you receive a 401 HTTP status code, your API key is not valid. Otherwise you should see something like this:<br/>
