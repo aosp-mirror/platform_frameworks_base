@@ -29,6 +29,7 @@ import android.os.IRemoteCallback;
 import android.os.RemoteException;
 import android.util.DisplayMetrics;
 import android.view.Display;
+import android.view.DisplayInfo;
 import android.view.Display_Delegate;
 import android.view.Gravity;
 import android.view.IApplicationToken;
@@ -70,20 +71,14 @@ public class BridgeWindowManager implements IWindowManager {
     }
 
     @Override
-    public int getMaximumSizeDimension() throws RemoteException {
-        return 0;
-    }
-
-    @Override
-    public void getCurrentSizeRange(Point smallestSize, Point largestSize) {
-    }
-
-    @Override
-    public void getDisplaySize(Point arg0) throws RemoteException {
-    }
-
-    @Override
-    public void getRealDisplaySize(Point arg0) throws RemoteException {
+    public void getDisplayInfo(int arg0, DisplayInfo arg1) throws RemoteException {
+        arg1.appWidth = mMetrics.widthPixels;
+        arg1.appHeight = mMetrics.heightPixels;
+        arg1.logicalWidth = mMetrics.widthPixels;
+        arg1.logicalHeight = mMetrics.heightPixels;
+        arg1.logicalDensity = mMetrics.density;
+        arg1.physicalXDpi = mMetrics.xdpi;
+        arg1.physicalYDpi = mMetrics.ydpi;
     }
 
     // ---- unused implementation of IWindowManager ----

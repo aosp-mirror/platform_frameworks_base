@@ -1955,6 +1955,15 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a
+     * {@link android.hardware.display.DisplayManager} for interacting with display devices.
+     *
+     * @see #getSystemService
+     * @see android.hardware.display.DisplayManager
+     */
+    public static final String DISPLAY_SERVICE = "display";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a
      * {@link android.os.SchedulingPolicyService} for managing scheduling policy.
      *
      * @see #getSystemService

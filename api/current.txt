@@ -5355,6 +5355,7 @@ package android.content {
     field public static final int CONTEXT_INCLUDE_CODE = 1; // 0x1
     field public static final int CONTEXT_RESTRICTED = 4; // 0x4
     field public static final java.lang.String DEVICE_POLICY_SERVICE = "device_policy";
+    field public static final java.lang.String DISPLAY_SERVICE = "display";
     field public static final java.lang.String DOWNLOAD_SERVICE = "download";
     field public static final java.lang.String DROPBOX_SERVICE = "dropbox";
     field public static final java.lang.String INPUT_METHOD_SERVICE = "input_method";
@@ -9948,6 +9949,13 @@ package android.hardware {
     field public static final deprecated int SENSOR_TEMPERATURE = 4; // 0x4
     field public static final deprecated int SENSOR_TRICORDER = 64; // 0x40
     field public static final float STANDARD_GRAVITY = 9.80665f;
+  }
+
+}
+
+package android.hardware.display {
+
+  public final class DisplayManager {
   }
 
 }
@@ -23120,13 +23128,15 @@ package android.view {
     method protected void onApplyThemeResource(android.content.res.Resources.Theme, int, boolean);
   }
 
-  public class Display {
+  public final class Display {
     method public void getCurrentSizeRange(android.graphics.Point, android.graphics.Point);
     method public int getDisplayId();
     method public deprecated int getHeight();
     method public void getMetrics(android.util.DisplayMetrics);
     method public deprecated int getOrientation();
-    method public int getPixelFormat();
+    method public deprecated int getPixelFormat();
+    method public void getRealMetrics(android.util.DisplayMetrics);
+    method public void getRealSize(android.graphics.Point);
     method public void getRectSize(android.graphics.Rect);
     method public float getRefreshRate();
     method public int getRotation();

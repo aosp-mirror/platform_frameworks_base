@@ -22,6 +22,7 @@ import com.android.server.EventLogTags;
 import com.android.server.LightsService;
 import com.android.server.Watchdog;
 import com.android.server.am.BatteryStatsService;
+import com.android.server.display.DisplayManagerService;
 
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
@@ -254,6 +255,7 @@ public class PowerManagerService extends IPowerManager.Stub
     private IActivityManager mActivityService;
     private IBatteryStats mBatteryStats;
     private BatteryService mBatteryService;
+    private DisplayManagerService mDisplayManagerService;
     private SensorManager mSensorManager;
     private Sensor mProximitySensor;
     private Sensor mLightSensor;
@@ -543,12 +545,13 @@ public class PowerManagerService extends IPowerManager.Stub
     private ContentQueryMap mSettings;
 
     public void init(Context context, LightsService lights, IActivityManager activity,
-            BatteryService battery) {
+            BatteryService battery, DisplayManagerService displayManagerService) {
         mLightsService = lights;
         mContext = context;
         mActivityService = activity;
         mBatteryStats = BatteryStatsService.getService();
         mBatteryService = battery;
+        mDisplayManagerService = displayManagerService;
 
         mLcdLight = lights.getLight(LightsService.LIGHT_ID_BACKLIGHT);
         mButtonLight = lights.getLight(LightsService.LIGHT_ID_BUTTONS);

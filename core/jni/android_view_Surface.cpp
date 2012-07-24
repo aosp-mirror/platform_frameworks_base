@@ -473,9 +473,9 @@ static void Surface_closeTransaction(
 }
 
 static void Surface_setOrientation(
-        JNIEnv* env, jobject clazz, jint display, jint orientation, jint flags)
+        JNIEnv* env, jobject clazz, jint display, jint orientation)
 {
-    int err = SurfaceComposerClient::setOrientation(display, orientation, flags);
+    int err = SurfaceComposerClient::setOrientation(display, orientation, 0);
     if (err < 0) {
         doThrowIAE(env);
     }
@@ -839,7 +839,7 @@ static JNINativeMethod gSurfaceMethods[] = {
     {"unlockCanvas",        "(Landroid/graphics/Canvas;)V", (void*)Surface_unlockCanvas },
     {"openTransaction",     "()V",  (void*)Surface_openTransaction },
     {"closeTransaction",    "()V",  (void*)Surface_closeTransaction },
-    {"setOrientation",      "(III)V", (void*)Surface_setOrientation },
+    {"setOrientation",      "(II)V", (void*)Surface_setOrientation },
     {"screenshot",          "(II)Landroid/graphics/Bitmap;", (void*)Surface_screenshotAll },
     {"screenshot",          "(IIII)Landroid/graphics/Bitmap;", (void*)Surface_screenshot },
     {"setLayer",            "(I)V", (void*)Surface_setLayer },

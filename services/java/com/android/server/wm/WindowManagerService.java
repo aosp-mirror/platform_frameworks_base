@@ -45,6 +45,8 @@ import com.android.server.AttributeCache;
 import com.android.server.EventLogTags;
 import com.android.server.Watchdog;
 import com.android.server.am.BatteryStatsService;
+import com.android.server.display.DisplayDeviceInfo;
+import com.android.server.display.DisplayManagerService;
 import com.android.server.input.InputManagerService;
 import com.android.server.power.PowerManagerService;
 import com.android.server.power.ShutdownThread;
@@ -104,6 +106,7 @@ import android.util.SparseIntArray;
 import android.util.TypedValue;
 import android.view.Choreographer;
 import android.view.Display;
+import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.IApplicationToken;
 import android.view.IInputFilter;
@@ -271,7 +274,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private static final String SYSTEM_SECURE = "ro.secure";
     private static final String SYSTEM_DEBUGGABLE = "ro.debuggable";
-    private static final String SYSTEM_HEADLESS = "ro.config.headless";
 
     /**
      * Condition waited on by {@link #reenableKeyguard} to know the call to
@@ -482,14 +484,7 @@ public class WindowManagerService extends IWindowManager.Stub
     int mInitialDisplayHeight = 0;
     int mBaseDisplayWidth = 0;
     int mBaseDisplayHeight = 0;
-    int mCurDisplayWidth = 0;
-    int mCurDisplayHeight = 0;
-    int mAppDisplayWidth = 0;
-    int mAppDisplayHeight = 0;
-    int mSmallestDisplayWidth = 0;
-    int mSmallestDisplayHeight = 0;
-    int mLargestDisplayWidth = 0;
-    int mLargestDisplayHeight = 0;
+    final DisplayInfo mDisplayInfo = new DisplayInfo();
 
     int mRotation = 0;
     int mForcedAppOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -616,6 +611,7 @@ public class WindowManagerService extends IWindowManager.Stub
     float mAnimatorDurationScale = 1.0f;
 
     final InputManagerService mInputManager;
+    final DisplayManagerService mDisplayManager;
 
     // Who is holding the screen on.
     Session mHoldingScreenOn;
@@ -785,9 +781,10 @@ public class WindowManagerService extends IWindowManager.Stub
     final boolean mOnlyCore;
 
     public static WindowManagerService main(Context context,
-            PowerManagerService pm, boolean haveInputMethods, boolean allowBootMsgs,
+            PowerManagerService pm, DisplayManagerService dm,
+            boolean haveInputMethods, boolean allowBootMsgs,
             boolean onlyCore) {
-        WMThread thr = new WMThread(context, pm, haveInputMethods, allowBootMsgs, onlyCore);
+        WMThread thr = new WMThread(context, pm, dm, haveInputMethods, allowBootMsgs, onlyCore);
         thr.start();
 
         synchronized (thr) {
@@ -806,15 +803,18 @@ public class WindowManagerService extends IWindowManager.Stub
 
         private final Context mContext;
         private final PowerManagerService mPM;
+        private final DisplayManagerService mDisplayManager;
         private final boolean mHaveInputMethods;
         private final boolean mAllowBootMessages;
         private final boolean mOnlyCore;
 
         public WMThread(Context context, PowerManagerService pm,
+                DisplayManagerService dm,
                 boolean haveInputMethods, boolean allowBootMsgs, boolean onlyCore) {
             super("WindowManager");
             mContext = context;
             mPM = pm;
+            mDisplayManager = dm;
             mHaveInputMethods = haveInputMethods;
             mAllowBootMessages = allowBootMsgs;
             mOnlyCore = onlyCore;
@@ -825,7 +825,7 @@ public class WindowManagerService extends IWindowManager.Stub
             Looper.prepare();
             //Looper.myLooper().setMessageLogging(new LogPrinter(
             //        android.util.Log.DEBUG, TAG, android.util.Log.LOG_ID_SYSTEM));
-            WindowManagerService s = new WindowManagerService(mContext, mPM,
+            WindowManagerService s = new WindowManagerService(mContext, mPM, mDisplayManager,
                     mHaveInputMethods, mAllowBootMessages, mOnlyCore);
             android.os.Process.setThreadPriority(
                     android.os.Process.THREAD_PRIORITY_DISPLAY);
@@ -892,6 +892,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private WindowManagerService(Context context, PowerManagerService pm,
+            DisplayManagerService displayManager,
             boolean haveInputMethods, boolean showBootMsgs, boolean onlyCore) {
         mContext = context;
         mHaveInputMethods = haveInputMethods;
@@ -899,7 +900,8 @@ public class WindowManagerService extends IWindowManager.Stub
         mOnlyCore = onlyCore;
         mLimitedAlphaCompositing = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_sf_limitedAlpha);
-        mHeadless = "1".equals(SystemProperties.get(SYSTEM_HEADLESS, "0"));
+        mDisplayManager = displayManager;
+        mHeadless = displayManager.isHeadless();
 
         mPowerManager = pm;
         mPowerManager.setPolicy(mPolicy);
@@ -1650,8 +1652,8 @@ public class WindowManagerService extends IWindowManager.Stub
         mInnerFields.mWallpaperMayChange = false;
         int changed = 0;
 
-        final int dw = mAppDisplayWidth;
-        final int dh = mAppDisplayHeight;
+        final int dw = mDisplayInfo.appWidth;
+        final int dh = mDisplayInfo.appHeight;
 
         // First find top-most window that has asked to be on top of the
         // wallpaper; all wallpapers go behind it.
@@ -2060,8 +2062,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     void updateWallpaperOffsetLocked(WindowState changingTarget, boolean sync) {
-        final int dw = mAppDisplayWidth;
-        final int dh = mAppDisplayHeight;
+        final int dw = mDisplayInfo.appWidth;
+        final int dh = mDisplayInfo.appHeight;
 
         WindowState target = mWallpaperTarget;
         if (target != null) {
@@ -2123,8 +2125,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     void updateWallpaperVisibilityLocked() {
         final boolean visible = isWallpaperVisible(mWallpaperTarget);
-        final int dw = mAppDisplayWidth;
-        final int dh = mAppDisplayHeight;
+        final int dw = mDisplayInfo.appWidth;
+        final int dh = mDisplayInfo.appHeight;
 
         int curTokenIndex = mWallpaperTokens.size();
         while (curTokenIndex > 0) {
@@ -2699,9 +2701,11 @@ public class WindowManagerService extends IWindowManager.Stub
         mTmpFloats[Matrix.MSKEW_X] = dsdy;
         mTmpFloats[Matrix.MSCALE_Y] = dtdy;
         matrix.setValues(mTmpFloats);
-        final RectF dispRect = new RectF(0, 0, mCurDisplayWidth, mCurDisplayHeight);
+        final RectF dispRect = new RectF(0, 0,
+                mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight);
         matrix.mapRect(dispRect);
-        window.mGivenTouchableRegion.set(0, 0, mCurDisplayWidth, mCurDisplayHeight);
+        window.mGivenTouchableRegion.set(0, 0,
+                mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight);
         window.mGivenTouchableRegion.op((int)dispRect.left, (int)dispRect.top,
                 (int)dispRect.right, (int)dispRect.bottom, Region.Op.DIFFERENCE);
         window.mTouchableInsets = ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
@@ -2981,7 +2985,8 @@ public class WindowManagerService extends IWindowManager.Stub
             configChanged = updateOrientationFromAppTokensLocked(false);
             performLayoutAndPlaceSurfacesLocked();
             if (toBeDisplayed && win.mIsWallpaper) {
-                updateWallpaperOffsetLocked(win, mAppDisplayWidth, mAppDisplayHeight, false);
+                updateWallpaperOffsetLocked(win,
+                        mDisplayInfo.appWidth, mDisplayInfo.appHeight, false);
             }
             if (win.mAppToken != null) {
                 win.mAppToken.updateReportedVisibilityLocked();
@@ -3201,8 +3206,8 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         if (enter) {
             // Entering app zooms out from the center of the initial rect.
-            float scaleW = mNextAppTransitionStartWidth / (float) mAppDisplayWidth;
-            float scaleH = mNextAppTransitionStartHeight / (float) mAppDisplayHeight;
+            float scaleW = mNextAppTransitionStartWidth / (float) mDisplayInfo.appWidth;
+            float scaleH = mNextAppTransitionStartHeight / (float) mDisplayInfo.appHeight;
             Animation scale = new ScaleAnimation(scaleW, 1, scaleH, 1,
                     computePivot(mNextAppTransitionStartX, scaleW),
                     computePivot(mNextAppTransitionStartY, scaleH));
@@ -3222,8 +3227,8 @@ public class WindowManagerService extends IWindowManager.Stub
         final Interpolator interpolator = AnimationUtils.loadInterpolator(mContext,
                 com.android.internal.R.interpolator.decelerate_cubic);
         a.setInterpolator(interpolator);
-        a.initialize(mAppDisplayWidth, mAppDisplayHeight,
-                mAppDisplayWidth, mAppDisplayHeight);
+        a.initialize(mDisplayInfo.appWidth, mDisplayInfo.appHeight,
+                mDisplayInfo.appWidth, mDisplayInfo.appHeight);
         return a;
     }
 
@@ -3252,8 +3257,8 @@ public class WindowManagerService extends IWindowManager.Stub
         if (thumb) {
             // Animation for zooming thumbnail from its initial size to
             // filling the screen.
-            float scaleW = mAppDisplayWidth/thumbWidth;
-            float scaleH = mAppDisplayHeight/thumbHeight;
+            float scaleW = mDisplayInfo.appWidth/thumbWidth;
+            float scaleH = mDisplayInfo.appHeight/thumbHeight;
 
             Animation scale = new ScaleAnimation(1, scaleW, 1, scaleH,
                     computePivot(mNextAppTransitionStartX, 1/scaleW),
@@ -3273,8 +3278,8 @@ public class WindowManagerService extends IWindowManager.Stub
             a = set;
         } else if (enter) {
             // Entering app zooms out from the center of the thumbnail.
-            float scaleW = thumbWidth / mAppDisplayWidth;
-            float scaleH = thumbHeight / mAppDisplayHeight;
+            float scaleW = thumbWidth / mDisplayInfo.appWidth;
+            float scaleH = thumbHeight / mDisplayInfo.appHeight;
             Animation scale = new ScaleAnimation(scaleW, 1, scaleH, 1,
                     computePivot(mNextAppTransitionStartX, scaleW),
                     computePivot(mNextAppTransitionStartY, scaleH));
@@ -3300,8 +3305,8 @@ public class WindowManagerService extends IWindowManager.Stub
         final Interpolator interpolator = AnimationUtils.loadInterpolator(mContext,
                 com.android.internal.R.interpolator.decelerate_quad);
         a.setInterpolator(interpolator);
-        a.initialize(mAppDisplayWidth, mAppDisplayHeight,
-                mAppDisplayWidth, mAppDisplayHeight);
+        a.initialize(mDisplayInfo.appWidth, mDisplayInfo.appHeight,
+                mDisplayInfo.appWidth, mDisplayInfo.appHeight);
         return a;
     }
 
@@ -5498,8 +5503,8 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized(mWindowMap) {
             long ident = Binder.clearCallingIdentity();
 
-            dw = mCurDisplayWidth;
-            dh = mCurDisplayHeight;
+            dw = mDisplayInfo.logicalWidth;
+            dh = mDisplayInfo.logicalHeight;
 
             int aboveAppLayer = mPolicy.windowTypeToLayerLw(
                     WindowManager.LayoutParams.TYPE_APPLICATION) * TYPE_LAYER_MULTIPLIER
@@ -5793,8 +5798,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mWaitingForConfig = true;
         mLayoutNeeded = true;
         startFreezingDisplayLocked(inTransaction);
-        mInputManager.setDisplayOrientation(0, rotation,
-                mDisplay != null ? mDisplay.getExternalRotation() : Surface.ROTATION_0);
+        mInputManager.setDisplayOrientation(0, rotation, Surface.ROTATION_0);
 
         // We need to update our screen size information to match the new
         // rotation.  Note that this is redundant with the later call to
@@ -5816,7 +5820,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     && mAnimator.mScreenRotationAnimation.hasScreenshot()) {
                 if (mAnimator.mScreenRotationAnimation.setRotation(rotation, mFxSession,
                         MAX_ANIMATION_DURATION, mTransitionAnimationScale,
-                        mCurDisplayWidth, mCurDisplayHeight)) {
+                        mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight)) {
                     updateLayoutToAnimationLocked();
                 }
             }
@@ -6315,18 +6319,18 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private void adjustDisplaySizeRanges(int rotation, int dw, int dh) {
         final int width = mPolicy.getConfigDisplayWidth(dw, dh, rotation);
-        if (width < mSmallestDisplayWidth) {
-            mSmallestDisplayWidth = width;
+        if (width < mDisplayInfo.smallestNominalAppWidth) {
+            mDisplayInfo.smallestNominalAppWidth = width;
         }
-        if (width > mLargestDisplayWidth) {
-            mLargestDisplayWidth = width;
+        if (width > mDisplayInfo.largestNominalAppWidth) {
+            mDisplayInfo.largestNominalAppWidth = width;
         }
         final int height = mPolicy.getConfigDisplayHeight(dw, dh, rotation);
-        if (height < mSmallestDisplayHeight) {
-            mSmallestDisplayHeight = height;
+        if (height < mDisplayInfo.smallestNominalAppHeight) {
+            mDisplayInfo.smallestNominalAppHeight = height;
         }
-        if (height > mLargestDisplayHeight) {
-            mLargestDisplayHeight = height;
+        if (height > mDisplayInfo.largestNominalAppHeight) {
+            mDisplayInfo.largestNominalAppHeight = height;
         }
     }
 
@@ -6423,10 +6427,10 @@ public class WindowManagerService extends IWindowManager.Stub
             unrotDw = dw;
             unrotDh = dh;
         }
-        mSmallestDisplayWidth = 1<<30;
-        mSmallestDisplayHeight = 1<<30;
-        mLargestDisplayWidth = 0;
-        mLargestDisplayHeight = 0;
+        mDisplayInfo.smallestNominalAppWidth = 1<<30;
+        mDisplayInfo.smallestNominalAppHeight = 1<<30;
+        mDisplayInfo.largestNominalAppWidth = 0;
+        mDisplayInfo.largestNominalAppHeight = 0;
         adjustDisplaySizeRanges(Surface.ROTATION_0, unrotDw, unrotDh);
         adjustDisplaySizeRanges(Surface.ROTATION_90, unrotDh, unrotDw);
         adjustDisplaySizeRanges(Surface.ROTATION_180, unrotDw, unrotDh);
@@ -6437,7 +6441,7 @@ public class WindowManagerService extends IWindowManager.Stub
         sl = reduceConfigLayout(sl, Surface.ROTATION_90, density, unrotDh, unrotDw);
         sl = reduceConfigLayout(sl, Surface.ROTATION_180, density, unrotDw, unrotDh);
         sl = reduceConfigLayout(sl, Surface.ROTATION_270, density, unrotDh, unrotDw);
-        outConfig.smallestScreenWidthDp = (int)(mSmallestDisplayWidth / density);
+        outConfig.smallestScreenWidthDp = (int)(mDisplayInfo.smallestNominalAppWidth / density);
         outConfig.screenLayout = sl;
     }
 
@@ -6481,32 +6485,24 @@ public class WindowManagerService extends IWindowManager.Stub
                 || mRotation == Surface.ROTATION_270);
         final int realdw = rotated ? mBaseDisplayHeight : mBaseDisplayWidth;
         final int realdh = rotated ? mBaseDisplayWidth : mBaseDisplayHeight;
+        int dw = realdw;
+        int dh = realdh;
 
-        synchronized(mDisplaySizeLock) {
-            if (mAltOrientation) {
-                mCurDisplayWidth = realdw;
-                mCurDisplayHeight = realdh;
-                if (realdw > realdh) {
-                    // Turn landscape into portrait.
-                    int maxw = (int)(realdh/1.3f);
-                    if (maxw < realdw) {
-                        mCurDisplayWidth = maxw;
-                    }
-                } else {
-                    // Turn portrait into landscape.
-                    int maxh = (int)(realdw/1.3f);
-                    if (maxh < realdh) {
-                        mCurDisplayHeight = maxh;
-                    }
+        if (mAltOrientation) {
+            if (realdw > realdh) {
+                // Turn landscape into portrait.
+                int maxw = (int)(realdh/1.3f);
+                if (maxw < realdw) {
+                    dw = maxw;
                 }
             } else {
-                mCurDisplayWidth = realdw;
-                mCurDisplayHeight = realdh;
+                // Turn portrait into landscape.
+                int maxh = (int)(realdw/1.3f);
+                if (maxh < realdh) {
+                    dh = maxh;
+                }
             }
         }
-
-        final int dw = mCurDisplayWidth;
-        final int dh = mCurDisplayHeight;
 
         if (config != null) {
             int orientation = Configuration.ORIENTATION_SQUARE;
@@ -6518,25 +6514,26 @@ public class WindowManagerService extends IWindowManager.Stub
             config.orientation = orientation;
         }
 
-        // Update real display metrics.
-        mDisplay.getMetricsWithSize(mRealDisplayMetrics, mCurDisplayWidth, mCurDisplayHeight);
-
         // Update application display metrics.
-        final DisplayMetrics dm = mDisplayMetrics;
         final int appWidth = mPolicy.getNonDecorDisplayWidth(dw, dh, mRotation);
         final int appHeight = mPolicy.getNonDecorDisplayHeight(dw, dh, mRotation);
         synchronized(mDisplaySizeLock) {
-            mAppDisplayWidth = appWidth;
-            mAppDisplayHeight = appHeight;
-            mAnimator.setDisplayDimensions(mCurDisplayWidth, mCurDisplayHeight,
-                    mAppDisplayWidth, mAppDisplayHeight);
+            mDisplayInfo.rotation = mRotation;
+            mDisplayInfo.logicalWidth = dw;
+            mDisplayInfo.logicalHeight = dh;
+            mDisplayInfo.appWidth = appWidth;
+            mDisplayInfo.appHeight = appHeight;
+            mDisplayInfo.getLogicalMetrics(mRealDisplayMetrics, null);
+            mDisplayInfo.getAppMetrics(mDisplayMetrics, null);
+            mDisplayManager.setDefaultDisplayInfo(mDisplayInfo);
+
+            mAnimator.setDisplayDimensions(dw, dh, appWidth, appHeight);
         }
         if (false) {
-            Slog.i(TAG, "Set app display size: " + mAppDisplayWidth
-                    + " x " + mAppDisplayHeight);
+            Slog.i(TAG, "Set app display size: " + appWidth + " x " + appHeight);
         }
-        mDisplay.getMetricsWithSize(dm, mAppDisplayWidth, mAppDisplayHeight);
 
+        final DisplayMetrics dm = mDisplayMetrics;
         mCompatibleScreenScale = CompatibilityInfo.computeCompatibleScaling(dm,
                 mCompatDisplayMetrics);
 
@@ -6843,27 +6840,26 @@ public class WindowManagerService extends IWindowManager.Stub
             mDisplay = wm.getDefaultDisplay();
             mIsTouchDevice = mContext.getPackageManager().hasSystemFeature(
                     PackageManager.FEATURE_TOUCHSCREEN);
+
             synchronized(mDisplaySizeLock) {
-                mInitialDisplayWidth = mDisplay.getRawWidth();
-                mInitialDisplayHeight = mDisplay.getRawHeight();
-                int rot = mDisplay.getRotation();
-                if (rot == Surface.ROTATION_90 || rot == Surface.ROTATION_270) {
-                    // If the screen is currently rotated, we need to swap the
-                    // initial width and height to get the true natural values.
-                    int tmp = mInitialDisplayWidth;
-                    mInitialDisplayWidth = mInitialDisplayHeight;
-                    mInitialDisplayHeight = tmp;
-                }
-                mBaseDisplayWidth = mCurDisplayWidth = mAppDisplayWidth = mInitialDisplayWidth;
-                mBaseDisplayHeight = mCurDisplayHeight = mAppDisplayHeight = mInitialDisplayHeight;
-                mAnimator.setDisplayDimensions(mCurDisplayWidth, mCurDisplayHeight,
-                        mAppDisplayWidth, mAppDisplayHeight);
+                // Bootstrap the default logical display from the display manager.
+                mDisplayManager.getDisplayInfo(Display.DEFAULT_DISPLAY, mDisplayInfo);
+                mInitialDisplayWidth = mDisplayInfo.logicalWidth;
+                mInitialDisplayHeight = mDisplayInfo.logicalHeight;
+                mBaseDisplayWidth = mInitialDisplayWidth;
+                mBaseDisplayHeight = mInitialDisplayHeight;
+
+                mAnimator.setDisplayDimensions(mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight,
+                        mDisplayInfo.appWidth, mDisplayInfo.appHeight);
             }
+
+            DisplayDeviceInfo info = new DisplayDeviceInfo();
+            mDisplayManager.getDefaultExternalDisplayDeviceInfo(info);
             mInputManager.setDisplaySize(Display.DEFAULT_DISPLAY,
-                    mDisplay.getRawWidth(), mDisplay.getRawHeight(),
-                    mDisplay.getRawExternalWidth(), mDisplay.getRawExternalHeight());
+                    mInitialDisplayWidth, mInitialDisplayHeight,
+                    info.width, info.height);
             mInputManager.setDisplayOrientation(Display.DEFAULT_DISPLAY,
-                    mDisplay.getRotation(), mDisplay.getExternalRotation());
+                    mDisplay.getRotation(), Surface.ROTATION_0);
             mPolicy.setInitialDisplaySize(mDisplay, mInitialDisplayWidth, mInitialDisplayHeight);
         }
 
@@ -7471,41 +7467,10 @@ public class WindowManagerService extends IWindowManager.Stub
         return false;
     }
 
-    public void getDisplaySize(Point size) {
-        synchronized(mDisplaySizeLock) {
-            size.x = mAppDisplayWidth;
-            size.y = mAppDisplayHeight;
-        }
-    }
-
-    public void getRealDisplaySize(Point size) {
-        synchronized(mDisplaySizeLock) {
-            size.x = mCurDisplayWidth;
-            size.y = mCurDisplayHeight;
-        }
-    }
-
     public void getInitialDisplaySize(Point size) {
         synchronized(mDisplaySizeLock) {
             size.x = mInitialDisplayWidth;
             size.y = mInitialDisplayHeight;
-        }
-    }
-
-    public int getMaximumSizeDimension() {
-        synchronized(mDisplaySizeLock) {
-            // Do this based on the raw screen size, until we are smarter.
-            return mBaseDisplayWidth > mBaseDisplayHeight
-                    ? mBaseDisplayWidth : mBaseDisplayHeight;
-        }
-    }
-
-    public void getCurrentSizeRange(Point smallestSize, Point largestSize) {
-        synchronized(mDisplaySizeLock) {
-            smallestSize.x = mSmallestDisplayWidth;
-            smallestSize.y = mSmallestDisplayHeight;
-            largestSize.x = mLargestDisplayWidth;
-            largestSize.y = mLargestDisplayHeight;
         }
     }
 
@@ -7899,8 +7864,8 @@ public class WindowManagerService extends IWindowManager.Stub
         
         mLayoutNeeded = false;
         
-        final int dw = mCurDisplayWidth;
-        final int dh = mCurDisplayHeight;
+        final int dw = mDisplayInfo.logicalWidth;
+        final int dh = mDisplayInfo.logicalHeight;
 
         final int NFW = mFakeWindows.size();
         for (int i=0; i<NFW; i++) {
@@ -8492,8 +8457,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (!mAnimator.isDimming(winAnimator)) {
                     final int width, height;
                     if (attrs.type == WindowManager.LayoutParams.TYPE_BOOT_PROGRESS) {
-                        width = mCurDisplayWidth;
-                        height = mCurDisplayHeight;
+                        width = mDisplayInfo.logicalWidth;
+                        height = mDisplayInfo.logicalHeight;
                     } else {
                         width = innerDw;
                         height = innerDh;
@@ -8537,10 +8502,10 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         final long currentTime = SystemClock.uptimeMillis();
-        final int dw = mCurDisplayWidth;
-        final int dh = mCurDisplayHeight;
-        final int innerDw = mAppDisplayWidth;
-        final int innerDh = mAppDisplayHeight;
+        final int dw = mDisplayInfo.logicalWidth;
+        final int dh = mDisplayInfo.logicalHeight;
+        final int innerDw = mDisplayInfo.appWidth;
+        final int innerDh = mDisplayInfo.appHeight;
 
         int i;
 
@@ -9456,7 +9421,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             mAnimator.mScreenRotationAnimation = new ScreenRotationAnimation(mContext,
-                    mFxSession, inTransaction, mCurDisplayWidth, mCurDisplayHeight,
+                    mFxSession, inTransaction, mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight,
                     mDisplay.getRotation());
         }
     }
@@ -9486,7 +9451,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 && mAnimator.mScreenRotationAnimation.hasScreenshot()) {
             if (DEBUG_ORIENTATION) Slog.i(TAG, "**** Dismissing screen rotation animation");
             if (mAnimator.mScreenRotationAnimation.dismiss(mFxSession, MAX_ANIMATION_DURATION,
-                    mTransitionAnimationScale, mCurDisplayWidth, mCurDisplayHeight)) {
+                    mTransitionAnimationScale, mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight)) {
                 updateLayoutToAnimationLocked();
             } else {
                 mAnimator.mScreenRotationAnimation.kill();
@@ -9935,19 +9900,21 @@ public class WindowManagerService extends IWindowManager.Stub
                         pw.print(" base=");
                         pw.print(mBaseDisplayWidth); pw.print("x"); pw.print(mBaseDisplayHeight);
                     }
-                    final int rawWidth = mDisplay.getRawWidth();
-                    final int rawHeight = mDisplay.getRawHeight();
-                    if (rawWidth != mCurDisplayWidth || rawHeight != mCurDisplayHeight) {
-                        pw.print(" raw="); pw.print(rawWidth); pw.print("x"); pw.print(rawHeight);
+                    if (mInitialDisplayWidth != mDisplayInfo.logicalWidth
+                            || mInitialDisplayHeight != mDisplayInfo.logicalHeight) {
+                        pw.print(" init="); pw.print(mInitialDisplayWidth);
+                        pw.print("x"); pw.print(mInitialDisplayHeight);
                     }
                     pw.print(" cur=");
-                    pw.print(mCurDisplayWidth); pw.print("x"); pw.print(mCurDisplayHeight);
+                    pw.print(mDisplayInfo.logicalWidth);
+                    pw.print("x"); pw.print(mDisplayInfo.logicalHeight);
                     pw.print(" app=");
-                    pw.print(mAppDisplayWidth); pw.print("x"); pw.print(mAppDisplayHeight);
-                    pw.print(" rng="); pw.print(mSmallestDisplayWidth);
-                    pw.print("x"); pw.print(mSmallestDisplayHeight);
-                    pw.print("-"); pw.print(mLargestDisplayWidth);
-                    pw.print("x"); pw.println(mLargestDisplayHeight);
+                    pw.print(mDisplayInfo.appWidth);
+                    pw.print("x"); pw.print(mDisplayInfo.appHeight);
+                    pw.print(" rng="); pw.print(mDisplayInfo.smallestNominalAppWidth);
+                    pw.print("x"); pw.print(mDisplayInfo.smallestNominalAppHeight);
+                    pw.print("-"); pw.print(mDisplayInfo.largestNominalAppWidth);
+                    pw.print("x"); pw.println(mDisplayInfo.largestNominalAppHeight);
         } else {
             pw.println("  NO DISPLAY");
         }

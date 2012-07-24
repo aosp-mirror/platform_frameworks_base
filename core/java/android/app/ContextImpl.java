@@ -47,6 +47,7 @@ import android.hardware.ISerialManager;
 import android.hardware.SensorManager;
 import android.hardware.SerialManager;
 import android.hardware.SystemSensorManager;
+import android.hardware.display.DisplayManager;
 import android.hardware.input.IInputManager;
 import android.hardware.input.InputManager;
 import android.hardware.usb.IUsbManager;
@@ -342,6 +343,11 @@ class ContextImpl extends Context {
                 public Object createStaticService() {
                     return InputManager.getInstance();
                 }});
+
+        registerService(DISPLAY_SERVICE, new StaticServiceFetcher() {
+            public Object createStaticService() {
+                return DisplayManager.getInstance();
+            }});
 
         registerService(INPUT_METHOD_SERVICE, new ServiceFetcher() {
                 public Object createService(ContextImpl ctx) {

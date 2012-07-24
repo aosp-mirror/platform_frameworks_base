@@ -151,8 +151,8 @@ class WindowStateAnimator {
         mAnimator = service.mAnimator;
         mPolicy = service.mPolicy;
         mContext = service.mContext;
-        mAnimDw = service.mAppDisplayWidth;
-        mAnimDh = service.mAppDisplayHeight;
+        mAnimDw = service.mDisplayInfo.appWidth;
+        mAnimDh = service.mDisplayInfo.appHeight;
 
         mWin = win;
         mAttachedWinAnimator = win.mAttachedWindow == null
@@ -248,8 +248,8 @@ class WindowStateAnimator {
                         " scale=" + mService.mWindowAnimationScale);
                     mAnimation.initialize(mWin.mFrame.width(), mWin.mFrame.height(),
                             mAnimDw, mAnimDh);
-                    mAnimDw = mService.mAppDisplayWidth;
-                    mAnimDh = mService.mAppDisplayHeight;
+                    mAnimDw = mService.mDisplayInfo.appWidth;
+                    mAnimDh = mService.mDisplayInfo.appHeight;
                     mAnimation.setStartTime(currentTime);
                     mLocalAnimating = true;
                     mAnimating = true;
@@ -1102,7 +1102,7 @@ class WindowStateAnimator {
                         WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
                 if ((w.mAttrs.flags & LayoutParams.FLAG_DIM_BEHIND) != 0) {
                     mService.startDimming(this, w.mExiting ? 0 : w.mAttrs.dimAmount,
-                            mService.mAppDisplayWidth, mService.mAppDisplayHeight);
+                            mService.mDisplayInfo.appWidth, mService.mDisplayInfo.appHeight);
                 }
             } catch (RuntimeException e) {
                 // If something goes wrong with the surface (such

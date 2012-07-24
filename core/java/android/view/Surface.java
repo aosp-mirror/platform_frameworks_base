@@ -403,19 +403,6 @@ public class Surface implements Parcelable {
     public native void destroy();
     
     private native Canvas lockCanvasNative(Rect dirty);   
-    
-    /*
-     * set display parameters & screenshots
-     */
-
-    /**
-     * set the orientation of the given display.
-     * @param display
-     * @param orientation
-     * @param flags Currently unused, set to 0.
-     * @hide
-     */
-    public static native   void setOrientation(int display, int orientation, int flags);
 
     /**
      * set the orientation of the given display.
@@ -423,10 +410,8 @@ public class Surface implements Parcelable {
      * @param orientation
      * @hide
      */
-    public static void setOrientation(int display, int orientation) {
-        setOrientation(display, orientation, 0);
-    }
-    
+    public static native void setOrientation(int display, int orientation);
+
     /**
      * Like {@link #screenshot(int, int, int, int)} but includes all
      * Surfaces in the screenshot.

@@ -125,8 +125,8 @@ class DragState {
             // The drag window covers the entire display
             mDragWindowHandle.frameLeft = 0;
             mDragWindowHandle.frameTop = 0;
-            mDragWindowHandle.frameRight = mService.mCurDisplayWidth;
-            mDragWindowHandle.frameBottom = mService.mCurDisplayHeight;
+            mDragWindowHandle.frameRight = mService.mDisplayInfo.logicalWidth;
+            mDragWindowHandle.frameBottom = mService.mDisplayInfo.logicalHeight;
 
             // Pause rotations before a drag.
             if (WindowManagerService.DEBUG_ORIENTATION) {
