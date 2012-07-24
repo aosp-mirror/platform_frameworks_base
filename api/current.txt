@@ -607,12 +607,16 @@ package android {
     field public static final int layout_above = 16843140; // 0x1010184
     field public static final int layout_alignBaseline = 16843142; // 0x1010186
     field public static final int layout_alignBottom = 16843146; // 0x101018a
+    field public static final int layout_alignEnd = 16843706; // 0x10103ba
     field public static final int layout_alignLeft = 16843143; // 0x1010187
     field public static final int layout_alignParentBottom = 16843150; // 0x101018e
+    field public static final int layout_alignParentEnd = 16843708; // 0x10103bc
     field public static final int layout_alignParentLeft = 16843147; // 0x101018b
     field public static final int layout_alignParentRight = 16843149; // 0x101018d
+    field public static final int layout_alignParentStart = 16843707; // 0x10103bb
     field public static final int layout_alignParentTop = 16843148; // 0x101018c
     field public static final int layout_alignRight = 16843145; // 0x1010189
+    field public static final int layout_alignStart = 16843705; // 0x10103b9
     field public static final int layout_alignTop = 16843144; // 0x1010188
     field public static final int layout_alignWithParentIfMissing = 16843154; // 0x1010192
     field public static final int layout_below = 16843141; // 0x1010185
@@ -634,8 +638,10 @@ package android {
     field public static final int layout_rowSpan = 16843644; // 0x101037c
     field public static final int layout_scale = 16843155; // 0x1010193
     field public static final int layout_span = 16843085; // 0x101014d
+    field public static final int layout_toEndOf = 16843704; // 0x10103b8
     field public static final int layout_toLeftOf = 16843138; // 0x1010182
     field public static final int layout_toRightOf = 16843139; // 0x1010183
+    field public static final int layout_toStartOf = 16843703; // 0x10103b7
     field public static final int layout_weight = 16843137; // 0x1010181
     field public static final int layout_width = 16842996; // 0x10100f4
     field public static final int layout_x = 16843135; // 0x101017f
@@ -25096,9 +25102,12 @@ package android.view {
     ctor public ViewGroup.MarginLayoutParams(int, int);
     ctor public ViewGroup.MarginLayoutParams(android.view.ViewGroup.MarginLayoutParams);
     ctor public ViewGroup.MarginLayoutParams(android.view.ViewGroup.LayoutParams);
+    method public int getLayoutDirection();
     method public int getMarginEnd();
     method public int getMarginStart();
+    method protected boolean isLayoutRtl();
     method public boolean isMarginRelative();
+    method public void setLayoutDirection(int);
     method public void setMargins(int, int, int, int);
     field public int bottomMargin;
     field public int endMargin;
@@ -28399,19 +28408,25 @@ package android.widget {
     field public static final int ABOVE = 2; // 0x2
     field public static final int ALIGN_BASELINE = 4; // 0x4
     field public static final int ALIGN_BOTTOM = 8; // 0x8
+    field public static final int ALIGN_END = 19; // 0x13
     field public static final int ALIGN_LEFT = 5; // 0x5
     field public static final int ALIGN_PARENT_BOTTOM = 12; // 0xc
+    field public static final int ALIGN_PARENT_END = 21; // 0x15
     field public static final int ALIGN_PARENT_LEFT = 9; // 0x9
     field public static final int ALIGN_PARENT_RIGHT = 11; // 0xb
+    field public static final int ALIGN_PARENT_START = 20; // 0x14
     field public static final int ALIGN_PARENT_TOP = 10; // 0xa
     field public static final int ALIGN_RIGHT = 7; // 0x7
+    field public static final int ALIGN_START = 18; // 0x12
     field public static final int ALIGN_TOP = 6; // 0x6
     field public static final int BELOW = 3; // 0x3
     field public static final int CENTER_HORIZONTAL = 14; // 0xe
     field public static final int CENTER_IN_PARENT = 13; // 0xd
     field public static final int CENTER_VERTICAL = 15; // 0xf
+    field public static final int END_OF = 17; // 0x11
     field public static final int LEFT_OF = 0; // 0x0
     field public static final int RIGHT_OF = 1; // 0x1
+    field public static final int START_OF = 16; // 0x10
     field public static final int TRUE = -1; // 0xffffffff
   }
 

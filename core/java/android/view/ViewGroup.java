@@ -5504,13 +5504,17 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         /**
          * The default start and end margin.
+         * @hide
          */
-        static private final int DEFAULT_RELATIVE = Integer.MIN_VALUE;
+        public static final int DEFAULT_RELATIVE = Integer.MIN_VALUE;
 
         private int initialLeftMargin;
         private int initialRightMargin;
 
-        private int layoutDirection;
+        private static int LAYOUT_DIRECTION_UNDEFINED = -1;
+
+        // Layout direction undefined by default
+        private int layoutDirection = LAYOUT_DIRECTION_UNDEFINED;
 
         /**
          * Creates a new set of layout parameters. The values are extracted from
@@ -5553,9 +5557,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             initialLeftMargin = leftMargin;
             initialRightMargin = rightMargin;
 
-            // LTR by default
-            layoutDirection = View.LAYOUT_DIRECTION_LTR;
-
             a.recycle();
         }
 
@@ -5585,7 +5586,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             this.initialLeftMargin = source.leftMargin;
             this.initialRightMargin = source.rightMargin;
 
-            this.layoutDirection = source.layoutDirection;
+            setLayoutDirection(source.layoutDirection);
         }
 
         /**
@@ -5688,10 +5689,32 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginStart
          * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginEnd
          *
-         * @return true if either marginStart or marginEnd has been set
+         * @return true if either marginStart or marginEnd has been set.
          */
         public boolean isMarginRelative() {
             return (startMargin != DEFAULT_RELATIVE) || (endMargin != DEFAULT_RELATIVE);
+        }
+
+        /**
+         * Set the layout direction
+         * @param layoutDirection the layout direction.
+         *        Should be either {@link View#LAYOUT_DIRECTION_LTR}
+         *                     or {@link View#LAYOUT_DIRECTION_RTL}.
+         */
+        public void setLayoutDirection(int layoutDirection) {
+            if (layoutDirection != View.LAYOUT_DIRECTION_LTR &&
+                    layoutDirection != View.LAYOUT_DIRECTION_RTL) return;
+            this.layoutDirection = layoutDirection;
+        }
+
+        /**
+         * Retuns the layout direction. Can be either {@link View#LAYOUT_DIRECTION_LTR} or
+         * {@link View#LAYOUT_DIRECTION_RTL}.
+         *
+         * @return the layout direction.
+         */
+        public int getLayoutDirection() {
+            return layoutDirection;
         }
 
         /**
@@ -5700,7 +5723,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          */
         @Override
         public void onResolveLayoutDirection(int layoutDirection) {
-            this.layoutDirection = layoutDirection;
+            setLayoutDirection(layoutDirection);
 
             if (!isMarginRelative()) return;
 
@@ -5715,6 +5738,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     rightMargin = (endMargin > DEFAULT_RELATIVE) ? endMargin : initialRightMargin;
                     break;
             }
+        }
+
+        protected boolean isLayoutRtl() {
+            return (layoutDirection == View.LAYOUT_DIRECTION_RTL);
         }
 
         /**

@@ -3670,5 +3670,11 @@
   <public type="attr" name="paddingEnd"/>
   <public type="attr" name="layout_marginStart"/>
   <public type="attr" name="layout_marginEnd"/>
+  <public type="attr" name="layout_toStartOf" />
+  <public type="attr" name="layout_toEndOf" />
+  <public type="attr" name="layout_alignStart" />
+  <public type="attr" name="layout_alignEnd" />
+  <public type="attr" name="layout_alignParentStart" />
+  <public type="attr" name="layout_alignParentEnd" />
 
 </resources>
