@@ -24,7 +24,7 @@
 	<TextView android:id="@android:id/text1"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-    android:layout_marginStart="?android:attr/listPreferredItemPaddingLeft"
+    android:layout_marginStart="?android:attr/listPreferredItemPaddingStart"
     android:layout_marginTop="8dip"
 		android:textAppearance="?android:attr/textAppearanceListItem"
 	/>

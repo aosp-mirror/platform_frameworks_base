@@ -275,6 +275,11 @@
         <!-- The preferred item height for dropdown lists. -->
         <attr name="dropdownListPreferredItemHeight" format="dimension" />
 
+        <!-- The preferred padding along the start edge of list items. -->
+        <attr name="listPreferredItemPaddingStart" format="dimension" />
+        <!-- The preferred padding along the end edge of list items. -->
+        <attr name="listPreferredItemPaddingEnd" format="dimension" />
+
         <!-- ============= -->
         <!-- Window styles -->
         <!-- ============= -->

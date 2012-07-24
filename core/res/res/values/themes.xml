@@ -128,6 +128,8 @@ please see themes_device_defaults.xml.
         <item name="textAppearanceListItemSmall">?android:attr/textAppearanceLarge</item>
         <item name="listPreferredItemPaddingLeft">6dip</item>
         <item name="listPreferredItemPaddingRight">6dip</item>
+        <item name="listPreferredItemPaddingStart">6dip</item>
+        <item name="listPreferredItemPaddingEnd">6dip</item>
 
         <!-- @hide -->
         <item name="searchResultListItemHeight">58dip</item>
@@ -637,6 +639,8 @@ please see themes_device_defaults.xml.
 
         <item name="listPreferredItemPaddingLeft">10dip</item>
         <item name="listPreferredItemPaddingRight">10dip</item>
+        <item name="listPreferredItemPaddingStart">10dip</item>
+        <item name="listPreferredItemPaddingEnd">10dip</item>
     </style>
 
     <!-- Variant of {@link Theme_Dialog} that does not include a frame (or background).
@@ -962,6 +966,8 @@ please see themes_device_defaults.xml.
         <item name="textAppearanceListItemSmall">?android:attr/textAppearanceMedium</item>
         <item name="listPreferredItemPaddingLeft">8dip</item>
         <item name="listPreferredItemPaddingRight">8dip</item>
+        <item name="listPreferredItemPaddingStart">8dip</item>
+        <item name="listPreferredItemPaddingEnd">8dip</item>
 
         <!-- @hide -->
         <item name="searchResultListItemHeight">58dip</item>
@@ -1267,6 +1273,8 @@ please see themes_device_defaults.xml.
         <item name="textAppearanceListItemSmall">?android:attr/textAppearanceMedium</item>
         <item name="listPreferredItemPaddingLeft">8dip</item>
         <item name="listPreferredItemPaddingRight">8dip</item>
+        <item name="listPreferredItemPaddingStart">8dip</item>
+        <item name="listPreferredItemPaddingEnd">8dip</item>
 
         <!-- @hide -->
         <item name="searchResultListItemHeight">58dip</item>
@@ -1573,6 +1581,8 @@ please see themes_device_defaults.xml.
 
         <item name="listPreferredItemPaddingLeft">16dip</item>
         <item name="listPreferredItemPaddingRight">16dip</item>
+        <item name="listPreferredItemPaddingStart">16dip</item>
+        <item name="listPreferredItemPaddingEnd">16dip</item>
     </style>
 
     <!-- Variant of Theme.Holo.Dialog that has a nice minimum width for
@@ -1681,6 +1691,8 @@ please see themes_device_defaults.xml.
 
         <item name="listPreferredItemPaddingLeft">16dip</item>
         <item name="listPreferredItemPaddingRight">16dip</item>
+        <item name="listPreferredItemPaddingStart">16dip</item>
+        <item name="listPreferredItemPaddingEnd">16dip</item>
     </style>
 
     <!-- Variant of Theme.Holo.Light.Dialog that has a nice minimum width for

@@ -26,8 +26,8 @@
         android:layout_weight="1"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:layout_marginStart="?android:attr/listPreferredItemPaddingLeft"
-        android:layout_marginEnd="?android:attr/listPreferredItemPaddingRight"
+        android:layout_marginStart="?android:attr/listPreferredItemPaddingStart"
+        android:layout_marginEnd="?android:attr/listPreferredItemPaddingEnd"
         android:duplicateParentState="true">
         
         <TextView 
