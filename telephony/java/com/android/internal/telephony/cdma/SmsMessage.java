@@ -42,6 +42,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import static android.telephony.SmsMessage.MessageClass;
@@ -781,7 +782,7 @@ public class SmsMessage extends SmsMessageBase {
      * binder-call, and hence should be thread-safe, it has been
      * synchronized.
      */
-    private synchronized static int getNextMessageId() {
+    synchronized static int getNextMessageId() {
         // Testing and dialog with partners has indicated that
         // msgId==0 is (sometimes?) treated specially by lower levels.
         // Specifically, the ID is not preserved for delivery ACKs.
@@ -997,7 +998,7 @@ public class SmsMessage extends SmsMessageBase {
      * Returns the list of service category program data, if present.
      * @return a list of CdmaSmsCbProgramData objects, or null if not present
      */
-    List<CdmaSmsCbProgramData> getSmsCbProgramData() {
+    ArrayList<CdmaSmsCbProgramData> getSmsCbProgramData() {
         return mBearerData.serviceCategoryProgramData;
     }
 }
