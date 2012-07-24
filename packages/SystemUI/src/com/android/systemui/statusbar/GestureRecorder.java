@@ -63,11 +63,15 @@ public class GestureRecorder {
                 }
             }
             public String toJson() {
-                return String.format("{\"type\":\"motion\", \"time\":%d, \"action\":\"%s\", \"x\":%.2f, \"y\":%.2f}",
+                return String.format(
+                        ("{\"type\":\"motion\", \"time\":%d, \"action\":\"%s\", "
+                            + "\"x\":%.2f, \"y\":%.2f, \"s\":%.2f, \"p\":%.2f}"),
                         this.time,
                         actionName(this.event.getAction()),
                         this.event.getRawX(),
-                        this.event.getRawY()
+                        this.event.getRawY(),
+                        this.event.getSize(),
+                        this.event.getPressure()
                         );
             }
         }
