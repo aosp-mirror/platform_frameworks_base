@@ -18,8 +18,8 @@
     android:layout_width="0dip"
     android:layout_height="64dip"
     android:layout_weight="1"
-    android:layout_marginLeft="-3dip"
-    android:layout_marginRight="-3dip"
+    android:layout_marginStart="-3dip"
+    android:layout_marginEnd="-3dip"
     android:background="@android:drawable/tab_indicator">
 
     <ImageView android:id="@+id/icon"

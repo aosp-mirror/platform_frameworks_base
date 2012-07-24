@@ -41,7 +41,7 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/pinDisplayGroup"
         android:layout_marginTop="9dip"
-        android:gravity="left|bottom"
+        android:gravity="start|bottom"
         android:singleLine="true"
         android:ellipsize="marquee"
         android:textAppearance="?android:attr/textAppearanceMedium"
@@ -56,9 +56,9 @@
         android:addStatesFromChildren="true"
         android:gravity="center_vertical"
         android:baselineAligned="false"
-        android:paddingRight="0dip"
-        android:layout_marginRight="30dip"
-        android:layout_marginLeft="30dip"
+        android:paddingEnd="0dip"
+        android:layout_marginEnd="30dip"
+        android:layout_marginStart="30dip"
         android:background="@android:drawable/edit_text"
     >
 
@@ -77,7 +77,7 @@
              android:layout_width="wrap_content"
              android:layout_height="match_parent"
              android:layout_marginTop="2dip"
-             android:layout_marginRight="2dip"
+             android:layout_marginEnd="2dip"
              android:layout_marginBottom="2dip"
              android:gravity="center"
             />
@@ -90,8 +90,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dip"
-        android:layout_marginLeft="8dip"
-        android:layout_marginRight="8dip">
+        android:layout_marginStart="8dip"
+        android:layout_marginEnd="8dip">
 
         <Button android:id="@+id/emergencyCallButton"
             android:text="@android:string/lockscreen_emergency_call"
@@ -101,7 +101,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1.0"
             android:layout_marginBottom="8dip"
-            android:layout_marginRight="8dip"
+            android:layout_marginEnd="8dip"
             android:textSize="18sp"
             android:drawableLeft="@drawable/ic_emergency"
             android:drawablePadding="8dip"
@@ -114,7 +114,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1.0"
             android:layout_marginBottom="8dip"
-            android:layout_marginLeft="8dip"
+            android:layout_marginStart="8dip"
             android:textSize="18sp"
         />
     </LinearLayout>

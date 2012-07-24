@@ -29,13 +29,13 @@ enabled.
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:minHeight="@android:dimen/alert_dialog_title_height"
-        android:paddingLeft="16dip"
-        android:paddingRight="16dip">
+        android:paddingStart="16dip"
+        android:paddingEnd="16dip">
         <ImageView android:id="@+id/left_icon"
             android:layout_width="32dip"
             android:layout_height="32dip"
             android:scaleType="fitCenter"
-            android:layout_marginRight="8dip" />
+            android:layout_marginEnd="8dip" />
         <TextView android:id="@android:id/title"
             style="?android:attr/windowTitleStyle"
             android:layout_width="wrap_content"
@@ -45,7 +45,7 @@ enabled.
             android:layout_width="32dip"
             android:layout_height="32dip"
             android:scaleType="fitCenter"
-            android:layout_marginLeft="8dip" />
+            android:layout_marginStart="8dip" />
     </LinearLayout>
 
     <View android:id="@+id/titleDivider"

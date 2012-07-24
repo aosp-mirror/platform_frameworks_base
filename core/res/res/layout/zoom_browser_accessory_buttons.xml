@@ -22,14 +22,14 @@
         android:background="@android:drawable/btn_browser_zoom_fit_page"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|left"
-        android:layout_marginLeft="7dip"
+        android:layout_gravity="bottom|start"
+        android:layout_marginStart="7dip"
         />
     <ImageView android:id="@+id/zoom_page_overview" 
         android:background="@android:drawable/btn_browser_zoom_page_overview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|right"
-        android:layout_marginRight="7dip"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="7dip"
         />
 </merge>

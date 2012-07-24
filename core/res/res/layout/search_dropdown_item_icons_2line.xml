@@ -19,8 +19,8 @@
 -->
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:paddingLeft="@dimen/dropdownitem_text_padding_left"
-    android:paddingRight="4dip"
+    android:paddingStart="@dimen/dropdownitem_text_padding_left"
+    android:paddingEnd="4dip"
     android:layout_width="match_parent"
     android:layout_height="?android:attr/searchResultListItemHeight" >
 
@@ -30,7 +30,7 @@
         android:layout_width="@dimen/dropdownitem_icon_width"
         android:layout_height="48dip"
         android:scaleType="centerInside"
-        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:layout_alignParentBottom="true"
         android:visibility="invisible" />
@@ -39,7 +39,7 @@
         android:layout_width="48dip"
         android:layout_height="48dip"
         android:scaleType="centerInside"
-        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
         android:layout_alignParentBottom="true"
         android:src="?attr/searchViewEditQuery"
@@ -51,7 +51,7 @@
         android:layout_height="48dip"
         android:scaleType="centerInside"
         android:layout_alignWithParentIfMissing="true"
-        android:layout_toLeftOf="@id/edit_query"
+        android:layout_toStartOf="@id/edit_query"
         android:layout_alignParentTop="true"
         android:layout_alignParentBottom="true"
         android:visibility="gone" />
@@ -67,8 +67,8 @@
         android:layout_height="29dip"
         android:paddingBottom="4dip"
         android:gravity="top"
-        android:layout_toRightOf="@android:id/icon1"
-        android:layout_toLeftOf="@android:id/icon2"
+        android:layout_toEndOf="@android:id/icon1"
+        android:layout_toStartOf="@android:id/icon2"
         android:layout_alignWithParentIfMissing="true"
         android:layout_alignParentBottom="true"
         android:visibility="gone" />
@@ -82,8 +82,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_toRightOf="@android:id/icon1"
-        android:layout_toLeftOf="@android:id/icon2"
+        android:layout_toEndOf="@android:id/icon1"
+        android:layout_toStartOf="@android:id/icon2"
         android:layout_above="@android:id/text2" />
 
 </RelativeLayout>

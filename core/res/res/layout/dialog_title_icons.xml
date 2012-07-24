@@ -31,8 +31,8 @@ enabled.
         android:minHeight="53dip"
         android:paddingTop="6dip"
         android:paddingBottom="9dip"
-        android:paddingLeft="10dip"
-        android:paddingRight="10dip">
+        android:paddingStart="10dip"
+        android:paddingEnd="10dip">
         <ImageView android:id="@+id/left_icon"
             android:layout_width="32dip"
             android:layout_height="32dip"
@@ -46,8 +46,8 @@ enabled.
             android:layout_weight="0"
             android:paddingTop="2dip"
             android:paddingBottom="1dip"
-            android:paddingLeft="14dip"
-            android:paddingRight="14dip" />
+            android:paddingStart="14dip"
+            android:paddingEnd="14dip" />
         <ImageView android:id="@+id/right_icon"
             android:layout_width="32dip"
             android:layout_height="32dip"

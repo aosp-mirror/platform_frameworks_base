@@ -22,17 +22,17 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dip"
             android:layout_marginBottom="1dip"
-            android:layout_marginLeft="10dip"
-            android:layout_marginRight="10dip"
+            android:layout_marginStart="10dip"
+            android:layout_marginEnd="10dip"
             android:layout_centerHorizontal="true" />
         <TextView
             android:id="@+id/progress_percent"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingBottom="12dip"
-            android:layout_marginLeft="10dip"
-            android:layout_marginRight="10dip"
-            android:layout_alignParentLeft="true"
+            android:layout_marginStart="10dip"
+            android:layout_marginEnd="10dip"
+            android:layout_alignParentStart="true"
             android:layout_below="@id/progress"
         />
         <TextView
@@ -40,9 +40,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingBottom="12dip"
-            android:layout_marginLeft="10dip"
-            android:layout_marginRight="10dip"
-            android:layout_alignParentRight="true"
+            android:layout_marginStart="10dip"
+            android:layout_marginEnd="10dip"
+            android:layout_alignParentEnd="true"
             android:layout_below="@id/progress"
         />
 </RelativeLayout>

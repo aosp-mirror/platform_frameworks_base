@@ -44,10 +44,10 @@
             <include layout="@layout/keyguard_screen_status_port"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="50dip"
+                android:layout_marginStart="50dip"
                 android:layout_marginTop="50dip"
                 android:layout_alignParentTop="true"
-                android:layout_alignParentLeft="true"/>
+                android:layout_alignParentStart="true"/>
 
             <!-- Music transport control -->
             <include android:id="@+id/transport"
@@ -76,7 +76,7 @@
             android:id="@+id/screenLocked"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="24dip"
+            android:layout_marginStart="24dip"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:layout_marginTop="12dip"
             android:drawablePadding="4dip"

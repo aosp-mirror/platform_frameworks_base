@@ -28,7 +28,7 @@
         android:id="@+id/package_icon"
         android:layout_width="30dip"
         android:layout_height="30dip"
-        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
         android:src="@drawable/ic_text_dot"
         android:scaleType="fitCenter" />
 
@@ -37,8 +37,8 @@
         android:id="@+id/package_label"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textStyle="bold"
-        android:paddingLeft="6dip"
-        android:layout_toRightOf="@id/package_icon"
+        android:paddingStart="6dip"
+        android:layout_toEndOf="@id/package_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 

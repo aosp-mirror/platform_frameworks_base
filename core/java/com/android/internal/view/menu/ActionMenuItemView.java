@@ -209,7 +209,7 @@ public class ActionMenuItemView extends TextView
         Toast cheatSheet = Toast.makeText(context, mItemData.getTitle(), Toast.LENGTH_SHORT);
         if (midy < displayFrame.height()) {
             // Show along the top; follow action buttons
-            cheatSheet.setGravity(Gravity.TOP | Gravity.RIGHT,
+            cheatSheet.setGravity(Gravity.TOP | Gravity.END,
                     screenWidth - screenPos[0] - width / 2, height);
         } else {
             // Show along the bottom center

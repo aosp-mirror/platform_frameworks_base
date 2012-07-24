@@ -20,8 +20,8 @@
     android:layout_height="wrap_content"
     android:minHeight="?android:attr/listPreferredItemHeight"
     android:gravity="center_vertical"
-    android:paddingLeft="@dimen/preference_child_padding_side"
-    android:paddingRight="?android:attr/scrollbarSize">
+    android:paddingStart="@dimen/preference_child_padding_side"
+    android:paddingEnd="?android:attr/scrollbarSize">
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -34,14 +34,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:paddingRight="@dimen/preference_item_padding_inner" />
+            android:paddingEnd="@dimen/preference_item_padding_inner" />
     </LinearLayout>
 
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:paddingRight="@dimen/preference_item_padding_inner"
+        android:paddingEnd="@dimen/preference_item_padding_inner"
         android:paddingTop="6dip"
         android:paddingBottom="6dip">
 
@@ -57,7 +57,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@android:id/title"
-            android:layout_alignLeft="@android:id/title"
+            android:layout_alignStart="@android:id/title"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="?android:attr/textColorSecondary"
             android:maxLines="10" />

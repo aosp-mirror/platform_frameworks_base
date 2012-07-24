@@ -18,14 +18,14 @@
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:paddingLeft="16dip"
-    android:paddingRight="16dip"
+    android:paddingStart="16dip"
+    android:paddingEnd="16dip"
     android:orientation="horizontal" >
 
    <ImageView android:id="@+id/account_row_icon"
         android:layout_width="wrap_content"
         android:layout_height="fill_parent"
-        android:paddingRight="8dip" />
+        android:paddingEnd="8dip" />
 
     <TextView xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/account_row_text"

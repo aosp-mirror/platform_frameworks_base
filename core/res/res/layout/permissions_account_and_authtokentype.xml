@@ -29,7 +29,7 @@
         android:layout_width="30dip"
         android:layout_height="30dip"
         android:drawable="@drawable/ic_bullet_key_permission"
-        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
         android:scaleType="fitCenter" />
 
 
@@ -37,8 +37,8 @@
         android:id="@+id/account_type"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textStyle="bold"
-        android:paddingLeft="6dip"
-        android:layout_toRightOf="@id/permission_icon"
+        android:paddingStart="6dip"
+        android:layout_toEndOf="@id/permission_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
@@ -47,9 +47,9 @@
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:layout_marginTop="-4dip"
         android:paddingBottom="8dip"
-        android:paddingLeft="6dip"
+        android:paddingStart="6dip"
         android:layout_below="@id/account_type"
-        android:layout_toRightOf="@id/permission_icon"
+        android:layout_toEndOf="@id/permission_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
@@ -58,9 +58,9 @@
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:layout_marginTop="-4dip"
         android:paddingBottom="8dip"
-        android:paddingLeft="6dip"
+        android:paddingStart="6dip"
         android:layout_below="@id/account_name"
-        android:layout_toRightOf="@id/permission_icon"
+        android:layout_toEndOf="@id/permission_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 

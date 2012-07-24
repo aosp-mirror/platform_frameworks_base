@@ -18,13 +18,13 @@
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
               android:orientation="horizontal"
-              android:paddingRight="8dip"
+              android:paddingEnd="8dip"
               android:background="?android:attr/actionBarItemBackground"
               android:enabled="false">
 
     <ImageView android:id="@android:id/up"
                android:src="?android:attr/homeAsUpIndicator"
-               android:layout_gravity="center_vertical|left"
+               android:layout_gravity="center_vertical|start"
                android:visibility="gone"
                android:layout_width="wrap_content"
                android:layout_height="wrap_content" />

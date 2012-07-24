@@ -55,8 +55,8 @@
                 android:orientation="vertical"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_marginRight="10dip"
-                android:layout_marginLeft="10dip">
+                android:layout_marginEnd="10dip"
+                android:layout_marginStart="10dip">
                 <TextView android:id="@+id/enter_puk"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -78,16 +78,16 @@
                   android:layout_width="wrap_content"
                   android:layout_weight="1"
                   android:layout_height="match_parent"
-                  android:paddingRight="0dip"
-                  android:layout_marginRight="10dip"
-                  android:layout_marginLeft="10dip">
+                  android:paddingEnd="0dip"
+                  android:layout_marginEnd="10dip"
+                  android:layout_marginStart="10dip">
 
                   <LinearLayout
                       android:layout_width="match_parent"
                       android:layout_height="wrap_content"
                       android:orientation="horizontal"
-                      android:layout_marginRight="6dip"
-                      android:layout_marginLeft="6dip"
+                      android:layout_marginEnd="6dip"
+                      android:layout_marginStart="6dip"
                       android:gravity="center_vertical"
                       android:background="@android:drawable/edit_text">
 
@@ -106,7 +106,7 @@
                           android:src="@android:drawable/ic_input_delete"
                           android:layout_width="wrap_content"
                           android:layout_height="wrap_content"
-                          android:layout_marginRight="-3dip"
+                          android:layout_marginEnd="-3dip"
                           android:layout_marginBottom="-3dip"
                       />
                   </LinearLayout>
@@ -116,8 +116,8 @@
                       android:layout_width="match_parent"
                       android:layout_height="wrap_content"
                       android:orientation="horizontal"
-                      android:layout_marginRight="6dip"
-                      android:layout_marginLeft="6dip"
+                      android:layout_marginEnd="6dip"
+                      android:layout_marginStart="6dip"
                       android:gravity="center_vertical"
                       android:background="@android:drawable/edit_text">
 
@@ -138,7 +138,7 @@
                           android:src="@android:drawable/ic_input_delete"
                           android:layout_width="wrap_content"
                           android:layout_height="wrap_content"
-                          android:layout_marginRight="-3dip"
+                          android:layout_marginEnd="-3dip"
                           android:layout_marginBottom="-3dip"
                       />
                   </LinearLayout>
@@ -152,8 +152,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dip"
-        android:layout_marginLeft="8dip"
-        android:layout_marginRight="8dip">
+        android:layout_marginStart="8dip"
+        android:layout_marginEnd="8dip">
 
         <Button android:id="@+id/emergencyCallButton"
             android:text="@android:string/lockscreen_emergency_call"
@@ -163,7 +163,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1.0"
             android:layout_marginBottom="8dip"
-            android:layout_marginRight="8dip"
+            android:layout_marginEnd="8dip"
             android:textSize="18sp"
             android:drawableLeft="@drawable/ic_emergency"
             android:drawablePadding="4dip"
@@ -176,7 +176,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1.0"
             android:layout_marginBottom="8dip"
-            android:layout_marginLeft="8dip"
+            android:layout_marginStart="8dip"
             android:textSize="18sp"
         />
     </LinearLayout>

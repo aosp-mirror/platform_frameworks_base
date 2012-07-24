@@ -458,7 +458,7 @@ public class SurfaceView extends View {
                 if (mWindow == null) {
                     mWindow = new MyWindow(this);
                     mLayout.type = mWindowType;
-                    mLayout.gravity = Gravity.LEFT|Gravity.TOP;
+                    mLayout.gravity = Gravity.START|Gravity.TOP;
                     mSession.addWithoutInputChannel(mWindow, mWindow.mSeq, mLayout,
                             mVisible ? VISIBLE : GONE, mContentInsets);
                 }

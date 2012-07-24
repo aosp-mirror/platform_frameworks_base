@@ -24,16 +24,16 @@
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="64dip"
-        android:layout_marginLeft="2dip"
-        android:layout_marginRight="2dip"
+        android:layout_marginStart="2dip"
+        android:layout_marginEnd="2dip"
         android:orientation="horizontal">
 
         <Button android:id="@+id/one"
             android:layout_width="0sp"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            android:layout_marginLeft="2dip"
-            android:layout_marginRight="2dip"
+            android:layout_marginStart="2dip"
+            android:layout_marginEnd="2dip"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textStyle="bold"
         />
@@ -42,8 +42,8 @@
             android:layout_width="0sp"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            android:layout_marginLeft="2dip"
-            android:layout_marginRight="2dip"
+            android:layout_marginStart="2dip"
+            android:layout_marginEnd="2dip"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textStyle="bold"
         />
@@ -52,8 +52,8 @@
             android:layout_width="0sp"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            android:layout_marginLeft="2dip"
-            android:layout_marginRight="2dip"
+            android:layout_marginStart="2dip"
+            android:layout_marginEnd="2dip"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textStyle="bold"
         />
@@ -63,16 +63,16 @@
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="64dip"
-        android:layout_marginLeft="2dip"
-        android:layout_marginRight="2dip"
+        android:layout_marginStart="2dip"
+        android:layout_marginEnd="2dip"
         android:orientation="horizontal">
 
         <Button android:id="@+id/four"
             android:layout_width="0sp"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            android:layout_marginLeft="2dip"
-            android:layout_marginRight="2dip"
+            android:layout_marginStart="2dip"
+            android:layout_marginEnd="2dip"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textStyle="bold"
         />
@@ -81,8 +81,8 @@
             android:layout_width="0sp"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            android:layout_marginLeft="2dip"
-            android:layout_marginRight="2dip"
+            android:layout_marginStart="2dip"
+            android:layout_marginEnd="2dip"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textStyle="bold"
         />
@@ -91,8 +91,8 @@
             android:layout_width="0sp"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            android:layout_marginLeft="2dip"
-            android:layout_marginRight="2dip"
+            android:layout_marginStart="2dip"
+            android:layout_marginEnd="2dip"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textStyle="bold"
         />
@@ -101,16 +101,16 @@
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="64dip"
-        android:layout_marginLeft="2dip"
-        android:layout_marginRight="2dip"
+        android:layout_marginStart="2dip"
+        android:layout_marginEnd="2dip"
         android:orientation="horizontal">
 
         <Button android:id="@+id/seven"
             android:layout_width="0sp"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            android:layout_marginLeft="2dip"
-            android:layout_marginRight="2dip"
+            android:layout_marginStart="2dip"
+            android:layout_marginEnd="2dip"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textStyle="bold"
         />
@@ -119,8 +119,8 @@
             android:layout_width="0sp"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            android:layout_marginLeft="2dip"
-            android:layout_marginRight="2dip"
+            android:layout_marginStart="2dip"
+            android:layout_marginEnd="2dip"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textStyle="bold"
         />
@@ -129,8 +129,8 @@
             android:layout_width="0sp"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            android:layout_marginLeft="2dip"
-            android:layout_marginRight="2dip"
+            android:layout_marginStart="2dip"
+            android:layout_marginEnd="2dip"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textStyle="bold"
         />
@@ -140,16 +140,16 @@
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="64dip"
-        android:layout_marginLeft="2dip"
-        android:layout_marginRight="2dip"
+        android:layout_marginStart="2dip"
+        android:layout_marginEnd="2dip"
         android:orientation="horizontal">
 
         <Button android:id="@+id/cancel"
             android:layout_width="0sp"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            android:layout_marginLeft="2dip"
-            android:layout_marginRight="2dip"
+            android:layout_marginStart="2dip"
+            android:layout_marginEnd="2dip"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textStyle="bold"
             android:text="@android:string/cancel"
@@ -159,8 +159,8 @@
             android:layout_width="0sp"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            android:layout_marginLeft="2dip"
-            android:layout_marginRight="2dip"
+            android:layout_marginStart="2dip"
+            android:layout_marginEnd="2dip"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textStyle="bold"
         />
@@ -169,8 +169,8 @@
             android:layout_width="0sp"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            android:layout_marginLeft="2dip"
-            android:layout_marginRight="2dip"
+            android:layout_marginStart="2dip"
+            android:layout_marginEnd="2dip"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textStyle="bold"
             android:text="@android:string/ok"

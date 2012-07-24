@@ -21,6 +21,6 @@
     android:textAppearance="?android:attr/textAppearanceListItem"
     android:gravity="center_vertical"
     android:background="?android:attr/listChoiceBackgroundIndicator"
-    android:paddingLeft="8dip"
-    android:paddingRight="8dip"
+    android:paddingStart="8dip"
+    android:paddingEnd="8dip"
 />

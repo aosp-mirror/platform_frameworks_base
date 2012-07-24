@@ -22,7 +22,7 @@
     android:layout_height="wrap_content"
     android:minHeight="?android:attr/listPreferredItemHeight"
     android:gravity="center_vertical"
-    android:paddingRight="?android:attr/scrollbarSize">
+    android:paddingEnd="?android:attr/scrollbarSize">
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -42,8 +42,8 @@
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16dip"
-        android:layout_marginRight="8dip"
+        android:layout_marginStart="16dip"
+        android:layout_marginEnd="8dip"
         android:layout_marginTop="6dip"
         android:layout_marginBottom="6dip"
         android:layout_weight="1">
@@ -60,7 +60,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@android:id/title"
-            android:layout_alignLeft="@android:id/title"
+            android:layout_alignStart="@android:id/title"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="?android:attr/textColorSecondary"
             android:maxLines="4" />
@@ -70,7 +70,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_below="@android:id/summary"
-            android:layout_alignLeft="@android:id/title"
+            android:layout_alignStart="@android:id/title"
             android:minWidth="@dimen/preference_widget_width"
             android:gravity="center"
             android:orientation="vertical" />
@@ -79,8 +79,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@android:id/summary"
-            android:layout_toRightOf="@android:id/widget_frame"
-            android:layout_alignParentRight="true" />
+            android:layout_toEndOf="@android:id/widget_frame"
+            android:layout_alignParentEnd="true" />
 
     </RelativeLayout>
 

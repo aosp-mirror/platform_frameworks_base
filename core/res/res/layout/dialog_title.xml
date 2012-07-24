@@ -30,8 +30,8 @@ enabled.
         android:minHeight="53dip"
         android:paddingTop="9dip"
         android:paddingBottom="9dip"
-        android:paddingLeft="10dip"
-        android:paddingRight="10dip" />
+        android:paddingStart="10dip"
+        android:paddingEnd="10dip" />
     <FrameLayout
         android:layout_width="match_parent" android:layout_height="wrap_content"
         android:layout_weight="1"

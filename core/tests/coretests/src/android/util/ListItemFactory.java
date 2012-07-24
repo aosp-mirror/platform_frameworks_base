@@ -247,7 +247,7 @@ public class ListItemFactory {
         TextView t1 = new TextView(context);
         t1.setHeight(desiredHeight);
         t1.setText(text);
-        t1.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
+        t1.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
         final ViewGroup.LayoutParams lp1 = new LinearLayout.LayoutParams(
                 0,
                 ViewGroup.LayoutParams.WRAP_CONTENT, 1.0f);

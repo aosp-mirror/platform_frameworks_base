@@ -32,7 +32,7 @@
     <com.android.internal.widget.DigitalClock android:id="@+id/time"
         android:layout_marginTop="8dip"
         android:layout_marginBottom="12dip"
-        android:layout_gravity="right">
+        android:layout_gravity="end">
 
         <!-- Because we can't have multi-tone fonts, we render two TextViews, one on
         top of the other. Hence the redundant layout... -->
@@ -55,7 +55,7 @@
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textSize="@dimen/keyguard_lockscreen_clock_font_size"
             android:layout_marginBottom="6dip"
-            android:layout_alignLeft="@id/timeDisplayBackground"
+            android:layout_alignStart="@id/timeDisplayBackground"
             android:layout_alignTop="@id/timeDisplayBackground"
             android:textColor="@color/lockscreen_clock_foreground"
             />
@@ -66,7 +66,7 @@
         android:id="@+id/date"
         android:layout_width="0dip"
         android:layout_gravity="fill_horizontal"
-        android:gravity="right"
+        android:gravity="end"
         android:singleLine="true"
         android:ellipsize="marquee"
         android:textAppearance="?android:attr/textAppearanceMedium"
@@ -79,7 +79,7 @@
         android:ellipsize="marquee"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
-        android:layout_gravity="right"
+        android:layout_gravity="end"
         android:drawablePadding="4dip"
         />
 
@@ -87,7 +87,7 @@
         android:id="@+id/status1"
         android:layout_width="0dip"
         android:layout_gravity="fill_horizontal"
-        android:gravity="right"
+        android:gravity="end"
         android:singleLine="true"
         android:ellipsize="marquee"
         android:textAppearance="?android:attr/textAppearanceMedium"
@@ -99,7 +99,7 @@
     <TextView android:id="@+id/carrier"
         android:layout_width="0dip"
         android:layout_gravity="fill_horizontal"
-        android:gravity="right"
+        android:gravity="end"
         android:singleLine="true"
         android:ellipsize="marquee"
         android:textAppearance="?android:attr/textAppearanceMedium"
@@ -109,11 +109,11 @@
     <LinearLayout
         style="?android:attr/buttonBarStyle"
         android:orientation="vertical"
-        android:layout_gravity="right">
+        android:layout_gravity="end">
 
         <Button android:id="@+id/emergencyCallButton"
             style="?android:attr/buttonBarButtonStyle"
-            android:layout_gravity="right"
+            android:layout_gravity="end"
             android:layout_width="wrap_content"
             android:layout_height="0dip"
             android:layout_weight="1"
@@ -125,7 +125,7 @@
 
         <Button android:id="@+id/forgotPatternButton"
             style="?android:attr/buttonBarButtonStyle"
-            android:layout_gravity="right"
+            android:layout_gravity="end"
             android:layout_width="wrap_content"
             android:layout_height="0dip"
             android:layout_weight="1"
@@ -142,9 +142,9 @@
          android:layout_width="match_parent"
          android:layout_height="match_parent"
          android:layout_marginTop="8dip"
-         android:layout_marginRight="8dip"
+         android:layout_marginEnd="8dip"
          android:layout_marginBottom="8dip"
-         android:layout_marginLeft="8dip"
+         android:layout_marginStart="8dip"
          android:layout_rowSpan="7"/>
 
 
@@ -169,7 +169,7 @@
         android:layout_rowSpan="7"
         android:layout_columnSpan="1"
         android:layout_gravity="fill"
-        android:layout_marginLeft="8dip"
+        android:layout_marginStart="8dip"
         android:layout_width="0dip"
         android:layout_height="0dip"
         android:background="@drawable/intro_bg">
@@ -187,7 +187,7 @@
             android:layout_height="wrap_content"
             android:padding="5dip"
             android:layout_alignParentTop="true"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
             android:src="@drawable/ic_facial_backup"
         />
 

@@ -32,7 +32,7 @@
     <com.android.internal.widget.DigitalClock android:id="@+id/time"
         android:layout_marginTop="80dip"
         android:layout_marginBottom="8dip"
-        android:layout_gravity="right">
+        android:layout_gravity="end">
 
        <!-- Because we can't have multi-tone fonts, we render two TextViews, one on
         top of the other. Hence the redundant layout... -->
@@ -56,7 +56,7 @@
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:layout_marginBottom="6dip"
             android:textColor="@color/lockscreen_clock_foreground"
-            android:layout_alignLeft="@id/timeDisplayBackground"
+            android:layout_alignStart="@id/timeDisplayBackground"
             android:layout_alignTop="@id/timeDisplayBackground"
             />
 
@@ -66,7 +66,7 @@
         android:id="@+id/date"
         android:layout_width="0dip"
         android:layout_gravity="fill_horizontal"
-        android:gravity="right"
+        android:gravity="end"
         android:layout_marginTop="6dip"
         android:singleLine="true"
         android:ellipsize="marquee"
@@ -82,14 +82,14 @@
         android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
         android:drawablePadding="4dip"
         android:layout_marginTop="4dip"
-        android:layout_gravity="right"
+        android:layout_gravity="end"
         />
 
     <TextView
         android:id="@+id/status1"
         android:layout_width="0dip"
         android:layout_gravity="fill_horizontal"
-        android:gravity="right"
+        android:gravity="end"
         android:layout_marginTop="4dip"
         android:singleLine="true"
         android:ellipsize="marquee"
@@ -105,7 +105,7 @@
         android:layout_width="0dip"
         android:layout_gravity="fill_horizontal"
         android:layout_marginBottom="12dip"
-        android:gravity="right"
+        android:gravity="end"
         android:singleLine="true"
         android:ellipsize="marquee"
         android:textAppearance="?android:attr/textAppearanceMedium"
@@ -117,7 +117,7 @@
         android:id="@+id/emergencyCallButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="right"
+        android:layout_gravity="end"
         android:drawableLeft="@*android:drawable/lockscreen_emergency_button"
         android:text="@*android:string/lockscreen_emergency_call"
         style="?android:attr/buttonBarButtonStyle"
@@ -134,7 +134,7 @@
         android:layout_width="302dip"
         android:layout_height="match_parent"
         android:layout_rowSpan="7"
-        android:gravity="left|center_vertical"
+        android:gravity="start|center_vertical"
         android:focusable="true"
 
         android:targetDrawables="@array/lockscreen_targets_with_camera"

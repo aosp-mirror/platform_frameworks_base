@@ -18,8 +18,8 @@
         android:orientation="vertical"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        android:layout_marginLeft="@dimen/preference_fragment_padding_side"
-        android:layout_marginRight="@dimen/preference_fragment_padding_side"
+        android:layout_marginStart="@dimen/preference_fragment_padding_side"
+        android:layout_marginEnd="@dimen/preference_fragment_padding_side"
     >
     <android.app.FragmentBreadCrumbs
             android:id="@android:id/title"
@@ -27,7 +27,7 @@
             android:layout_width="match_parent"
             android:paddingTop="16dip"
             android:paddingBottom="8dip"
-            android:gravity="center_vertical|left"
+            android:gravity="center_vertical|start"
         />
 
     <ImageView
