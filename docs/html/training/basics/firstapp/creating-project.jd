@@ -41,10 +41,10 @@ shows how to create a new project either using Eclipse (with the ADT plugin) or 
 SDK tools from a command line.</p>
 
 <p class="note"><strong>Note:</strong> You should already have the Android SDK installed, and if
-you're using Eclipse, you should also have the <a
-href="{@docRoot}tools/sdk/eclipse-adt.html">ADT plugin</a> installed. If you don't have
-these, follow the guide to <a href="{@docRoot}sdk/installing/index.html">Installing the Android SDK</a>
-before you start this lesson.</p>
+you're using Eclipse, you should also have the <a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT
+plugin</a> installed (version 20.0.0 or higher). If you don't have these, follow the guide to <a
+href="{@docRoot}sdk/installing/index.html">Installing the Android SDK</a> before you start this
+lesson.</p>
 
 
 <h2 id="Eclipse">Create a Project with Eclipse</h2>

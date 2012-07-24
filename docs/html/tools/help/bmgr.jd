@@ -7,9 +7,6 @@ parent.link=index.html
 
 <div id="qv-wrapper">
 <div id="qv">
-  <h2>bmgr quickview</h2>
-<p><code>bmgr</code> lets you control the backup/restore system on an Android device.
-
   <h2>In this document</h2>
   <ol>
 <li><a href="#backup">Forcing a Backup Operation</a></li>
