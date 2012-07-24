@@ -245,8 +245,8 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"允许应用检索活动窗口的内容。恶意应用可能会检索整个窗口的内容，并检查其中除密码以外的所有文字。"</string>
     <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"检索窗口信息"</string>
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"允许应用通过窗口管理器检索窗口信息。恶意应用可能会检索供内部系统使用的信息。"</string>
-    <string name="permlab_filter_events" msgid="8675535648807427389">"过滤活动"</string>
-    <string name="permdesc_filter_events" msgid="8006236315888347680">"允许应用注册输入过滤器，这类过滤器会在所有用户活动分派之前对这些用户活动的信息流进行过滤。恶意应用可能会在没有用户干预的情况下控制系统用户界面。"</string>
+    <string name="permlab_filter_events" msgid="8675535648807427389">"过滤事件"</string>
+    <string name="permdesc_filter_events" msgid="8006236315888347680">"允许应用注册输入过滤器，这类过滤器会在所有用户事件分派之前对用户事件流进行过滤。恶意应用可能会在没有用户干预的情况下控制系统用户界面。"</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"部分关机"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"使活动管理器进入关闭状态。不执行彻底关机。"</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"禁止切换应用"</string>
