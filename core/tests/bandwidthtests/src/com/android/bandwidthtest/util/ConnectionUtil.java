@@ -74,7 +74,6 @@ public class ConnectionUtil {
     private int mWifiState;
     private NetworkInfo mWifiNetworkInfo;
     private WifiManager mWifiManager;
-    private WifiManager.Channel mChannel;
     private Context mContext;
     // Verify connectivity state
     private static final int NUM_NETWORK_TYPES = ConnectivityManager.MAX_NETWORK_TYPE + 1;
@@ -115,7 +114,6 @@ public class ConnectionUtil {
 
         // Get an instance of WifiManager
         mWifiManager =(WifiManager)mContext.getSystemService(Context.WIFI_SERVICE);
-        mChannel = mWifiManager.initialize(mContext, mContext.getMainLooper(), null);
 
         mDownloadManager = (DownloadManager)mContext.getSystemService(Context.DOWNLOAD_SERVICE);
 
@@ -574,7 +572,7 @@ public class ConnectionUtil {
                         Log.v(LOG_TAG, "Found " + ssid + " in the scan result list.");
                         Log.v(LOG_TAG, "Retry: " + retry);
                         foundApInScanResults = true;
-                        mWifiManager.connect(mChannel, config, new WifiManager.ActionListener() {
+                        mWifiManager.connect(config, new WifiManager.ActionListener() {
                                 public void onSuccess() {
                                 }
                                 public void onFailure(int reason) {
@@ -628,7 +626,7 @@ public class ConnectionUtil {
         for (WifiConfiguration wifiConfig: wifiConfigList) {
             Log.v(LOG_TAG, "Remove wifi configuration: " + wifiConfig.networkId);
             int netId = wifiConfig.networkId;
-            mWifiManager.forget(mChannel, netId, new WifiManager.ActionListener() {
+            mWifiManager.forget(netId, new WifiManager.ActionListener() {
                     public void onSuccess() {
                     }
                     public void onFailure(int reason) {
