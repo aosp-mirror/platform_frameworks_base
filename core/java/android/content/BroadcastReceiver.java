@@ -735,7 +735,7 @@ public abstract class BroadcastReceiver {
     
     /**
      * Control inclusion of debugging help for mismatched
-     * calls to {@ Context#registerReceiver(BroadcastReceiver, IntentFilter)
+     * calls to {@link Context#registerReceiver(BroadcastReceiver, IntentFilter)
      * Context.registerReceiver()}.
      * If called with true, before given to registerReceiver(), then the
      * callstack of the following {@link Context#unregisterReceiver(BroadcastReceiver)
