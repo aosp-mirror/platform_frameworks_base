@@ -35,6 +35,7 @@ import android.text.TextUtils;
 import android.util.Slog;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.net.NetworkInterface;
@@ -109,7 +110,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private int mOtaspMode = ServiceStateTracker.OTASP_UNKNOWN;
 
-    private CellInfo mCellInfo = null;
+    private List<CellInfo> mCellInfo = null;
 
     static final int PHONE_STATE_PERMISSION_MASK =
                 PhoneStateListener.LISTEN_CALL_FORWARDING_INDICATOR |
@@ -242,7 +243,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     }
                     if ((events & PhoneStateListener.LISTEN_CELL_INFO) != 0) {
                         try {
-                            r.callback.onCellInfoChanged(new CellInfo(mCellInfo));
+                            r.callback.onCellInfoChanged(mCellInfo);
                         } catch (RemoteException ex) {
                             remove(r.binder);
                         }
@@ -336,7 +337,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         broadcastSignalStrengthChanged(signalStrength);
     }
 
-    public void notifyCellInfo(CellInfo cellInfo) {
+    public void notifyCellInfo(List<CellInfo> cellInfo) {
         if (!checkNotifyPermission("notifyCellInfo()")) {
             return;
         }
@@ -346,7 +347,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             for (Record r : mRecords) {
                 if ((r.events & PhoneStateListener.LISTEN_CELL_INFO) != 0) {
                     try {
-                        r.callback.onCellInfoChanged(new CellInfo(cellInfo));
+                        r.callback.onCellInfoChanged(cellInfo);
                     } catch (RemoteException ex) {
                         mRemoveList.add(r.binder);
                     }

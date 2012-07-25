@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,18 @@ package android.telephony;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 /**
  * CellIdentity is to represent a unique CDMA cell
  *
- * @hide pending API review
+ * @hide
  */
-public final class CdmaCellIdentity extends CellIdentity implements Parcelable {
+public final class CellIdentityCdma extends CellIdentity implements Parcelable {
+
+    private static final String LOG_TAG = "CellSignalStrengthCdma";
+    private static final boolean DBG = false;
+
     // Network Id 0..65535
     private final int mNetworkId;
     // CDMA System Id 0..32767
@@ -47,6 +52,17 @@ public final class CdmaCellIdentity extends CellIdentity implements Parcelable {
     private final int mLatitude;
 
     /**
+     * @hide
+     */
+    public CellIdentityCdma() {
+        mNetworkId = Integer.MAX_VALUE;
+        mSystemId = Integer.MAX_VALUE;
+        mBasestationId = Integer.MAX_VALUE;
+        mLongitude = Integer.MAX_VALUE;
+        mLatitude = Integer.MAX_VALUE;
+    }
+
+    /**
      * public constructor
      * @param nid Network Id 0..65535
      * @param sid CDMA System Id 0..32767
@@ -55,11 +71,10 @@ public final class CdmaCellIdentity extends CellIdentity implements Parcelable {
      *        to 2592000
      * @param lat Latitude is a decimal number ranges from -1296000
      *        to 1296000
-     * @param attr is comma separated “key=value” attribute pairs.
+     *
+     * @hide
      */
-    public CdmaCellIdentity (int nid, int sid,
-            int bid, int lon, int lat, String attr) {
-        super(CELLID_TYPE_CDMA, attr);
+    public CellIdentityCdma (int nid, int sid, int bid, int lon, int lat) {
         mNetworkId = nid;
         mSystemId = sid;
         mBasestationId = bid;
@@ -67,22 +82,18 @@ public final class CdmaCellIdentity extends CellIdentity implements Parcelable {
         mLatitude = lat;
     }
 
-    private CdmaCellIdentity(Parcel in) {
-        super(in);
-        mNetworkId = in.readInt();
-        mSystemId = in.readInt();
-        mBasestationId = in.readInt();
-        mLongitude = in.readInt();
-        mLatitude = in.readInt();
-    }
-
-    CdmaCellIdentity(CdmaCellIdentity cid) {
+    private CellIdentityCdma(CellIdentityCdma cid) {
         super(cid);
         mNetworkId = cid.mNetworkId;
         mSystemId = cid.mSystemId;
         mBasestationId = cid.mBasestationId;
         mLongitude = cid.mLongitude;
         mLatitude = cid.mLatitude;
+    }
+
+    @Override
+    CellIdentityCdma copy() {
+        return new CellIdentityCdma(this);
     }
 
     /**
@@ -118,9 +129,6 @@ public final class CdmaCellIdentity extends CellIdentity implements Parcelable {
     }
 
     /**
-     * @return Base station
-     */
-    /**
      * @return Base station latitude, which is a decimal number as
      * specified in 3GPP2 C.S0005-A v6.0. It is represented in units
      * of 0.25 seconds and ranges from -1296000 to 1296000, both
@@ -131,15 +139,55 @@ public final class CdmaCellIdentity extends CellIdentity implements Parcelable {
         return mLatitude;
     }
 
-    /** Implement the Parcelable interface {@hide} */
+    @Override
+    public int hashCode() {
+        int primeNum = 31;
+        return (mNetworkId * primeNum) + (mSystemId * primeNum) + (mBasestationId * primeNum) +
+                (mLatitude * primeNum) + (mLongitude * primeNum);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (super.equals(other)) {
+            try {
+                CellIdentityCdma o = (CellIdentityCdma)other;
+                return mNetworkId == o.mNetworkId &&
+                        mSystemId == o.mSystemId &&
+                        mBasestationId == o.mBasestationId &&
+                        mLatitude == o.mLatitude &&
+                        mLongitude == o.mLongitude;
+            } catch (ClassCastException e) {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("CdmaCellIdentitiy:");
+        sb.append(super.toString());
+        sb.append(" mNetworkId="); sb.append(mNetworkId);
+        sb.append(" mSystemId="); sb.append(mSystemId);
+        sb.append(" mBasestationId="); sb.append(mBasestationId);
+        sb.append(" mLongitude="); sb.append(mLongitude);
+        sb.append(" mLatitude="); sb.append(mLatitude);
+
+        return sb.toString();
+    }
+
+    /** Implement the Parcelable interface */
     @Override
     public int describeContents() {
         return 0;
     }
 
-    /** Implement the Parcelable interface {@hide} */
+    /** Implement the Parcelable interface */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        if (DBG) log("writeToParcel(Parcel, int): " + toString());
+        dest.writeInt(TYPE_CDMA);
         super.writeToParcel(dest, flags);
         dest.writeInt(mNetworkId);
         dest.writeInt(mSystemId);
@@ -148,17 +196,42 @@ public final class CdmaCellIdentity extends CellIdentity implements Parcelable {
         dest.writeInt(mLatitude);
     }
 
-    /** Implement the Parcelable interface {@hide} */
-    public static final Creator<CdmaCellIdentity> CREATOR =
-            new Creator<CdmaCellIdentity>() {
+    /** Construct from Parcel, type has already been processed */
+    private CellIdentityCdma(Parcel in) {
+        super(in);
+        mNetworkId = in.readInt();
+        mSystemId = in.readInt();
+        mBasestationId = in.readInt();
+        mLongitude = in.readInt();
+        mLatitude = in.readInt();
+        if (DBG) log("CellIdentityCdma(Parcel): " + toString());
+    }
+
+    /** Implement the Parcelable interface */
+    @SuppressWarnings("hiding")
+    public static final Creator<CellIdentityCdma> CREATOR =
+            new Creator<CellIdentityCdma>() {
         @Override
-        public CdmaCellIdentity createFromParcel(Parcel in) {
-            return new CdmaCellIdentity(in);
+        public CellIdentityCdma createFromParcel(Parcel in) {
+            in.readInt(); // Skip past token, we know what it is
+            return createFromParcelBody(in);
         }
 
         @Override
-        public CdmaCellIdentity[] newArray(int size) {
-            return new CdmaCellIdentity[size];
+        public CellIdentityCdma[] newArray(int size) {
+            return new CellIdentityCdma[size];
         }
     };
+
+    /** @hide */
+    static CellIdentityCdma createFromParcelBody(Parcel in) {
+        return new CellIdentityCdma(in);
+    }
+
+    /**
+     * log
+     */
+    private static void log(String s) {
+        Log.w(LOG_TAG, s);
+    }
 }

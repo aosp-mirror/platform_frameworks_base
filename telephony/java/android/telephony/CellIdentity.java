@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,70 +20,79 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * CellIdentity is to represent ONE unique cell in the world
+ * CellIdentity is immutable and represents ONE unique cell in the world
  * it contains all levels of info to identity country, carrier, etc.
  *
- * @hide pending API review
+ * @hide
  */
 public abstract class CellIdentity implements Parcelable {
 
-    // Cell is a GSM Cell {@link GsmCellIdentity}
-    public static final int CELLID_TYPE_GSM = 1;
-    // Cell is a CMDA Cell {@link CdmaCellIdentity}
-    public static final int CELLID_TYPE_CDMA = 2;
-    // Cell is a LTE Cell {@link LteCellIdentity}
-    public static final int CELLID_TYPE_LTE = 3;
+    // Type fields for parceling
+    protected static final int TYPE_GSM = 1;
+    protected static final int TYPE_CDMA = 2;
+    protected static final int TYPE_LTE = 3;
 
-    private int mCellIdType;
-    private String mCellIdAttributes;
-
-    protected CellIdentity(int type, String attr) {
-        this.mCellIdType = type;
-        this.mCellIdAttributes = new String(attr);
+    protected CellIdentity() {
     }
 
     protected CellIdentity(Parcel in) {
-        this.mCellIdType = in.readInt();
-        this.mCellIdAttributes = new String(in.readString());
     }
 
     protected CellIdentity(CellIdentity cid) {
-        this.mCellIdType = cid.mCellIdType;
-        this.mCellIdAttributes = new String(cid.mCellIdAttributes);
     }
 
     /**
-     * @return Cell Identity type as one of CELLID_TYPE_XXXX
+     * @return a copy of this object with package visibility.
      */
-    public int getCellIdType() {
-        return mCellIdType;
+    abstract CellIdentity copy();
+
+    @Override
+    public abstract int hashCode();
+
+    @Override
+    public boolean equals(Object other) {
+        if (other == null) {
+            return false;
+        }
+        if (this == other) {
+            return true;
+        }
+        return (other instanceof CellIdentity);
     }
 
-
-    /**
-     * @return Cell identity attribute pairs
-     * Comma separated “key=value” pairs.
-     *   key := must must an single alpha-numeric word
-     *   value := “quoted value string”
-     *
-     * Current list of keys and values:
-     *   type = fixed | mobile
-     */
-    public String getCellIdAttributes() {
-        return mCellIdAttributes;
+    @Override
+    public String toString() {
+        return "";
     }
 
-
-    /** Implement the Parcelable interface {@hide} */
+    /** Implement the Parcelable interface */
     @Override
     public int describeContents() {
         return 0;
     }
 
-    /** Implement the Parcelable interface {@hide} */
+    /** Implement the Parcelable interface */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(mCellIdType);
-        dest.writeString(mCellIdAttributes);
     }
+
+    /** Implement the Parcelable interface */
+    public static final Creator<CellIdentity> CREATOR =
+            new Creator<CellIdentity>() {
+        @Override
+        public CellIdentity createFromParcel(Parcel in) {
+            int type = in.readInt();
+            switch (type) {
+                case TYPE_GSM: return CellIdentityGsm.createFromParcelBody(in);
+                case TYPE_CDMA: return CellIdentityCdma.createFromParcelBody(in);
+                case TYPE_LTE: return CellIdentityLte.createFromParcelBody(in);
+                default: throw new RuntimeException("Bad CellIdentity Parcel");
+            }
+        }
+
+        @Override
+        public CellIdentity[] newArray(int size) {
+            return new CellIdentity[size];
+        }
+    };
 }
