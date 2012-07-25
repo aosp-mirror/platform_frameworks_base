@@ -1442,9 +1442,9 @@ public final class CalendarContract {
                         attendeeValues.put(Attendees.ATTENDEE_STATUS,
                                 subCursor.getInt(COLUMN_ATTENDEE_STATUS));
                         attendeeValues.put(Attendees.ATTENDEE_IDENTITY,
-                                subCursor.getInt(COLUMN_ATTENDEE_IDENTITY));
+                                subCursor.getString(COLUMN_ATTENDEE_IDENTITY));
                         attendeeValues.put(Attendees.ATTENDEE_ID_NAMESPACE,
-                                subCursor.getInt(COLUMN_ATTENDEE_ID_NAMESPACE));
+                                subCursor.getString(COLUMN_ATTENDEE_ID_NAMESPACE));
                         entity.addSubValue(Attendees.CONTENT_URI, attendeeValues);
                     }
                 } finally {
