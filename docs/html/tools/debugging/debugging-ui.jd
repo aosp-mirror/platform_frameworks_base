@@ -29,7 +29,7 @@ parent.link=index.html
                 <li><a href="#overlays">Working with Pixel Perfect overlays</a></li>
             </ol>
         </li>
-        <li><a href="#layoutopt">Using layoutopt</a></li>
+        <li><a href="#lint">Using lint to optimize your UI</a></li>
       </ol>
       <h2>Related videos</h2>
           <ol>
@@ -55,15 +55,15 @@ parent.link=index.html
   <p>
 Sometimes your application's layout can slow down your application.
   To help debug issues in your layout, the Android SDK provides the Hierarchy Viewer and
-  <code>layoutopt</code> tools.
+  <code>lint</code> tools.
   </p>
 
   <p>The Hierarchy Viewer application allows you to debug and optimize your user interface. It
   provides a visual representation of the layout's View hierarchy (the View Hierarchy window)
   and a magnified view of the display (the Pixel Perfect window).</p>
 
-  <p><code>layoutopt</code> is a command-line tool that helps you optimize the layouts and layout
-  hierarchies of your applications. You can run it against your layout files or resource
+  <p>Android <code>lint</code> is a static code scanning tool that helps you optimize the layouts and layout
+  hierarchies of your applications, as well as detect other common coding problems. You can run it against your layout files or resource
   directories to quickly check for inefficiencies or other types of problems that could be
   affecting the performance of your application.</p>
 
@@ -491,57 +491,7 @@ Sometimes your application's layout can slow down your application.
         alt=""
         height="600"/>
 <p class="img-caption"><strong>Figure 4.</strong> The Pixel Perfect window</p>
-<h2 id="layoutopt">Using layoutopt</h2>
-<p>
-    The <code>layoutopt</code> tool lets you analyze the XML files that define your
-    application's UI to find inefficiencies in the view hierarchy.</p>
-
-<p>
-    To run the tool, open a terminal and launch <code>layoutopt &lt;xmlfiles&gt;</code>
-    from your SDK <code>tools/</code> directory. The &lt;xmlfiles&gt; argument is a space-
-    delimited list of resources you want to analyze, either uncompiled resource xml files or
-    directories of such files.
-</p>
-<p>
-    The tool loads the specified XML files and analyzes their definitions and
-    hierarchies according to a set of predefined rules. For every issue it detects, it
-    displays the following information:
-</p>
-<ul>
-    <li>
-        The filename in which the issue was detected.
-    </li>
-    <li>
-        The line number for the issue.
-    </li>
-    <li>
-        A description of the issue, and for some types of issues it also suggests a resolution.
-    </li>
-</ul>
-<p>The following is a sample of the output from the tool:</p>
-<pre>
-$ layoutopt samples/
-samples/compound.xml
-   7:23 The root-level &lt;FrameLayout/&gt; can be replaced with &lt;merge/&gt;
-   11:21 This LinearLayout layout or its FrameLayout parent is useless
-samples/simple.xml
-   7:7 The root-level &lt;FrameLayout/&gt; can be replaced with &lt;merge/&gt;
-samples/too_deep.xml
-   -1:-1 This layout has too many nested layouts: 13 levels, it should have &lt;= 10!
-   20:81 This LinearLayout layout or its LinearLayout parent is useless
-   24:79 This LinearLayout layout or its LinearLayout parent is useless
-   28:77 This LinearLayout layout or its LinearLayout parent is useless
-   32:75 This LinearLayout layout or its LinearLayout parent is useless
-   36:73 This LinearLayout layout or its LinearLayout parent is useless
-   40:71 This LinearLayout layout or its LinearLayout parent is useless
-   44:69 This LinearLayout layout or its LinearLayout parent is useless
-   48:67 This LinearLayout layout or its LinearLayout parent is useless
-   52:65 This LinearLayout layout or its LinearLayout parent is useless
-   56:63 This LinearLayout layout or its LinearLayout parent is useless
-samples/too_many.xml
-   7:413 The root-level &lt;FrameLayout/&gt; can be replaced with &lt;merge/&gt;
-   -1:-1 This layout has too many views: 81 views, it should have &lt;= 80!
-samples/useless.xml
-   7:19 The root-level &lt;FrameLayout/&gt; can be replaced with &lt;merge/&gt;
-   11:17 This LinearLayout layout or its FrameLayout parent is useless
-</pre>
+<h2 id="lint">Using lint to Optimize Your UI</h2>
+<p>The Android {@code lint} tool lets you analyze the XML files that define your application's UI to find inefficiencies in the view hierarchy.</p>
+<p class="note"><strong>Note: </strong>The Android <code>layoutopt</code> tool has been replaced by the {@code lint} tool beginning in ADT and SDK Tools revision 16. The {@code lint} tool reports UI layout performance issues in a similar way as <code>layoutopt</code>, and detects additional problems.</p>
+<p>For more information about using {@code lint}, see <a href="{@docRoot}tools/debugging/improving-w-lint.html">Improving Your Code with lint</a> and the <a  href="{@docRoot}tools/help/lint.html">lint reference documentation</a>.</p>
