@@ -64,8 +64,8 @@ import java.util.Map;
  * it will only be applied after {@code android:state_pressed} and {@code
  * android:state_focused} have both evaluated false.</p>
  *
- * <p>See the <a href="{@docRoot}resources/tutorials/views/hello-formstuff.html">Form Stuff
- * tutorial</a>.</p>
+ * <p>See the <a href="{@docRoot}guide/topics/ui/controls/button.html">Buttons</a>
+ * guide.</p>
  *
  * <p><strong>XML attributes</strong></p>
  * <p>

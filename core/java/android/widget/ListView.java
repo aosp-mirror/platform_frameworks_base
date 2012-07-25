@@ -57,8 +57,8 @@ import java.util.ArrayList;
  * A view that shows items in a vertically scrolling list. The items
  * come from the {@link ListAdapter} associated with this view.
  *
- * <p>See the <a href="{@docRoot}resources/tutorials/views/hello-listview.html">List View
- * tutorial</a>.</p>
+ * <p>See the <a href="{@docRoot}guide/topics/ui/layout/listview.html">List View</a>
+ * guide.</p>
  *
  * @attr ref android.R.styleable#ListView_entries
  * @attr ref android.R.styleable#ListView_divider

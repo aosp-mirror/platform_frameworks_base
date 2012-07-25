@@ -83,8 +83,8 @@ import android.widget.RemoteViews.RemoteView;
  * href="{@docRoot}guide/topics/resources/drawable-resource.html#StateList">State List
  * Drawable</a>.</p>
  *
- * <p>Also see the <a href="{@docRoot}resources/tutorials/views/hello-formstuff.html">Form Stuff
- * tutorial</a> for an example implementation of a button.</p>
+ * <p>See the <a href="{@docRoot}guide/topics/ui/controls/button.html">Buttons</a>
+ * guide.</p>
  *
  * <p><strong>XML attributes</strong></p>
  * <p>

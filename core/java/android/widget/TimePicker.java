@@ -48,8 +48,8 @@ import java.util.Locale;
  * or 'P' to pick. For a dialog using this view, see
  * {@link android.app.TimePickerDialog}.
  *<p>
- * See the <a href="{@docRoot}resources/tutorials/views/hello-timepicker.html">Time Picker
- * tutorial</a>.
+ * See the <a href="{@docRoot}guide/topics/ui/controls/pickers.html">Pickers</a>
+ * guide.
  * </p>
  */
 @Widget
