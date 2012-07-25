@@ -932,10 +932,12 @@ public class NetworkController extends BroadcastReceiver {
 
             if (mDataConnected) {
                 mobileLabel = mNetworkName;
-            } else if (mConnected) {
-                if (hasService()) {
+            } else if (mConnected || mServiceState.isEmergencyOnly()) {
+                if (hasService() || mServiceState.isEmergencyOnly()) {
+                    // The isEmergencyOnly test covers the case of a phone with no SIM
                     mobileLabel = mNetworkName;
                 } else {
+                    // Tablets, basically
                     mobileLabel = "";
                 }
             } else {
