@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2009 Qualcomm Innovation Center, Inc.  All Rights Reserved.
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +27,7 @@ import android.util.Log;
 public class SignalStrength implements Parcelable {
 
     private static final String LOG_TAG = "SignalStrength";
-    private static final boolean DBG = false;
+    private static final boolean DBG = true;
 
     /** @hide */
     public static final int SIGNAL_STRENGTH_NONE_OR_UNKNOWN = 0;
@@ -114,19 +113,9 @@ public class SignalStrength implements Parcelable {
             int evdoDbm, int evdoEcio, int evdoSnr,
             int lteSignalStrength, int lteRsrp, int lteRsrq, int lteRssnr, int lteCqi,
             boolean gsm) {
-        mGsmSignalStrength = gsmSignalStrength;
-        mGsmBitErrorRate = gsmBitErrorRate;
-        mCdmaDbm = cdmaDbm;
-        mCdmaEcio = cdmaEcio;
-        mEvdoDbm = evdoDbm;
-        mEvdoEcio = evdoEcio;
-        mEvdoSnr = evdoSnr;
-        mLteSignalStrength = lteSignalStrength;
-        mLteRsrp = lteRsrp;
-        mLteRsrq = lteRsrq;
-        mLteRssnr = lteRssnr;
-        mLteCqi = lteCqi;
-        isGsm = gsm;
+        initialize(gsmSignalStrength, gsmBitErrorRate, cdmaDbm, cdmaEcio,
+                evdoDbm, evdoEcio, evdoSnr, lteSignalStrength, lteRsrp,
+                lteRsrq, lteRssnr, lteCqi, gsm);
     }
 
     /**
@@ -138,7 +127,7 @@ public class SignalStrength implements Parcelable {
             int cdmaDbm, int cdmaEcio,
             int evdoDbm, int evdoEcio, int evdoSnr,
             boolean gsm) {
-        this(gsmSignalStrength, gsmBitErrorRate, cdmaDbm, cdmaEcio,
+        initialize(gsmSignalStrength, gsmBitErrorRate, cdmaDbm, cdmaEcio,
                 evdoDbm, evdoEcio, evdoSnr, -1, -1,
                 -1, INVALID_SNR, -1, gsm);
     }
@@ -152,6 +141,69 @@ public class SignalStrength implements Parcelable {
      */
     public SignalStrength(SignalStrength s) {
         copyFrom(s);
+    }
+
+    /**
+     * Initialize gsm/cdma values, sets lte values to defaults.
+     *
+     * @param gsmSignalStrength
+     * @param gsmBitErrorRate
+     * @param cdmaDbm
+     * @param cdmaEcio
+     * @param evdoDbm
+     * @param evdoEcio
+     * @param evdoSnr
+     * @param gsm
+     *
+     * @hide
+     */
+    public void initialize(int gsmSignalStrength, int gsmBitErrorRate,
+            int cdmaDbm, int cdmaEcio,
+            int evdoDbm, int evdoEcio, int evdoSnr,
+            boolean gsm) {
+        initialize(gsmSignalStrength, gsmBitErrorRate, cdmaDbm, cdmaEcio,
+                evdoDbm, evdoEcio, evdoSnr, -1, -1,
+                -1, INVALID_SNR, -1, gsm);
+    }
+
+    /**
+     * Initialize all the values
+     *
+     * @param gsmSignalStrength
+     * @param gsmBitErrorRate
+     * @param cdmaDbm
+     * @param cdmaEcio
+     * @param evdoDbm
+     * @param evdoEcio
+     * @param evdoSnr
+     * @param lteSignalStrength
+     * @param lteRsrp
+     * @param lteRsrq
+     * @param lteRssnr
+     * @param lteCqi
+     * @param gsm
+     *
+     * @hide
+     */
+    public void initialize(int gsmSignalStrength, int gsmBitErrorRate,
+            int cdmaDbm, int cdmaEcio,
+            int evdoDbm, int evdoEcio, int evdoSnr,
+            int lteSignalStrength, int lteRsrp, int lteRsrq, int lteRssnr, int lteCqi,
+            boolean gsm) {
+        mGsmSignalStrength = gsmSignalStrength;
+        mGsmBitErrorRate = gsmBitErrorRate;
+        mCdmaDbm = cdmaDbm;
+        mCdmaEcio = cdmaEcio;
+        mEvdoDbm = evdoDbm;
+        mEvdoEcio = evdoEcio;
+        mEvdoSnr = evdoSnr;
+        mLteSignalStrength = lteSignalStrength;
+        mLteRsrp = lteRsrp;
+        mLteRsrq = lteRsrq;
+        mLteRssnr = lteRssnr;
+        mLteCqi = lteCqi;
+        isGsm = gsm;
+        if (DBG) log("initialize: " + toString());
     }
 
     /**
