@@ -37,8 +37,8 @@ import android.widget.RemoteViews.RemoteView;
  * A view that shows items in two-dimensional scrolling grid. The items in the
  * grid come from the {@link ListAdapter} associated with this view.
  *
- * <p>See the <a href="{@docRoot}resources/tutorials/views/hello-gridview.html">Grid
- * View tutorial</a>.</p>
+ * <p>See the <a href="{@docRoot}guide/topics/ui/layout/gridview.html">Grid
+ * View</a> guide.</p>
  * 
  * @attr ref android.R.styleable#GridView_horizontalSpacing
  * @attr ref android.R.styleable#GridView_verticalSpacing

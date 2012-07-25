@@ -53,6 +53,17 @@ import com.android.internal.R;
  * {@link #setSwitchTextAppearance(android.content.Context, int) switchTextAppearance} and
  * the related seSwitchTypeface() methods control that of the thumb.
  *
+ * <p>See the <a href="{@docRoot}guide/topics/ui/controls/togglebutton.html">Toggle Buttons</a>
+ * guide.</p>
+ *
+ * @attr ref android.R.styleable#Switch_textOn
+ * @attr ref android.R.styleable#Switch_textOff
+ * @attr ref android.R.styleable#Switch_switchMinWidth
+ * @attr ref android.R.styleable#Switch_switchPadding
+ * @attr ref android.R.styleable#Switch_switchTextAppearance
+ * @attr ref android.R.styleable#Switch_thumb
+ * @attr ref android.R.styleable#Switch_thumbTextPadding
+ * @attr ref android.R.styleable#Switch_track
  */
 public class Switch extends CompoundButton {
     private static final int TOUCH_MODE_IDLE = 0;
