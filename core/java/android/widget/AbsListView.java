@@ -16,8 +16,6 @@
 
 package android.widget;
 
-import com.android.internal.R;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
@@ -67,6 +65,8 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputConnectionWrapper;
 import android.view.inputmethod.InputMethodManager;
+
+import com.android.internal.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -1667,6 +1667,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             ss.checkIdState = idState;
         }
         ss.checkedItemCount = mCheckedItemCount;
+
+        if (mRemoteAdapter != null) {
+            mRemoteAdapter.saveRemoteViewsCache();
+        }
 
         return ss;
     }
@@ -5829,6 +5833,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         mDeferNotifyDataSetChanged = false;
         // Otherwise, create a new RemoteViewsAdapter for binding
         mRemoteAdapter = new RemoteViewsAdapter(getContext(), intent, this);
+        if (mRemoteAdapter.isDataReady()) {
+            setAdapter(mRemoteAdapter);
+        }
     }
 
     /**
