@@ -94,30 +94,33 @@ public abstract class WebSettings {
     }
 
     /**
-     * Default cache usage pattern. Use with {@link #setCacheMode}.
+     * Default cache usage mode. If the navigation type doesn't impose any
+     * specific behavior, use cached resources when they are available
+     * and not expired, otherwise load resources from the network.
+     * Use with {@link #setCacheMode}.
      */
     public static final int LOAD_DEFAULT = -1;
 
     /**
-     * Normal cache usage pattern. Use with {@link #setCacheMode}.
+     * Normal cache usage mode. Use with {@link #setCacheMode}.
      */
     public static final int LOAD_NORMAL = 0;
 
     /**
-     * Use cache if content is there, even if expired (eg, history nav).
-     * If it is not in the cache, load from network.
+     * Use cached resources when they are available, even if they have expired.
+     * Otherwise load resources from the network.
      * Use with {@link #setCacheMode}.
      */
     public static final int LOAD_CACHE_ELSE_NETWORK = 1;
 
     /**
-     * Don't use the cache, load from network.
+     * Don't use the cache, load from the network.
      * Use with {@link #setCacheMode}.
      */
     public static final int LOAD_NO_CACHE = 2;
 
     /**
-     * Don't use the network, load from cache only.
+     * Don't use the network, load from the cache.
      * Use with {@link #setCacheMode}.
      */
     public static final int LOAD_CACHE_ONLY = 3;
