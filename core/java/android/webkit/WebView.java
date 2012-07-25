@@ -65,8 +65,8 @@ import java.util.Map;
  * href="{@docRoot}guide/topics/manifest/manifest-element.html">{@code <manifest>}</a>
  * element.</p>
  *
- * <p>See the <a href="{@docRoot}resources/tutorials/views/hello-webview.html">Web View
- * tutorial</a>.</p>
+ * <p>For more information, read
+ * <a href="{@docRoot}guide/webapps/webview.html">Building Web Apps in WebView</a>.</p>
  *
  * <h3>Basic usage</h3>
  *
