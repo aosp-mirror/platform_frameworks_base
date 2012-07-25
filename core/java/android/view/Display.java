@@ -416,14 +416,8 @@ public class Display {
         outMetrics.ydpi = outMetrics.noncompatYdpi = mDpiY;
     }
 
-    static IWindowManager getWindowManager() {
-        synchronized (sStaticInit) {
-            if (sWindowManager == null) {
-                sWindowManager = IWindowManager.Stub.asInterface(
-                        ServiceManager.getService("window"));
-            }
-            return sWindowManager;
-        }
+    private static IWindowManager getWindowManager() {
+        return WindowManagerImpl.getWindowManagerService();
     }
 
     /*
@@ -449,6 +443,5 @@ public class Display {
 
     private static final Object sStaticInit = new Object();
     private static boolean sInitialized = false;
-    private static IWindowManager sWindowManager;
 }
 

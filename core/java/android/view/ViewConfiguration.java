@@ -20,6 +20,7 @@ import android.app.AppGlobals;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Point;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
@@ -277,15 +278,17 @@ public class ViewConfiguration {
         mDoubleTapSlop = (int) (sizeAndDensity * DOUBLE_TAP_SLOP + 0.5f);
         mWindowTouchSlop = (int) (sizeAndDensity * WINDOW_TOUCH_SLOP + 0.5f);
 
-        final Display display = WindowManagerImpl.getDefault().getDefaultDisplay();
         // Size of the screen in bytes, in ARGB_8888 format
-        mMaximumDrawingCacheSize = 4 * display.getRawWidth() * display.getRawHeight();
+        final Display display = WindowManagerImpl.getDefault().getDefaultDisplay();
+        final Point size = new Point();
+        display.getRealSize(size);
+        mMaximumDrawingCacheSize = 4 * size.x * size.y;
 
         mOverscrollDistance = (int) (sizeAndDensity * OVERSCROLL_DISTANCE + 0.5f);
         mOverflingDistance = (int) (sizeAndDensity * OVERFLING_DISTANCE + 0.5f);
 
         if (!sHasPermanentMenuKeySet) {
-            IWindowManager wm = Display.getWindowManager();
+            IWindowManager wm = WindowManagerImpl.getWindowManagerService();
             try {
                 sHasPermanentMenuKey = !wm.hasSystemNavBar() && !wm.hasNavigationBar();
                 sHasPermanentMenuKeySet = true;
