@@ -234,7 +234,7 @@ public class GestureRecorder {
                 w.close();
                 mGestures.clear();
                 // If we have a pending gesture, push it back
-                if (!mCurrentGesture.isComplete()) {
+                if (mCurrentGesture != null && !mCurrentGesture.isComplete()) {
                     mGestures.add(mCurrentGesture);
                 }
                 if (DEBUG) {
