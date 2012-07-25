@@ -4837,18 +4837,23 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
         canvas.translate(compoundPaddingLeft, extendedPaddingTop + voffsetText);
 
+        final boolean isLayoutRtl = isLayoutRtl();
+
         final int layoutDirection = getResolvedLayoutDirection();
         final int absoluteGravity = Gravity.getAbsoluteGravity(mGravity, layoutDirection);
         if (mEllipsize == TextUtils.TruncateAt.MARQUEE &&
                 mMarqueeFadeMode != MARQUEE_FADE_SWITCH_SHOW_ELLIPSIS) {
             if (!mSingleLine && getLineCount() == 1 && canMarquee() &&
                     (absoluteGravity & Gravity.HORIZONTAL_GRAVITY_MASK) != Gravity.LEFT) {
-                canvas.translate(mLayout.getLineRight(0) - (mRight - mLeft -
-                        getCompoundPaddingLeft() - getCompoundPaddingRight()), 0.0f);
+                final int width = mRight - mLeft;
+                final int padding = getCompoundPaddingLeft() + getCompoundPaddingRight();
+                final float dx = mLayout.getLineRight(0) - (width - padding);
+                canvas.translate(isLayoutRtl ? -dx : +dx, 0.0f);
             }
 
             if (mMarquee != null && mMarquee.isRunning()) {
-                canvas.translate(-mMarquee.mScroll, 0.0f);
+                final float dx = -mMarquee.getScroll();
+                canvas.translate(isLayoutRtl ? -dx : +dx, 0.0f);
             }
         }
 
@@ -4862,7 +4867,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         if (mMarquee != null && mMarquee.shouldDrawGhost()) {
-            canvas.translate((int) mMarquee.getGhostOffset(), 0.0f);
+            final int dx = (int) mMarquee.getGhostOffset();
+            canvas.translate(isLayoutRtl ? -dx : dx, 0.0f);
             layout.draw(canvas, highlight, mHighlightPaint, cursorOffsetVertical);
         }
 
@@ -7455,7 +7461,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (mMarquee != null && !mMarquee.isStopped()) {
                 final Marquee marquee = mMarquee;
                 if (marquee.shouldDrawLeftFade()) {
-                    return marquee.mScroll / getHorizontalFadingEdgeLength();
+                    final float scroll = marquee.getScroll();
+                    return scroll / getHorizontalFadingEdgeLength();
                 } else {
                     return 0.0f;
                 }
@@ -7483,7 +7490,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mMarqueeFadeMode != MARQUEE_FADE_SWITCH_SHOW_ELLIPSIS) {
             if (mMarquee != null && !mMarquee.isStopped()) {
                 final Marquee marquee = mMarquee;
-                return (marquee.mMaxFadeScroll - marquee.mScroll) / getHorizontalFadingEdgeLength();
+                final float maxFadeScroll = marquee.getMaxFadeScroll();
+                final float scroll = marquee.getScroll();
+                return (maxFadeScroll - scroll) / getHorizontalFadingEdgeLength();
             } else if (getLineCount() == 1) {
                 final int layoutDirection = getResolvedLayoutDirection();
                 final int absoluteGravity = Gravity.getAbsoluteGravity(mGravity, layoutDirection);
@@ -8577,13 +8586,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private byte mStatus = MARQUEE_STOPPED;
         private final float mScrollUnit;
         private float mMaxScroll;
-        float mMaxFadeScroll;
+        private float mMaxFadeScroll;
         private float mGhostStart;
         private float mGhostOffset;
         private float mFadeStop;
         private int mRepeatLimit;
 
-        float mScroll;
+        private float mScroll;
 
         Marquee(TextView v) {
             final float density = v.getContext().getResources().getDisplayMetrics().density;
@@ -8673,6 +8682,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         float getGhostOffset() {
             return mGhostOffset;
+        }
+
+        float getScroll() {
+            return mScroll;
+        }
+
+        float getMaxFadeScroll() {
+            return mMaxFadeScroll;
         }
 
         boolean shouldDrawLeftFade() {
