@@ -64,7 +64,7 @@ import java.io.File;
  *     {@link #ProviderTestCase2(Class, String)} as  its first operation.
  * </p>
  * For more information on content provider testing, please see
- * <a href="{@docRoot}guide/topics/testing/provider_testing.html">Content Provider Testing</a>.
+ * <a href="{@docRoot}tools/testing/contentprovider_testing.html">Content Provider Testing</a>.
  */
 public abstract class ProviderTestCase2<T extends ContentProvider> extends AndroidTestCase {
 
