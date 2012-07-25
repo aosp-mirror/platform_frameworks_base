@@ -133,8 +133,9 @@ devices.</p>
 <ol>
   <li>Launch the Android Virtual Device Manager:
     <ol type="a">
-      <li>In Eclipse, AVD Manager <img src="{@docRoot}images/tools/avd_manager.png"
-style="vertical-align:baseline;margin:0" /> in the toolbar.</li> 
+      <li>In Eclipse, click Android Virtual Device Manager 
+        <img src="{@docRoot}images/tools/avd_manager.png"
+style="vertical-align:baseline;margin:0" /> from the toolbar.</li> 
       <li>From the command line, change
 directories to <code>&lt;sdk>/tools/</code> and execute:
 <pre class="no-pretty-print">android avd</pre></li>
