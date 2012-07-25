@@ -813,6 +813,9 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
     @Override
     public Parcelable onSaveInstanceState() {
         Parcelable superState = super.onSaveInstanceState();
+        if (mRemoteViewsAdapter != null) {
+            mRemoteViewsAdapter.saveRemoteViewsCache();
+        }
         return new SavedState(superState, mWhichChild);
     }
 
@@ -984,6 +987,9 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
         mDeferNotifyDataSetChanged = false;
         // Otherwise, create a new RemoteViewsAdapter for binding
         mRemoteViewsAdapter = new RemoteViewsAdapter(getContext(), intent, this);
+        if (mRemoteViewsAdapter.isDataReady()) {
+            setAdapter(mRemoteViewsAdapter);
+        }
     }
 
     @Override
