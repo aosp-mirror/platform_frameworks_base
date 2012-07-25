@@ -5206,7 +5206,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
-     * If {link #addStatesFromChildren} is true, refreshes this group's
+     * If {@link #addStatesFromChildren} is true, refreshes this group's
      * drawable state (to include the states from its children).
      */
     public void childDrawableStateChanged(View child) {

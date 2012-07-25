@@ -155,7 +155,7 @@ public interface SurfaceHolder {
 
     /**
      * Make the surface a fixed size.  It will never change from this size.
-     * When working with a {link SurfaceView}, this must be called from the
+     * When working with a {@link SurfaceView}, this must be called from the
      * same thread running the SurfaceView's window.
      * 
      * @param width The surface's width.
@@ -167,14 +167,14 @@ public interface SurfaceHolder {
      * Allow the surface to resized based on layout of its container (this is
      * the default).  When this is enabled, you should monitor
      * {@link Callback#surfaceChanged} for changes to the size of the surface.
-     * When working with a {link SurfaceView}, this must be called from the
+     * When working with a {@link SurfaceView}, this must be called from the
      * same thread running the SurfaceView's window.
      */
     public void setSizeFromLayout();
 
     /**
      * Set the desired PixelFormat of the surface.  The default is OPAQUE.
-     * When working with a {link SurfaceView}, this must be called from the
+     * When working with a {@link SurfaceView}, this must be called from the
      * same thread running the SurfaceView's window.
      * 
      * @param format A constant from PixelFormat.

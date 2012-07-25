@@ -706,7 +706,7 @@ public class MediaPlayer
      * surface rendering area. When the surface has the same aspect ratio
      * as the content, the aspect ratio of the content is maintained;
      * otherwise, the aspect ratio of the content is not maintained when video
-     * is being rendered. Unlike {@ #VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING},
+     * is being rendered. Unlike {@link #VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING},
      * there is no content cropping with this video scaling mode.
      */
     public static final int VIDEO_SCALING_MODE_SCALE_TO_FIT = 1;

@@ -1610,7 +1610,7 @@ public abstract class PackageManager {
      *
      * @param flags Additional option flags. Use any combination of
      * {@link #GET_META_DATA}, {@link #GET_SHARED_LIBRARY_FILES},
-     * {link #GET_UNINSTALLED_PACKAGES} to modify the data returned.
+     * {@link #GET_UNINSTALLED_PACKAGES} to modify the data returned.
      *
      * @return A List of ApplicationInfo objects, one for each application that
      *         is installed on the device.  In the unlikely case of there being
