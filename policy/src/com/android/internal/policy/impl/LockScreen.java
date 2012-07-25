@@ -17,8 +17,6 @@
 package com.android.internal.policy.impl;
 
 import com.android.internal.R;
-import com.android.internal.policy.impl.KeyguardUpdateMonitor.InfoCallbackImpl;
-import com.android.internal.policy.impl.KeyguardUpdateMonitor.SimStateCallback;
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.SlidingTab;
@@ -86,7 +84,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
     // Is there a vibrator
     private final boolean mHasVibrator;
 
-    InfoCallbackImpl mInfoCallback = new InfoCallbackImpl() {
+    KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
 
         @Override
         public void onRingerModeChanged(int state) {
@@ -102,9 +100,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
             updateTargets();
         }
 
-    };
-
-    SimStateCallback mSimStateCallback = new SimStateCallback() {
+        @Override
         public void onSimStateChanged(IccCardConstants.State simState) {
             updateTargets();
         }
@@ -582,7 +578,6 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
     /** {@inheritDoc} */
     public void onPause() {
         mUpdateMonitor.removeCallback(mInfoCallback);
-        mUpdateMonitor.removeCallback(mSimStateCallback);
         mStatusViewManager.onPause();
         mUnlockWidgetMethods.reset(false);
     }
@@ -597,8 +592,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
     public void onResume() {
         // We don't want to show the camera target if SIM state prevents us from
         // launching the camera. So watch for SIM changes...
-        mUpdateMonitor.registerSimStateCallback(mSimStateCallback);
-        mUpdateMonitor.registerInfoCallback(mInfoCallback);
+        mUpdateMonitor.registerCallback(mInfoCallback);
 
         mStatusViewManager.onResume();
         postDelayed(mOnResumePing, ON_RESUME_PING_DELAY);
@@ -607,7 +601,6 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
     /** {@inheritDoc} */
     public void cleanUp() {
         mUpdateMonitor.removeCallback(mInfoCallback); // this must be first
-        mUpdateMonitor.removeCallback(mSimStateCallback);
         mUnlockWidgetMethods.cleanUp();
         mLockPatternUtils = null;
         mUpdateMonitor = null;

@@ -21,8 +21,7 @@ import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.widget.DigitalClock;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.TransportControlView;
-import com.android.internal.policy.impl.KeyguardUpdateMonitor.InfoCallbackImpl;
-import com.android.internal.policy.impl.KeyguardUpdateMonitor.SimStateCallback;
+import com.android.internal.policy.impl.KeyguardUpdateMonitor.BatteryStatus;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -107,6 +106,8 @@ class KeyguardStatusViewManager implements OnClickListener {
     private CharSequence mSpn;
     protected int mPhoneState;
     private DigitalClock mDigitalClock;
+    protected boolean mBatteryCharged;
+    protected boolean mBatteryIsLow;
 
     private class TransientTextManager {
         private TextView mTextView;
@@ -198,8 +199,8 @@ class KeyguardStatusViewManager implements OnClickListener {
 
         mTransientTextManager = new TransientTextManager(mCarrierView);
 
-        mUpdateMonitor.registerInfoCallback(mInfoCallback);
-        mUpdateMonitor.registerSimStateCallback(mSimStateCallback);
+        // Registering this callback immediately updates the battery state, among other things.
+        mUpdateMonitor.registerCallback(mInfoCallback);
 
         resetStatusInfo();
         refreshDate();
@@ -287,7 +288,6 @@ class KeyguardStatusViewManager implements OnClickListener {
     public void onPause() {
         if (DEBUG) Log.v(TAG, "onPause()");
         mUpdateMonitor.removeCallback(mInfoCallback);
-        mUpdateMonitor.removeCallback(mSimStateCallback);
     }
 
     /** {@inheritDoc} */
@@ -299,8 +299,7 @@ class KeyguardStatusViewManager implements OnClickListener {
             mDigitalClock.updateTime();
         }
 
-        mUpdateMonitor.registerInfoCallback(mInfoCallback);
-        mUpdateMonitor.registerSimStateCallback(mSimStateCallback);
+        mUpdateMonitor.registerCallback(mInfoCallback);
         resetStatusInfo();
         // Issue the biometric unlock failure message in a centralized place
         // TODO: we either need to make the Face Unlock multiple failures string a more general
@@ -312,9 +311,6 @@ class KeyguardStatusViewManager implements OnClickListener {
 
     void resetStatusInfo() {
         mInstructionText = null;
-        mShowingBatteryInfo = mUpdateMonitor.shouldShowBatteryInfo();
-        mPluggedIn = mUpdateMonitor.isDevicePluggedIn();
-        mBatteryLevel = mUpdateMonitor.getBatteryLevel();
         updateStatusLines(true);
     }
 
@@ -379,14 +375,11 @@ class KeyguardStatusViewManager implements OnClickListener {
         if (mShowingBatteryInfo) {
             // Battery status
             if (mPluggedIn) {
-                // Charging or charged
-                if (mUpdateMonitor.isDeviceCharged()) {
-                    string = getContext().getString(R.string.lockscreen_charged);
-                } else {
-                    string = getContext().getString(R.string.lockscreen_plugged_in, mBatteryLevel);
-                }
+                // Charging, charged or waiting to charge.
+                string = getContext().getString(mBatteryCharged ? R.string.lockscreen_charged
+                        :R.string.lockscreen_plugged_in, mBatteryLevel);
                 icon.value = CHARGING_ICON;
-            } else if (mBatteryLevel < KeyguardUpdateMonitor.LOW_BATTERY_THRESHOLD) {
+            } else if (mBatteryIsLow) {
                 // Battery is low
                 string = getContext().getString(R.string.lockscreen_low_battery);
                 icon.value = BATTERY_LOW_ICON;
@@ -406,14 +399,11 @@ class KeyguardStatusViewManager implements OnClickListener {
         } else if (mShowingBatteryInfo) {
             // Battery status
             if (mPluggedIn) {
-                // Charging or charged
-                if (mUpdateMonitor.isDeviceCharged()) {
-                    string = getContext().getString(R.string.lockscreen_charged);
-                } else {
-                    string = getContext().getString(R.string.lockscreen_plugged_in, mBatteryLevel);
-                }
+                // Charging, charged or waiting to charge.
+                string = getContext().getString(mBatteryCharged ? R.string.lockscreen_charged
+                        :R.string.lockscreen_plugged_in, mBatteryLevel);
                 icon.value = CHARGING_ICON;
-            } else if (mBatteryLevel < KeyguardUpdateMonitor.LOW_BATTERY_THRESHOLD) {
+            } else if (mBatteryIsLow) {
                 // Battery is low
                 string = getContext().getString(R.string.lockscreen_low_battery);
                 icon.value = BATTERY_LOW_ICON;
@@ -629,14 +619,15 @@ class KeyguardStatusViewManager implements OnClickListener {
         }
     }
 
-    private InfoCallbackImpl mInfoCallback = new InfoCallbackImpl() {
+    private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
 
         @Override
-        public void onRefreshBatteryInfo(boolean showBatteryInfo, boolean pluggedIn,
-                int batteryLevel) {
-            mShowingBatteryInfo = showBatteryInfo;
-            mPluggedIn = pluggedIn;
-            mBatteryLevel = batteryLevel;
+        public void onRefreshBatteryInfo(BatteryStatus status) {
+            mShowingBatteryInfo = status.isPluggedIn() || status.isBatteryLow();
+            mPluggedIn = status.isPluggedIn();
+            mBatteryLevel = status.level;
+            mBatteryCharged = status.isCharged();
+            mBatteryIsLow = status.isBatteryLow();
             final MutableInt tmpIcon = new MutableInt(0);
             update(BATTERY_INFO, getAltTextMessage(tmpIcon));
         }
@@ -659,10 +650,7 @@ class KeyguardStatusViewManager implements OnClickListener {
             updateEmergencyCallButtonState(phoneState);
         }
 
-    };
-
-    private SimStateCallback mSimStateCallback = new SimStateCallback() {
-
+        @Override
         public void onSimStateChanged(IccCardConstants.State simState) {
             updateCarrierStateWithSimStatus(simState);
         }
