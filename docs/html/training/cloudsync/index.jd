@@ -2,8 +2,8 @@ page.title=Syncing to the Cloud
 
 trainingnavtop=true
 startpage=true
-next.title=Syncing with App Engine
-next.link=aesync.html
+next.title=Making the Most of Google Cloud Messaging
+next.link=gcm.html
 
 @jd:body
 
@@ -21,14 +21,13 @@ installing your application on a new device.
 <h2>Lessons</h2>
 
 <dl>
-  <dt><strong><a href="aesync.html">Syncing with App Engine.</a></strong></dt>
-  <dd>Learn how to create a paired App Engine app and Android app which share a
-  data model, authenticates using the AccountManager, and communicate with each
-  other via REST and C2DM.</dd>
-  <dt><strong><a href="backupapi.html">Using the Backup
-      API</a></strong></dt>
+  <dt><strong><a href="backupapi.html">Using the Backup API</a></strong></dt>
   <dd>Learn how to integrate the Backup API into your Android Application, so
   that user data such as preferences, notes, and high scores update seamlessly
   across all of a user's devices</dd>
+  <dt><strong><a href="gcm.html">Making the Most of Google Cloud Messaging</a></strong></dt>
+  <dd>Learn how to efficiently send multicast messages, react intelligently to
+  incoming Google Cloud Messaging (GCM) messages, and use GCM messages to
+  efficiently sync with the server.</dd>
 </dl>
 
