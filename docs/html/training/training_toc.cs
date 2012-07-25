@@ -203,12 +203,12 @@
             <span class="en">Syncing to the Cloud</span>
           </a></div>
         <ul>
-          <li><a href="<?cs var:toroot ?>training/cloudsync/aesync.html">
-            <span class="en">Syncing with App Engine</span>
-          </a>
-          </li>
           <li><a href="<?cs var:toroot ?>training/cloudsync/backupapi.html">
             <span class="en">Using the Backup API</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/cloudsync/gcm.html">
+            <span class="en">Making the Most of Google Cloud Messaging</span>
           </a>
           </li>
         </ul>
