@@ -249,8 +249,11 @@
     <!-- Common options are [1, 4] for TYPE_WIFI and TYPE_MOBILE_DUN or
     <!== [0,1,5,7] for TYPE_MOBILE, TYPE_WIFI, TYPE_MOBILE_HIPRI and TYPE_BLUETOOTH -->
     <integer-array translatable="false" name="config_tether_upstream_types">
+        <item>0</item>
         <item>1</item>
-        <item>4</item>
+        <item>5</item>
+        <item>7</item>
+        <item>9</item>
     </integer-array>
 
     <!-- If the DUN connection for this CDMA device supports more than just DUN -->
