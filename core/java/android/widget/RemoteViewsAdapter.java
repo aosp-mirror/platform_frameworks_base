@@ -246,7 +246,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
      * A FrameLayout which contains a loading view, and manages the re/applying of RemoteViews when
      * they are loaded.
      */
-    private class RemoteViewsFrameLayout extends FrameLayout {
+    private static class RemoteViewsFrameLayout extends FrameLayout {
         public RemoteViewsFrameLayout(Context context) {
             super(context);
         }
@@ -301,7 +301,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
          * Notifies each of the RemoteViewsFrameLayouts associated with a particular position that
          * the associated RemoteViews has loaded.
          */
-        public void notifyOnRemoteViewsLoaded(int position, RemoteViews view, int typeId) {
+        public void notifyOnRemoteViewsLoaded(int position, RemoteViews view) {
             if (view == null) return;
 
             final Integer pos = position;
@@ -331,7 +331,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
     /**
      * The meta-data associated with the cache in it's current state.
      */
-    private class RemoteViewsMetaData {
+    private static class RemoteViewsMetaData {
         int count;
         int viewTypeCount;
         boolean hasStableIds;
@@ -390,14 +390,23 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
             }
         }
 
+        public boolean isViewTypeInRange(int typeId) {
+            int mappedType = getMappedViewType(typeId);
+            if (mappedType >= viewTypeCount) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+
         private RemoteViewsFrameLayout createLoadingView(int position, View convertView,
-                ViewGroup parent) {
+                ViewGroup parent, Object lock, LayoutInflater layoutInflater) {
             // Create and return a new FrameLayout, and setup the references for this position
             final Context context = parent.getContext();
             RemoteViewsFrameLayout layout = new RemoteViewsFrameLayout(context);
 
             // Create a new loading view
-            synchronized (mCache) {
+            synchronized (lock) {
                 boolean customLoadingViewAvailable = false;
 
                 if (mUserLoadingView != null) {
@@ -425,7 +434,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
                             mFirstViewHeight = firstView.getMeasuredHeight();
                             mFirstView = null;
                         } catch (Exception e) {
-                            float density = mContext.getResources().getDisplayMetrics().density;
+                            float density = context.getResources().getDisplayMetrics().density;
                             mFirstViewHeight = (int)
                                     Math.round(sDefaultLoadingViewHeight * density);
                             mFirstView = null;
@@ -434,7 +443,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
                     }
 
                     // Compose the loading view text
-                    TextView loadingTextView = (TextView) mLayoutInflater.inflate(
+                    TextView loadingTextView = (TextView) layoutInflater.inflate(
                             com.android.internal.R.layout.remote_views_adapter_default_loading_view,
                             layout, false);
                     loadingTextView.setHeight(mFirstViewHeight);
@@ -451,7 +460,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
     /**
      * The meta-data associated with a single item in the cache.
      */
-    private class RemoteViewsIndexMetaData {
+    private static class RemoteViewsIndexMetaData {
         int typeId;
         long itemId;
         boolean isRequested;
@@ -462,10 +471,11 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
 
         public void set(RemoteViews v, long id, boolean requested) {
             itemId = id;
-            if (v != null)
+            if (v != null) {
                 typeId = v.getLayoutId();
-            else
+            } else {
                 typeId = 0;
+            }
             isRequested = requested;
         }
     }
@@ -473,7 +483,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
     /**
      *
      */
-    private class FixedSizeRemoteViewsCache {
+    private static class FixedSizeRemoteViewsCache {
         private static final String TAG = "FixedSizeRemoteViewsCache";
 
         // The meta data related to all the RemoteViews, ie. count, is stable, etc.
@@ -861,21 +871,36 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
                     "returned from RemoteViewsFactory.");
             return;
         }
-        synchronized (mCache) {
-            // Cache the RemoteViews we loaded
-            mCache.insert(position, remoteViews, itemId, isRequested);
 
-            // Notify all the views that we have previously returned for this index that
-            // there is new data for it.
-            final RemoteViews rv = remoteViews;
-            final int typeId = mCache.getMetaDataAt(position).typeId;
-            if (notifyWhenLoaded) {
-                mMainQueue.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mRequestedViews.notifyOnRemoteViewsLoaded(position, rv, typeId);
-                    }
-                });
+        int layoutId = remoteViews.getLayoutId();
+        RemoteViewsMetaData metaData = mCache.getMetaData();
+        boolean viewTypeInRange;
+        synchronized (metaData) {
+            viewTypeInRange = metaData.isViewTypeInRange(layoutId);
+        }
+        synchronized (mCache) {
+            if (viewTypeInRange) {
+                // Cache the RemoteViews we loaded
+                mCache.insert(position, remoteViews, itemId, isRequested);
+
+                // Notify all the views that we have previously returned for this index that
+                // there is new data for it.
+                final RemoteViews rv = remoteViews;
+                if (notifyWhenLoaded) {
+                    mMainQueue.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mRequestedViews.notifyOnRemoteViewsLoaded(position, rv);
+                        }
+                    });
+                }
+            } else {
+                // We need to log an error here, as the the view type count specified by the
+                // factory is less than the number of view types returned. We don't return this
+                // view to the AdapterView, as this will cause an exception in the hosting process,
+                // which contains the associated AdapterView.
+                Log.e(TAG, "Error: widget's RemoteViewsFactory returns more view types than " +
+                        " indicated by getViewTypeCount() ");
             }
         }
     }
@@ -1010,7 +1035,8 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
                     RemoteViewsFrameLayout loadingView = null;
                     final RemoteViewsMetaData metaData = mCache.getMetaData();
                     synchronized (metaData) {
-                        loadingView = metaData.createLoadingView(position, convertView, parent);
+                        loadingView = metaData.createLoadingView(position, convertView, parent,
+                                mCache, mLayoutInflater);
                     }
                     return loadingView;
                 } finally {
@@ -1022,7 +1048,8 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
                 RemoteViewsFrameLayout loadingView = null;
                 final RemoteViewsMetaData metaData = mCache.getMetaData();
                 synchronized (metaData) {
-                    loadingView = metaData.createLoadingView(position, convertView, parent);
+                    loadingView = metaData.createLoadingView(position, convertView, parent,
+                            mCache, mLayoutInflater);
                 }
 
                 mRequestedViews.add(position, loadingView);
