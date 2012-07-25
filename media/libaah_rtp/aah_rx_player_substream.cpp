@@ -28,8 +28,7 @@
 
 #include "aah_rx_player.h"
 #include "aah_tx_packet.h"
-
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#include "aah_audio_algorithm.h"
 
 namespace android {
 
@@ -56,6 +55,8 @@ AAH_RXPlayer::Substream::Substream(uint32_t ssrc, OMXClient& omx) {
     if (OK != decoder_->initCheck()) {
         LOGE("%s failed to initialize decoder pump!", __PRETTY_FUNCTION__);
     }
+
+    aah_metadata_service_ = AAHMetaDataService::getInstance();
 
     // cleanupBufferInProgress will reset most of the internal state variables.
     // Just need to make sure that buffer_in_progress_ is NULL before calling.
@@ -642,6 +643,9 @@ void AAH_RXPlayer::Substream::processTSTransform(const LinearTransform& trans) {
     if (decoder_ != NULL) {
         decoder_->setRenderTSTransform(trans);
     }
+    if (aah_metadata_service_ != NULL) {
+        mMetaDataTsTransform.setMediaToCommonTransform(trans);
+    }
 }
 
 void AAH_RXPlayer::Substream::signalEOS() {
@@ -729,6 +733,46 @@ void AAH_RXPlayer::Substream::applyVolume() {
                            255.0f;
         decoder_->setRenderVolume(audio_volume_local_left_  * remote_vol,
                                   audio_volume_local_right_ * remote_vol);
+    }
+}
+
+void AAH_RXPlayer::Substream::processMetaData(uint8_t* data, uint32_t amt) {
+    if (aah_metadata_service_ == NULL) {
+        return;
+    }
+    uint32_t offset = 0;
+    // the packet must contain 4 bytes of TRTPMetaDataBlock payload
+    // beyond the TRTP header
+    while (offset <= amt - 4) {
+        uint16_t typeId = U16_AT(data + offset);
+        uint16_t item_length = U16_AT(data + offset + 2);
+        offset += 4;
+        if (offset <= amt - item_length) {
+            if (kMetaDataBeat == typeId) {
+                uint16_t count = U16_AT(data + offset);
+                uint8_t* buf = data + offset + 2;
+                mMetaDataTsTransform.prepareCommonToSystem();
+                for (int i = 0, c = count * BeatDetectionAlgorithm::kItemLength;
+                        i < c;
+                        i += BeatDetectionAlgorithm::kItemLength) {
+                    uint8_t* ptr = buf + i;
+                    int64_t ts = static_cast<int64_t>(U64_AT(ptr));
+                    mMetaDataTsTransform.mediaToSystem(&ts);
+                    TRTPPacket::writeU64(ptr, ts);
+                }
+            }
+            // TODO: in future, we may pass programID to java layer to identify
+            // the song; the java layer has no knowledge of ID at this moment
+            aah_metadata_service_->broadcast(typeId, item_length,
+                                             data + offset);
+        }
+        offset += item_length;
+    }
+}
+
+void AAH_RXPlayer::Substream::flushMetaDataService() {
+    if (aah_metadata_service_ != NULL) {
+        aah_metadata_service_->flush();
     }
 }
 

@@ -19,8 +19,7 @@
 
 #include <arpa/inet.h>
 #include <string.h>
-
-#include <media/stagefright/MediaDebug.h>
+#include <media/stagefright/foundation/ADebug.h>
 
 #include "aah_tx_packet.h"
 
@@ -188,6 +187,12 @@ void TRTPPacket::writeU64(uint8_t*& buf, uint64_t val) {
     buf[6] = static_cast<uint8_t>(val >>  8);
     buf[7] = static_cast<uint8_t>(val);
     buf += 8;
+}
+
+void TRTPPacket::writeFloat(uint8_t*& buf, float val) {
+    uint32_t intBits = *(reinterpret_cast<uint32_t *>(&val));
+    *reinterpret_cast<uint32_t*>(buf) = htonl(intBits);
+    buf += 4;
 }
 
 void TRTPPacket::writeTRTPHeader(uint8_t*& buf,
@@ -375,6 +380,60 @@ bool TRTPActiveProgramUpdatePacket::pack() {
     writeU8(cur,  mProgramIDCnt);
     for (uint8_t i = 0; i < mProgramIDCnt; ++i) {
         writeU8(cur,  mProgramIDs[i]);
+    }
+
+    mIsPacked = true;
+    return true;
+}
+
+
+void TRTPMetaDataBlock::writeBlockHead(uint8_t*& buf) const {
+    TRTPPacket::writeU16(buf, mTypeId);
+    TRTPPacket::writeU16(buf, mItemLength);
+}
+
+TRTPMetaDataPacket::~TRTPMetaDataPacket() {
+    for (size_t i=0; i < mBlocks.size(); i++) {
+        delete mBlocks[i];
+    }
+}
+
+void TRTPMetaDataPacket::append(TRTPMetaDataBlock* block) {
+    mBlocks.add(block);
+}
+
+bool TRTPMetaDataPacket::pack() {
+    if (mIsPacked) {
+        return false;
+    }
+
+    // Active program update packets contain a list of block, each block
+    // is 2 bytes typeId, 2 bytes item_length and item_length buffer
+    int packetLen = kRTPHeaderLen + TRTPHeaderLen();
+    for (size_t i = 0; i < mBlocks.size(); i++) {
+        const TRTPMetaDataBlock* block = mBlocks[i];
+        packetLen += 4 + block->mItemLength;
+    }
+    // compare to maximum UDP payload length
+    // (IP header 20, UDP header 8)
+    // TODO: split by MTU (normally 1500)
+    if (packetLen > (0xffff - 28)) {
+        return false;
+    }
+
+    mPacket = new uint8_t[packetLen];
+    if (!mPacket) {
+        return false;
+    }
+
+    mPacketLen = packetLen;
+
+    uint8_t* cur = mPacket;
+
+    writeTRTPHeader(cur, true, packetLen);
+    for (size_t i = 0; i < mBlocks.size(); i++) {
+        const TRTPMetaDataBlock* block = mBlocks[i];
+        block->write(cur);
     }
 
     mIsPacked = true;

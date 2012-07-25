@@ -1,0 +1,8 @@
+# Dependency file for use by layers.py
+
+# These packages are high-level and no other packages may import them.
+android.media.libaah
+
+# There are no legacy packages, but if there were, they would be listed like this.
+# They would be allowed to freely import and be imported.
+# -com.example.some.legacy.package

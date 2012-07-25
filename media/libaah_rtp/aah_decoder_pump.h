@@ -31,9 +31,11 @@ class MetaData;
 class OMXClient;
 class TimedAudioTrack;
 
-class AAH_DecoderPump : public MediaSource {
+// omx decoder wrapper, how to process the output buffer is to be defined in sub
+// classes such as android audio render or an audio processor
+class AAH_DecoderPumpBase : public MediaSource {
   public:
-    explicit AAH_DecoderPump(OMXClient& omx);
+    explicit AAH_DecoderPumpBase(OMXClient& omx);
     status_t initCheck();
 
     status_t queueForDecode(MediaBuffer* buf);
@@ -41,10 +43,6 @@ class AAH_DecoderPump : public MediaSource {
     status_t init(sp<MetaData> params);
     status_t shutdown();
 
-    void setRenderTSTransform(const LinearTransform& trans);
-    void setRenderVolume(float left, float right);
-    void setRenderStreamType(int stream_type);
-    bool isAboutToUnderflow(int64_t threshold);
     bool getStatus() const { return thread_status_; }
 
     // MediaSource methods
@@ -55,29 +53,32 @@ class AAH_DecoderPump : public MediaSource {
                               const ReadOptions *options);
 
   protected:
-    virtual ~AAH_DecoderPump();
+    virtual ~AAH_DecoderPumpBase();
+
+    virtual status_t shutdown_l();
+
+    sp<MetaData>        format_;
+    int32_t             format_channels_;
+    int32_t             format_sample_rate_;
+
+    CCHelper            cc_helper_;
 
   private:
     class ThreadWrapper : public Thread {
       public:
-        friend class AAH_DecoderPump;
-        explicit ThreadWrapper(AAH_DecoderPump* owner);
+        friend class AAH_DecoderPumpBase;
+        explicit ThreadWrapper(AAH_DecoderPumpBase* owner);
 
       private:
         virtual bool threadLoop();
-        AAH_DecoderPump* owner_;
+        AAH_DecoderPumpBase* owner_;
 
         DISALLOW_EVIL_CONSTRUCTORS(ThreadWrapper);
     };
 
     void* workThread();
-    virtual status_t shutdown_l();
-    void queueToRenderer(MediaBuffer* decoded_sample);
-    void stopAndCleanupRenderer();
-
-    sp<MetaData>        format_;
-    int32_t             format_channels_;
-    int32_t             format_sample_rate_;
+    virtual void queueToSink(MediaBuffer* decoded_sample) = 0;
+    virtual void stopAndCleanupSink() = 0;
 
     sp<MediaSource>     decoder_;
     OMXClient&          omx_;
@@ -88,8 +89,26 @@ class AAH_DecoderPump : public MediaSource {
     Mutex               thread_lock_;
     status_t            thread_status_;
 
+    // protected by the thread_lock_
+    typedef List<MediaBuffer*> MBQueue;
+    MBQueue in_queue_;
+
+    DISALLOW_EVIL_CONSTRUCTORS(AAH_DecoderPumpBase);
+};
+
+// decode audio and write to TimeAudioTrack
+class AAH_DecoderPump : public AAH_DecoderPumpBase {
+  public:
+    explicit AAH_DecoderPump(OMXClient& omx);
+    void setRenderTSTransform(const LinearTransform& trans);
+    void setRenderVolume(float left, float right);
+    void setRenderStreamType(int stream_type);
+    bool isAboutToUnderflow(int64_t threshold);
+
+  private:
     Mutex               render_lock_;
     TimedAudioTrack*    renderer_;
+
     bool                last_queued_pts_valid_;
     int64_t             last_queued_pts_;
     bool                last_ts_transform_valid_;
@@ -97,11 +116,10 @@ class AAH_DecoderPump : public MediaSource {
     float               last_left_volume_;
     float               last_right_volume_;
     int                 last_stream_type_;
-    CCHelper            cc_helper_;
 
-    // protected by the thread_lock_
-    typedef List<MediaBuffer*> MBQueue;
-    MBQueue in_queue_;
+    virtual void queueToSink(MediaBuffer* decoded_sample);
+    virtual void stopAndCleanupSink();
+    virtual status_t shutdown_l();
 
     DISALLOW_EVIL_CONSTRUCTORS(AAH_DecoderPump);
 };
