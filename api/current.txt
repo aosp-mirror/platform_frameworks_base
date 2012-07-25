@@ -26739,7 +26739,7 @@ package android.webkit {
     field public static final int LOAD_CACHE_ELSE_NETWORK = 1; // 0x1
     field public static final int LOAD_CACHE_ONLY = 3; // 0x3
     field public static final int LOAD_DEFAULT = -1; // 0xffffffff
-    field public static final int LOAD_NORMAL = 0; // 0x0
+    field public static final deprecated int LOAD_NORMAL = 0; // 0x0
     field public static final int LOAD_NO_CACHE = 2; // 0x2
   }
 
