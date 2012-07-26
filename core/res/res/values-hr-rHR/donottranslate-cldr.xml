@@ -85,8 +85,6 @@
     <string name="day_of_week_shortest_friday">p</string>
     <string name="day_of_week_shortest_saturday">s</string>
 
-    <string name="am">AM</string>
-    <string name="pm">PM</string>
     <string name="yesterday">jučer</string>
     <string name="today">danas</string>
     <string name="tomorrow">sutra</string>

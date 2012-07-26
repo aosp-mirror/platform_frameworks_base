@@ -85,8 +85,6 @@
     <string name="day_of_week_shortest_friday">金</string>
     <string name="day_of_week_shortest_saturday">土</string>
 
-    <string name="am">AM</string>
-    <string name="pm">PM</string>
     <string name="yesterday">昨日</string>
     <string name="today">今日</string>
     <string name="tomorrow">明日</string>

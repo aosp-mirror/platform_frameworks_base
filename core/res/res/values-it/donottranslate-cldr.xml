@@ -85,8 +85,6 @@
     <string name="day_of_week_shortest_friday">V</string>
     <string name="day_of_week_shortest_saturday">S</string>
 
-    <string name="am">m.</string>
-    <string name="pm">p.</string>
     <string name="yesterday">ieri</string>
     <string name="today">oggi</string>
     <string name="tomorrow">domani</string>

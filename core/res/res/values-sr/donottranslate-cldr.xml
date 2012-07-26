@@ -85,8 +85,6 @@
     <string name="day_of_week_shortest_friday">п</string>
     <string name="day_of_week_shortest_saturday">с</string>
 
-    <string name="am">пре подне</string>
-    <string name="pm">поподне</string>
     <string name="yesterday">јуче</string>
     <string name="today">данас</string>
     <string name="tomorrow">сутра</string>

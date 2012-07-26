@@ -85,8 +85,6 @@
     <string name="day_of_week_shortest_friday">ו</string>
     <string name="day_of_week_shortest_saturday">ש</string>
 
-    <string name="am">לפנה"צ</string>
-    <string name="pm">אחה"צ</string>
     <string name="yesterday">אתמול</string>
     <string name="today">היום</string>
     <string name="tomorrow">מחר</string>
