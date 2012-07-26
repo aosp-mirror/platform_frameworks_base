@@ -1306,6 +1306,21 @@ public class RelativeLayout extends ViewGroup {
             mRulesChanged = true;
         }
 
+        /**
+         * Removes a layout rule to be interpreted by the RelativeLayout.
+         *
+         * @param verb One of the verbs defined by
+         *        {@link android.widget.RelativeLayout RelativeLayout}, such as
+         *         ALIGN_WITH_PARENT_LEFT.
+         * @see #addRule(int)
+         * @see #addRule(int, int)
+         */
+        public void removeRule(int verb) {
+            mRules[verb] = 0;
+            mInitialRules[verb] = 0;
+            mRulesChanged = true;
+        }
+
         private boolean hasRelativeRules() {
             return (mInitialRules[START_OF] != 0 || mInitialRules[END_OF] != 0 ||
                     mInitialRules[ALIGN_START] != 0 || mInitialRules[ALIGN_END] != 0 ||
