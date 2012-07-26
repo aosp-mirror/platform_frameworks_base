@@ -197,6 +197,9 @@
       <li><a href="<?cs var:toroot ?>guide/topics/ui/actionbar.html">
            <span class="en">Action Bar</span>
           </a></li>
+      <li><a href="<?cs var:toroot ?>guide/topics/ui/settings.html">
+            <span class="en">Settings</span>
+          </a></li>
       <li class="nav-section">
           <div class="nav-section-header"><a href="<?cs var:toroot ?>guide/topics/ui/notifiers/index.html">
               <span class="en">Notifications</span>
