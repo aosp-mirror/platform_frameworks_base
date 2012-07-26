@@ -70,17 +70,6 @@ public class BridgeWindowManager implements IWindowManager {
         return mRotation;
     }
 
-    @Override
-    public void getDisplayInfo(int arg0, DisplayInfo arg1) throws RemoteException {
-        arg1.appWidth = mMetrics.widthPixels;
-        arg1.appHeight = mMetrics.heightPixels;
-        arg1.logicalWidth = mMetrics.widthPixels;
-        arg1.logicalHeight = mMetrics.heightPixels;
-        arg1.logicalDensity = mMetrics.density;
-        arg1.physicalXDpi = mMetrics.xdpi;
-        arg1.physicalYDpi = mMetrics.ydpi;
-    }
-
     // ---- unused implementation of IWindowManager ----
 
     @Override
