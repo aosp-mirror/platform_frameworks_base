@@ -354,7 +354,6 @@
   <java-symbol type="string" name="activitychooserview_choose_application" />
   <java-symbol type="string" name="alternate_eri_file" />
   <java-symbol type="string" name="alwaysUse" />
-  <java-symbol type="string" name="am" />
   <java-symbol type="string" name="autofill_address_line_1_label_re" />
   <java-symbol type="string" name="autofill_address_line_1_re" />
   <java-symbol type="string" name="autofill_address_line_2_re" />
@@ -693,7 +692,6 @@
   <java-symbol type="string" name="phoneTypeWork" />
   <java-symbol type="string" name="phoneTypeWorkMobile" />
   <java-symbol type="string" name="phoneTypeWorkPager" />
-  <java-symbol type="string" name="pm" />
   <java-symbol type="string" name="policydesc_disableCamera" />
   <java-symbol type="string" name="policydesc_encryptedStorage" />
   <java-symbol type="string" name="policydesc_expirePassword" />

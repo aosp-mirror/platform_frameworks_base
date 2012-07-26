@@ -85,8 +85,6 @@
     <string name="day_of_week_shortest_friday">v</string>
     <string name="day_of_week_shortest_saturday">s</string>
 
-    <string name="am">a.m.</string>
-    <string name="pm">p.m.</string>
     <string name="yesterday">ahir</string>
     <string name="today">avui</string>
     <string name="tomorrow">demà</string>

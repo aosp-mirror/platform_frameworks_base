@@ -85,8 +85,6 @@
     <string name="day_of_week_shortest_friday">ج</string>
     <string name="day_of_week_shortest_saturday">س</string>
 
-    <string name="am">ص</string>
-    <string name="pm">م</string>
     <string name="yesterday">أمس</string>
     <string name="today">اليوم</string>
     <string name="tomorrow">غدًا</string>

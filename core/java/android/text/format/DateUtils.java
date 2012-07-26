@@ -29,6 +29,8 @@ import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import libcore.icu.LocaleData;
+
 /**
  * This class contains various date-related utilities for creating text for things like
  * elapsed time and date ranges, strings for days of the week and months, and AM/PM text etc.
@@ -127,10 +129,6 @@ public class DateUtils
             com.android.internal.R.string.month_shortest_october,
             com.android.internal.R.string.month_shortest_november,
             com.android.internal.R.string.month_shortest_december,
-        };
-    private static final int[] sAmPm = new int[] {
-            com.android.internal.R.string.am,
-            com.android.internal.R.string.pm,
         };
     private static Configuration sLastConfig;
     private static java.text.DateFormat sStatusTimeFormat;
@@ -332,8 +330,7 @@ public class DateUtils
      * @return Localized version of "AM" or "PM".
      */
     public static String getAMPMString(int ampm) {
-        Resources r = Resources.getSystem();
-        return r.getString(sAmPm[ampm - Calendar.AM]);
+        return LocaleData.get(Locale.getDefault()).amPm[ampm - Calendar.AM];
     }
 
     /**

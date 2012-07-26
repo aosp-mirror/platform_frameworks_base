@@ -71,8 +71,6 @@
     <string name="day_of_week_shortest_friday">ج</string>
     <string name="day_of_week_shortest_saturday">ش</string>
 
-    <string name="am">قبل از ظهر</string>
-    <string name="pm">بعد از ظهر</string>
     <string name="yesterday">دیروز</string>
     <string name="today">امروز</string>
     <string name="tomorrow">فردا</string>
