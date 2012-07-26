@@ -5335,13 +5335,21 @@ public class PackageManagerService extends IPackageManager.Stub {
             final Uri packageURI, final IPackageInstallObserver observer, final int flags,
             final String installerPackageName) {
         installPackageWithVerification(packageURI, observer, flags, installerPackageName, null,
-                null, null);
+                null, null, null, null);
+    }
+
+    public void installPackageWithOrigin(
+            Uri packageURI, IPackageInstallObserver observer, int flags,
+            String installerPackageName, Uri originatingURI, Uri referrer) {
+        installPackageWithVerification(packageURI, observer, flags, installerPackageName, null,
+                null, null, originatingURI, referrer);
     }
 
     @Override
     public void installPackageWithVerification(Uri packageURI, IPackageInstallObserver observer,
             int flags, String installerPackageName, Uri verificationURI,
-            ManifestDigest manifestDigest, ContainerEncryptionParams encryptionParams) {
+            ManifestDigest manifestDigest, ContainerEncryptionParams encryptionParams,
+            Uri originatingURI, Uri referrer) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.INSTALL_PACKAGES, null);
 
         final int uid = Binder.getCallingUid();
@@ -5359,7 +5367,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         final Message msg = mHandler.obtainMessage(INIT_COPY);
         msg.obj = new InstallParams(packageURI, observer, filteredFlags, installerPackageName,
-                verificationURI, manifestDigest, encryptionParams);
+                verificationURI, manifestDigest, encryptionParams, originatingURI, referrer);
         mHandler.sendMessage(msg);
     }
 
@@ -5795,11 +5803,13 @@ public class PackageManagerService extends IPackageManager.Stub {
         private int mRet;
         private File mTempPackage;
         final ContainerEncryptionParams encryptionParams;
+        final Uri originatingURI;
+        final Uri referrer;
 
         InstallParams(Uri packageURI,
                 IPackageInstallObserver observer, int flags,
                 String installerPackageName, Uri verificationURI, ManifestDigest manifestDigest,
-                ContainerEncryptionParams encryptionParams) {
+                ContainerEncryptionParams encryptionParams, Uri originatingURI, Uri referrer) {
             this.mPackageURI = packageURI;
             this.flags = flags;
             this.observer = observer;
@@ -5807,6 +5817,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             this.verificationURI = verificationURI;
             this.manifestDigest = manifestDigest;
             this.encryptionParams = encryptionParams;
+            this.originatingURI = originatingURI;
+            this.referrer = referrer;
         }
 
         private int installLocationPolicy(PackageInfoLite pkgLite, int flags) {
@@ -6000,6 +6012,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                     if (verificationURI != null) {
                         verification.putExtra(PackageManager.EXTRA_VERIFICATION_URI,
                                 verificationURI);
+                    }
+
+                    if (originatingURI != null) {
+                        verification.putExtra(Intent.EXTRA_ORIGINATING_URI, originatingURI);
+                    }
+
+                    if (referrer != null) {
+                        verification.putExtra(Intent.EXTRA_REFERRER, referrer);
                     }
 
                     final PackageVerificationState verificationState = new PackageVerificationState(
