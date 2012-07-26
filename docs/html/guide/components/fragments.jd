@@ -709,6 +709,12 @@ href="{@docRoot}guide/components/activities.html#Lifecycle">managing the activit
 lifecycle</a> also apply to fragments. What you also need to understand, though, is how the life
 of the activity affects the life of the fragment.</p>
 
+<p class="caution"><strong>Caution:</strong> If you need a {@link android.content.Context} object
+within your {@link android.app.Fragment}, you can call {@link android.app.Fragment#getActivity()}.
+However, be careful to call {@link android.app.Fragment#getActivity()} only when the fragment is
+attached to an activity. When the fragment is not yet attached, or was detached during the end of
+its lifecycle, {@link android.app.Fragment#getActivity()} will return null.</p>
+
 
 <h3 id="CoordinatingWithActivity">Coordinating with the activity lifecycle</h3>
 
