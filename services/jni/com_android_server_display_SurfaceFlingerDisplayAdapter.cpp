@@ -46,12 +46,8 @@ static void nativeGetDefaultDisplayDeviceInfo(JNIEnv* env, jclass clazz, jobject
         return;
     }
 
-    bool rotated = (info.orientation == DISPLAY_ORIENTATION_90
-            || info.orientation == DISPLAY_ORIENTATION_270);
-    env->SetIntField(infoObj, gDisplayDeviceInfoClassInfo.width,
-            rotated ? info.h : info.w);
-    env->SetIntField(infoObj, gDisplayDeviceInfoClassInfo.height,
-            rotated ? info.w : info.h);
+    env->SetIntField(infoObj, gDisplayDeviceInfoClassInfo.width, info.w);
+    env->SetIntField(infoObj, gDisplayDeviceInfoClassInfo.height, info.h);
     env->SetFloatField(infoObj, gDisplayDeviceInfoClassInfo.refreshRate, info.fps);
     env->SetFloatField(infoObj, gDisplayDeviceInfoClassInfo.density, info.density);
     env->SetFloatField(infoObj, gDisplayDeviceInfoClassInfo.xDpi, info.xdpi);
