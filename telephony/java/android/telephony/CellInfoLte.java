@@ -22,8 +22,6 @@ import android.util.Log;
 
 /**
  * Immutable cell information from a point in time.
- *
- * @hide
  */
 public final class CellInfoLte extends CellInfo implements Parcelable {
 

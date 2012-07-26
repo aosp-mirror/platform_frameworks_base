@@ -21,14 +21,15 @@ import android.os.Parcelable;
 
 /**
  * Immutable cell information from a point in time.
- *
- * @hide
  */
 public class CellInfo implements Parcelable {
 
     // Type fields for parceling
+    /** @hide */
     protected static final int TYPE_GSM = 1;
+    /** @hide */
     protected static final int TYPE_CDMA = 2;
+    /** @hide */
     protected static final int TYPE_LTE = 3;
 
     // Type to distinguish where time stamp gets recorded.
@@ -54,12 +55,14 @@ public class CellInfo implements Parcelable {
     // Value of TIMESTAMP_TYPE_XXXX
     private int mTimeStampType;
 
+    /** @hide */
     protected CellInfo() {
         this.mRegistered = false;
         this.mTimeStampType = TIMESTAMP_TYPE_UNKNOWN;
         this.mTimeStamp = Long.MAX_VALUE;
     }
 
+    /** @hide */
     protected CellInfo(CellInfo ci) {
         this.mRegistered = ci.mRegistered;
         this.mTimeStampType = ci.mTimeStampType;
@@ -168,6 +171,7 @@ public class CellInfo implements Parcelable {
         dest.writeLong(mTimeStamp);
     }
 
+    /** @hide */
     protected CellInfo(Parcel in) {
         mRegistered = (in.readInt() == 1) ? true : false;
         mTimeStampType = in.readInt();

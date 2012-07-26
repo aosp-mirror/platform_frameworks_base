@@ -22,22 +22,26 @@ import android.os.Parcelable;
 /**
  * CellIdentity is immutable and represents ONE unique cell in the world
  * it contains all levels of info to identity country, carrier, etc.
- *
- * @hide
  */
 public abstract class CellIdentity implements Parcelable {
 
     // Type fields for parceling
+    /** @hide */
     protected static final int TYPE_GSM = 1;
+    /** @hide */
     protected static final int TYPE_CDMA = 2;
+    /** @hide */
     protected static final int TYPE_LTE = 3;
 
+    /** @hide */
     protected CellIdentity() {
     }
 
+    /** @hide */
     protected CellIdentity(Parcel in) {
     }
 
+    /** @hide */
     protected CellIdentity(CellIdentity cid) {
     }
 
