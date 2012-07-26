@@ -3,8 +3,9 @@ parent.title=Syncing to the Cloud
 parent.link=index.html
 
 trainingnavtop=true
-previous.title=Syncing with App Engine
-previous.link=aesync.html
+
+next.title=Making the Most of Google Cloud Messaging
+next.link=gcm.html
 
 @jd:body
 
