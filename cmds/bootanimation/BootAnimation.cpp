@@ -217,7 +217,7 @@ status_t BootAnimation::readyToRun() {
     mAssets.addDefaultAssets();
 
     DisplayInfo dinfo;
-    status_t status = session()->getDisplayInfo(0, &dinfo);
+    status_t status = SurfaceComposerClient::getDisplayInfo(0, &dinfo);
     if (status)
         return -1;
 
