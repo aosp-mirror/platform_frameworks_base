@@ -406,13 +406,13 @@ into a view that can be added into the {@link android.widget.AdapterView} layout
 
 <div class="layout first">
   <h4><a href="layout/listview.html">List View</a></h4>
-  <a href="layout/list.html"><img src="{@docRoot}images/ui/listview-small.png" alt="" /></a>
+  <a href="layout/listview.html"><img src="{@docRoot}images/ui/listview-small.png" alt="" /></a>
   <p>Displays a scrolling single column list.</p>
 </div>
 
 <div class="layout">
   <h4><a href="layout/gridview.html">Grid View</a></h4>
-  <a href="layout/grid.html"><img src="{@docRoot}images/ui/gridview-small.png" alt="" /></a>
+  <a href="layout/gridview.html"><img src="{@docRoot}images/ui/gridview-small.png" alt="" /></a>
   <p>Displays a scrolling grid of columns and rows.</p>
 </div>
 
