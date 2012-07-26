@@ -21,6 +21,7 @@ import android.content.ComponentCallbacks2;
 import android.content.res.Configuration;
 import android.opengl.ManagedEGLContext;
 import android.os.IBinder;
+import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.util.AndroidRuntimeException;
 import android.util.Log;
@@ -111,6 +112,7 @@ public class WindowManagerImpl implements WindowManager {
     public static final int ADD_PERMISSION_DENIED = -8;
 
     private static WindowManagerImpl sDefaultWindowManager;
+    private static IWindowManager sWindowManagerService;
 
     private final WindowManagerState mState;
     private final Window mParentWindow;
@@ -132,6 +134,16 @@ public class WindowManagerImpl implements WindowManager {
                         new WindowManagerState(), null, null);
             }
             return sDefaultWindowManager;
+        }
+    }
+
+    public static IWindowManager getWindowManagerService() {
+        synchronized (WindowManagerImpl.class) {
+            if (sWindowManagerService == null) {
+                sWindowManagerService = IWindowManager.Stub.asInterface(
+                        ServiceManager.getService("window"));
+            }
+            return sWindowManagerService;
         }
     }
 
