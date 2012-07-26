@@ -1272,7 +1272,7 @@ public class TelephonyManager {
      * <p>Requires Permission:
      * (@link android.Manifest.permission#ACCESS_COARSE_UPDATES}
      *
-     * @hide pending API review
+     * @hide
      */
     public List<CellInfo> getAllCellInfo() {
         try {
