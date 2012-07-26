@@ -477,7 +477,7 @@ class ContextImpl extends Context {
                 public Object createService(ContextImpl ctx) {
                     IBinder b = ServiceManager.getService(WIFI_SERVICE);
                     IWifiManager service = IWifiManager.Stub.asInterface(b);
-                    return new WifiManager(service, ctx.mMainThread.getHandler());
+                    return new WifiManager(ctx.getOuterContext(), service);
                 }});
 
         registerService(WIFI_P2P_SERVICE, new ServiceFetcher() {

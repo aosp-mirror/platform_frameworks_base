@@ -63,7 +63,6 @@ public class WifiConnectionTest
     private ConnectivityManagerTestActivity mAct;
     private ConnectivityManagerTestRunner mRunner;
     private WifiManager mWifiManager = null;
-    private WifiManager.Channel mChannel;
     private Set<WifiConfiguration> enabledNetworks = null;
 
     public WifiConnectionTest() {
@@ -77,7 +76,6 @@ public class WifiConnectionTest
         mWifiManager = (WifiManager) mRunner.getContext().getSystemService(Context.WIFI_SERVICE);
 
         mAct = getActivity();
-        mChannel = mWifiManager.initialize(mAct, mAct.getMainLooper(), null);
 
         networks = mAct.loadNetworkConfigurations();
         if (DEBUG) {
@@ -91,24 +89,6 @@ public class WifiConnectionTest
         WifiInfo mConnection = mAct.mWifiManager.getConnectionInfo();
         assertNotNull(mConnection);
         assertTrue("wpa_supplicant is not started ", mAct.mWifiManager.pingSupplicant());
-    }
-
-    private class WifiServiceHandler extends Handler {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case AsyncChannel.CMD_CHANNEL_HALF_CONNECTED:
-                    if (msg.arg1 == AsyncChannel.STATUS_SUCCESSFUL) {
-                        //AsyncChannel in msg.obj
-                    } else {
-                        log("Failed to establish AsyncChannel connection");
-                    }
-                    break;
-                default:
-                    //Ignore
-                    break;
-            }
-        }
     }
 
     private void printNetworkConfigurations() {

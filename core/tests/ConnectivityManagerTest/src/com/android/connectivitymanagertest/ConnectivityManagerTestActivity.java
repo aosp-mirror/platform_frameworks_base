@@ -94,7 +94,6 @@ public class ConnectivityManagerTestActivity extends Activity {
      * Control Wifi States
      */
     public WifiManager mWifiManager;
-    public WifiManager.Channel mChannel;
 
     /*
      * Verify connectivity state
@@ -242,7 +241,6 @@ public class ConnectivityManagerTestActivity extends Activity {
         // Get an instance of WifiManager
         mWifiManager =(WifiManager)getSystemService(Context.WIFI_SERVICE);
         mContext = this;
-        mChannel = mWifiManager.initialize(mContext, mContext.getMainLooper(), null);
 
         if (mWifiManager.isWifiApEnabled()) {
             // if soft AP is enabled, disable it
@@ -599,7 +597,7 @@ public class ConnectivityManagerTestActivity extends Activity {
                         log("found " + ssid + " in the scan result list");
                         log("retry: " + retry);
                         foundApInScanResults = true;
-                        mWifiManager.connect(mChannel, config,
+                        mWifiManager.connect(config,
                                 new WifiManager.ActionListener() {
                                     public void onSuccess() {
                                     }
@@ -658,7 +656,7 @@ public class ConnectivityManagerTestActivity extends Activity {
         for (WifiConfiguration wifiConfig: wifiConfigList) {
             log("remove wifi configuration: " + wifiConfig.networkId);
             int netId = wifiConfig.networkId;
-            mWifiManager.forget(mChannel, netId, new WifiManager.ActionListener() {
+            mWifiManager.forget(netId, new WifiManager.ActionListener() {
                     public void onSuccess() {
                     }
                     public void onFailure(int reason) {
