@@ -1422,6 +1422,9 @@ please see themes_device_defaults.xml.
         <item name="preferenceLayoutChild">@android:layout/preference_child_holo</item>
         <item name="detailsElementBackground">@android:drawable/panel_bg_holo_light</item>
 
+        <!-- PreferenceFrameLayout attributes -->
+        <item name="preferenceFrameLayoutStyle">@android:style/Widget.Holo.PreferenceFrameLayout</item>
+
         <!-- Search widget styles -->
         <item name="searchWidgetCorpusItemBackground">@android:color/search_widget_corpus_item_background</item>
 
