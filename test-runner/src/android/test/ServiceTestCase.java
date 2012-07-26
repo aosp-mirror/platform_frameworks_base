@@ -91,7 +91,7 @@ import java.util.Random;
  *      {@link #setApplication setApplication()}.  You must do this <em>before</em> calling
  *      startService() or bindService().  The test framework provides a
  *      number of alternatives for Context, including
- *      {link android.test.mock.MockContext MockContext},
+ *      {@link android.test.mock.MockContext MockContext},
  *      {@link android.test.RenamingDelegatingContext RenamingDelegatingContext},
  *      {@link android.content.ContextWrapper ContextWrapper}, and
  *      {@link android.test.IsolatedContext}.
