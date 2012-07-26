@@ -64,6 +64,7 @@ public final class DisplayManager {
      * @param displayId The logical display id.
      * @param outInfo A structure to populate with the display info.
      * @return True if the logical display exists, false otherwise.
+     * @hide
      */
     public boolean getDisplayInfo(int displayId, DisplayInfo outInfo) {
         try {
