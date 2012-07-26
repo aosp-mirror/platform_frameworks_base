@@ -174,7 +174,11 @@ public class CheckedTextView extends TextView implements Checkable {
         int newPadding = (mCheckMarkDrawable != null) ?
                 mCheckMarkWidth + mBasePadding : mBasePadding;
         mNeedRequestlayout |= (mPaddingRight != newPadding);
-        mPaddingRight = newPadding;
+        if (isLayoutRtl()) {
+            mPaddingLeft = newPadding;
+        } else {
+            mPaddingRight = newPadding;
+        }
         if (mNeedRequestlayout) {
             requestLayout();
             mNeedRequestlayout = false;
@@ -184,7 +188,7 @@ public class CheckedTextView extends TextView implements Checkable {
     @Override
     public void setPadding(int left, int top, int right, int bottom) {
         super.setPadding(left, top, right, bottom);
-        mBasePadding = mPaddingRight;
+        mBasePadding = getPaddingEnd();
     }
 
     @Override
@@ -213,12 +217,13 @@ public class CheckedTextView extends TextView implements Checkable {
                     break;
             }
             
-            int right = getWidth();
-            checkMarkDrawable.setBounds(
-                    right - mPaddingRight,
-                    y, 
-                    right - mPaddingRight + mCheckMarkWidth,
-                    y + height);
+            final boolean isLayoutRtl = isLayoutRtl();
+            final int width = getWidth();
+            final int top = y;
+            final int bottom = top + height;
+            final int left = isLayoutRtl ? getPaddingEnd() : width - getPaddingEnd();
+            final int right = left + mCheckMarkWidth;
+            checkMarkDrawable.setBounds( left, top, right, bottom);
             checkMarkDrawable.draw(canvas);
         }
     }
