@@ -340,8 +340,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mSystemReady;
     boolean mSystemBooted;
     boolean mHdmiPlugged;
-    int mExternalDisplayWidth;
-    int mExternalDisplayHeight;
     int mUiMode;
     int mDockMode = Intent.EXTRA_DOCK_STATE_UNDOCKED;
     int mLidOpenRotation;
@@ -997,9 +995,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mSeascapeRotation = Surface.ROTATION_270;
             }
         }
-
-        mExternalDisplayWidth = mDisplay.getRawExternalWidth();
-        mExternalDisplayHeight = mDisplay.getRawExternalHeight();
 
         mStatusBarHeight = mContext.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.status_bar_height);
@@ -3037,10 +3032,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     void setHdmiPlugged(boolean plugged) {
         if (mHdmiPlugged != plugged) {
             mHdmiPlugged = plugged;
-            if (plugged && mDisplay != null) {
-                mExternalDisplayWidth = mDisplay.getRawExternalWidth();
-                mExternalDisplayHeight = mDisplay.getRawExternalHeight();
-            }
             updateRotation(true, true);
             Intent intent = new Intent(ACTION_HDMI_PLUGGED);
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
