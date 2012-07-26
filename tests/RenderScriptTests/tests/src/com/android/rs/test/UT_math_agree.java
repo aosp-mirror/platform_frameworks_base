@@ -299,40 +299,6 @@ public class UT_math_agree extends UnitTest {
         float[] rand_f2_1 = randvec_float(2);
         float[] rand_f3_1 = randvec_float(3);
         float[] rand_f4_1 = randvec_float(4);
-        byte rand_sc1_0 = (byte)rand.nextInt(0x1 << 8);
-        byte[] rand_sc2_0 = randvec_char(2);
-        byte[] rand_sc3_0 = randvec_char(3);
-        byte[] rand_sc4_0 = randvec_char(4);
-        byte rand_sc1_1 = (byte)rand.nextInt(0x1 << 8);
-        byte[] rand_sc2_1 = randvec_char(2);
-        byte[] rand_sc3_1 = randvec_char(3);
-        byte[] rand_sc4_1 = randvec_char(4);
-        short rand_ss1_0 = (short)rand.nextInt(0x1 << 16);
-        short[] rand_ss2_0 = randvec_short(2);
-        short[] rand_ss3_0 = randvec_short(3);
-        short[] rand_ss4_0 = randvec_short(4);
-        short rand_ss1_1 = (short)rand.nextInt(0x1 << 16);
-        short[] rand_ss2_1 = randvec_short(2);
-        short[] rand_ss3_1 = randvec_short(3);
-        short[] rand_ss4_1 = randvec_short(4);
-        int rand_si1_0 = rand.nextInt();
-        int[] rand_si2_0 = randvec_int(2);
-        int[] rand_si3_0 = randvec_int(3);
-        int[] rand_si4_0 = randvec_int(4);
-        int rand_si1_1 = rand.nextInt();
-        int[] rand_si2_1 = randvec_int(2);
-        int[] rand_si3_1 = randvec_int(3);
-        int[] rand_si4_1 = randvec_int(4);
-        long rand_sl1_0 = rand.nextLong();
-        long[] rand_sl2_0 = randvec_long(2);
-        long[] rand_sl3_0 = randvec_long(3);
-        long[] rand_sl4_0 = randvec_long(4);
-        long rand_sl1_1 = rand.nextLong();
-        long[] rand_sl2_1 = randvec_long(2);
-        long[] rand_sl3_1 = randvec_long(3);
-        long[] rand_sl4_1 = randvec_long(4);
-        // FIXME:  generate unsigned input vectors once bug 6764163 is fixed
-        /*
         short rand_uc1_0 = (short)rand.nextInt(0x1 << 8);
         short[] rand_uc2_0 = randvec_uchar(2);
         short[] rand_uc3_0 = randvec_uchar(3);
@@ -341,6 +307,14 @@ public class UT_math_agree extends UnitTest {
         short[] rand_uc2_1 = randvec_uchar(2);
         short[] rand_uc3_1 = randvec_uchar(3);
         short[] rand_uc4_1 = randvec_uchar(4);
+        short rand_ss1_0 = (short)rand.nextInt(0x1 << 16);
+        short[] rand_ss2_0 = randvec_short(2);
+        short[] rand_ss3_0 = randvec_short(3);
+        short[] rand_ss4_0 = randvec_short(4);
+        short rand_ss1_1 = (short)rand.nextInt(0x1 << 16);
+        short[] rand_ss2_1 = randvec_short(2);
+        short[] rand_ss3_1 = randvec_short(3);
+        short[] rand_ss4_1 = randvec_short(4);
         int rand_us1_0 = rand.nextInt(0x1 << 16);
         int[] rand_us2_0 = randvec_ushort(2);
         int[] rand_us3_0 = randvec_ushort(3);
@@ -349,6 +323,14 @@ public class UT_math_agree extends UnitTest {
         int[] rand_us2_1 = randvec_ushort(2);
         int[] rand_us3_1 = randvec_ushort(3);
         int[] rand_us4_1 = randvec_ushort(4);
+        int rand_si1_0 = rand.nextInt();
+        int[] rand_si2_0 = randvec_int(2);
+        int[] rand_si3_0 = randvec_int(3);
+        int[] rand_si4_0 = randvec_int(4);
+        int rand_si1_1 = rand.nextInt();
+        int[] rand_si2_1 = randvec_int(2);
+        int[] rand_si3_1 = randvec_int(3);
+        int[] rand_si4_1 = randvec_int(4);
         long rand_ui1_0 = (long)rand.nextInt() - (long)Integer.MIN_VALUE;
         long[] rand_ui2_0 = randvec_uint(2);
         long[] rand_ui3_0 = randvec_uint(3);
@@ -357,6 +339,24 @@ public class UT_math_agree extends UnitTest {
         long[] rand_ui2_1 = randvec_uint(2);
         long[] rand_ui3_1 = randvec_uint(3);
         long[] rand_ui4_1 = randvec_uint(4);
+        long rand_sl1_0 = rand.nextLong();
+        long[] rand_sl2_0 = randvec_long(2);
+        long[] rand_sl3_0 = randvec_long(3);
+        long[] rand_sl4_0 = randvec_long(4);
+        long rand_sl1_1 = rand.nextLong();
+        long[] rand_sl2_1 = randvec_long(2);
+        long[] rand_sl3_1 = randvec_long(3);
+        long[] rand_sl4_1 = randvec_long(4);
+        // FIXME:  generate signed char vectors once bug 6865598 is fixed
+        /*
+        byte rand_sc1_0 = (byte)rand.nextInt(0x1 << 8);
+        byte[] rand_sc2_0 = randvec_char(2);
+        byte[] rand_sc3_0 = randvec_char(3);
+        byte[] rand_sc4_0 = randvec_char(4);
+        byte rand_sc1_1 = (byte)rand.nextInt(0x1 << 8);
+        byte[] rand_sc2_1 = randvec_char(2);
+        byte[] rand_sc3_1 = randvec_char(3);
+        byte[] rand_sc4_1 = randvec_char(4);
         */
         // TODO:  generate unsigned long vectors
 
@@ -369,10 +369,10 @@ public class UT_math_agree extends UnitTest {
         s.set_rand_f2_1(pack_f2(rand_f2_1));
         s.set_rand_f3_1(pack_f3(rand_f3_1));
         s.set_rand_f4_1(pack_f4(rand_f4_1));
-        s.set_rand_sc1_1(rand_sc1_1);
-        s.set_rand_sc2_1(pack_b2(rand_sc2_1));
-        s.set_rand_sc3_1(pack_b3(rand_sc3_1));
-        s.set_rand_sc4_1(pack_b4(rand_sc4_1));
+        s.set_rand_uc1_1(rand_uc1_1);
+        s.set_rand_uc2_1(pack_s2(rand_uc2_1));
+        s.set_rand_uc3_1(pack_s3(rand_uc3_1));
+        s.set_rand_uc4_1(pack_s4(rand_uc4_1));
         s.set_rand_ss1_0(rand_ss1_0);
         s.set_rand_ss2_0(pack_s2(rand_ss2_0));
         s.set_rand_ss3_0(pack_s3(rand_ss3_0));
@@ -381,31 +381,6 @@ public class UT_math_agree extends UnitTest {
         s.set_rand_ss2_1(pack_s2(rand_ss2_1));
         s.set_rand_ss3_1(pack_s3(rand_ss3_1));
         s.set_rand_ss4_1(pack_s4(rand_ss4_1));
-        s.set_rand_si1_0(rand_si1_0);
-        s.set_rand_si2_0(pack_i2(rand_si2_0));
-        s.set_rand_si3_0(pack_i3(rand_si3_0));
-        s.set_rand_si4_0(pack_i4(rand_si4_0));
-        s.set_rand_si1_1(rand_si1_1);
-        s.set_rand_si2_1(pack_i2(rand_si2_1));
-        s.set_rand_si3_1(pack_i3(rand_si3_1));
-        s.set_rand_si4_1(pack_i4(rand_si4_1));
-        s.set_rand_sl1_0(rand_sl1_0);
-        s.set_rand_sl2_0(pack_l2(rand_sl2_0));
-        s.set_rand_sl3_0(pack_l3(rand_sl3_0));
-        s.set_rand_sl4_0(pack_l4(rand_sl4_0));
-        s.set_rand_sl1_1(rand_sl1_1);
-        s.set_rand_sl2_1(pack_l2(rand_sl2_1));
-        s.set_rand_sl3_1(pack_l3(rand_sl3_1));
-        s.set_rand_sl4_1(pack_l4(rand_sl4_1));
-        // FIXME:  set signed char input vectors once bug is fixed
-        /*
-        s.set_rand_sc1_0(rand_sc1_0);
-        s.set_rand_sc2_0(pack_b2(rand_sc2_0));
-        s.set_rand_sc3_0(pack_b3(rand_sc3_0));
-        s.set_rand_sc4_0(pack_b4(rand_sc4_0));
-        */
-        // FIXME:  set unsigned input vectors once bug 6764163 is fixed
-        /*
         s.set_rand_us1_0(rand_us1_0);
         s.set_rand_us2_0(pack_i2(rand_us2_0));
         s.set_rand_us3_0(pack_i3(rand_us3_0));
@@ -414,14 +389,14 @@ public class UT_math_agree extends UnitTest {
         s.set_rand_us2_1(pack_i2(rand_us2_1));
         s.set_rand_us3_1(pack_i3(rand_us3_1));
         s.set_rand_us4_1(pack_i4(rand_us4_1));
-        s.set_rand_uc1_0(rand_uc1_0);
-        s.set_rand_uc2_0(pack_s2(rand_uc2_0));
-        s.set_rand_uc3_0(pack_s3(rand_uc3_0));
-        s.set_rand_uc4_0(pack_s4(rand_uc4_0));
-        s.set_rand_uc1_1(rand_uc1_1);
-        s.set_rand_uc2_1(pack_s2(rand_uc2_1));
-        s.set_rand_uc3_1(pack_s3(rand_uc3_1));
-        s.set_rand_uc4_1(pack_s4(rand_uc4_1));
+        s.set_rand_si1_0(rand_si1_0);
+        s.set_rand_si2_0(pack_i2(rand_si2_0));
+        s.set_rand_si3_0(pack_i3(rand_si3_0));
+        s.set_rand_si4_0(pack_i4(rand_si4_0));
+        s.set_rand_si1_1(rand_si1_1);
+        s.set_rand_si2_1(pack_i2(rand_si2_1));
+        s.set_rand_si3_1(pack_i3(rand_si3_1));
+        s.set_rand_si4_1(pack_i4(rand_si4_1));
         s.set_rand_ui1_0(rand_ui1_0);
         s.set_rand_ui2_0(pack_l2(rand_ui2_0));
         s.set_rand_ui3_0(pack_l3(rand_ui3_0));
@@ -430,6 +405,28 @@ public class UT_math_agree extends UnitTest {
         s.set_rand_ui2_1(pack_l2(rand_ui2_1));
         s.set_rand_ui3_1(pack_l3(rand_ui3_1));
         s.set_rand_ui4_1(pack_l4(rand_ui4_1));
+        s.set_rand_sl1_0(rand_sl1_0);
+        s.set_rand_sl2_0(pack_l2(rand_sl2_0));
+        s.set_rand_sl3_0(pack_l3(rand_sl3_0));
+        s.set_rand_sl4_0(pack_l4(rand_sl4_0));
+        s.set_rand_sl1_1(rand_sl1_1);
+        s.set_rand_sl2_1(pack_l2(rand_sl2_1));
+        s.set_rand_sl3_1(pack_l3(rand_sl3_1));
+        s.set_rand_sl4_1(pack_l4(rand_sl4_1));
+        s.set_rand_uc1_0(rand_uc1_0);
+        s.set_rand_uc2_0(pack_s2(rand_uc2_0));
+        s.set_rand_uc3_0(pack_s3(rand_uc3_0));
+        s.set_rand_uc4_0(pack_s4(rand_uc4_0));
+        // FIXME:  set char input vectors once bug 6865598 is fixed
+        /*
+        s.set_rand_sc1_0(rand_sc1_0);
+        s.set_rand_sc2_0(pack_b2(rand_sc2_0));
+        s.set_rand_sc3_0(pack_b3(rand_sc3_0));
+        s.set_rand_sc4_0(pack_b4(rand_sc4_0));
+        s.set_rand_sc1_1(rand_sc1_1);
+        s.set_rand_sc2_1(pack_b2(rand_sc2_1));
+        s.set_rand_sc3_1(pack_b3(rand_sc3_1));
+        s.set_rand_sc4_1(pack_b4(rand_sc4_1));
         */
         // TODO:  set unsigned long vectors
 
@@ -438,39 +435,36 @@ public class UT_math_agree extends UnitTest {
         s.set_min_rand_f2_f2(pack_f2(min(rand_f2_0, rand_f2_1)));
         s.set_min_rand_f3_f3(pack_f3(min(rand_f3_0, rand_f3_1)));
         s.set_min_rand_f4_f4(pack_f4(min(rand_f4_0, rand_f4_1)));
+        s.set_min_rand_uc1_uc1(min(rand_uc1_0, rand_uc1_1));
+        s.set_min_rand_uc2_uc2(pack_s2(min(rand_uc2_0, rand_uc2_1)));
+        s.set_min_rand_uc3_uc3(pack_s3(min(rand_uc3_0, rand_uc3_1)));
+        s.set_min_rand_uc4_uc4(pack_s4(min(rand_uc4_0, rand_uc4_1)));
         s.set_min_rand_ss1_ss1(min(rand_ss1_0, rand_ss1_1));
         s.set_min_rand_ss2_ss2(pack_s2(min(rand_ss2_0, rand_ss2_1)));
         s.set_min_rand_ss3_ss3(pack_s3(min(rand_ss3_0, rand_ss3_1)));
         s.set_min_rand_ss4_ss4(pack_s4(min(rand_ss4_0, rand_ss4_1)));
+        s.set_min_rand_us1_us1(min(rand_us1_0, rand_us1_1));
+        s.set_min_rand_us2_us2(pack_i2(min(rand_us2_0, rand_us2_1)));
+        s.set_min_rand_us3_us3(pack_i3(min(rand_us3_0, rand_us3_1)));
+        s.set_min_rand_us4_us4(pack_i4(min(rand_us4_0, rand_us4_1)));
         s.set_min_rand_si1_si1(min(rand_si1_0, rand_si1_1));
         s.set_min_rand_si2_si2(pack_i2(min(rand_si2_0, rand_si2_1)));
         s.set_min_rand_si3_si3(pack_i3(min(rand_si3_0, rand_si3_1)));
         s.set_min_rand_si4_si4(pack_i4(min(rand_si4_0, rand_si4_1)));
+        s.set_min_rand_ui1_ui1(min(rand_ui1_0, rand_ui1_1));
+        s.set_min_rand_ui2_ui2(pack_l2(min(rand_ui2_0, rand_ui2_1)));
+        s.set_min_rand_ui3_ui3(pack_l3(min(rand_ui3_0, rand_ui3_1)));
+        s.set_min_rand_ui4_ui4(pack_l4(min(rand_ui4_0, rand_ui4_1)));
         s.set_min_rand_sl1_sl1(min(rand_sl1_0, rand_sl1_1));
         s.set_min_rand_sl2_sl2(pack_l2(min(rand_sl2_0, rand_sl2_1)));
         s.set_min_rand_sl3_sl3(pack_l3(min(rand_sl3_0, rand_sl3_1)));
         s.set_min_rand_sl4_sl4(pack_l4(min(rand_sl4_0, rand_sl4_1)));
-        // FIXME:  set signed char min reference vectors once bug is fixed
+        // FIXME:  set char min reference vectors once bug 6865598 is fixed
         /*
         s.set_min_rand_sc1_sc1(min(rand_sc1_0, rand_sc1_1));
         s.set_min_rand_sc2_sc2(pack_b2(min(rand_sc2_0, rand_sc2_1)));
         s.set_min_rand_sc3_sc3(pack_b3(min(rand_sc3_0, rand_sc3_1)));
         s.set_min_rand_sc4_sc4(pack_b4(min(rand_sc4_0, rand_sc4_1)));
-        */
-        // FIXME:  set unsigned min reference vectors once bug 6764163 is fixed
-        /*
-        s.set_min_rand_uc1_uc1(min(rand_uc1_0, rand_uc1_1));
-        s.set_min_rand_uc2_uc2(pack_s3(min(rand_uc2_0, rand_uc2_1)));
-        s.set_min_rand_uc3_uc3(pack_s3(min(rand_uc3_0, rand_uc3_1)));
-        s.set_min_rand_uc4_uc4(pack_s4(min(rand_uc4_0, rand_uc4_1)));
-        s.set_min_rand_us1_us1(min(rand_us1_0, rand_us1_1));
-        s.set_min_rand_us2_us2(pack_i2(min(rand_us2_0, rand_us2_1)));
-        s.set_min_rand_us3_us3(pack_i3(min(rand_us3_0, rand_us3_1)));
-        s.set_min_rand_us4_us4(pack_i4(min(rand_us4_0, rand_us4_1)));
-        s.set_min_rand_ui1_ui1(min(rand_ui1_0, rand_ui1_1));
-        s.set_min_rand_ui2_ui2(pack_l2(min(rand_ui2_0, rand_ui2_1)));
-        s.set_min_rand_ui3_ui3(pack_l3(min(rand_ui3_0, rand_ui3_1)));
-        s.set_min_rand_ui4_ui4(pack_l4(min(rand_ui4_0, rand_ui4_1)));
         */
         // TODO:  set results for unsigned long min
 
@@ -479,40 +473,38 @@ public class UT_math_agree extends UnitTest {
         s.set_max_rand_f2_f2(pack_f2(max(rand_f2_0, rand_f2_1)));
         s.set_max_rand_f3_f3(pack_f3(max(rand_f3_0, rand_f3_1)));
         s.set_max_rand_f4_f4(pack_f4(max(rand_f4_0, rand_f4_1)));
+        s.set_max_rand_uc1_uc1(max(rand_uc1_0, rand_uc1_1));
+        s.set_max_rand_uc2_uc2(pack_s2(max(rand_uc2_0, rand_uc2_1)));
+        s.set_max_rand_uc3_uc3(pack_s3(max(rand_uc3_0, rand_uc3_1)));
+        s.set_max_rand_uc4_uc4(pack_s4(max(rand_uc4_0, rand_uc4_1)));
         s.set_max_rand_ss1_ss1(max(rand_ss1_0, rand_ss1_1));
         s.set_max_rand_ss2_ss2(pack_s2(max(rand_ss2_0, rand_ss2_1)));
         s.set_max_rand_ss3_ss3(pack_s3(max(rand_ss3_0, rand_ss3_1)));
         s.set_max_rand_ss4_ss4(pack_s4(max(rand_ss4_0, rand_ss4_1)));
+        s.set_max_rand_us1_us1(max(rand_us1_0, rand_us1_1));
+        s.set_max_rand_us2_us2(pack_i2(max(rand_us2_0, rand_us2_1)));
+        s.set_max_rand_us3_us3(pack_i3(max(rand_us3_0, rand_us3_1)));
+        s.set_max_rand_us4_us4(pack_i4(max(rand_us4_0, rand_us4_1)));
         s.set_max_rand_si1_si1(max(rand_si1_0, rand_si1_1));
         s.set_max_rand_si2_si2(pack_i2(max(rand_si2_0, rand_si2_1)));
         s.set_max_rand_si3_si3(pack_i3(max(rand_si3_0, rand_si3_1)));
         s.set_max_rand_si4_si4(pack_i4(max(rand_si4_0, rand_si4_1)));
+        s.set_max_rand_ui1_ui1(max(rand_ui1_0, rand_ui1_1));
+        s.set_max_rand_ui2_ui2(pack_l2(max(rand_ui2_0, rand_ui2_1)));
+        s.set_max_rand_ui3_ui3(pack_l3(max(rand_ui3_0, rand_ui3_1)));
+        s.set_max_rand_ui4_ui4(pack_l4(max(rand_ui4_0, rand_ui4_1)));
         s.set_max_rand_sl1_sl1(max(rand_sl1_0, rand_sl1_1));
         s.set_max_rand_sl2_sl2(pack_l2(max(rand_sl2_0, rand_sl2_1)));
         s.set_max_rand_sl3_sl3(pack_l3(max(rand_sl3_0, rand_sl3_1)));
         s.set_max_rand_sl4_sl4(pack_l4(max(rand_sl4_0, rand_sl4_1)));
-        // FIXME:  set signed char max reference vectors once bug is fixed
+        // FIXME:  set signed char max reference vectors once bug 6865598 is fixed
         /*
         s.set_max_rand_sc1_sc1(max(rand_sc1_0, rand_sc1_1));
         s.set_max_rand_sc2_sc2(pack_b2(max(rand_sc2_0, rand_sc2_1)));
         s.set_max_rand_sc3_sc3(pack_b3(max(rand_sc3_0, rand_sc3_1)));
         s.set_max_rand_sc4_sc4(pack_b4(max(rand_sc4_0, rand_sc4_1)));
         */
-        // FIXME:  set unsigned max reference vectors once bug 6764163 is fixed
-        /*
-        s.set_max_rand_uc1_uc1(max(rand_uc1_0, rand_uc1_1));
-        s.set_max_rand_uc2_uc2(pack_s3(max(rand_uc2_0, rand_uc2_1)));
-        s.set_max_rand_uc3_uc3(pack_s3(max(rand_uc3_0, rand_uc3_1)));
-        s.set_max_rand_uc4_uc4(pack_s4(max(rand_uc4_0, rand_uc4_1)));
-        s.set_max_rand_us1_us1(max(rand_us1_0, rand_us1_1));
-        s.set_max_rand_us2_us2(pack_i2(max(rand_us2_0, rand_us2_1)));
-        s.set_max_rand_us3_us3(pack_i3(max(rand_us3_0, rand_us3_1)));
-        s.set_max_rand_us4_us4(pack_i4(max(rand_us4_0, rand_us4_1)));
-        s.set_max_rand_ui1_ui1(max(rand_ui1_0, rand_ui1_1));
-        s.set_max_rand_ui2_ui2(pack_l2(max(rand_ui2_0, rand_ui2_1)));
-        s.set_max_rand_ui3_ui3(pack_l3(max(rand_ui3_0, rand_ui3_1)));
-        s.set_max_rand_ui4_ui4(pack_l4(max(rand_ui4_0, rand_ui4_1)));
-        */
+
         // TODO:  set results for unsigned long max
 
         // Set results for fmin
