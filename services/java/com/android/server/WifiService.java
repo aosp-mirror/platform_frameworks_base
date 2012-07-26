@@ -955,12 +955,10 @@ public class WifiService extends IWifiManager.Stub {
      * an AsyncChannel communication with WifiService
      */
     public Messenger getWifiServiceMessenger() {
-        /* Enforce the highest permissions
-           TODO: when we consider exposing the asynchronous API, think about
-                 how to provide both access and change permissions seperately
-         */
-        enforceAccessPermission();
-        enforceChangePermission();
+         /* STOPSHIP: Fix this to have old sync API not need these new permissions
+          * enforceAccessPermission();
+          * enforceChangePermission();
+          */
         return new Messenger(mAsyncServiceHandler);
     }
 
