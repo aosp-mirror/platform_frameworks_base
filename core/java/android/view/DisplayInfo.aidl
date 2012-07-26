@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,4 @@
 
 package android.view;
 
-import com.android.layoutlib.bridge.android.BridgeWindowManager;
-import com.android.layoutlib.bridge.impl.RenderAction;
-import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
-
-import android.os.RemoteException;
-
-/**
- * Delegate used to provide new implementation of a select few methods of {@link Display}
- *
- * Through the layoutlib_create tool, the original  methods of Display have been replaced
- * by calls to methods of the same name in this delegate class.
- *
- */
-public class Display_Delegate {
-
-}
+parcelable DisplayInfo;

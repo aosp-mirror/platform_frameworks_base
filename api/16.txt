@@ -22892,7 +22892,7 @@ package android.view {
     method protected void onApplyThemeResource(android.content.res.Resources.Theme, int, boolean);
   }
 
-  public class Display {
+  public final class Display {
     method public void getCurrentSizeRange(android.graphics.Point, android.graphics.Point);
     method public int getDisplayId();
     method public deprecated int getHeight();

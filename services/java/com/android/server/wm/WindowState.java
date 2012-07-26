@@ -480,7 +480,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
         if (mIsWallpaper && (fw != frame.width() || fh != frame.height())) {
             mService.updateWallpaperOffsetLocked(this,
-                    mService.mAppDisplayWidth, mService.mAppDisplayHeight, false);
+                    mService.mDisplayInfo.appWidth, mService.mDisplayInfo.appHeight, false);
         }
 
         if (WindowManagerService.localLOGV) {

@@ -44,7 +44,6 @@ LOCAL_SRC_FILES:= \
 	android_database_SQLiteGlobal.cpp \
 	android_database_SQLiteDebug.cpp \
 	android_emoji_EmojiFactory.cpp \
-	android_view_Display.cpp \
 	android_view_DisplayEventReceiver.cpp \
 	android_view_Surface.cpp \
 	android_view_TextureView.cpp \

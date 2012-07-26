@@ -49,6 +49,7 @@ import com.android.internal.os.SamplingProfilerIntegration;
 import com.android.internal.widget.LockSettingsService;
 import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.am.ActivityManagerService;
+import com.android.server.display.DisplayManagerService;
 import com.android.server.input.InputManagerService;
 import com.android.server.net.NetworkPolicyManagerService;
 import com.android.server.net.NetworkStatsService;
@@ -115,6 +116,7 @@ class ServerThread extends Thread {
 
         LightsService lights = null;
         PowerManagerService power = null;
+        DisplayManagerService display = null;
         BatteryService battery = null;
         VibratorService vibrator = null;
         AlarmManagerService alarm = null;
@@ -148,8 +150,13 @@ class ServerThread extends Thread {
             power = new PowerManagerService();
             ServiceManager.addService(Context.POWER_SERVICE, power);
 
+            Slog.i(TAG, "Display Manager");
+            display = new DisplayManagerService();
+            ServiceManager.addService(Context.DISPLAY_SERVICE, display);
+
             Slog.i(TAG, "Activity Manager");
             context = ActivityManagerService.main(factoryTest);
+            display.setContext(context);
 
             Slog.i(TAG, "Telephony Registry");
             ServiceManager.addService("telephony.registry", new TelephonyRegistry(context));
@@ -214,7 +221,7 @@ class ServerThread extends Thread {
 
             // only initialize the power service after we have started the
             // lights service, content providers and the battery service.
-            power.init(context, lights, ActivityManagerService.self(), battery);
+            power.init(context, lights, ActivityManagerService.self(), battery, display);
 
             Slog.i(TAG, "Alarm Manager");
             alarm = new AlarmManagerService(context);
@@ -225,7 +232,7 @@ class ServerThread extends Thread {
                     ActivityManagerService.self());
 
             Slog.i(TAG, "Window Manager");
-            wm = WindowManagerService.main(context, power,
+            wm = WindowManagerService.main(context, power, display,
                     factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL,
                     !firstBoot, onlyCore);
             ServiceManager.addService(Context.WINDOW_SERVICE, wm);

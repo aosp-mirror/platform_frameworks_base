@@ -25,6 +25,7 @@ import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IRemoteCallback;
+import android.view.DisplayInfo;
 import android.view.IApplicationToken;
 import android.view.IOnKeyguardExitResult;
 import android.view.IRotationWatcher;
@@ -56,11 +57,6 @@ interface IWindowManager
     IWindowSession openSession(in IInputMethodClient client,
             in IInputContext inputContext);
     boolean inputMethodClientHasFocus(IInputMethodClient client);
-    
-    void getDisplaySize(out Point size);
-    void getRealDisplaySize(out Point size);
-    int getMaximumSizeDimension();
-    void getCurrentSizeRange(out Point smallestSize, out Point largestSize);
 
     void setForcedDisplaySize(int longDimen, int shortDimen);
     void clearForcedDisplaySize();
