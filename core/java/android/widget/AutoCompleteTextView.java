@@ -75,8 +75,8 @@ import com.android.internal.R;
  * }
  * </pre>
  *
- * <p>See the <a href="{@docRoot}resources/tutorials/views/hello-autocomplete.html">Auto Complete
- * tutorial</a>.</p>
+ * <p>See the <a href="{@docRoot}guide/topics/ui/controls/text.html">Text Fields</a>
+ * guide.</p>
  *
  * @attr ref android.R.styleable#AutoCompleteTextView_completionHint
  * @attr ref android.R.styleable#AutoCompleteTextView_completionThreshold

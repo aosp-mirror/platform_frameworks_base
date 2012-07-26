@@ -38,8 +38,8 @@ import com.android.internal.R;
  * a radio group, checking one radio button unchecks all the others.</p>
  * </p>
  *
- * <p>See the <a href="{@docRoot}resources/tutorials/views/hello-formstuff.html">Form Stuff
- * tutorial</a>.</p>
+ * <p>See the <a href="{@docRoot}guide/topics/ui/controls/radiobutton.html">Radio Buttons</a>
+ * guide.</p>
  *
  * <p><strong>XML attributes</strong></p>
  * <p> 

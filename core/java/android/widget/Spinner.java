@@ -39,10 +39,16 @@ import android.view.accessibility.AccessibilityNodeInfo;
  * The items in the Spinner come from the {@link Adapter} associated with
  * this view.
  *
- * <p>See the <a href="{@docRoot}resources/tutorials/views/hello-spinner.html">Spinner
- * tutorial</a>.</p>
+ * <p>See the <a href="{@docRoot}guide/topics/ui/controls/spinner.html">Spinners</a> guide.</p>
  *
+ * @attr ref android.R.styleable#Spinner_dropDownHorizontalOffset
+ * @attr ref android.R.styleable#Spinner_dropDownSelector
+ * @attr ref android.R.styleable#Spinner_dropDownVerticalOffset
+ * @attr ref android.R.styleable#Spinner_dropDownWidth
+ * @attr ref android.R.styleable#Spinner_gravity
+ * @attr ref android.R.styleable#Spinner_popupBackground
  * @attr ref android.R.styleable#Spinner_prompt
+ * @attr ref android.R.styleable#Spinner_spinnerMode
  */
 @Widget
 public class Spinner extends AbsSpinner implements OnClickListener {
@@ -409,6 +415,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
     /**
      * <p>A spinner does not support item click events. Calling this method
      * will raise an exception.</p>
+     * <p>Instead use {@link AdapterView#setOnItemSelectedListener}.
      *
      * @param l this listener will be ignored
      */
