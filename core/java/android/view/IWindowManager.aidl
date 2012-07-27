@@ -25,7 +25,6 @@ import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IRemoteCallback;
-import android.view.DisplayInfo;
 import android.view.IApplicationToken;
 import android.view.IOnKeyguardExitResult;
 import android.view.IRotationWatcher;

@@ -25,6 +25,7 @@ import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.util.Slog;
+import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceSession;
 import android.view.animation.Animation;
@@ -212,10 +213,12 @@ class ScreenRotationAnimation {
         try {
             try {
                 if (WindowManagerService.DEBUG_SURFACE_TRACE) {
-                    mSurface = new SurfaceTrace(session, 0, "FreezeSurface", -1, mWidth, mHeight,
+                    mSurface = new SurfaceTrace(session, 0, "FreezeSurface", Display.DEFAULT_DISPLAY,
+                        mWidth, mHeight,
                         PixelFormat.OPAQUE, Surface.FX_SURFACE_SCREENSHOT | Surface.HIDDEN);
                 } else {
-                    mSurface = new Surface(session, 0, "FreezeSurface", -1, mWidth, mHeight,
+                    mSurface = new Surface(session, 0, "FreezeSurface", Display.DEFAULT_DISPLAY,
+                        mWidth, mHeight,
                         PixelFormat.OPAQUE, Surface.FX_SURFACE_SCREENSHOT | Surface.HIDDEN);
                 }
                 if (!mSurface.isValid()) {
