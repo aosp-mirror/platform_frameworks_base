@@ -786,6 +786,12 @@ public final class BluetoothDevice implements Parcelable {
         try {
             return sService.getBondState(this);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
+        catch (NullPointerException npe) {
+            // Handle case where bluetooth service proxy
+            // is already null.
+            Log.e(TAG, "NullPointerException for getBondState() of device ("+
+                getAddress()+")", npe);
+        }
         return BOND_NONE;
     }
 
