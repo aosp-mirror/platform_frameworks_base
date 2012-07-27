@@ -563,7 +563,7 @@ public class ClipData implements Parcelable {
         private String uriToHtml(String uri) {
             StringBuilder builder = new StringBuilder(256);
             builder.append("<a href=\"");
-            builder.append(uri);
+            builder.append(Html.escapeHtml(uri));
             builder.append("\">");
             builder.append(Html.escapeHtml(uri));
             builder.append("</a>");
