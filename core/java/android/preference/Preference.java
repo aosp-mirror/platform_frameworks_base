@@ -55,6 +55,13 @@ import java.util.Set;
  * {@link SharedPreferences}. It is up to the subclass to decide how to store
  * the value.
  * 
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For information about building a settings UI with Preferences,
+ * read the <a href="{@docRoot}guide/topics/ui/settings.html">Settings</a>
+ * guide.</p>
+ * </div>
+ * 
  * @attr ref android.R.styleable#Preference_icon
  * @attr ref android.R.styleable#Preference_key
  * @attr ref android.R.styleable#Preference_title
