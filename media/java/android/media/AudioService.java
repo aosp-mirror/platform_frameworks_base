@@ -3660,9 +3660,10 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             Iterator<FocusStackEntry> stackIterator = mFocusStack.iterator();
             while(stackIterator.hasNext()) {
                 FocusStackEntry fse = stackIterator.next();
-                pw.println("     source:" + fse.mSourceRef + " -- client: " + fse.mClientId
+                pw.println("  source:" + fse.mSourceRef + " -- client: " + fse.mClientId
                         + " -- duration: " + fse.mFocusChangeType
-                        + " -- uid: " + fse.mCallingUid);
+                        + " -- uid: " + fse.mCallingUid
+                        + " -- stream: " + fse.mStreamType);
             }
         }
     }
@@ -4022,7 +4023,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 startVoiceBasedInteractions(needWakeLock);
                 break;
             case VOICEBUTTON_ACTION_SIMULATE_KEY_PRESS:
-                if (DEBUG_RC) Log.v(TAG, "   send simulated key event");
+                if (DEBUG_RC) Log.v(TAG, "   send simulated key event, wakelock=" + needWakeLock);
                 sendSimulatedMediaButtonEvent(keyEvent, needWakeLock);
                 break;
         }
@@ -4654,17 +4655,40 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             clearRemoteControlDisplay_syncAfRcs();
             return;
         }
-        // if the top of the two stacks belong to different packages, there is a mismatch, clear
+
+        // determine which entry in the AudioFocus stack to consider, and compare against the
+        // top of the stack for the media button event receivers : simply using the top of the
+        // stack would make the entry disappear from the RemoteControlDisplay in conditions such as
+        // notifications playing during music playback.
+        // crawl the AudioFocus stack until an entry is found with the following characteristics:
+        // - focus gain on STREAM_MUSIC stream
+        // - non-transient focus gain on a stream other than music
+        FocusStackEntry af = null;
+        Iterator<FocusStackEntry> stackIterator = mFocusStack.iterator();
+        while(stackIterator.hasNext()) {
+            FocusStackEntry fse = (FocusStackEntry)stackIterator.next();
+            if ((fse.mStreamType == AudioManager.STREAM_MUSIC)
+                    || (fse.mFocusChangeType == AudioManager.AUDIOFOCUS_GAIN)) {
+                af = fse;
+                break;
+            }
+        }
+        if (af == null) {
+            clearRemoteControlDisplay_syncAfRcs();
+            return;
+        }
+
+        // if the audio focus and RC owners belong to different packages, there is a mismatch, clear
         if ((mRCStack.peek().mCallingPackageName != null)
-                && (mFocusStack.peek().mPackageName != null)
+                && (af.mPackageName != null)
                 && !(mRCStack.peek().mCallingPackageName.compareTo(
-                        mFocusStack.peek().mPackageName) == 0)) {
+                        af.mPackageName) == 0)) {
             clearRemoteControlDisplay_syncAfRcs();
             return;
         }
         // if the audio focus didn't originate from the same Uid as the one in which the remote
         //   control information will be retrieved, clear
-        if (mRCStack.peek().mCallingUid != mFocusStack.peek().mCallingUid) {
+        if (mRCStack.peek().mCallingUid != af.mCallingUid) {
             clearRemoteControlDisplay_syncAfRcs();
             return;
         }
