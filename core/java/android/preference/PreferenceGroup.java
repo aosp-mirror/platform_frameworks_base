@@ -33,6 +33,13 @@ import android.util.AttributeSet;
  * {@link Preference} objects. It is a base class for  Preference objects that are
  * parents, such as {@link PreferenceCategory} and {@link PreferenceScreen}.
  * 
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For information about building a settings UI with Preferences,
+ * read the <a href="{@docRoot}guide/topics/ui/settings.html">Settings</a>
+ * guide.</p>
+ * </div>
+ * 
  * @attr ref android.R.styleable#PreferenceGroup_orderingFromXml
  */
 public abstract class PreferenceGroup extends Preference implements GenericInflater.Parent<Preference> {
