@@ -718,7 +718,7 @@ nAllocationRead_i(JNIEnv *_env, jobject _this, RsContext con, jint alloc, jintAr
     LOG_API("nAllocationRead_i, con(%p), alloc(%p), len(%i)", con, (RsAllocation)alloc, len);
     jint *ptr = _env->GetIntArrayElements(data, NULL);
     jsize length = _env->GetArrayLength(data);
-    rsAllocationRead(con, (RsAllocation)alloc, ptr, length);
+    rsAllocationRead(con, (RsAllocation)alloc, ptr, length * sizeof(int));
     _env->ReleaseIntArrayElements(data, ptr, 0);
 }
 
@@ -729,7 +729,7 @@ nAllocationRead_s(JNIEnv *_env, jobject _this, RsContext con, jint alloc, jshort
     LOG_API("nAllocationRead_i, con(%p), alloc(%p), len(%i)", con, (RsAllocation)alloc, len);
     jshort *ptr = _env->GetShortArrayElements(data, NULL);
     jsize length = _env->GetArrayLength(data);
-    rsAllocationRead(con, (RsAllocation)alloc, ptr, length);
+    rsAllocationRead(con, (RsAllocation)alloc, ptr, length * sizeof(short));
     _env->ReleaseShortArrayElements(data, ptr, 0);
 }
 
@@ -740,7 +740,7 @@ nAllocationRead_b(JNIEnv *_env, jobject _this, RsContext con, jint alloc, jbyteA
     LOG_API("nAllocationRead_i, con(%p), alloc(%p), len(%i)", con, (RsAllocation)alloc, len);
     jbyte *ptr = _env->GetByteArrayElements(data, NULL);
     jsize length = _env->GetArrayLength(data);
-    rsAllocationRead(con, (RsAllocation)alloc, ptr, length);
+    rsAllocationRead(con, (RsAllocation)alloc, ptr, length * sizeof(char));
     _env->ReleaseByteArrayElements(data, ptr, 0);
 }
 
@@ -751,7 +751,7 @@ nAllocationRead_f(JNIEnv *_env, jobject _this, RsContext con, jint alloc, jfloat
     LOG_API("nAllocationRead_f, con(%p), alloc(%p), len(%i)", con, (RsAllocation)alloc, len);
     jfloat *ptr = _env->GetFloatArrayElements(data, NULL);
     jsize length = _env->GetArrayLength(data);
-    rsAllocationRead(con, (RsAllocation)alloc, ptr, length);
+    rsAllocationRead(con, (RsAllocation)alloc, ptr, length * sizeof(float));
     _env->ReleaseFloatArrayElements(data, ptr, 0);
 }
 
