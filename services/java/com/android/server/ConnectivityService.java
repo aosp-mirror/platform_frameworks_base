@@ -188,95 +188,81 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private static final boolean TO_DEFAULT_TABLE = true;
     private static final boolean TO_SECONDARY_TABLE = false;
 
-    // Share the event space with NetworkStateTracker (which can't see this
-    // internal class but sends us events).  If you change these, change
-    // NetworkStateTracker.java too.
-    private static final int MIN_NETWORK_STATE_TRACKER_EVENT = 1;
-    private static final int MAX_NETWORK_STATE_TRACKER_EVENT = 100;
-
     /**
      * used internally as a delayed event to make us switch back to the
      * default network
      */
-    private static final int EVENT_RESTORE_DEFAULT_NETWORK =
-            MAX_NETWORK_STATE_TRACKER_EVENT + 1;
+    private static final int EVENT_RESTORE_DEFAULT_NETWORK = 1;
 
     /**
      * used internally to change our mobile data enabled flag
      */
-    private static final int EVENT_CHANGE_MOBILE_DATA_ENABLED =
-            MAX_NETWORK_STATE_TRACKER_EVENT + 2;
+    private static final int EVENT_CHANGE_MOBILE_DATA_ENABLED = 2;
 
     /**
      * used internally to change our network preference setting
      * arg1 = networkType to prefer
      */
-    private static final int EVENT_SET_NETWORK_PREFERENCE =
-            MAX_NETWORK_STATE_TRACKER_EVENT + 3;
+    private static final int EVENT_SET_NETWORK_PREFERENCE = 3;
 
     /**
      * used internally to synchronize inet condition reports
      * arg1 = networkType
      * arg2 = condition (0 bad, 100 good)
      */
-    private static final int EVENT_INET_CONDITION_CHANGE =
-            MAX_NETWORK_STATE_TRACKER_EVENT + 4;
+    private static final int EVENT_INET_CONDITION_CHANGE = 4;
 
     /**
      * used internally to mark the end of inet condition hold periods
      * arg1 = networkType
      */
-    private static final int EVENT_INET_CONDITION_HOLD_END =
-            MAX_NETWORK_STATE_TRACKER_EVENT + 5;
+    private static final int EVENT_INET_CONDITION_HOLD_END = 5;
 
     /**
      * used internally to set enable/disable cellular data
      * arg1 = ENBALED or DISABLED
      */
-    private static final int EVENT_SET_MOBILE_DATA =
-            MAX_NETWORK_STATE_TRACKER_EVENT + 7;
+    private static final int EVENT_SET_MOBILE_DATA = 7;
 
     /**
      * used internally to clear a wakelock when transitioning
      * from one net to another
      */
-    private static final int EVENT_CLEAR_NET_TRANSITION_WAKELOCK =
-            MAX_NETWORK_STATE_TRACKER_EVENT + 8;
+    private static final int EVENT_CLEAR_NET_TRANSITION_WAKELOCK = 8;
 
     /**
      * used internally to reload global proxy settings
      */
-    private static final int EVENT_APPLY_GLOBAL_HTTP_PROXY =
-            MAX_NETWORK_STATE_TRACKER_EVENT + 9;
+    private static final int EVENT_APPLY_GLOBAL_HTTP_PROXY = 9;
 
     /**
      * used internally to set external dependency met/unmet
      * arg1 = ENABLED (met) or DISABLED (unmet)
      * arg2 = NetworkType
      */
-    private static final int EVENT_SET_DEPENDENCY_MET =
-            MAX_NETWORK_STATE_TRACKER_EVENT + 10;
+    private static final int EVENT_SET_DEPENDENCY_MET = 10;
 
     /**
      * used internally to restore DNS properties back to the
      * default network
      */
-    private static final int EVENT_RESTORE_DNS =
-            MAX_NETWORK_STATE_TRACKER_EVENT + 11;
+    private static final int EVENT_RESTORE_DNS = 11;
 
     /**
      * used internally to send a sticky broadcast delayed.
      */
-    private static final int EVENT_SEND_STICKY_BROADCAST_INTENT =
-            MAX_NETWORK_STATE_TRACKER_EVENT + 12;
+    private static final int EVENT_SEND_STICKY_BROADCAST_INTENT = 12;
 
     /**
      * Used internally to
      * {@link NetworkStateTracker#setPolicyDataEnable(boolean)}.
      */
-    private static final int EVENT_SET_POLICY_DATA_ENABLE = MAX_NETWORK_STATE_TRACKER_EVENT + 13;
+    private static final int EVENT_SET_POLICY_DATA_ENABLE = 13;
 
-    private Handler mHandler;
+    /** Handler used for internal events. */
+    private InternalHandler mHandler;
+    /** Handler used for incoming {@link NetworkStateTracker} events. */
+    private NetworkStateTrackerHandler mTrackerHandler;
 
     // list of DeathRecipients used to make sure features are turned off when
     // a process dies
@@ -334,7 +320,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         HandlerThread handlerThread = new HandlerThread("ConnectivityServiceThread");
         handlerThread.start();
-        mHandler = new MyHandler(handlerThread.getLooper());
+        mHandler = new InternalHandler(handlerThread.getLooper());
+        mTrackerHandler = new NetworkStateTrackerHandler(handlerThread.getLooper());
 
         // setup our unique device name
         if (TextUtils.isEmpty(SystemProperties.get("net.hostname"))) {
@@ -484,33 +471,33 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         for (int netType : mPriorityList) {
             switch (mNetConfigs[netType].radio) {
             case ConnectivityManager.TYPE_WIFI:
-                mNetTrackers[netType] = new WifiStateTracker(netType,
-                        mNetConfigs[netType].name);
-                mNetTrackers[netType].startMonitoring(context, mHandler);
-               break;
+                mNetTrackers[netType] = new WifiStateTracker(
+                        netType, mNetConfigs[netType].name);
+                mNetTrackers[netType].startMonitoring(context, mTrackerHandler);
+                break;
             case ConnectivityManager.TYPE_MOBILE:
                 mNetTrackers[netType] = new MobileDataStateTracker(netType,
                         mNetConfigs[netType].name);
-                mNetTrackers[netType].startMonitoring(context, mHandler);
+                mNetTrackers[netType].startMonitoring(context, mTrackerHandler);
                 break;
             case ConnectivityManager.TYPE_DUMMY:
                 mNetTrackers[netType] = new DummyDataStateTracker(netType,
                         mNetConfigs[netType].name);
-                mNetTrackers[netType].startMonitoring(context, mHandler);
+                mNetTrackers[netType].startMonitoring(context, mTrackerHandler);
                 break;
             case ConnectivityManager.TYPE_BLUETOOTH:
                 mNetTrackers[netType] = BluetoothTetheringDataTracker.getInstance();
-                mNetTrackers[netType].startMonitoring(context, mHandler);
+                mNetTrackers[netType].startMonitoring(context, mTrackerHandler);
                 break;
             case ConnectivityManager.TYPE_WIMAX:
                 mNetTrackers[netType] = makeWimaxStateTracker();
                 if (mNetTrackers[netType]!= null) {
-                    mNetTrackers[netType].startMonitoring(context, mHandler);
+                    mNetTrackers[netType].startMonitoring(context, mTrackerHandler);
                 }
                 break;
             case ConnectivityManager.TYPE_ETHERNET:
                 mNetTrackers[netType] = EthernetDataTracker.getInstance();
-                mNetTrackers[netType].startMonitoring(context, mHandler);
+                mNetTrackers[netType].startMonitoring(context, mTrackerHandler);
                 break;
             default:
                 loge("Trying to create a DataStateTracker for an unknown radio type " +
@@ -557,8 +544,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         loadGlobalProxy();
     }
-private NetworkStateTracker makeWimaxStateTracker() {
-        //Initialize Wimax
+
+    private NetworkStateTracker makeWimaxStateTracker() {
+        // Initialize Wimax
         DexClassLoader wimaxClassLoader;
         Class wimaxStateTrackerClass = null;
         Class wimaxServiceClass = null;
@@ -611,7 +599,7 @@ private NetworkStateTracker makeWimaxStateTracker() {
                 Constructor wmxStTrkrConst = wimaxStateTrackerClass.getConstructor
                         (new Class[] {Context.class, Handler.class});
                 wimaxStateTracker = (NetworkStateTracker)wmxStTrkrConst.newInstance(mContext,
-                        mHandler);
+                        mTrackerHandler);
 
                 Constructor wmxSrvConst = wimaxServiceClass.getDeclaredConstructor
                         (new Class[] {Context.class, wimaxStateTrackerClass});
@@ -632,6 +620,7 @@ private NetworkStateTracker makeWimaxStateTracker() {
 
         return wimaxStateTracker;
     }
+
     /**
      * Sets the preferred network.
      * @param preference the new preference
@@ -639,7 +628,8 @@ private NetworkStateTracker makeWimaxStateTracker() {
     public void setNetworkPreference(int preference) {
         enforceChangePermission();
 
-        mHandler.sendMessage(mHandler.obtainMessage(EVENT_SET_NETWORK_PREFERENCE, preference, 0));
+        mHandler.sendMessage(
+                mHandler.obtainMessage(EVENT_SET_NETWORK_PREFERENCE, preference, 0));
     }
 
     public int getNetworkPreference() {
@@ -2460,8 +2450,8 @@ private NetworkStateTracker makeWimaxStateTracker() {
     }
 
     // must be stateless - things change under us.
-    private class MyHandler extends Handler {
-        public MyHandler(Looper looper) {
+    private class NetworkStateTrackerHandler extends Handler {
+        public NetworkStateTrackerHandler(Looper looper) {
             super(looper);
         }
 
@@ -2519,6 +2509,19 @@ private NetworkStateTracker makeWimaxStateTracker() {
                     //       @see bug/4455071
                     handleConnectivityChange(info.getType(), false);
                     break;
+            }
+        }
+    }
+
+    private class InternalHandler extends Handler {
+        public InternalHandler(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            NetworkInfo info;
+            switch (msg.what) {
                 case EVENT_CLEAR_NET_TRANSITION_WAKELOCK:
                     String causedBy = null;
                     synchronized (ConnectivityService.this) {
