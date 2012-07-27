@@ -145,6 +145,7 @@ public class NetworkController extends BroadcastReceiver {
     ArrayList<TextView> mCombinedLabelViews = new ArrayList<TextView>();
     ArrayList<TextView> mMobileLabelViews = new ArrayList<TextView>();
     ArrayList<TextView> mWifiLabelViews = new ArrayList<TextView>();
+    ArrayList<TextView> mEmergencyLabelViews = new ArrayList<TextView>();
     ArrayList<SignalCluster> mSignalClusters = new ArrayList<SignalCluster>();
     int mLastPhoneSignalIconId = -1;
     int mLastDataDirectionIconId = -1;
@@ -245,6 +246,10 @@ public class NetworkController extends BroadcastReceiver {
         return mHasMobileDataFeature;
     }
 
+    public boolean isEmergencyOnly() {
+        return (mServiceState != null && mServiceState.isEmergencyOnly());
+    }
+
     public void addPhoneSignalIconView(ImageView v) {
         mPhoneSignalIconViews.add(v);
     }
@@ -282,6 +287,10 @@ public class NetworkController extends BroadcastReceiver {
 
     public void addWifiLabelView(TextView v) {
         mWifiLabelViews.add(v);
+    }
+
+    public void addEmergencyLabelView(TextView v) {
+        mEmergencyLabelViews.add(v);
     }
 
     public void addSignalCluster(SignalCluster cluster) {
@@ -917,7 +926,7 @@ public class NetworkController extends BroadcastReceiver {
         String wifiLabel = "";
         String mobileLabel = "";
         int N;
-        final boolean emergencyOnly = (mServiceState != null && mServiceState.isEmergencyOnly());
+        final boolean emergencyOnly = isEmergencyOnly();
 
         if (!mHasMobileDataFeature) {
             mDataSignalIconId = mPhoneSignalIconId = 0;
@@ -1079,6 +1088,7 @@ public class NetworkController extends BroadcastReceiver {
                     + " combinedActivityIconId=0x" + Integer.toHexString(combinedActivityIconId)
                     + " mobileLabel=" + mobileLabel
                     + " wifiLabel=" + wifiLabel
+                    + " emergencyOnly=" + emergencyOnly
                     + " combinedLabel=" + combinedLabel
                     + " mAirplaneMode=" + mAirplaneMode
                     + " mDataActivity=" + mDataActivity
@@ -1241,6 +1251,18 @@ public class NetworkController extends BroadcastReceiver {
             if ("".equals(mobileLabel)) {
                 v.setVisibility(View.GONE);
             } else {
+                v.setVisibility(View.VISIBLE);
+            }
+        }
+
+        // e-call label
+        N = mEmergencyLabelViews.size();
+        for (int i=0; i<N; i++) {
+            TextView v = mEmergencyLabelViews.get(i);
+            if (!emergencyOnly) {
+                v.setVisibility(View.GONE);
+            } else {
+                v.setText(mobileLabel); // comes from the telephony stack
                 v.setVisibility(View.VISIBLE);
             }
         }
