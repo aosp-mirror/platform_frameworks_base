@@ -531,7 +531,7 @@ static void renderText(OpenGLRenderer* renderer, const jchar* text, int count,
     jfloat totalAdvance = value->getTotalAdvance();
     const float* positions = value->getPos();
     int bytesCount = glyphsCount * sizeof(jchar);
-    renderer->drawGeneralText((const char*) glyphs, bytesCount, glyphsCount, x, y,
+    renderer->drawText((const char*) glyphs, bytesCount, glyphsCount, x, y,
             positions, paint, totalAdvance);
 }
 
@@ -562,7 +562,7 @@ static void renderTextRun(OpenGLRenderer* renderer, const jchar* text,
     jfloat totalAdvance = value->getTotalAdvance();
     const float* positions = value->getPos();
     int bytesCount = glyphsCount * sizeof(jchar);
-    renderer->drawGeneralText((const char*) glyphs, bytesCount, glyphsCount, x, y,
+    renderer->drawText((const char*) glyphs, bytesCount, glyphsCount, x, y,
             positions, paint, totalAdvance);
 }
 
