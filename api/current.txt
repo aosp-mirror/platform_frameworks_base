@@ -28452,6 +28452,7 @@ package android.widget {
     method public void addRule(int, int);
     method public java.lang.String debug(java.lang.String);
     method public int[] getRules();
+    method public void removeRule(int);
     field public boolean alignWithParent;
   }
 
