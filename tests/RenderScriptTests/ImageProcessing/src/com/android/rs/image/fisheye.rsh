@@ -38,6 +38,7 @@ void init_filter(uint32_t dim_x, uint32_t dim_y, float focus_x, float focus_y, f
     } else {
         scale.x = dimensions.x / dimensions.y;
         scale.y = 1.0;
+        bound2 *= (scale.x*scale.x + 1);
     }
     const float bound = sqrt(bound2);
     const float radius = 1.15 * bound;
