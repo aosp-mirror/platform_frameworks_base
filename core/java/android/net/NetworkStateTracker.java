@@ -41,12 +41,6 @@ public interface NetworkStateTracker {
      * -------------------------------------------------------------
      */
 
-    // Share the event space with ConnectivityService (which we can't see, but
-    // must send events to).  If you change these, change ConnectivityService
-    // too.
-    static final int MIN_NETWORK_STATE_TRACKER_EVENT = 1;
-    static final int MAX_NETWORK_STATE_TRACKER_EVENT = 100;
-
     /**
      * The network state has changed and the NetworkInfo object
      * contains the new state.
