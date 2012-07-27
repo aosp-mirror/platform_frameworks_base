@@ -22,6 +22,7 @@ import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.util.Slog;
+import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceSession;
 
@@ -44,11 +45,11 @@ public class BlackFrame {
             int h = b-t;
             if (WindowManagerService.DEBUG_SURFACE_TRACE) {
                 surface = new WindowStateAnimator.SurfaceTrace(session, 0, "BlackSurface("
-                        + l + ", " + t + ")",
-                        -1, w, h, PixelFormat.OPAQUE, Surface.FX_SURFACE_DIM);
+                        + l + ", " + t + ")", Display.DEFAULT_DISPLAY,
+                        w, h, PixelFormat.OPAQUE, Surface.FX_SURFACE_DIM);
             } else {
-                surface = new Surface(session, 0, "BlackSurface",
-                        -1, w, h, PixelFormat.OPAQUE, Surface.FX_SURFACE_DIM);
+                surface = new Surface(session, 0, "BlackSurface", Display.DEFAULT_DISPLAY,
+                        w, h, PixelFormat.OPAQUE, Surface.FX_SURFACE_DIM);
             }
             surface.setAlpha(1);
             surface.setLayer(layer);

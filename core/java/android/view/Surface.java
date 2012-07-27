@@ -248,7 +248,7 @@ public class Surface implements Parcelable {
 
     /** create a surface @hide */
     public Surface(SurfaceSession s,
-            int pid, int display, int w, int h, int format, int flags)
+            int pid, int displayId, int w, int h, int format, int flags)
         throws OutOfResourcesException {
         checkHeadless();
 
@@ -256,12 +256,12 @@ public class Surface implements Parcelable {
             mCreationStack = new Exception();
         }
         mCanvas = new CompatibleCanvas();
-        init(s,pid,null,display,w,h,format,flags);
+        init(s,pid,null,displayId,w,h,format,flags);
     }
 
     /** create a surface with a name @hide */
     public Surface(SurfaceSession s,
-            int pid, String name, int display, int w, int h, int format, int flags)
+            int pid, String name, int displayId, int w, int h, int format, int flags)
         throws OutOfResourcesException {
         checkHeadless();
 
@@ -269,7 +269,7 @@ public class Surface implements Parcelable {
             mCreationStack = new Exception();
         }
         mCanvas = new CompatibleCanvas();
-        init(s,pid,name,display,w,h,format,flags);
+        init(s,pid,name,displayId,w,h,format,flags);
         mName = name;
     }
 
@@ -508,7 +508,7 @@ public class Surface implements Parcelable {
     }
     
     private native void init(SurfaceSession s,
-            int pid, String name, int display, int w, int h, int format, int flags)
+            int pid, String name, int displayId, int w, int h, int format, int flags)
             throws OutOfResourcesException;
 
     private native void init(Parcel source);

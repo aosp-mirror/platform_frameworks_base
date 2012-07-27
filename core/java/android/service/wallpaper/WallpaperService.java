@@ -40,6 +40,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.LogPrinter;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.IWindowSession;
 import android.view.InputChannel;
@@ -612,8 +613,8 @@ public abstract class WallpaperService extends Service {
                         mLayout.windowAnimations =
                                 com.android.internal.R.style.Animation_Wallpaper;
                         mInputChannel = new InputChannel();
-                        if (mSession.add(mWindow, mWindow.mSeq, mLayout, View.VISIBLE, mContentInsets,
-                                mInputChannel) < 0) {
+                        if (mSession.addToDisplay(mWindow, mWindow.mSeq, mLayout, View.VISIBLE,
+                            Display.DEFAULT_DISPLAY, mContentInsets, mInputChannel) < 0) {
                             Log.w(TAG, "Failed to add window while updating wallpaper surface.");
                             return;
                         }

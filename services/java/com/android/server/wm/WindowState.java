@@ -251,15 +251,18 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     boolean mHasSurface = false;
 
+    int mDisplayId;
+
     WindowState(WindowManagerService service, Session s, IWindow c, WindowToken token,
            WindowState attachedWindow, int seq, WindowManager.LayoutParams a,
-           int viewVisibility) {
+           int viewVisibility, int displayId) {
         mService = service;
         mSession = s;
         mClient = c;
         mToken = token;
         mAttrs.copyFrom(a);
         mViewVisibility = viewVisibility;
+        mDisplayId = displayId;
         mPolicy = mService.mPolicy;
         mContext = mService.mContext;
         DeathRecipient deathRecipient = new DeathRecipient();

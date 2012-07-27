@@ -544,9 +544,9 @@ public final class ViewRootImpl implements ViewParent,
                     mOrigWindowType = mWindowAttributes.type;
                     mAttachInfo.mRecomputeGlobalAttributes = true;
                     collectViewAttributes();
-                    res = sWindowSession.add(mWindow, mSeq, mWindowAttributes,
-                            getHostVisibility(), mAttachInfo.mContentInsets,
-                            mInputChannel);
+                    res = sWindowSession.addToDisplay(mWindow, mSeq, mWindowAttributes,
+                            getHostVisibility(), Display.DEFAULT_DISPLAY,
+                            mAttachInfo.mContentInsets, mInputChannel);
                 } catch (RemoteException e) {
                     mAdded = false;
                     mView = null;
