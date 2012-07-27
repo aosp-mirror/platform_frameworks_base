@@ -2421,7 +2421,7 @@ status_t OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count
     return DrawGlInfo::kStatusDrew;
 }
 
-status_t OpenGLRenderer::drawGeneralText(const char* text, int bytesCount, int count,
+status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
         float x, float y, const float* positions, SkPaint* paint, float length) {
     if (text == NULL || count == 0 || mSnapshot->isIgnored() ||
             (paint->getAlpha() * mSnapshot->alpha == 0 && paint->getXfermode() == NULL)) {
@@ -2455,7 +2455,7 @@ status_t OpenGLRenderer::drawGeneralText(const char* text, int bytesCount, int c
     }
 
 #if DEBUG_GLYPHS
-    ALOGD("OpenGLRenderer drawGeneralText() with FontID=%d",
+    ALOGD("OpenGLRenderer drawText() with FontID=%d",
             SkTypeface::UniqueID(paint->getTypeface()));
 #endif
 
