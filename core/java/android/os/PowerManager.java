@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.content.Context;
 import android.util.Log;
 
 /**
@@ -42,8 +43,8 @@ import android.util.Log;
  * wl.release();
  * }
  * </p><p>
- * The following flags are defined, with varying effects on system power.
- * <i>These flags are mutually exclusive - you may only specify one of them.</i>
+ * The following wake lock levels are defined, with varying effects on system power.
+ * <i>These levels are mutually exclusive - you may only specify one of them.</i>
  *
  * <table border="2" width="85%" align="center" frame="hsides" rules="rows">
  *     <thead>
@@ -177,7 +178,7 @@ public final class PowerManager {
     /**
      * Wake lock level: Turns the screen off when the proximity sensor activates.
      * <p>
-     * Since not all devices have proximity sensors, use {@link #getSupportedWakeLockFlags}
+     * Since not all devices have proximity sensors, use {@link #isWakeLockLevelSupported}
      * to determine whether this wake lock level is supported.
      * </p>
      *
@@ -227,28 +228,23 @@ public final class PowerManager {
     public static final int WAIT_FOR_PROXIMITY_NEGATIVE = 1;
 
     /**
-     * Brightness value to use when battery is low.
-     * @hide
-     */
-    public static final int BRIGHTNESS_LOW_BATTERY = 10;
-
-    /**
      * Brightness value for fully on.
      * @hide
      */
     public static final int BRIGHTNESS_ON = 255;
 
     /**
-     * Brightness value for dim backlight.
-     * @hide
-     */
-    public static final int BRIGHTNESS_DIM = 20;
-
-    /**
      * Brightness value for fully off.
      * @hide
      */
     public static final int BRIGHTNESS_OFF = 0;
+
+    /**
+     * A nominal default brightness value.
+     * Use {@link #getDefaultScreenBrightnessSetting()} instead.
+     * @hide
+     */
+    private static final int BRIGHTNESS_DEFAULT = 102;
 
     // Note: Be sure to update android.os.BatteryStats and PowerManager.h
     // if adding or modifying user activity event constants.
@@ -271,15 +267,79 @@ public final class PowerManager {
      */
     public static final int USER_ACTIVITY_EVENT_TOUCH = 2;
 
+    /**
+     * User activity flag: Do not restart the user activity timeout or brighten
+     * the display in response to user activity if it is already dimmed.
+     * @hide
+     */
+    public static final int USER_ACTIVITY_FLAG_NO_CHANGE_LIGHTS = 1 << 0;
+
+    /**
+     * Special wake lock tag used for the wake lock in the Window Manager that handles the
+     * {@link android.view.WindowManager.LayoutParams#FLAG_KEEP_SCREEN_ON} flag.
+     * @hide
+     */
+    public static final String KEEP_SCREEN_ON_FLAG_TAG = "KEEP_SCREEN_ON_FLAG";
+
+    /**
+     * Go to sleep reason code: Going to sleep due by user request.
+     * @hide
+     */
+    public static final int GO_TO_SLEEP_REASON_USER = 0;
+
+    /**
+     * Go to sleep reason code: Going to sleep due by request of the
+     * device administration policy.
+     * @hide
+     */
+    public static final int GO_TO_SLEEP_REASON_DEVICE_ADMIN = 1;
+
+    /**
+     * Go to sleep reason code: Going to sleep due to a screen timeout.
+     * @hide
+     */
+    public static final int GO_TO_SLEEP_REASON_TIMEOUT = 2;
+
+    final Context mContext;
     final IPowerManager mService;
     final Handler mHandler;
 
     /**
      * {@hide}
      */
-    public PowerManager(IPowerManager service, Handler handler) {
+    public PowerManager(Context context, IPowerManager service, Handler handler) {
+        mContext = context;
         mService = service;
         mHandler = handler;
+    }
+
+    /**
+     * Gets the minimum supported screen brightness setting.
+     * The screen may be allowed to become dimmer than this value but
+     * this is the minimum value that can be set by the user.
+     * @hide
+     */
+    public int getMinimumScreenBrightnessSetting() {
+        return mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_screenBrightnessDim);
+    }
+
+    /**
+     * Gets the maximum supported screen brightness setting.
+     * The screen may be allowed to become dimmer than this value but
+     * this is the maximum value that can be set by the user.
+     * @hide
+     */
+    public int getMaximumScreenBrightnessSetting() {
+        return BRIGHTNESS_ON;
+    }
+
+    /**
+     * Gets the default screen brightness setting.
+     * @hide
+     */
+    public int getDefaultScreenBrightnessSetting() {
+        return BRIGHTNESS_DEFAULT;
     }
 
     /**
@@ -360,8 +420,10 @@ public final class PowerManager {
     /**
      * Notifies the power manager that user activity happened.
      * <p>
-     * Turns the device from whatever state it's in to full on, and resets
-     * the auto-off timer.
+     * Resets the auto-off timer and brightens the screen if the device
+     * is not asleep.  This is what happens normally when a key or the touch
+     * screen is pressed or when some other user activity occurs.
+     * This method does not wake up the device if it has been put to sleep.
      * </p><p>
      * Requires the {@link android.Manifest.permission#DEVICE_POWER} permission.
      * </p>
@@ -375,10 +437,14 @@ public final class PowerManager {
      * We want the device to stay on while the button is down, but we're about
      * to turn off the screen so we don't want the keyboard backlight to turn on again.
      * Otherwise the lights flash on and then off and it looks weird.
+     *
+     * @see #wakeUp
+     * @see #goToSleep
      */
     public void userActivity(long when, boolean noChangeLights) {
         try {
-            mService.userActivity(when, noChangeLights);
+            mService.userActivity(when, USER_ACTIVITY_EVENT_OTHER,
+                    noChangeLights ? USER_ACTIVITY_FLAG_NO_CHANGE_LIGHTS : 0);
         } catch (RemoteException e) {
         }
     }
@@ -386,8 +452,8 @@ public final class PowerManager {
    /**
      * Forces the device to go to sleep.
      * <p>
-     * Overrides all the wake locks that are held.  This is what happen when the power
-     * key is pressed to turn off the screen.
+     * Overrides all the wake locks that are held.
+     * This is what happens when the power key is pressed to turn off the screen.
      * </p><p>
      * Requires the {@link android.Manifest.permission#DEVICE_POWER} permission.
      * </p>
@@ -396,10 +462,37 @@ public final class PowerManager {
      * {@link SystemClock#uptimeMillis()} time base.  This timestamp is used to correctly
      * order the user activity with other power management functions.  It should be set
      * to the timestamp of the input event that caused the request to go to sleep.
+     *
+     * @see #userActivity
+     * @see #wakeUp
      */
     public void goToSleep(long time) {
         try {
-            mService.goToSleep(time);
+            mService.goToSleep(time, GO_TO_SLEEP_REASON_USER);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Forces the device to wake up from sleep.
+     * <p>
+     * If the device is currently asleep, wakes it up, otherwise does nothing.
+     * This is what happens when the power key is pressed to turn on the screen.
+     * </p><p>
+     * Requires the {@link android.Manifest.permission#DEVICE_POWER} permission.
+     * </p>
+     *
+     * @param time The time when the request to wake up was issued, in the
+     * {@link SystemClock#uptimeMillis()} time base.  This timestamp is used to correctly
+     * order the user activity with other power management functions.  It should be set
+     * to the timestamp of the input event that caused the request to wake up.
+     *
+     * @see #userActivity
+     * @see #goToSleep
+     */
+    public void wakeUp(long time) {
+        try {
+            mService.wakeUp(time);
         } catch (RemoteException e) {
         }
     }
@@ -416,34 +509,24 @@ public final class PowerManager {
      */
     public void setBacklightBrightness(int brightness) {
         try {
-            mService.setBacklightBrightness(brightness);
+            mService.setTemporaryScreenBrightnessSettingOverride(brightness);
         } catch (RemoteException e) {
         }
     }
 
    /**
-     * Returns the set of wake lock levels and flags for {@link #newWakeLock}
-     * that are supported on the device.
-     * <p>
-     * For example, to test to see if the {@link #PROXIMITY_SCREEN_OFF_WAKE_LOCK}
-     * is supported:
-     * {@samplecode
-     * PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-     * int supportedFlags = pm.getSupportedWakeLockFlags();
-     * boolean proximitySupported = ((supportedFlags & PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK)
-     *         == PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK);
-     * }
-     * </p>
+     * Returns true if the specified wake lock level is supported.
      *
-     * @return The set of supported WakeLock flags.
+     * @param level The wake lock level to check.
+     * @return True if the specified wake lock level is supported.
      *
      * {@hide}
      */
-    public int getSupportedWakeLockFlags() {
+    public boolean isWakeLockLevelSupported(int level) {
         try {
-            return mService.getSupportedWakeLockFlags();
+            return mService.isWakeLockLevelSupported(level);
         } catch (RemoteException e) {
-            return 0;
+            return false;
         }
     }
 
@@ -593,7 +676,7 @@ public final class PowerManager {
                 // been explicitly released by the keyguard.
                 mHandler.removeCallbacks(mReleaser);
                 try {
-                    mService.acquireWakeLock(mFlags, mToken, mTag, mWorkSource);
+                    mService.acquireWakeLock(mToken, mFlags, mTag, mWorkSource);
                 } catch (RemoteException e) {
                 }
                 mHeld = true;

@@ -33,7 +33,6 @@ import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Handler;
-import android.os.LocalPowerManager;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
@@ -156,10 +155,6 @@ public class KeyguardViewMediator implements KeyguardViewCallback {
     // true because the first lock (on boot) should be silent.
     private boolean mSuppressNextLockSound = true;
 
-
-    /** Low level access to the power manager for enableUserActivity.  Having this
-     * requires that we run in the system process.  */
-    LocalPowerManager mRealPowerManager;
 
     /** High level access to the power manager for WakeLocks */
     private PowerManager mPM;
@@ -358,11 +353,9 @@ public class KeyguardViewMediator implements KeyguardViewCallback {
 
     };
 
-    public KeyguardViewMediator(Context context, PhoneWindowManager callback,
-            LocalPowerManager powerManager) {
+    public KeyguardViewMediator(Context context, PhoneWindowManager callback) {
         mContext = context;
         mCallback = callback;
-        mRealPowerManager = powerManager;
         mPM = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mWakeLock = mPM.newWakeLock(
                 PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "keyguard");
@@ -1032,7 +1025,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback {
         if (DEBUG) Log.d(TAG, "handleKeyguardDone");
         handleHide();
         if (wakeup) {
-            mPM.userActivity(SystemClock.uptimeMillis(), true);
+            mPM.wakeUp(SystemClock.uptimeMillis());
         }
         mWakeLock.release();
         mContext.sendBroadcast(mUserPresentIntent);
@@ -1165,7 +1158,8 @@ public class KeyguardViewMediator implements KeyguardViewCallback {
         // disable user activity if we are shown and not hidden
         if (DEBUG) Log.d(TAG, "adjustUserActivityLocked mShowing: " + mShowing + " mHidden: " + mHidden);
         boolean enabled = !mShowing || mHidden;
-        mRealPowerManager.enableUserActivity(enabled);
+        // FIXME: Replace this with a new timeout control mechanism.
+        //mRealPowerManager.enableUserActivity(enabled);
         if (!enabled && mScreenOn) {
             // reinstate our short screen timeout policy
             pokeWakelock();

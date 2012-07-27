@@ -16269,6 +16269,7 @@ package android.os {
     method public android.os.PowerManager.WakeLock newWakeLock(int, java.lang.String);
     method public void reboot(java.lang.String);
     method public void userActivity(long, boolean);
+    method public void wakeUp(long);
     field public static final int ACQUIRE_CAUSES_WAKEUP = 268435456; // 0x10000000
     field public static final deprecated int FULL_WAKE_LOCK = 26; // 0x1a
     field public static final int ON_AFTER_RELEASE = 536870912; // 0x20000000
@@ -18759,7 +18760,7 @@ package android.provider {
     field public static final android.net.Uri DEFAULT_NOTIFICATION_URI;
     field public static final android.net.Uri DEFAULT_RINGTONE_URI;
     field public static final deprecated java.lang.String DEVICE_PROVISIONED = "device_provisioned";
-    field public static final java.lang.String DIM_SCREEN = "dim_screen";
+    field public static final deprecated java.lang.String DIM_SCREEN = "dim_screen";
     field public static final java.lang.String DTMF_TONE_WHEN_DIALING = "dtmf_tone";
     field public static final java.lang.String END_BUTTON_BEHAVIOR = "end_button_behavior";
     field public static final java.lang.String FONT_SCALE = "font_scale";
