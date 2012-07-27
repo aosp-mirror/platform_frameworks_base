@@ -14,50 +14,49 @@
  * limitations under the License.
  */
 
-rs_allocation in_alloc;
-rs_sampler sampler;
-
-static float2 center, dimensions;
 static float2 scale;
-static float alpha;
-static float radius2;
-static float factor;
+static float2 center, dimensions;
+static float range, inv_max_dist, shade, slope;
 
-void init_filter(uint32_t dim_x, uint32_t dim_y, float focus_x, float focus_y, float k) {
-    center.x = focus_x;
-    center.y = focus_y;
+void init_vignette(uint32_t dim_x, uint32_t dim_y, float center_x, float center_y,
+        float desired_scale, float desired_shade, float desired_slope) {
+
+    center.x = center_x;
+    center.y = center_y;
     dimensions.x = (float)dim_x;
     dimensions.y = (float)dim_y;
 
-    alpha = k * 2.0 + 0.75;
-    float bound2 = 0.25;
+    float max_dist = 0.5;
     if (dim_x > dim_y) {
         scale.x = 1.0;
         scale.y = dimensions.y / dimensions.x;
-        bound2 *= (scale.y*scale.y + 1);
+        max_dist *= sqrt(scale.y*scale.y + 1);
     } else {
         scale.x = dimensions.x / dimensions.y;
         scale.y = 1.0;
-        bound2 *= (scale.x*scale.x + 1);
+        max_dist *= sqrt(scale.x*scale.x + 1);
     }
-    const float bound = sqrt(bound2);
-    const float radius = 1.15 * bound;
-    radius2 = radius*radius;
-    const float max_radian = 0.5f * M_PI - atan(alpha / bound * sqrt(radius2 - bound2));
-    factor = bound / max_radian;
+    inv_max_dist = 1.0/max_dist;
+    // Range needs to be between 1.3 to 0.6. When scale is zero then range is
+    // 1.3 which means no vignette at all because the luminousity difference is
+    // less than 1/256.  Expect input scale to be between 0.0 and 1.0.
+    range = 1.3 - 0.7*sqrt(desired_scale);
+    shade = desired_shade;
+    slope = desired_slope;
 }
 
-void root(uchar4 *out, uint32_t x, uint32_t y) {
+void root(const uchar4 *in, uchar4 *out, uint32_t x, uint32_t y) {
     // Convert x and y to floating point coordinates with center as origin
+    const float4 fin = rsUnpackColor8888(*in);
     float2 coord;
     coord.x = (float)x / dimensions.x;
     coord.y = (float)y / dimensions.y;
     coord -= center;
     const float dist = length(scale * coord);
-    const float radian = M_PI_2 - atan((alpha * sqrt(radius2 - dist * dist)) / dist);
-    const float scalar = radian * factor / dist;
-    const float2 new_coord = coord * scalar + center;
-    const float4 fout = rsSample(in_alloc, sampler, new_coord);
+    const float lumen = shade / (1.0 + exp((dist * inv_max_dist - range) * slope)) + (1.0 - shade);
+    float4 fout;
+    fout.rgb = fin.rgb * lumen;
+    fout.w = fin.w;
     *out = rsPackColorTo8888(fout);
 }
 
