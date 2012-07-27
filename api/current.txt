@@ -28069,6 +28069,7 @@ package android.widget {
     method public void setHeight(int);
     method public void setHorizontalOffset(int);
     method public void setInputMethodMode(int);
+    method public void setLayoutDirection(int);
     method public void setListSelector(android.graphics.drawable.Drawable);
     method public void setModal(boolean);
     method public void setOnDismissListener(android.widget.PopupWindow.OnDismissListener);
