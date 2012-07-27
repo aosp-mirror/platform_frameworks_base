@@ -105,7 +105,7 @@ public:
         DrawPoints,
         DrawTextOnPath,
         DrawPosText,
-        DrawGeneralText,
+        DrawText,
         ResetShader,
         SetupShader,
         ResetColorFilter,
@@ -603,7 +603,7 @@ public:
             float hOffset, float vOffset, SkPaint* paint);
     virtual status_t drawPosText(const char* text, int bytesCount, int count,
             const float* positions, SkPaint* paint);
-    virtual status_t drawGeneralText(const char* text, int bytesCount, int count,
+    virtual status_t drawText(const char* text, int bytesCount, int count,
             float x, float y, const float* positions, SkPaint* paint, float length);
 
     virtual void resetShader();

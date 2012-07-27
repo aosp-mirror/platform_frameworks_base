@@ -63,7 +63,7 @@ const char* DisplayList::OP_NAMES[] = {
     "DrawPoints",
     "DrawTextOnPath",
     "DrawPosText",
-    "DrawGeneralText",
+    "DrawText",
     "ResetShader",
     "SetupShader",
     "ResetColorFilter",
@@ -593,7 +593,7 @@ void DisplayList::output(OpenGLRenderer& renderer, uint32_t level) {
                         text.text(), text.length(), count, paint);
             }
             break;
-            case DrawGeneralText: {
+            case DrawText: {
                 getText(&text);
                 int count = getInt();
                 int positionsCount = 0;
@@ -1221,7 +1221,7 @@ status_t DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flag
                         positions, paint);
             }
             break;
-            case DrawGeneralText: {
+            case DrawText: {
                 getText(&text);
                 int32_t count = getInt();
                 float x = getFloat();
@@ -1232,7 +1232,7 @@ status_t DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flag
                 float length = getFloat();
                 DISPLAY_LIST_LOGD("%s%s %s, %d, %d, %.2f, %.2f, %p, %.2f", (char*) indent,
                         OP_NAMES[op], text.text(), text.length(), count, x, y, paint, length);
-                drawGlStatus |= renderer.drawGeneralText(text.text(), text.length(), count,
+                drawGlStatus |= renderer.drawText(text.text(), text.length(), count,
                         x, y, positions, paint, length);
             }
             break;
@@ -1712,7 +1712,7 @@ status_t DisplayListRenderer::drawPosText(const char* text, int bytesCount, int 
     return DrawGlInfo::kStatusDone;
 }
 
-status_t DisplayListRenderer::drawGeneralText(const char* text, int bytesCount, int count,
+status_t DisplayListRenderer::drawText(const char* text, int bytesCount, int count,
         float x, float y, const float* positions, SkPaint* paint, float length) {
     if (!text || count <= 0) return DrawGlInfo::kStatusDone;
 
@@ -1733,7 +1733,7 @@ status_t DisplayListRenderer::drawGeneralText(const char* text, int bytesCount, 
         reject = quickReject(x, y + metrics.fTop, x + length, y + metrics.fBottom);
     }
 
-    uint32_t* location = addOp(DisplayList::DrawGeneralText, reject);
+    uint32_t* location = addOp(DisplayList::DrawText, reject);
     addText(text, bytesCount);
     addInt(count);
     addFloat(x);
