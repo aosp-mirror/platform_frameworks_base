@@ -112,7 +112,8 @@ class Watermark {
 
         try {
             mSurface = new Surface(session, 0,
-                    "WatermarkSurface", -1, 1, 1, PixelFormat.TRANSLUCENT, 0);
+                    "WatermarkSurface", Display.DEFAULT_DISPLAY,
+                    1, 1, PixelFormat.TRANSLUCENT, 0);
             mSurface.setLayer(WindowManagerService.TYPE_LAYER_MULTIPLIER*100);
             mSurface.setPosition(0, 0);
             mSurface.show();

@@ -39,7 +39,8 @@ class StrictModeFlash {
 
     public StrictModeFlash(Display display, SurfaceSession session) {
         try {
-            mSurface = new Surface(session, 0, "StrictModeFlash", -1, 1, 1, PixelFormat.TRANSLUCENT, 0);
+            mSurface = new Surface(session, 0, "StrictModeFlash", Display.DEFAULT_DISPLAY,
+                1, 1, PixelFormat.TRANSLUCENT, 0);
         } catch (Surface.OutOfResourcesException e) {
             return;
         }

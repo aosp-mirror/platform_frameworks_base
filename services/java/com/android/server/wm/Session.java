@@ -33,6 +33,7 @@ import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Slog;
+import android.view.Display;
 import android.view.IWindow;
 import android.view.IWindowSession;
 import android.view.InputChannel;
@@ -134,15 +135,33 @@ final class Session extends IWindowSession.Stub
         }
     }
 
+    @Override
     public int add(IWindow window, int seq, WindowManager.LayoutParams attrs,
             int viewVisibility, Rect outContentInsets, InputChannel outInputChannel) {
-        return mService.addWindow(this, window, seq, attrs, viewVisibility, outContentInsets,
-                outInputChannel);
+        return addToDisplay(window, seq, attrs, viewVisibility, Display.DEFAULT_DISPLAY,
+                outContentInsets, outInputChannel);
     }
-    
+
+    @Override
+    public int addToDisplay(IWindow window, int seq, WindowManager.LayoutParams attrs,
+            int viewVisibility, int displayId, Rect outContentInsets,
+            InputChannel outInputChannel) {
+        return mService.addWindow(this, window, seq, attrs, viewVisibility, displayId,
+                outContentInsets, outInputChannel);
+    }
+
+    @Override
     public int addWithoutInputChannel(IWindow window, int seq, WindowManager.LayoutParams attrs,
             int viewVisibility, Rect outContentInsets) {
-        return mService.addWindow(this, window, seq, attrs, viewVisibility, outContentInsets, null);
+        return addToDisplayWithoutInputChannel(window, seq, attrs, viewVisibility,
+                Display.DEFAULT_DISPLAY, outContentInsets);
+    }
+
+    @Override
+    public int addToDisplayWithoutInputChannel(IWindow window, int seq, WindowManager.LayoutParams attrs,
+            int viewVisibility, int displayId, Rect outContentInsets) {
+        return mService.addWindow(this, window, seq, attrs, viewVisibility, displayId,
+            outContentInsets, null);
     }
 
     public void remove(IWindow window) {

@@ -471,18 +471,18 @@ class WindowStateAnimator {
         private String mName = "Not named";
 
         public SurfaceTrace(SurfaceSession s,
-                       int pid, int display, int w, int h, int format, int flags) throws
+                       int pid, int displayId, int w, int h, int format, int flags) throws
                        OutOfResourcesException {
-            super(s, pid, display, w, h, format, flags);
+            super(s, pid, displayId, w, h, format, flags);
             mSize.set(w, h);
             Slog.v(SURFACE_TAG, "ctor: " + this + ". Called by "
                     + Debug.getCallers(3));
         }
 
         public SurfaceTrace(SurfaceSession s,
-                       int pid, String name, int display, int w, int h, int format, int flags)
+                       int pid, String name, int displayId, int w, int h, int format, int flags)
                    throws OutOfResourcesException {
-            super(s, pid, name, display, w, h, format, flags);
+            super(s, pid, name, displayId, w, h, format, flags);
             mName = name;
             mSize.set(w, h);
             Slog.v(SURFACE_TAG, "ctor: " + this + ". Called by "
@@ -646,12 +646,12 @@ class WindowStateAnimator {
                     mSurface = new SurfaceTrace(
                             mSession.mSurfaceSession, mSession.mPid,
                             attrs.getTitle().toString(),
-                            0, w, h, format, flags);
+                            mWin.mDisplayId, w, h, format, flags);
                 } else {
                     mSurface = new Surface(
                         mSession.mSurfaceSession, mSession.mPid,
                         attrs.getTitle().toString(),
-                        0, w, h, format, flags);
+                        mWin.mDisplayId, w, h, format, flags);
                 }
                 mWin.mHasSurface = true;
                 if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) Slog.i(TAG,
