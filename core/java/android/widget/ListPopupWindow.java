@@ -1121,6 +1121,12 @@ public class ListPopupWindow {
         return listContent + otherHeights;
     }
 
+    public void setLayoutDirection(int resolvedLayoutDirection) {
+        if (mDropDownList != null) {
+            mDropDownList.setLayoutDirection(resolvedLayoutDirection);
+        }
+    }
+
     /**
      * <p>Wrapper class for a ListView. This wrapper can hijack the focus to
      * make sure the list uses the appropriate drawables and states when

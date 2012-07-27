@@ -326,7 +326,6 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
                         int oldLeft, int oldTop, int oldRight, int oldBottom) {
                     adjustDropDownSizeAndPosition();
                 }
-
             });
         }
 
@@ -1285,15 +1284,22 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
             Resources res = getContext().getResources();
             int anchorPadding = mSearchPlate.getPaddingLeft();
             Rect dropDownPadding = new Rect();
+            final boolean isLayoutRtl = isLayoutRtl();
             int iconOffset = mIconifiedByDefault
                     ? res.getDimensionPixelSize(R.dimen.dropdownitem_icon_width)
                     + res.getDimensionPixelSize(R.dimen.dropdownitem_text_padding_left)
                     : 0;
             mQueryTextView.getDropDownBackground().getPadding(dropDownPadding);
-            mQueryTextView.setDropDownHorizontalOffset(-(dropDownPadding.left + iconOffset)
-                    + anchorPadding);
-            mQueryTextView.setDropDownWidth(mDropDownAnchor.getWidth() + dropDownPadding.left
-                    + dropDownPadding.right + iconOffset - (anchorPadding));
+            int offset;
+            if (isLayoutRtl) {
+                offset = - dropDownPadding.left;
+            } else {
+                offset = anchorPadding - (dropDownPadding.left + iconOffset);
+            }
+            mQueryTextView.setDropDownHorizontalOffset(offset);
+            final int width = mDropDownAnchor.getWidth() + dropDownPadding.left
+                    + dropDownPadding.right + iconOffset - anchorPadding;
+            mQueryTextView.setDropDownWidth(width);
         }
     }
 
@@ -1346,6 +1352,11 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
                 Log.d(LOG_TAG, "onNothingSelected()");
         }
     };
+
+    @Override
+    public void onResolvedLayoutDirectionChanged() {
+        mQueryTextView.setLayoutDirection(getResolvedLayoutDirection());
+    }
 
     /**
      * Query rewriting.
