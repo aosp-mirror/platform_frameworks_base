@@ -45,7 +45,24 @@ public final class BridgeWindowSession implements IWindowSession {
     }
 
     @Override
-    public int addWithoutInputChannel(IWindow arg0, int seq, LayoutParams arg1, int arg2, Rect arg3)
+    public int addToDisplay(IWindow arg0, int seq, LayoutParams arg1, int arg2, int displayId,
+                            Rect arg3, InputChannel outInputchannel)
+            throws RemoteException {
+        // pass for now.
+        return 0;
+    }
+
+    @Override
+    public int addWithoutInputChannel(IWindow arg0, int seq, LayoutParams arg1, int arg2,
+                                      Rect arg3)
+            throws RemoteException {
+        // pass for now.
+        return 0;
+    }
+
+    @Override
+    public int addToDisplayWithoutInputChannel(IWindow arg0, int seq, LayoutParams arg1, int arg2,
+                                               int displayId, Rect arg3)
             throws RemoteException {
         // pass for now.
         return 0;
