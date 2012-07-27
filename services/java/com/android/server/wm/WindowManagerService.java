@@ -2153,7 +2153,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public int addWindow(Session session, IWindow client, int seq,
-            WindowManager.LayoutParams attrs, int viewVisibility,
+            WindowManager.LayoutParams attrs, int viewVisibility, int displayId,
             Rect outContentInsets, InputChannel outInputChannel) {
         int res = mPolicy.checkAddPermission(attrs);
         if (res != WindowManagerImpl.ADD_OKAY) {
@@ -2255,7 +2255,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             win = new WindowState(this, session, client, token,
-                    attachedWindow, seq, attrs, viewVisibility);
+                    attachedWindow, seq, attrs, viewVisibility, displayId);
             if (win.mDeathRecipient == null) {
                 // Client has apparently died, so there is no reason to
                 // continue.
@@ -6674,7 +6674,8 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized (mWindowMap) {
                 try {
                     if (mDragState == null) {
-                        Surface surface = new Surface(session, callerPid, "drag surface", 0,
+                        Surface surface = new Surface(session, callerPid, "drag surface",
+                                Display.DEFAULT_DISPLAY,
                                 width, height, PixelFormat.TRANSLUCENT, Surface.HIDDEN);
                         if (SHOW_TRANSACTIONS) Slog.i(TAG, "  DRAG "
                                 + surface + ": CREATE");
@@ -8230,7 +8231,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         mNextAppTransitionThumbnail.getHeight());
                 try {
                     Surface surface = new Surface(mFxSession, Process.myPid(),
-                            "thumbnail anim", 0, dirty.width(), dirty.height(),
+                            "thumbnail anim", Display.DEFAULT_DISPLAY,
+                            dirty.width(), dirty.height(),
                             PixelFormat.TRANSLUCENT, Surface.HIDDEN);
                     topOpeningApp.mAppAnimator.thumbnail = surface;
                     if (SHOW_TRANSACTIONS) Slog.i(TAG, "  THUMBNAIL "

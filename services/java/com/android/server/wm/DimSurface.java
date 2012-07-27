@@ -30,18 +30,18 @@ class DimSurface {
     int mLayer = -1;
     int mLastDimWidth, mLastDimHeight;
 
-    DimSurface(SurfaceSession session) {
+    DimSurface(SurfaceSession session, final int displayId) {
         if (mDimSurface == null) {
             try {
                 if (WindowManagerService.DEBUG_SURFACE_TRACE) {
                     mDimSurface = new WindowStateAnimator.SurfaceTrace(session, 0,
                         "DimSurface",
-                        -1, 16, 16, PixelFormat.OPAQUE,
+                        displayId, 16, 16, PixelFormat.OPAQUE,
                         Surface.FX_SURFACE_DIM);
                 } else {
                     mDimSurface = new Surface(session, 0,
                         "DimSurface",
-                        -1, 16, 16, PixelFormat.OPAQUE,
+                        displayId, 16, 16, PixelFormat.OPAQUE,
                         Surface.FX_SURFACE_DIM);
                 }
                 if (WindowManagerService.SHOW_TRANSACTIONS ||

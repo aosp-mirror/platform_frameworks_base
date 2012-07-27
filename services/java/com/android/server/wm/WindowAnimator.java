@@ -16,6 +16,7 @@ import android.content.Context;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.Slog;
+import android.view.Display;
 import android.view.Surface;
 import android.view.WindowManagerPolicy;
 import android.view.animation.Animation;
@@ -121,8 +122,9 @@ public class WindowAnimator {
             }
         };
 
-        mWindowAnimationBackgroundSurface = new DimSurface(mService.mFxSession);
-        mDimAnimator = new DimAnimator(mService.mFxSession);
+        mWindowAnimationBackgroundSurface =
+                new DimSurface(mService.mFxSession, Display.DEFAULT_DISPLAY);
+        mDimAnimator = new DimAnimator(mService.mFxSession, Display.DEFAULT_DISPLAY);
     }
 
     /** Locked on mAnimToLayout */
