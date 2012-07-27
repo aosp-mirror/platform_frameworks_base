@@ -149,6 +149,12 @@ public class ImageProcessingActivity extends Activity
         case 8:
             mTest = new Fisheye(true);
             break;
+        case 9:
+            mTest = new Vignette(false);
+            break;
+        case 10:
+            mTest = new Vignette(true);
+            break;
         }
 
         mTest.createBaseTest(this, mBitmapIn);
@@ -161,7 +167,7 @@ public class ImageProcessingActivity extends Activity
     }
 
     void setupTests() {
-        mTestNames = new String[9];
+        mTestNames = new String[11];
         mTestNames[0] = "Levels Vec3 Relaxed";
         mTestNames[1] = "Levels Vec4 Relaxed";
         mTestNames[2] = "Levels Vec3 Full";
@@ -171,6 +177,8 @@ public class ImageProcessingActivity extends Activity
         mTestNames[6] = "Grain";
         mTestNames[7] = "Fisheye Full";
         mTestNames[8] = "Fisheye Relaxed";
+        mTestNames[9] = "Vignette Full";
+        mTestNames[10] = "Vignette Relaxed";
         mTestSpinner.setAdapter(new ArrayAdapter<String>(
             this, R.layout.spinner_layout, mTestNames));
     }
