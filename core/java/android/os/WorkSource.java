@@ -76,6 +76,20 @@ public class WorkSource implements Parcelable {
         mNum = 0;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof WorkSource && !diff((WorkSource)o);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 0;
+        for (int i = 0; i < mNum; i++) {
+            result = ((result << 4) | (result >>> 28)) ^ mUids[i];
+        }
+        return result;
+    }
+
     /**
      * Compare this WorkSource with another.
      * @param other The WorkSource to compare against.
