@@ -903,7 +903,7 @@ void NativeInputManager::handleInterceptActions(jint wmActions, nsecs_t when,
 #if DEBUG_INPUT_DISPATCHER_POLICY
         ALOGD("handleInterceptActions: Poking user activity.");
 #endif
-        android_server_PowerManagerService_userActivity(when, POWER_MANAGER_BUTTON_EVENT);
+        android_server_PowerManagerService_userActivity(when, USER_ACTIVITY_EVENT_BUTTON);
     }
 
     if (wmActions & WM_ACTION_PASS_TO_USER) {

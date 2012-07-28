@@ -18,12 +18,6 @@ package android.os;
 
 /** @hide */
 public interface LocalPowerManager {
-    // Note: be sure to update BatteryStats if adding or modifying event constants.
-    
-    public static final int OTHER_EVENT = 0;
-    public static final int BUTTON_EVENT = 1;
-    public static final int TOUCH_EVENT = 2;
-
     public static final int POKE_LOCK_IGNORE_TOUCH_EVENTS = 0x1;
 
     public static final int POKE_LOCK_SHORT_TIMEOUT = 0x2;
