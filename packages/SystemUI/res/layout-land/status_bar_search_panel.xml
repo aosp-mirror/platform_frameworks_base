@@ -44,7 +44,7 @@
                 android:layout_width="@dimen/navbar_search_panel_height"
                 android:layout_height="match_parent"
                 android:layout_alignParentBottom="true"
-                android:gravity="left"
+                android:gravity="start"
 
                 prvandroid:targetDrawables="@array/navbar_search_targets"
                 prvandroid:targetDescriptions="@array/navbar_search_target_descriptions"

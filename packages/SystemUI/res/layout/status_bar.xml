@@ -66,7 +66,7 @@
             <com.android.systemui.statusbar.phone.IconMerger android:id="@+id/notificationIcons"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"/>  
         </LinearLayout>
@@ -110,7 +110,7 @@
                 android:layout_height="match_parent"
                 android:singleLine="true"
                 android:paddingLeft="6dip"
-                android:gravity="center_vertical|left"
+                android:gravity="center_vertical|start"
                 />
         </LinearLayout>
     </LinearLayout>
@@ -124,7 +124,7 @@
         <ImageSwitcher android:id="@+id/tickerIcon"
             android:layout_width="@dimen/status_bar_icon_size"
             android:layout_height="@dimen/status_bar_icon_size"
-            android:layout_marginRight="4dip"
+            android:layout_marginEnd="4dip"
             >
             <com.android.systemui.statusbar.AnimatedImageView
                 android:layout_width="@dimen/status_bar_icon_size"

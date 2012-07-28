@@ -30,7 +30,7 @@
         android:textSize="20dp"
         android:textColor="@android:color/holo_blue_light"
         android:text="@string/status_bar_no_recent_apps"
-        android:gravity="left"
-        android:layout_gravity="bottom|left"
+        android:gravity="start"
+        android:layout_gravity="bottom|start"
     />
 </FrameLayout>

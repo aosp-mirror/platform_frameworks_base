@@ -25,7 +25,7 @@
         android:layout_height="@*android:dimen/system_bar_height"
         android:layout_width="match_parent"
         android:background="@drawable/system_bar_ticker_background"
-        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
         android:layout_alignParentBottom="true"
         android:clickable="false"
         />
@@ -36,7 +36,7 @@
         android:layout_height="@android:dimen/notification_large_icon_width"
         android:scaleType="center"
         android:visibility="gone"
-        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
         android:layout_alignParentBottom="true"
         />
 
@@ -45,7 +45,7 @@
         android:layout_weight="1"
         android:layout_height="@*android:dimen/system_bar_height"
         android:layout_width="match_parent"
-        android:layout_toRightOf="@id/large_icon"
+        android:layout_toEndOf="@id/large_icon"
         android:layout_alignParentBottom="true"
         android:layout_alignWithParentIfMissing="true"
         />

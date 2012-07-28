@@ -27,7 +27,7 @@
     android:background="#DD000000"
     android:focusable="true"
     android:orientation="horizontal" 
-    android:gravity="top|left"
+    android:gravity="top|start"
     >
 
     <ImageView

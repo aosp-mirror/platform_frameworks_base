@@ -30,7 +30,7 @@
         android:layout_height="wrap_content"
         android:textSize="18sp"
         android:textColor="#ffffffff"
-        android:gravity="left"
+        android:gravity="start"
         android:text="@string/battery_low_subtitle"
         />
     
@@ -39,7 +39,7 @@
         android:layout_height="wrap_content"
         android:textSize="18sp"
         android:textColor="#ffffffff"
-        android:gravity="left"
+        android:gravity="start"
         android:paddingBottom="16dp"
         />
 

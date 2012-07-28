@@ -37,13 +37,13 @@
             android:id="@+id/recents_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginRight="0dp"
+            android:layout_marginEnd="0dp"
             android:divider="@null"
             android:stackFromBottom="true"
             android:fadingEdge="vertical"
             android:scrollbars="none"
             android:fadingEdgeLength="@dimen/status_bar_recents_scroll_fading_edge_length"
-            android:layout_gravity="bottom|left"
+            android:layout_gravity="bottom|start"
             android:clipToPadding="false"
             android:clipChildren="false">
 

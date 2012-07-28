@@ -54,6 +54,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class NetworkController extends BroadcastReceiver {
     // debug
@@ -132,6 +133,9 @@ public class NetworkController extends BroadcastReceiver {
 
     private boolean mAirplaneMode = false;
     private boolean mLastAirplaneMode = true;
+
+    private Locale mLocale = null;
+    private Locale mLastLocale = null;
 
     // our ui
     Context mContext;
@@ -251,6 +255,8 @@ public class NetworkController extends BroadcastReceiver {
 
         // yuck
         mBatteryStats = BatteryStatsService.getService();
+
+        mLastLocale = mContext.getResources().getConfiguration().locale;
     }
 
     public boolean hasMobileDataFeature() {
@@ -398,8 +404,10 @@ public class NetworkController extends BroadcastReceiver {
             updateConnectivity(intent);
             refreshViews();
         } else if (action.equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
+            refreshLocale();
             refreshViews();
         } else if (action.equals(Intent.ACTION_AIRPLANE_MODE_CHANGED)) {
+            refreshLocale();
             updateAirplaneMode();
             refreshViews();
         } else if (action.equals(WimaxManagerConstants.NET_4G_STATE_CHANGED_ACTION) ||
@@ -519,6 +527,10 @@ public class NetworkController extends BroadcastReceiver {
     private void updateAirplaneMode() {
         mAirplaneMode = (Settings.Global.getInt(mContext.getContentResolver(),
             Settings.Global.AIRPLANE_MODE_ON, 0) == 1);
+    }
+
+    private void refreshLocale() {
+        mLocale = mContext.getResources().getConfiguration().locale;
     }
 
     private final void updateTelephonySignalStrength() {
@@ -1188,7 +1200,8 @@ public class NetworkController extends BroadcastReceiver {
          || mLastWifiIconId                 != mWifiIconId
          || mLastWimaxIconId                != mWimaxIconId
          || mLastDataTypeIconId             != mDataTypeIconId
-         || mLastAirplaneMode               != mAirplaneMode)
+         || mLastAirplaneMode               != mAirplaneMode
+         || mLastLocale                     != mLocale)
         {
             // NB: the mLast*s will be updated later
             for (SignalCluster cluster : mSignalClusters) {
@@ -1201,6 +1214,10 @@ public class NetworkController extends BroadcastReceiver {
 
         if (mLastAirplaneMode != mAirplaneMode) {
             mLastAirplaneMode = mAirplaneMode;
+        }
+
+        if (mLastLocale != mLocale) {
+            mLastLocale = mLocale;
         }
 
         // the phone icon on phones

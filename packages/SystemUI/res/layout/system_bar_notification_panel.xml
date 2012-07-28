@@ -21,7 +21,7 @@
     android:id="@+id/content_parent"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
-    android:gravity="right"
+    android:gravity="end"
     >
 
     <!-- lift the panel up off the status bar while leaving a touchable are -->
@@ -29,7 +29,7 @@
         android:id="@+id/system_bar_notification_panel_bottom_space"
         android:layout_height="56dp"
         android:layout_width="478dp"
-        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
         />
 
@@ -39,7 +39,7 @@
         android:layout_height="wrap_content"
         android:layout_width="478dp"
         android:orientation="vertical"
-        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
         android:layout_above="@id/system_bar_notification_panel_bottom_space"
         android:paddingBottom="8dp"
         >
@@ -48,7 +48,7 @@
             android:layout_width="match_parent"
             android:layout_height="130dp"
             android:layout_above="@id/content_frame"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
             android:layout_weight="0"
             />
 

@@ -121,6 +121,12 @@ public class SizeAdaptiveLayout extends ViewGroup {
         mTransitionAnimation.addListener(mAnimatorListener);
     }
 
+    @Override
+    public void setLayoutDirection(int layoutDirection) {
+        super.setLayoutDirection(layoutDirection);
+        mModestyPanel.setLayoutDirection(layoutDirection);
+    }
+
     /**
      * Visible for testing
      * @hide
@@ -225,13 +231,11 @@ public class SizeAdaptiveLayout extends ViewGroup {
         if (unboundedView != null) {
             tallestView = unboundedView;
         }
-        if (heightMode == MeasureSpec.UNSPECIFIED) {
+        if (heightMode == MeasureSpec.UNSPECIFIED || heightSize > tallestViewSize) {
             return tallestView;
+        } else {
+            return smallestView;
         }
-        if (heightSize > tallestViewSize) {
-            return tallestView;
-        }
-        return smallestView;
     }
 
     @Override
@@ -242,6 +246,7 @@ public class SizeAdaptiveLayout extends ViewGroup {
                                                            View.MeasureSpec.EXACTLY);
         mActiveChild = selectActiveChild(measureSpec);
         mActiveChild.setVisibility(View.VISIBLE);
+        mActiveChild.setLayoutDirection(getLayoutDirection());
 
         if (mLastActive != mActiveChild && mLastActive != null) {
             if (DEBUG) Log.d(TAG, this + " changed children from: " + mLastActive +
@@ -272,10 +277,10 @@ public class SizeAdaptiveLayout extends ViewGroup {
         final int childWidth = mActiveChild.getMeasuredWidth();
         final int childHeight = mActiveChild.getMeasuredHeight();
         // TODO investigate setting LAYER_TYPE_HARDWARE on mLastActive
-        mActiveChild.layout(0, 0, 0 + childWidth, 0 + childHeight);
+        mActiveChild.layout(0, 0, childWidth, childHeight);
 
         if (DEBUG) Log.d(TAG, "got modesty offset of " + mModestyPanelTop);
-        mModestyPanel.layout(0, mModestyPanelTop, 0 + childWidth, mModestyPanelTop + childHeight);
+        mModestyPanel.layout(0, mModestyPanelTop, childWidth, mModestyPanelTop + childHeight);
     }
 
     @Override
