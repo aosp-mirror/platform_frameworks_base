@@ -1037,7 +1037,7 @@ public class PowerManagerService extends IPowerManager.Stub
                 mWakeLockState = mLocks.gatherState();
                 // goes in the middle to reduce flicker
                 if ((wl.flags & PowerManager.ON_AFTER_RELEASE) != 0) {
-                    userActivity(SystemClock.uptimeMillis(), -1, false, OTHER_EVENT, false, true);
+                    userActivity(SystemClock.uptimeMillis(), -1, false, PowerManager.USER_ACTIVITY_EVENT_OTHER, false, true);
                 }
                 setPowerState(mWakeLockState | mUserState);
             }
@@ -2467,7 +2467,7 @@ public class PowerManagerService extends IPowerManager.Stub
 
     public void userActivityWithForce(long time, boolean noChangeLights, boolean force) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
-        userActivity(time, -1, noChangeLights, OTHER_EVENT, force, false);
+        userActivity(time, -1, noChangeLights, PowerManager.USER_ACTIVITY_EVENT_OTHER, force, false);
     }
 
     public void userActivity(long time, boolean noChangeLights) {
@@ -2480,7 +2480,7 @@ public class PowerManagerService extends IPowerManager.Stub
             return;
         }
 
-        userActivity(time, -1, noChangeLights, OTHER_EVENT, false, false);
+        userActivity(time, -1, noChangeLights, PowerManager.USER_ACTIVITY_EVENT_OTHER, false, false);
     }
 
     public void userActivity(long time, boolean noChangeLights, int eventType) {
@@ -2498,13 +2498,13 @@ public class PowerManagerService extends IPowerManager.Stub
     public void clearUserActivityTimeout(long now, long timeout) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
         Slog.i(TAG, "clearUserActivity for " + timeout + "ms from now");
-        userActivity(now, timeout, false, OTHER_EVENT, false, false);
+        userActivity(now, timeout, false, PowerManager.USER_ACTIVITY_EVENT_OTHER, false, false);
     }
 
     private void userActivity(long time, long timeoutOverride, boolean noChangeLights,
             int eventType, boolean force, boolean ignoreIfScreenOff) {
 
-        if (((mPokey & POKE_LOCK_IGNORE_TOUCH_EVENTS) != 0) && (eventType == TOUCH_EVENT)) {
+        if (((mPokey & POKE_LOCK_IGNORE_TOUCH_EVENTS) != 0) && (eventType == PowerManager.USER_ACTIVITY_EVENT_TOUCH)) {
             if (false) {
                 Slog.d(TAG, "dropping touch mPokey=0x" + Integer.toHexString(mPokey));
             }
@@ -2541,7 +2541,7 @@ public class PowerManagerService extends IPowerManager.Stub
                 if ((mUserActivityAllowed && !mProximitySensorActive) || force) {
                     // Only turn on button backlights if a button was pressed
                     // and auto brightness is disabled
-                    if (eventType == BUTTON_EVENT && !mUseSoftwareAutoBrightness) {
+                    if (eventType == PowerManager.USER_ACTIVITY_EVENT_BUTTON && !mUseSoftwareAutoBrightness) {
                         mUserState = (mKeyboardVisible ? ALL_BRIGHT : SCREEN_BUTTON_BRIGHT);
                     } else {
                         // don't clear button/keyboard backlights when the screen is touched.
@@ -2869,7 +2869,7 @@ public class PowerManagerService extends IPowerManager.Stub
                             lightSensorChangedLocked(value, false);
                         }
                     }
-                    userActivity(SystemClock.uptimeMillis(), false, BUTTON_EVENT, true);
+                    userActivity(SystemClock.uptimeMillis(), false, PowerManager.USER_ACTIVITY_EVENT_BUTTON, true);
                 }
             }
         }
@@ -3086,7 +3086,7 @@ public class PowerManagerService extends IPowerManager.Stub
         Slog.d(TAG, "bootCompleted");
         synchronized (mLocks) {
             mBootCompleted = true;
-            userActivity(SystemClock.uptimeMillis(), false, BUTTON_EVENT, true);
+            userActivity(SystemClock.uptimeMillis(), false, PowerManager.USER_ACTIVITY_EVENT_BUTTON, true);
             updateWakeLockLocked();
             mLocks.notifyAll();
         }

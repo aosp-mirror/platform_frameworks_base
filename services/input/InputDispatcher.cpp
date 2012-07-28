@@ -1693,7 +1693,7 @@ String8 InputDispatcher::getApplicationWindowLabelLocked(
 }
 
 void InputDispatcher::pokeUserActivityLocked(const EventEntry* eventEntry) {
-    int32_t eventType = POWER_MANAGER_OTHER_EVENT;
+    int32_t eventType = USER_ACTIVITY_EVENT_OTHER;
     switch (eventEntry->type) {
     case EventEntry::TYPE_MOTION: {
         const MotionEntry* motionEntry = static_cast<const MotionEntry*>(eventEntry);
@@ -1702,7 +1702,7 @@ void InputDispatcher::pokeUserActivityLocked(const EventEntry* eventEntry) {
         }
 
         if (MotionEvent::isTouchEvent(motionEntry->source, motionEntry->action)) {
-            eventType = POWER_MANAGER_TOUCH_EVENT;
+            eventType = USER_ACTIVITY_EVENT_TOUCH;
         }
         break;
     }
@@ -1711,7 +1711,7 @@ void InputDispatcher::pokeUserActivityLocked(const EventEntry* eventEntry) {
         if (keyEntry->flags & AKEY_EVENT_FLAG_CANCELED) {
             return;
         }
-        eventType = POWER_MANAGER_BUTTON_EVENT;
+        eventType = USER_ACTIVITY_EVENT_BUTTON;
         break;
     }
     }

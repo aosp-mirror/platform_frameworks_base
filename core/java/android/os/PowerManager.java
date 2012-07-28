@@ -250,6 +250,27 @@ public final class PowerManager {
      */
     public static final int BRIGHTNESS_OFF = 0;
 
+    // Note: Be sure to update android.os.BatteryStats and PowerManager.h
+    // if adding or modifying user activity event constants.
+
+    /**
+     * User activity event type: Unspecified event type.
+     * @hide
+     */
+    public static final int USER_ACTIVITY_EVENT_OTHER = 0;
+
+    /**
+     * User activity event type: Button or key pressed or released.
+     * @hide
+     */
+    public static final int USER_ACTIVITY_EVENT_BUTTON = 1;
+
+    /**
+     * User activity event type: Touch down, move or up.
+     * @hide
+     */
+    public static final int USER_ACTIVITY_EVENT_TOUCH = 2;
+
     final IPowerManager mService;
     final Handler mHandler;
 

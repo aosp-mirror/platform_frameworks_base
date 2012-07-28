@@ -55,7 +55,7 @@ static Mutex gPowerManagerLock;
 static bool gScreenOn;
 static bool gScreenBright;
 
-static nsecs_t gLastEventTime[POWER_MANAGER_LAST_EVENT + 1];
+static nsecs_t gLastEventTime[USER_ACTIVITY_EVENT_LAST + 1];
 
 // Throttling interval for user activity calls.
 static const nsecs_t MIN_TIME_BETWEEN_USERACTIVITIES = 500 * 1000000L; // 500ms
@@ -92,7 +92,7 @@ void android_server_PowerManagerService_userActivity(nsecs_t eventTime, int32_t 
         // Throttle calls into user activity by event type.
         // We're a little conservative about argument checking here in case the caller
         // passes in bad data which could corrupt system state.
-        if (eventType >= 0 && eventType <= POWER_MANAGER_LAST_EVENT) {
+        if (eventType >= 0 && eventType <= USER_ACTIVITY_EVENT_LAST) {
             nsecs_t now = systemTime(SYSTEM_TIME_MONOTONIC);
             if (eventTime > now) {
                 eventTime = now;
@@ -262,7 +262,7 @@ int register_android_server_PowerManagerService(JNIEnv* env) {
             "userActivity", "(JZIZ)V");
 
     // Initialize
-    for (int i = 0; i < POWER_MANAGER_LAST_EVENT; i++) {
+    for (int i = 0; i <= USER_ACTIVITY_EVENT_LAST; i++) {
         gLastEventTime[i] = LLONG_MIN;
     }
     gScreenOn = true;
