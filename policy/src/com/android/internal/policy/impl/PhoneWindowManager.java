@@ -3021,11 +3021,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         KeyEvent.KEYCODE_POWER, mDockMode != Intent.EXTRA_DOCK_STATE_UNDOCKED);
             } else {
                 mPowerManager.userActivity(SystemClock.uptimeMillis(), false,
-                        LocalPowerManager.BUTTON_EVENT);
+                        PowerManager.USER_ACTIVITY_EVENT_BUTTON);
             }
         } else if (!mLidControlsSleep) {
             mPowerManager.userActivity(SystemClock.uptimeMillis(), false,
-                    LocalPowerManager.OTHER_EVENT);
+                    PowerManager.USER_ACTIVITY_EVENT_OTHER);
         }
     }
 
@@ -4319,7 +4319,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mPowerManager.isScreenOn()) {
             if (mKeyguardMediator != null && !mKeyguardMediator.isShowingAndNotHidden()) {
                 long curTime = SystemClock.uptimeMillis();
-                mPowerManager.userActivity(curTime, false, LocalPowerManager.OTHER_EVENT);
+                mPowerManager.userActivity(curTime, false, PowerManager.USER_ACTIVITY_EVENT_OTHER);
             }
 
             synchronized (mLock) {

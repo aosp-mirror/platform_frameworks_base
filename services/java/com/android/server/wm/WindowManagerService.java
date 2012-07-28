@@ -80,7 +80,6 @@ import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
-import android.os.LocalPowerManager;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
@@ -8952,7 +8951,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (mTurnOnScreen) {
             if (DEBUG_VISIBILITY) Slog.v(TAG, "Turning screen on after layout!");
             mPowerManager.userActivity(SystemClock.uptimeMillis(), false,
-                    LocalPowerManager.BUTTON_EVENT, true);
+                    PowerManager.USER_ACTIVITY_EVENT_BUTTON, true);
             mTurnOnScreen = false;
         }
 
