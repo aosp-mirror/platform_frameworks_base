@@ -277,13 +277,15 @@ public abstract class BatteryStats implements Parcelable {
         public abstract long getVideoTurnedOnTime(long batteryRealtime, int which);
 
         /**
-         * Note that these must match the constants in android.os.LocalPowerManager.
+         * Note that these must match the constants in android.os.PowerManager.
+         * Also, if the user activity types change, the BatteryStatsImpl.VERSION must
+         * also be bumped.
          */
         static final String[] USER_ACTIVITY_TYPES = {
-            "other", "cheek", "touch", "long_touch", "touch_up", "button", "unknown"
+            "other", "button", "touch"
         };
         
-        public static final int NUM_USER_ACTIVITY_TYPES = 7;
+        public static final int NUM_USER_ACTIVITY_TYPES = 3;
         
         public abstract void noteUserActivityLocked(int type);
         public abstract boolean hasUserActivity();

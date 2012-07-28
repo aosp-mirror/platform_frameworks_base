@@ -87,7 +87,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 61 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 62 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -2681,9 +2681,12 @@ public final class BatteryStatsImpl extends BatteryStats {
             if (mUserActivityCounters == null) {
                 initUserActivityLocked();
             }
-            if (type < 0) type = 0;
-            else if (type >= NUM_USER_ACTIVITY_TYPES) type = NUM_USER_ACTIVITY_TYPES-1;
-            mUserActivityCounters[type].stepAtomic();
+            if (type >= 0 && type < NUM_USER_ACTIVITY_TYPES) {
+                mUserActivityCounters[type].stepAtomic();
+            } else {
+                Slog.w(TAG, "Unknown user activity type " + type + " was specified.",
+                        new Throwable());
+            }
         }
 
         @Override
