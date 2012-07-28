@@ -45,4 +45,7 @@ interface INetworkStatsService {
     /** Advise persistance threshold; may be overridden internally. */
     void advisePersistThreshold(long thresholdBytes);
 
+    /** Adjust recorded network stats. */
+    void adjustNetworkStats(int uid, int tag, long rxBytes, long rxPackets, long txBytes, long txPackets, long operationCount);
+
 }
