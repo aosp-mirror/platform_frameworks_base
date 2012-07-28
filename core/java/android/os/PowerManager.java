@@ -107,48 +107,30 @@ import android.util.Log;
 public final class PowerManager {
     private static final String TAG = "PowerManager";
 
-    /*
-     * These internal values define the underlying power elements that we might
-     * want to control individually.  Eventually we'd like to expose them.
+    /* NOTE: Wake lock levels were previously defined as a bit field, except that only a few
+     * combinations were actually supported so the bit field was removed.  This explains
+     * why the numbering scheme is so odd.  If adding a new wake lock level, any unused
+     * value can be used.
      */
-    private static final int WAKE_BIT_CPU_STRONG = 1 << 0;
-    private static final int WAKE_BIT_CPU_WEAK = 1 << 1;
-    private static final int WAKE_BIT_SCREEN_DIM = 1 << 2;
-    private static final int WAKE_BIT_SCREEN_BRIGHT = 1 << 3;
-    private static final int WAKE_BIT_KEYBOARD_BRIGHT = 1 << 4;
-    private static final int WAKE_BIT_PROXIMITY_SCREEN_OFF = 1 << 5;
-
-    private static final int LOCK_MASK = WAKE_BIT_CPU_STRONG
-            | WAKE_BIT_CPU_WEAK
-            | WAKE_BIT_SCREEN_DIM
-            | WAKE_BIT_SCREEN_BRIGHT
-            | WAKE_BIT_KEYBOARD_BRIGHT
-            | WAKE_BIT_PROXIMITY_SCREEN_OFF;
 
     /**
      * Wake lock level: Ensures that the CPU is running; the screen and keyboard
      * backlight will be allowed to go off.
-     */
-    public static final int PARTIAL_WAKE_LOCK = WAKE_BIT_CPU_STRONG;
-
-    /**
-     * Wake lock level: Ensures that the screen and keyboard backlight are on at
-     * full brightness.
-     *
-     * <p class="note">
-     * Most applications should strongly consider using
-     * {@link android.view.WindowManager.LayoutParams#FLAG_KEEP_SCREEN_ON} instead
-     * of managing their own wake locks.  This window flag will be correctly managed
-     * by the platform as the user moves between applications and doesn't require
-     * a special permission.
+     * <p>
+     * If the user presses the power button, then the screen will be turned off
+     * but the CPU will be kept on until all partial wake locks have been released.
      * </p>
      */
-    public static final int FULL_WAKE_LOCK = WAKE_BIT_CPU_WEAK | WAKE_BIT_SCREEN_BRIGHT 
-            | WAKE_BIT_KEYBOARD_BRIGHT;
+    public static final int PARTIAL_WAKE_LOCK = 0x00000001;
 
     /**
-     * Wake lock level: Ensures that the screen is on at full brightness;
+     * Wake lock level: Ensures that the screen is on (but may be dimmed);
      * the keyboard backlight will be allowed to go off.
+     * <p>
+     * If the user presses the power button, then the {@link #SCREEN_DIM_WAKE_LOCK} will be
+     * implicitly released by the system, causing both the screen and the CPU to be turned off.
+     * Contrast with {@link #PARTIAL_WAKE_LOCK}.
+     * </p>
      *
      * @deprecated Most applications should use
      * {@link android.view.WindowManager.LayoutParams#FLAG_KEEP_SCREEN_ON} instead
@@ -156,33 +138,59 @@ public final class PowerManager {
      * as the user moves between applications and doesn't require a special permission.
      */
     @Deprecated
-    public static final int SCREEN_BRIGHT_WAKE_LOCK = WAKE_BIT_CPU_WEAK | WAKE_BIT_SCREEN_BRIGHT;
+    public static final int SCREEN_DIM_WAKE_LOCK = 0x00000006;
 
     /**
-     * Wake lock level: Ensures that the screen is on (but may be dimmed);
+     * Wake lock level: Ensures that the screen is on at full brightness;
      * the keyboard backlight will be allowed to go off.
+     * <p>
+     * If the user presses the power button, then the {@link #SCREEN_BRIGHT_WAKE_LOCK} will be
+     * implicitly released by the system, causing both the screen and the CPU to be turned off.
+     * Contrast with {@link #PARTIAL_WAKE_LOCK}.
+     * </p>
+     *
+     * @deprecated Most applications should use
+     * {@link android.view.WindowManager.LayoutParams#FLAG_KEEP_SCREEN_ON} instead
+     * of this type of wake lock, as it will be correctly managed by the platform
+     * as the user moves between applications and doesn't require a special permission.
      */
-    public static final int SCREEN_DIM_WAKE_LOCK = WAKE_BIT_CPU_WEAK | WAKE_BIT_SCREEN_DIM;
+    @Deprecated
+    public static final int SCREEN_BRIGHT_WAKE_LOCK = 0x0000000a;
+
+    /**
+     * Wake lock level: Ensures that the screen and keyboard backlight are on at
+     * full brightness.
+     * <p>
+     * If the user presses the power button, then the {@link #FULL_WAKE_LOCK} will be
+     * implicitly released by the system, causing both the screen and the CPU to be turned off.
+     * Contrast with {@link #PARTIAL_WAKE_LOCK}.
+     * </p>
+     *
+     * @deprecated Most applications should use
+     * {@link android.view.WindowManager.LayoutParams#FLAG_KEEP_SCREEN_ON} instead
+     * of this type of wake lock, as it will be correctly managed by the platform
+     * as the user moves between applications and doesn't require a special permission.
+     */
+    @Deprecated
+    public static final int FULL_WAKE_LOCK = 0x0000001a;
 
     /**
      * Wake lock level: Turns the screen off when the proximity sensor activates.
      * <p>
-     * Since not all devices have proximity sensors, use {@link #getSupportedWakeLockFlags()}
+     * Since not all devices have proximity sensors, use {@link #getSupportedWakeLockFlags}
      * to determine whether this wake lock level is supported.
      * </p>
      *
      * {@hide}
      */
-    public static final int PROXIMITY_SCREEN_OFF_WAKE_LOCK = WAKE_BIT_PROXIMITY_SCREEN_OFF;
+    public static final int PROXIMITY_SCREEN_OFF_WAKE_LOCK = 0x00000020;
 
     /**
-     * Flag for {@link WakeLock#release release(int)} to defer releasing a
-     * {@link #WAKE_BIT_PROXIMITY_SCREEN_OFF} wake lock until the proximity sensor returns
-     * a negative value.
+     * Mask for the wake lock level component of a combined wake lock level and flags integer.
      *
-     * {@hide}
+     * @hide
      */
-    public static final int WAIT_FOR_PROXIMITY_NEGATIVE = 1;
+    public static final int WAKE_LOCK_LEVEL_MASK = 0x0000ffff;
 
     /**
      * Wake lock flag: Turn the screen on when the wake lock is acquired.
@@ -195,7 +203,7 @@ public final class PowerManager {
      * Cannot be used with {@link #PARTIAL_WAKE_LOCK}.
      * </p>
      */
-    public static final int ACQUIRE_CAUSES_WAKEUP = 1 << 28;
+    public static final int ACQUIRE_CAUSES_WAKEUP = 0x10000000;
 
     /**
      * Wake lock flag: When this wake lock is released, poke the user activity timer
@@ -207,7 +215,16 @@ public final class PowerManager {
      * Cannot be used with {@link #PARTIAL_WAKE_LOCK}.
      * </p>
      */
-    public static final int ON_AFTER_RELEASE = 1 << 29;
+    public static final int ON_AFTER_RELEASE = 0x20000000;
+
+    /**
+     * Flag for {@link WakeLock#release release(int)} to defer releasing a
+     * {@link #WAKE_BIT_PROXIMITY_SCREEN_OFF} wake lock until the proximity sensor returns
+     * a negative value.
+     *
+     * {@hide}
+     */
+    public static final int WAIT_FOR_PROXIMITY_NEGATIVE = 1;
 
     /**
      * Brightness value to use when battery is low.
@@ -298,20 +315,25 @@ public final class PowerManager {
      * @see #ON_AFTER_RELEASE
      */
     public WakeLock newWakeLock(int levelAndFlags, String tag) {
-        switch (levelAndFlags & LOCK_MASK) {
-        case PARTIAL_WAKE_LOCK:
-        case SCREEN_DIM_WAKE_LOCK:
-        case SCREEN_BRIGHT_WAKE_LOCK:
-        case FULL_WAKE_LOCK:
-        case PROXIMITY_SCREEN_OFF_WAKE_LOCK:
-            break;
-        default:
-            throw new IllegalArgumentException("Must specify a wake lock level.");
+        validateWakeLockParameters(levelAndFlags, tag);
+        return new WakeLock(levelAndFlags, tag);
+    }
+
+    /** @hide */
+    public static void validateWakeLockParameters(int levelAndFlags, String tag) {
+        switch (levelAndFlags & WAKE_LOCK_LEVEL_MASK) {
+            case PARTIAL_WAKE_LOCK:
+            case SCREEN_DIM_WAKE_LOCK:
+            case SCREEN_BRIGHT_WAKE_LOCK:
+            case FULL_WAKE_LOCK:
+            case PROXIMITY_SCREEN_OFF_WAKE_LOCK:
+                break;
+            default:
+                throw new IllegalArgumentException("Must specify a valid wake lock level.");
         }
         if (tag == null) {
             throw new IllegalArgumentException("The tag must not be null.");
         }
-        return new WakeLock(levelAndFlags, tag);
     }
 
     /**
