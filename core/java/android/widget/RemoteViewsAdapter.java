@@ -29,8 +29,6 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.Pair;
@@ -50,7 +48,7 @@ import com.android.internal.widget.IRemoteViewsFactory;
 public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback {
     private static final String TAG = "RemoteViewsAdapter";
 
-    // The max number of items in the cache
+    // The max number of items in the cache 
     private static final int sDefaultCacheSize = 40;
     // The delay (in millis) to wait until attempting to unbind from a service after a request.
     // This ensures that we don't stay continually bound to the service and that it can be destroyed
@@ -61,7 +59,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
     private static final int sDefaultLoadingViewHeight = 50;
 
     // Type defs for controlling different messages across the main and worker message queues
-    private static final int sDefaultMessageType = 0;
+    private static final int sDefaultMessageType = 0; 
     private static final int sUnbindServiceMessageType = 1;
 
     private final Context mContext;
@@ -88,9 +86,9 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
 
     // We cache the FixedSizeRemoteViewsCaches across orientation. These are the related data
     // structures;
-    private static final HashMap<Pair<Intent.FilterComparison, Integer>, Parcel>
+    private static final HashMap<Pair<Intent.FilterComparison, Integer>, FixedSizeRemoteViewsCache>
             sCachedRemoteViewsCaches = new HashMap<Pair<Intent.FilterComparison, Integer>,
-            Parcel>();
+                    FixedSizeRemoteViewsCache>();
     private static final HashMap<Pair<Intent.FilterComparison, Integer>, Runnable>
             sRemoteViewsCacheRemoveRunnables = new HashMap<Pair<Intent.FilterComparison, Integer>,
             Runnable>();
@@ -354,7 +352,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
     /**
      * The meta-data associated with the cache in it's current state.
      */
-    private static class RemoteViewsMetaData implements Parcelable {
+    private static class RemoteViewsMetaData {
         int count;
         int viewTypeCount;
         boolean hasStableIds;
@@ -371,51 +369,6 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
 
         public RemoteViewsMetaData() {
             reset();
-        }
-
-        public RemoteViewsMetaData(Parcel src) {
-            count = src.readInt();
-            viewTypeCount = src.readInt();
-            hasStableIds = src.readInt() == 0 ? false : true;
-            mFirstViewHeight = src.readInt();
-            if (src.readInt() != 0) {
-                mUserLoadingView = new RemoteViews(src);
-            }
-            if (src.readInt() != 0) {
-                mFirstView = new RemoteViews(src);
-            }
-            int count = src.readInt();
-            for (int i = 0; i < count; i++) {
-                mTypeIdIndexMap.put(src.readInt(), src.readInt());
-            }
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(count);
-            dest.writeInt(viewTypeCount);
-            dest.writeInt(hasStableIds ? 1 : 0);
-            dest.writeInt(mFirstViewHeight);
-            dest.writeInt(mUserLoadingView != null ? 1 : 0);
-            if (mUserLoadingView != null) {
-                mUserLoadingView.writeToParcel(dest, flags);
-            }
-            dest.writeInt(mFirstView != null ? 1 : 0);
-            if (mFirstView != null) {
-                mFirstView.writeToParcel(dest, flags);
-            }
-
-            int count = mTypeIdIndexMap.size();
-            dest.writeInt(count);
-            for (Integer key: mTypeIdIndexMap.keySet()) {
-                dest.writeInt(key);
-                dest.writeInt(mTypeIdIndexMap.get(key));
-            }
-        }
-
-        @Override
-        public int describeContents() {
-            return 0;
         }
 
         public void set(RemoteViewsMetaData d) {
@@ -528,28 +481,12 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
     /**
      * The meta-data associated with a single item in the cache.
      */
-    private static class RemoteViewsIndexMetaData implements Parcelable {
+    private static class RemoteViewsIndexMetaData {
         int typeId;
         long itemId;
 
         public RemoteViewsIndexMetaData(RemoteViews v, long itemId) {
             set(v, itemId);
-        }
-
-        public RemoteViewsIndexMetaData(Parcel src) {
-            typeId = src.readInt();
-            itemId = src.readLong();
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(typeId);
-            dest.writeLong(itemId);
-        }
-
-        @Override
-        public int describeContents() {
-            return 0;
         }
 
         public void set(RemoteViews v, long id) {
@@ -565,7 +502,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
     /**
      *
      */
-    private static class FixedSizeRemoteViewsCache implements Parcelable {
+    private static class FixedSizeRemoteViewsCache {
         private static final String TAG = "FixedSizeRemoteViewsCache";
 
         // The meta data related to all the RemoteViews, ie. count, is stable, etc.
@@ -625,57 +562,6 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
             mRequestedIndices = new HashSet<Integer>();
             mLastRequestedIndex = -1;
             mLoadIndices = new HashSet<Integer>();
-        }
-
-        public FixedSizeRemoteViewsCache(Parcel src) {
-            mMaxCount = src.readInt();
-            mMaxCountSlack = src.readInt();
-            mPreloadLowerBound = src.readInt();
-            mPreloadUpperBound = src.readInt();
-            mMetaData = new RemoteViewsMetaData(src);
-            int count = src.readInt();
-            mIndexMetaData = new HashMap<Integer, RemoteViewsIndexMetaData>();
-            for (int i = 0; i < count; i++) {
-                mIndexMetaData.put(src.readInt(), new RemoteViewsIndexMetaData(src));
-            }
-            count = src.readInt();
-            mIndexRemoteViews = new HashMap<Integer, RemoteViews>();
-            for (int i = 0; i < count; i++) {
-                mIndexRemoteViews.put(src.readInt(), new RemoteViews(src));
-            }
-
-            mTemporaryMetaData = new RemoteViewsMetaData();
-            mRequestedIndices = new HashSet<Integer>();
-            mLastRequestedIndex = -1;
-            mLoadIndices = new HashSet<Integer>();
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(mMaxCount);
-            dest.writeInt(mMaxCountSlack);
-            dest.writeInt(mPreloadLowerBound);
-            dest.writeInt(mPreloadUpperBound);
-            mMetaData.writeToParcel(dest, 0);
-
-            // We write the index data and cache
-            int count = mIndexMetaData.size();
-            dest.writeInt(count);
-            for (Integer key: mIndexMetaData.keySet()) {
-                dest.writeInt(key);
-                mIndexMetaData.get(key).writeToParcel(dest, flags);
-            }
-            count = mIndexRemoteViews.size();
-            dest.writeInt(count);
-            for (Integer key: mIndexRemoteViews.keySet()) {
-                dest.writeInt(key);
-                mIndexRemoteViews.get(key).writeToParcel(dest, flags);
-            }
-        }
-
-        @Override
-        public int describeContents() {
-            return 0;
         }
 
         public void insert(int position, RemoteViews v, long itemId,
@@ -897,12 +783,18 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
 
         synchronized(sCachedRemoteViewsCaches) {
             if (sCachedRemoteViewsCaches.containsKey(key)) {
-                Parcel src = sCachedRemoteViewsCaches.get(key);
-                src.setDataPosition(0);
-                mCache = new FixedSizeRemoteViewsCache(src);
-                mDataReady = true;
+                mCache = sCachedRemoteViewsCaches.get(key);
+                synchronized (mCache.mMetaData) {
+                    if (mCache.mMetaData.count > 0) {
+                        // As a precautionary measure, we verify that the meta data indicates a
+                        // non-zero count before declaring that data is ready.
+                        mDataReady = true;
+                    }
+                }
             } else {
                 mCache = new FixedSizeRemoteViewsCache(sDefaultCacheSize);
+            }
+            if (!mDataReady) {
                 requestBindService();
             }
         }
@@ -934,11 +826,18 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
                 sRemoteViewsCacheRemoveRunnables.remove(key);
             }
 
-            Parcel p = Parcel.obtain();
-            synchronized(mCache) {
-                mCache.writeToParcel(p, 0);
+            int metaDataCount = 0;
+            int numRemoteViewsCached = 0;
+            synchronized (mCache.mMetaData) {
+                metaDataCount = mCache.mMetaData.count;
             }
-            sCachedRemoteViewsCaches.put(key, p);
+            synchronized (mCache) {
+                numRemoteViewsCached = mCache.mIndexRemoteViews.size();
+            }
+            if (metaDataCount > 0 && numRemoteViewsCached > 0) {
+                sCachedRemoteViewsCaches.put(key, mCache);
+            }
+
             Runnable r = new Runnable() {
                 @Override
                 public void run() {
@@ -1332,6 +1231,12 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
 
     private ArrayList<Integer> getVisibleWindow(int lower, int upper, int count) {
         ArrayList<Integer> window = new ArrayList<Integer>();
+
+        // In the case that the window is invalid or uninitialized, return an empty window.
+        if ((lower == 0 && upper == 0) || lower < 0 || upper < 0) {
+            return window;
+        }
+
         if (lower <= upper) {
             for (int i = lower;  i <= upper; i++){
                 window.add(i);
