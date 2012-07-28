@@ -29254,6 +29254,7 @@ package android.widget {
     method public void setMediaController(android.widget.MediaController);
     method public void setOnCompletionListener(android.media.MediaPlayer.OnCompletionListener);
     method public void setOnErrorListener(android.media.MediaPlayer.OnErrorListener);
+    method public void setOnInfoListener(android.media.MediaPlayer.OnInfoListener);
     method public void setOnPreparedListener(android.media.MediaPlayer.OnPreparedListener);
     method public void setVideoPath(java.lang.String);
     method public void setVideoURI(android.net.Uri);
