@@ -88,6 +88,13 @@ public class TrafficStats {
      */
     public static final int TAG_SYSTEM_BACKUP = 0xFFFFFF03;
 
+    /**
+     * Default tag value for cloud messaging traffic.
+     *
+     * @hide
+     */
+    public static final int TAG_SYSTEM_CLOUD_MESSAGING = 0xFFFFFF04;
+
     private static INetworkStatsService sStatsService;
 
     private synchronized static INetworkStatsService getStatsService() {
@@ -241,6 +248,27 @@ public class TrafficStats {
         final int uid = android.os.Process.myUid();
         try {
             getStatsService().incrementOperationCount(uid, tag, operationCount);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Adjust network statistics for the given UID and tag by the requested
+     * amount. This can be used to correctly account network usage performed on
+     * behalf of another application. Values can be negative.
+     * <p>
+     * Requires that caller holds
+     * {@link android.Manifest.permission#MODIFY_NETWORK_ACCOUNTING} permission.
+     *
+     * @see #setThreadStatsUid(int)
+     * @hide
+     */
+    public static void adjustNetworkStats(int uid, int tag, long rxBytes, long rxPackets,
+            long txBytes, long txPackets, long operationCount) {
+        try {
+            getStatsService().adjustNetworkStats(
+                    uid, tag, rxBytes, rxPackets, txBytes, txPackets, operationCount);
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
