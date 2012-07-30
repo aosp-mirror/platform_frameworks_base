@@ -42,6 +42,7 @@ import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
+import android.view.Display;
 import android.view.WindowManager;
 
 import com.android.internal.os.BinderInternal;

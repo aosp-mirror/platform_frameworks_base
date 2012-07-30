@@ -38,6 +38,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.util.AndroidException;
+import android.view.Display;
 import android.view.IWindowManager;
 
 import java.io.BufferedReader;
@@ -1117,9 +1118,10 @@ public class Am {
 
         try {
             if (m >= 0 && n >= 0) {
-                wm.setForcedDisplaySize(m, n);
+                // TODO(multidisplay): For now Configuration only applies to main screen.
+                wm.setForcedDisplaySize(Display.DEFAULT_DISPLAY, m, n);
             } else {
-                wm.clearForcedDisplaySize();
+                wm.clearForcedDisplaySize(Display.DEFAULT_DISPLAY);
             }
         } catch (RemoteException e) {
         }

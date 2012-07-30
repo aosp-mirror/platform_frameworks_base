@@ -16,6 +16,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Debug;
 import android.util.Slog;
+import android.view.DisplayInfo;
 import android.view.Surface;
 import android.view.SurfaceSession;
 import android.view.WindowManager;
@@ -29,6 +30,9 @@ import com.android.server.wm.WindowManagerService.H;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+
+class WinAnimatorList extends ArrayList<WindowStateAnimator> {
+}
 
 /**
  * Keep track of animations and surface operations for a single WindowState.
@@ -151,8 +155,9 @@ class WindowStateAnimator {
         mAnimator = service.mAnimator;
         mPolicy = service.mPolicy;
         mContext = service.mContext;
-        mAnimDw = service.mDisplayInfo.appWidth;
-        mAnimDh = service.mDisplayInfo.appHeight;
+        final DisplayInfo displayInfo = win.mDisplayContent.getDisplayInfo();
+        mAnimDw = displayInfo.appWidth;
+        mAnimDh = displayInfo.appHeight;
 
         mWin = win;
         mAttachedWinAnimator = win.mAttachedWindow == null
@@ -248,8 +253,9 @@ class WindowStateAnimator {
                         " scale=" + mService.mWindowAnimationScale);
                     mAnimation.initialize(mWin.mFrame.width(), mWin.mFrame.height(),
                             mAnimDw, mAnimDh);
-                    mAnimDw = mService.mDisplayInfo.appWidth;
-                    mAnimDh = mService.mDisplayInfo.appHeight;
+                    final DisplayInfo displayInfo = mWin.mDisplayContent.getDisplayInfo();
+                    mAnimDw = displayInfo.appWidth;
+                    mAnimDh = displayInfo.appHeight;
                     mAnimation.setStartTime(currentTime);
                     mLocalAnimating = true;
                     mAnimating = true;
@@ -646,12 +652,12 @@ class WindowStateAnimator {
                     mSurface = new SurfaceTrace(
                             mSession.mSurfaceSession, mSession.mPid,
                             attrs.getTitle().toString(),
-                            mWin.mDisplayId, w, h, format, flags);
+                            mWin.mDisplayContent.getDisplayId(), w, h, format, flags);
                 } else {
                     mSurface = new Surface(
                         mSession.mSurfaceSession, mSession.mPid,
                         attrs.getTitle().toString(),
-                        mWin.mDisplayId, w, h, format, flags);
+                        mWin.mDisplayContent.getDisplayId(), w, h, format, flags);
                 }
                 mWin.mHasSurface = true;
                 if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) Slog.i(TAG,
@@ -1101,8 +1107,9 @@ class WindowStateAnimator {
                 mAnimator.mPendingLayoutChanges |=
                         WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
                 if ((w.mAttrs.flags & LayoutParams.FLAG_DIM_BEHIND) != 0) {
+                    final DisplayInfo displayInfo = mWin.mDisplayContent.getDisplayInfo();
                     mService.startDimming(this, w.mExiting ? 0 : w.mAttrs.dimAmount,
-                            mService.mDisplayInfo.appWidth, mService.mDisplayInfo.appHeight);
+                            displayInfo.appWidth, displayInfo.appHeight);
                 }
             } catch (RuntimeException e) {
                 // If something goes wrong with the surface (such
