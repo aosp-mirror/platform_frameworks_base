@@ -2508,13 +2508,14 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
 #endif
 
     bool status;
-    if (positions != NULL) {
-        status = fontRenderer.renderPosText(paint, clip, text, 0, bytesCount, count, x, y,
+    if (paint->getTextAlign() != SkPaint::kLeft_Align) {
+        SkPaint paintCopy(*paint);
+        paintCopy.setTextAlign(SkPaint::kLeft_Align);
+        status = fontRenderer.renderPosText(&paintCopy, clip, text, 0, bytesCount, count, x, y,
             positions, hasActiveLayer ? &bounds : NULL);
     } else {
-        // TODO: would it be okay to call renderPosText with null positions?
-        status = fontRenderer.renderText(paint, clip, text, 0, bytesCount, count, x, y,
-            hasActiveLayer ? &bounds : NULL);
+        status = fontRenderer.renderPosText(paint, clip, text, 0, bytesCount, count, x, y,
+            positions, hasActiveLayer ? &bounds : NULL);
     }
     if (status) {
 #if RENDER_LAYERS_AS_REGIONS
@@ -2801,23 +2802,11 @@ void OpenGLRenderer::drawTextDecorations(const char* text, int bytesCount, float
             underlineWidth = paintCopy.measureText(text, bytesCount);
         }
 
-        float offsetX = 0;
-        switch (paintCopy.getTextAlign()) {
-            case SkPaint::kCenter_Align:
-                offsetX = underlineWidth * 0.5f;
-                break;
-            case SkPaint::kRight_Align:
-                offsetX = underlineWidth;
-                break;
-            default:
-                break;
-        }
-
         if (CC_LIKELY(underlineWidth > 0.0f)) {
             const float textSize = paintCopy.getTextSize();
             const float strokeWidth = fmax(textSize * kStdUnderline_Thickness, 1.0f);
 
-            const float left = x - offsetX;
+            const float left = x;
             float top = 0.0f;
 
             int linesCount = 0;
