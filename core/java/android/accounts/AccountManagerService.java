@@ -220,8 +220,6 @@ public class AccountManagerService
 
         sThis.set(this);
 
-        UserAccounts accounts = initUser(0);
-
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         intentFilter.addDataScheme("package");
@@ -240,6 +238,11 @@ public class AccountManagerService
                 onUserRemoved(intent);
             }
         }, userFilter);
+    }
+
+    public void systemReady() {
+        mAuthenticatorCache.generateServicesMap();
+        initUser(0);
     }
 
     private UserAccounts initUser(int userId) {
