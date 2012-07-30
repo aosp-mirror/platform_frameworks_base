@@ -223,7 +223,7 @@ public class CheckedTextView extends TextView implements Checkable {
             final int bottom = top + height;
             final int left = isLayoutRtl ? getPaddingEnd() : width - getPaddingEnd();
             final int right = left + mCheckMarkWidth;
-            checkMarkDrawable.setBounds(left, top, right, bottom);
+            checkMarkDrawable.setBounds( left, top, right, bottom);
             checkMarkDrawable.draw(canvas);
         }
     }
