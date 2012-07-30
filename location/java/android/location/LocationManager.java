@@ -17,6 +17,7 @@
 package android.location;
 
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Looper;
@@ -160,6 +161,8 @@ public class LocationManager {
      */
     public static final String EXTRA_GPS_ENABLED = "enabled";
 
+    private final Context mContext;
+
     // Map from LocationListeners to their associated ListenerTransport objects
     private HashMap<LocationListener,ListenerTransport> mListeners =
         new HashMap<LocationListener,ListenerTransport>();
@@ -260,8 +263,9 @@ public class LocationManager {
      * right way to create an instance of this class is using the
      * factory Context.getSystemService.
      */
-    public LocationManager(ILocationManager service) {
+    public LocationManager(Context context, ILocationManager service) {
         mService = service;
+        mContext = context;
     }
 
     private LocationProvider createProvider(String name, Bundle info) {
@@ -657,7 +661,8 @@ public class LocationManager {
                     transport = new ListenerTransport(listener, looper);
                 }
                 mListeners.put(listener, transport);
-                mService.requestLocationUpdates(provider, criteria, minTime, minDistance, singleShot, transport);
+                mService.requestLocationUpdates(provider, criteria, minTime, minDistance,
+                        singleShot, transport, mContext.getPackageName());
             }
         } catch (RemoteException ex) {
             Log.e(TAG, "requestLocationUpdates: DeadObjectException", ex);
@@ -837,7 +842,8 @@ public class LocationManager {
         }
 
         try {
-            mService.requestLocationUpdatesPI(provider, criteria, minTime, minDistance, singleShot, intent);
+            mService.requestLocationUpdatesPI(provider, criteria, minTime, minDistance, singleShot,
+                    intent, mContext.getPackageName());
         } catch (RemoteException ex) {
             Log.e(TAG, "requestLocationUpdates: RemoteException", ex);
         }
@@ -1005,7 +1011,7 @@ public class LocationManager {
         try {
             ListenerTransport transport = mListeners.remove(listener);
             if (transport != null) {
-                mService.removeUpdates(transport);
+                mService.removeUpdates(transport, mContext.getPackageName());
             }
         } catch (RemoteException ex) {
             Log.e(TAG, "removeUpdates: DeadObjectException", ex);
@@ -1028,7 +1034,7 @@ public class LocationManager {
             Log.d(TAG, "removeUpdates: intent = " + intent);
         }
         try {
-            mService.removeUpdatesPI(intent);
+            mService.removeUpdatesPI(intent, mContext.getPackageName());
         } catch (RemoteException ex) {
             Log.e(TAG, "removeUpdates: RemoteException", ex);
         }
@@ -1087,7 +1093,7 @@ public class LocationManager {
         }
         try {
             mService.addProximityAlert(latitude, longitude, radius,
-                                       expiration, intent);
+                                       expiration, intent, mContext.getPackageName());
         } catch (RemoteException ex) {
             Log.e(TAG, "addProximityAlert: RemoteException", ex);
         }
@@ -1153,7 +1159,7 @@ public class LocationManager {
             throw new IllegalArgumentException("provider==null");
         }
         try {
-            return mService.getLastKnownLocation(provider);
+            return mService.getLastKnownLocation(provider, mContext.getPackageName());
         } catch (RemoteException ex) {
             Log.e(TAG, "getLastKnowLocation: RemoteException", ex);
             return null;
