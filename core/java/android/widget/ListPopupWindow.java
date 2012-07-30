@@ -22,6 +22,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.util.AttributeSet;
+import android.util.LocaleUtil;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -30,6 +31,8 @@ import android.view.View.MeasureSpec;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+
+import java.util.Locale;
 
 /**
  * A ListPopupWindow anchors itself to a host view and displays a
@@ -91,6 +94,8 @@ public class ListPopupWindow {
     private Rect mTempRect = new Rect();
 
     private boolean mModal;
+
+    private int mLayoutDirection;
 
     /**
      * The provided prompt view should appear above list content.
@@ -193,6 +198,9 @@ public class ListPopupWindow {
         mContext = context;
         mPopup = new PopupWindow(context, attrs, defStyleAttr, defStyleRes);
         mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
+        // Set the default layout direction to match the default locale one
+        final Locale locale = mContext.getResources().getConfiguration().locale;
+        mLayoutDirection = LocaleUtil.getLayoutDirectionFromLocale(locale);
     }
 
     /**
@@ -1013,6 +1021,8 @@ public class ListPopupWindow {
                 mDropDownList.setOnItemSelectedListener(mItemSelectedListener);
             }
 
+            mDropDownList.setLayoutDirection(mLayoutDirection);
+
             dropDownView = mDropDownList;
 
             View hintView = mPromptView;
@@ -1121,9 +1131,18 @@ public class ListPopupWindow {
         return listContent + otherHeights;
     }
 
-    public void setLayoutDirection(int resolvedLayoutDirection) {
+    /**
+     * Set the layout direction for this popup. Should be a resolved direction as the
+     * popup as no capacity to do the resolution on his own.
+     *
+     * @param layoutDirection One of {@link View#LAYOUT_DIRECTION_LTR},
+     *   {@link View#LAYOUT_DIRECTION_RTL},
+     *
+     */
+    public void setLayoutDirection(int layoutDirection) {
+        mLayoutDirection = layoutDirection;
         if (mDropDownList != null) {
-            mDropDownList.setLayoutDirection(resolvedLayoutDirection);
+            mDropDownList.setLayoutDirection(mLayoutDirection);
         }
     }
 
