@@ -376,8 +376,8 @@ public class Toast {
                 mWM = WindowManagerImpl.getDefault();
                 // We can resolve the Gravity here by using the Locale for getting
                 // the layout direction
-                final int layoutDirection = LocaleUtil.getLayoutDirectionFromLocale(
-                        Locale.getDefault());
+                final Locale locale = mView.getContext().getResources().getConfiguration().locale;
+                final int layoutDirection = LocaleUtil.getLayoutDirectionFromLocale(locale);
                 final int gravity = Gravity.getAbsoluteGravity(mGravity, layoutDirection);
                 mParams.gravity = gravity;
                 if ((gravity & Gravity.HORIZONTAL_GRAVITY_MASK) == Gravity.FILL_HORIZONTAL) {
