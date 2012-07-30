@@ -48,6 +48,9 @@ public class ActionMenuItemView extends TextView
     private int mMinWidth;
     private int mSavedPaddingLeft;
 
+    private static final int MAX_ICON_SIZE = 32; // dp
+    private int mMaxIconSize;
+
     public ActionMenuItemView(Context context) {
         this(context, null);
     }
@@ -66,6 +69,9 @@ public class ActionMenuItemView extends TextView
         mMinWidth = a.getDimensionPixelSize(
                 com.android.internal.R.styleable.ActionMenuItemView_minWidth, 0);
         a.recycle();
+
+        final float density = res.getDisplayMetrics().density;
+        mMaxIconSize = (int) (MAX_ICON_SIZE * density + 0.5f);
 
         setOnClickListener(this);
         setOnLongClickListener(this);
@@ -135,7 +141,20 @@ public class ActionMenuItemView extends TextView
 
     public void setIcon(Drawable icon) {
         mIcon = icon;
-        setCompoundDrawablesWithIntrinsicBounds(icon, null, null, null);
+        int width = icon.getIntrinsicWidth();
+        int height = icon.getIntrinsicHeight();
+        if (width > mMaxIconSize) {
+            final float scale = (float) mMaxIconSize / width;
+            width = mMaxIconSize;
+            height *= scale;
+        }
+        if (height > mMaxIconSize) {
+            final float scale = (float) mMaxIconSize / height;
+            height = mMaxIconSize;
+            width *= scale;
+        }
+        icon.setBounds(0, 0, width, height);
+        setCompoundDrawables(icon, null, null, null);
 
         updateTextButtonVisibility();
     }
@@ -245,7 +264,7 @@ public class ActionMenuItemView extends TextView
             // TextView won't center compound drawables in both dimensions without
             // a little coercion. Pad in to center the icon after we've measured.
             final int w = getMeasuredWidth();
-            final int dw = mIcon.getIntrinsicWidth();
+            final int dw = mIcon.getBounds().width();
             super.setPadding((w - dw) / 2, getPaddingTop(), getPaddingRight(), getPaddingBottom());
         }
     }
