@@ -26,6 +26,7 @@ import android.media.MediaPlayer;
 import android.media.Metadata;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
+import android.media.MediaPlayer.OnInfoListener;
 import android.net.Uri;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -84,6 +85,7 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
     private MediaPlayer.OnPreparedListener mOnPreparedListener;
     private int         mCurrentBufferPercentage;
     private OnErrorListener mOnErrorListener;
+    private OnInfoListener  mOnInfoListener;
     private int         mSeekWhenPrepared;  // recording the seek position while preparing
     private boolean     mCanPause;
     private boolean     mCanSeekBack;
@@ -230,6 +232,7 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
             mDuration = -1;
             mMediaPlayer.setOnCompletionListener(mCompletionListener);
             mMediaPlayer.setOnErrorListener(mErrorListener);
+            mMediaPlayer.setOnInfoListener(mOnInfoListener);
             mMediaPlayer.setOnBufferingUpdateListener(mBufferingUpdateListener);
             mCurrentBufferPercentage = 0;
             mMediaPlayer.setDataSource(mContext, mUri, mHeaders);
@@ -453,6 +456,16 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
     public void setOnErrorListener(OnErrorListener l)
     {
         mOnErrorListener = l;
+    }
+
+    /**
+     * Register a callback to be invoked when an informational event
+     * occurs during playback or setup.
+     *
+     * @param l The callback that will be run
+     */
+    public void setOnInfoListener(OnInfoListener l) {
+        mOnInfoListener = l;
     }
 
     SurfaceHolder.Callback mSHCallback = new SurfaceHolder.Callback()
