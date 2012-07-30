@@ -230,7 +230,7 @@
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"एप्‍लिकेशन डीबग करना सक्षम करें"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"एप्लिकेशन को अन्य एप्लिकेशन के लिए डीबग किया जाना चालू करने देता है. दुर्भावनापूर्ण एप्लिकेशन इसका उपयोग अन्य एप्लिकेशन को समाप्त करने के लिए कर सकते हैं."</string>
     <string name="permlab_changeConfiguration" msgid="4162092185124234480">"सिस्‍टम प्रदर्शन सेटिंग बदलें"</string>
-    <string name="permdesc_changeConfiguration" msgid="4372223873154296076">"एप्‍लिकेशन को वर्तमान कॉन्‍फ़िगरेशन, जैसे स्‍थान या समग्र फ़ॉन्‍ट आकार, बदलने देता है."</string>
+    <string name="permdesc_changeConfiguration" msgid="4372223873154296076">"एप्लिकेशन को वर्तमान कॉन्फ़िगरेशन, जैसे स्थान या समग्र फ़ॉन्ट आकार, बदलने देता है."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"कार मोड सक्षम करें"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"एप्लिकेशन को कार मोड सक्षम करने देता है."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"अन्‍य एप्‍लिकेशन बंद करें"</string>
