@@ -33,6 +33,15 @@
         <meta-data android:name="android.graphics.renderThread" android:value="true" />
 
         <activity
+                android:name="GradientStopsActivity"
+                android:label="_GradientStops">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
                 android:name="PaintDrawFilterActivity"
                 android:label="_DrawFilter">
             <intent-filter>

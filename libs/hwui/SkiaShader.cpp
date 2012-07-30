@@ -38,6 +38,21 @@ static const GLint gTileModes[] = {
         GL_MIRRORED_REPEAT  // == SkShader::kMirror_TileMode
 };
 
+/**
+ * This function does not work for n == 0.
+ */
+static inline bool isPowerOfTwo(unsigned int n) {
+    return !(n & (n - 1));
+}
+
+static inline void bindUniformColor(int slot, uint32_t color) {
+    glUniform4f(slot,
+            ((color >> 16) & 0xff) / 255.0f,
+            ((color >>  8) & 0xff) / 255.0f,
+            ((color      ) & 0xff) / 255.0f,
+            ((color >> 24) & 0xff) / 255.0f);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Base shader
 ///////////////////////////////////////////////////////////////////////////////
@@ -188,6 +203,8 @@ SkiaLinearGradientShader::SkiaLinearGradientShader(float* bounds, uint32_t* colo
     mUnitMatrix.load(unitMatrix);
 
     updateLocalMatrix(matrix);
+
+    mIsSimple = count == 2 && tileMode == SkShader::kClamp_TileMode;
 }
 
 SkiaLinearGradientShader::~SkiaLinearGradientShader() {
@@ -206,6 +223,7 @@ SkiaShader* SkiaLinearGradientShader::copy() {
     copy->mPositions = new float[mCount];
     memcpy(copy->mPositions, mPositions, sizeof(float) * mCount);
     copy->mCount = mCount;
+    copy->mIsSimple = mIsSimple;
     return copy;
 }
 
@@ -213,21 +231,27 @@ void SkiaLinearGradientShader::describe(ProgramDescription& description,
         const Extensions& extensions) {
     description.hasGradient = true;
     description.gradientType = ProgramDescription::kGradientLinear;
+    description.isSimpleGradient = mIsSimple;
 }
 
 void SkiaLinearGradientShader::setupProgram(Program* program, const mat4& modelView,
         const Snapshot& snapshot, GLuint* textureUnit) {
-    GLuint textureSlot = (*textureUnit)++;
-    Caches::getInstance().activeTexture(textureSlot);
+    if (CC_UNLIKELY(!mIsSimple)) {
+        GLuint textureSlot = (*textureUnit)++;
+        Caches::getInstance().activeTexture(textureSlot);
 
-    Texture* texture = mGradientCache->get(mColors, mPositions, mCount, mTileX);
+        Texture* texture = mGradientCache->get(mColors, mPositions, mCount);
+
+        // Uniforms
+        bindTexture(texture, gTileModes[mTileX], gTileModes[mTileY]);
+        glUniform1i(program->getUniform("gradientSampler"), textureSlot);
+    } else {
+        bindUniformColor(program->getUniform("startColor"), mColors[0]);
+        bindUniformColor(program->getUniform("endColor"), mColors[1]);
+    }
 
     mat4 screenSpace;
     computeScreenSpaceMatrix(screenSpace, modelView);
-
-    // Uniforms
-    bindTexture(texture, gTileModes[mTileX], gTileModes[mTileY]);
-    glUniform1i(program->getUniform("gradientSampler"), textureSlot);
     glUniformMatrix4fv(program->getUniform("screenSpace"), 1, GL_FALSE, &screenSpace.data[0]);
 }
 
@@ -269,6 +293,7 @@ SkiaShader* SkiaCircularGradientShader::copy() {
     copy->mPositions = new float[mCount];
     memcpy(copy->mPositions, mPositions, sizeof(float) * mCount);
     copy->mCount = mCount;
+    copy->mIsSimple = mIsSimple;
     return copy;
 }
 
@@ -276,6 +301,7 @@ void SkiaCircularGradientShader::describe(ProgramDescription& description,
         const Extensions& extensions) {
     description.hasGradient = true;
     description.gradientType = ProgramDescription::kGradientCircular;
+    description.isSimpleGradient = mIsSimple;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -296,6 +322,8 @@ SkiaSweepGradientShader::SkiaSweepGradientShader(float x, float y, uint32_t* col
     mUnitMatrix.load(unitMatrix);
 
     updateLocalMatrix(matrix);
+
+    mIsSimple = count == 2;
 }
 
 SkiaSweepGradientShader::SkiaSweepGradientShader(Type type, float x, float y, uint32_t* colors,
@@ -303,6 +331,8 @@ SkiaSweepGradientShader::SkiaSweepGradientShader(Type type, float x, float y, ui
         SkMatrix* matrix, bool blend):
         SkiaShader(type, key, tileMode, tileMode, matrix, blend),
         mColors(colors), mPositions(positions), mCount(count) {
+
+    mIsSimple = count == 2 && tileMode == SkShader::kClamp_TileMode;
 }
 
 SkiaSweepGradientShader::~SkiaSweepGradientShader() {
@@ -318,6 +348,7 @@ SkiaShader* SkiaSweepGradientShader::copy() {
     copy->mPositions = new float[mCount];
     memcpy(copy->mPositions, mPositions, sizeof(float) * mCount);
     copy->mCount = mCount;
+    copy->mIsSimple = mIsSimple;
     return copy;
 }
 
@@ -325,21 +356,27 @@ void SkiaSweepGradientShader::describe(ProgramDescription& description,
         const Extensions& extensions) {
     description.hasGradient = true;
     description.gradientType = ProgramDescription::kGradientSweep;
+    description.isSimpleGradient = mIsSimple;
 }
 
 void SkiaSweepGradientShader::setupProgram(Program* program, const mat4& modelView,
         const Snapshot& snapshot, GLuint* textureUnit) {
-    GLuint textureSlot = (*textureUnit)++;
-    Caches::getInstance().activeTexture(textureSlot);
+    if (CC_UNLIKELY(!mIsSimple)) {
+        GLuint textureSlot = (*textureUnit)++;
+        Caches::getInstance().activeTexture(textureSlot);
 
-    Texture* texture = mGradientCache->get(mColors, mPositions, mCount);
+        Texture* texture = mGradientCache->get(mColors, mPositions, mCount);
+
+        // Uniforms
+        bindTexture(texture, gTileModes[mTileX], gTileModes[mTileY]);
+        glUniform1i(program->getUniform("gradientSampler"), textureSlot);
+    } else {
+       bindUniformColor(program->getUniform("startColor"), mColors[0]);
+       bindUniformColor(program->getUniform("endColor"), mColors[1]);
+    }
 
     mat4 screenSpace;
     computeScreenSpaceMatrix(screenSpace, modelView);
-
-    // Uniforms
-    bindTexture(texture, gTileModes[mTileX], gTileModes[mTileY]);
-    glUniform1i(program->getUniform("gradientSampler"), textureSlot);
     glUniformMatrix4fv(program->getUniform("screenSpace"), 1, GL_FALSE, &screenSpace.data[0]);
 }
 
