@@ -41,7 +41,7 @@ public class Policy implements IPolicy {
         "com.android.internal.policy.impl.PhoneLayoutInflater",
         "com.android.internal.policy.impl.PhoneWindow",
         "com.android.internal.policy.impl.PhoneWindow$1",
-        "com.android.internal.policy.impl.PhoneWindow$ContextMenuCallback",
+        "com.android.internal.policy.impl.PhoneWindow$DialogMenuCallback",
         "com.android.internal.policy.impl.PhoneWindow$DecorView",
         "com.android.internal.policy.impl.PhoneWindow$PanelFeatureState",
         "com.android.internal.policy.impl.PhoneWindow$PanelFeatureState$SavedState",
