@@ -234,12 +234,7 @@ tabs. Fixed tabs in the main action bar can move to the top bar when the screen 
 
   </div>
   <div class="layout-content-col span-7">
-
-    <img src="{@docRoot}design/media/action_bar_pattern_default_tabs.png">
-    <div class="figure-caption">
-      Default fixed tabs shown in Holo Dark &amp; Light.
-    </div>
-
+    <img src="{@docRoot}design/media/actionbar_drawer.png">
   </div>
 </div>
 
