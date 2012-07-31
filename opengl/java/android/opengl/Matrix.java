@@ -312,7 +312,6 @@ public class Matrix {
      * @param near
      * @param far
      */
-
     public static void frustumM(float[] m, int offset,
             float left, float right, float bottom, float top,
             float near, float far) {
@@ -336,10 +335,10 @@ public class Matrix {
         final float r_depth  = 1.0f / (near - far);
         final float x = 2.0f * (near * r_width);
         final float y = 2.0f * (near * r_height);
-        final float A = 2.0f * ((right + left) * r_width);
+        final float A = (right + left) * r_width;
         final float B = (top + bottom) * r_height;
-        final float C = (far + near) * r_depth;
-        final float D = 2.0f * (far * near * r_depth);
+        final float C = -(far + near) * r_depth;
+        final float D = -2.0f * (far * near * r_depth);
         m[offset + 0] = x;
         m[offset + 5] = y;
         m[offset + 8] = A;
