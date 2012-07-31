@@ -60,4 +60,9 @@ public interface IAccountAuthenticatorCache {
      */
     void setListener(RegisteredServicesCacheListener<AuthenticatorDescription> listener,
             Handler handler);
+
+    /**
+     * Refreshes the authenticator cache.
+     */
+    void generateServicesMap();
 }

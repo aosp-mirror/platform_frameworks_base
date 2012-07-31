@@ -132,6 +132,9 @@ public final class ContentService extends IContentService.Stub {
     /*package*/ ContentService(Context context, boolean factoryTest) {
         mContext = context;
         mFactoryTest = factoryTest;
+    }
+
+    public void systemReady() {
         getSyncManager();
     }
 
@@ -524,7 +527,7 @@ public final class ContentService extends IContentService.Stub {
         }
     }
 
-    public static IContentService main(Context context, boolean factoryTest) {
+    public static ContentService main(Context context, boolean factoryTest) {
         ContentService service = new ContentService(context, factoryTest);
         ServiceManager.addService(ContentResolver.CONTENT_SERVICE_NAME, service);
         return service;
