@@ -1,0 +1,252 @@
+page.title=Using Wi-Fi Direct for Service Discovery
+parent.title=Connecting Devices Wirelessly
+parent.link=index.html
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+    <h2>This lesson teaches you to</h2>
+    <ol>
+      <li><a href="#manifest">Set Up the Manifest</a></li>
+      <li><a href="#register">Add a Local Service</a></li>
+      <li><a href="#discover">Discover Nearby Services</a></li>
+    </ol>
+    <!--
+    <h2>You should also read</h2>
+    <ul>
+      <li><a href="#"></a></li>
+    </ul>
+    -->
+  </div>
+</div>
+
+<p>The first lesson in this class, <a href="nsd.html">Using Network Service
+  Discovery</a>, showed you
+how to discover services that are connected to a local network. However, using
+Wi-Fi Direct&trad; Service Discovery allows you to discover the services of nearby devices directly,
+without being connected to a network.  You can also advertise the services
+running on your device.  These capabilities help you communicate between apps,
+even when no local network or hotspot is available.</p>
+<p>While this set of APIs is similar in purpose to the Network Service Discovery
+APIs outlined in a previous lesson, implementing them in code is very different.
+This lesson shows you how to discover services available from other devices,
+using Wi-Fi Direct&trade;. The lesson assumes that you're already familiar with the
+<a href="{@docRoot}guide/topics/connectivity/wifip2p.html">Wi-Fi Direct</a> API.</p>
+
+
+<h2 id="manifest">Set Up the Manifest</h2>
+<p>In order to use Wi-Fi Direct, add the {@link
+android.Manifest.permission#CHANGE_WIFI_STATE}, {@link
+android.Manifest.permission#ACCESS_WIFI_STATE},
+and {@link android.Manifest.permission#INTERNET}
+permissions to your manifest.  Even though Wi-Fi Direct doesn't require an
+Internet connection, it uses standard Java sockets, and using these in Android
+requires the requested permissions.</p>
+
+<pre>
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.android.nsdchat"
+    ...
+
+    &lt;uses-permission
+        android:required="true"
+        android:name="android.permission.ACCESS_WIFI_STATE"/&gt;
+    &lt;uses-permission
+        android:required="true"
+        android:name="android.permission.CHANGE_WIFI_STATE"/&gt;
+    &lt;uses-permission
+        android:required="true"
+        android:name="android.permission.INTERNET"/&gt;
+    ...
+</pre>
+
+<h2 id="register">Add a Local Service</h2>
+<p>If you're providing a local service, you need to register it for
+service discovery.  Once your local service is registered, the framework
+automatically responds to service discovery requests from peers.</p>
+
+<p>To create a local service:</p>
+
+<ol>
+  <li>Create a
+{@link android.net.wifi.p2p.nsd.WifiP2pServiceInfo} object.</li>
+  <li>Populate it with information about your service.</li>
+  <li>Call {@link
+android.net.wifi.p2p.WifiP2pManager#addLocalService(WifiP2pManager.Channel,
+WifiP2pServiceInfo, WifiP2pManager.ActionListener) addLocalService()} to register the local
+service for service discovery.</li>
+</ol>
+
+<pre>
+     private void startRegistration() {
+        //  Create a string map containing information about your service.
+        Map<String,String> record = new HashMap<String,String>();
+        record.put("listenport", String.valueOf(SERVER_PORT));
+        record.put("buddyname", "John Doe" + (int) (Math.random() * 1000));
+        record.put("available", "visible");
+
+        // Service information.  Pass it an instance name, service type
+        // _protocol._transportlayer , and the map containing
+        // information other devices will want once they connect to this one.
+        WifiP2pDnsSdServiceInfo serviceInfo =
+                WifiP2pDnsSdServiceInfo.newInstance("_test", "_presence._tcp", record);
+
+        // Add the local service, sending the service info, network channel,
+        // and listener that will be used to indicate success or failure of
+        // the request.
+        mManager.addLocalService(channel, serviceInfo, new ActionListener() {
+            &#64;Override
+            public void onSuccess() {
+                // Command successful! Code isn't necessarily needed here,
+                // Unless you want to update the UI or add logging statements.
+            }
+
+            &#64;Override
+            public void onFailure(int arg0) {
+                // Command failed.  Check for P2P_UNSUPPORTED, ERROR, or BUSY
+            }
+        });
+    }
+</pre>
+
+<h2 id="discover">Discover Nearby Services</h2>
+<p>Android uses callback methods to notify your application of available services, so
+the first thing to do is set those up.  Create a {@link
+android.net.wifi.p2p.WifiP2pManager.DnsSdTxtRecordListener} to listen for
+incoming records.  This record can optionally be broadcast by other
+devices.  When one comes in, copy the device address and any other
+relevant information you want into a data structure external to the current
+method, so you can access it later.  The following example assumes that the
+record contains a "buddyname" field, populated with the user's identity.</p>
+
+<pre>
+final HashMap&lt;String, String&gt; buddies = new HashMap&lt;String, String&gt;();
+...
+private void discoverService() {
+    DnsSdTxtRecordListener txtListener = new DnsSdTxtRecordListener() {
+        &#64;Override
+        /* Callback includes:
+         * fullDomain: full domain name: e.g "printer._ipp._tcp.local."
+         * record: TXT record dta as a map of key/value pairs.
+         * device: The device running the advertised service.
+         */
+
+        public void onDnsSdTxtRecordAvailable(
+                String fullDomain, Map<String,String> record, WifiP2pDevice device) {
+                Log.d(TAG, "DnsSdTxtRecord available -" + record.toString());
+                buddies.put(device.deviceAddress, record.get("buddyname"));
+            }
+        };
+    ...
+}
+</pre>
+
+<p>To get the service information, create a {@link
+android.net.wifi.p2p.WifiP2pManager.DnsSdServiceResponseListener}.  This
+receives the actual description and connection information.  The previous code
+snippet implemented a {@link java.util.Map} object to pair a device address with the buddy
+name.  The service response listener uses this to link the DNS record with the
+corresponding service information.  Once both
+listeners are implemented, add them to the {@link
+android.net.wifi.p2p.WifiP2pManager} using the {@link
+android.net.wifi.p2p.WifiP2pManager#setDnsSdResponseListeners(WifiP2pManager.Channel,
+WifiP2pManager.DnsSdServiceResponseListener,
+WifiP2pManager.DnsSdTxtRecordListener) setDnsSdResponseListeners()} method.</p>
+
+<pre>
+private void discoverService() {
+...
+
+    DnsSdServiceResponseListener servListener = new DnsSdServiceResponseListener() {
+        &#64;Override
+        public void onDnsSdServiceAvailable(String instanceName, String registrationType,
+                WifiP2pDevice resourceType) {
+
+                // Update the device name with the human-friendly version from
+                // the DnsTxtRecord, assuming one arrived.
+                resourceType.deviceName = buddies
+                        .containsKey(resourceType.deviceAddress) ? buddies
+                        .get(resourceType.deviceAddress) : resourceType.deviceName;
+
+                // Add to the custom adapter defined specifically for showing
+                // wifi devices.
+                WiFiDirectServicesList fragment = (WiFiDirectServicesList) getFragmentManager()
+                        .findFragmentById(R.id.frag_peerlist);
+                WiFiDevicesAdapter adapter = ((WiFiDevicesAdapter) fragment
+                        .getListAdapter());
+
+                adapter.add(resourceType);
+                adapter.notifyDataSetChanged();
+                Log.d(TAG, "onBonjourServiceAvailable " + instanceName);
+        }
+    };
+
+    mManager.setDnsSdResponseListeners(channel, servListener, txtListener);
+    ...
+}
+</pre>
+
+<p>Now create a service request and call {@link
+android.net.wifi.p2p.WifiP2pManager#addServiceRequest(WifiP2pManager.Channel,
+WifiP2pServiceRequest, WifiP2pManager.ActionListener) addServiceRequest()}.
+This method also takes a listener to report success or failure.</p>
+
+<pre>
+        serviceRequest = WifiP2pDnsSdServiceRequest.newInstance();
+        mManager.addServiceRequest(channel,
+                serviceRequest,
+                new ActionListener() {
+                    &#64;Override
+                    public void onSuccess() {
+                        // Success!
+                    }
+
+                    &#64;Override
+                    public void onFailure(int code) {
+                        // Command failed.  Check for P2P_UNSUPPORTED, ERROR, or BUSY
+                    }
+                });
+</pre>
+
+<p>Finally, make the call to {@link
+android.net.wifi.p2p.WifiP2pManager#discoverServices(WifiP2pManager.Channel,
+WifiP2pManager.ActionListener) discoverServices()}.</p>
+
+<pre>
+        mManager.discoverServices(channel, new ActionListener() {
+
+            &#64;Override
+            public void onSuccess() {
+                // Success!
+            }
+
+            &#64;Override
+            public void onFailure(int code) {
+                // Command failed.  Check for P2P_UNSUPPORTED, ERROR, or BUSY
+                if (code == WifiP2pManager.P2P_UNSUPPORTED) {
+                    Log.d(TAG, "P2P isn't supported on this device.");
+                else if(...)
+                    ...
+            }
+        });
+</pre>
+
+<p>If all goes well, hooray, you're done!  If you encounter problems, remember
+that the asynchronous calls you've made take an
+{@link android.net.wifi.p2p.WifiP2pManager.ActionListener} as an argument, and
+this provides you with callbacks indicating success or failure.  To diagnose
+problems, put debugging code in {@link
+android.net.wifi.p2p.WifiP2pManager.ActionListener#onFailure(int) onFailure()}.  The error code
+provided by the method hints at the problem.  Here are the possible error values
+and what they mean</p>
+<dl>
+  <dt> {@link android.net.wifi.p2p.WifiP2pManager#P2P_UNSUPPORTED}</dt>
+  <dd> Wi-Fi Direct isn't supported on the device running the app.</dd>
+  <dt> {@link android.net.wifi.p2p.WifiP2pManager#BUSY}</dt>
+  <dd> The system is to busy to process the request.</dd>
+  <dt> {@link android.net.wifi.p2p.WifiP2pManager#ERROR}</dt>
+  <dd> The operation failed due to an internal error.</dd>
+</dl>
