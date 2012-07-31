@@ -114,6 +114,8 @@ class ServerThread extends Thread {
                 : Integer.parseInt(factoryTestStr);
         final boolean headless = "1".equals(SystemProperties.get("ro.config.headless", "0"));
 
+        AccountManagerService accountManager = null;
+        ContentService contentService = null;
         LightsService lights = null;
         PowerManagerService power = null;
         BatteryService battery = null;
@@ -190,14 +192,14 @@ class ServerThread extends Thread {
             // The AccountManager must come before the ContentService
             try {
                 Slog.i(TAG, "Account Manager");
-                ServiceManager.addService(Context.ACCOUNT_SERVICE,
-                        new AccountManagerService(context));
+                accountManager = new AccountManagerService(context);
+                ServiceManager.addService(Context.ACCOUNT_SERVICE, accountManager);
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure starting Account Manager", e);
             }
 
             Slog.i(TAG, "Content Manager");
-            ContentService.main(context,
+            contentService = ContentService.main(context,
                     factoryTest == SystemServer.FACTORY_TEST_LOW_LEVEL);
 
             Slog.i(TAG, "System Content Providers");
@@ -463,6 +465,20 @@ class ServerThread extends Thread {
              */
             if (mountService != null) {
                 mountService.waitForAsecScan();
+            }
+
+            try {
+                if (accountManager != null)
+                    accountManager.systemReady();
+            } catch (Throwable e) {
+                reportWtf("making Account Manager Service ready", e);
+            }
+
+            try {
+                if (contentService != null)
+                    contentService.systemReady();
+            } catch (Throwable e) {
+                reportWtf("making Content Service ready", e);
             }
 
             try {
