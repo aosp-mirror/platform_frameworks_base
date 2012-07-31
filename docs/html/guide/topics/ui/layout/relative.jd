@@ -44,19 +44,19 @@ android.widget.RelativeLayout.LayoutParams}.</p>
 include:</p>
 <dl>
   <dt><a
-href="{docRoot}reference/android/widget/RelativeLayout.LayoutParams.html#attr_android:layout_alignParentTop"
+href="{@docRoot}reference/android/widget/RelativeLayout.LayoutParams.html#attr_android:layout_alignParentTop"
 >{@code android:layout_alignParentTop}</a></dt>
     <dd>If {@code "true"}, makes the top edge of this view match the top edge of the parent. </dd>
   <dt><a
-href="{docRoot}reference/android/widget/RelativeLayout.LayoutParams.html#attr_android:layout_centerVertical"
+href="{@docRoot}reference/android/widget/RelativeLayout.LayoutParams.html#attr_android:layout_centerVertical"
 >{@code android:layout_centerVertical}</a></dt>
     <dd>If {@code "true"}, centers this child vertically within its parent.</dd>
   <dt><a
-href="{docRoot}reference/android/widget/RelativeLayout.LayoutParams.html#attr_android:layout_below"
+href="{@docRoot}reference/android/widget/RelativeLayout.LayoutParams.html#attr_android:layout_below"
 >{@code android:layout_below}</a></dt>
     <dd>Positions the top edge of this view below the view specified with a resource ID.</dd>
   <dt><a
-href="{docRoot}reference/android/widget/RelativeLayout.LayoutParams.html#attr_android:layout_toRightOf"
+href="{@docRoot}reference/android/widget/RelativeLayout.LayoutParams.html#attr_android:layout_toRightOf"
 >{@code android:layout_toRightOf}</a></dt>
     <dd>Positions the left edge of this view to the right of the view specified with a resource ID.</dd>
 </dl>

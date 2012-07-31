@@ -61,7 +61,7 @@ well-designed class, though, a custom view should:
     existing view
     subclasses, such as {@link android.widget.Button}.</p>
 
-<p>To allow the <a href=”{@docRoot}guide/developing/tools/adt.html”>Android Developer Tools
+<p>To allow the <a href="{@docRoot}guide/developing/tools/adt.html">Android Developer Tools
 </a> to interact with your view, at a minimum you must provide a constructor that takes a
 {@link android.content.Context} and an {@link android.util.AttributeSet} object as parameters.
 This constructor allows the layout editor to create and edit an instance of your view.</p>
@@ -105,7 +105,7 @@ enable this behavior in your custom view, you must:
 
 <pre>
 &lt;resources>;
-   &ltdeclare-styleable name="PieChart">
+   &lt;declare-styleable name="PieChart">
        &lt;attr name="showText" format="boolean" />
        &lt;attr name="labelPosition" format="enum">
            &lt;enum name="left" value="0"/>
@@ -276,6 +276,6 @@ public void setShowText(boolean showText) {
             </ul>
 
             <p>For more information on creating accessible views, see
-                <a href=”{@docRoot}guide/topics/ui/accessibility/apps.html#custom-views”>
+                <a href="{@docRoot}guide/topics/ui/accessibility/apps.html#custom-views">
               Making Applications Accessible</a> in the Android Developers Guide.
         </p>

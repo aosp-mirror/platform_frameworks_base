@@ -18,7 +18,7 @@ the default position, the screens are wider than they are tall. This introduces 
 issues that we’ve noticed causing problems in some apps.</p>
     </a>
     
-    <a href="android-developers.blogspot.com/2011/06/deep-dive-into-location.html">
+    <a href="http://android-developers.blogspot.com/2011/06/deep-dive-into-location.html">
       <h4>A Deep Dive Into Location</h4>
       <p>I’ve written an open-source reference app that incorporates all of the tips, tricks, and
 cheats I know to reduce the time between opening an app and seeing an up-to-date list of nearby

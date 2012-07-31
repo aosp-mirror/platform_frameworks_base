@@ -169,8 +169,8 @@ root element.</p>
     <p>Another way to include a layout is to use {@link android.view.ViewStub}. It is a lightweight
 View that consumes no layout space until you explicitly inflate it, at which point, it includes a
 layout file defined by its {@code android:layout} attribute. For more information about using {@link
-android.view.ViewStub}, read <a href="{@docRoot}resources/articles/layout-tricks-stubs.html">Layout
-Tricks: ViewStubs</a>.</p>
+android.view.ViewStub}, read <a href="{@docRoot}training/improving-layouts/loading-ondemand.html">Loading
+  Views On Demand</a>.</p>
     </dd>
 
   <dt id="merge-element"><code>&lt;merge&gt;</code></dt>
@@ -181,8 +181,7 @@ that already contains the appropriate parent View to contain the children of the
 in another layout file using <a href="#include-element"><code>&lt;include&gt;</code></a> and
 this layout doesn't require a different {@link android.view.ViewGroup} container. For more
 information about merging layouts, read <a
-href="{@docRoot}resources/articles/layout-tricks-merge.html">Layout
-Tricks: Merging</a>.</dd>
+href="{@docRoot}training/improving-layouts/reusing-layouts.html">Re-using Layouts with &lt;include/></a>.</dd>
 
   </dl>
 

@@ -5,9 +5,9 @@ page.title=Tracer for OpenGL ES
 <div id="qv">
   <h2>In this document</h2>
   <ol>
-    <li><a href="running">Running Tracer</a></li>
-    <li><a href="generating">Generating a Trace</a></li>
-    <li><a href="analyzing">Analyzing a Trace</a></li>
+    <li><a href="#running">Running Tracer</a></li>
+    <li><a href="#generating">Generating a Trace</a></li>
+    <li><a href="#analyzing">Analyzing a Trace</a></li>
   </ol>
   <h2>See also</h2>
   <ol>

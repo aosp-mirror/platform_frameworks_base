@@ -49,13 +49,6 @@ perform interprocess communication</li>
       LocalService}</a></li>
 </ol>
 
-<h2>Articles</h2>
-<ol>
-  <li><a href="{@docRoot}resources/articles/multitasking-android-way.html">Multitasking the Android Way</a></li>
-  <li><a href="{@docRoot}resources/articles/service-api-changes-starting-with.html">Service API changes starting
-      with Android 2.0</a></li>
-</ol>
-
 <h2>See also</h2>
 <ol>
 <li><a href="{@docRoot}guide/components/bound-services.html">Bound Services</a></li>

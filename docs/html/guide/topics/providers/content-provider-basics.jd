@@ -1031,11 +1031,11 @@ mRowsDeleted = getContentResolver().delete(
     <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#gprmsn">
     android:grantUriPermission</a></code>
     attribute of the
-    {@code <a href="guide/topics/manifest/provider-element.html">&lt;provider&gt;</a>}
+    {@code <a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a>}
     element, as well as the
-    {@code <a href="guide/topics/manifest/grant-uri-permission-element.html">
+    {@code <a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">
     &lt;grant-uri-permission&gt;</a>} child element of the
-    {@code <a href="guide/topics/manifest/provider-element.html">&lt;provider&gt;</a>}
+    {@code <a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a>}
     element. The URI permissions mechanism is explained in more detail in the
     <a href="{@docRoot}guide/topics/security/security.html">Security and Permissions</a> guide,
     in the section "URI Permissions".

@@ -281,6 +281,6 @@ public void onAccessibilityEvent(AccessibilityEvent event) {
 
 <p>Now you have a complete, functioning accessibility service.  Try configuring
 how it interacts with the user, by adding Android's <a
-  href="http://developer.android.com/resources/articles/tts.html">text-to-speech
+  href="http://android-developers.blogspot.com/2009/09/introduction-to-text-to-speech-in.html">text-to-speech
   engine</a>, or using a {@link android.os.Vibrator} to provide haptic
 feedback!</p>

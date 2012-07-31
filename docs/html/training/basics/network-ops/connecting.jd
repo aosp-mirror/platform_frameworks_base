@@ -66,7 +66,7 @@ and {@link android.net.NetworkInfo#isConnected isConnected()}.
 Remember, the device may be out of range of a
 network, or the user may have disabled both Wi-Fi and mobile data access. 
 For more discussion of this topic, see the lesson <a
-href="{@docRoot}training/network-ops/managing.html">Managing Network
+href="{@docRoot}training/basics/network-ops/managing.html">Managing Network
 Usage</a>.</p>
 
 <pre>
