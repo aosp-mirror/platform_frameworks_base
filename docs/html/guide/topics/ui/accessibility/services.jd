@@ -10,7 +10,7 @@ parent.link=index.html
   <ol>
     <li><a href="#manifest">Manifest Declarations and Permissions</a>
       <ol>
-        <li><a href="service-declaration">Accessibility service declaration</a></li>
+        <li><a href="#service-declaration">Accessibility service declaration</a></li>
         <li><a href="#service-config">Accessibility service configuration</a></li>
       </ol>
     </li>

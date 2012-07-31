@@ -20,7 +20,7 @@ page.title=Android Open Accessory Protocol 2.0
 </div>
 
 <p>This document describes the changes to the Android Open Accessory (AOA) protocol since its
-initial release, and is a supplement to the documentation of the <a href="oap.html">first
+initial release, and is a supplement to the documentation of the <a href="aoa.html">first
 release of AOA</a>.</p>
 
 <p>The Android Open Accessory Protocol 2.0 adds two new features: audio output (from the Android
