@@ -1463,24 +1463,42 @@ public class MediaScanner
     }
 
     FileEntry makeEntryFor(String path) {
-        String key = path;
         String where;
         String[] selectionArgs;
-        if (mCaseInsensitivePaths) {
-            // the 'like' makes it use the index, the 'lower()' makes it correct
-            // when the path contains sqlite wildcard characters
-            where = "_data LIKE ?1 AND lower(_data)=lower(?1)";
-            selectionArgs = new String[] { path };
-        } else {
-            where = Files.FileColumns.DATA + "=?";
-            selectionArgs = new String[] { path };
-        }
 
         Cursor c = null;
         try {
+            boolean hasWildCards = path.contains("_") || path.contains("%");
+
+            if (hasWildCards || !mCaseInsensitivePaths) {
+                // if there are wildcard characters in the path, the "like" match
+                // will be slow, and it's worth trying an "=" comparison
+                // first, since in most cases the case will match.
+                // Also, we shouldn't do a "like" match on case-sensitive filesystems
+                where = Files.FileColumns.DATA + "=?";
+                selectionArgs = new String[] { path };
+            } else {
+                // if there are no wildcard characters in the path, then the "like"
+                // match will be just as fast as the "=" case, because of the index
+                where = "_data LIKE ?1 AND lower(_data)=lower(?1)";
+                selectionArgs = new String[] { path };
+            }
             c = mMediaProvider.query(mFilesUri, FILES_PRESCAN_PROJECTION,
                     where, selectionArgs, null, null);
-            if (c.moveToNext()) {
+            if (!c.moveToFirst() && hasWildCards && mCaseInsensitivePaths) {
+                // Try again with case-insensitive match. This will be slower, especially
+                // if the path contains wildcard characters.
+                // The 'like' makes it use the index, the 'lower()' makes it correct
+                // when the path contains sqlite wildcard characters,
+                where = "_data LIKE ?1 AND lower(_data)=lower(?1)";
+                selectionArgs = new String[] { path };
+                c.close();
+                c = mMediaProvider.query(mFilesUri, FILES_PRESCAN_PROJECTION,
+                        where, selectionArgs, null, null);
+                // TODO update the path in the db with the correct case so the fast
+                // path works next time?
+            }
+            if (c.moveToFirst()) {
                 long rowId = c.getLong(FILES_PRESCAN_ID_COLUMN_INDEX);
                 int format = c.getInt(FILES_PRESCAN_FORMAT_COLUMN_INDEX);
                 long lastModified = c.getLong(FILES_PRESCAN_DATE_MODIFIED_COLUMN_INDEX);
