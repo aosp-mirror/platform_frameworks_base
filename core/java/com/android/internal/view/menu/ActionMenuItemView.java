@@ -141,19 +141,21 @@ public class ActionMenuItemView extends TextView
 
     public void setIcon(Drawable icon) {
         mIcon = icon;
-        int width = icon.getIntrinsicWidth();
-        int height = icon.getIntrinsicHeight();
-        if (width > mMaxIconSize) {
-            final float scale = (float) mMaxIconSize / width;
-            width = mMaxIconSize;
-            height *= scale;
+        if (icon != null) {
+            int width = icon.getIntrinsicWidth();
+            int height = icon.getIntrinsicHeight();
+            if (width > mMaxIconSize) {
+                final float scale = (float) mMaxIconSize / width;
+                width = mMaxIconSize;
+                height *= scale;
+            }
+            if (height > mMaxIconSize) {
+                final float scale = (float) mMaxIconSize / height;
+                height = mMaxIconSize;
+                width *= scale;
+            }
+            icon.setBounds(0, 0, width, height);
         }
-        if (height > mMaxIconSize) {
-            final float scale = (float) mMaxIconSize / height;
-            height = mMaxIconSize;
-            width *= scale;
-        }
-        icon.setBounds(0, 0, width, height);
         setCompoundDrawables(icon, null, null, null);
 
         updateTextButtonVisibility();
