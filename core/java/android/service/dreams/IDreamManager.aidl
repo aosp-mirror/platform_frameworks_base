@@ -27,4 +27,5 @@ interface IDreamManager {
     void setDreamComponent(in ComponentName componentName);
     ComponentName getDreamComponent();
     void testDream(in ComponentName componentName);
+    boolean isDreaming();
 }

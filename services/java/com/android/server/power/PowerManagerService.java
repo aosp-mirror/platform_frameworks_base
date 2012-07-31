@@ -424,6 +424,11 @@ public class PowerManagerService extends IPowerManager.Stub
                             forceUserActivityLocked();
                         }
                     }
+
+                    // stop the screensaver if we're now unplugged
+                    if (mPolicy != null) {
+                        mPolicy.stopScreenSaver();
+                    }
                 }
             }
         }
@@ -1826,7 +1831,7 @@ public class PowerManagerService extends IPowerManager.Stub
             final boolean stateChanged = mPowerState != newState;
 
             if (stateChanged && reason == WindowManagerPolicy.OFF_BECAUSE_OF_TIMEOUT) {
-                if (mPolicy != null && mPolicy.isScreenSaverEnabled()) {
+                if (mPolicy != null && mPolicy.isScreenSaverEnabled() && mIsPowered) {
                     if (DEBUG) {
                         Slog.d(TAG, "setPowerState: running screen saver instead of turning off screen");
                     }
@@ -1921,6 +1926,13 @@ public class PowerManagerService extends IPowerManager.Stub
                         err = screenOffFinishedAnimatingLocked(reason);
                     } else {
                         err = 0;
+                    }
+
+                    // stop the screensaver if user turned screen off
+                    if (stateChanged && reason == WindowManagerPolicy.OFF_BECAUSE_OF_USER) {
+                        if (mPolicy != null) {
+                            mPolicy.stopScreenSaver();
+                        }
                     }
                 }
             } else if (stateChanged) {

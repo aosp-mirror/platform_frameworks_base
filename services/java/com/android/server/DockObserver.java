@@ -29,9 +29,12 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UEventObserver;
 import android.provider.Settings;
+import android.service.dreams.IDreamManager;
 import android.util.Log;
 import android.util.Slog;
 
@@ -194,7 +197,29 @@ class DockObserver extends UEventObserver {
                             }
                         }
 
-                        mContext.sendStickyBroadcast(intent);
+                        IDreamManager mgr = IDreamManager.Stub.asInterface(ServiceManager.getService("dreams"));
+                        if (mgr != null) {
+                            // dreams feature enabled
+                            boolean undocked = mDockState == Intent.EXTRA_DOCK_STATE_UNDOCKED;
+                            if (undocked) {
+                                try {
+                                    if (mgr.isDreaming()) {
+                                        mgr.awaken();
+                                    }
+                                } catch (RemoteException e) {
+                                    Slog.w(TAG, "Unable to awaken!", e);
+                                }
+                            } else {
+                                try {
+                                    mgr.dream();
+                                } catch (RemoteException e) {
+                                    Slog.w(TAG, "Unable to dream!", e);
+                                }
+                            }
+                        } else {
+                            // dreams feature not enabled, send legacy intent
+                            mContext.sendStickyBroadcast(intent);
+                        }
                     }
                     break;
             }
