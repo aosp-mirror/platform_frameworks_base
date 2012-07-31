@@ -460,6 +460,13 @@ public class ScrollView extends FrameLayout {
             return true;
         }
 
+        /*
+         * Don't try to intercept touch if we can't scroll anyway.
+         */
+        if (getScrollY() == 0 && !canScrollVertically(1)) {
+            return false;
+        }
+
         switch (action & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_MOVE: {
                 /*
