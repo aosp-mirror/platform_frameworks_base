@@ -166,6 +166,7 @@ public final class ActivityThread {
             = new HashMap<IBinder, Service>();
     AppBindData mBoundApplication;
     Profiler mProfiler;
+    int mCurDefaultDisplayDpi;
     Configuration mConfiguration;
     Configuration mCompatConfiguration;
     Configuration mResConfiguration;
@@ -1306,6 +1307,7 @@ public final class ActivityThread {
                     break;
                 case CONFIGURATION_CHANGED:
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "configChanged");
+                    mCurDefaultDisplayDpi = ((Configuration)msg.obj).densityDpi;
                     handleConfigurationChanged((Configuration)msg.obj, null);
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
@@ -1539,14 +1541,15 @@ public final class ActivityThread {
     }
 
     private Configuration mMainThreadConfig = new Configuration();
-    Configuration applyConfigCompatMainThread(Configuration config, CompatibilityInfo compat) {
+    Configuration applyConfigCompatMainThread(int displayDensity, Configuration config,
+            CompatibilityInfo compat) {
         if (config == null) {
             return null;
         }
         if (compat != null && !compat.supportsScreen()) {
             mMainThreadConfig.setTo(config);
             config = mMainThreadConfig;
-            compat.applyToConfiguration(config);
+            compat.applyToConfiguration(displayDensity, config);
         }
         return config;
     }
@@ -3464,6 +3467,7 @@ public final class ActivityThread {
         
         // If there was a pending configuration change, execute it first.
         if (changedConfig != null) {
+            mCurDefaultDisplayDpi = changedConfig.densityDpi;
             handleConfigurationChanged(changedConfig, null);
         }
 
@@ -3546,8 +3550,8 @@ public final class ActivityThread {
             for (ActivityClientRecord ar : mActivities.values()) {
                 Activity a = ar.activity;
                 if (a != null) {
-                    Configuration thisConfig = applyConfigCompatMainThread(newConfig,
-                            ar.packageInfo.mCompatibilityInfo.getIfNeeded());
+                    Configuration thisConfig = applyConfigCompatMainThread(mCurDefaultDisplayDpi,
+                            newConfig, ar.packageInfo.mCompatibilityInfo.getIfNeeded());
                     if (!ar.activity.mFinished && (allActivities || !ar.paused)) {
                         // If the activity is currently resumed, its configuration
                         // needs to change right now.
@@ -3691,14 +3695,14 @@ public final class ActivityThread {
         return changes != 0;
     }
 
-    final Configuration applyCompatConfiguration() {
+    final Configuration applyCompatConfiguration(int displayDensity) {
         Configuration config = mConfiguration;
         if (mCompatConfiguration == null) {
             mCompatConfiguration = new Configuration();
         }
         mCompatConfiguration.setTo(mConfiguration);
         if (mResCompatibilityInfo != null && !mResCompatibilityInfo.supportsScreen()) {
-            mResCompatibilityInfo.applyToConfiguration(mCompatConfiguration);
+            mResCompatibilityInfo.applyToConfiguration(displayDensity, mCompatConfiguration);
             config = mCompatConfiguration;
         }
         return config;
@@ -3713,6 +3717,7 @@ public final class ActivityThread {
             if (mPendingConfiguration != null) {
                 if (!mPendingConfiguration.isOtherSeqNewer(config)) {
                     config = mPendingConfiguration;
+                    mCurDefaultDisplayDpi = config.densityDpi;
                 }
                 mPendingConfiguration = null;
             }
@@ -3734,7 +3739,7 @@ public final class ActivityThread {
             }
             configDiff = mConfiguration.diff(config);
             mConfiguration.updateFrom(config);
-            config = applyCompatConfiguration();
+            config = applyCompatConfiguration(mCurDefaultDisplayDpi);
             callbacks = collectComponentCallbacksLocked(false, config);
         }
         
@@ -3933,7 +3938,7 @@ public final class ActivityThread {
             // Persistent processes on low-memory devices do not get to
             // use hardware accelerated drawing, since this can add too much
             // overhead to the process.
-            Display display = WindowManagerImpl.getDefault().getDefaultDisplay();
+            final Display display = WindowManagerImpl.getDefault().getDefaultDisplay();
             if (!ActivityManager.isHighEndGfx(display)) {
                 HardwareRenderer.disable(false);
             }
@@ -3970,7 +3975,8 @@ public final class ActivityThread {
          * in AppBindData can be safely assumed to be up to date
          */
         applyConfigurationToResourcesLocked(data.config, data.compatInfo);
-        applyCompatConfiguration();
+        mCurDefaultDisplayDpi = data.config.densityDpi;
+        applyCompatConfiguration(mCurDefaultDisplayDpi);
 
         data.info = getPackageInfoNoCheck(data.appInfo, data.compatInfo);
 

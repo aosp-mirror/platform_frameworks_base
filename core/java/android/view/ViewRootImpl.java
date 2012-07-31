@@ -318,6 +318,7 @@ public final class ViewRootImpl implements ViewParent,
     HashSet<View> mTempHashSet;
 
     private final int mDensity;
+    private final int mNoncompatDensity;
 
     /**
      * Consistency verifier for debugging purposes.
@@ -390,6 +391,7 @@ public final class ViewRootImpl implements ViewParent,
         mAttachInfo = new View.AttachInfo(sWindowSession, mWindow, this, mHandler, this);
         mViewConfiguration = ViewConfiguration.get(context);
         mDensity = context.getResources().getDisplayMetrics().densityDpi;
+        mNoncompatDensity = context.getResources().getDisplayMetrics().noncompatDensityDpi;
         mFallbackEventHandler = PolicyManager.makeNewFallbackEventHandler(context);
         mProfileRendering = Boolean.parseBoolean(
                 SystemProperties.get(PROPERTY_PROFILE_RENDERING, "false"));
@@ -2272,8 +2274,7 @@ public final class ViewRootImpl implements ViewParent,
                 if (mTranslator != null) {
                     mTranslator.translateCanvas(canvas);
                 }
-                canvas.setScreenDensity(scalingRequired
-                        ? DisplayMetrics.DENSITY_DEVICE : 0);
+                canvas.setScreenDensity(scalingRequired ? mNoncompatDensity : 0);
                 attachInfo.mSetIgnoreDirtyState = false;
 
                 mView.draw(canvas);
@@ -2673,7 +2674,7 @@ public final class ViewRootImpl implements ViewParent,
         CompatibilityInfo ci = mCompatibilityInfo.getIfNeeded();
         if (ci != null) {
             config = new Configuration(config);
-            ci.applyToConfiguration(config);
+            ci.applyToConfiguration(mNoncompatDensity, config);
         }
 
         synchronized (sConfigCallbacks) {
@@ -2684,7 +2685,7 @@ public final class ViewRootImpl implements ViewParent,
         if (mView != null) {
             // At this point the resources have been updated to
             // have the most recent config, whatever that is.  Use
-            // the on in them which may be newer.
+            // the one in them which may be newer.
             config = mView.getResources().getConfiguration();
             if (force || mLastConfiguration.diff(config) != 0) {
                 mLastConfiguration.setTo(config);

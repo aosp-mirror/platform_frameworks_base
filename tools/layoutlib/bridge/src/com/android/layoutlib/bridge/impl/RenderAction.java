@@ -100,7 +100,7 @@ public abstract class RenderAction<T extends RenderParams> extends FrameworkReso
 
         // setup the display Metrics.
         DisplayMetrics metrics = new DisplayMetrics();
-        metrics.densityDpi = mParams.getDensity().getDpiValue();
+        metrics.densityDpi = metrics.noncompatDensityDpi = mParams.getDensity().getDpiValue();
 
         metrics.density = metrics.noncompatDensity =
                 metrics.densityDpi / (float) DisplayMetrics.DENSITY_DEFAULT;
@@ -335,6 +335,7 @@ public abstract class RenderAction<T extends RenderParams> extends FrameworkReso
         } else {
             config.smallestScreenWidthDp = config.screenWidthDp;
         }
+        config.densityDpi = density.getDpiValue();
 
         // never run in compat mode:
         config.compatScreenWidthDp = config.screenWidthDp;

@@ -42,6 +42,7 @@ import android.os.ServiceManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.ViewRootImpl;
+import android.view.WindowManager;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -241,7 +242,7 @@ public class WallpaperManager {
                 }
                 mWallpaper = null;
                 try {
-                    mWallpaper = getCurrentWallpaperLocked();
+                    mWallpaper = getCurrentWallpaperLocked(context);
                 } catch (OutOfMemoryError e) {
                     Log.w(TAG, "No memory load current wallpaper", e);
                 }
@@ -264,7 +265,7 @@ public class WallpaperManager {
             }
         }
 
-        private Bitmap getCurrentWallpaperLocked() {
+        private Bitmap getCurrentWallpaperLocked(Context context) {
             try {
                 Bundle params = new Bundle();
                 ParcelFileDescriptor fd = mService.getWallpaper(this, params);
@@ -276,7 +277,7 @@ public class WallpaperManager {
                         BitmapFactory.Options options = new BitmapFactory.Options();
                         Bitmap bm = BitmapFactory.decodeFileDescriptor(
                                 fd.getFileDescriptor(), null, options);
-                        return generateBitmap(bm, width, height);
+                        return generateBitmap(context, bm, width, height);
                     } catch (OutOfMemoryError e) {
                         Log.w(TAG, "Can't decode file", e);
                     } finally {
@@ -304,7 +305,7 @@ public class WallpaperManager {
                     try {
                         BitmapFactory.Options options = new BitmapFactory.Options();
                         Bitmap bm = BitmapFactory.decodeStream(is, null, options);
-                        return generateBitmap(bm, width, height);
+                        return generateBitmap(context, bm, width, height);
                     } catch (OutOfMemoryError e) {
                         Log.w(TAG, "Can't decode stream", e);
                     } finally {
@@ -768,12 +769,15 @@ public class WallpaperManager {
         setResource(com.android.internal.R.drawable.default_wallpaper);
     }
     
-    static Bitmap generateBitmap(Bitmap bm, int width, int height) {
+    static Bitmap generateBitmap(Context context, Bitmap bm, int width, int height) {
         if (bm == null) {
             return null;
         }
 
-        bm.setDensity(DisplayMetrics.DENSITY_DEVICE);
+        WindowManager wm = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
+        DisplayMetrics metrics = new DisplayMetrics();
+        wm.getDefaultDisplay().getMetrics(metrics);
+        bm.setDensity(metrics.noncompatDensityDpi);
 
         if (width <= 0 || height <= 0
                 || (bm.getWidth() == width && bm.getHeight() == height)) {
@@ -783,7 +787,7 @@ public class WallpaperManager {
         // This is the final bitmap we want to return.
         try {
             Bitmap newbm = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-            newbm.setDensity(DisplayMetrics.DENSITY_DEVICE);
+            newbm.setDensity(metrics.noncompatDensityDpi);
 
             Canvas c = new Canvas(newbm);
             Rect targetRect = new Rect();

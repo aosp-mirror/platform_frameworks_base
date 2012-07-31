@@ -296,7 +296,7 @@ public class NinePatchDrawable extends Drawable {
         if (dither) {
             options.inDither = false;
         }
-        options.inScreenDensity = DisplayMetrics.DENSITY_DEVICE;
+        options.inScreenDensity = r.getDisplayMetrics().noncompatDensityDpi;
 
         final Rect padding = new Rect();
         final Rect layoutInsets = new Rect();
