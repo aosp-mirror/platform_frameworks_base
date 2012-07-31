@@ -187,10 +187,7 @@ href="#RestoreVersion">Checking the Restore Data Version</a> for more informatio
 available only on devices running API Level 8 (Android 2.2) or greater, so you should also
 set your <a
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code android:minSdkVersion}</a>
-attribute to "8". However, if you implement proper <a
-href="{@docRoot}resources/articles/backward-compatibility.html">backward compatibility</a> in
-your application, you can support this feature for devices running API Level 8 or greater, while
-remaining compatible with older devices.</p>
+attribute to "8".</p>
 
 
 
