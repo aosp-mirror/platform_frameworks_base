@@ -17,6 +17,7 @@
 static float2 scale;
 static float2 center, dimensions;
 static float range, inv_max_dist, shade, slope;
+static float2 overDimensions;
 
 void init_vignette(uint32_t dim_x, uint32_t dim_y, float center_x, float center_y,
         float desired_scale, float desired_shade, float desired_slope) {
@@ -43,20 +44,21 @@ void init_vignette(uint32_t dim_x, uint32_t dim_y, float center_x, float center_
     range = 1.3 - 0.7*sqrt(desired_scale);
     shade = desired_shade;
     slope = desired_slope;
+
+    overDimensions = ((float2)1.f) / dimensions;
 }
 
 void root(const uchar4 *in, uchar4 *out, uint32_t x, uint32_t y) {
     // Convert x and y to floating point coordinates with center as origin
-    const float4 fin = rsUnpackColor8888(*in);
-    float2 coord;
-    coord.x = (float)x / dimensions.x;
-    coord.y = (float)y / dimensions.y;
+    const float4 fin = convert_float4(*in);
+    float2 coord = {(float)x, (float)y};
+    coord *= overDimensions;
     coord -= center;
     const float dist = length(scale * coord);
     const float lumen = shade / (1.0 + exp((dist * inv_max_dist - range) * slope)) + (1.0 - shade);
     float4 fout;
     fout.rgb = fin.rgb * lumen;
     fout.w = fin.w;
-    *out = rsPackColorTo8888(fout);
+    *out = convert_uchar4(fout);
 }
 
