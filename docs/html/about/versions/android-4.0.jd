@@ -1,4 +1,6 @@
-page.title=Android 4.1 API Overview
+page.title=Android 4.0 Platform
+sdk.platform.version=4.0
+sdk.platform.apiLevel=14
 @jd:body
 
 <div id="qv-wrapper">
