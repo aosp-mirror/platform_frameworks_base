@@ -11341,6 +11341,7 @@ package android.media {
     field public static final int METADATA_KEY_NUM_TRACKS = 10; // 0xa
     field public static final int METADATA_KEY_TITLE = 7; // 0x7
     field public static final int METADATA_KEY_VIDEO_HEIGHT = 19; // 0x13
+    field public static final int METADATA_KEY_VIDEO_ROTATION = 24; // 0x18
     field public static final int METADATA_KEY_VIDEO_WIDTH = 18; // 0x12
     field public static final int METADATA_KEY_WRITER = 11; // 0xb
     field public static final int METADATA_KEY_YEAR = 8; // 0x8
