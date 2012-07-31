@@ -39,11 +39,11 @@ interface ILocationManager
     boolean providerMeetsCriteria(String provider, in Criteria criteria);
 
     void requestLocationUpdates(String provider, in Criteria criteria, long minTime, float minDistance,
-        boolean singleShot, in ILocationListener listener);
+        boolean singleShot, in ILocationListener listener, String packageName);
     void requestLocationUpdatesPI(String provider, in Criteria criteria, long minTime, float minDistance,
-        boolean singleShot, in PendingIntent intent);
-    void removeUpdates(in ILocationListener listener);
-    void removeUpdatesPI(in PendingIntent intent);
+        boolean singleShot, in PendingIntent intent, String packageName);
+    void removeUpdates(in ILocationListener listener, String packageName);
+    void removeUpdatesPI(in PendingIntent intent, String packageName);
 
     boolean addGpsStatusListener(IGpsStatusListener listener);
     void removeGpsStatusListener(IGpsStatusListener listener);
@@ -54,13 +54,13 @@ interface ILocationManager
     boolean sendExtraCommand(String provider, String command, inout Bundle extras);
 
     void addProximityAlert(double latitude, double longitude, float distance,
-        long expiration, in PendingIntent intent);
+        long expiration, in PendingIntent intent, String packageName);
     void removeProximityAlert(in PendingIntent intent);
 
     Bundle getProviderInfo(String provider);
     boolean isProviderEnabled(String provider);
 
-    Location getLastKnownLocation(String provider);
+    Location getLastKnownLocation(String provider, String packageName);
 
     // Used by location providers to tell the location manager when it has a new location.
     // Passive is true if the location is coming from the passive provider, in which case
