@@ -2282,7 +2282,7 @@ public class MediaPlayer
          * <li>{@link #MEDIA_ERROR_SERVER_DIED}
          * </ul>
          * @param extra an extra code, specific to the error. Typically
-         * implementation dependant.
+         * implementation dependent.
          * @return True if the method handled the error, false if it didn't.
          * Returning false, or not having an OnErrorListener at all, will
          * cause the OnCompletionListener to be called.
@@ -2387,7 +2387,7 @@ public class MediaPlayer
          * <li>{@link #MEDIA_INFO_METADATA_UPDATE}
          * </ul>
          * @param extra an extra code, specific to the info. Typically
-         * implementation dependant.
+         * implementation dependent.
          * @return True if the method handled the info, false if it didn't.
          * Returning false, or not having an OnErrorListener at all, will
          * cause the info to be discarded.
