@@ -1,0 +1,373 @@
+page.title=Using Network Service Discovery
+parent.title=Connecting Devices Wirelessly
+parent.link=index.html
+
+trainingnavtop=true
+next.title=Connecting with Wi-Fi Direct
+next.link=wifi-direct.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- table of contents -->
+<h2>This lesson teaches you how to</h2>
+<ol>
+  <li><a href="#register">Register Your Service on the Network</a></li>
+  <li><a href="#discover">Discover Services on the Network</a></li>
+  <li><a href="#connect">Connect to Services on the Network</a></li>
+  <li><a href="#teardown">Unregister Your Service on Application Close</a></li>
+</ol>
+
+<!--
+<h2>You should also read</h2>
+    <ul>
+    </ul>
+-->
+<h2>Try it out</h2>
+
+<div class="download-box">
+  <a href="{@docRoot}shareables/training/nsdchat.zip" class="button">Download
+    the sample app</a>
+  <p class="filename">nsdchat.zip</p>
+</div>
+</p>
+
+</div>
+</div>
+
+<p>Adding Network Service Discovery (NSD) to your app allows your users to
+identify other devices on the local network that support the services your app
+requests. This is useful for a variety of peer-to-peer applications such as file
+sharing or multi-player gaming. Android's NSD APIs simplify the effort required
+for you to implement such features.</p>
+
+<p>This lesson shows you how to build an application that can broadcast its
+name and connection information to the local network and scan for information
+from other applications doing the same.  Finally, this lesson shows you how
+to connect to the same application running on another device.</p>
+
+<h2 id="register">Register Your Service on the Network</h2>
+
+<p class="note"><strong>Note: </strong>This step is optional.  If
+you don't care about broadcasting your app's services over the local network,
+you can skip forward to the
+next section, <a href="#discover">Discover Services on the Network</a>.</p>
+
+<p>To register your service on the local network, first create a {@link
+android.net.nsd.NsdServiceInfo} object.  This object provides the information
+that other devices on the network use when they're deciding whether to connect to your
+service. </p>
+
+<pre>
+public void registerService(int port) {
+    // Create the NsdServiceInfo object, and populate it.
+    NsdServiceInfo serviceInfo  = new NsdServiceInfo();
+
+    // The name is subject to change based on conflicts
+    // with other services advertised on the same network.
+    serviceInfo.setServiceName("NsdChat");
+    serviceInfo.setServiceType("_http._tcp.");
+    serviceInfo.setPort(port);
+    ....
+}
+</pre>
+
+<p>This code snippet sets the service name to "NsdChat".
+The name is visible to any device on the network that is using NSD to look for
+local services.  Keep in mind that the name must be unique for any service on the
+network, and Android automatically handles conflict resolution.  If
+two devices on the network both have the NsdChat application installed, one of
+them changes the service name automatically, to something like "NsdChat
+(1)".</p>
+
+<p>The second parameter sets the service type, specifies which protocol and transport
+layer the application uses.  The syntax is
+"_&lt;protocol&gt;._&lt;transportlayer&gt;".  In the
+code snippet, the service uses HTTP protocol running over TCP.  An application
+offering a printer service (for instance, a network printer) would set the
+service type to "_ipp._tcp".</p>
+
+<p class="note"><strong>Note: </strong> The International Assigned Numbers
+Authority (IANA) manages a centralized,
+authoritative list of service types used by service discovery protocols such as NSD and Bonjour.
+You can download the list from <a
+  href="http://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xml">the
+IANA list of service names and port numbers</a>.
+If you intend to use a new service type, you should reserve it by filling out
+the  <a
+  href="http://www.iana.org/form/ports-services">IANA Ports and Service
+  registration form</a>.</p>
+
+<p>When setting the port for your service, avoid hardcoding it as this
+conflicts with other applications.  For instance, assuming
+that your application always uses port 1337 puts it in potential conflict with
+other installed applications that use the same port.  Instead, use the device's
+next available port.  Because this information is provided to other apps by a
+service broadcast, there's no need for the port your application uses to be
+known by other applications at compile-time.  Instead, the applications can get
+this information from your service broadcast, right before connecting to your
+service.</p>
+
+<p>If you're working with sockets, here's how you can initialize a socket to any
+available port simply by setting it to 0.</p>
+
+<pre>
+public void initializeServerSocket() {
+    // Initialize a server socket on the next available port.
+    mServerSocket = new ServerSocket(0);
+
+    // Store the chosen port.
+    mLocalPort =  mServerSocket.getLocalPort();
+    ...
+}
+</pre>
+
+<p>Now that you've defined the {@link android.net.nsd.NsdServiceInfo
+NsdServiceInfo} object, you need to implement the {@link
+android.net.nsd.NsdManager.RegistrationListener RegistrationListener} interface.  This
+interface contains callbacks used by Android to alert your application of the
+success or failure of service registration and unregistration.
+</p>
+<pre>
+public void initializeRegistrationListener() {
+    mRegistrationListener = new NsdManager.RegistrationListener() {
+
+        &#64;Override
+        public void onServiceRegistered(NsdServiceInfo NsdServiceInfo) {
+            // Save the service name.  Android may have changed it in order to
+            // resolve a conflict, so update the name you initially requested
+            // with the name Android actually used.
+            mServiceName = NsdServiceInfo.getServiceName();
+        }
+
+        &#64;Override
+        public void onRegistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
+            // Registration failed!  Put debugging code here to determine why.
+        }
+
+        &#64;Override
+        public void onServiceUnregistered(NsdServiceInfo arg0) {
+            // Service has been unregistered.  This only happens when you call
+            // NsdManager.unregisterService() and pass in this listener.
+        }
+
+        &#64;Override
+        public void onUnregistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
+            // Unregistration failed.  Put debugging code here to determine why.
+        }
+    };
+}
+</pre>
+
+<p>Now you have all the pieces to register your service.  Call the method
+{@link android.net.nsd.NsdManager#registerService registerService()}.
+</p>
+
+<p>Note that this method is asynchronous, so any code that needs to run
+after the service has been registered must go in the {@link
+android.net.nsd.NsdManager.RegistrationListener#onServiceRegistered(NsdServiceInfo)
+onServiceRegistered()} method.</p>
+
+<pre>
+public void registerService(int port) {
+    NsdServiceInfo serviceInfo  = new NsdServiceInfo();
+    serviceInfo.setServiceName("NsdChat");
+    serviceInfo.setServiceType("_http._tcp.");
+    serviceInfo.setPort(port);
+
+    mNsdManager = Context.getSystemService(Context.NSD_SERVICE);
+
+    mNsdManager.registerService(
+            serviceInfo, NsdManager.PROTOCOL_DNS_SD, mRegistrationListener);
+}
+</pre>
+
+<h2 id="discover">Discover Services on the Network</h2>
+<p>The network is teeming with life, from the beastly network printers to the
+docile network webcams, to the brutal, fiery battles of nearby tic-tac-toe
+players.  The key to letting your application see this vibrant ecosystem of
+functionality is service discovery.  Your application needs to listen to service
+broadcasts on the network to see what services are available, and filter out
+anything the application can't work with.</p>
+
+<p>Service discovery, like service registration, has two steps:
+ setting up a discovery listener with the relevant callbacks, and making a single asynchronous
+API call to {@link android.net.nsd.NsdManager#discoverServices(String
+, int , NsdManager.DiscoveryListener) discoverServices()}.</p>
+
+<p>First, instantiate an anonymous class that implements {@link
+android.net.nsd.NsdManager.DiscoveryListener}.  The following snippet shows a
+simple example:</p>
+
+<pre>
+public void initializeDiscoveryListener() {
+
+    // Instantiate a new DiscoveryListener
+    mDiscoveryListener = new NsdManager.DiscoveryListener() {
+
+        //  Called as soon as service discovery begins.
+        &#64;Override
+        public void onDiscoveryStarted(String regType) {
+            Log.d(TAG, "Service discovery started");
+        }
+
+        &#64;Override
+        public void onServiceFound(NsdServiceInfo service) {
+            // A service was found!  Do something with it.
+            Log.d(TAG, "Service discovery success" + service);
+            if (!service.getServiceType().equals(SERVICE_TYPE)) {
+                // Service type is the string containing the protocol and
+                // transport layer for this service.
+                Log.d(TAG, "Unknown Service Type: " + service.getServiceType());
+            } else if (service.getServiceName().equals(mServiceName)) {
+                // The name of the service tells the user what they'd be
+                // connecting to. It could be "Bob's Chat App".
+                Log.d(TAG, "Same machine: " + mServiceName);
+            } else if (service.getServiceName().contains("NsdChat")){
+                mNsdManager.resolveService(service, mResolveListener);
+            }
+        }
+
+        &#64;Override
+        public void onServiceLost(NsdServiceInfo service) {
+            // When the network service is no longer available.
+            // Internal bookkeeping code goes here.
+            Log.e(TAG, "service lost" + service);
+        }
+
+        &#64;Override
+        public void onDiscoveryStopped(String serviceType) {
+            Log.i(TAG, "Discovery stopped: " + serviceType);
+        }
+
+        &#64;Override
+        public void onStartDiscoveryFailed(String serviceType, int errorCode) {
+            Log.e(TAG, "Discovery failed: Error code:" + errorCode);
+            mNsdManager.stopServiceDiscovery(this);
+        }
+
+        &#64;Override
+        public void onStopDiscoveryFailed(String serviceType, int errorCode) {
+            Log.e(TAG, "Discovery failed: Error code:" + errorCode);
+            mNsdManager.stopServiceDiscovery(this);
+        }
+    };
+}
+</pre>
+
+<p>The NSD API uses the methods in this interface to inform your application when discovery
+is started, when it fails, and when services are found and lost (lost means "is
+no longer available").  Notice that this snippet does several checks
+when a service is found.</p>
+<ol>
+  <li>The service name of the found service is compared to the service
+name of the local service to determine if the device just picked up its own
+broadcast (which is valid).</li>
+<li>The service type is checked, to verify it's a type of service your
+application can connect to.</li>
+<li>The service name is checked to verify connection to the correct
+application.</li>
+</ol>
+
+<p>Checking the service name isn't always necessary, and is only relevant if you
+want to connect to a specific application.  For instance, the application might
+only want to connect to instances of itself running on other devices.  However, if the
+application wants to connect to a network printer, it's enough to see that the service type
+is "_ipp._tcp".</p>
+
+<p>After setting up the listener, call {@link android.net.nsd.NsdManager#discoverServices(String, int,
+NsdManager.DiscoveryListener) discoverServices()}, passing in the service type
+your application should look for, the discovery protocol to use, and the
+listener you just created.</p>
+
+<pre>
+    mNsdManager.discoverServices(
+        SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, mDiscoveryListener);
+</pre>
+
+
+<h2 id="connect">Connect to Services on the Network</h2>
+<p>When your application finds a service on the network to connect to, it
+must first determine the connection information for that service, using the
+{@link android.net.nsd.NsdManager#resolveService resolveService()} method.
+Implement a {@link android.net.nsd.NsdManager.ResolveListener} to pass into this
+method, and use it to get a {@link android.net.nsd.NsdServiceInfo} containing
+the connection information.</p>
+
+<pre>
+public void initializeResolveListener() {
+    mResolveListener = new NsdManager.ResolveListener() {
+
+        &#64;Override
+        public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
+            // Called when the resolve fails.  Use the error code to debug.
+            Log.e(TAG, "Resolve failed" + errorCode);
+        }
+
+        &#64;Override
+        public void onServiceResolved(NsdServiceInfo serviceInfo) {
+            Log.e(TAG, "Resolve Succeeded. " + serviceInfo);
+
+            if (serviceInfo.getServiceName().equals(mServiceName)) {
+                Log.d(TAG, "Same IP.");
+                return;
+            }
+            mService = serviceInfo;
+            int port = mService.getPort();
+            InetAddress host = mService.getHost();
+        }
+    };
+}
+</pre>
+
+<p>Once the service is resolved, your application receives detailed
+service information including an IP address and port number.  This is  everything
+you need to create your own network connection to the service.</p>
+
+
+<h2 id="teardown">Unregister Your Service on Application Close</h2>
+<p>It's important to enable and disable NSD
+functionality as appropriate during the application's
+lifecycle.  Unregistering your application when it closes down helps prevent
+other applications from thinking it's still active and attempting to connect to
+it.  Also, service discovery is an expensive operation, and should be stopped
+when the parent Activity is paused, and re-enabled when the Activity is
+resumed.  Override the lifecycle methods of your main Activity and insert code
+to start and stop service broadcast and discovery as appropriate.</p>
+
+<pre>
+//In your application's Activity
+
+    &#64;Override
+    protected void onPause() {
+        if (mNsdHelper != null) {
+            mNsdHelper.tearDown();
+        }
+        super.onPause();
+    }
+
+    &#64;Override
+    protected void onResume() {
+        super.onResume();
+        if (mNsdHelper != null) {
+            mNsdHelper.registerService(mConnection.getLocalPort());
+            mNsdHelper.discoverServices();
+        }
+    }
+
+    &#64;Override
+    protected void onDestroy() {
+        mNsdHelper.tearDown();
+        mConnection.tearDown();
+        super.onDestroy();
+    }
+
+    // NsdHelper's tearDown method
+        public void tearDown() {
+        mNsdManager.unregisterService(mRegistrationListener);
+        mNsdManager.stopServiceDiscovery(mDiscoveryListener);
+    }
+</pre>
+
