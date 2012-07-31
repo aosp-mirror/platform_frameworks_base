@@ -22,8 +22,8 @@ previous.link=loading-ondemand.html
 <!-- other docs (NOT javadocs) -->
 <h2>You should also read</h2>
 <ul>
-  <li><a href="{@docRoot}resources/articles/listview-backgrounds.html">ListView
-Backgrounds: An Optimization</a></li>
+  <li><a href="http://android-developers.blogspot.com/2009/01/why-is-my-list-black-android.html">Why
+      is my list black? An Android optimization</a></li>
 </ul>
 
 </div>

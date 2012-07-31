@@ -1,6 +1,5 @@
 page.title=Creating an Input Method
 parent.title=Articles
-parent.link=../browser.html?tag=article
 @jd:body
 
 <div id="qv-wrapper">
@@ -162,8 +161,8 @@ parent.link=../browser.html?tag=article
     In this example, {@code MyKeyboardView} is an instance of a custom implementation of 
     {@link android.inputmethodservice.KeyboardView} that renders a 
     {@link android.inputmethodservice.Keyboard}. If you’re building a traditional QWERTY keyboard, 
-    see the <a href=”{@docRoot}resources/samples/SoftKeyboard/index.html”>Soft Keyboard</a> sample 
-    app for an example of how to extend the {@link android.inputmethodservice.KeyboardView} class.
+    see the  Soft Keyboard <a href="{@docRoot}tools/samples/index.html">sample 
+    app</a> for an example of how to extend the {@link android.inputmethodservice.KeyboardView} class.
 </p>
 <h3 id="CandidateView">Candidates view</h3>
 <p>
@@ -175,7 +174,8 @@ parent.link=../browser.html?tag=article
     default behavior, so you don’t have to implement this if you don’t provide suggestions).</p>
 <p>
     For an example implementation that provides user suggestions, see the 
-    <a href=”{@docRoot}resources/samples/SoftKeyboard/index.html”>Soft Keyboard</a> sample app.
+    Soft Keyboard <a href="{@docRoot}tools/samples/index.html">sample 
+    app</a>.
 </p>
 <h3 id="DesignConsiderations">UI design considerations</h3>
 <p>
@@ -388,8 +388,8 @@ The input type bit pattern can have one of several values, including:
     To intercept hardware keys, override 
     {@link android.inputmethodservice.InputMethodService#onKeyDown(int, KeyEvent) onKeyDown()}
     and {@link android.inputmethodservice.InputMethodService#onKeyUp(int, KeyEvent) onKeyUp()}. 
-    See the <a href=”{@docRoot}resources/samples/SoftKeyboard/index.html”>Soft Keyboard</a> sample 
-    app for an example.
+    See the Soft Keyboard <a href="{@docRoot}tools/samples/index.html">sample 
+    app</a> for an example.
 </p>
 <p>
     Remember to call the <code>super()</code> method for keys you don't want to handle yourself.

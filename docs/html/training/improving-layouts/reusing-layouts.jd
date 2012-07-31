@@ -25,12 +25,9 @@ next.link=loading-ondemand.html
 <!-- other docs (NOT javadocs) -->
 <h2>You should also read</h2>
 <ul>
-  <li><a href="{@docRoot}resources/articles/layout-tricks-reuse.html">Creating Reusable UI
-Components</a></li>
-  <li><a href="{@docRoot}resources/articles/layout-tricks-merge.html">Merging Layouts</a></li>
   <li><a
 href="{@docRoot}guide/topics/resources/layout-resource.html#include-element">Layout
-Resource</a></li>
+Resources</a></li>
 </ul>
 
 </div>
