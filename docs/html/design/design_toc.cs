@@ -38,6 +38,7 @@
       <li><a href="<?cs var:toroot ?>design/patterns/settings.html">Settings</a></li>
       <li><a href="<?cs var:toroot ?>design/patterns/help.html">Help</a></li>
       <li><a href="<?cs var:toroot ?>design/patterns/compatibility.html">Compatibility</a></li>
+      <li><a href="<?cs var:toroot ?>design/patterns/accessibility.html">Accessibility</a></li>
       <li><a href="<?cs var:toroot ?>design/patterns/pure-android.html">Pure Android</a></li>
     </ul>
   </li>
