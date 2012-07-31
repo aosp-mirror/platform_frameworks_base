@@ -37,7 +37,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
     private static final String TEST_PASSWD2 = "87654321";
     private static final String TEST_KEYNAME = "test-key";
     private static final String TEST_KEYNAME1 = "test-key.1";
-    private static final String TEST_KEYNAME2 = "test-key.2";
+    private static final String TEST_KEYNAME2 = "test-key\02";
     private static final byte[] TEST_KEYVALUE = "test value".getBytes(Charsets.UTF_8);
 
     // "Hello, World" in Chinese
