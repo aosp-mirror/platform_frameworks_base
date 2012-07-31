@@ -584,7 +584,7 @@ bool CommonTimeServer::arbitrateMaster(
 
 static void hexDumpToString(const uint8_t* src, size_t src_len,
                             char* dst, size_t dst_len) {
-    size_t offset;
+    size_t offset = 0;
     size_t i;
 
     for (i = 0; (i < src_len) && (offset < dst_len); ++i) {
