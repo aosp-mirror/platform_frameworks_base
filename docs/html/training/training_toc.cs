@@ -673,6 +673,27 @@
       </li>
 
 
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="<?cs var:toroot ?>training/connect-devices-wirelessly/index.html">
+            <span class="en">Connecting Devices Wirelessly</span>
+          </a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/connect-devices-wirelessly/nsd.html">
+            <span class="en">Using Network Service Discovery</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/connect-devices-wirelessly/wifi-direct.html">
+            <span class="en">Connecting with Wi-Fi Direct</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/connect-devices-wirelessly/nsd-wifi-direct.html">
+            <span class="en">Using Wi-Fi Direct for Service Discovery</span>
+          </a>
+          </li>
+        </ul>
+      </li>
+
+
     </ul>
   </li>
 </ul><!-- nav -->
