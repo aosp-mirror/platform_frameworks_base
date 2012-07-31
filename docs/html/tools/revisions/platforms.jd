@@ -870,7 +870,7 @@ class="toggle-content-img" alt="" />Android {@sdkPlatformVersion}, Revision 1</a
 
 <dt>Tools:</dt>
 <dd>
-<p>Adds support for building with Android library projects. See <a href="tools-notes.html">SDK
+<p>Adds support for building with Android library projects. See <a href="{@docRoot}tools/sdk/tools-notes.html">SDK
 Tools, r6</a> for information.</p>
 </dd>
 

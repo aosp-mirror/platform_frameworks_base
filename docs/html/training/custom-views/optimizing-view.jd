@@ -19,7 +19,7 @@ previous.link=making-interactive.html
 
         <h2>You should also read</h2>
         <ul>
-            <li><a href=”{@docRoot}guide/topics/graphics/hardware-accel.html”>
+            <li><a href="{@docRoot}guide/topics/graphics/hardware-accel.html">
                 Hardware Acceleration
             </a>
         </li>

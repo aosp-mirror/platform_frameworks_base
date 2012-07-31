@@ -375,7 +375,7 @@ devices. </td>
 <td colspan="3"><code>docs/</code></td>
 <td>A full set of documentation in HTML format, including the Developer's Guide,
 API Reference, and other information. To read the documentation, load the
-file <code>offline.html</code> in a web browser.</td>
+file <code>index.html</code> in a web browser.</td>
 </tr>
 <tr>
 <td colspan="3"><code>platform-tools/</code></td>

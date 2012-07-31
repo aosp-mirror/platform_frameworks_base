@@ -58,7 +58,7 @@ suggestions on how to work with multiple sets of icons.</p>
 
 <h2 id="market">Application Icons on Google Play</h2>
 
-<p>If you are <a href="{@docRoot}tools/publishing/publishing.html">publishing
+<p>If you are <a href="{@docRoot}distribute/index.html">publishing
 your application on Google Play</a>, you will also need to provide a 512x512
 pixel, high-resolution application icon in the <a
 href="http://play.google.com/apps/publish">developer console</a> at upload-time.

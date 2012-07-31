@@ -111,10 +111,7 @@ storage.</p>
 <p class="caution"><strong>Caution:</strong> Although XML markup such as this will be ignored by
 older platforms, you must be careful not to use programming APIs introduced in API Level 8
 while your {@code minSdkVersion} is less than "8", unless you perform the work necessary to
-provide backward compatibility in your code. For information about building
-backward compatibility in your application code, see the <a
-href="{@docRoot}resources/articles/backward-compatibility.html">Backward Compatibility</a>
-article.</p>
+provide backward compatibility in your code.</p>
 
 
 
@@ -141,17 +138,13 @@ system again. At which time, you can restart your Service.</dd>
     <dd>Your alarms registered with {@link android.app.AlarmManager} will be cancelled. You must
 manually re-register any alarms when external storage is remounted.</dd>
   <dt>Input Method Engines</dt>
-    <dd>Your <a href="{@docRoot}resources/articles/on-screen-inputs.html">IME</a> will be
+    <dd>Your <a href="{@docRoot}guide/topics/text/creating-input-method.html">IME</a> will be
 replaced by the default IME. When external storage is remounted, the user can open system settings
 to enable your IME again.</dd>
   <dt>Live Wallpapers</dt>
-    <dd>Your running <a href="{@docRoot}resources/articles/live-wallpapers.html">Live Wallpaper</a>
+    <dd>Your running <a href="http://android-developers.blogspot.com/2010/02/live-wallpapers.html">Live Wallpaper</a>
 will be replaced by the default Live Wallpaper. When external storage is remounted, the user can
 select your Live Wallpaper again.</dd>
-  <dt>Live Folders</dt>
-    <dd>Your <a href="{@docRoot}resources/articles/live-folders.html">Live Folder</a> will be
-removed from the home screen. When external storage is remounted, the user can add your Live Folder
-to the home screen again.</dd>
   <dt>App Widgets</dt>
     <dd>Your <a href="{@docRoot}guide/topics/appwidgets/index.html">App Widget</a> will be removed
 from the home screen. When external storage is remounted, your App Widget will <em>not</em> be
@@ -174,7 +167,7 @@ external storage, it can never receive this broadcast.</dd>
   <dt>Copy Protection</dt>
     <dd>Your application cannot be installed to a device's SD card if it uses Google Play's 
       Copy Protection feature. However, if you use Google Play's 
-      <a href="{@docRoot}guide/google/play/licensing.html">Application Licensing</a> instead, your 
+      <a href="{@docRoot}guide/google/play/licensing/index.html">Application Licensing</a> instead, your 
       application <em>can</em> be installed to internal or external storage, including SD cards.</dd>
 </dl>
 

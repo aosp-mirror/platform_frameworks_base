@@ -662,7 +662,7 @@ whether there's a pressure sensor on a device:</p>
 <h4>Using Google Play filters to target specific sensor configurations</h4>
 
 <p>If you are publishing your application on Google Play you can use the
-  <a href="{@docRoot}guide//topics/manifest/uses-feature-element.html"><code>&lt;uses-feature&gt;
+  <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html"><code>&lt;uses-feature&gt;
     </code></a> element in your manifest file to filter your application from devices that do not
 have the appropriate sensor configuration for your application. The
 <code>&lt;uses-feature&gt;</code> element has several hardware descriptors that let you filter
