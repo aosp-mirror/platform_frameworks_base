@@ -1094,7 +1094,12 @@ int unlinklib(const char* dataDir)
         rc = -errno;
         goto out;
     }
-
+    if (chmod(libdir, 0755) < 0) {
+        ALOGE("cannot chmod dir '%s': %s\n", libdir, strerror(errno));
+        unlink(libdir);
+        rc = -errno;
+        goto out;
+    }
     if (chown(libdir, AID_SYSTEM, AID_SYSTEM) < 0) {
         ALOGE("cannot chown dir '%s': %s\n", libdir, strerror(errno));
         unlink(libdir);
