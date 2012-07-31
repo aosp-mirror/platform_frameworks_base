@@ -1,0 +1,62 @@
+page.title=Connecting Devices Wirelessly
+
+trainingnavtop=true
+startpage=true
+next.title=Using Network Service Discovery
+next.link=nsd.html
+
+@jd:body
+
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>Dependencies and prerequisites</h2>
+<ul>
+  <li>Android 4.1 or higher</li>
+</ul>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/connectivity/wifip2p.html">Wi-Fi Direct</a></li>
+</ul>
+
+
+</div>
+</div>
+
+
+<p>Besides enabling communication with the cloud, Android's wireless APIs also
+enable communication with other devices on the same local network, and even
+devices which are not on a network, but are physically nearby.  The addition of
+Network Service Discovery (NSD) takes this further by allowing an application to
+seek out a nearby device running services with which it can communicate.
+Integrating this functionality into your application helps you provide a wide range
+of features, such as playing games with users in the same room, pulling
+images from a networked NSD-enabled webcam, or remotely logging into
+other machines on the same network.</p>
+<p>This class describes the key APIs for finding and
+connecting to other devices from your application.  Specifically, it
+describes the NSD API for discovering available services and the Wi-Fi
+Direct&trade; API for doing peer-to-peer wireless connections.  This class also
+shows you how to use NSD and Wi-Fi Direct in
+combination to detect the services offered by a device and connect to the
+device when neither device is connected to a network.
+</p>
+<h2>Lessons</h2>
+
+<dl>
+  <dt><strong><a href="nsd.html">Using Network Service Discovery</a></strong></dt>
+  <dd>Learn how to broadcast services offered by your own application, discover
+  services offered on the local network, and use NSD to determine the connection
+  details for the service you wish to connect to.</dd>
+  <dt><strong><a href="wifi-direct.html">Connecting with Wi-Fi Direct</a></strong></dt>
+  <dd>Learn how to fetch a list of nearby peer devices, create an access point
+  for legacy devices, and connect to other devices capable of Wi-Fi Direct
+  connections.</dd>
+  <dt><strong><a href="nsd-wifi-direct.html">Using Wi-Fi Direct for Service
+      Discovery</a></strong></dt>
+  <dd>Learn how to discover services published by nearby devices without being
+  on the same network, using Wi-Fi Direct.</dd>
+</dl>
+
