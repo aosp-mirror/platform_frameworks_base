@@ -251,7 +251,7 @@ public abstract class RegisteredServicesCache<V> {
         return false;
     }
 
-    void generateServicesMap() {
+    public void generateServicesMap() {
         PackageManager pm = mContext.getPackageManager();
         ArrayList<ServiceInfo<V>> serviceInfos = new ArrayList<ServiceInfo<V>>();
         List<ResolveInfo> resolveInfos = pm.queryIntentServices(new Intent(mInterfaceName),
