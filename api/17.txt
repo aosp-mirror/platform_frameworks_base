@@ -72,7 +72,6 @@ package android {
     field public static final java.lang.String MODIFY_PHONE_STATE = "android.permission.MODIFY_PHONE_STATE";
     field public static final java.lang.String MOUNT_FORMAT_FILESYSTEMS = "android.permission.MOUNT_FORMAT_FILESYSTEMS";
     field public static final java.lang.String MOUNT_UNMOUNT_FILESYSTEMS = "android.permission.MOUNT_UNMOUNT_FILESYSTEMS";
-    field public static final java.lang.String NET_TUNNELING = "android.permission.NET_TUNNELING";
     field public static final java.lang.String NFC = "android.permission.NFC";
     field public static final deprecated java.lang.String PERSISTENT_ACTIVITY = "android.permission.PERSISTENT_ACTIVITY";
     field public static final java.lang.String PROCESS_OUTGOING_CALLS = "android.permission.PROCESS_OUTGOING_CALLS";
@@ -603,20 +602,15 @@ package android {
     field public static final int layerType = 16843604; // 0x1010354
     field public static final int layout = 16842994; // 0x10100f2
     field public static final int layoutAnimation = 16842988; // 0x10100ec
-    field public static final int layoutDirection = 16843698; // 0x10103b2
     field public static final int layout_above = 16843140; // 0x1010184
     field public static final int layout_alignBaseline = 16843142; // 0x1010186
     field public static final int layout_alignBottom = 16843146; // 0x101018a
-    field public static final int layout_alignEnd = 16843706; // 0x10103ba
     field public static final int layout_alignLeft = 16843143; // 0x1010187
     field public static final int layout_alignParentBottom = 16843150; // 0x101018e
-    field public static final int layout_alignParentEnd = 16843708; // 0x10103bc
     field public static final int layout_alignParentLeft = 16843147; // 0x101018b
     field public static final int layout_alignParentRight = 16843149; // 0x101018d
-    field public static final int layout_alignParentStart = 16843707; // 0x10103bb
     field public static final int layout_alignParentTop = 16843148; // 0x101018c
     field public static final int layout_alignRight = 16843145; // 0x1010189
-    field public static final int layout_alignStart = 16843705; // 0x10103b9
     field public static final int layout_alignTop = 16843144; // 0x1010188
     field public static final int layout_alignWithParentIfMissing = 16843154; // 0x1010192
     field public static final int layout_below = 16843141; // 0x1010185
@@ -629,19 +623,15 @@ package android {
     field public static final int layout_height = 16842997; // 0x10100f5
     field public static final int layout_margin = 16842998; // 0x10100f6
     field public static final int layout_marginBottom = 16843002; // 0x10100fa
-    field public static final int layout_marginEnd = 16843702; // 0x10103b6
     field public static final int layout_marginLeft = 16842999; // 0x10100f7
     field public static final int layout_marginRight = 16843001; // 0x10100f9
-    field public static final int layout_marginStart = 16843701; // 0x10103b5
     field public static final int layout_marginTop = 16843000; // 0x10100f8
     field public static final int layout_row = 16843643; // 0x101037b
     field public static final int layout_rowSpan = 16843644; // 0x101037c
     field public static final int layout_scale = 16843155; // 0x1010193
     field public static final int layout_span = 16843085; // 0x101014d
-    field public static final int layout_toEndOf = 16843704; // 0x10103b8
     field public static final int layout_toLeftOf = 16843138; // 0x1010182
     field public static final int layout_toRightOf = 16843139; // 0x1010183
-    field public static final int layout_toStartOf = 16843703; // 0x10103b7
     field public static final int layout_weight = 16843137; // 0x1010181
     field public static final int layout_width = 16842996; // 0x10100f4
     field public static final int layout_x = 16843135; // 0x101017f
@@ -660,10 +650,8 @@ package android {
     field public static final int listPreferredItemHeight = 16842829; // 0x101004d
     field public static final int listPreferredItemHeightLarge = 16843654; // 0x1010386
     field public static final int listPreferredItemHeightSmall = 16843655; // 0x1010387
-    field public static final int listPreferredItemPaddingEnd = 16843710; // 0x10103be
     field public static final int listPreferredItemPaddingLeft = 16843683; // 0x10103a3
     field public static final int listPreferredItemPaddingRight = 16843684; // 0x10103a4
-    field public static final int listPreferredItemPaddingStart = 16843709; // 0x10103bd
     field public static final int listSelector = 16843003; // 0x10100fb
     field public static final int listSeparatorTextViewStyle = 16843272; // 0x1010208
     field public static final int listViewStyle = 16842868; // 0x1010074
@@ -734,10 +722,8 @@ package android {
     field public static final int packageNames = 16843649; // 0x1010381
     field public static final int padding = 16842965; // 0x10100d5
     field public static final int paddingBottom = 16842969; // 0x10100d9
-    field public static final int paddingEnd = 16843700; // 0x10103b4
     field public static final int paddingLeft = 16842966; // 0x10100d6
     field public static final int paddingRight = 16842968; // 0x10100d8
-    field public static final int paddingStart = 16843699; // 0x10103b3
     field public static final int paddingTop = 16842967; // 0x10100d7
     field public static final int panelBackground = 16842846; // 0x101005e
     field public static final int panelColorBackground = 16842849; // 0x1010061
@@ -949,7 +935,6 @@ package android {
     field public static final int summaryColumn = 16843426; // 0x10102a2
     field public static final int summaryOff = 16843248; // 0x10101f0
     field public static final int summaryOn = 16843247; // 0x10101ef
-    field public static final int supportsRtl = 16843695; // 0x10103af
     field public static final int supportsUploading = 16843419; // 0x101029b
     field public static final int switchMinWidth = 16843632; // 0x1010370
     field public static final int switchPadding = 16843633; // 0x1010371
@@ -980,7 +965,6 @@ package android {
     field public static final int tension = 16843370; // 0x101026a
     field public static final int testOnly = 16843378; // 0x1010272
     field public static final int text = 16843087; // 0x101014f
-    field public static final int textAlignment = 16843697; // 0x10103b1
     field public static final int textAllCaps = 16843660; // 0x101038c
     field public static final int textAppearance = 16842804; // 0x1010034
     field public static final int textAppearanceButton = 16843271; // 0x1010207
@@ -1020,7 +1004,6 @@ package android {
     field public static final int textColorTertiary = 16843282; // 0x1010212
     field public static final int textColorTertiaryInverse = 16843283; // 0x1010213
     field public static final int textCursorDrawable = 16843618; // 0x1010362
-    field public static final int textDirection = 16843696; // 0x10103b0
     field public static final int textEditNoPasteWindowLayout = 16843541; // 0x1010315
     field public static final int textEditPasteWindowLayout = 16843540; // 0x1010314
     field public static final int textEditSideNoPasteWindowLayout = 16843615; // 0x101035f
@@ -4350,7 +4333,6 @@ package android.appwidget {
     method public void deleteHost();
     method protected android.appwidget.AppWidgetHostView onCreateView(android.content.Context, int, android.appwidget.AppWidgetProviderInfo);
     method protected void onProviderChanged(int, android.appwidget.AppWidgetProviderInfo);
-    method protected void onProvidersChanged();
     method public void startListening();
     method public void stopListening();
   }
@@ -4447,7 +4429,6 @@ package android.appwidget {
 package android.bluetooth {
 
   public final class BluetoothA2dp implements android.bluetooth.BluetoothProfile {
-    method public void finalize();
     method public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
     method public int getConnectionState(android.bluetooth.BluetoothDevice);
     method public java.util.List<android.bluetooth.BluetoothDevice> getDevicesMatchingConnectionStates(int[]);
@@ -5355,7 +5336,6 @@ package android.content {
     field public static final int CONTEXT_INCLUDE_CODE = 1; // 0x1
     field public static final int CONTEXT_RESTRICTED = 4; // 0x4
     field public static final java.lang.String DEVICE_POLICY_SERVICE = "device_policy";
-    field public static final java.lang.String DISPLAY_SERVICE = "display";
     field public static final java.lang.String DOWNLOAD_SERVICE = "download";
     field public static final java.lang.String DROPBOX_SERVICE = "dropbox";
     field public static final java.lang.String INPUT_METHOD_SERVICE = "input_method";
@@ -5825,9 +5805,7 @@ package android.content {
     field public static final java.lang.String EXTRA_KEY_EVENT = "android.intent.extra.KEY_EVENT";
     field public static final java.lang.String EXTRA_LOCAL_ONLY = "android.intent.extra.LOCAL_ONLY";
     field public static final java.lang.String EXTRA_NOT_UNKNOWN_SOURCE = "android.intent.extra.NOT_UNKNOWN_SOURCE";
-    field public static final java.lang.String EXTRA_ORIGINATING_URL = "android.intent.extra.ORIGINATING_URL";
     field public static final java.lang.String EXTRA_PHONE_NUMBER = "android.intent.extra.PHONE_NUMBER";
-    field public static final java.lang.String EXTRA_REFERRER = "android.intent.extra.REFERRER";
     field public static final java.lang.String EXTRA_REMOTE_INTENT_TOKEN = "android.intent.extra.remote_intent_token";
     field public static final java.lang.String EXTRA_REPLACING = "android.intent.extra.REPLACING";
     field public static final java.lang.String EXTRA_RETURN_RESULT = "android.intent.extra.RETURN_RESULT";
@@ -6284,7 +6262,6 @@ package android.content.pm {
     field public static final int FLAG_STOPPED = 2097152; // 0x200000
     field public static final int FLAG_SUPPORTS_LARGE_SCREENS = 2048; // 0x800
     field public static final int FLAG_SUPPORTS_NORMAL_SCREENS = 1024; // 0x400
-    field public static final int FLAG_SUPPORTS_RTL = 4194304; // 0x400000
     field public static final int FLAG_SUPPORTS_SCREEN_DENSITIES = 8192; // 0x2000
     field public static final int FLAG_SUPPORTS_SMALL_SCREENS = 512; // 0x200
     field public static final int FLAG_SUPPORTS_XLARGE_SCREENS = 524288; // 0x80000
@@ -6965,7 +6942,7 @@ package android.content.res {
     method public int getIndexCount();
     method public int getInt(int, int);
     method public int getInteger(int, int);
-    method public deprecated int getLayoutDimension(int, java.lang.String);
+    method public int getLayoutDimension(int, java.lang.String);
     method public int getLayoutDimension(int, int);
     method public java.lang.String getNonResourceString(int);
     method public java.lang.String getPositionDescription();
@@ -7330,7 +7307,7 @@ package android.database {
     field public static final int STATEMENT_UPDATE = 2; // 0x2
   }
 
-  public static deprecated class DatabaseUtils.InsertHelper {
+  public static class DatabaseUtils.InsertHelper {
     ctor public DatabaseUtils.InsertHelper(android.database.sqlite.SQLiteDatabase, java.lang.String);
     method public void bind(int, double);
     method public void bind(int, float);
@@ -8132,7 +8109,6 @@ package android.graphics {
     method public final int getWidth();
     method public final boolean hasAlpha();
     method public final boolean isMutable();
-    method public final boolean isPremultiplied();
     method public final boolean isRecycled();
     method public void prepareToDraw();
     method public void recycle();
@@ -8622,7 +8598,6 @@ package android.graphics {
     method public android.graphics.Paint.Align getTextAlign();
     method public void getTextBounds(java.lang.String, int, int, android.graphics.Rect);
     method public void getTextBounds(char[], int, int, android.graphics.Rect);
-    method public java.util.Locale getTextLocale();
     method public void getTextPath(char[], int, int, float, float, android.graphics.Path);
     method public void getTextPath(java.lang.String, int, int, float, float, android.graphics.Path);
     method public float getTextScaleX();
@@ -8672,7 +8647,6 @@ package android.graphics {
     method public void setStyle(android.graphics.Paint.Style);
     method public void setSubpixelText(boolean);
     method public void setTextAlign(android.graphics.Paint.Align);
-    method public void setTextLocale(java.util.Locale);
     method public void setTextScaleX(float);
     method public void setTextSize(float);
     method public void setTextSkewX(float);
@@ -9267,7 +9241,6 @@ package android.graphics.drawable {
     method public android.graphics.drawable.Drawable getCurrent();
     method public int getIntrinsicHeight();
     method public int getIntrinsicWidth();
-    method public int getLayoutDirection();
     method public final int getLevel();
     method public int getMinimumHeight();
     method public int getMinimumWidth();
@@ -9295,7 +9268,6 @@ package android.graphics.drawable {
     method public void setColorFilter(int, android.graphics.PorterDuff.Mode);
     method public void setDither(boolean);
     method public void setFilterBitmap(boolean);
-    method public void setLayoutDirection(int);
     method public final boolean setLevel(int);
     method public boolean setState(int[]);
     method public boolean setVisible(boolean, boolean);
@@ -9953,13 +9925,6 @@ package android.hardware {
 
 }
 
-package android.hardware.display {
-
-  public final class DisplayManager {
-  }
-
-}
-
 package android.hardware.input {
 
   public final class InputManager {
@@ -10520,7 +10485,6 @@ package android.location {
     method public float getAccuracy();
     method public double getAltitude();
     method public float getBearing();
-    method public long getElapsedRealtimeNano();
     method public android.os.Bundle getExtras();
     method public double getLatitude();
     method public double getLongitude();
@@ -10540,7 +10504,6 @@ package android.location {
     method public void setAccuracy(float);
     method public void setAltitude(double);
     method public void setBearing(float);
-    method public void setElapsedRealtimeNano(long);
     method public void setExtras(android.os.Bundle);
     method public void setLatitude(double);
     method public void setLongitude(double);
@@ -11411,7 +11374,6 @@ package android.media {
     field public static final int MEDIA_INFO_METADATA_UPDATE = 802; // 0x322
     field public static final int MEDIA_INFO_NOT_SEEKABLE = 801; // 0x321
     field public static final int MEDIA_INFO_UNKNOWN = 1; // 0x1
-    field public static final int MEDIA_INFO_VIDEO_RENDERING_START = 3; // 0x3
     field public static final int MEDIA_INFO_VIDEO_TRACK_LAGGING = 700; // 0x2bc
     field public static final java.lang.String MEDIA_MIMETYPE_TEXT_SUBRIP = "application/x-subrip";
     field public static final int VIDEO_SCALING_MODE_SCALE_TO_FIT = 1; // 0x1
@@ -13784,174 +13746,6 @@ package android.nfc.tech {
 
 package android.opengl {
 
-  public class EGL14 {
-    ctor public EGL14();
-    method public static boolean eglBindAPI(int);
-    method public static boolean eglBindTexImage(android.opengl.EGLDisplay, android.opengl.EGLSurface, int);
-    method public static boolean eglChooseConfig(android.opengl.EGLDisplay, int[], int, android.opengl.EGLConfig[], int, int, int[], int);
-    method public static boolean eglCopyBuffers(android.opengl.EGLDisplay, android.opengl.EGLSurface, int);
-    method public static android.opengl.EGLContext eglCreateContext(android.opengl.EGLDisplay, android.opengl.EGLConfig, android.opengl.EGLContext, int[], int);
-    method public static android.opengl.EGLSurface eglCreatePbufferFromClientBuffer(android.opengl.EGLDisplay, int, int, android.opengl.EGLConfig, int[], int);
-    method public static android.opengl.EGLSurface eglCreatePbufferSurface(android.opengl.EGLDisplay, android.opengl.EGLConfig, int[], int);
-    method public static android.opengl.EGLSurface eglCreatePixmapSurface(android.opengl.EGLDisplay, android.opengl.EGLConfig, int, int[], int);
-    method public static android.opengl.EGLSurface eglCreateWindowSurface(android.opengl.EGLDisplay, android.opengl.EGLConfig, java.lang.Object, int[], int);
-    method public static boolean eglDestroyContext(android.opengl.EGLDisplay, android.opengl.EGLContext);
-    method public static boolean eglDestroySurface(android.opengl.EGLDisplay, android.opengl.EGLSurface);
-    method public static boolean eglGetConfigAttrib(android.opengl.EGLDisplay, android.opengl.EGLConfig, int, int[], int);
-    method public static boolean eglGetConfigs(android.opengl.EGLDisplay, android.opengl.EGLConfig[], int, int, int[], int);
-    method public static android.opengl.EGLContext eglGetCurrentContext();
-    method public static android.opengl.EGLDisplay eglGetCurrentDisplay();
-    method public static android.opengl.EGLSurface eglGetCurrentSurface(int);
-    method public static android.opengl.EGLDisplay eglGetDisplay(int);
-    method public static int eglGetError();
-    method public static boolean eglInitialize(android.opengl.EGLDisplay, int[], int, int[], int);
-    method public static boolean eglMakeCurrent(android.opengl.EGLDisplay, android.opengl.EGLSurface, android.opengl.EGLSurface, android.opengl.EGLContext);
-    method public static int eglQueryAPI();
-    method public static boolean eglQueryContext(android.opengl.EGLDisplay, android.opengl.EGLContext, int, int[], int);
-    method public static java.lang.String eglQueryString(android.opengl.EGLDisplay, int);
-    method public static boolean eglQuerySurface(android.opengl.EGLDisplay, android.opengl.EGLSurface, int, int[], int);
-    method public static boolean eglReleaseTexImage(android.opengl.EGLDisplay, android.opengl.EGLSurface, int);
-    method public static boolean eglReleaseThread();
-    method public static boolean eglSurfaceAttrib(android.opengl.EGLDisplay, android.opengl.EGLSurface, int, int);
-    method public static boolean eglSwapBuffers(android.opengl.EGLDisplay, android.opengl.EGLSurface);
-    method public static boolean eglSwapInterval(android.opengl.EGLDisplay, int);
-    method public static boolean eglTerminate(android.opengl.EGLDisplay);
-    method public static boolean eglWaitClient();
-    method public static boolean eglWaitGL();
-    method public static boolean eglWaitNative(int);
-    field public static final int EGL_ALPHA_MASK_SIZE = 12350; // 0x303e
-    field public static final int EGL_ALPHA_SIZE = 12321; // 0x3021
-    field public static final int EGL_BACK_BUFFER = 12420; // 0x3084
-    field public static final int EGL_BAD_ACCESS = 12290; // 0x3002
-    field public static final int EGL_BAD_ALLOC = 12291; // 0x3003
-    field public static final int EGL_BAD_ATTRIBUTE = 12292; // 0x3004
-    field public static final int EGL_BAD_CONFIG = 12293; // 0x3005
-    field public static final int EGL_BAD_CONTEXT = 12294; // 0x3006
-    field public static final int EGL_BAD_CURRENT_SURFACE = 12295; // 0x3007
-    field public static final int EGL_BAD_DISPLAY = 12296; // 0x3008
-    field public static final int EGL_BAD_MATCH = 12297; // 0x3009
-    field public static final int EGL_BAD_NATIVE_PIXMAP = 12298; // 0x300a
-    field public static final int EGL_BAD_NATIVE_WINDOW = 12299; // 0x300b
-    field public static final int EGL_BAD_PARAMETER = 12300; // 0x300c
-    field public static final int EGL_BAD_SURFACE = 12301; // 0x300d
-    field public static final int EGL_BIND_TO_TEXTURE_RGB = 12345; // 0x3039
-    field public static final int EGL_BIND_TO_TEXTURE_RGBA = 12346; // 0x303a
-    field public static final int EGL_BLUE_SIZE = 12322; // 0x3022
-    field public static final int EGL_BUFFER_DESTROYED = 12437; // 0x3095
-    field public static final int EGL_BUFFER_PRESERVED = 12436; // 0x3094
-    field public static final int EGL_BUFFER_SIZE = 12320; // 0x3020
-    field public static final int EGL_CLIENT_APIS = 12429; // 0x308d
-    field public static final int EGL_COLOR_BUFFER_TYPE = 12351; // 0x303f
-    field public static final int EGL_CONFIG_CAVEAT = 12327; // 0x3027
-    field public static final int EGL_CONFIG_ID = 12328; // 0x3028
-    field public static final int EGL_CONFORMANT = 12354; // 0x3042
-    field public static final int EGL_CONTEXT_CLIENT_TYPE = 12439; // 0x3097
-    field public static final int EGL_CONTEXT_CLIENT_VERSION = 12440; // 0x3098
-    field public static final int EGL_CONTEXT_LOST = 12302; // 0x300e
-    field public static final int EGL_CORE_NATIVE_ENGINE = 12379; // 0x305b
-    field public static final int EGL_DEFAULT_DISPLAY = 0; // 0x0
-    field public static final int EGL_DEPTH_SIZE = 12325; // 0x3025
-    field public static final int EGL_DISPLAY_SCALING = 10000; // 0x2710
-    field public static final int EGL_DRAW = 12377; // 0x3059
-    field public static final int EGL_EXTENSIONS = 12373; // 0x3055
-    field public static final int EGL_FALSE = 0; // 0x0
-    field public static final int EGL_GREEN_SIZE = 12323; // 0x3023
-    field public static final int EGL_HEIGHT = 12374; // 0x3056
-    field public static final int EGL_HORIZONTAL_RESOLUTION = 12432; // 0x3090
-    field public static final int EGL_LARGEST_PBUFFER = 12376; // 0x3058
-    field public static final int EGL_LEVEL = 12329; // 0x3029
-    field public static final int EGL_LUMINANCE_BUFFER = 12431; // 0x308f
-    field public static final int EGL_LUMINANCE_SIZE = 12349; // 0x303d
-    field public static final int EGL_MATCH_NATIVE_PIXMAP = 12353; // 0x3041
-    field public static final int EGL_MAX_PBUFFER_HEIGHT = 12330; // 0x302a
-    field public static final int EGL_MAX_PBUFFER_PIXELS = 12331; // 0x302b
-    field public static final int EGL_MAX_PBUFFER_WIDTH = 12332; // 0x302c
-    field public static final int EGL_MAX_SWAP_INTERVAL = 12348; // 0x303c
-    field public static final int EGL_MIN_SWAP_INTERVAL = 12347; // 0x303b
-    field public static final int EGL_MIPMAP_LEVEL = 12419; // 0x3083
-    field public static final int EGL_MIPMAP_TEXTURE = 12418; // 0x3082
-    field public static final int EGL_MULTISAMPLE_RESOLVE = 12441; // 0x3099
-    field public static final int EGL_MULTISAMPLE_RESOLVE_BOX = 12443; // 0x309b
-    field public static final int EGL_MULTISAMPLE_RESOLVE_BOX_BIT = 512; // 0x200
-    field public static final int EGL_MULTISAMPLE_RESOLVE_DEFAULT = 12442; // 0x309a
-    field public static final int EGL_NATIVE_RENDERABLE = 12333; // 0x302d
-    field public static final int EGL_NATIVE_VISUAL_ID = 12334; // 0x302e
-    field public static final int EGL_NATIVE_VISUAL_TYPE = 12335; // 0x302f
-    field public static final int EGL_NONE = 12344; // 0x3038
-    field public static final int EGL_NON_CONFORMANT_CONFIG = 12369; // 0x3051
-    field public static final int EGL_NOT_INITIALIZED = 12289; // 0x3001
-    field public static android.opengl.EGLContext EGL_NO_CONTEXT;
-    field public static android.opengl.EGLDisplay EGL_NO_DISPLAY;
-    field public static android.opengl.EGLSurface EGL_NO_SURFACE;
-    field public static final int EGL_NO_TEXTURE = 12380; // 0x305c
-    field public static final int EGL_OPENGL_API = 12450; // 0x30a2
-    field public static final int EGL_OPENGL_BIT = 8; // 0x8
-    field public static final int EGL_OPENGL_ES2_BIT = 4; // 0x4
-    field public static final int EGL_OPENGL_ES_API = 12448; // 0x30a0
-    field public static final int EGL_OPENGL_ES_BIT = 1; // 0x1
-    field public static final int EGL_OPENVG_API = 12449; // 0x30a1
-    field public static final int EGL_OPENVG_BIT = 2; // 0x2
-    field public static final int EGL_OPENVG_IMAGE = 12438; // 0x3096
-    field public static final int EGL_PBUFFER_BIT = 1; // 0x1
-    field public static final int EGL_PIXEL_ASPECT_RATIO = 12434; // 0x3092
-    field public static final int EGL_PIXMAP_BIT = 2; // 0x2
-    field public static final int EGL_READ = 12378; // 0x305a
-    field public static final int EGL_RED_SIZE = 12324; // 0x3024
-    field public static final int EGL_RENDERABLE_TYPE = 12352; // 0x3040
-    field public static final int EGL_RENDER_BUFFER = 12422; // 0x3086
-    field public static final int EGL_RGB_BUFFER = 12430; // 0x308e
-    field public static final int EGL_SAMPLES = 12337; // 0x3031
-    field public static final int EGL_SAMPLE_BUFFERS = 12338; // 0x3032
-    field public static final int EGL_SINGLE_BUFFER = 12421; // 0x3085
-    field public static final int EGL_SLOW_CONFIG = 12368; // 0x3050
-    field public static final int EGL_STENCIL_SIZE = 12326; // 0x3026
-    field public static final int EGL_SUCCESS = 12288; // 0x3000
-    field public static final int EGL_SURFACE_TYPE = 12339; // 0x3033
-    field public static final int EGL_SWAP_BEHAVIOR = 12435; // 0x3093
-    field public static final int EGL_SWAP_BEHAVIOR_PRESERVED_BIT = 1024; // 0x400
-    field public static final int EGL_TEXTURE_2D = 12383; // 0x305f
-    field public static final int EGL_TEXTURE_FORMAT = 12416; // 0x3080
-    field public static final int EGL_TEXTURE_RGB = 12381; // 0x305d
-    field public static final int EGL_TEXTURE_RGBA = 12382; // 0x305e
-    field public static final int EGL_TEXTURE_TARGET = 12417; // 0x3081
-    field public static final int EGL_TRANSPARENT_BLUE_VALUE = 12341; // 0x3035
-    field public static final int EGL_TRANSPARENT_GREEN_VALUE = 12342; // 0x3036
-    field public static final int EGL_TRANSPARENT_RED_VALUE = 12343; // 0x3037
-    field public static final int EGL_TRANSPARENT_RGB = 12370; // 0x3052
-    field public static final int EGL_TRANSPARENT_TYPE = 12340; // 0x3034
-    field public static final int EGL_TRUE = 1; // 0x1
-    field public static final int EGL_VENDOR = 12371; // 0x3053
-    field public static final int EGL_VERSION = 12372; // 0x3054
-    field public static final int EGL_VERTICAL_RESOLUTION = 12433; // 0x3091
-    field public static final int EGL_VG_ALPHA_FORMAT = 12424; // 0x3088
-    field public static final int EGL_VG_ALPHA_FORMAT_NONPRE = 12427; // 0x308b
-    field public static final int EGL_VG_ALPHA_FORMAT_PRE = 12428; // 0x308c
-    field public static final int EGL_VG_ALPHA_FORMAT_PRE_BIT = 64; // 0x40
-    field public static final int EGL_VG_COLORSPACE = 12423; // 0x3087
-    field public static final int EGL_VG_COLORSPACE_LINEAR = 12426; // 0x308a
-    field public static final int EGL_VG_COLORSPACE_LINEAR_BIT = 32; // 0x20
-    field public static final int EGL_VG_COLORSPACE_sRGB = 12425; // 0x3089
-    field public static final int EGL_WIDTH = 12375; // 0x3057
-    field public static final int EGL_WINDOW_BIT = 4; // 0x4
-  }
-
-  public class EGLConfig extends android.opengl.EGLObjectHandle {
-  }
-
-  public class EGLContext extends android.opengl.EGLObjectHandle {
-  }
-
-  public class EGLDisplay extends android.opengl.EGLObjectHandle {
-  }
-
-  public abstract class EGLObjectHandle {
-    ctor protected EGLObjectHandle(int);
-    method public int getHandle();
-  }
-
-  public class EGLSurface extends android.opengl.EGLObjectHandle {
-  }
-
   public class ETC1 {
     ctor public ETC1();
     method public static void decodeBlock(java.nio.Buffer, java.nio.Buffer);
@@ -14859,12 +14653,8 @@ package android.opengl {
     method public static void glGenerateMipmap(int);
     method public static void glGetActiveAttrib(int, int, int, int[], int, int[], int, int[], int, byte[], int);
     method public static void glGetActiveAttrib(int, int, int, java.nio.IntBuffer, java.nio.IntBuffer, java.nio.IntBuffer, byte);
-    method public static java.lang.String glGetActiveAttrib(int, int, int[], int, int[], int);
-    method public static java.lang.String glGetActiveAttrib(int, int, java.nio.IntBuffer, java.nio.IntBuffer);
     method public static void glGetActiveUniform(int, int, int, int[], int, int[], int, int[], int, byte[], int);
     method public static void glGetActiveUniform(int, int, int, java.nio.IntBuffer, java.nio.IntBuffer, java.nio.IntBuffer, byte);
-    method public static java.lang.String glGetActiveUniform(int, int, int[], int, int[], int);
-    method public static java.lang.String glGetActiveUniform(int, int, java.nio.IntBuffer, java.nio.IntBuffer);
     method public static void glGetAttachedShaders(int, int, int[], int, int[], int);
     method public static void glGetAttachedShaders(int, int, java.nio.IntBuffer, java.nio.IntBuffer);
     method public static int glGetAttribLocation(int, java.lang.String);
@@ -14889,7 +14679,6 @@ package android.opengl {
     method public static void glGetShaderPrecisionFormat(int, int, java.nio.IntBuffer, java.nio.IntBuffer);
     method public static void glGetShaderSource(int, int, int[], int, byte[], int);
     method public static void glGetShaderSource(int, int, java.nio.IntBuffer, byte);
-    method public static java.lang.String glGetShaderSource(int);
     method public static void glGetShaderiv(int, int, int[], int);
     method public static void glGetShaderiv(int, int, java.nio.IntBuffer);
     method public static java.lang.String glGetString(int);
@@ -15542,7 +15331,6 @@ package android.os {
     field public static final int ICE_CREAM_SANDWICH = 14; // 0xe
     field public static final int ICE_CREAM_SANDWICH_MR1 = 15; // 0xf
     field public static final int JELLY_BEAN = 16; // 0x10
-    field public static final int JELLY_BEAN_MR1 = 17; // 0x11
   }
 
   public final class Bundle implements java.lang.Cloneable android.os.Parcelable {
@@ -16209,11 +15997,11 @@ package android.os {
     method public void reboot(java.lang.String);
     method public void userActivity(long, boolean);
     field public static final int ACQUIRE_CAUSES_WAKEUP = 268435456; // 0x10000000
-    field public static final deprecated int FULL_WAKE_LOCK = 26; // 0x1a
+    field public static final int FULL_WAKE_LOCK = 26; // 0x1a
     field public static final int ON_AFTER_RELEASE = 536870912; // 0x20000000
     field public static final int PARTIAL_WAKE_LOCK = 1; // 0x1
     field public static final deprecated int SCREEN_BRIGHT_WAKE_LOCK = 10; // 0xa
-    field public static final deprecated int SCREEN_DIM_WAKE_LOCK = 6; // 0x6
+    field public static final int SCREEN_DIM_WAKE_LOCK = 6; // 0x6
   }
 
   public final class PowerManager.WakeLock {
@@ -16367,7 +16155,6 @@ package android.os {
   public final class SystemClock {
     method public static long currentThreadTimeMillis();
     method public static long elapsedRealtime();
-    method public static long elapsedRealtimeNano();
     method public static boolean setCurrentTimeMillis(long);
     method public static void sleep(long);
     method public static long uptimeMillis();
@@ -20494,7 +20281,6 @@ package android.telephony.cdma {
   public class CdmaCellLocation extends android.telephony.CellLocation {
     ctor public CdmaCellLocation();
     ctor public CdmaCellLocation(android.os.Bundle);
-    method public static double convertQuartSecToDecDegrees(int);
     method public void fillInNotifierBundle(android.os.Bundle);
     method public int getBaseStationId();
     method public int getBaseStationLatitude();
@@ -22703,10 +22489,6 @@ package android.util {
     method public android.util.JsonWriter value(java.lang.Number) throws java.io.IOException;
   }
 
-  public class LocaleUtil {
-    method public static int getLayoutDirectionFromLocale(java.util.Locale);
-  }
-
   public final class Log {
     method public static int d(java.lang.String, java.lang.String);
     method public static int d(java.lang.String, java.lang.String, java.lang.Throwable);
@@ -22847,17 +22629,6 @@ package android.util {
     method public boolean isReadOnly();
     method public static android.util.Property<T, V> of(java.lang.Class<T>, java.lang.Class<V>, java.lang.String);
     method public void set(T, V);
-  }
-
-  public class PropertyValueModel extends android.util.ValueModel {
-    method public T get();
-    method public H getHost();
-    method public android.util.Property<H, T> getProperty();
-    method public java.lang.Class<T> getType();
-    method public static android.util.PropertyValueModel<H, T> of(H, android.util.Property<H, T>);
-    method public static android.util.PropertyValueModel<H, T> of(H, java.lang.Class<T>, java.lang.String);
-    method public static android.util.PropertyValueModel of(java.lang.Object, java.lang.String);
-    method public void set(T);
   }
 
   public class SparseArray implements java.lang.Cloneable {
@@ -23008,14 +22779,6 @@ package android.util {
     field public int type;
   }
 
-  public abstract class ValueModel {
-    ctor protected ValueModel();
-    method public abstract T get();
-    method public abstract java.lang.Class<T> getType();
-    method public abstract void set(T);
-    field public static final android.util.ValueModel EMPTY;
-  }
-
   public class Xml {
     method public static android.util.AttributeSet asAttributeSet(org.xmlpull.v1.XmlPullParser);
     method public static android.util.Xml.Encoding findEncodingByName(java.lang.String) throws java.io.UnsupportedEncodingException;
@@ -23135,9 +22898,7 @@ package android.view {
     method public deprecated int getHeight();
     method public void getMetrics(android.util.DisplayMetrics);
     method public deprecated int getOrientation();
-    method public deprecated int getPixelFormat();
-    method public void getRealMetrics(android.util.DisplayMetrics);
-    method public void getRealSize(android.graphics.Point);
+    method public int getPixelFormat();
     method public void getRectSize(android.graphics.Rect);
     method public float getRefreshRate();
     method public int getRotation();
@@ -23215,12 +22976,8 @@ package android.view {
   public class Gravity {
     ctor public Gravity();
     method public static void apply(int, int, int, android.graphics.Rect, android.graphics.Rect);
-    method public static void apply(int, int, int, android.graphics.Rect, android.graphics.Rect, int);
     method public static void apply(int, int, int, android.graphics.Rect, int, int, android.graphics.Rect);
-    method public static void apply(int, int, int, android.graphics.Rect, int, int, android.graphics.Rect, int);
     method public static void applyDisplay(int, android.graphics.Rect, android.graphics.Rect);
-    method public static void applyDisplay(int, android.graphics.Rect, android.graphics.Rect, int);
-    method public static int getAbsoluteGravity(int, int);
     method public static boolean isHorizontal(int);
     method public static boolean isVertical(int);
     field public static final int AXIS_CLIP = 8; // 0x8
@@ -24264,9 +24021,6 @@ package android.view {
     method public void buildDrawingCache(boolean);
     method public void buildLayer();
     method public boolean callOnClick();
-    method public boolean canResolveLayoutDirection();
-    method public boolean canResolveTextAlignment();
-    method public boolean canResolveTextDirection();
     method public boolean canScrollHorizontally(int);
     method public boolean canScrollVertically(int);
     method public void cancelLongPress();
@@ -24318,7 +24072,6 @@ package android.view {
     method protected boolean fitSystemWindows(android.graphics.Rect);
     method public android.view.View focusSearch(int);
     method public void forceLayout();
-    method public static int generateViewId();
     method public android.view.accessibility.AccessibilityNodeProvider getAccessibilityNodeProvider();
     method public float getAlpha();
     method public android.view.animation.Animation getAnimation();
@@ -24342,7 +24095,6 @@ package android.view {
     method public long getDrawingTime();
     method public boolean getFilterTouchesWhenObscured();
     method public boolean getFitsSystemWindows();
-    method public void getFocusRect(android.graphics.Rect);
     method public java.util.ArrayList<android.view.View> getFocusables(int);
     method public void getFocusedRect(android.graphics.Rect);
     method public boolean getGlobalVisibleRect(android.graphics.Rect, android.graphics.Point);
@@ -24357,7 +24109,6 @@ package android.view {
     method public boolean getKeepScreenOn();
     method public android.view.KeyEvent.DispatcherState getKeyDispatcherState();
     method public int getLayerType();
-    method public int getLayoutDirection();
     method public android.view.ViewGroup.LayoutParams getLayoutParams();
     method public final int getLeft();
     method protected float getLeftFadingEdgeStrength();
@@ -24381,18 +24132,13 @@ package android.view {
     method public android.view.View.OnFocusChangeListener getOnFocusChangeListener();
     method public int getOverScrollMode();
     method public int getPaddingBottom();
-    method public int getPaddingEnd();
     method public int getPaddingLeft();
     method public int getPaddingRight();
-    method public int getPaddingStart();
     method public int getPaddingTop();
     method public final android.view.ViewParent getParent();
     method public android.view.ViewParent getParentForAccessibility();
     method public float getPivotX();
     method public float getPivotY();
-    method public int getResolvedLayoutDirection();
-    method public int getResolvedTextAlignment();
-    method public int getResolvedTextDirection();
     method public android.content.res.Resources getResources();
     method public final int getRight();
     method protected float getRightFadingEdgeStrength();
@@ -24415,8 +24161,6 @@ package android.view {
     method public int getSystemUiVisibility();
     method public java.lang.Object getTag();
     method public java.lang.Object getTag(int);
-    method public int getTextAlignment();
-    method public int getTextDirection();
     method public final int getTop();
     method protected float getTopFadingEdgeStrength();
     method protected int getTopPaddingOffset();
@@ -24466,13 +24210,10 @@ package android.view {
     method public boolean isHovered();
     method public boolean isInEditMode();
     method public boolean isInTouchMode();
-    method protected static boolean isLayoutDirectionRtl(java.util.Locale);
     method public boolean isLayoutRequested();
-    method public boolean isLayoutRtl();
     method public boolean isLongClickable();
     method public boolean isOpaque();
     method protected boolean isPaddingOffsetRequired();
-    method public boolean isPaddingRelative();
     method public boolean isPressed();
     method public boolean isSaveEnabled();
     method public boolean isSaveFromParentEnabled();
@@ -24520,15 +24261,7 @@ package android.view {
     method protected void onLayout(boolean, int, int, int, int);
     method protected void onMeasure(int, int);
     method protected void onOverScrolled(int, int, boolean, boolean);
-    method public void onPaddingChanged(int);
     method public void onPopulateAccessibilityEvent(android.view.accessibility.AccessibilityEvent);
-    method public void onResolveDrawables(int);
-    method public void onResolvedLayoutDirectionChanged();
-    method public void onResolvedLayoutDirectionReset();
-    method public void onResolvedTextAlignmentChanged();
-    method public void onResolvedTextAlignmentReset();
-    method public void onResolvedTextDirectionChanged();
-    method public void onResolvedTextDirectionReset();
     method protected void onRestoreInstanceState(android.os.Parcelable);
     method protected android.os.Parcelable onSaveInstanceState();
     method public void onScreenStateChanged(int);
@@ -24571,16 +24304,8 @@ package android.view {
     method public void requestLayout();
     method public boolean requestRectangleOnScreen(android.graphics.Rect);
     method public boolean requestRectangleOnScreen(android.graphics.Rect, boolean);
-    method public void resetResolvedLayoutDirection();
-    method public void resetResolvedTextAlignment();
-    method public void resetResolvedTextDirection();
-    method public void resolveDrawables();
-    method public void resolveLayoutDirection();
-    method public void resolvePadding();
     method public static int resolveSize(int, int);
     method public static int resolveSizeAndState(int, int, int);
-    method public void resolveTextAlignment();
-    method public void resolveTextDirection();
     method public void restoreHierarchyState(android.util.SparseArray<android.os.Parcelable>);
     method public void saveHierarchyState(android.util.SparseArray<android.os.Parcelable>);
     method public void scheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable, long);
@@ -24619,7 +24344,6 @@ package android.view {
     method public void setImportantForAccessibility(int);
     method public void setKeepScreenOn(boolean);
     method public void setLayerType(int, android.graphics.Paint);
-    method public void setLayoutDirection(int);
     method public void setLayoutParams(android.view.ViewGroup.LayoutParams);
     method public final void setLeft(int);
     method public void setLongClickable(boolean);
@@ -24643,7 +24367,6 @@ package android.view {
     method public void setOnTouchListener(android.view.View.OnTouchListener);
     method public void setOverScrollMode(int);
     method public void setPadding(int, int, int, int);
-    method public void setPaddingRelative(int, int, int, int);
     method public void setPivotX(float);
     method public void setPivotY(float);
     method public void setPressed(boolean);
@@ -24668,8 +24391,6 @@ package android.view {
     method public void setSystemUiVisibility(int);
     method public void setTag(java.lang.Object);
     method public void setTag(int, java.lang.Object);
-    method public void setTextAlignment(int);
-    method public void setTextDirection(int);
     method public final void setTop(int);
     method public void setTouchDelegate(android.view.TouchDelegate);
     method public void setTranslationX(float);
@@ -24728,10 +24449,6 @@ package android.view {
     field public static final int LAYER_TYPE_HARDWARE = 2; // 0x2
     field public static final int LAYER_TYPE_NONE = 0; // 0x0
     field public static final int LAYER_TYPE_SOFTWARE = 1; // 0x1
-    field public static final int LAYOUT_DIRECTION_INHERIT = 2; // 0x2
-    field public static final int LAYOUT_DIRECTION_LOCALE = 3; // 0x3
-    field public static final int LAYOUT_DIRECTION_LTR = 0; // 0x0
-    field public static final int LAYOUT_DIRECTION_RTL = 1; // 0x1
     field public static final int MEASURED_HEIGHT_STATE_SHIFT = 16; // 0x10
     field public static final int MEASURED_SIZE_MASK = 16777215; // 0xffffff
     field public static final int MEASURED_STATE_MASK = -16777216; // 0xff000000
@@ -24782,22 +24499,8 @@ package android.view {
     field public static final int SYSTEM_UI_FLAG_LOW_PROFILE = 1; // 0x1
     field public static final int SYSTEM_UI_FLAG_VISIBLE = 0; // 0x0
     field public static final int SYSTEM_UI_LAYOUT_FLAGS = 1536; // 0x600
-    field public static final int TEXT_ALIGNMENT_CENTER = 4; // 0x4
-    field protected static int TEXT_ALIGNMENT_DEFAULT;
-    field public static final int TEXT_ALIGNMENT_GRAVITY = 1; // 0x1
     field public static final int TEXT_ALIGNMENT_INHERIT = 0; // 0x0
     field public static final int TEXT_ALIGNMENT_RESOLVED_DEFAULT = 131072; // 0x20000
-    field public static final int TEXT_ALIGNMENT_TEXT_END = 3; // 0x3
-    field public static final int TEXT_ALIGNMENT_TEXT_START = 2; // 0x2
-    field public static final int TEXT_ALIGNMENT_VIEW_END = 6; // 0x6
-    field public static final int TEXT_ALIGNMENT_VIEW_START = 5; // 0x5
-    field public static final int TEXT_DIRECTION_ANY_RTL = 2; // 0x2
-    field protected static int TEXT_DIRECTION_DEFAULT;
-    field public static final int TEXT_DIRECTION_FIRST_STRONG = 1; // 0x1
-    field public static final int TEXT_DIRECTION_INHERIT = 0; // 0x0
-    field public static final int TEXT_DIRECTION_LOCALE = 5; // 0x5
-    field public static final int TEXT_DIRECTION_LTR = 3; // 0x3
-    field public static final int TEXT_DIRECTION_RTL = 4; // 0x4
     field public static final android.util.Property TRANSLATION_X;
     field public static final android.util.Property TRANSLATION_Y;
     field protected static final java.lang.String VIEW_LOG_TAG = "View";
@@ -25101,7 +24804,6 @@ package android.view {
     ctor public ViewGroup.LayoutParams(android.content.Context, android.util.AttributeSet);
     ctor public ViewGroup.LayoutParams(int, int);
     ctor public ViewGroup.LayoutParams(android.view.ViewGroup.LayoutParams);
-    method public void onResolveLayoutDirection(int);
     method protected void setBaseAttributes(android.content.res.TypedArray, int, int);
     field public static final deprecated int FILL_PARENT = -1; // 0xffffffff
     field public static final int MATCH_PARENT = -1; // 0xffffffff
@@ -25116,18 +24818,10 @@ package android.view {
     ctor public ViewGroup.MarginLayoutParams(int, int);
     ctor public ViewGroup.MarginLayoutParams(android.view.ViewGroup.MarginLayoutParams);
     ctor public ViewGroup.MarginLayoutParams(android.view.ViewGroup.LayoutParams);
-    method public int getLayoutDirection();
-    method public int getMarginEnd();
-    method public int getMarginStart();
-    method protected boolean isLayoutRtl();
-    method public boolean isMarginRelative();
-    method public void setLayoutDirection(int);
     method public void setMargins(int, int, int, int);
     field public int bottomMargin;
-    field public int endMargin;
     field public int leftMargin;
     field public int rightMargin;
-    field public int startMargin;
     field public int topMargin;
   }
 
@@ -25431,7 +25125,7 @@ package android.view {
     field public static final deprecated int FLAG_BLUR_BEHIND = 4; // 0x4
     field public static final int FLAG_DIM_BEHIND = 2; // 0x2
     field public static final int FLAG_DISMISS_KEYGUARD = 4194304; // 0x400000
-    field public static final deprecated int FLAG_DITHER = 4096; // 0x1000
+    field public static final int FLAG_DITHER = 4096; // 0x1000
     field public static final int FLAG_FORCE_NOT_FULLSCREEN = 2048; // 0x800
     field public static final int FLAG_FULLSCREEN = 1024; // 0x400
     field public static final int FLAG_HARDWARE_ACCELERATED = 16777216; // 0x1000000
@@ -26588,7 +26282,7 @@ package android.webkit {
     method public boolean onJsBeforeUnload(android.webkit.WebView, java.lang.String, java.lang.String, android.webkit.JsResult);
     method public boolean onJsConfirm(android.webkit.WebView, java.lang.String, java.lang.String, android.webkit.JsResult);
     method public boolean onJsPrompt(android.webkit.WebView, java.lang.String, java.lang.String, java.lang.String, android.webkit.JsPromptResult);
-    method public deprecated boolean onJsTimeout();
+    method public boolean onJsTimeout();
     method public void onProgressChanged(android.webkit.WebView, int);
     method public void onReachedMaxAppCacheSize(long, long, android.webkit.WebStorage.QuotaUpdater);
     method public void onReceivedIcon(android.webkit.WebView, android.graphics.Bitmap);
@@ -26662,7 +26356,6 @@ package android.webkit {
     method public boolean getLightTouchEnabled();
     method public boolean getLoadWithOverviewMode();
     method public synchronized boolean getLoadsImagesAutomatically();
-    method public boolean getMediaPlaybackRequiresUserGesture();
     method public synchronized int getMinimumFontSize();
     method public synchronized int getMinimumLogicalFontSize();
     method public deprecated boolean getNavDump();
@@ -26712,7 +26405,6 @@ package android.webkit {
     method public void setLightTouchEnabled(boolean);
     method public void setLoadWithOverviewMode(boolean);
     method public synchronized void setLoadsImagesAutomatically(boolean);
-    method public void setMediaPlaybackRequiresUserGesture(boolean);
     method public synchronized void setMinimumFontSize(int);
     method public synchronized void setMinimumLogicalFontSize(int);
     method public deprecated void setNavDump(boolean);
@@ -27442,12 +27134,10 @@ package android.widget {
     method public abstract void onSelectedDayChange(android.widget.CalendarView, int, int, int);
   }
 
-  public class CheckBox extends android.widget.CompoundButton implements android.widget.ValueEditor {
+  public class CheckBox extends android.widget.CompoundButton {
     ctor public CheckBox(android.content.Context);
     ctor public CheckBox(android.content.Context, android.util.AttributeSet);
     ctor public CheckBox(android.content.Context, android.util.AttributeSet, int);
-    method public android.util.ValueModel<java.lang.Boolean> getValueModel();
-    method public void setValueModel(android.util.ValueModel<java.lang.Boolean>);
   }
 
   public abstract interface Checkable {
@@ -27462,6 +27152,7 @@ package android.widget {
     ctor public CheckedTextView(android.content.Context, android.util.AttributeSet, int);
     method public android.graphics.drawable.Drawable getCheckMarkDrawable();
     method public boolean isChecked();
+    method public void onPaddingChanged(int);
     method public void setCheckMarkDrawable(int);
     method public void setCheckMarkDrawable(android.graphics.drawable.Drawable);
     method public void setChecked(boolean);
@@ -27604,7 +27295,7 @@ package android.widget {
     field public static final int LETTERS_ONLY = 5; // 0x5
   }
 
-  public deprecated class DigitalClock extends android.widget.TextView {
+  public class DigitalClock extends android.widget.TextView {
     ctor public DigitalClock(android.content.Context);
     ctor public DigitalClock(android.content.Context, android.util.AttributeSet);
   }
@@ -27620,16 +27311,14 @@ package android.widget {
     method public void setSize(int, int);
   }
 
-  public class EditText extends android.widget.TextView implements android.widget.ValueEditor {
+  public class EditText extends android.widget.TextView {
     ctor public EditText(android.content.Context);
     ctor public EditText(android.content.Context, android.util.AttributeSet);
     ctor public EditText(android.content.Context, android.util.AttributeSet, int);
     method public void extendSelection(int);
-    method public android.util.ValueModel<java.lang.CharSequence> getValueModel();
     method public void selectAll();
     method public void setSelection(int, int);
     method public void setSelection(int);
-    method public void setValueModel(android.util.ValueModel<java.lang.CharSequence>);
   }
 
   public abstract interface ExpandableListAdapter {
@@ -28070,7 +27759,6 @@ package android.widget {
     method public void setHeight(int);
     method public void setHorizontalOffset(int);
     method public void setInputMethodMode(int);
-    method public void setLayoutDirection(int);
     method public void setListSelector(android.graphics.drawable.Drawable);
     method public void setModal(boolean);
     method public void setOnDismissListener(android.widget.PopupWindow.OnDismissListener);
@@ -28423,25 +28111,19 @@ package android.widget {
     field public static final int ABOVE = 2; // 0x2
     field public static final int ALIGN_BASELINE = 4; // 0x4
     field public static final int ALIGN_BOTTOM = 8; // 0x8
-    field public static final int ALIGN_END = 19; // 0x13
     field public static final int ALIGN_LEFT = 5; // 0x5
     field public static final int ALIGN_PARENT_BOTTOM = 12; // 0xc
-    field public static final int ALIGN_PARENT_END = 21; // 0x15
     field public static final int ALIGN_PARENT_LEFT = 9; // 0x9
     field public static final int ALIGN_PARENT_RIGHT = 11; // 0xb
-    field public static final int ALIGN_PARENT_START = 20; // 0x14
     field public static final int ALIGN_PARENT_TOP = 10; // 0xa
     field public static final int ALIGN_RIGHT = 7; // 0x7
-    field public static final int ALIGN_START = 18; // 0x12
     field public static final int ALIGN_TOP = 6; // 0x6
     field public static final int BELOW = 3; // 0x3
     field public static final int CENTER_HORIZONTAL = 14; // 0xe
     field public static final int CENTER_IN_PARENT = 13; // 0xd
     field public static final int CENTER_VERTICAL = 15; // 0xf
-    field public static final int END_OF = 17; // 0x11
     field public static final int LEFT_OF = 0; // 0x0
     field public static final int RIGHT_OF = 1; // 0x1
-    field public static final int START_OF = 16; // 0x10
     field public static final int TRUE = -1; // 0xffffffff
   }
 
@@ -28454,7 +28136,6 @@ package android.widget {
     method public void addRule(int, int);
     method public java.lang.String debug(java.lang.String);
     method public int[] getRules();
-    method public void removeRule(int);
     field public boolean alignWithParent;
   }
 
@@ -28654,13 +28335,11 @@ package android.widget {
     method public abstract java.lang.Object[] getSections();
   }
 
-  public class SeekBar extends android.widget.AbsSeekBar implements android.widget.ValueEditor {
+  public class SeekBar extends android.widget.AbsSeekBar {
     ctor public SeekBar(android.content.Context);
     ctor public SeekBar(android.content.Context, android.util.AttributeSet);
     ctor public SeekBar(android.content.Context, android.util.AttributeSet, int);
-    method public android.util.ValueModel<java.lang.Integer> getValueModel();
     method public void setOnSeekBarChangeListener(android.widget.SeekBar.OnSeekBarChangeListener);
-    method public void setValueModel(android.util.ValueModel<java.lang.Integer>);
   }
 
   public static abstract interface SeekBar.OnSeekBarChangeListener {
@@ -28758,7 +28437,7 @@ package android.widget {
     method public android.view.View newGroupView(boolean, android.view.ViewGroup);
   }
 
-  public deprecated class SlidingDrawer extends android.view.ViewGroup {
+  public class SlidingDrawer extends android.view.ViewGroup {
     ctor public SlidingDrawer(android.content.Context, android.util.AttributeSet);
     ctor public SlidingDrawer(android.content.Context, android.util.AttributeSet, int);
     method public void animateClose();
@@ -28985,12 +28664,9 @@ package android.widget {
     method public final int getAutoLinkMask();
     method public int getCompoundDrawablePadding();
     method public android.graphics.drawable.Drawable[] getCompoundDrawables();
-    method public android.graphics.drawable.Drawable[] getCompoundDrawablesRelative();
     method public int getCompoundPaddingBottom();
-    method public int getCompoundPaddingEnd();
     method public int getCompoundPaddingLeft();
     method public int getCompoundPaddingRight();
-    method public int getCompoundPaddingStart();
     method public int getCompoundPaddingTop();
     method public final int getCurrentHintTextColor();
     method public final int getCurrentTextColor();
@@ -29050,10 +28726,8 @@ package android.widget {
     method public float getTextScaleX();
     method public float getTextSize();
     method public int getTotalPaddingBottom();
-    method public int getTotalPaddingEnd();
     method public int getTotalPaddingLeft();
     method public int getTotalPaddingRight();
-    method public int getTotalPaddingStart();
     method public int getTotalPaddingTop();
     method public final android.text.method.TransformationMethod getTransformationMethod();
     method public android.graphics.Typeface getTypeface();
@@ -29079,13 +28753,11 @@ package android.widget {
     method public boolean onTextContextMenuItem(int);
     method public void removeTextChangedListener(android.text.TextWatcher);
     method protected void resetResolvedDrawables();
+    method protected void resolveDrawables();
     method public void setAllCaps(boolean);
     method public final void setAutoLinkMask(int);
     method public void setCompoundDrawablePadding(int);
     method public void setCompoundDrawables(android.graphics.drawable.Drawable, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable);
-    method public void setCompoundDrawablesRelative(android.graphics.drawable.Drawable, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable);
-    method public void setCompoundDrawablesRelativeWithIntrinsicBounds(int, int, int, int);
-    method public void setCompoundDrawablesRelativeWithIntrinsicBounds(android.graphics.drawable.Drawable, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable);
     method public void setCompoundDrawablesWithIntrinsicBounds(int, int, int, int);
     method public void setCompoundDrawablesWithIntrinsicBounds(android.graphics.drawable.Drawable, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable);
     method public void setCursorVisible(boolean);
@@ -29129,6 +28801,7 @@ package android.widget {
     method public void setMinWidth(int);
     method public final void setMovementMethod(android.text.method.MovementMethod);
     method public void setOnEditorActionListener(android.widget.TextView.OnEditorActionListener);
+    method public void setPaddingRelative(int, int, int, int);
     method public void setPaintFlags(int);
     method public void setPrivateImeOptions(java.lang.String);
     method public void setRawInputType(int);
@@ -29224,17 +28897,12 @@ package android.widget {
     method public void setTextOn(java.lang.CharSequence);
   }
 
-  public deprecated class TwoLineListItem extends android.widget.RelativeLayout {
+  public class TwoLineListItem extends android.widget.RelativeLayout {
     ctor public TwoLineListItem(android.content.Context);
     ctor public TwoLineListItem(android.content.Context, android.util.AttributeSet);
     ctor public TwoLineListItem(android.content.Context, android.util.AttributeSet, int);
     method public android.widget.TextView getText1();
     method public android.widget.TextView getText2();
-  }
-
-  public abstract interface ValueEditor {
-    method public abstract android.util.ValueModel<T> getValueModel();
-    method public abstract void setValueModel(android.util.ValueModel<T>);
   }
 
   public class VideoView extends android.view.SurfaceView implements android.widget.MediaController.MediaPlayerControl {
@@ -29255,7 +28923,6 @@ package android.widget {
     method public void setMediaController(android.widget.MediaController);
     method public void setOnCompletionListener(android.media.MediaPlayer.OnCompletionListener);
     method public void setOnErrorListener(android.media.MediaPlayer.OnErrorListener);
-    method public void setOnInfoListener(android.media.MediaPlayer.OnInfoListener);
     method public void setOnPreparedListener(android.media.MediaPlayer.OnPreparedListener);
     method public void setVideoPath(java.lang.String);
     method public void setVideoURI(android.net.Uri);
