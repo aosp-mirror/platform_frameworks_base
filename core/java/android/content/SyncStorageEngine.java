@@ -16,7 +16,6 @@
 
 package android.content;
 
-import com.android.internal.os.AtomicFile;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 
@@ -37,7 +36,7 @@ import android.os.Message;
 import android.os.Parcel;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
-import android.os.SystemClock;
+import android.util.AtomicFile;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.Xml;
