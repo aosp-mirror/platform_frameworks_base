@@ -1,19 +1,14 @@
-page.title=Progress and Activity
+page.title=Progress &amp; Activity
 @jd:body
 
-<p>When an operation of interest to the user is taking place over a relatively long period of time,
-provide visual feedback that it's still happening and in the process of being completed.</p>
-<h2 id="progress">Progress</h2>
+<p>Progress bars and activity indicators signal to users that something is happening that will take a moment.</p>
+<h2 id="progress">Progress bars</h2>
 
-<p>If you know the percentage of the operation that has been completed, use a determinate progress bar
-to give the user a sense of how much longer it will take.</p>
+<p>Progress bars are for situations where the percentage completed can be determined. They give users a quick sense of how much longer an operation will take.</p>
 
 <img src="{@docRoot}design/media/progress_download.png">
 
-<p>The progress bar should always travel from 0% to 100% completion. Avoid setting the bar to a lower
-value than a previous value, or using the same progress bar to represent the progress of multiple
-events, since doing so makes the display meaningless. If you're not sure how long a particular
-operation will take, use an indeterminate progress indicator.</p>
+<p>A progress bar should always fill from 0% to 100% and never move backwards to a lower value. If multiple operations are happening in sequence, use the progress bar to represent the delay as a whole, so that when the bar reaches 100%, it doesn't return back to 0%.</p>
 
 <div class="vspace size-2">&nbsp;</div>
 
@@ -22,12 +17,11 @@ operation will take, use an indeterminate progress indicator.</p>
   Progress bar in Holo Dark and Holo Light.
 </div>
 
-<h2 id="activity">Activity</h2>
+<h2 id="activity">Activity indicators</h2>
 
-<p>If you don't know how much longer an operation will continue, use an indeterminate progress
-indicator. There are two styles available: a flat bar and a circle. Use the one that best fits the
-available space.</p>
+<p>Activity indicators are for operations of an indeterminate length. They ask users to wait a moment while something finishes up, without getting into specifics about what's happening behind the scenes.</p>
 
+<p>Two styles are available: a bar and a circle. Each is offered in a variety of sizes, in both Holo Light and Holo Dark themes. Choose the appropriate style and size for the surrounding context. For example, the largest activity circle works well when displayed in a blank content area, but not in a smaller dialog box. Each operation should only be represented by one activity indicator.</p>
 
 <div class="layout-content-row">
   <div class="layout-content-col span-6">
@@ -38,14 +32,8 @@ available space.</p>
   <div class="layout-content-col span-7 with-callouts">
 
     <ol>
-      <li class="value-1"><h4>Activity bar (shown with the Holo Dark theme)</h4>
-        <p>
-
-An indeterminate activity bar is used at the start of an application download because the Play Store
-app hasn't been able to contact the server yet, and it's not possible to determine how long it will
-take for the download to begin.
-
-        </p>
+      <li class="value-1"><h4>Activity bar</h4>
+        <p>In this example, an activity bar (in Holo Dark) appears when a user first requests a download. There's an unknown period of time when the download has not yet started. As soon as the download starts, this activity bar transforms into a progress bar.</p>
       </li>
     </ol>
 
@@ -61,12 +49,19 @@ take for the download to begin.
   <div class="layout-content-col span-7 with-callouts">
 
     <ol>
-      <li class="value-2"><h4>Activity circle (shown with the Holo Light theme)</h4>
+      <li class="value-2"><h4>Activity circle</h4>
+        <p>In this example, an activity circle (in Holo Light) is used in the Gmail application when a message is being loaded because it's not possible to determine how long it will take to download the email.</p>
+        <p>When displaying an activity circle, do not include text to communicate what the app is doing. The moving circle alone provides sufficient feedback about the delay, and does so in an understated way that minimizes the impact.</p>
         <p>
-
-An indeterminate activity circle is used in the Gmail application when a message is being
-loaded because it's not possible to determine how long it will take to download the email.
-
+        <div class="layout-content-col span-3" style="margin-left:0">
+          <div class="do-dont-label bad">Don't</div>
+          <img src="{@docRoot}design/media/progress_activity_dont.png">
+        </div>
+      
+        <div class="layout-content-col span-3">
+          <div class="do-dont-label good">Do</div>
+          <img src="{@docRoot}design/media/progress_activity_do.png">
+        </div>
         </p>
       </li>
     </ol>
@@ -74,6 +69,34 @@ loaded because it's not possible to determine how long it will take to download 
   </div>
 </div>
 
-<p>You should only use one activity indicator on screen per activity, and it should appropriately sized
-for the surrounding context. For example, the largest activity circle works well when displayed in a
-blank content area, but not in a smaller dialog box.</p>
+<h2 id="custom-indicators">Custom indicators</h2>
+<p>The standard progress bar and activity indicators work well for most situations and should be used whenever possible to provide a consistent experience across Android. However, some situations may call for something more custom.</p>
+
+<p>Here's an example:<br>
+In all of the Google Play apps (Music, Books, Movies, Magazines), we wanted the current download state of each item to be visible at all times at the top-level screen. These states are:
+  <ul>
+    <li>Not downloaded</li>
+    <li>Temporarily downloaded (automatically cached by the app)</li>
+    <li>Permanently downloaded on the device at the user's request</li>
+  </ul>
+</p>
+<p>We also needed to indicate progress from one download state to another, because downloading is not instantaneous.</p>
+<p>This presented a challenge, because the Google Play apps use a variety of different layouts, and some of them are highly space-constrained. We didn't want this information to clutter the top-level screens, or compete too much with the cover art.</p>
+<p>So we designed a custom indicator that could show all of the information in a tiny footprint, with the flexibility to appear on top of content if necessary.</p>
+
+<img src="{@docRoot}design/media/progress_activity_custom.png">
+
+<p>The color indicates whether it's downloaded (blue) or not (gray). The appearance of the pin indicates whether the download is permanent (white, upright) or temporary (gray, diagonal). And when state is in the process of changing, progress is indicated by a moving pie chart.</p>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-9">
+    <img src="{@docRoot}design/media/progress_activity_custom_app.png">
+  </div>
+  <div class="layout-content-col span-4">
+    <div class="figure-caption">
+      Across Google Play apps with different layouts, the same custom indicator appears with each item. It communicates download state as well as progress, in a compact package that can be incorporated into any screen design.
+    </div>
+  </div>
+</div>
+
+<p>If you find that the standard indicators aren't meeting your needs (due to space constraints, state complexities), by all means design your own. Make it feel like part of the Android family by injecting some of the visual characteristics of the standard indicators. In this example, we carried over the circular shape, the same shade of blue, and the flat and simple style.</p>

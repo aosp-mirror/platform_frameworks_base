@@ -24,11 +24,11 @@ page.title=Help
   <div class="layout-content-col span-8">
     <ol>
       <li><strong>High value</strong>
-      <p>Without it, users wouldn't be able to customize the most frequently-visited Android screen to meet their needs.</p></li>
+      <p style="margin-top="0">Without it, users wouldn't be able to customize the most frequently-visited Android screen to meet their needs.</p></li>
       <li><strong>Available only through a gesture</strong>
-      <p>Users can't do this through a button or a menu.</p></li>
+      <p style="margin-top="0">Users can't do this through a button or a menu.</p></li>
       <li><strong>Atypical for the gesture</strong>
-      <p>Many high value functions invoked through a gesture - like scrolling, swiping tabs, and turning pages - are common and yield expected results. Users will be able to discover them in your app, and unsolicited help is unnecessary. But here, the gesture does something unexpected: press and hold doesn't just select an app, it also immediately navigates to the Home Screen and creates a shortcut to the app that can then be dragged around.</p></li>
+      <p style="margin-top="0">Many high value functions invoked through a gesture - like scrolling, swiping tabs, and turning pages - are common and yield expected results. Users will be able to discover them in your app, and unsolicited help is unnecessary. But here, the gesture does something unexpected: press and hold doesn't just select an app, it also immediately navigates to the Home Screen and creates a shortcut to the app that can then be dragged around.</p></li>
     </ol>
     <p>However, this is an exceptional case. Most functionality doesn't meet all three of these criteria.</p>
   </div>
