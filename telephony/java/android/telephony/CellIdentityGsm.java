@@ -22,8 +22,6 @@ import android.util.Log;
 
 /**
  * CellIdentity to represent a unique GSM or UMTS cell
- *
- * @hide
  */
 public final class CellIdentityGsm extends CellIdentity implements Parcelable {
 

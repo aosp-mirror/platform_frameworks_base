@@ -22,8 +22,6 @@ import android.util.Log;
 
 /**
  * LTE signal strength related information.
- *
- * @hide
  */
 public class CellSignalStrengthLte extends CellSignalStrength implements Parcelable {
 

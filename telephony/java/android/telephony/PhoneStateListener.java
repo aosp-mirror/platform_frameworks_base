@@ -162,8 +162,6 @@ public class PhoneStateListener {
      * Listen for changes to observed cell info.
      *
      * @see #onCellInfoChanged
-     *
-     * @hide
      */
     public static final int LISTEN_CELL_INFO = 0x00000400;
 
@@ -290,8 +288,6 @@ public class PhoneStateListener {
      * Callback invoked when a observed cell info has changed,
      * or new cells have been added or removed.
      * @param cellInfo is the list of currently visible cells.
-     *
-     * @hide
      */
     public void onCellInfoChanged(List<CellInfo> cellInfo) {
     }

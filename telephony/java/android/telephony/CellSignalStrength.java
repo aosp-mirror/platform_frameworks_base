@@ -18,18 +18,18 @@ package android.telephony;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.view.InputEvent;
 
 /**
  * Abstract base class for cell phone signal strength related information.
- *
- * @hide
  */
 public abstract class CellSignalStrength implements Parcelable {
 
     // Type fields for parceling
+    /** @hide */
     protected static final int TYPE_GSM = 1;
+    /** @hide */
     protected static final int TYPE_CDMA = 2;
+    /** @hide */
     protected static final int TYPE_LTE = 3;
 
 
@@ -49,6 +49,10 @@ public abstract class CellSignalStrength implements Parcelable {
     public static final String[] SIGNAL_STRENGTH_NAMES = {
         "none", "poor", "moderate", "good", "great"
     };
+
+    /** @hide */
+    protected CellSignalStrength() {
+    }
 
     /** @hide */
     public abstract void setDefaultValues();
