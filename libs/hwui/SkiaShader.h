@@ -154,13 +154,6 @@ private:
     SkiaBitmapShader() {
     }
 
-    /**
-     * This method does not work for n == 0.
-     */
-    inline bool isPowerOfTwo(unsigned int n) {
-        return !(n & (n - 1));
-    }
-
     SkBitmap* mBitmap;
     Texture* mTexture;
     GLenum mWrapS;
@@ -185,6 +178,7 @@ private:
     SkiaLinearGradientShader() {
     }
 
+    bool mIsSimple;
     float* mBounds;
     uint32_t* mColors;
     float* mPositions;
@@ -211,6 +205,7 @@ protected:
     SkiaSweepGradientShader() {
     }
 
+    bool mIsSimple;
     uint32_t* mColors;
     float* mPositions;
     int mCount;
