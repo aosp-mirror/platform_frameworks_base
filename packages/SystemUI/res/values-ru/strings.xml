@@ -25,7 +25,7 @@
     <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Показать уведомления"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Удаление из списка"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"О приложении"</string>
-    <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Приложения не найдены"</string>
+    <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"В последнее время вы не запускали приложения."</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Закрыть недавние приложения"</string>
   <plurals name="status_bar_accessibility_recent_apps">
     <item quantity="one" msgid="5854176083865845541">"Недавних приложений: 1"</item>
