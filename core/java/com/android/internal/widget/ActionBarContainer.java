@@ -77,18 +77,102 @@ public class ActionBarContainer extends FrameLayout {
     }
 
     public void setPrimaryBackground(Drawable bg) {
+        if (mBackground != null) {
+            mBackground.setCallback(null);
+            unscheduleDrawable(mBackground);
+        }
         mBackground = bg;
+        if (bg != null) {
+            bg.setCallback(this);
+        }
+        setWillNotDraw(mIsSplit ? mSplitBackground == null :
+                mBackground == null && mStackedBackground == null);
         invalidate();
     }
 
     public void setStackedBackground(Drawable bg) {
+        if (mStackedBackground != null) {
+            mStackedBackground.setCallback(null);
+            unscheduleDrawable(mStackedBackground);
+        }
         mStackedBackground = bg;
+        if (bg != null) {
+            bg.setCallback(this);
+        }
+        setWillNotDraw(mIsSplit ? mSplitBackground == null :
+                mBackground == null && mStackedBackground == null);
         invalidate();
     }
 
     public void setSplitBackground(Drawable bg) {
+        if (mSplitBackground != null) {
+            mSplitBackground.setCallback(null);
+            unscheduleDrawable(mSplitBackground);
+        }
         mSplitBackground = bg;
+        if (bg != null) {
+            bg.setCallback(this);
+        }
+        setWillNotDraw(mIsSplit ? mSplitBackground == null :
+                mBackground == null && mStackedBackground == null);
         invalidate();
+    }
+
+    @Override
+    public void setVisibility(int visibility) {
+        super.setVisibility(visibility);
+        final boolean isVisible = visibility == VISIBLE;
+        if (mBackground != null) mBackground.setVisible(isVisible, false);
+        if (mStackedBackground != null) mStackedBackground.setVisible(isVisible, false);
+        if (mSplitBackground != null) mSplitBackground.setVisible(isVisible, false);
+    }
+
+    @Override
+    protected boolean verifyDrawable(Drawable who) {
+        return (who == mBackground && !mIsSplit) || (who == mStackedBackground && mIsStacked) ||
+                (who == mSplitBackground && mIsSplit) || super.verifyDrawable(who);
+    }
+
+    @Override
+    protected void drawableStateChanged() {
+        super.drawableStateChanged();
+        if (mBackground != null && mBackground.isStateful()) {
+            mBackground.setState(getDrawableState());
+        }
+        if (mStackedBackground != null && mStackedBackground.isStateful()) {
+            mStackedBackground.setState(getDrawableState());
+        }
+        if (mSplitBackground != null && mSplitBackground.isStateful()) {
+            mSplitBackground.setState(getDrawableState());
+        }
+    }
+
+    @Override
+    public void jumpDrawablesToCurrentState() {
+        super.jumpDrawablesToCurrentState();
+        if (mBackground != null) {
+            mBackground.jumpToCurrentState();
+        }
+        if (mStackedBackground != null) {
+            mStackedBackground.jumpToCurrentState();
+        }
+        if (mSplitBackground != null) {
+            mSplitBackground.jumpToCurrentState();
+        }
+    }
+
+    @Override
+    public void onResolveDrawables(int layoutDirection) {
+        super.onResolveDrawables(layoutDirection);
+        if (mBackground != null) {
+            mBackground.setLayoutDirection(layoutDirection);
+        }
+        if (mStackedBackground != null) {
+            mStackedBackground.setLayoutDirection(layoutDirection);
+        }
+        if (mSplitBackground != null) {
+            mSplitBackground.setLayoutDirection(layoutDirection);
+        }
     }
 
     /**
