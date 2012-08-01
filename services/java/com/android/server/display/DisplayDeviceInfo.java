@@ -33,7 +33,7 @@ public final class DisplayDeviceInfo {
     public int height;
 
     public float refreshRate;
-    public float density;
+    public int densityDpi;
     public float xDpi;
     public float yDpi;
 
@@ -41,7 +41,7 @@ public final class DisplayDeviceInfo {
         width = other.width;
         height = other.height;
         refreshRate = other.refreshRate;
-        density = other.density;
+        densityDpi = other.densityDpi;
         xDpi = other.xDpi;
         yDpi = other.yDpi;
     }
@@ -49,6 +49,6 @@ public final class DisplayDeviceInfo {
     @Override
     public String toString() {
         return width + " x " + height + ", " + refreshRate + " fps, "
-                + "density " + density + ", " + xDpi + " x " + yDpi + " dpi";
+                + "density " + densityDpi + ", " + xDpi + " x " + yDpi + " dpi";
     }
 }

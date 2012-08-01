@@ -1018,9 +1018,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         com.android.internal.R.dimen.navigation_bar_width);
 
         // SystemUI (status bar) layout policy
+        DisplayMetrics metrics = new DisplayMetrics();
+        mDisplay.getMetrics(metrics);
         int shortSizeDp = shortSize
                 * DisplayMetrics.DENSITY_DEFAULT
-                / DisplayMetrics.DENSITY_DEVICE;
+                / metrics.densityDpi;
 
         if (shortSizeDp < 600) {
             // 0-599dp: "phone" UI with a separate status & navigation bar
