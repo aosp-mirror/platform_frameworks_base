@@ -76,8 +76,8 @@ android:name="android.software.sip"
 android:required="true"&gt;</code> and <code>&lt;uses-feature
 android:name="android.software.sip.voip"&gt;</code> to the application manifest.</p>
 
-<p class="note">To look at a sample application that uses the SIP API, see <a
-href="{@docRoot}resources/samples/SipDemo/index.html">SIP Demo</a>.</p>
+<p class="note">For more information, read the <a
+href="{@docRoot}guide/topics/connectivity/sip.html">SIP</a> developer guide.</p>
 
 <h3 id="nfc">Near Field Communications (NFC)</h3>
 

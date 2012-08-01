@@ -122,8 +122,8 @@ NFC. To request filtering, add
 <code>&lt;uses-feature android:name="android.hardware.nfc"
 android:required="true"&gt;</code> to the application's manifest.</p>
 
-<p class="note">To look at sample code for NFC, see
-<a href="{@docRoot}resources/samples/NFCDemo/index.html">NFCDemo app</a>, <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/nfc/TechFilter.html">filtering by tag technology</a></li>, <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/nfc/ForegroundDispatch.html">using foreground dispatch</a>, and <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/nfc/ForegroundNdefPush.html">foreground NDEF push (P2P)</a>.</p>
+<p class="note">For more information, read the 
+  <a href="{@docRoot}guide/topics/connectivity/nfc/index.html">NFC</a> developer guide.</p>
 
 <h3 id="bluetooth">Bluetooth</h3>
 
