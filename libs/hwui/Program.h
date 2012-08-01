@@ -79,6 +79,8 @@ namespace uirenderer {
 
 #define PROGRAM_HAS_GAMMA_CORRECTION 40
 
+#define PROGRAM_IS_SIMPLE_GRADIENT 41
+
 ///////////////////////////////////////////////////////////////////////////////
 // Types
 ///////////////////////////////////////////////////////////////////////////////
@@ -96,14 +98,14 @@ typedef uint64_t programid;
  */
 struct ProgramDescription {
     enum ColorModifier {
-        kColorNone,
+        kColorNone = 0,
         kColorMatrix,
         kColorLighting,
         kColorBlend
     };
 
     enum Gradient {
-        kGradientLinear,
+        kGradientLinear = 0,
         kGradientCircular,
         kGradientSweep
     };
@@ -129,6 +131,7 @@ struct ProgramDescription {
 
     bool hasGradient;
     Gradient gradientType;
+    bool isSimpleGradient;
 
     SkXfermode::Mode shadersMode;
 
@@ -170,6 +173,7 @@ struct ProgramDescription {
 
         hasGradient = false;
         gradientType = kGradientLinear;
+        isSimpleGradient = false;
 
         shadersMode = SkXfermode::kClear_Mode;
 
@@ -255,6 +259,7 @@ struct ProgramDescription {
         if (hasExternalTexture) key |= programid(0x1) << PROGRAM_HAS_EXTERNAL_TEXTURE_SHIFT;
         if (hasTextureTransform) key |= programid(0x1) << PROGRAM_HAS_TEXTURE_TRANSFORM_SHIFT;
         if (hasGammaCorrection) key |= programid(0x1) << PROGRAM_HAS_GAMMA_CORRECTION;
+        if (isSimpleGradient) key |= programid(0x1) << PROGRAM_IS_SIMPLE_GRADIENT;
         return key;
     }
 

@@ -150,19 +150,35 @@ static SkiaShader* LinearGradient_postCreate1(JNIEnv* env, jobject o, SkShader* 
     jfloat* storedBounds = new jfloat[4];
     storedBounds[0] = x0; storedBounds[1] = y0;
     storedBounds[2] = x1; storedBounds[3] = y1;
-    jfloat* storedPositions = new jfloat[count];
-    uint32_t* storedColors = new uint32_t[count];
-    for (size_t i = 0; i < count; i++) {
-        storedColors[i] = static_cast<uint32_t>(colorValues[i]);
-    }
+    
+    bool missFirst = false;
+    bool missLast = false;
+    size_t stopCount = count;
 
+    jfloat* storedPositions = NULL;
     if (posArray) {
         AutoJavaFloatArray autoPos(env, posArray, count);
         const float* posValues = autoPos.ptr();
-        for (size_t i = 0; i < count; i++) {
-            storedPositions[i] = posValues[i];
+
+        missFirst = posValues[0] != 0.0f;
+        missLast = posValues[count - 1] != 1.0f;
+
+        stopCount += missFirst + missLast;
+        storedPositions = new jfloat[stopCount];
+
+        if (missFirst) {
+            storedPositions[0] = 0.0f;
+        }
+
+        for (size_t i = missFirst; i < count + missFirst; i++) {
+            storedPositions[i] = posValues[i - missFirst];
+        }
+
+        if (missLast) {
+            storedPositions[stopCount - 1] = 1.0f;
         }
     } else {
+        storedPositions = new jfloat[count];
         storedPositions[0] = 0.0f;
         const jfloat step = 1.0f / (count - 1);
         for (size_t i = 1; i < count - 1; i++) {
@@ -171,8 +187,22 @@ static SkiaShader* LinearGradient_postCreate1(JNIEnv* env, jobject o, SkShader* 
         storedPositions[count - 1] = 1.0f;
     }
 
+    uint32_t* storedColors = new uint32_t[stopCount];
+
+    if (missFirst) {
+        storedColors[0] = static_cast<uint32_t>(colorValues[0]);
+    }
+
+    for (size_t i = missFirst; i < count + missFirst; i++) {
+        storedColors[i] = static_cast<uint32_t>(colorValues[i - missFirst]);
+    }
+
+    if (missLast) {
+        storedColors[stopCount - 1] = static_cast<uint32_t>(colorValues[count - 1]);
+    }
+
     SkiaShader* skiaShader = new SkiaLinearGradientShader(storedBounds, storedColors,
-            storedPositions, count, shader, static_cast<SkShader::TileMode>(tileMode), NULL,
+            storedPositions, stopCount, shader, static_cast<SkShader::TileMode>(tileMode), NULL,
             (shader->getFlags() & SkShader::kOpaqueAlpha_Flag) == 0);
 
     env->ReleaseIntArrayElements(colorArray, const_cast<jint*>(colorValues), JNI_ABORT);

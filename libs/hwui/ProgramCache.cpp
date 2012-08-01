@@ -71,13 +71,16 @@ const char* gVS_Header_Varyings_PointHasBitmap =
         "varying highp vec2 outPointBitmapTexCoords;\n";
 // TODO: These values are used to sample from textures,
 //       they may need to be highp
-const char* gVS_Header_Varyings_HasGradient[3] = {
+const char* gVS_Header_Varyings_HasGradient[6] = {
         // Linear
         "varying highp vec2 linear;\n",
+        "varying highp float linear;\n",
         // Circular
         "varying highp vec2 circular;\n",
+        "varying highp vec2 circular;\n",
         // Sweep
-        "varying highp vec2 sweep;\n"
+        "varying highp vec2 sweep;\n",
+        "varying highp vec2 sweep;\n",
 };
 const char* gVS_Main =
         "\nvoid main(void) {\n";
@@ -85,13 +88,16 @@ const char* gVS_Main_OutTexCoords =
         "    outTexCoords = texCoords;\n";
 const char* gVS_Main_OutTransformedTexCoords =
         "    outTexCoords = (mainTextureTransform * vec4(texCoords, 0.0, 1.0)).xy;\n";
-const char* gVS_Main_OutGradient[3] = {
+const char* gVS_Main_OutGradient[6] = {
         // Linear
         "    linear = vec2((screenSpace * position).x, 0.5);\n",
+        "    linear = (screenSpace * position).x;\n",
         // Circular
         "    circular = (screenSpace * position).xy;\n",
+        "    circular = (screenSpace * position).xy;\n",
         // Sweep
-        "    sweep = (screenSpace * position).xy;\n"
+        "    sweep = (screenSpace * position).xy;\n",
+        "    sweep = (screenSpace * position).xy;\n",
 };
 const char* gVS_Main_OutBitmapTexCoords =
         "    outBitmapTexCoords = (textureTransform * position).xy * textureDimension;\n";
@@ -131,13 +137,19 @@ const char* gFS_Uniforms_TextureSampler =
         "uniform sampler2D sampler;\n";
 const char* gFS_Uniforms_ExternalTextureSampler =
         "uniform samplerExternalOES sampler;\n";
-const char* gFS_Uniforms_GradientSampler[3] = {
+const char* gFS_Uniforms_GradientSampler[6] = {
         // Linear
         "uniform sampler2D gradientSampler;\n",
+        "uniform vec4 startColor;\n"
+        "uniform vec4 endColor;\n",
         // Circular
         "uniform sampler2D gradientSampler;\n",
+        "uniform vec4 startColor;\n"
+        "uniform vec4 endColor;\n",
         // Sweep
-        "uniform sampler2D gradientSampler;\n"
+        "uniform sampler2D gradientSampler;\n",
+        "uniform vec4 startColor;\n"
+        "uniform vec4 endColor;\n",
 };
 const char* gFS_Uniforms_BitmapSampler =
         "uniform sampler2D bitmapSampler;\n";
@@ -193,14 +205,22 @@ const char* gFS_Fast_SingleModulateA8Texture_ApplyGamma =
         "\nvoid main(void) {\n"
         "    gl_FragColor = color * pow(texture2D(sampler, outTexCoords).a, gamma);\n"
         "}\n\n";
-const char* gFS_Fast_SingleGradient =
+const char* gFS_Fast_SingleGradient[2] = {
         "\nvoid main(void) {\n"
         "    gl_FragColor = texture2D(gradientSampler, linear);\n"
-        "}\n\n";
-const char* gFS_Fast_SingleModulateGradient =
+        "}\n\n",
+        "\nvoid main(void) {\n"
+        "    gl_FragColor = mix(startColor, endColor, clamp(linear, 0.0, 1.0));\n"
+        "}\n\n"
+};
+const char* gFS_Fast_SingleModulateGradient[2] = {
         "\nvoid main(void) {\n"
         "    gl_FragColor = color.a * texture2D(gradientSampler, linear);\n"
-        "}\n\n";
+        "}\n\n",
+        "\nvoid main(void) {\n"
+        "    gl_FragColor = color.a * mix(startColor, endColor, clamp(linear, 0.0, 1.0));\n"
+        "}\n\n"
+};
 
 // General case
 const char* gFS_Main_FetchColor =
@@ -232,15 +252,18 @@ const char* gFS_Main_FetchA8Texture[2] = {
         // Modulate
         "    fragColor = color * texture2D(sampler, outTexCoords).a;\n"
 };
-const char* gFS_Main_FetchGradient[3] = {
+const char* gFS_Main_FetchGradient[6] = {
         // Linear
         "    vec4 gradientColor = texture2D(gradientSampler, linear);\n",
+        "    vec4 gradientColor = mix(startColor, endColor, clamp(linear, 0.0, 1.0));\n",
         // Circular
-        "    highp float index = length(circular);\n"
-        "    vec4 gradientColor = texture2D(gradientSampler, vec2(index, 0.5));\n",
+        "    vec4 gradientColor = texture2D(gradientSampler, vec2(length(circular), 0.5));\n",
+        "    vec4 gradientColor = mix(startColor, endColor, clamp(length(circular), 0.0, 1.0));\n",
         // Sweep
         "    highp float index = atan(sweep.y, sweep.x) * 0.15915494309; // inv(2 * PI)\n"
-        "    vec4 gradientColor = texture2D(gradientSampler, vec2(index - floor(index), 0.5));\n"
+        "    vec4 gradientColor = texture2D(gradientSampler, vec2(index - floor(index), 0.5));\n",
+        "    highp float index = atan(sweep.y, sweep.x) * 0.15915494309; // inv(2 * PI)\n"
+        "    vec4 gradientColor = mix(startColor, endColor, clamp(index - floor(index), 0.0, 1.0));\n"
 };
 const char* gFS_Main_FetchBitmap =
         "    vec4 bitmapColor = texture2D(bitmapSampler, outBitmapTexCoords);\n";
@@ -395,8 +418,11 @@ Program* ProgramCache::generateProgram(const ProgramDescription& description, pr
     String8 vertexShader = generateVertexShader(description);
     String8 fragmentShader = generateFragmentShader(description);
 
-    Program* program = new Program(description, vertexShader.string(), fragmentShader.string());
-    return program;
+    return new Program(description, vertexShader.string(), fragmentShader.string());
+}
+
+static inline size_t gradientIndex(const ProgramDescription& description) {
+    return description.gradientType * 2 + description.isSimpleGradient;
 }
 
 String8 ProgramCache::generateVertexShader(const ProgramDescription& description) {
@@ -430,7 +456,7 @@ String8 ProgramCache::generateVertexShader(const ProgramDescription& description
         shader.append(gVS_Header_Varyings_IsAA);
     }
     if (description.hasGradient) {
-        shader.append(gVS_Header_Varyings_HasGradient[description.gradientType]);
+        shader.append(gVS_Header_Varyings_HasGradient[gradientIndex(description)]);
     }
     if (description.hasBitmap) {
         shader.append(description.isPoint ?
@@ -449,7 +475,7 @@ String8 ProgramCache::generateVertexShader(const ProgramDescription& description
             shader.append(gVS_Main_AA);
         }
         if (description.hasGradient) {
-            shader.append(gVS_Main_OutGradient[description.gradientType]);
+            shader.append(gVS_Main_OutGradient[gradientIndex(description)]);
         }
         if (description.hasBitmap) {
             shader.append(description.isPoint ?
@@ -491,7 +517,7 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
         shader.append(gVS_Header_Varyings_IsAA);
     }
     if (description.hasGradient) {
-        shader.append(gVS_Header_Varyings_HasGradient[description.gradientType]);
+        shader.append(gVS_Header_Varyings_HasGradient[gradientIndex(description)]);
     }
     if (description.hasBitmap) {
         shader.append(description.isPoint ?
@@ -517,7 +543,7 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
         shader.append(gFS_Uniforms_AA);
     }
     if (description.hasGradient) {
-        shader.append(gFS_Uniforms_GradientSampler[description.gradientType]);
+        shader.append(gFS_Uniforms_GradientSampler[gradientIndex(description)]);
     }
     if (description.hasBitmap && description.isPoint) {
         shader.append(gFS_Header_Uniforms_PointHasBitmap);
@@ -567,9 +593,9 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
             fast = true;
         } else if (singleGradient) {
             if (!description.modulate) {
-                shader.append(gFS_Fast_SingleGradient);
+                shader.append(gFS_Fast_SingleGradient[description.isSimpleGradient]);
             } else {
-                shader.append(gFS_Fast_SingleModulateGradient);
+                shader.append(gFS_Fast_SingleModulateGradient[description.isSimpleGradient]);
             }
             fast = true;
         }
@@ -624,7 +650,7 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
             shader.append(gFS_Main_AccountForAA);
         }
         if (description.hasGradient) {
-            shader.append(gFS_Main_FetchGradient[description.gradientType]);
+            shader.append(gFS_Main_FetchGradient[gradientIndex(description)]);
         }
         if (description.hasBitmap) {
             if (description.isPoint) {
