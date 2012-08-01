@@ -45,17 +45,10 @@ parent.link=activities.html
     <li>{@link android.app.FragmentManager}</li>
     <li>{@link android.app.FragmentTransaction}</li>
   </ol>
-
-  <h2>Related samples</h2>
-  <ol>
-    <li><a
-href="{@docRoot}resources/samples/HoneycombGallery/index.html">Honeycomb Gallery</a></li>
-    <li><a
-href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/index.html#Fragment">ApiDemos</a></li>
-  </ol>
   
   <h2>See also</h2>
   <ol>
+    <li><a href="{@docRoot}training/basics/fragments/index.html">Building a Dynamic UI with Fragments</a></li>
     <li><a href="{@docRoot}guide/practices/tablets-and-handsets.html">Supporting Tablets
 and Handsets</a></li>
   </ol>
@@ -834,7 +827,7 @@ then rotates to landscape (which restarts the current activity).</p>
 
 
 <p>For more samples using fragments (and complete source files for this example),
-see the sample code available in <a
+see the API Demos sample app available in <a
 href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/index.html#Fragment">
 ApiDemos</a> (available for download from the <a
 href="{@docRoot}resources/samples/get.html">Samples SDK component</a>).</p>
