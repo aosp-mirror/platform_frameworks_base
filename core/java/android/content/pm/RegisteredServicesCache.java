@@ -26,6 +26,7 @@ import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.os.Environment;
 import android.os.Handler;
+import android.util.AtomicFile;
 import android.util.Log;
 import android.util.AttributeSet;
 import android.util.Xml;
@@ -44,7 +45,6 @@ import java.io.PrintWriter;
 import java.io.IOException;
 import java.io.FileInputStream;
 
-import com.android.internal.os.AtomicFile;
 import com.android.internal.util.FastXmlSerializer;
 
 import com.google.android.collect.Maps;

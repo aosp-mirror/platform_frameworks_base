@@ -16,7 +16,6 @@
 
 package com.android.server.input;
 
-import com.android.internal.os.AtomicFile;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
@@ -25,6 +24,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.Xml;
 

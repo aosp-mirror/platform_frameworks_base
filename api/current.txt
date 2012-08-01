@@ -22524,6 +22524,17 @@ package android.util {
     ctor public AndroidRuntimeException(java.lang.Exception);
   }
 
+  public class AtomicFile {
+    ctor public AtomicFile(java.io.File);
+    method public void delete();
+    method public void failWrite(java.io.FileOutputStream);
+    method public void finishWrite(java.io.FileOutputStream);
+    method public java.io.File getBaseFile();
+    method public java.io.FileInputStream openRead() throws java.io.FileNotFoundException;
+    method public byte[] readFully() throws java.io.IOException;
+    method public java.io.FileOutputStream startWrite() throws java.io.IOException;
+  }
+
   public abstract interface AttributeSet {
     method public abstract boolean getAttributeBooleanValue(java.lang.String, java.lang.String, boolean);
     method public abstract boolean getAttributeBooleanValue(int, boolean);
