@@ -561,7 +561,7 @@
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Apagar os dados do tablet sem avisar através de uma reposição de dados de fábrica."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Apagar os dados do telemóvel sem avisar através de uma reposição de dados de fábrica."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Definir o proxy global do aparelho"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Definir o proxy global do aparelho a ser utilizado quando a política estiver activada. Só o primeiro administrador do aparelho define o proxy global efectivo."</string>
+    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Definir o proxy global do dispositivo a ser utilizado quando a política estiver ativada. Só o primeiro administrador do dispositivo pode definir o proxy global efetivo."</string>
     <string name="policylab_expirePassword" msgid="885279151847254056">"Def. valid. palavra-passe bloq. ecrã"</string>
     <string name="policydesc_expirePassword" msgid="1729725226314691591">"Controlar a frequência com que a palavra-passe do bloqueio de ecrã deve ser alterada."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Def. encriptação armazenamento"</string>
