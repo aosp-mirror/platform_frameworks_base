@@ -250,6 +250,8 @@ void SkiaLinearGradientShader::setupProgram(Program* program, const mat4& modelV
         bindUniformColor(program->getUniform("endColor"), mColors[1]);
     }
 
+    Caches::getInstance().dither.setupProgram(program, textureUnit);
+
     mat4 screenSpace;
     computeScreenSpaceMatrix(screenSpace, modelView);
     glUniformMatrix4fv(program->getUniform("screenSpace"), 1, GL_FALSE, &screenSpace.data[0]);
@@ -374,6 +376,8 @@ void SkiaSweepGradientShader::setupProgram(Program* program, const mat4& modelVi
        bindUniformColor(program->getUniform("startColor"), mColors[0]);
        bindUniformColor(program->getUniform("endColor"), mColors[1]);
     }
+
+    Caches::getInstance().dither.setupProgram(program, textureUnit);
 
     mat4 screenSpace;
     computeScreenSpaceMatrix(screenSpace, modelView);
