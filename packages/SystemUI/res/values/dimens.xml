@@ -152,5 +152,5 @@
     <dimen name="carrier_label_height">24dp</dimen>
 
     <!-- The distance you can pull a notificaiton before it pops open -->
-    <dimen name="one_finger_pop_limit">96dp</dimen>
+    <dimen name="one_finger_pop_limit">32dp</dimen>
 </resources>

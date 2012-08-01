@@ -38,7 +38,6 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
     public interface Callback {
         View getChildAtRawPosition(float x, float y);
         View getChildAtPosition(float x, float y);
-        View getPreviousChild(View currentChild);
         boolean canChildBeExpanded(View v);
         boolean setUserExpandedChild(View v, boolean userxpanded);
     }
@@ -142,17 +141,6 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
         }
     }
 
-    class PopState {
-        View mCurrView;
-        View mCurrViewTopGlow;
-        View mCurrViewBottomGlow;
-        float mOldHeight;
-        float mNaturalHeight;
-        float mInitialTouchY;
-    }
-
-    private Stack<PopState> popStack;
-
     /**
      * Handle expansion gestures to expand and contract children of the callback.
      *
@@ -168,7 +156,6 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
         mLargeSize = large;
         mContext = context;
         mCallback = callback;
-        popStack = new Stack<PopState>();
         mScaler = new ViewScaler();
         mGravity = Gravity.TOP;
         mScaleAnimation = ObjectAnimator.ofFloat(mScaler, "height", 0f);
@@ -416,45 +403,40 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
         switch (action) {
             case MotionEvent.ACTION_MOVE: {
                 if (mPullingWithOneFinger) {
-                    float target = ev.getY() - mInitialTouchY + mOldHeight;
-                    float newHeight = clamp(target);
-                    if (mHasPopped || target > mPopLimit) {
+                    final float rawHeight = ev.getY() - mInitialTouchY + mOldHeight;
+                    final float newHeight = clamp(rawHeight);
+                    final boolean wasClosed = (mOldHeight == mSmallSize);
+                    boolean isFinished = false;
+                    if (rawHeight > mNaturalHeight) {
+                        isFinished = true;
+                    }
+                    if (rawHeight < mSmallSize) {
+                        isFinished = true;
+                    }
+
+                    final float pull = Math.abs(ev.getY() - mInitialTouchY);
+                    if (mHasPopped || pull > mPopLimit) {
                         if (!mHasPopped) {
                             vibrate(mPopDuration);
                             mHasPopped = true;
                         }
+                    }
+
+                    if (mHasPopped) {
                         mScaler.setHeight(newHeight);
-                        // glow if overscale
-                        if (target > mNaturalHeight) {
-                            View previous = mCallback.getPreviousChild(mCurrView);
-                            if (previous != null) {
-                                setGlow(0f);
-                                pushView(previous);
-                                initScale(previous);
-                                mInitialTouchY = ev.getY();
-                                target = mOldHeight;
-                                newHeight = clamp(target);
-                                mHasPopped = false;
-                            } else {
-                                setGlow(calculateGlow(target, newHeight));
-                            }
-                        } else if (target < mSmallSize && !popStack.empty()) {
-                            setGlow(0f);
-                            initScale(popView());
-                            mInitialTouchY = ev.getY();
-                            setGlow(GLOW_BASE);
-                        } else {
-                            setGlow(calculateGlow(target, newHeight));
-                        }
+                        setGlow(GLOW_BASE);
                     } else {
-                         if (target < mSmallSize && !popStack.empty()) {
-                            setGlow(0f);
-                            initScale(popView());
-                            mInitialTouchY = ev.getY();
-                            setGlow(GLOW_BASE);
-                         } else {
-                             setGlow(calculateGlow(4f * target, mSmallSize));
-                         }
+                        setGlow(calculateGlow(4f * pull, 0f));
+                    }
+
+                    final int x = (int) ev.getX();
+                    final int y = (int) ev.getY();
+                    View underPointer = findView(x, y);
+                    if (isFinished && underPointer != null && underPointer != mCurrView) {
+                        setGlow(0f);
+                        initScale(underPointer);
+                        mInitialTouchY = ev.getY();
+                        mHasPopped = false;
                     }
                     return true;
                 }
@@ -516,9 +498,6 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
     }
 
     private void clearView() {
-        while (!popStack.empty()) {
-            popStack.pop();
-        }
         mCurrView = null;
         mCurrViewTopGlow = null;
         mCurrViewBottomGlow = null;
@@ -537,33 +516,6 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
                 Slog.v(TAG,  debugLog);
             }
         }
-    }
-
-    private void pushView(View v) {
-        PopState state = new PopState();
-        state.mCurrView = mCurrView;
-        state.mCurrViewTopGlow = mCurrViewTopGlow;
-        state.mCurrViewBottomGlow = mCurrViewBottomGlow;
-        state.mOldHeight = mOldHeight;
-        state.mNaturalHeight = mNaturalHeight;
-        state.mInitialTouchY = mInitialTouchY;
-        popStack.push(state);
-    }
-
-    private View popView() {
-        if (popStack.empty()) {
-            return null;
-        }
-
-        PopState state = popStack.pop();
-        mCurrView = state.mCurrView;
-        mCurrViewTopGlow = state.mCurrViewTopGlow;
-        mCurrViewBottomGlow = state.mCurrViewBottomGlow;
-        mOldHeight = state.mOldHeight;
-        mNaturalHeight = state.mNaturalHeight;
-        mInitialTouchY = state.mInitialTouchY;
-
-        return mCurrView;
     }
 
     @Override
