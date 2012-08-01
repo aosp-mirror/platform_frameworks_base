@@ -1,0 +1,517 @@
+page.title=Device Art Generator
+@jd:body
+
+<p>The device art generator allows you to quickly wrap your app screenshots in real device artwork.
+This provides better visual context for your app screenshots on your web site or in other
+promotional materials.</p>
+
+<p class="note"><strong>Note</strong>: Do <em>not</em> use graphics created here in your 1024x500
+feature image or screenshots for your Google Play app listing.</p>
+
+<hr>
+
+<div class="supported-browser">
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-3">
+    <h4>Step 1</h4>
+    <p>Drag a screenshot from your desktop onto a device to the right.</p>
+  </div>
+  <div class="layout-content-col span-10">
+    <ul id="device-list"></ul>
+  </div>
+</div>
+
+<hr>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-3">
+    <h4>Step 2</h4>
+    <p>Customize the generated image and drag it to your desktop to save.</p>
+    <p id="frame-customizations">
+      <input type="checkbox" id="output-shadow" checked="checked" class="form-field-checkbutton">
+      <label for="output-shadow">Shadow</label><br>
+      <input type="checkbox" id="output-glare" checked="checked" class="form-field-checkbutton">
+      <label for="output-glare">Screen Glare</label><br><br>
+      <a class="button" id="rotate-button">Rotate</a>
+    </p>
+  </div>
+  <div class="layout-content-col span-10">
+    <div id="output">No input image.</div>
+  </div>
+</div>
+
+</div>
+
+<div class="unsupported-browser" style="display: none">
+  <p class="warning"><strong>Error:</strong> This page requires 
+    <span id="unsupported-browser-reason">certain features</span>, which your web browser
+    doesn't support. To continue, navigate to this page on a supported web browser, such as
+    <strong>Google Chrome</strong>.</p>
+  <a href="https://www.google.com/chrome/" class="button">Get Google Chrome</a>
+  <br><br>
+</div>
+
+<style>
+  h4 {
+    text-transform: uppercase;
+  }
+
+  #device-list {
+    padding: 0;
+    margin: 0;
+  }
+
+  #device-list li {
+    display: inline-block;
+    vertical-align: bottom;
+    margin: 0;
+    margin-right: 20px;
+    text-align: center;
+  }
+
+  #device-list li .thumb-container {
+    display: inline-block;
+  }
+
+  #device-list li .thumb-container img {
+    margin-bottom: 8px;
+    opacity: 0.6;
+
+    -webkit-transition: -webkit-transform 0.2s, opacity 0.2s;
+       -moz-transition:    -moz-transform 0.2s, opacity 0.2s;
+            transition:         transform 0.2s, opacity 0.2s;
+  }
+
+  #device-list li.drag-hover .thumb-container img {
+    opacity: 1;
+
+    -webkit-transform: scale(1.1);
+       -moz-transform: scale(1.1);
+            transform: scale(1.1);
+  }
+
+  #device-list li .device-details {
+    font-size: 13px;
+    line-height: 16px;
+    color: #888;
+  }
+
+  #device-list li .device-url {
+    font-weight: bold;
+  }
+
+  #output {
+    color: #f44;
+    font-style: italic;
+  }
+
+  #output img {
+    max-height: 500px;
+  }
+</style>
+<script>
+  // Global variables
+  var g_currentImage;
+  var g_currentDevice;
+
+  // Global constants
+  var MSG_INVALID_INPUT_IMAGE = 'Invalid screenshot provided. Screenshots must be PNG files '
+      + 'matching the target device\'s screen resolution in either portrait or landscape.';
+  var MSG_NO_INPUT_IMAGE = 'Drag a screenshot (in PNG format) from your desktop onto a '
+      + 'target device above.'
+  var MSG_GENERATING_IMAGE = 'Generating device art&hellip;';
+
+  var MAX_DISPLAY_HEIGHT = 126; // XOOM, to fit into 200px wide
+
+  // Device manifest.
+  var DEVICES = [
+    {
+      id: 'nexus_7',
+      title: 'Nexus 7',
+      url: 'http://www.android.com/devices/detail/nexus-7',
+      physicalSize: 7,
+      physicalHeight: 7.81,
+      density: 213,
+      landRes: ['shadow', 'back', 'fore'],
+      landOffset: [363,260],
+      portRes: ['shadow', 'back', 'fore'],
+      portOffset: [265,341],
+      portSize: [800,1280],
+    },
+    {
+      id: 'xoom',
+      title: 'Motorola XOOM',
+      url: 'http://www.google.com/phone/detail/motorola-xoom',
+      physicalSize: 10,
+      physicalHeight: 6.61,
+      density: 160,
+      landRes: ['shadow', 'back', 'fore'],
+      landOffset: [218,191],
+      portRes: ['shadow', 'back', 'fore'],
+      portOffset: [199,200],
+      portSize: [800,1280],
+    },
+    {
+      id: 'galaxy_nexus',
+      title: 'Galaxy Nexus',
+      url: 'http://www.android.com/devices/detail/galaxy-nexus',
+      physicalSize: 4.65,
+      physicalHeight: 5.33,
+      density: 320,
+      landRes: ['shadow', 'back', 'fore'],
+      landOffset: [371,199],
+      portRes: ['shadow', 'back', 'fore'],
+      portOffset: [216,353],
+      portSize: [720,1280],
+    },
+    {
+      id: 'nexus_s',
+      title: 'Nexus S',
+      url: 'http://www.google.com/phone/detail/nexus-s',
+      physicalSize: 4.0,
+      physicalHeight: 4.88,
+      density: 240,
+      landRes: ['shadow', 'back', 'fore'],
+      landOffset: [247,135],
+      portRes: ['shadow', 'back', 'fore'],
+      portOffset: [134,247],
+      portSize: [480,800],
+    }
+  ];
+
+  DEVICES = DEVICES.sort(function(x, y) { return x.physicalSize - y.physicalSize; });
+
+  var MAX_HEIGHT = 0;
+  for (var i = 0; i < DEVICES.length; i++) {
+    MAX_HEIGHT = Math.max(MAX_HEIGHT, DEVICES[i].physicalHeight);
+  }
+
+  // Setup performed once the DOM is ready.
+  $(document).ready(function() {
+    if (!checkBrowser()) {
+      return;
+    }
+
+    setupUI();
+
+    // Set up Chrome drag-out
+    $.event.props.push("dataTransfer");
+    document.body.addEventListener('dragstart', function(e) {
+      var a = e.target;
+      if (a.classList.contains('dragout')) {
+        e.dataTransfer.setData('DownloadURL', a.dataset.downloadurl);
+      }
+    }, false);
+  });
+
+  /**
+   * Returns the device from DEVICES with the given id.
+   */
+  function getDeviceById(id) {
+    for (var i = 0; i < DEVICES.length; i++) {
+      if (DEVICES[i].id == id)
+        return DEVICES[i];
+    }
+    return;
+  }
+
+  /**
+   * Checks to make sure the browser supports this page. If not,
+   * updates the UI accordingly and returns false.
+   */
+  function checkBrowser() {
+    // Check for browser support
+    var browserSupportError = null;
+
+    // Must have <canvas>
+    var elem = document.createElement('canvas');
+    if (!elem.getContext || !elem.getContext('2d')) {
+      browserSupportError = 'HTML5 canvas.';
+    }
+
+    // Must have FileReader
+    if (!window.FileReader) {
+      browserSupportError = 'desktop file access';
+    }
+
+    if (browserSupportError) {
+      $('.supported-browser').hide();
+
+      $('#unsupported-browser-reason').html(browserSupportError);
+      $('.unsupported-browser').show();
+      return false;
+    }
+
+    return true;
+  }
+
+  function setupUI() {
+    $('#output').html(MSG_NO_INPUT_IMAGE);
+
+    $('#frame-customizations').hide();
+
+    $('#output-shadow, #output-glare').click(function() {
+      createFrame(g_currentDevice, g_currentImage);
+    });
+
+    // Build device list.
+    $.each(DEVICES, function() {
+      $('<li>')
+          .append($('<div>')
+              .addClass('thumb-container')
+              .append($('<img>')
+                  .attr('src', 'device-art-resources/' + this.id + '/thumb.png')
+                  .attr('height',
+                      Math.floor(MAX_DISPLAY_HEIGHT * this.physicalHeight / MAX_HEIGHT))))
+          .append($('<div>')
+              .addClass('device-details')
+              .html((this.url
+                  ? ('<a class="device-url" href="' + this.url + '">' + this.title + '</a>')
+                  : this.title) +
+                '<br>' +  this.physicalSize + '" @ ' + this.density + 'dpi' +
+                '<br>' + this.portSize[0] + 'x' + this.portSize[1]))
+          .data('deviceId', this.id)
+          .appendTo('#device-list');
+    });
+
+    // Set up drag and drop.
+    $('#device-list li')
+        .live('dragover', function(evt) {
+          $(this).addClass('drag-hover');
+          evt.dataTransfer.dropEffect = 'link';
+          evt.preventDefault();
+        })
+        .live('dragleave', function(evt) {
+          $(this).removeClass('drag-hover');
+        })
+        .live('drop', function(evt) {
+          $('#output').empty().html(MSG_GENERATING_IMAGE);
+          $(this).removeClass('drag-hover');
+          g_currentDevice = getDeviceById($(this).closest('li').data('deviceId'));
+          evt.preventDefault();
+          loadImageFromFileList(evt.dataTransfer.files, function(data) {
+            if (data == null) {
+              $('#output').html(MSG_INVALID_INPUT_IMAGE);
+              return;
+            }
+            loadImageFromUri(data.uri, function(img) {
+              g_currentFilename = data.name;
+              g_currentImage = img;
+              createFrame();
+            });
+          });
+        });
+
+    // Set up rotate button.
+    $('#rotate-button').click(function() {
+      if (!g_currentImage) {
+        return;
+      }
+
+      var w = g_currentImage.naturalHeight;
+      var h = g_currentImage.naturalWidth;
+      var canvas = $('<canvas>')
+          .attr('width', w)
+          .attr('height', h)
+          .get(0);
+
+      var ctx = canvas.getContext('2d');
+      ctx.rotate(-Math.PI / 2);
+      ctx.translate(-h, 0);
+      ctx.drawImage(g_currentImage, 0, 0);
+
+      loadImageFromUri(canvas.toDataURL(), function(img) {
+        g_currentImage = img;
+        createFrame();
+      });
+    });
+  }
+
+  /**
+   * Generates the frame from the current selections (g_currentImage and g_currentDevice).
+   */
+  function createFrame() {
+    var port;
+    if (g_currentImage.naturalWidth  == g_currentDevice.portSize[0] &&
+        g_currentImage.naturalHeight == g_currentDevice.portSize[1]) {
+      if (!g_currentDevice.portRes) {
+        alert('No portrait frame is currently available for this device.');
+        $('#output').html(MSG_NO_INPUT_IMAGE);
+        return;
+      }
+      port = true;
+    } else if (g_currentImage.naturalWidth  == g_currentDevice.portSize[1] &&
+               g_currentImage.naturalHeight == g_currentDevice.portSize[0]) {
+      if (!g_currentDevice.landRes) {
+        alert('No landscape frame is currently available for this device.');
+        $('#output').html(MSG_NO_INPUT_IMAGE);
+        return;
+      }
+      port = false;
+    } else {
+      alert('Screenshots for ' + g_currentDevice.title + ' must be ' +
+          g_currentDevice.portSize[0] + 'x' + g_currentDevice.portSize[1] +
+          ' or ' +
+          g_currentDevice.portSize[1] + 'x' + g_currentDevice.portSize[0] + '.');
+      $('#output').html(MSG_INVALID_INPUT_IMAGE);
+      return;
+    }
+
+    // Load image resources
+    var res = port ? g_currentDevice.portRes : g_currentDevice.landRes;
+    var resList = {};
+    for (var i = 0; i < res.length; i++) {
+      resList[res[i]] = 'device-art-resources/' + g_currentDevice.id + '/' +
+          (port ? 'port_' : 'land_') + res[i] + '.png'
+    }
+
+    var resourceImages = {};
+    loadImageResources(resList, function(r) {
+      resourceImages = r;
+      continuation_();
+    });
+
+    function continuation_() {
+      var width = resourceImages['back'].naturalWidth;
+      var height = resourceImages['back'].naturalHeight;
+      var offset = port ? g_currentDevice.portOffset : g_currentDevice.landOffset;
+
+      var canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+
+      var ctx = canvas.getContext('2d');
+      if (resourceImages['shadow'] && $('#output-shadow').is(':checked')) {
+        ctx.drawImage(resourceImages['shadow'], 0, 0);
+      }
+      ctx.drawImage(resourceImages['back'], 0, 0);
+      ctx.drawImage(g_currentImage, offset[0], offset[1]);
+      if (resourceImages['fore'] && $('#output-glare').is(':checked')) {
+        ctx.drawImage(resourceImages['fore'], 0, 0);
+      }
+
+      var dataUrl = canvas.toDataURL();
+      var filename = g_currentFilename
+          ? ('framed_' + g_currentFilename)
+          : 'framed_screenshot.png';
+
+      var $link = $('<a>')
+          .attr('download', filename)
+          .attr('href', dataUrl)
+          .attr('draggable', true)
+          .attr('data-downloadurl', ['image/png', filename, dataUrl].join(':'))
+          .append($('<img>').attr('src', dataUrl))
+          .appendTo($('#output').empty());
+
+      $('#frame-customizations').show();
+    }
+  }
+
+  /**
+   * Loads an image from a data URI. The callback will be called with the <img> once
+   * it loads.
+   */
+  function loadImageFromUri(uri, callback) {
+    callback = callback || function(){};
+
+    var img = document.createElement('img');
+    img.src = uri;
+    img.onload = function() {
+      callback(img);
+    };
+    img.onerror = function() {
+      callback(null);
+    }
+  }
+
+  /**
+   * Loads a set of images (organized by ID). Once all images are loaded, the callback
+   * is triggered with a dictionary of <img>'s, organized by ID.
+   */
+  function loadImageResources(images, callback) {
+    var imageResources = {};
+
+    var checkForCompletion_ = function() {
+      for (var id in images) {
+        if (!(id in imageResources))
+          return;
+      }
+      (callback || function(){})(imageResources);
+      callback = null;
+    };
+
+    for (var id in images) {
+      var img = document.createElement('img');
+      img.src = images[id];
+      (function(img, id) {
+        img.onload = function() {
+          imageResources[id] = img;
+          checkForCompletion_();
+        };
+        img.onerror = function() {
+          imageResources[id] = null;
+          checkForCompletion_();
+        }
+      })(img, id);
+    }
+  }
+
+  /**
+   * Loads the first valid image from a FileList (e.g. drag + drop source), as a data URI. This
+   * method will throw an alert() in case of errors and call back with null.
+   *
+   * @param {FileList} fileList The FileList to load.
+   * @param {Function} callback The callback to fire once image loading is done (or fails).
+   * @return Returns an object containing 'uri' representing the loaded image. There will also be
+   *      a 'name' field indicating the file name, if one is available.
+   */
+  function loadImageFromFileList(fileList, callback) {
+    fileList = fileList || [];
+
+    var file = null;
+    for (var i = 0; i < fileList.length; i++) {
+      if (fileList[i].type.toLowerCase().match(/^image\/png/)) {
+        file = fileList[i];
+        break;
+      }
+    }
+
+    if (!file) {
+      alert('Please use a valid screenshot file (PNG format).');
+      callback(null);
+      return;
+    }
+
+    var fileReader = new FileReader();
+
+    // Closure to capture the file information.
+    fileReader.onload = function(e) {
+      callback({
+        uri: e.target.result,
+        name: file.name
+      });
+    };
+    fileReader.onerror = function(e) {
+      switch(e.target.error.code) {
+        case e.target.error.NOT_FOUND_ERR:
+          alert('File not found.');
+          break;
+        case e.target.error.NOT_READABLE_ERR:
+          alert('File is not readable.');
+          break;
+        case e.target.error.ABORT_ERR:
+          break; // noop
+        default:
+          alert('An error occurred reading this file.');
+      }
+      callback(null);
+    };
+    fileReader.onabort = function(e) {
+      alert('File read cancelled.');
+      callback(null);
+    };
+
+    fileReader.readAsDataURL(file);
+  }
+</script>
