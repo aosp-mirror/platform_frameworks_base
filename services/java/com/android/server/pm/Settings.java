@@ -121,6 +121,10 @@ final class Settings {
     final IntentResolver<PreferredActivity, PreferredActivity> mPreferredActivities =
                 new IntentResolver<PreferredActivity, PreferredActivity>() {
         @Override
+        protected PreferredActivity[] newArray(int size) {
+            return new PreferredActivity[size];
+        }
+        @Override
         protected String packageForFilter(PreferredActivity filter) {
             return filter.mPref.mComponent.getPackageName();
         }
