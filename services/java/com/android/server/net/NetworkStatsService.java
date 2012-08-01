@@ -695,14 +695,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         mGlobalAlertBytes = mSettings.getGlobalAlertBytes(mPersistThreshold);
     }
 
-    @Override
-    public void adjustNetworkStats(int uid, int tag, long rxBytes, long rxPackets, long txBytes,
-            long txPackets, long operationCount) {
-        mContext.enforceCallingOrSelfPermission(MODIFY_NETWORK_ACCOUNTING, TAG);
-
-        // TODO: store adjusted network stats in separate data structure
-    }
-
     /**
      * Receiver that watches for {@link IConnectivityManager} to claim network
      * interfaces. Used to associate {@link TelephonyManager#getSubscriberId()}
