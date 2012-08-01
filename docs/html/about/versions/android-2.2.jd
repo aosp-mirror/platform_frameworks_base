@@ -117,7 +117,7 @@ settings.</p>
 <p>For more information about setting a preferred install location for your
 application, including a discussion of what types of applications should and
 should not request external installation, please read the <a
-href="{@docRoot}guide/appendix/install-location.html">App Install Location</a>
+href="{@docRoot}guide/topics/data/install-location.html">App Install Location</a>
 document. </p>
 
 <h3 id="backup-manager">Data backup</h3>
