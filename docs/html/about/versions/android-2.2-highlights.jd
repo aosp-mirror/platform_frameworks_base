@@ -71,7 +71,7 @@ href="android-2.2.html#api">Android 2.2 version notes</a>.</p>
 <table class="columns" style="max-width:800px">
 <tr>
   <td>
-<img src="images/2.2/22home.png" alt="" height=230 />
+<img src="{@docRoot}sdk/images/2.2/22home.png" alt="" height=230 />
   </td>
   <td>
 <p style="margin-top:0">New Home screen <span class="green">tips widget</span> assists new users on
@@ -103,7 +103,7 @@ easily set up and sync an Exchange account (available for Exchange 2007 and high
 application, enabling users to auto-complete recipient names from the directory.</p>
   </td>
   <td>
-<img src="images/2.2/22exchange.png" alt="" height=300 />
+<img src="{@docRoot}sdk/images/2.2/22exchange.png" alt="" height=300 />
   </td>
 </tr>
 </table>
@@ -114,7 +114,7 @@ application, enabling users to auto-complete recipient names from the directory.
 <table class="columns" style="max-width:800px">
 <tr>
   <td>
-<img src="images/2.2/22gallery.png" alt="" height=220 />
+<img src="{@docRoot}sdk/images/2.2/22gallery.png" alt="" height=220 />
   </td>
   <td>
 <p>Gallery allows you to <span class="green">peek into picture stacks</span> using a zoom
@@ -141,7 +141,7 @@ connecting their phone to the computer with a USB cable. The connection is then 
 two devices.</p>
   </td>
   <td>
-<img src="images/2.2/22hotspot.png" alt="" height=180 />
+<img src="{@docRoot}sdk/images/2.2/22hotspot.png" alt="" height=180 />
   </td>
 </tr>
 </table>
@@ -152,7 +152,7 @@ two devices.</p>
 <table class="columns" style="max-width:800px">
 <tr>
   <td>
-<img src="images/2.2/22keyboard.png" alt="" height=220 />
+<img src="{@docRoot}sdk/images/2.2/22keyboard.png" alt="" height=220 />
   </td>
   <td>
 <p>Multi-lingual users can add multiple languages to the keyboard and <span class="green">switch
@@ -179,7 +179,7 @@ faster.</p>
 which results in faster app switching and smoother performance on memory-constrained devices.</p>
   </td>
   <td>
-<img src="images/2.2/jit-graph.png" alt="" height=200 />
+<img src="{@docRoot}sdk/images/2.2/jit-graph.png" alt="" height=200 />
   </td>
 </tr>
 </table>

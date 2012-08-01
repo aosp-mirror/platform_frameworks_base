@@ -118,7 +118,7 @@ Manager</a> and install the following:
       <li>Samples for SDK API 11</li>
     </ul>
   </li>
-  <li><a href="{@docRoot}guide/developing/other-ide.html#AVD">Create an AVD</a> for a tablet-type
+  <li><a href="{@docRoot}tools/devices/managing-avds.html">Create an AVD</a> for a tablet-type
 device:
   <p>Set the target to "Android 3.0" and the skin to "WXGA" (the default skin).</p></li>
 </ol>
