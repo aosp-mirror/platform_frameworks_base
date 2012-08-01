@@ -16,6 +16,8 @@
 
 package com.android.server.display;
 
+import android.util.DisplayMetrics;
+
 /**
  * Provides a fake default display for headless systems.
  */
@@ -26,7 +28,7 @@ public final class HeadlessDisplayAdapter extends DisplayAdapter {
             outInfo.width = 640;
             outInfo.height = 480;
             outInfo.refreshRate = 60;
-            outInfo.density = 1.0f;
+            outInfo.densityDpi = DisplayMetrics.DENSITY_DEFAULT;
             outInfo.xDpi = 160;
             outInfo.yDpi = 160;
         }

@@ -21,7 +21,6 @@ import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
-import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import android.util.Log;
