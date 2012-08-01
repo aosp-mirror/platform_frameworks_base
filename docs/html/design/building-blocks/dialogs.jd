@@ -10,29 +10,28 @@ user to adjust settings or enter text.</p>
 <div class="with-callouts">
 
 <ol>
-  <li>
-  <h4>Optional title region</h4>
-  <p>The title introduces the content of your dialog. It can, for example, identify the name of a
-   setting that the user is about to change, or request a decision.</p>
-  </li>
-  <li>
-  <h4>Content area</h4>
-  <p>Dialog content varies widely. For settings dialogs, a dialog may contain UI elements such as
-   sliders, text fields, checkboxes, or radio buttons that allow the user to change app or system
-   settings. In other cases, such as alerts, the content may consist solely of text that provides
-   further context for a user decision.</p>
-  </li>
-
-  <li>
-  <h4>Action buttons</h4>
-  <p>Action buttons are typically Cancel and/or OK, with OK indicating the preferred or most likely action. However, if the options consist of specific actions such as Close or Wait rather than a confirmation or cancellation of the action described in the content, then all the buttons should be active verbs. Order actions following these rules:</p>
-    <ul>
-    
-    <li>The dismissive action of a dialog is always on the left. Dismissive actions return to the user to the previous state.</li>
-    <li>The affirmative actions are on the right. Affirmative actions continue progress toward the user goal that triggered the dialog.</li>
-    </ul>
-  </li>
+<li>
+<h4>Optional title region</h4>
+<p>The title introduces the content of your dialog. It can, for example, identify the name of a
+ setting that the user is about to change, or request a decision.</p>
+</li>
+<li>
+<h4>Content area</h4>
+<p>Dialog content varies widely. For settings dialogs, a dialog may contain UI elements such as
+ sliders, text fields, checkboxes, or radio buttons that allow the user to change app or system
+ settings. In other cases, such as alerts, the content may consist solely of text that provides
+ further context for a user decision.</p>
+</li>
+<li>
+<h4>Action buttons</h4>
+<p>Action buttons are typically Cancel and/or OK, with OK indicating the preferred or most likely
+ action. However, if the options consist of specific actions such as Close or Wait rather than
+ a confirmation or cancellation of the action described in the content, then all the buttons
+ should be active verbs. As a rule, the dismissive action of a dialog is always on the left
+ whereas the affirmative actions are on the right.</p>
+</li>
 </ol>
+
 </div>
 
 <img src="{@docRoot}design/media/dialogs_examples.png">
