@@ -22791,6 +22791,7 @@ package android.util {
     method protected int sizeOf(K, V);
     method public final synchronized java.util.Map<K, V> snapshot();
     method public final synchronized java.lang.String toString();
+    method public void trimToSize(int);
   }
 
   public final class MalformedJsonException extends java.io.IOException {
