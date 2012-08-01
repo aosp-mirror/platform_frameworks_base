@@ -204,20 +204,6 @@ public class NotificationRowLayout
         return null;
     }
 
-    public View getPreviousChild(View currentChild) {
-        final int count = getChildCount();
-        for (int childIdx = 0; childIdx < count; childIdx++) {
-            if (getChildAt(childIdx) == currentChild) {
-                if (childIdx == 0) {
-                    return null;
-                } else {
-                    return getChildAt(childIdx - 1);
-                }
-            }
-        }
-        return null;
-    }
-
     public View getChildContentView(View v) {
         return v;
     }
