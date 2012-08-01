@@ -135,8 +135,7 @@ dynamic permission grants on a case-by-case basis.</p>
 
 <p>To provide additional protection for sensitive data, some applications
 choose to encrypt local files using a key that is not accessible to the
-application. (For example, a key can be placed in a <code><a
-href={@docRoot}reference/java/security/KeyStore.html">KeyStore</a></code> and
+application. (For example, a key can be placed in a {@link java.security.KeyStore} and
 protected with a user password that is not stored on the device).  While this
 does not protect data from a root compromise that can monitor the user
 inputting the password,  it can provide protection for a lost device without <a
@@ -717,8 +716,7 @@ href="{@docRoot}reference/android/accounts/AccountManager.html">
 AccountManager</a></code> using <code><a
 href="{@docRoot}reference/android/content/pm/PackageManager.html#checkSignatures(java.lang.String,%20java.lang.String)">checkSignature()</a></code>.
 Alternatively, if only one application will use the credential, you might use a
-<code><a
-href={@docRoot}reference/java/security/KeyStore.html">KeyStore</a></code> for
+{@link java.security.KeyStore} for
 storage.</p>
 
 <a name="Crypto"></a>
@@ -752,8 +750,7 @@ href="{@docRoot}reference/javax/crypto/KeyGenerator.html">
 number generator significantly weakens the strength of the algorithm, and may
 allow offline attacks.</p>
 
-<p>If you need to store a key for repeated use, use a mechanism like <code><a
-href="{@docRoot}reference/java/security/KeyStore.html">KeyStore</a></code> that
+<p>If you need to store a key for repeated use, use a mechanism like {@link java.security.KeyStore} that
 provides a mechanism for long term storage and retrieval of cryptographic
 keys.</p>
 

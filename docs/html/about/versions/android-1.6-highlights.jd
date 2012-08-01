@@ -49,17 +49,17 @@ This page provides an overview of some new features and technologies.</p>
 <!-- screenshots float right -->
 
 <div class="screenshot">
-<img src="images/search.png" class="screenshot" alt="" /><br/>
+<img src="{@docRoot}sdk/images/search.png" class="screenshot" alt="" /><br/>
 Quick Search Box
 </div>
  
 <div class="screenshot">
-<img src="images/camera.png" class="screenshot" alt="" /><br/>
+<img src="{@docRoot}sdk/images/camera.png" class="screenshot" alt="" /><br/>
 New Camera/Camcorder UI
 </div>
 
 <div class="screenshot">
-<img src="images/battery.png" class="screenshot" alt="" /><br/>
+<img src="{@docRoot}sdk/images/battery.png" class="screenshot" alt="" /><br/>
 Battery Usage Indicator
 </div>
 
@@ -121,7 +121,7 @@ on the new accessibility framework and enable them in Settings.</p>
 <h2 id="GooglePlayUpdates" style="clear:right">Google Play Updates</h2>
 
 <div class="screenshot" style="margin-top:-35px">
-<img src="images/market.png" class="screenshot" alt="" /><br/>
+<img src="{@docRoot}sdk/images/market.png" class="screenshot" alt="" /><br/>
 New Google Play UI
 </div>
 

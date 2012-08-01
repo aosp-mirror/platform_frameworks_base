@@ -336,6 +336,6 @@ android.widget.ArrayAdapter}&lt;String&gt;(this, <strong>android.R.layout.simple
 
 <p>In this example, {@link android.R.layout#simple_list_item_1} is a layout resource defined by the
 platform for items in a {@link android.widget.ListView}. You can use this instead of creating
-your own layout for list items. (For more about using {@link android.widget.ListView}, see the
-<a href="{@docRoot}resources/tutorials/views/hello-listview.html">List View Tutorial</a>.)</p>
+your own layout for list items. For more information, see the
+<a href="{@docRoot}guide/topics/ui/layout/listview.html">List View</a> developer guide.</p>
 
