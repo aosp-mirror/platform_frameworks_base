@@ -1613,10 +1613,7 @@ public class WifiStateMachine extends StateMachine {
             mWifiInfo.setNetworkId(WifiConfiguration.INVALID_NETWORK_ID);
         }
 
-        if (state == SupplicantState.ASSOCIATING) {
-            /* BSSID is valid only in ASSOCIATING state */
-            mWifiInfo.setBSSID(stateChangeResult.BSSID);
-        }
+        mWifiInfo.setBSSID(stateChangeResult.BSSID);
         mWifiInfo.setSSID(stateChangeResult.SSID);
 
         mSupplicantStateTracker.sendMessage(Message.obtain(message));
