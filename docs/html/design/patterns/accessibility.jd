@@ -31,7 +31,26 @@ page.title=Accessibility
 <h4>Label visual UI elements meaningfully</h4>
 <p>In your wireframes, <a href="{@docRoot}guide/topics/ui/accessibility/apps.html#label-ui">label functional UI components</a> that have no visible text. Those components might be buttons, icons, tabs with icons, and icons with state (like stars). Developers can use the <code><a href="{@docRoot}guide/topics/ui/accessibility/apps.html#label-ui">contentDescription</a></code> attribute to set the label.</p>
 
-<img src="{@docRoot}design/media/accessibility_contentdesc.png">
+<div class ="layout-content-row">
+    <div class="layout-content-col span-8">
+      <img src="{@docRoot}design/media/accessibility_contentdesc.png">
+    </div>
+    <div class="layout-content-col span-5 with-callouts">
+      <ol>
+        <li class="value-1">group</li>
+        <li class="value-2">all contacts</li>
+        <li class="value-3">favorites</li>
+        <li class="value-4">search</li>
+        <li class="value-5">action overflow button</li>
+        <li class="value-6">
+          <em>when starred:</em> remove from favorites </br>
+          <em>when not starred:</em> add to favorties</li>
+        <li class="value-7">action overflow button</li>
+        <li class="value-8">text message</li>
+        <li class="value-9">video chat</li>
+      </ol>
+  </div>
+</div>
 
 <h4>Provide alternatives to affordances that time out</h4>
 <p>Your app may have icons or controls that disappear after a certain amount of time. For example, five seconds after starting a video, playback controls may fade from the screen.</p>
