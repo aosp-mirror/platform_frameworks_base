@@ -1271,8 +1271,6 @@ public class TelephonyManager {
      *
      * <p>Requires Permission:
      * (@link android.Manifest.permission#ACCESS_COARSE_UPDATES}
-     *
-     * @hide
      */
     public List<CellInfo> getAllCellInfo() {
         try {

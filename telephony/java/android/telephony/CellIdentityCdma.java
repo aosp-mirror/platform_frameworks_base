@@ -22,8 +22,6 @@ import android.util.Log;
 
 /**
  * CellIdentity is to represent a unique CDMA cell
- *
- * @hide
  */
 public final class CellIdentityCdma extends CellIdentity implements Parcelable {
 

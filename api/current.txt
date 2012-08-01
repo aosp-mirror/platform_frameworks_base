@@ -20208,10 +20208,108 @@ package android.speech.tts {
 
 package android.telephony {
 
+  public abstract class CellIdentity implements android.os.Parcelable {
+    method public int describeContents();
+    method public abstract int hashCode();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public final class CellIdentityCdma extends android.telephony.CellIdentity implements android.os.Parcelable {
+    method public int getBasestationId();
+    method public int getLatitude();
+    method public int getLongitude();
+    method public int getNetworkId();
+    method public int getSystemId();
+    method public int hashCode();
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public final class CellIdentityGsm extends android.telephony.CellIdentity implements android.os.Parcelable {
+    method public int getCid();
+    method public int getLac();
+    method public int getMcc();
+    method public int getMnc();
+    method public int getPsc();
+    method public int hashCode();
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public final class CellIdentityLte extends android.telephony.CellIdentity implements android.os.Parcelable {
+    method public int getCi();
+    method public int getMcc();
+    method public int getMnc();
+    method public int getPci();
+    method public int getTac();
+    method public int hashCode();
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public class CellInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public long getTimeStamp();
+    method public boolean isRegistered();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public final class CellInfoCdma extends android.telephony.CellInfo implements android.os.Parcelable {
+    method public android.telephony.CellIdentityCdma getCellIdentity();
+    method public android.telephony.CellSignalStrengthCdma getCellSignalStrength();
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public final class CellInfoGsm extends android.telephony.CellInfo implements android.os.Parcelable {
+    method public android.telephony.CellIdentityGsm getCellIdentity();
+    method public android.telephony.CellSignalStrengthGsm getCellSignalStrength();
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public final class CellInfoLte extends android.telephony.CellInfo implements android.os.Parcelable {
+    method public android.telephony.CellIdentityLte getCellIdentity();
+    method public android.telephony.CellSignalStrengthLte getCellSignalStrength();
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
   public abstract class CellLocation {
     ctor public CellLocation();
     method public static android.telephony.CellLocation getEmpty();
     method public static void requestLocationUpdate();
+  }
+
+  public abstract class CellSignalStrength implements android.os.Parcelable {
+    method public int describeContents();
+    method public abstract boolean equals(java.lang.Object);
+    method public abstract int hashCode();
+    method public abstract void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public class CellSignalStrengthCdma extends android.telephony.CellSignalStrength implements android.os.Parcelable {
+    method public boolean equals(java.lang.Object);
+    method public int getCdmaDbm();
+    method public int getCdmaEcio();
+    method public int getEvdoDbm();
+    method public int getEvdoEcio();
+    method public int getEvdoSnr();
+    method public int hashCode();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public class CellSignalStrengthGsm extends android.telephony.CellSignalStrength implements android.os.Parcelable {
+    method public boolean equals(java.lang.Object);
+    method public int hashCode();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public class CellSignalStrengthLte extends android.telephony.CellSignalStrength implements android.os.Parcelable {
+    method public boolean equals(java.lang.Object);
+    method public int getTimingAdvance();
+    method public int hashCode();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
   }
 
   public class NeighboringCellInfo implements android.os.Parcelable {
@@ -20286,6 +20384,7 @@ package android.telephony {
     ctor public PhoneStateListener();
     method public void onCallForwardingIndicatorChanged(boolean);
     method public void onCallStateChanged(int, java.lang.String);
+    method public void onCellInfoChanged(java.util.List<android.telephony.CellInfo>);
     method public void onCellLocationChanged(android.telephony.CellLocation);
     method public void onDataActivity(int);
     method public void onDataConnectionStateChanged(int);
@@ -20296,6 +20395,7 @@ package android.telephony {
     method public void onSignalStrengthsChanged(android.telephony.SignalStrength);
     field public static final int LISTEN_CALL_FORWARDING_INDICATOR = 8; // 0x8
     field public static final int LISTEN_CALL_STATE = 32; // 0x20
+    field public static final int LISTEN_CELL_INFO = 1024; // 0x400
     field public static final int LISTEN_CELL_LOCATION = 16; // 0x10
     field public static final int LISTEN_DATA_ACTIVITY = 128; // 0x80
     field public static final int LISTEN_DATA_CONNECTION_STATE = 64; // 0x40
@@ -20421,6 +20521,7 @@ package android.telephony {
   }
 
   public class TelephonyManager {
+    method public java.util.List<android.telephony.CellInfo> getAllCellInfo();
     method public int getCallState();
     method public android.telephony.CellLocation getCellLocation();
     method public int getDataActivity();
