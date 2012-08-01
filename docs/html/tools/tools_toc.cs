@@ -5,7 +5,7 @@
         <a href="<?cs var:toroot ?>tools/index.html"><span class="en">Developer Tools</span></a>
     </div>
   </li>
-  
+
   <li class="nav-section">
     <div class="nav-section-header"><a href="<?cs var:toroot
 ?>sdk/index.html"><span class="en">Download</span></a></div>
@@ -29,7 +29,7 @@
       </li>
     </ul>
   </li>
-  
+
   <li class="nav-section">
     <div class="nav-section-header">
         <a href="/tools/workflow/index.html"><span class="en">Workflow</span></a>
@@ -39,8 +39,8 @@
         <div class="nav-section-header"><a href="/tools/devices/index.html"><span class="en">Setting Up Virtual Devices</span></a></div>
         <ul>
           <li><a href="/tools/devices/managing-avds.html"><span class="en">With AVD Manager</span></a></li>
-          <li><a href="/tools/devices/managing-avds-cmdline.html"><span class="en">From the Command Line</span></a></li>      
-          <li><a href="/tools/devices/emulator.html"><span class="en">Using the Android Emulator</span></a></li>                  
+          <li><a href="/tools/devices/managing-avds-cmdline.html"><span class="en">From the Command Line</span></a></li>
+          <li><a href="/tools/devices/emulator.html"><span class="en">Using the Android Emulator</span></a></li>
         </ul>
       </li>
       <li><a href="/tools/device.html"><span class="en">Using Hardware Devices</span></a></li>
@@ -48,16 +48,16 @@
         <div class="nav-section-header"><a href="/tools/projects/index.html"><span class="en">Setting Up Projects</span></a></div>
         <ul>
           <li><a href="/tools/projects/projects-eclipse.html"><span class="en">From Eclipse with ADT</span></a></li>
-          <li><a href="/tools/projects/projects-cmdline.html"><span class="en">From the Command Line</span></a></li>                      
+          <li><a href="/tools/projects/projects-cmdline.html"><span class="en">From the Command Line</span></a></li>
         </ul>
       </li>
 
-  
+
       <li class="nav-section">
         <div class="nav-section-header"><a href="/tools/building/index.html"><span class="en">Building and Running</span></a></div>
         <ul>
           <li><a href="/tools/building/building-eclipse.html"><span class="en">From Eclipse with ADT</span></a></li>
-          <li><a href="/tools/building/building-cmdline.html"><span class="en">From the Command Line</span></a></li>                    
+          <li><a href="/tools/building/building-cmdline.html"><span class="en">From the Command Line</span></a></li>
         </ul>
       </li>
 
@@ -76,7 +76,7 @@
           </li>
           <li><a href="<?cs var:toroot ?>tools/testing/testing_otheride.html">
             <span class="en">From Other IDEs</span></a>
-          </li>  
+          </li>
           <li>
             <a href="<?cs var:toroot?>tools/testing/activity_testing.html">
             <span class="en">Activity Testing</span></a>
@@ -88,6 +88,10 @@
           <li>
             <a href="<?cs var:toroot?>tools/testing/contentprovider_testing.html">
             <span class="en">Content Provider Testing</span></a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot?>tools/testing/testing_accessibility.html">
+            <span class="en">Accessibility Testing</span></a>
           </li>
           <li>
             <a href="<?cs var:toroot ?>tools/testing/what_to_test.html">
@@ -160,7 +164,7 @@ class="en">MonkeyRunner</span></a></li>
        <li><a href="<?cs var:toroot ?>tools/help/zipalign.html">zipalign</a></li>
     </ul>
   </li>
-  
+
   <li class="nav-section">
     <div class="nav-section-header"><a href="<?cs var:toroot
 ?>tools/revisions/index.html"><span class="en">Revisions</span></a></div>
@@ -178,8 +182,8 @@ class="en">MonkeyRunner</span></a></li>
 class="en">Platforms</span></a></li>
     </ul>
   </li>
-  
-  
+
+
   <li class="nav-section">
     <div class="nav-section-header"><a href="<?cs var:toroot
 ?>tools/extras/index.html"><span class="en">Extras</span></a></div>
@@ -192,13 +196,13 @@ class="en">USB Drivers</span></a>
     </ul>
   </li>
 
-  
+
   <li class="nav-section">
     <div class="nav-section-header empty"><a href="<?cs var:toroot
 ?>tools/samples/index.html"><span class="en">Samples</span></a></div>
   </li>
 
-  
+
   <li class="nav-section">
     <div class="nav-section-header">
     <a href="<?cs var:toroot ?>tools/adk/index.html">
@@ -217,7 +221,7 @@ class="en">USB Drivers</span></a>
       </li>
     </ul>
   </li>
-  
+
 </ul><!-- nav -->
 
 <script type="text/javascript">

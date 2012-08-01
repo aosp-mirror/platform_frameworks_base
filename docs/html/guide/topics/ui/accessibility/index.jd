@@ -8,47 +8,67 @@ parent.link=../index.html
 
   <h2>Topics</h2>
   <ol>
-  <li><a href="{@docRoot}guide/topics/ui/accessibility/apps.html">Making Applications Accessible</a>
-    </li>
-  <li><a href="{@docRoot}guide/topics/ui/accessibility/services.html">Building Accessibility
-    Services</a></li>
+  <li><a href="apps.html">
+    Making Applications Accessible</a></li>
+  <li><a href="checklist.html">
+    Accessibility Developer Checklist</a></li>
+  <li><a href="services.html">
+    Building Accessibility Services</a></li>
   </ol>
 
-  <h2>Key classes</h2>
-  <ol>
-    <li>{@link android.view.accessibility.AccessibilityEvent}</li>
-    <li>{@link android.accessibilityservice.AccessibilityService}</li>
-  </ol>
-  
   <h2>See also</h2>
   <ol>
-    <li><a href="{@docRoot}training/accessibility/index.html">Implementing Accessibility</a></li>
+    <li><a href="{@docRoot}design/patterns/accessibility.html">Android Design: Accessibility</a></li>
+    <li><a href="{@docRoot}training/accessibility/index.html">Training: Implementing Accessibility</a></li>
+    <li><a href="{@docRoot}tools/testing/testing_accessibility.html">Accessibility Testing Checklist</a></li>
+  </ol>
+
+  <h2>Related Videos</h2>
+  <ol>
+    <li>
+      <iframe title="Google I/O 2012 - Making Android Apps Accessible"
+          width="210" height="160"
+          src="http://www.youtube.com/embed/q3HliaMjL38?rel=0&amp;hd=1"
+          frameborder="0" allowfullscreen>
+      </iframe>
+    <li>
   </ol>
 
 </div>
 </div>
 
-<p>Many Android users have disabilities that require them to interact with their Android devices in
-different ways. These include users who have visual, physical or age-related disabilities that
-prevent them from fully seeing or using a touchscreen.</p>
+<p>Many Android users have different abilities that require them to interact with their Android
+devices in different ways. These include users who have visual, physical or age-related limitations
+that prevent them from fully seeing or using a touchscreen, and users with hearing loss who may not
+be able to perceive audible information and alerts.</p>
 
 <p>Android provides accessibility features and services for helping these users navigate their
-devices more easily, including text-to-speech, haptic feedback, trackball and D-pad navigation that
-augment their experience. Android application developers can take advantage of these services to
-make their applications more accessible and also build their own accessibility services.</p>
+devices more easily, including text-to-speech, haptic feedback, gesture navigation, trackball and
+directional-pad navigation. Android application developers can take advantage of these services to
+make their applications more accessible.</p>
+
+<p>Android developers can also build their own accessibility services, which can provide
+enhanced usability features such as audio prompting, physical feedback, and alternative navigation
+modes. Accessibility services can provide these enhancements for all applications, a set of
+applications or just a single app.</p>
 
 <p>The following topics show you how to use the Android framework to make applications more
 accessible.</p>
 
 <dl>
-  <dt><strong><a href="{@docRoot}guide/topics/ui/accessibility/apps.html">Making Applications
-Accessible</a></strong>
+  <dt><strong><a href="{@docRoot}guide/topics/ui/accessibility/apps.html">
+  Making Applications Accessible</a></strong>
   </dt>
   <dd>Development practices and API features to ensure your application is accessible to users with
 disabilities.</dd>
 
-  <dt><strong><a href="{@docRoot}guide/topics/ui/accessibility/services.html">Building Accessibility
-Services</a></strong>
+  <dt><strong><a href="{@docRoot}guide/topics/ui/accessibility/checklist.html">
+  Accessibility Developer Checklist</a></strong>
+  </dt>
+  <dd>A checklist to help developers ensure that their applications are accessible.</dd>
+
+  <dt><strong><a href="{@docRoot}guide/topics/ui/accessibility/services.html">
+  Building Accessibility Services</a></strong>
   </dt>
   <dd>How to use API features to build services that make other applications more accessible for
 users.</dd>
