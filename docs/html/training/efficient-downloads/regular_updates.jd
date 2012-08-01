@@ -15,14 +15,14 @@ next.link=redundant_redundant.html
 
 <h2>This lesson teaches you to</h2>
 <ol>
-  <li><a href="#C2DM">Use Cloud to Device Messaging as an alternative to polling</a></li>
+  <li><a href="#GCM">Use Google Cloud Messaging as an alternative to polling</a></li>
   <li><a href="#OptimizedPolling">Optimize polling with inexact repeating alarms and exponential back-offs</a></li>
 </ol>
 
 <h2>You should also read</h2>
 <ul>
   <li><a href="{@docRoot}training/monitoring-device-state/index.html">Optimizing Battery Life</a></li>
-  <li><a href="http://code.google.com/android/c2dm/">Android Cloud to Device Messaging</a></li>
+  <li><a href="{@docRoot}guide/google/gcm/index.html">Google Cloud Messaging for Android</a></li>
 </ul>
 
 </div>
@@ -34,17 +34,17 @@ next.link=redundant_redundant.html
 
 <p>This lesson will examine how your refresh frequency can be varied to best mitigate the effect of background updates on the underlying wireless radio state machine.</p>
  
-<h2 id="C2DM">Use Cloud to Device Messaging as an Alternative to Polling</h2> 
+<h2 id="GCM">Use Google Cloud Messaging as an Alternative to Polling</h2> 
  
 <p>Every time your app polls your server to check if an update is required, you activate the wireless radio, drawing power unnecessarily, for up to 20 seconds on a typical 3G connection.</p>
 
-<p><a href="http://code.google.com/android/c2dm/">Android Cloud to Device Messaging (C2DM)</a> is a lightweight mechanism used to transmit data from a server to a particular app instance. Using C2DM, your server can notify your app running on a particular device that there is new data available for it.</p>
+<p><a href="{@docRoot}guide/google/gcm/index.html">Google Cloud Messaging for Android (GCM)</a> is a lightweight mechanism used to transmit data from a server to a particular app instance. Using GCM, your server can notify your app running on a particular device that there is new data available for it.</p>
 
 <p>Compared to polling, where your app must regularly ping the server to query for new data, this event-driven model allows your app to create a new connection only when it knows there is data to download.</p>
 
 <p>The result is a reduction in unnecessary connections, and a reduced latency for updated data within your application.</p>
 
-<p>C2DM is implemented using a persistent TCP/IP connection. While it's possible to implement your own push service, it's best practice to use C2DM. This minimizes the number of persistent connections and allows the platform to optimize bandwidth and minimize the associated impact on battery life.</p>
+<p>GCM is implemented using a persistent TCP/IP connection. While it's possible to implement your own push service, it's best practice to use GCM. This minimizes the number of persistent connections and allows the platform to optimize bandwidth and minimize the associated impact on battery life.</p>
 
 <h2 id="OptimizedPolling">Optimize Polling with Inexact Repeating Alarms and Exponential Backoffs</h2> 
 
