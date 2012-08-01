@@ -65,4 +65,8 @@
     <div class="nav-section-header empty"><a href="<?cs var:toroot ?>design/downloads/index.html">Downloads</a></div>
   </li>
 
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>design/extras/index.html">Extras</a></div>
+  </li>
+
 </ul>
