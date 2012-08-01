@@ -149,7 +149,7 @@
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Переход в безопасный режим"</string>
     <string name="reboot_safemode_confirm" msgid="55293944502784668">"Перейти в безопасный режим? Все приложения сторонних поставщиков отключатся. Они будут включены по возвращении в обычный режим."</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Недавние"</string>
-    <string name="no_recent_tasks" msgid="8794906658732193473">"Список пуст"</string>
+    <string name="no_recent_tasks" msgid="8794906658732193473">"В последнее время вы не запускали приложения."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Настройки планшетного ПК"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Параметры телефона"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Блокировка экрана"</string>
