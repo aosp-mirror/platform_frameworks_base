@@ -22,8 +22,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.os.Bundle;
-// TODO(cmautner): remove after fixing 6829431.
-import android.os.Debug;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Parcel;
@@ -385,8 +383,7 @@ final class FragmentManagerState implements Parcelable {
  * Container for fragments associated with an activity.
  */
 final class FragmentManagerImpl extends FragmentManager {
-    // TODO(cmautner): restore to false after fixing 6829431.
-    static boolean DEBUG = true;
+    static boolean DEBUG = false;
     static final String TAG = "FragmentManager";
     
     static final String TARGET_REQUEST_CODE_STATE_TAG = "android:target_req_state";
@@ -735,10 +732,10 @@ final class FragmentManagerImpl extends FragmentManager {
 
     void moveToState(Fragment f, int newState, int transit, int transitionStyle,
             boolean keepActive) {
-        // TODO(cmautner): remove after fixing 6829431.
-        if (DEBUG) Log.v(TAG, "moveToState: " + f
-            + " oldState=" + f.mState + " newState=" + newState
-            + " mRemoving=" + f.mRemoving + " Callers=" + Debug.getCallers(5));
+        //if (DEBUG) Log.v(TAG, "moveToState: " + f
+        //    + " oldState=" + f.mState + " newState=" + newState
+        //    + " mRemoving=" + f.mRemoving + " Callers=" + Debug.getCallers(5));
+
         // Fragments that are not currently added will sit in the onCreate() state.
         if (!f.mAdded && newState > Fragment.CREATED) {
             newState = Fragment.CREATED;
