@@ -337,8 +337,8 @@ public class Matrix {
         final float y = 2.0f * (near * r_height);
         final float A = (right + left) * r_width;
         final float B = (top + bottom) * r_height;
-        final float C = -(far + near) * r_depth;
-        final float D = -2.0f * (far * near * r_depth);
+        final float C = (far + near) * r_depth;
+        final float D = 2.0f * (far * near * r_depth);
         m[offset + 0] = x;
         m[offset + 5] = y;
         m[offset + 8] = A;
