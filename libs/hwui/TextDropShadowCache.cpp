@@ -107,7 +107,9 @@ ShadowTexture* TextDropShadowCache::get(SkPaint* paint, const char* text, uint32
     ShadowTexture* texture = mCache.get(entry);
 
     if (!texture) {
-        FontRenderer::DropShadow shadow = mRenderer->renderDropShadow(paint, text, 0,
+        SkPaint paintCopy(*paint);
+        paintCopy.setTextAlign(SkPaint::kLeft_Align);
+        FontRenderer::DropShadow shadow = mRenderer->renderDropShadow(&paintCopy, text, 0,
                 len, numGlyphs, radius, positions);
 
         texture = new ShadowTexture;
