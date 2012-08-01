@@ -53,6 +53,7 @@ import android.os.Vibrator;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.util.AtomicFile;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
@@ -61,7 +62,6 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.Toast;
 
-import com.android.internal.os.AtomicFile;
 import com.android.internal.statusbar.StatusBarNotification;
 import com.android.internal.util.FastXmlSerializer;
 

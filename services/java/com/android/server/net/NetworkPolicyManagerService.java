@@ -117,6 +117,7 @@ import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.text.format.Formatter;
 import android.text.format.Time;
+import android.util.AtomicFile;
 import android.util.Log;
 import android.util.NtpTrustedTime;
 import android.util.Slog;
@@ -127,7 +128,6 @@ import android.util.TrustedTime;
 import android.util.Xml;
 
 import com.android.internal.R;
-import com.android.internal.os.AtomicFile;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Objects;

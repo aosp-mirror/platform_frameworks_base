@@ -44,6 +44,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserId;
+import android.util.AtomicFile;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
@@ -55,7 +56,6 @@ import android.view.WindowManager;
 import android.widget.RemoteViews;
 
 import com.android.internal.appwidget.IAppWidgetHost;
-import com.android.internal.os.AtomicFile;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.widget.IRemoteViewsAdapterConnection;
 import com.android.internal.widget.IRemoteViewsFactory;
