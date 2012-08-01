@@ -27,12 +27,12 @@ import android.os.Parcel;
 import android.os.Process;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.Xml;
 
 import com.android.internal.app.IUsageStats;
 import com.android.internal.content.PackageMonitor;
-import com.android.internal.os.AtomicFile;
 import com.android.internal.os.PkgUsageStats;
 import com.android.internal.util.FastXmlSerializer;
 

@@ -16,7 +16,6 @@
 package com.android.server;
 
 import com.android.internal.content.PackageMonitor;
-import com.android.internal.os.AtomicFile;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.view.IInputContext;
@@ -74,6 +73,7 @@ import android.provider.Settings.Secure;
 import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
 import android.text.style.SuggestionSpan;
+import android.util.AtomicFile;
 import android.util.EventLog;
 import android.util.LruCache;
 import android.util.Pair;

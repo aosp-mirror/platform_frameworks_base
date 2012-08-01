@@ -29,8 +29,8 @@ import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
 import android.net.TrafficStats;
 import android.text.format.DateUtils;
+import android.util.AtomicFile;
 
-import com.android.internal.os.AtomicFile;
 import com.android.internal.util.FileRotator;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Objects;
