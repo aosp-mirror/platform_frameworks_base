@@ -203,7 +203,7 @@ registerReceiver(mRetryReceiver, filter);
 <p>GCM allows a maximum of 4 different collapse keys to be used by the GCM server at any given time. In other words, the GCM server can simultaneously store 4 different send-to-sync messages, each with a different collapse key. If you exceed this number GCM will only keep 4 collapse keys, with no guarantees about which ones they will be.</p>
 
 <h3 id="payload">Messages with payload</h3>
-<p>Unlike a send-to-sync message, every &quot;message with payload&quot; (non-collapsible message) is delivered. The payload the message contains can be up to 4K. For example, here is a JSON-formatted message in an IM application in which spectators are discussing a sporting event:</p>
+<p>Unlike a send-to-sync message, every &quot;message with payload&quot; (non-collapsible message) is delivered. The payload the message contains can be up to 4kb. For example, here is a JSON-formatted message in an IM application in which spectators are discussing a sporting event:</p>
 
 <pre class="prettyprint pretty-json">{
   "registration_id" : "APA91bHun4MxP5egoKMwt2KZFBaFUH-1RYqx...",
