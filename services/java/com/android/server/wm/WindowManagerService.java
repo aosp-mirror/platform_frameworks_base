@@ -6546,6 +6546,7 @@ public class WindowManagerService extends IWindowManager.Stub
             config.compatScreenWidthDp = (int)(config.screenWidthDp / mCompatibleScreenScale);
             config.compatScreenHeightDp = (int)(config.screenHeightDp / mCompatibleScreenScale);
             config.compatSmallestScreenWidthDp = computeCompatSmallestWidth(rotated, dm, dw, dh);
+            config.densityDpi = mDisplayMetrics.densityDpi;
 
             // Update the configuration based on available input devices, lid switch,
             // and platform configuration.

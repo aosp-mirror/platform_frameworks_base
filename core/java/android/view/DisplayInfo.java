@@ -102,10 +102,10 @@ public final class DisplayInfo implements Parcelable {
     public float refreshRate;
 
     /**
-     * The logical display density which represents the scaling factor for
-     * the Density Independent Pixel unit.
+     * The logical display density which is the basis for density-independent
+     * pixels.
      */
-    public float logicalDensity;
+    public int logicalDensityDpi;
 
     /**
      * The exact physical pixels per inch of the screen in the X dimension.
@@ -158,7 +158,7 @@ public final class DisplayInfo implements Parcelable {
         logicalHeight = other.logicalHeight;
         rotation = other.rotation;
         refreshRate = other.refreshRate;
-        logicalDensity = other.logicalDensity;
+        logicalDensityDpi = other.logicalDensityDpi;
         physicalXDpi = other.physicalXDpi;
         physicalYDpi = other.physicalYDpi;
     }
@@ -174,7 +174,7 @@ public final class DisplayInfo implements Parcelable {
         logicalHeight = source.readInt();
         rotation = source.readInt();
         refreshRate = source.readFloat();
-        logicalDensity = source.readFloat();
+        logicalDensityDpi = source.readInt();
         physicalXDpi = source.readFloat();
         physicalYDpi = source.readFloat();
     }
@@ -191,7 +191,7 @@ public final class DisplayInfo implements Parcelable {
         dest.writeInt(logicalHeight);
         dest.writeInt(rotation);
         dest.writeFloat(refreshRate);
-        dest.writeFloat(logicalDensity);
+        dest.writeInt(logicalDensityDpi);
         dest.writeFloat(physicalXDpi);
         dest.writeFloat(physicalYDpi);
     }
@@ -206,12 +206,12 @@ public final class DisplayInfo implements Parcelable {
 
     private void getMetricsWithSize(DisplayMetrics outMetrics, CompatibilityInfoHolder cih,
             int width, int height) {
-        outMetrics.densityDpi =
-                (int)((logicalDensity * DisplayMetrics.DENSITY_DEFAULT) + .5f);
+        outMetrics.densityDpi = outMetrics.noncompatDensityDpi = logicalDensityDpi;
         outMetrics.noncompatWidthPixels  = outMetrics.widthPixels = width;
         outMetrics.noncompatHeightPixels = outMetrics.heightPixels = height;
 
-        outMetrics.density = outMetrics.noncompatDensity = logicalDensity;
+        outMetrics.density = outMetrics.noncompatDensity =
+                logicalDensityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
         outMetrics.scaledDensity = outMetrics.noncompatScaledDensity = outMetrics.density;
         outMetrics.xdpi = outMetrics.noncompatXdpi = physicalXDpi;
         outMetrics.ydpi = outMetrics.noncompatYdpi = physicalYDpi;

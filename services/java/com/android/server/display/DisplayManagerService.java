@@ -144,7 +144,7 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
         mDefaultDisplayInfo.logicalHeight = mDefaultDisplayDeviceInfo.height;
         mDefaultDisplayInfo.rotation = Surface.ROTATION_0;
         mDefaultDisplayInfo.refreshRate = mDefaultDisplayDeviceInfo.refreshRate;
-        mDefaultDisplayInfo.logicalDensity = mDefaultDisplayDeviceInfo.density;
+        mDefaultDisplayInfo.logicalDensityDpi = mDefaultDisplayDeviceInfo.densityDpi;
         mDefaultDisplayInfo.physicalXDpi = mDefaultDisplayDeviceInfo.xDpi;
         mDefaultDisplayInfo.physicalYDpi = mDefaultDisplayDeviceInfo.yDpi;
         mDefaultDisplayInfo.smallestNominalAppWidth = mDefaultDisplayDeviceInfo.width;

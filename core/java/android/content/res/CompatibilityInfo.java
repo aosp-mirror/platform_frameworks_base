@@ -439,7 +439,7 @@ public class CompatibilityInfo implements Parcelable {
         if (isScalingRequired()) {
             float invertedRatio = applicationInvertedScale;
             inoutDm.density = inoutDm.noncompatDensity * invertedRatio;
-            inoutDm.densityDpi = (int)((inoutDm.density*DisplayMetrics.DENSITY_DEFAULT)+.5f);
+            inoutDm.densityDpi = (int)((inoutDm.noncompatDensityDpi * invertedRatio) + .5f);
             inoutDm.scaledDensity = inoutDm.noncompatScaledDensity * invertedRatio;
             inoutDm.xdpi = inoutDm.noncompatXdpi * invertedRatio;
             inoutDm.ydpi = inoutDm.noncompatYdpi * invertedRatio;
@@ -448,7 +448,7 @@ public class CompatibilityInfo implements Parcelable {
         }
     }
 
-    public void applyToConfiguration(Configuration inoutConfig) {
+    public void applyToConfiguration(int displayDensity, Configuration inoutConfig) {
         if (!supportsScreen()) {
             // This is a larger screen device and the app is not
             // compatible with large screens, so we are forcing it to
@@ -459,6 +459,11 @@ public class CompatibilityInfo implements Parcelable {
             inoutConfig.screenWidthDp = inoutConfig.compatScreenWidthDp;
             inoutConfig.screenHeightDp = inoutConfig.compatScreenHeightDp;
             inoutConfig.smallestScreenWidthDp = inoutConfig.compatSmallestScreenWidthDp;
+        }
+        inoutConfig.densityDpi = displayDensity;
+        if (isScalingRequired()) {
+            float invertedRatio = applicationInvertedScale;
+            inoutConfig.densityDpi = (int)((inoutConfig.densityDpi * invertedRatio) + .5f);
         }
     }
 

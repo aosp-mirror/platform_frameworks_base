@@ -693,9 +693,9 @@ public class Resources {
              */
             if (value.density > 0 && value.density != TypedValue.DENSITY_NONE) {
                 if (value.density == density) {
-                    value.density = DisplayMetrics.DENSITY_DEVICE;
+                    value.density = mMetrics.densityDpi;
                 } else {
-                    value.density = (value.density * DisplayMetrics.DENSITY_DEVICE) / density;
+                    value.density = (value.density * mMetrics.densityDpi) / density;
                 }
             }
 
@@ -1435,7 +1435,8 @@ public class Resources {
             if (config != null) {
                 mTmpConfig.setTo(config);
                 if (mCompatibilityInfo != null) {
-                    mCompatibilityInfo.applyToConfiguration(mTmpConfig);
+                    mCompatibilityInfo.applyToConfiguration(mMetrics.noncompatDensityDpi,
+                            mTmpConfig);
                 }
                 if (mTmpConfig.locale == null) {
                     mTmpConfig.locale = Locale.getDefault();
@@ -1474,7 +1475,7 @@ public class Resources {
             mAssets.setConfiguration(mConfiguration.mcc, mConfiguration.mnc,
                     locale, mConfiguration.orientation,
                     mConfiguration.touchscreen,
-                    (int)(mMetrics.density*160), mConfiguration.keyboard,
+                    mConfiguration.densityDpi, mConfiguration.keyboard,
                     keyboardHidden, mConfiguration.navigation, width, height,
                     mConfiguration.smallestScreenWidthDp,
                     mConfiguration.screenWidthDp, mConfiguration.screenHeightDp,

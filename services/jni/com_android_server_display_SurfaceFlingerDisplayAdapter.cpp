@@ -31,7 +31,7 @@ static struct {
     jfieldID width;
     jfieldID height;
     jfieldID refreshRate;
-    jfieldID density;
+    jfieldID densityDpi;
     jfieldID xDpi;
     jfieldID yDpi;
 } gDisplayDeviceInfoClassInfo;
@@ -49,7 +49,8 @@ static void nativeGetDefaultDisplayDeviceInfo(JNIEnv* env, jclass clazz, jobject
     env->SetIntField(infoObj, gDisplayDeviceInfoClassInfo.width, info.w);
     env->SetIntField(infoObj, gDisplayDeviceInfoClassInfo.height, info.h);
     env->SetFloatField(infoObj, gDisplayDeviceInfoClassInfo.refreshRate, info.fps);
-    env->SetFloatField(infoObj, gDisplayDeviceInfoClassInfo.density, info.density);
+    env->SetIntField(infoObj, gDisplayDeviceInfoClassInfo.densityDpi,
+            (jint)((info.density*160) + .5f));
     env->SetFloatField(infoObj, gDisplayDeviceInfoClassInfo.xDpi, info.xdpi);
     env->SetFloatField(infoObj, gDisplayDeviceInfoClassInfo.yDpi, info.ydpi);
 }
@@ -81,7 +82,7 @@ int register_android_server_display_SurfaceFlingerDisplayAdapter(JNIEnv* env) {
     GET_FIELD_ID(gDisplayDeviceInfoClassInfo.width, clazz, "width", "I");
     GET_FIELD_ID(gDisplayDeviceInfoClassInfo.height, clazz, "height", "I");
     GET_FIELD_ID(gDisplayDeviceInfoClassInfo.refreshRate, clazz, "refreshRate", "F");
-    GET_FIELD_ID(gDisplayDeviceInfoClassInfo.density, clazz, "density", "F");
+    GET_FIELD_ID(gDisplayDeviceInfoClassInfo.densityDpi, clazz, "densityDpi", "I");
     GET_FIELD_ID(gDisplayDeviceInfoClassInfo.xDpi, clazz, "xDpi", "F");
     GET_FIELD_ID(gDisplayDeviceInfoClassInfo.yDpi, clazz, "yDpi", "F");
     return 0;
