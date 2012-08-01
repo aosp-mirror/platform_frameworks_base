@@ -54,27 +54,27 @@ and technologies in Android 2.0.</p>
 <!-- screenshots float right -->
 
 <div class="screenshot">
-  <img src="images/2.0/quick-connect.png" class="screenshot" alt="" /><br/>
+  <img src="{@docRoot}sdk/images/2.0/quick-connect.png" class="screenshot" alt="" /><br/>
   Quick Contact for Android
 </div>
 
 <div class="screenshot second">
-  <img src="images/2.0/multiple-accounts.png" class="screenshot" alt="" /><br/>
+  <img src="{@docRoot}sdk/images/2.0/multiple-accounts.png" class="screenshot" alt="" /><br/>
   Multiple Accounts
 </div>
 
 <div class="screenshot">
-  <img src="images/2.0/mms-search.png" class="screenshot" alt="" /><br/>
+  <img src="{@docRoot}sdk/images/2.0/mms-search.png" class="screenshot" alt="" /><br/>
   Messaging Search
 </div>
 
 <div class="screenshot second">
-  <img src="images/2.0/email-inbox.png" class="screenshot" alt="" /><br/>
+  <img src="{@docRoot}sdk/images/2.0/email-inbox.png" class="screenshot" alt="" /><br/>
   Email Combined Inbox
 </div>
 
 <div class="screenshot">
-  <img src="images/2.0/camera-modes.png" class="screenshot" alt="" /><br/>
+  <img src="{@docRoot}sdk/images/2.0/camera-modes.png" class="screenshot" alt="" /><br/>
   Camera Modes
 </div>
 

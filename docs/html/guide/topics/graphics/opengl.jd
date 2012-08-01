@@ -84,11 +84,8 @@ understanding how to implement these classes in an activity should be your first
     this class by creating an instance of {@link android.opengl.GLSurfaceView} and adding your
     {@link android.opengl.GLSurfaceView.Renderer Renderer} to it. However, if you want to capture
     touch screen events, you should extend the {@link android.opengl.GLSurfaceView} class to
-    implement the touch listeners, as shown in OpenGL Tutorials for
-    <a href="{@docRoot}resources/tutorials/opengl/opengl-es10.html#touch">ES 1.0</a>,
-    <a href="{@docRoot}resources/tutorials/opengl/opengl-es20.html#touch">ES 2.0</a> and the <a
-href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/graphics/TouchRotateActivity.html"
->TouchRotateActivity</a> sample.</dd>
+    implement the touch listeners, as shown in OpenGL training lesson,
+    <a href="{@docRoot}training/graphics/opengl/touch.html">Responding to Touch Events</a>.</dd>
 
   <dt><strong>{@link android.opengl.GLSurfaceView.Renderer}</strong></dt>
   <dd>This interface defines the methods required for drawing graphics in an OpenGL {@link
@@ -164,9 +161,8 @@ interface to OpenGL ES 2.0 and is available starting with Android 2.2 (API Level
   </li>
 </ul>
 
-<p>If you'd like to start building an app with OpenGL right away, have a look at the tutorials for
-<a href="{@docRoot}resources/tutorials/opengl/opengl-es10.html">OpenGL ES 1.0</a> or
-<a href="{@docRoot}resources/tutorials/opengl/opengl-es20.html">OpenGL ES 2.0</a>!
+<p>If you'd like to start building an app with OpenGL right away, follow the
+<a href="{@docRoot}training/graphics/opengl/index.html">Displaying Graphics with OpenGL ES</a> class.
 </p>
 
 <h2 id="manifest">Declaring OpenGL Requirements</h2>
@@ -277,10 +273,6 @@ which simulates a camera position.
 </li>
 </ol>
 
-<p>For a complete example of how to apply projection and camera views with OpenGL ES 1.0, see the <a
-href="{@docRoot}resources/tutorials/opengl/opengl-es10.html#projection-and-views">OpenGL ES 1.0
-tutorial</a>.</p>
-
 
 <h3 id="proj-es2">Projection and camera view in OpenGL ES 2.0</h3>
 <p>In the ES 2.0 API, you apply projection and camera view by first adding a matrix member to
@@ -382,8 +374,7 @@ objects to be rendered by OpenGL.
 </li>
 </ol>
 <p>For a complete example of how to apply projection and camera view with OpenGL ES 2.0, see the <a
-href="{@docRoot}resources/tutorials/opengl/opengl-es20.html#projection-and-views">OpenGL ES 2.0
-tutorial</a>.</p>
+href="{@docRoot}training/graphics/opengl/index.html">Displaying Graphics with OpenGL ES</a> class.</p>
 
 <h2 id="faces-winding">Shape Faces and Winding</h2>
 

@@ -262,7 +262,7 @@ are on the device upon start-up. If the files are not on the device, use Google 
 href="{@docRoot}guide/google/play/licensing/index.html">Application Licensing</a> service to request URLs
 for the expansion files, then download and save them.
     <p>To greatly reduce the amount of code you must write and ensure a good user experience
-during the download, we recommend you use the <a href="AboutLibraries">Downloader
+during the download, we recommend you use the <a href="#AboutLibraries">Downloader
 Library</a> to implement your download behavior.</p>
     <p>If you build your own download service instead of using the library, be aware that you
 must not change the name of the expansion files and must save them to the proper
