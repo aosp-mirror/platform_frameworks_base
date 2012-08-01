@@ -68,6 +68,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
+import android.content.pm.PackageParser.ActivityIntentInfo;
 import android.content.pm.PackageStats;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
@@ -4737,14 +4738,17 @@ public class PackageManagerService extends IPackageManager.Stub {
             mFlags = flags;
             final boolean defaultOnly = (flags&PackageManager.MATCH_DEFAULT_ONLY) != 0;
             final int N = packageActivities.size();
-            ArrayList<ArrayList<PackageParser.ActivityIntentInfo>> listCut =
-                new ArrayList<ArrayList<PackageParser.ActivityIntentInfo>>(N);
+            ArrayList<PackageParser.ActivityIntentInfo[]> listCut =
+                new ArrayList<PackageParser.ActivityIntentInfo[]>(N);
 
             ArrayList<PackageParser.ActivityIntentInfo> intentFilters;
             for (int i = 0; i < N; ++i) {
                 intentFilters = packageActivities.get(i).intents;
                 if (intentFilters != null && intentFilters.size() > 0) {
-                    listCut.add(intentFilters);
+                    PackageParser.ActivityIntentInfo[] array =
+                            new PackageParser.ActivityIntentInfo[intentFilters.size()];
+                    intentFilters.toArray(array);
+                    listCut.add(array);
                 }
             }
             return super.queryIntentFromList(intent, resolvedType, defaultOnly, listCut, userId);
@@ -4809,6 +4813,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             }
             return true;
+        }
+
+        @Override
+        protected ActivityIntentInfo[] newArray(int size) {
+            return new ActivityIntentInfo[size];
         }
 
         @Override
@@ -4925,14 +4934,17 @@ public class PackageManagerService extends IPackageManager.Stub {
             mFlags = flags;
             final boolean defaultOnly = (flags&PackageManager.MATCH_DEFAULT_ONLY) != 0;
             final int N = packageServices.size();
-            ArrayList<ArrayList<PackageParser.ServiceIntentInfo>> listCut =
-                new ArrayList<ArrayList<PackageParser.ServiceIntentInfo>>(N);
+            ArrayList<PackageParser.ServiceIntentInfo[]> listCut =
+                new ArrayList<PackageParser.ServiceIntentInfo[]>(N);
 
             ArrayList<PackageParser.ServiceIntentInfo> intentFilters;
             for (int i = 0; i < N; ++i) {
                 intentFilters = packageServices.get(i).intents;
                 if (intentFilters != null && intentFilters.size() > 0) {
-                    listCut.add(intentFilters);
+                    PackageParser.ServiceIntentInfo[] array =
+                            new PackageParser.ServiceIntentInfo[intentFilters.size()];
+                    intentFilters.toArray(array);
+                    listCut.add(array);
                 }
             }
             return super.queryIntentFromList(intent, resolvedType, defaultOnly, listCut, userId);
@@ -4992,6 +5004,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             }
             return true;
+        }
+
+        @Override
+        protected PackageParser.ServiceIntentInfo[] newArray(int size) {
+            return new PackageParser.ServiceIntentInfo[size];
         }
 
         @Override
