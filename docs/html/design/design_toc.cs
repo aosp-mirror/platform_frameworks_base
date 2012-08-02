@@ -26,7 +26,7 @@
   <li class="nav-section">
     <div class="nav-section-header"><a href="<?cs var:toroot ?>design/patterns/index.html">Patterns</a></div>
     <ul>
-      <li><a href="<?cs var:toroot ?>design/patterns/new.html">New in Android</a></li>
+      <li><a href="<?cs var:toroot ?>design/patterns/new-4-0.html">New in Android 4.0</a></li>
       <li><a href="<?cs var:toroot ?>design/patterns/gestures.html">Gestures</a></li>
       <li><a href="<?cs var:toroot ?>design/patterns/app-structure.html">App Structure</a></li>
       <li><a href="<?cs var:toroot ?>design/patterns/navigation.html">Navigation</a></li>
@@ -36,11 +36,8 @@
       <li><a href="<?cs var:toroot ?>design/patterns/selection.html">Selection</a></li>
       <li><a href="<?cs var:toroot ?>design/patterns/notifications.html">Notifications</a></li>
       <li><a href="<?cs var:toroot ?>design/patterns/settings.html">Settings</a></li>
-      <li><a href="<?cs var:toroot ?>design/patterns/help.html">Help</a></li>
       <li><a href="<?cs var:toroot ?>design/patterns/compatibility.html">Compatibility</a></li>
-      <li><a href="<?cs var:toroot ?>design/patterns/accessibility.html">Accessibility</a></li>
       <li><a href="<?cs var:toroot ?>design/patterns/pure-android.html">Pure Android</a></li>
-      <li><a href="<?cs var:toroot ?>design/patterns/confirming-acknowledging.html">Confirming &amp; Acknowledging</a></li>
     </ul>
   </li>
 
@@ -64,10 +61,6 @@
 
   <li class="nav-section">
     <div class="nav-section-header empty"><a href="<?cs var:toroot ?>design/downloads/index.html">Downloads</a></div>
-  </li>
-
-  <li class="nav-section">
-    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>design/extras/index.html">Extras</a></div>
   </li>
 
 </ul>
