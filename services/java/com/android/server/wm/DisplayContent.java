@@ -18,6 +18,8 @@ package com.android.server.wm;
 
 import android.view.DisplayInfo;
 
+import com.android.server.display.DisplayManagerService;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -56,10 +58,13 @@ class DisplayContent {
     int mInitialDisplayHeight = 0;
     int mBaseDisplayWidth = 0;
     int mBaseDisplayHeight = 0;
+    final DisplayManagerService mDisplayManager;
     final DisplayInfo mDisplayInfo = new DisplayInfo();
 
-    DisplayContent(final int displayId) {
+    DisplayContent(DisplayManagerService displayManager, final int displayId) {
+        mDisplayManager = displayManager;
         mDisplayId = displayId;
+        displayManager.getDisplayInfo(displayId, mDisplayInfo);
     }
 
     int getDisplayId() {

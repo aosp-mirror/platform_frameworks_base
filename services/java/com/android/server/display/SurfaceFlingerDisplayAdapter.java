@@ -35,7 +35,7 @@ public final class SurfaceFlingerDisplayAdapter extends DisplayAdapter {
     }
 
     @Override
-    public DisplayDevice[] getDisplayDevices() {
-        return new DisplayDevice[] { mDefaultDisplay };
+    public DisplayDevice getDisplayDevice() {
+        return mDefaultDisplay;
     }
 }

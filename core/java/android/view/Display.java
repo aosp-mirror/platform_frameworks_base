@@ -73,6 +73,12 @@ public final class Display {
     public static final int DEFAULT_DISPLAY = 0;
 
     /**
+     * Uninitialized display.
+     * @hide
+     */
+    public static final int NO_DISPLAY = -1;
+
+    /**
      * Internal method to create a display.
      * Applications should use {@link android.view.WindowManager#getDefaultDisplay()}
      * to get a display object for the default display.
