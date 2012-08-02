@@ -3606,4 +3606,8 @@
 
     <!-- "Done" button for MediaRouter chooser dialog when grouping routes. [CHAR LIMIT=NONE] -->
     <string name="media_route_chooser_grouping_done">Done</string>
+
+    <!-- Content description of a MediaRouteButton for accessibility support -->
+    <string name="media_route_button_content_description">Media output</string>
+
 </resources>
