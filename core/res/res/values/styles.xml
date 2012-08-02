@@ -2448,6 +2448,8 @@ please see styles_device_defaults.xml.
         <item name="android:externalRouteEnabledDrawable">@drawable/ic_media_route_holo_dark</item>
         <item name="android:minWidth">56dp</item>
         <item name="android:minHeight">48dp</item>
+        <item name="android:focusable">true</item>
+        <item name="android:contentDescription">@android:string/media_route_button_content_description</item>
     </style>
 
     <style name="Widget.Holo.Light.MediaRouteButton">
@@ -2455,6 +2457,8 @@ please see styles_device_defaults.xml.
         <item name="android:externalRouteEnabledDrawable">@drawable/ic_media_route_holo_light</item>
         <item name="android:minWidth">56dp</item>
         <item name="android:minHeight">48dp</item>
+        <item name="android:focusable">true</item>
+        <item name="android:contentDescription">@android:string/media_route_button_content_description</item>
     </style>
 
 </resources>
