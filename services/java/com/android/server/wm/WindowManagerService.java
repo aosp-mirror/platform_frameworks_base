@@ -4876,7 +4876,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final int pos = findWindowOffsetLocked(windows, tokenPos);
             reAddAppWindowsLocked(displayContent, pos, wtoken);
 
-            if (updateFocusAndLayout && !updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES, 
+            if (updateFocusAndLayout && !updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
                     false /*updateInputWindows*/)) {
                 assignLayersLocked(windows);
             }
@@ -4927,7 +4927,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mInputMonitor.setUpdateInputWindowsNeededLw();
 
-        // Note that the above updateFocusedWindowLocked used to sit here. 
+        // Note that the above updateFocusedWindowLocked used to sit here.
 
         mLayoutNeeded = true;
         performLayoutAndPlaceSurfacesLocked();
@@ -6572,7 +6572,7 @@ public class WindowManagerService extends IWindowManager.Stub
             displayInfo.appHeight = appHeight;
             displayInfo.getLogicalMetrics(mRealDisplayMetrics, null);
             displayInfo.getAppMetrics(mDisplayMetrics, null);
-            mDisplayManager.setDefaultDisplayInfo(displayInfo);
+            mDisplayManager.setDisplayInfo(displayContent.getDisplayId(), displayInfo);
 
             mAnimator.setDisplayDimensions(dw, dh, appWidth, appHeight);
         }
@@ -6882,48 +6882,51 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void displayReady() {
         displayReady(Display.DEFAULT_DISPLAY);
+
+        synchronized(mWindowMap) {
+            WindowManager wm = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
+            mDisplay = wm.getDefaultDisplay();
+            mIsTouchDevice = mContext.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_TOUCHSCREEN);
+
+            final DisplayInfo displayInfo = getDefaultDisplayInfo();
+            mAnimator.setDisplayDimensions(displayInfo.logicalWidth, displayInfo.logicalHeight,
+                displayInfo.appWidth, displayInfo.appHeight);
+
+            DisplayDeviceInfo info = new DisplayDeviceInfo();
+            mDisplayManager.getDefaultExternalDisplayDeviceInfo(info);
+
+            final DisplayContent displayContent = getDefaultDisplayContent();
+            mInputManager.setDisplaySize(Display.DEFAULT_DISPLAY,
+                    displayContent.mInitialDisplayWidth, displayContent.mInitialDisplayHeight,
+                    info.width, info.height);
+            mInputManager.setDisplayOrientation(Display.DEFAULT_DISPLAY,
+                    mDisplay.getRotation(), Surface.ROTATION_0);
+            mPolicy.setInitialDisplaySize(mDisplay,
+                    displayContent.mInitialDisplayWidth, displayContent.mInitialDisplayHeight);
+        }
     }
 
     public void displayReady(int displayId) {
         synchronized(mWindowMap) {
-            if (mDisplay != null) {
-                throw new IllegalStateException("Display already initialized");
-            }
-            WindowManager wm = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
-            mDisplay = wm.getDefaultDisplay();
-            mIsTouchDevice = mContext.getPackageManager().hasSystemFeature(
-                    PackageManager.FEATURE_TOUCHSCREEN);
-
             final DisplayContent displayContent = getDisplayContent(displayId);
+            final DisplayInfo displayInfo;
             synchronized(displayContent.mDisplaySizeLock) {
                 // Bootstrap the default logical display from the display manager.
-                final DisplayInfo displayInfo = displayContent.getDisplayInfo();
+                displayInfo = displayContent.getDisplayInfo();
                 mDisplayManager.getDisplayInfo(displayId, displayInfo);
                 displayContent.mInitialDisplayWidth = displayInfo.logicalWidth;
                 displayContent.mInitialDisplayHeight = displayInfo.logicalHeight;
                 displayContent.mBaseDisplayWidth = displayContent.mInitialDisplayWidth;
                 displayContent.mBaseDisplayHeight = displayContent.mInitialDisplayHeight;
-
-                mAnimator.setDisplayDimensions(displayInfo.logicalWidth, displayInfo.logicalHeight,
-                        displayInfo.appWidth, displayInfo.appHeight);
             }
-
-            DisplayDeviceInfo info = new DisplayDeviceInfo();
-            mDisplayManager.getDefaultExternalDisplayDeviceInfo(info);
-            mInputManager.setDisplaySize(displayId,
-                    displayContent.mInitialDisplayWidth, displayContent.mInitialDisplayHeight,
-                    info.width, info.height);
-            mInputManager.setDisplayOrientation(displayId,
-                    mDisplay.getRotation(), Surface.ROTATION_0);
-            mPolicy.setInitialDisplaySize(mDisplay,
-                    displayContent.mInitialDisplayWidth, displayContent.mInitialDisplayHeight);
         }
 
         try {
             mActivityManager.updateConfiguration(null);
         } catch (RemoteException e) {
         }
-        
+
         synchronized (mWindowMap) {
             readForcedDisplaySizeLocked(getDisplayContent(displayId));
         }
@@ -10325,7 +10328,7 @@ public class WindowManagerService extends IWindowManager.Stub
     public DisplayContent getDisplayContent(final int displayId) {
         DisplayContent displayContent = mDisplayContents.get(displayId);
         if (displayContent == null) {
-            displayContent = new DisplayContent(displayId);
+            displayContent = new DisplayContent(mDisplayManager, displayId);
             mDisplayContents.put(displayId, displayContent);
         }
         return displayContent;
