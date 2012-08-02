@@ -576,6 +576,16 @@ public class ActionMenuPresenter extends BaseMenuPresenter
         public boolean needsDividerAfter() {
             return false;
         }
+
+        @Override
+        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+            if (MeasureSpec.getMode(heightMeasureSpec) == MeasureSpec.AT_MOST) {
+                // Fill available height
+                heightMeasureSpec = MeasureSpec.makeMeasureSpec(
+                        MeasureSpec.getSize(heightMeasureSpec), MeasureSpec.EXACTLY);
+            }
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        }
     }
 
     private class OverflowPopup extends MenuPopupHelper {
