@@ -59,6 +59,7 @@ import android.os.UserId;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
+import android.view.Display;
 import android.view.WindowManagerPolicy;
 
 import java.io.IOException;
@@ -902,7 +903,7 @@ final class ActivityStack {
             mService.notifyAll();
         }
     }
-    
+
     public final Bitmap screenshotActivities(ActivityRecord who) {
         if (who.noDisplay) {
             return null;
@@ -919,7 +920,8 @@ final class ActivityStack {
         }
 
         if (w > 0) {
-            return mService.mWindowManager.screenshotApplications(who.appToken, w, h);
+            return mService.mWindowManager.screenshotApplications(who.appToken,
+                    Display.DEFAULT_DISPLAY, w, h);
         }
         return null;
     }

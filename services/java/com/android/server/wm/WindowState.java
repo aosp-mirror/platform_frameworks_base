@@ -35,6 +35,7 @@ import android.graphics.Region;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
+import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.IApplicationToken;
 import android.view.IWindow;
@@ -46,6 +47,9 @@ import android.view.WindowManagerPolicy;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+
+class WindowList extends ArrayList<WindowState> {
+}
 
 /**
  * A window in the window manager.
@@ -251,18 +255,18 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     boolean mHasSurface = false;
 
-    int mDisplayId;
+    DisplayContent  mDisplayContent;
 
     WindowState(WindowManagerService service, Session s, IWindow c, WindowToken token,
            WindowState attachedWindow, int seq, WindowManager.LayoutParams a,
-           int viewVisibility, int displayId) {
+           int viewVisibility, final DisplayContent displayContent) {
         mService = service;
         mSession = s;
         mClient = c;
         mToken = token;
         mAttrs.copyFrom(a);
         mViewVisibility = viewVisibility;
-        mDisplayId = displayId;
+        mDisplayContent = displayContent;
         mPolicy = mService.mPolicy;
         mContext = mService.mContext;
         DeathRecipient deathRecipient = new DeathRecipient();
@@ -346,7 +350,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mYOffset = 0;
         mLayer = 0;
         mInputWindowHandle = new InputWindowHandle(
-                mAppToken != null ? mAppToken.mInputApplicationHandle : null, this);
+                mAppToken != null ? mAppToken.mInputApplicationHandle : null, this,
+                displayContent.getDisplayId());
     }
 
     void attach() {
@@ -482,8 +487,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
 
         if (mIsWallpaper && (fw != frame.width() || fh != frame.height())) {
-            mService.updateWallpaperOffsetLocked(this,
-                    mService.mDisplayInfo.appWidth, mService.mDisplayInfo.appHeight, false);
+            final DisplayInfo displayInfo = mDisplayContent.getDisplayInfo();
+            mService.updateWallpaperOffsetLocked(this, displayInfo.appWidth, displayInfo.appHeight,
+                    false);
         }
 
         if (WindowManagerService.localLOGV) {
@@ -547,6 +553,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     public boolean getNeedsMenuLw(WindowManagerPolicy.WindowState bottom) {
         int index = -1;
         WindowState ws = this;
+        WindowList windows = getWindowList();
         while (true) {
             if ((ws.mAttrs.privateFlags
                     & WindowManager.LayoutParams.PRIVATE_FLAG_SET_NEEDS_MENU_KEY) != 0) {
@@ -561,13 +568,13 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             // look behind it.
             // First, we may need to determine the starting position.
             if (index < 0) {
-                index = mService.mWindows.indexOf(ws);
+                index = windows.indexOf(ws);
             }
             index--;
             if (index < 0) {
                 return false;
             }
-            ws = mService.mWindows.get(index);
+            ws = windows.get(index);
         }
     }
 
@@ -991,8 +998,13 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
     }
 
+    WindowList getWindowList() {
+        return mDisplayContent.getWindowList();
+    }
+
     void dump(PrintWriter pw, String prefix, boolean dumpAll) {
-        pw.print(prefix); pw.print("mSession="); pw.print(mSession);
+        pw.print(prefix); pw.print("mDisplayId="); pw.print(mDisplayContent.getDisplayId());
+                pw.print(" mSession="); pw.print(mSession);
                 pw.print(" mClient="); pw.println(mClient.asBinder());
         pw.print(prefix); pw.print("mAttrs="); pw.println(mAttrs);
         pw.print(prefix); pw.print("Requested w="); pw.print(mRequestedWidth);
