@@ -17,6 +17,7 @@
 package com.android.internal.view.menu;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
@@ -77,6 +78,15 @@ public class ActionMenuItemView extends TextView
         setOnLongClickListener(this);
 
         mSavedPaddingLeft = -1;
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        mAllowTextWithIcon = getContext().getResources().getBoolean(
+                com.android.internal.R.bool.config_allowActionMenuItemTextWithIcon);
+        updateTextButtonVisibility();
     }
 
     @Override
@@ -242,6 +252,11 @@ public class ActionMenuItemView extends TextView
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        if (MeasureSpec.getMode(heightMeasureSpec) == MeasureSpec.AT_MOST) {
+            // Fill all available height.
+            heightMeasureSpec = MeasureSpec.makeMeasureSpec(
+                    MeasureSpec.getSize(heightMeasureSpec), MeasureSpec.EXACTLY);
+        }
         final boolean textVisible = hasText();
         if (textVisible && mSavedPaddingLeft >= 0) {
             super.setPadding(mSavedPaddingLeft, getPaddingTop(),
