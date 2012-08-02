@@ -278,7 +278,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             super.setComposingText(limitedText, newCursorPosition);
             updateSelection();
             if (limitedText != text) {
-                restartInput();
                 int lastCaret = start + limitedText.length();
                 finishComposingText();
                 setSelection(lastCaret, lastCaret);
