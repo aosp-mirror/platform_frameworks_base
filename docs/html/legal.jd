@@ -18,12 +18,11 @@ mobile.</p>
 <p>To start developing apps for Android, <a
 href="{@docRoot}sdk/index.html">download the free Android SDK</a>.</p>
 
-
-
 <h2 id="Brands">Android Brands</h2>
 
-<p>The "Android" name and <img src="images/android-logo.png" alt="Android"
-style="margin:0;padding:0 2px;vertical-align:baseline" /> logo are trademarks of Google Inc.
+<p>The "Android" name, the <img src="images/android-logo.png" alt="Android"
+style="margin:0;padding:0 2px;vertical-align:baseline" /> logo, and
+<a href="http://www.google.com/permissions/">other trademarks</a> are property of Google Inc.
 You may not use the logo or the logo's custom typeface.</p>
 
 <p>You may use the word "Android" in a product name only as a descriptor, such as "for Android"
@@ -42,7 +41,7 @@ use of it must be attributed as such.</p>
 <p>For more information about Android brands, see the <a
 href="{@docRoot}distribute/googleplay/promote/brand.html">Android Branding Guidelines</a>.</p>
 
-
+<p>All other trademarks are the property of their respective owners.</p>
 
 <h2 id="WebSite">Web Site Content</h2>
 
@@ -125,5 +124,7 @@ Terms of Service</a></p>
 <p>Any and all other services available for Android but not documented on <a
 href="http://developer.android.com">developer.android.com</a> are subject to their own terms, as
 documented on their respective web sites. </p>
+
+
 
 </div>
