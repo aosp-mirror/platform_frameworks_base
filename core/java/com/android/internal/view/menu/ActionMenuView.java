@@ -15,6 +15,8 @@
  */
 package com.android.internal.view.menu;
 
+import com.android.internal.R;
+
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
@@ -25,8 +27,6 @@ import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.LinearLayout;
-
-import com.android.internal.R;
 
 /**
  * @hide
@@ -71,6 +71,11 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
 
     public boolean isExpandedFormat() {
         return mFormatItems;
+    }
+
+    public void setMaxItemHeight(int maxItemHeight) {
+        mMaxItemHeight = maxItemHeight;
+        requestLayout();
     }
 
     @Override

@@ -95,6 +95,9 @@ public abstract class AbsActionBarView extends ViewGroup {
 
     public void setContentHeight(int height) {
         mContentHeight = height;
+        if (mMenuView != null) {
+            mMenuView.setMaxItemHeight(mContentHeight);
+        }
         requestLayout();
     }
 
