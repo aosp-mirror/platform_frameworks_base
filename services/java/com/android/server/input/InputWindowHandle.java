@@ -87,12 +87,16 @@ public final class InputWindowHandle {
     // Window input features.
     public int inputFeatures;
 
+    // Display this input is on.
+    public final int displayId;
+
     private native void nativeDispose();
 
     public InputWindowHandle(InputApplicationHandle inputApplicationHandle,
-            Object windowState) {
+            Object windowState, int displayId) {
         this.inputApplicationHandle = inputApplicationHandle;
         this.windowState = windowState;
+        this.displayId = displayId;
     }
 
     @Override

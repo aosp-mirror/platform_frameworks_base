@@ -24,6 +24,7 @@ import com.android.server.wm.WindowManagerService;
 
 import android.graphics.Point;
 import android.util.Slog;
+import android.view.Display;
 
 /**
  * Activity manager code dealing with processes.
@@ -146,7 +147,7 @@ class ProcessList {
     void applyDisplaySize(WindowManagerService wm) {
         if (!mHaveDisplaySize) {
             Point p = new Point();
-            wm.getInitialDisplaySize(p);
+            wm.getInitialDisplaySize(Display.DEFAULT_DISPLAY, p);
             if (p.x != 0 && p.y != 0) {
                 updateOomLevels(p.x, p.y, true);
                 mHaveDisplaySize = true;

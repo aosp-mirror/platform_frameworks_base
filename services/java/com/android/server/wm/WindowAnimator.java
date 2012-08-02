@@ -39,7 +39,7 @@ public class WindowAnimator {
     final Context mContext;
     final WindowManagerPolicy mPolicy;
 
-    ArrayList<WindowStateAnimator> mWinAnimators = new ArrayList<WindowStateAnimator>();
+    ArrayList<WinAnimatorList> mWinAnimatorLists = new ArrayList<WinAnimatorList>();
 
     boolean mAnimating;
 
@@ -158,7 +158,8 @@ public class WindowAnimator {
                 mWallpaperTokens = new ArrayList<WindowToken>(layoutToAnim.mWallpaperTokens);
             }
 
-            mWinAnimators = new ArrayList<WindowStateAnimator>(layoutToAnim.mWinAnimators);
+            mWinAnimatorLists =
+                    new ArrayList<WinAnimatorList>(layoutToAnim.mWinAnimatorLists);
             mWallpaperTarget = layoutToAnim.mWallpaperTarget;
             mWpAppAnimator = mWallpaperTarget == null
                     ? null : mWallpaperTarget.mAppToken == null
@@ -267,7 +268,7 @@ public class WindowAnimator {
         }
     }
 
-    private void updateWindowsLocked() {
+    private void updateWindowsLocked(final WinAnimatorList winAnimatorList) {
         ++mAnimTransactionSequence;
 
         ArrayList<WindowStateAnimator> unForceHiding = null;
@@ -280,8 +281,8 @@ public class WindowAnimator {
         final int KEYGUARD_ANIMATING_OUT = 3;
         int forceHiding = KEYGUARD_NOT_SHOWN;
 
-        for (int i = mWinAnimators.size() - 1; i >= 0; i--) {
-            WindowStateAnimator winAnimator = mWinAnimators.get(i);
+        for (int i = winAnimatorList.size() - 1; i >= 0; i--) {
+            WindowStateAnimator winAnimator = winAnimatorList.get(i);
             WindowState win = winAnimator.mWin;
             final int flags = winAnimator.mAttrFlags;
 
@@ -418,13 +419,13 @@ public class WindowAnimator {
         }
     }
 
-    private void updateWallpaperLocked() {
+    private void updateWallpaperLocked(final WinAnimatorList winAnimatorList) {
         WindowStateAnimator windowAnimationBackground = null;
         int windowAnimationBackgroundColor = 0;
         WindowState detachedWallpaper = null;
 
-        for (int i = mWinAnimators.size() - 1; i >= 0; i--) {
-            WindowStateAnimator winAnimator = mWinAnimators.get(i);
+        for (int i = winAnimatorList.size() - 1; i >= 0; i--) {
+            WindowStateAnimator winAnimator = winAnimatorList.get(i);
             if (winAnimator.mSurface == null) {
                 continue;
             }
@@ -489,11 +490,11 @@ public class WindowAnimator {
             // don't cause the wallpaper to suddenly disappear.
             int animLayer = windowAnimationBackground.mAnimLayer;
             WindowState win = windowAnimationBackground.mWin;
-            if (windowAnimationBackground != null && mWallpaperTarget == win
+            if (mWallpaperTarget == win
                     || mLowerWallpaperTarget == win || mUpperWallpaperTarget == win) {
-                final int N = mWinAnimators.size();
+                final int N = winAnimatorList.size();
                 for (int i = 0; i < N; i++) {
-                    WindowStateAnimator winAnimator = mWinAnimators.get(i);
+                    WindowStateAnimator winAnimator = winAnimatorList.get(i);
                     if (winAnimator.mIsWallpaper) {
                         animLayer = winAnimator.mAnimLayer;
                         break;
@@ -548,9 +549,9 @@ public class WindowAnimator {
         }
     }
 
-    private void performAnimationsLocked() {
-        updateWindowsLocked();
-        updateWallpaperLocked();
+    private void performAnimationsLocked(final WinAnimatorList winAnimatorList) {
+        updateWindowsLocked(winAnimatorList);
+        updateWallpaperLocked(winAnimatorList);
 
         if ((mPendingLayoutChanges & WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER) != 0) {
             mPendingActions |= WALLPAPER_ACTION_PENDING;
@@ -562,6 +563,12 @@ public class WindowAnimator {
     // TODO(cmautner): Change the following comment when no longer locked on mWindowMap */
     /** Locked on mService.mWindowMap and this. */
     private void animateLocked() {
+        for (int i = mWinAnimatorLists.size() - 1; i >= 0; i--) {
+            animateLocked(mWinAnimatorLists.get(i));
+        }
+    }
+
+    private void animateLocked(final WinAnimatorList winAnimatorList) {
         mPendingLayoutChanges = 0;
         mCurrentTime = SystemClock.uptimeMillis();
         mBulkUpdateParams = SET_ORIENTATION_CHANGE_COMPLETE;
@@ -577,7 +584,7 @@ public class WindowAnimator {
 
         try {
             updateWindowsAppsAndRotationAnimationsLocked();
-            performAnimationsLocked();
+            performAnimationsLocked(winAnimatorList);
 
             // THIRD LOOP: Update the surfaces of all windows.
 
@@ -585,9 +592,9 @@ public class WindowAnimator {
                 mScreenRotationAnimation.updateSurfaces();
             }
 
-            final int N = mWinAnimators.size();
+            final int N = winAnimatorList.size();
             for (int i = 0; i < N; i++) {
-                mWinAnimators.get(i).prepareSurfaceLocked(true);
+                winAnimatorList.get(i).prepareSurfaceLocked(true);
             }
 
             if (mDimParams != null) {

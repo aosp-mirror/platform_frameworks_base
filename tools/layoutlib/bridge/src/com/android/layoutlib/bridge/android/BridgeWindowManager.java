@@ -92,7 +92,7 @@ public class BridgeWindowManager implements IWindowManager {
     }
 
     @Override
-    public void clearForcedDisplaySize() throws RemoteException {
+    public void clearForcedDisplaySize(int displayId) throws RemoteException {
         // TODO Auto-generated method stub
 
     }
@@ -262,7 +262,8 @@ public class BridgeWindowManager implements IWindowManager {
     }
 
     @Override
-    public Bitmap screenshotApplications(IBinder arg0, int arg1, int arg2) throws RemoteException {
+    public Bitmap screenshotApplications(IBinder arg0, int displayId, int arg1, int arg2)
+            throws RemoteException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -324,7 +325,7 @@ public class BridgeWindowManager implements IWindowManager {
     }
 
     @Override
-    public void setForcedDisplaySize(int arg0, int arg1) throws RemoteException {
+    public void setForcedDisplaySize(int displayId, int arg0, int arg1) throws RemoteException {
         // TODO Auto-generated method stub
 
     }

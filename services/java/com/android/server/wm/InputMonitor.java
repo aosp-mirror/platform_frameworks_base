@@ -201,7 +201,6 @@ final class InputMonitor implements InputManagerService.Callbacks {
         // As an optimization, we could try to prune the list of windows but this turns
         // out to be difficult because only the native code knows for sure which window
         // currently has touch focus.
-        final ArrayList<WindowState> windows = mService.mWindows;
         final WindowStateAnimator universeBackground = mService.mAnimator.mUniverseBackground;
         final int aboveUniverseLayer = mService.mAnimator.mAboveUniverseLayer;
         boolean addedUniverse = false;
@@ -226,8 +225,9 @@ final class InputMonitor implements InputManagerService.Callbacks {
             addInputWindowHandleLw(mService.mFakeWindows.get(i).mWindowHandle);
         }
 
-        final int N = windows.size();
-        for (int i = N - 1; i >= 0; i--) {
+        // TODO(multidisplay): Input only occurs on the default display.
+        final WindowList windows = mService.getDefaultWindowList();
+        for (int i = windows.size() - 1; i >= 0; i--) {
             final WindowState child = windows.get(i);
             final InputChannel inputChannel = child.mInputChannel;
             final InputWindowHandle inputWindowHandle = child.mInputWindowHandle;

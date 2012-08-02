@@ -57,8 +57,8 @@ interface IWindowManager
             in IInputContext inputContext);
     boolean inputMethodClientHasFocus(IInputMethodClient client);
 
-    void setForcedDisplaySize(int longDimen, int shortDimen);
-    void clearForcedDisplaySize();
+    void setForcedDisplaySize(int displayId, int longDimen, int shortDimen);
+    void clearForcedDisplaySize(int displayId);
 
     // Is the device configured to have a full system bar for larger screens?
     boolean hasSystemNavBar();
@@ -184,7 +184,7 @@ interface IWindowManager
 	/**
 	 * Create a screenshot of the applications currently displayed.
 	 */
-	Bitmap screenshotApplications(IBinder appToken, int maxWidth, int maxHeight);
+	Bitmap screenshotApplications(IBinder appToken, int displayId, int maxWidth, int maxHeight);
 
     /**
      * Called by the status bar to notify Views of changes to System UI visiblity.
