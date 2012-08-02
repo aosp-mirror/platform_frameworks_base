@@ -16,14 +16,32 @@
 
 package com.android.server.display;
 
+import android.view.Display;
+
 /**
- * A display adapter makes one or more display devices available to the system.
+ * A display adapter makes a single display devices available to the system.
  * <p>
  * For now, all display adapters are registered in the system server but
  * in principle it could be done from other processes.
  * </p>
  */
 public abstract class DisplayAdapter {
+    /** The current logical Display assignment for this adapter. Will change if other logical
+     * display is assigned to this adapter */
+    private int mDisplayId = Display.NO_DISPLAY;
+
+    /** Assign the displayId
+     * @hide */
+    public void setDisplayId(int displayId) {
+        mDisplayId = displayId;
+    }
+
+    /** Retrieve the displayId
+     * @hide */
+    public int getDisplayId() {
+        return mDisplayId;
+    }
+
     /**
      * Gets the display adapter name.
      * @return The display adapter name.
@@ -31,5 +49,5 @@ public abstract class DisplayAdapter {
     public abstract String getName();
 
     // TODO: dynamically register display devices
-    public abstract DisplayDevice[] getDisplayDevices();
+    public abstract DisplayDevice getDisplayDevice();
 }
