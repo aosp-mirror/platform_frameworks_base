@@ -161,6 +161,10 @@ public class NotificationRowLayout
         return NotificationData.setUserExpanded(v, userExpanded);
     }
 
+    public boolean setUserLockedChild(View v, boolean userLocked) {
+        return NotificationData.setUserLocked(v, userLocked);
+    }
+
     public void onChildDismissed(View v) {
         final View veto = v.findViewById(R.id.veto);
         if (veto != null && veto.getVisibility() != View.GONE && mRemoveViews) {

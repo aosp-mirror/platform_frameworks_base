@@ -39,7 +39,8 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
         View getChildAtRawPosition(float x, float y);
         View getChildAtPosition(float x, float y);
         boolean canChildBeExpanded(View v);
-        boolean setUserExpandedChild(View v, boolean userxpanded);
+        boolean setUserExpandedChild(View v, boolean userExpanded);
+        boolean setUserLockedChild(View v, boolean userLocked);
     }
 
     private static final String TAG = "ExpandHelper";
@@ -433,7 +434,7 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
                     final int y = (int) ev.getY();
                     View underPointer = findView(x, y);
                     if (isFinished && underPointer != null && underPointer != mCurrView) {
-                        setGlow(0f);
+                        finishScale(false);
                         initScale(underPointer);
                         mInitialTouchY = ev.getY();
                         mHasPopped = false;
@@ -458,6 +459,7 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
     private boolean initScale(View v) {
         if (v != null) {
             if (DEBUG) Slog.d(TAG, "scale begins on view: " + v);
+            mCallback.setUserLockedChild(v, true);
             setView(v);
             setGlow(GLOW_BASE);
             mScaler.setView(v);
@@ -479,21 +481,26 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
     }
 
     private void finishScale(boolean force) {
+        float currentHeight = mScaler.getHeight();
+        float targetHeight = mSmallSize;
         float h = mScaler.getHeight();
         final boolean wasClosed = (mOldHeight == mSmallSize);
         if (wasClosed) {
-            h = (force || h > mSmallSize) ? mNaturalHeight : mSmallSize;
+            targetHeight = (force || currentHeight > mSmallSize) ? mNaturalHeight : mSmallSize;
         } else {
-            h = (force || h < mNaturalHeight) ? mSmallSize : mNaturalHeight;
+            targetHeight = (force || currentHeight < mNaturalHeight) ? mSmallSize : mNaturalHeight;
         }
         if (mScaleAnimation.isRunning()) {
             mScaleAnimation.cancel();
         }
-        mScaleAnimation.setFloatValues(h);
-        mScaleAnimation.setupStartValues();
-        mScaleAnimation.start();
         setGlow(0f);
         mCallback.setUserExpandedChild(mCurrView, h == mNaturalHeight);
+        if (targetHeight != currentHeight) {
+            mScaleAnimation.setFloatValues(targetHeight);
+            mScaleAnimation.setupStartValues();
+            mScaleAnimation.start();
+        }
+        mCallback.setUserLockedChild(mCurrView, false);
         if (DEBUG) Slog.d(TAG, "scale was finished on view: " + mCurrView);
     }
 
