@@ -1378,7 +1378,8 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
                 mZoneTime    = c.getTimeInMillis();
             }
             if (DBG) {
-                log("NITZ: tzOffset=" + tzOffset + " dst=" + dst + " zone=" + zone.getID() +
+                log("NITZ: tzOffset=" + tzOffset + " dst=" + dst + " zone=" +
+                        (zone!=null ? zone.getID() : "NULL") +
                         " iso=" + iso + " mGotCountryCode=" + mGotCountryCode +
                         " mNeedFixZone=" + mNeedFixZone);
             }
