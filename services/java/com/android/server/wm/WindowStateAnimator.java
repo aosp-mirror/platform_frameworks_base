@@ -474,6 +474,7 @@ class WindowStateAnimator {
         private final Point mSize = new Point();
         private final Rect mWindowCrop = new Rect();
         private boolean mShown = false;
+        private int mDisplayId;
         private String mName = "Not named";
 
         public SurfaceTrace(SurfaceSession s,
@@ -481,6 +482,7 @@ class WindowStateAnimator {
                        OutOfResourcesException {
             super(s, pid, displayId, w, h, format, flags);
             mSize.set(w, h);
+            mDisplayId = displayId;
             Slog.v(SURFACE_TAG, "ctor: " + this + ". Called by "
                     + Debug.getCallers(3));
         }
@@ -548,6 +550,13 @@ class WindowStateAnimator {
         }
 
         @Override
+        public void setDisplayId(int displayId) {
+            super.setDisplayId(displayId);
+            mDisplayId = displayId;
+            Slog.v(SURFACE_TAG, "setDisplayId: " + this + ". Called by " + Debug.getCallers(3));
+        }
+
+        @Override
         public void hide() {
             super.hide();
             mShown = false;
@@ -588,7 +597,7 @@ class WindowStateAnimator {
         @Override
         public String toString() {
             return "Surface " + Integer.toHexString(System.identityHashCode(this)) + " "
-                    + mName + ": shown=" + mShown + " layer=" + mLayer
+                    + mName + " (" + mDisplayId + "): shown=" + mShown + " layer=" + mLayer
                     + " alpha=" + mSurfaceTraceAlpha + " " + mPosition.x + "," + mPosition.y
                     + " " + mSize.x + "x" + mSize.y
                     + " crop=" + mWindowCrop.toShortString();
