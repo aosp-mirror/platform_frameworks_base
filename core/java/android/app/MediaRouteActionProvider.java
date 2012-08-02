@@ -81,6 +81,7 @@ public class MediaRouteActionProvider extends ActionProvider {
         }
         mMenuItem = item;
         mView = new MediaRouteButton(mContext);
+        mView.setCheatSheetEnabled(true);
         mView.setRouteTypes(mRouteTypes);
         mView.setExtendedSettingsClickListener(mExtendedSettingsListener);
         mView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
