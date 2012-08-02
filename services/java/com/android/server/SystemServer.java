@@ -155,7 +155,7 @@ class ServerThread extends Thread {
 
             Slog.i(TAG, "Display Manager");
             display = new DisplayManagerService();
-            ServiceManager.addService(Context.DISPLAY_SERVICE, display);
+            ServiceManager.addService(Context.DISPLAY_SERVICE, display, true);
 
             Slog.i(TAG, "Activity Manager");
             context = ActivityManagerService.main(factoryTest);
