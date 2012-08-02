@@ -736,6 +736,14 @@ class CallbackProxy extends Handler {
                                                 res.cancel();
                                             }
                                         })
+                                .setOnCancelListener(
+                                        new DialogInterface.OnCancelListener() {
+                                            @Override
+                                            public void onCancel(
+                                                    DialogInterface dialog) {
+                                                res.cancel();
+                                            }
+                                        })
                                 .show();
                     }
                     receiver.setReady();
