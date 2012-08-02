@@ -29,6 +29,7 @@ import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.util.Slog;
+import android.view.DisplayInfo;
 import android.view.DragEvent;
 import android.view.InputChannel;
 import android.view.Surface;
@@ -58,6 +59,7 @@ class DragState {
     WindowState mTargetWindow;
     ArrayList<WindowState> mNotifiedWindows;
     boolean mDragInProgress;
+    DisplayContent mDisplayContent;
 
     private final Region mTmpRegion = new Region();
 
@@ -69,6 +71,12 @@ class DragState {
         mFlags = flags;
         mLocalWin = localWin;
         mNotifiedWindows = new ArrayList<WindowState>();
+        WindowState win = service.mWindowMap.get(token);
+        if (win != null) {
+            mDisplayContent = win.mDisplayContent;
+        } else {
+            Slog.e(WindowManagerService.TAG, "No window associated with token");
+        }
     }
 
     void reset() {
@@ -101,7 +109,8 @@ class DragState {
             mDragApplicationHandle.dispatchingTimeoutNanos =
                     WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
 
-            mDragWindowHandle = new InputWindowHandle(mDragApplicationHandle, null);
+            mDragWindowHandle = new InputWindowHandle(mDragApplicationHandle, null,
+                    mDisplayContent.getDisplayId());
             mDragWindowHandle.name = "drag";
             mDragWindowHandle.inputChannel = mServerChannel;
             mDragWindowHandle.layer = getDragLayerLw();
@@ -125,8 +134,9 @@ class DragState {
             // The drag window covers the entire display
             mDragWindowHandle.frameLeft = 0;
             mDragWindowHandle.frameTop = 0;
-            mDragWindowHandle.frameRight = mService.mDisplayInfo.logicalWidth;
-            mDragWindowHandle.frameBottom = mService.mDisplayInfo.logicalHeight;
+            DisplayInfo displayInfo = mDisplayContent.getDisplayInfo();
+            mDragWindowHandle.frameRight = displayInfo.logicalWidth;
+            mDragWindowHandle.frameBottom = displayInfo.logicalHeight;
 
             // Pause rotations before a drag.
             if (WindowManagerService.DEBUG_ORIENTATION) {
@@ -179,9 +189,10 @@ class DragState {
             Slog.d(WindowManagerService.TAG, "broadcasting DRAG_STARTED at (" + touchX + ", " + touchY + ")");
         }
 
-        final int N = mService.mWindows.size();
+        final WindowList windows = mDisplayContent.getWindowList();
+        final int N = windows.size();
         for (int i = 0; i < N; i++) {
-            sendDragStartedLw(mService.mWindows.get(i), touchX, touchY, mDataDescription);
+            sendDragStartedLw(windows.get(i), touchX, touchY, mDataDescription);
         }
     }
 
@@ -380,7 +391,8 @@ class DragState {
         WindowState touchedWin = null;
         final int x = (int) xf;
         final int y = (int) yf;
-        final ArrayList<WindowState> windows = mService.mWindows;
+
+        final WindowList windows = mDisplayContent.getWindowList();
         final int N = windows.size();
         for (int i = N - 1; i >= 0; i--) {
             WindowState child = windows.get(i);
