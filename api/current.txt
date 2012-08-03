@@ -19927,6 +19927,50 @@ package android.security {
 
 }
 
+package android.service.dreams {
+
+  public class Dream extends android.app.Service implements android.view.Window.Callback {
+    ctor public Dream();
+    method public void addContentView(android.view.View, android.view.ViewGroup.LayoutParams);
+    method public boolean dispatchGenericMotionEvent(android.view.MotionEvent);
+    method public boolean dispatchKeyEvent(android.view.KeyEvent);
+    method public boolean dispatchKeyShortcutEvent(android.view.KeyEvent);
+    method public boolean dispatchPopulateAccessibilityEvent(android.view.accessibility.AccessibilityEvent);
+    method public boolean dispatchTouchEvent(android.view.MotionEvent);
+    method public boolean dispatchTrackballEvent(android.view.MotionEvent);
+    method public android.view.View findViewById(int);
+    method public void finish();
+    method public android.view.Window getWindow();
+    method public android.view.WindowManager getWindowManager();
+    method public boolean isInteractive();
+    method protected void lightsOut();
+    method public void onActionModeFinished(android.view.ActionMode);
+    method public void onActionModeStarted(android.view.ActionMode);
+    method public void onAttachedToWindow();
+    method public final android.os.IBinder onBind(android.content.Intent);
+    method public void onContentChanged();
+    method public boolean onCreatePanelMenu(int, android.view.Menu);
+    method public android.view.View onCreatePanelView(int);
+    method public void onDetachedFromWindow();
+    method public boolean onMenuItemSelected(int, android.view.MenuItem);
+    method public boolean onMenuOpened(int, android.view.Menu);
+    method public void onPanelClosed(int, android.view.Menu);
+    method public boolean onPreparePanel(int, android.view.View, android.view.Menu);
+    method public boolean onSearchRequested();
+    method public void onStart();
+    method public final int onStartCommand(android.content.Intent, int, int);
+    method public void onWindowAttributesChanged(android.view.WindowManager.LayoutParams);
+    method public void onWindowFocusChanged(boolean);
+    method public android.view.ActionMode onWindowStartingActionMode(android.view.ActionMode.Callback);
+    method public void setContentView(int);
+    method public void setContentView(android.view.View);
+    method public void setContentView(android.view.View, android.view.ViewGroup.LayoutParams);
+    method public void setInteractive(boolean);
+    field public static final java.lang.String SERVICE_INTERFACE = "android.service.dreams.Dream";
+  }
+
+}
+
 package android.service.textservice {
 
   public abstract class SpellCheckerService extends android.app.Service {
