@@ -217,6 +217,14 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Umožňuje aplikácii prijímať a spracovávať správy WAP. Toto povolenie zahŕňa možnosť sledovať vaše správy alebo ich odstrániť bez toho, aby sa vám zobrazili."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"načítať spustené aplikácie"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Umožňuje aplikácii načítať informácie o aktuálne či nedávno spustených úlohách. Toto povolenie môže aplikácii umožniť objaviť informácie o tom, ktoré aplikácie sa na zariadení používajú."</string>
+    <!-- no translation found for permlab_interactAcrossUsers (7114255281944211682) -->
+    <skip />
+    <!-- no translation found for permdesc_interactAcrossUsers (364670963623385786) -->
+    <skip />
+    <!-- no translation found for permlab_interactAcrossUsersFull (2567734285545074105) -->
+    <skip />
+    <!-- no translation found for permdesc_interactAcrossUsersFull (376841368395502366) -->
+    <skip />
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"načítať podrobnosti o spustených aplikáciách"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Umožňuje aplikácii načítať podrobné informácie o aktuálnych a nedávno spustených úlohách. Škodlivé aplikácie môžu odhaliť súkromné informácie o iných aplikáciách."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"zmeniť poradie spustených aplikácií"</string>
@@ -1301,4 +1309,6 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Systém"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth audio"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Hotovo"</string>
+    <!-- no translation found for media_route_button_content_description (5758553567065145276) -->
+    <skip />
 </resources>
