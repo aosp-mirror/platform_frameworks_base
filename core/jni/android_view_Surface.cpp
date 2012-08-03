@@ -717,6 +717,14 @@ static void Surface_setWindowCrop(JNIEnv* env, jobject thiz, jobject crop)
     }
 }
 
+static void Surface_setDisplayId(JNIEnv* env, jobject thiz, jint displayId)
+{
+    const sp<SurfaceControl>& surface(getSurfaceControl(env, thiz));
+    if (surface == 0) return;
+
+    // TODO(mathias): Everything.
+}
+
 // ----------------------------------------------------------------------------
 
 static void Surface_copyFrom(
@@ -855,6 +863,7 @@ static JNINativeMethod gSurfaceMethods[] = {
     {"writeToParcel",       "(Landroid/os/Parcel;I)V", (void*)Surface_writeToParcel },
     {"isConsumerRunningBehind", "()Z", (void*)Surface_isConsumerRunningBehind },
     {"setWindowCrop",       "(Landroid/graphics/Rect;)V", (void*)Surface_setWindowCrop },
+    {"setDisplayId",        "(I)V", (void*)Surface_setDisplayId },
 };
 
 void nativeClassInit(JNIEnv* env, jclass clazz)
