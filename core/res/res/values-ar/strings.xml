@@ -217,6 +217,14 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"للسماح للتطبيق بتلقي رسائل WAP ومعالجتها. ويتضمن هذا الإذن إمكانية مراقبة الرسائل التي يتم إرسالها إليك أو حذفها بدون عرضها لك."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"استرداد التطبيقات التي قيد التشغيل"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"للسماح للتطبيق باسترداد معلومات حول المهام التي يجري تشغيلها حاليًا والتي تم تشغيلها مؤخرًا. وقد يسمح هذا للتطبيق باكتشاف معلومات حول التطبيقات المستخدمة على الجهاز."</string>
+    <!-- no translation found for permlab_interactAcrossUsers (7114255281944211682) -->
+    <skip />
+    <!-- no translation found for permdesc_interactAcrossUsers (364670963623385786) -->
+    <skip />
+    <!-- no translation found for permlab_interactAcrossUsersFull (2567734285545074105) -->
+    <skip />
+    <!-- no translation found for permdesc_interactAcrossUsersFull (376841368395502366) -->
+    <skip />
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"استرداد تفاصيل التطبيقات قيد التشغيل"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"يسمح للتطبيق باسترداد معلومات تفصيلية حول المهام قيد التشغيل حاليًا ومؤخرًا. قد تكتشف التطبيقات الضارة معلومات خاصة حول التطبيقات الأخرى."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"إعادة ترتيب التطبيقات قيد التشغيل"</string>
@@ -1301,4 +1309,6 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"النظام"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"صوت بلوتوث"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"تم"</string>
+    <!-- no translation found for media_route_button_content_description (5758553567065145276) -->
+    <skip />
 </resources>
