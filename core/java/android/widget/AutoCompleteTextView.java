@@ -904,8 +904,6 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      *
      * @param filter If <code>false</code>, no filtering will be performed
      *        as a result of this call.
-     * 
-     * @hide Pending API council approval.
      */
     public void setText(CharSequence text, boolean filter) {
         if (filter) {
