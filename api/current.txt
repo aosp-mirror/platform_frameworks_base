@@ -8114,8 +8114,11 @@ package android.graphics {
     method public static android.graphics.Bitmap createBitmap(android.graphics.Bitmap, int, int, int, int);
     method public static android.graphics.Bitmap createBitmap(android.graphics.Bitmap, int, int, int, int, android.graphics.Matrix, boolean);
     method public static android.graphics.Bitmap createBitmap(int, int, android.graphics.Bitmap.Config);
+    method public static android.graphics.Bitmap createBitmap(android.util.DisplayMetrics, int, int, android.graphics.Bitmap.Config);
     method public static android.graphics.Bitmap createBitmap(int[], int, int, int, int, android.graphics.Bitmap.Config);
+    method public static android.graphics.Bitmap createBitmap(android.util.DisplayMetrics, int[], int, int, int, int, android.graphics.Bitmap.Config);
     method public static android.graphics.Bitmap createBitmap(int[], int, int, android.graphics.Bitmap.Config);
+    method public static android.graphics.Bitmap createBitmap(android.util.DisplayMetrics, int[], int, int, android.graphics.Bitmap.Config);
     method public static android.graphics.Bitmap createScaledBitmap(android.graphics.Bitmap, int, int, boolean);
     method public int describeContents();
     method public void eraseColor(int);
@@ -19958,7 +19961,6 @@ package android.service.dreams {
     method public boolean onPreparePanel(int, android.view.View, android.view.Menu);
     method public boolean onSearchRequested();
     method public void onStart();
-    method public final int onStartCommand(android.content.Intent, int, int);
     method public void onWindowAttributesChanged(android.view.WindowManager.LayoutParams);
     method public void onWindowFocusChanged(boolean);
     method public android.view.ActionMode onWindowStartingActionMode(android.view.ActionMode.Callback);

@@ -534,7 +534,8 @@ public class TextureView extends View {
      */
     public Bitmap getBitmap(int width, int height) {
         if (isAvailable() && width > 0 && height > 0) {
-            return getBitmap(Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888));
+            return getBitmap(Bitmap.createBitmap(getResources().getDisplayMetrics(),
+                    width, height, Bitmap.Config.ARGB_8888));
         }
         return null;
     }
