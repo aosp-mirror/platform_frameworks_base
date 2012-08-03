@@ -543,6 +543,19 @@
        about currently and recently running tasks.  This may allow the app to
        discover information about which applications are used on the device.</string>
 
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE] -->
+    <string name="permlab_interactAcrossUsers">interact across users</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE] -->
+    <string name="permdesc_interactAcrossUsers">Allows the app to perform actions
+        across different users on the device.  Malicious apps may use this to violate
+        the protection between users.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE] -->
+    <string name="permlab_interactAcrossUsersFull">full license to interact across users</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE] -->
+    <string name="permdesc_interactAcrossUsersFull">Allows all possible interactions across
+        users.</string>
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=50] -->
     <string name="permlab_getDetailedTasks">retrieve details of running apps</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE] -->

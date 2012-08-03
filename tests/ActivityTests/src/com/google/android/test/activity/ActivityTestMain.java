@@ -16,37 +16,31 @@
 
 package com.google.android.test.activity;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.ActivityThread;
 import android.app.AlertDialog;
-import android.app.Application;
 import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.graphics.BitmapFactory;
+import android.os.IBinder;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ScrollView;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.content.res.CompatibilityInfo;
-import android.util.DisplayMetrics;
 import android.util.Log;
 
 public class ActivityTestMain extends Activity {
+    static final String TAG = "ActivityTest";
+
     ActivityManager mAm;
 
     private void addThumbnail(LinearLayout container, Bitmap bm,
@@ -111,6 +105,37 @@ public class ActivityTestMain extends Activity {
                         R.style.SlowDialog);
                 builder.setTitle("This is a title");
                 builder.show();
+                return true;
+            }
+        });
+        menu.add("Bind!").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override public boolean onMenuItemClick(MenuItem item) {
+                Intent intent = new Intent(ActivityTestMain.this, SingleUserService.class);
+                ServiceConnection conn = new ServiceConnection() {
+                    @Override
+                    public void onServiceConnected(ComponentName name, IBinder service) {
+                        Log.i(TAG, "Service connected " + name + " " + service);
+                    }
+                    @Override
+                    public void onServiceDisconnected(ComponentName name) {
+                        Log.i(TAG, "Service disconnected " + name);
+                    }
+                };
+                bindService(intent, conn, Context.BIND_AUTO_CREATE);
+                return true;
+            }
+        });
+        menu.add("Start!").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override public boolean onMenuItemClick(MenuItem item) {
+                Intent intent = new Intent(ActivityTestMain.this, SingleUserService.class);
+                startService(intent);
+                return true;
+            }
+        });
+        menu.add("Send!").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override public boolean onMenuItemClick(MenuItem item) {
+                Intent intent = new Intent(ActivityTestMain.this, UserTarget.class);
+                sendBroadcastToUser(intent, 1);
                 return true;
             }
         });

@@ -27,13 +27,15 @@ class BroadcastFilter extends IntentFilter {
     final ReceiverList receiverList;
     final String packageName;
     final String requiredPermission;
+    final int owningUid;
 
     BroadcastFilter(IntentFilter _filter, ReceiverList _receiverList,
-            String _packageName, String _requiredPermission) {
+            String _packageName, String _requiredPermission, int _owningUid) {
         super(_filter);
         receiverList = _receiverList;
         packageName = _packageName;
         requiredPermission = _requiredPermission;
+        owningUid = _owningUid;
     }
     
     public void dump(PrintWriter pw, String prefix) {

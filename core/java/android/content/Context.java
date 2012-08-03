@@ -988,12 +988,14 @@ public abstract class Context {
     public abstract void sendBroadcast(Intent intent);
 
     /**
-     * Same as #sendBroadcast(Intent intent), but for a specific user. Used by the system only.
+     * Same as #sendBroadcast(Intent intent), but for a specific user.  This broadcast
+     * can only be sent to receivers that are part of the calling application.  It
+     * requires holding the {@link android.Manifest.permission#INTERACT_ACROSS_USERS}
+     * permission.
      * @param intent the intent to broadcast
      * @param userId user to send the intent to
-     * @hide
      */
-    public void sendBroadcast(Intent intent, int userId) {
+    public void sendBroadcastToUser(Intent intent, int userId) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
