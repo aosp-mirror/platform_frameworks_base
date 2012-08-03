@@ -11140,9 +11140,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     private ServiceLookupResult retrieveServiceLocked(Intent service,
             String resolvedType, int callingPid, int callingUid, int userId) {
         ServiceRecord r = null;
-        if (DEBUG_SERVICE)
-            Slog.v(TAG, "retrieveServiceLocked: " + service + " type=" + resolvedType
-                    + " callingUid=" + callingUid);
+        if (DEBUG_SERVICE) Slog.v(TAG, "retrieveServiceLocked: " + service
+                + " type=" + resolvedType + " callingUid=" + callingUid);
 
         if (service.getComponent() != null) {
             r = mServiceMap.getServiceByName(service.getComponent(), userId);
@@ -11163,14 +11162,29 @@ public final class ActivityManagerService extends ActivityManagerNative
                           ": not found");
                     return null;
                 }
-                if (userId > 0) {
-                    if (isSingleton(sInfo.processName, sInfo.applicationInfo)) {
-                        userId = 0;
-                    }
-                    sInfo.applicationInfo = getAppInfoForUser(sInfo.applicationInfo, userId);
-                }
                 ComponentName name = new ComponentName(
                         sInfo.applicationInfo.packageName, sInfo.name);
+                if (userId > 0) {
+                    if (isSingleton(sInfo.processName, sInfo.applicationInfo)
+                            || (sInfo.flags&ServiceInfo.FLAG_SINGLE_USER) != 0) {
+                        userId = 0;
+                    } else if ((sInfo.flags&ServiceInfo.FLAG_SINGLE_USER) != 0) {
+                        if (checkComponentPermission(
+                                android.Manifest.permission.INTERACT_ACROSS_USERS,
+                                callingPid, callingUid, -1, true)
+                                == PackageManager.PERMISSION_GRANTED) {
+                            userId = 0;
+                        } else {
+                            String msg = "Permission Denial: Service " + name
+                                    + " requests FLAG_SINGLE_USER, but app does not hold "
+                                    + android.Manifest.permission.INTERACT_ACROSS_USERS;
+                            Slog.w(TAG, msg);
+                            throw new SecurityException(msg);
+                        }
+                    }
+                    sInfo = new ServiceInfo(sInfo);
+                    sInfo.applicationInfo = getAppInfoForUser(sInfo.applicationInfo, userId);
+                }
                 r = mServiceMap.getServiceByName(name, userId);
                 if (r == null) {
                     Intent.FilterComparison filter = new Intent.FilterComparison(
@@ -11531,11 +11545,11 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         final boolean isolated = (r.serviceInfo.flags&ServiceInfo.FLAG_ISOLATED_PROCESS) != 0;
-        final String appName = r.processName;
+        final String procName = r.processName;
         ProcessRecord app;
 
         if (!isolated) {
-            app = getProcessRecordLocked(appName, r.appInfo.uid);
+            app = getProcessRecordLocked(procName, r.appInfo.uid);
             if (DEBUG_MU)
                 Slog.v(TAG_MU, "bringUpServiceLocked: appInfo.uid=" + r.appInfo.uid + " app=" + app);
             if (app != null && app.thread != null) {
@@ -11563,7 +11577,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         // Not running -- get it started, and enqueue this service record
         // to be executed when the app comes up.
         if (app == null) {
-            if ((app=startProcessLocked(appName, r.appInfo, true, intentFlags,
+            if ((app=startProcessLocked(procName, r.appInfo, true, intentFlags,
                     "service", r.name, false, isolated)) == null) {
                 Slog.w(TAG, "Unable to launch app "
                         + r.appInfo.packageName + "/"
@@ -12668,6 +12682,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     public Intent registerReceiver(IApplicationThread caller, String callerPackage,
             IIntentReceiver receiver, IntentFilter filter, String permission) {
         enforceNotIsolatedCaller("registerReceiver");
+        int callingUid;
         synchronized(this) {
             ProcessRecord callerApp = null;
             if (caller != null) {
@@ -12683,8 +12698,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                     throw new SecurityException("Given caller package " + callerPackage
                             + " is not running in process " + callerApp);
                 }
+                callingUid = callerApp.info.uid;
             } else {
                 callerPackage = null;
+                callingUid = Binder.getCallingUid();
             }
 
             List allSticky = null;
@@ -12729,7 +12746,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 mRegisteredReceivers.put(receiver.asBinder(), rl);
             }
-            BroadcastFilter bf = new BroadcastFilter(filter, rl, callerPackage, permission);
+            BroadcastFilter bf = new BroadcastFilter(filter, rl, callerPackage,
+                    permission, callingUid);
             rl.add(bf);
             if (!bf.debugCheck()) {
                 Slog.w(TAG, "==> For Dynamic broadast");
@@ -12748,7 +12766,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     BroadcastQueue queue = broadcastQueueForIntent(intent);
                     BroadcastRecord r = new BroadcastRecord(queue, intent, null,
                             null, -1, -1, null, receivers, null, 0, null, null,
-                            false, true, true);
+                            false, true, true, false);
                     queue.enqueueParallelBroadcastLocked(r);
                     queue.scheduleBroadcastsLocked();
                 }
@@ -12840,7 +12858,34 @@ public final class ActivityManagerService extends ActivityManagerNative
         if ((resultTo != null) && !ordered) {
             Slog.w(TAG, "Broadcast " + intent + " not ordered but result callback requested!");
         }
-        
+
+        boolean onlySendToCaller = false;
+
+        // If the caller is trying to send this broadcast to a different
+        // user, verify that is allowed.
+        if (UserId.getUserId(callingUid) != userId) {
+            if (checkComponentPermission(
+                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                    callingPid, callingUid, -1, true)
+                    != PackageManager.PERMISSION_GRANTED) {
+                if (checkComponentPermission(
+                        android.Manifest.permission.INTERACT_ACROSS_USERS,
+                        callingPid, callingUid, -1, true)
+                        == PackageManager.PERMISSION_GRANTED) {
+                    onlySendToCaller = true;
+                } else {
+                    String msg = "Permission Denial: " + intent.getAction()
+                            + " broadcast from " + callerPackage
+                            + " asks to send as user " + userId
+                            + " but is calling from user " + UserId.getUserId(callingUid)
+                            + "; this requires "
+                            + android.Manifest.permission.INTERACT_ACROSS_USERS;
+                    Slog.w(TAG, msg);
+                    throw new SecurityException(msg);
+                }
+            }
+        }
+
         // Handle special intents: if this broadcast is from the package
         // manager about a package being removed, we need to remove all of
         // its activities from the history stack.
@@ -13042,7 +13087,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             BroadcastRecord r = new BroadcastRecord(queue, intent, callerApp,
                     callerPackage, callingPid, callingUid, requiredPermission,
                     registeredReceivers, resultTo, resultCode, resultData, map,
-                    ordered, sticky, false);
+                    ordered, sticky, false, onlySendToCaller);
             if (DEBUG_BROADCAST) Slog.v(
                     TAG, "Enqueueing parallel broadcast " + r);
             final boolean replaced = replacePending && queue.replaceParallelBroadcastLocked(r);
@@ -13132,7 +13177,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             BroadcastRecord r = new BroadcastRecord(queue, intent, callerApp,
                     callerPackage, callingPid, callingUid, requiredPermission,
                     receivers, resultTo, resultCode, resultData, map, ordered,
-                    sticky, false);
+                    sticky, false, onlySendToCaller);
             if (DEBUG_BROADCAST) Slog.v(
                     TAG, "Enqueueing ordered broadcast " + r
                     + ": prev had " + queue.mOrderedBroadcasts.size());

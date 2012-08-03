@@ -62,6 +62,7 @@ package android {
     field public static final java.lang.String INJECT_EVENTS = "android.permission.INJECT_EVENTS";
     field public static final java.lang.String INSTALL_LOCATION_PROVIDER = "android.permission.INSTALL_LOCATION_PROVIDER";
     field public static final java.lang.String INSTALL_PACKAGES = "android.permission.INSTALL_PACKAGES";
+    field public static final java.lang.String INTERACT_ACROSS_USERS = "android.permission.INTERACT_ACROSS_USERS";
     field public static final java.lang.String INTERNAL_SYSTEM_WINDOW = "android.permission.INTERNAL_SYSTEM_WINDOW";
     field public static final java.lang.String INTERNET = "android.permission.INTERNET";
     field public static final java.lang.String KILL_BACKGROUND_PROCESSES = "android.permission.KILL_BACKGROUND_PROCESSES";
@@ -893,6 +894,7 @@ package android {
     field public static final int shownWeekCount = 16843585; // 0x1010341
     field public static final int shrinkColumns = 16843082; // 0x101014a
     field public static final deprecated int singleLine = 16843101; // 0x101015d
+    field public static final int singleUser = 16843711; // 0x10103bf
     field public static final int smallIcon = 16843422; // 0x101029e
     field public static final int smallScreens = 16843396; // 0x1010284
     field public static final int smoothScrollbar = 16843313; // 0x1010231
@@ -5317,6 +5319,7 @@ package android.content {
     method public abstract void revokeUriPermission(android.net.Uri, int);
     method public abstract void sendBroadcast(android.content.Intent);
     method public abstract void sendBroadcast(android.content.Intent, java.lang.String);
+    method public void sendBroadcastToUser(android.content.Intent, int);
     method public abstract void sendOrderedBroadcast(android.content.Intent, java.lang.String);
     method public abstract void sendOrderedBroadcast(android.content.Intent, java.lang.String, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
     method public abstract void sendStickyBroadcast(android.content.Intent);
@@ -6700,6 +6703,7 @@ package android.content.pm {
     method public void dump(android.util.Printer, java.lang.String);
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int FLAG_ISOLATED_PROCESS = 2; // 0x2
+    field public static final int FLAG_SINGLE_USER = 4; // 0x4
     field public static final int FLAG_STOP_WITH_TASK = 1; // 0x1
     field public int flags;
     field public java.lang.String permission;

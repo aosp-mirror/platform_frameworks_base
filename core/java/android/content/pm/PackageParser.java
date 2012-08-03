@@ -2703,7 +2703,7 @@ public class PackageParser {
             return null;
         }
 
-        final boolean setExported = sa.hasValue(
+        boolean setExported = sa.hasValue(
                 com.android.internal.R.styleable.AndroidManifestService_exported);
         if (setExported) {
             s.info.exported = sa.getBoolean(
@@ -2728,6 +2728,18 @@ public class PackageParser {
                 com.android.internal.R.styleable.AndroidManifestService_isolatedProcess,
                 false)) {
             s.info.flags |= ServiceInfo.FLAG_ISOLATED_PROCESS;
+        }
+        if (sa.getBoolean(
+                com.android.internal.R.styleable.AndroidManifestService_singleUser,
+                false)) {
+            s.info.flags |= ServiceInfo.FLAG_SINGLE_USER;
+            if (s.info.exported) {
+                Slog.w(TAG, "Service exported request ignored due to singleUser: "
+                        + s.className + " at " + mArchiveSourcePath + " "
+                        + parser.getPositionDescription());
+                s.info.exported = false;
+            }
+            setExported = true;
         }
 
         sa.recycle();

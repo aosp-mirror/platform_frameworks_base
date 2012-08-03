@@ -896,7 +896,7 @@ public class AccountManagerService
     private void sendAccountsChangedBroadcast(int userId) {
         Log.i(TAG, "the accounts changed, sending broadcast of "
                 + ACCOUNTS_CHANGED_INTENT.getAction());
-        mContext.sendBroadcast(ACCOUNTS_CHANGED_INTENT, userId);
+        mContext.sendBroadcastToUser(ACCOUNTS_CHANGED_INTENT, userId);
     }
 
     public void clearPassword(Account account) {

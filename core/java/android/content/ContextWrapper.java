@@ -312,10 +312,9 @@ public class ContextWrapper extends Context {
         mBase.sendBroadcast(intent);
     }
 
-    /** @hide */
     @Override
-    public void sendBroadcast(Intent intent, int userId) {
-        mBase.sendBroadcast(intent, userId);
+    public void sendBroadcastToUser(Intent intent, int userId) {
+        mBase.sendBroadcastToUser(intent, userId);
     }
 
     @Override
