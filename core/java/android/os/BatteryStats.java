@@ -1705,7 +1705,7 @@ public abstract class BatteryStats implements Parcelable {
             
             if (u.hasUserActivity()) {
                 boolean hasData = false;
-                for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
+                for (int i=0; i<Uid.NUM_USER_ACTIVITY_TYPES; i++) {
                     int val = u.getUserActivityCount(i, which);
                     if (val != 0) {
                         if (!hasData) {
