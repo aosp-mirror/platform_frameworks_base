@@ -217,6 +217,14 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"อนุญาตให้แอปพลิเคชันรับและประมวลผลข้อความ WAP การอนุญาตนี้รวมถึงความสามารถในการตรวจสอบหรือลบข้อความที่ส่งมาให้คุณโดยไม่ต้องแสดงให้คุณเห็น"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"เรียกแอปพลิเคชันที่ทำงานอยู่"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"อนุญาตให้แอปพลิเคชันเรียกดูข้อมูลเกี่ยวกับงานที่ดำเนินการอยู่ในขณะนี้และเมื่อเร็วๆ นี้ ซึ่งอาจทำให้แอปพลิเคชันสามารถค้นข้อมูลได้ว่าอุปกรณ์นี้ใช้แอปพลิเคชันใดบ้าง"</string>
+    <!-- no translation found for permlab_interactAcrossUsers (7114255281944211682) -->
+    <skip />
+    <!-- no translation found for permdesc_interactAcrossUsers (364670963623385786) -->
+    <skip />
+    <!-- no translation found for permlab_interactAcrossUsersFull (2567734285545074105) -->
+    <skip />
+    <!-- no translation found for permdesc_interactAcrossUsersFull (376841368395502366) -->
+    <skip />
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"ดึงรายละเอียดของแอปที่ทำงานอยู่"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"อนุญาตให้แอปพลิเคชันดึงข้อมูลเกี่ยวกับงานที่กำลังเรียกใช้อยู่ในปัจจุบันและงานล่าสุด แอปพลิเคชันที่เป็นอันตรายอาจค้นพบข้อมูลเฉพาะตัวเกี่ยวกับแอปพลิเคชันอื่นๆ"</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"จัดลำดับแอปพลิเคชันที่ทำงานอยู่ใหม่"</string>
@@ -1301,4 +1309,6 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"ระบบ"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"เสียงบลูทูธ"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"เสร็จสิ้น"</string>
+    <!-- no translation found for media_route_button_content_description (5758553567065145276) -->
+    <skip />
 </resources>
