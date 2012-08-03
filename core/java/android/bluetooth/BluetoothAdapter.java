@@ -1246,10 +1246,8 @@ public final class BluetoothAdapter {
      * @hide
      */
     public boolean enableNoAutoConnect() {
-        try {
-            return mService.enableNoAutoConnect();
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return false;
+        // TODO avoid auto-connect in the new stack.
+        return enable();
     }
 
     /**
