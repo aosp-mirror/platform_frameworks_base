@@ -145,8 +145,7 @@ static void nativeSetPowerState(JNIEnv* env,
 
 static void nativeStartSurfaceFlingerAnimation(JNIEnv* env,
         jobject obj, jint mode) {
-    sp<ISurfaceComposer> s(ComposerService::getComposerService());
-    s->turnElectronBeamOff(mode);
+    // this is not handled by surfaceflinger anymore
 }
 
 static void nativeAcquireWakeLock(JNIEnv *env, jobject clazz, jint lock, jstring idObj) {
