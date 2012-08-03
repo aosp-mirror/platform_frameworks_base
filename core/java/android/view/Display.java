@@ -287,11 +287,6 @@ public final class Display {
             updateDisplayInfoLocked();
             mDisplayInfo.getAppMetrics(outMetrics, mCompatibilityInfo);
         }
-
-        final CompatibilityInfo ci = mCompatibilityInfo.getIfNeeded();
-        if (ci != null) {
-            ci.applyToDisplayMetrics(outMetrics);
-        }
     }
 
     /**
