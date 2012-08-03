@@ -55,6 +55,10 @@ public interface IActivityManager extends IInterface {
             Intent intent, String resolvedType, IBinder resultTo, String resultWho,
             int requestCode, int flags, String profileFile,
             ParcelFileDescriptor profileFd, Bundle options) throws RemoteException;
+    public int startActivityAsUser(IApplicationThread caller,
+            Intent intent, String resolvedType, IBinder resultTo, String resultWho,
+            int requestCode, int flags, String profileFile,
+            ParcelFileDescriptor profileFd, Bundle options, int userId) throws RemoteException;
     public WaitResult startActivityAndWait(IApplicationThread caller,
             Intent intent, String resolvedType, IBinder resultTo, String resultWho,
             int requestCode, int flags, String profileFile,
@@ -102,7 +106,7 @@ public interface IActivityManager extends IInterface {
     public List getTasks(int maxNum, int flags,
                          IThumbnailReceiver receiver) throws RemoteException;
     public List<ActivityManager.RecentTaskInfo> getRecentTasks(int maxNum,
-            int flags) throws RemoteException;
+            int flags, int userId) throws RemoteException;
     public ActivityManager.TaskThumbnails getTaskThumbnails(int taskId) throws RemoteException;
     public List getServices(int maxNum, int flags) throws RemoteException;
     public List<ActivityManager.ProcessErrorStateInfo> getProcessesInErrorState()
@@ -606,4 +610,5 @@ public interface IActivityManager extends IInterface {
     int GET_LAUNCHED_FROM_UID_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+149;
     int UNSTABLE_PROVIDER_DIED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+150;
     int IS_INTENT_SENDER_AN_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+151;
+    int START_ACTIVITY_AS_USER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+152;
 }

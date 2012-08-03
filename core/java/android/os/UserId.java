@@ -27,7 +27,12 @@ public final class UserId {
      */
     public static final int PER_USER_RANGE = 100000;
 
+    /** A user id to indicate all users on the device */
     public static final int USER_ALL = -1;
+
+    /** A user id to indicate the currently active user */
+    public static final int USER_CURRENT = -2;
+
 
     /**
      * Enable multi-user related side effects. Set this to false if there are problems with single

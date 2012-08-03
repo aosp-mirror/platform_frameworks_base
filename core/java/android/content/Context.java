@@ -851,6 +851,18 @@ public abstract class Context {
     public abstract void startActivity(Intent intent);
 
     /**
+     * Same as {@link #startActivity(Intent)}, but for a specific user. It requires holding
+     * the {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL} permission.
+     * @param intent The description of the activity to start.
+     * @param userId The user id of the user to start this activity for.
+     * @throws ActivityNotFoundException
+     * @hide
+     */
+    public void startActivityAsUser(Intent intent, int userId) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
      * Launch a new activity.  You will not receive any information about when
      * the activity exits.
      *
