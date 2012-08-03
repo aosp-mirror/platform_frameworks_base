@@ -62,6 +62,9 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
     /** All the DisplayInfos in the system indexed by deviceId */
     private final SparseArray<DisplayInfo> mDisplayInfos = new SparseArray<DisplayInfo>();
 
+    private final ArrayList<DisplayCallback> mCallbacks =
+            new ArrayList<DisplayManagerService.DisplayCallback>();
+
     public DisplayManagerService() {
         mHeadless = SystemProperties.get(SYSTEM_HEADLESS).equals("1");
         registerDefaultDisplayAdapter();
@@ -131,8 +134,20 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
      * @param adapter The wrapper for information associated with the physical display.
      */
     public void registerDisplayAdapter(DisplayAdapter adapter) {
+
+        int displayId;
+        DisplayCallback[] callbacks;
+
         synchronized (mLock) {
-            int displayId = mDisplayIdSeq++;
+            displayId = mDisplayIdSeq;
+            do {
+                // Find the next unused displayId. (Pretend like it might ever wrap around).
+                mDisplayIdSeq++;
+                if (mDisplayIdSeq < 0) {
+                    mDisplayIdSeq = Display.DEFAULT_DISPLAY + 1;
+                }
+            } while (mDisplayInfos.get(mDisplayIdSeq) != null);
+
             adapter.setDisplayId(displayId);
 
             createDisplayInfoLocked(displayId, adapter);
@@ -142,6 +157,11 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
             mLogicalToPhysicals.put(displayId, list);
 
             mDisplayAdapters.add(adapter);
+            callbacks = mCallbacks.toArray(new DisplayCallback[mCallbacks.size()]);
+        }
+
+        for (int i = callbacks.length - 1; i >= 0; i--) {
+            callbacks[i].displayAdded(displayId);
         }
 
         // TODO: Notify SurfaceFlinger of new addition.
@@ -188,7 +208,6 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
                 list = new ArrayList<DisplayAdapter>();
                 mLogicalToPhysicals.put(displayId, list);
             }
-
             list.add(adapter);
             adapter.setDisplayId(displayId);
         }
@@ -217,6 +236,20 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
         }
 
         // TODO: Notify SurfaceFlinger of removal.
+    }
+
+    public void registerDisplayCallback(final DisplayCallback callback) {
+        synchronized (mLock) {
+            if (!mCallbacks.contains(callback)) {
+                mCallbacks.add(callback);
+            }
+        }
+    }
+
+    public void unregisterDisplayCallback(final DisplayCallback callback) {
+        synchronized (mLock) {
+            mCallbacks.remove(callback);
+        }
     }
 
     /**
@@ -288,11 +321,17 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
 
         DisplayDeviceInfo info = new DisplayDeviceInfo();
         for (DisplayAdapter adapter : mDisplayAdapters) {
-            pw.println("Display for adapter " + adapter.getName());
+            pw.println("Display for adapter " + adapter.getName()
+                + " assigned to Display " + adapter.getDisplayId());
             DisplayDevice device = adapter.getDisplayDevice();
             pw.print("  ");
             device.getInfo(info);
             pw.println(info);
         }
+    }
+
+    public interface DisplayCallback {
+        public void displayAdded(int displayId);
+        public void displayRemoved(int displayId);
     }
 }
