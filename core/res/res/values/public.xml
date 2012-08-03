@@ -3660,7 +3660,7 @@
   <public type="style" name="Widget.DeviceDefault.Light.MediaRouteButton" id="0x010301d8" />
 
 <!-- ===============================================================
-     Resources added in version 17 of the platform (Jelly Bean MRx?)
+     Resources added in version 17 of the platform (Jelly Bean MR1)
      =============================================================== -->
   <eat-comment />
   <public type="attr" name="supportsRtl" />
@@ -3679,5 +3679,6 @@
   <public type="attr" name="layout_alignParentEnd" />
   <public type="attr" name="listPreferredItemPaddingStart" />
   <public type="attr" name="listPreferredItemPaddingEnd" />
-
+  <public type="attr" name="singleUser" />
+  
 </resources>

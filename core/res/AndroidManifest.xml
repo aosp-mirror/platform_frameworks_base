@@ -760,6 +760,25 @@
         android:label="@string/permlab_getTasks"
         android:description="@string/permdesc_getTasks" />
 
+    <!-- Allows an application to call APIs that allow it to do interactions
+         across the users on the device, using singleton services and
+         user-targeted broadcasts.  This permission is not available to
+         third party applications. -->
+    <permission android:name="android.permission.INTERACT_ACROSS_USERS"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:protectionLevel="signature|system|development"
+        android:label="@string/permlab_interactAcrossUsers"
+        android:description="@string/permdesc_interactAcrossUsers" />
+
+    <!-- @hide Fuller form of {@link android.Manifest.permission#INTERACT_ACROSS_USERS}
+         that removes restrictions on where broadcasts can be sent and allows other
+         types of interactions. -->
+    <permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:protectionLevel="signature"
+        android:label="@string/permlab_interactAcrossUsersFull"
+        android:description="@string/permdesc_interactAcrossUsersFull" />
+
     <!-- Allows an application to get full detailed information about
          recently running tasks, with full fidelity to the real state.
          @hide -->

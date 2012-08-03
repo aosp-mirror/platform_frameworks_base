@@ -966,9 +966,8 @@ class ContextImpl extends Context {
         }
     }
 
-    /** @hide */
     @Override
-    public void sendBroadcast(Intent intent, int userId) {
+    public void sendBroadcastToUser(Intent intent, int userId) {
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
         try {
             intent.setAllowFds(false);

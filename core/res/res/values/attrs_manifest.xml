@@ -1275,6 +1275,16 @@
              that is isolated from the rest of the system.  The only communication
              with it is through the Service API (binding and starting). -->
         <attr name="isolatedProcess" format="boolean" />
+        <!-- If set to true, a single instance of this service will run for
+             all users.  That instance will run as user 0, the default/primary
+             user.  When the app running in processes for other users interacts
+             with this service (by binding to it, starting it, etc) they will
+             always interact with the instance running for user 0.  Enabling
+             single user mode forces "exported" of the service to be false, to
+             avoid introducing multi-user security bugs.  You must hold the
+             permission {@link android.Manifest.permission#INTERACT_ACROSS_USERS} in order
+             to use this feature. -->
+        <attr name="singleUser" format="boolean" />
     </declare-styleable>
     
     <!-- The <code>receiver</code> tag declares an
