@@ -1,11 +1,16 @@
 <HTML>
 <BODY>
+<p>
 The widget package contains (mostly visual) UI elements to use
-on your Application screen. You can design your own <p>
+on your Application screen. You can also design your own.
+</p>
+
+<p>
 To create your own widget, extend {@link android.view.View} or a subclass. To
 use your widget in layout XML, there are two additional files for you to
 create. Here is a list of files you'll need to create to implement a custom
 widget:
+</p>
 <ul>
 <li><b>Java implementation file</b> - This is the file that implements the
 behavior of the widget. If you can instantiate the object from layout XML,
@@ -19,14 +24,16 @@ another in their layout XML.</li>
 res/layout/ that describes the layout of your widget. You could also do
 this in code in your Java file.</li>
 </ul>
+
+<p>
 ApiDemos sample application has an example of creating a custom layout XML
 tag, LabelView. See the following files that demonstrate implementing and using
-a custom widget:</p>
+a custom widget:
+</p>
 <ul>
-    <li><strong>LabelView.java</strong> - The implentation file</li>
+    <li><strong>LabelView.java</strong> - The implementation file</li>
     <li><strong>res/values/attrs.xml</strong> - Definition file</li>
-    <li><strong>res/layout/custom_view_1.xml</strong> - Layout
-file</li>
+    <li><strong>res/layout/custom_view_1.xml</strong> - Layout file</li>
 </ul>
 </BODY>
 </HTML>
