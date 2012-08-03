@@ -217,6 +217,14 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"允許應用程式接收和處理 WAP 訊息。這項權限也能讓應用程式監控訊息，或在您閱讀訊息前擅自刪除訊息。"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"擷取執行中的應用程式"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"允許應用程式擷取最近執行工作的資訊。這項設定可讓應用程式找出裝置所用程式的相關資訊。"</string>
+    <!-- no translation found for permlab_interactAcrossUsers (7114255281944211682) -->
+    <skip />
+    <!-- no translation found for permdesc_interactAcrossUsers (364670963623385786) -->
+    <skip />
+    <!-- no translation found for permlab_interactAcrossUsersFull (2567734285545074105) -->
+    <skip />
+    <!-- no translation found for permdesc_interactAcrossUsersFull (376841368395502366) -->
+    <skip />
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"擷取執行中應用程式的詳細資訊"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"允許應用程式擷取目前及最近所執行任務的詳細資訊。請注意，惡意應用程式可能會找出其他應用程式的不公開資訊。"</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"重新排序正在執行的應用程式"</string>
@@ -1301,4 +1309,6 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"系統"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"藍牙音訊"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"完成"</string>
+    <!-- no translation found for media_route_button_content_description (5758553567065145276) -->
+    <skip />
 </resources>

@@ -217,6 +217,14 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"به برنامه اجازه می‌دهد پیام‌های WAP را دریافت و پردازش کند. این مجوز می‌تواند پیام‌های ارسالی به شما را بدون نمایش آن‌ها به شما حذف یا کنترل کند."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"بازیابی برنامه‎های در حال اجرا"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"به برنامه امکان می‌دهد اطلاعات مربوط به کارهای در حال اجرای اخیر و کنونی را بازیابی کند. این ممکن است به برنامه امکان دهد به اطلاعات مربوط به برنامه‌هایی که در دستگاه استفاده می‌شوند دست یابد."</string>
+    <!-- no translation found for permlab_interactAcrossUsers (7114255281944211682) -->
+    <skip />
+    <!-- no translation found for permdesc_interactAcrossUsers (364670963623385786) -->
+    <skip />
+    <!-- no translation found for permlab_interactAcrossUsersFull (2567734285545074105) -->
+    <skip />
+    <!-- no translation found for permdesc_interactAcrossUsersFull (376841368395502366) -->
+    <skip />
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"بازیابی جزئیات برنامه‌های در حال اجرا"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"به برنامه اجازه می‎دهد تا اطلاعات مفصلی مربوط به کارهایی که در حال حاضر و اخیراً اجرا می‎شوند را بازیابی کند. برنامه‎های مخرب می‎توانند اطلاعات شخصی مربوط به برنامه‎های دیگر را پیدا کنند."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"تنظیم مجدد ترتیب برنامه‎های در حال اجرا"</string>
@@ -1301,4 +1309,6 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"سیستم"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"بلوتوث‌های صوتی"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"انجام شد"</string>
+    <!-- no translation found for media_route_button_content_description (5758553567065145276) -->
+    <skip />
 </resources>

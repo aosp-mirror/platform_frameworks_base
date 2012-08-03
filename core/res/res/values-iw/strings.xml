@@ -217,6 +217,14 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"מאפשר ליישום לקבל ולעבד הודעות WAP. אישור זה כולל את היכולת לעקוב אחר הודעות שנשלחו אליך ולמחוק אותן מבלי להציג לך אותן."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"אחזור יישומים פעילים"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"מאפשר ליישום לאחזר מידע לגבי משימות הפועלות כרגע ושפעלו לאחרונה. ייתכן שהדבר יתיר ליישום לגלות מידע לגבי היישומים שבהם נעשה שימוש במכשיר."</string>
+    <!-- no translation found for permlab_interactAcrossUsers (7114255281944211682) -->
+    <skip />
+    <!-- no translation found for permdesc_interactAcrossUsers (364670963623385786) -->
+    <skip />
+    <!-- no translation found for permlab_interactAcrossUsersFull (2567734285545074105) -->
+    <skip />
+    <!-- no translation found for permdesc_interactAcrossUsersFull (376841368395502366) -->
+    <skip />
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"אחזור פרטי יישומים פועלים"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"מאפשר ליישום לאחזר מידע מפורט על המשימות הנוכחיות הפועלות ועל משימות שפעלו לאחרונה. יישומים זדוניים עלולים לגלות מידע אישי על יישומים אחרים."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"סידור מחדש של יישומים פעילים"</string>
@@ -1301,4 +1309,6 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"מערכת"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"אודיו Bluetooth"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"סיום"</string>
+    <!-- no translation found for media_route_button_content_description (5758553567065145276) -->
+    <skip />
 </resources>

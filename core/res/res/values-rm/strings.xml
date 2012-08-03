@@ -289,6 +289,14 @@
     <skip />
     <!-- no translation found for permdesc_getTasks (7454215995847658102) -->
     <skip />
+    <!-- no translation found for permlab_interactAcrossUsers (7114255281944211682) -->
+    <skip />
+    <!-- no translation found for permdesc_interactAcrossUsers (364670963623385786) -->
+    <skip />
+    <!-- no translation found for permlab_interactAcrossUsersFull (2567734285545074105) -->
+    <skip />
+    <!-- no translation found for permdesc_interactAcrossUsersFull (376841368395502366) -->
+    <skip />
     <!-- no translation found for permlab_getDetailedTasks (6229468674753529501) -->
     <skip />
     <!-- no translation found for permdesc_getDetailedTasks (153824741440717599) -->
@@ -2049,5 +2057,7 @@
     <!-- no translation found for bluetooth_a2dp_audio_route_name (8575624030406771015) -->
     <skip />
     <!-- no translation found for media_route_chooser_grouping_done (7966438307723317169) -->
+    <skip />
+    <!-- no translation found for media_route_button_content_description (5758553567065145276) -->
     <skip />
 </resources>
