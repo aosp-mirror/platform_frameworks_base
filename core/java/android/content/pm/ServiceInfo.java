@@ -49,6 +49,13 @@ public class ServiceInfo extends ComponentInfo
     public static final int FLAG_ISOLATED_PROCESS = 0x0002;
 
     /**
+     * Bit in {@link #flags}: If set, a single instance of the service will
+     * run for all users on the device.  Set from the
+     * {@link android.R.attr#singleUser} attribute.
+     */
+    public static final int FLAG_SINGLE_USER = 0x0004;
+
+    /**
      * Options that have been set in the service declaration in the
      * manifest.
      * These include:

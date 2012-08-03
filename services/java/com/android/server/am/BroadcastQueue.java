@@ -369,7 +369,17 @@ public class BroadcastQueue {
     private final void deliverToRegisteredReceiverLocked(BroadcastRecord r,
             BroadcastFilter filter, boolean ordered) {
         boolean skip = false;
-        if (filter.requiredPermission != null) {
+        if (r.onlySendToCaller) {
+            if (!UserId.isSameApp(r.callingUid, filter.owningUid)) {
+                Slog.w(TAG, "Permission Denial: broadcasting "
+                        + r.intent.toString()
+                        + " from " + r.callerPackage + " (pid="
+                        + r.callingPid + ", uid=" + r.callingUid + ")"
+                        + " not allowed to go to different app " + filter.owningUid);
+                skip = true;
+            }
+        }
+        if (!skip && filter.requiredPermission != null) {
             int perm = mService.checkComponentPermission(filter.requiredPermission,
                     r.callingPid, r.callingUid, -1, true);
             if (perm != PackageManager.PERMISSION_GRANTED) {
@@ -382,7 +392,7 @@ public class BroadcastQueue {
                 skip = true;
             }
         }
-        if (r.requiredPermission != null) {
+        if (!skip && r.requiredPermission != null) {
             int perm = mService.checkComponentPermission(r.requiredPermission,
                     filter.receiverList.pid, filter.receiverList.uid, -1, true);
             if (perm != PackageManager.PERMISSION_GRANTED) {
@@ -651,6 +661,17 @@ public class BroadcastQueue {
                 (ResolveInfo)nextReceiver;
 
             boolean skip = false;
+            if (r.onlySendToCaller) {
+                if (!UserId.isSameApp(r.callingUid, info.activityInfo.applicationInfo.uid)) {
+                    Slog.w(TAG, "Permission Denial: broadcasting "
+                            + r.intent.toString()
+                            + " from " + r.callerPackage + " (pid="
+                            + r.callingPid + ", uid=" + r.callingUid + ")"
+                            + " not allowed to go to different app "
+                            + info.activityInfo.applicationInfo.uid);
+                    skip = true;
+                }
+            }
             int perm = mService.checkComponentPermission(info.activityInfo.permission,
                     r.callingPid, r.callingUid, info.activityInfo.applicationInfo.uid,
                     info.activityInfo.exported);
