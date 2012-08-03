@@ -71,6 +71,18 @@ public class NotificationData {
         public boolean setUserExpanded(boolean userExpanded) {
             return NotificationData.setUserExpanded(row, userExpanded);
         }
+        /**
+         * Return whether the entry is being touched by the user.
+         */
+        public boolean userLocked() {
+            return NotificationData.getUserLocked(row);
+        }
+        /**
+         * Set the flag indicating that this is being touched by the user.
+         */
+        public boolean setUserLocked(boolean userLocked) {
+            return NotificationData.setUserLocked(row, userLocked);
+        }
     }
     private final ArrayList<Entry> mEntries = new ArrayList<Entry>();
     private final Comparator<Entry> mEntryCmp = new Comparator<Entry>() {
@@ -196,5 +208,19 @@ public class NotificationData {
      */
     public static boolean setUserExpanded(View row, boolean userExpanded) {
         return writeBooleanTag(row, R.id.user_expanded_tag, userExpanded);
+    }
+
+    /**
+     * Return whether the entry is being touched by the user.
+     */
+    public static boolean getUserLocked(View row) {
+        return readBooleanTag(row, R.id.user_lock_tag);
+    }
+
+    /**
+     * Set whether the entry is being touched by the user.
+     */
+    public static boolean setUserLocked(View row, boolean userLocked) {
+        return writeBooleanTag(row, R.id.user_lock_tag, userLocked);
     }
 }
