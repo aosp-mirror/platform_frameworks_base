@@ -217,6 +217,14 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Permite que o aplicativo receba e processe mensagens WAP. Esta permissão inclui a capacidade de monitorar ou excluir mensagens enviadas para você sem mostrá-las para você."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"recuperar aplicativos em execução"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Permite que o aplicativo obtenha informações sobre tarefas em execução atuais e recentes. Pode permitir que o aplicativo descubra informações sobre os aplicativos usados ​​no dispositivo."</string>
+    <!-- no translation found for permlab_interactAcrossUsers (7114255281944211682) -->
+    <skip />
+    <!-- no translation found for permdesc_interactAcrossUsers (364670963623385786) -->
+    <skip />
+    <!-- no translation found for permlab_interactAcrossUsersFull (2567734285545074105) -->
+    <skip />
+    <!-- no translation found for permdesc_interactAcrossUsersFull (376841368395502366) -->
+    <skip />
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"recuperar detalhes dos aplicativos em execução"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Permite que o aplicativo recupere informações detalhadas sobre tarefas executadas atual e recentemente. Aplicativos maliciosos podem descobrir informações privadas sobre outros aplicativos."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"reordenar os aplicativos em execução"</string>
@@ -1301,4 +1309,6 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Sistema"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Áudio Bluetooth"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Concluído"</string>
+    <!-- no translation found for media_route_button_content_description (5758553567065145276) -->
+    <skip />
 </resources>
