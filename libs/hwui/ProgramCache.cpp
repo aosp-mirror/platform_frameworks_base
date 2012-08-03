@@ -75,9 +75,11 @@ const char* gVS_Header_Varyings_HasGradient[6] = {
         // Linear
         "varying highp vec2 linear;\n",
         "varying highp float linear;\n",
+
         // Circular
         "varying highp vec2 circular;\n",
         "varying highp vec2 circular;\n",
+
         // Sweep
         "varying highp vec2 sweep;\n",
         "varying highp vec2 sweep;\n",
@@ -92,9 +94,11 @@ const char* gVS_Main_OutGradient[6] = {
         // Linear
         "    linear = vec2((screenSpace * position).x, 0.5);\n",
         "    linear = (screenSpace * position).x;\n",
+
         // Circular
         "    circular = (screenSpace * position).xy;\n",
         "    circular = (screenSpace * position).xy;\n",
+
         // Sweep
         "    sweep = (screenSpace * position).xy;\n",
         "    sweep = (screenSpace * position).xy;\n",
@@ -137,19 +141,24 @@ const char* gFS_Uniforms_TextureSampler =
         "uniform sampler2D sampler;\n";
 const char* gFS_Uniforms_ExternalTextureSampler =
         "uniform samplerExternalOES sampler;\n";
+#define FS_UNIFORMS_DITHER \
+        "uniform float ditherSize;\n" \
+        "uniform sampler2D ditherSampler;\n"
+#define FS_UNIFORMS_GRADIENT \
+        "uniform vec4 startColor;\n" \
+        "uniform vec4 endColor;\n"
 const char* gFS_Uniforms_GradientSampler[6] = {
         // Linear
-        "uniform sampler2D gradientSampler;\n",
-        "uniform vec4 startColor;\n"
-        "uniform vec4 endColor;\n",
+        FS_UNIFORMS_DITHER "uniform sampler2D gradientSampler;\n",
+        FS_UNIFORMS_DITHER FS_UNIFORMS_GRADIENT,
+
         // Circular
-        "uniform sampler2D gradientSampler;\n",
-        "uniform vec4 startColor;\n"
-        "uniform vec4 endColor;\n",
+        FS_UNIFORMS_DITHER "uniform sampler2D gradientSampler;\n",
+        FS_UNIFORMS_DITHER FS_UNIFORMS_GRADIENT,
+
         // Sweep
-        "uniform sampler2D gradientSampler;\n",
-        "uniform vec4 startColor;\n"
-        "uniform vec4 endColor;\n",
+        FS_UNIFORMS_DITHER "uniform sampler2D gradientSampler;\n",
+        FS_UNIFORMS_DITHER FS_UNIFORMS_GRADIENT
 };
 const char* gFS_Uniforms_BitmapSampler =
         "uniform sampler2D bitmapSampler;\n";
@@ -175,6 +184,11 @@ const char* gFS_Main =
 const char* gFS_Main_PointBitmapTexCoords =
         "    highp vec2 outBitmapTexCoords = outPointBitmapTexCoords + "
         "((gl_PointCoord - vec2(0.5, 0.5)) * textureDimension * vec2(pointSize, pointSize));\n";
+
+#define FS_MAIN_DITHER \
+        "texture2D(ditherSampler, gl_FragCoord.xy * ditherSize).a * ditherSize * ditherSize"
+const char* gFS_Main_AddDitherToGradient =
+        "    gradientColor += " FS_MAIN_DITHER ";\n";
 
 // Fast cases
 const char* gFS_Fast_SingleColor =
@@ -207,18 +221,18 @@ const char* gFS_Fast_SingleModulateA8Texture_ApplyGamma =
         "}\n\n";
 const char* gFS_Fast_SingleGradient[2] = {
         "\nvoid main(void) {\n"
-        "    gl_FragColor = texture2D(gradientSampler, linear);\n"
+        "    gl_FragColor = " FS_MAIN_DITHER " + texture2D(gradientSampler, linear);\n"
         "}\n\n",
         "\nvoid main(void) {\n"
-        "    gl_FragColor = mix(startColor, endColor, clamp(linear, 0.0, 1.0));\n"
+        "    gl_FragColor = " FS_MAIN_DITHER " + mix(startColor, endColor, clamp(linear, 0.0, 1.0));\n"
         "}\n\n"
 };
 const char* gFS_Fast_SingleModulateGradient[2] = {
         "\nvoid main(void) {\n"
-        "    gl_FragColor = color.a * texture2D(gradientSampler, linear);\n"
+        "    gl_FragColor " FS_MAIN_DITHER " + color.a * texture2D(gradientSampler, linear);\n"
         "}\n\n",
         "\nvoid main(void) {\n"
-        "    gl_FragColor = color.a * mix(startColor, endColor, clamp(linear, 0.0, 1.0));\n"
+        "    gl_FragColor " FS_MAIN_DITHER " + color.a * mix(startColor, endColor, clamp(linear, 0.0, 1.0));\n"
         "}\n\n"
 };
 
@@ -254,16 +268,21 @@ const char* gFS_Main_FetchA8Texture[2] = {
 };
 const char* gFS_Main_FetchGradient[6] = {
         // Linear
-        "    vec4 gradientColor = texture2D(gradientSampler, linear);\n",
-        "    vec4 gradientColor = mix(startColor, endColor, clamp(linear, 0.0, 1.0));\n",
+        "    highp vec4 gradientColor = texture2D(gradientSampler, linear);\n",
+
+        "    highp vec4 gradientColor = mix(startColor, endColor, clamp(linear, 0.0, 1.0));\n",
+
         // Circular
-        "    vec4 gradientColor = texture2D(gradientSampler, vec2(length(circular), 0.5));\n",
-        "    vec4 gradientColor = mix(startColor, endColor, clamp(length(circular), 0.0, 1.0));\n",
+        "    highp vec4 gradientColor = texture2D(gradientSampler, vec2(length(circular), 0.5));\n",
+
+        "    highp vec4 gradientColor = mix(startColor, endColor, clamp(length(circular), 0.0, 1.0));\n",
+
         // Sweep
         "    highp float index = atan(sweep.y, sweep.x) * 0.15915494309; // inv(2 * PI)\n"
-        "    vec4 gradientColor = texture2D(gradientSampler, vec2(index - floor(index), 0.5));\n",
+        "    highp vec4 gradientColor = texture2D(gradientSampler, vec2(index - floor(index), 0.5));\n",
+
         "    highp float index = atan(sweep.y, sweep.x) * 0.15915494309; // inv(2 * PI)\n"
-        "    vec4 gradientColor = mix(startColor, endColor, clamp(index - floor(index), 0.0, 1.0));\n"
+        "    highp vec4 gradientColor = mix(startColor, endColor, clamp(index - floor(index), 0.0, 1.0));\n"
 };
 const char* gFS_Main_FetchBitmap =
         "    vec4 bitmapColor = texture2D(bitmapSampler, outBitmapTexCoords);\n";
@@ -651,6 +670,7 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
         }
         if (description.hasGradient) {
             shader.append(gFS_Main_FetchGradient[gradientIndex(description)]);
+            shader.append(gFS_Main_AddDitherToGradient);
         }
         if (description.hasBitmap) {
             if (description.isPoint) {

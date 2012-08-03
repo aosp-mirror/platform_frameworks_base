@@ -19,6 +19,7 @@ package com.android.test.hwui;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Shader;
@@ -111,6 +112,14 @@ public class GradientStopsActivity extends Activity {
 
             canvas.translate(0.0f, 75.0f);
             canvas.drawRect(0.0f, 0.0f, 768.0f, 50.0f, paint);
+
+            gradient = new LinearGradient(0.0f, 0.0f, 512.0f, 0.0f,
+                    colors, null, Shader.TileMode.CLAMP);
+
+            paint.setShader(gradient);
+
+            canvas.translate(0.0f, 75.0f);
+            canvas.drawRect(0.0f, 0.0f, 512.0f, 50.0f, paint);
         }
     }
 }

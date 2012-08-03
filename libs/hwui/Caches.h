@@ -38,6 +38,7 @@
 #include "TextDropShadowCache.h"
 #include "FboCache.h"
 #include "ResourceCache.h"
+#include "Dither.h"
 
 namespace android {
 namespace uirenderer {
@@ -250,6 +251,7 @@ public:
     TextDropShadowCache dropShadowCache;
     FboCache fboCache;
     ResourceCache resourceCache;
+    Dither dither;
 
     GammaFontRenderer* fontRenderer;
 

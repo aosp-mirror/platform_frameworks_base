@@ -252,6 +252,7 @@ void Caches::flush(FlushMode mode) {
             dropShadowCache.clear();
             gradientCache.clear();
             fontRenderer->clear();
+            dither.clear();
             // fall through
         case kFlushMode_Moderate:
             fontRenderer->flush();
