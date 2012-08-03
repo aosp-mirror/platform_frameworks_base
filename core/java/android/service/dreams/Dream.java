@@ -1,26 +1,31 @@
 /**
- * 
+ * Copyright (C) 2012 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package android.service.dreams;
-
-import com.android.internal.policy.PolicyManager;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.graphics.drawable.ColorDrawable;
-import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Slog;
 import android.view.ActionMode;
-import android.view.IWindowManager;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -28,14 +33,14 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.accessibility.AccessibilityEvent;
-import android.view.WindowManager;
-import android.view.WindowManagerImpl;
+
+import com.android.internal.policy.PolicyManager;
 
 /**
- * @hide
- *
+ *  Extend this class to implement a custom screensaver.
  */
 public class Dream extends Service implements Window.Callback {
     private final static boolean DEBUG = true;
@@ -61,7 +66,7 @@ public class Dream extends Service implements Window.Callback {
     final Handler mHandler = new Handler();
     
     boolean mFinished = false;
-    
+
     // begin Window.Callback methods
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
@@ -210,19 +215,14 @@ public class Dream extends Service implements Window.Callback {
 
         mSandman = IDreamManager.Stub.asInterface(ServiceManager.getService("dreams"));
     }
-    
+
     /**
-     * Called when this Dream is started. Place your initialization here.
-     * 
-     * Subclasses must call through to the superclass implementation.
-     * 
-     * XXX(dsandler) Might want to make this final and have a different method for clients to override 
+     * Called when this Dream is started.
      */
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        return super.onStartCommand(intent, flags, startId);
+    public void onStart() {
+        // hook for subclasses
     }
-    
+
    /**
      * Inflate a layout resource and set it to be the content view for this Dream.
      * Behaves similarly to {@link android.app.Activity#setContentView(int)}.
@@ -351,9 +351,12 @@ public class Dream extends Service implements Window.Callback {
             @Override
             public void run() {
                 if (DEBUG) Slog.v(TAG, "Dream window added on thread " + Thread.currentThread().getId());
-                
+
                 getWindowManager().addView(mWindow.getDecorView(), mWindow.getAttributes());
-            }});        
+
+                // start it up
+                onStart();
+            }});
     }
     
     /**

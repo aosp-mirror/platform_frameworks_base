@@ -1132,7 +1132,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     com.android.internal.R.bool.config_enableDreams);
             
             mScreenSaverEnabledByUser = 0 != Settings.Secure.getInt(resolver,
-                    Settings.Secure.SCREENSAVER_ENABLED, 1);
+                    Settings.Secure.SCREENSAVER_ENABLED, 0);
 
             if (SEPARATE_TIMEOUT_FOR_SCREEN_SAVER) {
                 mScreenSaverTimeout = Settings.Secure.getInt(resolver,
@@ -4076,7 +4076,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (dm == null) return;
             
             try {
-                if (localLOGV) Log.v(TAG, "startScreenSaver: awakening...");
+                if (!dm.isDreaming()) return;
+
+                if (localLOGV) Log.v(TAG, "stopScreenSaver: awakening...");
                 
                 dm.awaken();
             } catch (RemoteException ex) {

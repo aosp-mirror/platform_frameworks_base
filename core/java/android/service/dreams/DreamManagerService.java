@@ -114,9 +114,17 @@ public class DreamManagerService
         if (DEBUG) Slog.v(TAG, "awaken()");
         synchronized (mLock) {
             if (mCurrentDream != null) {
+                if (DEBUG) Slog.v(TAG, "disconnecting: " +  mCurrentDreamComponent + " service: " + mCurrentDream);
                 mContext.unbindService(this);
+                mCurrentDream = null;
+                mCurrentDreamToken = null;
             }
         }
+    }
+
+    // IDreamManager method
+    public boolean isDreaming() {
+        return mCurrentDream != null;
     }
 
     public void bindDreamComponentL(ComponentName componentName, boolean test) {
@@ -129,11 +137,7 @@ public class DreamManagerService
                 Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
                 )
             .putExtra("android.dreams.TEST", test);
-        
-        if (!mContext.bindService(intent, this, Context.BIND_AUTO_CREATE)) {
-            Slog.w(TAG, "unable to bind service: " + componentName);
-            return;
-        }
+
         mCurrentDreamComponent = componentName;
         mCurrentDreamToken = new Binder();
         try {
@@ -145,6 +149,9 @@ public class DreamManagerService
             Slog.w(TAG, "Unable to add window token. Proceed at your own risk.");
         }
         
+        if (!mContext.bindService(intent, this, Context.BIND_AUTO_CREATE)) {
+            Slog.w(TAG, "unable to bind service: " + componentName);
+        }
     }
 
     @Override
@@ -163,8 +170,7 @@ public class DreamManagerService
     @Override
     public void onServiceDisconnected(ComponentName name) {
         if (DEBUG) Slog.v(TAG, "disconnected: " + name + " service: " + mCurrentDream);
-        mCurrentDream = null;
-        mCurrentDreamToken = null;
+        // Only happens in exceptional circumstances
     }
     
     @Override

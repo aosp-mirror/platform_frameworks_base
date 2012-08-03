@@ -852,7 +852,7 @@
     <string name="config_wimaxStateTrackerClassname" translatable="false"></string>
 
     <!-- enable screen saver feature -->
-    <bool name="config_enableDreams">false</bool>
+    <bool name="config_enableDreams">true</bool>
     <!-- Name of screensaver components to look for if none has been chosen by the user -->
     <string name="config_defaultDreamComponent" translatable="false">com.google.android.deskclock/com.android.deskclock.Screensaver</string>
 
