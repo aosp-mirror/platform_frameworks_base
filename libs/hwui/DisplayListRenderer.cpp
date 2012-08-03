@@ -595,10 +595,13 @@ void DisplayList::output(OpenGLRenderer& renderer, uint32_t level) {
             break;
             case DrawText: {
                 getText(&text);
-                int count = getInt();
-                int positionsCount = 0;
+                int32_t count = getInt();
+                float x = getFloat();
+                float y = getFloat();
+                int32_t positionsCount = 0;
                 float* positions = getFloats(positionsCount);
                 SkPaint* paint = getPaint(renderer);
+                float length = getFloat();
                 ALOGD("%s%s %s, %d, %d, %p", (char*) indent, OP_NAMES[op],
                         text.text(), text.length(), count, paint);
             }
