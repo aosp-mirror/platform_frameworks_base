@@ -6568,6 +6568,7 @@ public class WindowManagerService extends IWindowManager.Stub
             displayInfo.rotation = mRotation;
             displayInfo.logicalWidth = dw;
             displayInfo.logicalHeight = dh;
+            displayInfo.logicalDensityDpi = displayContent.mBaseDisplayDensity;
             displayInfo.appWidth = appWidth;
             displayInfo.appHeight = appHeight;
             displayInfo.getLogicalMetrics(mRealDisplayMetrics, null);
@@ -6594,7 +6595,7 @@ public class WindowManagerService extends IWindowManager.Stub
             config.compatScreenWidthDp = (int)(config.screenWidthDp / mCompatibleScreenScale);
             config.compatScreenHeightDp = (int)(config.screenHeightDp / mCompatibleScreenScale);
             config.compatSmallestScreenWidthDp = computeCompatSmallestWidth(rotated, dm, dw, dh);
-            config.densityDpi = mDisplayMetrics.densityDpi;
+            config.densityDpi = displayContent.mBaseDisplayDensity;
 
             // Update the configuration based on available input devices, lid switch,
             // and platform configuration.
@@ -6902,8 +6903,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     info.width, info.height);
             mInputManager.setDisplayOrientation(Display.DEFAULT_DISPLAY,
                     mDisplay.getRotation(), Surface.ROTATION_0);
-            mPolicy.setInitialDisplaySize(mDisplay,
-                    displayContent.mInitialDisplayWidth, displayContent.mInitialDisplayHeight);
+            mPolicy.setInitialDisplaySize(mDisplay, displayContent.mInitialDisplayWidth,
+                    displayContent.mInitialDisplayHeight, displayContent.mInitialDisplayDensity);
         }
     }
 
@@ -6917,8 +6918,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 mDisplayManager.getDisplayInfo(displayId, displayInfo);
                 displayContent.mInitialDisplayWidth = displayInfo.logicalWidth;
                 displayContent.mInitialDisplayHeight = displayInfo.logicalHeight;
+                displayContent.mInitialDisplayDensity = displayInfo.logicalDensityDpi;
                 displayContent.mBaseDisplayWidth = displayContent.mInitialDisplayWidth;
                 displayContent.mBaseDisplayHeight = displayContent.mInitialDisplayHeight;
+                displayContent.mBaseDisplayDensity = displayContent.mInitialDisplayDensity;
             }
         }
 
@@ -6928,7 +6931,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         synchronized (mWindowMap) {
-            readForcedDisplaySizeLocked(getDisplayContent(displayId));
+            readForcedDisplaySizeAndDensityLocked(getDisplayContent(displayId));
         }
     }
 
@@ -7590,24 +7593,49 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private void readForcedDisplaySizeLocked(final DisplayContent displayContent) {
-        final String str = Settings.Secure.getString(mContext.getContentResolver(),
+    private void readForcedDisplaySizeAndDensityLocked(final DisplayContent displayContent) {
+        boolean changed = false;
+        final String sizeStr = Settings.Secure.getString(mContext.getContentResolver(),
                 Settings.Secure.DISPLAY_SIZE_FORCED);
-        if (str == null || str.length() == 0) {
-            return;
+        if (sizeStr != null && sizeStr.length() > 0) {
+            final int pos = sizeStr.indexOf(',');
+            if (pos > 0 && sizeStr.lastIndexOf(',') == pos) {
+                int width, height;
+                try {
+                    width = Integer.parseInt(sizeStr.substring(0, pos));
+                    height = Integer.parseInt(sizeStr.substring(pos+1));
+                    synchronized(displayContent.mDisplaySizeLock) {
+                        if (displayContent.mBaseDisplayWidth != width
+                                || displayContent.mBaseDisplayHeight != height) {
+                            changed = true;
+                            Slog.i(TAG, "FORCED DISPLAY SIZE: " + width + "x" + height);
+                            displayContent.mBaseDisplayWidth = width;
+                            displayContent.mBaseDisplayHeight = height;
+                        }
+                    }
+                } catch (NumberFormatException ex) {
+                }
+            }
         }
-        final int pos = str.indexOf(',');
-        if (pos <= 0 || str.lastIndexOf(',') != pos) {
-            return;
+        final String densityStr = Settings.Secure.getString(mContext.getContentResolver(),
+                Settings.Secure.DISPLAY_DENSITY_FORCED);
+        if (densityStr != null && densityStr.length() > 0) {
+            int density;
+            try {
+                density = Integer.parseInt(densityStr);
+                synchronized(displayContent.mDisplaySizeLock) {
+                    if (displayContent.mBaseDisplayDensity != density) {
+                        changed = true;
+                        Slog.i(TAG, "FORCED DISPLAY DENSITY: " + density);
+                        displayContent.mBaseDisplayDensity = density;
+                    }
+                }
+            } catch (NumberFormatException ex) {
+            }
         }
-        int width, height;
-        try {
-            width = Integer.parseInt(str.substring(0, pos));
-            height = Integer.parseInt(str.substring(pos+1));
-        } catch (NumberFormatException ex) {
-            return;
+        if (changed) {
+            reconfigureDisplayLocked(displayContent);
         }
-        setForcedDisplaySizeLocked(displayContent, width, height);
     }
 
     private void setForcedDisplaySizeLocked(DisplayContent displayContent, int width, int height) {
@@ -7617,8 +7645,49 @@ public class WindowManagerService extends IWindowManager.Stub
             displayContent.mBaseDisplayWidth = width;
             displayContent.mBaseDisplayHeight = height;
         }
+        reconfigureDisplayLocked(displayContent);
+    }
+
+    public void clearForcedDisplaySize(int displayId) {
+        synchronized(mWindowMap) {
+            final DisplayContent displayContent = getDisplayContent(displayId);
+            setForcedDisplaySizeLocked(displayContent, displayContent.mInitialDisplayWidth,
+                    displayContent.mInitialDisplayHeight);
+            Settings.Secure.putString(mContext.getContentResolver(),
+                    Settings.Secure.DISPLAY_SIZE_FORCED, "");
+        }
+    }
+
+    public void setForcedDisplayDensity(int displayId, int density) {
+        synchronized(mWindowMap) {
+            final DisplayContent displayContent = getDisplayContent(displayId);
+            setForcedDisplayDensityLocked(displayContent, density);
+            Settings.Secure.putString(mContext.getContentResolver(),
+                    Settings.Secure.DISPLAY_SIZE_FORCED, Integer.toString(density));
+        }
+    }
+
+    private void setForcedDisplayDensityLocked(DisplayContent displayContent, int density) {
+        Slog.i(TAG, "Using new display density: " + density);
+
+        synchronized(displayContent.mDisplaySizeLock) {
+            displayContent.mBaseDisplayDensity = density;
+        }
+        reconfigureDisplayLocked(displayContent);
+    }
+
+    public void clearForcedDisplayDensity(int displayId) {
+        synchronized(mWindowMap) {
+            final DisplayContent displayContent = getDisplayContent(displayId);
+            setForcedDisplayDensityLocked(displayContent, displayContent.mInitialDisplayDensity);
+            Settings.Secure.putString(mContext.getContentResolver(),
+                    Settings.Secure.DISPLAY_DENSITY_FORCED, "");
+        }
+    }
+
+    private void reconfigureDisplayLocked(DisplayContent displayContent) {
         mPolicy.setInitialDisplaySize(mDisplay, displayContent.mBaseDisplayWidth,
-                displayContent.mBaseDisplayHeight);
+                displayContent.mBaseDisplayHeight, displayContent.mBaseDisplayDensity);
 
         mLayoutNeeded = true;
 
@@ -7640,16 +7709,6 @@ public class WindowManagerService extends IWindowManager.Stub
         rebuildBlackFrame();
 
         performLayoutAndPlaceSurfacesLocked();
-    }
-
-    public void clearForcedDisplaySize(int displayId) {
-        synchronized(mWindowMap) {
-            final DisplayContent displayContent = getDisplayContent(displayId);
-            setForcedDisplaySizeLocked(displayContent, displayContent.mInitialDisplayWidth,
-                    displayContent.mInitialDisplayHeight);
-            Settings.Secure.putString(mContext.getContentResolver(),
-                    Settings.Secure.DISPLAY_SIZE_FORCED, "");
-        }
     }
 
     public boolean hasSystemNavBar() {

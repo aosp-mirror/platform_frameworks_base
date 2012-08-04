@@ -964,7 +964,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    public void setInitialDisplaySize(Display display, int width, int height) {
+    public void setInitialDisplaySize(Display display, int width, int height, int density) {
         mDisplay = display;
 
         int shortSize, longSize;
@@ -1018,11 +1018,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         com.android.internal.R.dimen.navigation_bar_width);
 
         // SystemUI (status bar) layout policy
-        DisplayMetrics metrics = new DisplayMetrics();
-        mDisplay.getMetrics(metrics);
-        int shortSizeDp = shortSize
-                * DisplayMetrics.DENSITY_DEFAULT
-                / metrics.densityDpi;
+        int shortSizeDp = shortSize * DisplayMetrics.DENSITY_DEFAULT / density;
 
         if (shortSizeDp < 600) {
             // 0-599dp: "phone" UI with a separate status & navigation bar
@@ -1052,12 +1048,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // The system bar is always at the bottom.  If you are watching
             // a video in landscape, we don't need to hide it if we can still
             // show a 16:9 aspect ratio with it.
-            int longSizeDp = longSize
-                    * DisplayMetrics.DENSITY_DEFAULT
-                    / DisplayMetrics.DENSITY_DEVICE;
+            int longSizeDp = longSize * DisplayMetrics.DENSITY_DEFAULT / density;
             int barHeightDp = mNavigationBarHeightForRotation[mLandscapeRotation]
-                    * DisplayMetrics.DENSITY_DEFAULT
-                    / DisplayMetrics.DENSITY_DEVICE;
+                    * DisplayMetrics.DENSITY_DEFAULT / density;
             int aspect = ((shortSizeDp-barHeightDp) * 16) / longSizeDp;
             // We have computed the aspect ratio with the bar height taken
             // out to be 16:aspect.  If this is less than 9, then hiding

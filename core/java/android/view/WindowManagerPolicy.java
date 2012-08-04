@@ -483,7 +483,7 @@ public interface WindowManagerPolicy {
      * Called by window manager once it has the initial, default native
      * display dimensions.
      */
-    public void setInitialDisplaySize(Display display, int width, int height);
+    public void setInitialDisplaySize(Display display, int width, int height, int density);
 
     /**
      * Check permissions when adding a window.

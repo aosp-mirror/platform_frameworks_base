@@ -2794,6 +2794,13 @@ public final class Settings {
         public static final String DISPLAY_SIZE_FORCED = "display_size_forced";
 
         /**
+         * The saved value for WindowManagerService.setForcedDisplayDensity().
+         * One integer in dpi.  If unset, then use the real display density.
+         * @hide
+         */
+        public static final String DISPLAY_DENSITY_FORCED = "display_density_forced";
+
+        /**
          * Whether assisted GPS should be enabled or not.
          * @hide
          */

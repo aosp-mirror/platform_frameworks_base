@@ -167,6 +167,7 @@ public final class ActivityThread {
     AppBindData mBoundApplication;
     Profiler mProfiler;
     int mCurDefaultDisplayDpi;
+    boolean mDensityCompatMode;
     Configuration mConfiguration;
     Configuration mCompatConfiguration;
     Configuration mResConfiguration;
@@ -2733,7 +2734,8 @@ public final class ActivityThread {
 
                 // On platforms where we don't want thumbnails, set dims to (0,0)
                 if ((w > 0) && (h > 0)) {
-                    thumbnail = Bitmap.createBitmap(w, h, THUMBNAIL_FORMAT);
+                    thumbnail = Bitmap.createBitmap(r.activity.getResources().getDisplayMetrics(),
+                            w, h, THUMBNAIL_FORMAT);
                     thumbnail.eraseColor(0);
                 }
             }
@@ -3468,6 +3470,7 @@ public final class ActivityThread {
         // If there was a pending configuration change, execute it first.
         if (changedConfig != null) {
             mCurDefaultDisplayDpi = changedConfig.densityDpi;
+            updateDefaultDensity();
             handleConfigurationChanged(changedConfig, null);
         }
 
@@ -3718,6 +3721,7 @@ public final class ActivityThread {
                 if (!mPendingConfiguration.isOtherSeqNewer(config)) {
                     config = mPendingConfiguration;
                     mCurDefaultDisplayDpi = config.densityDpi;
+                    updateDefaultDensity();
                 }
                 mPendingConfiguration = null;
             }
@@ -3918,8 +3922,20 @@ public final class ActivityThread {
         } catch (RemoteException e) {
             // Ignore
         }
-    }    
-    
+    }
+
+    private void updateDefaultDensity() {
+        if (mCurDefaultDisplayDpi != Configuration.DENSITY_DPI_UNDEFINED
+                && mCurDefaultDisplayDpi != DisplayMetrics.DENSITY_DEVICE
+                && !mDensityCompatMode) {
+            Slog.i(TAG, "Switching default density from "
+                    + DisplayMetrics.DENSITY_DEVICE + " to "
+                    + mCurDefaultDisplayDpi);
+            DisplayMetrics.DENSITY_DEVICE = mCurDefaultDisplayDpi;
+            Bitmap.setDefaultDensity(DisplayMetrics.DENSITY_DEFAULT);
+        }
+    }
+
     private void handleBindApplication(AppBindData data) {
         mBoundApplication = data;
         mConfiguration = new Configuration(data.config);
@@ -3980,6 +3996,16 @@ public final class ActivityThread {
 
         data.info = getPackageInfoNoCheck(data.appInfo, data.compatInfo);
 
+        /**
+         * Switch this process to density compatibility mode if needed.
+         */
+        if ((data.appInfo.flags&ApplicationInfo.FLAG_SUPPORTS_SCREEN_DENSITIES)
+                == 0) {
+            mDensityCompatMode = true;
+            Bitmap.setDefaultDensity(DisplayMetrics.DENSITY_DEFAULT);
+        }
+        updateDefaultDensity();
+
         final ContextImpl appContext = new ContextImpl();
         appContext.init(data.info, null, this);
         final File cacheDir = appContext.getCacheDir();
@@ -4008,14 +4034,6 @@ public final class ActivityThread {
          */
         if (data.appInfo.targetSdkVersion > 9) {
             StrictMode.enableDeathOnNetwork();
-        }
-
-        /**
-         * Switch this process to density compatibility mode if needed.
-         */
-        if ((data.appInfo.flags&ApplicationInfo.FLAG_SUPPORTS_SCREEN_DENSITIES)
-                == 0) {
-            Bitmap.setDefaultDensity(DisplayMetrics.DENSITY_DEFAULT);
         }
 
         if (data.debugMode != IApplicationThread.DEBUG_OFF) {

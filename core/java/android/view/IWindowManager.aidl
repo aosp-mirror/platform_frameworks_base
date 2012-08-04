@@ -59,6 +59,8 @@ interface IWindowManager
 
     void setForcedDisplaySize(int displayId, int longDimen, int shortDimen);
     void clearForcedDisplaySize(int displayId);
+    void setForcedDisplayDensity(int displayId, int density);
+    void clearForcedDisplayDensity(int displayId);
 
     // Is the device configured to have a full system bar for larger screens?
     boolean hasSystemNavBar();
