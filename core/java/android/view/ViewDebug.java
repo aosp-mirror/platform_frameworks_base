@@ -546,7 +546,7 @@ public class ViewDebug {
                                         (view != null && view.getResources() != null) ?
                                                 view.getResources().getDisplayMetrics() : null;
                                 final Bitmap bitmap = metrics != null ?
-                                        Bitmap.createBitmap(metrics.widthPixels,
+                                        Bitmap.createBitmap(metrics, metrics.widthPixels,
                                                 metrics.heightPixels, Bitmap.Config.RGB_565) : null;
                                 final Canvas canvas = bitmap != null ? new Canvas(bitmap) : null;
                                 return new Object[] {
@@ -706,7 +706,8 @@ public class ViewDebug {
             Log.w("View", "Failed to create capture bitmap!");
             // Send an empty one so that it doesn't get stuck waiting for
             // something.
-            b = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+            b = Bitmap.createBitmap(root.getResources().getDisplayMetrics(),
+                    1, 1, Bitmap.Config.ARGB_8888);
         }
 
         BufferedOutputStream out = null;

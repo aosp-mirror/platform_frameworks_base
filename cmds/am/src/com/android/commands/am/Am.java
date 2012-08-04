@@ -133,6 +133,8 @@ public class Am {
             runScreenCompat();
         } else if (op.equals("display-size")) {
             runDisplaySize();
+        } else if (op.equals("display-density")) {
+            runDisplayDensity();
         } else if (op.equals("to-uri")) {
             runToUri(false);
         } else if (op.equals("to-intent-uri")) {
@@ -1127,6 +1129,44 @@ public class Am {
         }
     }
 
+    private void runDisplayDensity() throws Exception {
+        String densityStr = nextArgRequired();
+        int density;
+        if ("reset".equals(densityStr)) {
+            density = -1;
+        } else {
+            try {
+                density = Integer.parseInt(densityStr);
+            } catch (NumberFormatException e) {
+                System.err.println("Error: bad number " + e);
+                showUsage();
+                return;
+            }
+            if (density < 72) {
+                System.err.println("Error: density must be >= 72");
+                showUsage();
+                return;
+            }
+        }
+
+        IWindowManager wm = IWindowManager.Stub.asInterface(ServiceManager.checkService(
+                Context.WINDOW_SERVICE));
+        if (wm == null) {
+            System.err.println(NO_SYSTEM_ERROR_CODE);
+            throw new AndroidException("Can't connect to window manager; is the system running?");
+        }
+
+        try {
+            if (density > 0) {
+                // TODO(multidisplay): For now Configuration only applies to main screen.
+                wm.setForcedDisplayDensity(Display.DEFAULT_DISPLAY, density);
+            } else {
+                wm.clearForcedDisplayDensity(Display.DEFAULT_DISPLAY);
+            }
+        } catch (RemoteException e) {
+        }
+    }
+
     private void runToUri(boolean intentScheme) throws Exception {
         Intent intent = makeIntent();
         System.out.println(intent.toUri(intentScheme ? Intent.URI_INTENT_SCHEME : 0));
@@ -1301,6 +1341,7 @@ public class Am {
                 "       am monitor [--gdb <port>]\n" +
                 "       am screen-compat [on|off] <PACKAGE>\n" +
                 "       am display-size [reset|MxN]\n" +
+                "       am display-density [reset|DENSITY]\n" +
                 "       am to-uri [INTENT]\n" +
                 "       am to-intent-uri [INTENT]\n" +
                 "\n" +
@@ -1354,6 +1395,8 @@ public class Am {
                 "am screen-compat: control screen compatibility mode of <PACKAGE>.\n" +
                 "\n" +
                 "am display-size: override display size.\n" +
+                "\n" +
+                "am display-density: override display density.\n" +
                 "\n" +
                 "am to-uri: print the given Intent specification as a URI.\n" +
                 "\n" +

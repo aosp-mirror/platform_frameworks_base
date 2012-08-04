@@ -92,7 +92,7 @@ public class DisplayMetrics {
      * density for a display in {@link #densityDpi}.
      */
     @Deprecated
-    public static final int DENSITY_DEVICE = getDeviceDensity();
+    public static int DENSITY_DEVICE = getDeviceDensity();
 
     /**
      * The absolute width of the display in pixels.

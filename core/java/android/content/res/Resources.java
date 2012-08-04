@@ -89,7 +89,8 @@ public class Resources {
             = new LongSparseArray<ColorStateList>();
     private static final LongSparseArray<Drawable.ConstantState> sPreloadedColorDrawables
             = new LongSparseArray<Drawable.ConstantState>();
-    private static boolean mPreloaded;
+    private static boolean sPreloaded;
+    private static int sPreloadedDensity;
 
     /*package*/ final TypedValue mTmpValue = new TypedValue();
     /*package*/ final Configuration mTmpConfig = new Configuration();
@@ -1837,11 +1838,14 @@ public class Resources {
      */
     public final void startPreloading() {
         synchronized (mSync) {
-            if (mPreloaded) {
+            if (sPreloaded) {
                 throw new IllegalStateException("Resources already preloaded");
             }
-            mPreloaded = true;
+            sPreloaded = true;
             mPreloading = true;
+            sPreloadedDensity = DisplayMetrics.DENSITY_DEVICE;
+            mConfiguration.densityDpi = sPreloadedDensity;
+            updateConfiguration(null, null);
         }
     }
     
@@ -1855,7 +1859,24 @@ public class Resources {
             flushLayoutCache();
         }
     }
-    
+
+    private boolean verifyPreloadConfig(TypedValue value, String name) {
+        if ((value.changingConfigurations&~(ActivityInfo.CONFIG_FONT_SCALE
+                | ActivityInfo.CONFIG_DENSITY)) != 0) {
+            String resName;
+            try {
+                resName = getResourceName(value.resourceId);
+            } catch (NotFoundException e) {
+                resName = "?";
+            }
+            Log.w(TAG, "Preloaded " + name + " resource #0x"
+                    + Integer.toHexString(value.resourceId)
+                    + " (" + resName + ") that varies with configuration!!");
+            return false;
+        }
+        return true;
+    }
+
     /*package*/ Drawable loadDrawable(TypedValue value, int id)
             throws NotFoundException {
 
@@ -1879,8 +1900,10 @@ public class Resources {
             return dr;
         }
 
-        Drawable.ConstantState cs = isColorDrawable ?
-                sPreloadedColorDrawables.get(key) : sPreloadedDrawables.get(key);
+        Drawable.ConstantState cs = isColorDrawable
+                ? sPreloadedColorDrawables.get(key)
+                : (sPreloadedDensity == mConfiguration.densityDpi
+                        ? sPreloadedDrawables.get(key) : null);
         if (cs != null) {
             dr = cs.newDrawable(this);
         } else {
@@ -1948,10 +1971,12 @@ public class Resources {
             cs = dr.getConstantState();
             if (cs != null) {
                 if (mPreloading) {
-                    if (isColorDrawable) {
-                        sPreloadedColorDrawables.put(key, cs);
-                    } else {
-                        sPreloadedDrawables.put(key, cs);
+                    if (verifyPreloadConfig(value, "drawable")) {
+                        if (isColorDrawable) {
+                            sPreloadedColorDrawables.put(key, cs);
+                        } else {
+                            sPreloadedDrawables.put(key, cs);
+                        }
                     }
                 } else {
                     synchronized (mTmpValue) {
@@ -2016,7 +2041,9 @@ public class Resources {
 
             csl = ColorStateList.valueOf(value.data);
             if (mPreloading) {
-                sPreloadedColorStateLists.put(key, csl);
+                if (verifyPreloadConfig(value, "color")) {
+                    sPreloadedColorStateLists.put(key, csl);
+                }
             }
 
             return csl;
@@ -2060,7 +2087,9 @@ public class Resources {
 
         if (csl != null) {
             if (mPreloading) {
-                sPreloadedColorStateLists.put(key, csl);
+                if (verifyPreloadConfig(value, "color")) {
+                    sPreloadedColorStateLists.put(key, csl);
+                }
             } else {
                 synchronized (mTmpValue) {
                     //Log.i(TAG, "Saving cached color state list @ #" +

@@ -16,7 +16,6 @@
 
 package android.view;
 
-import android.content.res.CompatibilityInfo;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
