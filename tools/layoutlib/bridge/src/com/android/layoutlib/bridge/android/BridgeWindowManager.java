@@ -94,7 +94,11 @@ public class BridgeWindowManager implements IWindowManager {
     @Override
     public void clearForcedDisplaySize(int displayId) throws RemoteException {
         // TODO Auto-generated method stub
+    }
 
+    @Override
+    public void clearForcedDisplayDensity(int displayId) throws RemoteException {
+        // TODO Auto-generated method stub
     }
 
     @Override
@@ -327,7 +331,11 @@ public class BridgeWindowManager implements IWindowManager {
     @Override
     public void setForcedDisplaySize(int displayId, int arg0, int arg1) throws RemoteException {
         // TODO Auto-generated method stub
+    }
 
+    @Override
+    public void setForcedDisplayDensity(int displayId, int density) throws RemoteException {
+        // TODO Auto-generated method stub
     }
 
     @Override
