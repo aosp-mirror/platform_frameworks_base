@@ -3902,7 +3902,7 @@ final class ActivityStack {
             Iterator<ConnectionRecord> it = r.connections.iterator();
             while (it.hasNext()) {
                 ConnectionRecord c = it.next();
-                mService.removeConnectionLocked(c, null, r);
+                mService.mServices.removeConnectionLocked(c, null, r);
             }
             r.connections = null;
         }
