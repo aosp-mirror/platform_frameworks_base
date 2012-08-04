@@ -384,7 +384,12 @@ public class ZygoteInit {
                 Log.v(TAG, "Preloading resource #" + Integer.toHexString(id));
             }
             if (id != 0) {
-                mResources.getColorStateList(id);
+                if (mResources.getColorStateList(id) == null) {
+                    throw new IllegalArgumentException(
+                            "Unable to find preloaded color resource #0x"
+                            + Integer.toHexString(id)
+                            + " (" + ar.getString(i) + ")");
+                }
             }
         }
         return N;
@@ -407,11 +412,11 @@ public class ZygoteInit {
                 Log.v(TAG, "Preloading resource #" + Integer.toHexString(id));
             }
             if (id != 0) {
-                Drawable dr = mResources.getDrawable(id);
-                if ((dr.getChangingConfigurations()&~ActivityInfo.CONFIG_FONT_SCALE) != 0) {
-                    Log.w(TAG, "Preloaded drawable resource #0x"
+                if (mResources.getDrawable(id) == null) {
+                    throw new IllegalArgumentException(
+                            "Unable to find preloaded drawable resource #0x"
                             + Integer.toHexString(id)
-                            + " (" + ar.getString(i) + ") that varies with configuration!!");
+                            + " (" + ar.getString(i) + ")");
                 }
             }
         }

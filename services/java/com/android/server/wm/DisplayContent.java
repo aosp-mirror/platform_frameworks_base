@@ -56,8 +56,10 @@ class DisplayContent {
     final Object mDisplaySizeLock = new Object();
     int mInitialDisplayWidth = 0;
     int mInitialDisplayHeight = 0;
+    int mInitialDisplayDensity = 0;
     int mBaseDisplayWidth = 0;
     int mBaseDisplayHeight = 0;
+    int mBaseDisplayDensity = 0;
     final DisplayManagerService mDisplayManager;
     final DisplayInfo mDisplayInfo = new DisplayInfo();
 
@@ -82,16 +84,14 @@ class DisplayContent {
     public void dump(PrintWriter pw) {
         pw.print("  Display: mDisplayId="); pw.println(mDisplayId);
         pw.print("  init="); pw.print(mInitialDisplayWidth); pw.print("x");
-        pw.print(mInitialDisplayHeight);
+        pw.print(mInitialDisplayHeight); pw.print(" "); pw.print(mInitialDisplayDensity);
+        pw.print("dpi");
         if (mInitialDisplayWidth != mBaseDisplayWidth
-                || mInitialDisplayHeight != mBaseDisplayHeight) {
+                || mInitialDisplayHeight != mBaseDisplayHeight
+                || mInitialDisplayDensity != mBaseDisplayDensity) {
             pw.print(" base=");
             pw.print(mBaseDisplayWidth); pw.print("x"); pw.print(mBaseDisplayHeight);
-        }
-        if (mInitialDisplayWidth != mDisplayInfo.logicalWidth
-                || mInitialDisplayHeight != mDisplayInfo.logicalHeight) {
-            pw.print(" init="); pw.print(mInitialDisplayWidth);
-            pw.print("x"); pw.print(mInitialDisplayHeight);
+            pw.print(" "); pw.print(mBaseDisplayDensity); pw.print("dpi");
         }
         pw.print(" cur=");
         pw.print(mDisplayInfo.logicalWidth);

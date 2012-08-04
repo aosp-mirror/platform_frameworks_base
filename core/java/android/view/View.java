@@ -12402,7 +12402,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 if (bitmap != null) bitmap.recycle();
 
                 try {
-                    bitmap = Bitmap.createBitmap(width, height, quality);
+                    bitmap = Bitmap.createBitmap(mResources.getDisplayMetrics(),
+                            width, height, quality);
                     bitmap.setDensity(getResources().getDisplayMetrics().densityDpi);
                     if (autoScale) {
                         mDrawingCache = bitmap;
@@ -12494,7 +12495,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         width = (int) ((width * scale) + 0.5f);
         height = (int) ((height * scale) + 0.5f);
 
-        Bitmap bitmap = Bitmap.createBitmap(width > 0 ? width : 1, height > 0 ? height : 1, quality);
+        Bitmap bitmap = Bitmap.createBitmap(mResources.getDisplayMetrics(),
+                width > 0 ? width : 1, height > 0 ? height : 1, quality);
         if (bitmap == null) {
             throw new OutOfMemoryError();
         }
