@@ -19,29 +19,39 @@ package com.android.server.net;
 import android.net.INetworkManagementEventObserver;
 
 /**
+ * Base {@link INetworkManagementEventObserver} that provides no-op
+ * implementations which can be overridden.
+ *
  * @hide
  */
-public abstract class NetworkAlertObserver extends INetworkManagementEventObserver.Stub {
+public class BaseNetworkObserver extends INetworkManagementEventObserver.Stub {
     @Override
     public void interfaceStatusChanged(String iface, boolean up) {
-        // ignored; interface changes come through ConnectivityService
+        // default no-op
     }
 
     @Override
     public void interfaceRemoved(String iface) {
-        // ignored; interface changes come through ConnectivityService
+        // default no-op
     }
 
     @Override
     public void interfaceLinkStateChanged(String iface, boolean up) {
-        // ignored; interface changes come through ConnectivityService
+        // default no-op
     }
 
     @Override
     public void interfaceAdded(String iface) {
-        // ignored; interface changes come through ConnectivityService
+        // default no-op
     }
+
+    @Override
     public void interfaceClassDataActivityChanged(String label, boolean active) {
-        // ignored; interface changes come through ConnectivityService
+        // default no-op
+    }
+
+    @Override
+    public void limitReached(String limitName, String iface) {
+        // default no-op
     }
 }
