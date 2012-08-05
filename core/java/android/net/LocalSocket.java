@@ -16,6 +16,7 @@
 
 package android.net;
 
+import java.io.Closeable;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,7 +27,7 @@ import java.net.SocketOptions;
  * Creates a (non-server) socket in the UNIX-domain namespace. The interface
  * here is not entirely unlike that of java.net.Socket
  */
-public class LocalSocket {
+public class LocalSocket implements Closeable {
 
     private LocalSocketImpl impl;
     private volatile boolean implCreated;
@@ -167,6 +168,7 @@ public class LocalSocket {
      *
      * @throws IOException
      */
+    @Override
     public void close() throws IOException {
         implCreateIfNeeded();
         impl.close();
