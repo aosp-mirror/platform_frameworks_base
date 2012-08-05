@@ -53,6 +53,8 @@ import java.io.OutputStream;
 import java.nio.charset.Charsets;
 import java.util.Arrays;
 
+import libcore.io.IoUtils;
+
 /**
  * @hide
  */
@@ -228,11 +230,7 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
             mConnection = connection;
             mInterface = interfaze;
         } catch (RuntimeException e) {
-            try {
-                tun.close();
-            } catch (Exception ex) {
-                // ignore
-            }
+            IoUtils.closeQuietly(tun);
             throw e;
         }
         Log.i(TAG, "Established by " + config.user + " on " + mInterface);
@@ -442,11 +440,7 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
             // We assume that everything is reset after stopping the daemons.
             interrupt();
             for (LocalSocket socket : mSockets) {
-                try {
-                    socket.close();
-                } catch (Exception e) {
-                    // ignore
-                }
+                IoUtils.closeQuietly(socket);
             }
         }
 
