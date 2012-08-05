@@ -83,6 +83,7 @@ import com.android.internal.telephony.PhoneConstants;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.connectivity.Tethering;
 import com.android.server.connectivity.Vpn;
+import com.android.server.net.BaseNetworkObserver;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Sets;
 import dalvik.system.DexClassLoader;
@@ -524,6 +525,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         try {
             nmService.registerObserver(mTethering);
             nmService.registerObserver(mVpn);
+            nmService.registerObserver(mDataActivityObserver);
         } catch (RemoteException e) {
             loge("Error registering observer :" + e);
         }
@@ -534,13 +536,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         mSettingsObserver = new SettingsObserver(mHandler, EVENT_APPLY_GLOBAL_HTTP_PROXY);
         mSettingsObserver.observe(mContext);
-
-        INetworkManagementEventObserver netdObserver = new NetdObserver();
-        try {
-            mNetd.registerObserver(netdObserver);
-        } catch (RemoteException e) {
-            loge("Error registering observer :" + e);
-        }
 
         loadGlobalProxy();
     }
@@ -922,18 +917,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         return tracker != null && tracker.setRadio(turnOn);
     }
 
-    private class NetdObserver extends INetworkManagementEventObserver.Stub {
+    private INetworkManagementEventObserver mDataActivityObserver = new BaseNetworkObserver() {
+        @Override
         public void interfaceClassDataActivityChanged(String label, boolean active) {
             int deviceType = Integer.parseInt(label);
             sendDataActivityBroadcast(deviceType, active);
         }
-
-        public void interfaceStatusChanged(String iface, boolean up) {}
-        public void interfaceLinkStateChanged(String iface, boolean up) {}
-        public void interfaceAdded(String iface) {}
-        public void interfaceRemoved(String iface) {}
-        public void limitReached(String limitName, String iface) {}
-    }
+    };
 
     /**
      * Used to notice when the calling process dies so we can self-expire
