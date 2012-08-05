@@ -12446,7 +12446,7 @@ package android.net {
     method public android.net.LocalSocketAddress getLocalSocketAddress();
   }
 
-  public class LocalSocket {
+  public class LocalSocket implements java.io.Closeable {
     ctor public LocalSocket();
     method public void bind(android.net.LocalSocketAddress) throws java.io.IOException;
     method public void close() throws java.io.IOException;
