@@ -429,7 +429,7 @@ it or provide instructions. Starting in Ice Cream Sandwich, we're using secondar
     <tbody>
       <tr>
         <td class="secondary-text">
-        After 10 minutes of activity
+        After 10 minutes of inactivity
         </td>
       </tr>
     </tbody>
@@ -551,7 +551,7 @@ more direct and understandable.</p>
     <tbody>
       <tr>
         <td class="secondary-text">
-        After 10 minutes of activity
+        After 10 minutes of inactivity
         </td>
       </tr>
     </tbody>

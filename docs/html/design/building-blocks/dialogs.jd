@@ -81,7 +81,46 @@ available based on the title and the text of the action buttons.</p>
 
   </div>
 </div>
+<p>When crafting a confirmation dialog, make the title meaningful by echoing the requested action.</p>
 
+<div class="layout-content-row">
+  <div class="layout-content-col span-4">
+    <div class="do-dont-label bad">Don't</div>
+      <table class="ui-table bad">
+      <thead>
+        <tr>
+          <th class="label">
+          Are you sure?
+          </th>
+        </tr>
+      </thead>
+      </table>
+  </div>
+  <div class="layout-content-col span-4">
+    <div class="do-dont-label bad">Don't</div>
+      <table class="ui-table bad">
+      <thead>
+        <tr>
+          <th class="label">
+          Warning!
+          </th>
+        </tr>
+      </thead>
+      </table>
+  </div>
+  <div class="layout-content-col span-5">
+    <div class="do-dont-label good">Do</div>
+      <table class="ui-table good">
+      <thead>
+        <tr>
+          <th class="label">
+          Erase USB storage?
+          </th>
+        </tr>
+      </thead>
+      </table>
+  </div>
+</div>
 
 <h2 id="popups">Popups</h2>
 

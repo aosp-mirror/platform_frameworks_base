@@ -3,20 +3,15 @@ page.title=Action Bar
 
 <img src="{@docRoot}design/media/action_bar_pattern_overview.png">
 
-<p>The <em>action bar</em> is arguably the most important structural element of an Android app. It's a
-dedicated piece of real estate at the top of each screen that is generally persistent throughout the
-app.</p>
-<p><strong>The main purpose of the action bar is to</strong>:</p>
+<p>The <em>action bar</em> is a dedicated piece of real estate at the top of each screen that is generally persistent throughout the app.</p>
+<p><strong>It provides several key functions</strong>:</p>
 <ul>
-<li>Make important actions (such as <em>New</em> or <em>Search</em>, etc) prominent and accessible in a predictable
-   way.</li>
-<li>Support consistent navigation and view switching within apps.</li>
-<li>Reduce clutter by providing an action overflow for rarely used actions.</li>
-<li>Provide a dedicated space for giving your app an identity.</li>
+  <li>Makes important actions prominent and accessible in a predictable way (such as <em>New</em> or <em>Search</em>).</li>
+  <li>Supports consistent navigation and view switching within apps.</li>
+  <li>Reduces clutter by providing an action overflow for rarely used actions.</li>
+  <li>Provides a dedicated space for giving your app an identity.</li>
 </ul>
-<p>If you're new to writing Android apps, note that the action bar is one of the most important design
-elements you can implement. Following the guidelines described here will go a long way toward making
-your app's interface consistent with the core Android apps.</p>
+<p>If you're new to writing Android apps, note that the action bar is one of the most important design elements you can implement. Following the guidelines described here will go a long way toward making your app's interface consistent with the core Android apps.</p>
 <h2 id="organization">General Organization</h2>
 
 <p>The action bar is split into four different functional areas that apply to most apps.</p>
@@ -224,7 +219,7 @@ tabs. Fixed tabs in the main action bar can move to the top bar when the screen 
 <h4>Drawers</h4>
 <div class="layout-content-row">
   <div class="layout-content-col span-6">
-<p>A <em>drawer</em> is a slide-out menu that allows users to switch between views of your app. It can be opened by touching the action bar's app icon (decorated with the Up caret.) Because it relies on Up navigation, a drawer is only suitable for use at the topmost level of your app's hierarchy.</p>
+<p>A <em>drawer</em> is a slide-out menu that allows users to switch between views of your app. It can be opened by touching the action bar's app icon (decorated with the Up caret.) Additionally, a drawer can be revealed by an edge swipe from the left of the screen, and dismissed by swiping from the right edge of the drawer. However, because many users will rely on Up navigation to open a drawer, it is only suitable for use at the topmost level of your app's hierarchy.</p>
 
 <p><strong>Open a drawer from the main action bar if</strong>:</p>
 <ul>
