@@ -1612,6 +1612,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         Intent intent = new Intent(ConnectivityManager.CONNECTIVITY_ACTION);
         intent.putExtra(ConnectivityManager.EXTRA_NETWORK_INFO, info);
+        intent.putExtra(ConnectivityManager.EXTRA_NETWORK_TYPE, info.getType());
         if (info.isFailover()) {
             intent.putExtra(ConnectivityManager.EXTRA_IS_FAILOVER, true);
             info.setFailover(false);
@@ -1738,6 +1739,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private Intent makeGeneralIntent(NetworkInfo info, String bcastType) {
         Intent intent = new Intent(bcastType);
         intent.putExtra(ConnectivityManager.EXTRA_NETWORK_INFO, info);
+        intent.putExtra(ConnectivityManager.EXTRA_NETWORK_TYPE, info.getType());
         if (info.isFailover()) {
             intent.putExtra(ConnectivityManager.EXTRA_IS_FAILOVER, true);
             info.setFailover(false);
@@ -1788,6 +1790,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         Intent intent = new Intent(ConnectivityManager.CONNECTIVITY_ACTION);
         intent.putExtra(ConnectivityManager.EXTRA_NETWORK_INFO, info);
+        intent.putExtra(ConnectivityManager.EXTRA_NETWORK_TYPE, info.getType());
         if (getActiveNetworkInfo() == null) {
             intent.putExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, true);
         }
