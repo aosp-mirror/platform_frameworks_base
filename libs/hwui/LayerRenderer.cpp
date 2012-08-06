@@ -45,7 +45,6 @@ int LayerRenderer::prepareDirty(float left, float top, float right, float bottom
     const float width = mLayer->layer.getWidth();
     const float height = mLayer->layer.getHeight();
 
-#if RENDER_LAYERS_AS_REGIONS
     Rect dirty(left, top, right, bottom);
     if (dirty.isEmpty() || (dirty.left <= 0 && dirty.top <= 0 &&
             dirty.right >= width && dirty.bottom >= height)) {
@@ -58,9 +57,6 @@ int LayerRenderer::prepareDirty(float left, float top, float right, float bottom
     }
 
     return OpenGLRenderer::prepareDirty(dirty.left, dirty.top, dirty.right, dirty.bottom, opaque);
-#else
-    return OpenGLRenderer::prepareDirty(0.0f, 0.0f, width, height, opaque);
-#endif
 }
 
 void LayerRenderer::finish() {
@@ -87,14 +83,10 @@ bool LayerRenderer::hasLayer() {
 }
 
 Region* LayerRenderer::getRegion() {
-#if RENDER_LAYERS_AS_REGIONS
     if (getSnapshot()->flags & Snapshot::kFlagFboTarget) {
         return OpenGLRenderer::getRegion();
     }
     return &mLayer->region;
-#else
-    return OpenGLRenderer::getRegion();
-#endif
 }
 
 // TODO: This implementation is flawed and can generate T-junctions
@@ -105,7 +97,6 @@ Region* LayerRenderer::getRegion() {
 //       In practice, T-junctions do not appear often so this has yet
 //       to be fixed.
 void LayerRenderer::generateMesh() {
-#if RENDER_LAYERS_AS_REGIONS
     if (mLayer->region.isRect() || mLayer->region.isEmpty()) {
         if (mLayer->mesh) {
             delete mLayer->mesh;
@@ -172,7 +163,6 @@ void LayerRenderer::generateMesh() {
             indices[index + 5] = quad + 3;   // bottom-right
         }
     }
-#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -108,9 +108,7 @@ bool Patch::matches(const int32_t* xDivs, const int32_t* yDivs, const uint32_t c
 
 void Patch::updateVertices(const float bitmapWidth, const float bitmapHeight,
         float left, float top, float right, float bottom) {
-#if RENDER_LAYERS_AS_REGIONS
     if (hasEmptyQuads) quads.clear();
-#endif
 
     // Reset the vertices count here, we will count exactly how many
     // vertices we actually need when generating the quads
@@ -278,13 +276,11 @@ void Patch::generateQuad(TextureVertex*& vertex, float x1, float y1, float x2, f
         return;
     }
 
-#if RENDER_LAYERS_AS_REGIONS
     // Record all non empty quads
     if (hasEmptyQuads) {
         Rect bounds(x1, y1, x2, y2);
         quads.add(bounds);
     }
-#endif
 
     // Left triangle
     TextureVertex::set(vertex++, x1, y1, u1, v1);
