@@ -368,6 +368,14 @@ public class WifiNative {
         return doStringCommand("SIGNAL_POLL");
     }
 
+    /** Example outout:
+     * TXGOOD=396
+     * TXBAD=1
+     */
+    public String pktcntPoll() {
+        return doStringCommand("PKTCNT_POLL");
+    }
+
     public boolean startWpsPbc(String bssid) {
         if (TextUtils.isEmpty(bssid)) {
             return doBooleanCommand("WPS_PBC");
