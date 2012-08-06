@@ -150,7 +150,7 @@ any way you want, provided that you follow the guidelines described below.</p>
                 <span style="margin-left:1em;">http://play.google.com/store/search?q=<em>yourCompanyName</em></span>
                 </li>
                 <li>A list of products published by you, for example,<br />
-                <span style="margin-left:1em;">http://play.google.com/store/search?q=<em>publisherName</em>M/span>
+                <span style="margin-left:1em;">http://play.google.com/store/search?q=<em>publisherName</em></span>
                 </li>
                 <li>A specific app product details page within Google Play, for example,<br />
                 <span style="margin-left:1em;">http://play.google.com/store/apps/details?id=<em>packageName</em></span>
@@ -171,4 +171,4 @@ any way you want, provided that you follow the guidelines described below.</p>
 <h2>Other Brands</h2>
 
 <p>Any other brands or icons depicted on this site are <em>not</em> are the property of their
-repective owners and usage is reserved. You must seek the developer for appropriate permission to use them.</p>
+respective owners and usage is reserved. You must seek the developer for appropriate permission to use them.</p>
