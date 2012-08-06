@@ -68,5 +68,9 @@
 
     <!-- The length of the vibration when the notificaiotn pops open. -->
     <integer name="one_finger_pop_duration_ms">10</integer>
+
+    <!-- Whether we're using the tablet-optimized recents interface (we use this
+     value at runtime for some things) -->
+    <integer name="status_bar_recents_bg_gradient_degrees">90</integer>
 </resources>
 
