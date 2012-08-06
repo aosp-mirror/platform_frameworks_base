@@ -29,9 +29,9 @@ h2.green+hr{background:#99CC00}
 <p>Before you write a single line of code, you need to design the user interface and make it fit
 the Android user experience. Although you may know what a user will <em>do</em> with your app, you
 should pause to focus on how a user will <em>interact</em> with it. Your design should be sleek,
-simple, powereful, and tailored to the Android experience.</p>
+simple, powerful, and tailored to the Android experience.</p>
 
-<p>So whether your a one-man shop or a large team, you should study the <a
+<p>So whether you're a one-man shop or a large team, you should study the <a
 href="{@docRoot}design/index.html">Design</a> guidelines first.</p>
 </div>
 
