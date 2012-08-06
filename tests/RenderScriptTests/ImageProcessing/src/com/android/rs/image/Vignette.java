@@ -26,6 +26,9 @@ import android.widget.TextView;
 public class Vignette extends TestBase {
     private ScriptC_vignette_full mScript_full = null;
     private ScriptC_vignette_relaxed mScript_relaxed = null;
+    private ScriptC_vignette_approx_full mScript_approx_full = null;
+    private ScriptC_vignette_approx_relaxed mScript_approx_relaxed = null;
+    private final boolean approx;
     private final boolean relaxed;
     private float center_x = 0.5f;
     private float center_y = 0.5f;
@@ -33,7 +36,8 @@ public class Vignette extends TestBase {
     private float shade = 0.5f;
     private float slope = 20.0f;
 
-    public Vignette(boolean relaxed) {
+    public Vignette(boolean approx, boolean relaxed) {
+        this.approx = approx;
         this.relaxed = relaxed;
     }
 
@@ -90,7 +94,18 @@ public class Vignette extends TestBase {
     }
 
     private void do_init() {
-        if (relaxed)
+        if (approx) {
+            if (relaxed)
+                mScript_approx_relaxed.invoke_init_vignette(
+                        mInPixelsAllocation.getType().getX(),
+                        mInPixelsAllocation.getType().getY(), center_x,
+                        center_y, scale, shade, slope);
+            else
+                mScript_approx_full.invoke_init_vignette(
+                        mInPixelsAllocation.getType().getX(),
+                        mInPixelsAllocation.getType().getY(), center_x,
+                        center_y, scale, shade, slope);
+        } else if (relaxed)
             mScript_relaxed.invoke_init_vignette(
                     mInPixelsAllocation.getType().getX(),
                     mInPixelsAllocation.getType().getY(), center_x, center_y,
@@ -103,21 +118,36 @@ public class Vignette extends TestBase {
     }
 
     public void createTest(android.content.res.Resources res) {
-        if (relaxed) {
+        if (approx) {
+            if (relaxed)
+                mScript_approx_relaxed = new ScriptC_vignette_approx_relaxed(
+                        mRS, res, R.raw.vignette_approx_relaxed);
+            else
+                mScript_approx_full = new ScriptC_vignette_approx_full(
+                        mRS, res, R.raw.vignette_approx_full);
+        } else if (relaxed)
             mScript_relaxed = new ScriptC_vignette_relaxed(mRS, res,
                     R.raw.vignette_relaxed);
-        } else {
+        else
             mScript_full = new ScriptC_vignette_full(mRS, res,
                     R.raw.vignette_full);
-        }
         do_init();
     }
 
     public void runTest() {
-        if (relaxed)
-            mScript_relaxed.forEach_root(mInPixelsAllocation, mOutPixelsAllocation);
+        if (approx) {
+            if (relaxed)
+                mScript_approx_relaxed.forEach_root(mInPixelsAllocation,
+                        mOutPixelsAllocation);
+            else
+                mScript_approx_full.forEach_root(mInPixelsAllocation,
+                        mOutPixelsAllocation);
+        } else if (relaxed)
+            mScript_relaxed.forEach_root(mInPixelsAllocation,
+                    mOutPixelsAllocation);
         else
-            mScript_full.forEach_root(mInPixelsAllocation, mOutPixelsAllocation);
+            mScript_full.forEach_root(mInPixelsAllocation,
+                    mOutPixelsAllocation);
     }
 
 }
