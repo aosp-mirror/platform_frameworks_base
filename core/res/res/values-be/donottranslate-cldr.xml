@@ -74,8 +74,6 @@
     <string name="day_of_week_shortest_friday">п</string>
     <string name="day_of_week_shortest_saturday">с</string>
 
-    <string name="am">да палудня</string>
-    <string name="pm">пасля палудня</string>
     <string name="yesterday">учора</string>
     <string name="today">сёння</string>
     <string name="tomorrow">заўтра</string>

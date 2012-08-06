@@ -85,8 +85,6 @@
     <string name="day_of_week_shortest_friday">금</string>
     <string name="day_of_week_shortest_saturday">토</string>
 
-    <string name="am">오전</string>
-    <string name="pm">오후</string>
     <string name="yesterday">어제</string>
     <string name="today">오늘</string>
     <string name="tomorrow">내일</string>
