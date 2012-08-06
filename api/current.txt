@@ -16418,6 +16418,7 @@ package android.os {
     method public void finishBroadcast();
     method public java.lang.Object getBroadcastCookie(int);
     method public E getBroadcastItem(int);
+    method public int getRegisteredCallbackCount();
     method public void kill();
     method public void onCallbackDied(E);
     method public void onCallbackDied(E, java.lang.Object);

@@ -67,7 +67,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 83;
+    private static final int DATABASE_VERSION = 84;
 
     private Context mContext;
     private int mUserHandle;
@@ -1229,6 +1229,33 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 83;
         }
 
+        if (upgradeVersion == 83) {
+            // 1. Setting whether screen magnification is enabled.
+            // 2. Setting for screen magnification scale.
+            // 3. Setting for screen magnification auto update.
+            db.beginTransaction();
+            SQLiteStatement stmt = null;
+            try {
+                stmt = db.compileStatement("INSERT INTO secure(name,value) VALUES(?,?);");
+                loadBooleanSetting(stmt,
+                        Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED,
+                        R.bool.def_accessibility_display_magnification_enabled);
+                stmt.close();
+                stmt = db.compileStatement("INSERT INTO secure(name,value) VALUES(?,?);");
+                loadFractionSetting(stmt, Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE,
+                        R.fraction.def_accessibility_display_magnification_scale, 1);
+                stmt.close();
+                stmt = db.compileStatement("INSERT INTO secure(name,value) VALUES(?,?);");
+                loadBooleanSetting(stmt,
+                        Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_AUTO_UPDATE,
+                        R.bool.def_accessibility_display_magnification_auto_update);
+            } finally {
+                db.endTransaction();
+                if (stmt != null) stmt.close();
+            }
+            upgradeVersion = 84;
+        }
+
         // *** Remember to update DATABASE_VERSION above!
 
         if (upgradeVersion != currentVersion) {
@@ -1776,6 +1803,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     R.string.def_screensaver_component);
             loadStringSetting(stmt, Settings.Secure.SCREENSAVER_DEFAULT_COMPONENT,
                     R.string.def_screensaver_component);
+
+            loadBooleanSetting(stmt, Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED,
+                    R.bool.def_accessibility_display_magnification_enabled);
+
+            loadFractionSetting(stmt, Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE,
+                    R.fraction.def_accessibility_display_magnification_scale, 1);
+
+            loadBooleanSetting(stmt,
+                    Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_AUTO_UPDATE,
+                    R.bool.def_accessibility_display_magnification_auto_update);
         } finally {
             if (stmt != null) stmt.close();
         }

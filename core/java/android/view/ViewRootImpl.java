@@ -4649,9 +4649,19 @@ public final class ViewRootImpl implements ViewParent,
         // ViewAncestor never intercepts touch event, so this can be a no-op
     }
 
-    public boolean requestChildRectangleOnScreen(View child, Rect rectangle,
-            boolean immediate) {
-        return scrollToRectOrFocus(rectangle, immediate);
+    public boolean requestChildRectangleOnScreen(View child, Rect rectangle, boolean immediate) {
+        final boolean scrolled = scrollToRectOrFocus(rectangle, immediate);
+        if (rectangle != null) {
+            mTempRect.set(rectangle);
+            mTempRect.offset(0, -mCurScrollY);
+            mTempRect.offset(mAttachInfo.mWindowLeft, mAttachInfo.mWindowTop);
+            try {
+                mWindowSession.onRectangleOnScreenRequested(mWindow, mTempRect, immediate);
+            } catch (RemoteException re) {
+                /* ignore */
+            }
+        }
+        return scrolled;
     }
 
     public void childHasTransientStateChanged(View child, boolean hasTransientState) {

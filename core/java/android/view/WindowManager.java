@@ -205,7 +205,8 @@ public interface WindowManager extends ViewManager {
             @ViewDebug.IntToString(from = TYPE_HIDDEN_NAV_CONSUMER, to = "TYPE_HIDDEN_NAV_CONSUMER"),
             @ViewDebug.IntToString(from = TYPE_DREAM, to = "TYPE_DREAM"),
             @ViewDebug.IntToString(from = TYPE_NAVIGATION_BAR_PANEL, to = "TYPE_NAVIGATION_BAR_PANEL"),
-            @ViewDebug.IntToString(from = TYPE_DISPLAY_OVERLAY, to = "TYPE_DISPLAY_OVERLAY")
+            @ViewDebug.IntToString(from = TYPE_DISPLAY_OVERLAY, to = "TYPE_DISPLAY_OVERLAY"),
+            @ViewDebug.IntToString(from = TYPE_MAGNIFICATION_OVERLAY, to = "TYPE_MAGNIFICATION_OVERLAY")
         })
         public int type;
     
@@ -465,6 +466,13 @@ public interface WindowManager extends ViewManager {
          * @hide
          */
         public static final int TYPE_DISPLAY_OVERLAY = FIRST_SYSTEM_WINDOW+26;
+
+        /**
+         * Window type: Magnification overlay window. Used to highlight the magnified
+         * portion of a display when accessibility magnification is enabled.
+         * @hide
+         */
+        public static final int TYPE_MAGNIFICATION_OVERLAY = FIRST_SYSTEM_WINDOW+27;
 
         /**
          * End of types of system windows.
