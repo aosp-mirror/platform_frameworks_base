@@ -52,13 +52,10 @@ Caches::Caches(): Singleton<Caches>(), mInitialized(false) {
     initFont();
     initExtensions();
     initConstraints();
+    initProperties();
 
     mDebugLevel = readDebugLevel();
     ALOGD("Enabling debug mode %d", mDebugLevel);
-
-#if RENDER_LAYERS_AS_REGIONS
-    INIT_LOGD("Layers will be composited as regions");
-#endif
 }
 
 void Caches::init() {
@@ -124,6 +121,16 @@ void Caches::initConstraints() {
     }
 
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
+}
+
+void Caches::initProperties() {
+    char property[PROPERTY_VALUE_MAX];
+    if (property_get(PROPERTY_DEBUG_LAYERS_UPDATES, property, NULL) > 0) {
+        INIT_LOGD("  Layers updates debug enabled: %s", property);
+        debugLayersUpdates = !strcmp(property, "true");
+    } else {
+        debugLayersUpdates = false;
+    }
 }
 
 void Caches::terminate() {

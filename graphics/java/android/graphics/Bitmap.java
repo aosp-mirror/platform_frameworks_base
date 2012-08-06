@@ -881,15 +881,17 @@ public final class Bitmap implements Parcelable {
      * <code>(128, 128, 0, 0)</code>.</p>
      * 
      * <p>This method always returns false if {@link #getConfig()} is
-     * {@link Bitmap.Config#ALPHA_8} or {@link Bitmap.Config#RGB_565}.</p>
+     * {@link Bitmap.Config#RGB_565}.</p>
+     * 
+     * <p>This method only returns true if {@link #hasAlpha()} returns true.
+     * A bitmap with no alpha channel can be used both as a pre-multiplied and
+     * as a non pre-multiplied bitmap.</p>
      * 
      * @return true if the underlying pixels have been pre-multiplied, false
      *         otherwise
      */
     public final boolean isPremultiplied() {
-        final Config config = getConfig();
-        //noinspection deprecation
-        return config == Config.ARGB_8888 || config == Config.ARGB_4444;
+        return getConfig() != Config.RGB_565 && hasAlpha();
     }
 
     /** Returns the bitmap's width */
