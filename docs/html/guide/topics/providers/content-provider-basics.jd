@@ -1030,12 +1030,12 @@ mRowsDeleted = getContentResolver().delete(
     A provider defines URI permissions for content URIs in its manifest, using the
     <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#gprmsn">
     android:grantUriPermission</a></code>
-    attribute of the
-    {@code <a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a>}
+    attribute of the <a href="{@docRoot}guide/topics/manifest/provider-element.html">
+    {@code &lt;provider&gt;}</a>
     element, as well as the
-    {@code <a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">
-    &lt;grant-uri-permission&gt;</a>} child element of the
-    {@code <a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a>}
+    <a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">{@code 
+    &lt;grant-uri-permission&gt;}</a> child element of the
+    <a href="{@docRoot}guide/topics/manifest/provider-element.html">{@code &lt;provider&gt;}</a>
     element. The URI permissions mechanism is explained in more detail in the
     <a href="{@docRoot}guide/topics/security/security.html">Security and Permissions</a> guide,
     in the section "URI Permissions".

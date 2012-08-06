@@ -66,7 +66,7 @@ import com.android.internal.os.HandlerCaller;
  * accessibility service. Following is an example declaration:
  * </p>
  * <pre> &lt;service android:name=".MyAccessibilityService"
- *         android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE&gt;
+ *         android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"&gt;
  *     &lt;intent-filter&gt;
  *         &lt;action android:name="android.accessibilityservice.AccessibilityService" /&gt;
  *     &lt;/intent-filter&gt;
