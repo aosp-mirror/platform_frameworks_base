@@ -1593,6 +1593,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         int prevNetType = info.getType();
 
         mNetTrackers[prevNetType].setTeardownRequested(false);
+
+        // Remove idletimer previously setup in {@code handleConnect}
+        removeDataActivityTracking(prevNetType);
+
         /*
          * If the disconnected network is not the active one, then don't report
          * this as a loss of connectivity. What probably happened is that we're
@@ -1872,10 +1876,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private void handleConnect(NetworkInfo info) {
         final int type = info.getType();
+        final NetworkStateTracker thisNet = mNetTrackers[type];
+
+        setupDataActivityTracking(type);
 
         // snapshot isFailover, because sendConnectedBroadcast() resets it
         boolean isFailover = info.isFailover();
-        final NetworkStateTracker thisNet = mNetTrackers[type];
 
         // if this is a default net and other default is running
         // kill the one not preferred
@@ -1940,6 +1946,58 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 BatteryStatsService.getService().noteNetworkInterfaceType(iface, type);
             } catch (RemoteException e) {
                 // ignored; service lives in system_server
+            }
+        }
+    }
+
+    /**
+     * Setup data activity tracking for the given network interface.
+     *
+     * Every {@code setupDataActivityTracking} should be paired with a
+     * {@link removeDataActivityTracking} for cleanup.
+     */
+    private void setupDataActivityTracking(int type) {
+        final NetworkStateTracker thisNet = mNetTrackers[type];
+        final String iface = thisNet.getLinkProperties().getInterfaceName();
+
+        final int timeout;
+
+        if (ConnectivityManager.isNetworkTypeMobile(type)) {
+            timeout = Settings.Secure.getInt(mContext.getContentResolver(),
+                                             Settings.Secure.DATA_ACTIVITY_TIMEOUT_MOBILE,
+                                             0);
+            // Canonicalize mobile network type
+            type = ConnectivityManager.TYPE_MOBILE;
+        } else if (ConnectivityManager.TYPE_WIFI == type) {
+            timeout = Settings.Secure.getInt(mContext.getContentResolver(),
+                                             Settings.Secure.DATA_ACTIVITY_TIMEOUT_WIFI,
+                                             0);
+        } else {
+            // do not track any other networks
+            timeout = 0;
+        }
+
+        if (timeout > 0 && iface != null) {
+            try {
+                mNetd.addIdleTimer(iface, timeout, Integer.toString(type));
+            } catch (RemoteException e) {
+            }
+        }
+    }
+
+    /**
+     * Remove data activity tracking when network disconnects.
+     */
+    private void removeDataActivityTracking(int type) {
+        final NetworkStateTracker net = mNetTrackers[type];
+        final String iface = net.getLinkProperties().getInterfaceName();
+
+        if (iface != null && (ConnectivityManager.isNetworkTypeMobile(type) ||
+                              ConnectivityManager.TYPE_WIFI == type)) {
+            try {
+                // the call fails silently if no idletimer setup for this interface
+                mNetd.removeIdleTimer(iface);
+            } catch (RemoteException e) {
             }
         }
     }

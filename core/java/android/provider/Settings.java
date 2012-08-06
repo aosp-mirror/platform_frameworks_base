@@ -2845,6 +2845,29 @@ public final class Settings {
          */
         public static final String TETHER_DUN_APN = "tether_dun_apn";
 
+        /** Inactivity timeout to track mobile data activity.
+         *
+         * If set to a positive integer, it indicates the inactivity timeout value in seconds to
+         * infer the data activity of mobile network. After a period of no activity on mobile
+         * networks with length specified by the timeout, an {@code ACTION_DATA_ACTIVITY_CHANGE}
+         * intent is fired to indicate a transition of network status from "active" to "idle". Any
+         * subsequent activity on mobile networks triggers the firing of {@code
+         * ACTION_DATA_ACTIVITY_CHANGE} intent indicating transition from "idle" to "active".
+         *
+         * Network activity refers to transmitting or receiving data on the network interfaces.
+         *
+         * Tracking is disabled if set to zero or negative value.
+         *
+         * @hide
+         */
+        public static final String DATA_ACTIVITY_TIMEOUT_MOBILE = "data_activity_timeout_mobile";
+
+        /** Timeout to tracking Wifi data activity. Same as {@code DATA_ACTIVITY_TIMEOUT_MOBILE}
+         * but for Wifi network.
+         * @hide
+         */
+        public static final String DATA_ACTIVITY_TIMEOUT_WIFI = "data_activity_timeout_wifi";
+
         /**
          * No longer supported.
          */
