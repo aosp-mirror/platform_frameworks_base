@@ -98,6 +98,24 @@ namespace {
 
         return path;
     }
+
+    /*
+     * Like strdup(), but uses C++ "new" operator instead of malloc.
+     */
+    static char* strdupNew(const char* str)
+    {
+        char* newStr;
+        int len;
+
+        if (str == NULL)
+            return NULL;
+
+        len = strlen(str);
+        newStr = new char[len+1];
+        memcpy(newStr, str, len+1);
+
+        return newStr;
+    }
 }
 
 /*
