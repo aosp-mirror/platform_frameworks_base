@@ -3,7 +3,8 @@ page.title=Samples
 @jd:body
 
 <p>To help you understand some fundamental Android APIs and coding practices, a variety of sample
-code is available from the Android SDK Manager.</p>
+code is available from the Android SDK Manager. Each version of the Android platform available
+from the SDK Manager offers its own set of sample apps.</p>
 
 <p>To download the samples:</p>
 <ol>
@@ -18,14 +19,14 @@ Android SDK, then execute {@code android sdk}.</ul>
   <li>Select and download <em>Samples for SDK</em>.</li>
 </ol>
 
-<p>When the download is complete, you can find the samples sources at this location:</p>
+<p>When the download is complete, you can find the source code for all samples at this location:</p>
 
 <p style="margin-left:2em">
-<code><em>&lt;sdk&gt;</em>/platforms/&lt;android-version>/samples/</code>
+<code>&lt;sdk&gt;/samples/android-&lt;version>/</code>
 </p>
 
+<p>The {@code &lt;version>} number corresponds to the platform's
+  <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API level</a>.</p>
+
 <p>You can easily create new Android projects with the downloaded samples, modify them
-if you'd like, and then run them on an emulator or device. </p>
-<!--
-<p>Below are summaries for several of the available samples.</p>
--->
+if you'd like, and then run them on an emulator or device.</p>

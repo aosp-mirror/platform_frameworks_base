@@ -108,7 +108,7 @@ public static class MainActivity extends Activity
         implements HeadlinesFragment.OnHeadlineSelectedListener{
     ...
     
-    public void onArticleSelected(Uri articleUri) {
+    public void onArticleSelected(int position) {
         // The user selected the headline of an article from the HeadlinesFragment
         // Do something here to display that article
     }
