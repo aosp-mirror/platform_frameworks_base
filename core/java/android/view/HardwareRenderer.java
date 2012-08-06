@@ -135,7 +135,19 @@ public abstract class HardwareRenderer {
      * @hide
      */
     public static final String DEBUG_DIRTY_REGIONS_PROPERTY = "debug.hwui.show_dirty_regions";
-    
+
+    /**
+     * Turn on to flash hardware layers when they update.
+     *
+     * Possible values:
+     * "true", to enable hardware layers updates debugging
+     * "false", to disable hardware layers updates debugging
+     *
+     * @hide
+     */
+    public static final String DEBUG_SHOW_LAYERS_UPDATES_PROPERTY =
+            "debug.hwui.show_layers_updates";
+
     /**
      * A process can set this flag to false to prevent the use of hardware
      * rendering.

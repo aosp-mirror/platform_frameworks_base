@@ -321,13 +321,11 @@ status_t OpenGLRenderer::callDrawGLFunction(Functor* functor, Rect& dirty) {
     Rect clip(*mSnapshot->clipRect);
     clip.snapToPixelBoundaries();
 
-#if RENDER_LAYERS_AS_REGIONS
     // Since we don't know what the functor will draw, let's dirty
     // tne entire clip region
     if (hasLayer()) {
         dirtyLayerUnchecked(clip, getRegion());
     }
-#endif
 
     DrawGlInfo info;
     info.clipLeft = clip.left;
@@ -595,10 +593,8 @@ bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, sp<Snapshot> sna
         GLuint previousFbo) {
     layer->setFbo(mCaches.fboCache.get());
 
-#if RENDER_LAYERS_AS_REGIONS
     snapshot->region = &snapshot->layer->region;
     snapshot->flags |= Snapshot::kFlagFboTarget;
-#endif
 
     Rect clip(bounds);
     snapshot->transform->mapRect(clip);
@@ -826,7 +822,6 @@ void OpenGLRenderer::composeLayerRect(Layer* layer, const Rect& rect, bool swap)
 }
 
 void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
-#if RENDER_LAYERS_AS_REGIONS
     if (layer->region.isRect()) {
         layer->setRegionAsRect();
 
@@ -907,9 +902,6 @@ void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
 
         layer->region.clear();
     }
-#else
-    composeLayerRect(layer, rect);
-#endif
 }
 
 void OpenGLRenderer::drawRegionRects(const Region& region) {
@@ -940,27 +932,22 @@ void OpenGLRenderer::drawRegionRects(const Region& region) {
 
 void OpenGLRenderer::dirtyLayer(const float left, const float top,
         const float right, const float bottom, const mat4 transform) {
-#if RENDER_LAYERS_AS_REGIONS
     if (hasLayer()) {
         Rect bounds(left, top, right, bottom);
         transform.mapRect(bounds);
         dirtyLayerUnchecked(bounds, getRegion());
     }
-#endif
 }
 
 void OpenGLRenderer::dirtyLayer(const float left, const float top,
         const float right, const float bottom) {
-#if RENDER_LAYERS_AS_REGIONS
     if (hasLayer()) {
         Rect bounds(left, top, right, bottom);
         dirtyLayerUnchecked(bounds, getRegion());
     }
-#endif
 }
 
 void OpenGLRenderer::dirtyLayerUnchecked(Rect& bounds, Region* region) {
-#if RENDER_LAYERS_AS_REGIONS
     if (bounds.intersect(*mSnapshot->clipRect)) {
         bounds.snapToPixelBoundaries();
         android::Rect dirty(bounds.left, bounds.top, bounds.right, bounds.bottom);
@@ -968,7 +955,6 @@ void OpenGLRenderer::dirtyLayerUnchecked(Rect& bounds, Region* region) {
             region->orSelf(dirty);
         }
     }
-#endif
 }
 
 void OpenGLRenderer::clearLayerRegions() {
@@ -1585,11 +1571,7 @@ status_t OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int mes
     float right = FLT_MIN;
     float bottom = FLT_MIN;
 
-#if RENDER_LAYERS_AS_REGIONS
     const bool hasActiveLayer = hasLayer();
-#else
-    const bool hasActiveLayer = false;
-#endif
 
     // TODO: Support the colors array
     TextureVertex mesh[count];
@@ -1620,7 +1602,6 @@ status_t OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int mes
             TextureVertex::set(vertex++, vertices[cx], vertices[cy], u2, v1);
             TextureVertex::set(vertex++, vertices[dx], vertices[dy], u2, v2);
 
-#if RENDER_LAYERS_AS_REGIONS
             if (hasActiveLayer) {
                 // TODO: This could be optimized to avoid unnecessary ops
                 left = fminf(left, fminf(vertices[ax], fminf(vertices[bx], vertices[cx])));
@@ -1628,15 +1609,12 @@ status_t OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int mes
                 right = fmaxf(right, fmaxf(vertices[ax], fmaxf(vertices[bx], vertices[cx])));
                 bottom = fmaxf(bottom, fmaxf(vertices[ay], fmaxf(vertices[by], vertices[cy])));
             }
-#endif
         }
     }
 
-#if RENDER_LAYERS_AS_REGIONS
     if (hasActiveLayer) {
         dirtyLayer(left, top, right, bottom, *mSnapshot->transform);
     }
-#endif
 
     drawTextureMesh(0.0f, 0.0f, 1.0f, 1.0f, texture->id, alpha / 255.0f,
             mode, texture->blend, &mesh[0].position[0], &mesh[0].texture[0],
@@ -1734,7 +1712,6 @@ status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const
 
     if (CC_LIKELY(mesh && mesh->verticesCount > 0)) {
         const bool pureTranslate = mSnapshot->transform->isPureTranslate();
-#if RENDER_LAYERS_AS_REGIONS
         // Mark the current layer dirty where we are going to draw the patch
         if (hasLayer() && mesh->hasEmptyQuads) {
             const float offsetX = left + mSnapshot->transform->getTranslateX();
@@ -1752,7 +1729,6 @@ status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const
                 }
             }
         }
-#endif
 
         if (CC_LIKELY(pureTranslate)) {
             const float x = (int) floorf(left + mSnapshot->transform->getTranslateX() + 0.5f);
@@ -2400,22 +2376,16 @@ status_t OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count
     const Rect* clip = pureTranslate ? mSnapshot->clipRect : &mSnapshot->getLocalClip();
     Rect bounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
 
-#if RENDER_LAYERS_AS_REGIONS
     const bool hasActiveLayer = hasLayer();
-#else
-    const bool hasActiveLayer = false;
-#endif
 
     if (fontRenderer.renderPosText(paint, clip, text, 0, bytesCount, count, x, y,
             positions, hasActiveLayer ? &bounds : NULL)) {
-#if RENDER_LAYERS_AS_REGIONS
         if (hasActiveLayer) {
             if (!pureTranslate) {
                 mSnapshot->transform->mapRect(bounds);
             }
             dirtyLayerUnchecked(bounds, getRegion());
         }
-#endif
     }
 
     return DrawGlInfo::kStatusDrew;
@@ -2501,11 +2471,7 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     const Rect* clip = pureTranslate ? mSnapshot->clipRect : &mSnapshot->getLocalClip();
     Rect bounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
 
-#if RENDER_LAYERS_AS_REGIONS
     const bool hasActiveLayer = hasLayer();
-#else
-    const bool hasActiveLayer = false;
-#endif
 
     bool status;
     if (paint->getTextAlign() != SkPaint::kLeft_Align) {
@@ -2517,15 +2483,12 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
         status = fontRenderer.renderPosText(paint, clip, text, 0, bytesCount, count, x, y,
             positions, hasActiveLayer ? &bounds : NULL);
     }
-    if (status) {
-#if RENDER_LAYERS_AS_REGIONS
-        if (hasActiveLayer) {
-            if (!pureTranslate) {
-                mSnapshot->transform->mapRect(bounds);
-            }
-            dirtyLayerUnchecked(bounds, getRegion());
+
+    if (status && hasActiveLayer) {
+        if (!pureTranslate) {
+            mSnapshot->transform->mapRect(bounds);
         }
-#endif
+        dirtyLayerUnchecked(bounds, getRegion());
     }
 
     drawTextDecorations(text, bytesCount, length, oldX, oldY, paint);
@@ -2568,20 +2531,14 @@ status_t OpenGLRenderer::drawTextOnPath(const char* text, int bytesCount, int co
     const Rect* clip = &mSnapshot->getLocalClip();
     Rect bounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
 
-#if RENDER_LAYERS_AS_REGIONS
     const bool hasActiveLayer = hasLayer();
-#else
-    const bool hasActiveLayer = false;
-#endif
 
     if (fontRenderer.renderTextOnPath(paint, clip, text, 0, bytesCount, count, path,
             hOffset, vOffset, hasActiveLayer ? &bounds : NULL)) {
-#if RENDER_LAYERS_AS_REGIONS
         if (hasActiveLayer) {
             mSnapshot->transform->mapRect(bounds);
             dirtyLayerUnchecked(bounds, getRegion());
         }
-#endif
     }
 
     return DrawGlInfo::kStatusDrew;
@@ -2610,6 +2567,8 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* pain
         return DrawGlInfo::kStatusDone;
     }
 
+    bool debugLayerUpdate = false;
+
     if (layer->deferredUpdateScheduled && layer->renderer && layer->displayList) {
         OpenGLRenderer* renderer = layer->renderer;
         Rect& dirty = layer->dirtyRect;
@@ -2625,6 +2584,8 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* pain
         layer->deferredUpdateScheduled = false;
         layer->renderer = NULL;
         layer->displayList = NULL;
+
+        debugLayerUpdate = mCaches.debugLayersUpdates;
     }
 
     mCaches.activeTexture(0);
@@ -2635,13 +2596,11 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* pain
 
     layer->setAlpha(alpha, mode);
 
-#if RENDER_LAYERS_AS_REGIONS
     if (CC_LIKELY(!layer->region.isEmpty())) {
         if (layer->region.isRect()) {
             composeLayerRect(layer, layer->regionRect);
         } else if (layer->mesh) {
             const float a = alpha / 255.0f;
-            const Rect& rect = layer->layer;
 
             setupDraw();
             setupDrawWithTexture();
@@ -2653,12 +2612,12 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* pain
             setupDrawColorFilterUniforms();
             setupDrawTexture(layer->getTexture());
             if (CC_LIKELY(mSnapshot->transform->isPureTranslate())) {
-                x = (int) floorf(x + mSnapshot->transform->getTranslateX() + 0.5f);
-                y = (int) floorf(y + mSnapshot->transform->getTranslateY() + 0.5f);
+                int tx = (int) floorf(x + mSnapshot->transform->getTranslateX() + 0.5f);
+                int ty = (int) floorf(y + mSnapshot->transform->getTranslateY() + 0.5f);
 
                 layer->setFilter(GL_NEAREST);
-                setupDrawModelViewTranslate(x, y,
-                        x + layer->layer.getWidth(), y + layer->layer.getHeight(), true);
+                setupDrawModelViewTranslate(tx, ty,
+                        tx + layer->layer.getWidth(), ty + layer->layer.getHeight(), true);
             } else {
                 layer->setFilter(GL_LINEAR);
                 setupDrawModelViewTranslate(x, y,
@@ -2675,11 +2634,12 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* pain
             drawRegionRects(layer->region);
 #endif
         }
+
+        if (debugLayerUpdate) {
+            drawColorRect(x, y, x + layer->layer.getWidth(), y + layer->layer.getHeight(),
+                    0x7f00ff00, SkXfermode::kSrcOver_Mode);
+        }
     }
-#else
-    const Rect r(x, y, x + layer->layer.getWidth(), y + layer->layer.getHeight());
-    composeLayerRect(layer, r);
-#endif
 
     return DrawGlInfo::kStatusDrew;
 }

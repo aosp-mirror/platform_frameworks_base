@@ -25,9 +25,6 @@
  * the OpenGLRenderer.
  */
 
-// If turned on, layers drawn inside FBOs are optimized with regions
-#define RENDER_LAYERS_AS_REGIONS 1
-
 // If turned on, text is interpreted as glyphs instead of UTF-16
 #define RENDER_TEXT_AS_GLYPHS 1
 
@@ -43,9 +40,10 @@
 #define STENCIL_BUFFER_SIZE 0
 
 /**
- * Debug level for app developers.
+ * Debug level for app developers. The value is a numeric value defined
+ * by the DebugLevel enum below.
  */
-#define PROPERTY_DEBUG "hwui.debug_level"
+#define PROPERTY_DEBUG "debug.hwui.level"
 
 /**
  * Debug levels. Debug levels are used as flags.
@@ -56,6 +54,12 @@ enum DebugLevel {
     kDebugCaches = 2,
     kDebugMoreCaches = kDebugMemory | kDebugCaches
 };
+
+/**
+ * Used to enable/disbale layers update debugging. The accepted values are
+ * "true" and "false". The default value is "false".
+ */
+#define PROPERTY_DEBUG_LAYERS_UPDATES "debug.hwui.show_layers_updates"
 
 // These properties are defined in mega-bytes
 #define PROPERTY_TEXTURE_CACHE_SIZE "ro.hwui.texture_cache_size"
