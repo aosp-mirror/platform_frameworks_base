@@ -236,6 +236,7 @@ public:
 
     // Misc
     GLint maxTextureSize;
+    bool debugLayersUpdates;
 
     TextureCache textureCache;
     LayerCache layerCache;
@@ -267,6 +268,7 @@ private:
     void initFont();
     void initExtensions();
     void initConstraints();
+    void initProperties();
 
     static void eventMarkNull(GLsizei length, const GLchar* marker) { }
     static void startMarkNull(GLsizei length, const GLchar* marker) { }
