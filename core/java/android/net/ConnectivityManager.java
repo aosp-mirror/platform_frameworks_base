@@ -89,9 +89,19 @@ public class ConnectivityManager {
      *             should always obtain network information through
      *             {@link #getActiveNetworkInfo()} or
      *             {@link #getAllNetworkInfo()}.
+     * @see #EXTRA_NETWORK_TYPE
      */
     @Deprecated
     public static final String EXTRA_NETWORK_INFO = "networkInfo";
+
+    /**
+     * Network type which triggered a {@link #CONNECTIVITY_ACTION} broadcast.
+     * Can be used with {@link #getNetworkInfo(int)} to get {@link NetworkInfo}
+     * state based on the calling application.
+     *
+     * @see android.content.Intent#getIntExtra(String, int)
+     */
+    public static final String EXTRA_NETWORK_TYPE = "networkType";
 
     /**
      * The lookup key for a boolean that indicates whether a connect event
