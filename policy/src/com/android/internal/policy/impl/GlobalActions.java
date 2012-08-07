@@ -30,7 +30,6 @@ import android.content.IntentFilter;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.ScaleDrawable;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.os.Handler;
@@ -45,7 +44,6 @@ import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.IWindowManager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -230,6 +228,50 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
         // next: airplane mode
         mItems.add(mAirplaneModeOn);
+
+        // next: bug report, if enabled
+        if (Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.BUGREPORT_IN_POWER_MENU, 0) != 0) {
+            mItems.add(
+                new SinglePressAction(0, R.string.global_action_bug_report) {
+
+                    public void onPress() {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                        builder.setTitle(com.android.internal.R.string.bugreport_title);
+                        builder.setMessage(com.android.internal.R.string.bugreport_message);
+                        builder.setNegativeButton(com.android.internal.R.string.cancel, null);
+                        builder.setPositiveButton(com.android.internal.R.string.report,
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        // Add a little delay before executing, to give the
+                                        // dialog a chance to go away before it takes a
+                                        // screenshot.
+                                        mHandler.postDelayed(new Runnable() {
+                                            @Override public void run() {
+                                                SystemProperties.set("ctl.start", "bugreport");
+                                            }
+                                        }, 500);
+                                    }
+                                });
+                        AlertDialog dialog = builder.create();
+                        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG);
+                        dialog.show();
+                    }
+
+                    public boolean onLongPress() {
+                        return false;
+                    }
+
+                    public boolean showDuringKeyguard() {
+                        return true;
+                    }
+
+                    public boolean showBeforeProvisioning() {
+                        return false;
+                    }
+                });
+        }
 
         // last: silent mode
         if (SHOW_SILENT_TOGGLE) {
