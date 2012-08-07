@@ -665,34 +665,6 @@ public class WebSettingsClassic extends WebSettings {
     }
 
     /**
-     * @see android.webkit.WebSettings#setTextSize(android.webkit.WebSettingsClassic.TextSize)
-     */
-    @Override
-    public synchronized void setTextSize(TextSize t) {
-        setTextZoom(t.value);
-    }
-
-    /**
-     * @see android.webkit.WebSettings#getTextSize()
-     */
-    @Override
-    public synchronized TextSize getTextSize() {
-        TextSize closestSize = null;
-        int smallestDelta = Integer.MAX_VALUE;
-        for (TextSize size : TextSize.values()) {
-            int delta = Math.abs(mTextSize - size.value);
-            if (delta == 0) {
-                return size;
-            }
-            if (delta < smallestDelta) {
-                smallestDelta = delta;
-                closestSize = size;
-            }
-        }
-        return closestSize != null ? closestSize : TextSize.NORMAL;
-    }
-
-    /**
      * Set the double-tap zoom of the page in percent. Default is 100.
      * @param doubleTapZoom A percent value for increasing or decreasing the double-tap zoom.
      */
