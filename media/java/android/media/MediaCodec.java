@@ -33,7 +33,6 @@ import java.util.Map;
  * codec.start();
  * ByteBuffer[] inputBuffers = codec.getInputBuffers();
  * ByteBuffer[] outputBuffers = codec.getOutputBuffers();
- * MediaFormat format = codec.getOutputFormat();
  * for (;;) {
  *   int inputBufferIndex = codec.dequeueInputBuffer(timeoutUs);
  *   if (inputBufferIndex &gt;= 0) {
@@ -51,7 +50,7 @@ import java.util.Map;
  *     outputBuffers = codec.getOutputBuffers();
  *   } else if (outputBufferIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
  *     // Subsequent data will conform to new format.
- *     format = codec.getOutputFormat();
+ *     MediaFormat format = codec.getOutputFormat();
  *     ...
  *   }
  * }
