@@ -346,6 +346,17 @@
     <!-- label for item that turns off power in phone options dialog -->
     <string name="global_action_power_off">Power off</string>
 
+    <!-- label for item that generates a bug report in the phone options dialog -->
+    <string name="global_action_bug_report">Bug report</string>
+
+    <!-- Take bug report menu title [CHAR LIMIT=NONE] -->
+    <string name="bugreport_title">Take bug report</string>
+    <!-- Message in bugreport dialog describing what it does [CHAR LIMIT=NONE] -->
+    <string name="bugreport_message">This will collect information about your
+        current device state, to send as an e-mail message.  It will take a little
+        time from starting the bug report until it is ready to be sent; please be
+        patient.</string>
+
     <!-- label for item that enables silent mode in phone options dialog -->
     <string name="global_action_toggle_silent_mode">Silent mode</string>
 
