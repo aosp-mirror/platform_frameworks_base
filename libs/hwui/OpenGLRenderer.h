@@ -63,17 +63,54 @@ public:
     ANDROID_API OpenGLRenderer();
     virtual ~OpenGLRenderer();
 
+    /**
+     * Indicates whether this renderer executes drawing commands immediately.
+     * If this method returns true, the drawing commands will be executed
+     * later.
+     */
     virtual bool isDeferred();
 
+    /**
+     * Sets the dimension of the underlying drawing surface. This method must
+     * be called at least once every time the drawing surface changes size.
+     *
+     * @param width The width in pixels of the underlysing surface
+     * @param height The height in pixels of the underlysing surface
+     */
     virtual void setViewport(int width, int height);
 
+    /**
+     * Prepares the renderer to draw a frame. This method must be invoked
+     * at the beginning of each frame. When this method is invoked, the
+     * entire drawing surface is assumed to be redrawn.
+     *
+     * @param opaque If true, the target surface is considered opaque
+     *               and will not be cleared. If false, the target surface
+     *               will be cleared
+     */
     ANDROID_API int prepare(bool opaque);
-    virtual int prepareDirty(float left, float top, float right, float bottom, bool opaque);
-    virtual void finish();
 
-    // These two calls must not be recorded in display lists
-    virtual void interrupt();
-    virtual void resume();
+    /**
+     * Prepares the renderer to draw a frame. This method must be invoked
+     * at the beginning of each frame. Only the specified rectangle of the
+     * frame is assumed to be dirty. A clip will automatically be set to
+     * the specified rectangle.
+     *
+     * @param left The left coordinate of the dirty rectangle
+     * @param top The top coordinate of the dirty rectangle
+     * @param right The right coordinate of the dirty rectangle
+     * @param bottom The bottom coordinate of the dirty rectangle
+     * @param opaque If true, the target surface is considered opaque
+     *               and will not be cleared. If false, the target surface
+     *               will be cleared in the specified dirty rectangle
+     */
+    virtual int prepareDirty(float left, float top, float right, float bottom, bool opaque);
+
+    /**
+     * Indicates the end of a frame. This method must be invoked whenever
+     * the caller is done rendering a frame.
+     */
+    virtual void finish();
 
     ANDROID_API status_t invokeFunctors(Rect& dirty);
     ANDROID_API void detachFunctor(Functor* functor);
@@ -89,10 +126,6 @@ public:
             SkPaint* p, int flags);
     virtual int saveLayerAlpha(float left, float top, float right, float bottom,
             int alpha, int flags);
-
-    void setAlpha(float alpha) {
-        mSnapshot->alpha = alpha;
-    }
 
     virtual void translate(float dx, float dy);
     virtual void rotate(float degrees);
@@ -159,12 +192,49 @@ public:
 
     SkPaint* filterPaint(SkPaint* paint);
 
+    /**
+     * Returns the desired size for the stencil buffer. If the returned value
+     * is 0, then no stencil buffer is required.
+     */
     ANDROID_API static uint32_t getStencilSize();
 
+    /**
+     * Sets the alpha on the current snapshot. This alpha value will be modulated
+     * with other alpha values when drawing primitives.
+     */
+    void setAlpha(float alpha) {
+        mSnapshot->alpha = alpha;
+    }
+
+    /**
+     * Inserts a named group marker in the stream of GL commands. This marker
+     * can be used by tools to group commands into logical groups. A call to
+     * this method must always be followed later on by a call to endMark().
+     */
     void startMark(const char* name) const;
+
+    /**
+     * Closes the last group marker opened by startMark().
+     */
     void endMark() const;
 
 protected:
+
+    /**
+     * This method must be invoked before handing control over to a draw functor.
+     * See callDrawGLFunction() for instance.
+     *
+     * This command must not be recorded inside display lists.
+     */
+    void interrupt();
+
+    /**
+     * This method must be invoked after getting control back from a draw functor.
+     *
+     * This command must not be recorded inside display lists.
+     */
+    void resume();
+
     /**
      * Compose the layer defined in the current snapshot with the layer
      * defined by the previous snapshot.
@@ -579,6 +649,7 @@ private:
      * Invoked before any drawing operation. This sets required state.
      */
     void setupDraw(bool clear = true);
+
     /**
      * Various methods to setup OpenGL rendering.
      */
@@ -626,6 +697,10 @@ private:
     void finishDrawTexture();
     void accountForClear(SkXfermode::Mode mode);
 
+    /**
+     * Renders the specified region as a series of rectangles. This method
+     * is used for debugging only.
+     */
     void drawRegionRects(const Region& region);
 
     /**
