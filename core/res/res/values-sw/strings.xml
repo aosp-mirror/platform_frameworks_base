@@ -217,14 +217,10 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Inaruhusu programu kupokea na kuchakata ujumbe wa WAP. Idhini hii inajumuisha uwezo wa kuchunguza na kufuta ujumbe uliotumwa kwako bila ya kukuonyesha."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"rudisha programu zinazoendeshwa"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Inaruhusu programu kurudisha taarifa kuhusu kazi zinazoendeshwa sasa na hivi karibuni. Hii inaweza kuruhusu programu kugundua taarifa kuhusu ni programu zipi zinazotumika kwenye kifaa."</string>
-    <!-- no translation found for permlab_interactAcrossUsers (7114255281944211682) -->
-    <skip />
-    <!-- no translation found for permdesc_interactAcrossUsers (364670963623385786) -->
-    <skip />
-    <!-- no translation found for permlab_interactAcrossUsersFull (2567734285545074105) -->
-    <skip />
-    <!-- no translation found for permdesc_interactAcrossUsersFull (376841368395502366) -->
-    <skip />
+    <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"ingiana na watumiaji"</string>
+    <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Inaruhusu programu kutenda vitendo kwa watumiaji tofauti kwenye kifaa. Programu hasidi huenda zikatumia hii ili kukiuka ulinzi kati ya watumiaji."</string>
+    <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"leseni kamili ili kuingiana na watumiaji"</string>
+    <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Inaruhusu miingialiano yote inayowezekana kwa watumiaji."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"epua maelezo ya programu zinazoendeshwa"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Huruhusu programu kuepua maelezo tondoti kuhusu kazi za sasa na zinazoendelea hivi karibuni. Programu hasidi huenda zikagundua maelezo ya kibinafsi kuhusu programu zingine."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"Agiza tena programu za kuendeshwa"</string>
