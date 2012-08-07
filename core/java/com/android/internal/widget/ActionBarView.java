@@ -26,6 +26,7 @@ import com.android.internal.view.menu.MenuPresenter;
 import com.android.internal.view.menu.MenuView;
 import com.android.internal.view.menu.SubMenuBuilder;
 
+import android.animation.LayoutTransition;
 import android.app.ActionBar;
 import android.app.ActionBar.OnNavigationListener;
 import android.app.Activity;
@@ -1271,12 +1272,19 @@ public class ActionBarView extends AbsActionBarView {
         private ImageView mIconView;
         private int mUpWidth;
 
+        private static final long DEFAULT_TRANSITION_DURATION = 150;
+
         public HomeView(Context context) {
             this(context, null);
         }
 
         public HomeView(Context context, AttributeSet attrs) {
             super(context, attrs);
+            LayoutTransition t = getLayoutTransition();
+            if (t != null) {
+                // Set a lower duration than the default
+                t.setDuration(DEFAULT_TRANSITION_DURATION);
+            }
         }
 
         public void setUp(boolean isUp) {
