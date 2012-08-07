@@ -1328,11 +1328,14 @@
   <java-symbol type="layout" name="screen_title_icons" />
   <java-symbol type="string" name="abbrev_wday_month_day_no_year" />
   <java-symbol type="string" name="android_upgrading_title" />
+  <java-symbol type="string" name="bugreport_title" />
+  <java-symbol type="string" name="bugreport_message" />
   <java-symbol type="string" name="faceunlock_multiple_failures" />
   <java-symbol type="string" name="global_action_power_off" />
   <java-symbol type="string" name="global_actions_airplane_mode_off_status" />
   <java-symbol type="string" name="global_actions_airplane_mode_on_status" />
   <java-symbol type="string" name="global_actions_toggle_airplane_mode" />
+  <java-symbol type="string" name="global_action_bug_report" />
   <java-symbol type="string" name="global_action_silent_mode_off_status" />
   <java-symbol type="string" name="global_action_silent_mode_on_status" />
   <java-symbol type="string" name="global_action_toggle_silent_mode" />
