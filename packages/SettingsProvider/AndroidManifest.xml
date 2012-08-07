@@ -14,6 +14,7 @@
 
         <provider android:name="SettingsProvider" android:authorities="settings"
                   android:multiprocess="false"
+                  android:exported="true"
                   android:writePermission="android.permission.WRITE_SETTINGS"
                   android:initOrder="100" />
     </application>
