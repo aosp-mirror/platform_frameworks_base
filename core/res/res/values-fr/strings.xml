@@ -217,14 +217,10 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Permet à l\'application de recevoir et de traiter les messages WAP. Cette autorisation lui donne la possibilité de surveiller ou supprimer les messages envoyés à votre appareil sans vous les montrer."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"récupérer les applications en cours d\'exécution"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Permet à l\'application de récupérer des informations sur des tâches en cours d\'exécution et récemment exécutées. L\'application est ainsi susceptible de d\'obtenir des informations sur les applications utilisées sur l\'appareil."</string>
-    <!-- no translation found for permlab_interactAcrossUsers (7114255281944211682) -->
-    <skip />
-    <!-- no translation found for permdesc_interactAcrossUsers (364670963623385786) -->
-    <skip />
-    <!-- no translation found for permlab_interactAcrossUsersFull (2567734285545074105) -->
-    <skip />
-    <!-- no translation found for permdesc_interactAcrossUsersFull (376841368395502366) -->
-    <skip />
+    <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"interagir entre les utilisateurs"</string>
+    <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Permet à l\'application d\'effectuer des actions entre les différents utilisateurs de l\'appareil. Les applications malveillantes peuvent utiliser cette autorisation pour passer outre la protection entre les utilisateurs."</string>
+    <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"autorisation totale d\'interagir entre les utilisateurs"</string>
+    <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Permet toutes les interactions possibles entre les utilisateurs."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"récupérer les détails des applications en cours d\'exécution"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Permet à l\'application de récupérer des informations détaillées sur les tâches en cours d\'exécution ou récemment exécutées. Des applications malveillantes peuvent utiliser cette fonctionnalité pour obtenir des informations confidentielles relatives à d\'autres applications."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"réorganiser les applications en cours d\'exécution"</string>

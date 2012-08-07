@@ -217,14 +217,10 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Ivumela uhlelo lokusebenza ukuthola nokucubungula imilayezo ye-WAP. Le mvume ifaka phakathi amandla okungamela noma okwesusa imilayezo ethunyelwe kuwe ngaphandle kokukubonisa."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"thola izinsiza ezisebenzayo"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Ivumela uhlelo lokusebenza ukubuyisa ulwazi mayelana nemisebenzi yamanje neyakamuva. Lokhu kungavumela uhlelo lokusebenza ukuthola ulwazi mayelana nokuthi iziphi izinhlelo zokusebenza ezisetshenziswa kudivayisi."</string>
-    <!-- no translation found for permlab_interactAcrossUsers (7114255281944211682) -->
-    <skip />
-    <!-- no translation found for permdesc_interactAcrossUsers (364670963623385786) -->
-    <skip />
-    <!-- no translation found for permlab_interactAcrossUsersFull (2567734285545074105) -->
-    <skip />
-    <!-- no translation found for permdesc_interactAcrossUsersFull (376841368395502366) -->
-    <skip />
+    <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"ihlanganyela phakathi kwabasebenzisi"</string>
+    <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Ivumela uhlelo lokusebenza ukwenza izenzo kubasebenzisi bonke kudivayisi. Izinhlelo zokusebenza ezingalungile zingasebenzisa lokhu ukwephula ukuvikela phakathi kwabasebenzisi."</string>
+    <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"ilayisensi egcwele yokuhlanganyela kubasebenzisi"</string>
+    <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Ivumela konke ukuhlanganyela phakathi kwabasebenzisi."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"thola kabusha imininingwane yezinhlelo zokusebenza ezisebenzayo"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Ivumela uhlelo lokusebenza ukuthola kabusha ulwazi mayelana nezinto ezenzeka manje nezisanda kwenzeka. Izinhlelo zokusebenza ezingalungile zingathola imininingwane eyimfihlo mayelana nezinye izinhlelo zokusebenza."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"misa kabusha izinsiza ezisebenzayo"</string>

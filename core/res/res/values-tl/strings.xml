@@ -217,14 +217,10 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Pinapayagan ang app na tumanggap at magproseso ng mga mensaheng WAP. Kabilang sa pahintulot na ito ang kakayahang sumubaybay o magtanggal ang app ng mga mensaheng ipinapadala sa iyo nang hindi ipinapakita ang mga ito sa iyo."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"bawiin ang tumatakbong apps"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Pinapayagan ang app na kumuha ng impormasyon tungkol sa mga kasalukuyan at kamakailang gumaganang gawain. Maaari nitong payagan ang app na tumuklas ng impormasyon tungkol sa kung aling mga application ang ginagamit sa device."</string>
-    <!-- no translation found for permlab_interactAcrossUsers (7114255281944211682) -->
-    <skip />
-    <!-- no translation found for permdesc_interactAcrossUsers (364670963623385786) -->
-    <skip />
-    <!-- no translation found for permlab_interactAcrossUsersFull (2567734285545074105) -->
-    <skip />
-    <!-- no translation found for permdesc_interactAcrossUsersFull (376841368395502366) -->
-    <skip />
+    <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"makipag-ugnayan sa kabuuan ng mga user"</string>
+    <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Binibigyang-daan ang app upang magsagawa ng mga pagkilos sa kabuuan ng iba\'t ibang mga user sa device. Maaari itong gamitin ng nakakahamak na apps upang lumabag sa proteksyon sa pagitan ng mga user."</string>
+    <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"ganap na lisensya upang makipag-ugnayan sa kabuuan ng mga user"</string>
+    <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Pinapayagan ang lahat ng posibleng pakikipag-ugnayan sa kabuuan ng mga user."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"bawiin ang mga detalye ng gumaganang apps"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Binibigyang-daan ang app na bawiin ang detalyadong impormasyon tungkol sa mga kasalukuyan at kamakailang gumaganang gawain. Maaaring makatuklas ang nakakahamak na apps ng pribadong impormasyon tungkol sa iba pang apps."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"muling isaayos ang tumatakbong apps"</string>
@@ -1309,6 +1305,5 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"System"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Audio sa Bluetooth"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Tapos na"</string>
-    <!-- no translation found for media_route_button_content_description (5758553567065145276) -->
-    <skip />
+    <string name="media_route_button_content_description" msgid="5758553567065145276">"Output ng media"</string>
 </resources>

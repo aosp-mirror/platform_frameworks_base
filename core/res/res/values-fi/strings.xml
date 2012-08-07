@@ -217,14 +217,10 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Antaa sovelluksen vastaanottaa ja käsitellä WAP-viestejä. Sovellus voi valvoa tai poistaa laitteeseesi lähetettyjä viestejä näyttämättä niitä sinulle."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"käynnissä olevien sovellusten noutaminen"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Antaa sovelluksen noutaa tietoja käynnissä olevista ja äskettäin suoritetuista tehtävistä. Sovellus voi saada tietoja laitteella käytetyistä sovelluksista."</string>
-    <!-- no translation found for permlab_interactAcrossUsers (7114255281944211682) -->
-    <skip />
-    <!-- no translation found for permdesc_interactAcrossUsers (364670963623385786) -->
-    <skip />
-    <!-- no translation found for permlab_interactAcrossUsersFull (2567734285545074105) -->
-    <skip />
-    <!-- no translation found for permdesc_interactAcrossUsersFull (376841368395502366) -->
-    <skip />
+    <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"suorita käyttäjien välisiä toimintoja"</string>
+    <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Antaa sovelluksen suorittaa käyttäjien välisiä toimintoja laitteessa. Haitalliset sovellukset voivat vahingoittaa käyttäjien välistä suojausta."</string>
+    <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"lupa suorittaa käyttäjien välisiä toimintoja"</string>
+    <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Sallii kaikki käyttäjien väliset toiminnot."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"hae tiedot suoritettavista sovelluksista"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Antaa sovellukselle oikeuden noutaa käynnissä oleviin ja käynnissä olleisiin tehtäviin liittyviä tietoja. Haitalliset sovellukset saattavat saada näin muihin sovelluksiin liittyviä yksityisiä tietoja."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"käynnissä olevien sovellusten järjesteleminen"</string>

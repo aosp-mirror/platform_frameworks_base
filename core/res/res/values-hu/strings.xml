@@ -217,14 +217,10 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Lehetővé teszi az alkalmazás számára, hogy WAP-üzeneteket fogadjon és dolgozzon fel. Ez azt is jelenti, hogy az alkalmazás megfigyelheti vagy törölheti a beérkező üzeneteket anélkül, hogy Ön látná azokat."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"futó alkalmazások lekérése"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Lehetővé teszi az alkalmazás számára a jelenleg futó és nemrég befejezett feladatokkal kapcsolatos információk lekérését. Ezáltal az alkalmazás engedélyt kap az eszközön használt alkalmazásokkal kapcsolatos információk felderítésére."</string>
-    <!-- no translation found for permlab_interactAcrossUsers (7114255281944211682) -->
-    <skip />
-    <!-- no translation found for permdesc_interactAcrossUsers (364670963623385786) -->
-    <skip />
-    <!-- no translation found for permlab_interactAcrossUsersFull (2567734285545074105) -->
-    <skip />
-    <!-- no translation found for permdesc_interactAcrossUsersFull (376841368395502366) -->
-    <skip />
+    <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"felhasználók közötti interakció"</string>
+    <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Lehetővé teszi az alkalmazás számára, hogy több felhasználó között végezzen különféle műveleteket az eszközön. A rosszindulatú alkalmazások arra használhatják ezt, hogy megsértsék a felhasználók biztonságát."</string>
+    <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"teljes licenc a felhasználók közötti interakcióhoz"</string>
+    <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Lehetővé teszi az összes lehetséges interakciót a felhasználók között."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"futó alkalmazások részleteinek lekérése"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Lehetővé teszi az alkalmazás számára a jelenleg és a nemrég futó feladatok részletes adatainak lekérését. A rosszindulatú alkalmazások más alkalmazásokkal kapcsolatos privát adatokhoz férhetnek hozzá."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"futó alkalmazások átrendezése"</string>

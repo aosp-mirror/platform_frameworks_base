@@ -217,14 +217,10 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Võimaldab rakendusel vastu võtta ja töödelda WAP-sõnumeid. See luba hõlmab võimet jälgida või kustutada teile saadetud sõnumeid neid teile näitamata."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"Käitatud rakenduste toomine"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Võimaldab rakendusel tuua teavet praegu ja hiljuti käitatud ülesannete kohta. See võib lubada rakendusel avastada teavet selle kohta, milliseid rakendusi seadmes kasutatakse."</string>
-    <!-- no translation found for permlab_interactAcrossUsers (7114255281944211682) -->
-    <skip />
-    <!-- no translation found for permdesc_interactAcrossUsers (364670963623385786) -->
-    <skip />
-    <!-- no translation found for permlab_interactAcrossUsersFull (2567734285545074105) -->
-    <skip />
-    <!-- no translation found for permdesc_interactAcrossUsersFull (376841368395502366) -->
-    <skip />
+    <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"toimingud erinevatel kasutajakontodel"</string>
+    <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Lubab rakendusel teha toiminguid seadme erinevatel kasutajakontodel. Pahatahtlikud rakendused võivad kasutada seda kasutajatevahelise kaitse rikkumiseks."</string>
+    <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"täielik litsents teha toiminguid erinevatel kasutajakontodel"</string>
+    <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Lubab kõiki võimalikke toiminguid erinevatel kasutajakontodel."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"töötavate rakenduste üksikasjade toomine"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Võimaldab rakendusel tuua üksikasjalikku teavet praegu töötavate ja hiljuti käitatud ülesannete kohta. Pahatahtlikud rakendused võivad tuvastada privaatset teavet muude rakenduste kohta."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"käitatud rakenduste ümberjärjestamine"</string>
@@ -1309,6 +1305,5 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Süsteem"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth-heli"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Valmis"</string>
-    <!-- no translation found for media_route_button_content_description (5758553567065145276) -->
-    <skip />
+    <string name="media_route_button_content_description" msgid="5758553567065145276">"Meediaväljund"</string>
 </resources>

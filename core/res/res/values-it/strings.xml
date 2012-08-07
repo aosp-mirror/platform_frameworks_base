@@ -217,14 +217,10 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Consente all\'applicazione di ricevere ed elaborare messaggi WAP. Questa autorizzazione include la facoltà di monitorare o eliminare i messaggi che ti vengono inviati senza mostrarteli."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"recupero applicazioni in esecuzione"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Consente all\'applicazione di recuperare informazioni sulle attività attualmente e recentemente in esecuzione. Ciò potrebbe consentire all\'applicazione di scoprire informazioni sulle applicazioni in uso sul dispositivo."</string>
-    <!-- no translation found for permlab_interactAcrossUsers (7114255281944211682) -->
-    <skip />
-    <!-- no translation found for permdesc_interactAcrossUsers (364670963623385786) -->
-    <skip />
-    <!-- no translation found for permlab_interactAcrossUsersFull (2567734285545074105) -->
-    <skip />
-    <!-- no translation found for permdesc_interactAcrossUsersFull (376841368395502366) -->
-    <skip />
+    <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"interazione tra gli utenti"</string>
+    <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Consente all\'applicazione di compiere azioni per diversi utenti sul dispositivo. Le applicazioni dannose potrebbero farne uso per violare la protezione tra utenti."</string>
+    <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"licenza completa per l\'interazione tra utenti"</string>
+    <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Consente tutte le interazioni possibili tra gli utenti."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"recupero dettagli applicazioni in esecuzione"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Consente all\'applicazione di recuperare informazioni dettagliate sulle attività attualmente e recentemente in esecuzione. Le applicazioni dannose potrebbero scoprire informazioni riservate su altre applicazioni."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"riordinamento applicazioni in esecuzione"</string>
