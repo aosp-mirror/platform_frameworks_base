@@ -32,7 +32,7 @@ import java.lang.reflect.Modifier;
  * the standard support creating a local implementation of such an object.
  * 
  * <p>Most developers will not implement this class directly, instead using the
- * <a href="{@docRoot}guide/developing/tools/aidl.html">aidl</a> tool to describe the desired
+ * <a href="{@docRoot}guide/components/aidl.html">aidl</a> tool to describe the desired
  * interface, having it generate the appropriate Binder subclass.  You can,
  * however, derive directly from Binder to implement your own custom RPC
  * protocol or simply instantiate a raw Binder object directly to use as a

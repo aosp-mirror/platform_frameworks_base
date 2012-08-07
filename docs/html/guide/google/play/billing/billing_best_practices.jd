@@ -58,7 +58,7 @@ sure to encrypt the content and use a device-specific encryption key.</p>
 <p>You should obfuscate your in-app billing code so it is difficult for an attacker to reverse
 engineer security protocols and other application components. At a minimum, we recommend that you
 run an  obfuscation tool like <a
-href="http://developer.android.com/tools/proguard.html">Proguard</a> on your
+href="{@docRoot}tools/help/proguard.html">Proguard</a> on your
 code.</p>
 <p>In addition to running an obfuscation program, we recommend that you use the following techniques
 to obfuscate your in-app billing code.</p>
