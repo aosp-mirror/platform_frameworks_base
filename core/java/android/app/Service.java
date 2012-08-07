@@ -142,7 +142,7 @@ import java.io.PrintWriter;
  * to the service.  The service will remain running as long as the connection
  * is established (whether or not the client retains a reference on the
  * service's IBinder).  Usually the IBinder returned is for a complex
- * interface that has been <a href="{@docRoot}guide/developing/tools/aidl.html">written
+ * interface that has been <a href="{@docRoot}guide/components/aidl.html">written
  * in aidl</a>.
  * 
  * <p>A service can be both started and have connections bound to it.  In such
@@ -473,7 +473,7 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * Return the communication channel to the service.  May return null if 
      * clients can not bind to the service.  The returned
      * {@link android.os.IBinder} is usually for a complex interface
-     * that has been <a href="{@docRoot}guide/developing/tools/aidl.html">described using
+     * that has been <a href="{@docRoot}guide/components/aidl.html">described using
      * aidl</a>.
      * 
      * <p><em>Note that unlike other application components, calls on to the
