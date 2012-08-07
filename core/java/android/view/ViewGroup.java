@@ -170,6 +170,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * This field should be made private, so it is hidden from the SDK.
      * {@hide}
      */
+    @ViewDebug.ExportedProperty(flagMapping = {
+            @ViewDebug.FlagToString(mask = FLAG_CLIP_CHILDREN, equals = FLAG_CLIP_CHILDREN,
+                    name = "CLIP_CHILDREN"),
+            @ViewDebug.FlagToString(mask = FLAG_CLIP_TO_PADDING, equals = FLAG_CLIP_TO_PADDING,
+                    name = "CLIP_TO_PADDING"),
+            @ViewDebug.FlagToString(mask = FLAG_PADDING_NOT_NULL, equals = FLAG_PADDING_NOT_NULL,
+                    name = "PADDING_NOT_NULL")
+    })
     protected int mGroupFlags;
 
     /*
@@ -2509,12 +2517,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         super.dispatchDetachedFromWindow();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void setPadding(int left, int top, int right, int bottom) {
-        super.setPadding(left, top, right, bottom);
+    void internalSetPadding(int left, int top, int right, int bottom) {
+        super.internalSetPadding(left, top, right, bottom);
 
         if ((mPaddingLeft | mPaddingTop | mPaddingRight | mPaddingBottom) != 0) {
             mGroupFlags |= FLAG_PADDING_NOT_NULL;
