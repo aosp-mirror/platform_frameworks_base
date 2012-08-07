@@ -217,14 +217,10 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Tillader, at appen kan modtage og behandle WAP-beskeder. Denne tilladelse omfatter muligheden for at overvåge eller slette de beskeder, der sendes til dig, uden at vise dem til dig."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"hente kørende apps"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Tillader, at appen kan hente oplysninger om nuværende og seneste opgaver. Med denne tilladelse kan appen finde oplysninger om, hvilke applikationer der bruges på enheden."</string>
-    <!-- no translation found for permlab_interactAcrossUsers (7114255281944211682) -->
-    <skip />
-    <!-- no translation found for permdesc_interactAcrossUsers (364670963623385786) -->
-    <skip />
-    <!-- no translation found for permlab_interactAcrossUsersFull (2567734285545074105) -->
-    <skip />
-    <!-- no translation found for permdesc_interactAcrossUsersFull (376841368395502366) -->
-    <skip />
+    <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"kommuniker på tværs af brugere"</string>
+    <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Tillader, at appen udfører handlinger på tværs af forskellige brugere på enheden. Ondsindede apps kan bruge dette til at krænke beskyttelsen mellem brugere."</string>
+    <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"fuld licens til at kommunikere på tværs af brugere"</string>
+    <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Tillader alle mulige former for kommunikation på tværs af brugere."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"hente oplysninger om apps, der kører"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Tillader, at appen kan hente oplysninger om aktuelle og seneste opgaver. Ondsindede apps kan muligvis finde personlige oplysninger om andre apps."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"omorganisere kørende apps"</string>
