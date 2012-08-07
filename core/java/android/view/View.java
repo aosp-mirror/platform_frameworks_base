@@ -14107,7 +14107,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         internalSetPadding(left, top, right, bottom);
     }
 
-    private void internalSetPadding(int left, int top, int right, int bottom) {
+    void internalSetPadding(int left, int top, int right, int bottom) {
         mUserPaddingLeft = left;
         mUserPaddingRight = right;
         mUserPaddingBottom = bottom;
