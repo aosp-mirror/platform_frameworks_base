@@ -1,8 +1,10 @@
 page.title=Computation
+page.landing=true
+page.landing.intro=Renderscript provides a platform-independent computation engine that operates at the native level. Use it to accelerate your apps that require extensive computational horsepower.
+page.landing.image=
+
 @jd:body
 
-<p>Renderscript provides a platform-independent computation engine that operates at the native level.
-  Use it to accelerate your apps that require extensive computational horsepower.</p>
 <div class="landing-docs">
 
   <div>
