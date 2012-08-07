@@ -217,14 +217,10 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Hiermee kan de app WAP-berichten ontvangen en verwerken. Dit betekent dat de app berichten die naar uw apparaat zijn verzonden, kan bijhouden of verwijderen zonder deze aan u weer te geven."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"actieve apps ophalen"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Hiermee kan de app informatie ophalen over actieve en recent uitgevoerde taken. Zo kan de app informatie vinden over welke apps op het apparaat worden gebruikt."</string>
-    <!-- no translation found for permlab_interactAcrossUsers (7114255281944211682) -->
-    <skip />
-    <!-- no translation found for permdesc_interactAcrossUsers (364670963623385786) -->
-    <skip />
-    <!-- no translation found for permlab_interactAcrossUsersFull (2567734285545074105) -->
-    <skip />
-    <!-- no translation found for permdesc_interactAcrossUsersFull (376841368395502366) -->
-    <skip />
+    <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"interactie tussen gebruikers"</string>
+    <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Hiermee kan de app acties uitvoeren voor verschillende gebruikers van het apparaat. Schadelijke apps kunnen dit gebruiken om de beveiliging tussen gebruikers te schenden."</string>
+    <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"volledige toestemming voor interactie tussen gebruikers"</string>
+    <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Hiermee is alle mogelijke interactie tussen gebruikers toegestaan."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"details van actieve apps ophalen"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Hiermee kan de app gedetailleerde informatie over huidige en recent uitgevoerde taken ophalen. Schadelijke apps kunnen op deze manier mogelijk privé-informatie over andere apps achterhalen."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"actieve apps opnieuw rangschikken"</string>

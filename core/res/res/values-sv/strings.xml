@@ -217,14 +217,10 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Tillåter att appen tar emot och hanterar WAP-meddelanden. Med den här behörigheten kan appen övervaka eller ta bort meddelanden som skickats till dig utan att visa dem för dig."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"hämta appar som körs"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Tillåter att appen hämtar information om nyligen körda och pågående aktiviteter. Detta kan innebära att appen tillåts ta reda på vilka appar som används på enheten."</string>
-    <!-- no translation found for permlab_interactAcrossUsers (7114255281944211682) -->
-    <skip />
-    <!-- no translation found for permdesc_interactAcrossUsers (364670963623385786) -->
-    <skip />
-    <!-- no translation found for permlab_interactAcrossUsersFull (2567734285545074105) -->
-    <skip />
-    <!-- no translation found for permdesc_interactAcrossUsersFull (376841368395502366) -->
-    <skip />
+    <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"interagera mellan användare"</string>
+    <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Tillåter att appen utför åtgärder mellan användare på enheten. Skadliga appar kan använda detta som ett sätt att kringgå skyddet mellan användare."</string>
+    <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"fullständig behörighet att interagera mellan användare"</string>
+    <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Tillåter all slags interaktion mellan användare."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"hämta information om aktiva appar"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Tillåter att appen hämtar detaljerad information om uppgifter som körs och har körts. Skadliga appar kan upptäcka personliga uppgifter om andra appar."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"byt ordning på appar som körs"</string>

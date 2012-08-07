@@ -217,14 +217,10 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Επιτρέπει στην εφαρμογή τη λήψη και την επεξεργασία μηνυμάτων WAP. Αυτό σημαίνει ότι η εφαρμογή θα μπορούσε να παρακολουθήσει ή να διαγράψει τα μηνύματα που αποστέλλονται στη συσκευή σας χωρίς αυτά να εμφανιστούν σε εσάς."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"ανάκτηση εκτελούμενων εφαρμογών"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Επιτρέπει στην εφαρμογή την ανάκτηση πληροφοριών σχετικά με τρέχουσες και πρόσφατα εκτελούμενες εργασίες. Αυτό μπορεί να δίνει τη δυνατότητα στην εφαρμογή να ανακαλύπτει πληροφορίες σχετικά με το ποιες εφαρμογές χρησιμοποιούνται στη συσκευή."</string>
-    <!-- no translation found for permlab_interactAcrossUsers (7114255281944211682) -->
-    <skip />
-    <!-- no translation found for permdesc_interactAcrossUsers (364670963623385786) -->
-    <skip />
-    <!-- no translation found for permlab_interactAcrossUsersFull (2567734285545074105) -->
-    <skip />
-    <!-- no translation found for permdesc_interactAcrossUsersFull (376841368395502366) -->
-    <skip />
+    <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"αλληλεπίδραση στους χρήστες"</string>
+    <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Δίνει στην εφαρμογή τη δυνατότητα να πραγματοποιεί ενέργειες σε όλους τους διαφορετικούς χρήστες στη συσκευή. Οι κακόβουλες εφαρμογές ενδέχεται να χρησιμοποιήσουν αυτή τη δυνατότητα για να παραβιάσουν την προστασία μεταξύ των χρηστών."</string>
+    <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"πλήρης άδεια αλληλεπίδρασης στους χρήστες"</string>
+    <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Επιτρέπει όλες τις πιθανές αλληλεπιδράσεις στους χρήστες."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"ανάκτηση λεπτομερειών σχετικά με τις εκτελούμενες εφαρμογές"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Επιτρέπει στην εφαρμογή την ανάκτηση λεπτομερών πληροφοριών σχετικά με τις τρέχουσες εκτελούμενες εργασίες και τις εργασίες που έχουν εκτελεστεί πρόσφατα. Τυχόν κακόβουλες εφαρμογές ενδέχεται να ανακαλύψουν ιδιωτικές πληροφορίες σχετικά με άλλες εφαρμογές."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"αναδιάταξη εκτελούμενων εφαρμογών"</string>

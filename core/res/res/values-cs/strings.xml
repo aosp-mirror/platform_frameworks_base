@@ -217,14 +217,10 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Umožňuje aplikaci přijmout a zpracovat zprávy WAP. Toto oprávnění umožňuje sledovat přijaté zprávy nebo je smazat, aniž by se vám zobrazily."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"načtení spuštěných aplikací"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Umožňuje aplikaci získat informace o aktuálně a naposledy spuštěných úlohách. Aplikace s tímto oprávněním může odhalit informace o aplikacích, které se v zařízení používají."</string>
-    <!-- no translation found for permlab_interactAcrossUsers (7114255281944211682) -->
-    <skip />
-    <!-- no translation found for permdesc_interactAcrossUsers (364670963623385786) -->
-    <skip />
-    <!-- no translation found for permlab_interactAcrossUsersFull (2567734285545074105) -->
-    <skip />
-    <!-- no translation found for permdesc_interactAcrossUsersFull (376841368395502366) -->
-    <skip />
+    <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"interakce napříč uživateli"</string>
+    <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Umožňuje aplikaci provádět akce napříč různými uživateli zařízení. Škodlivé aplikace toto oprávnění mohou zneužít k obejití ochrany mezi uživateli."</string>
+    <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"úplné oprávnění k interakcím napříč uživateli"</string>
+    <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Povoluje všechny možné interakce napříč uživateli."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"získání podrobností o spuštěných aplikacích"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Umožňuje aplikaci získat podrobné informace o aktuálně a naposledy spuštěných úlohách. Škodlivé aplikace mohou odhalit soukromé informace o ostatních aplikacích."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"změna uspořádání spuštěných aplikací"</string>
@@ -1225,8 +1221,8 @@
     <string name="time_picker_decrement_minute_button" msgid="6246834937080684791">"Ubrat minutu"</string>
     <string name="time_picker_increment_hour_button" msgid="3652056055810223139">"Přidat hodinu"</string>
     <string name="time_picker_decrement_hour_button" msgid="1377479863429214792">"Ubrat hodinu"</string>
-    <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"Nastavit odp."</string>
-    <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"Nastavit dop."</string>
+    <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"Nastavit PM"</string>
+    <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"Nastavit AM"</string>
     <string name="date_picker_increment_month_button" msgid="5369998479067934110">"Přidat měsíc"</string>
     <string name="date_picker_decrement_month_button" msgid="1832698995541726019">"Ubrat měsíc"</string>
     <string name="date_picker_increment_day_button" msgid="7130465412308173903">"Přidat den"</string>
