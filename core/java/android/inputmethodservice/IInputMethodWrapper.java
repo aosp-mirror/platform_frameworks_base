@@ -17,6 +17,7 @@
 package android.inputmethodservice;
 
 import com.android.internal.os.HandlerCaller;
+import com.android.internal.os.SomeArgs;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethod;
 import com.android.internal.view.IInputMethodCallback;
@@ -124,7 +125,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 if (target == null) {
                     return;
                 }
-                HandlerCaller.SomeArgs args = (HandlerCaller.SomeArgs)msg.obj;
+                SomeArgs args = (SomeArgs)msg.obj;
                 try {
                     target.dump((FileDescriptor)args.arg1,
                             (PrintWriter)args.arg2, (String[])args.arg3);
@@ -134,6 +135,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 synchronized (args.arg4) {
                     ((CountDownLatch)args.arg4).countDown();
                 }
+                args.recycle();
                 return;
             }
             
@@ -149,23 +151,25 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 inputMethod.unbindInput();
                 return;
             case DO_START_INPUT: {
-                HandlerCaller.SomeArgs args = (HandlerCaller.SomeArgs)msg.obj;
+                SomeArgs args = (SomeArgs)msg.obj;
                 IInputContext inputContext = (IInputContext)args.arg1;
                 InputConnection ic = inputContext != null
                         ? new InputConnectionWrapper(inputContext) : null;
                 EditorInfo info = (EditorInfo)args.arg2;
                 info.makeCompatible(mTargetSdkVersion);
                 inputMethod.startInput(ic, info);
+                args.recycle();
                 return;
             }
             case DO_RESTART_INPUT: {
-                HandlerCaller.SomeArgs args = (HandlerCaller.SomeArgs)msg.obj;
+                SomeArgs args = (SomeArgs)msg.obj;
                 IInputContext inputContext = (IInputContext)args.arg1;
                 InputConnection ic = inputContext != null
                         ? new InputConnectionWrapper(inputContext) : null;
                 EditorInfo info = (EditorInfo)args.arg2;
                 info.makeCompatible(mTargetSdkVersion);
                 inputMethod.restartInput(ic, info);
+                args.recycle();
                 return;
             }
             case DO_CREATE_SESSION: {

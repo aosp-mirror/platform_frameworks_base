@@ -17,6 +17,7 @@ package com.android.server;
 
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.HandlerCaller;
+import com.android.internal.os.SomeArgs;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethod;
@@ -2024,7 +2025,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @Override
     public boolean handleMessage(Message msg) {
-        HandlerCaller.SomeArgs args;
+        SomeArgs args;
         switch (msg.what) {
             case MSG_SHOW_IM_PICKER:
                 showInputMethodMenu();
@@ -2035,8 +2036,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 return true;
 
             case MSG_SHOW_IM_SUBTYPE_ENABLER:
-                args = (HandlerCaller.SomeArgs)msg.obj;
+                args = (SomeArgs)msg.obj;
                 showInputMethodAndSubtypeEnabler((String)args.arg1);
+                args.recycle();
                 return true;
 
             case MSG_SHOW_IM_CONFIG:
@@ -2053,48 +2055,53 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
                 return true;
             case MSG_BIND_INPUT:
-                args = (HandlerCaller.SomeArgs)msg.obj;
+                args = (SomeArgs)msg.obj;
                 try {
                     ((IInputMethod)args.arg1).bindInput((InputBinding)args.arg2);
                 } catch (RemoteException e) {
                 }
+                args.recycle();
                 return true;
             case MSG_SHOW_SOFT_INPUT:
-                args = (HandlerCaller.SomeArgs)msg.obj;
+                args = (SomeArgs)msg.obj;
                 try {
                     ((IInputMethod)args.arg1).showSoftInput(msg.arg1,
                             (ResultReceiver)args.arg2);
                 } catch (RemoteException e) {
                 }
+                args.recycle();
                 return true;
             case MSG_HIDE_SOFT_INPUT:
-                args = (HandlerCaller.SomeArgs)msg.obj;
+                args = (SomeArgs)msg.obj;
                 try {
                     ((IInputMethod)args.arg1).hideSoftInput(0,
                             (ResultReceiver)args.arg2);
                 } catch (RemoteException e) {
                 }
+                args.recycle();
                 return true;
             case MSG_ATTACH_TOKEN:
-                args = (HandlerCaller.SomeArgs)msg.obj;
+                args = (SomeArgs)msg.obj;
                 try {
                     if (DEBUG) Slog.v(TAG, "Sending attach of token: " + args.arg2);
                     ((IInputMethod)args.arg1).attachToken((IBinder)args.arg2);
                 } catch (RemoteException e) {
                 }
+                args.recycle();
                 return true;
             case MSG_CREATE_SESSION:
-                args = (HandlerCaller.SomeArgs)msg.obj;
+                args = (SomeArgs)msg.obj;
                 try {
                     ((IInputMethod)args.arg1).createSession(
                             (IInputMethodCallback)args.arg2);
                 } catch (RemoteException e) {
                 }
+                args.recycle();
                 return true;
             // ---------------------------------------------------------
 
             case MSG_START_INPUT:
-                args = (HandlerCaller.SomeArgs)msg.obj;
+                args = (SomeArgs)msg.obj;
                 try {
                     SessionState session = (SessionState)args.arg1;
                     setEnabledSessionInMainThread(session);
@@ -2102,9 +2109,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             (EditorInfo)args.arg3);
                 } catch (RemoteException e) {
                 }
+                args.recycle();
                 return true;
             case MSG_RESTART_INPUT:
-                args = (HandlerCaller.SomeArgs)msg.obj;
+                args = (SomeArgs)msg.obj;
                 try {
                     SessionState session = (SessionState)args.arg1;
                     setEnabledSessionInMainThread(session);
@@ -2112,6 +2120,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             (EditorInfo)args.arg3);
                 } catch (RemoteException e) {
                 }
+                args.recycle();
                 return true;
 
             // ---------------------------------------------------------
@@ -2124,13 +2133,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
                 return true;
             case MSG_BIND_METHOD:
-                args = (HandlerCaller.SomeArgs)msg.obj;
+                args = (SomeArgs)msg.obj;
                 try {
                     ((IInputMethodClient)args.arg1).onBindMethod(
                             (InputBindResult)args.arg2);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Client died receiving input method " + args.arg2);
                 }
+                args.recycle();
                 return true;
             case MSG_SET_ACTIVE:
                 try {

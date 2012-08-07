@@ -16,7 +16,7 @@
 
 package android.view.inputmethod;
 
-import com.android.internal.os.HandlerCaller;
+import com.android.internal.os.SomeArgs;
 import com.android.internal.view.IInputConnectionWrapper;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodCallback;
@@ -341,7 +341,7 @@ public final class InputMethodManager {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_DUMP: {
-                    HandlerCaller.SomeArgs args = (HandlerCaller.SomeArgs)msg.obj;
+                    SomeArgs args = (SomeArgs)msg.obj;
                     try {
                         doDump((FileDescriptor)args.arg1,
                                 (PrintWriter)args.arg2, (String[])args.arg3);
@@ -351,6 +351,7 @@ public final class InputMethodManager {
                     synchronized (args.arg4) {
                         ((CountDownLatch)args.arg4).countDown();
                     }
+                    args.recycle();
                     return;
                 }
                 case MSG_BIND: {
@@ -486,7 +487,7 @@ public final class InputMethodManager {
             // interface to the system.
             
             CountDownLatch latch = new CountDownLatch(1);
-            HandlerCaller.SomeArgs sargs = new HandlerCaller.SomeArgs();
+            SomeArgs sargs = SomeArgs.obtain();
             sargs.arg1 = fd;
             sargs.arg2 = fout;
             sargs.arg3 = args;

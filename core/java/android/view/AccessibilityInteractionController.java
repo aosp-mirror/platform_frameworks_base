@@ -25,15 +25,13 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
-import android.util.Pool;
-import android.util.Poolable;
-import android.util.PoolableManager;
-import android.util.Pools;
 import android.util.SparseLongArray;
 import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
+
+import com.android.internal.os.SomeArgs;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,7 +46,6 @@ import java.util.Map;
  * UI thread.
  */
 final class AccessibilityInteractionController {
-    private static final int POOL_SIZE = 5;
 
     private ArrayList<AccessibilityNodeInfo> mTempAccessibilityNodeInfoList =
         new ArrayList<AccessibilityNodeInfo>();
@@ -76,60 +73,6 @@ final class AccessibilityInteractionController {
         mPrefetcher = new AccessibilityNodePrefetcher();
     }
 
-    // Reusable poolable arguments for interacting with the view hierarchy
-    // to fit more arguments than Message and to avoid sharing objects between
-    // two messages since several threads can send messages concurrently.
-    private final Pool<SomeArgs> mPool = Pools.synchronizedPool(Pools.finitePool(
-            new PoolableManager<SomeArgs>() {
-                public SomeArgs newInstance() {
-                    return new SomeArgs();
-                }
-
-                public void onAcquired(SomeArgs info) {
-                    /* do nothing */
-                }
-
-                public void onReleased(SomeArgs info) {
-                    info.clear();
-                }
-            }, POOL_SIZE)
-    );
-
-    private class SomeArgs implements Poolable<SomeArgs> {
-        private SomeArgs mNext;
-        private boolean mIsPooled;
-
-        public Object arg1;
-        public Object arg2;
-        public int argi1;
-        public int argi2;
-        public int argi3;
-
-        public SomeArgs getNextPoolable() {
-            return mNext;
-        }
-
-        public boolean isPooled() {
-            return mIsPooled;
-        }
-
-        public void setNextPoolable(SomeArgs args) {
-            mNext = args;
-        }
-
-        public void setPooled(boolean isPooled) {
-            mIsPooled = isPooled;
-        }
-
-        private void clear() {
-            arg1 = null;
-            arg2 = null;
-            argi1 = 0;
-            argi2 = 0;
-            argi3 = 0;
-        }
-    }
-
     private boolean isShown(View view) {
         // The first two checks are made also made by isShown() which
         // however traverses the tree up to the parent to catch that.
@@ -148,7 +91,7 @@ final class AccessibilityInteractionController {
         message.what = PrivateHandler.MSG_FIND_ACCESSIBLITY_NODE_INFO_BY_ACCESSIBILITY_ID;
         message.arg1 = flags;
 
-        SomeArgs args = mPool.acquire();
+        SomeArgs args = SomeArgs.obtain();
         args.argi1 = AccessibilityNodeInfo.getAccessibilityViewId(accessibilityNodeId);
         args.argi2 = AccessibilityNodeInfo.getVirtualDescendantId(accessibilityNodeId);
         args.argi3 = interactionId;
@@ -177,7 +120,7 @@ final class AccessibilityInteractionController {
         final IAccessibilityInteractionConnectionCallback callback =
             (IAccessibilityInteractionConnectionCallback) args.arg1;
 
-        mPool.release(args);
+        args.recycle();
 
         List<AccessibilityNodeInfo> infos = mTempAccessibilityNodeInfoList;
         infos.clear();
@@ -216,7 +159,7 @@ final class AccessibilityInteractionController {
         message.arg1 = flags;
         message.arg2 = AccessibilityNodeInfo.getAccessibilityViewId(accessibilityNodeId);
 
-        SomeArgs args = mPool.acquire();
+        SomeArgs args = SomeArgs.obtain();
         args.argi1 = viewId;
         args.argi2 = interactionId;
         args.arg1 = callback;
@@ -245,7 +188,7 @@ final class AccessibilityInteractionController {
         final IAccessibilityInteractionConnectionCallback callback =
             (IAccessibilityInteractionConnectionCallback) args.arg1;
 
-        mPool.release(args);
+        args.recycle();
 
         AccessibilityNodeInfo info = null;
         try {
@@ -284,7 +227,7 @@ final class AccessibilityInteractionController {
         message.what = PrivateHandler.MSG_FIND_ACCESSIBLITY_NODE_INFO_BY_TEXT;
         message.arg1 = flags;
 
-        SomeArgs args = mPool.acquire();
+        SomeArgs args = SomeArgs.obtain();
         args.arg1 = text;
         args.arg2 = callback;
         args.argi1 = AccessibilityNodeInfo.getAccessibilityViewId(accessibilityNodeId);
@@ -315,7 +258,7 @@ final class AccessibilityInteractionController {
         final int accessibilityViewId = args.argi1;
         final int virtualDescendantId = args.argi2;
         final int interactionId = args.argi3;
-        mPool.release(args);
+        args.recycle();
 
         List<AccessibilityNodeInfo> infos = null;
         try {
@@ -383,7 +326,7 @@ final class AccessibilityInteractionController {
         message.arg1 = flags;
         message.arg2 = focusType;
 
-        SomeArgs args = mPool.acquire();
+        SomeArgs args = SomeArgs.obtain();
         args.argi1 = interactionId;
         args.argi2 = AccessibilityNodeInfo.getAccessibilityViewId(accessibilityNodeId);
         args.argi3 = AccessibilityNodeInfo.getVirtualDescendantId(accessibilityNodeId);
@@ -414,7 +357,7 @@ final class AccessibilityInteractionController {
         final IAccessibilityInteractionConnectionCallback callback =
             (IAccessibilityInteractionConnectionCallback) args.arg1;
 
-        mPool.release(args);
+        args.recycle();
 
         AccessibilityNodeInfo focused = null;
         try {
@@ -480,8 +423,7 @@ final class AccessibilityInteractionController {
         message.arg1 = flags;
         message.arg2 = AccessibilityNodeInfo.getAccessibilityViewId(accessibilityNodeId);
 
-        SomeArgs args = mPool.acquire();
-        args.argi1 = AccessibilityNodeInfo.getVirtualDescendantId(accessibilityNodeId);
+        SomeArgs args = SomeArgs.obtain();
         args.argi2 = direction;
         args.argi3 = interactionId;
         args.arg1 = callback;
@@ -505,13 +447,12 @@ final class AccessibilityInteractionController {
         final int accessibilityViewId = message.arg2;
 
         SomeArgs args = (SomeArgs) message.obj;
-        final int virtualDescendantId = args.argi1;
         final int direction = args.argi2;
         final int interactionId = args.argi3;
         final IAccessibilityInteractionConnectionCallback callback =
             (IAccessibilityInteractionConnectionCallback) args.arg1;
 
-        mPool.release(args);
+        args.recycle();
 
         AccessibilityNodeInfo next = null;
         try {
@@ -552,7 +493,7 @@ final class AccessibilityInteractionController {
         message.arg1 = flags;
         message.arg2 = AccessibilityNodeInfo.getAccessibilityViewId(accessibilityNodeId);
 
-        SomeArgs args = mPool.acquire();
+        SomeArgs args = SomeArgs.obtain();
         args.argi1 = AccessibilityNodeInfo.getVirtualDescendantId(accessibilityNodeId);
         args.argi2 = action;
         args.argi3 = interactionId;
@@ -585,7 +526,7 @@ final class AccessibilityInteractionController {
             (IAccessibilityInteractionConnectionCallback) args.arg1;
         Bundle arguments = (Bundle) args.arg2;
 
-        mPool.release(args);
+        args.recycle();
 
         boolean succeeded = false;
         try {
