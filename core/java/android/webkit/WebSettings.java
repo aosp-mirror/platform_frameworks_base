@@ -925,6 +925,9 @@ public abstract class WebSettings {
      * access to content from other file scheme URLs. See
      * {@link #setAllowFileAccessFromFileURLs}. To enable the most restrictive,
      * and therefore secure policy, this setting should be disabled.
+     * Note that this setting affects only JavaScript access to file scheme
+     * resources. Other access to such resources, for example, from image HTML
+     * elements, is unaffected.
      * <p>
      * The default value is true for API level
      * {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH_MR1} and below,
@@ -942,6 +945,9 @@ public abstract class WebSettings {
      * enable the most restrictive, and therefore secure policy, this setting
      * should be disabled. Note that the value of this setting is ignored if
      * the value of {@link #getAllowUniversalAccessFromFileURLs} is true.
+     * Note too, that this setting affects only JavaScript access to file scheme
+     * resources. Other access to such resources, for example, from image HTML
+     * elements, is unaffected.
      * <p>
      * The default value is true for API level
      * {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH_MR1} and below,
