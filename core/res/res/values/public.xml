@@ -443,34 +443,6 @@
   <java-symbol type="string" name="date_time" />
   <java-symbol type="string" name="date_time_set" />
   <java-symbol type="string" name="date_time_done" />
-  <java-symbol type="string" name="day_of_week_long_friday" />
-  <java-symbol type="string" name="day_of_week_long_monday" />
-  <java-symbol type="string" name="day_of_week_long_saturday" />
-  <java-symbol type="string" name="day_of_week_long_sunday" />
-  <java-symbol type="string" name="day_of_week_long_thursday" />
-  <java-symbol type="string" name="day_of_week_long_tuesday" />
-  <java-symbol type="string" name="day_of_week_long_wednesday" />
-  <java-symbol type="string" name="day_of_week_medium_friday" />
-  <java-symbol type="string" name="day_of_week_medium_monday" />
-  <java-symbol type="string" name="day_of_week_medium_saturday" />
-  <java-symbol type="string" name="day_of_week_medium_sunday" />
-  <java-symbol type="string" name="day_of_week_medium_thursday" />
-  <java-symbol type="string" name="day_of_week_medium_tuesday" />
-  <java-symbol type="string" name="day_of_week_medium_wednesday" />
-  <java-symbol type="string" name="day_of_week_short_friday" />
-  <java-symbol type="string" name="day_of_week_short_monday" />
-  <java-symbol type="string" name="day_of_week_short_saturday" />
-  <java-symbol type="string" name="day_of_week_short_sunday" />
-  <java-symbol type="string" name="day_of_week_short_thursday" />
-  <java-symbol type="string" name="day_of_week_short_tuesday" />
-  <java-symbol type="string" name="day_of_week_short_wednesday" />
-  <java-symbol type="string" name="day_of_week_shortest_friday" />
-  <java-symbol type="string" name="day_of_week_shortest_monday" />
-  <java-symbol type="string" name="day_of_week_shortest_saturday" />
-  <java-symbol type="string" name="day_of_week_shortest_sunday" />
-  <java-symbol type="string" name="day_of_week_shortest_thursday" />
-  <java-symbol type="string" name="day_of_week_shortest_tuesday" />
-  <java-symbol type="string" name="day_of_week_shortest_wednesday" />
   <java-symbol type="string" name="db_default_journal_mode" />
   <java-symbol type="string" name="db_default_sync_mode" />
   <java-symbol type="string" name="db_wal_sync_mode" />
@@ -585,54 +557,6 @@
   <java-symbol type="string" name="month" />
   <java-symbol type="string" name="month_day" />
   <java-symbol type="string" name="month_day_year" />
-  <java-symbol type="string" name="month_long_april" />
-  <java-symbol type="string" name="month_long_august" />
-  <java-symbol type="string" name="month_long_december" />
-  <java-symbol type="string" name="month_long_february" />
-  <java-symbol type="string" name="month_long_january" />
-  <java-symbol type="string" name="month_long_july" />
-  <java-symbol type="string" name="month_long_june" />
-  <java-symbol type="string" name="month_long_march" />
-  <java-symbol type="string" name="month_long_may" />
-  <java-symbol type="string" name="month_long_november" />
-  <java-symbol type="string" name="month_long_october" />
-  <java-symbol type="string" name="month_long_september" />
-  <java-symbol type="string" name="month_long_standalone_april" />
-  <java-symbol type="string" name="month_long_standalone_august" />
-  <java-symbol type="string" name="month_long_standalone_december" />
-  <java-symbol type="string" name="month_long_standalone_february" />
-  <java-symbol type="string" name="month_long_standalone_january" />
-  <java-symbol type="string" name="month_long_standalone_july" />
-  <java-symbol type="string" name="month_long_standalone_june" />
-  <java-symbol type="string" name="month_long_standalone_march" />
-  <java-symbol type="string" name="month_long_standalone_may" />
-  <java-symbol type="string" name="month_long_standalone_november" />
-  <java-symbol type="string" name="month_long_standalone_october" />
-  <java-symbol type="string" name="month_long_standalone_september" />
-  <java-symbol type="string" name="month_medium_april" />
-  <java-symbol type="string" name="month_medium_august" />
-  <java-symbol type="string" name="month_medium_december" />
-  <java-symbol type="string" name="month_medium_february" />
-  <java-symbol type="string" name="month_medium_january" />
-  <java-symbol type="string" name="month_medium_july" />
-  <java-symbol type="string" name="month_medium_june" />
-  <java-symbol type="string" name="month_medium_march" />
-  <java-symbol type="string" name="month_medium_may" />
-  <java-symbol type="string" name="month_medium_november" />
-  <java-symbol type="string" name="month_medium_october" />
-  <java-symbol type="string" name="month_medium_september" />
-  <java-symbol type="string" name="month_shortest_april" />
-  <java-symbol type="string" name="month_shortest_august" />
-  <java-symbol type="string" name="month_shortest_december" />
-  <java-symbol type="string" name="month_shortest_february" />
-  <java-symbol type="string" name="month_shortest_january" />
-  <java-symbol type="string" name="month_shortest_july" />
-  <java-symbol type="string" name="month_shortest_june" />
-  <java-symbol type="string" name="month_shortest_march" />
-  <java-symbol type="string" name="month_shortest_may" />
-  <java-symbol type="string" name="month_shortest_november" />
-  <java-symbol type="string" name="month_shortest_october" />
-  <java-symbol type="string" name="month_shortest_september" />
   <java-symbol type="string" name="month_year" />
   <java-symbol type="string" name="more_item_label" />
   <java-symbol type="string" name="needPuk" />
