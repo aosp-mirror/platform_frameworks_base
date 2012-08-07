@@ -34,7 +34,7 @@ public class BaseIWindow extends IWindow.Stub {
     }
 
     @Override
-    public void resized(int w, int h, Rect contentInsets,
+    public void resized(Rect frame, Rect contentInsets,
             Rect visibleInsets, boolean reportDraw, Configuration newConfig) {
         if (reportDraw) {
             try {

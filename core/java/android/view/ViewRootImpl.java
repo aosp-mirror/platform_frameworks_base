@@ -74,6 +74,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Scroller;
 
 import com.android.internal.R;
+import com.android.internal.os.SomeArgs;
 import com.android.internal.policy.PolicyManager;
 import com.android.internal.view.BaseSurfaceHolder;
 import com.android.internal.view.RootViewSurfaceTaker;
@@ -109,7 +110,7 @@ public final class ViewRootImpl implements ViewParent,
     private static final boolean DEBUG_FPS = false;
 
     private static final boolean USE_RENDER_THREAD = false;
-    
+
     /**
      * Set this system property to true to force the view hierarchy to render
      * at 60 Hz. This can be used to measure the potential framerate.
@@ -264,12 +265,6 @@ public final class ViewRootImpl implements ViewParent,
     final Configuration mLastConfiguration = new Configuration();
     final Configuration mPendingConfiguration = new Configuration();
 
-    class ResizedInfo {
-        Rect contentInsets;
-        Rect visibleInsets;
-        Configuration newConfig;
-    }
-    
     boolean mScrollMayChange;
     int mSoftInputMode;
     View mLastScrolledFocus;
@@ -2823,29 +2818,31 @@ public final class ViewRootImpl implements ViewParent,
             case MSG_DISPATCH_GET_NEW_SURFACE:
                 handleGetNewSurface();
                 break;
-            case MSG_RESIZED:
-                ResizedInfo ri = (ResizedInfo)msg.obj;
-
-                if (mWinFrame.width() == msg.arg1 && mWinFrame.height() == msg.arg2
-                        && mPendingContentInsets.equals(ri.contentInsets)
-                        && mPendingVisibleInsets.equals(ri.visibleInsets)
-                        && ((ResizedInfo)msg.obj).newConfig == null) {
+            case MSG_RESIZED: {
+                // Recycled in the fall through...
+                SomeArgs args = (SomeArgs) msg.obj;
+                if (mWinFrame.equals((Rect) args.arg1)
+                        && mPendingContentInsets.equals((Rect) args.arg2)
+                        && mPendingVisibleInsets.equals((Rect) args.arg3)
+                        && ((Configuration) args.arg4 == null)) {
                     break;
                 }
-                // fall through...
+                } // fall through...
             case MSG_RESIZED_REPORT:
                 if (mAdded) {
-                    Configuration config = ((ResizedInfo)msg.obj).newConfig;
+                    SomeArgs args = (SomeArgs) msg.obj;
+
+                    Configuration config = (Configuration) args.arg4;
                     if (config != null) {
                         updateConfiguration(config, false);
                     }
-                    // TODO: Should left/top stay unchanged and only change the right/bottom?
-                    mWinFrame.left = 0;
-                    mWinFrame.right = msg.arg1;
-                    mWinFrame.top = 0;
-                    mWinFrame.bottom = msg.arg2;
-                    mPendingContentInsets.set(((ResizedInfo)msg.obj).contentInsets);
-                    mPendingVisibleInsets.set(((ResizedInfo)msg.obj).visibleInsets);
+
+                    mWinFrame.set((Rect) args.arg1);
+                    mPendingContentInsets.set((Rect) args.arg2);
+                    mPendingVisibleInsets.set((Rect) args.arg3);
+
+                    args.recycle();
+
                     if (msg.what == MSG_RESIZED_REPORT) {
                         mReportNextDraw = true;
                     }
@@ -2853,6 +2850,7 @@ public final class ViewRootImpl implements ViewParent,
                     if (mView != null) {
                         forceLayout(mView);
                     }
+
                     requestLayout();
                 }
                 break;
@@ -4069,26 +4067,25 @@ public final class ViewRootImpl implements ViewParent,
         mHandler.sendMessage(msg);
     }
 
-    public void dispatchResized(int w, int h, Rect contentInsets,
+    public void dispatchResized(Rect frame, Rect contentInsets,
             Rect visibleInsets, boolean reportDraw, Configuration newConfig) {
-        if (DEBUG_LAYOUT) Log.v(TAG, "Resizing " + this + ": w=" + w
-                + " h=" + h + " contentInsets=" + contentInsets.toShortString()
+        if (DEBUG_LAYOUT) Log.v(TAG, "Resizing " + this + ": frame=" + frame.toShortString()
+                + " contentInsets=" + contentInsets.toShortString()
                 + " visibleInsets=" + visibleInsets.toShortString()
                 + " reportDraw=" + reportDraw);
-        Message msg = mHandler.obtainMessage(reportDraw ? MSG_RESIZED_REPORT :MSG_RESIZED);
+        Message msg = mHandler.obtainMessage(reportDraw ? MSG_RESIZED_REPORT : MSG_RESIZED);
         if (mTranslator != null) {
+            mTranslator.translateRectInScreenToAppWindow(frame);
             mTranslator.translateRectInScreenToAppWindow(contentInsets);
             mTranslator.translateRectInScreenToAppWindow(visibleInsets);
-            w *= mTranslator.applicationInvertedScale;
-            h *= mTranslator.applicationInvertedScale;
         }
-        msg.arg1 = w;
-        msg.arg2 = h;
-        ResizedInfo ri = new ResizedInfo();
-        ri.contentInsets = new Rect(contentInsets);
-        ri.visibleInsets = new Rect(visibleInsets);
-        ri.newConfig = newConfig;
-        msg.obj = ri;
+        SomeArgs args = SomeArgs.obtain();
+        final boolean sameProcessCall = (Binder.getCallingPid() == android.os.Process.myPid());
+        args.arg1 = sameProcessCall ? new Rect(frame) : frame;
+        args.arg2 = sameProcessCall ? new Rect(contentInsets) : contentInsets;
+        args.arg3 = sameProcessCall ? new Rect(visibleInsets) : visibleInsets;
+        args.arg4 = sameProcessCall && newConfig != null ? new Configuration(newConfig) : newConfig;
+        msg.obj = args;
         mHandler.sendMessage(msg);
     }
 
@@ -4734,11 +4731,11 @@ public final class ViewRootImpl implements ViewParent,
             mViewAncestor = new WeakReference<ViewRootImpl>(viewAncestor);
         }
 
-        public void resized(int w, int h, Rect contentInsets,
+        public void resized(Rect frame, Rect contentInsets,
                 Rect visibleInsets, boolean reportDraw, Configuration newConfig) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
-                viewAncestor.dispatchResized(w, h, contentInsets,
+                viewAncestor.dispatchResized(frame, contentInsets,
                         visibleInsets, reportDraw, newConfig);
             }
         }

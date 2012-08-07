@@ -8973,9 +8973,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (DEBUG_ORIENTATION &&
                             winAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING) Slog.i(
                             TAG, "Resizing " + win + " WITH DRAW PENDING");
-                    win.mClient.resized((int)winAnimator.mSurfaceW,
-                            (int)winAnimator.mSurfaceH,
-                            win.mLastContentInsets, win.mLastVisibleInsets,
+                    win.mClient.resized(win.mFrame, win.mLastContentInsets, win.mLastVisibleInsets,
                             winAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING,
                             configChanged ? win.mConfiguration : null);
                     win.mContentInsetsChanged = false;
