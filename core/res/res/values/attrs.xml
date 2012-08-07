@@ -5502,6 +5502,7 @@
         </attr>
         <!-- Options affecting how the action bar is displayed. -->
         <attr name="displayOptions">
+            <flag name="none" value="0" />
             <flag name="useLogo" value="0x1" />
             <flag name="showHome" value="0x2" />
             <flag name="homeAsUp" value="0x4" />
