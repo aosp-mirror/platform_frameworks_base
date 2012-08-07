@@ -216,7 +216,7 @@ public abstract class ServiceTestCase<T extends Service> extends AndroidTestCase
      *      the service. The flag is assumed to be {@link android.content.Context#BIND_AUTO_CREATE}.
      * </p>
      * <p>
-     *      See <a href="{@docRoot}guide/developing/tools/aidl.html">Designing a Remote Interface
+     *      See <a href="{@docRoot}guide/components/aidl.html">Designing a Remote Interface
      *      Using AIDL</a> for more information about the communication channel object returned
      *      by this method.
      * </p>
