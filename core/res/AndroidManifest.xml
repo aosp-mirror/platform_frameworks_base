@@ -278,6 +278,13 @@
         android:label="@string/permlab_writeContacts"
         android:description="@string/permdesc_writeContacts" />
 
+    <!-- Allows an application to execute contacts directory search.
+         This should only be used by ContactsProvider. -->
+    <!-- @hide -->
+    <permission android:name="android.permission.BIND_DIRECTORY_SEARCH"
+        android:permissionGroup="android.permission-group.PERSONAL_INFO"
+        android:protectionLevel="signature" />
+
     <!-- Allows an application to read the user's call log. -->
     <permission android:name="android.permission.READ_CALL_LOG"
         android:permissionGroup="android.permission-group.PERSONAL_INFO"

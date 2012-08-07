@@ -345,10 +345,10 @@ public final class ContactsContract {
      * directory provider URIs by themselves. This level of indirection allows
      * Contacts Provider to implement additional system-level features and
      * optimizations. Access to Contacts Provider is protected by the
-     * READ_CONTACTS permission, but access to the directory provider is not.
-     * Therefore directory providers must reject requests coming from clients
-     * other than the Contacts Provider itself. An easy way to prevent such
-     * unauthorized access is to check the name of the calling package:
+     * READ_CONTACTS permission, but access to the directory provider is protected by
+     * BIND_DIRECTORY_SEARCH. This permission was introduced at the API level 17, for previous
+     * platform versions the provider should perform the following check to make sure the call
+     * is coming from the ContactsProvider:
      * <pre>
      * private boolean isCallerAllowed() {
      *   PackageManager pm = getContext().getPackageManager();
