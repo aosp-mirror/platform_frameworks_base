@@ -699,7 +699,7 @@ method, which the LVL calls to let your application handle errors that are not
 retryable. For a list of such errors, see <a
 href="{@docRoot}guide/google/play/licensing/licensing-reference.html#server-response-codes">Server
 Response Codes</a> in the <a
-href="guide/google/play/licensing/licensing-reference.html">Licensing Reference</a>. You can implement
+href="{@docRoot}guide/google/play/licensing/licensing-reference.html">Licensing Reference</a>. You can implement
 the method in any way needed. In most cases, the
 method should log the error code and call <code>dontAllow()</code>.</p>
 
