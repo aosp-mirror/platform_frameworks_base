@@ -325,7 +325,7 @@ public class MediaFile {
         }
         int lastDot = fileName.lastIndexOf('.');
         if (lastDot > 0) {
-            String extension = fileName.substring(lastDot + 1);
+            String extension = fileName.substring(lastDot + 1).toUpperCase();
             Integer value = sFileTypeToFormatMap.get(extension);
             if (value != null) {
                 return value.intValue();
