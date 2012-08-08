@@ -21,6 +21,7 @@ interface IBluetoothManager
     void unregisterStateChangeCallback(in IBluetoothStateChangeCallback callback);
     boolean isEnabled();
     boolean enable();
+    boolean enableNoAutoConnect();
     boolean disable(boolean persist);
 
     String getAddress();

@@ -22,6 +22,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.Binder;
 import android.provider.Settings;
 import android.util.Log;
 import java.util.List;
@@ -66,6 +67,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     private IBluetooth mBluetooth;
     private boolean mBinding;
     private boolean mUnbinding;
+    private boolean mQuietEnable = false;
 
     private void registerForAirplaneMode(IntentFilter filter) {
         final ContentResolver resolver = mContext.getContentResolver();
@@ -105,7 +107,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 } else {
                     if (isBluetoothPersistedStateOn()) {
                         // enable without persisting the setting
-                        handleEnable(false);
+                        handleEnable(false, false);
                     }
                 }
             }
@@ -269,7 +271,32 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         Message msg = mHandler.obtainMessage(MESSAGE_GET_NAME_AND_ADDRESS);
         mHandler.sendMessage(msg);
     }
+    public boolean enableNoAutoConnect()
+    {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+                                                "Need BLUETOOTH ADMIN permission");
+        if (DBG) {
+            Log.d(TAG,"enableNoAutoConnect():  mBluetooth =" + mBluetooth +
+                    " mBinding = " + mBinding);
+        }
+        if (Binder.getCallingUid() != android.os.Process.NFC_UID) {
+            throw new SecurityException("no permission to enable Bluetooth quietly");
+        }
+        synchronized(mConnection) {
+            if (mBinding) {
+                Log.w(TAG,"enableNoAutoConnect(): binding in progress. Returning..");
+                return true;
+            }
+            if (mConnection == null) mBinding = true;
+        }
 
+        Message msg = mHandler.obtainMessage(MESSAGE_ENABLE);
+        msg.arg1=0; //No persist
+        msg.arg2=1; //Quiet mode
+        mHandler.sendMessage(msg);
+        return true;
+
+    }
     public boolean enable() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH ADMIN permission");
@@ -288,6 +315,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
 
         Message msg = mHandler.obtainMessage(MESSAGE_ENABLE);
         msg.arg1=1; //persist
+        msg.arg2=0; //No Quiet Mode
         mHandler.sendMessage(msg);
         return true;
     }
@@ -501,7 +529,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                         Log.d(TAG, "MESSAGE_ENABLE: mBluetooth = " + mBluetooth);
                     }
 
-                    handleEnable(msg.arg1 == 1);
+                    handleEnable(msg.arg1 == 1, msg.arg2 ==1);
                     break;
 
                 case MESSAGE_DISABLE:
@@ -574,14 +602,21 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
 
                         //Do enable request
                         try {
-                            if(!mBluetooth.enable()) {
-                                Log.e(TAG,"IBluetooth.enable() returned false");
+                            if (mQuietEnable == false) {
+                                if(!mBluetooth.enable()) {
+                                    Log.e(TAG,"IBluetooth.enable() returned false");
+                                }
+                            }
+                            else
+                            {
+                                if(!mBluetooth.enableNoAutoConnect()) {
+                                    Log.e(TAG,"IBluetooth.enableNoAutoConnect() returned false");
+                                }
                             }
                         } catch (RemoteException e) {
                             Log.e(TAG,"Unable to call enable()",e);
                         }
                     }
-
                     break;
                 }
                 case MESSAGE_TIMEOUT_BIND: {
@@ -637,10 +672,12 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         }
     };
 
-    private void handleEnable(boolean persist) {
+    private void handleEnable(boolean persist, boolean quietMode) {
         if (persist) {
             persistBluetoothSetting(true);
         }
+
+        mQuietEnable = quietMode;
 
         synchronized(mConnection) {
             if (mBluetooth == null) {
@@ -664,8 +701,15 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
 
                 //Enable bluetooth
                 try {
-                    if(!mBluetooth.enable()) {
-                        Log.e(TAG,"IBluetooth.enable() returned false");
+                    if (!mQuietEnable) {
+                        if(!mBluetooth.enable()) {
+                            Log.e(TAG,"IBluetooth.enable() returned false");
+                        }
+                    }
+                    else {
+                        if(!mBluetooth.enableNoAutoConnect()) {
+                            Log.e(TAG,"IBluetooth.enableNoAutoConnect() returned false");
+                        }
                     }
                 } catch (RemoteException e) {
                     Log.e(TAG,"Unable to call enable()",e);
