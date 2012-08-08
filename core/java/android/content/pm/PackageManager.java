@@ -2196,33 +2196,6 @@ public abstract class PackageManager {
     /**
      * Similar to
      * {@link #installPackage(Uri, IPackageInstallObserver, int, String)} but
-     * with references to the location of where the package originated from.
-     *
-     * @param packageURI The location of the package file to install. This can
-     *            be a 'file:' or a 'content:' URI.
-     * @param observer An observer callback to get notified when the package
-     *            installation is complete.
-     *            {@link IPackageInstallObserver#packageInstalled(String, int)}
-     *            will be called when that happens. observer may be null to
-     *            indicate that no callback is desired.
-     * @param flags - possible values: {@link #INSTALL_FORWARD_LOCK},
-     *            {@link #INSTALL_REPLACE_EXISTING}, {@link #INSTALL_ALLOW_TEST}
-     * @param installerPackageName Optional package name of the application that
-     *            is performing the installation. This identifies which market
-     *            the package came from.
-     * @param originatingURI URI referencing where the package was downloaded
-     *            from. May be {@code null}.
-     * @param referrer HTTP referrer URI associated with the originatingURI.
-     *            May be {@code null}.
-     * @hide
-     */
-    public abstract void installPackageWithOrigin(
-            Uri packageURI, IPackageInstallObserver observer, int flags,
-            String installerPackageName, Uri originatingURI, Uri referrer);
-
-    /**
-     * Similar to
-     * {@link #installPackage(Uri, IPackageInstallObserver, int, String)} but
      * with an extra verification file provided.
      *
      * @param packageURI The location of the package file to install. This can
@@ -2246,17 +2219,12 @@ public abstract class PackageManager {
      * @param encryptionParams if the package to be installed is encrypted,
      *            these parameters describing the encryption and authentication
      *            used. May be {@code null}.
-     * @param originatingURI URI referencing where the package was downloaded
-     *            from. May be {@code null}.
-     * @param referrer HTTP referrer URI associated with the originatingURI.
-     *            May be {@code null}.
      * @hide
      */
     public abstract void installPackageWithVerification(Uri packageURI,
             IPackageInstallObserver observer, int flags, String installerPackageName,
             Uri verificationURI, ManifestDigest manifestDigest,
-            ContainerEncryptionParams encryptionParams, Uri originatingURI,
-            Uri referrer);
+            ContainerEncryptionParams encryptionParams);
 
     /**
      * Allows a package listening to the

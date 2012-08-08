@@ -972,24 +972,12 @@ final class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public void installPackageWithOrigin(Uri packageURI, IPackageInstallObserver observer,
-            int flags, String installerPackageName, Uri originatingURI, Uri referrer) {
-        try {
-            mPM.installPackageWithOrigin(packageURI, observer, flags, null, originatingURI,
-                    referrer);
-        } catch (RemoteException e) {
-            // Should never happen!
-        }
-    }
-
-    @Override
     public void installPackageWithVerification(Uri packageURI, IPackageInstallObserver observer,
             int flags, String installerPackageName, Uri verificationURI,
-            ManifestDigest manifestDigest, ContainerEncryptionParams encryptionParams,
-            Uri originatingURI, Uri referrer) {
+            ManifestDigest manifestDigest, ContainerEncryptionParams encryptionParams) {
         try {
             mPM.installPackageWithVerification(packageURI, observer, flags, installerPackageName,
-                    verificationURI, manifestDigest, encryptionParams, originatingURI, referrer);
+                    verificationURI, manifestDigest, encryptionParams);
         } catch (RemoteException e) {
             // Should never happen!
         }
