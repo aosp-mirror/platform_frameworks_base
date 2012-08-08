@@ -985,9 +985,13 @@ public class ProgressBar extends View {
     }
 
     private void updateDrawableBounds(int w, int h) {
-        // onDraw will translate the canvas so we draw starting at 0,0
-        int right = w - mPaddingRight - mPaddingLeft;
-        int bottom = h - mPaddingBottom - mPaddingTop;
+        // onDraw will translate the canvas so we draw starting at 0,0.
+        // Subtract out padding for the purposes of the calculations below.
+        w -= mPaddingRight + mPaddingLeft;
+        h -= mPaddingTop + mPaddingBottom;
+
+        int right = w;
+        int bottom = h;
         int top = 0;
         int left = 0;
 
