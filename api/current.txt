@@ -5075,6 +5075,7 @@ package android.content {
   public class ContentProviderClient {
     method public android.content.ContentProviderResult[] applyBatch(java.util.ArrayList<android.content.ContentProviderOperation>) throws android.content.OperationApplicationException, android.os.RemoteException;
     method public int bulkInsert(android.net.Uri, android.content.ContentValues[]) throws android.os.RemoteException;
+    method public android.os.Bundle call(java.lang.String, java.lang.String, android.os.Bundle) throws android.os.RemoteException;
     method public int delete(android.net.Uri, java.lang.String, java.lang.String[]) throws android.os.RemoteException;
     method public android.content.ContentProvider getLocalContentProvider();
     method public java.lang.String[] getStreamTypes(android.net.Uri, java.lang.String) throws android.os.RemoteException;
@@ -5319,9 +5320,10 @@ package android.content {
     method public abstract void revokeUriPermission(android.net.Uri, int);
     method public abstract void sendBroadcast(android.content.Intent);
     method public abstract void sendBroadcast(android.content.Intent, java.lang.String);
-    method public void sendBroadcastToUser(android.content.Intent, int);
+    method public abstract void sendBroadcastToUser(android.content.Intent, int);
     method public abstract void sendOrderedBroadcast(android.content.Intent, java.lang.String);
     method public abstract void sendOrderedBroadcast(android.content.Intent, java.lang.String, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
+    method public abstract void sendOrderedBroadcastToUser(android.content.Intent, int, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
     method public abstract void sendStickyBroadcast(android.content.Intent);
     method public abstract void sendStickyOrderedBroadcast(android.content.Intent, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
     method public abstract void setTheme(int);
@@ -5453,8 +5455,10 @@ package android.content {
     method public void revokeUriPermission(android.net.Uri, int);
     method public void sendBroadcast(android.content.Intent);
     method public void sendBroadcast(android.content.Intent, java.lang.String);
+    method public void sendBroadcastToUser(android.content.Intent, int);
     method public void sendOrderedBroadcast(android.content.Intent, java.lang.String);
     method public void sendOrderedBroadcast(android.content.Intent, java.lang.String, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
+    method public void sendOrderedBroadcastToUser(android.content.Intent, int, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
     method public void sendStickyBroadcast(android.content.Intent);
     method public void sendStickyOrderedBroadcast(android.content.Intent, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
     method public void setTheme(int);
@@ -6235,6 +6239,7 @@ package android.content.pm {
     field public static final int FLAG_HARDWARE_ACCELERATED = 512; // 0x200
     field public static final int FLAG_MULTIPROCESS = 1; // 0x1
     field public static final int FLAG_NO_HISTORY = 128; // 0x80
+    field public static final int FLAG_SINGLE_USER = 1073741824; // 0x40000000
     field public static final int FLAG_STATE_NOT_NEEDED = 16; // 0x10
     field public static final int LAUNCH_MULTIPLE = 0; // 0x0
     field public static final int LAUNCH_SINGLE_INSTANCE = 3; // 0x3
@@ -6657,7 +6662,9 @@ package android.content.pm {
     ctor public ProviderInfo(android.content.pm.ProviderInfo);
     method public int describeContents();
     field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final int FLAG_SINGLE_USER = 1073741824; // 0x40000000
     field public java.lang.String authority;
+    field public int flags;
     field public boolean grantUriPermissions;
     field public int initOrder;
     field public deprecated boolean isSyncable;
@@ -6703,7 +6710,7 @@ package android.content.pm {
     method public void dump(android.util.Printer, java.lang.String);
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int FLAG_ISOLATED_PROCESS = 2; // 0x2
-    field public static final int FLAG_SINGLE_USER = 4; // 0x4
+    field public static final int FLAG_SINGLE_USER = 1073741824; // 0x40000000
     field public static final int FLAG_STOP_WITH_TASK = 1; // 0x1
     field public int flags;
     field public java.lang.String permission;
@@ -16248,6 +16255,7 @@ package android.os {
     method public static final int myPid();
     method public static final int myTid();
     method public static final int myUid();
+    method public static final int myUserHandle();
     method public static final void sendSignal(int, int);
     method public static final void setThreadPriority(int, int) throws java.lang.IllegalArgumentException, java.lang.SecurityException;
     method public static final void setThreadPriority(int) throws java.lang.IllegalArgumentException, java.lang.SecurityException;
@@ -21143,8 +21151,10 @@ package android.test.mock {
     method public void revokeUriPermission(android.net.Uri, int);
     method public void sendBroadcast(android.content.Intent);
     method public void sendBroadcast(android.content.Intent, java.lang.String);
+    method public void sendBroadcastToUser(android.content.Intent, int);
     method public void sendOrderedBroadcast(android.content.Intent, java.lang.String);
     method public void sendOrderedBroadcast(android.content.Intent, java.lang.String, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
+    method public void sendOrderedBroadcastToUser(android.content.Intent, int, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
     method public void sendStickyBroadcast(android.content.Intent);
     method public void sendStickyOrderedBroadcast(android.content.Intent, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
     method public void setTheme(int);

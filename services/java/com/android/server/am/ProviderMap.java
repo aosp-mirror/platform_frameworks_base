@@ -44,9 +44,9 @@ public class ProviderMap {
 
     private static final boolean DBG = false;
 
-    private final HashMap<String, ContentProviderRecord> mGlobalByName
+    private final HashMap<String, ContentProviderRecord> mSingletonByName
             = new HashMap<String, ContentProviderRecord>();
-    private final HashMap<ComponentName, ContentProviderRecord> mGlobalByClass
+    private final HashMap<ComponentName, ContentProviderRecord> mSingletonByClass
             = new HashMap<ComponentName, ContentProviderRecord>();
 
     private final SparseArray<HashMap<String, ContentProviderRecord>> mProvidersByNamePerUser
@@ -63,7 +63,7 @@ public class ProviderMap {
             Slog.i(TAG, "getProviderByName: " + name + " , callingUid = " + Binder.getCallingUid());
         }
         // Try to find it in the global list
-        ContentProviderRecord record = mGlobalByName.get(name);
+        ContentProviderRecord record = mSingletonByName.get(name);
         if (record != null) {
             return record;
         }
@@ -81,7 +81,7 @@ public class ProviderMap {
             Slog.i(TAG, "getProviderByClass: " + name + ", callingUid = " + Binder.getCallingUid());
         }
         // Try to find it in the global list
-        ContentProviderRecord record = mGlobalByClass.get(name);
+        ContentProviderRecord record = mSingletonByClass.get(name);
         if (record != null) {
             return record;
         }
@@ -95,8 +95,8 @@ public class ProviderMap {
             Slog.i(TAG, "putProviderByName: " + name + " , callingUid = " + Binder.getCallingUid()
                 + ", record uid = " + record.appInfo.uid);
         }
-        if (record.appInfo.uid < Process.FIRST_APPLICATION_UID) {
-            mGlobalByName.put(name, record);
+        if (record.singleton) {
+            mSingletonByName.put(name, record);
         } else {
             final int userId = UserId.getUserId(record.appInfo.uid);
             getProvidersByName(userId).put(name, record);
@@ -108,8 +108,8 @@ public class ProviderMap {
             Slog.i(TAG, "putProviderByClass: " + name + " , callingUid = " + Binder.getCallingUid()
                 + ", record uid = " + record.appInfo.uid);
         }
-        if (record.appInfo.uid < Process.FIRST_APPLICATION_UID) {
-            mGlobalByClass.put(name, record);
+        if (record.singleton) {
+            mSingletonByClass.put(name, record);
         } else {
             final int userId = UserId.getUserId(record.appInfo.uid);
             getProvidersByClass(userId).put(name, record);
@@ -117,10 +117,10 @@ public class ProviderMap {
     }
 
     void removeProviderByName(String name, int optionalUserId) {
-        if (mGlobalByName.containsKey(name)) {
+        if (mSingletonByName.containsKey(name)) {
             if (DBG)
                 Slog.i(TAG, "Removing from globalByName name=" + name);
-            mGlobalByName.remove(name);
+            mSingletonByName.remove(name);
         } else {
             // TODO: Verify this works, i.e., the caller happens to be from the correct user
             if (DBG)
@@ -132,10 +132,10 @@ public class ProviderMap {
     }
 
     void removeProviderByClass(ComponentName name, int optionalUserId) {
-        if (mGlobalByClass.containsKey(name)) {
+        if (mSingletonByClass.containsKey(name)) {
             if (DBG)
                 Slog.i(TAG, "Removing from globalByClass name=" + name);
-            mGlobalByClass.remove(name);
+            mSingletonByClass.remove(name);
         } else {
             if (DBG)
                 Slog.i(TAG,
@@ -197,37 +197,30 @@ public class ProviderMap {
     }
 
     void dumpProvidersLocked(PrintWriter pw, boolean dumpAll) {
-        boolean needSep = false;
-        if (mGlobalByClass.size() > 0) {
-            if (needSep)
-                pw.println(" ");
-            pw.println("  Published content providers (by class):");
-            dumpProvidersByClassLocked(pw, dumpAll, mGlobalByClass);
+        if (mSingletonByClass.size() > 0) {
+            pw.println("");
+            pw.println("  Published single-user content providers (by class):");
+            dumpProvidersByClassLocked(pw, dumpAll, mSingletonByClass);
         }
 
-        if (mProvidersByClassPerUser.size() > 1) {
-            pw.println("");
-            for (int i = 0; i < mProvidersByClassPerUser.size(); i++) {
-                HashMap<ComponentName, ContentProviderRecord> map = mProvidersByClassPerUser.valueAt(i);
-                pw.println("  User " + mProvidersByClassPerUser.keyAt(i) + ":");
-                dumpProvidersByClassLocked(pw, dumpAll, map);
-                pw.println(" ");
-            }
-        } else if (mProvidersByClassPerUser.size() == 1) {
-            HashMap<ComponentName, ContentProviderRecord> map = mProvidersByClassPerUser.valueAt(0);
+        pw.println("");
+        for (int i = 0; i < mProvidersByClassPerUser.size(); i++) {
+            HashMap<ComponentName, ContentProviderRecord> map = mProvidersByClassPerUser.valueAt(i);
+            pw.println("  Published user " + mProvidersByClassPerUser.keyAt(i)
+                    + " content providers (by class):");
             dumpProvidersByClassLocked(pw, dumpAll, map);
+            pw.println(" ");
         }
-        needSep = true;
 
         if (dumpAll) {
-            pw.println(" ");
-            pw.println("  Authority to provider mappings:");
-            dumpProvidersByNameLocked(pw, mGlobalByName);
+            pw.println("");
+            pw.println("  Single-user authority to provider mappings:");
+            dumpProvidersByNameLocked(pw, mSingletonByName);
 
             for (int i = 0; i < mProvidersByNamePerUser.size(); i++) {
-                if (i > 0) {
-                    pw.println("  User " + mProvidersByNamePerUser.keyAt(i) + ":");
-                }
+                pw.println("");
+                pw.println("  User " + mProvidersByNamePerUser.keyAt(i)
+                        + " authority to provider mappings:");
                 dumpProvidersByNameLocked(pw, mProvidersByNamePerUser.valueAt(i));
             }
         }
@@ -328,6 +321,4 @@ public class ProviderMap {
             }
         }
     }
-
-
 }

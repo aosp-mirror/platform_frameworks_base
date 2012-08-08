@@ -5936,15 +5936,26 @@ public final class ActivityManagerService extends ActivityManagerNative
             Slog.v(TAG_MU, "generateApplicationProvidersLocked, app.info.uid = " + app.uid);
         int userId = app.userId;
         if (providers != null) {
-            final int N = providers.size();
+            int N = providers.size();
             for (int i=0; i<N; i++) {
                 ProviderInfo cpi =
                     (ProviderInfo)providers.get(i);
+                boolean singleton = isSingleton(cpi.processName, cpi.applicationInfo,
+                        cpi.name, cpi.flags);
+                if (singleton && UserId.getUserId(app.uid) != 0) {
+                    // This is a singleton provider, but a user besides the
+                    // default user is asking to initialize a process it runs
+                    // in...  well, no, it doesn't actually run in this process,
+                    // it runs in the process of the default user.  Get rid of it.
+                    providers.remove(i);
+                    N--;
+                    continue;
+                }
 
                 ComponentName comp = new ComponentName(cpi.packageName, cpi.name);
                 ContentProviderRecord cpr = mProviderMap.getProviderByClass(comp, userId);
                 if (cpr == null) {
-                    cpr = new ContentProviderRecord(this, cpi, app.info, comp);
+                    cpr = new ContentProviderRecord(this, cpi, app.info, comp, singleton);
                     mProviderMap.putProviderByClass(comp, cpr);
                 }
                 if (DEBUG_MU)
@@ -6177,6 +6188,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 Binder.restoreCallingIdentity(origId);
             }
 
+            boolean singleton;
             if (!providerRunning) {
                 try {
                     cpi = AppGlobals.getPackageManager().
@@ -6187,7 +6199,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (cpi == null) {
                     return null;
                 }
-                if (isSingleton(cpi.processName, cpi.applicationInfo)) {
+                singleton = isSingleton(cpi.processName, cpi.applicationInfo,
+                        cpi.name, cpi.flags); 
+                if (singleton) {
                     userId = 0;
                 }
                 cpi.applicationInfo = getAppInfoForUser(cpi.applicationInfo, userId);
@@ -6222,7 +6236,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             return null;
                         }
                         ai = getAppInfoForUser(ai, userId);
-                        cpr = new ContentProviderRecord(this, cpi, ai, comp);
+                        cpr = new ContentProviderRecord(this, cpi, ai, comp, singleton);
                     } catch (RemoteException ex) {
                         // pm is in same process, this will never happen.
                     }
@@ -10515,17 +10529,31 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    boolean isSingleton(String componentProcessName, ApplicationInfo aInfo) {
+    boolean isSingleton(String componentProcessName, ApplicationInfo aInfo,
+            String className, int flags) {
         boolean result = false;
         if (UserId.getAppId(aInfo.uid) >= Process.FIRST_APPLICATION_UID) {
-            result = false;
+            if ((flags&ServiceInfo.FLAG_SINGLE_USER) != 0) {
+                if (ActivityManager.checkUidPermission(
+                        android.Manifest.permission.INTERACT_ACROSS_USERS,
+                        aInfo.uid) != PackageManager.PERMISSION_GRANTED) {
+                    ComponentName comp = new ComponentName(aInfo.packageName, className);
+                    String msg = "Permission Denial: Component " + comp.flattenToShortString()
+                            + " requests FLAG_SINGLE_USER, but app does not hold "
+                            + android.Manifest.permission.INTERACT_ACROSS_USERS;
+                    Slog.w(TAG, msg);
+                    throw new SecurityException(msg);
+                }
+                result = true;
+            }
         } else if (componentProcessName == aInfo.packageName) {
             result = (aInfo.flags & ApplicationInfo.FLAG_PERSISTENT) != 0;
         } else if ("system".equals(componentProcessName)) {
             result = true;
         }
         if (DEBUG_MU) {
-            Slog.v(TAG, "isSingleton(" + componentProcessName + ", " + aInfo + ") = " + result);
+            Slog.v(TAG, "isSingleton(" + componentProcessName + ", " + aInfo
+                    + ", " + className + ", 0x" + Integer.toHexString(flags) + ") = " + result);
         }
         return result;
     }
@@ -11131,30 +11159,15 @@ public final class ActivityManagerService extends ActivityManagerNative
         List receivers = null;
         List<BroadcastFilter> registeredReceivers = null;
         try {
-            if (intent.getComponent() != null) {
-                // Broadcast is going to one specific receiver class...
-                ActivityInfo ai = AppGlobals.getPackageManager().
-                        getReceiverInfo(intent.getComponent(), STOCK_PM_FLAGS, userId);
-                if (ai != null) {
-                    receivers = new ArrayList();
-                    ResolveInfo ri = new ResolveInfo();
-                    if (isSingleton(ai.processName, ai.applicationInfo)) {
-                        ri.activityInfo = getActivityInfoForUser(ai, 0);
-                    } else {
-                        ri.activityInfo = getActivityInfoForUser(ai, userId);
-                    }
-                    receivers.add(ri);
-                }
-            } else {
-                // Need to resolve the intent to interested receivers...
-                if ((intent.getFlags()&Intent.FLAG_RECEIVER_REGISTERED_ONLY)
-                         == 0) {
-                    receivers =
-                        AppGlobals.getPackageManager().queryIntentReceivers(
-                                    intent, resolvedType, STOCK_PM_FLAGS, userId);
-                }
-                registeredReceivers = mReceiverResolver.queryIntent(intent, resolvedType, false,
-                        userId);
+            // Need to resolve the intent to interested receivers...
+            if ((intent.getFlags()&Intent.FLAG_RECEIVER_REGISTERED_ONLY)
+                     == 0) {
+                receivers = AppGlobals.getPackageManager().queryIntentReceivers(
+                        intent, resolvedType, STOCK_PM_FLAGS, userId);
+            }
+            if (intent.getComponent() == null) {
+                registeredReceivers = mReceiverResolver.queryIntent(intent,
+                        resolvedType, false, userId);
             }
         } catch (RemoteException ex) {
             // pm is in same process, this will never happen.

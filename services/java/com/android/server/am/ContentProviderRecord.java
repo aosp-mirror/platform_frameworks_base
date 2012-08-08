@@ -38,6 +38,7 @@ class ContentProviderRecord {
     final int uid;
     final ApplicationInfo appInfo;
     final ComponentName name;
+    final boolean singleton;
     public IContentProvider provider;
     public boolean noReleaseNeeded;
     // All attached clients
@@ -54,12 +55,13 @@ class ContentProviderRecord {
     String shortStringName;
 
     public ContentProviderRecord(ActivityManagerService _service, ProviderInfo _info,
-            ApplicationInfo ai, ComponentName _name) {
+            ApplicationInfo ai, ComponentName _name, boolean _singleton) {
         service = _service;
         info = _info;
         uid = ai.uid;
         appInfo = ai;
         name = _name;
+        singleton = _singleton;
         noReleaseNeeded = uid == 0 || uid == Process.SYSTEM_UID;
     }
 
@@ -69,6 +71,7 @@ class ContentProviderRecord {
         uid = cpr.uid;
         appInfo = cpr.appInfo;
         name = cpr.name;
+        singleton = cpr.singleton;
         noReleaseNeeded = cpr.noReleaseNeeded;
     }
 
@@ -149,6 +152,9 @@ class ContentProviderRecord {
         if (full) {
             pw.print(prefix); pw.print("uid="); pw.print(uid);
                     pw.print(" provider="); pw.println(provider);
+        }
+        if (singleton) {
+            pw.print(prefix); pw.print("singleton="); pw.println(singleton);
         }
         pw.print(prefix); pw.print("authority="); pw.println(info.authority);
         if (full) {

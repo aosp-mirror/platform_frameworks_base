@@ -53,13 +53,14 @@ public class ServiceInfo extends ComponentInfo
      * run for all users on the device.  Set from the
      * {@link android.R.attr#singleUser} attribute.
      */
-    public static final int FLAG_SINGLE_USER = 0x0004;
+    public static final int FLAG_SINGLE_USER = 0x40000000;
 
     /**
      * Options that have been set in the service declaration in the
      * manifest.
      * These include:
-     * {@link #FLAG_STOP_WITH_TASK}, {@link #FLAG_ISOLATED_PROCESS}.
+     * {@link #FLAG_STOP_WITH_TASK}, {@link #FLAG_ISOLATED_PROCESS},
+     * {@link #FLAG_SINGLE_USER}.
      */
     public int flags;
 
