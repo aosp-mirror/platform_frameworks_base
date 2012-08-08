@@ -632,10 +632,6 @@ public class WebSettingsClassic extends WebSettings {
     @Override
     public synchronized void setTextZoom(int textZoom) {
         if (mTextSize != textZoom) {
-            if (WebViewClassic.mLogEvent) {
-                EventLog.writeEvent(EventLogTags.BROWSER_TEXT_SIZE_CHANGE,
-                        mTextSize, textZoom);
-            }
             mTextSize = textZoom;
             postSync();
         }
