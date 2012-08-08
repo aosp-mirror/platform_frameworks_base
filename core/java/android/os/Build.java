@@ -414,6 +414,15 @@ public class Build {
 
         /**
          * Moar jelly beans!
+         *
+         * <p>Applications targeting this or a later release will get these
+         * new changes in behavior:</p>
+         * <ul>
+         * <li>Content Providers: The default value of {@code android:exported} is now
+         * {@code false}. See
+         * <a href="{docRoot}guide/topics/manifest/provider-element.html#exported">
+         * the android:exported section</a> in the provider documentation for more details.</li>
+         * </ul>
          */
         public static final int JELLY_BEAN_MR1 = 17;
     }

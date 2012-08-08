@@ -2443,8 +2443,28 @@ public class PackageParser {
             return null;
         }
 
+        boolean providerExportedDefault = false;
+
+        if (owner.applicationInfo.targetSdkVersion < Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            // For compatibility, applications targeting API level 16 or lower
+            // should have their content providers exported by default, unless they
+            // specify otherwise.
+            providerExportedDefault = true;
+        }
+
+        if (((owner.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0)
+            && (owner.applicationInfo.targetSdkVersion == Build.VERSION_CODES.JELLY_BEAN)) {
+            // STOPSHIP: REMOVE THIS IF BLOCK
+            // To expose more bugs, pre-installed system apps targeting API level 16
+            // should not have their content providers exported by default.
+            // This is only a short term check, and should be removed when the
+            // default SDK version changes to 17.
+            providerExportedDefault = false;
+        }
+
         p.info.exported = sa.getBoolean(
-                com.android.internal.R.styleable.AndroidManifestProvider_exported, true);
+                com.android.internal.R.styleable.AndroidManifestProvider_exported,
+                providerExportedDefault);
 
         String cpname = sa.getNonConfigurationString(
                 com.android.internal.R.styleable.AndroidManifestProvider_authorities, 0);
@@ -2516,7 +2536,7 @@ public class PackageParser {
         }
         
         if (cpname == null) {
-            outError[0] = "<provider> does not incude authorities attribute";
+            outError[0] = "<provider> does not include authorities attribute";
             return null;
         }
         p.info.authority = cpname.intern();
