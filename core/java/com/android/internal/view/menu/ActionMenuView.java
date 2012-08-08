@@ -524,6 +524,9 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
 
     @Override
     protected boolean hasDividerBeforeChildAt(int childIndex) {
+        if (childIndex == 0) {
+            return false;
+        }
         final View childBefore = getChildAt(childIndex - 1);
         final View child = getChildAt(childIndex);
         boolean result = false;
