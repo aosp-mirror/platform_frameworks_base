@@ -2302,8 +2302,8 @@ public final class BatteryStatsImpl extends BatteryStats {
                 batteryRealtime, which);
     }
 
-    @Override public int getPhoneSignalStrengthCount(int dataType, int which) {
-        return mPhoneDataConnectionsTimer[dataType].getCountLocked(which);
+    @Override public int getPhoneSignalStrengthCount(int strengthBin, int which) {
+        return mPhoneSignalStrengthsTimer[strengthBin].getCountLocked(which);
     }
 
     @Override public long getPhoneDataConnectionTime(int dataType,
