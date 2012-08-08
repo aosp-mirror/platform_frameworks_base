@@ -721,12 +721,17 @@ public class MediaRecorder
     public native int getMaxAmplitude() throws IllegalStateException;
 
     /* Do not change this value without updating its counterpart
-     * in include/media/mediarecorder.h!
+     * in include/media/mediarecorder.h or mediaplayer.h!
      */
     /** Unspecified media recorder error.
      * @see android.media.MediaRecorder.OnErrorListener
      */
     public static final int MEDIA_RECORDER_ERROR_UNKNOWN = 1;
+    /** Media server died. In this case, the application must release the
+     * MediaRecorder object and instantiate a new one.
+     * @see android.media.MediaRecorder.OnErrorListener
+     */
+    public static final int MEDIA_ERROR_SERVER_DIED = 100;
 
     /**
      * Interface definition for a callback to be invoked when an error
@@ -741,6 +746,7 @@ public class MediaRecorder
          * @param what    the type of error that has occurred:
          * <ul>
          * <li>{@link #MEDIA_RECORDER_ERROR_UNKNOWN}
+         * <li>{@link #MEDIA_ERROR_SERVER_DIED}
          * </ul>
          * @param extra   an extra code, specific to the error type
          */
