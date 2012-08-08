@@ -112,6 +112,21 @@ public:
      */
     virtual void finish();
 
+    /**
+     * This method must be invoked before handing control over to a draw functor.
+     * See callDrawGLFunction() for instance.
+     *
+     * This command must not be recorded inside display lists.
+     */
+    virtual void interrupt();
+
+    /**
+     * This method must be invoked after getting control back from a draw functor.
+     *
+     * This command must not be recorded inside display lists.
+     */
+    virtual void resume();
+
     ANDROID_API status_t invokeFunctors(Rect& dirty);
     ANDROID_API void detachFunctor(Functor* functor);
     ANDROID_API void attachFunctor(Functor* functor);
@@ -219,22 +234,6 @@ public:
     void endMark() const;
 
 protected:
-
-    /**
-     * This method must be invoked before handing control over to a draw functor.
-     * See callDrawGLFunction() for instance.
-     *
-     * This command must not be recorded inside display lists.
-     */
-    void interrupt();
-
-    /**
-     * This method must be invoked after getting control back from a draw functor.
-     *
-     * This command must not be recorded inside display lists.
-     */
-    void resume();
-
     /**
      * Compose the layer defined in the current snapshot with the layer
      * defined by the previous snapshot.
