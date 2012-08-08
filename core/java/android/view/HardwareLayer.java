@@ -17,6 +17,7 @@
 package android.view;
 
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 
@@ -143,13 +144,15 @@ abstract class HardwareLayer {
 
     /**
      * This must be invoked before drawing onto this layer.
+     * @param currentCanvas
      */
-    abstract HardwareCanvas start();
+    abstract HardwareCanvas start(Canvas currentCanvas);
     
     /**
      * This must be invoked after drawing onto this layer.
+     * @param currentCanvas
      */
-    abstract void end();
+    abstract void end(Canvas currentCanvas);
 
     /**
      * Copies this layer into the specified bitmap.
