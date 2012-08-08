@@ -1479,7 +1479,6 @@
   <java-symbol type="style" name="Theme.Toast" />
   <java-symbol type="xml" name="storage_list" />
   <java-symbol type="bool" name="config_enableDreams" />
-  <java-symbol type="string" name="config_defaultDreamComponent" />
   <java-symbol type="string" name="enable_explore_by_touch_warning_title" />
   <java-symbol type="string" name="enable_explore_by_touch_warning_message" />
 
