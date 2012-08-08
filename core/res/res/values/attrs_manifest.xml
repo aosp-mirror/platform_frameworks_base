@@ -284,7 +284,19 @@
          who do not know their particular component name) and for all
          content providers. -->
     <attr name="exported" format="boolean" />
-    
+
+    <!-- If set to true, a single instance of this component will run for
+         all users.  That instance will run as user 0, the default/primary
+         user.  When the app running is in processes for other users and interacts
+         with this component (by binding to a service for example) those processes will
+         always interact with the instance running for user 0.  Enabling
+         single user mode forces "exported" of the component to be false, to
+         help avoid introducing multi-user security bugs.  You must hold the
+         permission {@link android.Manifest.permission#INTERACT_ACROSS_USERS} in order
+         to use this feature.  This flag can only be used with services,
+         receivers, and providers; it can not be used with activities. -->
+    <attr name="singleUser" format="boolean" />
+
     <!-- Specify a specific process that the associated code is to run in.
          Use with the application tag (to supply a default process for all
          application components), or with the activity, receiver, service,
@@ -1194,6 +1206,7 @@
              component specific values). -->
         <attr name="enabled" />
         <attr name="exported" />
+        <attr name="singleUser" />
     </declare-styleable>
     
     <!-- Attributes that can be supplied in an AndroidManifest.xml
@@ -1275,16 +1288,7 @@
              that is isolated from the rest of the system.  The only communication
              with it is through the Service API (binding and starting). -->
         <attr name="isolatedProcess" format="boolean" />
-        <!-- If set to true, a single instance of this service will run for
-             all users.  That instance will run as user 0, the default/primary
-             user.  When the app running in processes for other users interacts
-             with this service (by binding to it, starting it, etc) they will
-             always interact with the instance running for user 0.  Enabling
-             single user mode forces "exported" of the service to be false, to
-             avoid introducing multi-user security bugs.  You must hold the
-             permission {@link android.Manifest.permission#INTERACT_ACROSS_USERS} in order
-             to use this feature. -->
-        <attr name="singleUser" format="boolean" />
+        <attr name="singleUser" />
     </declare-styleable>
     
     <!-- The <code>receiver</code> tag declares an
@@ -1318,8 +1322,9 @@
              component specific values). -->
         <attr name="enabled" />
         <attr name="exported" />
+        <attr name="singleUser" />
     </declare-styleable>
-    
+
     <!-- The <code>activity</code> tag declares an
          {@link android.app.Activity} class that is available
          as part of the package's application components, implementing
@@ -1372,6 +1377,7 @@
         <attr name="hardwareAccelerated" />
         <attr name="uiOptions" />
         <attr name="parentActivityName" />
+        <attr name="singleUser" />
     </declare-styleable>
     
     <!-- The <code>activity-alias</code> tag declares a new

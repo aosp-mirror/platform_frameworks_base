@@ -640,9 +640,22 @@ public class Process {
     public static final native int myTid();
 
     /**
-     * Returns the identifier of this process's user.
+     * Returns the identifier of this process's uid.  This is the kernel uid
+     * that the process is running under, which is the identity of its
+     * app-specific sandbox.  It is different from {@link #myUserHandle} in that
+     * a uid identifies a specific app sandbox in a specific user.
      */
     public static final native int myUid();
+
+    /**
+     * Returns the identifier of this process's user handle.  This is the
+     * user the process is running under.  It is distinct from
+     * {@link #myUid()} in that a particular user will have multiple
+     * distinct apps running under it each with their own uid.
+     */
+    public static final int myUserHandle() {
+        return UserId.getUserId(myUid());
+    }
 
     /**
      * Returns whether the current process is in an isolated sandbox.

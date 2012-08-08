@@ -172,6 +172,14 @@ public class ActivityInfo extends ComponentInfo
      */
     public static final int FLAG_IMMERSIVE = 0x0400;
     /**
+     * Bit in {@link #flags}: If set, a single instance of the receiver will
+     * run for all users on the device.  Set from the
+     * {@link android.R.attr#singleUser} attribute.  Note that this flag is
+     * only relevent for ActivityInfo structures that are describiner receiver
+     * components; it is not applied to activities.
+     */
+    public static final int FLAG_SINGLE_USER = 0x40000000;
+    /**
      * Options that have been set in the activity declaration in the
      * manifest.
      * These include:
@@ -181,7 +189,7 @@ public class ActivityInfo extends ComponentInfo
      * {@link #FLAG_STATE_NOT_NEEDED}, {@link #FLAG_EXCLUDE_FROM_RECENTS},
      * {@link #FLAG_ALLOW_TASK_REPARENTING}, {@link #FLAG_NO_HISTORY},
      * {@link #FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS},
-     * {@link #FLAG_HARDWARE_ACCELERATED}
+     * {@link #FLAG_HARDWARE_ACCELERATED}, {@link #FLAG_SINGLE_USER}.
      */
     public int flags;
 
