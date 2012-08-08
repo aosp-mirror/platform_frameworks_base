@@ -115,13 +115,6 @@ public interface BluetoothProfile {
     public static final int PRIORITY_UNDEFINED = -1;
 
     /**
-     * This Intent is sent to initiate the other  profile connections which are enabled
-     * @hide
-     **/
-    public static final String ACTION_CONNECT_OTHER_PROFILES =
-                            "android.bluetooth.profile.CONNECT_OTHER_PROFILES";
-
-    /**
      * Get connected devices for this specific profile.
      *
      * <p> Return the set of devices which are in state {@link #STATE_CONNECTED}
