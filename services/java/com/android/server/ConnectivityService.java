@@ -20,6 +20,13 @@ import static android.Manifest.permission.MANAGE_NETWORK_POLICY;
 import static android.Manifest.permission.RECEIVE_DATA_ACTIVITY_CHANGE;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION_IMMEDIATE;
+import static android.net.ConnectivityManager.TYPE_BLUETOOTH;
+import static android.net.ConnectivityManager.TYPE_DUMMY;
+import static android.net.ConnectivityManager.TYPE_ETHERNET;
+import static android.net.ConnectivityManager.TYPE_MOBILE;
+import static android.net.ConnectivityManager.TYPE_WIFI;
+import static android.net.ConnectivityManager.TYPE_WIMAX;
+import static android.net.ConnectivityManager.getNetworkTypeName;
 import static android.net.ConnectivityManager.isNetworkTypeValid;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
@@ -86,14 +93,13 @@ import com.android.server.connectivity.Vpn;
 import com.android.server.net.BaseNetworkObserver;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Sets;
+
 import dalvik.system.DexClassLoader;
+
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.InvocationTargetException;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -317,12 +323,24 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     public ConnectivityService(Context context, INetworkManagementService netd,
             INetworkStatsService statsService, INetworkPolicyManager policyManager) {
+        // Currently, omitting a NetworkFactory will create one internally
+        // TODO: create here when we have cleaner WiMAX support
+        this(context, netd, statsService, policyManager, null);
+    }
+
+    public ConnectivityService(Context context, INetworkManagementService netd,
+            INetworkStatsService statsService, INetworkPolicyManager policyManager,
+            NetworkFactory netFactory) {
         if (DBG) log("ConnectivityService starting up");
 
         HandlerThread handlerThread = new HandlerThread("ConnectivityServiceThread");
         handlerThread.start();
         mHandler = new InternalHandler(handlerThread.getLooper());
         mTrackerHandler = new NetworkStateTrackerHandler(handlerThread.getLooper());
+
+        if (netFactory == null) {
+            netFactory = new DefaultNetworkFactory(context, mTrackerHandler);
+        }
 
         // setup our unique device name
         if (TextUtils.isEmpty(SystemProperties.get("net.hostname"))) {
@@ -462,59 +480,27 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         mTestMode = SystemProperties.get("cm.test.mode").equals("true")
                 && SystemProperties.get("ro.build.type").equals("eng");
-        /*
-         * Create the network state trackers for Wi-Fi and mobile
-         * data. Maybe this could be done with a factory class,
-         * but it's not clear that it's worth it, given that
-         * the number of different network types is not going
-         * to change very often.
-         */
-        for (int netType : mPriorityList) {
-            switch (mNetConfigs[netType].radio) {
-            case ConnectivityManager.TYPE_WIFI:
-                mNetTrackers[netType] = new WifiStateTracker(
-                        netType, mNetConfigs[netType].name);
-                mNetTrackers[netType].startMonitoring(context, mTrackerHandler);
-                break;
-            case ConnectivityManager.TYPE_MOBILE:
-                mNetTrackers[netType] = new MobileDataStateTracker(netType,
-                        mNetConfigs[netType].name);
-                mNetTrackers[netType].startMonitoring(context, mTrackerHandler);
-                break;
-            case ConnectivityManager.TYPE_DUMMY:
-                mNetTrackers[netType] = new DummyDataStateTracker(netType,
-                        mNetConfigs[netType].name);
-                mNetTrackers[netType].startMonitoring(context, mTrackerHandler);
-                break;
-            case ConnectivityManager.TYPE_BLUETOOTH:
-                mNetTrackers[netType] = BluetoothTetheringDataTracker.getInstance();
-                mNetTrackers[netType].startMonitoring(context, mTrackerHandler);
-                break;
-            case ConnectivityManager.TYPE_WIMAX:
-                mNetTrackers[netType] = makeWimaxStateTracker();
-                if (mNetTrackers[netType]!= null) {
-                    mNetTrackers[netType].startMonitoring(context, mTrackerHandler);
-                }
-                break;
-            case ConnectivityManager.TYPE_ETHERNET:
-                mNetTrackers[netType] = EthernetDataTracker.getInstance();
-                mNetTrackers[netType].startMonitoring(context, mTrackerHandler);
-                break;
-            default:
-                loge("Trying to create a DataStateTracker for an unknown radio type " +
-                        mNetConfigs[netType].radio);
+
+        // Create and start trackers for hard-coded networks
+        for (int targetNetworkType : mPriorityList) {
+            final NetworkConfig config = mNetConfigs[targetNetworkType];
+            final NetworkStateTracker tracker;
+            try {
+                tracker = netFactory.createTracker(targetNetworkType, config);
+                mNetTrackers[targetNetworkType] = tracker;
+            } catch (IllegalArgumentException e) {
+                Slog.e(TAG, "Problem creating " + getNetworkTypeName(targetNetworkType)
+                        + " tracker: " + e);
                 continue;
             }
-            mCurrentLinkProperties[netType] = null;
-            if (mNetTrackers[netType] != null && mNetConfigs[netType].isDefault()) {
-                mNetTrackers[netType].reconnect();
+
+            tracker.startMonitoring(context, mTrackerHandler);
+            if (config.isDefault()) {
+                tracker.reconnect();
             }
         }
 
-        IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
-        INetworkManagementService nmService = INetworkManagementService.Stub.asInterface(b);
-
-        mTethering = new Tethering(mContext, nmService, statsService, this, mHandler.getLooper());
+        mTethering = new Tethering(mContext, mNetd, statsService, this, mHandler.getLooper());
         mTetheringConfigValid = ((mTethering.getTetherableUsbRegexs().length != 0 ||
                                   mTethering.getTetherableWifiRegexs().length != 0 ||
                                   mTethering.getTetherableBluetoothRegexs().length != 0) &&
@@ -523,9 +509,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         mVpn = new Vpn(mContext, new VpnCallback());
 
         try {
-            nmService.registerObserver(mTethering);
-            nmService.registerObserver(mVpn);
-            nmService.registerObserver(mDataActivityObserver);
+            mNetd.registerObserver(mTethering);
+            mNetd.registerObserver(mVpn);
+            mNetd.registerObserver(mDataActivityObserver);
         } catch (RemoteException e) {
             loge("Error registering observer :" + e);
         }
@@ -540,7 +526,53 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         loadGlobalProxy();
     }
 
-    private NetworkStateTracker makeWimaxStateTracker() {
+    /**
+     * Factory that creates {@link NetworkStateTracker} instances using given
+     * {@link NetworkConfig}.
+     */
+    public interface NetworkFactory {
+        public NetworkStateTracker createTracker(int targetNetworkType, NetworkConfig config);
+    }
+
+    private static class DefaultNetworkFactory implements NetworkFactory {
+        private final Context mContext;
+        private final Handler mTrackerHandler;
+
+        public DefaultNetworkFactory(Context context, Handler trackerHandler) {
+            mContext = context;
+            mTrackerHandler = trackerHandler;
+        }
+
+        @Override
+        public NetworkStateTracker createTracker(int targetNetworkType, NetworkConfig config) {
+            switch (config.radio) {
+                case TYPE_WIFI:
+                    return new WifiStateTracker(targetNetworkType, config.name);
+                case TYPE_MOBILE:
+                    return new MobileDataStateTracker(targetNetworkType, config.name);
+                case TYPE_DUMMY:
+                    return new DummyDataStateTracker(targetNetworkType, config.name);
+                case TYPE_BLUETOOTH:
+                    return BluetoothTetheringDataTracker.getInstance();
+                case TYPE_WIMAX:
+                    return makeWimaxStateTracker(mContext, mTrackerHandler);
+                case TYPE_ETHERNET:
+                    return EthernetDataTracker.getInstance();
+                default:
+                    throw new IllegalArgumentException(
+                            "Trying to create a NetworkStateTracker for an unknown radio type: "
+                            + config.radio);
+            }
+        }
+    }
+
+    /**
+     * Loads external WiMAX library and registers as system service, returning a
+     * {@link NetworkStateTracker} for WiMAX. Caller is still responsible for
+     * invoking {@link NetworkStateTracker#startMonitoring(Context, Handler)}.
+     */
+    private static NetworkStateTracker makeWimaxStateTracker(
+            Context context, Handler trackerHandler) {
         // Initialize Wimax
         DexClassLoader wimaxClassLoader;
         Class wimaxStateTrackerClass = null;
@@ -554,25 +586,25 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         NetworkStateTracker wimaxStateTracker = null;
 
-        boolean isWimaxEnabled = mContext.getResources().getBoolean(
+        boolean isWimaxEnabled = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_wimaxEnabled);
 
         if (isWimaxEnabled) {
             try {
-                wimaxJarLocation = mContext.getResources().getString(
+                wimaxJarLocation = context.getResources().getString(
                         com.android.internal.R.string.config_wimaxServiceJarLocation);
-                wimaxLibLocation = mContext.getResources().getString(
+                wimaxLibLocation = context.getResources().getString(
                         com.android.internal.R.string.config_wimaxNativeLibLocation);
-                wimaxManagerClassName = mContext.getResources().getString(
+                wimaxManagerClassName = context.getResources().getString(
                         com.android.internal.R.string.config_wimaxManagerClassname);
-                wimaxServiceClassName = mContext.getResources().getString(
+                wimaxServiceClassName = context.getResources().getString(
                         com.android.internal.R.string.config_wimaxServiceClassname);
-                wimaxStateTrackerClassName = mContext.getResources().getString(
+                wimaxStateTrackerClassName = context.getResources().getString(
                         com.android.internal.R.string.config_wimaxStateTrackerClassname);
 
                 log("wimaxJarLocation: " + wimaxJarLocation);
                 wimaxClassLoader =  new DexClassLoader(wimaxJarLocation,
-                        new ContextWrapper(mContext).getCacheDir().getAbsolutePath(),
+                        new ContextWrapper(context).getCacheDir().getAbsolutePath(),
                         wimaxLibLocation, ClassLoader.getSystemClassLoader());
 
                 try {
@@ -593,13 +625,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
                 Constructor wmxStTrkrConst = wimaxStateTrackerClass.getConstructor
                         (new Class[] {Context.class, Handler.class});
-                wimaxStateTracker = (NetworkStateTracker)wmxStTrkrConst.newInstance(mContext,
-                        mTrackerHandler);
+                wimaxStateTracker = (NetworkStateTracker) wmxStTrkrConst.newInstance(
+                        context, trackerHandler);
 
                 Constructor wmxSrvConst = wimaxServiceClass.getDeclaredConstructor
                         (new Class[] {Context.class, wimaxStateTrackerClass});
                 wmxSrvConst.setAccessible(true);
-                IBinder svcInvoker = (IBinder)wmxSrvConst.newInstance(mContext, wimaxStateTracker);
+                IBinder svcInvoker = (IBinder)wmxSrvConst.newInstance(context, wimaxStateTracker);
                 wmxSrvConst.setAccessible(false);
 
                 ServiceManager.addService(WimaxManagerConstants.WIMAX_SERVICE, svcInvoker);
@@ -1882,6 +1914,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         // snapshot isFailover, because sendConnectedBroadcast() resets it
         boolean isFailover = info.isFailover();
+        final String thisIface = thisNet.getLinkProperties().getInterfaceName();
 
         // if this is a default net and other default is running
         // kill the one not preferred
@@ -1940,10 +1973,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         sendConnectedBroadcastDelayed(info, getConnectivityChangeDelay());
 
         // notify battery stats service about this network
-        final String iface = thisNet.getLinkProperties().getInterfaceName();
-        if (iface != null) {
+        if (thisIface != null) {
             try {
-                BatteryStatsService.getService().noteNetworkInterfaceType(iface, type);
+                BatteryStatsService.getService().noteNetworkInterfaceType(thisIface, type);
             } catch (RemoteException e) {
                 // ignored; service lives in system_server
             }
@@ -2985,11 +3017,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
     }
 
-    private void log(String s) {
+    private static void log(String s) {
         Slog.d(TAG, s);
     }
 
-    private void loge(String s) {
+    private static void loge(String s) {
         Slog.e(TAG, s);
     }
 
