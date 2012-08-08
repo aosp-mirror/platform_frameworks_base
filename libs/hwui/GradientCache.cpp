@@ -18,6 +18,7 @@
 
 #include <utils/threads.h>
 
+#include "Caches.h"
 #include "Debug.h"
 #include "GradientCache.h"
 #include "Properties.h"
@@ -128,9 +129,13 @@ void GradientCache::clear() {
 
 void GradientCache::getGradientInfo(const uint32_t* colors, const int count,
         GradientInfo& info) {
-    uint32_t width = 1 << (31 - __builtin_clz(256 * (count - 1)));
-    bool hasAlpha = false;
+    uint32_t width = 256 * (count - 1);
 
+    if (!Caches::getInstance().extensions.hasNPot()) {
+        width = 1 << (31 - __builtin_clz(width));
+    }
+
+    bool hasAlpha = false;
     for (int i = 0; i < count; i++) {
         if (((colors[i] >> 24) & 0xff) < 255) {
             hasAlpha = true;

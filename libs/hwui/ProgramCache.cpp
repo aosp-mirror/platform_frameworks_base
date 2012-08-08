@@ -69,12 +69,10 @@ const char* gVS_Header_Varyings_HasBitmap =
         "varying highp vec2 outBitmapTexCoords;\n";
 const char* gVS_Header_Varyings_PointHasBitmap =
         "varying highp vec2 outPointBitmapTexCoords;\n";
-// TODO: These values are used to sample from textures,
-//       they may need to be highp
 const char* gVS_Header_Varyings_HasGradient[6] = {
         // Linear
         "varying highp vec2 linear;\n",
-        "varying highp float linear;\n",
+        "varying float linear;\n",
 
         // Circular
         "varying highp vec2 circular;\n",
@@ -268,21 +266,21 @@ const char* gFS_Main_FetchA8Texture[2] = {
 };
 const char* gFS_Main_FetchGradient[6] = {
         // Linear
-        "    highp vec4 gradientColor = texture2D(gradientSampler, linear);\n",
+        "    vec4 gradientColor = texture2D(gradientSampler, linear);\n",
 
-        "    highp vec4 gradientColor = mix(startColor, endColor, clamp(linear, 0.0, 1.0));\n",
+        "    vec4 gradientColor = mix(startColor, endColor, clamp(linear, 0.0, 1.0));\n",
 
         // Circular
-        "    highp vec4 gradientColor = texture2D(gradientSampler, vec2(length(circular), 0.5));\n",
+        "    vec4 gradientColor = texture2D(gradientSampler, vec2(length(circular), 0.5));\n",
 
-        "    highp vec4 gradientColor = mix(startColor, endColor, clamp(length(circular), 0.0, 1.0));\n",
+        "    vec4 gradientColor = mix(startColor, endColor, clamp(length(circular), 0.0, 1.0));\n",
 
         // Sweep
         "    highp float index = atan(sweep.y, sweep.x) * 0.15915494309; // inv(2 * PI)\n"
-        "    highp vec4 gradientColor = texture2D(gradientSampler, vec2(index - floor(index), 0.5));\n",
+        "    vec4 gradientColor = texture2D(gradientSampler, vec2(index - floor(index), 0.5));\n",
 
         "    highp float index = atan(sweep.y, sweep.x) * 0.15915494309; // inv(2 * PI)\n"
-        "    highp vec4 gradientColor = mix(startColor, endColor, clamp(index - floor(index), 0.0, 1.0));\n"
+        "    vec4 gradientColor = mix(startColor, endColor, clamp(index - floor(index), 0.0, 1.0));\n"
 };
 const char* gFS_Main_FetchBitmap =
         "    vec4 bitmapColor = texture2D(bitmapSampler, outBitmapTexCoords);\n";
