@@ -352,7 +352,7 @@ interface IPackageManager {
     String nextPackageToClean(String lastPackage);
 
     void movePackage(String packageName, IPackageMoveObserver observer, int flags);
-
+    
     boolean addPermissionAsync(in PermissionInfo info);
 
     boolean setInstallLocation(int loc);
@@ -363,14 +363,9 @@ interface IPackageManager {
     void setUserName(int userId, String name);
     ParcelFileDescriptor setUserIcon(int userId);
 
-    void installPackageWithOrigin(in Uri packageURI, in IPackageInstallObserver observer,
-            int flags, in String installerPackageName, in Uri originatingURI,
-            in Uri referrer);
-
     void installPackageWithVerification(in Uri packageURI, in IPackageInstallObserver observer,
             int flags, in String installerPackageName, in Uri verificationURI,
-            in ManifestDigest manifestDigest, in ContainerEncryptionParams encryptionParams,
-            in Uri originatingURI, in Uri referrer);
+            in ManifestDigest manifestDigest, in ContainerEncryptionParams encryptionParams);
 
     void verifyPendingInstall(int id, int verificationCode);
 

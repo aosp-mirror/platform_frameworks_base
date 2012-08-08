@@ -563,17 +563,7 @@ public class MockPackageManager extends PackageManager {
     @Override
     public void installPackageWithVerification(Uri packageURI, IPackageInstallObserver observer,
             int flags, String installerPackageName, Uri verificationURI,
-            ManifestDigest manifestDigest, ContainerEncryptionParams encryptionParams,
-            Uri originatingURI, Uri referrer) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @hide
-     */
-    @Override
-    public void installPackageWithOrigin(Uri packageURI, IPackageInstallObserver observer,
-            int flags, String installerPackageName, Uri originatingURI, Uri referrer) {
+            ManifestDigest manifestDigest, ContainerEncryptionParams encryptionParams) {
         throw new UnsupportedOperationException();
     }
 

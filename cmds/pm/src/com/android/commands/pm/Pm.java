@@ -782,7 +782,6 @@ public final class Pm {
         String macAlgo = null;
         byte[] macKey = null;
         byte[] tag = null;
-        String referrer = null;
 
         while ((opt=nextOption()) != null) {
             if (opt.equals("-l")) {
@@ -846,13 +845,6 @@ public final class Pm {
                     showUsage();
                     return;
                 }
-            } else if (opt.equals("--referrer")) {
-                referrer = nextOptionData();
-                if (referrer == null) {
-                    System.err.println("Error: must supply argument for --referrer");
-                    showUsage();
-                    return;
-                }
             } else {
                 System.err.println("Error: Unknown option: " + opt);
                 showUsage();
@@ -900,13 +892,6 @@ public final class Pm {
 
         final Uri apkURI;
         final Uri verificationURI;
-        final Uri referrerURI;
-
-        if (referrer != null) {
-            referrerURI = Uri.parse(referrer);
-        } else {
-            referrerURI = null;
-        }
 
         // Populate apkURI, must be present
         final String apkFilePath = nextArg();
@@ -931,7 +916,7 @@ public final class Pm {
         PackageInstallObserver obs = new PackageInstallObserver();
         try {
             mPm.installPackageWithVerification(apkURI, obs, installFlags, installerPackageName,
-                    verificationURI, null, encryptionParams, apkURI, referrerURI);
+                    verificationURI, null, encryptionParams);
 
             synchronized (obs) {
                 while (!obs.finished) {
@@ -1451,8 +1436,7 @@ public final class Pm {
         System.err.println("       pm list libraries");
         System.err.println("       pm path PACKAGE");
         System.err.println("       pm install [-l] [-r] [-t] [-i INSTALLER_PACKAGE_NAME] [-s] [-f]");
-        System.err.println("                  [--algo <algorithm name> --key <key-in-hex> --iv <IV-in-hex>]");
-        System.err.println("                  [--referrer <URI>] PATH");
+        System.err.println("                  [--algo <algorithm name> --key <key-in-hex> --iv <IV-in-hex>] PATH");
         System.err.println("       pm uninstall [-k] PACKAGE");
         System.err.println("       pm clear PACKAGE");
         System.err.println("       pm enable PACKAGE_OR_COMPONENT");
