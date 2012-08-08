@@ -97,7 +97,8 @@ are by default) for the content provider to be enabled.  If either is
 applications &mdash; "{@code true}" if it can be, and "{@code false}" if not.  
 If "{@code false}", the provider is available only to components of the 
 same application or applications with the same user ID.  The default value
-is "{@code true}".
+is "{@code true}" for applications which target API level 16 (Jelly Bean)
+and below, and "{@code false}" otherwise.
 
 <p>
 You can export a content provider but still limit access to it with the
