@@ -185,28 +185,18 @@ collections of items. Then use multi-select to allow application of those action
 in a category view.</p>
 <h2 id="details">Details</h2>
 
-<p>The detail view allows you to view and act on your data. The layout of the detail view depends on
-the data type being displayed, and therefore differs widely among apps.</p>
+<p>The detail view allows you to view and act on your data. The layout of the detail view depends on the data type being displayed, and therefore differs widely among apps.</p>
 
 <div class="layout-content-row">
   <div class="layout-content-col span-4">
 
 <h4>Layout</h4>
-<p>Consider the activities people will perform in the detail view and arrange the layout accordingly.
-For immersive content, make use of the lights-out mode to allow for distraction-free viewing of
-full-screen content.</p>
-
-    <img src="{@docRoot}design/media/app_structure_people_detail.png">
+<p>Consider the activities people will perform in the detail view and arrange the layout accordingly.</p>
 
   </div>
   <div class="layout-content-col span-9">
 
-    <img src="{@docRoot}design/media/app_structure_book_detail_page_flip.png">
-    <div class="figure-caption">
-      Google Books' detail view is all about replicating the experience of reading an actual book.
-      The page-flip animation reinforces that notion. To create an immersive experience the app
-      enters lights-out mode, which hides all system UI affordances.
-    </div>
+    <img src="{@docRoot}design/media/app_structure_people_detail.png">
 
     <div class="figure-caption">
       The purpose of the People app's detail view is to surface communication options. The list view
@@ -217,9 +207,25 @@ full-screen content.</p>
   </div>
 </div>
 
+<div class="layout-content-row">
+  <div class="layout-content-col span-4">
+
+<h4>Lights-out mode</h4>
+<p>Immersive content like media and games is best experienced full screen without distractions. But that doesn't mean you can't also offer actions on the content like sharing, commenting, or searching. If the user hasn't interacted with any of the controls after a short period of time, automatically fade away the action bar and all system UI affordances so the user can lean back and enjoy the content. We call this lights-out mode. Later, if the user wants to take some action, they can touch anywhere on the screen to exit lights-out mode and bring back the controls.</p>
+
+  </div>
+  <div class="layout-content-col span-9">
+
+    <img src="{@docRoot}design/media/app_structure_book_detail_page_flip.png">
+    <div class="figure-caption">
+      Google Books' detail view replicates the immersive experience of reading an actual book through lights-out mode and a page-flip animation.
+    </div>
+  </div>
+</div>
+
 <h4>Make navigation between detail views efficient</h4>
 <p>If your users are likely to want to look at multiple items in sequence, allow them to navigate
-between items from within the detail view. Use swipe views or other techniques, such as filmstrips,
+between items from within the detail view. Use swipe views or other techniques, such as thumbnail view controls,
 to achieve this.</p>
 
 <img src="{@docRoot}design/media/app_structure_gmail_swipe.png">
@@ -229,8 +235,8 @@ to achieve this.</p>
 
 <img src="{@docRoot}design/media/app_structure_gallery_filmstrip.png">
 <div class="figure-caption">
-  In addition to supporting swipe gestures to move left or right through images, Gallery provides a
-  filmstrip control that lets people quickly jump to specific images.
+  In addition to supporting swipe gestures to move left or right through pages, Magazines provides a
+  thumbnail view control that lets people quickly jump to specific pages.
 </div>
 
 <h2 id="checklist">Checklist</h2>
