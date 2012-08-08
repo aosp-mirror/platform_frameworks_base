@@ -90,6 +90,7 @@ public class DctConstants {
     public static final int CMD_SET_USER_DATA_ENABLE = BASE + 30;
     public static final int CMD_SET_DEPENDENCY_MET = BASE + 31;
     public static final int CMD_SET_POLICY_DATA_ENABLE = BASE + 32;
+    public static final int EVENT_ICC_CHANGED = BASE + 33;
 
     /***** Constants *****/
 
