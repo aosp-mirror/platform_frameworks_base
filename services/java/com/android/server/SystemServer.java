@@ -702,6 +702,12 @@ class ServerThread extends Thread {
         }
 
         try {
+            lockSettings.systemReady();
+        } catch (Throwable e) {
+            reportWtf("making Lock Settings Service ready", e);
+        }
+
+        try {
             wm.systemReady();
         } catch (Throwable e) {
             reportWtf("making Window Manager Service ready", e);
@@ -725,11 +731,6 @@ class ServerThread extends Thread {
             pm.systemReady();
         } catch (Throwable e) {
             reportWtf("making Package Manager Service ready", e);
-        }
-        try {
-            lockSettings.systemReady();
-        } catch (Throwable e) {
-            reportWtf("making Lock Settings Service ready", e);
         }
 
         // These are needed to propagate to the runnable below.
