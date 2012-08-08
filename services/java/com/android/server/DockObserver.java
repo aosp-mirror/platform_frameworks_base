@@ -16,6 +16,8 @@
 
 package com.android.server;
 
+import static android.provider.Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK;
+
 import com.android.server.power.PowerManagerService;
 
 import android.bluetooth.BluetoothAdapter;
@@ -50,6 +52,8 @@ class DockObserver extends UEventObserver {
 
     private static final String DOCK_UEVENT_MATCH = "DEVPATH=/devices/virtual/switch/dock";
     private static final String DOCK_STATE_PATH = "/sys/class/switch/dock/state";
+
+    private static final int DEFAULT_DOCK = 1;
 
     private static final int MSG_DOCK_STATE = 0;
 
@@ -131,6 +135,11 @@ class DockObserver extends UEventObserver {
         mHandler.sendEmptyMessage(MSG_DOCK_STATE);
     }
 
+    private static boolean isScreenSaverActivatedOnDock(Context context) {
+        return 0 != Settings.Secure.getInt(
+                    context.getContentResolver(), SCREENSAVER_ACTIVATE_ON_DOCK, DEFAULT_DOCK);
+    }
+
     private final Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -210,10 +219,12 @@ class DockObserver extends UEventObserver {
                                     Slog.w(TAG, "Unable to awaken!", e);
                                 }
                             } else {
-                                try {
-                                    mgr.dream();
-                                } catch (RemoteException e) {
-                                    Slog.w(TAG, "Unable to dream!", e);
+                                if (isScreenSaverActivatedOnDock(mContext)) {
+                                    try {
+                                        mgr.dream();
+                                    } catch (RemoteException e) {
+                                        Slog.w(TAG, "Unable to dream!", e);
+                                    }
                                 }
                             }
                         } else {
