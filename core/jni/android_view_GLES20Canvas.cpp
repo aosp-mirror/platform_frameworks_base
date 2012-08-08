@@ -720,6 +720,16 @@ static void android_view_GLES20Canvas_outputDisplayList(JNIEnv* env,
 // Layers
 // ----------------------------------------------------------------------------
 
+static void android_view_GLES20Canvas_interrupt(JNIEnv* env, jobject clazz,
+        OpenGLRenderer* renderer) {
+    renderer->interrupt();
+}
+
+static void android_view_GLES20Canvas_resume(JNIEnv* env, jobject clazz,
+        OpenGLRenderer* renderer) {
+    renderer->resume();
+}
+
 static OpenGLRenderer* android_view_GLES20Canvas_createLayerRenderer(JNIEnv* env,
         jobject clazz, Layer* layer) {
     if (layer) {
@@ -962,6 +972,8 @@ static JNINativeMethod gMethods[] = {
     { "nResetDisplayListRenderer",  "(I)V",    (void*) android_view_GLES20Canvas_resetDisplayListRenderer },
 
     { "nOutputDisplayList",      "(II)V",      (void*) android_view_GLES20Canvas_outputDisplayList },
+    { "nInterrupt",              "(I)V",       (void*) android_view_GLES20Canvas_interrupt },
+    { "nResume",                 "(I)V",       (void*) android_view_GLES20Canvas_resume },
 
     { "nCreateLayerRenderer",    "(I)I",       (void*) android_view_GLES20Canvas_createLayerRenderer },
     { "nCreateLayer",            "(IIZ[I)I",   (void*) android_view_GLES20Canvas_createLayer },
