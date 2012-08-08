@@ -988,18 +988,6 @@ public abstract class Context {
     public abstract void sendBroadcast(Intent intent);
 
     /**
-     * Same as #sendBroadcast(Intent intent), but for a specific user.  This broadcast
-     * can only be sent to receivers that are part of the calling application.  It
-     * requires holding the {@link android.Manifest.permission#INTERACT_ACROSS_USERS}
-     * permission.
-     * @param intent the intent to broadcast
-     * @param userId user to send the intent to
-     */
-    public void sendBroadcastToUser(Intent intent, int userId) {
-        throw new RuntimeException("Not implemented. Must override in a subclass.");
-    }
-
-    /**
      * Broadcast the given intent to all interested BroadcastReceivers, allowing
      * an optional required permission to be enforced.  This
      * call is asynchronous; it returns immediately, and you will continue
@@ -1095,6 +1083,48 @@ public abstract class Context {
             String receiverPermission, BroadcastReceiver resultReceiver,
             Handler scheduler, int initialCode, String initialData,
             Bundle initialExtras);
+
+    /**
+     * Same as {@link #sendBroadcast(Intent)}, but for a specific user.  This broadcast
+     * can only be sent to receivers that are part of the calling application.  It
+     * requires holding the {@link android.Manifest.permission#INTERACT_ACROSS_USERS}
+     * permission.
+     * @param intent The intent to broadcast
+     * @param userHandle User to send the intent to.
+     * @see #sendBroadcast(Intent)
+     */
+    public abstract void sendBroadcastToUser(Intent intent, int userHandle);
+
+    /**
+     * Same as
+     * {@link #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)},
+     * but for a specific user.  This broadcast
+     * can only be sent to receivers that are part of the calling application.  It
+     * requires holding the {@link android.Manifest.permission#INTERACT_ACROSS_USERS}
+     * permission.
+     *
+     * <p>See {@link BroadcastReceiver} for more information on Intent broadcasts.
+     *
+     * @param intent The Intent to broadcast; all receivers matching this
+     *               Intent will receive the broadcast.
+     * @param userHandle User to send the intent to.
+     * @param resultReceiver Your own BroadcastReceiver to treat as the final
+     *                       receiver of the broadcast.
+     * @param scheduler A custom Handler with which to schedule the
+     *                  resultReceiver callback; if null it will be
+     *                  scheduled in the Context's main thread.
+     * @param initialCode An initial value for the result code.  Often
+     *                    Activity.RESULT_OK.
+     * @param initialData An initial value for the result data.  Often
+     *                    null.
+     * @param initialExtras An initial value for the result extras.  Often
+     *                      null.
+     *
+     * @see #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)
+     */
+    public abstract void sendOrderedBroadcastToUser(Intent intent, int userHandle,
+            BroadcastReceiver resultReceiver, Handler scheduler,
+            int initialCode, String initialData, Bundle initialExtras);
 
     /**
      * Perform a {@link #sendBroadcast(Intent)} that is "sticky," meaning the
@@ -1403,11 +1433,11 @@ public abstract class Context {
             int flags);
 
     /**
-     * Same as {@link #bindService(Intent, ServiceConnection, int)}, but with an explicit userId
+     * Same as {@link #bindService(Intent, ServiceConnection, int)}, but with an explicit userHandle
      * argument for use by system server and other multi-user aware code.
      * @hide
      */
-    public boolean bindService(Intent service, ServiceConnection conn, int flags, int userId) {
+    public boolean bindService(Intent service, ServiceConnection conn, int flags, int userHandle) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 

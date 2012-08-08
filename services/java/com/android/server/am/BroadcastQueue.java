@@ -20,12 +20,15 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
+import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.IIntentReceiver;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -249,7 +252,7 @@ public class BroadcastQueue {
                 finishReceiverLocked(br, br.resultCode, br.resultData,
                         br.resultExtras, br.resultAbort, true);
                 scheduleBroadcastsLocked();
-                // We need to reset the state if we fails to start the receiver.
+                // We need to reset the state if we failed to start the receiver.
                 br.state = BroadcastRecord.IDLE;
                 throw new RuntimeException(e.getMessage());
             }
@@ -659,6 +662,9 @@ public class BroadcastQueue {
 
             ResolveInfo info =
                 (ResolveInfo)nextReceiver;
+            ComponentName component = new ComponentName(
+                    info.activityInfo.applicationInfo.packageName,
+                    info.activityInfo.name);
 
             boolean skip = false;
             if (r.onlySendToCaller) {
@@ -667,6 +673,7 @@ public class BroadcastQueue {
                             + r.intent.toString()
                             + " from " + r.callerPackage + " (pid="
                             + r.callingPid + ", uid=" + r.callingUid + ")"
+                            + " to " + component.flattenToShortString()
                             + " not allowed to go to different app "
                             + info.activityInfo.applicationInfo.uid);
                     skip = true;
@@ -682,16 +689,14 @@ public class BroadcastQueue {
                             + " from " + r.callerPackage + " (pid=" + r.callingPid
                             + ", uid=" + r.callingUid + ")"
                             + " is not exported from uid " + info.activityInfo.applicationInfo.uid
-                            + " due to receiver " + info.activityInfo.packageName
-                            + "/" + info.activityInfo.name);
+                            + " due to receiver " + component.flattenToShortString());
                 } else {
                     Slog.w(TAG, "Permission Denial: broadcasting "
                             + r.intent.toString()
                             + " from " + r.callerPackage + " (pid=" + r.callingPid
                             + ", uid=" + r.callingUid + ")"
                             + " requires " + info.activityInfo.permission
-                            + " due to receiver " + info.activityInfo.packageName
-                            + "/" + info.activityInfo.name);
+                            + " due to receiver " + component.flattenToShortString());
                 }
                 skip = true;
             }
@@ -707,10 +712,30 @@ public class BroadcastQueue {
                 if (perm != PackageManager.PERMISSION_GRANTED) {
                     Slog.w(TAG, "Permission Denial: receiving "
                             + r.intent + " to "
-                            + info.activityInfo.applicationInfo.packageName
+                            + component.flattenToShortString()
                             + " requires " + r.requiredPermission
                             + " due to sender " + r.callerPackage
                             + " (uid " + r.callingUid + ")");
+                    skip = true;
+                }
+            }
+            boolean isSingleton = false;
+            try {
+                isSingleton = mService.isSingleton(info.activityInfo.processName,
+                        info.activityInfo.applicationInfo,
+                        info.activityInfo.name, info.activityInfo.flags);
+            } catch (SecurityException e) {
+                Slog.w(TAG, e.getMessage());
+                skip = true;
+            }
+            if ((info.activityInfo.flags&ActivityInfo.FLAG_SINGLE_USER) != 0) {
+                if (ActivityManager.checkUidPermission(
+                        android.Manifest.permission.INTERACT_ACROSS_USERS,
+                        info.activityInfo.applicationInfo.uid)
+                                != PackageManager.PERMISSION_GRANTED) {
+                    Slog.w(TAG, "Permission Denial: Receiver " + component.flattenToShortString()
+                            + " requests FLAG_SINGLE_USER, but app does not hold "
+                            + android.Manifest.permission.INTERACT_ACROSS_USERS);
                     skip = true;
                 }
             }
@@ -736,14 +761,9 @@ public class BroadcastQueue {
 
             r.state = BroadcastRecord.APP_RECEIVE;
             String targetProcess = info.activityInfo.processName;
-            r.curComponent = new ComponentName(
-                    info.activityInfo.applicationInfo.packageName,
-                    info.activityInfo.name);
-            if (r.callingUid != Process.SYSTEM_UID) {
-                boolean isSingleton = mService.isSingleton(info.activityInfo.processName,
-                        info.activityInfo.applicationInfo);
-                int targetUserId = isSingleton ? 0 : UserId.getUserId(r.callingUid);
-                info.activityInfo = mService.getActivityInfoForUser(info.activityInfo,targetUserId);
+            r.curComponent = component;
+            if (r.callingUid != Process.SYSTEM_UID && isSingleton) {
+                info.activityInfo = mService.getActivityInfoForUser(info.activityInfo, 0);
             }
             r.curReceiver = info.activityInfo;
             if (DEBUG_MU && r.callingUid > UserId.PER_USER_RANGE) {

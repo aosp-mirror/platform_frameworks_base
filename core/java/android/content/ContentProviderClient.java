@@ -231,6 +231,19 @@ public class ContentProviderClient {
         }
     }
 
+    /** See {@link ContentProvider#call(String, String, Bundle)} */
+    public Bundle call(String method, String arg, Bundle extras)
+            throws RemoteException {
+        try {
+            return mContentProvider.call(method, arg, extras);
+        } catch (DeadObjectException e) {
+            if (!mStable) {
+                mContentResolver.unstableProviderDied(mContentProvider);
+            }
+            throw e;
+        }
+    }
+
     /**
      * Call this to indicate to the system that the associated {@link ContentProvider} is no
      * longer needed by this {@link ContentProviderClient}.

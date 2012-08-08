@@ -313,11 +313,6 @@ public class ContextWrapper extends Context {
     }
 
     @Override
-    public void sendBroadcastToUser(Intent intent, int userId) {
-        mBase.sendBroadcastToUser(intent, userId);
-    }
-
-    @Override
     public void sendBroadcast(Intent intent, String receiverPermission) {
         mBase.sendBroadcast(intent, receiverPermission);
     }
@@ -336,6 +331,19 @@ public class ContextWrapper extends Context {
         mBase.sendOrderedBroadcast(intent, receiverPermission,
                 resultReceiver, scheduler, initialCode,
                 initialData, initialExtras);
+    }
+
+    @Override
+    public void sendBroadcastToUser(Intent intent, int userHandle) {
+        mBase.sendBroadcastToUser(intent, userHandle);
+    }
+
+    @Override
+    public void sendOrderedBroadcastToUser(Intent intent, int userHandle,
+            BroadcastReceiver resultReceiver, Handler scheduler,
+            int initialCode, String initialData, Bundle initialExtras) {
+        mBase.sendOrderedBroadcastToUser(intent, userHandle, resultReceiver,
+                scheduler, initialCode, initialData, initialExtras);
     }
 
     @Override
@@ -395,8 +403,8 @@ public class ContextWrapper extends Context {
 
     /** @hide */
     @Override
-    public boolean bindService(Intent service, ServiceConnection conn, int flags, int userId) {
-        return mBase.bindService(service, conn, flags, userId);
+    public boolean bindService(Intent service, ServiceConnection conn, int flags, int userHandle) {
+        return mBase.bindService(service, conn, flags, userHandle);
     }
 
     @Override

@@ -22,16 +22,20 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentProviderClient;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.graphics.Bitmap;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ScrollView;
+import android.widget.Toast;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -42,6 +46,18 @@ public class ActivityTestMain extends Activity {
     static final String TAG = "ActivityTest";
 
     ActivityManager mAm;
+
+    class BroadcastResultReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle res = getResultExtras(true);
+            int user = res.getInt("user", -1);
+            Toast.makeText(ActivityTestMain.this,
+                    "Receiver executed as user "
+                    + (user >= 0 ? Integer.toString(user) : "unknown"),
+                    Toast.LENGTH_LONG).show();
+        }
+    }
 
     private void addThumbnail(LinearLayout container, Bitmap bm,
             final ActivityManager.RecentTaskInfo task,
@@ -134,8 +150,35 @@ public class ActivityTestMain extends Activity {
         });
         menu.add("Send!").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override public boolean onMenuItemClick(MenuItem item) {
+                Intent intent = new Intent(ActivityTestMain.this, SingleUserReceiver.class);
+                sendOrderedBroadcast(intent, null, new BroadcastResultReceiver(), 
+                        null, Activity.RESULT_OK, null, null);
+                return true;
+            }
+        });
+        menu.add("Call!").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override public boolean onMenuItemClick(MenuItem item) {
+                ContentProviderClient cpl = getContentResolver().acquireContentProviderClient(
+                        SingleUserProvider.AUTHORITY);
+                Bundle res = null;
+                try {
+                    res = cpl.call("getuser", null, null);
+                } catch (RemoteException e) {
+                }
+                int user = res != null ? res.getInt("user", -1) : -1;
+                Toast.makeText(ActivityTestMain.this,
+                        "Provider executed as user "
+                        + (user >= 0 ? Integer.toString(user) : "unknown"),
+                        Toast.LENGTH_LONG).show();
+                cpl.release();
+                return true;
+            }
+        });
+        menu.add("Send to user 1!").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override public boolean onMenuItemClick(MenuItem item) {
                 Intent intent = new Intent(ActivityTestMain.this, UserTarget.class);
-                sendBroadcastToUser(intent, 1);
+                sendOrderedBroadcastToUser(intent, 1, new BroadcastResultReceiver(), 
+                        null, Activity.RESULT_OK, null, null);
                 return true;
             }
         });

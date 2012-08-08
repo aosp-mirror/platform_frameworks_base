@@ -1840,6 +1840,18 @@ public class ActivityManager {
         return PackageManager.PERMISSION_DENIED;
     }
 
+    /** @hide */
+    public static int checkUidPermission(String permission, int uid) {
+        try {
+            return AppGlobals.getPackageManager()
+                    .checkUidPermission(permission, uid);
+        } catch (RemoteException e) {
+            // Should never happen, but if it does... deny!
+            Slog.e(TAG, "PackageManager is dead?!?", e);
+        }
+        return PackageManager.PERMISSION_DENIED;
+    }
+
     /**
      * Returns the usage statistics of each installed package.
      *
