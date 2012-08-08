@@ -2076,6 +2076,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     static final int VIEW_QUICK_REJECTED = 0x10000000;
 
+    /**
+     * Flag indicating that start/end padding has been resolved into left/right padding
+     * for use in measurement, layout, drawing, etc. This is set by {@link #resolvePadding()}
+     * and checked by {@link #measure(int, int)} to determine if padding needs to be resolved
+     * during measurement. In some special cases this is required such as when an adapter-based
+     * view measures prospective children without attaching them to a window.
+     */
+    static final int PADDING_RESOLVED = 0x20000000;
+
     // There are a couple of flags left in mPrivateFlags2
 
     /* End of masks for mPrivateFlags2 */
@@ -11335,6 +11344,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         internalSetPadding(mUserPaddingLeft, mPaddingTop, mUserPaddingRight, mUserPaddingBottom);
         onPaddingChanged(resolvedLayoutDirection);
+        mPrivateFlags2 |= PADDING_RESOLVED;
     }
 
     /**
@@ -11430,6 +11440,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         resetResolvedLayoutDirection();
         resetResolvedTextAlignment();
         resetAccessibilityStateChanged();
+        mPrivateFlags2 &= ~PADDING_RESOLVED;
     }
 
     /**
@@ -14948,6 +14959,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             // first clears the measured dimension flag
             mPrivateFlags &= ~MEASURED_DIMENSION_SET;
+
+            if ((mPrivateFlags2 & PADDING_RESOLVED) == 0) {
+                resolvePadding();
+            }
 
             // measure ourselves, this should set the measured dimension flag back
             onMeasure(widthMeasureSpec, heightMeasureSpec);
