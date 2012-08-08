@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+  Copyright (C) 2012 The Android Open Source Project
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  -->
+
+<resources>
+
+    <string name="app_name">NetworkUsage</string>
+
+    <!--  Menu items -->
+    <string name="settings">Settings</string>
+    <string name="refresh">Refresh</string>
+
+    <!--  NetworkActivity -->
+    <string name="page_title">Newest StackOverflow questions tagged \'android\'</string>
+    <string name="updated">Last updated:</string>
+    <string name="lost_connection">Lost connection.</string>
+    <string name="wifi_connected">Wi-Fi reconnected.</string>
+    <string name="connection_error">Unable to load content. Check your network connection.</string>
+    <string name="xml_error">Error parsing XML.</string>
+
+</resources>
