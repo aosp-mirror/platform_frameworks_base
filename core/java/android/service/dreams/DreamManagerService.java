@@ -5,8 +5,6 @@ import static android.provider.Settings.Secure.SCREENSAVER_COMPONENT;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
-import com.android.internal.view.IInputMethod;
-
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -16,34 +14,32 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.SystemClock;
 import android.provider.Settings;
-import android.util.Log;
 import android.util.Slog;
 import android.view.IWindowManager;
 import android.view.WindowManager;
 
 /**
- * 
+ *
  * @hide
  *
  */
 
-public class DreamManagerService 
-        extends IDreamManager.Stub 
+public class DreamManagerService
+        extends IDreamManager.Stub
         implements ServiceConnection
 {
     private static final boolean DEBUG = true;
     private static final String TAG = "DreamManagerService";
-    
+
     final Object mLock = new Object[0];
 
     private Context mContext;
     private IWindowManager mIWindowManager;
-    
+
     private ComponentName mCurrentDreamComponent;
     private IDreamService mCurrentDream;
-    private Binder mCurrentDreamToken; 
+    private Binder mCurrentDreamToken;
 
     public DreamManagerService(Context context) {
         if (DEBUG) Slog.v(TAG, "DreamManagerService startup");
@@ -60,6 +56,7 @@ public class DreamManagerService
     }
 
     // IDreamManager method
+    @Override
     public void dream() {
         ComponentName name = getDreamComponent();
         if (name != null) {
@@ -75,26 +72,26 @@ public class DreamManagerService
     }
 
     // IDreamManager method
+    @Override
     public void setDreamComponent(ComponentName name) {
         Settings.Secure.putString(mContext.getContentResolver(), SCREENSAVER_COMPONENT, name.flattenToString());
     }
-    
+
     // IDreamManager method
+    @Override
     public ComponentName getDreamComponent() {
-        // TODO(dsandler) don't load this every time, watch the value  
+        // TODO(dsandler) don't load this every time, watch the value
         String component = Settings.Secure.getString(mContext.getContentResolver(), SCREENSAVER_COMPONENT);
-        if (component == null) {
-            component = mContext.getResources().getString(
-                com.android.internal.R.string.config_defaultDreamComponent);
-        }
         if (component != null) {
             return ComponentName.unflattenFromString(component);
         } else {
+            // We rely on DatabaseHelper to set a sane default for us when the settings DB is upgraded
             return null;
         }
     }
-    
+
     // IDreamManager method
+    @Override
     public void testDream(ComponentName name) {
         if (DEBUG) Slog.v(TAG, "startDream name=" + name
                 + " pid=" + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid());
@@ -110,6 +107,7 @@ public class DreamManagerService
     }
 
     // IDreamManager method
+    @Override
     public void awaken() {
         if (DEBUG) Slog.v(TAG, "awaken()");
         synchronized (mLock) {
@@ -123,6 +121,7 @@ public class DreamManagerService
     }
 
     // IDreamManager method
+    @Override
     public boolean isDreaming() {
         return mCurrentDream != null;
     }
@@ -141,14 +140,14 @@ public class DreamManagerService
         mCurrentDreamComponent = componentName;
         mCurrentDreamToken = new Binder();
         try {
-            if (DEBUG) Slog.v(TAG, "Adding window token: " + mCurrentDreamToken 
+            if (DEBUG) Slog.v(TAG, "Adding window token: " + mCurrentDreamToken
                     + " for window type: " + WindowManager.LayoutParams.TYPE_DREAM);
             mIWindowManager.addWindowToken(mCurrentDreamToken,
                     WindowManager.LayoutParams.TYPE_DREAM);
         } catch (RemoteException e) {
             Slog.w(TAG, "Unable to add window token. Proceed at your own risk.");
         }
-        
+
         if (!mContext.bindService(intent, this, Context.BIND_AUTO_CREATE)) {
             Slog.w(TAG, "unable to bind service: " + componentName);
         }
@@ -172,7 +171,7 @@ public class DreamManagerService
         if (DEBUG) Slog.v(TAG, "disconnected: " + name + " service: " + mCurrentDream);
         // Only happens in exceptional circumstances
     }
-    
+
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);

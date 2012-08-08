@@ -65,7 +65,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 79;
+    private static final int DATABASE_VERSION = 80;
 
     private Context mContext;
 
@@ -1072,6 +1072,30 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
             upgradeVersion = 79;
         }
+
+        // vvv Jelly Bean MR1 changes begin here vvv
+
+        if (upgradeVersion == 79) {
+            // update screensaver settings
+            db.beginTransaction();
+            SQLiteStatement stmt = null;
+            try {
+                stmt = db.compileStatement("INSERT OR REPLACE INTO secure(name,value)"
+                        + " VALUES(?,?);");
+                loadBooleanSetting(stmt, Settings.Secure.SCREENSAVER_ENABLED,
+                        R.bool.def_screensaver_enabled);
+                loadBooleanSetting(stmt, Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK,
+                        R.bool.def_screensaver_activate_on_dock);
+                loadStringSetting(stmt, Settings.Secure.SCREENSAVER_COMPONENT,
+                        R.string.def_screensaver_component);
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+                if (stmt != null) stmt.close();
+            }
+            upgradeVersion = 80;
+        }
+
 
         // *** Remember to update DATABASE_VERSION above!
 
