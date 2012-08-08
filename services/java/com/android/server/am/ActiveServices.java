@@ -478,7 +478,8 @@ public class ActiveServices {
         if (res.record == null) {
             return -1;
         }
-        if (mAm.isSingleton(res.record.processName, res.record.appInfo)) {
+        if (mAm.isSingleton(res.record.processName, res.record.appInfo,
+                res.record.serviceInfo.name, res.record.serviceInfo.flags)) {
             userId = 0;
             res = retrieveServiceLocked(service, resolvedType, Binder.getCallingPid(),
                     Binder.getCallingUid(), 0);
@@ -787,22 +788,9 @@ public class ActiveServices {
                 ComponentName name = new ComponentName(
                         sInfo.applicationInfo.packageName, sInfo.name);
                 if (userId > 0) {
-                    if (mAm.isSingleton(sInfo.processName, sInfo.applicationInfo)
-                            || (sInfo.flags&ServiceInfo.FLAG_SINGLE_USER) != 0) {
+                    if (mAm.isSingleton(sInfo.processName, sInfo.applicationInfo,
+                            sInfo.name, sInfo.flags)) {
                         userId = 0;
-                    } else if ((sInfo.flags&ServiceInfo.FLAG_SINGLE_USER) != 0) {
-                        if (mAm.checkComponentPermission(
-                                android.Manifest.permission.INTERACT_ACROSS_USERS,
-                                callingPid, callingUid, -1, true)
-                                == PackageManager.PERMISSION_GRANTED) {
-                            userId = 0;
-                        } else {
-                            String msg = "Permission Denial: Service " + name
-                                    + " requests FLAG_SINGLE_USER, but app does not hold "
-                                    + android.Manifest.permission.INTERACT_ACROSS_USERS;
-                            Slog.w(TAG, msg);
-                            throw new SecurityException(msg);
-                        }
                     }
                     sInfo = new ServiceInfo(sInfo);
                     sInfo.applicationInfo = mAm.getAppInfoForUser(sInfo.applicationInfo, userId);

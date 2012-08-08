@@ -2040,7 +2040,7 @@ public class PackageParser {
             return null;
         }
 
-        final boolean setExported = sa.hasValue(
+        boolean setExported = sa.hasValue(
                 com.android.internal.R.styleable.AndroidManifestActivity_exported);
         if (setExported) {
             a.info.exported = sa.getBoolean(
@@ -2164,6 +2164,21 @@ public class PackageParser {
         } else {
             a.info.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
             a.info.configChanges = 0;
+        }
+
+        if (receiver) {
+            if (sa.getBoolean(
+                    com.android.internal.R.styleable.AndroidManifestActivity_singleUser,
+                    false)) {
+                a.info.flags |= ServiceInfo.FLAG_SINGLE_USER;
+                if (a.info.exported) {
+                    Slog.w(TAG, "Activity exported request ignored due to singleUser: "
+                            + a.className + " at " + mArchiveSourcePath + " "
+                            + parser.getPositionDescription());
+                    a.info.exported = false;
+                }
+                setExported = true;
+            }
         }
 
         sa.recycle();
@@ -2474,6 +2489,20 @@ public class PackageParser {
         p.info.initOrder = sa.getInt(
                 com.android.internal.R.styleable.AndroidManifestProvider_initOrder,
                 0);
+
+        p.info.flags = 0;
+
+        if (sa.getBoolean(
+                com.android.internal.R.styleable.AndroidManifestProvider_singleUser,
+                false)) {
+            p.info.flags |= ProviderInfo.FLAG_SINGLE_USER;
+            if (p.info.exported) {
+                Slog.w(TAG, "Provider exported request ignored due to singleUser: "
+                        + p.className + " at " + mArchiveSourcePath + " "
+                        + parser.getPositionDescription());
+                p.info.exported = false;
+            }
+        }
 
         sa.recycle();
 

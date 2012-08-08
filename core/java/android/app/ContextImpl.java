@@ -967,18 +967,6 @@ class ContextImpl extends Context {
     }
 
     @Override
-    public void sendBroadcastToUser(Intent intent, int userId) {
-        String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
-        try {
-            intent.setAllowFds(false);
-            ActivityManagerNative.getDefault().broadcastIntent(mMainThread.getApplicationThread(),
-                    intent, resolvedType, null, Activity.RESULT_OK, null, null, null, false, false,
-                    userId);
-        } catch (RemoteException e) {
-        }
-    }
-
-    @Override
     public void sendBroadcast(Intent intent, String receiverPermission) {
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
         try {
@@ -1034,6 +1022,50 @@ class ContextImpl extends Context {
                 mMainThread.getApplicationThread(), intent, resolvedType, rd,
                 initialCode, initialData, initialExtras, receiverPermission,
                 true, false, Binder.getOrigCallingUser());
+        } catch (RemoteException e) {
+        }
+    }
+
+    @Override
+    public void sendBroadcastToUser(Intent intent, int userHandle) {
+        String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
+        try {
+            intent.setAllowFds(false);
+            ActivityManagerNative.getDefault().broadcastIntent(mMainThread.getApplicationThread(),
+                    intent, resolvedType, null, Activity.RESULT_OK, null, null, null, false, false,
+                    userHandle);
+        } catch (RemoteException e) {
+        }
+    }
+
+    @Override
+    public void sendOrderedBroadcastToUser(Intent intent, int userHandle,
+            BroadcastReceiver resultReceiver, Handler scheduler,
+            int initialCode, String initialData, Bundle initialExtras) {
+        IIntentReceiver rd = null;
+        if (resultReceiver != null) {
+            if (mPackageInfo != null) {
+                if (scheduler == null) {
+                    scheduler = mMainThread.getHandler();
+                }
+                rd = mPackageInfo.getReceiverDispatcher(
+                    resultReceiver, getOuterContext(), scheduler,
+                    mMainThread.getInstrumentation(), false);
+            } else {
+                if (scheduler == null) {
+                    scheduler = mMainThread.getHandler();
+                }
+                rd = new LoadedApk.ReceiverDispatcher(
+                        resultReceiver, getOuterContext(), scheduler, null, false).getIIntentReceiver();
+            }
+        }
+        String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
+        try {
+            intent.setAllowFds(false);
+            ActivityManagerNative.getDefault().broadcastIntent(
+                mMainThread.getApplicationThread(), intent, resolvedType, rd,
+                initialCode, initialData, initialExtras, null,
+                true, false, userHandle);
         } catch (RemoteException e) {
         }
     }
@@ -1197,7 +1229,7 @@ class ContextImpl extends Context {
 
     /** @hide */
     @Override
-    public boolean bindService(Intent service, ServiceConnection conn, int flags, int userId) {
+    public boolean bindService(Intent service, ServiceConnection conn, int flags, int userHandle) {
         IServiceConnection sd;
         if (conn == null) {
             throw new IllegalArgumentException("connection is null");
@@ -1219,7 +1251,7 @@ class ContextImpl extends Context {
             int res = ActivityManagerNative.getDefault().bindService(
                 mMainThread.getApplicationThread(), getActivityToken(),
                 service, service.resolveTypeIfNeeded(getContentResolver()),
-                sd, flags, userId);
+                sd, flags, userHandle);
             if (res < 0) {
                 throw new SecurityException(
                         "Not allowed to bind to service " + service);
