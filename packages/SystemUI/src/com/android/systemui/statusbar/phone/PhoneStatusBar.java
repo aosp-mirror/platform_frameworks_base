@@ -46,6 +46,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.UserId;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -2222,8 +2223,8 @@ public class PhoneStatusBar extends BaseStatusBar {
                 ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
             } catch (RemoteException e) {
             }
-            v.getContext().startActivity(new Intent(Settings.ACTION_SETTINGS)
-                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+            v.getContext().startActivityAsUser(new Intent(Settings.ACTION_SETTINGS)
+                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK), UserId.USER_CURRENT);
             animateCollapse();
         }
     };

@@ -276,6 +276,12 @@ public class ContextWrapper extends Context {
         mBase.startActivity(intent);
     }
 
+    /** @hide */
+    @Override
+    public void startActivityAsUser(Intent intent, int userId) {
+        mBase.startActivityAsUser(intent, userId);
+    }
+
     @Override
     public void startActivity(Intent intent, Bundle options) {
         mBase.startActivity(intent, options);

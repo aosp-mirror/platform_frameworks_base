@@ -30,6 +30,7 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Process;
+import android.os.UserId;
 import android.util.Log;
 
 import com.android.systemui.R;
@@ -243,7 +244,8 @@ public class RecentTasksLoader {
                 mContext.getSystemService(Context.ACTIVITY_SERVICE);
 
                 final List<ActivityManager.RecentTaskInfo> recentTasks =
-                        am.getRecentTasks(MAX_TASKS, ActivityManager.RECENT_IGNORE_UNAVAILABLE);
+                        am.getRecentTasksForUser(MAX_TASKS,
+                                ActivityManager.RECENT_IGNORE_UNAVAILABLE, UserId.USER_CURRENT);
                 int numTasks = recentTasks.size();
                 ActivityInfo homeInfo = new Intent(Intent.ACTION_MAIN)
                         .addCategory(Intent.CATEGORY_HOME).resolveActivityInfo(pm, 0);
