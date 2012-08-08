@@ -72,14 +72,6 @@ public abstract class WebSettings {
         TextSize(int size) {
             value = size;
         }
-
-        /**
-         * @hide Only for use by WebViewProvider implementations
-         */
-        public int getValue() {
-            return value;
-        }
-
         int value;
     }
 
@@ -442,7 +434,7 @@ public abstract class WebSettings {
      * Gets the text zoom of the page in percent.
      *
      * @return the text zoom of the page in percent
-     * @see #setTextSizeZoom
+     * @see #setTextZoom
      */
     public synchronized int getTextZoom() {
         throw new MustOverrideException();
@@ -455,7 +447,7 @@ public abstract class WebSettings {
      * @deprecated Use {@link #setTextZoom} instead.
      */
     public synchronized void setTextSize(TextSize t) {
-        throw new MustOverrideException();
+        setTextZoom(t.value);
     }
 
     /**
@@ -468,7 +460,20 @@ public abstract class WebSettings {
      * @deprecated Use {@link #getTextZoom} instead.
      */
     public synchronized TextSize getTextSize() {
-        throw new MustOverrideException();
+        TextSize closestSize = null;
+        int smallestDelta = Integer.MAX_VALUE;
+        int textSize = getTextZoom();
+        for (TextSize size : TextSize.values()) {
+            int delta = Math.abs(textSize - size.value);
+            if (delta == 0) {
+                return size;
+            }
+            if (delta < smallestDelta) {
+                smallestDelta = delta;
+                closestSize = size;
+            }
+        }
+        return closestSize != null ? closestSize : TextSize.NORMAL;
     }
 
     /**
