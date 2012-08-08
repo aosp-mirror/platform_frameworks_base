@@ -154,6 +154,12 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Opciones de dispositivo"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Bloqueo de pantalla"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Apagar"</string>
+    <!-- no translation found for global_action_bug_report (7934010578922304799) -->
+    <skip />
+    <!-- no translation found for bugreport_title (2667494803742548533) -->
+    <skip />
+    <!-- no translation found for bugreport_message (398447048750350456) -->
+    <skip />
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Modo silencioso"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"El sonido está Desactivado"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"El sonido está Activado"</string>
