@@ -946,6 +946,11 @@ void FontRenderer::appendRotatedMeshQuad(float x1, float y1, float u1, float v1,
 uint32_t FontRenderer::getRemainingCacheCapacity() {
     uint32_t remainingCapacity = 0;
     float totalPixels = 0;
+
+    //avoid divide by zero if the size is 0
+    if (mCacheLines.size() == 0) {
+        return 0;
+    }
     for(uint32_t i = 0; i < mCacheLines.size(); i ++) {
          remainingCapacity += (mCacheLines[i]->mMaxWidth - mCacheLines[i]->mCurrentCol);
          totalPixels += mCacheLines[i]->mMaxWidth;
