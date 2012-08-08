@@ -2892,7 +2892,7 @@ void OpenGLRenderer::chooseBlending(bool blend, SkXfermode::Mode mode,
         // the blending, turn blending off here
         // If the blend mode cannot be implemented using shaders, fall
         // back to the default SrcOver blend mode instead
-        if CC_UNLIKELY((mode > SkXfermode::kScreen_Mode)) {
+        if (CC_UNLIKELY(mode > SkXfermode::kScreen_Mode)) {
             if (CC_UNLIKELY(mCaches.extensions.hasFramebufferFetch())) {
                 description.framebufferMode = mode;
                 description.swapSrcDst = swapSrcDst;

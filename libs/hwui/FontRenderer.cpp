@@ -37,7 +37,7 @@ namespace uirenderer {
 #define DEFAULT_TEXT_CACHE_WIDTH 1024
 #define DEFAULT_TEXT_CACHE_HEIGHT 256
 #define MAX_TEXT_CACHE_WIDTH 2048
-#define TEXTURE_BORDER_SIZE 2
+#define TEXTURE_BORDER_SIZE 1
 
 #define AUTO_KERN(prev, next) (((next) - (prev) + 32) >> 6 << 16)
 
@@ -50,10 +50,10 @@ bool CacheTextureLine::fitBitmap(const SkGlyph& glyph, uint32_t *retOriginX, uin
         return false;
     }
 
-    if (mCurrentCol + glyph.fWidth + TEXTURE_BORDER_SIZE < mMaxWidth) {
-        *retOriginX = mCurrentCol + 1;
-        *retOriginY = mCurrentRow + 1;
-        mCurrentCol += glyph.fWidth + TEXTURE_BORDER_SIZE;
+    if (mCurrentCol + glyph.fWidth + TEXTURE_BORDER_SIZE * 2 < mMaxWidth) {
+        *retOriginX = mCurrentCol + TEXTURE_BORDER_SIZE;
+        *retOriginY = mCurrentRow + TEXTURE_BORDER_SIZE;
+        mCurrentCol += glyph.fWidth + TEXTURE_BORDER_SIZE * 2;
         mDirty = true;
         return true;
     }
@@ -412,10 +412,10 @@ void Font::updateGlyphCache(SkPaint* paint, const SkGlyph& skiaGlyph, CachedGlyp
     uint32_t cacheWidth = glyph->mCachedTextureLine->mCacheTexture->mWidth;
     uint32_t cacheHeight = glyph->mCachedTextureLine->mCacheTexture->mHeight;
 
-    glyph->mBitmapMinU = (float) startX / (float) cacheWidth;
-    glyph->mBitmapMinV = (float) startY / (float) cacheHeight;
-    glyph->mBitmapMaxU = (float) endX / (float) cacheWidth;
-    glyph->mBitmapMaxV = (float) endY / (float) cacheHeight;
+    glyph->mBitmapMinU = startX / (float) cacheWidth;
+    glyph->mBitmapMinV = startY / (float) cacheHeight;
+    glyph->mBitmapMaxU = endX / (float) cacheWidth;
+    glyph->mBitmapMaxV = endY / (float) cacheHeight;
 
     mState->mUploadTexture = true;
 }
@@ -590,9 +590,6 @@ void FontRenderer::allocateTextureMemory(CacheTexture* cacheTexture) {
     int height = cacheTexture->mHeight;
 
     cacheTexture->mTexture = new uint8_t[width * height];
-#if DEBUG_FONT_RENDERER
-    memset(cacheTexture->mTexture, 0, width * height * sizeof(uint8_t));
-#endif
 
     if (!cacheTexture->mTextureId) {
         glGenTextures(1, &cacheTexture->mTextureId);
@@ -617,7 +614,7 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
         uint32_t* retOriginX, uint32_t* retOriginY) {
     cachedGlyph->mIsValid = false;
     // If the glyph is too tall, don't cache it
-    if (glyph.fHeight + TEXTURE_BORDER_SIZE > mCacheLines[mCacheLines.size() - 1]->mMaxHeight) {
+    if (glyph.fHeight + TEXTURE_BORDER_SIZE * 2 > mCacheLines[mCacheLines.size() - 1]->mMaxHeight) {
         ALOGE("Font size to large to fit in cache. width, height = %i, %i",
                 (int) glyph.fWidth, (int) glyph.fHeight);
         return;
@@ -677,6 +674,18 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
     unsigned int stride = glyph.rowBytes();
 
     uint32_t cacheX = 0, bX = 0, cacheY = 0, bY = 0;
+
+    for (cacheX = startX - TEXTURE_BORDER_SIZE; cacheX < endX + TEXTURE_BORDER_SIZE; cacheX++) {
+        cacheBuffer[(startY - TEXTURE_BORDER_SIZE) * cacheWidth + cacheX] = 0;
+        cacheBuffer[(endY + TEXTURE_BORDER_SIZE - 1) * cacheWidth + cacheX] = 0;
+    }
+
+    for (cacheY = startY - TEXTURE_BORDER_SIZE + 1;
+            cacheY < endY + TEXTURE_BORDER_SIZE - 1; cacheY++) {
+        cacheBuffer[cacheY * cacheWidth + startX - TEXTURE_BORDER_SIZE] = 0;
+        cacheBuffer[cacheY * cacheWidth + endX + TEXTURE_BORDER_SIZE - 1] = 0;
+    }
+
     if (mGammaTable) {
         for (cacheX = startX, bX = 0; cacheX < endX; cacheX++, bX++) {
             for (cacheY = startY, bY = 0; cacheY < endY; cacheY++, bY++) {
