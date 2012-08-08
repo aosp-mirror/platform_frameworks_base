@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
@@ -56,12 +57,12 @@ class GLES20TextureLayer extends GLES20Layer {
     }
 
     @Override
-    HardwareCanvas start() {
+    HardwareCanvas start(Canvas currentCanvas) {
         return null;
     }
 
     @Override
-    void end() {
+    void end(Canvas currentCanvas) {
     }
 
     SurfaceTexture getSurfaceTexture() {

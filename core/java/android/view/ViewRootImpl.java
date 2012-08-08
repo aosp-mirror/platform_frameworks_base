@@ -1408,6 +1408,7 @@ public final class ViewRootImpl implements ViewParent,
                         disposeResizeBuffer();
 
                         boolean completed = false;
+                        HardwareCanvas hwRendererCanvas = mAttachInfo.mHardwareRenderer.getCanvas();
                         HardwareCanvas layerCanvas = null;
                         try {
                             if (mResizeBuffer == null) {
@@ -1417,7 +1418,7 @@ public final class ViewRootImpl implements ViewParent,
                                     mResizeBuffer.getHeight() != mHeight) {
                                 mResizeBuffer.resize(mWidth, mHeight);
                             }
-                            layerCanvas = mResizeBuffer.start();
+                            layerCanvas = mResizeBuffer.start(hwRendererCanvas);
                             layerCanvas.setViewport(mWidth, mHeight);
                             layerCanvas.onPreDraw(null);
                             final int restoreCount = layerCanvas.save();
@@ -1456,7 +1457,7 @@ public final class ViewRootImpl implements ViewParent,
                                 layerCanvas.onPostDraw();
                             }
                             if (mResizeBuffer != null) {
-                                mResizeBuffer.end();
+                                mResizeBuffer.end(hwRendererCanvas);
                                 if (!completed) {
                                     mResizeBuffer.destroy();
                                     mResizeBuffer = null;
