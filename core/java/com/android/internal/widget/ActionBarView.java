@@ -856,6 +856,7 @@ public class ActionBarView extends AbsActionBarView {
         final int paddingRight = getPaddingRight();
         final int height = maxHeight - verticalPadding;
         final int childSpecHeight = MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST);
+        final int exactHeightSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY);
 
         int availableWidth = contentWidth - paddingLeft - paddingRight;
         int leftOfCenter = availableWidth / 2;
@@ -871,16 +872,14 @@ public class ActionBarView extends AbsActionBarView {
             } else {
                 homeWidthSpec = MeasureSpec.makeMeasureSpec(lp.width, MeasureSpec.EXACTLY);
             }
-            homeLayout.measure(homeWidthSpec,
-                    MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
+            homeLayout.measure(homeWidthSpec, exactHeightSpec);
             final int homeWidth = homeLayout.getMeasuredWidth() + homeLayout.getStartOffset();
             availableWidth = Math.max(0, availableWidth - homeWidth);
             leftOfCenter = Math.max(0, availableWidth - homeWidth);
         }
         
         if (mMenuView != null && mMenuView.getParent() == this) {
-            availableWidth = measureChildView(mMenuView, availableWidth,
-                    childSpecHeight, 0);
+            availableWidth = measureChildView(mMenuView, availableWidth, exactHeightSpec, 0);
             rightOfCenter = Math.max(0, rightOfCenter - mMenuView.getMeasuredWidth());
         }
 
