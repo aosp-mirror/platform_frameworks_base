@@ -25,7 +25,6 @@ import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
@@ -39,7 +38,7 @@ import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.SystemClock;
-import android.os.SystemProperties;
+import android.os.SystemService;
 import android.util.Log;
 
 import com.android.internal.R;
@@ -485,8 +484,7 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
 
                 // Wait for the daemons to stop.
                 for (String daemon : mDaemons) {
-                    String key = "init.svc." + daemon;
-                    while (!"stopped".equals(SystemProperties.get(key, "stopped"))) {
+                    while (!SystemService.isStopped(daemon)) {
                         checkpoint(true);
                     }
                 }
@@ -519,11 +517,10 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
 
                     // Start the daemon.
                     String daemon = mDaemons[i];
-                    SystemProperties.set("ctl.start", daemon);
+                    SystemService.start(daemon);
 
                     // Wait for the daemon to start.
-                    String key = "init.svc." + daemon;
-                    while (!"running".equals(SystemProperties.get(key))) {
+                    while (!SystemService.isRunning(daemon)) {
                         checkpoint(true);
                     }
 
@@ -579,8 +576,7 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
                     // Check if a running daemon is dead.
                     for (int i = 0; i < mDaemons.length; ++i) {
                         String daemon = mDaemons[i];
-                        if (mArguments[i] != null && !"running".equals(
-                                SystemProperties.get("init.svc." + daemon))) {
+                        if (mArguments[i] != null && !SystemService.isRunning(daemon)) {
                             throw new IllegalStateException(daemon + " is dead");
                         }
                     }
@@ -647,7 +643,7 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
                 // Kill the daemons if they fail to stop.
                 if (mInfo.state == LegacyVpnInfo.STATE_INITIALIZING) {
                     for (String daemon : mDaemons) {
-                        SystemProperties.set("ctl.stop", daemon);
+                        SystemService.stop(daemon);
                     }
                 }
 
