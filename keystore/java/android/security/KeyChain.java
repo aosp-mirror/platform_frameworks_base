@@ -26,20 +26,16 @@ import android.os.Looper;
 import android.os.RemoteException;
 import java.io.ByteArrayInputStream;
 import java.io.Closeable;
-import java.io.IOException;
 import java.security.InvalidKeyException;
-import java.security.KeyPair;
 import java.security.Principal;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import libcore.util.Objects;
 
 import org.apache.harmony.xnet.provider.jsse.OpenSSLEngine;
 import org.apache.harmony.xnet.provider.jsse.TrustedCertificateStore;
@@ -341,20 +337,9 @@ public final class KeyChain {
         try {
             IKeyChainService keyChainService = keyChainConnection.getService();
             byte[] certificateBytes = keyChainService.getCertificate(alias);
-            List<X509Certificate> chain = new ArrayList<X509Certificate>();
-            chain.add(toCertificate(certificateBytes));
             TrustedCertificateStore store = new TrustedCertificateStore();
-            for (int i = 0; true; i++) {
-                X509Certificate cert = chain.get(i);
-                if (Objects.equal(cert.getSubjectX500Principal(), cert.getIssuerX500Principal())) {
-                    break;
-                }
-                X509Certificate issuer = store.findIssuer(cert);
-                if (issuer == null) {
-                    break;
-                }
-                chain.add(issuer);
-            }
+            List<X509Certificate> chain = store
+                    .getCertificateChain(toCertificate(certificateBytes));
             return chain.toArray(new X509Certificate[chain.size()]);
         } catch (RemoteException e) {
             throw new KeyChainException(e);
