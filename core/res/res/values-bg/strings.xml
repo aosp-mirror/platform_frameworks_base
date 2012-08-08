@@ -217,14 +217,10 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Разрешава на приложението да получава и обработва WAP съобщения. Това разрешение включва възможността да наблюдава или изтрива изпратените до вас, без да ви ги покаже."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"извличане на изпълняваните приложения"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Разрешава на приложението да извлича информация за задачите, изпълнявани понастоящем и неотдавна. Това може да му позволи да открива данни за това, кои приложения се използват на устройството."</string>
-    <!-- no translation found for permlab_interactAcrossUsers (7114255281944211682) -->
-    <skip />
-    <!-- no translation found for permdesc_interactAcrossUsers (364670963623385786) -->
-    <skip />
-    <!-- no translation found for permlab_interactAcrossUsersFull (2567734285545074105) -->
-    <skip />
-    <!-- no translation found for permdesc_interactAcrossUsersFull (376841368395502366) -->
-    <skip />
+    <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"взаимодействие с потребителите"</string>
+    <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Разрешава на приложението да изпълнява действия за различни потребители на устройството. Злонамерените приложения може да използват това, за да нарушат защитата между потребителите."</string>
+    <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"пълен лиценз за взаимодействие с потребителите"</string>
+    <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Разрешава всички възможни взаимодействия с потребителите."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"извличане на подробности за изпълняваните прилож."</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Разрешава на приложението да извлича подробна информация за задачите, изпълнявани понастоящем и неотдавна. Злонамерените приложения могат да открият поверителна информация за други приложения."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"пренареждане на изпълняваните приложения"</string>
@@ -1309,6 +1305,5 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Система"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Звук през Bluetooth"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Готово"</string>
-    <!-- no translation found for media_route_button_content_description (5758553567065145276) -->
-    <skip />
+    <string name="media_route_button_content_description" msgid="5758553567065145276">"Изходяща мултимедия"</string>
 </resources>

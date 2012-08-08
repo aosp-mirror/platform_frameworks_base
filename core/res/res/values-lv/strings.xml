@@ -217,14 +217,10 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Ļauj lietotnei saņemt un apstrādāt WAP ziņojumus. Šī atļauja ietver iespēju pārraudzīt vai dzēst jums nosūtītos ziņojumus, neparādot tos jums."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"izgūt izmantotās lietotnes"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Ļauj lietotnei izgūt informāciju par pašreiz un nesen darbinātajiem uzdevumiem. Tādējādi lietotne var atklāt informāciju par ierīcē izmantotajām lietojumprogrammām."</string>
-    <!-- no translation found for permlab_interactAcrossUsers (7114255281944211682) -->
-    <skip />
-    <!-- no translation found for permdesc_interactAcrossUsers (364670963623385786) -->
-    <skip />
-    <!-- no translation found for permlab_interactAcrossUsersFull (2567734285545074105) -->
-    <skip />
-    <!-- no translation found for permdesc_interactAcrossUsersFull (376841368395502366) -->
-    <skip />
+    <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"darboties visos lietotāju kontos"</string>
+    <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Ļauj lietotnei veikt darbības vairāku ierīces lietotāju kontos. Ļaunprātīgas lietotnes var izmantot šo atļauju, lai apdraudētu lietotāju kontu drošību."</string>
+    <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"pilna licence ar atļauju darboties visos lietotāju kontos"</string>
+    <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Ļauj veikt jebkādas darbības visos lietotāju kontos."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"Informācijas izguve par izmantotajām lietotnēm"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Ļauj lietotnei izgūt informāciju par šobrīd un nesen veiktajiem uzdevumiem. Ļaunprātīgas lietotnes var atklāt privātu informāciju par citām lietotnēm."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"pārkārtot izmantotās lietotnes"</string>
@@ -1309,6 +1305,5 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Sistēma"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth audio"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Gatavs"</string>
-    <!-- no translation found for media_route_button_content_description (5758553567065145276) -->
-    <skip />
+    <string name="media_route_button_content_description" msgid="5758553567065145276">"Multivides izeja"</string>
 </resources>

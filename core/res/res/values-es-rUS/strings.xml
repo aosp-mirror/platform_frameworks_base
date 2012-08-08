@@ -217,14 +217,10 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Permite que la aplicación reciba y procese mensajes WAP, lo que significa que podría controlar o eliminar mensajes enviados al usuario sin mostrártelos."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"recuperar aplicaciones en ejecución"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Permite que la aplicación recupere información sobre las tareas que se estén ejecutando en ese momento o que se hayan ejecutado recientemente. La aplicación puede utilizar este permiso para descubrir cuáles son las aplicaciones que se utilizan en el dispositivo."</string>
-    <!-- no translation found for permlab_interactAcrossUsers (7114255281944211682) -->
-    <skip />
-    <!-- no translation found for permdesc_interactAcrossUsers (364670963623385786) -->
-    <skip />
-    <!-- no translation found for permlab_interactAcrossUsersFull (2567734285545074105) -->
-    <skip />
-    <!-- no translation found for permdesc_interactAcrossUsersFull (376841368395502366) -->
-    <skip />
+    <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"Interactuar con los usuarios"</string>
+    <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Permite que la aplicación lleve a cabo acciones entre los diferentes usuarios del dispositivo. Las aplicaciones maliciosas pueden utilizar este permiso para infringir la protección entre usuarios."</string>
+    <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"Licencia completa para interactuar con los usuarios"</string>
+    <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Permite que la aplicación interactúe con los usuarios."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"recuperar información sobre las aplicaciones en ejecución"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Permite que la aplicación recupere información detallada sobre tareas en ejecución y recientemente ejecutadas. Las aplicaciones malintencionadas pueden hallar información privada sobre otras aplicaciones."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"reorganizar aplicaciones en ejecución"</string>
@@ -1309,6 +1305,5 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Sistema"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Audio Bluetooth"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Listo"</string>
-    <!-- no translation found for media_route_button_content_description (5758553567065145276) -->
-    <skip />
+    <string name="media_route_button_content_description" msgid="5758553567065145276">"Salida multimedia"</string>
 </resources>

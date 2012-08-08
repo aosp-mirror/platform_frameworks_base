@@ -217,14 +217,10 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Leidžiama programai gauti ir apdoroti WAP pranešimus. Šis leidimas apima galimybę stebėti ar ištrinti jums siunčiamus pranešimus jums jų neparodžius."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"nuskaityti vykdomas programas"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Leidžiama programai nuskaityti informaciją apie šiuo ir pastaruoju metu vykdomas užduotis. Taip programa gali atrasti informacijos, kokios programos naudojamos įrenginyje."</string>
-    <!-- no translation found for permlab_interactAcrossUsers (7114255281944211682) -->
-    <skip />
-    <!-- no translation found for permdesc_interactAcrossUsers (364670963623385786) -->
-    <skip />
-    <!-- no translation found for permlab_interactAcrossUsersFull (2567734285545074105) -->
-    <skip />
-    <!-- no translation found for permdesc_interactAcrossUsersFull (376841368395502366) -->
-    <skip />
+    <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"sąveikauti su naudotojais"</string>
+    <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Leidžiama programai atlikti veiksmus skirtingų įrenginio naudotojų profiliuose. Kenkėjiškos programos gali pasinaudoti šiuo leidimu, kad pažeistų naudotojų saugumą."</string>
+    <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"visa licencija, leidžianti sąveikauti su naudotojais"</string>
+    <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Leidžiama bet kokia sąveika tarp naudotojų."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"nuskaityti veikiančių programų išsamią informaciją"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Leidžiama programai nuskaityti išsamią informaciją apie šiuo ir pastaruoju metu vykdomas užduotis. Kenkėjiškos programos gali surasti privačios informacijos apie kitas programas."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"pertvarkyti vykdomas programas"</string>
@@ -1309,6 +1305,5 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Sistema"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"„Bluetooth“ garsas"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Atlikta"</string>
-    <!-- no translation found for media_route_button_content_description (5758553567065145276) -->
-    <skip />
+    <string name="media_route_button_content_description" msgid="5758553567065145276">"Medijos išvestis"</string>
 </resources>
