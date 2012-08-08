@@ -420,7 +420,7 @@ public class Build {
          * <ul>
          * <li>Content Providers: The default value of {@code android:exported} is now
          * {@code false}. See
-         * <a href="{docRoot}guide/topics/manifest/provider-element.html#exported">
+         * <a href="{@docRoot}guide/topics/manifest/provider-element.html#exported">
          * the android:exported section</a> in the provider documentation for more details.</li>
          * </ul>
          */
