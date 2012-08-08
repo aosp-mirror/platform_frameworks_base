@@ -2305,19 +2305,48 @@ public final class ActivityManagerService extends ActivityManagerNative
             Intent intent, String resolvedType, IBinder resultTo,
             String resultWho, int requestCode, int startFlags,
             String profileFile, ParcelFileDescriptor profileFd, Bundle options) {
+        return startActivityAsUser(caller, intent, resolvedType, resultTo, resultWho, requestCode,
+                startFlags, profileFile, profileFd, options, UserId.getCallingUserId());
+    }
+
+    public final int startActivityAsUser(IApplicationThread caller,
+            Intent intent, String resolvedType, IBinder resultTo,
+            String resultWho, int requestCode, int startFlags,
+            String profileFile, ParcelFileDescriptor profileFd, Bundle options, int userId) {
         enforceNotIsolatedCaller("startActivity");
-        int userId = 0;
-        if (intent.getCategories() != null && intent.getCategories().contains(Intent.CATEGORY_HOME)) {
-            // Requesting home, set the identity to the current user
-            // HACK!
-            userId = mCurrentUserId;
-        } else {
-            // TODO: Fix this in a better way - calls coming from SystemUI should probably carry
-            // the current user's userId
-            if (Binder.getCallingUid() < Process.FIRST_APPLICATION_UID) {
-                userId = 0;
+        if (userId != UserId.getCallingUserId()) {
+            // Requesting a different user, make sure that they have the permission
+            if (checkComponentPermission(
+                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                    Binder.getCallingPid(), Binder.getCallingUid(), -1, true)
+                    == PackageManager.PERMISSION_GRANTED) {
+                // Translate to the current user id, if caller wasn't aware
+                if (userId == UserId.USER_CURRENT) {
+                    userId = mCurrentUserId;
+                }
             } else {
-                userId = Binder.getOrigCallingUser();
+                String msg = "Permission Denial: "
+                        + "Request to startActivity as user " + userId
+                        + " but is calling from user " + UserId.getCallingUserId()
+                        + "; this requires "
+                        + android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+                Slog.w(TAG, msg);
+                throw new SecurityException(msg);
+            }
+        } else {
+            if (intent.getCategories() != null
+                    && intent.getCategories().contains(Intent.CATEGORY_HOME)) {
+                // Requesting home, set the identity to the current user
+                // HACK!
+                userId = mCurrentUserId;
+            } else {
+                // TODO: Fix this in a better way - calls coming from SystemUI should probably carry
+                // the current user's userId
+                if (Binder.getCallingUid() < Process.FIRST_APPLICATION_UID) {
+                    userId = 0;
+                } else {
+                    userId = Binder.getOrigCallingUser();
+                }
             }
         }
         return mMainStack.startActivityMayWait(caller, -1, intent, resolvedType,
@@ -5470,13 +5499,28 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     public List<ActivityManager.RecentTaskInfo> getRecentTasks(int maxNum,
-            int flags) {
+            int flags, int userId) {
         final int callingUid = Binder.getCallingUid();
-        // If it's the system uid asking, then use the current user id.
-        // TODO: Make sure that there aren't any other legitimate calls from the system uid that
-        // require the entire list.
-        final int callingUserId = callingUid == Process.SYSTEM_UID
-                ? mCurrentUserId : UserId.getUserId(callingUid);
+        if (userId != UserId.getCallingUserId()) {
+            // Check if the caller is holding permissions for cross-user requests.
+            if (checkComponentPermission(
+                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                    Binder.getCallingPid(), callingUid, -1, true)
+                    != PackageManager.PERMISSION_GRANTED) {
+                String msg = "Permission Denial: "
+                        + "Request to get recent tasks for user " + userId
+                        + " but is calling from user " + UserId.getUserId(callingUid)
+                        + "; this requires "
+                        + android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+                Slog.w(TAG, msg);
+                throw new SecurityException(msg);
+            } else {
+                if (userId == UserId.USER_CURRENT) {
+                    userId = mCurrentUserId;
+                }
+            }
+        }
+
         synchronized (this) {
             enforceCallingPermission(android.Manifest.permission.GET_TASKS,
                     "getRecentTasks()");
@@ -5485,7 +5529,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     == PackageManager.PERMISSION_GRANTED;
 
             IPackageManager pm = AppGlobals.getPackageManager();
-            
+
             final int N = mRecentTasks.size();
             ArrayList<ActivityManager.RecentTaskInfo> res
                     = new ArrayList<ActivityManager.RecentTaskInfo>(
@@ -5493,7 +5537,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             for (int i=0; i<N && maxNum > 0; i++) {
                 TaskRecord tr = mRecentTasks.get(i);
                 // Only add calling user's recent tasks
-                if (tr.userId != callingUserId) continue;
+                if (tr.userId != userId) continue;
                 // Return the entry if desired by the caller.  We always return
                 // the first entry, because callers always expect this to be the
                 // foreground app.  We may filter others if the caller has
@@ -5521,13 +5565,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                         // Check whether this activity is currently available.
                         try {
                             if (rti.origActivity != null) {
-                                if (pm.getActivityInfo(rti.origActivity, 0, callingUserId)
+                                if (pm.getActivityInfo(rti.origActivity, 0, userId)
                                         == null) {
                                     continue;
                                 }
                             } else if (rti.baseIntent != null) {
                                 if (pm.queryIntentActivities(rti.baseIntent,
-                                        null, 0, callingUserId) == null) {
+                                        null, 0, userId) == null) {
                                     continue;
                                 }
                             }
