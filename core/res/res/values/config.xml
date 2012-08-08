@@ -853,8 +853,6 @@
 
     <!-- enable screen saver feature -->
     <bool name="config_enableDreams">true</bool>
-    <!-- Name of screensaver components to look for if none has been chosen by the user -->
-    <string name="config_defaultDreamComponent" translatable="false">com.google.android.deskclock/com.android.deskclock.Screensaver</string>
 
     <!-- Base "touch slop" value used by ViewConfiguration as a
          movement threshold where scrolling should begin. -->
