@@ -25,6 +25,10 @@ public:
     static float SqrtF(JNIEnv* env, jobject clazz, float x) {
         return sqrtf(x);
     }
+
+    static float ExpF(JNIEnv* env, jobject clazz, float x) {
+        return expf(x);
+    }
 };
 
 static JNINativeMethod gMathUtilsMethods[] = {
@@ -32,7 +36,8 @@ static JNINativeMethod gMathUtilsMethods[] = {
     {"ceil", "(F)F", (void*) MathUtilsGlue::CeilF},
     {"sin", "(F)F", (void*) MathUtilsGlue::SinF},
     {"cos", "(F)F", (void*) MathUtilsGlue::CosF},
-    {"sqrt", "(F)F", (void*) MathUtilsGlue::SqrtF}
+    {"sqrt", "(F)F", (void*) MathUtilsGlue::SqrtF},
+    {"exp", "(F)F", (void*) MathUtilsGlue::ExpF},
 };
 
 int register_android_util_FloatMath(JNIEnv* env)
