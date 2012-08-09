@@ -257,7 +257,7 @@ public class UsbManager {
      * data using {@link android.hardware.usb.UsbRequest}.
      *
      * @param device the device to open
-     * @return true if we successfully opened the device
+     * @return a {@link UsbDeviceConnection}, or {@code null} if open failed
      */
     public UsbDeviceConnection openDevice(UsbDevice device) {
         try {
