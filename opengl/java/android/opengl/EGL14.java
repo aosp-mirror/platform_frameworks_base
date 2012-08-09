@@ -248,6 +248,8 @@ public static final int EGL_CORE_NATIVE_ENGINE             = 0x305B;
         } else if (win instanceof SurfaceHolder) {
             SurfaceHolder holder = (SurfaceHolder)win;
             sur = holder.getSurface();
+        } else if (win instanceof Surface) {
+            sur = (Surface) win;
         }
 
         EGLSurface surface;
@@ -259,7 +261,7 @@ public static final int EGL_CORE_NATIVE_ENGINE             = 0x305B;
         } else {
             throw new java.lang.UnsupportedOperationException(
                 "eglCreateWindowSurface() can only be called with an instance of " +
-                "SurfaceView, SurfaceTexture or SurfaceHolder at the moment, " +
+                "Surface, SurfaceView, SurfaceTexture or SurfaceHolder at the moment, " +
                 "this will be fixed later.");
         }
 
