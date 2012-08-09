@@ -1697,6 +1697,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             loadIntegerSetting(stmt, Settings.Secure.WIFI_MAX_DHCP_RETRY_COUNT,
                     R.integer.def_max_dhcp_retries);
+
+            loadBooleanSetting(stmt, Settings.Secure.SCREENSAVER_ENABLED,
+                    R.bool.def_screensaver_enabled);
+            loadBooleanSetting(stmt, Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK,
+                    R.bool.def_screensaver_activate_on_dock);
+            loadStringSetting(stmt, Settings.Secure.SCREENSAVER_COMPONENT,
+                    R.string.def_screensaver_component);
         } finally {
             if (stmt != null) stmt.close();
         }
