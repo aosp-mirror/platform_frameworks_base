@@ -5,7 +5,9 @@ parent.link=manifest-intro.html
 
 <dl class="xml">
 <dt>syntax:</dt>
-<dd><pre class="stx">&lt;provider android:<a href="#auth">authorities</a>="<i>list</i>"
+<dd>
+<pre class="stx">
+&lt;provider android:<a href="#auth">authorities</a>="<i>list</i>"
           android:<a href="#enabled">enabled</a>=["true" | "false"]
           android:<a href="#exported">exported</a>=["true" | "false"]
           android:<a href="#gprmsn">grantUriPermissions</a>=["true" | "false"]
@@ -20,10 +22,13 @@ parent.link=manifest-intro.html
           android:<a href="#sync">syncable</a>=["true" | "false"]
           android:<a href="#wprmsn">writePermission</a>="<i>string</i>" &gt;
     . . .
-&lt;/provider&gt;</pre></dd>
+&lt;/provider&gt;</pre>
+</dd>
 
 <dt>contained in:</dt>
-<dd><code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code></dd>
+<dd>
+    <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code>
+</dd>
 
 <dt>can contain:</dt>
 <dd><code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data&gt;</a></code>
@@ -31,58 +36,67 @@ parent.link=manifest-intro.html
 <br/><code><a href="{@docRoot}guide/topics/manifest/path-permission-element.html">&lt;path-permission&gt;</a></code></dd>
 
 <dt>description:</dt>
-<dd>Declares a content provider &mdash; a subclass of 
-{@link android.content.ContentProvider} &mdash; that supplies structured 
-access to data managed by the application.  All content providers that 
-are part of the application must be represented by {@code &lt;provider&gt;} 
-elements in the manifest file.  The system cannot see, and therefore will 
-not run, any that are not declared.  (You need to declare only 
-those content providers that you develop as part of your application,
-not those developed by others that your application uses.)
-
-<p>
-The Android system identifies content providers by the authority part
- of a {@code content:} URI.  For example, suppose that the following URI 
-is passed to <code>{@link android.content.ContentResolver#query 
-ContentResolver.query()}</code>:
-
-<p style="margin-left: 2em">{@code content://com.example.project.healthcareprovider/nurses/rn}</p>
-
-<p>
-The {@code content:} scheme identifies the data as belonging to a content 
-provider and the authority ({@code com.example.project.healthcareprovider}) 
-identifies the particular provider.  The authority therefore must be unique.  
-Typically, as in this example, it's the fully qualified name of a 
-ContentProvider subclass.  The path part of a URI may be used by a content 
-provider to identify particular data subsets, but those paths are not
-declared in the manifest.
-</p>
-
-<p>
-For information on using and developing content providers, see a separate document, 
-<a href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a>.
-</p></dd>
+<dd>
+    Declares a content provider component. A content provider is a subclass of 
+    {@link android.content.ContentProvider} that supplies structured access to data managed by the 
+    application.  All content providers in your application must be defined in a 
+    {@code &lt;provider&gt;} element in the manifest file; otherwise, the system is unaware of them 
+    and doesn't run them.
+    <p>
+        You only declare content providers that are part of your application. Content providers in
+        other applications that you use in your application should not be declared.
+    </p>  
+    <p>
+        The Android system stores references to content providers according to an <b>authority</b>
+        string, part of the provider's <b>content URI</b>. For example, suppose you want to 
+        access a content provider that stores information about health care professionals. To do
+        this, you call the method 
+        {@link android.content.ContentResolver#query ContentResolver.query()}, which among other
+        arguments takes a URI that identifies the provider:
+    </p> 
+<pre>
+content://com.example.project.healthcareprovider/nurses/rn
+</pre>
+    <p>
+        The <code>content:</code> <b>scheme</b> identifies the URI as a content URI pointing to
+        an Android content provider. The authority 
+        <code>com.example.project.healthcareprovider</code> identifies the provider itself; the
+        Android system looks up the authority in its list of known providers and their authorities. 
+        The substring <code>nurses/rn</code> is a <b>path</b>, which the content provider can use 
+        to identify subsets of the provider data.
+    </p>
+    <p>
+        Notice that when you define your provider in the <code>&lt;provider&gt;</code> element, you 
+        don't include the scheme or the path in the <code>android:name</code> argument, only the
+        authority.    
+    </p>
+    <p>
+        For information on using and developing content providers, see the API Guide, 
+        <a href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a>.
+    </p>
+</dd>
 
 <dt>attributes:</dt>
-<dd><dl class="attr">
-<dt><a name="auth"></a>{@code android:authorities}</dt>
-<dd>A list of one or more URI authorities that identify data under the purview 
-of the content provider.
-Multiple authorities are listed by separating their names with a semicolon. 
-To avoid conflicts, authority names should use a Java-style naming convention 
-(such as {@code com.example.provider.cartoonprovider}).  Typically, it's the name
-of the ContentProvider subclass.
+<dd>
+    <dl class="attr">
+        <dt><a name="auth"></a>{@code android:authorities}</dt>
+        <dd>
+        A list of one or more URI authorities that identify data offered by the content provider.
+        Multiple authorities are listed by separating their names with a semicolon. 
+        To avoid conflicts, authority names should use a Java-style naming convention 
+        (such as {@code com.example.provider.cartoonprovider}).  Typically, it's the name
+        of the {@link android.content.ContentProvider} subclass that implements the provider
+        <p>
+            There is no default.  At least one authority must be specified.
+        </p>
+        </dd>
 
-<p>
-There is no default.  At least one authority must be specified.
-</p></dd>
+        <dt><a name="enabled"></a>{@code android:enabled}</dt>
+        <dd>Whether or not the content provider can be instantiated by the system &mdash; 
+        "{@code true}" if it can be, and "{@code false}" if not.  The default value 
+        is "{@code true}".
 
-<dt><a name="enabled"></a>{@code android:enabled}</dt>
-<dd>Whether or not the content provider can be instantiated by the system &mdash; 
-"{@code true}" if it can be, and "{@code false}" if not.  The default value 
-is "{@code true}".
-
-<p>
+        <p>
 The <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> element has its own 
 <code><a href="{@docRoot}guide/topics/manifest/application-element.html#enabled">enabled</a></code> attribute that applies to all 
 application components, including content providers.  The 
@@ -93,17 +107,37 @@ are by default) for the content provider to be enabled.  If either is
 </p></dd>
 
 <dt><a name="exported"></a>{@code android:exported}</dt>
-<dd>Whether or not the content provider can be used by components of other 
-applications &mdash; "{@code true}" if it can be, and "{@code false}" if not.  
-If "{@code false}", the provider is available only to components of the 
-same application or applications with the same user ID.  The default value
-is "{@code true}" for applications which target API level 16 (Jelly Bean)
-and below, and "{@code false}" otherwise.
-
-<p>
-You can export a content provider but still limit access to it with the
-<code><a href="{@docRoot}guide/topics/manifest/provider-element.html#prmsn">permission</a></code> attribute.
-</p></dd> 
+<dd>
+    Whether the content provider is available for other applications to use:
+    <ul> 
+        <li>
+            <code>true</code>: The provider is available to other applications. Any application can
+            use the provider's content URI to access it, subject to the permissions specified for
+            the provider.
+        </li>
+        <li>
+            <code>false</code>: The provider is not available to other applications. Set 
+            <code>android:exported="false"</code> to limit access to the provider to your
+            applications. Only applications that have the same user ID (UID) as the provider will
+            have access to it.
+        </li>
+    </ul>
+    <p>
+        The default value is <code>"true"</code> for applications that set either 
+<code><a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">android:minSdkVersion</a></code>
+        or 
+<code><a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">android:targetSdkVersion</a></code> to 
+        <code>"16"</code> or lower. For applications that
+        set either of these attributes to <code>"17"</code> or higher, the default is 
+        <code>"false"</code>.
+    </p>
+    <p>
+        You can set <code>android:exported="false"</code> and still limit access to your
+        provider by setting permissions with the 
+   <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#prmsn">permission</a></code>
+        attribute.
+    </p>
+</dd> 
 
 <dt><a name="gprmsn"></a>{@code android:grantUriPermissions}</dt>
 <dd>Whether or not those who ordinarily would not have permission to 
