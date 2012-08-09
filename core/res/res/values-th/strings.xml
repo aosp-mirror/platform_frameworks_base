@@ -154,6 +154,12 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"ตัวเลือกโทรศัพท์"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"ล็อกหน้าจอ"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"ปิดเครื่อง"</string>
+    <!-- no translation found for global_action_bug_report (7934010578922304799) -->
+    <skip />
+    <!-- no translation found for bugreport_title (2667494803742548533) -->
+    <skip />
+    <!-- no translation found for bugreport_message (398447048750350456) -->
+    <skip />
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"โหมดปิดเสียง"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"ปิดเสียงไว้"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"เปิดเสียงแล้ว"</string>
