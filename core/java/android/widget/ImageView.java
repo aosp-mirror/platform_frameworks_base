@@ -342,8 +342,15 @@ public class ImageView extends View {
             updateDrawable(null);
             mResource = resId;
             mUri = null;
+
+            final int oldWidth = mDrawableWidth;
+            final int oldHeight = mDrawableHeight;
+
             resolveUri();
-            requestLayout();
+
+            if (oldWidth != mDrawableWidth || oldHeight != mDrawableHeight) {
+                requestLayout();
+            }
             invalidate();
         }
     }
@@ -367,8 +374,15 @@ public class ImageView extends View {
             updateDrawable(null);
             mResource = 0;
             mUri = uri;
+
+            final int oldWidth = mDrawableWidth;
+            final int oldHeight = mDrawableHeight;
+
             resolveUri();
-            requestLayout();
+
+            if (oldWidth != mDrawableWidth || oldHeight != mDrawableHeight) {
+                requestLayout();
+            }
             invalidate();
         }
     }
@@ -383,8 +397,8 @@ public class ImageView extends View {
             mResource = 0;
             mUri = null;
 
-            int oldWidth = mDrawableWidth;
-            int oldHeight = mDrawableHeight;
+            final int oldWidth = mDrawableWidth;
+            final int oldHeight = mDrawableHeight;
 
             updateDrawable(drawable);
 
