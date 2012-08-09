@@ -39,6 +39,7 @@ LOCAL_SRC_FILES += \
        core/java/android/speech/tts/EventLogTags.logtags \
        core/java/android/webkit/EventLogTags.logtags \
        telephony/java/com/android/internal/telephony/EventLogTags.logtags \
+       media/java/android/media/EventLogTags.logtags \
 
 # The following filters out code we are temporarily not including at all.
 # TODO: Move AWT and beans (and associated harmony code) back into libcore.

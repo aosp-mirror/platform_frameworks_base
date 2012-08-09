@@ -1,0 +1,6 @@
+option java_package android.media
+# media service
+270700 time_audio_played (time|2|3),(duration|2|3)
+270705 total_audio_played (time|2|3),(duration|2|3)
+270701 time_video_played (time|2|3),(duration|2|3)
+270706 total_video_played (time|2|3),(duration|2|3)

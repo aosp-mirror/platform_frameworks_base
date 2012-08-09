@@ -39,6 +39,10 @@ import java.net.InetSocketAddress;
 import java.util.Map;
 import java.util.Set;
 import java.lang.ref.WeakReference;
+import android.os.SystemClock;
+import android.util.TimeUtils;
+import android.media.EventLogTags;
+import java.lang.System;
 
 /**
  * MediaPlayer class can be used to control playback
@@ -542,6 +546,17 @@ public class MediaPlayer
     private boolean mScreenOnWhilePlaying;
     private boolean mStayAwake;
 
+    // logging
+    private static final long MIN_MEDIA_TIME_MS = 10 * 1000;
+    private static final int AUDIO = 0;
+    private static final int VIDEO = 1;
+    private long mTimeAudioPlayed;
+    private long mTimeVideoPlayed;
+    private long mPrevAudioPlayed;
+    private long mPrevVideoPlayed;
+    private long mTotalAudioPlayed = 0;
+    private long mTotalVideoPlayed = 0;
+
     /**
      * Default constructor. Consider using one of the create() methods for
      * synchronously instantiating a MediaPlayer from a Uri or resource.
@@ -907,6 +922,7 @@ public class MediaPlayer
      * @throws IllegalStateException if it is called in an invalid state
      */
     public  void start() throws IllegalStateException {
+        logMediaStarted();
         stayAwake(true);
         _start();
     }
@@ -920,6 +936,7 @@ public class MediaPlayer
      * initialized.
      */
     public void stop() throws IllegalStateException {
+        logMediaStopped();
         stayAwake(false);
         _stop();
     }
@@ -933,6 +950,7 @@ public class MediaPlayer
      * initialized.
      */
     public void pause() throws IllegalStateException {
+        logMediaPaused();
         stayAwake(false);
         _pause();
     }
@@ -1960,4 +1978,61 @@ public class MediaPlayer
 
     private OnInfoListener mOnInfoListener;
 
+    private void logMediaStarted(){
+        long currentTime = SystemClock.elapsedRealtime();
+        // start playing video
+        if (getVideoWidth() != 0) {
+            mPrevVideoPlayed = currentTime;
+        }
+        // start playing audio
+        else {
+            mPrevAudioPlayed = currentTime;
+        }
+    }
+
+    private void logMediaStopped() {
+        long currentTime = SystemClock.elapsedRealtime();
+        // playing video
+        if (getVideoWidth() != 0) {
+            mTimeVideoPlayed = currentTime - mPrevVideoPlayed;
+            if (mTimeVideoPlayed >= MIN_MEDIA_TIME_MS) {
+                mTotalVideoPlayed += mTimeVideoPlayed;
+                mPrevVideoPlayed = 0;
+                EventLogTags.writeTimeVideoPlayed(currentTime, mTimeVideoPlayed);
+                EventLogTags.writeTotalVideoPlayed(currentTime, mTotalVideoPlayed);
+            }
+        }
+        // playing audio
+        else {
+            mTimeAudioPlayed = currentTime - mPrevAudioPlayed;
+            if (mTimeAudioPlayed >= MIN_MEDIA_TIME_MS) {
+                mTotalAudioPlayed += mTimeAudioPlayed;
+                mPrevAudioPlayed = 0;
+                EventLogTags.writeTimeAudioPlayed(currentTime, mTimeAudioPlayed);
+                EventLogTags.writeTotalAudioPlayed(currentTime, mTotalAudioPlayed);
+            }
+        }
+    }
+
+    private void logMediaPaused() {
+        long currentTime = SystemClock.elapsedRealtime();
+        // playing video
+        if (getVideoWidth() != 0) {
+            mTimeVideoPlayed = currentTime - mPrevVideoPlayed;
+            if (mTimeVideoPlayed >= MIN_MEDIA_TIME_MS) {
+                mTotalVideoPlayed += mTimeVideoPlayed;
+                mPrevVideoPlayed = 0;
+                EventLogTags.writeTimeVideoPlayed(currentTime, mTimeVideoPlayed);
+            }
+        }
+        // playing audio
+        else {
+            mTimeAudioPlayed = currentTime - mPrevAudioPlayed;
+            if (mTimeAudioPlayed >= MIN_MEDIA_TIME_MS) {
+                mTotalAudioPlayed += mTimeAudioPlayed;
+                mPrevAudioPlayed = 0;
+                EventLogTags.writeTimeAudioPlayed(currentTime, mTimeAudioPlayed);
+            }
+        }
+    }
 }
