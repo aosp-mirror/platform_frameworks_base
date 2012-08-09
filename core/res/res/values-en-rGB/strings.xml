@@ -154,6 +154,12 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Phone options"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Screen lock"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Power off"</string>
+    <!-- no translation found for global_action_bug_report (7934010578922304799) -->
+    <skip />
+    <!-- no translation found for bugreport_title (2667494803742548533) -->
+    <skip />
+    <!-- no translation found for bugreport_message (398447048750350456) -->
+    <skip />
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Silent mode"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Sound is OFF"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Sound is ON"</string>
@@ -217,14 +223,10 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Allows the app to receive and process WAP messages. This permission includes the ability to monitor or delete messages sent to you without showing them to you."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"retrieve running apps"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Allows the app to retrieve information about currently and recently running tasks. This may allow the app to discover information about which applications are used on the device."</string>
-    <!-- no translation found for permlab_interactAcrossUsers (7114255281944211682) -->
-    <skip />
-    <!-- no translation found for permdesc_interactAcrossUsers (364670963623385786) -->
-    <skip />
-    <!-- no translation found for permlab_interactAcrossUsersFull (2567734285545074105) -->
-    <skip />
-    <!-- no translation found for permdesc_interactAcrossUsersFull (376841368395502366) -->
-    <skip />
+    <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"interact across users"</string>
+    <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Allows the app to perform actions across different users on the device. Malicious apps may use this to violate the protection between users."</string>
+    <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"full license to interact across users"</string>
+    <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Allows all possible interactions across users."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"retrieve details of running apps"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Allows the app to retrieve detailed information about currently and recently running tasks. Malicious apps may discover private information about other apps."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"re-order running apps"</string>
