@@ -1830,8 +1830,8 @@ public class PowerManagerService extends IPowerManager.Stub
 
             final boolean stateChanged = mPowerState != newState;
 
-            if (stateChanged && reason == WindowManagerPolicy.OFF_BECAUSE_OF_TIMEOUT) {
-                if (mPolicy != null && mPolicy.isScreenSaverEnabled() && mIsPowered) {
+            if (stateChanged && !newScreenOn && reason == WindowManagerPolicy.OFF_BECAUSE_OF_TIMEOUT) {
+                if (mPolicy != null && mIsPowered && mPolicy.isScreenSaverEnabled()) {
                     if (DEBUG) {
                         Slog.d(TAG, "setPowerState: running screen saver instead of turning off screen");
                     }
