@@ -2452,16 +2452,6 @@ public class PackageParser {
             providerExportedDefault = true;
         }
 
-        if (((owner.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0)
-            && (owner.applicationInfo.targetSdkVersion == Build.VERSION_CODES.JELLY_BEAN)) {
-            // STOPSHIP: REMOVE THIS IF BLOCK
-            // To expose more bugs, pre-installed system apps targeting API level 16
-            // should not have their content providers exported by default.
-            // This is only a short term check, and should be removed when the
-            // default SDK version changes to 17.
-            providerExportedDefault = false;
-        }
-
         p.info.exported = sa.getBoolean(
                 com.android.internal.R.styleable.AndroidManifestProvider_exported,
                 providerExportedDefault);
