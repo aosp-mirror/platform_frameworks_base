@@ -154,12 +154,9 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Chaguo za simu"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Funga skrini"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Nishati imezimwa"</string>
-    <!-- no translation found for global_action_bug_report (7934010578922304799) -->
-    <skip />
-    <!-- no translation found for bugreport_title (2667494803742548533) -->
-    <skip />
-    <!-- no translation found for bugreport_message (398447048750350456) -->
-    <skip />
+    <string name="global_action_bug_report" msgid="7934010578922304799">"Ripoti ya hitilafu"</string>
+    <string name="bugreport_title" msgid="2667494803742548533">"Chukua ripoti ya hitilafu"</string>
+    <string name="bugreport_message" msgid="398447048750350456">"Hii itakusanya maelezo kuhusu hali yako ya sasa ya kifaa, ili kutuma ujumbe wa barua pepe. Itachukua muda mfupi kuanza ripoti ya hitilafu mpaka itakapokuwa tayari kutumwa; tafadhali vumilia."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Mtindo wa kimya"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Sauti Imezimwa"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Sauti imewashwa"</string>
@@ -1180,9 +1177,9 @@
     <string name="next_button_label" msgid="1080555104677992408">"Ifuatayo"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Ruka"</string>
     <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Utumizi wa juu wa data ya simu"</string>
-    <string name="throttle_warning_notification_message" msgid="3340822228599337743">"Gusa ili kujifunza zaidi kuhusu matumizi ya data ya simu ya mkononi."</string>
+    <string name="throttle_warning_notification_message" msgid="3340822228599337743">"Gusa ili kupata maelezo zaidi kuhusu matumizi ya data ya simu ya mkononi."</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"Kiwango cha kupunguza data ya simu kimezidishwa."</string>
-    <string name="throttled_notification_message" msgid="5443457321354907181">"Gusa ili kujifunza zaidi kuhusu matumizi ya data ya simu ya mkononi."</string>
+    <string name="throttled_notification_message" msgid="5443457321354907181">"Gusa ili kupata maelezo zaidi kuhusu matumizi ya data ya simu ya mkononi."</string>
     <string name="no_matches" msgid="8129421908915840737">"Hakuna vinavyolingana"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Pata kwenye ukurasa"</string>
   <plurals name="matches_found">
@@ -1311,5 +1308,5 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Mfumo"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Sauti ya Bluetooth"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Kwisha"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"Towe ya midia"</string>
+    <string name="media_route_button_content_description" msgid="5758553567065145276">"Towe la midia"</string>
 </resources>
