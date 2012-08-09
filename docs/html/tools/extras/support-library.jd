@@ -90,6 +90,24 @@ padding: 5px 0 0;
 <div class="toggleable opened">
   <a href="#" onclick="return toggleDiv(this)">
   <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px" width="9px"
+/>Support Package, revision 10</a> <em>(August 2012)</em>
+  <div class="toggleme">
+    <dl>
+      <dt>Changes for v4 support library:</dt>
+      <dd>
+        <ul>
+          <li>Added support for notification features introduced in Android 4.1 (API Level 16) with
+          additions to {@link android.support.v4.app.NotificationCompat}.</li>
+        </ul>
+      </dd>
+    </dl>
+  </div>
+</div>
+
+
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)">
+  <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px"
 />Support Package, revision 9</a> <em>(June 2012)</em>
   <div class="toggleme">
     <dl>
@@ -589,3 +607,4 @@ Android online developer documentation:</p>
 <p>Additionally, the <a href="http://code.google.com/p/iosched/">Google I/O App</a> is a complete
 application that uses the v4 support library to provide a single APK for both handsets and tablets
 and also demonstrates some of Android's best practices in Android UI design.</p>
+
