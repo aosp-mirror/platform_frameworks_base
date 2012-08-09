@@ -2,21 +2,21 @@ page.title=Android SDK
 header.hide=1
 page.metaDescription=Download the official Android SDK to develop apps for Android-powered devices.
 
-sdk.win_installer=installer_r20.0.1-windows.exe
-sdk.win_installer_bytes=70486979
-sdk.win_installer_checksum=a8df28a29c7b8598e4c50f363692256d
+sdk.win_installer=installer_r20.0.3-windows.exe
+sdk.win_installer_bytes=70495456
+sdk.win_installer_checksum=cf23b95d0c9cd57fac3c3be253171af4
 
-sdk.win_download=android-sdk_r20.0.1-windows.zip
-sdk.win_bytes=90370975
-sdk.win_checksum=5774f536892036f87d3bf6502862cea5
+sdk.win_download=android-sdk_r20.0.3-windows.zip
+sdk.win_bytes=90379469
+sdk.win_checksum=cd895c79201f7f02507eb3c3868a1c5e
 
-sdk.mac_download=android-sdk_r20.0.1-macosx.zip
-sdk.mac_bytes=58217336
-sdk.mac_checksum=cc132d04bc551b23b0c507cf5943df57
+sdk.mac_download=android-sdk_r20.0.3-macosx.zip
+sdk.mac_bytes=58218455
+sdk.mac_checksum=07dc88ba2c0817ef178a665d002831bf
 
-sdk.linux_download=android-sdk_r20.0.1-linux.tgz
-sdk.linux_bytes=82607616
-sdk.linux_checksum=cd7176831087f53e46123dd91551be32
+sdk.linux_download=android-sdk_r20.0.3-linux.tgz
+sdk.linux_bytes=82616305
+sdk.linux_checksum=0d53c2c31d6b5d0cf7385bccd0b06c27
 
 @jd:body
 
@@ -141,3 +141,4 @@ for Java, both of which are <em>not</em> supported for Android development. </p>
     $('.reqs').show();
   }
 </script>
+
