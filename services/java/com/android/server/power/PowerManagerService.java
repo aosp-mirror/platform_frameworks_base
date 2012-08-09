@@ -426,7 +426,7 @@ public class PowerManagerService extends IPowerManager.Stub
                     }
 
                     // stop the screensaver if we're now unplugged
-                    if (mPolicy != null) {
+                    if (mPolicy != null && wasPowered) {
                         mPolicy.stopScreenSaver();
                     }
                 }
