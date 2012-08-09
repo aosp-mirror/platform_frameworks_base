@@ -4197,12 +4197,19 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // Tell anyone interested that we are done booting!
                 SystemProperties.set("sys.boot_completed", "1");
                 SystemProperties.set("dev.bootcomplete", "1");
-                /* TODO: Send this to all users that are to be logged in on startup */
-                broadcastIntentLocked(null, null,
-                        new Intent(Intent.ACTION_BOOT_COMPLETED, null),
-                        null, null, 0, null, null,
-                        android.Manifest.permission.RECEIVE_BOOT_COMPLETED,
-                        false, false, MY_PID, Process.SYSTEM_UID, Binder.getOrigCallingUser());
+                try {
+                    List<UserInfo> users = AppGlobals.getPackageManager().getUsers();
+                    for (UserInfo user : users) {
+                        broadcastIntentLocked(null, null,
+                                new Intent(Intent.ACTION_BOOT_COMPLETED, null),
+                                null, null, 0, null, null,
+                                android.Manifest.permission.RECEIVE_BOOT_COMPLETED,
+                                false, false, MY_PID, Process.SYSTEM_UID, user.id);
+                    }
+                } catch (RemoteException re) {
+                    // Won't happen, in same process
+                }
+
             }
         }
     }
