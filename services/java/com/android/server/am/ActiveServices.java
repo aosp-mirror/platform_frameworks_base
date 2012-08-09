@@ -226,7 +226,7 @@ public class ActiveServices {
 
         ServiceLookupResult res =
             retrieveServiceLocked(service, resolvedType,
-                    callingPid, callingUid, UserId.getUserId(callingUid));
+                    callingPid, callingUid, UserId.getUserId(callingUid), true);
         if (res == null) {
             return null;
         }
@@ -277,8 +277,10 @@ public class ActiveServices {
         }
 
         // If this service is active, make sure it is stopped.
-        ServiceLookupResult r = findServiceLocked(service, resolvedType,
-                callerApp == null ? UserId.getCallingUserId() : callerApp.userId);
+        ServiceLookupResult r = retrieveServiceLocked(service, resolvedType,
+                Binder.getCallingPid(), Binder.getCallingUid(),
+                callerApp == null ? UserId.getCallingUserId() : callerApp.userId,
+                false);
         if (r != null) {
             if (r.record != null) {
                 final long origId = Binder.clearCallingIdentity();
@@ -296,8 +298,9 @@ public class ActiveServices {
     }
 
     IBinder peekServiceLocked(Intent service, String resolvedType) {
-        ServiceLookupResult r = findServiceLocked(service, resolvedType,
-                UserId.getCallingUserId());
+        ServiceLookupResult r = retrieveServiceLocked(service, resolvedType,
+                Binder.getCallingPid(), Binder.getCallingUid(),
+                UserId.getCallingUserId(), false);
 
         IBinder ret = null;
         if (r != null) {
@@ -471,7 +474,7 @@ public class ActiveServices {
 
         ServiceLookupResult res =
             retrieveServiceLocked(service, resolvedType,
-                    Binder.getCallingPid(), Binder.getCallingUid(), userId);
+                    Binder.getCallingPid(), Binder.getCallingUid(), userId, true);
         if (res == null) {
             return 0;
         }
@@ -482,7 +485,7 @@ public class ActiveServices {
                 res.record.serviceInfo.name, res.record.serviceInfo.flags)) {
             userId = 0;
             res = retrieveServiceLocked(service, resolvedType, Binder.getCallingPid(),
-                    Binder.getCallingUid(), 0);
+                    Binder.getCallingUid(), 0, true);
         }
         ServiceRecord s = res.record;
 
@@ -689,60 +692,6 @@ public class ActiveServices {
             record = _record;
             permission = _permission;
         }
-    };
-
-    private ServiceLookupResult findServiceLocked(Intent service,
-            String resolvedType, int userId) {
-        ServiceRecord r = null;
-        if (service.getComponent() != null) {
-            r = mServiceMap.getServiceByName(service.getComponent(), userId);
-        }
-        if (r == null) {
-            Intent.FilterComparison filter = new Intent.FilterComparison(service);
-            r = mServiceMap.getServiceByIntent(filter, userId);
-        }
-
-        if (r == null) {
-            try {
-                ResolveInfo rInfo =
-                    AppGlobals.getPackageManager().resolveService(
-                                service, resolvedType, 0, userId);
-                ServiceInfo sInfo =
-                    rInfo != null ? rInfo.serviceInfo : null;
-                if (sInfo == null) {
-                    return null;
-                }
-
-                ComponentName name = new ComponentName(
-                        sInfo.applicationInfo.packageName, sInfo.name);
-                r = mServiceMap.getServiceByName(name, Binder.getOrigCallingUser());
-            } catch (RemoteException ex) {
-                // pm is in same process, this will never happen.
-            }
-        }
-        if (r != null) {
-            int callingPid = Binder.getCallingPid();
-            int callingUid = Binder.getCallingUid();
-            if (mAm.checkComponentPermission(r.permission,
-                    callingPid, callingUid, r.appInfo.uid, r.exported)
-                    != PackageManager.PERMISSION_GRANTED) {
-                if (!r.exported) {
-                    Slog.w(TAG, "Permission Denial: Accessing service " + r.name
-                            + " from pid=" + callingPid
-                            + ", uid=" + callingUid
-                            + " that is not exported from uid " + r.appInfo.uid);
-                    return new ServiceLookupResult(null, "not exported from uid "
-                            + r.appInfo.uid);
-                }
-                Slog.w(TAG, "Permission Denial: Accessing service " + r.name
-                        + " from pid=" + callingPid
-                        + ", uid=" + callingUid
-                        + " requires " + r.permission);
-                return new ServiceLookupResult(null, r.permission);
-            }
-            return new ServiceLookupResult(r, null);
-        }
-        return null;
     }
 
     private class ServiceRestarter implements Runnable {
@@ -760,7 +709,8 @@ public class ActiveServices {
     }
 
     private ServiceLookupResult retrieveServiceLocked(Intent service,
-            String resolvedType, int callingPid, int callingUid, int userId) {
+            String resolvedType, int callingPid, int callingUid, int userId,
+            boolean createIfNeeded) {
         ServiceRecord r = null;
         if (DEBUG_SERVICE) Slog.v(TAG, "retrieveServiceLocked: " + service
                 + " type=" + resolvedType + " callingUid=" + callingUid);
@@ -796,7 +746,7 @@ public class ActiveServices {
                     sInfo.applicationInfo = mAm.getAppInfoForUser(sInfo.applicationInfo, userId);
                 }
                 r = mServiceMap.getServiceByName(name, userId);
-                if (r == null) {
+                if (r == null && createIfNeeded) {
                     Intent.FilterComparison filter = new Intent.FilterComparison(
                             service.cloneFilter());
                     ServiceRestarter res = new ServiceRestarter();
@@ -897,87 +847,94 @@ public class ActiveServices {
         boolean canceled = false;
 
         final long now = SystemClock.uptimeMillis();
-        long minDuration = SERVICE_RESTART_DURATION;
-        long resetTime = SERVICE_RESET_RUN_DURATION;
 
         if ((r.serviceInfo.applicationInfo.flags
-                &ApplicationInfo.FLAG_PERSISTENT) != 0) {
-            minDuration /= 4;
-        }
+                &ApplicationInfo.FLAG_PERSISTENT) == 0) {
+            long minDuration = SERVICE_RESTART_DURATION;
+            long resetTime = SERVICE_RESET_RUN_DURATION;
 
-        // Any delivered but not yet finished starts should be put back
-        // on the pending list.
-        final int N = r.deliveredStarts.size();
-        if (N > 0) {
-            for (int i=N-1; i>=0; i--) {
-                ServiceRecord.StartItem si = r.deliveredStarts.get(i);
-                si.removeUriPermissionsLocked();
-                if (si.intent == null) {
-                    // We'll generate this again if needed.
-                } else if (!allowCancel || (si.deliveryCount < ServiceRecord.MAX_DELIVERY_COUNT
-                        && si.doneExecutingCount < ServiceRecord.MAX_DONE_EXECUTING_COUNT)) {
-                    r.pendingStarts.add(0, si);
-                    long dur = SystemClock.uptimeMillis() - si.deliveredTime;
-                    dur *= 2;
-                    if (minDuration < dur) minDuration = dur;
-                    if (resetTime < dur) resetTime = dur;
-                } else {
-                    Slog.w(TAG, "Canceling start item " + si.intent + " in service "
-                            + r.name);
-                    canceled = true;
+            // Any delivered but not yet finished starts should be put back
+            // on the pending list.
+            final int N = r.deliveredStarts.size();
+            if (N > 0) {
+                for (int i=N-1; i>=0; i--) {
+                    ServiceRecord.StartItem si = r.deliveredStarts.get(i);
+                    si.removeUriPermissionsLocked();
+                    if (si.intent == null) {
+                        // We'll generate this again if needed.
+                    } else if (!allowCancel || (si.deliveryCount < ServiceRecord.MAX_DELIVERY_COUNT
+                            && si.doneExecutingCount < ServiceRecord.MAX_DONE_EXECUTING_COUNT)) {
+                        r.pendingStarts.add(0, si);
+                        long dur = SystemClock.uptimeMillis() - si.deliveredTime;
+                        dur *= 2;
+                        if (minDuration < dur) minDuration = dur;
+                        if (resetTime < dur) resetTime = dur;
+                    } else {
+                        Slog.w(TAG, "Canceling start item " + si.intent + " in service "
+                                + r.name);
+                        canceled = true;
+                    }
                 }
+                r.deliveredStarts.clear();
             }
-            r.deliveredStarts.clear();
-        }
 
-        r.totalRestartCount++;
-        if (r.restartDelay == 0) {
-            r.restartCount++;
-            r.restartDelay = minDuration;
-        } else {
-            // If it has been a "reasonably long time" since the service
-            // was started, then reset our restart duration back to
-            // the beginning, so we don't infinitely increase the duration
-            // on a service that just occasionally gets killed (which is
-            // a normal case, due to process being killed to reclaim memory).
-            if (now > (r.restartTime+resetTime)) {
-                r.restartCount = 1;
+            r.totalRestartCount++;
+            if (r.restartDelay == 0) {
+                r.restartCount++;
                 r.restartDelay = minDuration;
             } else {
-                if ((r.serviceInfo.applicationInfo.flags
-                        &ApplicationInfo.FLAG_PERSISTENT) != 0) {
-                    // Services in peristent processes will restart much more
-                    // quickly, since they are pretty important.  (Think SystemUI).
-                    r.restartDelay += minDuration/2;
+                // If it has been a "reasonably long time" since the service
+                // was started, then reset our restart duration back to
+                // the beginning, so we don't infinitely increase the duration
+                // on a service that just occasionally gets killed (which is
+                // a normal case, due to process being killed to reclaim memory).
+                if (now > (r.restartTime+resetTime)) {
+                    r.restartCount = 1;
+                    r.restartDelay = minDuration;
                 } else {
-                    r.restartDelay *= SERVICE_RESTART_DURATION_FACTOR;
-                    if (r.restartDelay < minDuration) {
-                        r.restartDelay = minDuration;
+                    if ((r.serviceInfo.applicationInfo.flags
+                            &ApplicationInfo.FLAG_PERSISTENT) != 0) {
+                        // Services in peristent processes will restart much more
+                        // quickly, since they are pretty important.  (Think SystemUI).
+                        r.restartDelay += minDuration/2;
+                    } else {
+                        r.restartDelay *= SERVICE_RESTART_DURATION_FACTOR;
+                        if (r.restartDelay < minDuration) {
+                            r.restartDelay = minDuration;
+                        }
                     }
                 }
             }
-        }
 
-        r.nextRestartTime = now + r.restartDelay;
+            r.nextRestartTime = now + r.restartDelay;
 
-        // Make sure that we don't end up restarting a bunch of services
-        // all at the same time.
-        boolean repeat;
-        do {
-            repeat = false;
-            for (int i=mRestartingServices.size()-1; i>=0; i--) {
-                ServiceRecord r2 = mRestartingServices.get(i);
-                if (r2 != r && r.nextRestartTime
-                        >= (r2.nextRestartTime-SERVICE_MIN_RESTART_TIME_BETWEEN)
-                        && r.nextRestartTime
-                        < (r2.nextRestartTime+SERVICE_MIN_RESTART_TIME_BETWEEN)) {
-                    r.nextRestartTime = r2.nextRestartTime + SERVICE_MIN_RESTART_TIME_BETWEEN;
-                    r.restartDelay = r.nextRestartTime - now;
-                    repeat = true;
-                    break;
+            // Make sure that we don't end up restarting a bunch of services
+            // all at the same time.
+            boolean repeat;
+            do {
+                repeat = false;
+                for (int i=mRestartingServices.size()-1; i>=0; i--) {
+                    ServiceRecord r2 = mRestartingServices.get(i);
+                    if (r2 != r && r.nextRestartTime
+                            >= (r2.nextRestartTime-SERVICE_MIN_RESTART_TIME_BETWEEN)
+                            && r.nextRestartTime
+                            < (r2.nextRestartTime+SERVICE_MIN_RESTART_TIME_BETWEEN)) {
+                        r.nextRestartTime = r2.nextRestartTime + SERVICE_MIN_RESTART_TIME_BETWEEN;
+                        r.restartDelay = r.nextRestartTime - now;
+                        repeat = true;
+                        break;
+                    }
                 }
-            }
-        } while (repeat);
+            } while (repeat);
+
+        } else {
+            // Persistent processes are immediately restrted, so there is no
+            // reason to hold of on restarting their services.
+            r.totalRestartCount++;
+            r.restartCount = 0;
+            r.restartDelay = 0;
+            r.nextRestartTime = now;
+        }
 
         if (!mRestartingServices.contains(r)) {
             mRestartingServices.add(r);
@@ -1494,6 +1451,7 @@ public class ActiveServices {
 
     boolean attachApplicationLocked(ProcessRecord proc, String processName) throws Exception {
         boolean didSomething = false;
+        // Collect any services that are waiting for this process to come up.
         if (mPendingServices.size() > 0) {
             ServiceRecord sr = null;
             try {
@@ -1513,6 +1471,22 @@ public class ActiveServices {
                 Slog.w(TAG, "Exception in new application when starting service "
                         + sr.shortName, e);
                 throw e;
+            }
+        }
+        // Also, if there are any services that are waiting to restart and
+        // would run in this process, now is a good time to start them.  It would
+        // be weird to bring up the process but arbitrarily not let the services
+        // run at this point just because their restart time hasn't come up.
+        if (mRestartingServices.size() > 0) {
+            ServiceRecord sr = null;
+            for (int i=0; i<mRestartingServices.size(); i++) {
+                sr = mRestartingServices.get(i);
+                if (proc != sr.isolatedProc && (proc.uid != sr.appInfo.uid
+                        || !processName.equals(sr.processName))) {
+                    continue;
+                }
+                mAm.mHandler.removeCallbacks(sr.restarter);
+                mAm.mHandler.post(sr.restarter);
             }
         }
         return didSomething;
@@ -1836,7 +1810,8 @@ public class ActiveServices {
         pw.println("ACTIVITY MANAGER SERVICES (dumpsys activity services)");
         try {
             List<UserInfo> users = mAm.getUserManager().getUsers();
-            for (UserInfo user : users) {
+            for (int ui=0; ui<users.size(); ui++) {
+                final UserInfo user = users.get(ui);
                 if (mServiceMap.getAllServices(user.id).size() > 0) {
                     boolean printed = false;
                     long nowReal = SystemClock.elapsedRealtime();
@@ -1852,7 +1827,10 @@ public class ActiveServices {
                             continue;
                         }
                         if (!printed) {
-                            pw.println("  Active services:");
+                            if (ui > 0) {
+                                pw.println();
+                            }
+                            pw.println("  User " + user.id + " active services:");
                             printed = true;
                         }
                         if (needSep) {
