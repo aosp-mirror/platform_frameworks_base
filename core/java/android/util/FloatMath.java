@@ -71,4 +71,13 @@ public class FloatMath {
      * @return the square root of value
      */
     public static native float sqrt(float value);
+
+    /**
+     * Returns the closest float approximation of the raising "e" to the power
+     * of the argument.
+     *
+     * @param value to compute the exponential of
+     * @return the exponential of value
+     */
+    public static native float exp(float value);
 }
