@@ -53,6 +53,8 @@ namespace uirenderer {
     #define IS_END_OF_STRING(glyph) glyph < 0
 #endif
 
+#define TEXTURE_BORDER_SIZE 1
+
 ///////////////////////////////////////////////////////////////////////////////
 // Declarations
 ///////////////////////////////////////////////////////////////////////////////
@@ -80,16 +82,79 @@ public:
     bool mLinearFiltering;
 };
 
+/**
+ * CacheBlock is a noce in a linked list of current free space areas in a CacheTextureLine.
+ * Using CacheBlocks enables us to pack the cache line from top to bottom as well as left to right.
+ * When we add a glyph to the cache, we see if it fits within one of the existing columns that
+ * have already been started (this is the case if the glyph fits vertically as well as
+ * horizontally, and if its width is sufficiently close to the column width to avoid
+ * sub-optimal packing of small glyphs into wide columns). If there is no column in which the
+ * glyph fits, we check the final node, which is the remaining space in the cache line, creating
+ * a new column as appropriate.
+ *
+ * As columns fill up, we remove their CacheBlock from the list to avoid having to check
+ * small blocks in the future.
+ */
+struct CacheBlock {
+    uint16_t mX;
+    uint16_t mY;
+    uint16_t mWidth;
+    uint16_t mHeight;
+    CacheBlock* mNext;
+    CacheBlock* mPrev;
+
+    CacheBlock(uint16_t x, uint16_t y, uint16_t width, uint16_t height, bool empty = false):
+        mX(x), mY(y), mWidth(width), mHeight(height), mNext(NULL), mPrev(NULL)
+    {
+    }
+
+    static CacheBlock* insertBlock(CacheBlock* head, CacheBlock *newBlock);
+
+    static CacheBlock* removeBlock(CacheBlock* head, CacheBlock *blockToRemove);
+
+    void output() {
+        CacheBlock *currBlock = this;
+        while (currBlock) {
+            ALOGD("Block: this, x, y, w, h = %p, %d, %d, %d, %d",
+                    currBlock, currBlock->mX, currBlock->mY, currBlock->mWidth, currBlock->mHeight);
+            currBlock = currBlock->mNext;
+        }
+    }
+};
+
 class CacheTextureLine {
 public:
     CacheTextureLine(uint16_t maxWidth, uint16_t maxHeight, uint32_t currentRow,
-            uint32_t currentCol, CacheTexture* cacheTexture):
+            CacheTexture* cacheTexture):
                 mMaxHeight(maxHeight),
                 mMaxWidth(maxWidth),
                 mCurrentRow(currentRow),
-                mCurrentCol(currentCol),
                 mDirty(false),
+                mNumGlyphs(0),
                 mCacheTexture(cacheTexture) {
+        mCacheBlocks = new CacheBlock(TEXTURE_BORDER_SIZE, TEXTURE_BORDER_SIZE,
+                maxWidth - TEXTURE_BORDER_SIZE, maxHeight - TEXTURE_BORDER_SIZE, true);
+    }
+
+    ~CacheTextureLine() {
+        reset();
+    }
+
+    void reset() {
+        // Delete existing cache blocks
+        while (mCacheBlocks != NULL) {
+            CacheBlock* tmpBlock = mCacheBlocks;
+            mCacheBlocks = mCacheBlocks->mNext;
+            delete tmpBlock;
+        }
+        mNumGlyphs = 0;
+    }
+
+    void init() {
+        // reset, then create a new remainder space to start again
+        reset();
+        mCacheBlocks = new CacheBlock(TEXTURE_BORDER_SIZE, TEXTURE_BORDER_SIZE,
+                mMaxWidth - TEXTURE_BORDER_SIZE, mMaxHeight - TEXTURE_BORDER_SIZE, true);
     }
 
     bool fitBitmap(const SkGlyph& glyph, uint32_t *retOriginX, uint32_t *retOriginY);
@@ -97,9 +162,10 @@ public:
     uint16_t mMaxHeight;
     uint16_t mMaxWidth;
     uint32_t mCurrentRow;
-    uint32_t mCurrentCol;
     bool mDirty;
+    uint16_t mNumGlyphs;
     CacheTexture* mCacheTexture;
+    CacheBlock* mCacheBlocks;
 };
 
 struct CachedGlyphInfo {
@@ -179,6 +245,8 @@ protected:
         MEASURE,
     };
 
+    void precache(SkPaint* paint, const char* text, int numGlyphs);
+
     void render(SkPaint* paint, const char *text, uint32_t start, uint32_t len,
             int numGlyphs, int x, int y, RenderMode mode, uint8_t *bitmap,
             uint32_t bitmapW, uint32_t bitmapH, Rect *bounds, const float* positions);
@@ -244,6 +312,9 @@ public:
     }
 
     void setFont(SkPaint* paint, uint32_t fontId, float fontSize);
+
+    void precache(SkPaint* paint, const char* text, int numGlyphs);
+
     // bounds is an out parameter
     bool renderText(SkPaint* paint, const Rect* clip, const char *text, uint32_t startIndex,
             uint32_t len, int numGlyphs, int x, int y, Rect* bounds);
@@ -327,8 +398,6 @@ protected:
     void initRender(const Rect* clip, Rect* bounds);
     void finishRender();
 
-    void precacheLatin(SkPaint* paint);
-
     void issueDrawCommand();
     void appendMeshQuadNoClip(float x1, float y1, float u1, float v1,
             float x2, float y2, float u2, float v2,
@@ -347,7 +416,6 @@ protected:
     uint32_t mSmallCacheHeight;
 
     Vector<CacheTextureLine*> mCacheLines;
-    uint32_t getRemainingCacheCapacity();
 
     Font* mCurrentFont;
     Vector<Font*> mActiveFonts;
