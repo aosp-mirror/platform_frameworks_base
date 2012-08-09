@@ -90,6 +90,7 @@ android_hardware_UsbRequest_queue_array(JNIEnv *env, jobject thiz,
         request->buffer = malloc(length);
         if (!request->buffer)
             return false;
+        memset(request->buffer, 0, length);
         if (out) {
             // copy data from Java buffer to native buffer
             env->GetByteArrayRegion(buffer, 0, length, (jbyte *)request->buffer);
@@ -113,14 +114,14 @@ android_hardware_UsbRequest_queue_array(JNIEnv *env, jobject thiz,
     }
 }
 
-static void
+static int
 android_hardware_UsbRequest_dequeue_array(JNIEnv *env, jobject thiz,
         jbyteArray buffer, jint length, jboolean out)
 {
     struct usb_request* request = get_request_from_object(env, thiz);
     if (!request) {
         ALOGE("request is closed in native_dequeue");
-        return;
+        return -1;
     }
 
     if (buffer && length && request->buffer && !out) {
@@ -129,7 +130,7 @@ android_hardware_UsbRequest_dequeue_array(JNIEnv *env, jobject thiz,
     }
     free(request->buffer);
     env->DeleteGlobalRef((jobject)request->client_data);
-
+    return request->actual_length;
 }
 
 static jboolean
@@ -163,16 +164,17 @@ android_hardware_UsbRequest_queue_direct(JNIEnv *env, jobject thiz,
     }
 }
 
-static void
+static int
 android_hardware_UsbRequest_dequeue_direct(JNIEnv *env, jobject thiz)
 {
     struct usb_request* request = get_request_from_object(env, thiz);
     if (!request) {
         ALOGE("request is closed in native_dequeue");
-        return;
+        return -1;
     }
     // all we need to do is delete our global ref
     env->DeleteGlobalRef((jobject)request->client_data);
+    return request->actual_length;
 }
 
 static jboolean
@@ -191,10 +193,10 @@ static JNINativeMethod method_table[] = {
                                             (void *)android_hardware_UsbRequest_init},
     {"native_close",            "()V",      (void *)android_hardware_UsbRequest_close},
     {"native_queue_array",      "([BIZ)Z",  (void *)android_hardware_UsbRequest_queue_array},
-    {"native_dequeue_array",    "([BIZ)V",  (void *)android_hardware_UsbRequest_dequeue_array},
+    {"native_dequeue_array",    "([BIZ)I",  (void *)android_hardware_UsbRequest_dequeue_array},
     {"native_queue_direct",     "(Ljava/nio/ByteBuffer;IZ)Z",
                                             (void *)android_hardware_UsbRequest_queue_direct},
-    {"native_dequeue_direct",   "()V",      (void *)android_hardware_UsbRequest_dequeue_direct},
+    {"native_dequeue_direct",   "()I",      (void *)android_hardware_UsbRequest_dequeue_direct},
     {"native_cancel",           "()Z",      (void *)android_hardware_UsbRequest_cancel},
 };
 

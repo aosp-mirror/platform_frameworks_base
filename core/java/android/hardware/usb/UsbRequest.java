@@ -152,10 +152,14 @@ public class UsbRequest {
 
     /* package */ void dequeue() {
         boolean out = (mEndpoint.getDirection() == UsbConstants.USB_DIR_OUT);
+        int bytesRead;
         if (mBuffer.isDirect()) {
-            native_dequeue_direct();
+            bytesRead = native_dequeue_direct();
         } else {
-            native_dequeue_array(mBuffer.array(), mLength, out);
+            bytesRead = native_dequeue_array(mBuffer.array(), mLength, out);
+        }
+        if (bytesRead >= 0) {
+            mBuffer.position(Math.min(bytesRead, mLength));
         }
         mBuffer = null;
         mLength = 0;
@@ -174,8 +178,8 @@ public class UsbRequest {
             int ep_attributes, int ep_max_packet_size, int ep_interval);
     private native void native_close();
     private native boolean native_queue_array(byte[] buffer, int length, boolean out);
-    private native void native_dequeue_array(byte[] buffer, int length, boolean out);
+    private native int native_dequeue_array(byte[] buffer, int length, boolean out);
     private native boolean native_queue_direct(ByteBuffer buffer, int length, boolean out);
-    private native void native_dequeue_direct();
+    private native int native_dequeue_direct();
     private native boolean native_cancel();
 }
