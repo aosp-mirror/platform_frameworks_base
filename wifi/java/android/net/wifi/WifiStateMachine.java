@@ -41,6 +41,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.database.ContentObserver;
 import android.net.ConnectivityManager;
 import android.net.DhcpInfo;
 import android.net.DhcpInfoInternal;
@@ -138,6 +139,8 @@ public class WifiStateMachine extends StateMachine {
     private boolean mSetScanActive = false;
     /* High perf mode is true if an app has held a high perf Wifi Lock */
     private boolean mHighPerfMode = false;
+    /* Tracks if user has disabled suspend optimizations through settings */
+    private AtomicBoolean mSuspendOptEnabled = new AtomicBoolean(true);
 
     private boolean mBluetoothConnectionActive = false;
 
@@ -591,6 +594,9 @@ public class WifiStateMachine extends StateMachine {
         mPrimaryDeviceType = mContext.getResources().getString(
                 com.android.internal.R.string.config_wifi_p2p_device_type);
 
+        mSuspendOptEnabled.set(Settings.Secure.getInt(mContext.getContentResolver(),
+                    Settings.Secure.WIFI_SUSPEND_OPTIMIZATIONS_ENABLED, 1) == 1);
+
         mContext.registerReceiver(
             new BroadcastReceiver() {
                 @Override
@@ -626,18 +632,25 @@ public class WifiStateMachine extends StateMachine {
                         enableBackgroundScanCommand(false);
                     }
                     enableAllNetworks();
-                    sendMessage(CMD_CLEAR_SUSPEND_OPTIMIZATIONS);
+                    if (mSuspendOptEnabled.get()) {
+                        if (DBG) log("Clear suspend optimizations");
+                        sendMessage(CMD_CLEAR_SUSPEND_OPTIMIZATIONS);
+                    }
                 } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
                     enableRssiPolling(false);
                     if (mBackgroundScanSupported) {
                         enableBackgroundScanCommand(true);
                     }
-                    //Allow 2s for suspend optimizations to be set
-                    mSuspendWakeLock.acquire(2000);
-                    sendMessage(CMD_SET_SUSPEND_OPTIMIZATIONS);
+                    if (mSuspendOptEnabled.get()) {
+                        if (DBG) log("Enable suspend optimizations");
+                        //Allow 2s for suspend optimizations to be set
+                        mSuspendWakeLock.acquire(2000);
+                        sendMessage(CMD_SET_SUSPEND_OPTIMIZATIONS);
+                    }
                 }
             }
         };
+
         mContext.registerReceiver(
                 new BroadcastReceiver() {
                     @Override
@@ -647,6 +660,16 @@ public class WifiStateMachine extends StateMachine {
                     }
                 },
                 new IntentFilter(ACTION_DELAYED_DRIVER_STOP));
+
+        mContext.getContentResolver().registerContentObserver(Settings.Secure.getUriFor(
+                Settings.Secure.WIFI_SUSPEND_OPTIMIZATIONS_ENABLED), false,
+                new ContentObserver(getHandler()) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        mSuspendOptEnabled.set(Settings.Secure.getInt(mContext.getContentResolver(),
+                                Settings.Secure.WIFI_SUSPEND_OPTIMIZATIONS_ENABLED, 1) == 1);
+                    }
+                });
 
         mScanResultCache = new LruCache<String, ScanResult>(SCAN_RESULT_CACHE_SIZE);
 
@@ -1133,6 +1156,8 @@ public class WifiStateMachine extends StateMachine {
         sb.append("mLastNetworkId ").append(mLastNetworkId).append(LS);
         sb.append("mReconnectCount ").append(mReconnectCount).append(LS);
         sb.append("mIsScanMode ").append(mIsScanMode).append(LS);
+        sb.append("mHighPerfMode").append(mHighPerfMode).append(LS);
+        sb.append("mSuspendOptEnabled").append(mSuspendOptEnabled).append(LS);
         sb.append("Supplicant status").append(LS)
                 .append(mWifiNative.status()).append(LS).append(LS);
 
