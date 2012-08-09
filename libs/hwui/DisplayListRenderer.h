@@ -770,10 +770,10 @@ private:
         addInt((int) pathCopy);
     }
 
-    inline void addPaint(SkPaint* paint) {
+    inline SkPaint* addPaint(SkPaint* paint) {
         if (!paint) {
             addInt((int) NULL);
-            return;
+            return paint;
         }
 
         SkPaint* paintCopy = mPaintMap.valueFor(paint);
@@ -785,6 +785,8 @@ private:
         }
 
         addInt((int) paintCopy);
+
+        return paintCopy;
     }
 
     inline void addDisplayList(DisplayList* displayList) {
