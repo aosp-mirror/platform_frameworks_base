@@ -101,6 +101,19 @@ public final class Display {
     }
 
     /**
+     * Gets a full copy of the display information.
+     *
+     * @param outDisplayInfo The object to receive the copy of the display information.
+     * @hide
+     */
+    public void getDisplayInfo(DisplayInfo outDisplayInfo) {
+        synchronized (this) {
+            updateDisplayInfoLocked();
+            outDisplayInfo.copyFrom(mDisplayInfo);
+        }
+    }
+
+    /**
      * Gets the size of the display, in pixels.
      * <p>
      * Note that this value should <em>not</em> be used for computing layouts,
