@@ -39,10 +39,9 @@ public final class ProviderRequest implements Parcelable {
      * is a high power slow interval request and a
      * low power fast interval request.
      */
-    public List<LocationRequest> locationRequests = null;
+    public List<LocationRequest> locationRequests = new ArrayList<LocationRequest>();
 
-    public ProviderRequest() {
-    }
+    public ProviderRequest() { }
 
     public static final Parcelable.Creator<ProviderRequest> CREATOR =
             new Parcelable.Creator<ProviderRequest>() {
@@ -52,7 +51,6 @@ public final class ProviderRequest implements Parcelable {
             request.reportLocation = in.readInt() == 1;
             request.interval = in.readLong();
             int count = in.readInt();
-            request.locationRequests = new ArrayList<LocationRequest>(count);
             for (int i = 0; i < count; i++) {
                 request.locationRequests.add(LocationRequest.CREATOR.createFromParcel(in));
             }
@@ -73,8 +71,10 @@ public final class ProviderRequest implements Parcelable {
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeInt(reportLocation ? 1 : 0);
         parcel.writeLong(interval);
-        parcel.writeParcelableArray(locationRequests.toArray(
-                new LocationRequest[locationRequests.size()]), 0);
+        parcel.writeInt(locationRequests.size());
+        for (LocationRequest request : locationRequests) {
+            request.writeToParcel(parcel, flags);
+        }
     }
 
     @Override

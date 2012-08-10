@@ -78,7 +78,7 @@ public class FusedLocationProvider extends LocationProviderBase implements Fusio
                 case MSG_SET_REQUEST:
                     {
                         RequestWrapper wrapper = (RequestWrapper) msg.obj;
-                        mEngine.setRequirements(wrapper.request, wrapper.source);
+                        mEngine.setRequest(wrapper.request, wrapper.source);
                         break;
                     }
             }
@@ -97,7 +97,7 @@ public class FusedLocationProvider extends LocationProviderBase implements Fusio
 
     @Override
     public void onSetRequest(ProviderRequestUnbundled request, WorkSource source) {
-        mHandler.obtainMessage(MSG_SET_REQUEST,  new RequestWrapper(request, source));
+        mHandler.obtainMessage(MSG_SET_REQUEST, new RequestWrapper(request, source)).sendToTarget();
     }
 
     @Override

@@ -787,10 +787,6 @@ public class LocationManagerService extends ILocationManager.Stub implements Obs
             for (UpdateRecord record : records) {
                 LocationRequest locationRequest = record.mRequest;
 
-                if (providerRequest.locationRequests == null) {
-                    providerRequest.locationRequests = new ArrayList<LocationRequest>();
-                }
-
                 providerRequest.locationRequests.add(locationRequest);
                 if (locationRequest.getInterval() < providerRequest.interval) {
                     providerRequest.reportLocation = true;
