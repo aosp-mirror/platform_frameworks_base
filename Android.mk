@@ -197,8 +197,8 @@ LOCAL_SRC_FILES += \
 	location/java/android/location/IGpsStatusProvider.aidl \
 	location/java/android/location/ILocationListener.aidl \
 	location/java/android/location/ILocationManager.aidl \
-	location/java/android/location/ILocationProvider.aidl \
 	location/java/android/location/INetInitiatedListener.aidl \
+	location/java/com/android/internal/location/ILocationProvider.aidl \
 	media/java/android/media/IAudioService.aidl \
 	media/java/android/media/IAudioFocusDispatcher.aidl \
 	media/java/android/media/IAudioRoutesObserver.aidl \
@@ -306,7 +306,11 @@ aidl_files := \
 	frameworks/base/graphics/java/android/graphics/Rect.aidl \
 	frameworks/base/graphics/java/android/graphics/Region.aidl \
 	frameworks/base/location/java/android/location/Criteria.aidl \
+	frameworks/base/location/java/android/location/Geofence.aidl \
 	frameworks/base/location/java/android/location/Location.aidl \
+	frameworks/base/location/java/android/location/LocationRequest.aidl \
+	frameworks/base/location/java/com/android/internal/location/ProviderProperties.aidl \
+	frameworks/base/location/java/com/android/internal/location/ProviderRequest.aidl \
 	frameworks/base/telephony/java/android/telephony/ServiceState.aidl \
 	frameworks/base/telephony/java/com/android/internal/telephony/IPhoneSubInfo.aidl \
 	frameworks/base/telephony/java/com/android/internal/telephony/ITelephony.aidl \

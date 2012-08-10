@@ -16,42 +16,33 @@
 
 package com.android.server.location;
 
-import android.location.Criteria;
-import android.location.Location;
-import android.net.NetworkInfo;
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+
+import com.android.internal.location.ProviderProperties;
+import com.android.internal.location.ProviderRequest;
+
+
 import android.os.Bundle;
 import android.os.WorkSource;
 
 /**
  * Location Manager's interface for location providers.
- *
- * {@hide}
+ * @hide
  */
 public interface LocationProviderInterface {
-    String getName();
-    boolean requiresNetwork();
-    boolean requiresSatellite();
-    boolean requiresCell();
-    boolean hasMonetaryCost();
-    boolean supportsAltitude();
-    boolean supportsSpeed();
-    boolean supportsBearing();
-    int getPowerRequirement();
-    boolean meetsCriteria(Criteria criteria);
-    int getAccuracy();
-    boolean isEnabled();
-    void enable();
-    void disable();
-    int getStatus(Bundle extras);
-    long getStatusUpdateTime();
-    void enableLocationTracking(boolean enable);
-    /* returns false if single shot is not supported */
-    boolean requestSingleShotFix();
-    String getInternalState();
-    void setMinTime(long minTime, WorkSource ws);
-    void updateNetworkState(int state, NetworkInfo info);
-    void updateLocation(Location location);
-    boolean sendExtraCommand(String command, Bundle extras);
-    void addListener(int uid);
-    void removeListener(int uid);
+    public String getName();
+
+    public void enable();
+    public void disable();
+    public boolean isEnabled();
+    public void setRequest(ProviderRequest request, WorkSource source);
+
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args);
+
+    // --- deprecated (but still supported) ---
+    public ProviderProperties getProperties();
+    public int getStatus(Bundle extras);
+    public long getStatusUpdateTime();
+    public boolean sendExtraCommand(String command, Bundle extras);
 }

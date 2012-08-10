@@ -21,6 +21,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
 import android.util.Printer;
+import android.util.TimeUtils;
 
 import java.text.DecimalFormat;
 import java.util.StringTokenizer;
@@ -84,17 +85,6 @@ public class Location implements Parcelable {
     // Scratchpad
     private float[] mResults = new float[2];
 
-    public void dump(Printer pw, String prefix) {
-        pw.println(prefix + "mProvider=" + mProvider + " mTime=" + mTime);
-        pw.println(prefix + "mElapsedRealtimeNano=" + mElapsedRealtimeNano);
-        pw.println(prefix + "mLatitude=" + mLatitude + " mLongitude=" + mLongitude);
-        pw.println(prefix + "mHasAltitude=" + mHasAltitude + " mAltitude=" + mAltitude);
-        pw.println(prefix + "mHasSpeed=" + mHasSpeed + " mSpeed=" + mSpeed);
-        pw.println(prefix + "mHasBearing=" + mHasBearing + " mBearing=" + mBearing);
-        pw.println(prefix + "mHasAccuracy=" + mHasAccuracy + " mAccuracy=" + mAccuracy);
-        pw.println(prefix + "mExtras=" + mExtras);
-    }
-    
     /**
      * Constructs a new Location.  By default, time, latitude,
      * longitude, and numSatellites are 0; hasAltitude, hasSpeed, and
@@ -766,25 +756,46 @@ public class Location implements Parcelable {
         mExtras = (extras == null) ? null : new Bundle(extras);
     }
 
-    @Override public String toString() {
-        return "Location[mProvider=" + mProvider +
-            ",mTime=" + mTime +
-            ",mElapsedRealtimeNano=" + mElapsedRealtimeNano +
-            ",mLatitude=" + mLatitude +
-            ",mLongitude=" + mLongitude +
-            ",mHasAltitude=" + mHasAltitude +
-            ",mAltitude=" + mAltitude +
-            ",mHasSpeed=" + mHasSpeed +
-            ",mSpeed=" + mSpeed +
-            ",mHasBearing=" + mHasBearing +
-            ",mBearing=" + mBearing +
-            ",mHasAccuracy=" + mHasAccuracy +
-            ",mAccuracy=" + mAccuracy +
-            ",mExtras=" + mExtras + "]";
+    @Override
+    public String toString() {
+        StringBuilder s = new StringBuilder();
+        s.append("Location[");
+        s.append(mProvider);
+        s.append(String.format(" %.6f,%.6f", mLatitude, mLongitude));
+        if (mHasAccuracy) s.append(String.format(" acc=%.0f", mAccuracy));
+        else s.append(" acc=???");
+        if (mTime == 0) {
+            s.append(" t=?!?");
+        }
+        if (mElapsedRealtimeNano == 0) {
+            s.append(" et=?!?");
+        } else {
+            long age = SystemClock.elapsedRealtimeNano() - mElapsedRealtimeNano;
+            s.append(" age=");
+            TimeUtils.formatDuration(age / 1000000L, s);
+        }
+        if (mHasAltitude) s.append(" alt=").append(mAltitude);
+        if (mHasSpeed) s.append(" vel=").append(mSpeed);
+        if (mHasBearing) s.append(" bear=").append(mBearing);
+
+        if (mExtras != null) {
+            s.append(" {").append(mExtras).append('}');
+        }
+        s.append(']');
+        return s.toString();
+    }
+
+    /**
+     * @deprecated Use {@link #toString} instead
+     */
+    @Deprecated
+    public void dump(Printer pw, String prefix) {
+        pw.println(prefix + toString());
     }
 
     public static final Parcelable.Creator<Location> CREATOR =
         new Parcelable.Creator<Location>() {
+        @Override
         public Location createFromParcel(Parcel in) {
             String provider = in.readString();
             Location l = new Location(provider);
@@ -804,15 +815,18 @@ public class Location implements Parcelable {
             return l;
         }
 
+        @Override
         public Location[] newArray(int size) {
             return new Location[size];
         }
     };
 
+    @Override
     public int describeContents() {
         return 0;
     }
 
+    @Override
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeString(mProvider);
         parcel.writeLong(mTime);
@@ -828,5 +842,5 @@ public class Location implements Parcelable {
         parcel.writeInt(mHasAccuracy ? 1 : 0);
         parcel.writeFloat(mAccuracy);
         parcel.writeBundle(mExtras);
-   }
+    }
 }

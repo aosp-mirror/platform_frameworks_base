@@ -20,52 +20,35 @@ import android.app.PendingIntent;
 import android.location.Address;
 import android.location.Criteria;
 import android.location.GeocoderParams;
+import android.location.Geofence;
 import android.location.IGeocodeProvider;
 import android.location.IGpsStatusListener;
 import android.location.ILocationListener;
 import android.location.Location;
+import android.location.LocationRequest;
 import android.os.Bundle;
+
+import com.android.internal.location.ProviderProperties;
 
 /**
  * System private API for talking with the location service.
  *
- * {@hide}
+ * @hide
  */
 interface ILocationManager
 {
-    List<String> getAllProviders();
-    List<String> getProviders(in Criteria criteria, boolean enabledOnly);
-    String getBestProvider(in Criteria criteria, boolean enabledOnly);
-    boolean providerMeetsCriteria(String provider, in Criteria criteria);
+    void requestLocationUpdates(in LocationRequest request, in ILocationListener listener,
+            in PendingIntent intent, String packageName);
+    void removeUpdates(in ILocationListener listener, in PendingIntent intent, String packageName);
 
-    void requestLocationUpdates(String provider, in Criteria criteria, long minTime, float minDistance,
-        boolean singleShot, in ILocationListener listener);
-    void requestLocationUpdatesPI(String provider, in Criteria criteria, long minTime, float minDistance,
-        boolean singleShot, in PendingIntent intent);
-    void removeUpdates(in ILocationListener listener);
-    void removeUpdatesPI(in PendingIntent intent);
+    void requestGeofence(in LocationRequest request, in Geofence geofence,
+            in PendingIntent intent, String packageName);
+    void removeGeofence(in Geofence fence, in PendingIntent intent, String packageName);
+
+    Location getLastLocation(in LocationRequest request);
 
     boolean addGpsStatusListener(IGpsStatusListener listener);
     void removeGpsStatusListener(IGpsStatusListener listener);
-
-    // for reporting callback completion
-    void locationCallbackFinished(ILocationListener listener);
-
-    boolean sendExtraCommand(String provider, String command, inout Bundle extras);
-
-    void addProximityAlert(double latitude, double longitude, float distance,
-        long expiration, in PendingIntent intent, in String packageName);
-    void removeProximityAlert(in PendingIntent intent);
-
-    Bundle getProviderInfo(String provider);
-    boolean isProviderEnabled(String provider);
-
-    Location getLastKnownLocation(String provider);
-
-    // Used by location providers to tell the location manager when it has a new location.
-    // Passive is true if the location is coming from the passive provider, in which case
-    // it need not be shared with other providers.
-    void reportLocation(in Location location, boolean passive);
 
     boolean geocoderIsPresent();
     String getFromLocation(double latitude, double longitude, int maxResults,
@@ -75,9 +58,17 @@ interface ILocationManager
         double upperRightLatitude, double upperRightLongitude, int maxResults,
         in GeocoderParams params, out List<Address> addrs);
 
-    void addTestProvider(String name, boolean requiresNetwork, boolean requiresSatellite,
-        boolean requiresCell, boolean hasMonetaryCost, boolean supportsAltitude,
-        boolean supportsSpeed, boolean supportsBearing, int powerRequirement, int accuracy);
+    boolean sendNiResponse(int notifId, int userResponse);
+
+    // --- deprecated ---
+    List<String> getAllProviders();
+    List<String> getProviders(in Criteria criteria, boolean enabledOnly);
+    String getBestProvider(in Criteria criteria, boolean enabledOnly);
+    boolean providerMeetsCriteria(String provider, in Criteria criteria);
+    ProviderProperties getProviderProperties(String provider);
+    boolean isProviderEnabled(String provider);
+
+    void addTestProvider(String name, in ProviderProperties properties);
     void removeTestProvider(String provider);
     void setTestProviderLocation(String provider, in Location loc);
     void clearTestProviderLocation(String provider);
@@ -86,6 +77,17 @@ interface ILocationManager
     void setTestProviderStatus(String provider, int status, in Bundle extras, long updateTime);
     void clearTestProviderStatus(String provider);
 
-    // for NI support
-    boolean sendNiResponse(int notifId, int userResponse);
+    boolean sendExtraCommand(String provider, String command, inout Bundle extras);
+
+    // --- internal ---
+
+    // Used by location providers to tell the location manager when it has a new location.
+    // Passive is true if the location is coming from the passive provider, in which case
+    // it need not be shared with other providers.
+    void reportLocation(in Location location, boolean passive);
+
+    // for reporting callback completion
+    void locationCallbackFinished(ILocationListener listener);
+
+
 }

@@ -17,37 +17,42 @@
 
 package com.android.server.location;
 
+import android.app.PendingIntent;
+import android.location.Geofence;
 import android.location.Location;
 
 /**
- * Represents a simple circular GeoFence.
+ * Represents state associated with a geofence
  */
-public class Geofence {
+public class GeofenceState {
     public final static int FLAG_ENTER = 0x01;
     public final static int FLAG_EXIT = 0x02;
 
-    static final int STATE_UNKNOWN = 0;
-    static final int STATE_INSIDE = 1;
-    static final int STATE_OUTSIDE = 2;
+    private static final int STATE_UNKNOWN = 0;
+    private static final int STATE_INSIDE = 1;
+    private static final int STATE_OUTSIDE = 2;
 
-    final double mLatitude;
-    final double mLongitude;
-    final float mRadius;
-    final Location mLocation;
+    public final Geofence mFence;
+    private final Location mLocation;
+    public final long mExpireAt;
+    public final String mPackageName;
+    public final PendingIntent mIntent;
 
     int mState;  // current state
     double mDistance;  // current distance to center of fence
 
-    public Geofence(double latitude, double longitude, float radius, Location prevLocation) {
+    public GeofenceState(Geofence fence, Location prevLocation, long expireAt,
+            String packageName, PendingIntent intent) {
         mState = STATE_UNKNOWN;
 
-        mLatitude = latitude;
-        mLongitude = longitude;
-        mRadius = radius;
+        mFence = fence;
+        mExpireAt = expireAt;
+        mPackageName = packageName;
+        mIntent = intent;
 
         mLocation = new Location("");
-        mLocation.setLatitude(latitude);
-        mLocation.setLongitude(longitude);
+        mLocation.setLatitude(fence.getLatitude());
+        mLocation.setLongitude(fence.getLongitude());
 
         if (prevLocation != null) {
             processLocation(prevLocation);
@@ -63,7 +68,7 @@ public class Geofence {
 
         int prevState = mState;
         //TODO: inside/outside detection could be made more rigorous
-        boolean inside = mDistance <= Math.max(mRadius, location.getAccuracy());
+        boolean inside = mDistance <= Math.max(mFence.getRadius(), location.getAccuracy());
         if (inside) {
             mState = STATE_INSIDE;
         } else {
@@ -94,7 +99,6 @@ public class Geofence {
             default:
                 state = "?";
         }
-        return String.format("(%.4f, %.4f r=%.0f d=%.0f %s)", mLatitude, mLongitude, mRadius,
-                mDistance, state);
+        return String.format("%s d=%.0f %s", mFence.toString(), mDistance, state);
     }
 }
