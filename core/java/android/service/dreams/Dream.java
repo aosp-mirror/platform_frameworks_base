@@ -172,11 +172,6 @@ public class Dream extends Service implements Window.Callback {
 
     @Override
     public void onAttachedToWindow() {
-        mWindow.addFlags(
-                WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON
-                | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
-        );
-        lightsOut();
     }
 
     @Override
@@ -306,7 +301,8 @@ public class Dream extends Service implements Window.Callback {
         // turn the lights down low
         final View v = mWindow.getDecorView();
         if (v != null) {
-            v.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
+            v.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE 
+                                  | View.SYSTEM_UI_FLAG_FULLSCREEN);
         }
     }
 
