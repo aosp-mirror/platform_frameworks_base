@@ -1071,6 +1071,13 @@ exit:
     return ret;
 }
 
+static jint
+nScriptIntrinsicCreate(JNIEnv *_env, jobject _this, RsContext con, jint id, jint eid)
+{
+    LOG_API("nScriptIntrinsicCreate, con(%p) id(%i) element(%p)", con, id, (void *)eid);
+    return (jint)rsScriptIntrinsicCreate(con, id, (RsElement)eid);
+}
+
 // ---------------------------------------------------------------------------
 
 static jint
@@ -1412,6 +1419,7 @@ static JNINativeMethod methods[] = {
 {"rsnScriptSetVarObj",               "(IIII)V",                               (void*)nScriptSetVarObj },
 
 {"rsnScriptCCreate",                 "(ILjava/lang/String;Ljava/lang/String;[BI)I",  (void*)nScriptCCreate },
+{"rsnScriptIntrinsicCreate",         "(III)I",                                (void*)nScriptIntrinsicCreate },
 
 {"rsnProgramStoreCreate",            "(IZZZZZZIII)I",                         (void*)nProgramStoreCreate },
 

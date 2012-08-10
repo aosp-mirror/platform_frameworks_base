@@ -561,6 +561,12 @@ public class RenderScript {
         return rsnScriptCCreate(mContext, resName, cacheDir, script, length);
     }
 
+    native int  rsnScriptIntrinsicCreate(int con, int id, int eid);
+    synchronized int nScriptIntrinsicCreate(int id, int eid) {
+        validate();
+        return rsnScriptIntrinsicCreate(mContext, id, eid);
+    }
+
     native int  rsnSamplerCreate(int con, int magFilter, int minFilter,
                                  int wrapS, int wrapT, int wrapR, float aniso);
     synchronized int nSamplerCreate(int magFilter, int minFilter,
