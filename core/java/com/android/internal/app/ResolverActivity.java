@@ -150,7 +150,8 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
 
             resizeGrid();
         } else if (count == 1) {
-            startActivity(mAdapter.intentForPosition(0));
+            startActivityAsUser(mAdapter.intentForPosition(0),
+                    UserHandle.getUserId(mLaunchedFromUid));
             mPackageMonitor.unregister();
             mRegistered = false;
             finish();
@@ -363,12 +364,12 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
                     if (r.match > bestMatch) bestMatch = r.match;
                 }
                 getPackageManager().addPreferredActivity(filter, bestMatch, set,
-                        intent.getComponent());
+                        intent.getComponent(), UserHandle.getUserId(mLaunchedFromUid));
             }
         }
 
         if (intent != null) {
-            startActivity(intent);
+            startActivityAsUser(intent, UserHandle.getUserId(mLaunchedFromUid));
         }
     }
 
@@ -376,7 +377,7 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
         Intent in = new Intent().setAction("android.settings.APPLICATION_DETAILS_SETTINGS")
                 .setData(Uri.fromParts("package", ri.activityInfo.packageName, null))
                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-        startActivity(in);
+        startActivityAsUser(in, UserHandle.getUserId(mLaunchedFromUid));
     }
 
     private final class DisplayResolveInfo {
