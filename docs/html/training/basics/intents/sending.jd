@@ -31,11 +31,11 @@ next.link=result.html
 <p>One of Android's most important features is an app's ability to send the user to another app
 based on an "action" it would like to perform. For example, if
 your app has the address of a business that you'd like to show on a map, you don't have to build
-an activity in your app that shows a map. Instead, you can send a out a request to view the address
-using an {@link android.content.Intent}. The Android system then starts an app that's able to view
+an activity in your app that shows a map. Instead, you can create a request to view the address
+using an {@link android.content.Intent}. The Android system then starts an app that's able to show
 the address on a map.</p>
 
-<p>As shown in the first class, <a href="{@docRoot}training/basics/firstapp/index.html">Building
+<p>As explained in the first class, <a href="{@docRoot}training/basics/firstapp/index.html">Building
 Your First App</a>, you must use intents to navigate between activities in your own app. You
 generally do so with an <em>explicit intent</em>, which defines the exact class name of the
 component you want to start. However, when you want to have a separate app perform an action, such
