@@ -39,7 +39,7 @@ public class MtpStorage {
         mStorageId = volume.getStorageId();
         mPath = volume.getPath();
         mDescription = context.getResources().getString(volume.getDescriptionId());
-        mReserveSpace = volume.getMtpReserveSpace();
+        mReserveSpace = volume.getMtpReserveSpace() * 1024 * 1024;
         mRemovable = volume.isRemovable();
         mMaxFileSize = volume.getMaxFileSize();
     }
@@ -87,7 +87,7 @@ public class MtpStorage {
      * Returns the amount of space to reserve on the storage file system.
      * This can be set to a non-zero value to prevent MTP from filling up the entire storage.
      *
-     * @return the storage unit description
+     * @return reserved space in bytes.
      */
     public final long getReserveSpace() {
         return mReserveSpace;
