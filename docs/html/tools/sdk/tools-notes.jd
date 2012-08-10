@@ -28,6 +28,37 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>SDK Tools, Revision 20.0.3</a> <em>(August 2012)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <dl>
+    <dt>Dependencies:</dt>
+    <dd>
+      <ul>
+        <li>Android SDK Platform-tools revision 12 or later.</li>
+        <li>If you are developing in Eclipse with ADT, note that the SDK Tools r20.0.3 is designed
+        for use with ADT 20.0.3 and later. If you haven't already, update your
+        <a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT Plugin</a> to 20.0.3.</li>
+        <li>If you are developing outside Eclipse, you must have
+          <a href="http://ant.apache.org/">Apache Ant</a> 1.8 or later.</li>
+    </ul>
+    </dd>
+    <dt>Bug fixes:</dt>
+    <dd>
+      <ul>
+        <li>Fixed problem with cached download lists in SDK Manager.</li>
+      </ul>
+    </dd>
+    </dl>
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 20.0.1</a> <em>(July 2012)</em>
   </p>
 
@@ -942,3 +973,4 @@ href="/tools/help/layoutopt.html">layoutopt</a>.</p>
 </dl>
  </div>
 </div>
+
