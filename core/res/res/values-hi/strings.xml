@@ -154,12 +154,9 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"फ़ोन विकल्‍प"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"स्‍क्रीन लॉक"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"पावर बंद"</string>
-    <!-- no translation found for global_action_bug_report (7934010578922304799) -->
-    <skip />
-    <!-- no translation found for bugreport_title (2667494803742548533) -->
-    <skip />
-    <!-- no translation found for bugreport_message (398447048750350456) -->
-    <skip />
+    <string name="global_action_bug_report" msgid="7934010578922304799">"बग रिपोर्ट"</string>
+    <string name="bugreport_title" msgid="2667494803742548533">"बग रिपोर्ट प्राप्त करें"</string>
+    <string name="bugreport_message" msgid="398447048750350456">"ईमेल संदेश के रूप में भेजने के लिए, इसके द्वारा आपके उपकरण की वर्तमान स्थिति के बारे में जानकारी एकत्र की जाएगी. बग रिपोर्ट प्रारंभ करने से लेकर भेजने के लिए तैयार होने तक कुछ समय लगेगा; कृपया धैर्य रखें."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"मौन मोड"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"ध्‍वनि बंद है"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"ध्‍वनि चालू है"</string>
@@ -193,7 +190,7 @@
     <string name="permgrouplab_storage" msgid="1971118770546336966">"संग्रहण"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"USB संग्रहण में पहुंचें."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"SD कार्ड में पहुंचें."</string>
-    <string name="permlab_statusBar" msgid="7417192629601890791">"स्‍थिति बार अक्षम या संशोधित करें"</string>
+    <string name="permlab_statusBar" msgid="7417192629601890791">"स्‍थिति बार अक्षम या बदलें"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"एप्लिकेशन को स्थिति बार अक्षम करने या सिस्‍टम आइकन को जोड़ने या निकालने देता है."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"स्‍थिति बार"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"एप्‍लिकेशन को स्‍थिति बार होने देता है."</string>
@@ -273,7 +270,7 @@
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"एप्लिकेशन को चलाई जाने वाली अधिकतम प्रक्रियाओं को नियंत्रित करने देता है. सामान्य एप्लिकेशन के लिए कभी आवश्यक नहीं होती."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"पृष्ठभूमि एप्‍लिकेशन को बलपूर्वक बंद करें"</string>
     <string name="permdesc_setAlwaysFinish" msgid="7471310652868841499">"एप्लिकेशन को यह नियंत्रित करने देता है कि पृष्ठभूमि में जाते ही गतिविधियां पूर्ण हो जाती है या नही. सामान्य एप्लिकेशन के लिए कभी आवश्यकता नहीं होती."</string>
-    <string name="permlab_batteryStats" msgid="7863923071360031652">"बैटरी आंकड़े संशोधित करें"</string>
+    <string name="permlab_batteryStats" msgid="7863923071360031652">"बैटरी आंकड़े बदलें"</string>
     <string name="permdesc_batteryStats" msgid="6835186932305744068">"एप्‍लिकेशन को बैटरी के संकलित आंकड़ों को संशोधित करने देता है. सामान्‍य एप्‍लिकेशन द्वारा उपयोग करने के लिए नहीं."</string>
     <string name="permlab_backup" msgid="470013022865453920">"सिस्‍टम बैकअप नियंत्रित और पुनर्स्‍थापित करें"</string>
     <string name="permdesc_backup" msgid="6912230525140589891">"एप्लिकेशन को सिस्टम के बैकअप को नियंत्रित और क्रियाविधि को पुर्नस्थापित करने देता है. सामान्‍य एप्‍लिकेशन द्वारा उपयोग करने के लिए नहीं."</string>
@@ -283,7 +280,7 @@
     <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"किसी एप्‍लिकेशन को ऐसी विंडो बनाने देता है जिनका उपयोग आंतरिक सिस्‍टम उपयोगकर्ता इंटरफ़ेस द्वारा किया जाना है. सामान्‍य एप्‍लिकेशन द्वारा उपयोग करने के लिए नहीं."</string>
     <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"अन्‍य एप्‍लिकेशन पर खींचें"</string>
     <string name="permdesc_systemAlertWindow" msgid="4460454022797261814">"एप्लिकेशन को सिस्टम अलर्ट विंडो प्रदर्शित करने देता है. कुछ अलर्ट विंडो संपूर्ण स्क्रीन को घेर सकते हैं."</string>
-    <string name="permlab_setAnimationScale" msgid="2805103241153907174">"वैश्विक एनिमेशन गति संशोधित करें"</string>
+    <string name="permlab_setAnimationScale" msgid="2805103241153907174">"वैश्विक एनिमेशन गति बदलें"</string>
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"एप्‍लिकेशन को किसी भी समय वैश्विक एनिमेशन गति (तेज़ या धीमे एनिमेशन) बदलने देता है."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"एप्‍लिकेशन टोकन प्रबंधित करें"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"एप्लिकेशन को उनके सामान्य Z-क्रमों पर न पहुंचते हुए उनके स्वयं के टोकन बनाने और प्रबंधित करने देता है. सामान्‍य एप्‍लिकेशन के लिए कभी भी आवश्‍यक नहीं होना चाहिए."</string>
@@ -346,11 +343,11 @@
     <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"एप्लिकेशन को उसके या अन्य एप्लिकेशन के लिए विशेष अनुमतियां देने या रद्द करने देता है. दुर्भावनापूर्ण एप्लिकेशन इसका उपयोग उन सुविधाओं तक पहुंचने के लिए कर सकते हैं जो आपने उन्हें नहीं दी हैं."</string>
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"पसंदीदा एप्‍लिकेशन सेट करें"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"एप्लिकेशन को आपके पसंदीदा एप्लिकेशन को संशोधित करने देता है. दुर्भावनापूर्ण एप्लिकेशन आपसे निजी डेटा एकत्रित करने के लिए आपके मौजूदा एप्लिकेशन को स्पूफ़ करके, चलाए जाने वाले एप्लिकेशन को चुपचाप बदल सकते हैं."</string>
-    <string name="permlab_writeSettings" msgid="2226195290955224730">"सिस्‍टम सेटिंग संशोधित करें"</string>
+    <string name="permlab_writeSettings" msgid="2226195290955224730">"सिस्‍टम सेटिंग बदलें"</string>
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"एप्लिकेशन को सिस्टम सेटिंग डेटा संशोधित करने देता है. दुर्भावनापूर्ण एप्लिकेशन आपके सिस्टम के कॉन्फ़िगरेशन को दूषित कर सकते हैं."</string>
-    <string name="permlab_writeSecureSettings" msgid="204676251876718288">"सुरक्षित सिस्‍टम सेटिंग संशोधित करें"</string>
+    <string name="permlab_writeSecureSettings" msgid="204676251876718288">"सुरक्षित सिस्‍टम सेटिंग बदलें"</string>
     <string name="permdesc_writeSecureSettings" msgid="8159535613020137391">"एप्लिकेशन को सिस्टम के सुरक्षित सेटिंग डेटा को संशोधित करने देता है. सामान्‍य एप्‍लिकेशन द्वारा उपयोग करने के लिए नहीं."</string>
-    <string name="permlab_writeGservices" msgid="2149426664226152185">"Google सेवाएं मैप संशोधित करें"</string>
+    <string name="permlab_writeGservices" msgid="2149426664226152185">"Google सेवाएं मैप बदलें"</string>
     <string name="permdesc_writeGservices" msgid="1287309437638380229">"एप्‍लिकेशन को Google सेवाओं का मानचित्र संशोधित करने देता है. सामान्‍य एप्‍लिकेशन द्वारा उपयोग करने के लिए नहीं."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"प्रारंभ होने पर चलाएं"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"एप्लिकेशन को सिस्टम द्वारा बूटिंग पूर्ण करते ही स्वतः आरंभ करने देता है. इससे टेबलेट को आरंभ होने में अधिक समय लग सकता है और एप्लिकेशन को निरंतर चलाकर संपूर्ण टेबलेट को धीमा करने देता है."</string>
@@ -361,7 +358,7 @@
     <string name="permlab_readContacts" msgid="8348481131899886131">"अपने संपर्क पढ़ें"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"एप्लिकेशन को आपके टेबलेट में संग्रहीत संपर्कों के डेटा को, साथ ही आपके द्वारा विशिष्ट व्यक्तियों को कॉल करने, ईमेल करने, या अन्‍य तरीके से संवाद करने की आवृत्ति को पढ़ने देता है. यह अनुमति एप्लिकेशन को आपके संपर्क डेटा को सहेजने देती है, और दुर्भावनापूर्ण एप्लिकेशन आपकी जानकारी के बिना संपर्क डेटा को साझा कर सकते हैं."</string>
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"एप्लिकेशन को आपके फ़ोन में संग्रहीत संपर्कों के डेटा को, साथ ही आपके द्वारा विशिष्ट व्यक्तियों को कॉल करने, ईमेल करने, या अन्‍य तरीके से संवाद करने की आवृत्ति को पढ़ने देता है. यह अनुमति एप्लिकेशन को आपके संपर्क डेटा को सहेजने देती है, और दुर्भावनापूर्ण एप्लिकेशन आपकी जानकारी के बिना संपर्क डेटा को साझा कर सकते हैं."</string>
-    <string name="permlab_writeContacts" msgid="5107492086416793544">"अपने संपर्क संशोधित करें"</string>
+    <string name="permlab_writeContacts" msgid="5107492086416793544">"अपने संपर्क बदलें"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"एप्लिकेशन को आपके टेबलेट में संग्रहीत संपर्कों के डेटा को, साथ ही आपके द्वारा विशिष्ट व्यक्तियों को कॉल करने, ईमेल करने, या अन्‍य तरीके से संवाद करने की आवृत्ति को संशोधित करने देता है. यह अनुमति एप्लिकेशन को आपके संपर्क डेटा को हटाने देती है."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"एप्लिकेशन को आपके फ़ोन में संग्रहीत संपर्कों के डेटा को, साथ ही आपके द्वारा विशिष्ट व्यक्तियों को कॉल करने, ईमेल करने, या अन्‍य तरीके से संवाद करने की आवृत्ति को संशोधित करने देता है. यह अनुमति एप्लिकेशन को आपके संपर्क डेटा को हटाने देती है."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"कॉल लॉग पढ़ें"</string>
@@ -372,7 +369,7 @@
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"एप्‍लिकेशन को इनकमिंग और आउटगोइंग कॉल के डेटा सहित, आपके फ़ोन का कॉल लॉग संशोधित करने देता है. दुर्भावनापूर्ण एप्‍लिकेशन आपके कॉल लॉग को मिटाने या संशोधित करने के लिए इसका उपयोग कर सकते हैं."</string>
     <string name="permlab_readProfile" msgid="4701889852612716678">"स्‍वयं का संपर्क कार्ड पढ़ें"</string>
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"एप्लिकेशन को आपके उपकरण में संग्रहीत व्यक्तिगत प्रोफ़ाइल जानकारी, जैसे आपका नाम और संपर्क जानकारी, पढ़ने देता है. इसका अर्थ है कि एप्लिकेशन आपको पहचान सकता है और आपकी प्रोफ़ाइल जानकारी अन्य लोगों को भेज सकता है."</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"स्‍वयं का संपर्क कार्ड संशोधित करें"</string>
+    <string name="permlab_writeProfile" msgid="907793628777397643">"स्‍वयं का संपर्क कार्ड बदलें"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"एप्लिकेशन को आपके उपकरण में संग्रहीत निजी प्रोफ़ाइल जानकारी, जैसे आपका नाम और संपर्क जानकारी को बदलने या उसमें कुछ जोड़ने देता है. इसका अर्थ है कि एप्लिकेशन आपको पहचान सकता है और आपकी प्रोफ़ाइल जानकारी अन्य लोगों को भेज सकता है."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"अपनी सामाजिक स्‍ट्रीम पढ़ें"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"एप्लिकेशन को आपके और आपके मित्रों के सामाजिक अपडेट तक पहुंचने और उन्हें समन्‍वयित करने देता है. जानकारी साझा करते समय सावधान रहें - इससे गोपनीयता पर ध्यान दिए बिना, एप्लिकेशन सामाजिक नेटवर्क पर आपके और आपके मित्रों के बीच संचारों को पढ़ सकता है. ध्‍यान दें: यह अनुमति सभी सामाजिक नेटवर्क पर लागू नहीं की जा सकती."</string>
@@ -452,7 +449,7 @@
     <string name="permdesc_checkinProperties" msgid="4024526968630194128">"एप्लिकेशन को चेकइन सेवा द्वारा अपलोड किए गए गुणों पर पढ़ें/लिखें पहुंच देता है. सामान्‍य एप्‍लिकेशन द्वारा उपयोग करने के लिए नहीं."</string>
     <string name="permlab_bindGadget" msgid="776905339015863471">"विजेट चुनें"</string>
     <string name="permdesc_bindGadget" msgid="8261326938599049290">"एप्लिकेशन को सिस्टम को यह बताने देता है कि किस एप्लिकेशन द्वारा कौन से विजेट का उपयोग किया जा सकता है. कोई एप्लिकेशन, इस अनुमति के साथ अन्य एप्लिकेशन के निजी डेटा पर पहुंच सकते हैं. सामान्‍य एप्‍लिकेशन द्वारा उपयोग करने के लिए नहीं."</string>
-    <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"फ़ोन स्‍थिति संशोधित करें"</string>
+    <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"फ़ोन स्‍थिति बदलें"</string>
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"एप्‍लिकेशन को उपकरण की फ़ोन सुविधाएं नियंत्रित करने देता है. इस अनुमति वाला कोई एप्‍लिकेशन आपको सूचित किए बिना नेटवर्क स्‍विच कर सकता है, फ़ोन का रेडियो चालू और बंद कर सकता है और ऐसे ही अन्य कार्य कर सकता है."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"फ़ोन की स्‍थिति और पहचान पढ़ें"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"एप्लिकेशन को उपकरण की फ़ोन सुविधाओं तक पहुंचने देता है. यह अनुमति एप्लिकेशन को फ़ोन नंबर और उपकरण आईडी, कॉल सक्रिय है या नहीं, और कॉल द्वारा कनेक्ट किया गया दूरस्‍थ नंबर निर्धारित करने देती है."</string>
@@ -542,11 +539,11 @@
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"संरक्ष‍ित संग्रहण पर पहुंच का परीक्षण करें"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="5791957130190763289">"एप्लि. को USB संग्रहण अनुमति जांचने देता है जो भावी उपकरणों में उपलब्‍ध होगा."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"एप्लिकेशन को SD कार्ड के लिए किसी अनुमति का परीक्षण करने देता है जो भविष्‍य के उपकरणों में उपलब्‍ध होगा."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"अपने USB संग्रहण की सामग्री संशोधित करें या हटाएं"</string>
-    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"अपने SD कार्ड की सामग्री संशोधित करें या हटाएं"</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"अपने USB संग्रहण की सामग्री बदलें या हटाएं"</string>
+    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"अपने SD कार्ड की सामग्री बदलें या हटाएं"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"एप्लि. को USB संग्रहण में लिखने देता है."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"एप्लिकेशन को SD कार्ड पर लिखने देता है."</string>
-    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"आंतरिक मीडिया संग्रहण सामग्रियों को संशोधित करें/हटाएं"</string>
+    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"आंतरिक मीडिया संग्रहण सामग्रियों को बदलें/हटाएं"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"एप्लिकेशन को आंतरिक मीडिया संग्रहण की सामग्री को संशोधित करने देता है."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"कैश फ़ाइल सिस्‍टम में पहंचे"</string>
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"एप्‍लिकेशन को संचय फ़ाइल सिस्‍टम पढ़ने और लिखने देता है."</string>
@@ -556,7 +553,7 @@
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"किसी एप्लिकेशन को विशिष्ट नेटवर्क और एप्‍लिकेशन के लिए ऐतिहासिक नेटवर्क उपयोग को पढ़ने देता है."</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"नेटवर्क नीति प्रबंधित करें"</string>
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"एप्‍लिकेशन को नेटवर्क नीतियां प्रबंधित करने और एप्‍लिकेशन-विशिष्‍ट नियमों को परिभाषित करने देता है."</string>
-    <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"नेटवर्क उपयोग हिसाब संशोधित करें"</string>
+    <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"नेटवर्क उपयोग हिसाब बदलें"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"एप्लिकेशन को यह संशोधित करने देता है कि एप्‍लिकेशन की तुलना में नेटवर्क उपयोग का मूल्यांकन कैसे किया जाता है. सामान्‍य एप्‍लिकेशन द्वारा उपयोग करने के लिए नहीं."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"पासवर्ड नियम सेट करें"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"स्‍क्रीन-अनलॉक पासवर्ड में अनुमति प्राप्त लंबाई और वर्णों को नियंत्रित करें."</string>
@@ -776,7 +773,7 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"रीबूट करें"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"\'<xliff:g id="TITLE">%s</xliff:g>\' पर यह पृष्ठ दर्शाता है:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
-    <string name="js_dialog_before_unload" msgid="730366588032430474">"इस पृष्ठ से दूर नेविगेट करें?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"जारी रखने के लिए ठीक का चयन करें, या वर्तमान पृष्ठ पर रहने के लिए रद्द करें का चयन करें."</string>
+    <string name="js_dialog_before_unload" msgid="730366588032430474">"इस पृष्ठ से दूर नेविगेट करें?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"जारी रखने के लिए ठीक को चुनें, या वर्तमान पृष्ठ पर रहने के लिए रद्द करें को चुनें."</string>
     <string name="save_password_label" msgid="6860261758665825069">"पुष्टि करें"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"युक्ति: ज़ूम इन और आउट करने के लिए डबल-टैप करें."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"स्‍वत: भरण"</string>
@@ -806,7 +803,7 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"एप्‍लिकेशन को इंस्‍टॉल किए गए अलार्म घड़ी एप्‍लिकेशन में अलार्म सेट करने देता है. हो सकता है कुछ अलार्म घड़ी एप्‍लिकेशन में यह सुविधा न हो."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"ध्‍वनिमेल जोड़ें"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"एप्लिकेशन को आपके ध्‍वनिमेल इनबॉक्‍स में संदेश जोड़ने देता है."</string>
-    <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"ब्राउज़र भौगोलिक-स्थान अनुमतियों को संशोधित करें"</string>
+    <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"ब्राउज़र भौगोलिक-स्थान अनुमतियों को बदलें"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"एप्‍लिकेशन को ब्राउज़र के भौगोलिक-स्‍थान की अनुमतियां संशोधित करने देता है. दुर्भावनापूर्ण एप्‍लिकेशन इसका उपयोग एकपक्षीय वेबसाइट को स्‍थान जानकारी भेजने में कर सकते हैं."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"पैकेज सत्‍यापि‍त करें"</string>
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"एप्‍लि‍केशन को इंस्‍टॉल करने योग्‍य पैकेज सत्‍यापि‍त करने देता है."</string>
@@ -935,14 +932,14 @@
     <string name="Midnight" msgid="5630806906897892201">"मध्‍यरात्रि"</string>
     <string name="elapsed_time_short_format_mm_ss" msgid="4431555943828711473">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss" msgid="1846071997616654124">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
-    <string name="selectAll" msgid="6876518925844129331">"सभी का चयन करें"</string>
+    <string name="selectAll" msgid="6876518925844129331">"सभी को चुनें"</string>
     <string name="cut" msgid="3092569408438626261">"काटें"</string>
     <string name="copy" msgid="2681946229533511987">"प्रतिलिपि बनाएं"</string>
     <string name="paste" msgid="5629880836805036433">"चिपकाएं"</string>
     <string name="replace" msgid="5781686059063148930">"बदलें•"</string>
     <string name="delete" msgid="6098684844021697789">"हटाएं"</string>
     <string name="copyUrl" msgid="2538211579596067402">"URL की प्रतिलिपि बनाएं"</string>
-    <string name="selectTextMode" msgid="1018691815143165326">"पाठ का चयन करें"</string>
+    <string name="selectTextMode" msgid="1018691815143165326">"पाठ को चुनें"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"पाठ चयन"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"शब्दकोश में जोड़ें"</string>
     <string name="deleteText" msgid="6979668428458199034">"हटाएं"</string>
@@ -996,7 +993,7 @@
     <string name="old_app_description" msgid="2082094275580358049">"नया एप्‍लिकेशन प्रारंभ न करें."</string>
     <string name="new_app_action" msgid="5472756926945440706">"<xliff:g id="OLD_APP">%1$s</xliff:g> प्रारंभ करें"</string>
     <string name="new_app_description" msgid="1932143598371537340">"पुराने एप्‍लिकेशन को बिना सहेजे बंद करें."</string>
-    <string name="sendText" msgid="5209874571959469142">"पाठ के लिए किसी क्रिया का चयन करें"</string>
+    <string name="sendText" msgid="5209874571959469142">"पाठ के लिए किसी क्रिया को चुनें"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"रिंगर वॉल्‍यूम"</string>
     <string name="volume_music" msgid="5421651157138628171">"मीडिया वॉल्‍यूम"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Bluetooth द्वारा चलाया जा रहा है"</string>
@@ -1106,7 +1103,7 @@
     <string name="configure_input_methods" msgid="9091652157722495116">"इनपुट पद्धतियां सेट करें"</string>
     <string name="use_physical_keyboard" msgid="6203112478095117625">"भौतिक कीबोर्ड"</string>
     <string name="hardware" msgid="7517821086888990278">"हार्डवेयर"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"कीबोर्ड लेआउट का चयन करें"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"कीबोर्ड लेआउट को चुनें"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"कीबोर्ड लेआउट का चयन करने के लिए स्‍पर्श करें."</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
