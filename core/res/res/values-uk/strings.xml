@@ -154,12 +154,9 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Параметри телеф."</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Заблок. екран"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Вимкнути"</string>
-    <!-- no translation found for global_action_bug_report (7934010578922304799) -->
-    <skip />
-    <!-- no translation found for bugreport_title (2667494803742548533) -->
-    <skip />
-    <!-- no translation found for bugreport_message (398447048750350456) -->
-    <skip />
+    <string name="global_action_bug_report" msgid="7934010578922304799">"Звіт про помилки"</string>
+    <string name="bugreport_title" msgid="2667494803742548533">"Зробити звіт про помилки"</string>
+    <string name="bugreport_message" msgid="398447048750350456">"Збиратиметься інформація про поточний стан вашого пристрою для подальшого надсилання електронною поштою. Від початку створення звіту про помилки до його повної готовності для надсилання потрібен певний час, тож будьте терплячими."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Беззвуч. режим"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Звук ВИМК."</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Звук УВІМК."</string>
