@@ -154,12 +154,9 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Opciones de dispositivo"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Bloqueo de pantalla"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Apagar"</string>
-    <!-- no translation found for global_action_bug_report (7934010578922304799) -->
-    <skip />
-    <!-- no translation found for bugreport_title (2667494803742548533) -->
-    <skip />
-    <!-- no translation found for bugreport_message (398447048750350456) -->
-    <skip />
+    <string name="global_action_bug_report" msgid="7934010578922304799">"Informe de errores"</string>
+    <string name="bugreport_title" msgid="2667494803742548533">"Iniciar informe de errores"</string>
+    <string name="bugreport_message" msgid="398447048750350456">"Se recopilará información sobre el estado actual de tu dispositivo, que se enviará por correo. Pasarán unos minutos desde que se inicie el informe de errores hasta que se envíe, por lo que te recomendamos que tengas paciencia."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Modo silencioso"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"El sonido está Desactivado"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"El sonido está Activado"</string>
@@ -226,7 +223,7 @@
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"Interactuar con los usuarios"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Permite que la aplicación lleve a cabo acciones entre los diferentes usuarios del dispositivo. Las aplicaciones maliciosas pueden utilizar este permiso para infringir la protección entre usuarios."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"Licencia completa para interactuar con los usuarios"</string>
-    <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Permite que la aplicación interactúe con los usuarios."</string>
+    <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Permite todas las interacciones posibles con los usuarios."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"recuperar información sobre las aplicaciones en ejecución"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Permite que la aplicación recupere información detallada sobre tareas en ejecución y recientemente ejecutadas. Las aplicaciones malintencionadas pueden hallar información privada sobre otras aplicaciones."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"reorganizar aplicaciones en ejecución"</string>
