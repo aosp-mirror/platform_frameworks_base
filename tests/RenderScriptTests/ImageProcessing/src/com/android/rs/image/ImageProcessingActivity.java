@@ -161,6 +161,12 @@ public class ImageProcessingActivity extends Activity
         case 12:
             mTest = new Vignette(true, true);
             break;
+        case 13:
+            mTest = new GroupTest(true);
+            break;
+        case 14:
+            mTest = new GroupTest(false);
+            break;
         }
 
         mTest.createBaseTest(this, mBitmapIn);
@@ -173,7 +179,7 @@ public class ImageProcessingActivity extends Activity
     }
 
     void setupTests() {
-        mTestNames = new String[13];
+        mTestNames = new String[15];
         mTestNames[0] = "Levels Vec3 Relaxed";
         mTestNames[1] = "Levels Vec4 Relaxed";
         mTestNames[2] = "Levels Vec3 Full";
@@ -187,6 +193,8 @@ public class ImageProcessingActivity extends Activity
         mTestNames[10] = "Vignette Relaxed";
         mTestNames[11] = "Vignette Approximate Full";
         mTestNames[12] = "Vignette Approximate Relaxed";
+        mTestNames[13] = "Group Test (emulated)";
+        mTestNames[14] = "Group Test (native)";
         mTestSpinner.setAdapter(new ArrayAdapter<String>(
             this, R.layout.spinner_layout, mTestNames));
     }
