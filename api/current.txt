@@ -10451,7 +10451,7 @@ package android.location {
     field public static final android.os.Parcelable.Creator CREATOR;
   }
 
-  public class Criteria implements android.os.Parcelable {
+  public deprecated class Criteria implements android.os.Parcelable {
     ctor public Criteria();
     ctor public Criteria(android.location.Criteria);
     method public int describeContents();
@@ -10497,6 +10497,13 @@ package android.location {
     method public static boolean isPresent();
   }
 
+  public final class Geofence implements android.os.Parcelable {
+    method public static android.location.Geofence createCircle(double, double, float);
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
   public final class GpsSatellite {
     method public float getAzimuth();
     method public float getElevation();
@@ -10534,7 +10541,7 @@ package android.location {
     method public int describeContents();
     method public static void distanceBetween(double, double, double, double, float[]);
     method public float distanceTo(android.location.Location);
-    method public void dump(android.util.Printer, java.lang.String);
+    method public deprecated void dump(android.util.Printer, java.lang.String);
     method public float getAccuracy();
     method public double getAltitude();
     method public float getBearing();
@@ -10582,63 +10589,94 @@ package android.location {
   public class LocationManager {
     method public boolean addGpsStatusListener(android.location.GpsStatus.Listener);
     method public boolean addNmeaListener(android.location.GpsStatus.NmeaListener);
-    method public void addProximityAlert(double, double, float, long, android.app.PendingIntent);
-    method public void addTestProvider(java.lang.String, boolean, boolean, boolean, boolean, boolean, boolean, boolean, int, int);
-    method public void clearTestProviderEnabled(java.lang.String);
-    method public void clearTestProviderLocation(java.lang.String);
-    method public void clearTestProviderStatus(java.lang.String);
-    method public java.util.List<java.lang.String> getAllProviders();
-    method public java.lang.String getBestProvider(android.location.Criteria, boolean);
+    method public deprecated void addProximityAlert(double, double, float, long, android.app.PendingIntent);
+    method public deprecated void addTestProvider(java.lang.String, boolean, boolean, boolean, boolean, boolean, boolean, boolean, int, int);
+    method public deprecated void clearTestProviderEnabled(java.lang.String);
+    method public deprecated void clearTestProviderLocation(java.lang.String);
+    method public deprecated void clearTestProviderStatus(java.lang.String);
+    method public deprecated java.util.List<java.lang.String> getAllProviders();
+    method public deprecated java.lang.String getBestProvider(android.location.Criteria, boolean);
     method public android.location.GpsStatus getGpsStatus(android.location.GpsStatus);
-    method public android.location.Location getLastKnownLocation(java.lang.String);
-    method public android.location.LocationProvider getProvider(java.lang.String);
-    method public java.util.List<java.lang.String> getProviders(boolean);
-    method public java.util.List<java.lang.String> getProviders(android.location.Criteria, boolean);
-    method public boolean isProviderEnabled(java.lang.String);
+    method public deprecated android.location.Location getLastKnownLocation(java.lang.String);
+    method public deprecated android.location.Location getLastKnownLocation(android.location.Criteria);
+    method public android.location.Location getLastLocation(android.location.LocationRequest);
+    method public deprecated android.location.LocationProvider getProvider(java.lang.String);
+    method public deprecated java.util.List<java.lang.String> getProviders(boolean);
+    method public deprecated java.util.List<java.lang.String> getProviders(android.location.Criteria, boolean);
+    method public deprecated boolean isProviderEnabled(java.lang.String);
+    method public void removeAllGeofences(android.app.PendingIntent);
+    method public void removeGeofence(android.location.Geofence, android.app.PendingIntent);
     method public void removeGpsStatusListener(android.location.GpsStatus.Listener);
     method public void removeNmeaListener(android.location.GpsStatus.NmeaListener);
-    method public void removeProximityAlert(android.app.PendingIntent);
-    method public void removeTestProvider(java.lang.String);
+    method public deprecated void removeProximityAlert(android.app.PendingIntent);
+    method public deprecated void removeTestProvider(java.lang.String);
     method public void removeUpdates(android.location.LocationListener);
     method public void removeUpdates(android.app.PendingIntent);
-    method public void requestLocationUpdates(java.lang.String, long, float, android.location.LocationListener);
-    method public void requestLocationUpdates(java.lang.String, long, float, android.location.LocationListener, android.os.Looper);
-    method public void requestLocationUpdates(long, float, android.location.Criteria, android.location.LocationListener, android.os.Looper);
-    method public void requestLocationUpdates(java.lang.String, long, float, android.app.PendingIntent);
-    method public void requestLocationUpdates(long, float, android.location.Criteria, android.app.PendingIntent);
-    method public void requestSingleUpdate(java.lang.String, android.location.LocationListener, android.os.Looper);
-    method public void requestSingleUpdate(android.location.Criteria, android.location.LocationListener, android.os.Looper);
-    method public void requestSingleUpdate(java.lang.String, android.app.PendingIntent);
-    method public void requestSingleUpdate(android.location.Criteria, android.app.PendingIntent);
-    method public boolean sendExtraCommand(java.lang.String, java.lang.String, android.os.Bundle);
-    method public void setTestProviderEnabled(java.lang.String, boolean);
-    method public void setTestProviderLocation(java.lang.String, android.location.Location);
-    method public void setTestProviderStatus(java.lang.String, int, android.os.Bundle, long);
-    field public static final java.lang.String GPS_PROVIDER = "gps";
+    method public void requestGeofence(android.location.LocationRequest, android.location.Geofence, android.app.PendingIntent);
+    method public deprecated void requestLocationUpdates(java.lang.String, long, float, android.location.LocationListener);
+    method public deprecated void requestLocationUpdates(java.lang.String, long, float, android.location.LocationListener, android.os.Looper);
+    method public deprecated void requestLocationUpdates(long, float, android.location.Criteria, android.location.LocationListener, android.os.Looper);
+    method public deprecated void requestLocationUpdates(java.lang.String, long, float, android.app.PendingIntent);
+    method public deprecated void requestLocationUpdates(long, float, android.location.Criteria, android.app.PendingIntent);
+    method public void requestLocationUpdates(android.location.LocationRequest, android.location.LocationListener, android.os.Looper);
+    method public void requestLocationUpdates(android.location.LocationRequest, android.app.PendingIntent);
+    method public deprecated void requestSingleUpdate(java.lang.String, android.location.LocationListener, android.os.Looper);
+    method public deprecated void requestSingleUpdate(android.location.Criteria, android.location.LocationListener, android.os.Looper);
+    method public deprecated void requestSingleUpdate(java.lang.String, android.app.PendingIntent);
+    method public deprecated void requestSingleUpdate(android.location.Criteria, android.app.PendingIntent);
+    method public deprecated boolean sendExtraCommand(java.lang.String, java.lang.String, android.os.Bundle);
+    method public deprecated void setTestProviderEnabled(java.lang.String, boolean);
+    method public deprecated void setTestProviderLocation(java.lang.String, android.location.Location);
+    method public deprecated void setTestProviderStatus(java.lang.String, int, android.os.Bundle, long);
+    field public static final deprecated java.lang.String GPS_PROVIDER = "gps";
     field public static final java.lang.String KEY_LOCATION_CHANGED = "location";
-    field public static final java.lang.String KEY_PROVIDER_ENABLED = "providerEnabled";
+    field public static final deprecated java.lang.String KEY_PROVIDER_ENABLED = "providerEnabled";
     field public static final java.lang.String KEY_PROXIMITY_ENTERING = "entering";
-    field public static final java.lang.String KEY_STATUS_CHANGED = "status";
-    field public static final java.lang.String NETWORK_PROVIDER = "network";
-    field public static final java.lang.String PASSIVE_PROVIDER = "passive";
-    field public static final java.lang.String PROVIDERS_CHANGED_ACTION = "android.location.PROVIDERS_CHANGED";
+    field public static final deprecated java.lang.String KEY_STATUS_CHANGED = "status";
+    field public static final deprecated java.lang.String NETWORK_PROVIDER = "network";
+    field public static final deprecated java.lang.String PASSIVE_PROVIDER = "passive";
+    field public static final deprecated java.lang.String PROVIDERS_CHANGED_ACTION = "android.location.PROVIDERS_CHANGED";
   }
 
-  public abstract class LocationProvider {
-    method public abstract int getAccuracy();
+  public deprecated class LocationProvider {
+    method public int getAccuracy();
     method public java.lang.String getName();
-    method public abstract int getPowerRequirement();
-    method public abstract boolean hasMonetaryCost();
+    method public int getPowerRequirement();
+    method public boolean hasMonetaryCost();
     method public boolean meetsCriteria(android.location.Criteria);
-    method public abstract boolean requiresCell();
-    method public abstract boolean requiresNetwork();
-    method public abstract boolean requiresSatellite();
-    method public abstract boolean supportsAltitude();
-    method public abstract boolean supportsBearing();
-    method public abstract boolean supportsSpeed();
+    method public boolean requiresCell();
+    method public boolean requiresNetwork();
+    method public boolean requiresSatellite();
+    method public boolean supportsAltitude();
+    method public boolean supportsBearing();
+    method public boolean supportsSpeed();
     field public static final int AVAILABLE = 2; // 0x2
     field public static final int OUT_OF_SERVICE = 0; // 0x0
     field public static final int TEMPORARILY_UNAVAILABLE = 1; // 0x1
+  }
+
+  public final class LocationRequest implements android.os.Parcelable {
+    method public static android.location.LocationRequest create();
+    method public int describeContents();
+    method public long getExpireAt();
+    method public long getFastestInterval();
+    method public long getInterval();
+    method public int getNumUpdates();
+    method public int getQuality();
+    method public android.location.LocationRequest setExpireAt(long);
+    method public android.location.LocationRequest setExpireIn(long);
+    method public android.location.LocationRequest setFastestInterval(long);
+    method public android.location.LocationRequest setInterval(long);
+    method public android.location.LocationRequest setNumUpdates(int);
+    method public android.location.LocationRequest setQuality(int);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final int ACCURACY_BLOCK = 102; // 0x66
+    field public static final int ACCURACY_CITY = 104; // 0x68
+    field public static final int ACCURACY_FINE = 100; // 0x64
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final int POWER_HIGH = 203; // 0xcb
+    field public static final int POWER_LOW = 201; // 0xc9
+    field public static final int POWER_NONE = 200; // 0xc8
   }
 
 }

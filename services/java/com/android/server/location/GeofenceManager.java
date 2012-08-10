@@ -25,47 +25,36 @@ import android.Manifest.permission;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.location.Geofence;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.location.LocationRequest;
 import android.os.Bundle;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.SystemClock;
 
 public class GeofenceManager implements LocationListener, PendingIntent.OnFinished {
-    static final String TAG = "GeofenceManager";
+    private static final String TAG = "GeofenceManager";
 
     /**
      * Assume a maximum land speed, as a heuristic to throttle location updates.
      * (Air travel should result in an airplane mode toggle which will
      * force a new location update anyway).
      */
-    static final int MAX_SPEED_M_S = 100;  // 360 km/hr (high speed train)
+    private static final int MAX_SPEED_M_S = 100;  // 360 km/hr (high speed train)
 
-    class GeofenceWrapper {
-        final Geofence fence;
-        final long expiry;
-        final String packageName;
-        final PendingIntent intent;
+    private final Context mContext;
+    private final LocationManager mLocationManager;
+    private final PowerManager.WakeLock mWakeLock;
+    private final Looper mLooper;  // looper thread to take location updates on
 
-        public GeofenceWrapper(Geofence fence, long expiry, String packageName,
-                PendingIntent intent) {
-            this.fence = fence;
-            this.expiry = expiry;
-            this.packageName = packageName;
-            this.intent = intent;
-        }
-    }
+    private Object mLock = new Object();
 
-    final Context mContext;
-    final LocationManager mLocationManager;
-    final PowerManager.WakeLock mWakeLock;
-    final Looper mLooper;  // looper thread to take location updates on
-
-    // access to members below is synchronized on this
-    Location mLastLocation;
-    List<GeofenceWrapper> mFences = new LinkedList<GeofenceWrapper>();
+    // access to members below is synchronized on mLock
+    private Location mLastLocation;
+    private List<GeofenceState> mFences = new LinkedList<GeofenceState>();
 
     public GeofenceManager(Context context) {
         mContext = context;
@@ -73,82 +62,98 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
         PowerManager powerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
         mLooper = Looper.myLooper();
-        mLocationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, 0, 0, this);
+
+        LocationRequest request = new LocationRequest()
+                .setQuality(LocationRequest.POWER_NONE)
+                .setFastestInterval(0);
+        mLocationManager.requestLocationUpdates(request, this, Looper.myLooper());
     }
 
-    public void addFence(double latitude, double longitude, float radius, long expiration,
-            PendingIntent intent, int uid, String packageName) {
-        long expiry = SystemClock.elapsedRealtime() + expiration;
-        if (expiration < 0) {
-            expiry = Long.MAX_VALUE;
-        }
-        Geofence fence = new Geofence(latitude, longitude, radius, mLastLocation);
-        GeofenceWrapper fenceWrapper = new GeofenceWrapper(fence, expiry, packageName, intent);
+    public void addFence(LocationRequest request, Geofence geofence, PendingIntent intent, int uid,
+            String packageName) {
+        GeofenceState state = new GeofenceState(geofence, mLastLocation,
+                request.getExpireAt(), packageName, intent);
 
-        synchronized (this) {
-            mFences.add(fenceWrapper);
-            updateProviderRequirements();
-        }
-    }
-
-    public void removeFence(PendingIntent intent) {
-        synchronized (this) {
-            Iterator<GeofenceWrapper> iter = mFences.iterator();
-            while (iter.hasNext()) {
-                GeofenceWrapper fenceWrapper = iter.next();
-                if (fenceWrapper.intent.equals(intent)) {
-                    iter.remove();
+        synchronized (mLock) {
+            // first make sure it doesn't already exist
+            for (int i = mFences.size() - 1; i >= 0; i--) {
+                GeofenceState w = mFences.get(i);
+                if (geofence.equals(w.mFence) && intent.equals(w.mIntent)) {
+                    // already exists, remove the old one
+                    mFences.remove(i);
+                    break;
                 }
             }
-            updateProviderRequirements();
+            mFences.add(state);
+            updateProviderRequirementsLocked();
+        }
+    }
+
+    public void removeFence(Geofence fence, PendingIntent intent) {
+        synchronized (mLock) {
+            Iterator<GeofenceState> iter = mFences.iterator();
+            while (iter.hasNext()) {
+                GeofenceState state = iter.next();
+                if (state.mIntent.equals(intent)) {
+
+                    if (fence == null) {
+                        // alwaus remove
+                        iter.remove();
+                    } else {
+                        // just remove matching fences
+                        if (fence.equals(state.mFence)) {
+                            iter.remove();
+                        }
+                    }
+                }
+            }
+            updateProviderRequirementsLocked();
         }
     }
 
     public void removeFence(String packageName) {
-        synchronized (this) {
-            Iterator<GeofenceWrapper> iter = mFences.iterator();
+        synchronized (mLock) {
+            Iterator<GeofenceState> iter = mFences.iterator();
             while (iter.hasNext()) {
-                GeofenceWrapper fenceWrapper = iter.next();
-                if (fenceWrapper.packageName.equals(packageName)) {
+                GeofenceState state = iter.next();
+                if (state.mPackageName.equals(packageName)) {
                     iter.remove();
                 }
             }
-            updateProviderRequirements();
+            updateProviderRequirementsLocked();
         }
     }
 
-    void removeExpiredFences() {
-        synchronized (this) {
-            long time = SystemClock.elapsedRealtime();
-            Iterator<GeofenceWrapper> iter = mFences.iterator();
-            while (iter.hasNext()) {
-                GeofenceWrapper fenceWrapper = iter.next();
-                if (fenceWrapper.expiry < time) {
-                    iter.remove();
-                }
+    private void removeExpiredFencesLocked() {
+        long time = SystemClock.elapsedRealtime();
+        Iterator<GeofenceState> iter = mFences.iterator();
+        while (iter.hasNext()) {
+            GeofenceState state = iter.next();
+            if (state.mExpireAt < time) {
+                iter.remove();
             }
         }
     }
 
-    void processLocation(Location location) {
+    private void processLocation(Location location) {
         List<PendingIntent> enterIntents = new LinkedList<PendingIntent>();
         List<PendingIntent> exitIntents = new LinkedList<PendingIntent>();
 
-        synchronized (this) {
+        synchronized (mLock) {
             mLastLocation = location;
 
-            removeExpiredFences();
+            removeExpiredFencesLocked();
 
-            for (GeofenceWrapper fenceWrapper : mFences) {
-                int event = fenceWrapper.fence.processLocation(location);
-                if ((event & Geofence.FLAG_ENTER) != 0) {
-                    enterIntents.add(fenceWrapper.intent);
+            for (GeofenceState state : mFences) {
+                int event = state.processLocation(location);
+                if ((event & GeofenceState.FLAG_ENTER) != 0) {
+                    enterIntents.add(state.mIntent);
                 }
-                if ((event & Geofence.FLAG_EXIT) != 0) {
-                    exitIntents.add(fenceWrapper.intent);
+                if ((event & GeofenceState.FLAG_EXIT) != 0) {
+                    exitIntents.add(state.mIntent);
                 }
             }
-            updateProviderRequirements();
+            updateProviderRequirementsLocked();
         }
 
         // release lock before sending intents
@@ -160,52 +165,50 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
         }
     }
 
-    void sendIntentEnter(PendingIntent pendingIntent) {
+    private void sendIntentEnter(PendingIntent pendingIntent) {
         Intent intent = new Intent();
         intent.putExtra(LocationManager.KEY_PROXIMITY_ENTERING, true);
         sendIntent(pendingIntent, intent);
     }
 
-    void sendIntentExit(PendingIntent pendingIntent) {
+    private void sendIntentExit(PendingIntent pendingIntent) {
         Intent intent = new Intent();
         intent.putExtra(LocationManager.KEY_PROXIMITY_ENTERING, false);
         sendIntent(pendingIntent, intent);
     }
 
-    void sendIntent(PendingIntent pendingIntent, Intent intent) {
+    private void sendIntent(PendingIntent pendingIntent, Intent intent) {
         try {
             mWakeLock.acquire();
             pendingIntent.send(mContext, 0, intent, this, null, permission.ACCESS_FINE_LOCATION);
         } catch (PendingIntent.CanceledException e) {
-            removeFence(pendingIntent);
+            removeFence(null, pendingIntent);
             mWakeLock.release();
         }
     }
 
-    void updateProviderRequirements() {
-        synchronized (this) {
-            double minDistance = Double.MAX_VALUE;
-            for (GeofenceWrapper alert : mFences) {
-                if (alert.fence.getDistance() < minDistance) {
-                    minDistance = alert.fence.getDistance();
-                }
+    private void updateProviderRequirementsLocked() {
+        double minDistance = Double.MAX_VALUE;
+        for (GeofenceState state : mFences) {
+            if (state.getDistance() < minDistance) {
+                minDistance = state.getDistance();
             }
+        }
 
-            if (minDistance == Double.MAX_VALUE) {
-                disableLocation();
-            } else {
-                int intervalMs = (int)(minDistance * 1000) / MAX_SPEED_M_S;
-                setLocationInterval(intervalMs);
-            }
+        if (minDistance == Double.MAX_VALUE) {
+            disableLocationLocked();
+        } else {
+            int intervalMs = (int)(minDistance * 1000) / MAX_SPEED_M_S;
+            requestLocationLocked(intervalMs);
         }
     }
 
-    void setLocationInterval(int intervalMs) {
-        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, intervalMs, 0, this,
+    private void requestLocationLocked(int intervalMs) {
+        mLocationManager.requestLocationUpdates(new LocationRequest().setInterval(intervalMs), this,
                 mLooper);
     }
 
-    void disableLocation() {
+    private void disableLocationLocked() {
         mLocationManager.removeUpdates(this);
     }
 
@@ -231,11 +234,12 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
 
     public void dump(PrintWriter pw) {
         pw.println("  Geofences:");
-        for (GeofenceWrapper fenceWrapper : mFences) {
+
+        for (GeofenceState state : mFences) {
             pw.append("    ");
-            pw.append(fenceWrapper.packageName);
+            pw.append(state.mPackageName);
             pw.append(" ");
-            pw.append(fenceWrapper.fence.toString());
+            pw.append(state.mFence.toString());
             pw.append("\n");
         }
     }

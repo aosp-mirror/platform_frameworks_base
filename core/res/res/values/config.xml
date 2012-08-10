@@ -592,11 +592,30 @@
     <!-- True if WallpaperService is enabled -->
     <bool name="config_enableWallpaperService">true</bool>
 
-    <!-- Package name providing network location support. -->
-    <string name="config_networkLocationProviderPackageName" translatable="false">@null</string>
+    <!-- Package name(s) containing location provider support.
+         These packages can contain services implementing location providers,
+         such as the Geocode Provider, Network Location Provider, and
+         Fused Location Provider. They will each be searched for
+         service components implementing these providers.
+         It is strongly recommended that the packages explicitly named
+         below are on the system image, so that they will not map to
+         a 3rd party application.
+         The location framework also has support for installation
+         of new location providers at run-time. The new package does not
+         have to be explicitly listed here, however it must have a signature
+         that matches the signature of at least one package on this list.
+         Platforms should overlay additional packages in
+         config_overlay_locationProviderPackageNames, instead of overlaying
+         this config, if they only want to append packages and not replace
+         the entire array.
+         -->
+    <string-array name="config_locationProviderPackageNames" translatable="false">
+        <item>com.android.location.fused</item>
+    </string-array>
 
-    <!-- Package name providing geocoder API support. -->
-    <string name="config_geocodeProviderPackageName" translatable="false">@null</string>
+    <!-- Pacakge name(s) supplied by overlay, and appended to
+         config_locationProviderPackageNames. -->
+    <string-array name="config_overlay_locationProviderPackageNames" translatable="false" />
 
     <!-- Boolean indicating if current platform supports bluetooth SCO for off call
     use cases -->
