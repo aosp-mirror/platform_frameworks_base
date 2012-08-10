@@ -88,13 +88,14 @@ Emulator 2, adb: 5557 ...
 	<li>Serial number &mdash; A string created by adb to uniquely identify an emulator/device instance by its 
         console port number. The format of the serial number is <code>&lt;type&gt;-&lt;consolePort&gt;</code>. 
         Here's an example serial number: <code>emulator-5554</code></li>
-	<li>State &mdash; The connection state of the instance. Three states are supported: 
+	<li>State &mdash; The connection state of the instance may be one of the following:
 		<ul>
 		<li><code>offline</code> &mdash; the instance is not connected to adb or is not responding.</li>
 		<li><code>device</code> &mdash; the instance is now connected to the adb server. Note that this state does not 
                     imply that the Android system is fully booted and operational, since the instance connects to adb 
                     while the system is still booting. However, after boot-up, this is the normal operational state of 
                     an emulator/device instance.</li>
+                <li><code>no device</code> &mdash; there is no emulator/device connected.
 		</ul>
 	</li>
 </ul>
@@ -111,7 +112,6 @@ emulator-5554&nbsp;&nbsp;device
 emulator-5556&nbsp;&nbsp;device
 emulator-5558&nbsp;&nbsp;device</pre>
 
-<p>If there is no emulator/device running, adb returns <code>no device</code>.</p>
 
 
 <a name="directingcommands"></a>

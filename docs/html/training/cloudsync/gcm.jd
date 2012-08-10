@@ -37,8 +37,7 @@ your server.</p>
 <p>This lesson covers some of the best practices
 for integrating GCM into your application, and assumes you are already familiar
 with basic implementation of this service.  If this is not the case, you can read the <a
-  href="http://developer.google.com/android/gcm/demo">GCM
-  Tutorial</a>.</p>
+  href="{@docRoot}guide/google/gcm/demo.html">GCM demo app tutorial</a>.</p>
 
 <h2 id="multicast">Send Multicast Messages Efficiently</h2>
 <p>One of the most useful features in GCM is support for up to 1,000 recipients for
