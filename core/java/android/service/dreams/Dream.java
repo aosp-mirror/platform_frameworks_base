@@ -70,7 +70,13 @@ public class Dream extends Service implements Window.Callback {
     // begin Window.Callback methods
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        if (!mInteractive) { 
+        // TODO: create more flexible version of mInteractive that allows use of KEYCODE_BACK
+        if (!mInteractive) {
+            if (DEBUG) Slog.v(TAG, "finishing on keyEvent");
+            finish();
+            return true;
+        } else if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+            if (DEBUG) Slog.v(TAG, "finishing on back key");
             finish();
             return true;
         }
@@ -80,6 +86,7 @@ public class Dream extends Service implements Window.Callback {
     @Override
     public boolean dispatchKeyShortcutEvent(KeyEvent event) {
         if (!mInteractive) { 
+            if (DEBUG) Slog.v(TAG, "finishing on keyShortcutEvent");
             finish();
             return true;
         }
@@ -88,7 +95,10 @@ public class Dream extends Service implements Window.Callback {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
+        // TODO: create more flexible version of mInteractive that allows clicks 
+        // but finish()es on any other kind of activity
         if (!mInteractive) { 
+            if (DEBUG) Slog.v(TAG, "finishing on touchEvent");
             finish();
             return true;
         }
@@ -97,7 +107,8 @@ public class Dream extends Service implements Window.Callback {
 
     @Override
     public boolean dispatchTrackballEvent(MotionEvent event) {
-        if (!mInteractive) { 
+        if (!mInteractive) {
+            if (DEBUG) Slog.v(TAG, "finishing on trackballEvent");
             finish();
             return true;
         }
@@ -107,6 +118,7 @@ public class Dream extends Service implements Window.Callback {
     @Override
     public boolean dispatchGenericMotionEvent(MotionEvent event) {
         if (!mInteractive) { 
+            if (DEBUG) Slog.v(TAG, "finishing on genericMotionEvent");
             finish();
             return true;
         }
