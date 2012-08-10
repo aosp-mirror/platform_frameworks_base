@@ -48,6 +48,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserId;
 import android.provider.Settings;
+import android.service.dreams.IDreamManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Slog;
@@ -153,6 +154,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     Display mDisplay;
 
     IWindowManager mWindowManager;
+    IDreamManager mDreamManager;
 
     StatusBarWindowView mStatusBarWindow;
     PhoneStatusBarView mStatusBarView;
@@ -301,6 +303,9 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         mWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
+
+        mDreamManager = IDreamManager.Stub.asInterface(
+                ServiceManager.checkService("dreams"));
 
         super.start(); // calls createAndAddWindows()
 
@@ -606,6 +611,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     private Runnable mShowSearchPanel = new Runnable() {
         public void run() {
             showSearchPanel();
+            awakenDreams();
         }
     };
 
@@ -622,11 +628,22 @@ public class PhoneStatusBar extends BaseStatusBar {
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 mHandler.removeCallbacks(mShowSearchPanel);
+                awakenDreams();
             break;
         }
         return false;
         }
     };
+
+    private void awakenDreams() {
+        if (mDreamManager != null) {
+            try {
+                mDreamManager.awaken();
+            } catch (RemoteException e) {
+                // fine, stay asleep then
+            }
+        }
+    }
 
     private void prepareNavigationBarView() {
         mNavigationBarView.reorient();
