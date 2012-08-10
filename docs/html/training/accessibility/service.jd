@@ -175,7 +175,7 @@ In that method, use {@link
 android.view.accessibility.AccessibilityEvent#getEventType} to determine the
 type of event, and {@link
 android.view.accessibility.AccessibilityEvent#getContentDescription} to extract
-any label text associated with the fiew that fired the event.</pre>
+any label text associated with the view that fired the event.</pre>
 
 <pre>
 &#64;Override

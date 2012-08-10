@@ -270,7 +270,7 @@ density.</p>
 
 <p>The density of a device's screen is based on the screen resolution, as defined by the number of
 dots per inch (dpi). There are three screen
-density categories supported by Android: low (ldpi), medium (mdpi), and high (mdpi). A screen
+density categories supported by Android: low (ldpi), medium (mdpi), and high (hdpi). A screen
 with low density has fewer available pixels per inch, whereas a screen with high density has more
 pixels per inch (compared to a medium density screen). The Android Browser and {@link
 android.webkit.WebView} target a medium density screen by default.</p>

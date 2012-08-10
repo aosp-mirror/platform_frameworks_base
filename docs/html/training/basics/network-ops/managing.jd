@@ -116,7 +116,7 @@ background data.</p>
 follows. The method {@link
 android.net.ConnectivityManager#getActiveNetworkInfo() getActiveNetworkInfo()}
 returns a {@link android.net.NetworkInfo} instance representing the first
-connected network interface it can find, or <code>null</code> if none if the
+connected network interface it can find, or <code>null</code> if none of the
 interfaces is connected (meaning that an
 internet connection is not available):</p>
 
