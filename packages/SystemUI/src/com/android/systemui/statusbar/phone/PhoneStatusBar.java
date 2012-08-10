@@ -2118,8 +2118,11 @@ public class PhoneStatusBar extends BaseStatusBar {
         updateCarrierLabelVisibility(false);
     }
 
+    // called by makeStatusbar and also by PhoneStatusBarView
     void updateDisplaySize() {
         mDisplay.getMetrics(mDisplayMetrics);
+        mGestureRec.tag("display", 
+                String.format("%dx%d", mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels));
     }
 
     void performDisableActions(int net) {
