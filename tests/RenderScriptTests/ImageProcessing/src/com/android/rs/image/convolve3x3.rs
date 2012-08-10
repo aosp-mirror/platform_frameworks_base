@@ -22,12 +22,7 @@ int32_t gWidth;
 int32_t gHeight;
 rs_allocation gIn;
 
-float gCoeffs[9] ;
-void setCoefficients(float coef[9]) {
-    for(int i=0; i < 9; i++) {
-        gCoeffs[i] = coef[i];
-    }
-}
+float gCoeffs[9];
 
 void root(uchar4 *out, uint32_t x, uint32_t y) {
     uint32_t x1 = min((int32_t)x+1, gWidth);
