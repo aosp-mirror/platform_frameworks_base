@@ -1912,6 +1912,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         setupDataActivityTracking(type);
 
+        setupDataActivityTracking(type);
+
         // snapshot isFailover, because sendConnectedBroadcast() resets it
         boolean isFailover = info.isFailover();
         final String thisIface = thisNet.getLinkProperties().getInterfaceName();
