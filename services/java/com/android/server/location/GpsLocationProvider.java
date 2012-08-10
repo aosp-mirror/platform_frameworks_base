@@ -81,8 +81,8 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
     private static final String TAG = "GpsLocationProvider";
 
-    private static final boolean DEBUG = false;
-    private static final boolean VERBOSE = false;
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
 
     // these need to match GpsPositionMode enum in gps.h
     private static final int GPS_POSITION_MODE_STANDALONE = 0;
