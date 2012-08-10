@@ -1259,7 +1259,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="TextAppearance.Holo.Small.Inverse">
-        <item name="android:textColor">?textColorPrimaryInverse</item>
+        <item name="android:textColor">?textColorSecondaryInverse</item>
         <item name="android:textColorHint">?textColorHintInverse</item>
         <item name="android:textColorHighlight">?textColorHighlightInverse</item>
         <item name="android:textColorLink">?textColorLinkInverse</item>
@@ -1392,6 +1392,13 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="TextAppearance.Holo.Widget.Switch" parent="TextAppearance.Holo.Small">
+        <!-- Switch thumb asset presents a dark background. -->
+        <item name="android:textColor">@android:color/secondary_text_holo_dark</item>
+    </style>
+
+    <style name="TextAppearance.Holo.Light.Widget.Switch" parent="TextAppearance.Holo.Small">
+        <!-- Switch thumb asset presents a dark background. -->
+        <item name="android:textColor">@android:color/primary_text_holo_dark</item>
     </style>
 
     <style name="TextAppearance.Holo.WindowTitle">
@@ -2317,7 +2324,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Holo.Light.CompoundButton.Switch" parent="Widget.CompoundButton.Switch">
         <item name="android:track">@android:drawable/switch_track_holo_light</item>
         <item name="android:thumb">@android:drawable/switch_inner_holo_light</item>
-        <item name="android:switchTextAppearance">@android:style/TextAppearance.Holo.Widget.Switch</item>
+        <item name="android:switchTextAppearance">@android:style/TextAppearance.Holo.Light.Widget.Switch</item>
         <item name="android:textOn">@android:string/capital_on</item>
         <item name="android:textOff">@android:string/capital_off</item>
         <item name="android:thumbTextPadding">12dip</item>
