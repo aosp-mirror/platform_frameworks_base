@@ -224,9 +224,9 @@
     <string name="permlab_getTasks" msgid="6466095396623933906">"检索正在运行的应用"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"允许该应用检索近期运行的和当前正在运行的任务的相关信息。此权限可让该应用了解设备上使用了哪些应用。"</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"用户间互动"</string>
-    <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"允许该应用在设备上跨不同用户执行操作。恶意应用可能会借此破坏用户之间的保护。"</string>
-    <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"完全允许用户之间进行互动"</string>
-    <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"允许用户之间进行所有可能的互动。"</string>
+    <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"允许该应用在设备上跨多个用户执行操作。恶意应用可能会借此破坏用户之间的保护措施。"</string>
+    <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"完全允许在用户之间进行互动"</string>
+    <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"允许在用户之间进行所有可能的互动。"</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"检索正在运行的应用的详细信息"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"允许该应用检索当前正在运行和近期运行的任务的详细信息。恶意应用可能会发现有关其他应用的私密信息。"</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"对正在运行的应用重新排序"</string>

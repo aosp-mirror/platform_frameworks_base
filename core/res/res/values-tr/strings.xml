@@ -154,12 +154,9 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Telefon seçenekleri"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Ekran kilidi"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Kapat"</string>
-    <!-- no translation found for global_action_bug_report (7934010578922304799) -->
-    <skip />
-    <!-- no translation found for bugreport_title (2667494803742548533) -->
-    <skip />
-    <!-- no translation found for bugreport_message (398447048750350456) -->
-    <skip />
+    <string name="global_action_bug_report" msgid="7934010578922304799">"Hata raporu"</string>
+    <string name="bugreport_title" msgid="2667494803742548533">"Hata raporu al"</string>
+    <string name="bugreport_message" msgid="398447048750350456">"Bu rapor, e-posta iletisi olarak göndermek üzere mevcut cihazınızın durumuyla ilgili bilgi toplar. Hata raporu başlatıldıktan sonra hazır olması biraz zaman alabilir, lütfen sabırlı olun."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Sessiz mod"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Ses KAPALI"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Ses AÇIK"</string>
