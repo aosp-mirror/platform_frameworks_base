@@ -1243,36 +1243,6 @@ public class LocationManager {
         }
     }
 
-    /**
-     * Return the last know Location that satisfies the given
-     * criteria. This can be done without starting the provider.
-     * Note that this location could
-     * be out-of-date, for example if the device was turned off and
-     * moved to another location.
-     *
-     * <p> If no location is found that satisfies the criteria, null is returned
-     *
-     * @param criteria location criteria
-     * @return the last known location that satisfies criteria, or null
-     *
-     * @throws SecurityException if no suitable permission is present
-     * @throws IllegalArgumentException if criteria is null
-     * @deprecated use the {@link LocationRequest} class instead
-     */
-    @Deprecated
-    public Location getLastKnownLocation(Criteria criteria) {
-        checkCriteria(criteria);
-
-        LocationRequest request = LocationRequest.createFromDeprecatedCriteria(
-                criteria, 0, 0, true);
-        try {
-            return mService.getLastLocation(request);
-        } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException", e);
-            return null;
-        }
-    }
-
     // Mock provider support
 
     /**
