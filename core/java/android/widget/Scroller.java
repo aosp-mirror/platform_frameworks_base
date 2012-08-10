@@ -57,45 +57,70 @@ public class Scroller  {
     private boolean mFlywheel;
 
     private float mVelocity;
+    private float mCurrVelocity;
+    private int mDistance;
+
+    private float mFlingFriction = ViewConfiguration.getScrollFriction();
 
     private static final int DEFAULT_DURATION = 250;
     private static final int SCROLL_MODE = 0;
     private static final int FLING_MODE = 1;
 
-    private static float DECELERATION_RATE = (float) (Math.log(0.75) / Math.log(0.9));
-    private static float ALPHA = 800; // pixels / seconds
-    private static float START_TENSION = 0.4f; // Tension at start: (0.4 * total T, 1.0 * Distance)
-    private static float END_TENSION = 1.0f - START_TENSION;
+    private static float DECELERATION_RATE = (float) (Math.log(0.78) / Math.log(0.9));
+    private static final float INFLEXION = 0.35f; // Tension lines cross at (INFLEXION, 1)
+    private static final float START_TENSION = 0.5f;
+    private static final float END_TENSION = 1.0f;
+    private static final float P1 = START_TENSION * INFLEXION;
+    private static final float P2 = 1.0f - END_TENSION * (1.0f - INFLEXION);
+
     private static final int NB_SAMPLES = 100;
-    private static final float[] SPLINE = new float[NB_SAMPLES + 1];
+    private static final float[] SPLINE_POSITION = new float[NB_SAMPLES + 1];
+    private static final float[] SPLINE_TIME = new float[NB_SAMPLES + 1];
 
     private float mDeceleration;
     private final float mPpi;
 
+    // A context-specific coefficient adjusted to physical values.
+    private float mPhysicalCoeff;
+
     static {
         float x_min = 0.0f;
-        for (int i = 0; i <= NB_SAMPLES; i++) {
-            final float t = (float) i / NB_SAMPLES;
+        float y_min = 0.0f;
+        for (int i = 0; i < NB_SAMPLES; i++) {
+            final float alpha = (float) i / NB_SAMPLES;
+
             float x_max = 1.0f;
             float x, tx, coef;
             while (true) {
                 x = x_min + (x_max - x_min) / 2.0f;
                 coef = 3.0f * x * (1.0f - x);
-                tx = coef * ((1.0f - x) * START_TENSION + x * END_TENSION) + x * x * x;
-                if (Math.abs(tx - t) < 1E-5) break;
-                if (tx > t) x_max = x;
+                tx = coef * ((1.0f - x) * P1 + x * P2) + x * x * x;
+                if (Math.abs(tx - alpha) < 1E-5) break;
+                if (tx > alpha) x_max = x;
                 else x_min = x;
             }
-            final float d = coef + x * x * x;
-            SPLINE[i] = d;
+            SPLINE_POSITION[i] = coef * ((1.0f - x) * START_TENSION + x) + x * x * x;
+
+            float y_max = 1.0f;
+            float y, dy;
+            while (true) {
+                y = y_min + (y_max - y_min) / 2.0f;
+                coef = 3.0f * y * (1.0f - y);
+                dy = coef * ((1.0f - y) * START_TENSION + y) + y * y * y;
+                if (Math.abs(dy - alpha) < 1E-5) break;
+                if (dy > alpha) y_max = y;
+                else y_min = y;
+            }
+            SPLINE_TIME[i] = coef * ((1.0f - y) * P1 + y * P2) + y * y * y;
         }
-        SPLINE[NB_SAMPLES] = 1.0f;
+        SPLINE_POSITION[NB_SAMPLES] = SPLINE_TIME[NB_SAMPLES] = 1.0f;
 
         // This controls the viscous fluid effect (how much of it)
         sViscousFluidScale = 8.0f;
         // must be set to 1.0 (used in viscousFluid())
         sViscousFluidNormalize = 1.0f;
         sViscousFluidNormalize = 1.0f / viscousFluid(1.0f);
+
     }
 
     private static float sViscousFluidScale;
@@ -129,6 +154,8 @@ public class Scroller  {
         mPpi = context.getResources().getDisplayMetrics().density * 160.0f;
         mDeceleration = computeDeceleration(ViewConfiguration.getScrollFriction());
         mFlywheel = flywheel;
+
+        mPhysicalCoeff = computeDeceleration(0.84f); // look and feel tuning
     }
 
     /**
@@ -140,6 +167,7 @@ public class Scroller  {
      */
     public final void setFriction(float friction) {
         mDeceleration = computeDeceleration(friction);
+        mFlingFriction = friction;
     }
     
     private float computeDeceleration(float friction) {
@@ -202,7 +230,8 @@ public class Scroller  {
      * negative.
      */
     public float getCurrVelocity() {
-        return mVelocity - mDeceleration * timePassed() / 2000.0f;
+        return mMode == FLING_MODE ?
+                mCurrVelocity : mVelocity - mDeceleration * timePassed() / 2000.0f;
     }
 
     /**
@@ -269,11 +298,18 @@ public class Scroller  {
             case FLING_MODE:
                 final float t = (float) timePassed / mDuration;
                 final int index = (int) (NB_SAMPLES * t);
-                final float t_inf = (float) index / NB_SAMPLES;
-                final float t_sup = (float) (index + 1) / NB_SAMPLES;
-                final float d_inf = SPLINE[index];
-                final float d_sup = SPLINE[index + 1];
-                final float distanceCoef = d_inf + (t - t_inf) / (t_sup - t_inf) * (d_sup - d_inf);
+                float distanceCoef = 1.f;
+                float velocityCoef = 0.f;
+                if (index < NB_SAMPLES) {
+                    final float t_inf = (float) index / NB_SAMPLES;
+                    final float t_sup = (float) (index + 1) / NB_SAMPLES;
+                    final float d_inf = SPLINE_POSITION[index];
+                    final float d_sup = SPLINE_POSITION[index + 1];
+                    velocityCoef = (d_sup - d_inf) / (t_sup - t_inf);
+                    distanceCoef = d_inf + (t - t_inf) * velocityCoef;
+                }
+
+                mCurrVelocity = velocityCoef * mDistance / mDuration * 1000.0f;
                 
                 mCurrX = mStartX + Math.round(distanceCoef * (mFinalX - mStartX));
                 // Pin to mMinX <= mCurrX <= mMaxX
@@ -392,8 +428,7 @@ public class Scroller  {
         float velocity = FloatMath.sqrt(velocityX * velocityX + velocityY * velocityY);
      
         mVelocity = velocity;
-        final double l = Math.log(START_TENSION * velocity / ALPHA);
-        mDuration = (int) (1000.0 * Math.exp(l / (DECELERATION_RATE - 1.0)));
+        mDuration = getSplineFlingDuration(velocity);
         mStartTime = AnimationUtils.currentAnimationTimeMillis();
         mStartX = startX;
         mStartY = startY;
@@ -401,25 +436,41 @@ public class Scroller  {
         float coeffX = velocity == 0 ? 1.0f : velocityX / velocity;
         float coeffY = velocity == 0 ? 1.0f : velocityY / velocity;
 
-        int totalDistance =
-                (int) (ALPHA * Math.exp(DECELERATION_RATE / (DECELERATION_RATE - 1.0) * l));
+        double totalDistance = getSplineFlingDistance(velocity);
+        mDistance = (int) (totalDistance * Math.signum(velocity));
         
         mMinX = minX;
         mMaxX = maxX;
         mMinY = minY;
         mMaxY = maxY;
 
-        mFinalX = startX + Math.round(totalDistance * coeffX);
+        mFinalX = startX + (int) Math.round(totalDistance * coeffX);
         // Pin to mMinX <= mFinalX <= mMaxX
         mFinalX = Math.min(mFinalX, mMaxX);
         mFinalX = Math.max(mFinalX, mMinX);
         
-        mFinalY = startY + Math.round(totalDistance * coeffY);
+        mFinalY = startY + (int) Math.round(totalDistance * coeffY);
         // Pin to mMinY <= mFinalY <= mMaxY
         mFinalY = Math.min(mFinalY, mMaxY);
         mFinalY = Math.max(mFinalY, mMinY);
     }
     
+    private double getSplineDeceleration(float velocity) {
+        return Math.log(INFLEXION * Math.abs(velocity) / (mFlingFriction * mPhysicalCoeff));
+    }
+
+    private int getSplineFlingDuration(float velocity) {
+        final double l = getSplineDeceleration(velocity);
+        final double decelMinusOne = DECELERATION_RATE - 1.0;
+        return (int) (1000.0 * Math.exp(l / decelMinusOne));
+    }
+
+    private double getSplineFlingDistance(float velocity) {
+        final double l = getSplineDeceleration(velocity);
+        final double decelMinusOne = DECELERATION_RATE - 1.0;
+        return mFlingFriction * mPhysicalCoeff * Math.exp(DECELERATION_RATE / decelMinusOne * l);
+    }
+
     static float viscousFluid(float x)
     {
         x *= sViscousFluidScale;
