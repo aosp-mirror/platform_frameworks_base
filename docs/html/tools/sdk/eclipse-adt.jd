@@ -97,6 +97,39 @@ padding: 5px 0 0;
   <a href="#" onclick="return toggleDiv(this)">
   <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px"
     width="9px"/>
+ADT 20.0.3</a> <em>(August 2012)</em>
+  <div class="toggleme">
+<dl>
+  <dt>Dependencies:</dt>
+
+  <dd>
+    <ul>
+      <li>Java 1.6 or higher is required for ADT 20.0.3.</li>
+      <li>Eclipse Helios (Version 3.6.2) or higher is required for ADT 20.0.3.</li>
+      <li>ADT 20.0.3 is designed for use with <a href="{@docRoot}tools/sdk/tools-notes.html">SDK
+      Tools r20.0.3</a>. If you haven't already installed SDK Tools r20.0.3 into your SDK, use the
+      Android SDK Manager to do so.</li>
+    </ul>
+  </dd>
+
+  <dt>Bug fixes:</dt>
+  <dd>
+    <ul>
+      <li>Fixed issue with keyboard shortcuts for editors in Eclipse Juno (Version 4.x).</li>
+      <li>Fixed problem with cached download lists in SDK Manager.</li>
+    </ul>
+  </dd>
+
+</dl>
+
+</div>
+</div>
+
+
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)">
+  <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px"
+    width="9px"/>
 ADT 20.0.2</a> <em>(July 2012)</em>
   <div class="toggleme">
 <dl>

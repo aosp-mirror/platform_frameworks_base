@@ -1,9 +1,9 @@
 page.title=Installing the Eclipse Plugin
 walkthru=1
-adt.zip.version=20.0.2
-adt.zip.download=ADT-20.0.2.zip
-adt.zip.bytes=12388464
-adt.zip.checksum=8e727bcdc9789c900784a82e6330ec22
+adt.zip.version=20.0.3
+adt.zip.download=ADT-20.0.3.zip
+adt.zip.bytes=12390954
+adt.zip.checksum=869a536b1c56d0cd920ed9ae259ae619
 
 @jd:body
 
@@ -11,7 +11,7 @@ adt.zip.checksum=8e727bcdc9789c900784a82e6330ec22
 
 <p>Android offers a custom plugin for the Eclipse IDE, called Android
 Development Tools (ADT). This plugin is designed to give you a powerful, integrated
-environment in which to develop Android apps. It extends the capabilites
+environment in which to develop Android apps. It extends the capabilities
 of Eclipse to let you quickly set up new Android projects, build an app
 UI, debug your app, and export signed (or unsigned) app packages (APKs) for distribution.
 </p>
@@ -39,21 +39,21 @@ the <strong>Next</strong> link on the right.</p>
 
 <ol>
     <li>Start Eclipse, then select <strong>Help</strong> &gt; <strong>Install New
-Software...</strong>.</li>
+Software</strong>.</li>
     <li>Click <strong>Add</strong>, in the top-right corner.</li>
     <li>In the Add Repository dialog that appears, enter "ADT Plugin" for the <em>Name</em> and the
 following URL for the <em>Location</em>:
       <pre>https://dl-ssl.google.com/android/eclipse/</pre>
     </li>
-    <li>Click <strong>OK</strong>
-      <p>Note: If you have trouble acquiring the plugin, try using "http" in the Location URL,
+    <li>Click <strong>OK</strong>.
+      <p>If you have trouble acquiring the plugin, try using "http" in the Location URL,
 instead of "https" (https is preferred for security reasons).</p></li>
     <li>In the Available Software dialog, select the checkbox next to Developer Tools and click
 <strong>Next</strong>.</li>
     <li>In the next window, you'll see a list of the tools to be downloaded. Click
 <strong>Next</strong>. </li>
     <li>Read and accept the license agreements, then click <strong>Finish</strong>.
-      <p>Note: If you get a security warning saying that the authenticity or validity of
+      <p>If you get a security warning saying that the authenticity or validity of
 the software can't be established, click <strong>OK</strong>.</p></li>
     <li>When the installation completes, restart Eclipse. </li>
 </ol>
@@ -148,17 +148,15 @@ remote update site, you can download the ADT zip file to your local machine and
 manually install it:</p>
 
 <ol>
-  <li>Download the current ADT Plugin zip file from the table below (do not unpack it).
+  <li>Download the ADT Plugin zip file (do not unpack it):
 
   <table class="download">
     <tr>
-      <th>Name</th>
       <th>Package</th>
       <th>Size</th>
       <th>MD5 Checksum</th>
   </tr>
   <tr>
-    <td>ADT {@adtZipVersion}</td>
     <td>
       <a href="http://dl.google.com/android/{@adtZipDownload}">{@adtZipDownload}</a>
     </td>
@@ -169,16 +167,20 @@ manually install it:</p>
 </li>
 
 </li>
-  <li>Follow steps 1 and 2 in the <a href="#installing">default install
-      instructions</a> (above).</li>
-  <li>In the Add Site dialog, click <strong>Archive</strong>.</li>
-  <li>Browse and select the downloaded zip file.</li>
-  <li>Enter a name for the local update site (e.g.,
-      "Android Plugin") in the "Name" field.</li>
-  <li>Click <strong>OK</strong>.
-  <li>Follow the remaining procedures as listed for
-      <a href="#installing">default installation</a> above,
-      starting from step 4.</li>
+  <li>Start Eclipse, then select <strong>Help</strong> &gt; <strong>Install New
+Software</strong>.</li>
+  <li>Click <strong>Add</strong>, in the top-right corner.</li>
+  <li>In the Add Repository dialog, click <strong>Archive</strong>.</li>
+  <li>Select the downloaded {@adtZipDownload} file and click <strong>OK</strong>.</li>
+  <li>Enter "ADT Plugin" for the name and click <strong>OK</strong>.
+  <li>In the Available Software dialog, select the checkbox next to Developer Tools and click
+<strong>Next</strong>.</li>
+  <li>In the next window, you'll see a list of the tools to be downloaded. Click
+<strong>Next</strong>. </li>
+  <li>Read and accept the license agreements, then click <strong>Finish</strong>.
+    <p>If you get a security warning saying that the authenticity or validity of
+the software can't be established, click <strong>OK</strong>.</p></li>
+  <li>When the installation completes, restart Eclipse. </li>
 </ol>
 
 <p>To update your plugin once you've installed using the zip file, you will have
@@ -204,3 +206,4 @@ JKS</pre>
 ...then your development machine lacks a suitable Java VM. Installing Sun
 Java 6 will resolve this issue and you can then reinstall the ADT
 Plugin.</p>
+
