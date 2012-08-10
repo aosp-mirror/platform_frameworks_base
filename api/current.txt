@@ -10598,7 +10598,6 @@ package android.location {
     method public deprecated java.lang.String getBestProvider(android.location.Criteria, boolean);
     method public android.location.GpsStatus getGpsStatus(android.location.GpsStatus);
     method public deprecated android.location.Location getLastKnownLocation(java.lang.String);
-    method public deprecated android.location.Location getLastKnownLocation(android.location.Criteria);
     method public android.location.Location getLastLocation(android.location.LocationRequest);
     method public deprecated android.location.LocationProvider getProvider(java.lang.String);
     method public deprecated java.util.List<java.lang.String> getProviders(boolean);
