@@ -135,7 +135,7 @@ those events&mdash;and abandoning your audio focus. At that point, you would exp
 (pressing play in your app) to be required before you resume playing audio.</p>
 
 <p>In the following code snippet, we pause the playback or our media player object if the audio
-loss is transien and resume it when we have regained the focus. If the loss is permanent, it
+loss is transient and resume it when we have regained the focus. If the loss is permanent, it
 unregisters our media button event receiver and stops monitoring audio focus changes.<p>
 
 <pre>
@@ -169,7 +169,7 @@ lose focus, then returns it to its previous level when we regain focus.</p>
 <pre>
 OnAudioFocusChangeListener afChangeListener = new OnAudioFocusChangeListener() {
     public void onAudioFocusChange(int focusChange) {
-        if (focusChange == AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK
+        if (focusChange == AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
             // Lower the volume
         } else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
             // Raise it back to normal
