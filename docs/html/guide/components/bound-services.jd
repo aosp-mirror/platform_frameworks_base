@@ -640,12 +640,6 @@ href="{@docRoot}resources/samples/ApiDemos/index.html">ApiDemos</a>.</p>
 
 <h2 id="Lifecycle">Managing the Lifecycle of a Bound Service</h2>
 
-<div class="figure" style="width:588px">
-<img src="{@docRoot}images/fundamentals/service_binding_tree_lifecycle.png" alt="" />
-<p class="img-caption"><strong>Figure 1.</strong> The lifecycle for a service that is started
-and also allows binding.</p>
-</div>
-
 <p>When a service is unbound from all clients, the Android system destroys it (unless it was also
 started with {@link android.app.Service#onStartCommand onStartCommand()}). As such, you don't have
 to manage the lifecycle of your service if it's purely a bound
@@ -666,6 +660,12 @@ android.app.Service#onBind onBind()}). {@link android.app.Service#onRebind
 onRebind()} returns void, but the client still receives the {@link android.os.IBinder} in its
 {@link android.content.ServiceConnection#onServiceConnected onServiceConnected()} callback.
 Below, figure 1 illustrates the logic for this kind of lifecycle.</p>
+
+
+<img src="{@docRoot}images/fundamentals/service_binding_tree_lifecycle.png" alt="" />
+<p class="img-caption"><strong>Figure 1.</strong> The lifecycle for a service that is started
+and also allows binding.</p>
+
 
 <p>For more information about the lifecycle of an started service, see the <a
 href="{@docRoot}guide/components/services.html#Lifecycle">Services</a> document.</p>
