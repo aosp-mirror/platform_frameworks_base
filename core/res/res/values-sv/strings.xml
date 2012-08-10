@@ -143,7 +143,7 @@
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Vibrerande ringsignal"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Ringsignal på"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Avslutar…"</string>
-    <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Din pekdator stängs av."</string>
+    <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Din surfplatta stängs av."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Din telefon stängs av."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Vill du stänga av?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Starta om i felsäkert läge"</string>
@@ -154,12 +154,9 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Telefonalternativ"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Skärmlås"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Stäng av"</string>
-    <!-- no translation found for global_action_bug_report (7934010578922304799) -->
-    <skip />
-    <!-- no translation found for bugreport_title (2667494803742548533) -->
-    <skip />
-    <!-- no translation found for bugreport_message (398447048750350456) -->
-    <skip />
+    <string name="global_action_bug_report" msgid="7934010578922304799">"Felrapport"</string>
+    <string name="bugreport_title" msgid="2667494803742548533">"Skapa felrapport"</string>
+    <string name="bugreport_message" msgid="398447048750350456">"Nu hämtas information om aktuell status för enheten, som sedan skickas i ett e-postmeddelade. Det tar en liten stund innan felrapporten är färdig och kan skickas, så vi ber dig ha tålamod."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Tyst läge"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Ljudet är AV"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Ljudet är PÅ"</string>
@@ -409,7 +406,7 @@
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"inaktivera telefonen permanent"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Tillåter att appen inaktiverar hela pekdatorn permanent. Detta är mycket farligt."</string>
     <string name="permdesc_brick" product="default" msgid="5788903297627283099">"Tillåter att appen inaktiverar hela mobilen permanent. Detta är mycket farligt."</string>
-    <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"tvinga omstart av pekdator"</string>
+    <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"tvinga omstart av surfplatta"</string>
     <string name="permlab_reboot" product="default" msgid="2898560872462638242">"tvinga omstart av telefon"</string>
     <string name="permdesc_reboot" product="tablet" msgid="8172056180063700741">"Tillåter att appen tvingar pekdatorn att starta om."</string>
     <string name="permdesc_reboot" product="default" msgid="5326008124289989969">"Tillåter att appen tvingar mobilen att starta om."</string>
@@ -1303,7 +1300,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Vill du ta emot samtal?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Alltid"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Bara en gång"</string>
-    <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Pekdator"</string>
+    <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Surfplatta"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Mobil"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Hörlurar"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Dockningsstationens högtalare"</string>

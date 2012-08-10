@@ -774,7 +774,7 @@
     <string name="factorytest_not_system" msgid="4435201656767276723">"FACTORY_TEST操作は、/system/appにインストールされたパッケージのみが対象です。"</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"FACTORY_TEST操作を行うパッケージは見つかりませんでした。"</string>
     <string name="factorytest_reboot" msgid="6320168203050791643">"再起動"</string>
-    <string name="js_dialog_title" msgid="1987483977834603872">"ページ「<xliff:g id="TITLE">%s</xliff:g>」の記述:"</string>
+    <string name="js_dialog_title" msgid="1987483977834603872">"<xliff:g id="TITLE">%s</xliff:g> のページ:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
     <string name="js_dialog_before_unload" msgid="730366588032430474">"このページから移動しますか？"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"移動する場合は[OK]、現在のページに留まる場合は[キャンセル]をタップしてください。"</string>
     <string name="save_password_label" msgid="6860261758665825069">"確認"</string>
