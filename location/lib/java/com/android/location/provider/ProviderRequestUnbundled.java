@@ -42,6 +42,9 @@ public final class ProviderRequestUnbundled {
         return mRequest.interval;
     }
 
+    /**
+     * Never null.
+     */
     public List<LocationRequest> getLocationRequests() {
         return mRequest.locationRequests;
     }
