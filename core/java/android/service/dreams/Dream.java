@@ -346,6 +346,11 @@ public class Dream extends Service implements Window.Callback {
         lp.type = WindowManager.LayoutParams.TYPE_DREAM;
         lp.token = windowToken;
         lp.windowAnimations = com.android.internal.R.style.Animation_Dream;
+        lp.flags |= ( WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+                    | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
+                    | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON 
+                    );
+        mWindow.setAttributes(lp);
         
         //WindowManagerImpl.getDefault().addView(mWindow.getDecorView(), lp);
         
