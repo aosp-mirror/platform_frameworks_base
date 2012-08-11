@@ -20,6 +20,7 @@ import com.android.internal.content.PackageHelper;
 
 import android.app.ActivityManagerNative;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ContainerEncryptionParams;
 import android.content.pm.FeatureInfo;
@@ -39,9 +40,11 @@ import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.IUserManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserManager;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -59,6 +62,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 public final class Pm {
     IPackageManager mPm;
+    IUserManager mUm;
 
     private WeakHashMap<String, Resources> mResourceCache
             = new WeakHashMap<String, Resources>();
@@ -82,6 +86,7 @@ public final class Pm {
             return;
         }
 
+        mUm = IUserManager.Stub.asInterface(ServiceManager.getService("user"));
         mPm = IPackageManager.Stub.asInterface(ServiceManager.getService("package"));
         if (mPm == null) {
             System.err.println(PM_NOT_RUNNING_ERR);
@@ -985,7 +990,7 @@ public final class Pm {
         }
         name = arg;
         try {
-            if (mPm.createUser(name, 0) == null) {
+            if (mUm.createUser(name, 0) == null) {
                 System.err.println("Error: couldn't create User.");
                 showUsage();
             }
@@ -1017,7 +1022,7 @@ public final class Pm {
             return;
         }
         try {
-            if (!mPm.removeUser(userId)) {
+            if (!mUm.removeUser(userId)) {
                 System.err.println("Error: couldn't remove user.");
                 showUsage();
             }
@@ -1034,7 +1039,7 @@ public final class Pm {
             return;
         }
         try {
-            List<UserInfo> users = mPm.getUsers();
+            List<UserInfo> users = mUm.getUsers();
             if (users == null) {
                 System.err.println("Error: couldn't get users");
             } else {

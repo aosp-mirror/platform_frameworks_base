@@ -890,6 +890,22 @@ public abstract class Context {
     public abstract void startActivity(Intent intent, Bundle options);
 
     /**
+     * Same as {@link #startActivity(Intent, Bundle)}, but for a specific user. It requires holding
+     * the {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL} permission.
+     * @param intent The description of the activity to start.
+     * @param options Additional options for how the Activity should be started.
+     * May be null if there are no options.  See {@link android.app.ActivityOptions}
+     * for how to build the Bundle supplied here; there are no supported definitions
+     * for building it manually.
+     * @param userId The user id of the user to start this activity for.
+     * @throws ActivityNotFoundException
+     * @hide
+     */
+    public void startActivityAsUser(Intent intent, Bundle options, int userId) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
      * Same as {@link #startActivities(Intent[], Bundle)} with no options
      * specified.
      *
@@ -2016,6 +2032,15 @@ public abstract class Context {
      * @hide
      */
     public static final String SCHEDULING_POLICY_SERVICE = "scheduling_policy";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link android.os.UserManager} for managing users on devices that support multiple users.
+     *
+     * @see #getSystemService
+     * @see android.os.UserManager
+     */
+    public static final String USER_SERVICE = "user";
 
     /**
      * Determine whether the given permission is allowed for a particular

@@ -34,6 +34,7 @@ import org.xmlpull.v1.XmlSerializer;
 
 import android.app.AppGlobals;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ComponentInfo;
@@ -79,6 +80,7 @@ final class Settings {
     private static final String TAG = "PackageSettings";
 
     private static final boolean DEBUG_STOPPED = false;
+    private static final boolean DEBUG_MU = false;
 
     private static final String TAG_READ_EXTERNAL_STORAGE = "read-external-storage";
     private static final String ATTR_ENFORCEMENT = "enforcement";
@@ -173,12 +175,15 @@ final class Settings {
      */
     private final ArrayList<PendingPackage> mPendingPackages = new ArrayList<PendingPackage>();
 
+    private final Context mContext;
+
     private final File mSystemDir;
-    Settings() {
-        this(Environment.getDataDirectory());
+    Settings(Context context) {
+        this(context, Environment.getDataDirectory());
     }
 
-    Settings(File dataDir) {
+    Settings(Context context, File dataDir) {
+        mContext = context;
         mSystemDir = new File(dataDir, "system");
         mSystemDir.mkdirs();
         FileUtils.setPermissions(mSystemDir.toString(),
@@ -739,6 +744,9 @@ final class Settings {
     }
 
     void readPackageRestrictionsLPr(int userId) {
+        if (DEBUG_MU) {
+            Log.i(TAG, "Reading package restrictions for user=" + userId);
+        }
         FileInputStream str = null;
         File userPackagesStateFile = getUserPackagesStateFile(userId);
         File backupFile = getUserPackagesStateBackupFile(userId);
@@ -891,6 +899,9 @@ final class Settings {
     }
 
     void writePackageRestrictionsLPr(int userId) {
+        if (DEBUG_MU) {
+            Log.i(TAG, "Writing package restrictions for user=" + userId);
+        }
         // Keep the old stopped packages around until we know the new ones have
         // been successfully written.
         File userPackagesStateFile = getUserPackagesStateFile(userId);
@@ -935,6 +946,7 @@ final class Settings {
                     boolean stopped = pkg.getStopped(userId);
                     boolean notLaunched = pkg.getNotLaunched(userId);
                     int enabled = pkg.getEnabled(userId);
+                    if (DEBUG_MU) Log.i(TAG, "  pkg=" + pkg.name + ", state=" + enabled);
                     HashSet<String> enabledComponents = pkg.getEnabledComponents(userId);
                     HashSet<String> disabledComponents = pkg.getDisabledComponents(userId);
 
@@ -1584,7 +1596,24 @@ final class Settings {
             mReadMessages.append("Error reading: " + e.toString());
             PackageManagerService.reportSettingsProblem(Log.ERROR, "Error reading settings: " + e);
             Log.wtf(PackageManagerService.TAG, "Error reading package manager settings", e);
+        }
 
+        if (mBackupStoppedPackagesFilename.exists()
+                || mStoppedPackagesFilename.exists()) {
+            // Read old file
+            readStoppedLPw();
+            mBackupStoppedPackagesFilename.delete();
+            mStoppedPackagesFilename.delete();
+            // Migrate to new file format
+            writePackageRestrictionsLPr(0);
+        } else {
+            if (users == null) {
+                readPackageRestrictionsLPr(0);
+            } else {
+                for (UserInfo user : users) {
+                    readPackageRestrictionsLPr(user.id);
+                }
+            }
         }
 
         final int N = mPendingPackages.size();
@@ -1628,23 +1657,6 @@ final class Settings {
             }
         }
 
-        if (mBackupStoppedPackagesFilename.exists()
-                || mStoppedPackagesFilename.exists()) {
-            // Read old file
-            readStoppedLPw();
-            mBackupStoppedPackagesFilename.delete();
-            mStoppedPackagesFilename.delete();
-            // Migrate to new file format
-            writePackageRestrictionsLPr(0);
-        } else {
-            if (users == null) {
-                readPackageRestrictionsLPr(0);
-            } else {
-                for (UserInfo user : users) {
-                    readPackageRestrictionsLPr(user.id);
-                }
-            }
-        }
         mReadMessages.append("Read completed successfully: " + mPackages.size() + " packages, "
                 + mSharedUsers.size() + " shared uids\n");
 
@@ -2378,9 +2390,7 @@ final class Settings {
     private List<UserInfo> getAllUsers() {
         long id = Binder.clearCallingIdentity();
         try {
-            return AppGlobals.getPackageManager().getUsers();
-        } catch (RemoteException re) {
-            // Local to system process, shouldn't happen
+            return UserManagerService.getInstance(mContext).getUsers();
         } catch (NullPointerException npe) {
             // packagemanager not yet initialized
         } finally {

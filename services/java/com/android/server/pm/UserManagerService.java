@@ -22,12 +22,17 @@ import static android.os.ParcelFileDescriptor.MODE_READ_WRITE;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
+import android.os.Binder;
 import android.os.Environment;
 import android.os.FileUtils;
+import android.os.IUserManager;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.os.SystemClock;
 import android.os.UserId;
 import android.util.Log;
@@ -48,9 +53,9 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
-public class UserManager {
+public class UserManagerService extends IUserManager.Stub {
 
-    private static final String TAG = "UserManager";
+    private static final String TAG = "UserManagerService";
 
     private static final String TAG_NAME = "name";
 
@@ -75,14 +80,25 @@ public class UserManager {
     private final File mUsersDir;
     private final File mUserListFile;
     private int[] mUserIds;
+    private boolean mGuestEnabled;
 
     private Installer mInstaller;
     private File mBaseUserPath;
+    private Context mContext;
+    private static UserManagerService sInstance;
+    private PackageManagerService mPm;
+
+    public synchronized static UserManagerService getInstance(Context context) {
+        if (sInstance == null) {
+            sInstance = new UserManagerService(context);
+        }
+        return sInstance;
+    }
 
     /**
      * Available for testing purposes.
      */
-    UserManager(File dataDir, File baseUserPath) {
+    UserManagerService(File dataDir, File baseUserPath) {
         mUsersDir = new File(dataDir, USER_INFO_DIR);
         mUsersDir.mkdirs();
         // Make zeroth user directory, for services to migrate their files to that location
@@ -97,12 +113,19 @@ public class UserManager {
         readUserList();
     }
 
-    public UserManager(Installer installer, File baseUserPath) {
-        this(Environment.getDataDirectory(), baseUserPath);
-        mInstaller = installer;
+    public UserManagerService(Context context) {
+        this(Environment.getDataDirectory(), new File(Environment.getDataDirectory(), "user"));
+        mContext = context;
     }
 
+    void setInstaller(PackageManagerService pm, Installer installer) {
+        mInstaller = installer;
+        mPm = pm;
+    }
+
+    @Override
     public List<UserInfo> getUsers() {
+        enforceSystemOrRoot("Only the system can query users");
         synchronized (mUsers) {
             ArrayList<UserInfo> users = new ArrayList<UserInfo>(mUsers.size());
             for (int i = 0; i < mUsers.size(); i++) {
@@ -112,7 +135,9 @@ public class UserManager {
         }
     }
 
-    public UserInfo getUser(int userId) {
+    @Override
+    public UserInfo getUserInfo(int userId) {
+        enforceSystemOrRoot("Only the system can query user");
         synchronized (mUsers) {
             UserInfo info = mUsers.get(userId);
             return info;
@@ -125,7 +150,9 @@ public class UserManager {
         }
     }
 
+    @Override
     public void setUserName(int userId, String name) {
+        enforceSystemOrRoot("Only the system can rename users");
         synchronized (mUsers) {
             UserInfo info = mUsers.get(userId);
             if (name != null && !name.equals(info.name)) {
@@ -135,7 +162,9 @@ public class UserManager {
         }
     }
 
+    @Override
     public ParcelFileDescriptor setUserIcon(int userId) {
+        enforceSystemOrRoot("Only the system can update users");
         synchronized (mUsers) {
             UserInfo info = mUsers.get(userId);
             if (info == null) return null;
@@ -144,6 +173,57 @@ public class UserManager {
                 writeUserLocked(info);
             }
             return fd;
+        }
+    }
+
+    @Override
+    public void setGuestEnabled(boolean enable) {
+        enforceSystemOrRoot("Only the system can enable guest users");
+        synchronized (mUsers) {
+            if (mGuestEnabled != enable) {
+                mGuestEnabled = enable;
+                // Erase any guest user that currently exists
+                for (int i = 0; i < mUsers.size(); i++) {
+                    UserInfo user = mUsers.valueAt(i);
+                    if (user.isGuest()) {
+                        if (!enable) {
+                            removeUser(user.id);
+                        }
+                        return;
+                    }
+                }
+                // No guest was found
+                if (enable) {
+                    createUser("Guest", UserInfo.FLAG_GUEST);
+                }
+            }
+        }
+    }
+
+    @Override
+    public boolean isGuestEnabled() {
+        synchronized (mUsers) {
+            return mGuestEnabled;
+        }
+    }
+
+    @Override
+    public void wipeUser(int userHandle) {
+        enforceSystemOrRoot("Only the system can wipe users");
+        // TODO:
+    }
+
+    /**
+     * Enforces that only the system UID or root's UID can call a method exposed
+     * via Binder.
+     *
+     * @param message used as message if SecurityException is thrown
+     * @throws SecurityException if the caller is not system or root
+     */
+    private static final void enforceSystemOrRoot(String message) {
+        final int uid = Binder.getCallingUid();
+        if (uid != Process.SYSTEM_UID && uid != 0) {
+            throw new SecurityException(message);
         }
     }
 
@@ -184,6 +264,7 @@ public class UserManager {
     }
 
     private void readUserListLocked() {
+        mGuestEnabled = false;
         if (!mUserListFile.exists()) {
             fallbackToSingleUserLocked();
             return;
@@ -211,6 +292,9 @@ public class UserManager {
                     UserInfo user = readUser(Integer.parseInt(id));
                     if (user != null) {
                         mUsers.put(user.id, user);
+                    }
+                    if (user.isGuest()) {
+                        mGuestEnabled = true;
                     }
                 }
             }
@@ -389,7 +473,9 @@ public class UserManager {
         return null;
     }
 
+    @Override
     public UserInfo createUser(String name, int flags) {
+        enforceSystemOrRoot("Only the system can create users");
         int userId = getNextAvailableId();
         UserInfo userInfo = new UserInfo(userId, name, null, flags);
         File userPath = new File(mBaseUserPath, Integer.toString(userId));
@@ -402,6 +488,11 @@ public class UserManager {
             writeUserLocked(userInfo);
             updateUserIdsLocked();
         }
+        if (userInfo != null) {
+            Intent addedIntent = new Intent(Intent.ACTION_USER_ADDED);
+            addedIntent.putExtra(Intent.EXTRA_USERID, userInfo.id);
+            mContext.sendBroadcast(addedIntent, android.Manifest.permission.MANAGE_ACCOUNTS);
+        }
         return userInfo;
     }
 
@@ -410,27 +501,37 @@ public class UserManager {
      * after the user's processes have been terminated.
      * @param id the user's id
      */
-    public boolean removeUser(int id) {
+    public boolean removeUser(int userHandle) {
+        enforceSystemOrRoot("Only the system can remove users");
         synchronized (mUsers) {
-            return removeUserLocked(id);
+            return removeUserLocked(userHandle);
         }
     }
 
-    private boolean removeUserLocked(int id) {
-        // Remove from the list
-        UserInfo userInfo = mUsers.get(id);
-        if (userInfo != null) {
-            // Remove this user from the list
-            mUsers.remove(id);
-            // Remove user file
-            File userFile = new File(mUsersDir, id + ".xml");
-            userFile.delete();
-            // Update the user list
-            writeUserListLocked();
-            updateUserIdsLocked();
-            return true;
+    private boolean removeUserLocked(int userHandle) {
+        final UserInfo user = mUsers.get(userHandle);
+        if (userHandle == 0 || user == null) {
+            return false;
         }
-        return false;
+
+        mPm.cleanUpUser(userHandle);
+
+        // Remove this user from the list
+        mUsers.remove(userHandle);
+        // Remove user file
+        File userFile = new File(mUsersDir, userHandle + ".xml");
+        userFile.delete();
+        // Update the user list
+        writeUserListLocked();
+        updateUserIdsLocked();
+
+        // Let other services shutdown any activity
+        Intent addedIntent = new Intent(Intent.ACTION_USER_REMOVED);
+        addedIntent.putExtra(Intent.EXTRA_USERID, userHandle);
+        mContext.sendBroadcast(addedIntent, android.Manifest.permission.MANAGE_ACCOUNTS);
+
+        removePackageFolders(userHandle);
+        return true;
     }
 
     public void installPackageForAllUsers(String packageName, int uid) {
