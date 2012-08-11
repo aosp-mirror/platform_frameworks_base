@@ -120,9 +120,9 @@ public class FusionEngine implements LocationListener {
     }
 
     /** Called on mLooper thread */
-    public void setRequirements(ProviderRequestUnbundled request, WorkSource source) {
+    public void setRequest(ProviderRequestUnbundled request, WorkSource source) {
         mRequest = request;
-        mEnabled = true;
+        mEnabled = request.getReportLocation();
         updateRequirements();
     }
 
