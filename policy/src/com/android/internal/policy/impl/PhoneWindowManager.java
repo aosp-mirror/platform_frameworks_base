@@ -2854,8 +2854,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if ((attrs.flags & FLAG_FORCE_NOT_FULLSCREEN) != 0) {
                 mForceStatusBar = true;
             }
-            if (attrs.type >= FIRST_APPLICATION_WINDOW
-                    && attrs.type <= LAST_APPLICATION_WINDOW
+            if (((attrs.type >= FIRST_APPLICATION_WINDOW && attrs.type <= LAST_APPLICATION_WINDOW)
+                        || attrs.type == TYPE_DREAM)
                     && attrs.x == 0 && attrs.y == 0
                     && attrs.width == WindowManager.LayoutParams.MATCH_PARENT
                     && attrs.height == WindowManager.LayoutParams.MATCH_PARENT) {
