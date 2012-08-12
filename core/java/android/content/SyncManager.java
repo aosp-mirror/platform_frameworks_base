@@ -53,6 +53,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserId;
+import android.os.UserManager;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.text.format.DateUtils;
@@ -206,16 +207,20 @@ public class SyncManager implements OnAccountsUpdateListener {
     // Use this as a random offset to seed all periodic syncs
     private int mSyncRandomOffsetMillis;
 
+    private UserManager mUserManager;
+
     private static final long SYNC_ALARM_TIMEOUT_MIN = 30 * 1000; // 30 seconds
     private static final long SYNC_ALARM_TIMEOUT_MAX = 2 * 60 * 60 * 1000; // two hours
 
-    private List<UserInfo> getAllUsers() {
-        try {
-            return AppGlobals.getPackageManager().getUsers();
-        } catch (RemoteException re) {
-            // Local to system process, shouldn't happen
+    private UserManager getUserManager() {
+        if (mUserManager == null) {
+            mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         }
-        return null;
+        return mUserManager;
+    }
+
+    private List<UserInfo> getAllUsers() {
+        return getUserManager().getUsers();
     }
 
     private boolean containsAccountAndUser(AccountAndUser[] accounts, Account account, int userId) {

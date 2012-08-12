@@ -18,12 +18,17 @@ package android.content.pm;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.Parcelable.Creator;
 
 /**
  * Per-user information.
  * @hide
  */
 public class UserInfo implements Parcelable {
+
+    /** 6 bits for user type */
+    public static final int FLAG_MASK_USER_TYPE = 0x0000003F;
+
     /**
      * Primary user. Only one user can have this flag set. Meaning of this
      * flag TBD.
@@ -40,6 +45,12 @@ public class UserInfo implements Parcelable {
      * Indicates a guest user that may be transient.
      */
     public static final int FLAG_GUEST   = 0x00000004;
+
+    /**
+     * Indicates the user has restrictions in privileges, in addition to those for normal users.
+     * Exact meaning TBD. For instance, maybe they can't install apps or administer WiFi access pts.
+     */
+    public static final int FLAG_RESTRICTED = 0x00000008;
 
     public int id;
     public String name;

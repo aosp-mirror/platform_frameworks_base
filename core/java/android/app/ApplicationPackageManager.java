@@ -41,8 +41,8 @@ import android.content.pm.PermissionInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.content.pm.UserInfo;
 import android.content.pm.ManifestDigest;
+import android.content.pm.UserInfo;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
@@ -1180,80 +1180,6 @@ final class ApplicationPackageManager extends PackageManager {
             // Should never happen!
         }
         return PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
-    }
-
-    // Multi-user support
-
-    /**
-     * @hide
-     */
-    @Override
-    public UserInfo createUser(String name, int flags) {
-        try {
-            return mPM.createUser(name, flags);
-        } catch (RemoteException e) {
-            // Should never happen!
-        }
-        return null;
-    }
-
-    /**
-     * @hide
-     */
-    @Override
-    public List<UserInfo> getUsers() {
-        try {
-            return mPM.getUsers();
-        } catch (RemoteException re) {
-            ArrayList<UserInfo> users = new ArrayList<UserInfo>();
-            UserInfo primary = new UserInfo(0, "Root!", null,
-                    UserInfo.FLAG_ADMIN | UserInfo.FLAG_PRIMARY);
-            users.add(primary);
-            return users;
-        }
-    }
-
-    /**
-     * @hide
-     */
-    @Override
-    public UserInfo getUser(int userId) {
-        try {
-            return mPM.getUser(userId);
-        } catch (RemoteException re) {
-            return null;
-        }
-    }
-
-    /**
-     * @hide
-     */
-    @Override
-    public boolean removeUser(int id) {
-        try {
-            return mPM.removeUser(id);
-        } catch (RemoteException e) {
-            return false;
-        }
-    }
-
-    /**
-     * @hide
-     */
-    @Override
-    public void setUserName(int id, String name) {
-        try {
-            mPM.setUserName(id, name);
-        } catch (RemoteException re) {
-        }
-    }
-
-    /**
-     * @hide
-     */
-    @Override
-    public void updateUserFlags(int id, int flags) {
-        // TODO:
     }
 
     /**

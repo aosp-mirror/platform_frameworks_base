@@ -27,6 +27,7 @@ import com.android.server.ProcessMap;
 import com.android.server.SystemServer;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityStack.ActivityState;
+import com.android.server.pm.UserManagerService;
 import com.android.server.wm.WindowManagerService;
 
 import dalvik.system.Zygote;
@@ -76,12 +77,12 @@ import android.content.pm.IPackageManager;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.UserInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PathPermission;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.content.pm.UserInfo;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -111,6 +112,7 @@ import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserId;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.text.format.Time;
 import android.util.EventLog;
@@ -777,6 +779,10 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     static ActivityManagerService mSelf;
     static ActivityThread mSystemThread;
+
+    private int mCurrentUserId;
+    private SparseIntArray mLoggedInUsers = new SparseIntArray(5);
+    private UserManager mUserManager;
 
     private final class AppDeathRecipient implements IBinder.DeathRecipient {
         final ProcessRecord mApp;
@@ -4197,19 +4203,14 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // Tell anyone interested that we are done booting!
                 SystemProperties.set("sys.boot_completed", "1");
                 SystemProperties.set("dev.bootcomplete", "1");
-                try {
-                    List<UserInfo> users = AppGlobals.getPackageManager().getUsers();
-                    for (UserInfo user : users) {
-                        broadcastIntentLocked(null, null,
-                                new Intent(Intent.ACTION_BOOT_COMPLETED, null),
-                                null, null, 0, null, null,
-                                android.Manifest.permission.RECEIVE_BOOT_COMPLETED,
-                                false, false, MY_PID, Process.SYSTEM_UID, user.id);
-                    }
-                } catch (RemoteException re) {
-                    // Won't happen, in same process
+                List<UserInfo> users = getUserManager().getUsers();
+                for (UserInfo user : users) {
+                    broadcastIntentLocked(null, null,
+                            new Intent(Intent.ACTION_BOOT_COMPLETED, null),
+                            null, null, 0, null, null,
+                            android.Manifest.permission.RECEIVE_BOOT_COMPLETED,
+                            false, false, MY_PID, Process.SYSTEM_UID, user.id);
                 }
-
             }
         }
     }
@@ -13358,9 +13359,6 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     // Multi-user methods
 
-    private int mCurrentUserId;
-    private SparseIntArray mLoggedInUsers = new SparseIntArray(5);
-
     public boolean switchUser(int userId) {
         final int callingUid = Binder.getCallingUid();
         if (callingUid != 0 && callingUid != Process.myUid()) {
@@ -13403,7 +13401,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             Slog.e(TAG, "Trying to get user from unauthorized app");
             return null;
         }
-        return AppGlobals.getPackageManager().getUser(mCurrentUserId);
+        return getUserManager().getUserInfo(mCurrentUserId);
     }
 
     private void onUserRemoved(Intent intent) {
@@ -13431,14 +13429,15 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private boolean userExists(int userId) {
-        try {
-            UserInfo user = AppGlobals.getPackageManager().getUser(userId);
-            return user != null;
-        } catch (RemoteException re) {
-            // Won't happen, in same process
-        }
+        UserInfo user = getUserManager().getUserInfo(userId);
+        return user != null;
+    }
 
-        return false;
+    UserManager getUserManager() {
+        if (mUserManager == null) {
+            mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        }
+        return mUserManager;
     }
 
     private void checkValidCaller(int uid, int userId) {

@@ -36,6 +36,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserId;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -789,7 +790,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                     | Intent.FLAG_ACTIVITY_TASK_ON_HOME
                     | Intent.FLAG_ACTIVITY_NEW_TASK);
             if (DEBUG) Log.v(TAG, "Starting activity " + intent);
-            context.startActivity(intent, opts.toBundle());
+            context.startActivityAsUser(intent, opts.toBundle(), UserId.USER_CURRENT);
         }
         if (usingDrawingCache) {
             holder.thumbnailViewImage.setDrawingCacheEnabled(false);

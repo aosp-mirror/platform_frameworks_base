@@ -1835,7 +1835,7 @@ public class ActiveServices {
 
         pw.println("ACTIVITY MANAGER SERVICES (dumpsys activity services)");
         try {
-            List<UserInfo> users = AppGlobals.getPackageManager().getUsers();
+            List<UserInfo> users = mAm.getUserManager().getUsers();
             for (UserInfo user : users) {
                 if (mServiceMap.getAllServices(user.id).size() > 0) {
                     boolean printed = false;
@@ -1913,8 +1913,8 @@ public class ActiveServices {
                     needSep = printed;
                 }
             }
-        } catch (RemoteException re) {
-
+        } catch (Exception e) {
+            Log.w(TAG, "Exception in dumpServicesLocked: " + e);
         }
 
         if (mPendingServices.size() > 0) {
@@ -2028,16 +2028,13 @@ public class ActiveServices {
             int opti, boolean dumpAll) {
         ArrayList<ServiceRecord> services = new ArrayList<ServiceRecord>();
 
+        List<UserInfo> users = mAm.getUserManager().getUsers();
         if ("all".equals(name)) {
             synchronized (this) {
-                try {
-                    List<UserInfo> users = AppGlobals.getPackageManager().getUsers();
-                    for (UserInfo user : users) {
-                        for (ServiceRecord r1 : mServiceMap.getAllServices(user.id)) {
-                            services.add(r1);
-                        }
+                for (UserInfo user : users) {
+                    for (ServiceRecord r1 : mServiceMap.getAllServices(user.id)) {
+                        services.add(r1);
                     }
-                } catch (RemoteException re) {
                 }
             }
         } else {
@@ -2055,24 +2052,20 @@ public class ActiveServices {
             }
 
             synchronized (this) {
-                try {
-                    List<UserInfo> users = AppGlobals.getPackageManager().getUsers();
-                    for (UserInfo user : users) {
-                        for (ServiceRecord r1 : mServiceMap.getAllServices(user.id)) {
-                            if (componentName != null) {
-                                if (r1.name.equals(componentName)) {
-                                    services.add(r1);
-                                }
-                            } else if (name != null) {
-                                if (r1.name.flattenToString().contains(name)) {
-                                    services.add(r1);
-                                }
-                            } else if (System.identityHashCode(r1) == objectId) {
+                for (UserInfo user : users) {
+                    for (ServiceRecord r1 : mServiceMap.getAllServices(user.id)) {
+                        if (componentName != null) {
+                            if (r1.name.equals(componentName)) {
                                 services.add(r1);
                             }
+                        } else if (name != null) {
+                            if (r1.name.flattenToString().contains(name)) {
+                                services.add(r1);
+                            }
+                        } else if (System.identityHashCode(r1) == objectId) {
+                            services.add(r1);
                         }
                     }
-                } catch (RemoteException re) {
                 }
             }
         }

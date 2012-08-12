@@ -55,6 +55,7 @@ import com.android.server.input.InputManagerService;
 import com.android.server.net.NetworkPolicyManagerService;
 import com.android.server.net.NetworkStatsService;
 import com.android.server.pm.PackageManagerService;
+import com.android.server.pm.UserManagerService;
 import com.android.server.power.PowerManagerService;
 import com.android.server.power.ShutdownThread;
 import com.android.server.usb.UsbService;
@@ -192,6 +193,11 @@ class ServerThread extends Thread {
             }
 
             ActivityManagerService.setSystemProcess();
+            
+            Slog.i(TAG, "User Service");
+            ServiceManager.addService(Context.USER_SERVICE,
+                    UserManagerService.getInstance(context));
+
 
             mContentResolver = context.getContentResolver();
 
