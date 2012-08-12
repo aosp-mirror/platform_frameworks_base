@@ -2616,56 +2616,6 @@ public abstract class PackageManager {
             String packageName, IPackageMoveObserver observer, int flags);
 
     /**
-     * Creates a user with the specified name and options.
-     *
-     * @param name the user's name
-     * @param flags flags that identify the type of user and other properties.
-     * @see UserInfo
-     *
-     * @return the UserInfo object for the created user, or null if the user could not be created.
-     * @hide
-     */
-    public abstract UserInfo createUser(String name, int flags);
-
-    /**
-     * @return the list of users that were created
-     * @hide
-     */
-    public abstract List<UserInfo> getUsers();
-
-    /**
-     * @param id the ID of the user, where 0 is the primary user.
-     * @hide
-     */
-    public abstract boolean removeUser(int id);
-
-    /**
-     * Updates the user's name.
-     *
-     * @param id the user's id
-     * @param name the new name for the user
-     * @hide
-     */
-    public abstract void setUserName(int id, String name);
-
-    /**
-     * Changes the user's properties specified by the flags.
-     *
-     * @param id the user's id
-     * @param flags the new flags for the user
-     * @hide
-     */
-    public abstract void updateUserFlags(int id, int flags);
-
-    /**
-     * Returns the details for the user specified by userId.
-     * @param userId the user id of the user
-     * @return UserInfo for the specified user, or null if no such user exists.
-     * @hide
-     */
-    public abstract UserInfo getUser(int userId);
-
-    /**
      * Returns the device identity that verifiers can use to associate their scheme to a particular
      * device. This should not be used by anything other than a package verifier.
      * 

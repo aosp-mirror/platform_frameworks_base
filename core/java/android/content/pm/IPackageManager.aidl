@@ -358,11 +358,6 @@ interface IPackageManager {
     boolean setInstallLocation(int loc);
     int getInstallLocation();
 
-    UserInfo createUser(in String name, int flags);
-    boolean removeUser(int userId);
-    void setUserName(int userId, String name);
-    ParcelFileDescriptor setUserIcon(int userId);
-
     void installPackageWithVerification(in Uri packageURI, in IPackageInstallObserver observer,
             int flags, in String installerPackageName, in Uri verificationURI,
             in ManifestDigest manifestDigest, in ContainerEncryptionParams encryptionParams);
@@ -372,9 +367,6 @@ interface IPackageManager {
     VerifierDeviceIdentity getVerifierDeviceIdentity();
 
     boolean isFirstBoot();
-
-    List<UserInfo> getUsers();
-    UserInfo getUser(int userId);
 
     void setPermissionEnforced(String permission, boolean enforced);
     boolean isPermissionEnforced(String permission);

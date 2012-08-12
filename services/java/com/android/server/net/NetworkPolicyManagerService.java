@@ -113,6 +113,7 @@ import android.os.MessageQueue.IdleHandler;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.UserId;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.text.format.Formatter;
@@ -1707,7 +1708,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     private void updateRulesForAppLocked(int appId) {
-        for (UserInfo user : mContext.getPackageManager().getUsers()) {
+        UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        for (UserInfo user : um.getUsers()) {
             final int uid = UserId.getUid(user.id, appId);
             updateRulesForUidLocked(uid);
         }

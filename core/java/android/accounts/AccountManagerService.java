@@ -51,6 +51,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserId;
+import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -92,6 +93,7 @@ public class AccountManagerService
     private final Context mContext;
 
     private final PackageManager mPackageManager;
+    private UserManager mUserManager;
 
     private HandlerThread mMessageThread;
     private final MessageHandler mMessageHandler;
@@ -245,6 +247,13 @@ public class AccountManagerService
         initUser(0);
     }
 
+    private UserManager getUserManager() {
+        if (mUserManager == null) {
+            mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        }
+        return mUserManager;
+    }
+
     private UserAccounts initUser(int userId) {
         synchronized (mUsers) {
             UserAccounts accounts = mUsers.get(userId);
@@ -382,12 +391,7 @@ public class AccountManagerService
     }
 
     private List<UserInfo> getAllUsers() {
-        try {
-            return AppGlobals.getPackageManager().getUsers();
-        } catch (RemoteException re) {
-            // Local to system process, shouldn't happen
-        }
-        return null;
+        return getUserManager().getUsers();
     }
 
     public void onServiceChanged(AuthenticatorDescription desc, boolean removed) {
