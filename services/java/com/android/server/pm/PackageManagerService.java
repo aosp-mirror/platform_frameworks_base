@@ -68,6 +68,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
+import android.content.pm.UserInfo;
 import android.content.pm.PackageParser.ActivityIntentInfo;
 import android.content.pm.PackageStats;
 import android.content.pm.ParceledListSlice;
@@ -77,7 +78,6 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.Signature;
-import android.content.pm.UserInfo;
 import android.content.pm.ManifestDigest;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.pm.VerifierInfo;
@@ -101,6 +101,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserId;
+import android.os.UserManager;
 import android.provider.Settings.Secure;
 import android.security.SystemKeyStore;
 import android.util.DisplayMetrics;
@@ -420,7 +421,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     // Delay time in millisecs
     static final int BROADCAST_DELAY = 10 * 1000;
 
-    static UserManager sUserManager;
+    static UserManagerService sUserManager;
 
     // Stores a list of users whose package restrictions file needs to be updated
     private HashSet<Integer> mDirtyUsers = new HashSet<Integer>();
@@ -899,7 +900,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         mOnlyCore = onlyCore;
         mNoDexOpt = "eng".equals(SystemProperties.get("ro.build.type"));
         mMetrics = new DisplayMetrics();
-        mSettings = new Settings();
+        mSettings = new Settings(context);
         mSettings.addSharedUserLPw("android.uid.system",
                 Process.SYSTEM_UID, ApplicationInfo.FLAG_SYSTEM);
         mSettings.addSharedUserLPw("android.uid.phone", RADIO_UID, ApplicationInfo.FLAG_SYSTEM);
@@ -942,11 +943,12 @@ public class PackageManagerService extends IPackageManager.Stub {
             mUserAppDataDir = new File(dataDir, "user");
             mDrmAppPrivateInstallDir = new File(dataDir, "app-private");
 
-            sUserManager = new UserManager(mInstaller, mUserAppDataDir);
+            sUserManager = UserManagerService.getInstance(context);
+            sUserManager.setInstaller(this, mInstaller);
 
             readPermissions();
 
-            mRestoredSettings = mSettings.readLPw(getUsers());
+            mRestoredSettings = mSettings.readLPw(sUserManager.getUsers());
             long startTime = SystemClock.uptimeMillis();
 
             EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_SYSTEM_SCAN_START,
@@ -9459,48 +9461,16 @@ public class PackageManagerService extends IPackageManager.Stub {
                 PackageHelper.APP_INSTALL_AUTO);
     }
 
-    public UserInfo createUser(String name, int flags) {
-        // TODO(kroot): Add a real permission for creating users
-        enforceSystemOrRoot("Only the system can create users");
-
-        UserInfo userInfo = sUserManager.createUser(name, flags);
-        if (userInfo != null) {
-            Intent addedIntent = new Intent(Intent.ACTION_USER_ADDED);
-            addedIntent.putExtra(Intent.EXTRA_USERID, userInfo.id);
-            mContext.sendBroadcast(addedIntent, android.Manifest.permission.MANAGE_ACCOUNTS);
-        }
-        return userInfo;
-    }
-
-    public boolean removeUser(int userId) {
-        // TODO(kroot): Add a real permission for removing users
-        enforceSystemOrRoot("Only the system can remove users");
-
-        if (userId == 0 || !sUserManager.exists(userId)) {
-            return false;
-        }
-
-        cleanUpUser(userId);
-
-        if (sUserManager.removeUser(userId)) {
-            // Let other services shutdown any activity
-            Intent addedIntent = new Intent(Intent.ACTION_USER_REMOVED);
-            addedIntent.putExtra(Intent.EXTRA_USERID, userId);
-            mContext.sendBroadcast(addedIntent, android.Manifest.permission.MANAGE_ACCOUNTS);
-        }
-        sUserManager.removePackageFolders(userId);
-        return true;
-    }
-
-    private void cleanUpUser(int userId) {
+    /** Called by UserManagerService */
+    void cleanUpUser(int userHandle) {
         // Disable all the packages for the user first
         synchronized (mPackages) {
             Set<Entry<String, PackageSetting>> entries = mSettings.mPackages.entrySet();
             for (Entry<String, PackageSetting> entry : entries) {
-                entry.getValue().removeUser(userId);
+                entry.getValue().removeUser(userHandle);
             }
-            if (mDirtyUsers.remove(userId));
-            mSettings.removeUserLPr(userId);
+            if (mDirtyUsers.remove(userHandle));
+            mSettings.removeUserLPr(userHandle);
         }
     }
 
@@ -9513,30 +9483,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             return mSettings.getVerifierDeviceIdentityLPw();
         }
-    }
-
-    @Override
-    public List<UserInfo> getUsers() {
-        enforceSystemOrRoot("Only the system can query users");
-        return sUserManager.getUsers();
-    }
-
-    @Override
-    public UserInfo getUser(int userId) {
-        enforceSystemOrRoot("Only the system can query user");
-        return sUserManager.getUser(userId);
-    }
-
-    @Override
-    public void setUserName(int userId, String name) {
-        enforceSystemOrRoot("Only the system can rename users");
-        sUserManager.setUserName(userId, name);
-    }
-
-    @Override
-    public ParcelFileDescriptor setUserIcon(int userId) {
-        enforceSystemOrRoot("Only the system can update users");
-        return sUserManager.setUserIcon(userId);
     }
 
     @Override

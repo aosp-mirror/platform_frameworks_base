@@ -16,7 +16,7 @@
 
 package com.android.server.pm;
 
-import com.android.server.pm.UserManager;
+import com.android.server.pm.UserManagerService;
 
 import android.content.pm.UserInfo;
 import android.os.Debug;
@@ -25,14 +25,14 @@ import android.test.AndroidTestCase;
 
 import java.util.List;
 
-/** Test {@link UserManager} functionality. */
+/** Test {@link UserManagerService} functionality. */
 public class UserManagerTest extends AndroidTestCase {
 
-    UserManager mUserManager = null;
+    UserManagerService mUserManager = null;
 
     @Override
     public void setUp() throws Exception {
-        mUserManager = new UserManager(Environment.getExternalStorageDirectory(),
+        mUserManager = new UserManagerService(Environment.getExternalStorageDirectory(),
                 Environment.getExternalStorageDirectory());
     }
 
@@ -52,7 +52,7 @@ public class UserManagerTest extends AndroidTestCase {
     }
 
     public void testAddUser() throws Exception {
-        final UserManager details = mUserManager;
+        final UserManagerService details = mUserManager;
 
         UserInfo userInfo = details.createUser("Guest 1", UserInfo.FLAG_GUEST);
         assertTrue(userInfo != null);
@@ -71,7 +71,7 @@ public class UserManagerTest extends AndroidTestCase {
     }
 
     public void testAdd2Users() throws Exception {
-        final UserManager details = mUserManager;
+        final UserManagerService details = mUserManager;
 
         UserInfo user1 = details.createUser("Guest 1", UserInfo.FLAG_GUEST);
         UserInfo user2 = details.createUser("User 2", UserInfo.FLAG_ADMIN);
@@ -85,7 +85,7 @@ public class UserManagerTest extends AndroidTestCase {
     }
 
     public void testRemoveUser() throws Exception {
-        final UserManager details = mUserManager;
+        final UserManagerService details = mUserManager;
 
         UserInfo userInfo = details.createUser("Guest 1", UserInfo.FLAG_GUEST);
 

@@ -32,6 +32,7 @@ import android.database.ContentObserver;
 import android.os.Binder;
 import android.os.Process;
 import android.os.UserId;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.SparseArray;
@@ -77,7 +78,8 @@ public class SearchManagerService extends ISearchManager.Stub {
         Searchables searchables = mSearchables.get(userId);
 
         long origId = Binder.clearCallingIdentity();
-        boolean userExists = mContext.getPackageManager().getUser(userId) != null;
+        boolean userExists = ((UserManager) mContext.getSystemService(Context.USER_SERVICE))
+                .getUserInfo(userId) != null;
         Binder.restoreCallingIdentity(origId);
 
         if (searchables == null && userExists) {

@@ -38,6 +38,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
+import android.os.UserManager;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.telephony.PhoneStateListener;
@@ -278,7 +279,8 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             mItems.add(mSilentModeAction);
         }
 
-        List<UserInfo> users = mContext.getPackageManager().getUsers();
+        List<UserInfo> users = ((UserManager) mContext.getSystemService(Context.USER_SERVICE))
+                .getUsers();
         if (users.size() > 1) {
             UserInfo currentUser;
             try {

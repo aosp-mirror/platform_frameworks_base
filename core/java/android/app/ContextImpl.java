@@ -80,6 +80,7 @@ import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IPowerManager;
+import android.os.IUserManager;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.Process;
@@ -87,6 +88,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserId;
 import android.os.SystemVibrator;
+import android.os.UserManager;
 import android.os.storage.StorageManager;
 import android.telephony.TelephonyManager;
 import android.content.ClipboardManager;
@@ -498,6 +500,13 @@ class ContextImpl extends Context {
                     return WindowManagerImpl.getDefault().makeCompatible(
                             ctx.mPackageInfo.mCompatibilityInfo);
                 }});
+
+        registerService(USER_SERVICE, new ServiceFetcher() {
+            public Object getService(ContextImpl ctx) {
+                IBinder b = ServiceManager.getService(USER_SERVICE);
+                IUserManager service = IUserManager.Stub.asInterface(b);
+                return new UserManager(ctx, service);
+            }});
     }
 
     static ContextImpl getImpl(Context context) {
@@ -916,6 +925,18 @@ class ContextImpl extends Context {
         mMainThread.getInstrumentation().execStartActivity(
             getOuterContext(), mMainThread.getApplicationThread(), null,
             (Activity)null, intent, -1, options);
+    }
+
+    /** @hide */
+    @Override
+    public void startActivityAsUser(Intent intent, Bundle options, int userId) {
+        try {
+            ActivityManagerNative.getDefault().startActivityAsUser(
+                mMainThread.getApplicationThread(), intent,
+                intent.resolveTypeIfNeeded(getContentResolver()),
+                null, null, 0, Intent.FLAG_ACTIVITY_NEW_TASK, null, null, options, userId);
+        } catch (RemoteException re) {
+        }
     }
 
     @Override
