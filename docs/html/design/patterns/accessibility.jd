@@ -1,0 +1,80 @@
+page.title=Accessibility
+@jd:body
+
+<p>One of Android's missions is to organize the world's information and make it universally accessible and useful. Accessibility is the measure of how successfully a product can be used by people with varying abilities. Our mission applies to all users-including people with disabilities such as visual impairment, color deficiency, hearing loss, and limited dexterity.</p>
+<p><a href="https://www.google.com/#hl=en&q=universal+design&fp=1">Universal design</a> is the practice of making products that are inherently accessible to all users, regardless of ability. The Android design patterns were created in accordance with universal design principles, and following them will help your app meet basic usability standards. Adhering to universal design and enabling Android's accessibility tools will make your app as accessible as possible.</p>
+<p>Robust support for accessibility will increase your app's user base. It may also be required for adoption by some organizations.</p>
+<p><a href="http://www.google.com/accessibility/">Learn more about Google and accessibility.</a></p>
+
+<h2 id="tools">Android's Accessibility Tools</h2>
+<p>Android includes several features that support access for users with visual impairments; they don't require drastic visual changes to your app.</p>
+
+<ul>
+  <li><strong><a href="https://play.google.com/store/apps/details?id=com.google.android.marvin.talkback">TalkBack</a></strong> is a pre-installed screen reader service provided by Google. It uses spoken feedback to describe the results of actions such as launching an app, and events such as notifications.</li>
+  <li><strong>Explore by Touch</strong> is a system feature that works with TalkBack, allowing you to touch your device's screen and hear what's under your finger via spoken feedback. This feature is helpful to users with low vision.</li>
+  <li><strong>Accessibility settings</strong> let you modify your device's display and sound options, such as increasing the text size, changing the speed at which text is spoken, and more.</li>
+</ul>
+
+<p>Some users use hardware or software directional controllers (such as a D-pad, trackball, keyboard) to jump from selection to selection on a screen. They interact with the structure of your app in a linear fashion, similar to 4-way remote control navigation on a television.</p>
+
+<h2 id="tools">Guidelines</h2>
+<p>The Android design principle "I should always know where I am" is key for accessibility concerns. As a user navigates through an application, they need feedback and a mental model of where they are. All users benefit from a strong sense of information hierarchy and an architecture that makes sense. Most users benefit from visual and haptic feedback during their navigation (such as labels, colors, icons, touch feedback) Low vision users benefit from explicit verbal descriptions and large visuals with high contrast.</p>
+<p>As you design your app, think about the labels and notations needed to navigate your app by sound. When using Explore by Touch, the user enables an invisible but audible layer of structure in your application. Like any other aspect of app design, this structure can be simple, elegant, and robust. The following are Android's recommended guidelines to enable effective navigation for all users.</p>
+
+<h4>Make navigation intuitive</h4>
+<p>Design well-defined, clear task flows with minimal navigation steps, especially for major user tasks. Make sure those tasks are navigable via focus controls. </p>
+
+<h4>Use recommended touch target sizes</h4>
+<p>48 dp is the recommended touch target size for on screen elements. Read about <a href="{@docRoot}design/style/metrics-grids.html">Android Metrics and Grids</a> to learn about implementation strategies to help most of your users. For certain users, it may be appropriate to use larger touch targets. An example of this is educational apps, where buttons larger than the minimum recommendations are appropriate for children with developing motor skills and people with manual dexterity challenges.</p>
+
+
+<h4>Label visual UI elements meaningfully</h4>
+<p>In your wireframes, <a href="{@docRoot}guide/topics/ui/accessibility/apps.html#label-ui">label functional UI components</a> that have no visible text. Those components might be buttons, icons, tabs with icons, and icons with state (like stars). Developers can use the <code><a href="{@docRoot}guide/topics/ui/accessibility/apps.html#label-ui">contentDescription</a></code> attribute to set the label.</p>
+
+<div class ="layout-content-row">
+    <div class="layout-content-col span-8">
+      <img src="{@docRoot}design/media/accessibility_contentdesc.png">
+    </div>
+    <div class="layout-content-col span-5 with-callouts">
+      <ol>
+        <li class="value-1">group</li>
+        <li class="value-2">all contacts</li>
+        <li class="value-3">favorites</li>
+        <li class="value-4">search</li>
+        <li class="value-5">action overflow button</li>
+        <li class="value-6">
+          <em>when starred:</em> remove from favorites </br>
+          <em>when not starred:</em> add to favorties</li>
+        <li class="value-7">action overflow button</li>
+        <li class="value-8">text message</li>
+        <li class="value-9">video chat</li>
+      </ol>
+  </div>
+</div>
+
+<h4>Provide alternatives to affordances that time out</h4>
+<p>Your app may have icons or controls that disappear after a certain amount of time. For example, five seconds after starting a video, playback controls may fade from the screen.</p>
+
+<p>Due to the way that TalkBack works, those controls are not read out loud unless they are focused on. If they fade out from the screen quickly, your user may not even be aware that they are available. Therefore, make sure that you are not relying on timed out controls for high priority task flows. (This is a good universal design guideline too.) If the controls enable an important function, make sure that the user can turn on the controls again and/or their function is duplicated elsewhere. You can also change the behavior of your app when accessibility services are turned on. Your developer may be able to make sure that timed-out controls won't disappear.</p>
+
+<h4>Use standard framework controls or enable TalkBack for custom controls</h4>
+<p>Standard Android framework controls work automatically with accessibility services and have ContentDescriptions built in by default.</p>
+
+<p>An oft-overlooked system control is font size. Users can turn on a system-wide large font size in Settings; using the default system font size in your application will enable the user's preferences in your app as well. To enable system font size in your app, mark text and their associated containers to be measured in <a href="{@docRoot}guide/practices/screens_support.html#screen-independence">scale pixels</a>.</p>
+
+<p>Also, keep in mind that when users have large fonts enabled or speak a different language than you, their type might be larger than the space you've allotted for it. Read <a href="{@docRoot}design/style/devices-displays.html">Devices and Displays</a> and <a href="http://developer.android.com/guide/practices/screens_support.html">Supporting Multiple Screens</a> for design strategies.</p>
+
+<p>If you use custom controls, Android has the developer tools in place to allow adherence to the above guidelines and provide meaningful descriptions about the UI. Provide adequate notation on your wireframes and direct your developer to the <a href="{@docRoot}guide/topics/ui/accessibility/apps.html#custom-views">Custom Views</a> documentation.</p>
+
+<h4>Try it out yourself</h4>
+<p>Turn on the TalkBack service in <strong>Settings > Accessibility</strong> and navigate your application using directional controls or eyes-free navigation.</p>
+
+<h2>Checklist</h2>
+<ul>
+  <li>Make navigation intuitive</li>
+  <li>Use recommended touch target sizes</li>
+  <li>Label visual UI elements meaningfully</li>
+  <li>Provide alternatives to affordances that time out</li>
+  <li>Use standard framework controls or enable TalkBack for custom controls</li>
+  <li>Try it out yourself</li>
+</ul>
