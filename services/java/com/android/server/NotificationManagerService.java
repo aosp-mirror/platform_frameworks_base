@@ -51,6 +51,7 @@ import android.os.ServiceManager;
 import android.os.UserId;
 import android.os.Vibrator;
 import android.provider.Settings;
+import android.service.dreams.IDreamManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.AtomicFile;
@@ -147,6 +148,8 @@ public class NotificationManagerService extends INotificationManager.Stub
     // Notification control database. For now just contains disabled packages.
     private AtomicFile mPolicyFile;
     private HashSet<String> mBlockedPackages = new HashSet<String>();
+
+    private IDreamManager mSandman;
 
     private static final int DB_VERSION = 1;
 
@@ -634,6 +637,8 @@ public class NotificationManagerService extends INotificationManager.Stub
     void systemReady() {
         mAudioService = IAudioService.Stub.asInterface(
                 ServiceManager.getService(Context.AUDIO_SERVICE));
+        mSandman = IDreamManager.Stub.asInterface(
+                ServiceManager.getService("dreams"));
 
         // no beeping until we're basically done booting
         mSystemReady = true;
@@ -970,6 +975,16 @@ public class NotificationManagerService extends INotificationManager.Stub
             if ((notification.flags&Notification.FLAG_FOREGROUND_SERVICE) != 0) {
                 notification.flags |= Notification.FLAG_ONGOING_EVENT
                         | Notification.FLAG_NO_CLEAR;
+            }
+
+            // Stop screensaver if the notification has a full-screen intent.
+            // (like an incoming phone call)
+            if (notification.fullScreenIntent != null && mSandman != null) {
+                try {
+                    mSandman.awaken();
+                } catch (RemoteException e) {
+                    // noop
+                }
             }
 
             if (notification.icon != 0) {
