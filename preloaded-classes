@@ -38,10 +38,6 @@ android.animation.TimeInterpolator
 android.animation.TypeEvaluator
 android.animation.ValueAnimator
 android.animation.ValueAnimator$1
-android.animation.ValueAnimator$2
-android.animation.ValueAnimator$3
-android.animation.ValueAnimator$4
-android.animation.ValueAnimator$5
 android.animation.ValueAnimator$AnimationHandler
 android.app.ActionBar
 android.app.ActionBar$LayoutParams
@@ -279,7 +275,6 @@ android.content.res.ObbInfo
 android.content.res.ObbInfo$1
 android.content.res.ObbScanner
 android.content.res.Resources
-android.content.res.Resources$1
 android.content.res.Resources$Theme
 android.content.res.StringBlock
 android.content.res.StringBlock$StyleIDs
@@ -318,13 +313,11 @@ android.database.MatrixCursor
 android.database.Observable
 android.database.sqlite.DatabaseObjectNotClosedException
 android.database.sqlite.SQLiteClosable
-android.database.sqlite.SQLiteCompiledSql
 android.database.sqlite.SQLiteCursor
 android.database.sqlite.SQLiteCursorDriver
 android.database.sqlite.SQLiteDatabase
 android.database.sqlite.SQLiteDatabase$1
 android.database.sqlite.SQLiteDatabase$CustomFunction
-android.database.sqlite.SQLiteDatabase$DatabaseReentrantLock
 android.database.sqlite.SQLiteDebug
 android.database.sqlite.SQLiteDebug$PagerStats
 android.database.sqlite.SQLiteDirectCursorDriver
@@ -482,7 +475,6 @@ android.location.LocationManager
 android.media.AudioFormat
 android.media.AudioManager
 android.media.AudioManager$1
-android.media.AudioManager$2
 android.media.AudioManager$FocusEventHandlerDelegate
 android.media.AudioManager$FocusEventHandlerDelegate$1
 android.media.AudioRecord
@@ -495,8 +487,6 @@ android.media.IAudioFocusDispatcher$Stub
 android.media.IAudioService
 android.media.IAudioService$Stub
 android.media.IAudioService$Stub$Proxy
-android.media.IRemoteControlClientDispatcher
-android.media.IRemoteControlClientDispatcher$Stub
 android.media.JetPlayer
 android.media.MediaFile
 android.media.MediaPlayer
@@ -605,7 +595,6 @@ android.os.Parcelable$ClassLoaderCreator
 android.os.Parcelable$Creator
 android.os.PatternMatcher
 android.os.PatternMatcher$1
-android.os.Power
 android.os.PowerManager
 android.os.PowerManager$WakeLock
 android.os.PowerManager$WakeLock$1
@@ -698,7 +687,6 @@ android.text.TextDirectionHeuristic
 android.text.TextDirectionHeuristics
 android.text.TextDirectionHeuristics$1
 android.text.TextDirectionHeuristics$AnyStrong
-android.text.TextDirectionHeuristics$CharCount
 android.text.TextDirectionHeuristics$FirstStrong
 android.text.TextDirectionHeuristics$TextDirectionAlgorithm
 android.text.TextDirectionHeuristics$TextDirectionHeuristicImpl
@@ -729,7 +717,6 @@ android.text.method.TextKeyListener$Capitalize
 android.text.method.TransformationMethod
 android.text.method.TransformationMethod2
 android.text.method.WordIterator
-android.text.method.WordIterator$1
 android.text.style.AlignmentSpan
 android.text.style.CharacterStyle
 android.text.style.LeadingMarginSpan
@@ -824,10 +811,9 @@ android.view.InputEvent
 android.view.InputEvent$1
 android.view.InputEventConsistencyVerifier
 android.view.InputEventConsistencyVerifier$KeyState
-android.view.InputHandler
+android.view.InputEventReceiver
 android.view.InputQueue
 android.view.InputQueue$Callback
-android.view.InputQueue$FinishedCallback
 android.view.KeyCharacterMap
 android.view.KeyCharacterMap$FallbackAction
 android.view.KeyEvent
@@ -903,7 +889,6 @@ android.view.ViewManager
 android.view.ViewParent
 android.view.ViewRootImpl
 android.view.ViewRootImpl$2
-android.view.ViewRootImpl$3
 android.view.ViewRootImpl$AccessibilityInteractionConnectionManager
 android.view.ViewRootImpl$InputMethodCallback
 android.view.ViewRootImpl$ResizedInfo
@@ -1005,8 +990,11 @@ android.widget.CompoundButton$OnCheckedChangeListener
 android.widget.CursorAdapter
 android.widget.CursorFilter$CursorFilterClient
 android.widget.EdgeEffect
-android.widget.EdgeGlow
 android.widget.EditText
+android.widget.Editor$Blink
+android.widget.Editor$EasyEditSpanController
+android.widget.Editor$InputContentType
+android.widget.Editor$InputMethodState
 android.widget.ExpandableListView
 android.widget.FastScroller
 android.widget.FastScroller$1
@@ -1080,17 +1068,12 @@ android.widget.TableRow
 android.widget.TextView
 android.widget.TextView$2
 android.widget.TextView$3
-android.widget.TextView$Blink
 android.widget.TextView$BufferType
 android.widget.TextView$ChangeWatcher
 android.widget.TextView$CharWrapper
 android.widget.TextView$Drawables
-android.widget.TextView$EasyEditSpanController
-android.widget.TextView$InputContentType
-android.widget.TextView$InputMethodState
 android.widget.TextView$OnEditorActionListener
 android.widget.TextView$SavedState
-android.widget.TextView$TextAlign
 android.widget.VideoView
 android.widget.ViewAnimator
 com.android.i18n.phonenumbers.AsYouTypeFormatter
@@ -1144,7 +1127,7 @@ com.android.internal.telephony.ITelephony$Stub
 com.android.internal.telephony.ITelephonyRegistry
 com.android.internal.telephony.ITelephonyRegistry$Stub
 com.android.internal.telephony.ITelephonyRegistry$Stub$Proxy
-com.android.internal.telephony.Phone$State
+com.android.internal.telephony.PhoneConstants$State
 com.android.internal.util.ArrayUtils
 com.android.internal.util.FastXmlSerializer
 com.android.internal.util.Preconditions
