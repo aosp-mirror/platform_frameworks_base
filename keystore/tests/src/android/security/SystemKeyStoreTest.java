@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.security.tests;
+package android.security;
 
 import android.app.Activity;
 import android.security.SystemKeyStore;
@@ -26,7 +26,11 @@ import android.test.suitebuilder.annotation.MediumTest;
  *
  * Running the test suite:
  *
- *  adb shell am instrument -w android.security.tests/.KeyStoreTestRunner
+ *  runtest keystore-unit
+ *
+ * Or this individual test case:
+ *
+ *  runtest --path frameworks/base/keystore/tests/src/android/security/SystemKeyStoreTest.java
  */
 @MediumTest
 public class SystemKeyStoreTest extends ActivityUnitTestCase<Activity> {
