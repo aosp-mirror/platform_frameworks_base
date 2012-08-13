@@ -220,10 +220,10 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Cho phép ứng dụng nhận và xử lý tin nhắn WAP. Quyền này bao gồm khả năng giám sát hoặc xóa tin nhắn được gửi cho bạn mà không hiển thị chúng cho bạn."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"truy xuất các ứng dụng đang chạy"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Cho phép ứng dụng truy xuất thông tin về các công việc đã và đang chạy gần đây. Việc này có thể cho phép ứng dụng phát hiện thông tin về những ứng dụng nào đã được sử dụng trên thiết bị."</string>
-    <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"tương tác với người dùng"</string>
-    <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Cho phép ứng dụng thực hiện hành động với những người dùng khác trên thiết bị. Ứng dụng độc hại có thể sử dụng quyền này để vi phạm khả năng bảo vệ giữa người dùng."</string>
-    <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"cấp phép đầy đủ để tương tác với người dùng"</string>
-    <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Cho phép tất cả các tương tác có thể xảy ra với người dùng."</string>
+    <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"tương tác giữa người dùng"</string>
+    <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Cho phép ứng dụng thực hiện hành động giữa những người dùng khác trên thiết bị. Ứng dụng độc hại có thể sử dụng quyền này để vi phạm khả năng bảo vệ giữa người dùng."</string>
+    <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"cấp phép đầy đủ để tương tác giữa người dùng"</string>
+    <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Cho phép tất cả các tương tác giữa người dùng."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"truy xuất chi tiết về các ứng dụng đang chạy"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Cho phép ứng dụng truy xuất thông tin chi tiết về các tác vụ đã và đang chạy gần đây. Ứng dụng độc hại có thể phát hiện thông tin riêng tư về các ứng dụng khác."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"sắp xếp lại những ứng dụng đang chạy"</string>
