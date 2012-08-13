@@ -20,10 +20,10 @@ footer.hide=1
   <div id="text-overlay">
     Design apps that behave in a consistent, predictable fashion.
     <br><br>
-    <a href="{@docRoot}design/patterns/new-4-0.html" class="landing-page-link">New in Android 4.0</a>
+    <a href="{@docRoot}design/patterns/new.html" class="landing-page-link">New in Android</a>
   </div>
 
-  <a href="{@docRoot}design/patterns/new-4-0.html">
+  <a href="{@docRoot}design/patterns/new.html">
     <img src="{@docRoot}design/media/patterns_landing.png">
   </a>
 </div>
