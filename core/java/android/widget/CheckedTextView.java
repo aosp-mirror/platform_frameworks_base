@@ -151,7 +151,7 @@ public class CheckedTextView extends TextView implements Checkable {
             mCheckMarkWidth = 0;
         }
         mCheckMarkDrawable = d;
-        // Do padding resolution. This will call setPadding() and do a requestLayout() if needed.
+        // Do padding resolution. This will call internalSetPadding() and do a requestLayout() if needed.
         resolvePadding();
     }
 
@@ -167,6 +167,19 @@ public class CheckedTextView extends TextView implements Checkable {
      */
     public Drawable getCheckMarkDrawable() {
         return mCheckMarkDrawable;
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    protected void internalSetPadding(int left, int top, int right, int bottom) {
+        super.internalSetPadding(left, top, right, bottom);
+        if (isLayoutRtl()) {
+            mBasePadding = mUserPaddingLeft;
+        } else {
+            mBasePadding = mUserPaddingRight;
+        }
     }
 
     @Override
@@ -221,8 +234,15 @@ public class CheckedTextView extends TextView implements Checkable {
             final int width = getWidth();
             final int top = y;
             final int bottom = top + height;
-            final int left = isLayoutRtl ? getPaddingEnd() : width - getPaddingEnd();
-            final int right = left + mCheckMarkWidth;
+            final int left;
+            final int right;
+            if (isLayoutRtl) {
+                right = getPaddingEnd();
+                left = right - mCheckMarkWidth;
+            } else {
+                left = width - getPaddingEnd();
+                right = left + mCheckMarkWidth;
+            }
             checkMarkDrawable.setBounds( left, top, right, bottom);
             checkMarkDrawable.draw(canvas);
         }
