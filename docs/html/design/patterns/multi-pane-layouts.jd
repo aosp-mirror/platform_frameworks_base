@@ -26,8 +26,8 @@ left pane. Make sure to keep the item in the left pane selected in order to esta
 relationship between the panels.</p>
 <h2 id="orientation">Compound Views and Orientation Changes</h2>
 
-<p>Screens should have the same functionality regardless of orientation. If you use a compound view in
-one orientation, don't split it up when the user rotates the screen. There are several techniques
+<p>Screens should strive to have the same functionality regardless of orientation. If you use a compound view in
+one orientation, try not to split it up when the user rotates the screen. There are several techniques
 you can use to adjust the layout after orientation change while keeping functional parity intact.</p>
 
 <div class="layout-content-row">
@@ -83,9 +83,7 @@ width and vice versa.</p>
   <div class="layout-content-col span-5">
 
 <h4>Show/hide</h4>
-<p>After rotating the device, show the right pane in fullscreen view. Use the Up icon in the action bar
-to show the left panel and allow navigation to a different email. Hide the left panel by touching
-the content in the detail panel.</p>
+<p>If your screen cannot accommodate the compound view on rotation show the right pane in full screen view on rotation to portrait. Use the Up icon in action bar to show the parent screen.</p>
 
   </div>
 </div>
@@ -104,7 +102,7 @@ the content in the detail panel.</p>
 <p>Look for opportunities to consolidate your views into multi-panel compound views.</p>
 </li>
 <li>
-<p>Make sure that your screens provide functional parity after the screen orientation
+<p>Make sure that your screens try to provide functional parity after the screen orientation
   changes.</p>
 </li>
 </ul>
