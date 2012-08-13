@@ -22,7 +22,7 @@
         <uses-library android:name="android.test.runner" />
     </application>
 
-    <instrumentation android:name=".KeyStoreTestRunner"
+    <instrumentation android:name="android.test.InstrumentationTestRunner"
         android:targetPackage="android.security.tests"
         android:label="KeyStore Tests">
     </instrumentation>
