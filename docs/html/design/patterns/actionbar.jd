@@ -66,7 +66,7 @@ content, such as an app title or longer branding information.
         <p>
 
 Show the most important actions of your app in the actions section. Actions that don't fit in the
-action bar are moved automatically to the action overflow.
+action bar are moved automatically to the action overflow. Long-press on an icon to view the action's name.
 
         </p>
       </li>
@@ -144,28 +144,44 @@ content of a CAB in order to insert the actions you would like the user to be ab
 <p>For more information, refer to the <a href="{@docRoot}design/patterns/selection.html">Selection
 pattern</a>.</p>
 
-<h2 id="elements">Action Bar Elements</h2>
+<h2 id="elements">View Controls</h2>
+<p>If your app displays data in different views, the action bar has three different controls to allow users to switch between them: tabs, spinners, and drawers.</p>
 
 <h4>Tabs</h4>
-<p><em>Tabs</em> display app views concurrently and make it easy to explore and switch between them. Use tabs
-if you expect your users to switch views frequently.</p>
+<p><em>Tabs</em> display app views concurrently and make it easy to explore and switch between them. Tabs may be fixed, where all tabs are simultaneously displayed, or may scroll, allowing a larger number of views to be presented.</p>
 
 <img src="{@docRoot}design/media/tabs_youtube.png">
 
-<p>There are two types of tabs: fixed and scrollable.</p>
+<p><strong>Use tabs if</strong>:</p>
+<ul>
+<li>You expect your app's users to switch views frequently.</li>
+<li>You want the user to be highly aware of the alternate views.</li>
+</ul>
 
+<h4>Fixed tabs</h4>
 <div class="layout-content-row">
   <div class="layout-content-col span-6">
+<p><em>Fixed tabs</em> are always visible on the screen, and can't be moved out of the way like scrollable
+tabs. Fixed tabs in the main action bar can move to the top bar when the screen orientation changes.</p>
+
+<p>Use fixed tabs to support quick changes between two or three app views. Fixed tabs should always allow the user to navigate between the views by swiping left or right on the content area.</p>
+
+  </div>
+  <div class="layout-content-col span-7">
+
+    <img src="{@docRoot}design/media/action_bar_pattern_default_tabs.png">
+    <div class="figure-caption">
+      Default fixed tabs shown in Holo Dark &amp; Light.
+    </div>
+
+  </div>
+</div>
 
 <h4>Scrollable tabs</h4>
-<p><em>Scrollable tabs</em> always take up the entire width of the bar, with the currently active view item in
-the center, and therefore need to live in a dedicated bar. Scrollable tabs can themselves be
-scrolled horizontally to bring more tabs into view.</p>
-<p>Use scrollable tabs if you have a large number of views or if you're unsure how many views will be
-displayed because your app inserts views dynamically (for example, open chats in a messaging app
-that the user can navigate between). Scrollable tabs should always allow the user to navigate
-between the views by swiping left or right on the content area as well as swiping the tabs
-themselves.</p>
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+<p><em>Scrollable tabs</em> always take up the entire width of the bar, with the currently active view item in the center, and therefore need to live in a dedicated bar. Scrollable tabs can themselves be scrolled horizontally to bring more tabs into view.</p>
+<p>Use scrollable tabs if you have a large number of views or if you're unsure how many views will be displayed because your app inserts views dynamically (for example, open chats in a messaging app that the user can navigate between). Scrollable tabs should always allow the user to navigate between the views by swiping left or right on the content area as well as swiping the tabs themselves.</p>
 
   </div>
   <div class="layout-content-col span-7">
@@ -186,30 +202,12 @@ themselves.</p>
 <div class="layout-content-row">
   <div class="layout-content-col span-6">
 
-<h4>Fixed tabs</h4>
-<p><em>Fixed tabs</em> are always visible on the screen, and can't be moved out of the way like scrollable
-tabs. Fixed tabs in the main action bar can move to the top bar when the screen orientation changes.</p>
-
-  </div>
-  <div class="layout-content-col span-7">
-
-    <img src="{@docRoot}design/media/action_bar_pattern_default_tabs.png">
-    <div class="figure-caption">
-      Default fixed tabs shown in Holo Dark &amp; Light.
-    </div>
-
-  </div>
-</div>
-
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
-
 <h4>Spinners</h4>
 <p>A <em>spinner</em> is a drop-down menu that allows users to switch between views of your app. </p>
-<p><strong>Use spinners rather than tabs in the main action bar if</strong>:</p>
+<p><strong>Use a spinner in the main action bar if</strong>:</p>
 <ul>
 <li>You don't want to give up the vertical screen real estate for a dedicated tab bar.</li>
-<li>You expect your app's users to switch views infrequently.</li>
+<li>The user is switching between views of the same data set (for example: calendar events viewed by day, week, or month) or data sets of the same type (such as content for two different accounts).</li>
 </ul>
 
   </div>
@@ -223,7 +221,24 @@ tabs. Fixed tabs in the main action bar can move to the top bar when the screen 
   </div>
 </div>
 
-<h4>Action buttons</h4>
+<h4>Drawers</h4>
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+<p>A <em>drawer</em> is a slide-out menu that allows users to switch between views of your app. It can be opened by touching the action bar's app icon (decorated with the Up caret.) Because it relies on Up navigation, a drawer is only suitable for use at the topmost level of your app's hierarchy.</p>
+
+<p><strong>Open a drawer from the main action bar if</strong>:</p>
+<ul>
+<li>You don't want to give up the vertical screen real estate for a dedicated tab bar.</li>
+<li>You want to provide direct navigation to a number of views within your app which don't have direct relationships between each other.</li>
+</ul>
+
+  </div>
+  <div class="layout-content-col span-7">
+    <img src="{@docRoot}design/media/actionbar_drawer.png">
+  </div>
+</div>
+
+<h2>Action buttons</h2>
 <p><em>Action buttons</em> on the action bar surface your app's most important activities. Think about which
 buttons will get used most often, and order them accordingly. Depending on available screen real
 estate, the system shows your most important actions as action buttons and moves the rest to the
