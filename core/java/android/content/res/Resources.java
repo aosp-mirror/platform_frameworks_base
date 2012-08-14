@@ -1435,9 +1435,12 @@ public class Resources {
             int configChanges = 0xfffffff;
             if (config != null) {
                 mTmpConfig.setTo(config);
+                int density = config.densityDpi;
+                if (density == Configuration.DENSITY_DPI_UNDEFINED) {
+                    density = mMetrics.noncompatDensityDpi;
+                }
                 if (mCompatibilityInfo != null) {
-                    mCompatibilityInfo.applyToConfiguration(mMetrics.noncompatDensityDpi,
-                            mTmpConfig);
+                    mCompatibilityInfo.applyToConfiguration(density, mTmpConfig);
                 }
                 if (mTmpConfig.locale == null) {
                     mTmpConfig.locale = Locale.getDefault();
@@ -1447,6 +1450,10 @@ public class Resources {
             }
             if (mConfiguration.locale == null) {
                 mConfiguration.locale = Locale.getDefault();
+            }
+            if (mConfiguration.densityDpi != Configuration.DENSITY_DPI_UNDEFINED) {
+                mMetrics.densityDpi = mConfiguration.densityDpi;
+                mMetrics.density = mConfiguration.densityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
             }
             mMetrics.scaledDensity = mMetrics.density * mConfiguration.fontScale;
 

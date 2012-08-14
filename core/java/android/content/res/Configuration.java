@@ -35,6 +35,9 @@ import java.util.Locale;
  * <pre>Configuration config = getResources().getConfiguration();</pre>
  */
 public final class Configuration implements Parcelable, Comparable<Configuration> {
+    /** @hide */
+    public static final Configuration EMPTY = new Configuration();
+
     /**
      * Current user preference for the scaling factor for fonts, relative
      * to the base density scaling.

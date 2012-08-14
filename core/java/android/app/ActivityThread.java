@@ -1471,13 +1471,25 @@ public final class ActivityThread {
 
     private static class ResourcesKey {
         final private String mResDir;
+        final private Configuration mOverrideConfiguration;
         final private float mScale;
         final private int mHash;
 
-        ResourcesKey(String resDir, float scale) {
+        ResourcesKey(String resDir, Configuration overrideConfiguration, float scale) {
             mResDir = resDir;
+            if (overrideConfiguration != null) {
+                if (Configuration.EMPTY.equals(overrideConfiguration)) {
+                    overrideConfiguration = null;
+                }
+            }
+            mOverrideConfiguration = overrideConfiguration;
             mScale = scale;
-            mHash = mResDir.hashCode() << 2 + (int) (mScale * 2);
+            int hash = 17;
+            hash = 31 * hash + mResDir.hashCode();
+            hash = 31 * hash + (mOverrideConfiguration != null
+                    ? mOverrideConfiguration.hashCode() : 0);
+            hash = 31 * hash + Float.floatToIntBits(mScale);
+            mHash = hash;
         }
 
         @Override
@@ -1491,7 +1503,21 @@ public final class ActivityThread {
                 return false;
             }
             ResourcesKey peer = (ResourcesKey) obj;
-            return mResDir.equals(peer.mResDir) && mScale == peer.mScale;
+            if (!mResDir.equals(peer.mResDir)) {
+                return false;
+            }
+            if (mOverrideConfiguration != peer.mOverrideConfiguration) {
+                if (mOverrideConfiguration == null || peer.mOverrideConfiguration == null) {
+                    return false;
+                }
+                if (!mOverrideConfiguration.equals(peer.mOverrideConfiguration)) {
+                    return false;
+                }
+            }
+            if (mScale != peer.mScale) {
+                return false;
+            }
+            return true;
         }
     }
 
@@ -1562,8 +1588,10 @@ public final class ActivityThread {
      * @param compInfo the compability info. It will use the default compatibility info when it's
      * null.
      */
-    Resources getTopLevelResources(String resDir, CompatibilityInfo compInfo) {
-        ResourcesKey key = new ResourcesKey(resDir, compInfo.applicationScale);
+    Resources getTopLevelResources(String resDir, Configuration overrideConfiguration,
+            CompatibilityInfo compInfo) {
+        ResourcesKey key = new ResourcesKey(resDir, overrideConfiguration,
+                compInfo.applicationScale);
         Resources r;
         synchronized (mPackages) {
             // Resources is app scale dependent.
@@ -1595,13 +1623,20 @@ public final class ActivityThread {
 
         //Slog.i(TAG, "Resource: key=" + key + ", display metrics=" + metrics);
         DisplayMetrics metrics = getDisplayMetricsLocked(null, false);
-        r = new Resources(assets, metrics, getConfiguration(), compInfo);
+        Configuration config;
+        if (key.mOverrideConfiguration != null) {
+            config = new Configuration(getConfiguration());
+            config.updateFrom(key.mOverrideConfiguration);
+        } else {
+            config = getConfiguration();
+        }
+        r = new Resources(assets, metrics, config, compInfo);
         if (false) {
             Slog.i(TAG, "Created app resources " + resDir + " " + r + ": "
                     + r.getConfiguration() + " appScale="
                     + r.getCompatibilityInfo().applicationScale);
         }
-        
+
         synchronized (mPackages) {
             WeakReference<Resources> wr = mActiveResources.get(key);
             Resources existing = wr != null ? wr.get() : null;
@@ -1621,8 +1656,10 @@ public final class ActivityThread {
     /**
      * Creates the top level resources for the given package.
      */
-    Resources getTopLevelResources(String resDir, LoadedApk pkgInfo) {
-        return getTopLevelResources(resDir, pkgInfo.mCompatibilityInfo.get());
+    Resources getTopLevelResources(String resDir, Configuration overrideConfiguration,
+            LoadedApk pkgInfo) {
+        return getTopLevelResources(resDir, overrideConfiguration,
+                pkgInfo.mCompatibilityInfo.get());
     }
 
     final Handler getHandler() {
@@ -3675,18 +3712,28 @@ public final class ActivityThread {
 
         ApplicationPackageManager.configurationChanged();
         //Slog.i(TAG, "Configuration changed in " + currentPackageName());
-        
-        Iterator<WeakReference<Resources>> it =
-            mActiveResources.values().iterator();
-        //Iterator<Map.Entry<String, WeakReference<Resources>>> it =
-        //    mActiveResources.entrySet().iterator();
+
+        Configuration tmpConfig = null;
+
+        Iterator<Map.Entry<ResourcesKey, WeakReference<Resources>>> it =
+                mActiveResources.entrySet().iterator();
         while (it.hasNext()) {
-            WeakReference<Resources> v = it.next();
-            Resources r = v.get();
+            Map.Entry<ResourcesKey, WeakReference<Resources>> entry = it.next();
+            Resources r = entry.getValue().get();
             if (r != null) {
                 if (DEBUG_CONFIGURATION) Slog.v(TAG, "Changing resources "
                         + r + " config to: " + config);
-                r.updateConfiguration(config, dm, compat);
+                Configuration override = entry.getKey().mOverrideConfiguration;
+                if (override != null) {
+                    if (tmpConfig == null) {
+                        tmpConfig = new Configuration();
+                    }
+                    tmpConfig.setTo(config);
+                    tmpConfig.updateFrom(override);
+                    r.updateConfiguration(tmpConfig, dm, compat);
+                } else {
+                    r.updateConfiguration(config, dm, compat);
+                }
                 //Slog.i(TAG, "Updated app resources " + v.getKey()
                 //        + " " + r + ": " + r.getConfiguration());
             } else {

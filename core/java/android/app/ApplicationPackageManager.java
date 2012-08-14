@@ -713,7 +713,7 @@ final class ApplicationPackageManager extends PackageManager {
         }
         Resources r = mContext.mMainThread.getTopLevelResources(
             app.uid == Process.myUid() ? app.sourceDir
-            : app.publicSourceDir, mContext.mPackageInfo);
+            : app.publicSourceDir, null, mContext.mPackageInfo);
         if (r != null) {
             return r;
         }
