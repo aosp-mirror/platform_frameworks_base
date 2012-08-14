@@ -67,12 +67,10 @@ class BlockingAudioTrack {
     private int mAudioBufferSize;
     private int mBytesWritten = 0;
 
-    private AudioTrack mAudioTrack;
+    // Need to be seen by stop() which can be called from another thread. mAudioTrack will be
+    // set to null only after waitAndRelease().
+    private volatile AudioTrack mAudioTrack;
     private volatile boolean mStopped;
-    // Locks the initialization / uninitialization of the audio track.
-    // This is required because stop() will throw an illegal state exception
-    // if called before init() or after mAudioTrack.release().
-    private final Object mAudioTrackLock = new Object();
 
     BlockingAudioTrack(int streamType, int sampleRate,
             int audioFormat, int channelCount,
@@ -93,19 +91,21 @@ class BlockingAudioTrack {
         mStopped = false;
     }
 
-    public void init() {
+    public boolean init() {
         AudioTrack track = createStreamingAudioTrack();
+        mAudioTrack = track;
 
-        synchronized (mAudioTrackLock) {
-            mAudioTrack = track;
+        if (track == null) {
+            return false;
+        } else {
+            return true;
         }
     }
 
     public void stop() {
-        synchronized (mAudioTrackLock) {
-            if (mAudioTrack != null) {
-                mAudioTrack.stop();
-            }
+        AudioTrack track = mAudioTrack;
+        if (track != null) {
+            track.stop();
         }
         mStopped = true;
     }
@@ -120,6 +120,12 @@ class BlockingAudioTrack {
     }
 
     public void waitAndRelease() {
+        AudioTrack track = mAudioTrack;
+        if (track == null) {
+            if (DBG) Log.d(TAG, "Audio track null [duplicate call to waitAndRelease ?]");
+            return;
+        }
+
         // For "small" audio tracks, we have to stop() them to make them mixable,
         // else the audio subsystem will wait indefinitely for us to fill the buffer
         // before rendering the track mixable.
@@ -129,11 +135,11 @@ class BlockingAudioTrack {
         if (mBytesWritten < mAudioBufferSize && !mStopped) {
             if (DBG) {
                 Log.d(TAG, "Stopping audio track to flush audio, state was : " +
-                        mAudioTrack.getPlayState() + ",stopped= " + mStopped);
+                        track.getPlayState() + ",stopped= " + mStopped);
             }
 
             mIsShortUtterance = true;
-            mAudioTrack.stop();
+            track.stop();
         }
 
         // Block until the audio track is done only if we haven't stopped yet.
@@ -145,11 +151,9 @@ class BlockingAudioTrack {
         // The last call to AudioTrack.write( ) will return only after
         // all data from the audioTrack has been sent to the mixer, so
         // it's safe to release at this point.
-        if (DBG) Log.d(TAG, "Releasing audio track [" + mAudioTrack.hashCode() + "]");
-        synchronized (mAudioTrackLock) {
-            mAudioTrack.release();
-            mAudioTrack = null;
-        }
+        if (DBG) Log.d(TAG, "Releasing audio track [" + track.hashCode() + "]");
+        track.release();
+        mAudioTrack = null;
     }
 
 
