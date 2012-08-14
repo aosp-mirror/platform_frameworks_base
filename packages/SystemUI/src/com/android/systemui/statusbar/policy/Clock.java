@@ -34,6 +34,7 @@ import android.text.style.RelativeSizeSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 import android.util.AttributeSet;
+import android.util.Slog;
 import android.view.View;
 import android.widget.TextView;
 
@@ -173,7 +174,6 @@ public class Clock extends TextView {
                         + "a" + MAGIC2 + format.substring(b + 1);
                 }
             }
-
             mClockFormat = sdf = new SimpleDateFormat(format);
             mClockFormatString = format;
         } else {

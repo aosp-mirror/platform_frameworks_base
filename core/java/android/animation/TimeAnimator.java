@@ -13,6 +13,12 @@ public class TimeAnimator extends ValueAnimator {
     private long mPreviousTime = -1;
 
     @Override
+    public void start() {
+        mPreviousTime = -1;
+        super.start();
+    }
+
+    @Override
     boolean animationFrame(long currentTime) {
         if (mListener != null) {
             long totalTime = currentTime - mStartTime;
