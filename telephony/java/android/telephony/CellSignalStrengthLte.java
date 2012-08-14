@@ -87,6 +87,22 @@ public class CellSignalStrengthLte extends CellSignalStrength implements Parcela
     }
 
     /**
+     * Initialize from the SignalStrength structure.
+     *
+     * @param ss
+     *
+     * @hide
+     */
+    public void initialize(SignalStrength ss, int timingAdvance) {
+        mSignalStrength = ss.getLteSignalStrenght();
+        mRsrp = ss.getLteRsrp();
+        mRsrq = ss.getLteRsrq();
+        mRssnr = ss.getLteRssnr();
+        mCqi = ss.getLteCqi();
+        mTimingAdvance = timingAdvance;
+    }
+
+    /**
      * @hide
      */
     protected void copyFrom(CellSignalStrengthLte s) {
