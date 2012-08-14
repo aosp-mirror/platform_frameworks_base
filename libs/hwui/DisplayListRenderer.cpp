@@ -1699,7 +1699,9 @@ status_t DisplayListRenderer::drawTextOnPath(const char* text, int bytesCount, i
     addFloat(hOffset);
     addFloat(vOffset);
     paint->setAntiAlias(true);
-    addPaint(paint);
+    SkPaint* addedPaint = addPaint(paint);
+    FontRenderer& fontRenderer = mCaches.fontRenderer->getFontRenderer(addedPaint);
+    fontRenderer.precache(addedPaint, text, count);
     return DrawGlInfo::kStatusDone;
 }
 
@@ -1711,7 +1713,9 @@ status_t DisplayListRenderer::drawPosText(const char* text, int bytesCount, int 
     addInt(count);
     addFloats(positions, count * 2);
     paint->setAntiAlias(true);
-    addPaint(paint);
+    SkPaint* addedPaint = addPaint(paint);
+    FontRenderer& fontRenderer = mCaches.fontRenderer->getFontRenderer(addedPaint);
+    fontRenderer.precache(addedPaint, text, count);
     return DrawGlInfo::kStatusDone;
 }
 
@@ -1742,7 +1746,11 @@ status_t DisplayListRenderer::drawText(const char* text, int bytesCount, int cou
     addFloat(x);
     addFloat(y);
     addFloats(positions, count * 2);
-    addPaint(paint);
+    SkPaint* addedPaint = addPaint(paint);
+    if (!reject) {
+        FontRenderer& fontRenderer = mCaches.fontRenderer->getFontRenderer(addedPaint);
+        fontRenderer.precache(addedPaint, text, count);
+    }
     addFloat(length);
     addSkip(location);
     return DrawGlInfo::kStatusDone;
