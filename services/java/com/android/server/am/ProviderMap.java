@@ -198,7 +198,6 @@ public class ProviderMap {
 
     void dumpProvidersLocked(PrintWriter pw, boolean dumpAll) {
         if (mSingletonByClass.size() > 0) {
-            pw.println("");
             pw.println("  Published single-user content providers (by class):");
             dumpProvidersByClassLocked(pw, dumpAll, mSingletonByClass);
         }
@@ -206,10 +205,10 @@ public class ProviderMap {
         pw.println("");
         for (int i = 0; i < mProvidersByClassPerUser.size(); i++) {
             HashMap<ComponentName, ContentProviderRecord> map = mProvidersByClassPerUser.valueAt(i);
+            pw.println("");
             pw.println("  Published user " + mProvidersByClassPerUser.keyAt(i)
                     + " content providers (by class):");
             dumpProvidersByClassLocked(pw, dumpAll, map);
-            pw.println(" ");
         }
 
         if (dumpAll) {
