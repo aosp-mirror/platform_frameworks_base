@@ -2,9 +2,7 @@ page.title=Content Provider Basics
 @jd:body
 <div id="qv-wrapper">
 <div id="qv">
-
-
-                    <!-- In this document -->
+<!-- In this document -->
 <h2>In this document</h2>
 <ol>
     <li>
@@ -238,15 +236,11 @@ page.title=Content Provider Basics
 </p>
 <p>
     For example, to get a list of the words and their locales from the User Dictionary Provider,
-    you call {@link android.content.ContentResolver#query(Uri, String[], String, String[], String)
-    ContentResolver.query()}.
-    The {@link android.content.ContentResolver#query(Uri, String[], String, String[], String)
-    query()} method calls the
-    {@link android.content.ContentProvider#query(Uri, String[], String, String[], String)
-    ContentProvider.query()} method defined by the User Dictionary Provider. The following lines
-    of code show a
-    {@link android.content.ContentResolver#query(Uri, String[], String, String[], String)
-    ContentResolver.query()} call:
+    you call {@link android.content.ContentResolver#query ContentResolver.query()}.
+    The {@link android.content.ContentResolver#query query()} method calls the
+    {@link android.content.ContentProvider#query ContentProvider.query()} method defined by the 
+    User Dictionary Provider. The following lines of code show a
+    {@link android.content.ContentResolver#query ContentResolver.query()} call:
 <p>
 <pre>
 // Queries the user dictionary and returns results
@@ -259,7 +253,7 @@ mCursor = getContentResolver().query(
 </pre>
 <p>
     Table 2 shows how the arguments to
-    {@link android.content.ContentResolver#query(Uri, String[], String, String[], String)
+    {@link android.content.ContentResolver#query 
     query(Uri,projection,selection,selectionArgs,sortOrder)} match an SQL SELECT statement:
 </p>
 <p class="table-caption">
@@ -344,7 +338,7 @@ content://user_dictionary/words
     <code>4</code> from user dictionary, you can use this content URI:
 </p>
 <pre>
-Uri singleUri = ContentUri.withAppendedId(UserDictionary.Words.CONTENT_URI,4);
+Uri singleUri = ContentUris.withAppendedId(UserDictionary.Words.CONTENT_URI,4);
 </pre>
 <p>
     You often use id values when you've retrieved a set of rows and then want to update or delete
@@ -354,7 +348,7 @@ Uri singleUri = ContentUri.withAppendedId(UserDictionary.Words.CONTENT_URI,4);
     <strong>Note:</strong> The {@link android.net.Uri} and {@link android.net.Uri.Builder} classes
     contain convenience methods for constructing well-formed Uri objects from strings. The
     {@link android.content.ContentUris} contains convenience methods for appending id values to
-    a URI. The previous snippet uses {@link android.content.ContentUris#withAppendedId(Uri, long)
+    a URI. The previous snippet uses {@link android.content.ContentUris#withAppendedId
     withAppendedId()} to append an id to the UserDictionary content URI.
 </p>
 
@@ -367,10 +361,9 @@ Uri singleUri = ContentUri.withAppendedId(UserDictionary.Words.CONTENT_URI,4);
 </p>
 <p class="note">
     For the sake of clarity, the code snippets in this section call
-    {@link android.content.ContentResolver#query(Uri, String[], String, String[], String)
-    ContentResolver.query()} on the "UI thread"". In actual code, however, you should
-    do queries asynchronously on a separate thread. One way to do this is to use the
-    {@link android.content.CursorLoader} class, which is described
+    {@link android.content.ContentResolver#query ContentResolver.query()} on the "UI thread"". In 
+    actual code, however, you should do queries asynchronously on a separate thread. One way to do 
+    this is to use the {@link android.content.CursorLoader} class, which is described
     in more detail in the <a href="{@docRoot}guide/components/loaders.html">
     Loaders</a> guide. Also, the lines of code are snippets only; they don't show a complete
     application.
@@ -391,8 +384,8 @@ Uri singleUri = ContentUri.withAppendedId(UserDictionary.Words.CONTENT_URI,4);
     To retrieve data from a provider, your application needs "read access permission" for the
     provider. You can't request this permission at run-time; instead, you have to specify that
     you need this permission in your manifest, using the
-    <code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">
-    &lt;uses-permission&gt;</a></code> element and the exact permission name defined by the
+<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>
+    element and the exact permission name defined by the
     provider. When you specify this element in your manifest, you are in effect "requesting" this
     permission for your application. When users install your application, they implicitly grant
     this request.
@@ -436,10 +429,9 @@ String[] mSelectionArgs = {""};
 </pre>
 <p>
     The next snippet shows how to use
-    {@link android.content.ContentResolver#query(Uri, String[], String, String[], String)
-    ContentResolver.query()}, using the User Dictionary Provider as an example.
-    A provider client query is similar to an SQL query, and it contains a set of columns to return,
-    a set of selection criteria, and a sort order.
+    {@link android.content.ContentResolver#query ContentResolver.query()}, using the User Dictionary
+    Provider as an example. A provider client query is similar to an SQL query, and it contains a 
+    set of columns to return, a set of selection criteria, and a sort order.
 </p>
 <p>
     The set of columns that the query should return is called a <strong>projection</strong>
@@ -448,9 +440,9 @@ String[] mSelectionArgs = {""};
 <p>
     The expression that specifies the rows to retrieve is split into a selection clause and
     selection arguments. The selection clause is a combination of logical and Boolean expressions,
-    column names, and values (the variable <code>mSelection</code>). If you specify the replaceable
-    parameter <code>?</code> instead of a value, the query method retrieves the value from the
-    selection arguments array (the variable <code>mSelectionArgs</code>).
+    column names, and values (the variable <code>mSelectionClause</code>). If you specify the 
+    replaceable parameter <code>?</code> instead of a value, the query method retrieves the value 
+    from the selection arguments array (the variable <code>mSelectionArgs</code>).
 </p>
 <p>
     In the next snippet, if the user doesn't enter a word, the selection clause is set to
@@ -517,7 +509,7 @@ if (null == mCursor) {
     This query is analogous to the SQL statement:
 </p>
 <pre>
-SELECT _ID, word, frequency, locale FROM words WHERE word = &lt;userinput&gt; ORDER BY word ASC;
+SELECT _ID, word, locale FROM words WHERE word = &lt;userinput&gt; ORDER BY word ASC;
 </pre>
 <p>
     In this SQL statement, the actual column names are used instead of contract class constants.
@@ -575,16 +567,15 @@ selectionArgs[0] = mUserInput;
 <!-- Displaying the results -->
 <h3 id="DisplayResults">Displaying query results</h3>
 <p>
-    The {@link android.content.ContentResolver#query(Uri, String[], String, String[], String)
-    ContentResolver.query()} client method always returns a {@link android.database.Cursor}
-    containing the columns specified by the query's projection for the rows that match the query's
-    selection criteria. A {@link android.database.Cursor} object provides random read access to the
-    rows and columns it contains. Using {@link android.database.Cursor} methods,
-    you can iterate over the rows in the results, determine the data type of each column, get the
-    data out of a column, and examine other properties of the results. Some
-    {@link android.database.Cursor} implementations automatically update the object when the
-    provider's data changes, or trigger methods in an observer object when the
-    {@link android.database.Cursor} changes, or both.
+    The {@link android.content.ContentResolver#query ContentResolver.query()} client method always 
+    returns a {@link android.database.Cursor} containing the columns specified by the query's 
+    projection for the rows that match the query's selection criteria. A 
+    {@link android.database.Cursor} object provides random read access to the rows and columns it 
+    contains. Using {@link android.database.Cursor} methods, you can iterate over the rows in the 
+    results, determine the data type of each column, get the data out of a column, and examine other
+    properties of the results. Some {@link android.database.Cursor} implementations automatically 
+    update the object when the provider's data changes, or trigger methods in an observer object 
+    when the {@link android.database.Cursor} changes, or both.
 </p>
 <p class="note">
     <strong>Note:</strong> A provider may restrict access to columns based on the nature of the
@@ -594,7 +585,7 @@ selectionArgs[0] = mUserInput;
 <p>
     If no rows match the selection criteria, the provider
     returns a {@link android.database.Cursor} object for which
-    {@link android.database.Cursor#getCount() Cursor.getCount()} is 0 (an empty cursor).
+    {@link android.database.Cursor#getCount Cursor.getCount()} is 0 (an empty cursor).
 </p>
 <p>
     If an internal error occurs, the results of the query depend on the particular provider. It may
@@ -685,8 +676,8 @@ if (mCursor != null) {
 <p>
     {@link android.database.Cursor} implementations contain several "get" methods for
     retrieving different types of data from the object. For example, the previous snippet
-    uses {@link android.database.Cursor#getString(int) getString()}. They also have a
-    {@link android.database.Cursor#getType(int) getType()} method that returns a value indicating
+    uses {@link android.database.Cursor#getString getString()}. They also have a
+    {@link android.database.Cursor#getType getType()} method that returns a value indicating
     the data type of the column.
 </p>
 
@@ -713,17 +704,16 @@ if (mCursor != null) {
 </p>
 <p>
     To get the permissions needed to access a provider, an application requests them with a
-    <code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">
-    &lt;uses-permission&gt;</a></code> element in its manifest file.
-    When the Android Package Manager installs the application, a user must approve all of the
-    permissions the application requests. If the user approves all of them, Package Manager
-    continues the installation; if the user doesn't approve them, Package Manager
+<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>
+    element in its manifest file. When the Android Package Manager installs the application, a user 
+    must approve all of the permissions the application requests. If the user approves all of them, 
+    Package Manager continues the installation; if the user doesn't approve them, Package Manager
     aborts the installation.
 </p>
 <p>
     The following
-    <code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">
-    &lt;uses-permission&gt;</a></code> element requests read access to the User Dictionary Provider:
+<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code> 
+    element requests read access to the User Dictionary Provider:
 </p>
 <pre>
     &lt;uses-permission android:name="android.permission.READ_USER_DICTIONARY"&gt;
@@ -746,7 +736,7 @@ if (mCursor != null) {
 <h3 id="Inserting">Inserting data</h3>
 <p>
     To insert data into a provider, you call the
-    {@link android.content.ContentResolver#insert(Uri,ContentValues) ContentResolver.insert()}
+    {@link android.content.ContentResolver#insert ContentResolver.insert()}
     method. This method inserts a new row into the provider and returns a content URI for that row.
     This snippet shows how to insert a new word into the User Dictionary Provider:
 </p>
@@ -777,8 +767,7 @@ mNewUri = getContentResolver().insert(
     The data for the new row goes into a single {@link android.content.ContentValues} object, which
     is similar in form to a one-row cursor. The columns in this object don't need to have the
     same data type, and if you don't want to specify a value at all, you can set a column
-    to <code>null</code> using {@link android.content.ContentValues#putNull(String)
-    ContentValues.putNull()}.
+    to <code>null</code> using {@link android.content.ContentValues#putNull ContentValues.putNull()}.
 </p>
 <p>
     The snippet doesn't add the <code>_ID</code> column, because this column is maintained
@@ -799,17 +788,16 @@ content://user_dictionary/words/&lt;id_value&gt;
 </p>
 <p>
     To get the value of <code>_ID</code> from the returned {@link android.net.Uri}, call
-    {@link android.content.ContentUris#parseId(Uri) ContentUris.parseId()}.
+    {@link android.content.ContentUris#parseId ContentUris.parseId()}.
 </p>
 <h3 id="Updating">Updating data</h3>
 <p>
     To update a row, you use a {@link android.content.ContentValues} object with the updated
     values just as you do with an insertion, and selection criteria just as you do with a query.
     The client method you use is
-    {@link android.content.ContentResolver#update(Uri, ContentValues, String, String[])
-    ContentResolver.update()}. You only need to add values to the
-    {@link android.content.ContentValues} object for columns you're updating. If you want to clear
-    the contents of a column, set the value to <code>null</code>.
+    {@link android.content.ContentResolver#update ContentResolver.update()}. You only need to add 
+    values to the {@link android.content.ContentValues} object for columns you're updating. If you 
+    want to clear the contents of a column, set the value to <code>null</code>.
 </p>
 <p>
     The following snippet changes all the rows whose locale has the language "en" to a
@@ -842,9 +830,8 @@ mRowsUpdated = getContentResolver().update(
 </pre>
 <p>
     You should also sanitize user input when you call
-    {@link android.content.ContentResolver#update(Uri, ContentValues, String, String[])
-    ContentResolver.update()}. To learn more about this, read the section
-    <a href="#Injection">Protecting against malicious input</a>.
+    {@link android.content.ContentResolver#update ContentResolver.update()}. To learn more about 
+    this, read the section <a href="#Injection">Protecting against malicious input</a>.
 </p>
 <h3 id="Deleting">Deleting data</h3>
 <p>
@@ -873,9 +860,8 @@ mRowsDeleted = getContentResolver().delete(
 </pre>
 <p>
     You should also sanitize user input when you call
-    {@link android.content.ContentResolver#delete(Uri, String, String[])
-    ContentResolver.delete()}. To learn more about this, read the section
-    <a href="#Injection">Protecting against malicious input</a>.
+    {@link android.content.ContentResolver#delete ContentResolver.delete()}. To learn more about 
+    this, read the section <a href="#Injection">Protecting against malicious input</a>.
 </p>
 <!-- Provider Data Types -->
 <h2 id="DataTypes">Provider Data Types</h2>
@@ -907,7 +893,7 @@ mRowsDeleted = getContentResolver().delete(
     The data types for the User Dictionary Provider are listed in the reference documentation
     for its contract class {@link android.provider.UserDictionary.Words} (contract classes are
     described in the section <a href="#ContractClasses">Contract Classes</a>).
-    You can also determine the data type by calling {@link android.database.Cursor#getType(int)
+    You can also determine the data type by calling {@link android.database.Cursor#getType
     Cursor.getType()}.
 </p>
 <p>
@@ -918,7 +904,7 @@ mRowsDeleted = getContentResolver().delete(
     data structures or files. For example, the {@link android.provider.ContactsContract.Data}
     table in the Contacts Provider uses MIME types to label the type of contact data stored in each
     row. To get the MIME type corresponding to a content URI, call
-    {@link android.content.ContentResolver#getType(Uri) ContentResolver.getType()}.
+    {@link android.content.ContentResolver#getType ContentResolver.getType()}.
 </p>
 <p>
     The section <a href="#MIMETypeReference">MIME Type Reference</a> describes the
@@ -935,8 +921,7 @@ mRowsDeleted = getContentResolver().delete(
     <li>
         <a href="#Batch">Batch access</a>: You can create a batch of access calls with methods in
         the {@link android.content.ContentProviderOperation} class, and then apply them with
-        {@link android.content.ContentResolver#applyBatch(String, ArrayList)
-        ContentResolver.applyBatch()}.
+        {@link android.content.ContentResolver#applyBatch ContentResolver.applyBatch()}.
     </li>
     <li>
         Asynchronous queries: You should do queries in a separate thread. One way to do this is to
@@ -963,11 +948,10 @@ mRowsDeleted = getContentResolver().delete(
     To access a provider in "batch mode",
     you create an array of {@link android.content.ContentProviderOperation} objects and then
     dispatch them to a content provider with
-    {@link android.content.ContentResolver#applyBatch(String, ArrayList)
-    ContentResolver.applyBatch()}. You pass the content provider's <em>authority</em> to this
-    method, rather than a particular content URI, which allows each
-    {@link android.content.ContentProviderOperation} object in the array to work against a
-    different table. A call to {@link android.content.ContentResolver#applyBatch(String, ArrayList)
+    {@link android.content.ContentResolver#applyBatch ContentResolver.applyBatch()}. You pass the 
+    content provider's <em>authority</em> to this  method, rather than a particular content URI. 
+    This allows each {@link android.content.ContentProviderOperation} object in the array to work 
+    against a different table. A call to {@link android.content.ContentResolver#applyBatch
     ContentResolver.applyBatch()} returns an array of results.
 </p>
 <p>
@@ -1028,14 +1012,13 @@ mRowsDeleted = getContentResolver().delete(
 </p>
 <p>
     A provider defines URI permissions for content URIs in its manifest, using the
-    <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#gprmsn">
-    android:grantUriPermission</a></code>
-    attribute of the <a href="{@docRoot}guide/topics/manifest/provider-element.html">
-    {@code &lt;provider&gt;}</a>
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html#gprmsn">android:grantUriPermission</a></code>
+    attribute of the 
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code>
     element, as well as the
-    <a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">{@code 
-    &lt;grant-uri-permission&gt;}</a> child element of the
-    <a href="{@docRoot}guide/topics/manifest/provider-element.html">{@code &lt;provider&gt;}</a>
+<code><a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">&lt;grant-uri-permission&gt;</a></code>
+    child element of the
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code>
     element. The URI permissions mechanism is explained in more detail in the
     <a href="{@docRoot}guide/topics/security/security.html">Security and Permissions</a> guide,
     in the section "URI Permissions".
@@ -1053,7 +1036,7 @@ mRowsDeleted = getContentResolver().delete(
         Your application sends an intent containing the action
         {@link android.content.Intent#ACTION_PICK} and the "contacts" MIME type
         {@link android.provider.ContactsContract.RawContacts#CONTENT_ITEM_TYPE}, using the
-        method {@link android.app.Activity#startActivityForResult(Intent, int)
+        method {@link android.app.Activity#startActivityForResult
         startActivityForResult()}.
     </li>
     <li>
@@ -1063,7 +1046,7 @@ mRowsDeleted = getContentResolver().delete(
     <li>
         In the selection activity, the user selects a
         contact to update. When this happens, the selection activity calls
-        {@link android.app.Activity#setResult(int, Intent) setResult(resultcode, intent)}
+        {@link android.app.Activity#setResult setResult(resultcode, intent)}
         to set up a intent to give back to your application. The intent contains the content URI
         of the contact the user selected, and the "extras" flags
         {@link android.content.Intent#FLAG_GRANT_READ_URI_PERMISSION}. These flags grant URI
@@ -1073,7 +1056,7 @@ mRowsDeleted = getContentResolver().delete(
     </li>
     <li>
         Your activity returns to the foreground, and the system calls your activity's
-        {@link android.app.Activity#onActivityResult(int, int, Intent) onActivityResult()}
+        {@link android.app.Activity#onActivityResult onActivityResult()}
         method. This method receives the result intent created by the selection activity in
         the People app.
     </li>
