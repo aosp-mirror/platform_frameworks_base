@@ -32,9 +32,15 @@
         android:layout_height="@*android:dimen/status_bar_height"
         />
 
-    <include layout="@layout/status_bar_expanded"
+    <com.android.systemui.statusbar.phone.PanelHolder
+        android:id="@+id/panel_holder"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        />
+        android:layout_height="match_parent"
+        >
+        <include layout="@layout/status_bar_expanded"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            />
+    </com.android.systemui.statusbar.phone.PanelHolder>
 
 </com.android.systemui.statusbar.phone.StatusBarWindowView>

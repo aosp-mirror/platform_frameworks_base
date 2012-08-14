@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
@@ -35,133 +36,16 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.policy.FixedSizeDrawable;
 
-public class PhoneStatusBarView extends FrameLayout {
+public class PhoneStatusBarView extends PanelBar {
     private static final String TAG = "PhoneStatusBarView";
-
-    static final int DIM_ANIM_TIME = 400;
-    
-    PhoneStatusBar mService;
-    boolean mTracking;
-    int mStartX, mStartY;
-    ViewGroup mNotificationIcons;
-    ViewGroup mStatusIcons;
-    
-    boolean mNightMode = false;
-    int mStartAlpha = 0, mEndAlpha = 0;
-    long mEndTime = 0;
-
-    Rect mButtonBounds = new Rect();
-    boolean mCapturingEvents = true;
+    PhoneStatusBar mBar;
 
     public PhoneStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    @Override
-    protected void onFinishInflate() {
-        super.onFinishInflate();
-        mNotificationIcons = (ViewGroup)findViewById(R.id.notificationIcons);
-        mStatusIcons = (ViewGroup)findViewById(R.id.statusIcons);
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        //mService.onBarViewAttached();
-    }
-    
-    @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        mService.updateDisplaySize();
-        boolean nightMode = (newConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK)
-                == Configuration.UI_MODE_NIGHT_YES;
-        if (mNightMode != nightMode) {
-            mNightMode = nightMode;
-            mStartAlpha = getCurAlpha();
-            mEndAlpha = mNightMode ? 0x80 : 0x00;
-            mEndTime = SystemClock.uptimeMillis() + DIM_ANIM_TIME;
-            invalidate();
-        }
-    }
-
-    int getCurAlpha() {
-        long time = SystemClock.uptimeMillis();
-        if (time > mEndTime) {
-            return mEndAlpha;
-        }
-        return mEndAlpha
-                - (int)(((mEndAlpha-mStartAlpha) * (mEndTime-time) / DIM_ANIM_TIME));
-    }
-    
-    @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
-        mService.updateExpandedViewPos(BaseStatusBar.EXPANDED_LEAVE_ALONE);
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        super.onLayout(changed, l, t, r, b);
-    }
-
-    @Override
-    protected void dispatchDraw(Canvas canvas) {
-        super.dispatchDraw(canvas);
-        int alpha = getCurAlpha();
-        if (alpha != 0) {
-            canvas.drawARGB(alpha, 0, 0, 0);
-        }
-        if (alpha != mEndAlpha) {
-            invalidate();
-        }
-    }
-
-    /**
-     * Gets the left position of v in this view.  Throws if v is not
-     * a child of this.
-     */
-    private int getViewOffset(View v) {
-        int offset = 0;
-        while (v != this) {
-            offset += v.getLeft();
-            ViewParent p = v.getParent();
-            if (v instanceof View) {
-                v = (View)p;
-            } else {
-                throw new RuntimeException(v + " is not a child of " + this);
-            }
-        }
-        return offset;
-    }
-
-    /**
-     * Ensure that, if there is no target under us to receive the touch,
-     * that we process it ourself.  This makes sure that onInterceptTouchEvent()
-     * is always called for the entire gesture.
-     */
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        if (!mCapturingEvents) {
-            return false;
-        }
-        if (event.getAction() != MotionEvent.ACTION_DOWN) {
-            mService.interceptTouchEvent(event);
-        }
-        return true;
-    }
-
-    @Override
-    public boolean onInterceptTouchEvent(MotionEvent event) {
-        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            if (mButtonBounds.contains((int)event.getX(), (int)event.getY())) {
-                mCapturingEvents = false;
-                return false;
-            }
-        }
-        mCapturingEvents = true;
-        return mService.interceptTouchEvent(event)
-                ? true : super.onInterceptTouchEvent(event);
+    public void setBar(PhoneStatusBar bar) {
+        mBar = bar;
     }
 
     @Override
@@ -178,4 +62,42 @@ public class PhoneStatusBarView extends FrameLayout {
         }
         return false;
     }
+
+    @Override
+    public void onPanelPeeked() {
+        super.onPanelPeeked();
+        mBar.makeExpandedVisible(true);
+    }
+
+    @Override
+    public void onAllPanelsCollapsed() {
+        super.onAllPanelsCollapsed();
+        mBar.makeExpandedInvisible();
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        return mBar.interceptTouchEvent(event) || super.onTouchEvent(event);
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent event) {
+        return mBar.interceptTouchEvent(event) || super.onInterceptTouchEvent(event);
+    }
+
+    @Override
+    public void panelExpansionChanged(PanelView pv, float frac) {
+        super.panelExpansionChanged(pv, frac);
+
+        if (PhoneStatusBar.DIM_BEHIND_EXPANDED_PANEL && ActivityManager.isHighEndGfx(mBar.mDisplay)) {
+            // woo, special effects
+            final float k = (float)(1f-0.5f*(1f-Math.cos(3.14159f * Math.pow(1f-frac, 2.2f))));
+            final int color = ((int)(0xB0 * k)) << 24;
+            mBar.mStatusBarWindow.setBackgroundColor(color);
+        }
+
+        mBar.updateCarrierLabelVisibility(false);
+    }
+
+
 }
