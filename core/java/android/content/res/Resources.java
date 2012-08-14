@@ -1121,8 +1121,8 @@ public class Resources {
          * Return a StyledAttributes holding the values defined by
          * <var>Theme</var> which are listed in <var>attrs</var>.
          * 
-         * <p>Be sure to call StyledAttributes.recycle() when you are done with
-         * the array.
+         * <p>Be sure to call {@link TypedArray#recycle() TypedArray.recycle()} when you are done
+         * with the array.
          * 
          * @param attrs The desired attributes.
          *
@@ -1149,8 +1149,8 @@ public class Resources {
          * Return a StyledAttributes holding the values defined by the style
          * resource <var>resid</var> which are listed in <var>attrs</var>.
          * 
-         * <p>Be sure to call StyledAttributes.recycle() when you are done with
-         * the array.
+         * <p>Be sure to call {@link TypedArray#recycle() TypedArray.recycle()} when you are done
+         * with the array.
          * 
          * @param resid The desired style resource.
          * @param attrs The desired attributes in the style.
@@ -1209,8 +1209,8 @@ public class Resources {
          * AttributeSet specifies a style class (through the "style" attribute),
          * that style will be applied on top of the base attributes it defines.
          * 
-         * <p>Be sure to call StyledAttributes.recycle() when you are done with
-         * the array.
+         * <p>Be sure to call {@link TypedArray#recycle() TypedArray.recycle()} when you are done
+         * with the array.
          * 
          * <p>When determining the final value of a particular attribute, there
          * are four inputs that come into play:</p>

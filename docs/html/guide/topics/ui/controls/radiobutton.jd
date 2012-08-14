@@ -72,7 +72,7 @@ click event for both radio buttons:</p>
 <pre>
 public void onRadioButtonClicked(View view) {
     // Is the button now checked?
-    boolean checked = (RadioButton) view).isChecked();
+    boolean checked = ((RadioButton) view).isChecked();
     
     // Check which radio button was clicked
     switch(view.getId()) {
