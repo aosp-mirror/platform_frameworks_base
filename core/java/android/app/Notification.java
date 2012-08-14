@@ -897,12 +897,16 @@ public class Notification implements Parcelable
      * Builder class for {@link Notification} objects.
      * 
      * Provides a convenient way to set the various fields of a {@link Notification} and generate
-     * content views using the platform's notification layout template. 
+     * content views using the platform's notification layout template. If your app supports
+     * versions of Android as old as API level 4, you can instead use
+     * {@link android.support.v4.app.NotificationCompat.Builder NotificationCompat.Builder},
+     * available in the <a href="{@docRoot}tools/extras/support-library.html">Android Support
+     * library</a>.
      * 
-     * Example:
+     * <p>Example:
      * 
      * <pre class="prettyprint">
-     * Notification noti = new Notification.Builder()
+     * Notification noti = new Notification.Builder(mContext)
      *         .setContentTitle(&quot;New mail from &quot; + sender.toString())
      *         .setContentText(subject)
      *         .setSmallIcon(R.drawable.new_mail)
