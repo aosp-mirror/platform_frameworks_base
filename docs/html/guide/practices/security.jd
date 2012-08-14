@@ -1,11 +1,11 @@
-page.title=﻿Designing for Security
+page.title=Designing for Security
 @jd:body
 
 <div id="qv-wrapper">
 <div id="qv">
 <h2>In this document</h2>
 <ol>
-<li><a href="#Dalvik">Using Davlik Code</a></li>
+<li><a href="#Dalvik">Using Dalvik Code</a></li>
 <li><a href="#Native">Using Native Code</a></li>
 <li><a href="#Data">Storing Data</a></li>
 <li><a href="#IPC">Using IPC</a></li>
