@@ -24,6 +24,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.os.UserId;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.util.AttributeSet;
@@ -73,14 +74,15 @@ public class SearchPanelView extends FrameLayout implements
         // Close Recent Apps if needed
         mBar.animateCollapse(CommandQueue.FLAG_EXCLUDE_SEARCH_PANEL);
         // Launch Assist
-        Intent intent = SearchManager.getAssistIntent(mContext);
+        Intent intent = ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
+                .getAssistIntent(mContext, UserId.USER_CURRENT);
         if (intent == null) return;
         try {
             ActivityOptions opts = ActivityOptions.makeCustomAnimation(mContext,
                     R.anim.search_launch_enter, R.anim.search_launch_exit,
                     getHandler(), this);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            mContext.startActivity(intent, opts.toBundle());
+            mContext.startActivityAsUser(intent, opts.toBundle(), UserId.USER_CURRENT);
         } catch (ActivityNotFoundException e) {
             Slog.w(TAG, "Activity not found for " + intent.getAction());
             onAnimationStarted();
@@ -140,7 +142,8 @@ public class SearchPanelView extends FrameLayout implements
     }
 
     private void maybeSwapSearchIcon() {
-        Intent intent = SearchManager.getAssistIntent(mContext);
+        Intent intent = ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
+                .getAssistIntent(mContext, UserId.USER_CURRENT);
         if (intent != null) {
             ComponentName component = intent.getComponent();
             if (component == null || !mGlowPadView.replaceTargetDrawablesIfPresent(component,
@@ -277,6 +280,7 @@ public class SearchPanelView extends FrameLayout implements
     }
 
     public boolean isAssistantAvailable() {
-        return SearchManager.getAssistIntent(mContext) != null;
+        return ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
+                .getAssistIntent(mContext, UserId.USER_CURRENT) != null;
     }
 }

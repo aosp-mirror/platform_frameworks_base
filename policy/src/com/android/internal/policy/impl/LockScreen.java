@@ -32,6 +32,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.os.UserId;
 import android.os.Vibrator;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -275,7 +276,8 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
 
             // Update the search icon with drawable from the search .apk
             if (!mSearchDisabled) {
-                Intent intent = SearchManager.getAssistIntent(mContext);
+                Intent intent = ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
+                        .getAssistIntent(mContext, UserId.USER_CURRENT);
                 if (intent != null) {
                     // XXX Hack. We need to substitute the icon here but haven't formalized
                     // the public API. The "_google" metadata will be going away, so
@@ -309,7 +311,9 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
             final int resId = mGlowPadView.getResourceIdForTarget(target);
             switch (resId) {
                 case com.android.internal.R.drawable.ic_action_assist_generic:
-                    Intent assistIntent = SearchManager.getAssistIntent(mContext);
+                    Intent assistIntent =
+                            ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
+                            .getAssistIntent(mContext, UserId.USER_CURRENT);
                     if (assistIntent != null) {
                         launchActivity(assistIntent);
                     } else {
@@ -335,6 +339,10 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
             }
         }
 
+        /**
+         * Launches the said intent for the current foreground user.
+         * @param intent
+         */
         private void launchActivity(Intent intent) {
             intent.setFlags(
                     Intent.FLAG_ACTIVITY_NEW_TASK
@@ -346,7 +354,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
                 Log.w(TAG, "can't dismiss keyguard on launch");
             }
             try {
-                mContext.startActivity(intent);
+                mContext.startActivityAsUser(intent, UserId.USER_CURRENT);
             } catch (ActivityNotFoundException e) {
                 Log.w(TAG, "Activity not found for intent + " + intent.getAction());
             }
@@ -522,7 +530,9 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
         } else if (disabledBySimState) {
             Log.v(TAG, "Camera disabled by Sim State");
         }
-        boolean searchActionAvailable = SearchManager.getAssistIntent(mContext) != null;
+        boolean searchActionAvailable =
+                ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
+                .getAssistIntent(mContext, UserId.USER_CURRENT) != null;
         mCameraDisabled = disabledByAdmin || disabledBySimState || !cameraTargetPresent;
         mSearchDisabled = disabledBySimState || !searchActionAvailable || !searchTargetPresent;
         mUnlockWidgetMethods.updateResources();
