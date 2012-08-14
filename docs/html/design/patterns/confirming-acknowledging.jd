@@ -23,37 +23,30 @@ page.title=Confirming &amp; Acknowledging
 <h2>Confirming</h2>
 <div class="layout-content-row">
   <div class="layout-content-col span-6">
-    <img src="{@docRoot}design/media/confirm_ack_ex_books.png">
     <h4>Example: Google Play Books</h4>
-    <p>In this example, the user has requested to delete a book from their Google Play library. A dialog appears to confirm this action because it's important to understand that the book will no longer be available from any device.</p>
+    <img src="{@docRoot}design/media/confirm_ack_ex_books.png">
+    <p>In this example, the user has requested to delete a book from their Google Play library. An <a href="{@docRoot}design/building-blocks/dialogs.html#alerts">alert</a> appears to confirm this action because it's important to understand that the book will no longer be available from any device.</p>
     <p>When crafting a confirmation dialog, make the title meaningful by echoing the requested action.</p>
-
-    <ul class="nolist">
-      <li class="do-dont-label bad">Don't<p><b>Are you sure?</b></p></li>
-      <li class="do-dont-label bad">Don't<p><b>Warning!</b></p></li>
-      <li class="do-dont-label good">Do<p><b>Delete from library?</b></p></li>
-    </ul>
-
   </div>
   <div class="layout-content-col span-7">
-    <img src="{@docRoot}design/media/confirm_ack_ex_beam.png">
     <h4>Example: Android Beam</h4>
-    <p>Confirmations don't necessarily have to be presented in a dialog with two buttons. After initiating Android Beam, the user is prompted to touch the content to be shared (in this example, it's a photo). If they decide not to proceed, they simply move their phone away.</p>
+    <img src="{@docRoot}design/media/confirm_ack_ex_beam.png">
+    <p>Confirmations don't necessarily have to be presented in an alert with two buttons. After initiating Android Beam, the user is prompted to touch the content to be shared (in this example, it's a photo). If they decide not to proceed, they simply move their phone away.</p>
   </div>
 </div>
 
 <h2>Acknowledging</h2>
 <div class="layout-content-row">
   <div class="layout-content-col span-6">
-    <img src="{@docRoot}design/media/confirm_ack_ex_draftsave.png">
     <h4>Example: Abandoned Gmail draft saved</h4>
+    <img src="{@docRoot}design/media/confirm_ack_ex_draftsave.png">
     <p>In this example, if the user navigates back or up from the Gmail compose screen, something possibly unexpected happens: the current draft is automatically saved. An acknowledgment in the form of a toast makes that apparent. It fades after a few seconds.</p>
     <p>Undo isn't appropriate here because saving was initiated by the app, not the user. And it's quick and easy to resume composing the message by navigating to the list of drafts.</p>
 
   </div>
   <div class="layout-content-col span-6">
-    <img src="{@docRoot}design/media/confirm_ack_draft_deleted.png">
     <h4>Example: Gmail conversation deleted</h4>
+    <img src="{@docRoot}design/media/confirm_ack_draft_deleted.png">
     <p>After the user deletes a conversation from the list in Gmail, an acknowledgment appears with an undo option. The acknowledgment remains until the user takes an unrelated action, such as scrolling the list.</p>
   </div>
 </div>
@@ -61,16 +54,16 @@ page.title=Confirming &amp; Acknowledging
 <h2>No Confirmation or Acknowledgment</h2>
 <div class="layout-content-row">
   <div class="layout-content-col span-6">
-    <img src="{@docRoot}design/media/confirm_ack_ex_removeapp.png">
+    <h4>Example: +1'ing</h4>
+    <img style="padding: 33px 0 30px;" src="{@docRoot}design/media/confirm_ack_ex_plus1.png">
+    <p><strong>Confirmation is unnecessary</strong>. If the user +1'd by accident, it's not a big deal. They can just touch the button again to undo the action.</p>
+    <p><strong>Acknowledgment is unnecessary</strong>. The user will see the +1 button bounce and turn red. That's a very clear signal.</p>
+  </div>
+  <div class="layout-content-col span-7">
     <h4>Example: Removing an app from the Home Screen</h4>
+    <img src="{@docRoot}design/media/confirm_ack_ex_removeapp.png">
     <p><strong>Confirmation is unnecessary</strong>. This is a deliberate action: the user must drag and drop an item onto a relatively large and isolated target. Therefore, accidents are highly unlikely. But if the user regrets the decision, it only takes a few seconds to bring it back again.</p>
     <p><strong>Acknowledgment is unnecessary</strong>. The user will know the app is gone from the Home Screen because they made it disappear by dragging it away.</p>
 
-  </div>
-  <div class="layout-content-col span-7">
-    <img src="{@docRoot}design/media/confirm_ack_ex_plus1.png">
-    <h4>Example: +1'ing</h4>
-    <p><strong>Confirmation is unnecessary</strong>. If the user +1'd by accident, it's not a big deal. They can just touch the button again to undo the action.</p>
-    <p><strong>Acknowledgment is unnecessary</strong>. The user will see the +1 button bounce and turn red. That's a very clear signal.</p>
   </div>
 </div>

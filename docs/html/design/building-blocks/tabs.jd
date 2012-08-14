@@ -35,9 +35,8 @@ to the next/previous view, swipe left or right.</p>
 
 
 <h2 id="fixed">Fixed Tabs</h2>
-
-
 <p>Fixed tabs display all items concurrently. To navigate to a different view, touch the tab, or swipe left or right.</p>
+<p>Fixed tabs are displayed with equal width, based on the width of the widest tab label. If there is insufficient room to display all tabs, the tab labels themselves will be scrollable. For this reason, fixed tabs are best suited for displaying 3 or fewer tabs.</p>
 
 <img src="{@docRoot}design/media/tabs_standard.png">
 <div class="figure-caption">

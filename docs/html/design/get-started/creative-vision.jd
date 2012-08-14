@@ -5,13 +5,7 @@ page.title=Creative Vision
 
 <div class="vspace size-1">&nbsp;</div>
 
-<p>Ice Cream Sandwich (Android 4.0) marks a major milestone for Android design. We touched nearly every
-pixel of the system as we expanded the new design approaches introduced in Honeycomb tablets to all
-types of mobile devices. Starting with the most basic elements, we introduced a new font, Roboto,
-designed for high-resolution displays. Other big changes include framework-level action bars on
-phones and support for new phones without physical buttons.</p>
-<p>We focused the design work with three overarching goals for our core apps and the system at large.
-As you design apps to work with Android, consider these goals:</p>
+<p>We focused the design of Android around three overarching goals, which apply to our core apps as well as the system at large. As you design apps to work with Android, consider these goals:</p>
 
 <div class="vspace size-1">&nbsp;</div>
 

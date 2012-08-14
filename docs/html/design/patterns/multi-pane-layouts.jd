@@ -67,9 +67,7 @@ you can use to adjust the layout after orientation change while keeping function
   <div class="layout-content-col span-5">
 
 <h4>Expand/collapse</h4>
-<p>When the device rotates, collapse the left pane view to only show the most important information.
-Provide an <em>expand</em> control that allows the user to bring the left pane content back to its original
-width and vice versa.</p>
+<p>When the device rotates, collapse the left pane view to only show the most important information.</p>
 
   </div>
 </div>
