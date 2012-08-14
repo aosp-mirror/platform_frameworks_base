@@ -9802,7 +9802,7 @@ package android.hardware {
     method public float getZ();
   }
 
-  public class Sensor {
+  public final class Sensor {
     method public float getMaximumRange();
     method public int getMinDelay();
     method public java.lang.String getName();
