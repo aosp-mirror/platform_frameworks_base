@@ -99,7 +99,7 @@ import java.util.ArrayList;
 
 public class PhoneStatusBar extends BaseStatusBar {
     static final String TAG = "PhoneStatusBar";
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
     public static final boolean SPEW = DEBUG;
     public static final boolean DUMPTRUCK = true; // extra dumpsys info
 
@@ -189,7 +189,6 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     // position
     int[] mPositionTmp = new int[2];
-    boolean mExpanded;
     boolean mExpandedVisible;
 
     // the date view
@@ -297,7 +296,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    if (mExpanded && !mAnimating) {
+                    if (mExpandedVisible && !mAnimating) {
                         animateCollapse();
                     }
                 }
@@ -1161,9 +1160,8 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     public void animateCollapse(int flags) {
         if (SPEW) {
-            Slog.d(TAG, "animateCollapse(): mExpanded=" + mExpanded
+            Slog.d(TAG, "animateCollapse(): "
                     + " mExpandedVisible=" + mExpandedVisible
-                    + " mExpanded=" + mExpanded
                     + " mAnimating=" + mAnimating
                     + " mAnimatingReveal=" + mAnimatingReveal
                     + " mAnimY=" + mAnimY
@@ -1186,7 +1184,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     @Override
     public void animateExpand() {
-        if (SPEW) Slog.d(TAG, "animateExpand: mExpanded=" + mExpanded);
+        if (SPEW) Slog.d(TAG, "animateExpand: mExpandedVisible=" + mExpandedVisible);
         if ((mDisabled & StatusBarManager.DISABLE_EXPAND) != 0) {
             return ;
         }
@@ -1197,7 +1195,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     void makeExpandedInvisible() {
-        if (SPEW) Slog.d(TAG, "makeExpandedInvisible: mExpanded=" + mExpanded
+        if (SPEW) Slog.d(TAG, "makeExpandedInvisible: mExpandedVisible=" + mExpandedVisible
                 + " mExpandedVisible=" + mExpandedVisible);
 
         if (!mExpandedVisible) {
@@ -1224,11 +1222,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         if ((mDisabled & StatusBarManager.DISABLE_NOTIFICATION_ICONS) == 0) {
             setNotificationIconVisibility(true, com.android.internal.R.anim.fade_in);
         }
-
-        if (!mExpanded) {
-            return;
-        }
-        mExpanded = false;
 
         // Close any "App info" popups that might have snuck on-screen
         dismissPopups();
@@ -1513,8 +1506,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         synchronized (mQueueLock) {
             pw.println("Current Status Bar state:");
-            pw.println("  mExpanded=" + mExpanded
-                    + ", mExpandedVisible=" + mExpandedVisible
+            pw.println("  mExpandedVisible=" + mExpandedVisible
                     + ", mTrackingPosition=" + mTrackingPosition);
             pw.println("  mTicking=" + mTicking);
             pw.println("  mTracking=" + mTracking);
@@ -1725,6 +1717,9 @@ public class PhoneStatusBar extends BaseStatusBar {
                         mPostCollapseCleanup = new Runnable() {
                             @Override
                             public void run() {
+                                if (DEBUG) {
+                                    Slog.v(TAG, "running post-collapse cleanup");
+                                }
                                 try {
                                     mPile.setViewRemoval(true);
                                     mBarService.onClearAllNotifications();
@@ -1945,7 +1940,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     @Override
     protected boolean shouldDisableNavbarGestures() {
-        return mExpanded || (mDisabled & StatusBarManager.DISABLE_HOME) != 0;
+        return mExpandedVisible || (mDisabled & StatusBarManager.DISABLE_HOME) != 0;
     }
 
     private static class FastColorDrawable extends Drawable {
