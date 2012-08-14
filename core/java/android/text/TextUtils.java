@@ -1042,9 +1042,14 @@ public class TextUtils {
                                          float avail, TruncateAt where,
                                          boolean preserveLength,
                                          EllipsizeCallback callback) {
+
+        final String ellipsis = (where == TruncateAt.END_SMALL) ?
+                Resources.getSystem().getString(R.string.ellipsis_two_dots) :
+                Resources.getSystem().getString(R.string.ellipsis);
+
         return ellipsize(text, paint, avail, where, preserveLength, callback,
                 TextDirectionHeuristics.FIRSTSTRONG_LTR,
-                (where == TruncateAt.END_SMALL) ? ELLIPSIS_TWO_DOTS : ELLIPSIS_NORMAL);
+                ellipsis);
     }
 
     /**
@@ -1700,9 +1705,4 @@ public class TextUtils {
     private static String[] EMPTY_STRING_ARRAY = new String[]{};
 
     private static final char ZWNBS_CHAR = '\uFEFF';
-
-    private static final String ELLIPSIS_NORMAL = Resources.getSystem().getString(
-            R.string.ellipsis);
-    private static final String ELLIPSIS_TWO_DOTS = Resources.getSystem().getString(
-            R.string.ellipsis_two_dots);
 }
