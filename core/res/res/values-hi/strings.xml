@@ -1075,7 +1075,7 @@
     <string name="usb_storage_error_message" product="nosdcard" msgid="3017045217365540658">"USB विशाल संग्रहण के लिए आपके USB संग्रहण का उपयोग करने में समस्‍या है."</string>
     <string name="usb_storage_error_message" product="default" msgid="2876018512716970313">"USB विशाल संग्रहण के लिए आपके SD कार्ड का उपयोग करने में समस्‍या है."</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB कनेक्ट किया गया"</string>
-    <string name="usb_storage_notification_message" msgid="939822783828183763">"आपके कंप्‍यूटर में/से फ़ाइल की प्रतिलिपि बनाने के लिए चयन करें."</string>
+    <string name="usb_storage_notification_message" msgid="939822783828183763">"आपके कंप्‍यूटर में/से फ़ाइल की प्रतिलिपि बनाने के लिए चुनें."</string>
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"USB संग्रहण बंद करें"</string>
     <string name="usb_storage_stop_notification_message" msgid="1656852098555623822">"USB संग्रहण बंद करने के लिए स्‍पर्श करें."</string>
     <string name="usb_storage_stop_title" msgid="660129851708775853">"USB संग्रहण उपयोग में है"</string>
