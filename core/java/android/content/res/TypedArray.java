@@ -684,7 +684,7 @@ public class TypedArray {
     }
 
     /**
-     * Give back a previously retrieved StyledAttributes, for later re-use.
+     * Give back a previously retrieved array, for later re-use.
      */
     public void recycle() {
         synchronized (mResources.mTmpValue) {
