@@ -19,7 +19,9 @@ package com.android.systemui.statusbar.phone;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.SystemClock;
 import android.util.AttributeSet;
@@ -39,6 +41,7 @@ import com.android.systemui.statusbar.policy.FixedSizeDrawable;
 public class PhoneStatusBarView extends PanelBar {
     private static final String TAG = "PhoneStatusBarView";
     PhoneStatusBar mBar;
+    int mScrimColor;
 
     public PhoneStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -46,6 +49,12 @@ public class PhoneStatusBarView extends PanelBar {
 
     public void setBar(PhoneStatusBar bar) {
         mBar = bar;
+    }
+
+    @Override
+    public void onAttachedToWindow() {
+        Resources res = getContext().getResources();
+        mScrimColor = res.getColor(R.color.notification_panel_scrim_color);
     }
 
     @Override
@@ -89,10 +98,11 @@ public class PhoneStatusBarView extends PanelBar {
     public void panelExpansionChanged(PanelView pv, float frac) {
         super.panelExpansionChanged(pv, frac);
 
-        if (PhoneStatusBar.DIM_BEHIND_EXPANDED_PANEL && ActivityManager.isHighEndGfx(mBar.mDisplay)) {
+        if (mScrimColor != 0 && ActivityManager.isHighEndGfx(mBar.mDisplay)) {
             // woo, special effects
             final float k = (float)(1f-0.5f*(1f-Math.cos(3.14159f * Math.pow(1f-frac, 2.2f))));
-            final int color = ((int)(0xB0 * k)) << 24;
+            // attenuate background color alpha by k
+            final int color = (int) ((float)(mScrimColor >>> 24) * k) << 24 | (mScrimColor & 0xFFFFFF);
             mBar.mStatusBarWindow.setBackgroundColor(color);
         }
 
