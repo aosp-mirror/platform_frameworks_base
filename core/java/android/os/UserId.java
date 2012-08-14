@@ -33,6 +33,8 @@ public final class UserId {
     /** A user id to indicate the currently active user */
     public static final int USER_CURRENT = -2;
 
+    /** A user id constant to indicate the "owner" user of the device */
+    public static final int USER_OWNER = 0;
 
     /**
      * Enable multi-user related side effects. Set this to false if there are problems with single
