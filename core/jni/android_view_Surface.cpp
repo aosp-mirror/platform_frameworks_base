@@ -135,6 +135,7 @@ public:
         return mScreenshot.getFormat();
     }
 
+    SK_DECLARE_UNFLATTENABLE_OBJECT()
 protected:
     // overrides from SkPixelRef
     virtual void* onLockPixels(SkColorTable** ct) {

@@ -18,7 +18,8 @@
 #define ANDROID_HWUI_DISPLAY_LIST_RENDERER_H
 
 #include <SkChunkAlloc.h>
-#include <SkFlattenable.h>
+#include <SkReader32.h>
+#include <SkWriter32.h>
 #include <SkMatrix.h>
 #include <SkCamera.h>
 #include <SkPaint.h>
@@ -499,7 +500,7 @@ private:
     Vector<SkiaShader*> mShaders;
     Vector<Layer*> mLayers;
 
-    mutable SkFlattenableReadBuffer mReader;
+    mutable SkReader32 mReader;
 
     size_t mSize;
 

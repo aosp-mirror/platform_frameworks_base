@@ -105,7 +105,7 @@ SkScalar calculateStretch(SkScalar boundsLimit, SkScalar startingPoint,
 void NinePatch_Draw(SkCanvas* canvas, const SkRect& bounds,
                        const SkBitmap& bitmap, const android::Res_png_9patch& chunk,
                        const SkPaint* paint, SkRegion** outRegion) {
-    if (canvas && canvas->quickReject(bounds, SkCanvas::kBW_EdgeType)) {
+    if (canvas && canvas->quickReject(bounds)) {
         return;
     }
 

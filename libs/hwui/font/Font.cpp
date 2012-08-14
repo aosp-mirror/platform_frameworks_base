@@ -18,6 +18,7 @@
 
 #include <cutils/compiler.h>
 
+#include <SkGlyph.h>
 #include <SkUtils.h>
 
 #include "Debug.h"

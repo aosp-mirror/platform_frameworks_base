@@ -278,25 +278,25 @@ public:
         canvas->setDrawFilter(filter);
     }
     
-    static jboolean quickReject__RectFI(JNIEnv* env, jobject, SkCanvas* canvas,
-                                        jobject rect, int edgetype) {
+    static jboolean quickReject__RectF(JNIEnv* env, jobject, SkCanvas* canvas,
+                                        jobject rect) {
         SkRect rect_;
         GraphicsJNI::jrectf_to_rect(env, rect, &rect_);
-        return canvas->quickReject(rect_, (SkCanvas::EdgeType)edgetype);
+        return canvas->quickReject(rect_);
     }
- 
-    static jboolean quickReject__PathI(JNIEnv* env, jobject, SkCanvas* canvas,
-                                       SkPath* path, int edgetype) {
-        return canvas->quickReject(*path, (SkCanvas::EdgeType)edgetype);
+
+    static jboolean quickReject__Path(JNIEnv* env, jobject, SkCanvas* canvas,
+                                       SkPath* path) {
+        return canvas->quickReject(*path);
     }
- 
-    static jboolean quickReject__FFFFI(JNIEnv* env, jobject, SkCanvas* canvas,
+
+    static jboolean quickReject__FFFF(JNIEnv* env, jobject, SkCanvas* canvas,
                                        jfloat left, jfloat top, jfloat right,
-                                       jfloat bottom, int edgetype) {
+                                       jfloat bottom) {
         SkRect r;
         r.set(SkFloatToScalar(left), SkFloatToScalar(top),
               SkFloatToScalar(right), SkFloatToScalar(bottom));
-        return canvas->quickReject(r, (SkCanvas::EdgeType)edgetype);
+        return canvas->quickReject(r);
     }
  
     static void drawRGB(JNIEnv* env, jobject, SkCanvas* canvas,
@@ -938,12 +938,19 @@ static void doDrawTextDecorations(SkCanvas* canvas, jfloat x, jfloat y, jfloat l
                               jobject bounds) {
         SkRect   r;
         SkIRect ir;
-        bool     result = canvas->getClipBounds(&r, SkCanvas::kBW_EdgeType);
+        bool     result = canvas->getClipBounds(&r);
 
         if (!result) {
             r.setEmpty();
+        } else {
+            // ensure the clip is not larger than the canvas
+            SkRect canvasRect;
+            SkISize deviceSize = canvas->getDeviceSize();
+            canvasRect.iset(0, 0, deviceSize.fWidth, deviceSize.fHeight);
+            r.intersect(canvasRect);
         }
         r.round(&ir);
+
         (void)GraphicsJNI::irect_to_jrect(ir, env, bounds);
         return result;
     }
@@ -992,10 +999,10 @@ static JNINativeMethod gCanvasMethods[] = {
     {"native_getClipBounds","(ILandroid/graphics/Rect;)Z",
         (void*) SkCanvasGlue::getClipBounds},
     {"native_getCTM", "(II)V", (void*)SkCanvasGlue::getCTM},
-    {"native_quickReject","(ILandroid/graphics/RectF;I)Z",
-        (void*) SkCanvasGlue::quickReject__RectFI},
-    {"native_quickReject","(III)Z", (void*) SkCanvasGlue::quickReject__PathI},
-    {"native_quickReject","(IFFFFI)Z", (void*)SkCanvasGlue::quickReject__FFFFI},
+    {"native_quickReject","(ILandroid/graphics/RectF;)Z",
+        (void*) SkCanvasGlue::quickReject__RectF},
+    {"native_quickReject","(II)Z", (void*) SkCanvasGlue::quickReject__Path},
+    {"native_quickReject","(IFFFF)Z", (void*)SkCanvasGlue::quickReject__FFFF},
     {"native_drawRGB","(IIII)V", (void*) SkCanvasGlue::drawRGB},
     {"native_drawARGB","(IIIII)V", (void*) SkCanvasGlue::drawARGB},
     {"native_drawColor","(II)V", (void*) SkCanvasGlue::drawColor__I},

@@ -147,25 +147,6 @@ static SkTypeface* Typeface_createFromFile(JNIEnv* env, jobject, jstring jpath) 
     return SkTypeface::CreateFromFile(str.c_str());
 }
 
-#define MIN_GAMMA   (0.1f)
-#define MAX_GAMMA   (10.0f)
-static float pinGamma(float gamma) {
-    if (gamma < MIN_GAMMA) {
-        gamma = MIN_GAMMA;
-    } else if (gamma > MAX_GAMMA) {
-        gamma = MAX_GAMMA;
-    }
-    return gamma;
-}
-
-extern void skia_set_text_gamma(float, float);
-
-static void Typeface_setGammaForText(JNIEnv* env, jobject, jfloat blackGamma,
-                                     jfloat whiteGamma) {
-    // Comment this out for release builds. This is only used during development
-    skia_set_text_gamma(pinGamma(blackGamma), pinGamma(whiteGamma));
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 static JNINativeMethod gTypefaceMethods[] = {
@@ -177,7 +158,6 @@ static JNINativeMethod gTypefaceMethods[] = {
                                            (void*)Typeface_createFromAsset },
     { "nativeCreateFromFile",     "(Ljava/lang/String;)I",
                                            (void*)Typeface_createFromFile },
-    { "setGammaForText", "(FF)V", (void*)Typeface_setGammaForText },
 };
 
 int register_android_graphics_Typeface(JNIEnv* env)
