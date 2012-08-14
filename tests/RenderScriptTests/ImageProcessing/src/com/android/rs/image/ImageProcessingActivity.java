@@ -167,6 +167,9 @@ public class ImageProcessingActivity extends Activity
         case 14:
             mTest = new GroupTest(false);
             break;
+        case 15:
+            mTest = new Intrinsics(0);
+            break;
         }
 
         mTest.createBaseTest(this, mBitmapIn);
@@ -179,7 +182,7 @@ public class ImageProcessingActivity extends Activity
     }
 
     void setupTests() {
-        mTestNames = new String[15];
+        mTestNames = new String[16];
         mTestNames[0] = "Levels Vec3 Relaxed";
         mTestNames[1] = "Levels Vec4 Relaxed";
         mTestNames[2] = "Levels Vec3 Full";
@@ -195,6 +198,7 @@ public class ImageProcessingActivity extends Activity
         mTestNames[12] = "Vignette Approximate Relaxed";
         mTestNames[13] = "Group Test (emulated)";
         mTestNames[14] = "Group Test (native)";
+        mTestNames[15] = "Intrinsics Convolve 3x3";
         mTestSpinner.setAdapter(new ArrayAdapter<String>(
             this, R.layout.spinner_layout, mTestNames));
     }
