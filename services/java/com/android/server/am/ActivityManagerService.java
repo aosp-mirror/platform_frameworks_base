@@ -1952,7 +1952,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mPidsSelfLocked.remove(app.pid);
                 mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
             }
-            app.pid = 0;
+            app.setPid(0);
         }
 
         if (DEBUG_PROCESSES && mProcessesOnHold.contains(app)) Slog.v(TAG,
@@ -2055,7 +2055,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             buf.append("}");
             Slog.i(TAG, buf.toString());
-            app.pid = startResult.pid;
+            app.setPid(startResult.pid);
             app.usingWrapper = startResult.usingWrapper;
             app.removed = false;
             synchronized (mPidsSelfLocked) {
@@ -2067,7 +2067,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         } catch (RuntimeException e) {
             // XXX do better error recovery.
-            app.pid = 0;
+            app.setPid(0);
             Slog.e(TAG, "Failure starting process " + app.processName, e);
         }
     }
