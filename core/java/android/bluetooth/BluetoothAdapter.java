@@ -504,7 +504,10 @@ public final class BluetoothAdapter {
      *         immediate error
      */
     public boolean enable() {
-        boolean enabled = false;
+        if (isEnabled() == true){
+            if (DBG) Log.d(TAG, "enable(): BT is already enabled..!");
+            return true;
+        }
         try {
             return mManagerService.enable();
         } catch (RemoteException e) {Log.e(TAG, "", e);}
@@ -1246,8 +1249,14 @@ public final class BluetoothAdapter {
      * @hide
      */
     public boolean enableNoAutoConnect() {
-        // TODO avoid auto-connect in the new stack.
-        return enable();
+        if (isEnabled() == true){
+            if (DBG) Log.d(TAG, "enableNoAutoConnect(): BT is already enabled..!");
+            return true;
+        }
+        try {
+            return mManagerService.enableNoAutoConnect();
+        } catch (RemoteException e) {Log.e(TAG, "", e);}
+        return false;
     }
 
     /**
