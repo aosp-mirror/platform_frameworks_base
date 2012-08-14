@@ -96,7 +96,7 @@ and leave the rest of your app little memory to work with.</p>
 <p>Here’s an example of setting up a {@link android.util.LruCache} for bitmaps:</p>
 
 <pre>
-private LruCache<String, Bitmap> mMemoryCache;
+private LruCache&lt;String, Bitmap&gt; mMemoryCache;
 
 &#64;Override
 protected void onCreate(Bundle savedInstanceState) {
@@ -109,7 +109,7 @@ protected void onCreate(Bundle savedInstanceState) {
     // Use 1/8th of the available memory for this memory cache.
     final int cacheSize = 1024 * 1024 * memClass / 8;
 
-    mMemoryCache = new LruCache<String, Bitmap>(cacheSize) {
+    mMemoryCache = new LruCache&lt;String, Bitmap&gt;(cacheSize) {
         &#64;Override
         protected int sizeOf(String key, Bitmap bitmap) {
             // The cache size will be measured in bytes rather than number of items.
@@ -159,7 +159,7 @@ public void loadBitmap(int resId, ImageView imageView) {
 updated to add entries to the memory cache:</p>
 
 <pre>
-class BitmapWorkerTask extends AsyncTask<Integer, Void, Bitmap> {
+class BitmapWorkerTask extends AsyncTask&lt;Integer, Void, Bitmap&gt; {
     ...
     // Decode image in background.
     &#64;Override
@@ -179,7 +179,7 @@ class BitmapWorkerTask extends AsyncTask<Integer, Void, Bitmap> {
 rely on images being available in this cache. Components like {@link android.widget.GridView} with
 larger datasets can easily fill up a memory cache. Your application could be interrupted by another
 task like a phone call, and while in the background it might be killed and the memory cache
-destroyed. Once the user resumes, your application it has to process each image again.</p>
+destroyed. Once the user resumes, your application has to process each image again.</p>
 
 <p>A disk cache can be used in these cases to persist processed bitmaps and help decrease loading
 times where images are no longer available in a memory cache. Of course, fetching images from disk
@@ -190,18 +190,14 @@ be unpredictable.</p>
 appropriate place to store cached images if they are accessed more frequently, for example in an
 image gallery application.</p>
 
-<p>Included in the sample code of this class is a basic {@code DiskLruCache} implementation.
-However, a more robust and recommended {@code DiskLruCache} solution is included in the Android 4.0
-source code ({@code libcore/luni/src/main/java/libcore/io/DiskLruCache.java}). Back-porting this
-class for use on previous Android releases should be fairly straightforward (a <a
-href="http://www.google.com/search?q=disklrucache">quick search</a> shows others who have already
-implemented this solution).</p>
-
-<p>Here’s updated example code that uses the simple {@code DiskLruCache} included in the sample
-application of this class:</p>
+<p>The sample code of this class uses a {@code DiskLruCache} implementation that is pulled from the 
+<a href="https://android.googlesource.com/platform/libcore/+/master/luni/src/main/java/libcore/io/DiskLruCache.java">Android source</a>. Here’s updated example code that adds a disk cache in addition
+to the existing memory cache:</p>
 
 <pre>
-private DiskLruCache mDiskCache;
+private DiskLruCache mDiskLruCache;
+private final Object mDiskCacheLock = new Object();
+private boolean mDiskCacheStarting = true;
 private static final int DISK_CACHE_SIZE = 1024 * 1024 * 10; // 10MB
 private static final String DISK_CACHE_SUBDIR = "thumbnails";
 
@@ -210,12 +206,26 @@ protected void onCreate(Bundle savedInstanceState) {
     ...
     // Initialize memory cache
     ...
-    File cacheDir = getCacheDir(this, DISK_CACHE_SUBDIR);
-    mDiskCache = DiskLruCache.openCache(this, cacheDir, DISK_CACHE_SIZE);
+    // Initialize disk cache on background thread
+    File cacheDir = getDiskCacheDir(this, DISK_CACHE_SUBDIR);
+    new InitDiskCacheTask().execute(cacheDir);
     ...
 }
 
-class BitmapWorkerTask extends AsyncTask<Integer, Void, Bitmap> {
+class InitDiskCacheTask extends AsyncTask&lt;File, Void, Void&gt; {
+    &#64;Override
+    protected Void doInBackground(File... params) {
+        synchronized (mDiskCacheLock) {
+            File cacheDir = params[0];
+            mDiskLruCache = DiskLruCache.open(cacheDir, DISK_CACHE_SIZE);
+            mDiskCacheStarting = false; // Finished initialization
+            mDiskCacheLock.notifyAll(); // Wake any waiting threads
+        }
+        return null;
+    }
+}
+
+class BitmapWorkerTask extends AsyncTask&lt;Integer, Void, Bitmap&gt; {
     ...
     // Decode image in background.
     &#64;Override
@@ -232,7 +242,7 @@ class BitmapWorkerTask extends AsyncTask<Integer, Void, Bitmap> {
         }
 
         // Add final bitmap to caches
-        addBitmapToCache(String.valueOf(imageKey, bitmap);
+        addBitmapToCache(imageKey, bitmap);
 
         return bitmap;
     }
@@ -246,27 +256,47 @@ public void addBitmapToCache(String key, Bitmap bitmap) {
     }
 
     // Also add to disk cache
-    if (!mDiskCache.containsKey(key)) {
-        mDiskCache.put(key, bitmap);
+    synchronized (mDiskCacheLock) {
+        if (mDiskLruCache != null && mDiskLruCache.get(key) == null) {
+            mDiskLruCache.put(key, bitmap);
+        }
     }
 }
 
 public Bitmap getBitmapFromDiskCache(String key) {
-    return mDiskCache.get(key);
+    synchronized (mDiskCacheLock) {
+        // Wait while disk cache is started from background thread
+        while (mDiskCacheStarting) {
+            try {
+                mDiskCacheLock.wait();
+            } catch (InterruptedException e) {}
+        }
+        if (mDiskLruCache != null) {
+            return mDiskLruCache.get(key);
+        }
+    }
+    return null;
 }
 
 // Creates a unique subdirectory of the designated app cache directory. Tries to use external
 // but if not mounted, falls back on internal storage.
-public static File getCacheDir(Context context, String uniqueName) {
+public static File getDiskCacheDir(Context context, String uniqueName) {
     // Check if media is mounted or storage is built-in, if so, try and use external cache dir
     // otherwise use internal cache dir
-    final String cachePath = Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED
-            || !Environment.isExternalStorageRemovable() ?
-                    context.getExternalCacheDir().getPath() : context.getCacheDir().getPath();
+    final String cachePath =
+            Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) ||
+                    !isExternalStorageRemovable() ? getExternalCacheDir(context).getPath() :
+                            context.getCacheDir().getPath();
 
     return new File(cachePath + File.separator + uniqueName);
 }
 </pre>
+
+<p class="note"><strong>Note:</strong> Even initializing the disk cache requires disk operations
+and therefore should not take place on the main thread. However, this does mean there's a chance
+the cache is accessed before initialization. To address this, in the above implementation, a lock
+object ensures that the app does not read from the disk cache until the cache has been
+initialized.</p>
 
 <p>While the memory cache is checked in the UI thread, the disk cache is checked in the background
 thread. Disk operations should never take place on the UI thread. When image processing is
@@ -292,7 +322,7 @@ android.widget.ImageView} objects.</p>
 changes using a {@link android.app.Fragment}:</p>
 
 <pre>
-private LruCache<String, Bitmap> mMemoryCache;
+private LruCache&lt;String, Bitmap&gt; mMemoryCache;
 
 &#64;Override
 protected void onCreate(Bundle savedInstanceState) {
@@ -301,7 +331,7 @@ protected void onCreate(Bundle savedInstanceState) {
             RetainFragment.findOrCreateRetainFragment(getFragmentManager());
     mMemoryCache = RetainFragment.mRetainedCache;
     if (mMemoryCache == null) {
-        mMemoryCache = new LruCache<String, Bitmap>(cacheSize) {
+        mMemoryCache = new LruCache&lt;String, Bitmap&gt;(cacheSize) {
             ... // Initialize cache here as usual
         }
         mRetainFragment.mRetainedCache = mMemoryCache;
@@ -311,7 +341,7 @@ protected void onCreate(Bundle savedInstanceState) {
 
 class RetainFragment extends Fragment {
     private static final String TAG = "RetainFragment";
-    public LruCache<String, Bitmap> mRetainedCache;
+    public LruCache&lt;String, Bitmap&gt; mRetainedCache;
 
     public RetainFragment() {}
 
