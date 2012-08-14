@@ -30,6 +30,7 @@ import android.net.ConnectivityManager;
 import android.net.LinkProperties;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.net.wifi.RssiPacketCountInfo;
 import android.os.Message;
 import android.os.SystemClock;
 import android.provider.Settings;
@@ -105,9 +106,6 @@ public class WifiWatchdogStateMachine extends StateMachine {
     /* Notifications from/to WifiStateMachine */
     static final int POOR_LINK_DETECTED                             = BASE + 21;
     static final int GOOD_LINK_DETECTED                             = BASE + 22;
-    static final int RSSI_PKTCNT_FETCH                              = BASE + 23;
-    static final int RSSI_PKTCNT_FETCH_SUCCEEDED                    = BASE + 24;
-    static final int RSSI_PKTCNT_FETCH_FAILED                       = BASE + 25;
 
     /*
      * RSSI levels as used by notification icon
@@ -123,7 +121,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
      * <p>
      * Larger threshold is more adaptive but increases sampling cost.
      */
-    private static final int LINK_MONITOR_LEVEL_THRESHOLD = 4;
+    private static final int LINK_MONITOR_LEVEL_THRESHOLD = WifiManager.RSSI_LEVELS - 1;
 
     /**
      * Remember packet loss statistics of how many BSSIDs.
@@ -228,8 +226,8 @@ public class WifiWatchdogStateMachine extends StateMachine {
      * Adaptive good link target to avoid flapping.
      * When a poor link is detected, a good link target is calculated as follows:
      * <p>
-     *      targetRSSI = min{ rssi | loss(rssi) < GOOD_LINK_LOSS_THRESHOLD } + rssi_adj[i],
-     *                   where rssi is in the above GOOD_LINK_RSSI_RANGE.
+     *      targetRSSI = min { rssi | loss(rssi) < GOOD_LINK_LOSS_THRESHOLD } + rssi_adj[i],
+     *                   where rssi is within the above GOOD_LINK_RSSI_RANGE.
      *      targetCount = sample_count[i] .
      * <p>
      * While WiFi is being avoided, we keep monitoring its signal strength.
@@ -241,7 +239,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
      * <p>
      * Intuitively, larger index i makes it more difficult to get back to WiFi, avoiding flapping.
      * In experiments, (+9 dB / 30 counts) makes it quite difficult to achieve.
-     * Avoid using it unless flapping is really bad (say, last poor link is only 1min ago).
+     * Avoid using it unless flapping is really bad (say, last poor link is < 1 min ago).
      */
     private static final GoodLinkTarget[] GOOD_LINK_TARGET = {
         /*                  rssi_adj,       sample_count,   reduce_time */
@@ -591,8 +589,8 @@ public class WifiWatchdogStateMachine extends StateMachine {
                 case EVENT_BSSID_CHANGE:
                 case CMD_DELAYED_WALLED_GARDEN_CHECK:
                 case CMD_RSSI_FETCH:
-                case RSSI_PKTCNT_FETCH_SUCCEEDED:
-                case RSSI_PKTCNT_FETCH_FAILED:
+                case WifiManager.RSSI_PKTCNT_FETCH_SUCCEEDED:
+                case WifiManager.RSSI_PKTCNT_FETCH_FAILED:
                     // ignore
                     break;
                 case EVENT_SCREEN_ON:
@@ -764,15 +762,15 @@ public class WifiWatchdogStateMachine extends StateMachine {
 
                 case CMD_RSSI_FETCH:
                     if (msg.arg1 == mRssiFetchToken) {
-                        mWsmChannel.sendMessage(RSSI_PKTCNT_FETCH, new RssiPktcntStat());
+                        mWsmChannel.sendMessage(WifiManager.RSSI_PKTCNT_FETCH);
                         sendMessageDelayed(obtainMessage(CMD_RSSI_FETCH, ++mRssiFetchToken, 0),
                                 LINK_SAMPLING_INTERVAL_MS);
                     }
                     break;
 
-                case RSSI_PKTCNT_FETCH_SUCCEEDED:
-                    RssiPktcntStat stat = (RssiPktcntStat) msg.obj;
-                    int rssi = stat.rssi;
+                case WifiManager.RSSI_PKTCNT_FETCH_SUCCEEDED:
+                    RssiPacketCountInfo info = (RssiPacketCountInfo) msg.obj;
+                    int rssi = info.rssi;
                     if (DBG) logd("Fetch RSSI succeed, rssi=" + rssi);
 
                     long time = mCurrentBssid.mBssidAvoidTimeMax - SystemClock.elapsedRealtime();
@@ -795,7 +793,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
                     }
                     break;
 
-                case RSSI_PKTCNT_FETCH_FAILED:
+                case WifiManager.RSSI_PKTCNT_FETCH_FAILED:
                     if (DBG) logd("RSSI_FETCH_FAILED");
                     break;
 
@@ -944,18 +942,18 @@ public class WifiWatchdogStateMachine extends StateMachine {
                     if (!mIsScreenOn) {
                         transitionTo(mOnlineState);
                     } else if (msg.arg1 == mRssiFetchToken) {
-                        mWsmChannel.sendMessage(RSSI_PKTCNT_FETCH, new RssiPktcntStat());
+                        mWsmChannel.sendMessage(WifiManager.RSSI_PKTCNT_FETCH);
                         sendMessageDelayed(obtainMessage(CMD_RSSI_FETCH, ++mRssiFetchToken, 0),
                                 LINK_SAMPLING_INTERVAL_MS);
                     }
                     break;
 
-                case RSSI_PKTCNT_FETCH_SUCCEEDED:
-                    RssiPktcntStat stat = (RssiPktcntStat) msg.obj;
-                    int rssi = stat.rssi;
+                case WifiManager.RSSI_PKTCNT_FETCH_SUCCEEDED:
+                    RssiPacketCountInfo info = (RssiPacketCountInfo) msg.obj;
+                    int rssi = info.rssi;
                     int mrssi = (mLastRssi + rssi) / 2;
-                    int txbad = stat.txbad;
-                    int txgood = stat.txgood;
+                    int txbad = info.txbad;
+                    int txgood = info.txgood;
                     if (DBG) logd("Fetch RSSI succeed, rssi=" + rssi + " mrssi=" + mrssi + " txbad="
                             + txbad + " txgood=" + txgood);
 
@@ -1003,7 +1001,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
                     mLastRssi = rssi;
                     break;
 
-                case RSSI_PKTCNT_FETCH_FAILED:
+                case WifiManager.RSSI_PKTCNT_FETCH_FAILED:
                     // can happen if we are waiting to get a disconnect notification
                     if (DBG) logd("RSSI_FETCH_FAILED");
                     break;
@@ -1156,15 +1154,6 @@ public class WifiWatchdogStateMachine extends StateMachine {
 
     private static void loge(String s) {
         Log.e(TAG, s);
-    }
-
-    /**
-     * Bundle of RSSI and packet count information
-     */
-    public class RssiPktcntStat {
-        public int rssi;
-        public int txgood;
-        public int txbad;
     }
 
     /**
