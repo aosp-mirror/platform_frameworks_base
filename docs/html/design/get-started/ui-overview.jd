@@ -101,8 +101,7 @@ notification opens the associated app. <a href="{@docRoot}design/patterns/notifi
 
     <img src="{@docRoot}design/media/notifications_dismiss.png">
 
-<p>Most notifications have a one-line title and a one-line message. The recommended layout for a
-notification includes two lines. If necessary, you can add a third line. Timestamps are optional.</p>
+<p>Notifications can be expanded to uncover more details and relevant actions. When collapsed, notifications have a one-line title and a one-line message.The recommended layout for a notification includes two lines. If necessary, you can add a third line.</p>
 <p>Swiping a notification right or left removes it from the notification drawer.</p>
 
   </div>

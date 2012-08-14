@@ -17,20 +17,18 @@ page.title=Help
   <li><strong>They're usually not necessary.</strong> If you have usability concerns about an aspect of your app, don't just throw help at the problem. Try to solve it in the UI. Apply Android design patterns, styles, and building blocks, and you'll go a long way in reducing the need to educate your users.</li>
 </ul>
 <p>The only reason for showing pure help content to new users unsolicited is:<br>
-<em>To teach high value functionality that's only available through an atypical use of a gesture.</em></p>
+<em>To teach high value functionality that's only available through a gesture.</em></p>
 
 <p>For example, we use help content to teach users how to place apps on their Home Screen. This functionality is:</p>
 <div class="layout-content-row">
   <div class="layout-content-col span-8">
-    <ol>
+    <ul>
       <li><strong>High value</strong>
-      <p style="margin-top="0">Without it, users wouldn't be able to customize the most frequently-visited Android screen to meet their needs.</p></li>
+      <p style="margin-top:0;">Without it, users wouldn't be able to customize the most frequently visited Android screen to meet their needs.</p></li>
       <li><strong>Available only through a gesture</strong>
-      <p style="margin-top="0">Users can't do this through a button or a menu.</p></li>
-      <li><strong>Atypical for the gesture</strong>
-      <p style="margin-top="0">Many high value functions invoked through a gesture - like scrolling, swiping tabs, and turning pages - are common and yield expected results. Users will be able to discover them in your app, and unsolicited help is unnecessary. But here, the gesture does something unexpected: press and hold doesn't just select an app, it also immediately navigates to the Home Screen and creates a shortcut to the app that can then be dragged around.</p></li>
-    </ol>
-    <p>However, this is an exceptional case. Most functionality doesn't meet all three of these criteria.</p>
+      <p style="margin-top:0;">Because there's no button or menu for it, users might not ever discover it on their own.</p></li>
+    </ul>
+    <p>However, not all high value gesture-only functionality needs a tutorial. For example, don't teach users how to scroll content. They already know how because it's a fundamental, system-wide interaction.</p>
   </div>
   <div class="layout-content-col span-5">
     <img src="{@docRoot}design/media/help_cling.png">
@@ -60,9 +58,9 @@ page.title=Help
 
 <h3 id="help-urgent">Assume that every call for help is urgent</h3>
 
-<p>In addition to help, you might want to expose miscellaneous other information, such as copyright info, credits, terms of service, and privacy policy.</p>
+<p>In addition to help, you might want to expose other information, such as copyright info, credits, terms of service, and privacy policy.</p>
 
-<p>Let users access this information through your Help menu item, but don't give it prominence equal to the core help content. Optimize the flow for people who have urgent questions about how to do something or why something is happening in your app. The smaller subset of users who are looking for legal fine print or the names of the people who created the app won't be as burdened by taking a few extra steps.</p>
+<p>Let users access this information through the Help menu item, but optimize the flow for people with urgent questions about how to do something or why something is happening in your app. The smaller subset of users who are looking for legal fine print or the names of the people who created the app won't be as burdened by taking a few extra steps.</p>
 
 <p>The same is true for any communication options you might want to provide, such as contacting customer support or submitting feedback. Offer these options in a way that doesn't add an extra step before users see help. When you put the help content forward, you increase the likelihood that users will find the answers on their own, which in turn reduces your support costs.</p>
 
@@ -91,7 +89,7 @@ page.title=Help
   </div>
   <div class="layout-content-col span-5">
     <h4 class="do-dont-label good">Even Better</h4>
-    <p>Build a help screen in your app and offer other options in the action bar.</p>
+    <p>Build a help screen in your app and offer other options in the action bar. For example, you could let users contact you with questions or feedback through an action button. The action overflow is the ideal place for non-help information that users rarely need.</p>
     <p>This requires more development work than launching a web browser, but it's a nicer experience for users because they don't leave your app to get the help they need and doesn't require a network connection.</p>
   </div>
 </div>

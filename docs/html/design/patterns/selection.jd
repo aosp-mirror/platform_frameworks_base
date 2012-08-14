@@ -1,8 +1,7 @@
 page.title=Selection
 @jd:body
 
-<p>Android 3.0 introduced the <em>long press</em> gesture&mdash;that is, a touch that's held in the same
-position for a moment&mdash;as the global gesture to select data. This affects the way you should
+<p>Android 3.0 changed the <em>long press</em> gesture&mdash;that is, a touch that's held in the same position for a moment&mdash;to be the global gesture to select data.. This affects the way you should
 handle multi-select and contextual actions in your apps.</p>
 
 <div class="vspace size-1">&nbsp;</div>
