@@ -20,7 +20,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Represents a Geofence
+ * Represents a geographical boundary, also known as a geofence.
+ *
+ * <p>Currently only circular geofences are supported, but this object
+ * is opaque so could be used in the future to represent polygons or other
+ * shapes.
  */
 public final class Geofence implements Parcelable {
     /** @hide */
@@ -33,6 +37,7 @@ public final class Geofence implements Parcelable {
 
     /**
      * Create a horizontal, circular geofence.
+     *
      * @param latitude latitude in degrees
      * @param longitude longitude in degrees
      * @param radius radius in meters
@@ -152,6 +157,9 @@ public final class Geofence implements Parcelable {
         return result;
     }
 
+    /**
+     * Two geofences are equal if they have identical properties.
+     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
