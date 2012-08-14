@@ -34,8 +34,10 @@ import android.app.ActivityManagerNative;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.ContentObserver;
@@ -47,6 +49,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserId;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
@@ -65,6 +68,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.RemoteViews;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
@@ -72,6 +76,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     CommandQueue.Callbacks, RecentsPanelView.OnRecentsPanelVisibilityChangedListener {
     static final String TAG = "StatusBar";
     private static final boolean DEBUG = false;
+    public static final boolean MULTIUSER_DEBUG = false;
 
     protected static final int MSG_OPEN_RECENTS_PANEL = 1020;
     protected static final int MSG_CLOSE_RECENTS_PANEL = 1021;
@@ -111,6 +116,8 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected RecentTasksLoader mRecentTasksLoader;
 
     protected PopupMenu mNotificationBlamePopup;
+
+    protected int mCurrentUserId = 0;
 
     // UI-specific methods
 
@@ -252,6 +259,40 @@ public abstract class BaseStatusBar extends SystemUI implements
                    switches[3]
                    ));
         }
+
+        // XXX: this is currently broken and will always return 0, but should start working at some point
+        try {
+            mCurrentUserId = ActivityManagerNative.getDefault().getCurrentUser().id;
+        } catch (RemoteException e) {
+            Log.v(TAG, "Couldn't get current user ID; guessing it's 0", e);
+        }
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_USER_SWITCHED);
+        mContext.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                if (Intent.ACTION_USER_SWITCHED.equals(action)) {
+                    mCurrentUserId = intent.getIntExtra(Intent.EXTRA_USERID, -1);
+                    if (true) Slog.v(TAG, "userId " + mCurrentUserId + " is in the house");
+                    userSwitched(mCurrentUserId);
+                }
+            }}, filter);
+    }
+
+    public void userSwitched(int newUserId) {
+        // should be overridden
+    }
+
+    public boolean notificationIsForCurrentUser(StatusBarNotification n) {
+        final int thisUserId = mCurrentUserId;
+        final int notificationUserId = n.getUserId();
+        if (DEBUG && MULTIUSER_DEBUG) {
+            Slog.v(TAG, String.format("%s: current userid: %d, notification userid: %d",
+                    n, thisUserId, notificationUserId));
+        }
+        return thisUserId == notificationUserId;
     }
 
     protected View updateNotificationVetoButton(View row, StatusBarNotification n) {
@@ -604,6 +645,14 @@ public abstract class BaseStatusBar extends SystemUI implements
         applyLegacyRowBackground(sbn, content);
 
         row.setTag(R.id.expandable_tag, Boolean.valueOf(large != null));
+
+        if (MULTIUSER_DEBUG) {
+            TextView debug = (TextView) row.findViewById(R.id.debug_info);
+            if (debug != null) {
+                debug.setVisibility(View.VISIBLE);
+                debug.setText("U " + entry.notification.getUserId());
+            }
+        }
         entry.row = row;
         entry.content = content;
         entry.expanded = expandedOneU;
