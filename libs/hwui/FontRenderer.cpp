@@ -37,9 +37,76 @@ namespace uirenderer {
 #define DEFAULT_TEXT_CACHE_WIDTH 1024
 #define DEFAULT_TEXT_CACHE_HEIGHT 256
 #define MAX_TEXT_CACHE_WIDTH 2048
-#define TEXTURE_BORDER_SIZE 1
+#define CACHE_BLOCK_ROUNDING_SIZE 4
 
 #define AUTO_KERN(prev, next) (((next) - (prev) + 32) >> 6 << 16)
+
+///////////////////////////////////////////////////////////////////////////////
+// CacheBlock
+///////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Insert new block into existing linked list of blocks. Blocks are sorted in increasing-width
+ * order, except for the final block (the remainder space at the right, since we fill from the
+ * left).
+ */
+CacheBlock* CacheBlock::insertBlock(CacheBlock* head, CacheBlock *newBlock) {
+#if DEBUG_FONT_RENDERER
+    ALOGD("insertBlock: this, x, y, w, h = %p, %d, %d, %d, %d",
+            newBlock, newBlock->mX, newBlock->mY,
+            newBlock->mWidth, newBlock->mHeight);
+#endif
+    CacheBlock *currBlock = head;
+    CacheBlock *prevBlock = NULL;
+    while (currBlock && currBlock->mY != TEXTURE_BORDER_SIZE) {
+        if (newBlock->mWidth < currBlock->mWidth) {
+            newBlock->mNext = currBlock;
+            newBlock->mPrev = prevBlock;
+            currBlock->mPrev = newBlock;
+            if (prevBlock) {
+                prevBlock->mNext = newBlock;
+                return head;
+            } else {
+                return newBlock;
+            }
+        }
+        prevBlock = currBlock;
+        currBlock = currBlock->mNext;
+    }
+    // new block larger than all others - insert at end (but before the remainder space, if there)
+    newBlock->mNext = currBlock;
+    newBlock->mPrev = prevBlock;
+    if (currBlock) {
+        currBlock->mPrev = newBlock;
+    }
+    if (prevBlock) {
+        prevBlock->mNext = newBlock;
+        return head;
+    } else {
+        return newBlock;
+    }
+}
+
+CacheBlock* CacheBlock::removeBlock(CacheBlock* head, CacheBlock *blockToRemove) {
+#if DEBUG_FONT_RENDERER
+    ALOGD("removeBlock: this, x, y, w, h = %p, %d, %d, %d, %d",
+            blockToRemove, blockToRemove->mX, blockToRemove->mY,
+            blockToRemove->mWidth, blockToRemove->mHeight);
+#endif
+    CacheBlock* newHead = head;
+    CacheBlock* nextBlock = blockToRemove->mNext;
+    CacheBlock* prevBlock = blockToRemove->mPrev;
+    if (prevBlock) {
+        prevBlock->mNext = nextBlock;
+    } else {
+        newHead = nextBlock;
+    }
+    if (nextBlock) {
+        nextBlock->mPrev = prevBlock;
+    }
+    delete blockToRemove;
+    return newHead;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // CacheTextureLine
@@ -50,14 +117,73 @@ bool CacheTextureLine::fitBitmap(const SkGlyph& glyph, uint32_t *retOriginX, uin
         return false;
     }
 
-    if (mCurrentCol + glyph.fWidth + TEXTURE_BORDER_SIZE * 2 < mMaxWidth) {
-        *retOriginX = mCurrentCol + TEXTURE_BORDER_SIZE;
-        *retOriginY = mCurrentRow + TEXTURE_BORDER_SIZE;
-        mCurrentCol += glyph.fWidth + TEXTURE_BORDER_SIZE * 2;
-        mDirty = true;
-        return true;
+    uint16_t glyphW = glyph.fWidth + TEXTURE_BORDER_SIZE;
+    uint16_t glyphH = glyph.fHeight + TEXTURE_BORDER_SIZE;
+    // roundedUpW equals glyphW to the next multiple of CACHE_BLOCK_ROUNDING_SIZE.
+    // This columns for glyphs that are close but not necessarily exactly the same size. It trades
+    // off the loss of a few pixels for some glyphs against the ability to store more glyphs
+    // of varying sizes in one block.
+    uint16_t roundedUpW =
+            (glyphW + CACHE_BLOCK_ROUNDING_SIZE - 1) & -CACHE_BLOCK_ROUNDING_SIZE;
+    CacheBlock *cacheBlock = mCacheBlocks;
+    while (cacheBlock) {
+        // Store glyph in this block iff: it fits the block's remaining space and:
+        // it's the remainder space (mY == 0) or there's only enough height for this one glyph
+        // or it's within ROUNDING_SIZE of the block width
+        if (roundedUpW <= cacheBlock->mWidth && glyphH <= cacheBlock->mHeight &&
+                (cacheBlock->mY == TEXTURE_BORDER_SIZE ||
+                        (cacheBlock->mWidth - roundedUpW < CACHE_BLOCK_ROUNDING_SIZE))) {
+            if (cacheBlock->mHeight - glyphH < glyphH) {
+                // Only enough space for this glyph - don't bother rounding up the width
+                roundedUpW = glyphW;
+            }
+            *retOriginX = cacheBlock->mX;
+            *retOriginY = mCurrentRow + cacheBlock->mY;
+            // If this is the remainder space, create a new cache block for this column. Otherwise,
+            // adjust the info about this column.
+            if (cacheBlock->mY == TEXTURE_BORDER_SIZE) {
+                uint16_t oldX = cacheBlock->mX;
+                // Adjust remainder space dimensions
+                cacheBlock->mWidth -= roundedUpW;
+                cacheBlock->mX += roundedUpW;
+                if (mMaxHeight - glyphH >= glyphH) {
+                    // There's enough height left over to create a new CacheBlock
+                    CacheBlock *newBlock = new CacheBlock(oldX, glyphH, roundedUpW,
+                            mMaxHeight - glyphH);
+#if DEBUG_FONT_RENDERER
+                    ALOGD("fitBitmap: Created new block: this, x, y, w, h = %p, %d, %d, %d, %d",
+                            newBlock, newBlock->mX, newBlock->mY,
+                            newBlock->mWidth, newBlock->mHeight);
+#endif
+                    mCacheBlocks = CacheBlock::insertBlock(mCacheBlocks, newBlock);
+                }
+            } else {
+                // Insert into current column and adjust column dimensions
+                cacheBlock->mY += glyphH;
+                cacheBlock->mHeight -= glyphH;
+#if DEBUG_FONT_RENDERER
+                ALOGD("fitBitmap: Added to existing block: this, x, y, w, h = %p, %d, %d, %d, %d",
+                        cacheBlock, cacheBlock->mX, cacheBlock->mY,
+                        cacheBlock->mWidth, cacheBlock->mHeight);
+#endif
+            }
+            if (cacheBlock->mHeight < fmin(glyphH, glyphW)) {
+                // If remaining space in this block is too small to be useful, remove it
+                mCacheBlocks = CacheBlock::removeBlock(mCacheBlocks, cacheBlock);
+            }
+            mDirty = true;
+#if DEBUG_FONT_RENDERER
+            ALOGD("fitBitmap: current block list:");
+            mCacheBlocks->output();
+#endif
+            ++mNumGlyphs;
+            return true;
+        }
+        cacheBlock = cacheBlock->mNext;
     }
-
+#if DEBUG_FONT_RENDERER
+    ALOGD("fitBitmap: returning false for glyph of size %d, %d", glyphW, glyphH);
+#endif
     return false;
 }
 
@@ -295,6 +421,27 @@ void Font::measure(SkPaint* paint, const char* text, uint32_t start, uint32_t le
     }
     bounds->set(1e6, -1e6, -1e6, 1e6);
     render(paint, text, start, len, numGlyphs, 0, 0, MEASURE, NULL, 0, 0, bounds, positions);
+}
+
+void Font::precache(SkPaint* paint, const char* text, int numGlyphs) {
+
+    if (numGlyphs == 0 || text == NULL) {
+        return;
+    }
+    int glyphsCount = 0;
+
+    while (glyphsCount < numGlyphs) {
+        glyph_t glyph = GET_GLYPH(text);
+
+        // Reached the end of the string
+        if (IS_END_OF_STRING(glyph)) {
+            break;
+        }
+
+        CachedGlyphInfo* cachedGlyph = getCachedGlyph(paint, glyph);
+
+        glyphsCount++;
+    }
 }
 
 void Font::render(SkPaint* paint, const char* text, uint32_t start, uint32_t len,
@@ -545,9 +692,33 @@ void FontRenderer::flushAllAndInvalidate() {
         mActiveFonts[i]->invalidateTextureCache();
     }
 
+    uint16_t totalGlyphs = 0;
     for (uint32_t i = 0; i < mCacheLines.size(); i++) {
-        mCacheLines[i]->mCurrentCol = 0;
+        totalGlyphs += mCacheLines[i]->mNumGlyphs;
+        mCacheLines[i]->init();
     }
+
+#if DEBUG_FONT_RENDERER
+    ALOGD("FontRenderer: flushAllAndInvalidatel");
+    // Erase caches, just as a debugging facility
+    if (mCacheTextureSmall && mCacheTextureSmall->mTexture) {
+        memset(mCacheTextureSmall->mTexture, 0,
+                mCacheTextureSmall->mWidth * mCacheTextureSmall->mHeight);
+    }
+    if (mCacheTexture128 && mCacheTexture128->mTexture) {
+        memset(mCacheTexture128->mTexture, 0,
+                mCacheTexture128->mWidth * mCacheTexture128->mHeight);
+    }
+    if (mCacheTexture256 && mCacheTexture256->mTexture) {
+        memset(mCacheTexture256->mTexture, 0,
+                mCacheTexture256->mWidth * mCacheTexture256->mHeight);
+    }
+    if (mCacheTexture512 && mCacheTexture512->mTexture) {
+        memset(mCacheTexture512->mTexture, 0,
+                mCacheTexture512->mWidth * mCacheTexture512->mHeight);
+    }
+    ALOGD("Flushing caches: glyphs cached = %d", totalGlyphs);
+#endif
 }
 
 void FontRenderer::deallocateTextureMemory(CacheTexture *cacheTexture) {
@@ -573,7 +744,16 @@ void FontRenderer::flushLargeCaches() {
                 cacheLine->mCacheTexture == mCacheTexture256 ||
                 cacheLine->mCacheTexture == mCacheTexture512) &&
                 cacheLine->mCacheTexture->mTexture != NULL) {
-            cacheLine->mCurrentCol = 0;
+#if DEBUG_FONT_RENDERER
+            if (cacheLine->mCacheTexture == mCacheTexture128) {
+                ALOGD("flushing cacheTexture128");
+            } else if (cacheLine->mCacheTexture == mCacheTexture256) {
+                ALOGD("flushing cacheTexture256");
+            } else {
+                ALOGD("flushing cacheTexture512");
+            }
+#endif
+            cacheLine->init();
             for (uint32_t i = 0; i < mActiveFonts.size(); i++) {
                 mActiveFonts[i]->invalidateTextureCache(cacheLine);
             }
@@ -614,9 +794,12 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
         uint32_t* retOriginX, uint32_t* retOriginY) {
     cachedGlyph->mIsValid = false;
     // If the glyph is too tall, don't cache it
-    if (glyph.fHeight + TEXTURE_BORDER_SIZE * 2 > mCacheLines[mCacheLines.size() - 1]->mMaxHeight) {
-        ALOGE("Font size to large to fit in cache. width, height = %i, %i",
-                (int) glyph.fWidth, (int) glyph.fHeight);
+    if (mCacheLines.size() == 0 ||
+        glyph.fHeight + TEXTURE_BORDER_SIZE * 2 > mCacheLines[mCacheLines.size() - 1]->mMaxHeight) {
+        if (mCacheLines.size() != 0) {
+            ALOGE("Font size too large to fit in cache. width, height = %i, %i",
+                    (int) glyph.fWidth, (int) glyph.fHeight);
+        }
         return;
     }
 
@@ -747,26 +930,26 @@ void FontRenderer::initTextTexture() {
     mUploadTexture = false;
     // Split up our default cache texture into lines of certain widths
     int nextLine = 0;
-    mCacheLines.push(new CacheTextureLine(mSmallCacheWidth, 18, nextLine, 0, mCacheTextureSmall));
+    mCacheLines.push(new CacheTextureLine(mSmallCacheWidth, 18, nextLine, mCacheTextureSmall));
     nextLine += mCacheLines.top()->mMaxHeight;
-    mCacheLines.push(new CacheTextureLine(mSmallCacheWidth, 26, nextLine, 0, mCacheTextureSmall));
+    mCacheLines.push(new CacheTextureLine(mSmallCacheWidth, 26, nextLine, mCacheTextureSmall));
     nextLine += mCacheLines.top()->mMaxHeight;
-    mCacheLines.push(new CacheTextureLine(mSmallCacheWidth, 26, nextLine, 0, mCacheTextureSmall));
+    mCacheLines.push(new CacheTextureLine(mSmallCacheWidth, 26, nextLine, mCacheTextureSmall));
     nextLine += mCacheLines.top()->mMaxHeight;
-    mCacheLines.push(new CacheTextureLine(mSmallCacheWidth, 34, nextLine, 0, mCacheTextureSmall));
+    mCacheLines.push(new CacheTextureLine(mSmallCacheWidth, 34, nextLine, mCacheTextureSmall));
     nextLine += mCacheLines.top()->mMaxHeight;
-    mCacheLines.push(new CacheTextureLine(mSmallCacheWidth, 34, nextLine, 0, mCacheTextureSmall));
+    mCacheLines.push(new CacheTextureLine(mSmallCacheWidth, 34, nextLine, mCacheTextureSmall));
     nextLine += mCacheLines.top()->mMaxHeight;
-    mCacheLines.push(new CacheTextureLine(mSmallCacheWidth, 42, nextLine, 0, mCacheTextureSmall));
+    mCacheLines.push(new CacheTextureLine(mSmallCacheWidth, 42, nextLine, mCacheTextureSmall));
     nextLine += mCacheLines.top()->mMaxHeight;
     mCacheLines.push(new CacheTextureLine(mSmallCacheWidth, mSmallCacheHeight - nextLine,
-            nextLine, 0, mCacheTextureSmall));
+            nextLine, mCacheTextureSmall));
 
     //  The first cache is split into 2 lines of height 128, the rest have just one cache line.
-    mCacheLines.push(new CacheTextureLine(maxWidth, 128, 0, 0, mCacheTexture128));
-    mCacheLines.push(new CacheTextureLine(maxWidth, 128, 128, 0, mCacheTexture128));
-    mCacheLines.push(new CacheTextureLine(maxWidth, 256, 0, 0, mCacheTexture256));
-    mCacheLines.push(new CacheTextureLine(maxWidth, 512, 0, 0, mCacheTexture512));
+    mCacheLines.push(new CacheTextureLine(maxWidth, 128, 0, mCacheTexture128));
+    mCacheLines.push(new CacheTextureLine(maxWidth, 128, 128, mCacheTexture128));
+    mCacheLines.push(new CacheTextureLine(maxWidth, 256, 0, mCacheTexture256));
+    mCacheLines.push(new CacheTextureLine(maxWidth, 512, 0, mCacheTexture512));
 }
 
 // Avoid having to reallocate memory and render quad by quad
@@ -837,6 +1020,10 @@ void FontRenderer::checkTextureUpdate() {
                 glBindTexture(GL_TEXTURE_2D, cacheTexture->mTextureId);
                 lastTextureId = cacheTexture->mTextureId;
             }
+#if DEBUG_FONT_RENDERER
+            ALOGD("glTextSubimage for cacheLine %d: xOff, yOff, width height = %d, %d, %d, %d", i,
+                    xOffset, yOffset, width, height);
+#endif
             glTexSubImage2D(GL_TEXTURE_2D, 0, xOffset, yOffset, width, height,
                     GL_ALPHA, GL_UNSIGNED_BYTE, textureData);
 
@@ -960,43 +1147,7 @@ void FontRenderer::appendRotatedMeshQuad(float x1, float y1, float u1, float v1,
     }
 }
 
-uint32_t FontRenderer::getRemainingCacheCapacity() {
-    uint32_t remainingCapacity = 0;
-    float totalPixels = 0;
-
-    //avoid divide by zero if the size is 0
-    if (mCacheLines.size() == 0) {
-        return 0;
-    }
-    for(uint32_t i = 0; i < mCacheLines.size(); i ++) {
-         remainingCapacity += (mCacheLines[i]->mMaxWidth - mCacheLines[i]->mCurrentCol);
-         totalPixels += mCacheLines[i]->mMaxWidth;
-    }
-    remainingCapacity = (remainingCapacity * 100) / totalPixels;
-    return remainingCapacity;
-}
-
-void FontRenderer::precacheLatin(SkPaint* paint) {
-    // Remaining capacity is measured in %
-    uint32_t remainingCapacity = getRemainingCacheCapacity();
-    uint32_t precacheIndex = 0;
-
-    // We store a string with letters in a rough frequency of occurrence
-    String16 l("eisarntolcdugpmhbyfvkwzxjq EISARNTOLCDUGPMHBYFVKWZXJQ,.?!()-+@;:'0123456789");
-
-    size_t size = l.size();
-    uint16_t latin[size];
-    paint->utfToGlyphs(l.string(), SkPaint::kUTF16_TextEncoding, size * sizeof(char16_t), latin);
-
-    while (remainingCapacity > 25 && precacheIndex < size) {
-        mCurrentFont->getCachedGlyph(paint, TO_GLYPH(latin[precacheIndex]));
-        remainingCapacity = getRemainingCacheCapacity();
-        precacheIndex++;
-    }
-}
-
 void FontRenderer::setFont(SkPaint* paint, uint32_t fontId, float fontSize) {
-    uint32_t currentNumFonts = mActiveFonts.size();
     int flags = 0;
     if (paint->isFakeBoldText()) {
         flags |= Font::kFakeBold;
@@ -1012,12 +1163,6 @@ void FontRenderer::setFont(SkPaint* paint, uint32_t fontId, float fontSize) {
     mCurrentFont = Font::create(this, fontId, fontSize, flags, italicStyle,
             scaleX, style, strokeWidth);
 
-    const float maxPrecacheFontSize = 40.0f;
-    bool isNewFont = currentNumFonts != mActiveFonts.size();
-
-    if (isNewFont && fontSize <= maxPrecacheFontSize) {
-        precacheLatin(paint);
-    }
 }
 
 FontRenderer::DropShadow FontRenderer::renderDropShadow(SkPaint* paint, const char *text,
@@ -1082,6 +1227,25 @@ void FontRenderer::finishRender() {
         issueDrawCommand();
         mCurrentQuadIndex = 0;
     }
+}
+
+void FontRenderer::precache(SkPaint* paint, const char* text, int numGlyphs) {
+    int flags = 0;
+    if (paint->isFakeBoldText()) {
+        flags |= Font::kFakeBold;
+    }
+    const float skewX = paint->getTextSkewX();
+    uint32_t italicStyle = *(uint32_t*) &skewX;
+    const float scaleXFloat = paint->getTextScaleX();
+    uint32_t scaleX = *(uint32_t*) &scaleXFloat;
+    SkPaint::Style style = paint->getStyle();
+    const float strokeWidthFloat = paint->getStrokeWidth();
+    uint32_t strokeWidth = *(uint32_t*) &strokeWidthFloat;
+    float fontSize = paint->getTextSize();
+    Font* font = Font::create(this, SkTypeface::UniqueID(paint->getTypeface()),
+            fontSize, flags, italicStyle, scaleX, style, strokeWidth);
+
+    font->precache(paint, text, numGlyphs);
 }
 
 bool FontRenderer::renderText(SkPaint* paint, const Rect* clip, const char *text,
