@@ -112,7 +112,7 @@ methods.</p>
 </table>
 -->
 
-<p>As you'll learn in the following lessons, there are several situtations in which an activity
+<p>As you'll learn in the following lessons, there are several situations in which an activity
 transitions between different states that are illustrated in figure 1. However, only three of
 these states can be static. That is, the activity can exist in one of only three states for an
 extended period of time:</p>

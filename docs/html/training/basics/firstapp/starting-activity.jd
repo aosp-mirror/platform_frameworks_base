@@ -285,8 +285,8 @@ href="{@docRoot}tools/extras/support-library.html#SettingUp">setting up the Supp
 
 <p>The app is now runnable because the {@link android.content.Intent} in the
 first activity now resolves to the {@code DisplayMessageActivity} class. If you run the app now,
-clicking the Send button starts the
-second activity, but it doesn't show anything yet.</p>
+clicking the Send button starts the second activity, but it's still using the default
+"Hello world" layout.</p>
 
 
 <h2 id="ReceiveIntent">Receive the Intent</h2>

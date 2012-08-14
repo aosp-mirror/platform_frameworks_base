@@ -217,7 +217,7 @@ item in the list of settings.</p>
         android:dialogTitle="@string/pref_syncConnectionType"
         android:entries="@array/pref_syncConnectionTypes_entries"
         android:entryValues="@array/pref_syncConnectionTypes_values"
-        android:defaultValue="@string/pref_syncConnectionTypes_default" >
+        android:defaultValue="@string/pref_syncConnectionTypes_default" />
 &lt;/PreferenceScreen>
 </pre>
 
