@@ -30,4 +30,5 @@ interface ISearchManager {
    List<ResolveInfo> getGlobalSearchActivities();
    ComponentName getGlobalSearchActivity();
    ComponentName getWebSearchActivity();
+   ComponentName getAssistIntent(int userHandle);
 }
