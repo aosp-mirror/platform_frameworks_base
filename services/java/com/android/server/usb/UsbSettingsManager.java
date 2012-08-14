@@ -545,6 +545,10 @@ class UsbSettingsManager {
             defaultPackage = mDevicePreferenceMap.get(new DeviceFilter(device));
         }
 
+        // Send broadcast to running activity with registered intent
+        mContext.sendBroadcast(intent);
+
+        // Start activity with registered intent
         resolveActivity(intent, matches, defaultPackage, device, null);
     }
 
