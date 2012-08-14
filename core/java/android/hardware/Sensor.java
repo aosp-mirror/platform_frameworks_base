@@ -26,7 +26,7 @@ package android.hardware;
  * @see SensorEvent
  *
  */
-public class Sensor {
+public final class Sensor {
 
     /**
      * A constant describing an accelerometer sensor type. See
@@ -201,5 +201,12 @@ public class Sensor {
     void setRange(float max, float res) {
         mMaxRange = max;
         mResolution = res;
+    }
+
+    @Override
+    public String toString() {
+        return "{Sensor name=\"" + mName + "\", vendor=\"" + mVendor + "\", version=" + mVersion
+                + ", type=" + mType + ", maxRange=" + mMaxRange + ", resolution=" + mResolution
+                + ", power=" + mPower + ", minDelay=" + mMinDelay + "}";
     }
 }
