@@ -1626,7 +1626,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             mLastMaximumTimeToLock = timeMs;
 
             try {
-                getIPowerManager().setMaximumScreenOffTimeount((int)timeMs);
+                getIPowerManager().setMaximumScreenOffTimeoutFromDeviceAdmin((int)timeMs);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failure talking with power manager", e);
             }
@@ -1667,8 +1667,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             long ident = Binder.clearCallingIdentity();
             try {
                 // Power off the display
-                mIPowerManager.goToSleepWithReason(SystemClock.uptimeMillis(),
-                        WindowManagerPolicy.OFF_BECAUSE_OF_ADMIN);
+                getIPowerManager().goToSleep(SystemClock.uptimeMillis(),
+                        PowerManager.GO_TO_SLEEP_REASON_DEVICE_ADMIN);
                 // Ensure the device is locked
                 getWindowManager().lockNow();
             } catch (RemoteException e) {

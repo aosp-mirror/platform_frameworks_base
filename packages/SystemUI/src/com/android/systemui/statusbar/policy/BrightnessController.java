@@ -20,6 +20,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.IPowerManager;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
@@ -31,8 +32,8 @@ import android.widget.CompoundButton;
 public class BrightnessController implements ToggleSlider.Listener {
     private static final String TAG = "StatusBar.BrightnessController";
 
-    private static final int MINIMUM_BACKLIGHT = android.os.PowerManager.BRIGHTNESS_DIM;
-    private static final int MAXIMUM_BACKLIGHT = android.os.PowerManager.BRIGHTNESS_ON;
+    private final int mMinimumBacklight;
+    private final int mMaximumBacklight;
 
     private Context mContext;
     private ToggleSlider mControl;
@@ -41,6 +42,10 @@ public class BrightnessController implements ToggleSlider.Listener {
     public BrightnessController(Context context, ToggleSlider control) {
         mContext = context;
         mControl = control;
+
+        PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
+        mMinimumBacklight = pm.getMinimumScreenBrightnessSetting();
+        mMaximumBacklight = pm.getMaximumScreenBrightnessSetting();
 
         boolean automaticAvailable = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_automatic_brightness_available);
@@ -65,11 +70,11 @@ public class BrightnessController implements ToggleSlider.Listener {
             value = Settings.System.getInt(mContext.getContentResolver(), 
                     Settings.System.SCREEN_BRIGHTNESS);
         } catch (SettingNotFoundException ex) {
-            value = MAXIMUM_BACKLIGHT;
+            value = mMaximumBacklight;
         }
 
-        control.setMax(MAXIMUM_BACKLIGHT - MINIMUM_BACKLIGHT);
-        control.setValue(value - MINIMUM_BACKLIGHT);
+        control.setMax(mMaximumBacklight - mMinimumBacklight);
+        control.setValue(value - mMinimumBacklight);
 
         control.setOnChangedListener(this);
     }
@@ -78,7 +83,7 @@ public class BrightnessController implements ToggleSlider.Listener {
         setMode(automatic ? Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC
                 : Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
         if (!automatic) {
-            final int val = value + MINIMUM_BACKLIGHT;
+            final int val = value + mMinimumBacklight;
             setBrightness(val);
             if (!tracking) {
                 AsyncTask.execute(new Runnable() {
@@ -98,7 +103,7 @@ public class BrightnessController implements ToggleSlider.Listener {
     
     private void setBrightness(int brightness) {
         try {
-            mPower.setBacklightBrightness(brightness);
+            mPower.setTemporaryScreenBrightnessSettingOverride(brightness);
         } catch (RemoteException ex) {
         }        
     }

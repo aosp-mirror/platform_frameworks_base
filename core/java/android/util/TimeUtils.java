@@ -18,6 +18,7 @@ package android.util;
 
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
+import android.os.SystemClock;
 import android.text.format.DateUtils;
 
 import com.android.internal.util.XmlUtils;
@@ -389,6 +390,18 @@ public class TimeUtils {
             return;
         }
         formatDuration(time-now, pw, 0);
+    }
+
+    /** @hide Just for debugging; not internationalized. */
+    public static String formatUptime(long time) {
+        final long diff = time - SystemClock.uptimeMillis();
+        if (diff > 0) {
+            return time + " (in " + diff + " ms)";
+        }
+        if (diff < 0) {
+            return time + " (" + -diff + " ms ago)";
+        }
+        return time + " (now)";
     }
 
     /**

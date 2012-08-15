@@ -33,6 +33,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.UEventObserver;
 import android.provider.Settings;
@@ -64,11 +65,8 @@ class DockObserver extends UEventObserver {
 
     private final Context mContext;
 
-    private PowerManagerService mPowerManager;
-
-    public DockObserver(Context context, PowerManagerService pm) {
+    public DockObserver(Context context) {
         mContext = context;
-        mPowerManager = pm;
         init();  // set initial status
 
         startObserving(DOCK_UEVENT_MATCH);
@@ -94,8 +92,9 @@ class DockObserver extends UEventObserver {
                                 && mPreviousDockState != Intent.EXTRA_DOCK_STATE_LE_DESK
                                 && mPreviousDockState != Intent.EXTRA_DOCK_STATE_HE_DESK) ||
                                 mDockState != Intent.EXTRA_DOCK_STATE_UNDOCKED) {
-                            mPowerManager.userActivityWithForce(SystemClock.uptimeMillis(),
-                                    false, true);
+                            PowerManager pm =
+                                    (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
+                            pm.wakeUp(SystemClock.uptimeMillis());
                         }
                         update();
                     }

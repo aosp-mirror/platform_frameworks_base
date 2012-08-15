@@ -349,7 +349,7 @@ public class Watchdog extends Thread {
         }
 
         if (mMinScreenOff >= 0 && (mPower == null ||
-                mPower.timeSinceScreenOn() < mMinScreenOff)) {
+                mPower.timeSinceScreenWasLastOn() < mMinScreenOff)) {
             return "screen";
         }
 

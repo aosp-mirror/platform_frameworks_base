@@ -143,7 +143,7 @@ static void loadSystemIconAsSprite(JNIEnv* env, jobject contextObj, int32_t styl
 
 enum {
     WM_ACTION_PASS_TO_USER = 1,
-    WM_ACTION_POKE_USER_ACTIVITY = 2,
+    WM_ACTION_WAKE_UP = 2,
     WM_ACTION_GO_TO_SLEEP = 4,
 };
 
@@ -899,11 +899,11 @@ void NativeInputManager::handleInterceptActions(jint wmActions, nsecs_t when,
         android_server_PowerManagerService_goToSleep(when);
     }
 
-    if (wmActions & WM_ACTION_POKE_USER_ACTIVITY) {
+    if (wmActions & WM_ACTION_WAKE_UP) {
 #if DEBUG_INPUT_DISPATCHER_POLICY
-        ALOGD("handleInterceptActions: Poking user activity.");
+        ALOGD("handleInterceptActions: Waking up.");
 #endif
-        android_server_PowerManagerService_userActivity(when, USER_ACTIVITY_EVENT_BUTTON);
+        android_server_PowerManagerService_wakeUp(when);
     }
 
     if (wmActions & WM_ACTION_PASS_TO_USER) {
