@@ -471,7 +471,7 @@ public final class LoadedApk {
 
     public Resources getResources(ActivityThread mainThread) {
         if (mResources == null) {
-            mResources = mainThread.getTopLevelResources(mResDir, this);
+            mResources = mainThread.getTopLevelResources(mResDir, null, this);
         }
         return mResources;
     }
