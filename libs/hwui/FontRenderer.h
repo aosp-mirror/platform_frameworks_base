@@ -61,35 +61,14 @@ namespace uirenderer {
 
 class FontRenderer;
 
-class CacheTexture {
-public:
-    CacheTexture(uint16_t width, uint16_t height) :
-            mTexture(NULL), mTextureId(0), mWidth(width), mHeight(height),
-            mLinearFiltering(false) { }
-    ~CacheTexture() {
-        if (mTexture) {
-            delete[] mTexture;
-        }
-        if (mTextureId) {
-            glDeleteTextures(1, &mTextureId);
-        }
-    }
-
-    uint8_t* mTexture;
-    GLuint mTextureId;
-    uint16_t mWidth;
-    uint16_t mHeight;
-    bool mLinearFiltering;
-};
-
 /**
- * CacheBlock is a noce in a linked list of current free space areas in a CacheTextureLine.
- * Using CacheBlocks enables us to pack the cache line from top to bottom as well as left to right.
+ * CacheBlock is a node in a linked list of current free space areas in a CacheTexture.
+ * Using CacheBlocks enables us to pack the cache from top to bottom as well as left to right.
  * When we add a glyph to the cache, we see if it fits within one of the existing columns that
  * have already been started (this is the case if the glyph fits vertically as well as
  * horizontally, and if its width is sufficiently close to the column width to avoid
  * sub-optimal packing of small glyphs into wide columns). If there is no column in which the
- * glyph fits, we check the final node, which is the remaining space in the cache line, creating
+ * glyph fits, we check the final node, which is the remaining space in the cache, creating
  * a new column as appropriate.
  *
  * As columns fill up, we remove their CacheBlock from the list to avoid having to check
@@ -122,21 +101,22 @@ struct CacheBlock {
     }
 };
 
-class CacheTextureLine {
+class CacheTexture {
 public:
-    CacheTextureLine(uint16_t maxWidth, uint16_t maxHeight, uint32_t currentRow,
-            CacheTexture* cacheTexture):
-                mMaxHeight(maxHeight),
-                mMaxWidth(maxWidth),
-                mCurrentRow(currentRow),
-                mDirty(false),
-                mNumGlyphs(0),
-                mCacheTexture(cacheTexture) {
+    CacheTexture(uint16_t width, uint16_t height) :
+            mTexture(NULL), mTextureId(0), mWidth(width), mHeight(height),
+            mLinearFiltering(false), mDirty(false), mNumGlyphs(0) {
         mCacheBlocks = new CacheBlock(TEXTURE_BORDER_SIZE, TEXTURE_BORDER_SIZE,
-                maxWidth - TEXTURE_BORDER_SIZE, maxHeight - TEXTURE_BORDER_SIZE, true);
+                mWidth - TEXTURE_BORDER_SIZE, mHeight - TEXTURE_BORDER_SIZE, true);
     }
 
-    ~CacheTextureLine() {
+    ~CacheTexture() {
+        if (mTexture) {
+            delete[] mTexture;
+        }
+        if (mTextureId) {
+            glDeleteTextures(1, &mTextureId);
+        }
         reset();
     }
 
@@ -154,17 +134,18 @@ public:
         // reset, then create a new remainder space to start again
         reset();
         mCacheBlocks = new CacheBlock(TEXTURE_BORDER_SIZE, TEXTURE_BORDER_SIZE,
-                mMaxWidth - TEXTURE_BORDER_SIZE, mMaxHeight - TEXTURE_BORDER_SIZE, true);
+                mWidth - TEXTURE_BORDER_SIZE, mHeight - TEXTURE_BORDER_SIZE, true);
     }
 
     bool fitBitmap(const SkGlyph& glyph, uint32_t *retOriginX, uint32_t *retOriginY);
 
-    uint16_t mMaxHeight;
-    uint16_t mMaxWidth;
-    uint32_t mCurrentRow;
+    uint8_t* mTexture;
+    GLuint mTextureId;
+    uint16_t mWidth;
+    uint16_t mHeight;
+    bool mLinearFiltering;
     bool mDirty;
     uint16_t mNumGlyphs;
-    CacheTexture* mCacheTexture;
     CacheBlock* mCacheBlocks;
 };
 
@@ -193,7 +174,7 @@ struct CachedGlyphInfo {
     // Auto-kerning
     SkFixed mLsbDelta;
     SkFixed mRsbDelta;
-    CacheTextureLine* mCachedTextureLine;
+    CacheTexture* mCacheTexture;
 };
 
 
@@ -260,7 +241,7 @@ protected:
     // Cache of glyphs
     DefaultKeyedVector<glyph_t, CachedGlyphInfo*> mCachedGlyphs;
 
-    void invalidateTextureCache(CacheTextureLine *cacheLine = NULL);
+    void invalidateTextureCache(CacheTexture *cacheTexture = NULL);
 
     CachedGlyphInfo* cacheGlyph(SkPaint* paint, glyph_t glyph);
     void updateGlyphCache(SkPaint* paint, const SkGlyph& skiaGlyph, CachedGlyphInfo* glyph);
@@ -364,17 +345,11 @@ public:
 
     uint32_t getCacheSize() const {
         uint32_t size = 0;
-        if (mCacheTextureSmall != NULL && mCacheTextureSmall->mTexture != NULL) {
-            size += mCacheTextureSmall->mWidth * mCacheTextureSmall->mHeight;
-        }
-        if (mCacheTexture128 != NULL && mCacheTexture128->mTexture != NULL) {
-            size += mCacheTexture128->mWidth * mCacheTexture128->mHeight;
-        }
-        if (mCacheTexture256 != NULL && mCacheTexture256->mTexture != NULL) {
-            size += mCacheTexture256->mWidth * mCacheTexture256->mHeight;
-        }
-        if (mCacheTexture512 != NULL && mCacheTexture512->mTexture != NULL) {
-            size += mCacheTexture512->mWidth * mCacheTexture512->mHeight;
+        for (uint32_t i = 0; i < mCacheTextures.size(); i++) {
+            CacheTexture* cacheTexture = mCacheTextures[i];
+            if (cacheTexture != NULL && cacheTexture->mTexture != NULL) {
+                size += cacheTexture->mWidth * cacheTexture->mHeight;
+            }
         }
         return size;
     }
@@ -390,6 +365,7 @@ protected:
     CacheTexture* createCacheTexture(int width, int height, bool allocate);
     void cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyph,
             uint32_t *retOriginX, uint32_t *retOriginY);
+    CacheTexture* cacheBitmapInTexture(const SkGlyph& glyph, uint32_t* startX, uint32_t* startY);
 
     void flushAllAndInvalidate();
     void initVertexArrayBuffers();
@@ -415,17 +391,13 @@ protected:
     uint32_t mSmallCacheWidth;
     uint32_t mSmallCacheHeight;
 
-    Vector<CacheTextureLine*> mCacheLines;
+    Vector<CacheTexture*> mCacheTextures;
 
     Font* mCurrentFont;
     Vector<Font*> mActiveFonts;
 
     CacheTexture* mCurrentCacheTexture;
     CacheTexture* mLastCacheTexture;
-    CacheTexture* mCacheTextureSmall;
-    CacheTexture* mCacheTexture128;
-    CacheTexture* mCacheTexture256;
-    CacheTexture* mCacheTexture512;
 
     void checkTextureUpdate();
     bool mUploadTexture;
