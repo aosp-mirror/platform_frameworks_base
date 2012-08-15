@@ -22,10 +22,15 @@ two-dimensional,
 scrollable grid. The grid items are automatically inserted to the layout using a {@link
 android.widget.ListAdapter}.</p>
 
+<p>For an introduction to how you can dynamically insert views using an adapter, read
+<a href="{@docRoot}guide/topics/ui/declaring-layout.html#AdapterViews">Building Layouts with
+  an Adapter</a>.</p>
+
 <img src="{@docRoot}images/ui/gridview.png" alt="" />
 
 
 <h2 id="example">Example</h2>
+
 <p>In this tutorial, you'll create a grid of image thumbnails. When an item is selected, a
 toast message will display the position of the image.</p>
 
