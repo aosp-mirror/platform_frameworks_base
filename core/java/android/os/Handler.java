@@ -123,6 +123,7 @@ public class Handler {
         }
         mQueue = mLooper.mQueue;
         mCallback = null;
+        mAsynchronous = false;
     }
 
     /**
@@ -147,6 +148,7 @@ public class Handler {
         }
         mQueue = mLooper.mQueue;
         mCallback = callback;
+        mAsynchronous = false;
     }
 
     /**
@@ -156,6 +158,7 @@ public class Handler {
         mLooper = looper;
         mQueue = looper.mQueue;
         mCallback = null;
+        mAsynchronous = false;
     }
 
     /**
@@ -166,6 +169,31 @@ public class Handler {
         mLooper = looper;
         mQueue = looper.mQueue;
         mCallback = callback;
+        mAsynchronous = false;
+    }
+
+    /**
+     * Use the provided queue instead of the default one and take a callback
+     * interface in which to handle messages.  Also set whether the handler
+     * should be asynchronous.
+     *
+     * Handlers are synchronous by default unless this constructor is used to make
+     * one that is strictly asynchronous.
+     *
+     * Asynchronous messages represent interrupts or events that do not require global ordering
+     * with represent to synchronous messages.  Asynchronous messages are not subject to
+     * the synchronization barriers introduced by {@link MessageQueue#enqueueSyncBarrier(long)}.
+     *
+     * @param async If true, the handler calls {@link Message#setAsynchronous(boolean)} for
+     * each {@link Message} that is sent to it or {@link Runnable} that is posted to it.
+     *
+     * @hide
+     */
+    public Handler(Looper looper, Callback callback, boolean async) {
+        mLooper = looper;
+        mQueue = looper.mQueue;
+        mCallback = callback;
+        mAsynchronous = async;
     }
 
     /**
@@ -464,20 +492,15 @@ public class Handler {
      *         the looper is quit before the delivery time of the message
      *         occurs then the message will be dropped.
      */
-    public boolean sendMessageAtTime(Message msg, long uptimeMillis)
-    {
-        boolean sent = false;
+    public boolean sendMessageAtTime(Message msg, long uptimeMillis) {
         MessageQueue queue = mQueue;
-        if (queue != null) {
-            msg.target = this;
-            sent = queue.enqueueMessage(msg, uptimeMillis);
-        }
-        else {
+        if (queue == null) {
             RuntimeException e = new RuntimeException(
-                this + " sendMessageAtTime() called with no mQueue");
+                    this + " sendMessageAtTime() called with no mQueue");
             Log.w("Looper", e.getMessage(), e);
+            return false;
         }
-        return sent;
+        return enqueueMessage(queue, msg, uptimeMillis);
     }
 
     /**
@@ -492,20 +515,23 @@ public class Handler {
      *         message queue.  Returns false on failure, usually because the
      *         looper processing the message queue is exiting.
      */
-    public final boolean sendMessageAtFrontOfQueue(Message msg)
-    {
-        boolean sent = false;
+    public final boolean sendMessageAtFrontOfQueue(Message msg) {
         MessageQueue queue = mQueue;
-        if (queue != null) {
-            msg.target = this;
-            sent = queue.enqueueMessage(msg, 0);
-        }
-        else {
+        if (queue == null) {
             RuntimeException e = new RuntimeException(
                 this + " sendMessageAtTime() called with no mQueue");
             Log.w("Looper", e.getMessage(), e);
+            return false;
         }
-        return sent;
+        return enqueueMessage(queue, msg, 0);
+    }
+
+    private boolean enqueueMessage(MessageQueue queue, Message msg, long uptimeMillis) {
+        msg.target = this;
+        if (mAsynchronous) {
+            msg.setAsynchronous(true);
+        }
+        return queue.enqueueMessage(msg, uptimeMillis);
     }
 
     /**
@@ -618,5 +644,6 @@ public class Handler {
     final MessageQueue mQueue;
     final Looper mLooper;
     final Callback mCallback;
+    final boolean mAsynchronous;
     IMessenger mMessenger;
 }
