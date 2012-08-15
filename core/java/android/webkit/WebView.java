@@ -164,10 +164,7 @@ import java.util.Map;
  *
  * <p>For obvious security reasons, your application has its own
  * cache, cookie store etc.&mdash;it does not share the Browser
- * application's data. Cookies are managed on a separate thread, so
- * operations like index building don't block the UI
- * thread. Follow the instructions in {@link android.webkit.CookieSyncManager}
- * if you want to use cookies in your application.
+ * application's data.
  * </p>
  *
  * <p>By default, requests by the HTML to open new windows are
