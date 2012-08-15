@@ -21,6 +21,8 @@
 #include "JNIHelp.h"
 #include "jni.h"
 
+#include <ScopedUtfChars.h>
+
 #include <limits.h>
 
 #include <android_runtime/AndroidRuntime.h>
@@ -28,6 +30,7 @@
 #include <utils/Timers.h>
 #include <utils/misc.h>
 #include <utils/String8.h>
+#include <utils/Log.h>
 #include <hardware/power.h>
 #include <hardware_legacy/power.h>
 #include <cutils/android_reboot.h>
@@ -42,8 +45,9 @@ namespace android {
 // ----------------------------------------------------------------------------
 
 static struct {
-    jmethodID goToSleep;
-    jmethodID userActivity;
+    jmethodID wakeUpFromNative;
+    jmethodID goToSleepFromNative;
+    jmethodID userActivityFromNative;
 } gPowerManagerServiceClassInfo;
 
 // ----------------------------------------------------------------------------
@@ -106,9 +110,21 @@ void android_server_PowerManagerService_userActivity(nsecs_t eventTime, int32_t 
 
         JNIEnv* env = AndroidRuntime::getJNIEnv();
 
-        env->CallVoidMethod(gPowerManagerServiceObj, gPowerManagerServiceClassInfo.userActivity,
-                nanoseconds_to_milliseconds(eventTime), false, eventType, false);
-        checkAndClearExceptionFromCallback(env, "userActivity");
+        env->CallVoidMethod(gPowerManagerServiceObj,
+                gPowerManagerServiceClassInfo.userActivityFromNative,
+                nanoseconds_to_milliseconds(eventTime), eventType, 0);
+        checkAndClearExceptionFromCallback(env, "userActivityFromNative");
+    }
+}
+
+void android_server_PowerManagerService_wakeUp(nsecs_t eventTime) {
+    if (gPowerManagerServiceObj) {
+        JNIEnv* env = AndroidRuntime::getJNIEnv();
+
+        env->CallVoidMethod(gPowerManagerServiceObj,
+                gPowerManagerServiceClassInfo.wakeUpFromNative,
+                nanoseconds_to_milliseconds(eventTime));
+        checkAndClearExceptionFromCallback(env, "wakeUpFromNative");
     }
 }
 
@@ -116,9 +132,10 @@ void android_server_PowerManagerService_goToSleep(nsecs_t eventTime) {
     if (gPowerManagerServiceObj) {
         JNIEnv* env = AndroidRuntime::getJNIEnv();
 
-        env->CallVoidMethod(gPowerManagerServiceObj, gPowerManagerServiceClassInfo.goToSleep,
-                nanoseconds_to_milliseconds(eventTime));
-        checkAndClearExceptionFromCallback(env, "goToSleep");
+        env->CallVoidMethod(gPowerManagerServiceObj,
+                gPowerManagerServiceClassInfo.goToSleepFromNative,
+                nanoseconds_to_milliseconds(eventTime), 0);
+        checkAndClearExceptionFromCallback(env, "goToSleepFromNative");
     }
 }
 
@@ -137,68 +154,62 @@ static void nativeInit(JNIEnv* env, jobject obj) {
 }
 
 static void nativeSetPowerState(JNIEnv* env,
-        jobject serviceObj, jboolean screenOn, jboolean screenBright) {
+        jclass clazz, jboolean screenOn, jboolean screenBright) {
     AutoMutex _l(gPowerManagerLock);
     gScreenOn = screenOn;
     gScreenBright = screenBright;
 }
 
-static void nativeStartSurfaceFlingerAnimation(JNIEnv* env,
-        jobject obj, jint mode) {
-    // this is not handled by surfaceflinger anymore
+static void nativeAcquireSuspendBlocker(JNIEnv *env, jclass clazz, jstring nameStr) {
+    ScopedUtfChars name(env, nameStr);
+    acquire_wake_lock(PARTIAL_WAKE_LOCK, name.c_str());
 }
 
-static void nativeAcquireWakeLock(JNIEnv *env, jobject clazz, jint lock, jstring idObj) {
-    if (idObj == NULL) {
-        jniThrowNullPointerException(env, "id is null");
-        return;
-    }
-
-    const char *id = env->GetStringUTFChars(idObj, NULL);
-
-    acquire_wake_lock(lock, id);
-
-    env->ReleaseStringUTFChars(idObj, id);
+static void nativeReleaseSuspendBlocker(JNIEnv *env, jclass clazz, jstring nameStr) {
+    ScopedUtfChars name(env, nameStr);
+    release_wake_lock(name.c_str());
 }
 
-static void nativeReleaseWakeLock(JNIEnv *env, jobject clazz, jstring idObj) {
-    if (idObj == NULL) {
-        jniThrowNullPointerException(env, "id is null");
-        return ;
-    }
-
-    const char *id = env->GetStringUTFChars(idObj, NULL);
-
-    release_wake_lock(id);
-
-    env->ReleaseStringUTFChars(idObj, id);
-
-}
-
-static int nativeSetScreenState(JNIEnv *env, jobject clazz, jboolean on) {
+static void nativeSetScreenState(JNIEnv *env, jclass clazz, jboolean on) {
     sp<ISurfaceComposer> s(ComposerService::getComposerService());
     if (on) {
-        autosuspend_disable();
+        {
+            ALOGD_IF_SLOW(50, "Excessive delay in autosuspend_disable() while turning screen on");
+            autosuspend_disable();
+        }
+
         if (gPowerModule) {
+            ALOGD_IF_SLOW(10, "Excessive delay in setInteractive(true) while turning screen on");
             gPowerModule->setInteractive(gPowerModule, true);
         }
-        s->unblank();
+
+        {
+            ALOGD_IF_SLOW(20, "Excessive delay in unblank() while turning screen on");
+            s->unblank();
+        }
     } else {
-        s->blank();
+        {
+            ALOGD_IF_SLOW(20, "Excessive delay in blank() while turning screen off");
+            s->blank();
+        }
+
         if (gPowerModule) {
+            ALOGD_IF_SLOW(10, "Excessive delay in setInteractive(false) while turning screen off");
             gPowerModule->setInteractive(gPowerModule, false);
         }
-        autosuspend_enable();
-    }
 
-    return 0;
+        {
+            ALOGD_IF_SLOW(50, "Excessive delay in autosuspend_enable() while turning screen off");
+            autosuspend_enable();
+        }
+    }
 }
 
-static void nativeShutdown(JNIEnv *env, jobject clazz) {
+static void nativeShutdown(JNIEnv *env, jclass clazz) {
     android_reboot(ANDROID_RB_POWEROFF, 0, 0);
 }
 
-static void nativeReboot(JNIEnv *env, jobject clazz, jstring reason) {
+static void nativeReboot(JNIEnv *env, jclass clazz, jstring reason) {
     if (reason == NULL) {
         android_reboot(ANDROID_RB_RESTART, 0, 0);
     } else {
@@ -218,13 +229,11 @@ static JNINativeMethod gPowerManagerServiceMethods[] = {
             (void*) nativeInit },
     { "nativeSetPowerState", "(ZZ)V",
             (void*) nativeSetPowerState },
-    { "nativeStartSurfaceFlingerAnimation", "(I)V",
-            (void*) nativeStartSurfaceFlingerAnimation },
-    { "nativeAcquireWakeLock", "(ILjava/lang/String;)V",
-            (void*) nativeAcquireWakeLock },
-    { "nativeReleaseWakeLock", "(Ljava/lang/String;)V",
-            (void*) nativeReleaseWakeLock },
-    { "nativeSetScreenState", "(Z)I",
+    { "nativeAcquireSuspendBlocker", "(Ljava/lang/String;)V",
+            (void*) nativeAcquireSuspendBlocker },
+    { "nativeReleaseSuspendBlocker", "(Ljava/lang/String;)V",
+            (void*) nativeReleaseSuspendBlocker },
+    { "nativeSetScreenState", "(Z)V",
             (void*) nativeSetScreenState },
     { "nativeShutdown", "()V",
             (void*) nativeShutdown },
@@ -254,11 +263,14 @@ int register_android_server_PowerManagerService(JNIEnv* env) {
     jclass clazz;
     FIND_CLASS(clazz, "com/android/server/power/PowerManagerService");
 
-    GET_METHOD_ID(gPowerManagerServiceClassInfo.goToSleep, clazz,
-            "goToSleep", "(J)V");
+    GET_METHOD_ID(gPowerManagerServiceClassInfo.wakeUpFromNative, clazz,
+            "wakeUpFromNative", "(J)V");
 
-    GET_METHOD_ID(gPowerManagerServiceClassInfo.userActivity, clazz,
-            "userActivity", "(JZIZ)V");
+    GET_METHOD_ID(gPowerManagerServiceClassInfo.goToSleepFromNative, clazz,
+            "goToSleepFromNative", "(JI)V");
+
+    GET_METHOD_ID(gPowerManagerServiceClassInfo.userActivityFromNative, clazz,
+            "userActivityFromNative", "(JII)V");
 
     // Initialize
     for (int i = 0; i <= USER_ACTIVITY_EVENT_LAST; i++) {

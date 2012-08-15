@@ -1381,7 +1381,9 @@ public final class Settings {
 
         /**
          * Whether or not to dim the screen. 0=no  1=yes
+         * @deprecated This setting is no longer used.
          */
+        @Deprecated
         public static final String DIM_SCREEN = "dim_screen";
 
         /**

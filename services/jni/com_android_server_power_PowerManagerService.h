@@ -27,6 +27,7 @@ namespace android {
 extern bool android_server_PowerManagerService_isScreenOn();
 extern bool android_server_PowerManagerService_isScreenBright();
 extern void android_server_PowerManagerService_userActivity(nsecs_t eventTime, int32_t eventType);
+extern void android_server_PowerManagerService_wakeUp(nsecs_t eventTime);
 extern void android_server_PowerManagerService_goToSleep(nsecs_t eventTime);
 
 } // namespace android

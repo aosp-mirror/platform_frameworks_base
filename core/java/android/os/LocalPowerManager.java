@@ -18,25 +18,11 @@ package android.os;
 
 /** @hide */
 public interface LocalPowerManager {
+    // FIXME: Replace poke locks with something else.
+
     public static final int POKE_LOCK_IGNORE_TOUCH_EVENTS = 0x1;
 
     public static final int POKE_LOCK_SHORT_TIMEOUT = 0x2;
     public static final int POKE_LOCK_MEDIUM_TIMEOUT = 0x4;
     public static final int POKE_LOCK_TIMEOUT_MASK = 0x6;
-
-    void goToSleep(long time);
-    
-    // notify power manager when keyboard is opened/closed
-    void setKeyboardVisibility(boolean visible);
-
-    // when the keyguard is up, it manages the power state, and userActivity doesn't do anything.
-    void enableUserActivity(boolean enabled);
-
-    // the same as the method on PowerManager
-    void userActivity(long time, boolean noChangeLights, int eventType);
-
-    boolean isScreenOn();
-
-    void setScreenBrightnessOverride(int brightness);
-    void setButtonBrightnessOverride(int brightness);
 }

@@ -440,7 +440,7 @@ public final class BridgeContext extends Context {
         }
 
         if (POWER_SERVICE.equals(service)) {
-            return new PowerManager(new BridgePowerManager(), new Handler());
+            return new PowerManager(this, new BridgePowerManager(), new Handler());
         }
 
         throw new UnsupportedOperationException("Unsupported Service: " + service);

@@ -500,19 +500,15 @@ public class ConnectivityManagerTestActivity extends Activity {
         log("Turn screen off");
         PowerManager pm =
             (PowerManager) getSystemService(Context.POWER_SERVICE);
-        pm.goToSleep(SystemClock.uptimeMillis() + 100);
+        pm.goToSleep(SystemClock.uptimeMillis());
     }
 
     // Turn screen on
     public void turnScreenOn() {
         log("Turn screen on");
-        IPowerManager mPowerManagerService = IPowerManager.Stub.asInterface(
-                ServiceManager.getService("power"));;
-        try {
-            mPowerManagerService.userActivityWithForce(SystemClock.uptimeMillis(), false, true);
-        } catch (Exception e) {
-            log(e.toString());
-        }
+        PowerManager pm =
+                (PowerManager) getSystemService(Context.POWER_SERVICE);
+        pm.wakeUp(SystemClock.uptimeMillis());
     }
 
     /**

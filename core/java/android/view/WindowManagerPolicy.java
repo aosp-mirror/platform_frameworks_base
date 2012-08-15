@@ -22,7 +22,6 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.IBinder;
-import android.os.LocalPowerManager;
 import android.os.Looper;
 import android.view.animation.Animation;
 
@@ -115,11 +114,11 @@ public interface WindowManagerPolicy {
     public final static int ACTION_PASS_TO_USER = 0x00000001;
 
     /**
-     * This key event should extend the user activity timeout and turn the lights on.
+     * This key event should wake the device.
      * To be returned from {@link #interceptKeyBeforeQueueing}.
      * Do not return this and {@link #ACTION_GO_TO_SLEEP} or {@link #ACTION_PASS_TO_USER}.
      */
-    public final static int ACTION_POKE_USER_ACTIVITY = 0x00000002;
+    public final static int ACTION_WAKE_UP = 0x00000002;
 
     /**
      * This key event should put the device to sleep (and engage keyguard if necessary)
@@ -473,11 +472,9 @@ public interface WindowManagerPolicy {
      * Perform initialization of the policy.
      * 
      * @param context The system context we are running in.
-     * @param powerManager 
      */
     public void init(Context context, IWindowManager windowManager,
-            WindowManagerFuncs windowManagerFuncs,
-            LocalPowerManager powerManager);
+            WindowManagerFuncs windowManagerFuncs);
 
     /**
      * Called by window manager once it has the initial, default native
@@ -1091,31 +1088,6 @@ public interface WindowManagerPolicy {
      * Lock the device now.
      */
     public void lockNow();
-
-    /**
-     * Check to see if a screensaver should be run instead of powering off the screen on timeout. 
-     * 
-     * @return true if the screensaver should run, false if the screen should turn off.
-     * 
-     * @hide
-     */
-    public boolean isScreenSaverEnabled();
-
-    /**
-     * Start the screensaver (if it is enabled and not yet running).
-     * 
-     * @return Whether the screensaver was successfully started.
-     * 
-     * @hide
-     */
-    public boolean startScreenSaver();
-
-    /**
-     * Stop the screensaver if it is running.
-     * 
-     * @hide
-     */
-    public void stopScreenSaver();
 
     /**
      * Set the last used input method window state. This state is used to make IME transition

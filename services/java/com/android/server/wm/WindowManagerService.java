@@ -855,7 +855,7 @@ public class WindowManagerService extends IWindowManager.Stub
             android.os.Process.setThreadPriority(
                     android.os.Process.THREAD_PRIORITY_FOREGROUND);
             android.os.Process.setCanSelfBackground(false);
-            mPolicy.init(mContext, mService, mService, mPM);
+            mPolicy.init(mContext, mService, mService);
             mService.mAnimator.mAboveUniverseLayer = mPolicy.getAboveUniverseLayer()
                     * TYPE_LAYER_MULTIPLIER
                     + TYPE_LAYER_OFFSET;
@@ -910,7 +910,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mContext.registerReceiver(mBroadcastReceiver, filter);
 
         mHoldingScreenWakeLock = pmc.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK
-                | PowerManager.ON_AFTER_RELEASE, "KEEP_SCREEN_ON_FLAG");
+                | PowerManager.ON_AFTER_RELEASE, PowerManager.KEEP_SCREEN_ON_FLAG_TAG);
         mHoldingScreenWakeLock.setReferenceCounted(false);
 
         mInputManager = new InputManagerService(context, mInputMonitor);
@@ -9074,16 +9074,16 @@ public class WindowManagerService extends IWindowManager.Stub
         setHoldScreenLocked(mInnerFields.mHoldScreen != null);
         if (!mDisplayFrozen) {
             if (mInnerFields.mScreenBrightness < 0 || mInnerFields.mScreenBrightness > 1.0f) {
-                mPowerManager.setScreenBrightnessOverride(-1);
+                mPowerManager.setScreenBrightnessOverrideFromWindowManager(-1);
             } else {
-                mPowerManager.setScreenBrightnessOverride((int)
-                        (mInnerFields.mScreenBrightness * PowerManager.BRIGHTNESS_ON));
+                mPowerManager.setScreenBrightnessOverrideFromWindowManager(
+                        toBrightnessOverride(mInnerFields.mScreenBrightness));
             }
             if (mInnerFields.mButtonBrightness < 0 || mInnerFields.mButtonBrightness > 1.0f) {
-                mPowerManager.setButtonBrightnessOverride(-1);
+                mPowerManager.setButtonBrightnessOverrideFromWindowManager(-1);
             } else {
-                mPowerManager.setButtonBrightnessOverride((int)
-                        (mInnerFields.mButtonBrightness * PowerManager.BRIGHTNESS_ON));
+                mPowerManager.setButtonBrightnessOverrideFromWindowManager(
+                        toBrightnessOverride(mInnerFields.mButtonBrightness));
             }
         }
         if (mInnerFields.mHoldScreen != mHoldingScreenOn) {
@@ -9094,8 +9094,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         if (mTurnOnScreen) {
             if (DEBUG_VISIBILITY) Slog.v(TAG, "Turning screen on after layout!");
-            mPowerManager.userActivity(SystemClock.uptimeMillis(), false,
-                    PowerManager.USER_ACTIVITY_EVENT_BUTTON, true);
+            mPowerManager.wakeUp(SystemClock.uptimeMillis());
             mTurnOnScreen = false;
         }
 
@@ -9124,6 +9123,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 + Integer.toHexString(mPendingLayoutChanges) + " mLayoutNeeded=" + mLayoutNeeded
                 + " animating=" + mAnimator.mAnimating);
         }
+    }
+
+    private int toBrightnessOverride(float value) {
+        return (int)(value * PowerManager.BRIGHTNESS_ON);
     }
 
     void checkDrawnWindowsLocked() {

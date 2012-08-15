@@ -109,7 +109,7 @@ public class SettingsHelper {
             IPowerManager power = IPowerManager.Stub.asInterface(
                     ServiceManager.getService("power"));
             if (power != null) {
-                power.setBacklightBrightness(brightness);
+                power.setTemporaryScreenBrightnessSettingOverride(brightness);
             }
         } catch (RemoteException doe) {
 

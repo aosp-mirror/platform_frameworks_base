@@ -50,6 +50,7 @@ import com.android.internal.os.SamplingProfilerIntegration;
 import com.android.internal.widget.LockSettingsService;
 import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.am.ActivityManagerService;
+import com.android.server.am.BatteryStatsService;
 import com.android.server.display.DisplayManagerService;
 import com.android.server.input.InputManagerService;
 import com.android.server.net.NetworkPolicyManagerService;
@@ -230,7 +231,8 @@ class ServerThread extends Thread {
 
             // only initialize the power service after we have started the
             // lights service, content providers and the battery service.
-            power.init(context, lights, ActivityManagerService.self(), battery, display);
+            power.init(context, lights, ActivityManagerService.self(), battery,
+                    BatteryStatsService.getService(), display);
 
             Slog.i(TAG, "Alarm Manager");
             alarm = new AlarmManagerService(context);
@@ -553,7 +555,7 @@ class ServerThread extends Thread {
             try {
                 Slog.i(TAG, "Dock Observer");
                 // Listen for dock station changes
-                dock = new DockObserver(context, power);
+                dock = new DockObserver(context);
             } catch (Throwable e) {
                 reportWtf("starting DockObserver", e);
             }
