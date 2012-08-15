@@ -917,6 +917,12 @@ public final class BridgeContext extends Context {
     }
 
     @Override
+    public Context createConfigurationContext(Configuration overrideConfiguration) {
+        // pass
+        return null;
+    }
+
+    @Override
     public String[] databaseList() {
         // pass
         return null;

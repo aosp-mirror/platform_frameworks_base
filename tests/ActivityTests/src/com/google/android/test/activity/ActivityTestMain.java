@@ -40,12 +40,16 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.util.Log;
 
 public class ActivityTestMain extends Activity {
     static final String TAG = "ActivityTest";
 
+    static final String KEY_CONFIGURATION = "configuration";
+
     ActivityManager mAm;
+    Configuration mOverrideConfig;
 
     class BroadcastResultReceiver extends BroadcastReceiver {
         @Override
@@ -111,6 +115,12 @@ public class ActivityTestMain extends Activity {
         super.onCreate(savedInstanceState);
 
         mAm = (ActivityManager)getSystemService(ACTIVITY_SERVICE);
+        if (savedInstanceState != null) {
+            mOverrideConfig = savedInstanceState.getParcelable(KEY_CONFIGURATION);
+            if (mOverrideConfig != null) {
+                applyOverrideConfiguration(mOverrideConfig);
+            }
+        }
     }
 
     @Override
@@ -182,6 +192,21 @@ public class ActivityTestMain extends Activity {
                 return true;
             }
         });
+        menu.add("Density!").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override public boolean onMenuItemClick(MenuItem item) {
+                if (mOverrideConfig == null) {
+                    mOverrideConfig = new Configuration();
+                }
+                if (mOverrideConfig.densityDpi == Configuration.DENSITY_DPI_UNDEFINED) {
+                    mOverrideConfig.densityDpi = (getApplicationContext().getResources()
+                            .getConfiguration().densityDpi*2)/3;
+                } else {
+                    mOverrideConfig.densityDpi = Configuration.DENSITY_DPI_UNDEFINED;
+                }
+                recreate();
+                return true;
+            }
+        });
         return true;
     }
 
@@ -189,6 +214,14 @@ public class ActivityTestMain extends Activity {
     protected void onStart() {
         super.onStart();
         buildUi();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (mOverrideConfig != null) {
+            outState.putParcelable(KEY_CONFIGURATION, mOverrideConfig);
+        }
     }
 
     private View scrollWrap(View view) {
