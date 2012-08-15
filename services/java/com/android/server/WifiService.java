@@ -303,6 +303,10 @@ public class WifiService extends IWifiManager.Stub {
                     mWifiStateMachine.sendMessage(Message.obtain(msg));
                     break;
                 }
+                case WifiManager.RSSI_PKTCNT_FETCH: {
+                    mWifiStateMachine.sendMessage(Message.obtain(msg));
+                    break;
+                }
                 default: {
                     Slog.d(TAG, "WifiServicehandler.handleMessage ignoring msg=" + msg);
                     break;
