@@ -37,8 +37,8 @@ public class CookieManager {
     /**
      * Gets the singleton CookieManager instance. If this method is used
      * before the application instantiates a {@link WebView} instance,
-     * {@link CookieSyncManager#createInstance(Context)} must be called
-     * first.
+     * {@link CookieSyncManager#createInstance CookieSyncManager.createInstance(Context)}
+     * must be called first.
      *
      * @return the singleton CookieManager instance
      */
