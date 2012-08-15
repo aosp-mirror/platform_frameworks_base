@@ -20,6 +20,7 @@ import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorListenerAdapter;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.os.Handler;
@@ -427,6 +428,94 @@ final class FragmentManagerImpl extends FragmentManager {
         }
     };
 
+    private void logViewHierarchy(String prefix, View view) {
+        StringBuilder builder = new StringBuilder(128);
+        builder.append(prefix);
+        DebugUtils.buildShortClassTag(view, builder);
+        int id = view.getId();
+        if (id != -1) {
+            builder.append(" #");
+            builder.append(Integer.toHexString(id));
+            if (id != 0 && id != -1) {
+                try {
+                    String pkgname;
+                    switch (id&0xff000000) {
+                        case 0x7f000000:
+                            pkgname="app";
+                            break;
+                        case 0x01000000:
+                            pkgname="android";
+                            break;
+                        default:
+                            pkgname = view.getResources().getResourcePackageName(id);
+                            break;
+                    }
+                    String typename = view.getResources().getResourceTypeName(id);
+                    String entryname = view.getResources().getResourceEntryName(id);
+                    builder.append(" (");
+                    builder.append(pkgname);
+                    builder.append(":");
+                    builder.append(typename);
+                    builder.append("/");
+                    builder.append(entryname);
+                    builder.append(")");
+                } catch (Resources.NotFoundException e) {
+                }
+            }
+        }
+        Object tag = view.getTag();
+        if (tag != null) {
+            builder.append(" ");
+            builder.append(tag);
+        }
+        builder.append("}");
+        Log.e(TAG, builder.toString());
+
+        if (!(view instanceof ViewGroup)) {
+            return;
+        }
+        ViewGroup grp = (ViewGroup)view;
+        final int N = grp.getChildCount();
+        if (N <= 0) {
+            return;
+        }
+        prefix = prefix + "  ";
+        for (int i=0; i<N; i++) {
+            logViewHierarchy(prefix, grp.getChildAt(i));
+        }
+    }
+
+    private void throwNoViewFound(Fragment f) {
+        String msg = "No view found for id 0x"
+                + Integer.toHexString(f.mContainerId) + " ("
+                + f.getResources().getResourceName(f.mContainerId)
+                + ") for fragment " + f;
+        Log.e(TAG, msg);
+        Log.e(TAG, "Activity state:");
+        if (f.getActivity() != null) {
+            try {
+                LogWriter logw = new LogWriter(Log.ERROR, TAG);
+                PrintWriter pw = new PrintWriter(logw);
+                f.getActivity().dump("  ", null, pw, new String[] { });
+            } catch (Exception e) {
+                Log.e(TAG, "Failed dumping state", e);
+            }
+        } else {
+            Log.e(TAG, "  NULL ACTIVITY!");
+        }
+        Log.e(TAG, "View hierarchy:");
+        if (f.getActivity() != null) {
+            try {
+                logViewHierarchy("  ", f.getActivity().getWindow().getDecorView());
+            } catch (Exception e) {
+                Log.e(TAG, "Failed dumping view hierarchy", e);
+            }
+        } else {
+            Log.e(TAG, "  NULL ACTIVITY!");
+        }
+        throw new IllegalArgumentException(msg);
+    }
+
     @Override
     public FragmentTransaction beginTransaction() {
         return new BackStackRecord(this);
@@ -824,9 +913,7 @@ final class FragmentManagerImpl extends FragmentManager {
                             if (f.mContainerId != 0) {
                                 container = (ViewGroup)mActivity.findViewById(f.mContainerId);
                                 if (container == null && !f.mRestored) {
-                                    throw new IllegalArgumentException("No view found for id 0x"
-                                            + Integer.toHexString(f.mContainerId)
-                                            + " for fragment " + f);
+                                    throwNoViewFound(f);
                                 }
                             }
                             f.mContainer = container;
