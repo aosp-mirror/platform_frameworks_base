@@ -156,7 +156,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"Ausschalten"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Fehlerbericht"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Fehlerbericht abrufen"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"Bei diesem Fehlerbericht werden Daten zum aktuellen Status Ihres Geräts erfasst und als E-Mail versandt. Vom Start des Berichts bis zu seinem Versand kann es eine Weile dauern. Bitte haben Sie Geduld."</string>
+    <string name="bugreport_message" msgid="398447048750350456">"Bei diesem Fehlerbericht werden Daten zum aktuellen Status Ihres Geräts erfasst und als E-Mail versandt. Vom Start des Berichts bis zu seinem Versand kann es eine Weile dauern. Bitte haben Sie etwas Geduld."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Lautlos-Modus"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Ton ist AUS."</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Ton ist AN."</string>
