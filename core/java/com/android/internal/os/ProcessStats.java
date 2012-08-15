@@ -582,6 +582,9 @@ public class ProcessStats {
                     }
                 } catch (NumberFormatException nfe) {
                     Slog.i(TAG, "Unable to parse time_in_state");
+                } catch (java.util.NoSuchElementException nsee) {
+                    Slog.i(TAG, "time_in_state changed size halfway?");
+                    break;
                 }
             }
         }
