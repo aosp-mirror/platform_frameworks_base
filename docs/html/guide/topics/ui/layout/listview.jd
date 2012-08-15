@@ -28,6 +28,10 @@ scrollable items. The list items are automatically inserted to the list using an
 android.widget.Adapter} that pulls content from a source such as an array or database query and
 converts each item result into a view that's placed into the list.</p>
 
+<p>For an introduction to how you can dynamically insert views using an adapter, read
+<a href="{@docRoot}guide/topics/ui/declaring-layout.html#AdapterViews">Building Layouts with
+  an Adapter</a>.</p>
+
 <img src="{@docRoot}images/ui/listview.png" alt="" />
 
 <h2 id="Loader">Using a Loader</h2>
@@ -147,5 +151,5 @@ href="{@docRoot}guide/topics/providers/contacts-provider.html">Contacts
 Provider</a>, if you want to
 try this code, your app must request the {@link android.Manifest.permission#READ_CONTACTS}
 permission in the manifest file:<br/>
-<code>&lt;uses-permission android:name="android.permission.READ_CONTACTS" /></p>
+<code>&lt;uses-permission android:name="android.permission.READ_CONTACTS" /></code></p>
 
