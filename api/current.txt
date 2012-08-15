@@ -5262,6 +5262,7 @@ package android.content {
     method public abstract int checkUriPermission(android.net.Uri, int, int, int);
     method public abstract int checkUriPermission(android.net.Uri, java.lang.String, java.lang.String, int, int, int);
     method public abstract deprecated void clearWallpaper() throws java.io.IOException;
+    method public abstract android.content.Context createConfigurationContext(android.content.res.Configuration);
     method public abstract android.content.Context createPackageContext(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract java.lang.String[] databaseList();
     method public abstract boolean deleteDatabase(java.lang.String);
@@ -5406,6 +5407,7 @@ package android.content {
     method public int checkUriPermission(android.net.Uri, int, int, int);
     method public int checkUriPermission(android.net.Uri, java.lang.String, java.lang.String, int, int, int);
     method public void clearWallpaper() throws java.io.IOException;
+    method public android.content.Context createConfigurationContext(android.content.res.Configuration);
     method public android.content.Context createPackageContext(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method public java.lang.String[] databaseList();
     method public boolean deleteDatabase(java.lang.String);
@@ -21148,6 +21150,7 @@ package android.test.mock {
     method public int checkUriPermission(android.net.Uri, int, int, int);
     method public int checkUriPermission(android.net.Uri, java.lang.String, java.lang.String, int, int, int);
     method public void clearWallpaper();
+    method public android.content.Context createConfigurationContext(android.content.res.Configuration);
     method public android.content.Context createPackageContext(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method public java.lang.String[] databaseList();
     method public boolean deleteDatabase(java.lang.String);
@@ -23352,6 +23355,7 @@ package android.view {
   public class ContextThemeWrapper extends android.content.ContextWrapper {
     ctor public ContextThemeWrapper();
     ctor public ContextThemeWrapper(android.content.Context, int);
+    method public void applyOverrideConfiguration(android.content.res.Configuration);
     method protected void onApplyThemeResource(android.content.res.Resources.Theme, int, boolean);
   }
 

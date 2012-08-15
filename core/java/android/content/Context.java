@@ -19,6 +19,7 @@ package android.content;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.DatabaseErrorHandler;
@@ -2443,6 +2444,23 @@ public abstract class Context {
      */
     public abstract Context createPackageContext(String packageName,
             int flags) throws PackageManager.NameNotFoundException;
+
+    /**
+     * Return a new Context object for the current Context but whose resources
+     * are adjusted to match the given Configuration.  Each call to this method
+     * returns a new instance of a Contex object; Context objects are not
+     * shared, however common state (ClassLoader, other Resources for the
+     * same configuration) may be so the Context itself can be fairly lightweight.
+     *
+     * @param overrideConfiguration A {@link Configuration} specifying what
+     * values to modify in the base Configuration of the original Context's
+     * resources.  If the base configuration changes (such as due to an
+     * orientation change), the resources of this context will also change except
+     * for those that have been explicitly overridden with a value here.
+     *
+     * @return A Context for the application.
+     */
+    public abstract Context createConfigurationContext(Configuration overrideConfiguration);
 
     /**
      * Indicates whether this Context is restricted.

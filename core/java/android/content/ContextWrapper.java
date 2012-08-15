@@ -19,6 +19,7 @@ package android.content;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
@@ -530,6 +531,11 @@ public class ContextWrapper extends Context {
     public Context createPackageContext(String packageName, int flags)
         throws PackageManager.NameNotFoundException {
         return mBase.createPackageContext(packageName, flags);
+    }
+
+    @Override
+    public Context createConfigurationContext(Configuration overrideConfiguration) {
+        return mBase.createConfigurationContext(overrideConfiguration);
     }
 
     @Override

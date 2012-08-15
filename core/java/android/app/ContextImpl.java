@@ -37,6 +37,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.content.res.CompatibilityInfo;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
@@ -525,7 +526,7 @@ class ContextImpl extends Context {
 
     @Override
     public AssetManager getAssets() {
-        return mResources.getAssets();
+        return getResources().getAssets();
     }
 
     @Override
@@ -1591,6 +1592,16 @@ class ContextImpl extends Context {
     }
 
     @Override
+    public Context createConfigurationContext(Configuration overrideConfiguration) {
+        ContextImpl c = new ContextImpl();
+        c.init(mPackageInfo, null, mMainThread);
+        c.mResources = mMainThread.getTopLevelResources(
+                mPackageInfo.getResDir(), overrideConfiguration,
+                mResources.getCompatibilityInfo());
+        return c;
+    }
+
+    @Override
     public boolean isRestricted() {
         return mRestricted;
     }
@@ -1659,12 +1670,11 @@ class ContextImpl extends Context {
                         " compatiblity info:" + container.getDisplayMetrics());
             }
             mResources = mainThread.getTopLevelResources(
-                    mPackageInfo.getResDir(), container.getCompatibilityInfo());
+                    mPackageInfo.getResDir(), null, container.getCompatibilityInfo());
         }
         mMainThread = mainThread;
         mContentResolver = new ApplicationContentResolver(this, mainThread);
-
-        setActivityToken(activityToken);
+        mActivityToken = activityToken;
     }
 
     final void init(Resources resources, ActivityThread mainThread) {
@@ -1689,10 +1699,6 @@ class ContextImpl extends Context {
             return mReceiverRestrictedContext;
         }
         return mReceiverRestrictedContext = new ReceiverRestrictedContext(getOuterContext());
-    }
-
-    final void setActivityToken(IBinder token) {
-        mActivityToken = token;
     }
 
     final void setOuterContext(Context context) {
