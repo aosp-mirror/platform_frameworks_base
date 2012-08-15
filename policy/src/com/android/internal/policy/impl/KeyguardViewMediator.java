@@ -34,6 +34,7 @@ import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Handler;
 import android.os.LocalPowerManager;
+import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
@@ -976,7 +977,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback {
      * interacts with the keyguard ui should be posted to this handler, rather
      * than called directly.
      */
-    private Handler mHandler = new Handler() {
+    private Handler mHandler = new Handler(Looper.myLooper(), null, true /*async*/) {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
