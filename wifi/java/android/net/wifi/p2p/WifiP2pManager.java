@@ -455,6 +455,13 @@ public class WifiP2pManager {
     /** @hide */
     public static final int RESPONSE_PERSISTENT_GROUP_INFO          = BASE + 63;
 
+    /** @hide */
+    public static final int SET_WFD_INFO                            = BASE + 64;
+    /** @hide */
+    public static final int SET_WFD_INFO_FAILED                     = BASE + 65;
+    /** @hide */
+    public static final int SET_WFD_INFO_SUCCEEDED                  = BASE + 66;
+
     /**
      * Create a new WifiP2pManager instance. Applications use
      * {@link android.content.Context#getSystemService Context.getSystemService()} to retrieve
@@ -742,6 +749,7 @@ public class WifiP2pManager {
                     case WifiP2pManager.CLEAR_SERVICE_REQUESTS_FAILED:
                     case WifiP2pManager.SET_DEVICE_NAME_FAILED:
                     case WifiP2pManager.DELETE_PERSISTENT_GROUP_FAILED:
+                    case WifiP2pManager.SET_WFD_INFO_FAILED:
                         if (listener != null) {
                             ((ActionListener) listener).onFailure(message.arg1);
                         }
@@ -762,6 +770,7 @@ public class WifiP2pManager {
                     case WifiP2pManager.CLEAR_SERVICE_REQUESTS_SUCCEEDED:
                     case WifiP2pManager.SET_DEVICE_NAME_SUCCEEDED:
                     case WifiP2pManager.DELETE_PERSISTENT_GROUP_SUCCEEDED:
+                    case WifiP2pManager.SET_WFD_INFO_SUCCEEDED:
                         if (listener != null) {
                             ((ActionListener) listener).onSuccess();
                         }
@@ -1297,6 +1306,13 @@ public class WifiP2pManager {
         c.mAsyncChannel.sendMessage(SET_DEVICE_NAME, 0, c.putListener(listener), d);
     }
 
+    /** @hide */
+    public void setWFDInfo(
+            Channel c, WifiP2pWfdInfo wfdInfo,
+            ActionListener listener) {
+        checkChannel(c);
+        c.mAsyncChannel.sendMessage(SET_WFD_INFO, 0, c.putListener(listener), wfdInfo);
+    }
 
     /**
      * Set dialog listener to over-ride system dialogs on p2p events. This function
