@@ -376,12 +376,13 @@ public class Process {
     public static final ProcessStartResult start(final String processClass,
                                   final String niceName,
                                   int uid, int gid, int[] gids,
-                                  int debugFlags, int targetSdkVersion,
+                                  int debugFlags, int mountExternal,
+                                  int targetSdkVersion,
                                   String seInfo,
                                   String[] zygoteArgs) {
         try {
             return startViaZygote(processClass, niceName, uid, gid, gids,
-                    debugFlags, targetSdkVersion, seInfo, zygoteArgs);
+                    debugFlags, mountExternal, targetSdkVersion, seInfo, zygoteArgs);
         } catch (ZygoteStartFailedEx ex) {
             Log.e(LOG_TAG,
                     "Starting VM process through Zygote failed");
@@ -553,7 +554,8 @@ public class Process {
                                   final String niceName,
                                   final int uid, final int gid,
                                   final int[] gids,
-                                  int debugFlags, int targetSdkVersion,
+                                  int debugFlags, int mountExternal,
+                                  int targetSdkVersion,
                                   String seInfo,
                                   String[] extraArgs)
                                   throws ZygoteStartFailedEx {
@@ -579,6 +581,11 @@ public class Process {
             }
             if ((debugFlags & Zygote.DEBUG_ENABLE_ASSERT) != 0) {
                 argsForZygote.add("--enable-assert");
+            }
+            if (mountExternal == Zygote.MOUNT_EXTERNAL_SINGLEUSER) {
+                argsForZygote.add("--mount-external-singleuser");
+            } else if (mountExternal == Zygote.MOUNT_EXTERNAL_MULTIUSER) {
+                argsForZygote.add("--mount-external-multiuser");
             }
             argsForZygote.add("--target-sdk-version=" + targetSdkVersion);
 

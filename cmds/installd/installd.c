@@ -331,37 +331,109 @@ int initialize_globals() {
 }
 
 int initialize_directories() {
+    int res = -1;
+    int version = 0;
+    FILE* file;
+
+    // Read current filesystem layout version to handle upgrade paths
+    char version_path[PATH_MAX];
+    if (snprintf(version_path, PATH_MAX, "%s.layout_version", android_data_dir.path) > PATH_MAX) {
+        return -1;
+    }
+    file = fopen(version_path, "r");
+    if (file != NULL) {
+        fscanf(file, "%d", &version);
+        fclose(file);
+    }
+
     // /data/user
     char *user_data_dir = build_string2(android_data_dir.path, SECONDARY_USER_PREFIX);
     // /data/data
     char *legacy_data_dir = build_string2(android_data_dir.path, PRIMARY_USER_PREFIX);
     // /data/user/0
-    char *primary_data_dir = build_string3(android_data_dir.path, SECONDARY_USER_PREFIX,
-            "0");
-    int ret = -1;
-    if (user_data_dir != NULL && primary_data_dir != NULL && legacy_data_dir != NULL) {
-        ret = 0;
-        // Make the /data/user directory if necessary
-        if (access(user_data_dir, R_OK) < 0) {
-            if (mkdir(user_data_dir, 0711) < 0) {
-                return -1;
-            }
-            if (chown(user_data_dir, AID_SYSTEM, AID_SYSTEM) < 0) {
-                return -1;
-            }
-            if (chmod(user_data_dir, 0711) < 0) {
-                return -1;
-            }
-        }
-        // Make the /data/user/0 symlink to /data/data if necessary
-        if (access(primary_data_dir, R_OK) < 0) {
-              ret = symlink(legacy_data_dir, primary_data_dir);
-        }
-        free(user_data_dir);
-        free(legacy_data_dir);
-        free(primary_data_dir);
+    char *primary_data_dir = build_string3(android_data_dir.path, SECONDARY_USER_PREFIX, "0");
+    if (!user_data_dir || !legacy_data_dir || !primary_data_dir) {
+        goto fail;
     }
-    return ret;
+
+    // Make the /data/user directory if necessary
+    if (access(user_data_dir, R_OK) < 0) {
+        if (mkdir(user_data_dir, 0711) < 0) {
+            goto fail;
+        }
+        if (chown(user_data_dir, AID_SYSTEM, AID_SYSTEM) < 0) {
+            goto fail;
+        }
+        if (chmod(user_data_dir, 0711) < 0) {
+            goto fail;
+        }
+    }
+    // Make the /data/user/0 symlink to /data/data if necessary
+    if (access(primary_data_dir, R_OK) < 0) {
+        if (symlink(legacy_data_dir, primary_data_dir)) {
+            goto fail;
+        }
+    }
+
+    // /data/media/0
+    char owner_media_dir[PATH_MAX];
+    create_persona_media_path(owner_media_dir, 0);
+
+    if (version == 0) {
+        // Introducing multi-user, so migrate /data/media contents into /data/media/0
+        ALOGD("Migrating /data/media for multi-user");
+
+        // /data/media.tmp
+        char media_tmp_dir[PATH_MAX];
+        snprintf(media_tmp_dir, PATH_MAX, "%smedia.tmp", android_data_dir.path);
+
+        // Only copy when upgrade not already in progress
+        if (access(media_tmp_dir, F_OK) == -1) {
+            if (rename(android_media_dir.path, media_tmp_dir) == -1) {
+                ALOGE("Failed to move legacy media path: %s", strerror(errno));
+                goto fail;
+            }
+        }
+
+        // Create /data/media again
+        if (ensure_dir(android_media_dir.path, 0770, AID_MEDIA_RW, AID_MEDIA_RW) == -1) {
+            goto fail;
+        }
+
+        // Move any owner data into place
+        if (access(media_tmp_dir, F_OK) == 0) {
+            if (rename(media_tmp_dir, owner_media_dir) == -1) {
+                ALOGE("Failed to move owner media path: %s", strerror(errno));
+                goto fail;
+            }
+        }
+        version = 1;
+    }
+
+    // Ensure /data/media/0 is always ready
+    if (ensure_dir(owner_media_dir, 0770, AID_MEDIA_RW, AID_MEDIA_RW) == -1) {
+        goto fail;
+    }
+
+    // Persist our current version
+    file = fopen(version_path, "w");
+    if (file != NULL) {
+        fprintf(file, "%d", version);
+        fsync(fileno(file));
+        fclose(file);
+    } else {
+        ALOGE("Failed to save version to %s: %s", version_path, strerror(errno));
+        goto fail;
+    }
+
+    // Success!
+    res = 0;
+
+fail:
+    free(user_data_dir);
+    free(legacy_data_dir);
+    free(primary_data_dir);
+    return res;
 }
 
 int main(const int argc, const char *argv[]) {

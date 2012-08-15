@@ -18,15 +18,13 @@ package com.android.internal.os;
 
 import android.net.Credentials;
 import android.net.LocalSocket;
-import android.os.Build;
 import android.os.Process;
+import android.os.SELinux;
 import android.os.SystemProperties;
 import android.util.Log;
 
 import dalvik.system.PathClassLoader;
 import dalvik.system.Zygote;
-
-import android.os.SELinux;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -234,9 +232,9 @@ class ZygoteConnection {
                 ZygoteInit.setCloseOnExec(serverPipeFd, true);
             }
 
-            pid = Zygote.forkAndSpecialize(parsedArgs.uid, parsedArgs.gid,
-                    parsedArgs.gids, parsedArgs.debugFlags, rlimits,
-                    parsedArgs.seInfo, parsedArgs.niceName);
+            pid = Zygote.forkAndSpecialize(parsedArgs.uid, parsedArgs.gid, parsedArgs.gids,
+                    parsedArgs.debugFlags, rlimits, parsedArgs.mountExternal, parsedArgs.seInfo,
+                    parsedArgs.niceName);
         } catch (IOException ex) {
             logAndPrintError(newStderr, "Exception creating pipe", ex);
         } catch (ErrnoException ex) {
@@ -340,6 +338,9 @@ class ZygoteConnection {
          * --enable-safemode, and --enable-jni-logging.
          */
         int debugFlags;
+
+        /** From --mount-external */
+        int mountExternal = Zygote.MOUNT_EXTERNAL_NONE;
 
         /** from --target-sdk-version. */
         int targetSdkVersion;
@@ -526,6 +527,10 @@ class ZygoteConnection {
                                 "Duplicate arg specified");
                     }
                     niceName = arg.substring(arg.indexOf('=') + 1);
+                } else if (arg.equals("--mount-external-singleuser")) {
+                    mountExternal = Zygote.MOUNT_EXTERNAL_SINGLEUSER;
+                } else if (arg.equals("--mount-external-multiuser")) {
+                    mountExternal = Zygote.MOUNT_EXTERNAL_MULTIUSER;
                 } else {
                     break;
                 }
