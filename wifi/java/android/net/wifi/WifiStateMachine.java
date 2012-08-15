@@ -52,7 +52,7 @@ import android.net.LinkProperties;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkUtils;
-import android.net.wifi.WifiWatchdogStateMachine.RssiPktcntStat;
+import android.net.wifi.RssiPacketCountInfo;
 import android.net.wifi.WpsResult.Status;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pService;
@@ -1189,7 +1189,7 @@ public class WifiStateMachine extends StateMachine {
             case CMD_RSSI_POLL:
             case CMD_DELAYED_STOP_DRIVER:
             case WifiMonitor.SCAN_RESULTS_EVENT:
-            case WifiWatchdogStateMachine.RSSI_PKTCNT_FETCH:
+            case WifiManager.RSSI_PKTCNT_FETCH:
                 return false;
             default:
                 return true;
@@ -1543,7 +1543,7 @@ public class WifiStateMachine extends StateMachine {
     /*
      * Fetch TX packet counters on current connection
      */
-    private void fetchPktcntNative(RssiPktcntStat stat) {
+    private void fetchPktcntNative(RssiPacketCountInfo info) {
         String pktcntPoll = mWifiNative.pktcntPoll();
 
         if (pktcntPoll != null) {
@@ -1553,9 +1553,9 @@ public class WifiStateMachine extends StateMachine {
                 if (prop.length < 2) continue;
                 try {
                     if (prop[0].equals("TXGOOD")) {
-                        stat.txgood = Integer.parseInt(prop[1]);
+                        info.txgood = Integer.parseInt(prop[1]);
                     } else if (prop[0].equals("TXBAD")) {
-                        stat.txbad = Integer.parseInt(prop[1]);
+                        info.txbad = Integer.parseInt(prop[1]);
                     }
                 } catch (NumberFormatException e) {
                     //Ignore
@@ -1972,8 +1972,9 @@ public class WifiStateMachine extends StateMachine {
                     replyToMessage(message, WifiManager.DISABLE_NETWORK_FAILED,
                             WifiManager.BUSY);
                     break;
-                case WifiWatchdogStateMachine.RSSI_PKTCNT_FETCH:
-                    replyToMessage(message, WifiWatchdogStateMachine.RSSI_PKTCNT_FETCH_FAILED);
+                case WifiManager.RSSI_PKTCNT_FETCH:
+                    replyToMessage(message, WifiManager.RSSI_PKTCNT_FETCH_FAILED,
+                            WifiManager.BUSY);
                     break;
                 default:
                     loge("Error! unhandled message" + message);
@@ -3176,13 +3177,12 @@ public class WifiStateMachine extends StateMachine {
                                 mRssiPollToken, 0), POLL_RSSI_INTERVAL_MSECS);
                     }
                     break;
-                case WifiWatchdogStateMachine.RSSI_PKTCNT_FETCH:
-                    RssiPktcntStat stat = (RssiPktcntStat) message.obj;
+                case WifiManager.RSSI_PKTCNT_FETCH:
+                    RssiPacketCountInfo info = new RssiPacketCountInfo();
                     fetchRssiAndLinkSpeedNative();
-                    stat.rssi = mWifiInfo.getRssi();
-                    fetchPktcntNative(stat);
-                    replyToMessage(message, WifiWatchdogStateMachine.RSSI_PKTCNT_FETCH_SUCCEEDED,
-                            stat);
+                    info.rssi = mWifiInfo.getRssi();
+                    fetchPktcntNative(info);
+                    replyToMessage(message, WifiManager.RSSI_PKTCNT_FETCH_SUCCEEDED, info);
                     break;
                 default:
                     return NOT_HANDLED;

@@ -906,6 +906,17 @@ public class WifiManager {
     }
 
     /**
+     * Return TX packet counter, for CTS test of WiFi watchdog.
+     * @param listener is the interface to receive result
+     *
+     * @hide for CTS test only
+     */
+    public void getTxPacketCount(TxPacketCountListener listener) {
+        validateChannel();
+        mAsyncChannel.sendMessage(RSSI_PKTCNT_FETCH, 0, putListener(listener));
+    }
+
+    /**
      * Calculates the level of the signal. This should be used any time a signal
      * is being shown.
      *
@@ -1143,11 +1154,18 @@ public class WifiManager {
     /** @hide */
     public static final int DISABLE_NETWORK_SUCCEEDED       = BASE + 19;
 
+    /** @hide */
+    public static final int RSSI_PKTCNT_FETCH               = BASE + 20;
+    /** @hide */
+    public static final int RSSI_PKTCNT_FETCH_SUCCEEDED     = BASE + 21;
+    /** @hide */
+    public static final int RSSI_PKTCNT_FETCH_FAILED        = BASE + 22;
+
     /* For system use only */
     /** @hide */
-    public static final int ENABLE_TRAFFIC_STATS_POLL       = BASE + 21;
+    public static final int ENABLE_TRAFFIC_STATS_POLL       = BASE + 31;
     /** @hide */
-    public static final int TRAFFIC_STATS_POLL              = BASE + 22;
+    public static final int TRAFFIC_STATS_POLL              = BASE + 32;
 
 
     /**
@@ -1208,6 +1226,21 @@ public class WifiManager {
          * WPS operation failed
          * @param reason The reason for failure could be one of
          * {@link #IN_PROGRESS}, {@link #WPS_OVERLAP_ERROR},{@link #ERROR} or {@link #BUSY}
+         */
+        public void onFailure(int reason);
+    }
+
+    /** Interface for callback invocation on a TX packet count poll action {@hide} */
+    public interface TxPacketCountListener {
+        /**
+         * The operation succeeded
+         * @param count TX packet counter
+         */
+        public void onSuccess(int count);
+        /**
+         * The operation failed
+         * @param reason The reason for failure could be one of
+         * {@link #ERROR}, {@link #IN_PROGRESS} or {@link #BUSY}
          */
         public void onFailure(int reason);
     }
@@ -1279,6 +1312,20 @@ public class WifiManager {
                 case WifiManager.WPS_FAILED:
                     if (listener != null) {
                         ((WpsListener) listener).onFailure(message.arg1);
+                    }
+                    break;
+                case WifiManager.RSSI_PKTCNT_FETCH_SUCCEEDED:
+                    if (listener != null) {
+                        RssiPacketCountInfo info = (RssiPacketCountInfo) message.obj;
+                        if (info != null)
+                            ((TxPacketCountListener) listener).onSuccess(info.txgood + info.txbad);
+                        else
+                            ((TxPacketCountListener) listener).onFailure(ERROR);
+                    }
+                    break;
+                case WifiManager.RSSI_PKTCNT_FETCH_FAILED:
+                    if (listener != null) {
+                        ((TxPacketCountListener) listener).onFailure(message.arg1);
                     }
                     break;
                 default:
