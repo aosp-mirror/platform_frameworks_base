@@ -156,7 +156,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"خاموش کردن"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"گزارش اشکال"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"گرفتن گزارش اشکال"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"این گزارش اطلاعات مربوط به وضعیت دستگاه کنونی شما را جمع‌آوری می‌کند تا به صورت یک پیام ایمیل ارسال شود. از زمان شروع گزارش اشکال تا آماده شدن برای ارسال اندکی زمان می‌برد؛ لطفاً صبور باشید."</string>
+    <string name="bugreport_message" msgid="398447048750350456">"این گزارش اطلاعات مربوط به وضعیت دستگاه کنونی شما را جمع‌آوری می‌کند تا به صورت یک پیام ایمیل ارسال شود. از زمان شروع گزارش اشکال تا آماده شدن برای ارسال اندکی زمان می‌برد؛ لطفاً شکیبا باشید."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"حالت ساکت"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"صدا خاموش است"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"صدا روشن است"</string>
