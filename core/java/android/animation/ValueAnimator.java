@@ -232,6 +232,13 @@ public class ValueAnimator extends Animator {
     }
 
     /**
+     * @hide
+     */
+    public static float getDurationScale() {
+        return sDurationScale;
+    }
+
+    /**
      * Creates a new ValueAnimator object. This default constructor is primarily for
      * use internally; the factory methods which take parameters are more generally
      * useful.
