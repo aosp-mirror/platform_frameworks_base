@@ -144,30 +144,36 @@ public class ImageProcessingActivity extends Activity
             mTest = new Grain();
             break;
         case 7:
-            mTest = new Fisheye(false);
+            mTest = new Fisheye(false, false);
             break;
         case 8:
-            mTest = new Fisheye(true);
+            mTest = new Fisheye(false, true);
             break;
         case 9:
-            mTest = new Vignette(false, false);
+            mTest = new Fisheye(true, false);
             break;
         case 10:
-            mTest = new Vignette(false, true);
+            mTest = new Fisheye(true, true);
             break;
         case 11:
-            mTest = new Vignette(true, false);
+            mTest = new Vignette(false, false);
             break;
         case 12:
-            mTest = new Vignette(true, true);
+            mTest = new Vignette(false, true);
             break;
         case 13:
-            mTest = new GroupTest(true);
+            mTest = new Vignette(true, false);
             break;
         case 14:
-            mTest = new GroupTest(false);
+            mTest = new Vignette(true, true);
             break;
         case 15:
+            mTest = new GroupTest(true);
+            break;
+        case 16:
+            mTest = new GroupTest(false);
+            break;
+        case 17:
             mTest = new Intrinsics(0);
             break;
         }
@@ -182,7 +188,7 @@ public class ImageProcessingActivity extends Activity
     }
 
     void setupTests() {
-        mTestNames = new String[16];
+        mTestNames = new String[18];
         mTestNames[0] = "Levels Vec3 Relaxed";
         mTestNames[1] = "Levels Vec4 Relaxed";
         mTestNames[2] = "Levels Vec3 Full";
@@ -192,13 +198,15 @@ public class ImageProcessingActivity extends Activity
         mTestNames[6] = "Grain";
         mTestNames[7] = "Fisheye Full";
         mTestNames[8] = "Fisheye Relaxed";
-        mTestNames[9] = "Vignette Full";
-        mTestNames[10] = "Vignette Relaxed";
-        mTestNames[11] = "Vignette Approximate Full";
-        mTestNames[12] = "Vignette Approximate Relaxed";
-        mTestNames[13] = "Group Test (emulated)";
-        mTestNames[14] = "Group Test (native)";
-        mTestNames[15] = "Intrinsics Convolve 3x3";
+        mTestNames[9] = "Fisheye Approximate Full";
+        mTestNames[10] = "Fisheye Approximate Relaxed";
+        mTestNames[11] = "Vignette Full";
+        mTestNames[12] = "Vignette Relaxed";
+        mTestNames[13] = "Vignette Approximate Full";
+        mTestNames[14] = "Vignette Approximate Relaxed";
+        mTestNames[15] = "Group Test (emulated)";
+        mTestNames[16] = "Group Test (native)";
+        mTestNames[17] = "Intrinsics Convolve 3x3";
         mTestSpinner.setAdapter(new ArrayAdapter<String>(
             this, R.layout.spinner_layout, mTestNames));
     }
