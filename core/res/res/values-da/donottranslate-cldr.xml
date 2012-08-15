@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="yesterday">i går</string>
-    <string name="today">i dag</string>
-    <string name="tomorrow">i morgen</string>
-
     <string name="hour_minute_24">%H:%M</string>
     <string name="hour_minute_ampm">%-l.%M %p</string>
     <string name="hour_minute_cap_ampm">%-l.%M %^p</string>
