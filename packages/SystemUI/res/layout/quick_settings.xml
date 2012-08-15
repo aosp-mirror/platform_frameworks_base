@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 
-<com.android.systemui.statusbar.phone.PanelView
+<com.android.systemui.statusbar.phone.SettingsPanelView 
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -42,4 +42,4 @@
             android:src="@drawable/status_bar_close"
             />
     </LinearLayout>
-</com.android.systemui.statusbar.phone.PanelView>
+</com.android.systemui.statusbar.phone.SettingsPanelView >

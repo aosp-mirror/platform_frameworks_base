@@ -223,7 +223,7 @@ public class PanelView extends FrameLayout {
                                     xVel, yVel,
                                     vel);
 
-                            fling(vel, false);
+                            fling(vel, true);
 
                             mVelocityTracker.recycle();
                             mVelocityTracker = null;
@@ -238,7 +238,7 @@ public class PanelView extends FrameLayout {
     public void fling(float vel, boolean always) {
         mVel = vel;
 
-        if (mVel != 0) {
+        if (always||mVel != 0) {
             animationTick(0); // begin the animation
         }
     }
