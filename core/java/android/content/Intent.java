@@ -2279,24 +2279,24 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.PRE_BOOT_COMPLETED";
 
     /**
-     * Broadcast sent to the system when a user is added. Carries an extra EXTRA_USERID that has the
-     * userid of the new user.
+     * Broadcast sent to the system when a user is added. Carries an extra EXTRA_USER_HANDLE that has the
+     * userHandle of the new user.
      * @hide
      */
     public static final String ACTION_USER_ADDED =
             "android.intent.action.USER_ADDED";
 
     /**
-     * Broadcast sent to the system when a user is removed. Carries an extra EXTRA_USERID that has
-     * the userid of the user.
+     * Broadcast sent to the system when a user is removed. Carries an extra EXTRA_USER_HANDLE that has
+     * the userHandle of the user.
      * @hide
      */
     public static final String ACTION_USER_REMOVED =
             "android.intent.action.USER_REMOVED";
 
     /**
-     * Broadcast sent to the system when the user switches. Carries an extra EXTRA_USERID that has
-     * the userid of the user to become the current one.
+     * Broadcast sent to the system when the user switches. Carries an extra EXTRA_USER_HANDLE that has
+     * the userHandle of the user to become the current one.
      * @hide
      */
     public static final String ACTION_USER_SWITCHED =
@@ -2852,12 +2852,12 @@ public class Intent implements Parcelable, Cloneable {
         "android.intent.extra.LOCAL_ONLY";
 
     /**
-     * The userid carried with broadcast intents related to addition, removal and switching of users
+     * The userHandle carried with broadcast intents related to addition, removal and switching of users
      * - {@link #ACTION_USER_ADDED}, {@link #ACTION_USER_REMOVED} and {@link #ACTION_USER_SWITCHED}.
      * @hide
      */
-    public static final String EXTRA_USERID =
-            "android.intent.extra.user_id";
+    public static final String EXTRA_USER_HANDLE =
+            "android.intent.extra.user_handle";
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
