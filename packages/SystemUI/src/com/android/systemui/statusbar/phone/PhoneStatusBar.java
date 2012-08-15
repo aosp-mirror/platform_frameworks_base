@@ -169,11 +169,15 @@ public class PhoneStatusBar extends BaseStatusBar {
     PanelView mNotificationPanel; // the sliding/resizing panel within the notification window
     ScrollView mScrollView;
     View mExpandedContents;
-    int mNotificationPanelMarginBottomPx, mNotificationPanelMarginLeftPx;
     final Rect mNotificationPanelBackgroundPadding = new Rect();
     int mNotificationPanelGravity;
+    int mNotificationPanelMarginBottomPx, mNotificationPanelMarginPx;
     int mNotificationPanelMinHeight;
     boolean mNotificationPanelIsFullScreenWidth;
+
+    // settings
+    PanelView mSettingsPanel;
+    int mSettingsPanelGravity;
 
     // top bar
     View mClearButton;
@@ -310,21 +314,28 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         mNotificationPanel = (PanelView) mStatusBarWindow.findViewById(R.id.notification_panel);
         // don't allow clicks on the panel to pass through to the background where they will cause the panel to close
-        mNotificationPanel.setOnTouchListener(new View.OnTouchListener() {
+        View.OnTouchListener clickStopper = new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 return true;
             }
-        });
+        };
+        mNotificationPanel.setOnTouchListener(clickStopper);
         mNotificationPanelIsFullScreenWidth =
             (mNotificationPanel.getLayoutParams().width == ViewGroup.LayoutParams.MATCH_PARENT);
         mNotificationPanel.setSystemUiVisibility(
                   View.STATUS_BAR_DISABLE_NOTIFICATION_TICKER
                 | (mNotificationPanelIsFullScreenWidth ? 0 : View.STATUS_BAR_DISABLE_SYSTEM_INFO));
 
+        // quick settings (WIP)
+        mSettingsPanel = (PanelView) mStatusBarWindow.findViewById(R.id.settings_panel);
+        mSettingsPanel.setOnTouchListener(clickStopper);
+
         if (!ActivityManager.isHighEndGfx(mDisplay)) {
             mStatusBarWindow.setBackground(null);
             mNotificationPanel.setBackground(new FastColorDrawable(context.getResources().getColor(
+                    R.color.notification_panel_solid_background)));
+            mSettingsPanel.setBackground(new FastColorDrawable(context.getResources().getColor(
                     R.color.notification_panel_solid_background)));
         }
         if (ENABLE_INTRUDERS) {
@@ -1634,8 +1645,12 @@ public class PhoneStatusBar extends BaseStatusBar {
         if (DEBUG) Slog.v(TAG, "updateExpandedViewPos");
         FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mNotificationPanel.getLayoutParams();
         lp.gravity = mNotificationPanelGravity;
-        lp.leftMargin = mNotificationPanelMarginLeftPx;
+        lp.leftMargin = mNotificationPanelMarginPx;
         mNotificationPanel.setLayoutParams(lp);
+        lp = (FrameLayout.LayoutParams) mSettingsPanel.getLayoutParams();
+        lp.gravity = mSettingsPanelGravity;
+        lp.rightMargin = mNotificationPanelMarginPx;
+        mSettingsPanel.setLayoutParams(lp);
     }
 
     // called by makeStatusbar and also by PhoneStatusBarView
@@ -1872,11 +1887,15 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         mNotificationPanelMarginBottomPx
             = (int) res.getDimension(R.dimen.notification_panel_margin_bottom);
-        mNotificationPanelMarginLeftPx
+        mNotificationPanelMarginPx
             = (int) res.getDimension(R.dimen.notification_panel_margin_left);
         mNotificationPanelGravity = res.getInteger(R.integer.notification_panel_layout_gravity);
         if (mNotificationPanelGravity <= 0) {
-            mNotificationPanelGravity = Gravity.CENTER_VERTICAL | Gravity.TOP;
+            mNotificationPanelGravity = Gravity.LEFT | Gravity.TOP;
+        }
+        mSettingsPanelGravity = res.getInteger(R.integer.settings_panel_layout_gravity);
+        if (mSettingsPanelGravity <= 0) {
+            mSettingsPanelGravity = Gravity.RIGHT | Gravity.TOP;
         }
         getNinePatchPadding(res.getDrawable(R.drawable.notification_panel_bg), mNotificationPanelBackgroundPadding);
         final int notificationPanelDecorationHeight =
