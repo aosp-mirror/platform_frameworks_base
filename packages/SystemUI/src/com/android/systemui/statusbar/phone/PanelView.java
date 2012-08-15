@@ -14,7 +14,7 @@ import android.widget.FrameLayout;
 import com.android.systemui.R;
 
 public class PanelView extends FrameLayout {
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
     public static final String TAG = PanelView.class.getSimpleName();
     public static final void LOG(String fmt, Object... args) {
         if (!DEBUG) return;
