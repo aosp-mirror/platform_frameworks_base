@@ -378,28 +378,26 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     imeOptions |= EditorInfo.IME_FLAG_NAVIGATE_PREVIOUS;
                 }
             }
+            int action = EditorInfo.IME_ACTION_GO;
             switch (type) {
                 case WebTextView.NORMAL_TEXT_FIELD:
-                    imeOptions |= EditorInfo.IME_ACTION_GO;
                     break;
                 case WebTextView.TEXT_AREA:
                     inputType |= InputType.TYPE_TEXT_FLAG_MULTI_LINE
                             | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
                             | InputType.TYPE_TEXT_FLAG_AUTO_CORRECT;
-                    imeOptions |= EditorInfo.IME_ACTION_NONE;
+                    action = EditorInfo.IME_ACTION_NONE;
                     break;
                 case WebTextView.PASSWORD:
                     inputType |= EditorInfo.TYPE_TEXT_VARIATION_WEB_PASSWORD;
-                    imeOptions |= EditorInfo.IME_ACTION_GO;
                     break;
                 case WebTextView.SEARCH:
-                    imeOptions |= EditorInfo.IME_ACTION_SEARCH;
+                    action = EditorInfo.IME_ACTION_SEARCH;
                     break;
                 case WebTextView.EMAIL:
                     // inputType needs to be overwritten because of the different text variation.
                     inputType = InputType.TYPE_CLASS_TEXT
                             | InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS;
-                    imeOptions |= EditorInfo.IME_ACTION_GO;
                     break;
                 case WebTextView.NUMBER:
                     // inputType needs to be overwritten because of the different class.
@@ -407,23 +405,20 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                             | InputType.TYPE_NUMBER_FLAG_SIGNED | InputType.TYPE_NUMBER_FLAG_DECIMAL;
                     // Number and telephone do not have both a Tab key and an
                     // action, so set the action to NEXT
-                    imeOptions |= EditorInfo.IME_ACTION_NEXT;
                     break;
                 case WebTextView.TELEPHONE:
                     // inputType needs to be overwritten because of the different class.
                     inputType = InputType.TYPE_CLASS_PHONE;
-                    imeOptions |= EditorInfo.IME_ACTION_NEXT;
                     break;
                 case WebTextView.URL:
                     // TYPE_TEXT_VARIATION_URI prevents Tab key from showing, so
                     // exclude it for now.
-                    imeOptions |= EditorInfo.IME_ACTION_GO;
                     inputType |= InputType.TYPE_TEXT_VARIATION_URI;
                     break;
                 default:
-                    imeOptions |= EditorInfo.IME_ACTION_GO;
                     break;
             }
+            imeOptions |= action;
             mHint = initData.mLabel;
             mInputType = inputType;
             mImeOptions = imeOptions;
