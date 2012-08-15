@@ -6,14 +6,6 @@ parent.link=index.html
 <div id="qv-wrapper">
 <div id="qv">
 
-  <h2>Quickview</h2>
-  <ul>
-    <li>The Android system sends search queries from the search dialog or widget to an activity you
-specify to perform searches and present results</li>
-    <li>You can put the search widget in the Action Bar, as an "action view," for quick
-access</li>
-  </ul>
-
 
 <h2>In this document</h2>
 <ol>
@@ -61,14 +53,8 @@ Dictionary</a></li>
 
 <h2>Downloads</h2>
 <ol>
-<li><a href="{@docRoot}shareables/search_icons.zip">search_icons.zip</a></li>
-</ol>
-
-<h2>See also</h2>
-<ol>
-<li><a href="adding-recent-query-suggestions.html">Adding Recent Query Suggestions</a></li>
-<li><a href="adding-custom-suggestions.html">Adding Custom Suggestions</a></li>
-<li><a href="searchable-config.html">Searchable Configuration</a></li>
+<li><a href="{@docRoot}design/downloads/index.html#action-bar-icon-pack">Action Bar
+Icon Pack</a></li>
 </ol>
 
 </div>
@@ -142,12 +128,14 @@ data, and displays the search results.</p></li>
   <li>A search interface, provided by either:
     <ul>
       <li>The search dialog
-        <p>By default, the search dialog is hidden, but appears at the top of the screen when the 
-user presses the device SEARCH button (when available) or another button in your user interface.</p>
+        <p>By default, the search dialog is hidden, but appears at the top of the screen when
+          you call {@link android.app.Activity#onSearchRequested()} (when the user presses your
+          Search button).</p>
       </li>
       <li>Or, a {@link android.widget.SearchView} widget
         <p>Using the search widget allows you to put the search box anywhere in your activity.
-Instead of putting it in your activity layout, however, it's usually more convenient for users as an
+Instead of putting it in your activity layout, you should usually use
+{@link android.widget.SearchView} as an 
 <a href="{@docRoot}guide/topics/ui/actionbar.html#ActionView">action view in the Action Bar</a>.</p>
       </li>
     </ul>
@@ -415,10 +403,9 @@ searchable activity that performs the search. However, if you are developing
 your application for devices running Android 3.0, you should consider using the search widget
 instead (see the side box).</p>
 
-<p>The search dialog is always hidden by default, until the user activates it. If the user's device
-includes a SEARCH button, pressing it will activate the search dialog by default. Your application
-can also activate the search dialog on demand by calling {@link
-android.app.Activity#onSearchRequested onSearchRequested()}. However, neither of these work
+<p>The search dialog is always hidden by default, until the user activates it. Your application
+can activate the search dialog by calling {@link
+android.app.Activity#onSearchRequested onSearchRequested()}. However, this method doesn't work
 until you enable the search dialog for the activity.</p>
 
 <p>To enable the search dialog, you must indicate to the system which searchable activity should
@@ -469,8 +456,8 @@ search dialog:</p>
 href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code &lt;meta-data&gt;}</a>
 element to declare which searchable activity to use for searches, the activity has enabled the
 search dialog.
-While the user is in this activity, the device SEARCH button (if available) and the {@link
-android.app.Activity#onSearchRequested onSearchRequested()} method will activate the search dialog.
+While the user is in this activity, the {@link
+android.app.Activity#onSearchRequested onSearchRequested()} method activates the search dialog.
 When the user executes the search, the system starts {@code SearchableActivity} and delivers it
 the {@link android.content.Intent#ACTION_SEARCH} intent.</p>
 
@@ -495,21 +482,22 @@ searches.</p>
 
 <h3 id="InvokingTheSearchDialog">Invoking the search dialog</h3>
 
-<p>As mentioned above, the device SEARCH button will open the search dialog as long as the current
-activity has declared in the manifest the searchable activity to use.</p>
+<p>Although some devices provide a dedicated Search button, the behavior of the button may vary
+between devices and many devices do not provide a Search button at all. So when using the search
+dialog, you <strong>must provide a search button in your UI</strong> that activates the search
+dialog by calling {@link android.app.Activity#onSearchRequested()}.</p>
 
-<p>However, some devices do not include a dedicated SEARCH button, so you should not assume that
-it's always available. When using the search dialog, you must <strong>always provide another search
-button in your UI</strong> that activates the search dialog by calling {@link
-android.app.Activity#onSearchRequested()}.</p>
+<p>For instance, you should add a Search button in your <a
+href="{@docRoot}guide/topics/ui/menus.html#options-menu">Options Menu</a> or UI
+layout that calls {@link android.app.Activity#onSearchRequested()}. For consistency with
+the Android system and other apps, you should label your button with the Android Search icon that's
+available from the <a href="{@docRoot}design/downloads/index.html#action-bar-icon-pack">Action Bar
+Icon Pack</a>.</p>
 
-<p>For instance, you should either provide a menu item in your <a
-href="{@docRoot}guide/topics/ui/menus.html#options-menu">Options Menu</a> or a button in your
-activity layout that
-activates search by calling {@link android.app.Activity#onSearchRequested()}. The <a
-href="{@docRoot}shareables/search_icons.zip">search_icons.zip</a> file includes icons for
-medium and high density screens, which you can use for your search menu item or button (low-density
-screens scale-down the hdpi image by one half). </p>
+<p class="note"><strong>Note:</strong> If your app uses the <a
+href="{@docRoot}guide/topics/ui/actionbar.html">action bar</a>, then you should not use
+the search dialog for your search interface. Instead, use the <a href="#UsingSearchWidget">search
+widget</a> as a collapsible view in the action bar.</p>
 
 <p>You can also enable "type-to-search" functionality, which activates the search dialog when the
 user starts typing on the keyboard&mdash;the keystrokes are inserted into the search dialog. You can
