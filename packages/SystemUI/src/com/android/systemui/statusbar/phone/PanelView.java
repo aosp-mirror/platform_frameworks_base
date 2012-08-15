@@ -16,9 +16,9 @@ import com.android.systemui.R;
 public class PanelView extends FrameLayout {
     public static final boolean DEBUG = false;
     public static final String TAG = PanelView.class.getSimpleName();
-    public static final void LOG(String fmt, Object... args) {
+    public final void LOG(String fmt, Object... args) {
         if (!DEBUG) return;
-        Log.v(TAG, String.format(fmt, args));
+        Log.v(TAG, (mViewName != null ? (mViewName + ": ") : "") + String.format(fmt, args));
     }
 
     public static final boolean BRAKES = false;
@@ -61,6 +61,7 @@ public class PanelView extends FrameLayout {
 
     private float mVel, mAccel;
     private int mFullHeight = 0;
+    private String mViewName; 
 
     private void animationTick(long dtms) {
         if (!mTimeAnimator.isStarted()) {
@@ -69,7 +70,7 @@ public class PanelView extends FrameLayout {
             mTimeAnimator.setTimeListener(mAnimationCallback);
 
             mTimeAnimator.start();
-        } else {
+        } else if (dtms > 0) {
             final float dt = dtms * 0.001f;                  // ms -> s
             LOG("tick: v=%.2fpx/s dt=%.4fs", mVel, dt);
             LOG("tick: before: h=%d", (int) mExpandedHeight);
@@ -170,13 +171,16 @@ public class PanelView extends FrameLayout {
                 public boolean onTouch(View v, MotionEvent event) {
                     final float y = event.getY();
                     final float rawY = event.getRawY();
-                    LOG("handle.onTouch: y=%.1f rawY=%.1f off=%.1f", y, rawY, mTouchOffset);
+                    LOG("handle.onTouch: a=%s y=%.1f rawY=%.1f off=%.1f",
+                            MotionEvent.actionToString(event.getAction()),
+                            y, rawY, mTouchOffset);
                     PanelView.this.getLocationOnScreen(mAbsPos);
 
                     switch (event.getAction()) {
                         case MotionEvent.ACTION_DOWN:
                             mVelocityTracker = VelocityTracker.obtain();
                             trackMovement(event);
+                            mBar.onTrackingStarted(PanelView.this);
                             mTouchOffset = (rawY - mAbsPos[1]) - PanelView.this.getExpandedHeight();
                             break;
 
@@ -190,6 +194,7 @@ public class PanelView extends FrameLayout {
 
                         case MotionEvent.ACTION_UP:
                         case MotionEvent.ACTION_CANCEL:
+                            mBar.onTrackingStopped(PanelView.this);
                             trackMovement(event);
                             mVelocityTracker.computeCurrentVelocity(1000);
 
@@ -241,6 +246,11 @@ public class PanelView extends FrameLayout {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+        mViewName = getResources().getResourceName(getId());
+    }
+
+    public String getName() {
+        return mViewName;
     }
 
     @Override
@@ -278,7 +288,7 @@ public class PanelView extends FrameLayout {
         }
 
         LOG("setExpansion: height=%.1f fh=%.1f", h, fh);
-        
+
         if (h < 0) h = 0;
         else if (h > fh) h = fh;
 
