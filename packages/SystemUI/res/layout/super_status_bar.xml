@@ -36,8 +36,13 @@
         android:id="@+id/panel_holder"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginTop="@*android:dimen/status_bar_height"
         >
         <include layout="@layout/status_bar_expanded"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            />
+        <include layout="@layout/quick_settings"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             />

@@ -42,6 +42,7 @@ public class PhoneStatusBarView extends PanelBar {
     private static final String TAG = "PhoneStatusBarView";
     PhoneStatusBar mBar;
     int mScrimColor;
+    PanelView mFadingPanel = null;
 
     public PhoneStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -76,12 +77,21 @@ public class PhoneStatusBarView extends PanelBar {
     public void onPanelPeeked() {
         super.onPanelPeeked();
         mBar.makeExpandedVisible(true);
+        if (mFadingPanel == null) {
+            mFadingPanel = mTouchingPanel;
+        }
     }
 
     @Override
     public void onAllPanelsCollapsed() {
         super.onAllPanelsCollapsed();
         mBar.makeExpandedInvisible();
+        mFadingPanel = null;
+    }
+
+    @Override
+    public void onPanelFullyOpened(PanelView openPanel) {
+        mFadingPanel = openPanel;
     }
 
     @Override
@@ -98,7 +108,8 @@ public class PhoneStatusBarView extends PanelBar {
     public void panelExpansionChanged(PanelView pv, float frac) {
         super.panelExpansionChanged(pv, frac);
 
-        if (mScrimColor != 0 && ActivityManager.isHighEndGfx(mBar.mDisplay)) {
+        if (mFadingPanel == pv 
+                && mScrimColor != 0 && ActivityManager.isHighEndGfx(mBar.mDisplay)) {
             // woo, special effects
             final float k = (float)(1f-0.5f*(1f-Math.cos(3.14159f * Math.pow(1f-frac, 2.2f))));
             // attenuate background color alpha by k

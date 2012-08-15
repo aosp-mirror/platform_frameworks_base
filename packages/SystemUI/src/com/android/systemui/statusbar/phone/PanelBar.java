@@ -18,7 +18,7 @@ public class PanelBar extends FrameLayout {
 
     private PanelHolder mPanelHolder;
     private ArrayList<PanelView> mPanels = new ArrayList<PanelView>();
-    private PanelView mTouchingPanel;
+    protected PanelView mTouchingPanel;
 
     public PanelBar(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -71,24 +71,25 @@ public class PanelBar extends FrameLayout {
 
     public void panelExpansionChanged(PanelView panel, float frac) {
         boolean fullyClosed = true;
-        boolean fullyOpened = false;
+        PanelView fullyOpenedPanel = null;
         for (PanelView pv : mPanels) {
             if (pv.getExpandedHeight() > 0f) {
                 fullyClosed = false;
                 final float thisFrac = pv.getExpandedFraction();
                 LOG("panel %s: f=%.1f", pv, thisFrac);
                 if (panel == pv) {
-                    if (thisFrac == 1f) fullyOpened = true;
+                    if (thisFrac == 1f) fullyOpenedPanel = panel;
                 } else {
                     pv.setExpandedFraction(1f-frac);
                 }
             }
         }
-        if (fullyOpened) onPanelFullyOpened();
+        if (fullyOpenedPanel != null) onPanelFullyOpened(fullyOpenedPanel);
         if (fullyClosed) onAllPanelsCollapsed();
         else onPanelPeeked();
 
-        LOG("panelExpansionChanged: [%s%s ]", fullyOpened?" fullyOpened":"", fullyClosed?" fullyClosed":"");
+        LOG("panelExpansionChanged: [%s%s ]", 
+                (fullyOpenedPanel!=null)?" fullyOpened":"", fullyClosed?" fullyClosed":"");
     }
 
     public void collapseAllPanels(boolean animate) {
@@ -109,7 +110,7 @@ public class PanelBar extends FrameLayout {
         LOG("onAllPanelsCollapsed");
     }
 
-    public void onPanelFullyOpened() {
+    public void onPanelFullyOpened(PanelView openPanel) {
         LOG("onPanelFullyOpened");
     }
 }
