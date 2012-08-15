@@ -27,6 +27,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.UserId;
 import android.util.AndroidException;
 
 /**
@@ -613,6 +614,47 @@ public final class PendingIntent implements Parcelable {
         } catch (RemoteException e) {
             // Should never happen.
             return null;
+        }
+    }
+
+    /**
+     * Return the uid of the application that created this
+     * PendingIntent, that is the identity under which you will actually be
+     * sending the Intent.  The returned integer is supplied by the system, so
+     * that an application can not spoof its uid.
+     *
+     * @return The uid of the PendingIntent, or -1 if there is
+     * none associated with it.
+     */
+    public int getTargetUid() {
+        try {
+            return ActivityManagerNative.getDefault()
+                .getUidForIntentSender(mTarget);
+        } catch (RemoteException e) {
+            // Should never happen.
+            return -1;
+        }
+    }
+
+    /**
+     * Return the user handle of the application that created this
+     * PendingIntent, that is the user under which you will actually be
+     * sending the Intent.  The returned integer is supplied by the system, so
+     * that an application can not spoof its user.  See
+     * {@link android.os.Process#myUserHandle() Process.myUserHandle()} for
+     * more explanation of user handles.
+     *
+     * @return The user handle of the PendingIntent, or -1 if there is
+     * none associated with it.
+     */
+    public int getTargetUserHandle() {
+        try {
+            int uid = ActivityManagerNative.getDefault()
+                .getUidForIntentSender(mTarget);
+            return uid > 0 ? UserId.getUserId(uid) : -1;
+        } catch (RemoteException e) {
+            // Should never happen.
+            return -1;
         }
     }
 

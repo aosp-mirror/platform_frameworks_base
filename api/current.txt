@@ -3870,6 +3870,8 @@ package android.app {
     method public android.content.IntentSender getIntentSender();
     method public static android.app.PendingIntent getService(android.content.Context, int, android.content.Intent, int);
     method public java.lang.String getTargetPackage();
+    method public int getTargetUid();
+    method public int getTargetUserHandle();
     method public static android.app.PendingIntent readPendingIntentOrNullFromParcel(android.os.Parcel);
     method public void send() throws android.app.PendingIntent.CanceledException;
     method public void send(int) throws android.app.PendingIntent.CanceledException;
@@ -5984,6 +5986,8 @@ package android.content {
   public class IntentSender implements android.os.Parcelable {
     method public int describeContents();
     method public java.lang.String getTargetPackage();
+    method public int getTargetUid();
+    method public int getTargetUserHandle();
     method public static android.content.IntentSender readIntentSenderOrNullFromParcel(android.os.Parcel);
     method public void sendIntent(android.content.Context, int, android.content.Intent, android.content.IntentSender.OnFinished, android.os.Handler) throws android.content.IntentSender.SendIntentException;
     method public void sendIntent(android.content.Context, int, android.content.Intent, android.content.IntentSender.OnFinished, android.os.Handler, java.lang.String) throws android.content.IntentSender.SendIntentException;
