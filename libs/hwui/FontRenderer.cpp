@@ -699,7 +699,6 @@ void FontRenderer::flushAllAndInvalidate() {
     }
 
 #if DEBUG_FONT_RENDERER
-    ALOGD("FontRenderer: flushAllAndInvalidatel");
     // Erase caches, just as a debugging facility
     if (mCacheTextureSmall && mCacheTextureSmall->mTexture) {
         memset(mCacheTextureSmall->mTexture, 0,
@@ -792,14 +791,12 @@ void FontRenderer::allocateTextureMemory(CacheTexture* cacheTexture) {
 
 void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyph,
         uint32_t* retOriginX, uint32_t* retOriginY) {
+    checkInit();
     cachedGlyph->mIsValid = false;
     // If the glyph is too tall, don't cache it
-    if (mCacheLines.size() == 0 ||
-        glyph.fHeight + TEXTURE_BORDER_SIZE * 2 > mCacheLines[mCacheLines.size() - 1]->mMaxHeight) {
-        if (mCacheLines.size() != 0) {
-            ALOGE("Font size too large to fit in cache. width, height = %i, %i",
-                    (int) glyph.fWidth, (int) glyph.fHeight);
-        }
+    if (glyph.fHeight + TEXTURE_BORDER_SIZE * 2 > mCacheLines[mCacheLines.size() - 1]->mMaxHeight) {
+        ALOGE("Font size too large to fit in cache. width, height = %i, %i",
+                (int) glyph.fWidth, (int) glyph.fHeight);
         return;
     }
 
