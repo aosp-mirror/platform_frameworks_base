@@ -418,7 +418,8 @@ class ContextImpl extends Context {
                 public Object createService(ContextImpl ctx) {
                     IBinder b = ServiceManager.getService(POWER_SERVICE);
                     IPowerManager service = IPowerManager.Stub.asInterface(b);
-                    return new PowerManager(service, ctx.mMainThread.getHandler());
+                    return new PowerManager(ctx.getOuterContext(),
+                            service, ctx.mMainThread.getHandler());
                 }});
 
         registerService(SEARCH_SERVICE, new ServiceFetcher() {

@@ -16,32 +16,15 @@
 
 package com.android.statusbartest;
 
-import android.app.ListActivity;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.widget.ArrayAdapter;
-import android.view.View;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.IPowerManager;
-import android.widget.ListView;
-import android.content.Intent;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.StatusBarManager;
 import android.os.RemoteException;
-import android.os.Vibrator;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.LocalPowerManager;
 import android.os.ServiceManager;
-import android.util.Log;
-import android.net.Uri;
-import android.os.SystemClock;
-import android.widget.RemoteViews;
-import android.widget.Toast;
 import android.os.PowerManager;
 
 public class PowerTest extends TestActivity
@@ -99,6 +82,28 @@ public class PowerTest extends TestActivity
         new Test("Disable proximity (WAIT_FOR_PROXIMITY_NEGATIVE)") {
             public void run() {
                 mProx.release(PowerManager.WAIT_FOR_PROXIMITY_NEGATIVE);
+            }
+        },
+        new Test("Enable proximity, wait 5 seconds then disable") {
+            public void run() {
+                mProx.acquire();
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mProx.release();
+                    }
+                }, 5000);
+            }
+        },
+        new Test("Enable proximity, wait 5 seconds then disable  (WAIT_FOR_PROXIMITY_NEGATIVE)") {
+            public void run() {
+                mProx.acquire();
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mProx.release(PowerManager.WAIT_FOR_PROXIMITY_NEGATIVE);
+                    }
+                }, 5000);
             }
         },
         new Test("Touch events don't poke") {

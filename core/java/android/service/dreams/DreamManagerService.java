@@ -123,7 +123,9 @@ public class DreamManagerService
     // IDreamManager method
     @Override
     public boolean isDreaming() {
-        return mCurrentDream != null;
+        synchronized (mLock) {
+            return mCurrentDreamToken != null;
+        }
     }
 
     public void bindDreamComponentL(ComponentName componentName, boolean test) {
