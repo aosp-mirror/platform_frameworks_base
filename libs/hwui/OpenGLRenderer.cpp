@@ -250,6 +250,7 @@ void OpenGLRenderer::resume() {
     glViewport(0, 0, snapshot->viewport.getWidth(), snapshot->viewport.getHeight());
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
+    mCaches.scissorEnabled = glIsEnabled(GL_SCISSOR_TEST);
     mCaches.enableScissor();
     mCaches.resetScissor();
     dirtyClip();
