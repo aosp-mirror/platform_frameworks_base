@@ -230,7 +230,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
 
     private KeyguardUpdateMonitor mUpdateMonitor;
 
-    private boolean mScreenOn = false;
+    private boolean mScreenOn;
 
     // last known state of the cellular connection
     private String mPhoneState = TelephonyManager.EXTRA_STATE_IDLE;
@@ -317,6 +317,8 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
 
         final ContentResolver cr = mContext.getContentResolver();
         mShowLockIcon = (Settings.System.getInt(cr, "show_status_bar_lock", 0) == 1);
+
+        mScreenOn = mPM.isScreenOn();
 
         mLockSounds = new SoundPool(1, AudioManager.STREAM_SYSTEM, 0);
         String soundPath = Settings.System.getString(cr, Settings.System.LOCK_SOUND);
