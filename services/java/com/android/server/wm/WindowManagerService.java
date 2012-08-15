@@ -57,6 +57,7 @@ import android.app.ActivityOptions;
 import android.app.IActivityManager;
 import android.app.StatusBarManager;
 import android.app.admin.DevicePolicyManager;
+import android.animation.ValueAnimator;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -900,8 +901,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 Settings.System.WINDOW_ANIMATION_SCALE, mWindowAnimationScale);
         mTransitionAnimationScale = Settings.System.getFloat(context.getContentResolver(),
                 Settings.System.TRANSITION_ANIMATION_SCALE, mTransitionAnimationScale);
-        mAnimatorDurationScale = Settings.System.getFloat(context.getContentResolver(),
-                Settings.System.ANIMATOR_DURATION_SCALE, mTransitionAnimationScale);
+        setAnimatorDurationScale(Settings.System.getFloat(context.getContentResolver(),
+                Settings.System.ANIMATOR_DURATION_SCALE, mTransitionAnimationScale));
 
         // Track changes to DevicePolicyManager state so we can enable/disable keyguard.
         IntentFilter filter = new IntentFilter();
@@ -5160,12 +5161,17 @@ public class WindowManagerService extends IWindowManager.Stub
                 mTransitionAnimationScale = fixScale(scales[1]);
             }
             if (scales.length >= 3) {
-                mAnimatorDurationScale = fixScale(scales[2]);
+                setAnimatorDurationScale(fixScale(scales[2]));
             }
         }
 
         // Persist setting
         mH.obtainMessage(H.PERSIST_ANIMATION_SCALE).sendToTarget();
+    }
+
+    private void setAnimatorDurationScale(float scale) {
+        mAnimatorDurationScale = scale;
+        ValueAnimator.setDurationScale(scale);
     }
 
     public float getAnimationScale(int which) {
