@@ -32,12 +32,17 @@ parent.link=index.html
     <li>{@link android.view.ViewGroup}</li>
     <li>{@link android.view.ViewGroup.LayoutParams}</li>
   </ol>
-</div>
+  
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}training/basics/firstapp/building-ui.html">Building a Simple User
+Interface</a></li> </div>
 </div>
 
-<p>Your layout is the architecture for the user interface in an Activity.
-It defines the layout structure and holds all the elements that appear to the user. 
-You can declare your layout in two ways:</p>
+<p>A layout defines the visual structure for a user interface, such as the UI for an <a
+href="{@docRoot}guide/components/activities.html">activity</a> or <a
+href="{@docRoot}guide/topics/appwidgets/index.html">app widget</a>.
+You can declare a layout in two ways:</p>
 <ul>
 <li><strong>Declare UI elements in XML</strong>. Android provides a straightforward XML 
 vocabulary that corresponds to the View classes and subclasses, such as those for widgets and layouts.</li>
@@ -77,16 +82,6 @@ Layout Objects</a>. There are also a collection of tutorials on building various
 
 <h2 id="write">Write the XML</h2>
 
-<div class="sidebox-wrapper">
-<div class="sidebox">
-<p>For your convenience, the API reference documentation for UI related classes
-lists the available XML attributes that correspond to the class methods, including inherited
-attributes.</p>
-<p>To learn more about the available XML elements and attributes, as well as the format of the XML file, see <a
-href="{@docRoot}guide/topics/resources/available-resources.html#layoutresources">Layout Resources</a>.</p>
-</div>
-</div>
-
 <p>Using Android's XML vocabulary, you can quickly design UI layouts and the screen elements they contain, in the same way you create web pages in HTML &mdash; with a series of nested elements. </p>
 
 <p>Each layout file must contain exactly one root element, which must be a View or ViewGroup object. Once you've defined the root element, you can add additional layout objects or widgets as child elements to gradually build a View hierarchy that defines your layout. For example, here's an XML layout that uses a vertical {@link android.widget.LinearLayout}
@@ -111,7 +106,8 @@ to hold a {@link android.widget.TextView} and a {@link android.widget.Button}:</
 <p>After you've declared your layout in XML, save the file with the <code>.xml</code> extension, 
 in your Android project's <code>res/layout/</code> directory, so it will properly compile. </p>
 
-<p>We'll discuss each of the attributes shown here a little later.</p>
+<p>More information about the syntax for a layout XML file is available in the <a
+href="{@docRoot}guide/topics/resources/layout-resource.html">Layout Resources</a> document.</p>
 
 <h2 id="load">Load the XML Resource</h2>
 
