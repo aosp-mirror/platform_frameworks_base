@@ -34,10 +34,22 @@ import com.android.internal.location.ILocationProvider;
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
 
-
 /**
- * Base class for location providers implemented as services.
- * @hide
+ * Base class for location providers implemented as unbundled services.
+ *
+ * <p>The network location provider must export a service with action
+ * "com.android.location.service.v2.NetworkLocationProvider"
+ * and a valid minor version in a meta-data field on the service, and
+ * then return the result of {@link #getBinder()} on service binding.
+ *
+ * <p>The fused location provider must export a service with action
+ * "com.android.location.service.FusedLocationProvider"
+ * and a valid minor version in a meta-data field on the service, and
+ * then return the result of {@link #getBinder()} on service binding.
+ *
+ * <p>IMPORTANT: This class is effectively a public API for unbundled
+ * applications, and must remain API stable. See README.txt in the root
+ * of this package for more information.
  */
 public abstract class LocationProviderBase {
     private final String TAG;
