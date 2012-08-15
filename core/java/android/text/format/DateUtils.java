@@ -521,14 +521,19 @@ public class DateUtils
         int days = Math.abs(currentDay - startDay);
         boolean past = (today > day);
 
+        // TODO: some locales name other days too, such as de_DE's "Vorgestern" (today - 2).
+        Locale locale = r.getConfiguration().locale;
+        if (locale == null) {
+            locale = Locale.getDefault();
+        }
         if (days == 1) {
             if (past) {
-                return r.getString(com.android.internal.R.string.yesterday);
+                return LocaleData.get(locale).yesterday;
             } else {
-                return r.getString(com.android.internal.R.string.tomorrow);
+                return LocaleData.get(locale).tomorrow;
             }
         } else if (days == 0) {
-            return r.getString(com.android.internal.R.string.today);
+            return LocaleData.get(locale).today;
         }
 
         int resId;
