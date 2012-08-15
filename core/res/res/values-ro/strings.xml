@@ -156,7 +156,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"Opriţi alimentarea"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Raport despre erori"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Executaţi un raport despre erori"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"Acest raport va colecta informaţii despre starea actuală a dispozitivului, pentru a le trimite ca mesaj de e-mail. Va dura un timp din momentul pornirii raportului despre erori şi până când acesta va fi gata pentru a fi trimis, prin urmare vă rugăm să aveţi puţină răbdare."</string>
+    <string name="bugreport_message" msgid="398447048750350456">"Acest raport va colecta informaţii despre starea actuală a dispozitivului, pentru a le trimite într-un e-mail. Aveți răbdare după pornirea raportului despre erori până când va fi gata de trimis."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Mod Silenţios"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Sunetul este DEZACTIVAT"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Sunetul este ACTIVAT"</string>
