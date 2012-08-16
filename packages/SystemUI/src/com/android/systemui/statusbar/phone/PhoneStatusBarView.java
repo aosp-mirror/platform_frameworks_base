@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import android.app.ActivityManager;
+import android.app.StatusBarManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -67,6 +68,11 @@ public class PhoneStatusBarView extends PanelBar {
         } else if (pv.getId() == R.id.settings_panel){
             mSettingsPanel = pv;
         }
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return ((mBar.mDisabled & StatusBarManager.DISABLE_EXPAND) == 0);
     }
 
     @Override
