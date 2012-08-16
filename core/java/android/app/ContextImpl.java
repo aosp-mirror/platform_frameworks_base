@@ -906,12 +906,13 @@ class ContextImpl extends Context {
 
     /** @hide */
     @Override
-    public void startActivityAsUser(Intent intent, int userId) {
+    public void startActivityAsUser(Intent intent, UserHandle user) {
         try {
             ActivityManagerNative.getDefault().startActivityAsUser(
                 mMainThread.getApplicationThread(), intent,
                 intent.resolveTypeIfNeeded(getContentResolver()),
-                null, null, 0, Intent.FLAG_ACTIVITY_NEW_TASK, null, null, null, userId);
+                null, null, 0, Intent.FLAG_ACTIVITY_NEW_TASK, null, null, null,
+                user.getIdentifier());
         } catch (RemoteException re) {
         }
     }
@@ -931,12 +932,13 @@ class ContextImpl extends Context {
 
     /** @hide */
     @Override
-    public void startActivityAsUser(Intent intent, Bundle options, int userId) {
+    public void startActivityAsUser(Intent intent, Bundle options, UserHandle user) {
         try {
             ActivityManagerNative.getDefault().startActivityAsUser(
                 mMainThread.getApplicationThread(), intent,
                 intent.resolveTypeIfNeeded(getContentResolver()),
-                null, null, 0, Intent.FLAG_ACTIVITY_NEW_TASK, null, null, options, userId);
+                null, null, 0, Intent.FLAG_ACTIVITY_NEW_TASK, null, null, options,
+                user.getIdentifier());
         } catch (RemoteException re) {
         }
     }
@@ -1062,19 +1064,19 @@ class ContextImpl extends Context {
     }
 
     @Override
-    public void sendBroadcastToUser(Intent intent, int userHandle) {
+    public void sendBroadcastAsUser(Intent intent, UserHandle user) {
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
         try {
             intent.setAllowFds(false);
             ActivityManagerNative.getDefault().broadcastIntent(mMainThread.getApplicationThread(),
                     intent, resolvedType, null, Activity.RESULT_OK, null, null, null, false, false,
-                    userHandle);
+                    user.getIdentifier());
         } catch (RemoteException e) {
         }
     }
 
     @Override
-    public void sendOrderedBroadcastToUser(Intent intent, int userHandle,
+    public void sendOrderedBroadcastAsUser(Intent intent, UserHandle user,
             BroadcastReceiver resultReceiver, Handler scheduler,
             int initialCode, String initialData, Bundle initialExtras) {
         IIntentReceiver rd = null;
@@ -1100,7 +1102,7 @@ class ContextImpl extends Context {
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, rd,
                 initialCode, initialData, initialExtras, null,
-                true, false, userHandle);
+                true, false, user.getIdentifier());
         } catch (RemoteException e) {
         }
     }

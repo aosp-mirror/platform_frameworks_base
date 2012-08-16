@@ -2066,7 +2066,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (searchManager != null) {
                 searchManager.stopSearch();
             }
-            mContext.startActivityAsUser(intent, UserHandle.USER_CURRENT);
+            mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
         } catch (ActivityNotFoundException e) {
             Slog.w(TAG, "No activity to handle assist long press action.", e);
         }
@@ -2081,7 +2081,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     | Intent.FLAG_ACTIVITY_SINGLE_TOP
                     | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             try {
-                mContext.startActivityAsUser(intent, UserHandle.USER_CURRENT);
+                mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
             } catch (ActivityNotFoundException e) {
                 Slog.w(TAG, "No activity to handle assist action.", e);
             }

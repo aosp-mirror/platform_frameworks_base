@@ -639,22 +639,22 @@ public final class PendingIntent implements Parcelable {
     /**
      * Return the user handle of the application that created this
      * PendingIntent, that is the user under which you will actually be
-     * sending the Intent.  The returned integer is supplied by the system, so
+     * sending the Intent.  The returned UserHandle is supplied by the system, so
      * that an application can not spoof its user.  See
      * {@link android.os.Process#myUserHandle() Process.myUserHandle()} for
      * more explanation of user handles.
      *
-     * @return The user handle of the PendingIntent, or -1 if there is
+     * @return The user handle of the PendingIntent, or null if there is
      * none associated with it.
      */
-    public int getTargetUserHandle() {
+    public UserHandle getTargetUserHandle() {
         try {
             int uid = ActivityManagerNative.getDefault()
                 .getUidForIntentSender(mTarget);
-            return uid > 0 ? UserHandle.getUserId(uid) : -1;
+            return uid > 0 ? new UserHandle(UserHandle.getUserId(uid)) : null;
         } catch (RemoteException e) {
             // Should never happen.
-            return -1;
+            return null;
         }
     }
 

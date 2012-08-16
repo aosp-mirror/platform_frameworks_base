@@ -119,7 +119,8 @@ public class SettingsView extends LinearLayout implements View.OnClickListener {
     // ----------------------------
     private void onClickSettings() {
         getContext().startActivityAsUser(new Intent(Settings.ACTION_SETTINGS)
-                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK), UserHandle.USER_CURRENT);
+                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                new UserHandle(UserHandle.USER_CURRENT));
         getStatusBarManager().collapse();
     }
 }

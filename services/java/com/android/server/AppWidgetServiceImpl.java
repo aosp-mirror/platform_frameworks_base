@@ -499,7 +499,7 @@ class AppWidgetServiceImpl {
                 Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_DELETED);
                 intent.setComponent(p.info.provider);
                 intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id.appWidgetId);
-                mContext.sendBroadcastToUser(intent, mUserId);
+                mContext.sendBroadcastAsUser(intent, new UserHandle(mUserId));
                 if (p.instances.size() == 0) {
                     // cancel the future updates
                     cancelBroadcasts(p);
@@ -507,7 +507,7 @@ class AppWidgetServiceImpl {
                     // send the broacast saying that the provider is not in use any more
                     intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_DISABLED);
                     intent.setComponent(p.info.provider);
-                    mContext.sendBroadcastToUser(intent, mUserId);
+                    mContext.sendBroadcastAsUser(intent, new UserHandle(mUserId));
                 }
             }
         }
@@ -880,7 +880,7 @@ class AppWidgetServiceImpl {
             intent.setComponent(p.info.provider);
             intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id.appWidgetId);
             intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_OPTIONS, options);
-            mContext.sendBroadcastToUser(intent, mUserId);
+            mContext.sendBroadcastAsUser(intent, new UserHandle(mUserId));
         }
     }
 
@@ -1205,7 +1205,7 @@ class AppWidgetServiceImpl {
     void sendEnableIntentLocked(Provider p) {
         Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_ENABLED);
         intent.setComponent(p.info.provider);
-        mContext.sendBroadcastToUser(intent, mUserId);
+        mContext.sendBroadcastAsUser(intent, new UserHandle(mUserId));
     }
 
     void sendUpdateIntentLocked(Provider p, int[] appWidgetIds) {
@@ -1213,7 +1213,7 @@ class AppWidgetServiceImpl {
             Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
             intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds);
             intent.setComponent(p.info.provider);
-            mContext.sendBroadcastToUser(intent, mUserId);
+            mContext.sendBroadcastAsUser(intent, new UserHandle(mUserId));
         }
     }
 

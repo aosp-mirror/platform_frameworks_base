@@ -38,6 +38,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.UserHandle;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -304,12 +305,12 @@ public class MockContext extends Context {
     }
 
     @Override
-    public void sendBroadcastToUser(Intent intent, int userId) {
+    public void sendBroadcastAsUser(Intent intent, UserHandle user) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void sendOrderedBroadcastToUser(Intent intent, int userId,
+    public void sendOrderedBroadcastAsUser(Intent intent, UserHandle user,
             BroadcastReceiver resultReceiver, Handler scheduler,
             int initialCode, String initialData, Bundle initialExtras) {
         throw new UnsupportedOperationException();

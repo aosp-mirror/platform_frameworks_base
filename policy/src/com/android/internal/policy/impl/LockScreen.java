@@ -354,7 +354,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
                 Log.w(TAG, "can't dismiss keyguard on launch");
             }
             try {
-                mContext.startActivityAsUser(intent, UserHandle.USER_CURRENT);
+                mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
             } catch (ActivityNotFoundException e) {
                 Log.w(TAG, "Activity not found for intent + " + intent.getAction());
             }

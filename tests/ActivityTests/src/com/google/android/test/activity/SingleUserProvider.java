@@ -21,7 +21,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Process;
+import android.os.UserHandle;
 
 public class SingleUserProvider extends ContentProvider {
     static final String AUTHORITY = "com.google.android.test.activity.single_user";
@@ -60,7 +60,7 @@ public class SingleUserProvider extends ContentProvider {
     @Override
     public Bundle call(String method, String arg, Bundle extras) {
         Bundle res = new Bundle();
-        res.putInt("user", Process.myUserHandle());
+        res.putInt("user", UserHandle.myUserId());
         return res;
     }
 }

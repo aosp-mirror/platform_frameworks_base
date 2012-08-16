@@ -655,13 +655,13 @@ public class Process {
     public static final native int myUid();
 
     /**
-     * Returns the identifier of this process's user handle.  This is the
+     * Returns this process's user handle.  This is the
      * user the process is running under.  It is distinct from
      * {@link #myUid()} in that a particular user will have multiple
      * distinct apps running under it each with their own uid.
      */
-    public static final int myUserHandle() {
-        return UserHandle.getUserId(myUid());
+    public static final UserHandle myUserHandle() {
+        return new UserHandle(UserHandle.getUserId(myUid()));
     }
 
     /**

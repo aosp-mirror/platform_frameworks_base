@@ -30,6 +30,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.UserHandle;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -279,8 +280,8 @@ public class ContextWrapper extends Context {
 
     /** @hide */
     @Override
-    public void startActivityAsUser(Intent intent, int userId) {
-        mBase.startActivityAsUser(intent, userId);
+    public void startActivityAsUser(Intent intent, UserHandle user) {
+        mBase.startActivityAsUser(intent, user);
     }
 
     @Override
@@ -290,8 +291,8 @@ public class ContextWrapper extends Context {
 
     /** @hide */
     @Override
-    public void startActivityAsUser(Intent intent, Bundle options, int userId) {
-        mBase.startActivityAsUser(intent, options, userId);
+    public void startActivityAsUser(Intent intent, Bundle options, UserHandle user) {
+        mBase.startActivityAsUser(intent, options, user);
     }
 
     @Override
@@ -347,15 +348,15 @@ public class ContextWrapper extends Context {
     }
 
     @Override
-    public void sendBroadcastToUser(Intent intent, int userHandle) {
-        mBase.sendBroadcastToUser(intent, userHandle);
+    public void sendBroadcastAsUser(Intent intent, UserHandle user) {
+        mBase.sendBroadcastAsUser(intent, user);
     }
 
     @Override
-    public void sendOrderedBroadcastToUser(Intent intent, int userHandle,
+    public void sendOrderedBroadcastAsUser(Intent intent, UserHandle user,
             BroadcastReceiver resultReceiver, Handler scheduler,
             int initialCode, String initialData, Bundle initialExtras) {
-        mBase.sendOrderedBroadcastToUser(intent, userHandle, resultReceiver,
+        mBase.sendOrderedBroadcastAsUser(intent, user, resultReceiver,
                 scheduler, initialCode, initialData, initialExtras);
     }
 
