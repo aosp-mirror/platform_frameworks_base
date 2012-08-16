@@ -96,9 +96,20 @@ final class DisplayPowerController {
 
     // Filter time constant in milliseconds for computing a moving
     // average of light samples.  Different constants are used
-    // to adapt to brighter or dimmer environments.
-    private static final long BRIGHTENING_LIGHT_TIME_CONSTANT = 2500; // 2.5 sec
-    private static final long DIMMING_LIGHT_TIME_CONSTANT = 10000; // 10 sec
+    // to calculate the average light level when adapting to brighter or
+    // dimmer environments.
+    // This parameter only controls the averaging of light samples.
+    private static final long BRIGHTENING_LIGHT_TIME_CONSTANT = 1500;
+    private static final long DIMMING_LIGHT_TIME_CONSTANT = 3000;
+
+    // Stability requirements in milliseconds for accepting a new brightness
+    // level.  This is used for debouncing the light sensor.  Different constants
+    // are used to debounce the light sensor when adapting to brighter or dimmer
+    // environments.
+    // This parameter controls how quickly brightness changes occur in response to
+    // an observed change in light level.
+    private static final long BRIGHTENING_LIGHT_DEBOUNCE = 2500;
+    private static final long DIMMING_LIGHT_DEBOUNCE = 10000;
 
     private final Object mLock = new Object();
 
@@ -232,6 +243,9 @@ final class DisplayPowerController {
 
     // The time of the most light recent sample.
     private long mLastLightSampleTime;
+
+    // The time when we accumulated the first recent light sample into mRecentLightSamples.
+    private long mFirstRecentLightSampleTime;
 
     // The upcoming debounce light sensor time.
     // This is only valid when mLightMeasurementValue && mRecentLightSamples >= 1.
@@ -664,7 +678,6 @@ final class DisplayPowerController {
             // If the newest light sample doesn't seem to be going in the
             // same general direction as recent samples, then start over.
             setRecentLight(time, lux, lux > mLightMeasurement);
-            mPendingLightSensorDebounceTime = time + mRecentLightTimeConstant;
         } else if (mRecentLightSamples >= 1) {
             // Add the newest light sample to the moving average.
             accumulateRecentLight(time, lux);
@@ -677,6 +690,8 @@ final class DisplayPowerController {
                     + ", mRecentLightAverage=" + mRecentLightAverage
                     + ", mRecentLightBrightening=" + mRecentLightBrightening
                     + ", mRecentLightTimeConstant=" + mRecentLightTimeConstant
+                    + ", mFirstRecentLightSampleTime="
+                            + TimeUtils.formatUptime(mFirstRecentLightSampleTime)
                     + ", mPendingLightSensorDebounceTime="
                             + TimeUtils.formatUptime(mPendingLightSensorDebounceTime));
         }
@@ -694,6 +709,9 @@ final class DisplayPowerController {
         mRecentLightAverage = lux;
         mLastLightSample = lux;
         mLastLightSampleTime = time;
+        mFirstRecentLightSampleTime = time;
+        mPendingLightSensorDebounceTime = time + (brightening ?
+                BRIGHTENING_LIGHT_DEBOUNCE : DIMMING_LIGHT_DEBOUNCE);
     }
 
     private void accumulateRecentLight(long time, float lux) {
@@ -715,8 +733,7 @@ final class DisplayPowerController {
                 if (DEBUG) {
                     Slog.d(TAG, "debounceLightSensor: Accepted new measurement "
                             + mLightMeasurement + " after "
-                            + (now - mPendingLightSensorDebounceTime
-                                    + mRecentLightTimeConstant) + " ms based on "
+                            + (now - mFirstRecentLightSampleTime) + " ms based on "
                             + mRecentLightSamples + " recent samples.");
                 }
 
@@ -885,6 +902,8 @@ final class DisplayPowerController {
         pw.println("  mRecentLightAverage=" + mRecentLightAverage);
         pw.println("  mRecentLightBrightening=" + mRecentLightBrightening);
         pw.println("  mRecentLightTimeConstant=" + mRecentLightTimeConstant);
+        pw.println("  mFirstRecentLightSampleTime="
+                + TimeUtils.formatUptime(mFirstRecentLightSampleTime));
         pw.println("  mPendingLightSensorDebounceTime="
                 + TimeUtils.formatUptime(mPendingLightSensorDebounceTime));
         pw.println("  mScreenAutoBrightness=" + mScreenAutoBrightness);
