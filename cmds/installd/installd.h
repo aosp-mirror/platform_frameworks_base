@@ -35,6 +35,7 @@
 #include <cutils/sockets.h>
 #include <cutils/log.h>
 #include <cutils/properties.h>
+#include <cutils/multiuser.h>
 
 #include <private/android_filesystem_config.h>
 
@@ -138,6 +139,8 @@ int create_pkg_path(char path[PKG_PATH_MAX],
 int create_persona_path(char path[PKG_PATH_MAX],
                     uid_t persona);
 
+int create_persona_media_path(char path[PKG_PATH_MAX], userid_t userid);
+
 int create_move_path(char path[PKG_PATH_MAX],
                      const char* pkgname,
                      const char* leaf,
@@ -179,6 +182,8 @@ int append_and_increment(char** dst, const char* src, size_t* dst_size);
 
 char *build_string2(char *s1, char *s2);
 char *build_string3(char *s1, char *s2, char *s3);
+
+int ensure_dir(const char* path, mode_t mode, uid_t uid, gid_t gid);
 
 /* commands.c */
 

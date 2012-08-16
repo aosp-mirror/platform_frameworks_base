@@ -1980,10 +1980,20 @@ public final class ActivityManagerService extends ActivityManagerNative
             int uid = app.uid;
 
             int[] gids = null;
+            int mountExternal = Zygote.MOUNT_EXTERNAL_NONE;
             if (!app.isolated) {
                 try {
-                    gids = mContext.getPackageManager().getPackageGids(
-                            app.info.packageName);
+                    final PackageManager pm = mContext.getPackageManager();
+                    gids = pm.getPackageGids(app.info.packageName);
+                    if (pm.checkPermission(
+                            android.Manifest.permission.READ_EXTERNAL_STORAGE, app.info.packageName)
+                            == PERMISSION_GRANTED) {
+                        if (Environment.isExternalStorageEmulated()) {
+                            mountExternal = Zygote.MOUNT_EXTERNAL_MULTIUSER;
+                        } else {
+                            mountExternal = Zygote.MOUNT_EXTERNAL_SINGLEUSER;
+                        }
+                    }
                 } catch (PackageManager.NameNotFoundException e) {
                     Slog.w(TAG, "Unable to retrieve gids", e);
                 }
@@ -2025,7 +2035,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             // Start the process.  It will either succeed and return a result containing
             // the PID of the new process, or else throw a RuntimeException.
             Process.ProcessStartResult startResult = Process.start("android.app.ActivityThread",
-                    app.processName, uid, uid, gids, debugFlags,
+                    app.processName, uid, uid, gids, debugFlags, mountExternal,
                     app.info.targetSdkVersion, null, null);
 
             BatteryStatsImpl bs = app.batteryStats.getBatteryStats();
