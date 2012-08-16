@@ -33,7 +33,7 @@ void init_filter(uint32_t dim_x, uint32_t dim_y, float center_x, float center_y,
         axis_scale.y = (float)dim_y / (float)dim_x;
     else
         axis_scale.x = (float)dim_x / (float)dim_y;
-    
+
     const float bound2 = 0.25 * (axis_scale.x*axis_scale.x + axis_scale.y*axis_scale.y);
     const float bound = sqrt(bound2);
     const float radius = 1.15 * bound;
@@ -48,8 +48,8 @@ void root(uchar4 *out, uint32_t x, uint32_t y) {
     const float2 coord = mad(inCoord, inv_dimensions, neg_center);
     const float2 scaledCoord = axis_scale * coord;
     const float dist2 = scaledCoord.x*scaledCoord.x + scaledCoord.y*scaledCoord.y;
-    const float inv_dist = rsqrt(dist2);
-    const float radian = M_PI_2 - atan((alpha * sqrt(radius2 - dist2)) * inv_dist);
+    const float inv_dist = approx_rsqrt(dist2);
+    const float radian = M_PI_2 - approx_atan((alpha * approx_sqrt(radius2 - dist2)) * inv_dist);
     const float scalar = radian * factor * inv_dist;
     const float2 new_coord = mad(coord, scalar, center);
     const float4 fout = rsSample(in_alloc, sampler, new_coord);
