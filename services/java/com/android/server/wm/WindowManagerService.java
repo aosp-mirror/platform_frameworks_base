@@ -5868,7 +5868,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        rebuildBlackFrame();
+        rebuildBlackFrameLocked();
 
         final WindowList windows = displayContent.getWindowList();
         for (int i = windows.size() - 1; i >= 0; i--) {
@@ -6885,6 +6885,8 @@ public class WindowManagerService extends IWindowManager.Stub
         displayReady(Display.DEFAULT_DISPLAY);
 
         synchronized(mWindowMap) {
+            readForcedDisplaySizeAndDensityLocked(getDefaultDisplayContent());
+
             WindowManager wm = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
             mDisplay = wm.getDefaultDisplay();
             mIsTouchDevice = mContext.getPackageManager().hasSystemFeature(
@@ -6906,6 +6908,11 @@ public class WindowManagerService extends IWindowManager.Stub
             mPolicy.setInitialDisplaySize(mDisplay, displayContent.mInitialDisplayWidth,
                     displayContent.mInitialDisplayHeight, displayContent.mInitialDisplayDensity);
         }
+
+        try {
+            mActivityManager.updateConfiguration(null);
+        } catch (RemoteException e) {
+        }
     }
 
     public void displayReady(int displayId) {
@@ -6923,15 +6930,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 displayContent.mBaseDisplayHeight = displayContent.mInitialDisplayHeight;
                 displayContent.mBaseDisplayDensity = displayContent.mInitialDisplayDensity;
             }
-        }
-
-        try {
-            mActivityManager.updateConfiguration(null);
-        } catch (RemoteException e) {
-        }
-
-        synchronized (mWindowMap) {
-            readForcedDisplaySizeAndDensityLocked(getDisplayContent(displayId));
         }
     }
 
@@ -7561,7 +7559,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private void rebuildBlackFrame() {
+    private void rebuildBlackFrameLocked() {
         if (mBlackFrame != null) {
             mBlackFrame.kill();
             mBlackFrame = null;
@@ -7573,6 +7571,13 @@ public class WindowManagerService extends IWindowManager.Stub
             int initW, initH, baseW, baseH;
             final boolean rotated = (mRotation == Surface.ROTATION_90
                     || mRotation == Surface.ROTATION_270);
+            if (DEBUG_BOOT) {
+                Slog.i(TAG, "BLACK FRAME: rotated=" + rotated + " init="
+                        + displayContent.mInitialDisplayWidth + "x"
+                        + displayContent.mInitialDisplayHeight + " base="
+                        + displayContent.mBaseDisplayWidth + "x"
+                        + displayContent.mBaseDisplayHeight);
+            }
             if (rotated) {
                 initW = displayContent.mInitialDisplayHeight;
                 initH = displayContent.mInitialDisplayWidth;
@@ -7634,7 +7639,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
         if (changed) {
-            reconfigureDisplayLocked(displayContent);
+            rebuildBlackFrameLocked();
         }
     }
 
@@ -7663,7 +7668,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final DisplayContent displayContent = getDisplayContent(displayId);
             setForcedDisplayDensityLocked(displayContent, density);
             Settings.Secure.putString(mContext.getContentResolver(),
-                    Settings.Secure.DISPLAY_SIZE_FORCED, Integer.toString(density));
+                    Settings.Secure.DISPLAY_DENSITY_FORCED, Integer.toString(density));
         }
     }
 
@@ -7706,7 +7711,7 @@ public class WindowManagerService extends IWindowManager.Stub
             mH.sendEmptyMessage(H.SEND_NEW_CONFIGURATION);
         }
 
-        rebuildBlackFrame();
+        rebuildBlackFrameLocked();
 
         performLayoutAndPlaceSurfacesLocked();
     }
