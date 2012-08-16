@@ -1,5 +1,25 @@
+/*
+ * Copyright (C) 2012 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package android.os;
 
+import android.util.Slog;
+
+import java.io.IOException;
+import java.io.File;
 import java.io.FileDescriptor;
 
 /**
@@ -8,6 +28,8 @@ import java.io.FileDescriptor;
  * {@hide}
  */
 public class SELinux {
+
+    private static final String TAG = "SELinux";
 
     /**
      * Determine whether SELinux is disabled or enabled.
@@ -102,4 +124,53 @@ public class SELinux {
      * @return a boolean indicating whether permission was granted.
      */
     public static final native boolean checkSELinuxAccess(String scon, String tcon, String tclass, String perm);
+
+    /**
+     * Restores a file to its default SELinux security context.
+     * If the system is not compiled with SELinux, then {@code true}
+     * is automatically returned.
+     * If SELinux is compiled in, but disabled, then {@code true} is
+     * returned.
+     *
+     * @param pathname The pathname of the file to be relabeled.
+     * @return a boolean indicating whether the relabeling succeeded.
+     * @exception NullPointerException if the pathname is a null object.
+     */
+    public static boolean restorecon(String pathname) throws NullPointerException {
+        if (pathname == null) { throw new NullPointerException(); }
+        return native_restorecon(pathname);
+    }
+
+    /**
+     * Restores a file to its default SELinux security context.
+     * If the system is not compiled with SELinux, then {@code true}
+     * is automatically returned.
+     * If SELinux is compiled in, but disabled, then {@code true} is
+     * returned.
+     *
+     * @param pathname The pathname of the file to be relabeled.
+     * @return a boolean indicating whether the relabeling succeeded.
+     */
+    private static native boolean native_restorecon(String pathname);
+
+    /**
+     * Restores a file to its default SELinux security context.
+     * If the system is not compiled with SELinux, then {@code true}
+     * is automatically returned.
+     * If SELinux is compiled in, but disabled, then {@code true} is
+     * returned.
+     *
+     * @param file The File object representing the path to be relabeled.
+     * @return a boolean indicating whether the relabeling succeeded.
+     * @exception NullPointerException if the file is a null object.
+     */
+    public static boolean restorecon(File file) throws NullPointerException {
+        try {
+            return native_restorecon(file.getCanonicalPath());
+        } catch (IOException e) {
+            Slog.e(TAG, "Error getting canonical path. Restorecon failed for " +
+                   file.getPath(), e);
+            return false;
+        }
+    }
 }
