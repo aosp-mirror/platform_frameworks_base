@@ -38,7 +38,6 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.content.PackageHelper;
-import com.android.internal.telephony.BaseCommands;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.RILConstants;
@@ -65,7 +64,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 80;
+    private static final int DATABASE_VERSION = 81;
 
     private Context mContext;
 
@@ -1073,9 +1072,55 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 79;
         }
 
+        if (upgradeVersion == 79) {
+            // Before touch exploration was a global setting controlled by the user
+            // via the UI. However, if the enabled accessibility services do not
+            // handle touch exploration mode, enabling it makes no sense. Therefore,
+            // now the services request touch exploration mode and the user is
+            // presented with a dialog to allow that and if she does we store that
+            // in the database. As a result of this change a user that has enabled
+            // accessibility, touch exploration, and some accessibility services
+            // may lose touch exploration state, thus rendering the device useless
+            // unless sighted help is provided, since the enabled service(s) are
+            // not in the list of services to which the user granted a permission
+            // to put the device in touch explore mode. Here we are allowing all
+            // enabled accessibility services to toggle touch exploration provided
+            // accessibility and touch exploration are enabled and no services can
+            // toggle touch exploration. Note that the user has already manually
+            // enabled the services and touch exploration which means the she has
+            // given consent to have these services work in touch exploration mode.
+            final boolean accessibilityEnabled = getIntValueFromTable(db, "secure",
+                    Settings.Secure.ACCESSIBILITY_ENABLED, 0) == 1;
+            final boolean touchExplorationEnabled = getIntValueFromTable(db, "secure",
+                    Settings.Secure.TOUCH_EXPLORATION_ENABLED, 0) == 1;
+            if (accessibilityEnabled && touchExplorationEnabled) {
+                String enabledServices = getStringValueFromTable(db, "secure",
+                        Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES, "");
+                String touchExplorationGrantedServices = getStringValueFromTable(db, "secure",
+                        Settings.Secure.TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES, "");
+                if (TextUtils.isEmpty(touchExplorationGrantedServices)
+                        && !TextUtils.isEmpty(enabledServices)) {
+                    SQLiteStatement stmt = null;
+                    try {
+                        db.beginTransaction();
+                        stmt = db.compileStatement("INSERT OR REPLACE INTO secure(name,value)"
+                                + " VALUES(?,?);");
+                        loadSetting(stmt,
+                                Settings.Secure.TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES,
+                                enabledServices);
+                        db.setTransactionSuccessful();
+                    } finally {
+                        db.endTransaction();
+                        if (stmt != null) stmt.close();
+                    }
+                }
+            }
+            upgradeVersion = 80;
+        }
+
         // vvv Jelly Bean MR1 changes begin here vvv
 
-        if (upgradeVersion == 79) {
+        if (upgradeVersion == 80) {
             // update screensaver settings
             db.beginTransaction();
             SQLiteStatement stmt = null;
@@ -1093,9 +1138,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 db.endTransaction();
                 if (stmt != null) stmt.close();
             }
-            upgradeVersion = 80;
+            upgradeVersion = 81;
         }
-
 
         // *** Remember to update DATABASE_VERSION above!
 
@@ -1743,18 +1787,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     private int getIntValueFromSystem(SQLiteDatabase db, String name, int defaultValue) {
-        int value = defaultValue;
+        return getIntValueFromTable(db, "system", name, defaultValue);
+    }
+
+    private int getIntValueFromTable(SQLiteDatabase db, String table, String name,
+            int defaultValue) {
+        String value = getStringValueFromTable(db, table, name, null);
+        return (value != null) ? Integer.parseInt(value) : defaultValue;
+    }
+
+    private String getStringValueFromTable(SQLiteDatabase db, String table, String name,
+            String defaultValue) {
         Cursor c = null;
         try {
-            c = db.query("system", new String[] { Settings.System.VALUE }, "name='" + name + "'",
+            c = db.query(table, new String[] { Settings.System.VALUE }, "name='" + name + "'",
                     null, null, null, null);
             if (c != null && c.moveToFirst()) {
                 String val = c.getString(0);
-                value = val == null ? defaultValue : Integer.parseInt(val);
+                return val == null ? defaultValue : val;
             }
         } finally {
             if (c != null) c.close();
         }
-        return value;
+        return defaultValue;
     }
 }
