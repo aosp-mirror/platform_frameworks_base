@@ -80,4 +80,14 @@ public class FloatMath {
      * @return the exponential of value
      */
     public static native float exp(float value);
+
+    /**
+     * Returns {@code sqrt(}<i>{@code x}</i><sup>{@code 2}</sup>{@code +} <i>
+     * {@code y}</i><sup>{@code 2}</sup>{@code )}.
+     *
+     * @param x a float number
+     * @param y a float number
+     * @return the hypotenuse
+     */
+    public static native float hypot(float x, float y);
 }
