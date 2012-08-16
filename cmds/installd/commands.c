@@ -213,24 +213,39 @@ int make_user_data(const char *pkgname, uid_t uid, uid_t persona)
 
 int delete_persona(uid_t persona)
 {
-    char pkgdir[PKG_PATH_MAX];
-
-    if (create_persona_path(pkgdir, persona))
+    char data_path[PKG_PATH_MAX];
+    if (create_persona_path(data_path, persona)) {
         return -1;
+    }
+    if (delete_dir_contents(data_path, 1, NULL)) {
+        return -1;
+    }
 
-    return delete_dir_contents(pkgdir, 1, NULL);
+    char media_path[PATH_MAX];
+    if (create_persona_media_path(media_path, (userid_t) persona) == -1) {
+        return -1;
+    }
+    if (delete_dir_contents(media_path, 1, NULL) == -1) {
+        return -1;
+    }
+
+    return 0;
 }
 
 int clone_persona_data(uid_t src_persona, uid_t target_persona, int copy)
 {
     char src_data_dir[PKG_PATH_MAX];
     char pkg_path[PKG_PATH_MAX];
+    char media_path[PATH_MAX];
     DIR *d;
     struct dirent *de;
     struct stat s;
     uid_t uid;
 
     if (create_persona_path(src_data_dir, src_persona)) {
+        return -1;
+    }
+    if (create_persona_media_path(media_path, (userid_t) target_persona) == -1) {
         return -1;
     }
 
@@ -259,6 +274,11 @@ int clone_persona_data(uid_t src_persona, uid_t target_persona, int copy)
             }
         }
         closedir(d);
+    }
+
+    // ensure /data/media/<user_id> exists
+    if (ensure_dir(media_path, 0770, AID_MEDIA_RW, AID_MEDIA_RW) == -1) {
+        return -1;
     }
     return 0;
 }
