@@ -69,14 +69,14 @@ public class PanelBar extends FrameLayout {
         return mPanels.get((int)(N * x / getMeasuredWidth()));
     }
 
-    public boolean isEnabled() {
+    public boolean panelsEnabled() {
         return true;
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         // Allow subclasses to implement enable/disable semantics
-        if (!isEnabled()) return false;
+        if (!panelsEnabled()) return false;
 
         // figure out which panel needs to be talked to here
         if (event.getAction() == MotionEvent.ACTION_DOWN) {

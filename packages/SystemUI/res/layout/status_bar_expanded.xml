@@ -23,10 +23,11 @@
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:id="@+id/notification_panel"
     android:layout_width="0dp"
-    android:layout_height="0dp"
+    android:layout_height="wrap_content"
     android:background="@drawable/notification_panel_bg"
     android:paddingTop="@dimen/notification_panel_padding_top"
     android:layout_marginLeft="@dimen/notification_panel_margin_left"
+    android:animateLayoutChanges="true"
     >
 
     <TextView
@@ -45,6 +46,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/close_handle_underlap"
         android:orientation="vertical"
+	    android:animateLayoutChanges="true"
         >
 
         <include layout="@layout/status_bar_expanded_header"

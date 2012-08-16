@@ -22,6 +22,7 @@ public class PanelView extends FrameLayout {
     }
 
     public static final boolean BRAKES = false;
+    private static final boolean STRETCH_PAST_CONTENTS = true;
 
     private float mSelfExpandVelocityPx; // classic value: 2000px/s
     private float mSelfCollapseVelocityPx; // classic value: 2000px/s (will be negated to collapse "up")
@@ -45,6 +46,9 @@ public class PanelView extends FrameLayout {
     private float mTouchOffset;
     private float mExpandedFraction = 0;
     private float mExpandedHeight = 0;
+    private boolean mClosing;
+    private boolean mRubberbanding;
+    private boolean mTracking;
 
     private TimeAnimator mTimeAnimator;
     private VelocityTracker mVelocityTracker;
@@ -61,12 +65,13 @@ public class PanelView extends FrameLayout {
 
     private final Runnable mStopAnimator = new Runnable() { public void run() {
         if (mTimeAnimator.isStarted()) {
-            mTimeAnimator.end(); }
+            mTimeAnimator.end();
+        }
     }};
 
     private float mVel, mAccel;
     private int mFullHeight = 0;
-    private String mViewName; 
+    private String mViewName;
 
     private void animationTick(long dtms) {
         if (!mTimeAnimator.isStarted()) {
@@ -75,16 +80,18 @@ public class PanelView extends FrameLayout {
             mTimeAnimator.setTimeListener(mAnimationCallback);
 
             mTimeAnimator.start();
+            
+            mRubberbanding = STRETCH_PAST_CONTENTS && mExpandedHeight > getFullHeight();
+            mClosing = (mExpandedHeight > 0 && mVel < 0) || mRubberbanding;
         } else if (dtms > 0) {
             final float dt = dtms * 0.001f;                  // ms -> s
             LOG("tick: v=%.2fpx/s dt=%.4fs", mVel, dt);
             LOG("tick: before: h=%d", (int) mExpandedHeight);
 
             final float fh = getFullHeight();
-            final boolean closing = mExpandedHeight > 0 && mVel < 0;
             boolean braking = false;
             if (BRAKES) {
-                if (closing) {
+                if (mClosing) {
                     braking = mExpandedHeight <= mCollapseBrakingDistancePx;
                     mAccel = braking ? 10*mCollapseAccelPx : -mCollapseAccelPx;
                 } else {
@@ -92,36 +99,40 @@ public class PanelView extends FrameLayout {
                     mAccel = braking ? 10*-mExpandAccelPx : mExpandAccelPx;
                 }
             } else {
-                mAccel = closing ? -mCollapseAccelPx : mExpandAccelPx;
+                mAccel = mClosing ? -mCollapseAccelPx : mExpandAccelPx;
             }
 
             mVel += mAccel * dt;
 
             if (braking) {
-                if (closing && mVel > -mBrakingSpeedPx) {
+                if (mClosing && mVel > -mBrakingSpeedPx) {
                     mVel = -mBrakingSpeedPx;
-                } else if (!closing && mVel < mBrakingSpeedPx) {
+                } else if (!mClosing && mVel < mBrakingSpeedPx) {
                     mVel = mBrakingSpeedPx;
                 }
             } else {
-                if (closing && mVel > -mFlingCollapseMinVelocityPx) {
+                if (mClosing && mVel > -mFlingCollapseMinVelocityPx) {
                     mVel = -mFlingCollapseMinVelocityPx;
-                } else if (!closing && mVel > mFlingGestureMaxOutputVelocityPx) {
+                } else if (!mClosing && mVel > mFlingGestureMaxOutputVelocityPx) {
                     mVel = mFlingGestureMaxOutputVelocityPx;
                 }
             }
 
             float h = mExpandedHeight + mVel * dt;
+            
+            if (mRubberbanding && h < fh) {
+                h = fh;
+            }
 
-            LOG("tick: new h=%d closing=%s", (int) h, closing?"true":"false");
+            LOG("tick: new h=%d closing=%s", (int) h, mClosing?"true":"false");
 
             setExpandedHeightInternal(h);
 
             mBar.panelExpansionChanged(PanelView.this, mExpandedFraction);
 
             if (mVel == 0
-                    || (closing && mExpandedHeight == 0)
-                    || (!closing && mExpandedHeight == getFullHeight())) {
+                    || (mClosing && mExpandedHeight == 0)
+                    || ((mRubberbanding || !mClosing) && mExpandedHeight == fh)) {
                 post(mStopAnimator);
             }
         }
@@ -183,6 +194,7 @@ public class PanelView extends FrameLayout {
 
                     switch (event.getAction()) {
                         case MotionEvent.ACTION_DOWN:
+                            mTracking = true;
                             mVelocityTracker = VelocityTracker.obtain();
                             trackMovement(event);
                             mBar.onTrackingStarted(PanelView.this);
@@ -190,7 +202,7 @@ public class PanelView extends FrameLayout {
                             break;
 
                         case MotionEvent.ACTION_MOVE:
-                            PanelView.this.setExpandedHeight(rawY - mAbsPos[1] - mTouchOffset);
+                            PanelView.this.setExpandedHeightInternal(rawY - mAbsPos[1] - mTouchOffset);
 
                             mBar.panelExpansionChanged(PanelView.this, mExpandedFraction);
 
@@ -199,6 +211,7 @@ public class PanelView extends FrameLayout {
 
                         case MotionEvent.ACTION_UP:
                         case MotionEvent.ACTION_CANCEL:
+                            mTracking = false;
                             mBar.onTrackingStopped(PanelView.this);
                             trackMovement(event);
                             mVelocityTracker.computeCurrentVelocity(1000);
@@ -275,6 +288,10 @@ public class PanelView extends FrameLayout {
         LOG("onMeasure(%d, %d) -> (%d, %d)",
                 widthMeasureSpec, heightMeasureSpec, getMeasuredWidth(), getMeasuredHeight());
         mFullHeight = getMeasuredHeight();
+        // if one of our children is getting smaller, we should track that
+        if (!mTracking && !mRubberbanding && !mTimeAnimator.isStarted() && mExpandedHeight > 0 && mExpandedHeight != mFullHeight) {
+            mExpandedHeight = mFullHeight;
+        }
         heightMeasureSpec = MeasureSpec.makeMeasureSpec(
                     (int) mExpandedHeight, MeasureSpec.AT_MOST); // MeasureSpec.getMode(heightMeasureSpec));
         setMeasuredDimension(widthMeasureSpec, heightMeasureSpec);
@@ -286,17 +303,22 @@ public class PanelView extends FrameLayout {
         setExpandedHeightInternal(height);
     }
 
+    @Override
+    protected void onLayout (boolean changed, int left, int top, int right, int bottom) {
+        LOG("onLayout: changed=%s, bottom=%d eh=%d fh=%d", changed?"T":"f", bottom, (int)mExpandedHeight, (int)mFullHeight);
+        super.onLayout(changed, left, top, right, bottom);
+    }
+
     public void setExpandedHeightInternal(float h) {
         float fh = getFullHeight();
         if (fh == 0) {
             // Hmm, full height hasn't been computed yet
         }
 
-        LOG("setExpansion: height=%.1f fh=%.1f", h, fh);
+        LOG("setExpansion: height=%.1f fh=%.1f tracking=%s rubber=%s", h, fh, mTracking?"T":"f", mRubberbanding?"T":"f");
 
         if (h < 0) h = 0;
-        else if (h > fh) h = fh;
-
+        if (!(STRETCH_PAST_CONTENTS && (mTracking || mRubberbanding)) && h > fh) h = fh;
         mExpandedHeight = h;
 
         requestLayout();
