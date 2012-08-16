@@ -29,6 +29,10 @@ public:
     static float ExpF(JNIEnv* env, jobject clazz, float x) {
         return expf(x);
     }
+
+    static float HypotF(JNIEnv* env, jobject clazz, float x, float y) {
+        return hypotf(x, y);
+    }
 };
 
 static JNINativeMethod gMathUtilsMethods[] = {
@@ -38,6 +42,7 @@ static JNINativeMethod gMathUtilsMethods[] = {
     {"cos", "(F)F", (void*) MathUtilsGlue::CosF},
     {"sqrt", "(F)F", (void*) MathUtilsGlue::SqrtF},
     {"exp", "(F)F", (void*) MathUtilsGlue::ExpF},
+    {"hypot", "(FF)F", (void*) MathUtilsGlue::HypotF},
 };
 
 int register_android_util_FloatMath(JNIEnv* env)
