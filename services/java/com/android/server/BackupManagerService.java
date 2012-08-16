@@ -65,7 +65,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.os.UserId;
+import android.os.UserHandle;
 import android.os.WorkSource;
 import android.os.storage.IMountService;
 import android.provider.Settings;
@@ -4846,8 +4846,8 @@ class BackupManagerService extends IBackupManager.Stub {
     // ----- IBackupManager binder interface -----
 
     public void dataChanged(final String packageName) {
-        final int callingUserHandle = UserId.getCallingUserId();
-        if (callingUserHandle != UserId.USER_OWNER) {
+        final int callingUserHandle = UserHandle.getCallingUserId();
+        if (callingUserHandle != UserHandle.USER_OWNER) {
             // App is running under a non-owner user profile.  For now, we do not back
             // up data from secondary user profiles.
             // TODO: backups for all user profiles.
@@ -4950,8 +4950,8 @@ class BackupManagerService extends IBackupManager.Stub {
             boolean doAllApps, boolean includeSystem, String[] pkgList) {
         mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "fullBackup");
 
-        final int callingUserHandle = UserId.getCallingUserId();
-        if (callingUserHandle != UserId.USER_OWNER) {
+        final int callingUserHandle = UserHandle.getCallingUserId();
+        if (callingUserHandle != UserHandle.USER_OWNER) {
             throw new IllegalStateException("Backup supported only for the device owner");
         }
 
@@ -5019,8 +5019,8 @@ class BackupManagerService extends IBackupManager.Stub {
     public void fullRestore(ParcelFileDescriptor fd) {
         mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "fullRestore");
 
-        final int callingUserHandle = UserId.getCallingUserId();
-        if (callingUserHandle != UserId.USER_OWNER) {
+        final int callingUserHandle = UserHandle.getCallingUserId();
+        if (callingUserHandle != UserHandle.USER_OWNER) {
             throw new IllegalStateException("Restore supported only for the device owner");
         }
 

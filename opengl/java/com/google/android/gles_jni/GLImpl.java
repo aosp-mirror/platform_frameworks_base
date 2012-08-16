@@ -23,7 +23,7 @@ import android.app.AppGlobals;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.os.Build;
-import android.os.UserId;
+import android.os.UserHandle;
 import android.util.Log;
 
 import java.nio.Buffer;
@@ -68,7 +68,7 @@ public class GLImpl implements GL10, GL10Ext, GL11, GL11Ext, GL11ExtensionPack {
         int version = 0;
         IPackageManager pm = AppGlobals.getPackageManager();
         try {
-            ApplicationInfo applicationInfo = pm.getApplicationInfo(appName, 0, UserId.myUserId());
+            ApplicationInfo applicationInfo = pm.getApplicationInfo(appName, 0, UserHandle.myUserId());
             if (applicationInfo != null) {
                 version = applicationInfo.targetSdkVersion;
             }

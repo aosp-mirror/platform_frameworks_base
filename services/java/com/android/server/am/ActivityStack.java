@@ -55,7 +55,7 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.os.UserId;
+import android.os.UserHandle;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
@@ -501,7 +501,7 @@ final class ActivityStack {
 
         TaskRecord cp = null;
 
-        final int userId = UserId.getUserId(info.applicationInfo.uid);
+        final int userId = UserHandle.getUserId(info.applicationInfo.uid);
         final int N = mHistory.size();
         for (int i=(N-1); i>=0; i--) {
             ActivityRecord r = mHistory.get(i);
@@ -545,7 +545,7 @@ final class ActivityStack {
         if (info.targetActivity != null) {
             cls = new ComponentName(info.packageName, info.targetActivity);
         }
-        final int userId = UserId.getUserId(info.applicationInfo.uid);
+        final int userId = UserHandle.getUserId(info.applicationInfo.uid);
 
         final int N = mHistory.size();
         for (int i=(N-1); i>=0; i--) {
@@ -2406,7 +2406,7 @@ final class ActivityStack {
         }
 
         if (err == ActivityManager.START_SUCCESS) {
-            final int userId = aInfo != null ? UserId.getUserId(aInfo.applicationInfo.uid) : 0;
+            final int userId = aInfo != null ? UserHandle.getUserId(aInfo.applicationInfo.uid) : 0;
             Slog.i(TAG, "START {" + intent.toShortString(true, true, true, false)
                     + " u=" + userId + "} from pid " + (callerApp != null ? callerApp.pid : callingPid));
         }

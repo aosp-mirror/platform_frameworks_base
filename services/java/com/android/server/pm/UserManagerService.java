@@ -34,7 +34,7 @@ import android.os.IUserManager;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.SystemClock;
-import android.os.UserId;
+import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -539,7 +539,7 @@ public class UserManagerService extends IUserManager.Stub {
             // Don't do it for the primary user, it will become recursive.
             if (userId == 0)
                 continue;
-            mInstaller.createUserData(packageName, UserId.getUid(userId, uid),
+            mInstaller.createUserData(packageName, UserHandle.getUid(userId, uid),
                     userId);
         }
     }

@@ -25,7 +25,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.UserId;
+import android.os.UserHandle;
 import android.util.Slog;
 
 import java.io.PrintWriter;
@@ -259,7 +259,7 @@ class PendingIntentRecord extends IIntentSender.Stub {
                             owner.broadcastIntentInPackage(key.packageName, uid,
                                     finalIntent, resolvedType,
                                     finishedReceiver, code, null, null,
-                                requiredPermission, (finishedReceiver != null), false, UserId
+                                requiredPermission, (finishedReceiver != null), false, UserHandle
                                         .getUserId(uid));
                             sendFinish = false;
                         } catch (RuntimeException e) {

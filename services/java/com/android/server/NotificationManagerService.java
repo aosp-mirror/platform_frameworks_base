@@ -48,7 +48,7 @@ import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.UserId;
+import android.os.UserHandle;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.service.dreams.IDreamManager;
@@ -1286,7 +1286,7 @@ public class NotificationManagerService extends INotificationManager.Stub
         try {
             ApplicationInfo ai = mContext.getPackageManager().getApplicationInfo(
                     pkg, 0);
-            if (!UserId.isSameApp(ai.uid, uid)) {
+            if (!UserHandle.isSameApp(ai.uid, uid)) {
                 throw new SecurityException("Calling uid " + uid + " gave package"
                         + pkg + " which is owned by uid " + ai.uid);
             }

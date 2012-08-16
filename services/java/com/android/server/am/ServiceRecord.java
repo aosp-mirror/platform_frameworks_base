@@ -31,7 +31,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.os.UserId;
+import android.os.UserHandle;
 import android.util.Slog;
 import android.util.TimeUtils;
 
@@ -296,7 +296,7 @@ class ServiceRecord extends Binder {
         this.restarter = restarter;
         createTime = SystemClock.elapsedRealtime();
         lastActivity = SystemClock.uptimeMillis();
-        userId = UserId.getUserId(appInfo.uid);
+        userId = UserHandle.getUserId(appInfo.uid);
     }
 
     public AppBindRecord retrieveAppBindingLocked(Intent intent,

@@ -36,7 +36,7 @@ import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.os.UserId;
+import android.os.UserHandle;
 import android.util.EventLog;
 import android.util.Slog;
 
@@ -373,7 +373,7 @@ public class BroadcastQueue {
             BroadcastFilter filter, boolean ordered) {
         boolean skip = false;
         if (r.onlySendToCaller) {
-            if (!UserId.isSameApp(r.callingUid, filter.owningUid)) {
+            if (!UserHandle.isSameApp(r.callingUid, filter.owningUid)) {
                 Slog.w(TAG, "Permission Denial: broadcasting "
                         + r.intent.toString()
                         + " from " + r.callerPackage + " (pid="
@@ -668,7 +668,7 @@ public class BroadcastQueue {
 
             boolean skip = false;
             if (r.onlySendToCaller) {
-                if (!UserId.isSameApp(r.callingUid, info.activityInfo.applicationInfo.uid)) {
+                if (!UserHandle.isSameApp(r.callingUid, info.activityInfo.applicationInfo.uid)) {
                     Slog.w(TAG, "Permission Denial: broadcasting "
                             + r.intent.toString()
                             + " from " + r.callerPackage + " (pid="
@@ -766,7 +766,7 @@ public class BroadcastQueue {
                 info.activityInfo = mService.getActivityInfoForUser(info.activityInfo, 0);
             }
             r.curReceiver = info.activityInfo;
-            if (DEBUG_MU && r.callingUid > UserId.PER_USER_RANGE) {
+            if (DEBUG_MU && r.callingUid > UserHandle.PER_USER_RANGE) {
                 Slog.v(TAG_MU, "Updated broadcast record activity info for secondary user, "
                         + info.activityInfo + ", callingUid = " + r.callingUid + ", uid = "
                         + info.activityInfo.applicationInfo.uid);
@@ -775,7 +775,7 @@ public class BroadcastQueue {
             // Broadcast is being executed, its package can't be stopped.
             try {
                 AppGlobals.getPackageManager().setPackageStoppedState(
-                        r.curComponent.getPackageName(), false, UserId.getUserId(r.callingUid));
+                        r.curComponent.getPackageName(), false, UserHandle.getUserId(r.callingUid));
             } catch (RemoteException e) {
             } catch (IllegalArgumentException e) {
                 Slog.w(TAG, "Failed trying to unstop package "

@@ -100,7 +100,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.os.UserId;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings.Secure;
 import android.security.SystemKeyStore;
@@ -691,15 +691,15 @@ public class PackageManagerService extends IPackageManager.Stub {
                             }
                             sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
                                     res.pkg.applicationInfo.packageName,
-                                    extras, null, null, UserId.USER_ALL);
+                                    extras, null, null, UserHandle.USER_ALL);
                             if (update) {
                                 sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED,
                                         res.pkg.applicationInfo.packageName,
-                                        extras, null, null, UserId.USER_ALL);
+                                        extras, null, null, UserHandle.USER_ALL);
                                 sendPackageBroadcast(Intent.ACTION_MY_PACKAGE_REPLACED,
                                         null, null,
                                         res.pkg.applicationInfo.packageName, null,
-                                        UserId.USER_ALL);
+                                        UserHandle.USER_ALL);
                             }
                             if (res.removedInfo.args != null) {
                                 // Remove the replaced package's older resources safely now
@@ -1630,14 +1630,14 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             PackageParser.Package p = mPackages.get(packageName);
             if(p != null) {
-                return UserId.getUid(userId, p.applicationInfo.uid);
+                return UserHandle.getUid(userId, p.applicationInfo.uid);
             }
             PackageSetting ps = mSettings.mPackages.get(packageName);
             if((ps == null) || (ps.pkg == null) || (ps.pkg.applicationInfo == null)) {
                 return -1;
             }
             p = ps.pkg;
-            return p != null ? UserId.getUid(userId, p.applicationInfo.uid) : -1;
+            return p != null ? UserHandle.getUid(userId, p.applicationInfo.uid) : -1;
         }
     }
 
@@ -1961,7 +1961,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private void checkValidCaller(int uid, int userId) {
-        if (UserId.getUserId(uid) == userId || uid == Process.SYSTEM_UID || uid == 0)
+        if (UserHandle.getUserId(uid) == userId || uid == Process.SYSTEM_UID || uid == 0)
             return;
 
         throw new SecurityException("Caller uid=" + uid
@@ -1990,7 +1990,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     public int checkUidPermission(String permName, int uid) {
         synchronized (mPackages) {
-            Object obj = mSettings.getUserIdLPr(UserId.getAppId(uid));
+            Object obj = mSettings.getUserIdLPr(UserHandle.getAppId(uid));
             if (obj != null) {
                 GrantedPermissions gp = (GrantedPermissions)obj;
                 if (gp.grantedPermissions.contains(permName)) {
@@ -2024,7 +2024,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (permName != null) {
             BasePermission bp = findPermissionTreeLP(permName);
             if (bp != null) {
-                if (bp.uid == UserId.getAppId(Binder.getCallingUid())) {
+                if (bp.uid == UserHandle.getAppId(Binder.getCallingUid())) {
                     return bp;
                 }
                 throw new SecurityException("Calling uid "
@@ -2227,8 +2227,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     public int checkUidSignatures(int uid1, int uid2) {
         // Map to base uids.
-        uid1 = UserId.getAppId(uid1);
-        uid2 = UserId.getAppId(uid2);
+        uid1 = UserHandle.getAppId(uid1);
+        uid2 = UserHandle.getAppId(uid2);
         // reader
         synchronized (mPackages) {
             Signature[] s1;
@@ -2286,7 +2286,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     public String[] getPackagesForUid(int uid) {
-        uid = UserId.getAppId(uid);
+        uid = UserHandle.getAppId(uid);
         // reader
         synchronized (mPackages) {
             Object obj = mSettings.getUserIdLPr(uid);
@@ -2311,7 +2311,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     public String getNameForUid(int uid) {
         // reader
         synchronized (mPackages) {
-            Object obj = mSettings.getUserIdLPr(UserId.getAppId(uid));
+            Object obj = mSettings.getUserIdLPr(UserHandle.getAppId(uid));
             if (obj instanceof SharedUserSetting) {
                 final SharedUserSetting sus = (SharedUserSetting) obj;
                 return sus.name + ":" + sus.userId;
@@ -2791,7 +2791,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         final ParceledListSlice<PackageInfo> list = new ParceledListSlice<PackageInfo>();
         final boolean listUninstalled = (flags & PackageManager.GET_UNINSTALLED_PACKAGES) != 0;
         final String[] keys;
-        int userId = UserId.getCallingUserId();
+        int userId = UserHandle.getCallingUserId();
 
         // writer
         synchronized (mPackages) {
@@ -2890,7 +2890,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         // reader
         synchronized (mPackages) {
             final Iterator<PackageParser.Package> i = mPackages.values().iterator();
-            final int userId = UserId.getCallingUserId();
+            final int userId = UserHandle.getCallingUserId();
             while (i.hasNext()) {
                 final PackageParser.Package p = i.next();
                 if (p.applicationInfo != null
@@ -2938,7 +2938,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             final Iterator<Map.Entry<String, PackageParser.Provider>> i = mProviders.entrySet()
                     .iterator();
-            final int userId = UserId.getCallingUserId();
+            final int userId = UserHandle.getCallingUserId();
             while (i.hasNext()) {
                 Map.Entry<String, PackageParser.Provider> entry = i.next();
                 PackageParser.Provider p = entry.getValue();
@@ -2965,14 +2965,14 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             final Iterator<PackageParser.Provider> i = mProvidersByComponent.values().iterator();
             final int userId = processName != null ?
-                    UserId.getUserId(uid) : UserId.getCallingUserId();
+                    UserHandle.getUserId(uid) : UserHandle.getCallingUserId();
             while (i.hasNext()) {
                 final PackageParser.Provider p = i.next();
                 PackageSetting ps = mSettings.mPackages.get(p.owner.packageName);
                 if (p.info.authority != null
                         && (processName == null
                                 || (p.info.processName.equals(processName)
-                                        && UserId.isSameApp(p.info.applicationInfo.uid, uid)))
+                                        && UserHandle.isSameApp(p.info.applicationInfo.uid, uid)))
                         && mSettings.isEnabledLPr(p.info, flags, userId)
                         && (!mSafeMode
                                 || (p.info.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0)) {
@@ -5148,7 +5148,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         IActivityManager am = ActivityManagerNative.getDefault();
         if (am != null) {
             try {
-                int[] userIds = userId == UserId.USER_ALL
+                int[] userIds = userId == UserHandle.USER_ALL
                         ? sUserManager.getUserIds() 
                         : new int[] {userId};
                 for (int id : userIds) {
@@ -5163,7 +5163,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     // Modify the UID when posting to other users
                     int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
                     if (uid > 0 && id > 0) {
-                        uid = UserId.getUid(id, UserId.getAppId(uid));
+                        uid = UserHandle.getUid(id, UserHandle.getAppId(uid));
                         intent.putExtra(Intent.EXTRA_UID, uid);
                     }
                     intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
@@ -5312,13 +5312,13 @@ public class PackageManagerService extends IPackageManager.Stub {
                 extras.putInt(Intent.EXTRA_UID, removedUid);
                 extras.putBoolean(Intent.EXTRA_DATA_REMOVED, false);
                 sendPackageBroadcast(Intent.ACTION_PACKAGE_REMOVED, removedPackage,
-                        extras, null, null, UserId.USER_ALL);
+                        extras, null, null, UserHandle.USER_ALL);
             }
             if (addedPackage != null) {
                 Bundle extras = new Bundle(1);
                 extras.putInt(Intent.EXTRA_UID, addedUid);
                 sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, addedPackage,
-                        extras, null, null, UserId.USER_ALL);
+                        extras, null, null, UserHandle.USER_ALL);
             }
         }
 
@@ -7539,11 +7539,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                 extras.putBoolean(Intent.EXTRA_REPLACING, true);
 
                 sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName,
-                        extras, null, null, UserId.USER_ALL);
+                        extras, null, null, UserHandle.USER_ALL);
                 sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED, packageName,
-                        extras, null, null, UserId.USER_ALL);
+                        extras, null, null, UserHandle.USER_ALL);
                 sendPackageBroadcast(Intent.ACTION_MY_PACKAGE_REPLACED, null,
-                        null, packageName, null, UserId.USER_ALL);
+                        null, packageName, null, UserHandle.USER_ALL);
             }
         }
         // Force a gc here.
@@ -7576,15 +7576,15 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             if (removedPackage != null) {
                 sendPackageBroadcast(Intent.ACTION_PACKAGE_REMOVED, removedPackage,
-                        extras, null, null, UserId.USER_ALL);
+                        extras, null, null, UserHandle.USER_ALL);
                 if (fullRemove && !replacing) {
                     sendPackageBroadcast(Intent.ACTION_PACKAGE_FULLY_REMOVED, removedPackage,
-                            extras, null, null, UserId.USER_ALL);
+                            extras, null, null, UserHandle.USER_ALL);
                 }
             }
             if (removedUid >= 0) {
                 sendPackageBroadcast(Intent.ACTION_UID_REMOVED, null, extras, null, null,
-                        UserId.getUserId(removedUid));
+                        UserHandle.getUserId(removedUid));
             }
         }
     }
@@ -7948,7 +7948,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.DELETE_CACHE_FILES, null);
         // Queue up an async operation since the package deletion may take a little while.
-        final int userId = UserId.getCallingUserId();
+        final int userId = UserHandle.getCallingUserId();
         mHandler.post(new Runnable() {
             public void run() {
                 mHandler.removeCallbacks(this);
@@ -8303,7 +8303,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         + "/" + className);
             }
             // Allow root and verify that userId is not being specified by a different user
-            if (!allowedByPermission && !UserId.isSameApp(uid, pkgSetting.appId)) {
+            if (!allowedByPermission && !UserHandle.isSameApp(uid, pkgSetting.appId)) {
                 throw new SecurityException(
                         "Permission Denial: attempt to change component state from pid="
                         + Binder.getCallingPid()
@@ -8352,7 +8352,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             }
             mSettings.writePackageRestrictionsLPr(userId);
-            packageUid = UserId.getUid(userId, pkgSetting.appId);
+            packageUid = UserHandle.getUid(userId, pkgSetting.appId);
             components = mPendingBroadcasts.get(packageName);
             final boolean newPackage = components == null;
             if (newPackage) {
@@ -8401,7 +8401,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         extras.putBoolean(Intent.EXTRA_DONT_KILL_APP, killFlag);
         extras.putInt(Intent.EXTRA_UID, packageUid);
         sendPackageBroadcast(Intent.ACTION_PACKAGE_CHANGED,  packageName, extras, null, null,
-                UserId.getUserId(packageUid));
+                UserHandle.getUserId(packageUid));
     }
 
     public void setPackageStoppedState(String packageName, boolean stopped, int userId) {
@@ -9027,7 +9027,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             String action = mediaStatus ? Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE
                     : Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE;
-            sendPackageBroadcast(action, null, extras, null, finishedReceiver, UserId.USER_ALL);
+            sendPackageBroadcast(action, null, extras, null, finishedReceiver, UserHandle.USER_ALL);
         }
     }
 

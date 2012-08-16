@@ -37,7 +37,7 @@ import android.os.Bundle;
 import android.os.PatternMatcher;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.UserId;
+import android.os.UserHandle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -133,7 +133,7 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
         mAdapter = new ResolveListAdapter(this, intent, initialIntents, rList,
                 mLaunchedFromUid);
         int count = mAdapter.getCount();
-        if (mLaunchedFromUid < 0 || UserId.isIsolated(mLaunchedFromUid)) {
+        if (mLaunchedFromUid < 0 || UserHandle.isIsolated(mLaunchedFromUid)) {
             // Gulp!
             finish();
             return;
