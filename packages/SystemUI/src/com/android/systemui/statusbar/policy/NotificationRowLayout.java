@@ -78,6 +78,7 @@ public class NotificationRowLayout
         super(context, attrs, defStyle);
 
         mRealLayoutTransition = new LayoutTransition();
+        mRealLayoutTransition.setAnimateParentHierarchy(true);
         setLayoutTransitionsEnabled(true);
         
         setOrientation(LinearLayout.VERTICAL);
