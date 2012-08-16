@@ -101,8 +101,7 @@ public class GestureRecorder {
                 mDownTime = ev.getDownTime();
             } else {
                 if (mDownTime != ev.getDownTime()) {
-                    // TODO: remove
-                    throw new RuntimeException("Assertion failure in GestureRecorder: event downTime ("
+                    Slog.w(TAG, "Assertion failure in GestureRecorder: event downTime ("
                             +ev.getDownTime()+") does not match gesture downTime ("+mDownTime+")");
                 }
             }
