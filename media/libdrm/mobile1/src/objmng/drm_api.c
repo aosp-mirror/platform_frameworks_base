@@ -1478,13 +1478,13 @@ static int32_t drm_readBinaryContentFromInputStream(T_DRM_Session_Node* s, int32
 
     if (NULL != s->readBuf && s->readBufLen > 0) { /* read from backup buffer */
         if (leftLen <= s->readBufLen) {
-            memcpy(mediaBuf, s->readBuf + s->readBufOff, leftLen);
+            memcpy(mediaBuf + readBytes, s->readBuf + s->readBufOff, leftLen);
             s->readBufOff += leftLen;
             s->readBufLen -= leftLen;
             readBytes += leftLen;
             leftLen = 0;
         } else {
-            memcpy(mediaBuf, s->readBuf + s->readBufOff, s->readBufLen);
+            memcpy(mediaBuf + readBytes, s->readBuf + s->readBufOff, s->readBufLen);
             s->readBufOff += s->readBufLen;
             leftLen -= s->readBufLen;
             readBytes += s->readBufLen;
