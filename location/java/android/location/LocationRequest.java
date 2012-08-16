@@ -195,20 +195,6 @@ public final class LocationRequest implements Parcelable {
         return mSmallestDisplacement;
     }
 
-    /** @hide */
-    public LocationRequest applyCoarsePermissionRestrictions() {
-        switch (mQuality) {
-            case ACCURACY_FINE:
-                mQuality = ACCURACY_BLOCK;
-                break;
-        }
-        // cap fastest interval to 6 seconds
-        if (mFastestInterval < 6 * 1000) mFastestInterval = 6 * 1000;
-        // cap requested interval to 1 minute
-        if (mInterval < 60 * 1000) mInterval = 60 * 1000;
-        return this;
-    }
-
     private static void checkInterval(long millis) {
         if (millis < 0) {
             throw new IllegalArgumentException("invalid interval: " + millis);
