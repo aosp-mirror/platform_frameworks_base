@@ -22876,6 +22876,7 @@ package android.util {
     method public static float cos(float);
     method public static float exp(float);
     method public static float floor(float);
+    method public static float hypot(float, float);
     method public static float sin(float);
     method public static float sqrt(float);
   }
