@@ -155,7 +155,7 @@
     <string name="global_action_lock" msgid="2844945191792119712">"屏幕锁定"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"关机"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"错误报告"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"获取错误报告"</string>
+    <string name="bugreport_title" msgid="2667494803742548533">"提交错误报告"</string>
     <string name="bugreport_message" msgid="398447048750350456">"这会收集有关当前设备状态的信息，并以电子邮件的形式进行发送。从开始生成错误报告到准备好发送需要一点时间，请耐心等待。"</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"静音模式"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"声音已关闭"</string>
