@@ -64,15 +64,18 @@ public class PanelBar extends FrameLayout {
         return getMeasuredHeight();
     }
 
+    public PanelView selectPanelForTouchX(float x) {
+        final int N = mPanels.size();
+        return mPanels.get((int)(N * x / getMeasuredWidth()));
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         // figure out which panel needs to be talked to here
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            final int N = mPanels.size();
-            final int i = (int)(N * event.getX() / getMeasuredWidth());
-            mTouchingPanel = mPanels.get(i);
+            mTouchingPanel = selectPanelForTouchX(event.getX());
             mPanelHolder.setSelectedPanel(mTouchingPanel);
-            LOG("PanelBar.onTouch: state=%d ACTION_DOWN: panel %d", mState, i);
+            LOG("PanelBar.onTouch: state=%d ACTION_DOWN: panel %s", mState, mTouchingPanel.getName());
             if (mState == STATE_CLOSED || mState == STATE_OPEN) {
                 go(STATE_TRANSITIONING);
                 onPanelPeeked();

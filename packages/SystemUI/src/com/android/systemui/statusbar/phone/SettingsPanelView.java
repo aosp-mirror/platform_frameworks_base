@@ -19,8 +19,8 @@ package com.android.systemui.statusbar.phone;
 import android.content.Context;
 import android.util.AttributeSet;
 
-public class NotificationPanelView extends PanelView {
-    public NotificationPanelView(Context context, AttributeSet attrs) {
+public class SettingsPanelView extends PanelView {
+    public SettingsPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
@@ -28,7 +28,7 @@ public class NotificationPanelView extends PanelView {
     public void fling(float vel, boolean always) {
         ((PhoneStatusBarView) mBar).mBar.getGestureRecorder().tag(
             "fling " + ((vel > 0) ? "open" : "closed"),
-            "notifications,v=" + vel);
+            "settings,v=" + vel);
         super.fling(vel, always);
     }
 }
