@@ -65,11 +65,24 @@
         android:layout_weight="1"
         />
 
+    <TextView
+        android:id="@+id/header_debug_info"
+        android:visibility="invisible"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:fontFamily="sans-serif-condensed"
+        android:textSize="11dp"
+        android:textStyle="bold"
+        android:textColor="#00A040"
+        android:padding="2dp"
+        />
+    
     <ImageView android:id="@+id/clear_all_button"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:scaleType="center"
         android:src="@drawable/ic_notify_clear"
         android:contentDescription="@string/accessibility_clear_all"
-        />            
+        />     
 </LinearLayout>
