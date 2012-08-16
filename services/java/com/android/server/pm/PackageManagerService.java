@@ -97,6 +97,7 @@ import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.SELinux;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -6484,6 +6485,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                     return false;
                 }
 
+                if (!SELinux.restorecon(newCodeFile)) {
+                    return false;
+                }
+
                 return true;
             }
         }
@@ -7465,6 +7470,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             FileUtils.setPermissions(
                     tmpPackageFile.getCanonicalPath(), FileUtils.S_IRUSR|FileUtils.S_IWUSR,
                     -1, -1);
+            if (!SELinux.restorecon(tmpPackageFile)) {
+                return null;
+            }
         } catch (IOException e) {
             Slog.e(TAG, "Trouble getting the canoncical path for a temp file.");
             return null;
