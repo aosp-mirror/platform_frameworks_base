@@ -47,46 +47,6 @@ public class FileUtils {
     public static final int S_IROTH = 00004;
     public static final int S_IWOTH = 00002;
     public static final int S_IXOTH = 00001;
-    
-    
-    /**
-     * File status information. This class maps directly to the POSIX stat structure.
-     * @deprecated use {@link StructStat} instead.
-     * @hide
-     */
-    @Deprecated
-    public static final class FileStatus {
-        public int dev;
-        public int ino;
-        public int mode;
-        public int nlink;
-        public int uid;
-        public int gid;
-        public int rdev;
-        public long size;
-        public int blksize;
-        public long blocks;
-        public long atime;
-        public long mtime;
-        public long ctime;
-    }
-    
-    /**
-     * Get the status for the given path. This is equivalent to the POSIX stat(2) system call. 
-     * @param path The path of the file to be stat'd.
-     * @param status Optional argument to fill in. It will only fill in the status if the file
-     * exists. 
-     * @return true if the file exists and false if it does not exist. If you do not have 
-     * permission to stat the file, then this method will return false.
-     * @deprecated use {@link Os#stat(String)} instead.
-     */
-    @Deprecated
-    public static boolean getFileStatus(String path, FileStatus status) {
-        StrictMode.noteDiskRead();
-        return getFileStatusNative(path, status);
-    }
-
-    private static native boolean getFileStatusNative(String path, FileStatus status);
 
     /** Regular expression for safe filenames: no spaces or metacharacters */
     private static final Pattern SAFE_FILENAME_PATTERN = Pattern.compile("[\\w%+,./=_-]+");
