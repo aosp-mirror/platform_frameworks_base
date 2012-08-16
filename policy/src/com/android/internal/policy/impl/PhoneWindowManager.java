@@ -1717,15 +1717,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mHomePressed = false;
                 mHomeLongPressed = false;
                 if (!homeWasLongPressed) {
-                    try {
-                        IStatusBarService statusbar = getStatusBarService();
-                        if (statusbar != null) {
-                            statusbar.cancelPreloadRecentApps();
+                    if (mLongPressOnHomeBehavior == LONG_PRESS_HOME_RECENT_SYSTEM_UI) {
+                        try {
+                            IStatusBarService statusbar = getStatusBarService();
+                            if (statusbar != null) {
+                                statusbar.cancelPreloadRecentApps();
+                            }
+                        } catch (RemoteException e) {
+                            Slog.e(TAG, "RemoteException when showing recent apps", e);
+                            // re-acquire status bar service next time it is needed.
+                            mStatusBarService = null;
                         }
-                    } catch (RemoteException e) {
-                        Slog.e(TAG, "RemoteException when showing recent apps", e);
-                        // re-acquire status bar service next time it is needed.
-                        mStatusBarService = null;
                     }
 
                     mHomePressed = false;
