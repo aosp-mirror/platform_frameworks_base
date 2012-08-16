@@ -109,7 +109,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     public static final String ACTION_STATUSBAR_START
             = "com.android.internal.policy.statusbar.START";
 
-    private static final boolean SHOW_CARRIER_LABEL = true;
+    private static final boolean SHOW_CARRIER_LABEL = false; // XXX: doesn't work with rubberband panels right now
 
     private static final int MSG_OPEN_NOTIFICATION_PANEL = 1000;
     private static final int MSG_CLOSE_NOTIFICATION_PANEL = 1001;
