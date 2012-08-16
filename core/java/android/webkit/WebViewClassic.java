@@ -1626,12 +1626,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         mZoomManager.updateMultiTouchSupport(context);
     }
 
-    void updateJavaScriptEnabled(boolean enabled) {
-        if (isAccessibilityEnabled()) {
-            getAccessibilityInjector().updateJavaScriptEnabled(enabled);
-        }
-    }
-
     private void init() {
         OnTrimMemoryListener.init(mContext);
         mWebView.setWillNotDraw(false);

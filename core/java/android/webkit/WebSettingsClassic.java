@@ -1135,7 +1135,6 @@ public class WebSettingsClassic extends WebSettings {
         if (mJavaScriptEnabled != flag) {
             mJavaScriptEnabled = flag;
             postSync();
-            mWebView.updateJavaScriptEnabled(flag);
         }
     }
 

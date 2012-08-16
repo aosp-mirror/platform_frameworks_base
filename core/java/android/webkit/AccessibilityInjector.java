@@ -279,7 +279,6 @@ class AccessibilityInjector {
         }
 
         if (!shouldInjectJavaScript(url)) {
-            mAccessibilityScriptInjected = false;
             toggleFallbackAccessibilityInjector(true);
             return;
         }
@@ -290,23 +289,6 @@ class AccessibilityInjector {
         mWebView.loadUrl(injectionUrl);
 
         mAccessibilityScriptInjected = true;
-    }
-
-    /**
-     * Adjusts the accessibility injection state to reflect changes in the
-     * JavaScript enabled state.
-     *
-     * @param enabled Whether JavaScript is enabled.
-     */
-    public void updateJavaScriptEnabled(boolean enabled) {
-        if (enabled) {
-            addAccessibilityApisIfNecessary();
-        } else {
-            removeAccessibilityApisIfNecessary();
-        }
-
-        // We have to reload the page after adding or removing APIs.
-        mWebView.reload();
     }
 
     /**
