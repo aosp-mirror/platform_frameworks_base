@@ -68,39 +68,6 @@ jint android_os_FileUtils_setPermissions(JNIEnv* env, jobject clazz,
     return chmod(file8.string(), mode) == 0 ? 0 : errno;
 }
 
-jint android_os_FileUtils_getPermissions(JNIEnv* env, jobject clazz,
-                                         jstring file, jintArray outArray)
-{
-    const jchar* str = env->GetStringCritical(file, 0);
-    String8 file8;
-    if (str) {
-        file8 = String8(str, env->GetStringLength(file));
-        env->ReleaseStringCritical(file, str);
-    }
-    if (file8.size() <= 0) {
-        return ENOENT;
-    }
-    struct stat st;
-    if (stat(file8.string(), &st) != 0) {
-        return errno;
-    }
-    jint* array = (jint*)env->GetPrimitiveArrayCritical(outArray, 0);
-    if (array) {
-        int len = env->GetArrayLength(outArray);
-        if (len >= 1) {
-            array[0] = st.st_mode;
-        }
-        if (len >= 2) {
-            array[1] = st.st_uid;
-        }
-        if (len >= 3) {
-            array[2] = st.st_gid;
-        }
-    }
-    env->ReleasePrimitiveArrayCritical(outArray, array, 0);
-    return 0;
-}
-
 jint android_os_FileUtils_setUMask(JNIEnv* env, jobject clazz, jint mask)
 {
     return umask(mask);
@@ -158,7 +125,6 @@ jboolean android_os_FileUtils_getFileStatus(JNIEnv* env, jobject clazz, jstring 
 
 static const JNINativeMethod methods[] = {
     {"setPermissions",  "(Ljava/lang/String;III)I", (void*)android_os_FileUtils_setPermissions},
-    {"getPermissions",  "(Ljava/lang/String;[I)I", (void*)android_os_FileUtils_getPermissions},
     {"setUMask",        "(I)I",                    (void*)android_os_FileUtils_setUMask},
     {"getFatVolumeId",  "(Ljava/lang/String;)I", (void*)android_os_FileUtils_getFatVolumeId},
     {"getFileStatusNative", "(Ljava/lang/String;Landroid/os/FileUtils$FileStatus;)Z", (void*)android_os_FileUtils_getFileStatus},

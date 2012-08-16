@@ -28,9 +28,6 @@ import java.util.regex.Pattern;
 import java.util.zip.CRC32;
 import java.util.zip.CheckedInputStream;
 
-import libcore.io.Os;
-import libcore.io.StructStat;
-
 /**
  * Tools for managing files.  Not for public consumption.
  * @hide
@@ -95,12 +92,6 @@ public class FileUtils {
     private static final Pattern SAFE_FILENAME_PATTERN = Pattern.compile("[\\w%+,./=_-]+");
 
     public static native int setPermissions(String file, int mode, int uid, int gid);
-
-    /**
-     * @deprecated use {@link Os#stat(String)} instead.
-     */
-    @Deprecated
-    public static native int getPermissions(String file, int[] outPermissions);
 
     public static native int setUMask(int mask);
 
