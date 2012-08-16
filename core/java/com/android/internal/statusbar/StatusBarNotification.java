@@ -19,6 +19,7 @@ package com.android.internal.statusbar;
 import android.app.Notification;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.UserId;
 import android.widget.RemoteViews;
 
 
@@ -131,6 +132,11 @@ public class StatusBarNotification implements Parcelable {
     public boolean isClearable() {
         return ((notification.flags & Notification.FLAG_ONGOING_EVENT) == 0)
                 && ((notification.flags & Notification.FLAG_NO_CLEAR) == 0);
+    }
+
+    /** Returns a userHandle for the instance of the app that posted this notification. */
+    public int getUserId() {
+        return UserId.getUserId(this.uid);
     }
 }
 
