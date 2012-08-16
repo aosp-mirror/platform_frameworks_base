@@ -43,6 +43,7 @@ public class PhoneStatusBarView extends PanelBar {
     PhoneStatusBar mBar;
     int mScrimColor;
     PanelView mFadingPanel = null;
+    PanelView mNotificationPanel, mSettingsPanel;
 
     public PhoneStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -59,6 +60,16 @@ public class PhoneStatusBarView extends PanelBar {
     }
 
     @Override
+    public void addPanel(PanelView pv) {
+        super.addPanel(pv);
+        if (pv.getId() == R.id.notification_panel) {
+            mNotificationPanel = pv;
+        } else if (pv.getId() == R.id.settings_panel){
+            mSettingsPanel = pv;
+        }
+    }
+
+    @Override
     public boolean onRequestSendAccessibilityEvent(View child, AccessibilityEvent event) {
         if (super.onRequestSendAccessibilityEvent(child, event)) {
             // The status bar is very small so augment the view that the user is touching
@@ -71,6 +82,20 @@ public class PhoneStatusBarView extends PanelBar {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public PanelView selectPanelForTouchX(float x) {
+        // We split the status bar into thirds: the left 2/3 are for notifications, and the 
+        // right 1/3 for quick settings. If you pull the status bar down a second time you'll
+        // toggle panels no matter where you pull it down.
+        final float w = (float) getMeasuredWidth();
+        final float f = x / w;
+        if (f > 0.67f && mSettingsPanel.getExpandedFraction() != 1.0f
+                || mNotificationPanel.getExpandedFraction() == 1.0f) {
+            return mSettingsPanel;
+        }
+        return mNotificationPanel;
     }
 
     @Override
