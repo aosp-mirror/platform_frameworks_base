@@ -33,11 +33,11 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
 import android.util.Slog;
+import android.util.Spline;
 import android.util.TimeUtils;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 
@@ -98,9 +98,9 @@ final class DisplayPowerController {
     // average of light samples.  Different constants are used
     // to calculate the average light level when adapting to brighter or
     // dimmer environments.
-    // This parameter only controls the averaging of light samples.
-    private static final long BRIGHTENING_LIGHT_TIME_CONSTANT = 1500;
-    private static final long DIMMING_LIGHT_TIME_CONSTANT = 3000;
+    // This parameter only controls the filtering of light samples.
+    private static final long BRIGHTENING_LIGHT_TIME_CONSTANT = 500;
+    private static final long DIMMING_LIGHT_TIME_CONSTANT = 2000;
 
     // Stability requirements in milliseconds for accepting a new brightness
     // level.  This is used for debouncing the light sensor.  Different constants
@@ -144,8 +144,7 @@ final class DisplayPowerController {
 
     // Auto-brightness.
     private boolean mUseSoftwareAutoBrightnessConfig;
-    private int[] mAutoBrightnessLevelsConfig;
-    private int[] mAutoBrightnessLcdBacklightValuesConfig;
+    private Spline mScreenAutoBrightnessSpline;
 
     // Amount of time to delay auto-brightness after screen on while waiting for
     // the light sensor to warm-up in milliseconds.
@@ -289,17 +288,18 @@ final class DisplayPowerController {
         mUseSoftwareAutoBrightnessConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_automatic_brightness_available);
         if (mUseSoftwareAutoBrightnessConfig) {
-            mAutoBrightnessLevelsConfig = resources.getIntArray(
+            int[] lux = resources.getIntArray(
                     com.android.internal.R.array.config_autoBrightnessLevels);
-            mAutoBrightnessLcdBacklightValuesConfig = resources.getIntArray(
+            int[] screenBrightness = resources.getIntArray(
                     com.android.internal.R.array.config_autoBrightnessLcdBacklightValues);
-            if (mAutoBrightnessLcdBacklightValuesConfig.length
-                    != mAutoBrightnessLevelsConfig.length + 1) {
+
+            mScreenAutoBrightnessSpline = createAutoBrightnessSpline(lux, screenBrightness);
+            if (mScreenAutoBrightnessSpline == null) {
                 Slog.e(TAG, "Error in config.xml.  config_autoBrightnessLcdBacklightValues "
-                        + "(size " + mAutoBrightnessLcdBacklightValuesConfig.length + ") "
-                        + "should have exactly one more entry than "
-                        + "config_autoBrightnessLevels (size "
-                        + mAutoBrightnessLevelsConfig.length + ").  "
+                        + "(size " + screenBrightness.length + ") "
+                        + "must be monotic and have exactly one more entry than "
+                        + "config_autoBrightnessLevels (size " + lux.length + ") "
+                        + "which must be strictly increasing.  "
                         + "Auto-brightness will be disabled.");
                 mUseSoftwareAutoBrightnessConfig = false;
             }
@@ -319,6 +319,31 @@ final class DisplayPowerController {
         if (mUseSoftwareAutoBrightnessConfig
                 && !DEBUG_PRETEND_LIGHT_SENSOR_ABSENT) {
             mLightSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+        }
+    }
+
+    private static Spline createAutoBrightnessSpline(int[] lux, int[] brightness) {
+        try {
+            final int n = brightness.length;
+            float[] x = new float[n];
+            float[] y = new float[n];
+            y[0] = brightness[0];
+            for (int i = 1; i < n; i++) {
+                x[i] = lux[i - 1];
+                y[i] = brightness[i];
+            }
+
+            Spline spline = Spline.createMonotoneCubicSpline(x, y);
+            if (false) {
+                Slog.d(TAG, "Auto-brightness spline: " + spline);
+                for (float v = 1f; v < lux[lux.length - 1] * 1.25f; v *= 1.25f) {
+                    Slog.d(TAG, String.format("  %7.1f: %7.1f", v, spline.interpolate(v)));
+                }
+            }
+            return spline;
+        } catch (IllegalArgumentException ex) {
+            Slog.e(TAG, "Could not create auto-brightness spline.", ex);
+            return null;
         }
     }
 
@@ -768,13 +793,13 @@ final class DisplayPowerController {
             return;
         }
 
-        final int newScreenAutoBrightness = mapLuxToBrightness(mLightMeasurement,
-                mAutoBrightnessLevelsConfig,
-                mAutoBrightnessLcdBacklightValuesConfig);
+        final int newScreenAutoBrightness = interpolateBrightness(
+                mScreenAutoBrightnessSpline, mLightMeasurement);
         if (mScreenAutoBrightness != newScreenAutoBrightness) {
             if (DEBUG) {
                 Slog.d(TAG, "updateAutoBrightness: mScreenAutoBrightness="
-                        + mScreenAutoBrightness);
+                        + mScreenAutoBrightness + "newScreenAutoBrightness="
+                        + newScreenAutoBrightness);
             }
 
             mScreenAutoBrightness = newScreenAutoBrightness;
@@ -784,20 +809,8 @@ final class DisplayPowerController {
         }
     }
 
-    /**
-     * Maps a light sensor measurement in lux to a brightness value given
-     * a table of lux breakpoint values and a table of brightnesses that
-     * is one element larger.
-     */
-    private static int mapLuxToBrightness(float lux,
-            int[] fromLux, int[] toBrightness) {
-        // TODO implement interpolation and possibly range expansion
-        int level = 0;
-        final int count = fromLux.length;
-        while (level < count && lux >= fromLux[level]) {
-            level += 1;
-        }
-        return toBrightness[level];
+    private static int interpolateBrightness(Spline spline, float lux) {
+        return Math.min(255, Math.max(0, (int)Math.round(spline.interpolate(lux))));
     }
 
     private void sendOnStateChanged() {
@@ -839,10 +852,7 @@ final class DisplayPowerController {
         pw.println("  mScreenBrightnessDimConfig=" + mScreenBrightnessDimConfig);
         pw.println("  mUseSoftwareAutoBrightnessConfig="
                 + mUseSoftwareAutoBrightnessConfig);
-        pw.println("  mAutoBrightnessLevelsConfig="
-                + Arrays.toString(mAutoBrightnessLevelsConfig));
-        pw.println("  mAutoBrightnessLcdBacklightValuesConfig="
-                + Arrays.toString(mAutoBrightnessLcdBacklightValuesConfig));
+        pw.println("  mScreenAutoBrightnessSpline=" + mScreenAutoBrightnessSpline);
         pw.println("  mLightSensorWarmUpTimeConfig=" + mLightSensorWarmUpTimeConfig);
 
         if (Looper.myLooper() == mHandler.getLooper()) {
