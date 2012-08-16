@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.accessibilityservice.AccessibilityServiceInfo;
 import android.animation.ObjectAnimator;
 import android.annotation.Widget;
 import android.app.ActivityManager;
@@ -1738,8 +1739,21 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         event.setMaxScrollY(Math.max(convertedContentHeight - adjustedViewHeight, 0));
     }
 
-    private boolean isAccessibilityEnabled() {
-        return AccessibilityManager.getInstance(mContext).isEnabled();
+    private boolean isAccessibilityInjectionEnabled() {
+        final AccessibilityManager manager = AccessibilityManager.getInstance(mContext);
+        if (!manager.isEnabled()) {
+            return false;
+        }
+
+        // Accessibility scripts should be injected only when a speaking service
+        // is enabled. This may need to change later to accommodate Braille.
+        final List<AccessibilityServiceInfo> services = manager.getEnabledAccessibilityServiceList(
+                AccessibilityServiceInfo.FEEDBACK_SPOKEN);
+        if (services.isEmpty()) {
+            return false;
+        }
+
+        return true;
     }
 
     private AccessibilityInjector getAccessibilityInjector() {
@@ -3925,7 +3939,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
         // reset the flag since we set to true in if need after
         // loading is see onPageFinished(Url)
-        if (isAccessibilityEnabled()) {
+        if (isAccessibilityInjectionEnabled()) {
             getAccessibilityInjector().onPageStarted(url);
         }
 
@@ -3940,7 +3954,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     /* package */ void onPageFinished(String url) {
         mZoomManager.onPageFinished(url);
 
-        if (isAccessibilityEnabled()) {
+        if (isAccessibilityInjectionEnabled()) {
             getAccessibilityInjector().onPageFinished(url);
         }
     }
@@ -4981,7 +4995,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         }
 
         // See if the accessibility injector needs to handle this event.
-        if (isAccessibilityEnabled()
+        if (isAccessibilityInjectionEnabled()
                 && getAccessibilityInjector().handleKeyEventIfNecessary(event)) {
             return true;
         }
@@ -5088,7 +5102,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         }
 
         // See if the accessibility injector needs to handle this event.
-        if (isAccessibilityEnabled()
+        if (isAccessibilityInjectionEnabled()
                 && getAccessibilityInjector().handleKeyEventIfNecessary(event)) {
             return true;
         }
@@ -5339,7 +5353,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     public void onAttachedToWindow() {
         if (mWebView.hasWindowFocus()) setActive(true);
 
-        if (isAccessibilityEnabled()) {
+        if (isAccessibilityInjectionEnabled()) {
             getAccessibilityInjector().addAccessibilityApisIfNecessary();
         }
 
@@ -5352,7 +5366,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         mZoomManager.dismissZoomPicker();
         if (mWebView.hasWindowFocus()) setActive(false);
 
-        if (isAccessibilityEnabled()) {
+        if (isAccessibilityInjectionEnabled()) {
             getAccessibilityInjector().removeAccessibilityApisIfNecessary();
         } else {
             // Ensure the injector is cleared if we're detaching from the window
@@ -7434,7 +7448,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     break;
 
                 case SELECTION_STRING_CHANGED:
-                    if (isAccessibilityEnabled()) {
+                    if (isAccessibilityInjectionEnabled()) {
                         getAccessibilityInjector()
                                 .handleSelectionChangedIfNecessary((String) msg.obj);
                     }
