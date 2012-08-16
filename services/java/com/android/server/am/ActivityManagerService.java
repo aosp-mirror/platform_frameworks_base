@@ -111,7 +111,7 @@ import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.os.UserId;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.text.format.Time;
@@ -1084,7 +1084,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     boolean restart = (msg.arg2 == 1);
                     String pkg = (String) msg.obj;
                     forceStopPackageLocked(pkg, uid, restart, false, true, false,
-                            UserId.getUserId(uid));
+                            UserHandle.getUserId(uid));
                 }
             } break;
             case FINALIZE_PENDING_INTENT_MSG: {
@@ -1829,7 +1829,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (procs == null) return null;
             final int N = procs.size();
             for (int i = 0; i < N; i++) {
-                if (UserId.isSameUser(procs.keyAt(i), uid)) return procs.valueAt(i);
+                if (UserHandle.isSameUser(procs.keyAt(i), uid)) return procs.valueAt(i);
             }
         }
         ProcessRecord proc = mProcessNames.get(processName, uid);
@@ -2195,7 +2195,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     void enforceNotIsolatedCaller(String caller) {
-        if (UserId.isIsolated(Binder.getCallingUid())) {
+        if (UserHandle.isIsolated(Binder.getCallingUid())) {
             throw new SecurityException("Isolated process not allowed to call " + caller);
         }
     }
@@ -2324,7 +2324,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             String resultWho, int requestCode, int startFlags,
             String profileFile, ParcelFileDescriptor profileFd, Bundle options) {
         return startActivityAsUser(caller, intent, resolvedType, resultTo, resultWho, requestCode,
-                startFlags, profileFile, profileFd, options, UserId.getCallingUserId());
+                startFlags, profileFile, profileFd, options, UserHandle.getCallingUserId());
     }
 
     public final int startActivityAsUser(IApplicationThread caller,
@@ -2332,20 +2332,20 @@ public final class ActivityManagerService extends ActivityManagerNative
             String resultWho, int requestCode, int startFlags,
             String profileFile, ParcelFileDescriptor profileFd, Bundle options, int userId) {
         enforceNotIsolatedCaller("startActivity");
-        if (userId != UserId.getCallingUserId()) {
+        if (userId != UserHandle.getCallingUserId()) {
             // Requesting a different user, make sure that they have the permission
             if (checkComponentPermission(
                     android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
                     Binder.getCallingPid(), Binder.getCallingUid(), -1, true)
                     == PackageManager.PERMISSION_GRANTED) {
                 // Translate to the current user id, if caller wasn't aware
-                if (userId == UserId.USER_CURRENT) {
+                if (userId == UserHandle.USER_CURRENT) {
                     userId = mCurrentUserId;
                 }
             } else {
                 String msg = "Permission Denial: "
                         + "Request to startActivity as user " + userId
-                        + " but is calling from user " + UserId.getCallingUserId()
+                        + " but is calling from user " + UserHandle.getCallingUserId()
                         + "; this requires "
                         + android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
                 Slog.w(TAG, msg);
@@ -2457,7 +2457,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     AppGlobals.getPackageManager().queryIntentActivities(
                             intent, r.resolvedType,
                             PackageManager.MATCH_DEFAULT_ONLY | STOCK_PM_FLAGS,
-                            UserId.getCallingUserId());
+                            UserHandle.getCallingUserId());
 
                 // Look for the original activity in the list...
                 final int N = resolves != null ? resolves.size() : 0;
@@ -2562,7 +2562,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     "startActivityInPackage only available to the system");
         }
         int ret = mMainStack.startActivities(null, uid, intents, resolvedTypes, resultTo,
-                options, UserId.getUserId(uid));
+                options, UserHandle.getUserId(uid));
         return ret;
     }
 
@@ -3428,7 +3428,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             throw new SecurityException(msg);
         }
         
-        int userId = UserId.getCallingUserId();
+        int userId = UserHandle.getCallingUserId();
         long callingId = Binder.clearCallingIdentity();
         try {
             IPackageManager pm = AppGlobals.getPackageManager();
@@ -3502,7 +3502,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }
-        final int userId = UserId.getCallingUserId();
+        final int userId = UserHandle.getCallingUserId();
         long callingId = Binder.clearCallingIdentity();
         try {
             IPackageManager pm = AppGlobals.getPackageManager();
@@ -3638,7 +3638,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private void forceStopPackageLocked(final String packageName, int uid) {
-        forceStopPackageLocked(packageName, uid, false, false, true, false, UserId.getUserId(uid));
+        forceStopPackageLocked(packageName, uid, false, false, true, false, UserHandle.getUserId(uid));
         Intent intent = new Intent(Intent.ACTION_PACKAGE_RESTARTED,
                 Uri.fromParts("package", packageName, null));
         if (!mProcessesReady) {
@@ -3648,7 +3648,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         broadcastIntentLocked(null, null, intent,
                 null, null, 0, null, null, null,
                 false, false,
-                MY_PID, Process.SYSTEM_UID, UserId.getUserId(uid));
+                MY_PID, Process.SYSTEM_UID, UserHandle.getUserId(uid));
     }
     
     private final boolean killPackageProcessesLocked(String packageName, int uid,
@@ -4369,8 +4369,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             try {
                 if (callingUid != 0 && callingUid != Process.SYSTEM_UID) {
                     int uid = AppGlobals.getPackageManager()
-                            .getPackageUid(packageName, UserId.getUserId(callingUid));
-                    if (!UserId.isSameApp(callingUid, uid)) {
+                            .getPackageUid(packageName, UserHandle.getUserId(callingUid));
+                    if (!UserHandle.isSameApp(callingUid, uid)) {
                         String msg = "Permission Denial: getIntentSender() from pid="
                             + Binder.getCallingPid()
                             + ", uid=" + Binder.getCallingUid()
@@ -4466,8 +4466,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             PendingIntentRecord rec = (PendingIntentRecord)sender;
             try {
                 int uid = AppGlobals.getPackageManager()
-                        .getPackageUid(rec.key.packageName, UserId.getCallingUserId());
-                if (!UserId.isSameApp(uid, Binder.getCallingUid())) {
+                        .getPackageUid(rec.key.packageName, UserHandle.getCallingUserId());
+                if (!UserHandle.isSameApp(uid, Binder.getCallingUid())) {
                     String msg = "Permission Denial: cancelIntentSender() from pid="
                         + Binder.getCallingPid()
                         + ", uid=" + Binder.getCallingUid()
@@ -4686,7 +4686,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (permission == null) {
             return PackageManager.PERMISSION_DENIED;
         }
-        return checkComponentPermission(permission, pid, UserId.getAppId(uid), -1, true);
+        return checkComponentPermission(permission, pid, UserHandle.getAppId(uid), -1, true);
     }
 
     /**
@@ -4696,7 +4696,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     int checkCallingPermission(String permission) {
         return checkPermission(permission,
                 Binder.getCallingPid(),
-                UserId.getAppId(Binder.getCallingUid()));
+                UserHandle.getAppId(Binder.getCallingUid()));
     }
 
     /**
@@ -4827,7 +4827,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             pid = tlsIdentity.pid;
         }
 
-        uid = UserId.getAppId(uid);
+        uid = UserHandle.getAppId(uid);
         // Our own process gets to do everything.
         if (pid == MY_PID) {
             return PackageManager.PERMISSION_GRANTED;
@@ -4873,13 +4873,13 @@ public final class ActivityManagerService extends ActivityManagerNative
         String name = uri.getAuthority();
         ProviderInfo pi = null;
         ContentProviderRecord cpr = mProviderMap.getProviderByName(name,
-                UserId.getUserId(callingUid));
+                UserHandle.getUserId(callingUid));
         if (cpr != null) {
             pi = cpr.info;
         } else {
             try {
                 pi = pm.resolveContentProvider(name,
-                        PackageManager.GET_URI_PERMISSION_PATTERNS, UserId.getUserId(callingUid));
+                        PackageManager.GET_URI_PERMISSION_PATTERNS, UserHandle.getUserId(callingUid));
             } catch (RemoteException ex) {
             }
         }
@@ -4891,7 +4891,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         int targetUid = lastTargetUid;
         if (targetUid < 0 && targetPkg != null) {
             try {
-                targetUid = pm.getPackageUid(targetPkg, UserId.getUserId(callingUid));
+                targetUid = pm.getPackageUid(targetPkg, UserHandle.getUserId(callingUid));
                 if (targetUid < 0) {
                     if (DEBUG_URI_PERMISSION) Slog.v(TAG,
                             "Can't grant URI permission no uid for: " + targetPkg);
@@ -5183,7 +5183,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         final String authority = uri.getAuthority();
         ProviderInfo pi = null;
-        int userId = UserId.getUserId(callingUid);
+        int userId = UserHandle.getUserId(callingUid);
         ContentProviderRecord cpr = mProviderMap.getProviderByName(authority, userId);
         if (cpr != null) {
             pi = cpr.info;
@@ -5521,7 +5521,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     public List<ActivityManager.RecentTaskInfo> getRecentTasks(int maxNum,
             int flags, int userId) {
         final int callingUid = Binder.getCallingUid();
-        if (userId != UserId.getCallingUserId()) {
+        if (userId != UserHandle.getCallingUserId()) {
             // Check if the caller is holding permissions for cross-user requests.
             if (checkComponentPermission(
                     android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
@@ -5529,13 +5529,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                     != PackageManager.PERMISSION_GRANTED) {
                 String msg = "Permission Denial: "
                         + "Request to get recent tasks for user " + userId
-                        + " but is calling from user " + UserId.getUserId(callingUid)
+                        + " but is calling from user " + UserHandle.getUserId(callingUid)
                         + "; this requires "
                         + android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
                 Slog.w(TAG, msg);
                 throw new SecurityException(msg);
             } else {
-                if (userId == UserId.USER_CURRENT) {
+                if (userId == UserHandle.USER_CURRENT) {
                     userId = mCurrentUserId;
                 }
             }
@@ -6006,7 +6006,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     (ProviderInfo)providers.get(i);
                 boolean singleton = isSingleton(cpi.processName, cpi.applicationInfo,
                         cpi.name, cpi.flags);
-                if (singleton && UserId.getUserId(app.uid) != 0) {
+                if (singleton && UserHandle.getUserId(app.uid) != 0) {
                     // This is a singleton provider, but a user besides the
                     // default user is asking to initialize a process it runs
                     // in...  well, no, it doesn't actually run in this process,
@@ -6177,7 +6177,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
 
             // First check if this content provider has been published...
-            int userId = UserId.getUserId(r != null ? r.uid : Binder.getCallingUid());
+            int userId = UserHandle.getUserId(r != null ? r.uid : Binder.getCallingUid());
             cpr = mProviderMap.getProviderByName(name, userId);
             boolean providerRunning = cpr != null;
             if (providerRunning) {
@@ -6725,7 +6725,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
         int uid = info.uid;
         if (isolated) {
-            int userId = UserId.getUserId(uid);
+            int userId = UserHandle.getUserId(uid);
             int stepsLeft = Process.LAST_ISOLATED_UID - Process.FIRST_ISOLATED_UID + 1;
             uid = 0;
             while (true) {
@@ -6733,7 +6733,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         || mNextIsolatedProcessUid > Process.LAST_ISOLATED_UID) {
                     mNextIsolatedProcessUid = Process.FIRST_ISOLATED_UID;
                 }
-                uid = UserId.getUid(userId, mNextIsolatedProcessUid);
+                uid = UserHandle.getUid(userId, mNextIsolatedProcessUid);
                 mNextIsolatedProcessUid++;
                 if (mIsolatedProcesses.indexOfKey(uid) < 0) {
                     // No process for this uid, use it.
@@ -6771,7 +6771,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         // This package really, really can not be stopped.
         try {
             AppGlobals.getPackageManager().setPackageStoppedState(
-                    info.packageName, false, UserId.getUserId(app.uid));
+                    info.packageName, false, UserHandle.getUserId(app.uid));
         } catch (RemoteException e) {
         } catch (IllegalArgumentException e) {
             Slog.w(TAG, "Failed trying to unstop package "
@@ -8509,7 +8509,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             IPackageManager pm = AppGlobals.getPackageManager();
             for (String pkg : extList) {
                 try {
-                    ApplicationInfo info = pm.getApplicationInfo(pkg, 0, UserId.getCallingUserId());
+                    ApplicationInfo info = pm.getApplicationInfo(pkg, 0, UserHandle.getCallingUserId());
                     if ((info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0) {
                         retList.add(info);
                     }
@@ -10258,10 +10258,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 cpr.launchingApp = null;
                 cpr.notifyAll();
             }
-            mProviderMap.removeProviderByClass(cpr.name, UserId.getUserId(cpr.uid));
+            mProviderMap.removeProviderByClass(cpr.name, UserHandle.getUserId(cpr.uid));
             String names[] = cpr.info.authority.split(";");
             for (int j = 0; j < names.length; j++) {
-                mProviderMap.removeProviderByName(names[j], UserId.getUserId(cpr.uid));
+                mProviderMap.removeProviderByName(names[j], UserHandle.getUserId(cpr.uid));
             }
         }
 
@@ -10599,7 +10599,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     boolean isSingleton(String componentProcessName, ApplicationInfo aInfo,
             String className, int flags) {
         boolean result = false;
-        if (UserId.getAppId(aInfo.uid) >= Process.FIRST_APPLICATION_UID) {
+        if (UserHandle.getAppId(aInfo.uid) >= Process.FIRST_APPLICATION_UID) {
             if ((flags&ServiceInfo.FLAG_SINGLE_USER) != 0) {
                 if (ActivityManager.checkUidPermission(
                         android.Manifest.permission.INTERACT_ACROSS_USERS,
@@ -10704,7 +10704,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             // Backup agent is now in use, its package can't be stopped.
             try {
                 AppGlobals.getPackageManager().setPackageStoppedState(
-                        app.packageName, false, UserId.getUserId(app.uid));
+                        app.packageName, false, UserHandle.getUserId(app.uid));
             } catch (RemoteException e) {
             } catch (IllegalArgumentException e) {
                 Slog.w(TAG, "Failed trying to unstop package "
@@ -11046,7 +11046,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         // If the caller is trying to send this broadcast to a different
         // user, verify that is allowed.
-        if (UserId.getUserId(callingUid) != userId) {
+        if (UserHandle.getUserId(callingUid) != userId) {
             if (checkComponentPermission(
                     android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
                     callingPid, callingUid, -1, true)
@@ -11060,7 +11060,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     String msg = "Permission Denial: " + intent.getAction()
                             + " broadcast from " + callerPackage
                             + " asks to send as user " + userId
-                            + " but is calling from user " + UserId.getUserId(callingUid)
+                            + " but is calling from user " + UserHandle.getUserId(callingUid)
                             + "; this requires "
                             + android.Manifest.permission.INTERACT_ACROSS_USERS;
                     Slog.w(TAG, msg);
@@ -11553,7 +11553,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 throw new SecurityException(msg);
             }
 
-            int userId = UserId.getCallingUserId();
+            int userId = UserHandle.getCallingUserId();
             final long origId = Binder.clearCallingIdentity();
             // Instrumentation can kill and relaunch even persistent processes
             forceStopPackageLocked(ii.targetPackage, -1, true, false, true, true, userId);
@@ -11616,7 +11616,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     public void finishInstrumentation(IApplicationThread target,
             int resultCode, Bundle results) {
-        int userId = UserId.getCallingUserId();
+        int userId = UserHandle.getCallingUserId();
         // Refuse possible leaked file descriptors
         if (results != null && results.hasFileDescriptors()) {
             throw new IllegalArgumentException("File descriptors passed in Intent");
@@ -11929,7 +11929,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 } else {
                     try {
                         ActivityInfo aInfo = AppGlobals.getPackageManager().getActivityInfo(
-                                destIntent.getComponent(), 0, UserId.getCallingUserId());
+                                destIntent.getComponent(), 0, UserHandle.getCallingUserId());
                         int res = mMainStack.startActivityLocked(srec.app.thread, destIntent,
                                 null, aInfo, parent.appToken, null,
                                 0, -1, parent.launchedFromUid, 0, null, true, null);
@@ -13509,7 +13509,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             for (Entry<String, SparseArray<ProcessRecord>> uidMap : map.entrySet()) {
                 SparseArray<ProcessRecord> uids = uidMap.getValue();
                 for (int i = 0; i < uids.size(); i++) {
-                    if (UserId.getUserId(uids.keyAt(i)) == extraUserId) {
+                    if (UserHandle.getUserId(uids.keyAt(i)) == extraUserId) {
                         pkgAndUids.add(new Pair<String,Integer>(uidMap.getKey(), uids.keyAt(i)));
                     }
                 }
@@ -13535,14 +13535,14 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private void checkValidCaller(int uid, int userId) {
-        if (UserId.getUserId(uid) == userId || uid == Process.SYSTEM_UID || uid == 0) return;
+        if (UserHandle.getUserId(uid) == userId || uid == Process.SYSTEM_UID || uid == 0) return;
 
         throw new SecurityException("Caller uid=" + uid
                 + " is not privileged to communicate with user=" + userId);
     }
 
     private int applyUserId(int uid, int userId) {
-        return UserId.getUid(userId, uid);
+        return UserHandle.getUid(userId, uid);
     }
 
     ApplicationInfo getAppInfoForUser(ApplicationInfo info, int userId) {
@@ -13556,7 +13556,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     ActivityInfo getActivityInfoForUser(ActivityInfo aInfo, int userId) {
         if (aInfo == null
-                || (userId < 1 && aInfo.applicationInfo.uid < UserId.PER_USER_RANGE)) {
+                || (userId < 1 && aInfo.applicationInfo.uid < UserHandle.PER_USER_RANGE)) {
             return aInfo;
         }
 

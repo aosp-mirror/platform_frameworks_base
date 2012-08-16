@@ -654,7 +654,7 @@ public class Process {
      * distinct apps running under it each with their own uid.
      */
     public static final int myUserHandle() {
-        return UserId.getUserId(myUid());
+        return UserHandle.getUserId(myUid());
     }
 
     /**
@@ -662,7 +662,7 @@ public class Process {
      * @hide
      */
     public static final boolean isIsolated() {
-        int uid = UserId.getAppId(myUid());
+        int uid = UserHandle.getAppId(myUid());
         return uid >= FIRST_ISOLATED_UID && uid <= LAST_ISOLATED_UID;
     }
 

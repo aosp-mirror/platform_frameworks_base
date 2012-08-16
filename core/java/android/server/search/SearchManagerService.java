@@ -37,7 +37,7 @@ import android.database.ContentObserver;
 import android.os.Binder;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.UserId;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.util.Log;
@@ -186,45 +186,45 @@ public class SearchManagerService extends ISearchManager.Stub {
             Log.e(TAG, "getSearchableInfo(), activity == null");
             return null;
         }
-        return getSearchables(UserId.getCallingUserId()).getSearchableInfo(launchActivity);
+        return getSearchables(UserHandle.getCallingUserId()).getSearchableInfo(launchActivity);
     }
 
     /**
      * Returns a list of the searchable activities that can be included in global search.
      */
     public List<SearchableInfo> getSearchablesInGlobalSearch() {
-        return getSearchables(UserId.getCallingUserId()).getSearchablesInGlobalSearchList();
+        return getSearchables(UserHandle.getCallingUserId()).getSearchablesInGlobalSearchList();
     }
 
     public List<ResolveInfo> getGlobalSearchActivities() {
-        return getSearchables(UserId.getCallingUserId()).getGlobalSearchActivities();
+        return getSearchables(UserHandle.getCallingUserId()).getGlobalSearchActivities();
     }
 
     /**
      * Gets the name of the global search activity.
      */
     public ComponentName getGlobalSearchActivity() {
-        return getSearchables(UserId.getCallingUserId()).getGlobalSearchActivity();
+        return getSearchables(UserHandle.getCallingUserId()).getGlobalSearchActivity();
     }
 
     /**
      * Gets the name of the web search activity.
      */
     public ComponentName getWebSearchActivity() {
-        return getSearchables(UserId.getCallingUserId()).getWebSearchActivity();
+        return getSearchables(UserHandle.getCallingUserId()).getWebSearchActivity();
     }
 
     @Override
     public ComponentName getAssistIntent(int userHandle) {
         try {
-            if (userHandle != UserId.getCallingUserId()) {
+            if (userHandle != UserHandle.getCallingUserId()) {
                 // Requesting a different user, make sure that they have the permission
                 if (ActivityManager.checkComponentPermission(
                         android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
                         Binder.getCallingUid(), -1, true)
                         == PackageManager.PERMISSION_GRANTED) {
                     // Translate to the current user id, if caller wasn't aware
-                    if (userHandle == UserId.USER_CURRENT) {
+                    if (userHandle == UserHandle.USER_CURRENT) {
                         long identity = Binder.clearCallingIdentity();
                         userHandle = ActivityManagerNative.getDefault().getCurrentUser().id;
                         Binder.restoreCallingIdentity(identity);
@@ -232,7 +232,7 @@ public class SearchManagerService extends ISearchManager.Stub {
                 } else {
                     String msg = "Permission Denial: "
                             + "Request to getAssistIntent for " + userHandle
-                            + " but is calling from user " + UserId.getCallingUserId()
+                            + " but is calling from user " + UserHandle.getCallingUserId()
                             + "; this requires "
                             + android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
                     Slog.w(TAG, msg);

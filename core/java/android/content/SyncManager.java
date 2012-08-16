@@ -52,7 +52,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.os.UserId;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.WorkSource;
 import android.provider.Settings;
@@ -174,7 +174,7 @@ public class SyncManager implements OnAccountsUpdateListener {
                             Log.v(TAG, "Internal storage is low.");
                         }
                         mStorageIsLow = true;
-                        cancelActiveSync(null /* any account */, UserId.USER_ALL,
+                        cancelActiveSync(null /* any account */, UserHandle.USER_ALL,
                                 null /* any authority */);
                     } else if (Intent.ACTION_DEVICE_STORAGE_OK.equals(action)) {
                         if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -195,7 +195,7 @@ public class SyncManager implements OnAccountsUpdateListener {
     private BroadcastReceiver mBackgroundDataSettingChanged = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             if (getConnectivityManager().getBackgroundDataSetting()) {
-                scheduleSync(null /* account */, UserId.USER_ALL, null /* authority */,
+                scheduleSync(null /* account */, UserHandle.USER_ALL, null /* authority */,
                         new Bundle(), 0 /* delay */,
                         false /* onlyThoseWithUnknownSyncableState */);
             }
@@ -287,7 +287,7 @@ public class SyncManager implements OnAccountsUpdateListener {
             // a chance to set their syncable state.
 
             boolean onlyThoseWithUnkownSyncableState = justBootedUp;
-            scheduleSync(null, UserId.USER_ALL, null, null, 0 /* no delay */,
+            scheduleSync(null, UserHandle.USER_ALL, null, null, 0 /* no delay */,
                     onlyThoseWithUnkownSyncableState);
         }
     }
@@ -371,7 +371,7 @@ public class SyncManager implements OnAccountsUpdateListener {
         mSyncAdapters.setListener(new RegisteredServicesCacheListener<SyncAdapterType>() {
             public void onServiceChanged(SyncAdapterType type, boolean removed) {
                 if (!removed) {
-                    scheduleSync(null, UserId.USER_ALL, type.authority, null, 0 /* no delay */,
+                    scheduleSync(null, UserHandle.USER_ALL, type.authority, null, 0 /* no delay */,
                             false /* onlyThoseWithUnkownSyncableState */);
                 }
             }
@@ -517,7 +517,7 @@ public class SyncManager implements OnAccountsUpdateListener {
         }
 
         AccountAndUser[] accounts;
-        if (requestedAccount != null && userId != UserId.USER_ALL) {
+        if (requestedAccount != null && userId != UserHandle.USER_ALL) {
             accounts = new AccountAndUser[] { new AccountAndUser(requestedAccount, userId) };
         } else {
             // if the accounts aren't configured yet then we can't support an account-less
@@ -2180,7 +2180,7 @@ public class SyncManager implements OnAccountsUpdateListener {
                         }
                     }
                     // check if the userid matches
-                    if (userId != UserId.USER_ALL
+                    if (userId != UserHandle.USER_ALL
                             && userId != activeSyncContext.mSyncOperation.userId) {
                         continue;
                     }

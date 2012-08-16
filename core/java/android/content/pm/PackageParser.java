@@ -28,7 +28,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PatternMatcher;
-import android.os.UserId;
+import android.os.UserHandle;
 import android.util.AttributeSet;
 import android.util.Base64;
 import android.util.DisplayMetrics;
@@ -249,7 +249,7 @@ public class PackageParser {
 
         return generatePackageInfo(p, gids, flags, firstInstallTime, lastUpdateTime,
                 grantedPermissions, false, PackageManager.COMPONENT_ENABLED_STATE_DEFAULT,
-                UserId.getCallingUserId());
+                UserHandle.getCallingUserId());
     }
 
     /**
@@ -263,7 +263,7 @@ public class PackageParser {
             HashSet<String> grantedPermissions, boolean stopped, int enabledState) {
 
         return generatePackageInfo(p, gids, flags, firstInstallTime, lastUpdateTime,
-                grantedPermissions, stopped, enabledState, UserId.getCallingUserId());
+                grantedPermissions, stopped, enabledState, UserHandle.getCallingUserId());
     }
 
     public static PackageInfo generatePackageInfo(PackageParser.Package p,
@@ -3478,7 +3478,7 @@ public class PackageParser {
 
     public static ApplicationInfo generateApplicationInfo(Package p, int flags, boolean stopped,
             int enabledState) {
-        return generateApplicationInfo(p, flags, stopped, enabledState, UserId.getCallingUserId());
+        return generateApplicationInfo(p, flags, stopped, enabledState, UserHandle.getCallingUserId());
     }
 
     public static ApplicationInfo generateApplicationInfo(Package p, int flags,
@@ -3508,7 +3508,7 @@ public class PackageParser {
         // Make shallow copy so we can store the metadata/libraries safely
         ApplicationInfo ai = new ApplicationInfo(p.applicationInfo);
         if (userId != 0) {
-            ai.uid = UserId.getUid(userId, ai.uid);
+            ai.uid = UserHandle.getUid(userId, ai.uid);
             ai.dataDir = PackageManager.getDataDirForUser(userId, ai.packageName);
         }
         if ((flags & PackageManager.GET_META_DATA) != 0) {
@@ -3616,7 +3616,7 @@ public class PackageParser {
             int enabledState, int userId) {
         if (s == null) return null;
         if (!copyNeeded(flags, s.owner, enabledState, s.metaData)
-                && userId == UserId.getUserId(s.info.applicationInfo.uid)) {
+                && userId == UserHandle.getUserId(s.info.applicationInfo.uid)) {
             return s.info;
         }
         // Make shallow copies so we can store the metadata safely

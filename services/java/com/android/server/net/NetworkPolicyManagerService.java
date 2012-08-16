@@ -112,7 +112,7 @@ import android.os.Message;
 import android.os.MessageQueue.IdleHandler;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
-import android.os.UserId;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
@@ -426,7 +426,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             final String action = intent.getAction();
             final int uid = intent.getIntExtra(EXTRA_UID, 0);
-            final int appId = UserId.getAppId(uid);
+            final int appId = UserHandle.getAppId(uid);
             synchronized (mRulesLock) {
                 if (ACTION_PACKAGE_ADDED.equals(action)) {
                     // NOTE: PACKAGE_ADDED is currently only sent once, and is
@@ -1188,8 +1188,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         final int uid = readIntAttribute(in, ATTR_UID);
                         final int policy = readIntAttribute(in, ATTR_POLICY);
 
-                        final int appId = UserId.getAppId(uid);
-                        if (UserId.isApp(appId)) {
+                        final int appId = UserHandle.getAppId(uid);
+                        if (UserHandle.isApp(appId)) {
                             setAppPolicyUnchecked(appId, policy, false);
                         } else {
                             Slog.w(TAG, "unable to apply policy to UID " + uid + "; ignoring");
@@ -1198,7 +1198,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         final int appId = readIntAttribute(in, ATTR_APP_ID);
                         final int policy = readIntAttribute(in, ATTR_POLICY);
 
-                        if (UserId.isApp(appId)) {
+                        if (UserHandle.isApp(appId)) {
                             setAppPolicyUnchecked(appId, policy, false);
                         } else {
                             Slog.w(TAG, "unable to apply policy to appId " + appId + "; ignoring");
@@ -1304,7 +1304,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     public void setAppPolicy(int appId, int policy) {
         mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
 
-        if (!UserId.isApp(appId)) {
+        if (!UserHandle.isApp(appId)) {
             throw new IllegalArgumentException("cannot apply policy to appId " + appId);
         }
 
@@ -1698,7 +1698,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         final PackageManager pm = mContext.getPackageManager();
         final List<ApplicationInfo> apps = pm.getInstalledApplications(0);
         for (ApplicationInfo app : apps) {
-            final int appId = UserId.getAppId(app.uid);
+            final int appId = UserHandle.getAppId(app.uid);
             updateRulesForAppLocked(appId);
         }
 
@@ -1710,7 +1710,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private void updateRulesForAppLocked(int appId) {
         UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         for (UserInfo user : um.getUsers()) {
-            final int uid = UserId.getUid(user.id, appId);
+            final int uid = UserHandle.getUid(user.id, appId);
             updateRulesForUidLocked(uid);
         }
     }
@@ -1718,7 +1718,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static boolean isUidValidForRules(int uid) {
         // allow rules on specific system services, and any apps
         if (uid == android.os.Process.MEDIA_UID || uid == android.os.Process.DRM_UID
-                || UserId.isApp(uid)) {
+                || UserHandle.isApp(uid)) {
             return true;
         }
 
@@ -1728,7 +1728,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private void updateRulesForUidLocked(int uid) {
         if (!isUidValidForRules(uid)) return;
 
-        final int appId = UserId.getAppId(uid);
+        final int appId = UserHandle.getAppId(uid);
         final int appPolicy = getAppPolicy(appId);
         final boolean uidForeground = isUidForeground(uid);
 

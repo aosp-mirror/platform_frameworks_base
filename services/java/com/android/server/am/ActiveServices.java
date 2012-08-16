@@ -51,7 +51,7 @@ import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.os.UserId;
+import android.os.UserHandle;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
@@ -226,7 +226,7 @@ public class ActiveServices {
 
         ServiceLookupResult res =
             retrieveServiceLocked(service, resolvedType,
-                    callingPid, callingUid, UserId.getUserId(callingUid), true);
+                    callingPid, callingUid, UserHandle.getUserId(callingUid), true);
         if (res == null) {
             return null;
         }
@@ -279,7 +279,7 @@ public class ActiveServices {
         // If this service is active, make sure it is stopped.
         ServiceLookupResult r = retrieveServiceLocked(service, resolvedType,
                 Binder.getCallingPid(), Binder.getCallingUid(),
-                callerApp == null ? UserId.getCallingUserId() : callerApp.userId,
+                callerApp == null ? UserHandle.getCallingUserId() : callerApp.userId,
                 false);
         if (r != null) {
             if (r.record != null) {
@@ -300,7 +300,7 @@ public class ActiveServices {
     IBinder peekServiceLocked(Intent service, String resolvedType) {
         ServiceLookupResult r = retrieveServiceLocked(service, resolvedType,
                 Binder.getCallingPid(), Binder.getCallingUid(),
-                UserId.getCallingUserId(), false);
+                UserHandle.getCallingUserId(), false);
 
         IBinder ret = null;
         if (r != null) {
@@ -759,8 +759,8 @@ public class ActiveServices {
                     }
                     r = new ServiceRecord(mAm, ss, name, filter, sInfo, res);
                     res.setService(r);
-                    mServiceMap.putServiceByName(name, UserId.getUserId(r.appInfo.uid), r);
-                    mServiceMap.putServiceByIntent(filter, UserId.getUserId(r.appInfo.uid), r);
+                    mServiceMap.putServiceByName(name, UserHandle.getUserId(r.appInfo.uid), r);
+                    mServiceMap.putServiceByIntent(filter, UserHandle.getUserId(r.appInfo.uid), r);
 
                     // Make sure this component isn't in the pending list.
                     int N = mPendingServices.size();
@@ -1725,7 +1725,7 @@ public class ActiveServices {
         ArrayList<ActivityManager.RunningServiceInfo> res
                 = new ArrayList<ActivityManager.RunningServiceInfo>();
 
-        int userId = UserId.getUserId(Binder.getCallingUid());
+        int userId = UserHandle.getUserId(Binder.getCallingUid());
         if (mServiceMap.getAllServices(userId).size() > 0) {
             Iterator<ServiceRecord> it
                     = mServiceMap.getAllServices(userId).iterator();
@@ -1746,7 +1746,7 @@ public class ActiveServices {
     }
 
     public PendingIntent getRunningServiceControlPanelLocked(ComponentName name) {
-        int userId = UserId.getUserId(Binder.getCallingUid());
+        int userId = UserHandle.getUserId(Binder.getCallingUid());
         ServiceRecord r = mServiceMap.getServiceByName(name, userId);
         if (r != null) {
             for (ArrayList<ConnectionRecord> conn : r.connections.values()) {

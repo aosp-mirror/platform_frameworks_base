@@ -18,7 +18,7 @@
 package android.os;
 
 import android.os.Process;
-import android.os.UserId;
+import android.os.UserHandle;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
 
@@ -32,10 +32,10 @@ public class ProcessTest extends TestCase {
         assertEquals(android.os.Process.SYSTEM_UID, Process.getUidForName("system"));
         assertEquals(Process.BLUETOOTH_UID, Process.getUidForName("bluetooth"));
         assertEquals(Process.FIRST_APPLICATION_UID, Process.getUidForName("u0_a0"));
-        assertEquals(UserId.getUid(1, Process.SYSTEM_UID), Process.getUidForName("u1_system"));
-        assertEquals(UserId.getUid(2, Process.FIRST_ISOLATED_UID),
+        assertEquals(UserHandle.getUid(1, Process.SYSTEM_UID), Process.getUidForName("u1_system"));
+        assertEquals(UserHandle.getUid(2, Process.FIRST_ISOLATED_UID),
                 Process.getUidForName("u2_i0"));
-        assertEquals(UserId.getUid(3, Process.FIRST_APPLICATION_UID + 100),
+        assertEquals(UserHandle.getUid(3, Process.FIRST_APPLICATION_UID + 100),
                 Process.getUidForName("u3_a100"));
     }
 

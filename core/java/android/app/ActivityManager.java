@@ -40,7 +40,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
-import android.os.UserId;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -529,7 +529,7 @@ public class ActivityManager {
             throws SecurityException {
         try {
             return ActivityManagerNative.getDefault().getRecentTasks(maxNum,
-                    flags, UserId.myUserId());
+                    flags, UserHandle.myUserId());
         } catch (RemoteException e) {
             // System dead, we will be dead too soon!
             return null;
@@ -1843,12 +1843,12 @@ public class ActivityManager {
             return PackageManager.PERMISSION_GRANTED;
         }
         // Isolated processes don't get any permissions.
-        if (UserId.isIsolated(uid)) {
+        if (UserHandle.isIsolated(uid)) {
             return PackageManager.PERMISSION_DENIED;
         }
         // If there is a uid that owns whatever is being accessed, it has
         // blanket access to it regardless of the permissions it requires.
-        if (owningUid >= 0 && UserId.isSameApp(uid, owningUid)) {
+        if (owningUid >= 0 && UserHandle.isSameApp(uid, owningUid)) {
             return PackageManager.PERMISSION_GRANTED;
         }
         // If the target is not exported, then nobody else can get to it.

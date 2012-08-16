@@ -50,7 +50,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.os.UserId;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -354,7 +354,7 @@ public class AccountManagerService
     }
 
     private UserAccounts getUserAccountsForCaller() {
-        return getUserAccounts(UserId.getCallingUserId());
+        return getUserAccounts(UserHandle.getCallingUserId());
     }
 
     protected UserAccounts getUserAccounts(int userId) {
@@ -1004,7 +1004,7 @@ public class AccountManagerService
         if (callingUid != android.os.Process.SYSTEM_UID) {
             throw new SecurityException("can only call from system");
         }
-        UserAccounts accounts = getUserAccounts(UserId.getUserId(callingUid));
+        UserAccounts accounts = getUserAccounts(UserHandle.getUserId(callingUid));
         long identityToken = clearCallingIdentity();
         try {
             new Session(accounts, response, accountType, false,
@@ -1222,7 +1222,7 @@ public class AccountManagerService
     private Integer getCredentialPermissionNotificationId(Account account, String authTokenType,
             int uid) {
         Integer id;
-        UserAccounts accounts = getUserAccounts(UserId.getUserId(uid));
+        UserAccounts accounts = getUserAccounts(UserHandle.getUserId(uid));
         synchronized (accounts.credentialsPermissionNotificationIds) {
             final Pair<Pair<Account, String>, Integer> key =
                     new Pair<Pair<Account, String>, Integer>(
@@ -2269,7 +2269,7 @@ public class AccountManagerService
             Log.e(TAG, "grantAppPermission: called with invalid arguments", new Exception());
             return;
         }
-        UserAccounts accounts = getUserAccounts(UserId.getUserId(uid));
+        UserAccounts accounts = getUserAccounts(UserHandle.getUserId(uid));
         synchronized (accounts.cacheLock) {
             final SQLiteDatabase db = accounts.openHelper.getWritableDatabase();
             db.beginTransaction();
@@ -2303,7 +2303,7 @@ public class AccountManagerService
             Log.e(TAG, "revokeAppPermission: called with invalid arguments", new Exception());
             return;
         }
-        UserAccounts accounts = getUserAccounts(UserId.getUserId(uid));
+        UserAccounts accounts = getUserAccounts(UserHandle.getUserId(uid));
         synchronized (accounts.cacheLock) {
             final SQLiteDatabase db = accounts.openHelper.getWritableDatabase();
             db.beginTransaction();

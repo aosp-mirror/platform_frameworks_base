@@ -25,7 +25,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.os.SystemProperties;
-import android.os.UserId;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.text.TextUtils;
@@ -97,7 +97,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private static final void checkWritePermission(int userId) {
         final int callingUid = Binder.getCallingUid();
-        if (UserId.getAppId(callingUid) != android.os.Process.SYSTEM_UID) {
+        if (UserHandle.getAppId(callingUid) != android.os.Process.SYSTEM_UID) {
             throw new SecurityException("uid=" + callingUid
                     + " not authorized to write lock settings");
         }
@@ -105,7 +105,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private static final void checkPasswordReadPermission(int userId) {
         final int callingUid = Binder.getCallingUid();
-        if (UserId.getAppId(callingUid) != android.os.Process.SYSTEM_UID) {
+        if (UserHandle.getAppId(callingUid) != android.os.Process.SYSTEM_UID) {
             throw new SecurityException("uid=" + callingUid
                     + " not authorized to read lock password");
         }
@@ -113,8 +113,8 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private static final void checkReadPermission(int userId) {
         final int callingUid = Binder.getCallingUid();
-        if (UserId.getAppId(callingUid) != android.os.Process.SYSTEM_UID
-                && UserId.getUserId(callingUid) != userId) {
+        if (UserHandle.getAppId(callingUid) != android.os.Process.SYSTEM_UID
+                && UserHandle.getUserId(callingUid) != userId) {
             throw new SecurityException("uid=" + callingUid
                     + " not authorized to read settings of user " + userId);
         }

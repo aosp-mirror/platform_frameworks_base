@@ -87,7 +87,7 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.UserId;
+import android.os.UserHandle;
 import android.os.SystemVibrator;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
@@ -1259,7 +1259,7 @@ class ContextImpl extends Context {
     @Override
     public boolean bindService(Intent service, ServiceConnection conn,
             int flags) {
-        return bindService(service, conn, flags, UserId.getUserId(Process.myUid()));
+        return bindService(service, conn, flags, UserHandle.getUserId(Process.myUid()));
     }
 
     /** @hide */
