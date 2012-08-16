@@ -19,7 +19,7 @@ package com.android.internal.statusbar;
 import android.app.Notification;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.UserId;
+import android.os.UserHandle;
 import android.widget.RemoteViews;
 
 
@@ -136,7 +136,7 @@ public class StatusBarNotification implements Parcelable {
 
     /** Returns a userHandle for the instance of the app that posted this notification. */
     public int getUserId() {
-        return UserId.getUserId(this.uid);
+        return UserHandle.getUserId(this.uid);
     }
 }
 

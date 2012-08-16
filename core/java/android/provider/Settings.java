@@ -41,7 +41,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
-import android.os.UserId;
+import android.os.UserHandle;
 import android.speech.tts.TextToSpeech;
 import android.text.TextUtils;
 import android.util.AndroidException;
@@ -2336,7 +2336,7 @@ public final class Settings {
             if (sLockSettings != null && !sIsSystemProcess
                     && MOVED_TO_LOCK_SETTINGS.contains(name)) {
                 try {
-                    return sLockSettings.getString(name, "0", UserId.getCallingUserId());
+                    return sLockSettings.getString(name, "0", UserHandle.getCallingUserId());
                 } catch (RemoteException re) {
                     // Fall through
                 }

@@ -43,7 +43,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.os.UserId;
+import android.os.UserHandle;
 import android.util.AtomicFile;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -593,7 +593,7 @@ class AppWidgetServiceImpl {
     private boolean callerHasBindAppWidgetPermission(String packageName) {
         int callingUid = Binder.getCallingUid();
         try {
-            if (!UserId.isSameApp(callingUid, getUidForPackage(packageName))) {
+            if (!UserHandle.isSameApp(callingUid, getUidForPackage(packageName))) {
                 return false;
             }
         } catch (Exception e) {
@@ -665,7 +665,7 @@ class AppWidgetServiceImpl {
                 mBoundRemoteViewsServices.remove(key);
             }
 
-            int userId = UserId.getUserId(id.provider.uid);
+            int userId = UserHandle.getUserId(id.provider.uid);
             // Bind to the RemoteViewsService (which will trigger a callback to the
             // RemoteViewsAdapter.onServiceConnected())
             final long token = Binder.clearCallingIdentity();
@@ -756,7 +756,7 @@ class AppWidgetServiceImpl {
             }
         };
 
-        int userId = UserId.getUserId(id.provider.uid);
+        int userId = UserHandle.getUserId(id.provider.uid);
         // Bind to the service and remove the static intent->factory mapping in the
         // RemoteViewsService.
         final long token = Binder.clearCallingIdentity();
@@ -1026,7 +1026,7 @@ class AppWidgetServiceImpl {
                             }
                         };
 
-                        int userId = UserId.getUserId(id.provider.uid);
+                        int userId = UserHandle.getUserId(id.provider.uid);
                         // Bind to the service and call onDataSetChanged()
                         final long token = Binder.clearCallingIdentity();
                         try {
@@ -1375,7 +1375,7 @@ class AppWidgetServiceImpl {
             throw new IllegalArgumentException("packageName and uid don't match packageName="
                     + packageName);
         }
-        if (!UserId.isSameApp(callingUid, packageUid)) {
+        if (!UserHandle.isSameApp(callingUid, packageUid)) {
             throw new IllegalArgumentException("packageName and uid don't match packageName="
                     + packageName);
         }

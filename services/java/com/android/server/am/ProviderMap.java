@@ -20,7 +20,7 @@ import android.content.ComponentName;
 import android.os.Binder;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.UserId;
+import android.os.UserHandle;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -98,7 +98,7 @@ public class ProviderMap {
         if (record.singleton) {
             mSingletonByName.put(name, record);
         } else {
-            final int userId = UserId.getUserId(record.appInfo.uid);
+            final int userId = UserHandle.getUserId(record.appInfo.uid);
             getProvidersByName(userId).put(name, record);
         }
     }
@@ -111,7 +111,7 @@ public class ProviderMap {
         if (record.singleton) {
             mSingletonByClass.put(name, record);
         } else {
-            final int userId = UserId.getUserId(record.appInfo.uid);
+            final int userId = UserHandle.getUserId(record.appInfo.uid);
             getProvidersByClass(userId).put(name, record);
         }
     }

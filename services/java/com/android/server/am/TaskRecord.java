@@ -19,7 +19,7 @@ package com.android.server.am;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.os.UserId;
+import android.os.UserHandle;
 import android.util.Slog;
 
 import java.io.PrintWriter;
@@ -101,7 +101,7 @@ class TaskRecord extends ThumbnailHolder {
         }
 
         if (info.applicationInfo != null) {
-            userId = UserId.getUserId(info.applicationInfo.uid);
+            userId = UserHandle.getUserId(info.applicationInfo.uid);
         }
     }
     

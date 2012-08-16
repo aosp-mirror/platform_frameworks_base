@@ -26,7 +26,7 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.UserId;
+import android.os.UserHandle;
 import android.util.Log;
 import android.util.SparseIntArray;
 import android.Manifest;
@@ -168,7 +168,7 @@ public final class ContentService extends IContentService.Stub {
                     + ", syncToNetwork " + syncToNetwork);
         }
 
-        int userId = UserId.getCallingUserId();
+        int userId = UserHandle.getCallingUserId();
         // This makes it so that future permission checks will be in the context of this
         // process rather than the caller's process. We will restore this before returning.
         long identityToken = clearCallingIdentity();
@@ -236,7 +236,7 @@ public final class ContentService extends IContentService.Stub {
 
     public void requestSync(Account account, String authority, Bundle extras) {
         ContentResolver.validateSyncExtrasBundle(extras);
-        int userId = UserId.getCallingUserId();
+        int userId = UserHandle.getCallingUserId();
 
         // This makes it so that future permission checks will be in the context of this
         // process rather than the caller's process. We will restore this before returning.
@@ -259,7 +259,7 @@ public final class ContentService extends IContentService.Stub {
      * @param authority filter the pending and active syncs to cancel using this authority
      */
     public void cancelSync(Account account, String authority) {
-        int userId = UserId.getCallingUserId();
+        int userId = UserHandle.getCallingUserId();
 
         // This makes it so that future permission checks will be in the context of this
         // process rather than the caller's process. We will restore this before returning.
@@ -294,7 +294,7 @@ public final class ContentService extends IContentService.Stub {
     public boolean getSyncAutomatically(Account account, String providerName) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_SETTINGS,
                 "no permission to read the sync settings");
-        int userId = UserId.getCallingUserId();
+        int userId = UserHandle.getCallingUserId();
 
         long identityToken = clearCallingIdentity();
         try {
@@ -312,7 +312,7 @@ public final class ContentService extends IContentService.Stub {
     public void setSyncAutomatically(Account account, String providerName, boolean sync) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SYNC_SETTINGS,
                 "no permission to write the sync settings");
-        int userId = UserId.getCallingUserId();
+        int userId = UserHandle.getCallingUserId();
 
         long identityToken = clearCallingIdentity();
         try {
@@ -330,7 +330,7 @@ public final class ContentService extends IContentService.Stub {
             long pollFrequency) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SYNC_SETTINGS,
                 "no permission to write the sync settings");
-        int userId = UserId.getCallingUserId();
+        int userId = UserHandle.getCallingUserId();
 
         long identityToken = clearCallingIdentity();
         try {
@@ -344,7 +344,7 @@ public final class ContentService extends IContentService.Stub {
     public void removePeriodicSync(Account account, String authority, Bundle extras) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SYNC_SETTINGS,
                 "no permission to write the sync settings");
-        int userId = UserId.getCallingUserId();
+        int userId = UserHandle.getCallingUserId();
 
         long identityToken = clearCallingIdentity();
         try {
@@ -358,7 +358,7 @@ public final class ContentService extends IContentService.Stub {
     public List<PeriodicSync> getPeriodicSyncs(Account account, String providerName) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_SETTINGS,
                 "no permission to read the sync settings");
-        int userId = UserId.getCallingUserId();
+        int userId = UserHandle.getCallingUserId();
 
         long identityToken = clearCallingIdentity();
         try {
@@ -372,7 +372,7 @@ public final class ContentService extends IContentService.Stub {
     public int getIsSyncable(Account account, String providerName) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_SETTINGS,
                 "no permission to read the sync settings");
-        int userId = UserId.getCallingUserId();
+        int userId = UserHandle.getCallingUserId();
 
         long identityToken = clearCallingIdentity();
         try {
@@ -390,7 +390,7 @@ public final class ContentService extends IContentService.Stub {
     public void setIsSyncable(Account account, String providerName, int syncable) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SYNC_SETTINGS,
                 "no permission to write the sync settings");
-        int userId = UserId.getCallingUserId();
+        int userId = UserHandle.getCallingUserId();
 
         long identityToken = clearCallingIdentity();
         try {
@@ -407,7 +407,7 @@ public final class ContentService extends IContentService.Stub {
     public boolean getMasterSyncAutomatically() {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_SETTINGS,
                 "no permission to read the sync settings");
-        int userId = UserId.getCallingUserId();
+        int userId = UserHandle.getCallingUserId();
 
         long identityToken = clearCallingIdentity();
         try {
@@ -424,7 +424,7 @@ public final class ContentService extends IContentService.Stub {
     public void setMasterSyncAutomatically(boolean flag) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SYNC_SETTINGS,
                 "no permission to write the sync settings");
-        int userId = UserId.getCallingUserId();
+        int userId = UserHandle.getCallingUserId();
 
         long identityToken = clearCallingIdentity();
         try {
@@ -440,7 +440,7 @@ public final class ContentService extends IContentService.Stub {
     public boolean isSyncActive(Account account, String authority) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_STATS,
                 "no permission to read the sync stats");
-        int userId = UserId.getCallingUserId();
+        int userId = UserHandle.getCallingUserId();
 
         long identityToken = clearCallingIdentity();
         try {
@@ -458,7 +458,7 @@ public final class ContentService extends IContentService.Stub {
     public List<SyncInfo> getCurrentSyncs() {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_STATS,
                 "no permission to read the sync stats");
-        int userId = UserId.getCallingUserId();
+        int userId = UserHandle.getCallingUserId();
 
         long identityToken = clearCallingIdentity();
         try {
@@ -471,7 +471,7 @@ public final class ContentService extends IContentService.Stub {
     public SyncStatusInfo getSyncStatus(Account account, String authority) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_STATS,
                 "no permission to read the sync stats");
-        int userId = UserId.getCallingUserId();
+        int userId = UserHandle.getCallingUserId();
 
         long identityToken = clearCallingIdentity();
         try {
@@ -489,7 +489,7 @@ public final class ContentService extends IContentService.Stub {
     public boolean isSyncPending(Account account, String authority) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_STATS,
                 "no permission to read the sync stats");
-        int userId = UserId.getCallingUserId();
+        int userId = UserHandle.getCallingUserId();
 
         long identityToken = clearCallingIdentity();
         try {

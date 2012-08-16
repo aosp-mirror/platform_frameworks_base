@@ -47,7 +47,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteCallbackList;
 import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.os.UserId;
+import android.os.UserHandle;
 import android.service.wallpaper.IWallpaperConnection;
 import android.service.wallpaper.IWallpaperEngine;
 import android.service.wallpaper.IWallpaperService;
@@ -483,7 +483,7 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
     public void clearWallpaper() {
         if (DEBUG) Slog.v(TAG, "clearWallpaper");
         synchronized (mLock) {
-            clearWallpaperLocked(false, UserId.getCallingUserId());
+            clearWallpaperLocked(false, UserHandle.getCallingUserId());
         }
     }
 
@@ -520,7 +520,7 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
     public void setDimensionHints(int width, int height) throws RemoteException {
         checkPermission(android.Manifest.permission.SET_WALLPAPER_HINTS);
 
-        int userId = UserId.getCallingUserId();
+        int userId = UserHandle.getCallingUserId();
         WallpaperData wallpaper = mWallpaperMap.get(userId);
         if (wallpaper == null) {
             throw new IllegalStateException("Wallpaper not yet initialized for user " + userId);
@@ -551,14 +551,14 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
 
     public int getWidthHint() throws RemoteException {
         synchronized (mLock) {
-            WallpaperData wallpaper = mWallpaperMap.get(UserId.getCallingUserId());
+            WallpaperData wallpaper = mWallpaperMap.get(UserHandle.getCallingUserId());
             return wallpaper.width;
         }
     }
 
     public int getHeightHint() throws RemoteException {
         synchronized (mLock) {
-            WallpaperData wallpaper = mWallpaperMap.get(UserId.getCallingUserId());
+            WallpaperData wallpaper = mWallpaperMap.get(UserHandle.getCallingUserId());
             return wallpaper.height;
         }
     }
@@ -573,7 +573,7 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
             if (callingUid == android.os.Process.SYSTEM_UID) {
                 wallpaperUserId = mCurrentUserId;
             } else {
-                wallpaperUserId = UserId.getUserId(callingUid);
+                wallpaperUserId = UserHandle.getUserId(callingUid);
             }
             WallpaperData wallpaper = mWallpaperMap.get(wallpaperUserId);
             try {
@@ -596,7 +596,7 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
     }
 
     public WallpaperInfo getWallpaperInfo() {
-        int userId = UserId.getCallingUserId();
+        int userId = UserHandle.getCallingUserId();
         synchronized (mLock) {
             WallpaperData wallpaper = mWallpaperMap.get(userId);
             if (wallpaper.connection != null) {
@@ -608,7 +608,7 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
 
     public ParcelFileDescriptor setWallpaper(String name) {
         if (DEBUG) Slog.v(TAG, "setWallpaper");
-        int userId = UserId.getCallingUserId();
+        int userId = UserHandle.getCallingUserId();
         WallpaperData wallpaper = mWallpaperMap.get(userId);
         if (wallpaper == null) {
             throw new IllegalStateException("Wallpaper not yet initialized for user " + userId);
@@ -651,7 +651,7 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
 
     public void setWallpaperComponent(ComponentName name) {
         if (DEBUG) Slog.v(TAG, "setWallpaperComponent name=" + name);
-        int userId = UserId.getCallingUserId();
+        int userId = UserHandle.getCallingUserId();
         WallpaperData wallpaper = mWallpaperMap.get(userId);
         if (wallpaper == null) {
             throw new IllegalStateException("Wallpaper not yet initialized for user " + userId);

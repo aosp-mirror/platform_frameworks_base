@@ -37,7 +37,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.StrictMode;
 import android.os.Trace;
-import android.os.UserId;
+import android.os.UserHandle;
 import android.util.AndroidRuntimeException;
 import android.util.Slog;
 import android.view.CompatibilityInfoHolder;
@@ -120,8 +120,8 @@ public final class LoadedApk {
         final int myUid = Process.myUid();
         mResDir = aInfo.uid == myUid ? aInfo.sourceDir
                 : aInfo.publicSourceDir;
-        if (!UserId.isSameUser(aInfo.uid, myUid) && !Process.isIsolated()) {
-            aInfo.dataDir = PackageManager.getDataDirForUser(UserId.getUserId(myUid),
+        if (!UserHandle.isSameUser(aInfo.uid, myUid) && !Process.isIsolated()) {
+            aInfo.dataDir = PackageManager.getDataDirForUser(UserHandle.getUserId(myUid),
                     mPackageName);
         }
         mSharedLibraries = aInfo.sharedLibraryFiles;
@@ -195,7 +195,7 @@ public final class LoadedApk {
         ApplicationInfo ai = null;
         try {
             ai = ActivityThread.getPackageManager().getApplicationInfo(packageName,
-                    PackageManager.GET_SHARED_LIBRARY_FILES, UserId.myUserId());
+                    PackageManager.GET_SHARED_LIBRARY_FILES, UserHandle.myUserId());
         } catch (RemoteException e) {
             throw new AssertionError(e);
         }
@@ -358,7 +358,7 @@ public final class LoadedApk {
         IPackageManager pm = ActivityThread.getPackageManager();
         android.content.pm.PackageInfo pi;
         try {
-            pi = pm.getPackageInfo(mPackageName, 0, UserId.myUserId());
+            pi = pm.getPackageInfo(mPackageName, 0, UserHandle.myUserId());
         } catch (RemoteException e) {
             throw new AssertionError(e);
         }

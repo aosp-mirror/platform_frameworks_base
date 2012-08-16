@@ -27,7 +27,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.UserId;
+import android.os.UserHandle;
 import android.util.AndroidException;
 
 
@@ -257,7 +257,7 @@ public class IntentSender implements Parcelable {
         try {
             int uid = ActivityManagerNative.getDefault()
                 .getUidForIntentSender(mTarget);
-            return uid > 0 ? UserId.getUserId(uid) : -1;
+            return uid > 0 ? UserHandle.getUserId(uid) : -1;
         } catch (RemoteException e) {
             // Should never happen.
             return -1;

@@ -71,7 +71,7 @@ import android.os.Binder;
 import android.os.INetworkManagementService;
 import android.os.IPowerManager;
 import android.os.MessageQueue.IdleHandler;
-import android.os.UserId;
+import android.os.UserHandle;
 import android.test.AndroidTestCase;
 import android.test.mock.MockPackageManager;
 import android.test.suitebuilder.annotation.LargeTest;
@@ -138,10 +138,10 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
     private static final int APP_ID_A = android.os.Process.FIRST_APPLICATION_UID + 800;
     private static final int APP_ID_B = android.os.Process.FIRST_APPLICATION_UID + 801;
 
-    private static final int UID_A = UserId.getUid(USER_ID, APP_ID_A);
-    private static final int UID_B = UserId.getUid(USER_ID, APP_ID_B);
-    private static final int UID_A_GUEST = UserId.getUid(USER_ID_GUEST, APP_ID_A);
-    private static final int UID_B_GUEST = UserId.getUid(USER_ID_GUEST, APP_ID_B);
+    private static final int UID_A = UserHandle.getUid(USER_ID, APP_ID_A);
+    private static final int UID_B = UserHandle.getUid(USER_ID, APP_ID_B);
+    private static final int UID_A_GUEST = UserHandle.getUid(USER_ID_GUEST, APP_ID_A);
+    private static final int UID_B_GUEST = UserHandle.getUid(USER_ID_GUEST, APP_ID_B);
 
     private static final int PID_1 = 400;
     private static final int PID_2 = 401;

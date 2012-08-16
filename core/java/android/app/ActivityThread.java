@@ -62,7 +62,7 @@ import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.Trace;
-import android.os.UserId;
+import android.os.UserHandle;
 import android.util.AndroidRuntimeException;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
@@ -1696,7 +1696,7 @@ public final class ActivityThread {
         ApplicationInfo ai = null;
         try {
             ai = getPackageManager().getApplicationInfo(packageName,
-                    PackageManager.GET_SHARED_LIBRARY_FILES, UserId.myUserId());
+                    PackageManager.GET_SHARED_LIBRARY_FILES, UserHandle.myUserId());
         } catch (RemoteException e) {
             // Ignore
         }
@@ -1713,7 +1713,7 @@ public final class ActivityThread {
         boolean includeCode = (flags&Context.CONTEXT_INCLUDE_CODE) != 0;
         boolean securityViolation = includeCode && ai.uid != 0
                 && ai.uid != Process.SYSTEM_UID && (mBoundApplication != null
-                        ? !UserId.isSameApp(ai.uid, mBoundApplication.appInfo.uid)
+                        ? !UserHandle.isSameApp(ai.uid, mBoundApplication.appInfo.uid)
                         : true);
         if ((flags&(Context.CONTEXT_INCLUDE_CODE
                 |Context.CONTEXT_IGNORE_SECURITY))

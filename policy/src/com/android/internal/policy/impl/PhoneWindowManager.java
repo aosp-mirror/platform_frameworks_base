@@ -54,7 +54,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UEventObserver;
-import android.os.UserId;
+import android.os.UserHandle;
 import android.os.Vibrator;
 import android.provider.Settings;
 
@@ -2064,7 +2064,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (searchManager != null) {
                 searchManager.stopSearch();
             }
-            mContext.startActivityAsUser(intent, UserId.USER_CURRENT);
+            mContext.startActivityAsUser(intent, UserHandle.USER_CURRENT);
         } catch (ActivityNotFoundException e) {
             Slog.w(TAG, "No activity to handle assist long press action.", e);
         }
@@ -2073,13 +2073,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private void launchAssistAction() {
         sendCloseSystemWindows(SYSTEM_DIALOG_REASON_ASSIST);
         Intent intent = ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
-                .getAssistIntent(mContext, UserId.USER_CURRENT);
+                .getAssistIntent(mContext, UserHandle.USER_CURRENT);
         if (intent != null) {
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                     | Intent.FLAG_ACTIVITY_SINGLE_TOP
                     | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             try {
-                mContext.startActivityAsUser(intent, UserId.USER_CURRENT);
+                mContext.startActivityAsUser(intent, UserHandle.USER_CURRENT);
             } catch (ActivityNotFoundException e) {
                 Slog.w(TAG, "No activity to handle assist action.", e);
             }

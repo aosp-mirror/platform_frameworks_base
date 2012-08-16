@@ -49,7 +49,7 @@ import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.UserId;
+import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -2353,7 +2353,7 @@ final class Settings {
 
     boolean setPackageStoppedStateLPw(String packageName, boolean stopped,
             boolean allowedByPermission, int uid, int userId) {
-        int appId = UserId.getAppId(uid);
+        int appId = UserHandle.getAppId(uid);
         final PackageSetting pkgSetting = mPackages.get(packageName);
         if (pkgSetting == null) {
             throw new IllegalArgumentException("Unknown package: " + packageName);

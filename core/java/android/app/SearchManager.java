@@ -31,7 +31,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.UserId;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
@@ -847,7 +847,7 @@ public class SearchManager
      * @hide
      */
     public Intent getAssistIntent(Context context) {
-        return getAssistIntent(context, UserId.myUserId());
+        return getAssistIntent(context, UserHandle.myUserId());
     }
 
     /**

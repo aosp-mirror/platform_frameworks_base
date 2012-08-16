@@ -19,7 +19,7 @@ package com.android.systemui.statusbar.tablet;
 import android.app.StatusBarManager;
 import android.content.Context;
 import android.content.Intent;
-import android.os.UserId;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Slog;
@@ -119,7 +119,7 @@ public class SettingsView extends LinearLayout implements View.OnClickListener {
     // ----------------------------
     private void onClickSettings() {
         getContext().startActivityAsUser(new Intent(Settings.ACTION_SETTINGS)
-                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK), UserId.USER_CURRENT);
+                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK), UserHandle.USER_CURRENT);
         getStatusBarManager().collapse();
     }
 }

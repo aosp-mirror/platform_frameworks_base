@@ -82,7 +82,7 @@ public class Binder implements IBinder {
      * @hide
      */
     public static final int getOrigCallingUid() {
-        if (UserId.MU_ENABLED) {
+        if (UserHandle.MU_ENABLED) {
             return getOrigCallingUidNative();
         } else {
             return getCallingUid();
@@ -97,7 +97,7 @@ public class Binder implements IBinder {
      * @hide
      */
     public static final int getOrigCallingUser() {
-        return UserId.getUserId(getOrigCallingUid());
+        return UserHandle.getUserId(getOrigCallingUid());
     }
 
     /**

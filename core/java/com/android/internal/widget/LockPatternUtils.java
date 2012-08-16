@@ -34,7 +34,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.os.UserId;
+import android.os.UserHandle;
 import android.os.storage.IMountService;
 import android.provider.Settings;
 import android.security.KeyStore;
@@ -246,7 +246,7 @@ public class LockPatternUtils {
         if (callingUid == android.os.Process.SYSTEM_UID) {
             return mCurrentUserId;
         } else {
-            return UserId.getUserId(callingUid);
+            return UserHandle.getUserId(callingUid);
         }
     }
 

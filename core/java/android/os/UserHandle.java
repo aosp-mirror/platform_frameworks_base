@@ -17,9 +17,10 @@
 package android.os;
 
 /**
+ * Representation of a user on the device.
  * @hide
  */
-public final class UserId {
+public final class UserHandle {
     /**
      * Range of IDs allocated for a user.
      *
@@ -70,7 +71,7 @@ public final class UserId {
 
     public static boolean isApp(int uid) {
         if (uid > 0) {
-            uid = UserId.getAppId(uid);
+            uid = UserHandle.getAppId(uid);
             return uid >= Process.FIRST_APPLICATION_UID && uid <= Process.LAST_APPLICATION_UID;
         } else {
             return false;

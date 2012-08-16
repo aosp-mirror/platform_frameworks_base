@@ -30,7 +30,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.SystemClock;
-import android.os.UserId;
+import android.os.UserHandle;
 import android.util.PrintWriterPrinter;
 import android.util.TimeUtils;
 
@@ -313,7 +313,7 @@ class ProcessRecord {
         info = _info;
         isolated = _info.uid != _uid;
         uid = _uid;
-        userId = UserId.getUserId(_uid);
+        userId = UserHandle.getUserId(_uid);
         processName = _processName;
         pkgList.add(_info.packageName);
         thread = _thread;
@@ -396,7 +396,7 @@ class ProcessRecord {
             sb.append(info.uid%Process.FIRST_APPLICATION_UID);
             if (uid != info.uid) {
                 sb.append('i');
-                sb.append(UserId.getAppId(uid) - Process.FIRST_ISOLATED_UID);
+                sb.append(UserHandle.getAppId(uid) - Process.FIRST_ISOLATED_UID);
             }
         }
     }
