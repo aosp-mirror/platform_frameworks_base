@@ -242,8 +242,8 @@ final class DisplayPowerState {
                 mElectronBeam.draw(mElectronBeamLevel);
             }
 
-            if ((mDirty & DIRTY_BRIGHTNESS) != 0) {
-                mScreenBrightnessModulator.setBrightness(mScreenBrightness);
+            if ((mDirty & (DIRTY_BRIGHTNESS | DIRTY_SCREEN_ON)) != 0) {
+                mScreenBrightnessModulator.setBrightness(mScreenOn ? mScreenBrightness : 0);
             }
 
             if ((mDirty & DIRTY_SCREEN_ON) != 0 && mScreenOn) {
