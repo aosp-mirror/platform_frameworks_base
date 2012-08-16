@@ -124,4 +124,6 @@ interface IConnectivityManager
     LegacyVpnInfo getLegacyVpnInfo();
 
     boolean updateLockdownVpn();
+
+    void captivePortalCheckComplete(in NetworkInfo info);
 }

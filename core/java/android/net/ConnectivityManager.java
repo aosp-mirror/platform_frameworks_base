@@ -921,4 +921,15 @@ public class ConnectivityManager {
             return false;
         }
     }
+
+    /**
+     * {@hide}
+     */
+    public void captivePortalCheckComplete(NetworkInfo info) {
+        try {
+            mService.captivePortalCheckComplete(info);
+        } catch (RemoteException e) {
+        }
+    }
+
 }

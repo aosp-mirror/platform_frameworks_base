@@ -412,6 +412,7 @@ public class WifiService extends IWifiManager.Stub {
                             switch(mNetworkInfo.getDetailedState()) {
                                 case CONNECTED:
                                 case DISCONNECTED:
+                                case CAPTIVE_PORTAL_CHECK:
                                     evaluateTrafficStatsPolling();
                                     resetNotification();
                                     break;
@@ -604,6 +605,12 @@ public class WifiService extends IWifiManager.Stub {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CHANGE_WIFI_MULTICAST_STATE,
                 "WifiService");
+    }
+
+    private void enforceConnectivityInternalPermission() {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.CONNECTIVITY_INTERNAL,
+                "ConnectivityService");
     }
 
     /**
@@ -910,7 +917,7 @@ public class WifiService extends IWifiManager.Stub {
      *
      */
     public void startWifi() {
-        enforceChangePermission();
+        enforceConnectivityInternalPermission();
         /* TODO: may be add permissions for access only to connectivity service
          * TODO: if a start issued, keep wifi alive until a stop issued irrespective
          * of WifiLock & device idle status unless wifi enabled status is toggled
@@ -920,19 +927,23 @@ public class WifiService extends IWifiManager.Stub {
         mWifiStateMachine.reconnectCommand();
     }
 
+    public void captivePortalCheckComplete() {
+        enforceConnectivityInternalPermission();
+        mWifiStateMachine.captivePortalCheckComplete();
+    }
+
     /**
      * see {@link android.net.wifi.WifiManager#stopWifi}
      *
      */
     public void stopWifi() {
-        enforceChangePermission();
-        /* TODO: may be add permissions for access only to connectivity service
+        enforceConnectivityInternalPermission();
+        /*
          * TODO: if a stop is issued, wifi is brought up only by startWifi
          * unless wifi enabled status is toggled
          */
         mWifiStateMachine.setDriverStart(false, mEmergencyCallbackMode);
     }
-
 
     /**
      * see {@link android.net.wifi.WifiManager#addToBlacklist}

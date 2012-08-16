@@ -16,20 +16,15 @@
 
 package android.net.wifi;
 
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.net.ConnectivityManager;
 import android.net.LinkProperties;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.net.wifi.RssiPacketCountInfo;
 import android.os.Message;
 import android.os.SystemClock;
@@ -44,10 +39,7 @@ import com.android.internal.util.Protocol;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 
-import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.text.DecimalFormat;
 
 /**
@@ -100,8 +92,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
     private static final int EVENT_SCREEN_OFF                       = BASE + 9;
 
     /* Internal messages */
-    private static final int CMD_DELAYED_WALLED_GARDEN_CHECK        = BASE + 11;
-    private static final int CMD_RSSI_FETCH                         = BASE + 12;
+    private static final int CMD_RSSI_FETCH                         = BASE + 11;
 
     /* Notifications from/to WifiStateMachine */
     static final int POOR_LINK_DETECTED                             = BASE + 21;
@@ -266,27 +257,6 @@ public class WifiWatchdogStateMachine extends StateMachine {
         new MaxAvoidTime(   0  * 60000,         -55       ),
     };
 
-
-    private static final String WALLED_GARDEN_NOTIFICATION_ID = "WifiWatchdog.walledgarden";
-
-    private static final long DEFAULT_WALLED_GARDEN_INTERVAL_MS = 30 * 60 * 1000;
-
-    /**
-     * See http://go/clientsdns for usage approval
-     */
-    private static final String DEFAULT_WALLED_GARDEN_URL =
-            "http://clients3.google.com/generate_204";
-    private static final int WALLED_GARDEN_SOCKET_TIMEOUT_MS = 10000;
-
-    /**
-     * Some carrier apps might have support captive portal handling. Add some
-     * delay to allow app authentication to be done before our test. TODO: This
-     * should go away once we provide an API to apps to disable walled garden
-     * test for certain SSIDs
-     */
-    private static final int WALLED_GARDEN_START_DELAY_MS = 3000;
-
-
     /* Framework related */
     private Context mContext;
     private ContentResolver mContentResolver;
@@ -300,13 +270,6 @@ public class WifiWatchdogStateMachine extends StateMachine {
     /* System settingss related */
     private static boolean sWifiOnly = false;
     private boolean mPoorNetworkDetectionEnabled;
-    private long mWalledGardenIntervalMs;
-    private boolean mWalledGardenTestEnabled;
-    private String mWalledGardenUrl;
-
-    /* Wall garden detection related */
-    private long mLastWalledGardenCheckTime = 0;
-    private boolean mWalledGardenNotificationShown;
 
     /* Poor link detection related */
     private LruCache<String, BssidStatistics> mBssidCache =
@@ -325,7 +288,6 @@ public class WifiWatchdogStateMachine extends StateMachine {
     private NotConnectedState mNotConnectedState = new NotConnectedState();
     private VerifyingLinkState mVerifyingLinkState = new VerifyingLinkState();
     private ConnectedState mConnectedState = new ConnectedState();
-    private WalledGardenCheckState mWalledGardenCheckState = new WalledGardenCheckState();
     private OnlineWatchState mOnlineWatchState = new OnlineWatchState();
     private LinkMonitoringState mLinkMonitoringState = new LinkMonitoringState();
     private OnlineState mOnlineState = new OnlineState();
@@ -359,7 +321,6 @@ public class WifiWatchdogStateMachine extends StateMachine {
                 addState(mNotConnectedState, mWatchdogEnabledState);
                 addState(mVerifyingLinkState, mWatchdogEnabledState);
                 addState(mConnectedState, mWatchdogEnabledState);
-                    addState(mWalledGardenCheckState, mConnectedState);
                     addState(mOnlineWatchState, mConnectedState);
                     addState(mLinkMonitoringState, mConnectedState);
                     addState(mOnlineState, mConnectedState);
@@ -379,13 +340,12 @@ public class WifiWatchdogStateMachine extends StateMachine {
                 Context.CONNECTIVITY_SERVICE);
         sWifiOnly = (cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE) == false);
 
-        // Watchdog is always enabled. Poor network detection & walled garden detection
-        // can individually be turned on/off
+        // Watchdog is always enabled. Poor network detection can be seperately turned on/off
         // TODO: Remove this setting & clean up state machine since we always have
         // watchdog in an enabled state
         putSettingsBoolean(contentResolver, Settings.Secure.WIFI_WATCHDOG_ON, true);
 
-        // disable poor network avoidance, but keep watchdog active for walled garden detection
+        // disable poor network avoidance
         if (sWifiOnly) {
             logd("Disabling poor network avoidance for wi-fi only device");
             putSettingsBoolean(contentResolver,
@@ -458,44 +418,8 @@ public class WifiWatchdogStateMachine extends StateMachine {
         };
 
         mContext.getContentResolver().registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.WIFI_WATCHDOG_WALLED_GARDEN_INTERVAL_MS),
-                false, contentObserver);
-        mContext.getContentResolver().registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED),
                 false, contentObserver);
-        mContext.getContentResolver().registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.WIFI_WATCHDOG_WALLED_GARDEN_TEST_ENABLED),
-                false, contentObserver);
-        mContext.getContentResolver().registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.WIFI_WATCHDOG_WALLED_GARDEN_URL),
-                false, contentObserver);
-    }
-
-    /**
-     * DNS based detection techniques do not work at all hotspots. The one sure
-     * way to check a walled garden is to see if a URL fetch on a known address
-     * fetches the data we expect
-     */
-    private boolean isWalledGardenConnection() {
-        HttpURLConnection urlConnection = null;
-        try {
-            URL url = new URL(mWalledGardenUrl);
-            urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setInstanceFollowRedirects(false);
-            urlConnection.setConnectTimeout(WALLED_GARDEN_SOCKET_TIMEOUT_MS);
-            urlConnection.setReadTimeout(WALLED_GARDEN_SOCKET_TIMEOUT_MS);
-            urlConnection.setUseCaches(false);
-            urlConnection.getInputStream();
-            // we got a valid response, but not from the real google
-            return urlConnection.getResponseCode() != 204;
-        } catch (IOException e) {
-            if (DBG) logd("Walled garden check - probably not a portal: exception " + e);
-            return false;
-        } finally {
-            if (urlConnection != null) {
-                urlConnection.disconnect();
-            }
-        }
     }
 
     public void dump(PrintWriter pw) {
@@ -504,10 +428,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
         pw.println("mWifiInfo: [" + mWifiInfo + "]");
         pw.println("mLinkProperties: [" + mLinkProperties + "]");
         pw.println("mCurrentSignalLevel: [" + mCurrentSignalLevel + "]");
-        pw.println("mWalledGardenIntervalMs: [" + mWalledGardenIntervalMs + "]");
         pw.println("mPoorNetworkDetectionEnabled: [" + mPoorNetworkDetectionEnabled + "]");
-        pw.println("mWalledGardenTestEnabled: [" + mWalledGardenTestEnabled + "]");
-        pw.println("mWalledGardenUrl: [" + mWalledGardenUrl + "]");
     }
 
     private boolean isWatchdogEnabled() {
@@ -521,47 +442,6 @@ public class WifiWatchdogStateMachine extends StateMachine {
 
         mPoorNetworkDetectionEnabled = getSettingsBoolean(mContentResolver,
                 Settings.Secure.WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED, true);
-        mWalledGardenTestEnabled = getSettingsBoolean(mContentResolver,
-                Settings.Secure.WIFI_WATCHDOG_WALLED_GARDEN_TEST_ENABLED, true);
-        mWalledGardenUrl = getSettingsStr(mContentResolver,
-                Settings.Secure.WIFI_WATCHDOG_WALLED_GARDEN_URL,
-                DEFAULT_WALLED_GARDEN_URL);
-        mWalledGardenIntervalMs = Secure.getLong(mContentResolver,
-                Secure.WIFI_WATCHDOG_WALLED_GARDEN_INTERVAL_MS,
-                DEFAULT_WALLED_GARDEN_INTERVAL_MS);
-    }
-
-    private void setWalledGardenNotificationVisible(boolean visible) {
-        // if it should be hidden and it is already hidden, then noop
-        if (!visible && !mWalledGardenNotificationShown) {
-            return;
-        }
-
-        Resources r = Resources.getSystem();
-        NotificationManager notificationManager = (NotificationManager) mContext
-            .getSystemService(Context.NOTIFICATION_SERVICE);
-
-        if (visible) {
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mWalledGardenUrl));
-            intent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK);
-
-            CharSequence title = r.getString(R.string.wifi_available_sign_in, 0);
-            CharSequence details = r.getString(R.string.wifi_available_sign_in_detailed,
-                    mWifiInfo.getSSID());
-
-            Notification notification = new Notification();
-            notification.when = 0;
-            notification.icon = com.android.internal.R.drawable.stat_notify_wifi_in_range;
-            notification.flags = Notification.FLAG_AUTO_CANCEL;
-            notification.contentIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
-            notification.tickerText = title;
-            notification.setLatestEventInfo(mContext, title, details, notification.contentIntent);
-
-            notificationManager.notify(WALLED_GARDEN_NOTIFICATION_ID, 1, notification);
-        } else {
-            notificationManager.cancel(WALLED_GARDEN_NOTIFICATION_ID, 1);
-        }
-        mWalledGardenNotificationShown = visible;
     }
 
     /**
@@ -587,7 +467,6 @@ public class WifiWatchdogStateMachine extends StateMachine {
                 case EVENT_NETWORK_STATE_CHANGE:
                 case EVENT_SUPPLICANT_STATE_CHANGE:
                 case EVENT_BSSID_CHANGE:
-                case CMD_DELAYED_WALLED_GARDEN_CHECK:
                 case CMD_RSSI_FETCH:
                 case WifiManager.RSSI_PKTCNT_FETCH_SUCCEEDED:
                 case WifiManager.RSSI_PKTCNT_FETCH_FAILED:
@@ -685,11 +564,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
                             }
                             break;
                         case CONNECTED:
-                            if (shouldCheckWalledGarden()) {
-                                transitionTo(mWalledGardenCheckState);
-                            } else {
-                                transitionTo(mOnlineWatchState);
-                            }
+                            transitionTo(mOnlineWatchState);
                             break;
                         default:
                             transitionTo(mNotConnectedState);
@@ -716,7 +591,6 @@ public class WifiWatchdogStateMachine extends StateMachine {
                     return NOT_HANDLED;
             }
 
-            setWalledGardenNotificationVisible(false);
             return HANDLED;
         }
     }
@@ -830,38 +704,6 @@ public class WifiWatchdogStateMachine extends StateMachine {
                     return HANDLED;
             }
             return NOT_HANDLED;
-        }
-    }
-
-    /**
-     * Checking for wall garden.
-     */
-    class WalledGardenCheckState extends State {
-        private int mWalledGardenToken = 0;
-        @Override
-        public void enter() {
-            if (DBG) logd(getName());
-            sendMessageDelayed(obtainMessage(CMD_DELAYED_WALLED_GARDEN_CHECK,
-                    ++mWalledGardenToken, 0), WALLED_GARDEN_START_DELAY_MS);
-        }
-
-        @Override
-        public boolean processMessage(Message msg) {
-            switch (msg.what) {
-                case CMD_DELAYED_WALLED_GARDEN_CHECK:
-                    if (msg.arg1 == mWalledGardenToken) {
-                        mLastWalledGardenCheckTime = SystemClock.elapsedRealtime();
-                        if (isWalledGardenConnection()) {
-                            if (DBG) logd("Walled garden detected");
-                            setWalledGardenNotificationVisible(true);
-                        }
-                        transitionTo(mOnlineWatchState);
-                    }
-                    break;
-                default:
-                    return NOT_HANDLED;
-            }
-            return HANDLED;
         }
     }
 
@@ -1035,22 +877,6 @@ public class WifiWatchdogStateMachine extends StateMachine {
             }
             return HANDLED;
         }
-    }
-
-    private boolean shouldCheckWalledGarden() {
-        if (!mWalledGardenTestEnabled) {
-            if (DBG) logd("Skipping walled garden check - disabled");
-            return false;
-        }
-
-        long waitTime = (mWalledGardenIntervalMs + mLastWalledGardenCheckTime)
-            - SystemClock.elapsedRealtime();
-
-        if (mLastWalledGardenCheckTime != 0 && waitTime > 0) {
-            if (DBG) logd("Skipping walled garden check - wait " + waitTime + " ms.");
-            return false;
-        }
-        return true;
     }
 
     private void updateCurrentBssid(String bssid) {
