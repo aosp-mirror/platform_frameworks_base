@@ -70,6 +70,12 @@ final class DisplayPowerController {
     private static final boolean DEBUG_PRETEND_PROXIMITY_SENSOR_ABSENT = false;
     private static final boolean DEBUG_PRETEND_LIGHT_SENSOR_ABSENT = false;
 
+    // If true, uses the electron beam on animation.
+    // We might want to turn this off if we cannot get a guarantee that the screen
+    // actually turns on and starts showing new content after the call to set the
+    // screen state returns.
+    private static final boolean USE_ELECTRON_BEAM_ON_ANIMATION = true;
+
     private static final int ELECTRON_BEAM_ON_ANIMATION_DURATION_MILLIS = 300;
     private static final int ELECTRON_BEAM_OFF_ANIMATION_DURATION_MILLIS = 600;
 
@@ -550,14 +556,19 @@ final class DisplayPowerController {
                 // on animation immediately then the results are pretty ugly.
                 if (!mElectronBeamOffAnimator.isStarted()) {
                     setScreenOn(true);
-                    if (!mElectronBeamOnAnimator.isStarted()) {
-                        if (mPowerState.getElectronBeamLevel() == 1.0f) {
-                            mPowerState.dismissElectronBeam();
-                        } else if (mPowerState.prepareElectronBeam(true)) {
-                            mElectronBeamOnAnimator.start();
-                        } else {
-                            mElectronBeamOnAnimator.end();
+                    if (USE_ELECTRON_BEAM_ON_ANIMATION) {
+                        if (!mElectronBeamOnAnimator.isStarted()) {
+                            if (mPowerState.getElectronBeamLevel() == 1.0f) {
+                                mPowerState.dismissElectronBeam();
+                            } else if (mPowerState.prepareElectronBeam(true)) {
+                                mElectronBeamOnAnimator.start();
+                            } else {
+                                mElectronBeamOnAnimator.end();
+                            }
                         }
+                    } else {
+                        mPowerState.setElectronBeamLevel(1.0f);
+                        mPowerState.dismissElectronBeam();
                     }
                 }
             } else {
