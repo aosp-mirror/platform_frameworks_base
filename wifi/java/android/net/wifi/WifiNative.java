@@ -547,10 +547,9 @@ public class WifiNative {
                 break;
         }
 
-        //TODO: Add persist behavior once the supplicant interaction is fixed for both
-        // group and client scenarios
-        /* Persist unless there is an explicit request to not do so*/
-        //if (config.persist != WifiP2pConfig.Persist.NO) args.add("persistent");
+        if (config.netId == WifiP2pGroup.PERSISTENT_NET_ID) {
+            args.add("persistent");
+        }
 
         if (joinExistingGroup) {
             args.add("join");
@@ -592,8 +591,15 @@ public class WifiNative {
         return false;
     }
 
-    public boolean p2pGroupAdd() {
+    public boolean p2pGroupAdd(boolean persistent) {
+        if (persistent) {
+            return doBooleanCommand("P2P_GROUP_ADD persistent");
+        }
         return doBooleanCommand("P2P_GROUP_ADD");
+    }
+
+    public boolean p2pGroupAdd(int netId) {
+        return doBooleanCommand("P2P_GROUP_ADD persistent=" + netId);
     }
 
     public boolean p2pGroupRemove(String iface) {
@@ -624,6 +630,9 @@ public class WifiNative {
         return doBooleanCommand("P2P_INVITE persistent=" + netId + " peer=" + deviceAddress);
     }
 
+    public String p2pGetSsid(String deviceAddress) {
+        return p2pGetParam(deviceAddress, "oper_ssid");
+    }
 
     public String p2pGetDeviceAddress() {
         String status = status();
@@ -663,6 +672,24 @@ public class WifiNative {
 
     public String p2pPeer(String deviceAddress) {
         return doStringCommand("P2P_PEER " + deviceAddress);
+    }
+
+    private String p2pGetParam(String deviceAddress, String key) {
+        if (deviceAddress == null) return null;
+
+        String peerInfo = p2pPeer(deviceAddress);
+        if (peerInfo == null) return null;
+        String[] tokens= peerInfo.split("\n");
+
+        key += "=";
+        for (String token : tokens) {
+            if (token.startsWith(key)) {
+                String[] nameValue = token.split("=");
+                if (nameValue.length != 2) break;
+                return nameValue[1];
+            }
+        }
+        return null;
     }
 
     public boolean p2pServiceAdd(WifiP2pServiceInfo servInfo) {
