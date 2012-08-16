@@ -47,7 +47,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Parcelable;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
@@ -64,6 +63,7 @@ import com.android.internal.location.ProviderRequest;
 import com.android.server.location.GeocoderProxy;
 import com.android.server.location.GeofenceManager;
 import com.android.server.location.GpsLocationProvider;
+import com.android.server.location.LocationFudger;
 import com.android.server.location.LocationProviderInterface;
 import com.android.server.location.LocationProviderProxy;
 import com.android.server.location.MockProvider;
@@ -110,19 +110,6 @@ public class LocationManagerService extends ILocationManager.Stub implements Obs
 
     private static final int MSG_LOCATION_CHANGED = 1;
 
-    // Accuracy in meters above which a location is considered coarse
-    private static final double COARSE_ACCURACY_M = 100.0;
-    private static final String EXTRA_COARSE_LOCATION = "coarseLocation";
-
-    private static final int APPROXIMATE_METERS_PER_DEGREE_AT_EQUATOR = 111000;
-
-    /**
-     * Maximum latitude of 1 meter from the pole.
-     * This keeps cosine(MAX_LATITUDE) to a non-zero value;
-     */
-    private static final double MAX_LATITUDE =
-            90.0 - (1.0 / APPROXIMATE_METERS_PER_DEGREE_AT_EQUATOR);
-
     // Location Providers may sometimes deliver location updates
     // slightly faster that requested - provide grace period so
     // we don't unnecessarily filter events that are otherwise on
@@ -137,6 +124,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Obs
     private final Object mLock = new Object();
 
     // --- fields below are final after init() ---
+    private LocationFudger mLocationFudger;
     private GeofenceManager mGeofenceManager;
     private PowerManager.WakeLock mWakeLock;
     private PackageManager mPackageManager;
@@ -221,6 +209,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Obs
             loadProvidersLocked();
         }
         mGeofenceManager = new GeofenceManager(mContext);
+        mLocationFudger = new LocationFudger();
 
         // Register for Network (Wifi or Mobile) updates
         IntentFilter filter = new IntentFilter();
@@ -907,7 +896,22 @@ public class LocationManagerService extends ILocationManager.Stub implements Obs
         String perm = checkPermission();
 
         if (ACCESS_COARSE_LOCATION.equals(perm)) {
-            request.applyCoarsePermissionRestrictions();
+             switch (request.getQuality()) {
+                 case LocationRequest.ACCURACY_FINE:
+                     request.setQuality(LocationRequest.ACCURACY_BLOCK);
+                     break;
+                 case LocationRequest.POWER_HIGH:
+                     request.setQuality(LocationRequest.POWER_LOW);
+                     break;
+             }
+             // throttle fastest interval
+             if (request.getFastestInterval() < LocationFudger.FASTEST_INTERVAL_MS) {
+                 request.setFastestInterval(LocationFudger.FASTEST_INTERVAL_MS);
+             }
+        }
+        // throttle interval if its faster than the fastest interval
+        if (request.getInterval () < request.getFastestInterval()) {
+            request.setInterval(request.getFastestInterval());
         }
         return perm;
     }
@@ -1075,7 +1079,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Obs
             if (ACCESS_FINE_LOCATION.equals(perm)) {
                 return location;
             } else {
-                return getCoarseLocationExtra(location);
+                return mLocationFudger.getOrCreate(location);
             }
         }
     }
@@ -1291,11 +1295,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Obs
         LocationProviderInterface p = mProvidersByName.get(provider);
         if (p == null) return;
 
-        // Add the coarse location as an extra, if not already present
-        Location coarse = getCoarseLocationExtra(location);
-        if (coarse == null) {
-            coarse = addCoarseLocationExtra(location);
-        }
+        // Add the coarse location as an extra
+        Location coarse = mLocationFudger.getOrCreate(location);
 
         // Update last known locations
         Location lastLocation = mLastLocation.get(provider);
@@ -1660,106 +1661,6 @@ public class LocationManagerService extends ILocationManager.Stub implements Obs
         }
     }
 
-    private static double wrapLatitude(double lat) {
-         if (lat > MAX_LATITUDE) lat = MAX_LATITUDE;
-         if (lat < -MAX_LATITUDE) lat = -MAX_LATITUDE;
-         return lat;
-    }
-
-    private static double wrapLongitude(double lon) {
-        if (lon >= 180.0) lon -= 360.0;
-        if (lon < -180.0) lon += 360.0;
-        return lon;
-    }
-
-    private static double distanceToDegreesLatitude(double distance) {
-        return distance / APPROXIMATE_METERS_PER_DEGREE_AT_EQUATOR;
-    }
-
-    /**
-     * Requires latitude since longitudinal distances change with distance from equator.
-     */
-    private static double distanceToDegreesLongitude(double distance, double lat) {
-        return distance / APPROXIMATE_METERS_PER_DEGREE_AT_EQUATOR / Math.cos(lat);
-    }
-
-    /**
-     * Fudge a location into a coarse location.
-     * <p>Add a random offset, then quantize the result (snap-to-grid).
-     * Random offsets alone can be low-passed pretty easily.
-     * Snap-to-grid on its own is excellent unless you are sitting on a
-     * grid boundary and bouncing between quantizations.
-     * The combination is quite hard to reverse engineer.
-     * <p>The random offset used is smaller than the goal accuracy
-     * ({@link #COARSE_ACCURACY_M}), in order to give relatively stable
-     * results after quantization.
-     */
-    private static Location createCoarse(Location fine) {
-        Location coarse = new Location(fine);
-
-        coarse.removeBearing();
-        coarse.removeSpeed();
-        coarse.removeAltitude();
-
-        double lat = coarse.getLatitude();
-        double lon = coarse.getLongitude();
-
-        // wrap
-        lat = wrapLatitude(lat);
-        lon = wrapLongitude(lon);
-
-        if (coarse.getAccuracy() < COARSE_ACCURACY_M / 2) {
-            // apply a random offset
-            double fudgeDistance = COARSE_ACCURACY_M / 2.0 - coarse.getAccuracy();
-            lat += (Math.random() - 0.5) * distanceToDegreesLatitude(fudgeDistance);
-            lon += (Math.random() - 0.5) * distanceToDegreesLongitude(fudgeDistance, lat);
-        }
-
-        // wrap
-        lat = wrapLatitude(lat);
-        lon = wrapLongitude(lon);
-
-        // quantize (snap-to-grid)
-        double latGranularity = distanceToDegreesLatitude(COARSE_ACCURACY_M);
-        double lonGranularity = distanceToDegreesLongitude(COARSE_ACCURACY_M, lat);
-        long latQuantized = Math.round(lat / latGranularity);
-        long lonQuantized = Math.round(lon / lonGranularity);
-        lat = latQuantized * latGranularity;
-        lon = lonQuantized * lonGranularity;
-
-        // wrap again
-        lat = wrapLatitude(lat);
-        lon = wrapLongitude(lon);
-
-        // apply
-        coarse.setLatitude(lat);
-        coarse.setLongitude(lon);
-        coarse.setAccuracy((float)COARSE_ACCURACY_M);
-
-        return coarse;
-    }
-
-
-    private static Location getCoarseLocationExtra(Location location) {
-        Bundle extras = location.getExtras();
-        if (extras == null) return null;
-        Parcelable parcel = extras.getParcelable(EXTRA_COARSE_LOCATION);
-        if (parcel == null) return null;
-        if (!(parcel instanceof Location)) return null;
-        Location coarse = (Location) parcel;
-        if (coarse.getAccuracy() < COARSE_ACCURACY_M) return null;
-        return coarse;
-    }
-
-    private static Location addCoarseLocationExtra(Location location) {
-        Bundle extras = location.getExtras();
-        if (extras == null) extras = new Bundle();
-        Location coarse = createCoarse(location);
-        extras.putParcelable(EXTRA_COARSE_LOCATION, coarse);
-        location.setExtras(extras);
-        return coarse;
-    }
-
     private void log(String log) {
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Slog.d(TAG, log);
@@ -1818,6 +1719,9 @@ public class LocationManagerService extends ILocationManager.Stub implements Obs
                     i.getValue().dump(pw, "      ");
                 }
             }
+
+            pw.append("  fudger: ");
+            mLocationFudger.dump(fd, pw,  args);
 
             if (args.length > 0 && "short".equals(args[0])) {
                 return;
