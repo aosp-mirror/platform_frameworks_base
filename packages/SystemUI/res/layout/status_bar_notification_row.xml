@@ -49,4 +49,17 @@
         android:background="@drawable/bottom_divider_glow"
         />
 
+    <TextView
+        android:id="@+id/debug_info"
+        android:visibility="invisible"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|right"
+        android:fontFamily="sans-serif-condensed"
+        android:textSize="9dp"
+        android:textStyle="bold"
+        android:textColor="#00A040"
+        android:padding="2dp"
+        />
+
 </FrameLayout>
