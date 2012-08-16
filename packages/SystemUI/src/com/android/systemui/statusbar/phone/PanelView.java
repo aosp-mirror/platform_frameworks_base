@@ -59,6 +59,11 @@ public class PanelView extends FrameLayout {
         }
     };
 
+    private final Runnable mStopAnimator = new Runnable() { public void run() {
+        if (mTimeAnimator.isStarted()) {
+            mTimeAnimator.end(); }
+    }};
+
     private float mVel, mAccel;
     private int mFullHeight = 0;
     private String mViewName; 
@@ -117,7 +122,7 @@ public class PanelView extends FrameLayout {
             if (mVel == 0
                     || (closing && mExpandedHeight == 0)
                     || (!closing && mExpandedHeight == getFullHeight())) {
-                mTimeAnimator.end();
+                post(mStopAnimator);
             }
         }
     }
@@ -277,7 +282,7 @@ public class PanelView extends FrameLayout {
 
 
     public void setExpandedHeight(float height) {
-        mTimeAnimator.end();
+        post(mStopAnimator);
         setExpandedHeightInternal(height);
     }
 
