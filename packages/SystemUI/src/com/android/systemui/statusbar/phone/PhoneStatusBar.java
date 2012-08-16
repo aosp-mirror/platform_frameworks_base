@@ -1309,10 +1309,6 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         mGestureRec.add(event);
 
-        if ((mDisabled & StatusBarManager.DISABLE_EXPAND) != 0) {
-            return false;
-        }
-
         return false;
     }
 
