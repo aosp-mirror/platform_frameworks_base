@@ -17,7 +17,6 @@
 package android.app;
 
 import android.content.SharedPreferences;
-import android.os.FileUtils.FileStatus;
 import android.os.FileUtils;
 import android.os.Looper;
 import android.util.Log;
@@ -44,6 +43,11 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
+
+import libcore.io.ErrnoException;
+import libcore.io.IoUtils;
+import libcore.io.Libcore;
+import libcore.io.StructStat;
 
 final class SharedPreferencesImpl implements SharedPreferences {
     private static final String TAG = "SharedPreferencesImpl";
@@ -105,26 +109,32 @@ final class SharedPreferencesImpl implements SharedPreferences {
         }
 
         Map map = null;
-        FileStatus stat = new FileStatus();
-        if (FileUtils.getFileStatus(mFile.getPath(), stat) && mFile.canRead()) {
-            try {
-                BufferedInputStream str = new BufferedInputStream(
-                        new FileInputStream(mFile), 16*1024);
-                map = XmlUtils.readMapXml(str);
-                str.close();
-            } catch (XmlPullParserException e) {
-                Log.w(TAG, "getSharedPreferences", e);
-            } catch (FileNotFoundException e) {
-                Log.w(TAG, "getSharedPreferences", e);
-            } catch (IOException e) {
-                Log.w(TAG, "getSharedPreferences", e);
+        StructStat stat = null;
+        try {
+            stat = Libcore.os.stat(mFile.getPath());
+            if (mFile.canRead()) {
+                BufferedInputStream str = null;
+                try {
+                    str = new BufferedInputStream(
+                            new FileInputStream(mFile), 16*1024);
+                    map = XmlUtils.readMapXml(str);
+                } catch (XmlPullParserException e) {
+                    Log.w(TAG, "getSharedPreferences", e);
+                } catch (FileNotFoundException e) {
+                    Log.w(TAG, "getSharedPreferences", e);
+                } catch (IOException e) {
+                    Log.w(TAG, "getSharedPreferences", e);
+                } finally {
+                    IoUtils.closeQuietly(str);
+                }
             }
+        } catch (ErrnoException e) {
         }
         mLoaded = true;
         if (map != null) {
             mMap = map;
-            mStatTimestamp = stat.mtime;
-            mStatSize = stat.size;
+            mStatTimestamp = stat.st_mtime;
+            mStatSize = stat.st_size;
         } else {
             mMap = new HashMap<String, Object>();
         }
@@ -155,12 +165,21 @@ final class SharedPreferencesImpl implements SharedPreferences {
                 return false;
             }
         }
-        FileStatus stat = new FileStatus();
-        if (!FileUtils.getFileStatus(mFile.getPath(), stat)) {
+
+        final StructStat stat;
+        try {
+            /*
+             * Metadata operations don't usually count as a block guard
+             * violation, but we explicitly want this one.
+             */
+            BlockGuard.getThreadPolicy().onReadFromDisk();
+            stat = Libcore.os.stat(mFile.getPath());
+        } catch (ErrnoException e) {
             return true;
         }
+
         synchronized (this) {
-            return mStatTimestamp != stat.mtime || mStatSize != stat.size;
+            return mStatTimestamp != stat.st_mtime || mStatSize != stat.st_size;
         }
     }
 
@@ -577,12 +596,14 @@ final class SharedPreferencesImpl implements SharedPreferences {
             FileUtils.sync(str);
             str.close();
             ContextImpl.setFilePermissionsFromMode(mFile.getPath(), mMode, 0);
-            FileStatus stat = new FileStatus();
-            if (FileUtils.getFileStatus(mFile.getPath(), stat)) {
+            try {
+                final StructStat stat = Libcore.os.stat(mFile.getPath());
                 synchronized (this) {
-                    mStatTimestamp = stat.mtime;
-                    mStatSize = stat.size;
+                    mStatTimestamp = stat.st_mtime;
+                    mStatSize = stat.st_size;
                 }
+            } catch (ErrnoException e) {
+                // Do nothing
             }
             // Writing was successful, delete the backup file if there is one.
             mBackupFile.delete();

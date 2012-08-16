@@ -17,21 +17,13 @@
 package android.os;
 
 import android.content.Context;
-import android.os.FileUtils;
-import android.os.FileUtils.FileStatus;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
-import android.test.suitebuilder.annotation.SmallTest;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
-
-import junit.framework.Assert;
+import java.io.FileWriter;
 
 public class FileUtilsTest extends AndroidTestCase {
     private static final String TEST_DATA =
@@ -58,60 +50,6 @@ public class FileUtilsTest extends AndroidTestCase {
     protected void tearDown() throws Exception {
         if (mTestFile.exists()) mTestFile.delete();
         if (mCopyFile.exists()) mCopyFile.delete();
-    }
-
-    @LargeTest
-    public void testGetFileStatus() {
-        final byte[] MAGIC = { 0xB, 0xE, 0x0, 0x5 };
-
-        try {
-            // truncate test file and write MAGIC (4 bytes) to it.
-            FileOutputStream os = new FileOutputStream(mTestFile, false);
-            os.write(MAGIC, 0, 4);
-            os.flush();
-            os.close();
-        } catch (FileNotFoundException e) {
-            Assert.fail("File was removed durning test" + e);
-        } catch (IOException e) {
-            Assert.fail("Unexpected IOException: " + e);
-        }
-        
-        Assert.assertTrue(mTestFile.exists());
-        Assert.assertTrue(FileUtils.getFileStatus(mTestFile.getPath(), null));
-        
-        FileStatus status1 = new FileStatus();
-        FileUtils.getFileStatus(mTestFile.getPath(), status1);
-        
-        Assert.assertEquals(4, status1.size);
-        
-        // Sleep for at least one second so that the modification time will be different.
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-        }
-
-        try {
-            // append so we don't change the creation time.
-            FileOutputStream os = new FileOutputStream(mTestFile, true);
-            os.write(MAGIC, 0, 4);
-            os.flush();
-            os.close();
-        } catch (FileNotFoundException e) {
-            Assert.fail("File was removed durning test" + e);
-        } catch (IOException e) {
-            Assert.fail("Unexpected IOException: " + e);
-        }
-        
-        FileStatus status2 = new FileStatus();
-        FileUtils.getFileStatus(mTestFile.getPath(), status2);
-        
-        Assert.assertEquals(8, status2.size);
-        Assert.assertTrue(status2.mtime > status1.mtime);
-        
-        mTestFile.delete();
-        
-        Assert.assertFalse(mTestFile.exists());
-        Assert.assertFalse(FileUtils.getFileStatus(mTestFile.getPath(), null));
     }
 
     // TODO: test setPermissions(), getPermissions()
