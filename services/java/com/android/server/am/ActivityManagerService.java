@@ -13493,7 +13493,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         // Inform of user switch
         Intent addedIntent = new Intent(Intent.ACTION_USER_SWITCHED);
         addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
-        mContext.sendBroadcast(addedIntent, android.Manifest.permission.MANAGE_ACCOUNTS);
+        mContext.sendBroadcast(addedIntent, android.Manifest.permission.MANAGE_USERS);
 
         return true;
     }
