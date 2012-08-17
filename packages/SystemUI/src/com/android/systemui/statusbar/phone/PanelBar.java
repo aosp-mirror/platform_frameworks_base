@@ -10,22 +10,23 @@ import android.widget.FrameLayout;
 
 public class PanelBar extends FrameLayout {
     public static final boolean DEBUG = false;
-    public static final String TAG = PanelView.class.getSimpleName();
+    public static final String TAG = PanelBar.class.getSimpleName();
     public static final void LOG(String fmt, Object... args) {
         if (!DEBUG) return;
         Slog.v(TAG, String.format(fmt, args));
     }
 
+    public static final int STATE_CLOSED = 0;
+    public static final int STATE_OPENING = 1;
+    public static final int STATE_OPEN = 2;
+
     private PanelHolder mPanelHolder;
     private ArrayList<PanelView> mPanels = new ArrayList<PanelView>();
     protected PanelView mTouchingPanel;
-    private static final int STATE_CLOSED = 0;
-    private static final int STATE_TRANSITIONING = 1;
-    private static final int STATE_OPEN = 2;
     private int mState = STATE_CLOSED;
     private boolean mTracking;
 
-    private void go(int state) {
+    public void go(int state) {
         LOG("go state: %d -> %d", mState, state);
         mState = state;
     }
@@ -80,16 +81,19 @@ public class PanelBar extends FrameLayout {
 
         // figure out which panel needs to be talked to here
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            mTouchingPanel = selectPanelForTouchX(event.getX());
-            mPanelHolder.setSelectedPanel(mTouchingPanel);
-            LOG("PanelBar.onTouch: state=%d ACTION_DOWN: panel %s", mState, mTouchingPanel.getName());
-            if (mState == STATE_CLOSED || mState == STATE_OPEN) {
-                go(STATE_TRANSITIONING);
-                onPanelPeeked();
-            }
+            final PanelView panel = selectPanelForTouchX(event.getX());
+            LOG("PanelBar.onTouch: state=%d ACTION_DOWN: panel %s", mState, panel);
+            startOpeningPanel(panel);
         }
         final boolean result = mTouchingPanel.getHandle().dispatchTouchEvent(event);
         return result;
+    }
+
+    // called from PanelView when self-expanding, too
+    public void startOpeningPanel(PanelView panel) {
+        LOG("startOpeningPanel: " + panel);
+        mTouchingPanel = panel;
+        mPanelHolder.setSelectedPanel(mTouchingPanel);
     }
 
     public void panelExpansionChanged(PanelView panel, float frac) {
@@ -99,6 +103,10 @@ public class PanelBar extends FrameLayout {
         for (PanelView pv : mPanels) {
             // adjust any other panels that may be partially visible
             if (pv.getExpandedHeight() > 0f) {
+                if (mState == STATE_CLOSED) {
+                    go(STATE_OPENING);
+                    onPanelPeeked();
+                }
                 fullyClosed = false;
                 final float thisFrac = pv.getExpandedFraction();
                 LOG("panelExpansionChanged:  -> %s: f=%.1f", pv.getName(), thisFrac);
@@ -112,7 +120,7 @@ public class PanelBar extends FrameLayout {
         if (fullyOpenedPanel != null && !mTracking) {
             go(STATE_OPEN);
             onPanelFullyOpened(fullyOpenedPanel);
-        } else if (fullyClosed && !mTracking) {
+        } else if (fullyClosed && !mTracking && mState != STATE_CLOSED) {
             go(STATE_CLOSED);
             onAllPanelsCollapsed();
         }
@@ -122,12 +130,20 @@ public class PanelBar extends FrameLayout {
     }
 
     public void collapseAllPanels(boolean animate) {
+        boolean waiting = false;
         for (PanelView pv : mPanels) {
-            if (animate && pv == mTouchingPanel) {
-                mTouchingPanel.collapse();
+            if (animate && !pv.isFullyCollapsed()) {
+                pv.collapse();
+                waiting = true;
             } else {
                 pv.setExpandedFraction(0); // just in case
             }
+        }
+        if (!waiting) {
+            // it's possible that nothing animated, so we replicate the termination 
+            // conditions of panelExpansionChanged here
+            go(STATE_CLOSED);
+            onAllPanelsCollapsed();
         }
     }
 
