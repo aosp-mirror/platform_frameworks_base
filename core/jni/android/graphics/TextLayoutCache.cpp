@@ -19,6 +19,7 @@
 #include "TextLayoutCache.h"
 #include "TextLayout.h"
 #include "SkFontHost.h"
+#include "SkTypeface_android.h"
 #include <unicode/unistr.h>
 #include <unicode/normlzr.h>
 #include <unicode/uchar.h>
@@ -224,7 +225,7 @@ void TextLayoutCache::dumpCacheStats() {
  */
 TextLayoutCacheKey::TextLayoutCacheKey(): text(NULL), start(0), count(0), contextCount(0),
         dirFlags(0), typeface(NULL), textSize(0), textSkewX(0), textScaleX(0), flags(0),
-        hinting(SkPaint::kNo_Hinting)  {
+        hinting(SkPaint::kNo_Hinting), variant(SkPaint::kDefault_Variant), language()  {
 }
 
 TextLayoutCacheKey::TextLayoutCacheKey(const SkPaint* paint, const UChar* text,
@@ -237,6 +238,8 @@ TextLayoutCacheKey::TextLayoutCacheKey(const SkPaint* paint, const UChar* text,
     textScaleX = paint->getTextScaleX();
     flags = paint->getFlags();
     hinting = paint->getHinting();
+    variant = paint->getFontVariant();
+    language = paint->getLanguage();
 }
 
 TextLayoutCacheKey::TextLayoutCacheKey(const TextLayoutCacheKey& other) :
@@ -251,7 +254,9 @@ TextLayoutCacheKey::TextLayoutCacheKey(const TextLayoutCacheKey& other) :
         textSkewX(other.textSkewX),
         textScaleX(other.textScaleX),
         flags(other.flags),
-        hinting(other.hinting) {
+        hinting(other.hinting),
+        variant(other.variant),
+        language(other.language) {
     if (other.text) {
         textCopy.setTo(other.text, other.contextCount);
     }
@@ -287,6 +292,12 @@ int TextLayoutCacheKey::compare(const TextLayoutCacheKey& lhs, const TextLayoutC
 
     deltaInt = lhs.dirFlags - rhs.dirFlags;
     if (deltaInt) return (deltaInt);
+
+    deltaInt = lhs.variant - rhs.variant;
+    if (deltaInt) return (deltaInt);
+
+    if (lhs.language < rhs.language) return -1;
+    if (lhs.language > rhs.language) return +1;
 
     return memcmp(lhs.getText(), rhs.getText(), lhs.contextCount * sizeof(UChar));
 }
@@ -615,6 +626,8 @@ void TextLayoutShaper::computeRunValues(const SkPaint* paint, const UChar* chars
     mShapingPaint.setTextScaleX(paint->getTextScaleX());
     mShapingPaint.setFlags(paint->getFlags());
     mShapingPaint.setHinting(paint->getHinting());
+    mShapingPaint.setFontVariant(paint->getFontVariant());
+    mShapingPaint.setLanguage(paint->getLanguage());
 
     // Split the BiDi run into Script runs. Harfbuzz will populate the pos, length and script
     // into the shaperItem
