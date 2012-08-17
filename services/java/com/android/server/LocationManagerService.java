@@ -904,14 +904,17 @@ public class LocationManagerService extends ILocationManager.Stub implements Obs
                      request.setQuality(LocationRequest.POWER_LOW);
                      break;
              }
-             // throttle fastest interval
+             // throttle
+             if (request.getInterval() < LocationFudger.FASTEST_INTERVAL_MS) {
+                 request.setInterval(LocationFudger.FASTEST_INTERVAL_MS);
+             }
              if (request.getFastestInterval() < LocationFudger.FASTEST_INTERVAL_MS) {
                  request.setFastestInterval(LocationFudger.FASTEST_INTERVAL_MS);
              }
         }
-        // throttle interval if its faster than the fastest interval
-        if (request.getInterval () < request.getFastestInterval()) {
-            request.setInterval(request.getFastestInterval());
+        // make getFastestInterval() the minimum of interval and fastest interval
+        if (request.getFastestInterval() > request.getInterval()) {
+            request.setFastestInterval(request.getInterval());
         }
         return perm;
     }
@@ -1287,6 +1290,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Obs
     }
 
     private void handleLocationChangedLocked(Location location, boolean passive) {
+        if (D) Log.d(TAG, "incoming location: " + location);
+
         long now = SystemClock.elapsedRealtime();
         String provider = (passive ? LocationManager.PASSIVE_PROVIDER : location.getProvider());
         ArrayList<UpdateRecord> records = mRecordsByProvider.get(provider);
