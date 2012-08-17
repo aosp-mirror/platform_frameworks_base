@@ -1715,8 +1715,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             final float x = event.getX();
             final float y = event.getY();
 
+            final boolean customOrder = isChildrenDrawingOrderEnabled();
             for (int i = childrenCount - 1; i >= 0; i--) {
-                final View child = children[i];
+                final int childIndex = customOrder ? getChildDrawingOrder(childrenCount, i) : i;
+                final View child = children[childIndex];
                 if (!canViewReceivePointerEvents(child)
                         || !isTransformedTouchPointInView(x, y, child, null)) {
                     continue;
@@ -1841,8 +1843,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                         final float x = ev.getX(actionIndex);
                         final float y = ev.getY(actionIndex);
 
+                        final boolean customOrder = isChildrenDrawingOrderEnabled();
                         for (int i = childrenCount - 1; i >= 0; i--) {
-                            final View child = children[i];
+                            final int childIndex = customOrder ?
+                                    getChildDrawingOrder(childrenCount, i) : i;
+                            final View child = children[childIndex];
                             if (!canViewReceivePointerEvents(child)
                                     || !isTransformedTouchPointInView(x, y, child, null)) {
                                 continue;
@@ -1860,7 +1865,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                             if (dispatchTransformedTouchEvent(ev, false, child, idBitsToAssign)) {
                                 // Child wants to receive touch within its bounds.
                                 mLastTouchDownTime = ev.getDownTime();
-                                mLastTouchDownIndex = i;
+                                mLastTouchDownIndex = childIndex;
                                 mLastTouchDownX = ev.getX();
                                 mLastTouchDownY = ev.getY();
                                 newTouchTarget = addTouchTarget(child, idBitsToAssign);
