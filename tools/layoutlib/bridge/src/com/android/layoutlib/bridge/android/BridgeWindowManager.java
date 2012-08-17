@@ -225,7 +225,7 @@ public class BridgeWindowManager implements IWindowManager {
 
     @Override
     public void overridePendingAppTransitionThumb(Bitmap srcThumb, int startX, int startY,
-            IRemoteCallback startedCallback, boolean delayed) throws RemoteException {
+            IRemoteCallback startedCallback, boolean scaleUp) throws RemoteException {
         // TODO Auto-generated method stub
     }
 
