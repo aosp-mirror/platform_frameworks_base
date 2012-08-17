@@ -22,6 +22,7 @@ import static android.os.ParcelFileDescriptor.MODE_READ_WRITE;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -35,6 +36,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.util.AtomicFile;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -55,21 +57,16 @@ import org.xmlpull.v1.XmlSerializer;
 
 public class UserManagerService extends IUserManager.Stub {
 
-    private static final String TAG = "UserManagerService";
+    private static final String LOG_TAG = "UserManagerService";
 
     private static final String TAG_NAME = "name";
-
     private static final String ATTR_FLAGS = "flags";
-
     private static final String ATTR_ICON_PATH = "icon";
-
     private static final String ATTR_ID = "id";
-
+    private static final String ATTR_SERIAL_NO = "serialNumber";
+    private static final String ATTR_NEXT_SERIAL_NO = "nextSerialNumber";
     private static final String TAG_USERS = "users";
-
     private static final String TAG_USER = "user";
-
-    private static final String LOG_TAG = "UserManager";
 
     private static final String USER_INFO_DIR = "system" + File.separator + "users";
     private static final String USER_LIST_FILENAME = "userlist.xml";
@@ -81,6 +78,7 @@ public class UserManagerService extends IUserManager.Stub {
     private final File mUserListFile;
     private int[] mUserIds;
     private boolean mGuestEnabled;
+    private int mNextSerialNumber;
 
     private Installer mInstaller;
     private File mBaseUserPath;
@@ -125,7 +123,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public List<UserInfo> getUsers() {
-        enforceSystemOrRoot("Only the system can query users");
+        checkManageUsersPermission("query users");
         synchronized (mUsers) {
             ArrayList<UserInfo> users = new ArrayList<UserInfo>(mUsers.size());
             for (int i = 0; i < mUsers.size(); i++) {
@@ -137,7 +135,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public UserInfo getUserInfo(int userId) {
-        enforceSystemOrRoot("Only the system can query user");
+        checkManageUsersPermission("query user");
         synchronized (mUsers) {
             UserInfo info = mUsers.get(userId);
             return info;
@@ -152,7 +150,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public void setUserName(int userId, String name) {
-        enforceSystemOrRoot("Only the system can rename users");
+        checkManageUsersPermission("rename users");
         synchronized (mUsers) {
             UserInfo info = mUsers.get(userId);
             if (name != null && !name.equals(info.name)) {
@@ -164,7 +162,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public ParcelFileDescriptor setUserIcon(int userId) {
-        enforceSystemOrRoot("Only the system can update users");
+        checkManageUsersPermission("update users");
         synchronized (mUsers) {
             UserInfo info = mUsers.get(userId);
             if (info == null) return null;
@@ -178,7 +176,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public void setGuestEnabled(boolean enable) {
-        enforceSystemOrRoot("Only the system can enable guest users");
+        checkManageUsersPermission("enable guest users");
         synchronized (mUsers) {
             if (mGuestEnabled != enable) {
                 mGuestEnabled = enable;
@@ -209,7 +207,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public void wipeUser(int userHandle) {
-        enforceSystemOrRoot("Only the system can wipe users");
+        checkManageUsersPermission("wipe user");
         // TODO:
     }
 
@@ -220,10 +218,13 @@ public class UserManagerService extends IUserManager.Stub {
      * @param message used as message if SecurityException is thrown
      * @throws SecurityException if the caller is not system or root
      */
-    private static final void enforceSystemOrRoot(String message) {
+    private static final void checkManageUsersPermission(String message) {
         final int uid = Binder.getCallingUid();
-        if (uid != Process.SYSTEM_UID && uid != 0) {
-            throw new SecurityException(message);
+        if (uid != Process.SYSTEM_UID && uid != 0
+                && ActivityManager.checkComponentPermission(
+                        android.Manifest.permission.MANAGE_USERS,
+                        uid, -1, true) != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("You need MANAGE_USERS permission to: " + message);
         }
     }
 
@@ -243,7 +244,7 @@ public class UserManagerService extends IUserManager.Stub {
             info.iconPath = file.getAbsolutePath();
             return fd;
         } catch (FileNotFoundException e) {
-            Slog.w(TAG, "Error setting photo for user ", e);
+            Slog.w(LOG_TAG, "Error setting photo for user ", e);
         }
         return null;
     }
@@ -270,8 +271,9 @@ public class UserManagerService extends IUserManager.Stub {
             return;
         }
         FileInputStream fis = null;
+        AtomicFile userListFile = new AtomicFile(mUserListFile);
         try {
-            fis = new FileInputStream(mUserListFile);
+            fis = userListFile.openRead();
             XmlPullParser parser = Xml.newPullParser();
             parser.setInput(fis, null);
             int type;
@@ -286,15 +288,26 @@ public class UserManagerService extends IUserManager.Stub {
                 return;
             }
 
+            mNextSerialNumber = -1;
+            if (parser.getName().equals(TAG_USERS)) {
+                String lastSerialNumber = parser.getAttributeValue(null, ATTR_NEXT_SERIAL_NO);
+                if (lastSerialNumber != null) {
+                    mNextSerialNumber = Integer.parseInt(lastSerialNumber);
+                }
+            }
+
             while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
                 if (type == XmlPullParser.START_TAG && parser.getName().equals(TAG_USER)) {
                     String id = parser.getAttributeValue(null, ATTR_ID);
                     UserInfo user = readUser(Integer.parseInt(id));
                     if (user != null) {
                         mUsers.put(user.id, user);
-                    }
-                    if (user.isGuest()) {
-                        mGuestEnabled = true;
+                        if (user.isGuest()) {
+                            mGuestEnabled = true;
+                        }
+                        if (mNextSerialNumber < 0 || mNextSerialNumber <= user.id) {
+                            mNextSerialNumber = user.id + 1;
+                        }
                     }
                 }
             }
@@ -333,9 +346,9 @@ public class UserManagerService extends IUserManager.Stub {
      */
     private void writeUserLocked(UserInfo userInfo) {
         FileOutputStream fos = null;
+        AtomicFile userFile = new AtomicFile(new File(mUsersDir, userInfo.id + ".xml"));
         try {
-            final File mUserFile = new File(mUsersDir, userInfo.id + ".xml");
-            fos = new FileOutputStream(mUserFile);
+            fos = userFile.startWrite();
             final BufferedOutputStream bos = new BufferedOutputStream(fos);
 
             // XmlSerializer serializer = XmlUtils.serializerInstance();
@@ -346,6 +359,7 @@ public class UserManagerService extends IUserManager.Stub {
 
             serializer.startTag(null, TAG_USER);
             serializer.attribute(null, ATTR_ID, Integer.toString(userInfo.id));
+            serializer.attribute(null, ATTR_SERIAL_NO, Integer.toString(userInfo.serialNumber));
             serializer.attribute(null, ATTR_FLAGS, Integer.toString(userInfo.flags));
             if (userInfo.iconPath != null) {
                 serializer.attribute(null,  ATTR_ICON_PATH, userInfo.iconPath);
@@ -358,30 +372,26 @@ public class UserManagerService extends IUserManager.Stub {
             serializer.endTag(null, TAG_USER);
 
             serializer.endDocument();
-        } catch (IOException ioe) {
+            userFile.finishWrite(fos);
+        } catch (Exception ioe) {
             Slog.e(LOG_TAG, "Error writing user info " + userInfo.id + "\n" + ioe);
-        } finally {
-            if (fos != null) {
-                try {
-                    fos.close();
-                } catch (IOException ioe) {
-                }
-            }
+            userFile.failWrite(fos);
         }
     }
 
     /*
      * Writes the user list file in this format:
      *
-     * <users>
+     * <users nextSerialNumber="3">
      *   <user id="0"></user>
      *   <user id="2"></user>
      * </users>
      */
     private void writeUserListLocked() {
         FileOutputStream fos = null;
+        AtomicFile userListFile = new AtomicFile(mUserListFile);
         try {
-            fos = new FileOutputStream(mUserListFile);
+            fos = userListFile.startWrite();
             final BufferedOutputStream bos = new BufferedOutputStream(fos);
 
             // XmlSerializer serializer = XmlUtils.serializerInstance();
@@ -391,6 +401,7 @@ public class UserManagerService extends IUserManager.Stub {
             serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
 
             serializer.startTag(null, TAG_USERS);
+            serializer.attribute(null, ATTR_NEXT_SERIAL_NO, Integer.toString(mNextSerialNumber));
 
             for (int i = 0; i < mUsers.size(); i++) {
                 UserInfo user = mUsers.valueAt(i);
@@ -402,27 +413,24 @@ public class UserManagerService extends IUserManager.Stub {
             serializer.endTag(null, TAG_USERS);
 
             serializer.endDocument();
-        } catch (IOException ioe) {
+            userListFile.finishWrite(fos);
+        } catch (Exception e) {
+            userListFile.failWrite(fos);
             Slog.e(LOG_TAG, "Error writing user list");
-        } finally {
-            if (fos != null) {
-                try {
-                    fos.close();
-                } catch (IOException ioe) {
-                }
-            }
         }
     }
 
     private UserInfo readUser(int id) {
         int flags = 0;
+        int serialNumber = id;
         String name = null;
         String iconPath = null;
 
         FileInputStream fis = null;
         try {
-            File userFile = new File(mUsersDir, Integer.toString(id) + ".xml");
-            fis = new FileInputStream(userFile);
+            AtomicFile userFile =
+                    new AtomicFile(new File(mUsersDir, Integer.toString(id) + ".xml"));
+            fis = userFile.openRead();
             XmlPullParser parser = Xml.newPullParser();
             parser.setInput(fis, null);
             int type;
@@ -442,6 +450,10 @@ public class UserManagerService extends IUserManager.Stub {
                     Slog.e(LOG_TAG, "User id does not match the file name");
                     return null;
                 }
+                String serialNumberValue = parser.getAttributeValue(null, ATTR_SERIAL_NO);
+                if (serialNumberValue != null) {
+                    serialNumber = Integer.parseInt(serialNumberValue);
+                }
                 String flagString = parser.getAttributeValue(null, ATTR_FLAGS);
                 flags = Integer.parseInt(flagString);
                 iconPath = parser.getAttributeValue(null, ATTR_ICON_PATH);
@@ -458,6 +470,7 @@ public class UserManagerService extends IUserManager.Stub {
             }
 
             UserInfo userInfo = new UserInfo(id, name, iconPath, flags);
+            userInfo.serialNumber = serialNumber;
             return userInfo;
 
         } catch (IOException ioe) {
@@ -475,7 +488,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public UserInfo createUser(String name, int flags) {
-        enforceSystemOrRoot("Only the system can create users");
+        checkManageUsersPermission("Only the system can create users");
         int userId = getNextAvailableId();
         UserInfo userInfo = new UserInfo(userId, name, null, flags);
         File userPath = new File(mBaseUserPath, Integer.toString(userId));
@@ -483,6 +496,7 @@ public class UserManagerService extends IUserManager.Stub {
             return null;
         }
         synchronized (mUsers) {
+            userInfo.serialNumber = mNextSerialNumber++;
             mUsers.put(userId, userInfo);
             writeUserListLocked();
             writeUserLocked(userInfo);
@@ -490,8 +504,8 @@ public class UserManagerService extends IUserManager.Stub {
         }
         if (userInfo != null) {
             Intent addedIntent = new Intent(Intent.ACTION_USER_ADDED);
-            addedIntent.putExtra(Intent.EXTRA_USERID, userInfo.id);
-            mContext.sendBroadcast(addedIntent, android.Manifest.permission.MANAGE_ACCOUNTS);
+            addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userInfo.id);
+            mContext.sendBroadcast(addedIntent, android.Manifest.permission.MANAGE_USERS);
         }
         return userInfo;
     }
@@ -502,9 +516,34 @@ public class UserManagerService extends IUserManager.Stub {
      * @param id the user's id
      */
     public boolean removeUser(int userHandle) {
-        enforceSystemOrRoot("Only the system can remove users");
+        checkManageUsersPermission("Only the system can remove users");
+        boolean result;
         synchronized (mUsers) {
-            return removeUserLocked(userHandle);
+            result = removeUserLocked(userHandle);
+        }
+        // Let other services shutdown any activity
+        Intent addedIntent = new Intent(Intent.ACTION_USER_REMOVED);
+        addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userHandle);
+        mContext.sendBroadcast(addedIntent, android.Manifest.permission.MANAGE_USERS);
+        return result;
+    }
+
+    @Override
+    public int getUserSerialNumber(int userHandle) {
+        synchronized (mUsers) {
+            if (!exists(userHandle)) return -1;
+            return getUserInfo(userHandle).serialNumber;
+        }
+    }
+
+    @Override
+    public int getUserHandle(int userSerialNumber) {
+        synchronized (mUsers) {
+            for (int userId : mUserIds) {
+                if (getUserInfo(userId).serialNumber == userSerialNumber) return userId;
+            }
+            // Not found
+            return -1;
         }
     }
 
@@ -519,16 +558,11 @@ public class UserManagerService extends IUserManager.Stub {
         // Remove this user from the list
         mUsers.remove(userHandle);
         // Remove user file
-        File userFile = new File(mUsersDir, userHandle + ".xml");
+        AtomicFile userFile = new AtomicFile(new File(mUsersDir, userHandle + ".xml"));
         userFile.delete();
         // Update the user list
         writeUserListLocked();
         updateUserIdsLocked();
-
-        // Let other services shutdown any activity
-        Intent addedIntent = new Intent(Intent.ACTION_USER_REMOVED);
-        addedIntent.putExtra(Intent.EXTRA_USERID, userHandle);
-        mContext.sendBroadcast(addedIntent, android.Manifest.permission.MANAGE_ACCOUNTS);
 
         removePackageFolders(userHandle);
         return true;

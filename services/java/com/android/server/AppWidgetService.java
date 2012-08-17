@@ -177,7 +177,7 @@ class AppWidgetService extends IAppWidgetService.Stub
         mContext.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                onUserRemoved(intent.getIntExtra(Intent.EXTRA_USERID, -1));
+                onUserRemoved(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1));
             }
         }, userFilter);
     }

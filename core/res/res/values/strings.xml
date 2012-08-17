@@ -567,6 +567,11 @@
     <string name="permdesc_interactAcrossUsersFull">Allows all possible interactions across
         users.</string>
 
+    <!--  Title of an application permission, listed so the user can choose whether they want to allow the application to create/remove/query users. [CHAR LIMIT=none] -->
+    <string name="permlab_manageUsers">manage users</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to create/remove/query users. [CHAR LIMIT=NONE] -->
+    <string name="permdesc_manageUsers">Allows apps to manage users on the device, including query, creation and deletion.</string>
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=50] -->
     <string name="permlab_getDetailedTasks">retrieve details of running apps</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE] -->

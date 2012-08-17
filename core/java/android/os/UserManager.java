@@ -209,4 +209,40 @@ public class UserManager {
     public int getMaxSupportedUsers() {
         return mContext.getResources().getInteger(R.integer.config_multiuserMaximumUsers);
     }
+
+    /**
+     * Returns a serial number on this device for a given userHandle. User handles can be recycled
+     * when deleting and creating users, but serial numbers are not reused until the device is wiped.
+     * @param userHandle
+     * @return a serial number associated with that user, or -1 if the userHandle is not valid.
+     * @hide
+     */
+    public int getUserSerialNumber(int userHandle) {
+        try {
+            return mService.getUserSerialNumber(userHandle);
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not get serial number for user " + userHandle);
+        }
+        return -1;
+    }
+
+    /**
+     * Returns a userHandle on this device for a given user serial number. User handles can be
+     * recycled when deleting and creating users, but serial numbers are not reused until the device
+     * is wiped.
+     * @param userSerialNumber
+     * @return the userHandle associated with that user serial number, or -1 if the serial number
+     * is not valid.
+     * @hide
+     */
+    public int getUserHandle(int userSerialNumber) {
+        try {
+            return mService.getUserHandle(userSerialNumber);
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not get userHandle for user " + userSerialNumber);
+        }
+        return -1;
+    }
+
+
 }

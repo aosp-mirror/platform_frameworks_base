@@ -766,7 +766,6 @@
         android:protectionLevel="dangerous"
         android:label="@string/permlab_getTasks"
         android:description="@string/permdesc_getTasks" />
-
     <!-- Allows an application to call APIs that allow it to do interactions
          across the users on the device, using singleton services and
          user-targeted broadcasts.  This permission is not available to
@@ -786,6 +785,15 @@
         android:label="@string/permlab_interactAcrossUsersFull"
         android:description="@string/permdesc_interactAcrossUsersFull" />
 
+    <!-- Allows an application to call APIs that allow it to query and manage
+         users on the device. This permission is not available to
+         third party applications. -->
+    <permission android:name="android.permission.MANAGE_USERS"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:protectionLevel="signature"
+        android:label="@string/permlab_manageUsers"
+        android:description="@string/permdesc_manageUsers" />
+    
     <!-- Allows an application to get full detailed information about
          recently running tasks, with full fidelity to the real state.
          @hide -->

@@ -96,7 +96,7 @@ public class ClipboardService extends IClipboard.Stub {
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
                 if (Intent.ACTION_USER_REMOVED.equals(action)) {
-                    removeClipboard(intent.getIntExtra(Intent.EXTRA_USERID, 0));
+                    removeClipboard(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0));
                 }
             }
         }, userFilter);
