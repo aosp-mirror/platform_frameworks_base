@@ -2422,6 +2422,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 final int M = prefs.size();
                 for (int i=0; i<M; i++) {
                     final PreferredActivity pa = prefs.get(i);
+                    if (pa.mUserId != userId) {
+                        continue;
+                    }
                     if (pa.mPref.mMatch != match) {
                         continue;
                     }
@@ -7645,7 +7648,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                             mSettings.updateSharedUserPermsLPw(deletedPs, mGlobalGids);
                         }
                     }
-                    clearPackagePreferredActivitiesLPw(deletedPs.name);
+                    clearPackagePreferredActivitiesLPw(deletedPs.name, UserHandle.USER_ALL);
                 }
             }
             // can downgrade to reader
@@ -8112,26 +8115,28 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
     
     public void addPreferredActivity(IntentFilter filter, int match,
-            ComponentName[] set, ComponentName activity) {
+            ComponentName[] set, ComponentName activity, int userId) {
         // writer
+        int callingUid = Binder.getCallingUid();
+        checkValidCaller(callingUid, userId);
         synchronized (mPackages) {
             if (mContext.checkCallingOrSelfPermission(
                     android.Manifest.permission.SET_PREFERRED_APPLICATIONS)
                     != PackageManager.PERMISSION_GRANTED) {
-                if (getUidTargetSdkVersionLockedLPr(Binder.getCallingUid())
+                if (getUidTargetSdkVersionLockedLPr(callingUid)
                         < Build.VERSION_CODES.FROYO) {
                     Slog.w(TAG, "Ignoring addPreferredActivity() from uid "
-                            + Binder.getCallingUid());
+                            + callingUid);
                     return;
                 }
                 mContext.enforceCallingOrSelfPermission(
                         android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
             }
-            
-            Slog.i(TAG, "Adding preferred activity " + activity + ":");
+
+            Slog.i(TAG, "Adding preferred activity " + activity + " for user " + userId + " :");
             filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
             mSettings.mPreferredActivities.addFilter(
-                    new PreferredActivity(filter, match, set, activity));
+                    new PreferredActivity(filter, match, set, activity, userId));
             scheduleWriteSettingsLocked();            
         }
     }
@@ -8167,13 +8172,15 @@ public class PackageManagerService extends IPackageManager.Stub {
                 mContext.enforceCallingOrSelfPermission(
                         android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
             }
-            
+
+            final int callingUserId = UserHandle.getCallingUserId();
             ArrayList<PreferredActivity> removed = null;
             Iterator<PreferredActivity> it = mSettings.mPreferredActivities.filterIterator();
             String action = filter.getAction(0);
             String category = filter.getCategory(0);
             while (it.hasNext()) {
                 PreferredActivity pa = it.next();
+                if (pa.mUserId != callingUserId) continue;
                 if (pa.getAction(0).equals(action) && pa.getCategory(0).equals(category)) {
                     if (removed == null) {
                         removed = new ArrayList<PreferredActivity>();
@@ -8189,7 +8196,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     mSettings.mPreferredActivities.removeFilter(pa);
                 }
             }
-            addPreferredActivity(filter, match, set, activity);
+            addPreferredActivity(filter, match, set, activity, callingUserId);
         }
     }
 
@@ -8213,17 +8220,21 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             }
 
-            if (clearPackagePreferredActivitiesLPw(packageName)) {
+            if (clearPackagePreferredActivitiesLPw(packageName, UserHandle.getCallingUserId())) {
                 scheduleWriteSettingsLocked();            
             }
         }
     }
 
-    boolean clearPackagePreferredActivitiesLPw(String packageName) {
+    /** This method takes a specific user id as well as UserHandle.USER_ALL. */
+    boolean clearPackagePreferredActivitiesLPw(String packageName, int userId) {
         ArrayList<PreferredActivity> removed = null;
         Iterator<PreferredActivity> it = mSettings.mPreferredActivities.filterIterator();
         while (it.hasNext()) {
             PreferredActivity pa = it.next();
+            if (userId != UserHandle.USER_ALL && pa.mUserId != userId) {
+                continue;
+            }
             if (pa.mPref.mComponent.getPackageName().equals(packageName)) {
                 if (removed == null) {
                     removed = new ArrayList<PreferredActivity>();
@@ -8245,11 +8256,15 @@ public class PackageManagerService extends IPackageManager.Stub {
             List<ComponentName> outActivities, String packageName) {
 
         int num = 0;
+        final int userId = UserHandle.getCallingUserId();
         // reader
         synchronized (mPackages) {
             final Iterator<PreferredActivity> it = mSettings.mPreferredActivities.filterIterator();
             while (it.hasNext()) {
                 final PreferredActivity pa = it.next();
+                if (pa.mUserId != userId) {
+                    continue;
+                }
                 if (packageName == null
                         || pa.mPref.mComponent.getPackageName().equals(packageName)) {
                     if (outFilters != null) {

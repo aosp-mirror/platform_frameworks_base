@@ -200,7 +200,7 @@ interface IPackageManager {
     List<PackageInfo> getPreferredPackages(int flags);
 
     void addPreferredActivity(in IntentFilter filter, int match,
-            in ComponentName[] set, in ComponentName activity);
+            in ComponentName[] set, in ComponentName activity, int userId);
 
     void replacePreferredActivity(in IntentFilter filter, int match,
             in ComponentName[] set, in ComponentName activity);
