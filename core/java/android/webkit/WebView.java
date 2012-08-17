@@ -1403,7 +1403,6 @@ public class WebView extends AbsoluteLayout
      * @return the address, or if no address is found, null
      */
     public static String findAddress(String addr) {
-        checkThread();
         return getFactory().getStatics().findAddress(addr);
     }
 
