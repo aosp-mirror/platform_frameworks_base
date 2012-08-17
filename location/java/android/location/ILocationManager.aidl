@@ -45,7 +45,7 @@ interface ILocationManager
             in PendingIntent intent, String packageName);
     void removeGeofence(in Geofence fence, in PendingIntent intent, String packageName);
 
-    Location getLastLocation(in LocationRequest request);
+    Location getLastLocation(in LocationRequest request, String packageName);
 
     boolean addGpsStatusListener(IGpsStatusListener listener);
     void removeGpsStatusListener(IGpsStatusListener listener);
