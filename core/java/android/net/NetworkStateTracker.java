@@ -69,6 +69,12 @@ public interface NetworkStateTracker {
     public static final int EVENT_RESTORE_DEFAULT_NETWORK = 6;
 
     /**
+     * msg.what = EVENT_NETWORK_SUBTYPE_CHANGED
+     * msg.obj = NetworkInfo object
+     */
+    public static final int EVENT_NETWORK_SUBTYPE_CHANGED = 7;
+
+    /**
      * -------------------------------------------------------------
      * Control Interface
      * -------------------------------------------------------------

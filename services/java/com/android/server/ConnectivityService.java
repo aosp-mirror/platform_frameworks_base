@@ -2490,6 +2490,11 @@ private NetworkStateTracker makeWimaxStateTracker() {
                     //       @see bug/4455071
                     handleConnectivityChange(info.getType(), false);
                     break;
+                case NetworkStateTracker.EVENT_NETWORK_SUBTYPE_CHANGED:
+                    info = (NetworkInfo) msg.obj;
+                    type = info.getType();
+                    updateNetworkSettings(mNetTrackers[type]);
+                    break;
                 case EVENT_CLEAR_NET_TRANSITION_WAKELOCK:
                     String causedBy = null;
                     synchronized (ConnectivityService.this) {
