@@ -3872,7 +3872,7 @@ package android.app {
     method public static android.app.PendingIntent getService(android.content.Context, int, android.content.Intent, int);
     method public java.lang.String getTargetPackage();
     method public int getTargetUid();
-    method public int getTargetUserHandle();
+    method public android.os.UserHandle getTargetUserHandle();
     method public static android.app.PendingIntent readPendingIntentOrNullFromParcel(android.os.Parcel);
     method public void send() throws android.app.PendingIntent.CanceledException;
     method public void send(int) throws android.app.PendingIntent.CanceledException;
@@ -5324,10 +5324,10 @@ package android.content {
     method public abstract void revokeUriPermission(android.net.Uri, int);
     method public abstract void sendBroadcast(android.content.Intent);
     method public abstract void sendBroadcast(android.content.Intent, java.lang.String);
-    method public abstract void sendBroadcastToUser(android.content.Intent, int);
+    method public abstract void sendBroadcastAsUser(android.content.Intent, android.os.UserHandle);
     method public abstract void sendOrderedBroadcast(android.content.Intent, java.lang.String);
     method public abstract void sendOrderedBroadcast(android.content.Intent, java.lang.String, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
-    method public abstract void sendOrderedBroadcastToUser(android.content.Intent, int, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
+    method public abstract void sendOrderedBroadcastAsUser(android.content.Intent, android.os.UserHandle, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
     method public abstract void sendStickyBroadcast(android.content.Intent);
     method public abstract void sendStickyOrderedBroadcast(android.content.Intent, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
     method public abstract void setTheme(int);
@@ -5461,10 +5461,10 @@ package android.content {
     method public void revokeUriPermission(android.net.Uri, int);
     method public void sendBroadcast(android.content.Intent);
     method public void sendBroadcast(android.content.Intent, java.lang.String);
-    method public void sendBroadcastToUser(android.content.Intent, int);
+    method public void sendBroadcastAsUser(android.content.Intent, android.os.UserHandle);
     method public void sendOrderedBroadcast(android.content.Intent, java.lang.String);
     method public void sendOrderedBroadcast(android.content.Intent, java.lang.String, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
-    method public void sendOrderedBroadcastToUser(android.content.Intent, int, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
+    method public void sendOrderedBroadcastAsUser(android.content.Intent, android.os.UserHandle, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
     method public void sendStickyBroadcast(android.content.Intent);
     method public void sendStickyOrderedBroadcast(android.content.Intent, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
     method public void setTheme(int);
@@ -5990,7 +5990,7 @@ package android.content {
     method public int describeContents();
     method public java.lang.String getTargetPackage();
     method public int getTargetUid();
-    method public int getTargetUserHandle();
+    method public android.os.UserHandle getTargetUserHandle();
     method public static android.content.IntentSender readIntentSenderOrNullFromParcel(android.os.Parcel);
     method public void sendIntent(android.content.Context, int, android.content.Intent, android.content.IntentSender.OnFinished, android.os.Handler) throws android.content.IntentSender.SendIntentException;
     method public void sendIntent(android.content.Context, int, android.content.Intent, android.content.IntentSender.OnFinished, android.os.Handler, java.lang.String) throws android.content.IntentSender.SendIntentException;
@@ -16302,7 +16302,7 @@ package android.os {
     method public static final int myPid();
     method public static final int myTid();
     method public static final int myUid();
-    method public static final int myUserHandle();
+    method public static final android.os.UserHandle myUserHandle();
     method public static final void sendSignal(int, int);
     method public static final void setThreadPriority(int, int) throws java.lang.IllegalArgumentException, java.lang.SecurityException;
     method public static final void setThreadPriority(int) throws java.lang.IllegalArgumentException, java.lang.SecurityException;
@@ -16455,6 +16455,15 @@ package android.os {
 
   public class TransactionTooLargeException extends android.os.RemoteException {
     ctor public TransactionTooLargeException();
+  }
+
+  public final class UserHandle implements android.os.Parcelable {
+    ctor public UserHandle(android.os.Parcel);
+    method public int describeContents();
+    method public static android.os.UserHandle readFromParcel(android.os.Parcel);
+    method public void writeToParcel(android.os.Parcel, int);
+    method public static void writeToParcel(android.os.UserHandle, android.os.Parcel);
+    field public static final android.os.Parcelable.Creator CREATOR;
   }
 
   public class UserManager {
@@ -21206,10 +21215,10 @@ package android.test.mock {
     method public void revokeUriPermission(android.net.Uri, int);
     method public void sendBroadcast(android.content.Intent);
     method public void sendBroadcast(android.content.Intent, java.lang.String);
-    method public void sendBroadcastToUser(android.content.Intent, int);
+    method public void sendBroadcastAsUser(android.content.Intent, android.os.UserHandle);
     method public void sendOrderedBroadcast(android.content.Intent, java.lang.String);
     method public void sendOrderedBroadcast(android.content.Intent, java.lang.String, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
-    method public void sendOrderedBroadcastToUser(android.content.Intent, int, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
+    method public void sendOrderedBroadcastAsUser(android.content.Intent, android.os.UserHandle, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
     method public void sendStickyBroadcast(android.content.Intent);
     method public void sendStickyOrderedBroadcast(android.content.Intent, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
     method public void setTheme(int);

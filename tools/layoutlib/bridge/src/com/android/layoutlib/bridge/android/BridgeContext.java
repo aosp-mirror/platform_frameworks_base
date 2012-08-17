@@ -61,6 +61,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
+import android.os.UserHandle;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -1193,12 +1194,12 @@ public final class BridgeContext extends Context {
     }
 
     @Override
-    public void sendBroadcastToUser(Intent intent, int userId) {
+    public void sendBroadcastAsUser(Intent intent, UserHandle user) {
         // pass
     }
 
     @Override
-    public void sendOrderedBroadcastToUser(Intent intent, int userId,
+    public void sendOrderedBroadcastAsUser(Intent intent, UserHandle user,
             BroadcastReceiver resultReceiver, Handler scheduler,
             int initialCode, String initialData, Bundle initialExtras) {
         // pass

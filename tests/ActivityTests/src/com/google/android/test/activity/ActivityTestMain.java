@@ -30,6 +30,7 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.graphics.Bitmap;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -187,7 +188,7 @@ public class ActivityTestMain extends Activity {
         menu.add("Send to user 1!").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override public boolean onMenuItemClick(MenuItem item) {
                 Intent intent = new Intent(ActivityTestMain.this, UserTarget.class);
-                sendOrderedBroadcastToUser(intent, 1, new BroadcastResultReceiver(), 
+                sendOrderedBroadcastAsUser(intent, new UserHandle(1), new BroadcastResultReceiver(), 
                         null, Activity.RESULT_OK, null, null);
                 return true;
             }

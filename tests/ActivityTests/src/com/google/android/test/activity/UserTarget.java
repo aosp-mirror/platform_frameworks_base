@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Process;
+import android.os.UserHandle;
 import android.util.Log;
 
 public class UserTarget extends BroadcastReceiver {
@@ -28,7 +29,7 @@ public class UserTarget extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         Log.i("ActivityTest", "Received: " + intent);
         Bundle res = getResultExtras(true);
-        res.putInt("user", Process.myUserHandle());
+        res.putInt("user", UserHandle.myUserId());
         setResultExtras(res);
     }
 }
