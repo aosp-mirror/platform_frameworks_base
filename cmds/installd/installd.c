@@ -407,6 +407,35 @@ int initialize_directories() {
                 goto fail;
             }
         }
+
+        // Ensure media directories for any existing users
+        DIR *dir;
+        struct dirent *dirent;
+        char user_media_dir[PATH_MAX];
+
+        dir = opendir(user_data_dir);
+        if (dir != NULL) {
+            while ((dirent = readdir(dir))) {
+                if (dirent->d_type == DT_DIR) {
+                    const char *name = dirent->d_name;
+
+                    // skip "." and ".."
+                    if (name[0] == '.') {
+                        if (name[1] == 0) continue;
+                        if ((name[1] == '.') && (name[2] == 0)) continue;
+                    }
+
+                    // /data/media/<user_id>
+                    snprintf(user_media_dir, PATH_MAX, "%s%s", android_media_dir.path, name);
+                    if (ensure_dir(user_media_dir, 0770, AID_MEDIA_RW, AID_MEDIA_RW) == -1) {
+                        ALOGE("Failed to ensure %s: %s", user_media_dir, strerror(errno));
+                        goto fail;
+                    }
+                }
+            }
+            closedir(dir);
+        }
+
         version = 1;
     }
 
