@@ -78,12 +78,9 @@ status_t ChromiumHTTPDataSource::connect_l(
         disconnect_l();
     }
 
-    if (!(mFlags & kFlagIncognito)) {
-        LOG_PRI(ANDROID_LOG_INFO, LOG_TAG, "connect to %s @%lld", uri, offset);
-    } else {
-        LOG_PRI(ANDROID_LOG_INFO, LOG_TAG,
-                "connect to <URL suppressed> @%lld", offset);
-    }
+    // Don't log uri
+    LOG_PRI(ANDROID_LOG_INFO, LOG_TAG,
+            "connect to <URL suppressed> @%lld", offset);
 
     mURI = uri;
     mContentType = String8("application/octet-stream");
