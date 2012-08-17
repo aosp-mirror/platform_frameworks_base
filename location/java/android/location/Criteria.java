@@ -24,7 +24,9 @@ import android.os.Parcelable;
  * location provider.  Providers maybe ordered according to accuracy,
  * power usage, ability to report altitude, speed,
  * and bearing, and monetary cost.
- * @deprecated {@link LocationRequest} instead
+ *
+ * @deprecated use {@link LocationRequest} instead, and also see notes
+ * at {@link LocationManager}
  */
 @Deprecated
 public class Criteria implements Parcelable {

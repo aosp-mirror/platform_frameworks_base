@@ -22,7 +22,6 @@ import java.util.HashMap;
 
 import com.android.location.provider.ProviderRequestUnbundled;
 
-
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
