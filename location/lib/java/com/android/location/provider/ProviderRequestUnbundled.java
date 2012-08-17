@@ -23,9 +23,11 @@ import android.location.LocationRequest;
 import com.android.internal.location.ProviderRequest;
 
 /**
- * This class is a public API for unbundled providers,
- * that hides the (hidden framework) ProviderRequest.
- * <p>Do _not_ remove public methods on this class.
+ * This class is an interface to Provider Requests for unbundled applications.
+ *
+ * <p>IMPORTANT: This class is effectively a public API for unbundled
+ * applications, and must remain API stable. See README.txt in the root
+ * of this package for more information.
  */
 public final class ProviderRequestUnbundled {
     private final ProviderRequest mRequest;

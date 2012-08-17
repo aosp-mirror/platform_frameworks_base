@@ -25,12 +25,14 @@ import android.location.IGeocodeProvider;
 import java.util.List;
 
 /**
- * An abstract superclass for geocode providers that are implemented
- * outside of the core android platform.
- * Geocode providers can be implemented as services and return the result of
+ * Base class for geocode providers implemented as unbundled services.
+ *
+ * <p>Geocode providers can be implemented as services and return the result of
  * {@link GeocodeProvider#getBinder()} in its getBinder() method.
  *
- * @hide
+ * <p>IMPORTANT: This class is effectively a public API for unbundled
+ * applications, and must remain API stable. See README.txt in the root
+ * of this package for more information.
  */
 public abstract class GeocodeProvider {
 
