@@ -82,7 +82,8 @@ public class SearchPanelView extends FrameLayout implements
                     R.anim.search_launch_enter, R.anim.search_launch_exit,
                     getHandler(), this);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            mContext.startActivityAsUser(intent, opts.toBundle(), UserHandle.USER_CURRENT);
+            mContext.startActivityAsUser(intent, opts.toBundle(),
+                    new UserHandle(UserHandle.USER_CURRENT));
         } catch (ActivityNotFoundException e) {
             Slog.w(TAG, "Activity not found for " + intent.getAction());
             onAnimationStarted();

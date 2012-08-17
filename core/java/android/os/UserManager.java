@@ -51,7 +51,7 @@ public class UserManager {
      * @hide
      * */
     public int getUserHandle() {
-        return Process.myUserHandle();
+        return UserHandle.myUserId();
     }
 
     /**

@@ -18,30 +18,32 @@ package android.os;
 
 /**
  * Representation of a user on the device.
- * @hide
  */
-public final class UserHandle {
+public final class UserHandle implements Parcelable {
     /**
-     * Range of IDs allocated for a user.
-     *
-     * @hide
+     * @hide Range of uids allocated for a user.
      */
     public static final int PER_USER_RANGE = 100000;
 
-    /** A user id to indicate all users on the device */
+    /** @hide A user id to indicate all users on the device */
     public static final int USER_ALL = -1;
 
-    /** A user id to indicate the currently active user */
+    /** @hide A user id to indicate the currently active user */
     public static final int USER_CURRENT = -2;
 
-    /** A user id constant to indicate the "owner" user of the device */
+    /** @hide An undefined user id */
+    public static final int USER_NULL = -10000;
+
+    /** @hide A user id constant to indicate the "owner" user of the device */
     public static final int USER_OWNER = 0;
 
     /**
-     * Enable multi-user related side effects. Set this to false if there are problems with single
-     * user usecases.
-     * */
+     * @hide Enable multi-user related side effects. Set this to false if
+     * there are problems with single user use-cases.
+     */
     public static final boolean MU_ENABLED = true;
+
+    final int mHandle;
 
     /**
      * Checks to see if the user id is the same for the two uids, i.e., they belong to the same
@@ -64,11 +66,13 @@ public final class UserHandle {
         return getAppId(uid1) == getAppId(uid2);
     }
 
+    /** @hide */
     public static final boolean isIsolated(int uid) {
         uid = getAppId(uid);
         return uid >= Process.FIRST_ISOLATED_UID && uid <= Process.LAST_ISOLATED_UID;
     }
 
+    /** @hide */
     public static boolean isApp(int uid) {
         if (uid > 0) {
             uid = UserHandle.getAppId(uid);
@@ -90,6 +94,7 @@ public final class UserHandle {
         }
     }
 
+    /** @hide */
     public static final int getCallingUserId() {
         return getUserId(Binder.getCallingUid());
     }
@@ -117,8 +122,107 @@ public final class UserHandle {
     /**
      * Returns the user id of the current process
      * @return user id of the current process
+     * @hide
      */
     public static final int myUserId() {
         return getUserId(Process.myUid());
+    }
+
+    /** @hide */
+    public UserHandle(int h) {
+        mHandle = h;
+    }
+
+    /** @hide */
+    public int getIdentifier() {
+        return mHandle;
+    }
+
+    @Override
+    public String toString() {
+        return "UserHandle{" + mHandle + "}";
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        try {
+            if (obj != null) {
+                UserHandle other = (UserHandle)obj;
+                return mHandle == other.mHandle;
+            }
+        } catch (ClassCastException e) {
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return mHandle;
+    }
+    
+    public int describeContents() {
+        return 0;
+    }
+
+    public void writeToParcel(Parcel out, int flags) {
+        out.writeInt(mHandle);
+    }
+
+    /**
+     * Write a UserHandle to a Parcel, handling null pointers.  Must be
+     * read with {@link #readFromParcel(Parcel)}.
+     * 
+     * @param h The UserHandle to be written.
+     * @param out The Parcel in which the UserHandle will be placed.
+     * 
+     * @see #readFromParcel(Parcel)
+     */
+    public static void writeToParcel(UserHandle h, Parcel out) {
+        if (h != null) {
+            h.writeToParcel(out, 0);
+        } else {
+            out.writeInt(USER_NULL);
+        }
+    }
+    
+    /**
+     * Read a UserHandle from a Parcel that was previously written
+     * with {@link #writeToParcel(UserHandle, Parcel)}, returning either
+     * a null or new object as appropriate.
+     * 
+     * @param in The Parcel from which to read the UserHandle
+     * @return Returns a new UserHandle matching the previously written
+     * object, or null if a null had been written.
+     * 
+     * @see #writeToParcel(UserHandle, Parcel)
+     */
+    public static UserHandle readFromParcel(Parcel in) {
+        int h = in.readInt();
+        return h != USER_NULL ? new UserHandle(h) : null;
+    }
+    
+    public static final Parcelable.Creator<UserHandle> CREATOR
+            = new Parcelable.Creator<UserHandle>() {
+        public UserHandle createFromParcel(Parcel in) {
+            return new UserHandle(in);
+        }
+
+        public UserHandle[] newArray(int size) {
+            return new UserHandle[size];
+        }
+    };
+
+    /**
+     * Instantiate a new UserHandle from the data in a Parcel that was
+     * previously written with {@link #writeToParcel(Parcel, int)}.  Note that you
+     * must not use this with data written by
+     * {@link #writeToParcel(UserHandle, Parcel)} since it is not possible
+     * to handle a null UserHandle here.
+     * 
+     * @param in The Parcel containing the previously written UserHandle,
+     * positioned at the location in the buffer where it was written.
+     */
+    public UserHandle(Parcel in) {
+        mHandle = in.readInt();
     }
 }

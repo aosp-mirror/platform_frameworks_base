@@ -32,6 +32,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.UserHandle;
 import android.util.AttributeSet;
 
 import java.io.File;
@@ -855,11 +856,11 @@ public abstract class Context {
      * Same as {@link #startActivity(Intent)}, but for a specific user. It requires holding
      * the {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL} permission.
      * @param intent The description of the activity to start.
-     * @param userId The user id of the user to start this activity for.
+     * @param user The UserHandle of the user to start this activity for.
      * @throws ActivityNotFoundException
      * @hide
      */
-    public void startActivityAsUser(Intent intent, int userId) {
+    public void startActivityAsUser(Intent intent, UserHandle user) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
@@ -898,11 +899,11 @@ public abstract class Context {
      * May be null if there are no options.  See {@link android.app.ActivityOptions}
      * for how to build the Bundle supplied here; there are no supported definitions
      * for building it manually.
-     * @param userId The user id of the user to start this activity for.
+     * @param user The UserHandle of the user to start this activity for.
      * @throws ActivityNotFoundException
      * @hide
      */
-    public void startActivityAsUser(Intent intent, Bundle options, int userId) {
+    public void startActivityAsUser(Intent intent, Bundle options, UserHandle userId) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
@@ -1119,10 +1120,10 @@ public abstract class Context {
      * requires holding the {@link android.Manifest.permission#INTERACT_ACROSS_USERS}
      * permission.
      * @param intent The intent to broadcast
-     * @param userHandle User to send the intent to.
+     * @param user UserHandle to send the intent to.
      * @see #sendBroadcast(Intent)
      */
-    public abstract void sendBroadcastToUser(Intent intent, int userHandle);
+    public abstract void sendBroadcastAsUser(Intent intent, UserHandle user);
 
     /**
      * Same as
@@ -1136,7 +1137,7 @@ public abstract class Context {
      *
      * @param intent The Intent to broadcast; all receivers matching this
      *               Intent will receive the broadcast.
-     * @param userHandle User to send the intent to.
+     * @param user UserHandle to send the intent to.
      * @param resultReceiver Your own BroadcastReceiver to treat as the final
      *                       receiver of the broadcast.
      * @param scheduler A custom Handler with which to schedule the
@@ -1151,7 +1152,7 @@ public abstract class Context {
      *
      * @see #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)
      */
-    public abstract void sendOrderedBroadcastToUser(Intent intent, int userHandle,
+    public abstract void sendOrderedBroadcastAsUser(Intent intent, UserHandle user,
             BroadcastReceiver resultReceiver, Handler scheduler,
             int initialCode, String initialData, Bundle initialExtras);
 

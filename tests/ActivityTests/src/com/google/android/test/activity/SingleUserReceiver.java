@@ -21,12 +21,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Process;
+import android.os.UserHandle;
 
 public class SingleUserReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Bundle res = getResultExtras(true);
-        res.putInt("user", Process.myUserHandle());
+        res.putInt("user", UserHandle.myUserId());
         setResultExtras(res);
     }
 }
