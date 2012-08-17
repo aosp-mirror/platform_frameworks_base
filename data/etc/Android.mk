@@ -21,8 +21,6 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := platform.xml
 
-LOCAL_MODULE_TAGS := user
-
 LOCAL_MODULE_CLASS := ETC
 
 # This will install the file in /system/etc/permissions
@@ -37,8 +35,6 @@ include $(BUILD_PREBUILT)
 #include $(CLEAR_VARS)
 
 #LOCAL_MODULE := required_hardware.xml
-
-#LOCAL_MODULE_TAGS := user
 
 #LOCAL_MODULE_CLASS := ETC
 
