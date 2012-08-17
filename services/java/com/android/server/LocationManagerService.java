@@ -63,6 +63,7 @@ import com.android.internal.location.ProviderRequest;
 import com.android.server.location.GeocoderProxy;
 import com.android.server.location.GeofenceManager;
 import com.android.server.location.GpsLocationProvider;
+import com.android.server.location.LocationBlacklist;
 import com.android.server.location.LocationFudger;
 import com.android.server.location.LocationProviderInterface;
 import com.android.server.location.LocationProviderProxy;
@@ -132,8 +133,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Obs
     private IGpsStatusProvider mGpsStatusProvider;
     private INetInitiatedListener mNetInitiatedListener;
     private LocationWorkerHandler mLocationHandler;
-    // track the passive provider for some special cases
-    private PassiveProvider mPassiveProvider;
+    private PassiveProvider mPassiveProvider;  // track passive provider for special cases
+    private LocationBlacklist mBlacklist;
 
     // --- fields below are protected by mWakeLock ---
     private int mPendingBroadcasts;
@@ -208,7 +209,9 @@ public class LocationManagerService extends ILocationManager.Stub implements Obs
         synchronized (mLock) {
             loadProvidersLocked();
         }
-        mGeofenceManager = new GeofenceManager(mContext);
+        mBlacklist = new LocationBlacklist(mContext, mLocationHandler);
+        mBlacklist.init();
+        mGeofenceManager = new GeofenceManager(mContext, mBlacklist);
         mLocationFudger = new LocationFudger();
 
         // Register for Network (Wifi or Mobile) updates
@@ -1063,10 +1066,17 @@ public class LocationManagerService extends ILocationManager.Stub implements Obs
     }
 
     @Override
-    public Location getLastLocation(LocationRequest request) {
+    public Location getLastLocation(LocationRequest request, String packageName) {
         if (D) Log.d(TAG, "getLastLocation: " + request);
         if (request == null) request = DEFAULT_LOCATION_REQUEST;
         String perm = checkPermissionAndRequest(request);
+        checkPackageName(packageName);
+
+        if (mBlacklist.isBlacklisted(packageName)) {
+            if (D) Log.d(TAG, "not returning last loc for blacklisted app: " +
+                    packageName);
+            return null;
+        }
 
         synchronized (mLock) {
             // Figure out the provider. Either its explicitly request (deprecated API's),
@@ -1325,6 +1335,13 @@ public class LocationManagerService extends ILocationManager.Stub implements Obs
         for (UpdateRecord r : records) {
             Receiver receiver = r.mReceiver;
             boolean receiverDead = false;
+
+            if (mBlacklist.isBlacklisted(receiver.mPackageName)) {
+                if (D) Log.d(TAG, "skipping loc update for blacklisted app: " +
+                        receiver.mPackageName);
+                continue;
+            }
+
             if (ACCESS_FINE_LOCATION.equals(receiver.mPermission)) {
                 location = lastLocation;  // use fine location
             } else {
@@ -1716,8 +1733,9 @@ public class LocationManagerService extends ILocationManager.Stub implements Obs
                 for (String i : mDisabledProviders) {
                     pw.println("    " + i);
                 }
-
             }
+            pw.append("  ");
+            mBlacklist.dump(pw);
             if (mMockProviders.size() > 0) {
                 pw.println("  Mock Providers:");
                 for (Map.Entry<String, MockProvider> i : mMockProviders.entrySet()) {

@@ -34,9 +34,13 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.SystemClock;
+import android.util.Log;
+
+import com.android.server.LocationManagerService;
 
 public class GeofenceManager implements LocationListener, PendingIntent.OnFinished {
     private static final String TAG = "GeofenceManager";
+    private static final boolean D = LocationManagerService.D;
 
     /**
      * Assume a maximum land speed, as a heuristic to throttle location updates.
@@ -49,6 +53,7 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
     private final LocationManager mLocationManager;
     private final PowerManager.WakeLock mWakeLock;
     private final Looper mLooper;  // looper thread to take location updates on
+    private final LocationBlacklist mBlacklist;
 
     private Object mLock = new Object();
 
@@ -56,12 +61,13 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
     private Location mLastLocation;
     private List<GeofenceState> mFences = new LinkedList<GeofenceState>();
 
-    public GeofenceManager(Context context) {
+    public GeofenceManager(Context context, LocationBlacklist blacklist) {
         mContext = context;
         mLocationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
         PowerManager powerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
         mLooper = Looper.myLooper();
+        mBlacklist = blacklist;
 
         LocationRequest request = new LocationRequest()
                 .setQuality(LocationRequest.POWER_NONE)
@@ -145,6 +151,12 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
             removeExpiredFencesLocked();
 
             for (GeofenceState state : mFences) {
+                if (mBlacklist.isBlacklisted(state.mPackageName)) {
+                    if (D) Log.d(TAG, "skipping geofence processing for blacklisted app: " +
+                            state.mPackageName);
+                    continue;
+                }
+
                 int event = state.processLocation(location);
                 if ((event & GeofenceState.FLAG_ENTER) != 0) {
                     enterIntents.add(state.mIntent);

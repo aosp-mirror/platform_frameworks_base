@@ -1174,8 +1174,10 @@ public class LocationManager {
      * @throws SecurityException if no suitable permission is present
      */
     public Location getLastLocation() {
+        String packageName = mContext.getPackageName();
+
         try {
-            return mService.getLastLocation(null);
+            return mService.getLastLocation(null, packageName);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException", e);
             return null;
@@ -1204,12 +1206,12 @@ public class LocationManager {
     @Deprecated
     public Location getLastKnownLocation(String provider) {
         checkProvider(provider);
-
+        String packageName = mContext.getPackageName();
         LocationRequest request = LocationRequest.createFromDeprecatedProvider(
                 provider, 0, 0, true);
 
         try {
-            return mService.getLastLocation(request);
+            return mService.getLastLocation(request, packageName);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException", e);
             return null;
