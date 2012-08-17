@@ -968,7 +968,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Obs
         final int uid = Binder.getCallingUid();
         Receiver recevier = checkListenerOrIntent(listener, intent, pid, uid, packageName);
 
-        // so wakelock calls will succeed (not totally sure this is still needed)
+        // providers may use public location API's, need to clear identity
         long identity = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
@@ -1018,7 +1018,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Obs
         final int uid = Binder.getCallingUid();
         Receiver receiver = checkListenerOrIntent(listener, intent, pid, uid, packageName);
 
-        // so wakelock calls will succeed (not totally sure this is still needed)
+        // providers may use public location API's, need to clear identity
         long identity = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
@@ -1107,7 +1107,14 @@ public class LocationManagerService extends ILocationManager.Stub implements Obs
 
         if (D) Log.d(TAG, "requestGeofence: " + request + " " + geofence + " " + intent);
 
-        mGeofenceManager.addFence(request, geofence, intent, Binder.getCallingUid(), packageName);
+        // geo-fence manager uses the public location API, need to clear identity
+        int uid = Binder.getCallingUid();
+        long identity = Binder.clearCallingIdentity();
+        try {
+            mGeofenceManager.addFence(request, geofence, intent, uid, packageName);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     @Override
@@ -1118,7 +1125,13 @@ public class LocationManagerService extends ILocationManager.Stub implements Obs
 
         if (D) Log.d(TAG, "removeGeofence: " + geofence + " " + intent);
 
-        mGeofenceManager.removeFence(geofence, intent);
+        // geo-fence manager uses the public location API, need to clear identity
+        long identity = Binder.clearCallingIdentity();
+        try {
+            mGeofenceManager.removeFence(geofence, intent);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
 
