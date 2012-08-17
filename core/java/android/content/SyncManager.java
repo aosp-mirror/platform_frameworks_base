@@ -895,7 +895,7 @@ public class SyncManager implements OnAccountsUpdateListener {
     }
 
     private void onUserRemoved(Intent intent) {
-        int userId = intent.getIntExtra(Intent.EXTRA_USERID, -1);
+        int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
         if (userId == -1) return;
 
         // Clean up the storage engine database

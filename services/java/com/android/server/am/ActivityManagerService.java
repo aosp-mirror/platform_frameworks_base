@@ -13492,7 +13492,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         // Inform of user switch
         Intent addedIntent = new Intent(Intent.ACTION_USER_SWITCHED);
-        addedIntent.putExtra(Intent.EXTRA_USERID, userId);
+        addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
         mContext.sendBroadcast(addedIntent, android.Manifest.permission.MANAGE_ACCOUNTS);
 
         return true;
@@ -13509,7 +13509,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private void onUserRemoved(Intent intent) {
-        int extraUserId = intent.getIntExtra(Intent.EXTRA_USERID, -1);
+        int extraUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
         if (extraUserId < 1) return;
 
         // Kill all the processes for the user
