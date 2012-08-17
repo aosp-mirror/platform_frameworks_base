@@ -33,22 +33,38 @@ class PreferredActivity extends IntentFilter implements PreferredComponent.Callb
     private static final String TAG = "PreferredActivity";
 
     private static final boolean DEBUG_FILTERS = false;
+    static final String ATTR_USER_ID = "userId";
 
     final PreferredComponent mPref;
+    final int mUserId;
 
     PreferredActivity(IntentFilter filter, int match, ComponentName[] set, ComponentName activity) {
+        this(filter, match, set, activity, 0);
+    }
+
+    PreferredActivity(IntentFilter filter, int match, ComponentName[] set, ComponentName activity,
+            int userId) {
         super(filter);
+        mUserId = userId;
         mPref = new PreferredComponent(this, match, set, activity);
     }
 
     PreferredActivity(XmlPullParser parser) throws XmlPullParserException, IOException {
+        String userIdString = parser.getAttributeValue(null, ATTR_USER_ID);
+        if (userIdString != null && userIdString.length() > 0) {
+            mUserId = Integer.parseInt(userIdString);
+        } else {
+            // Old format with no userId specified - assume primary user
+            mUserId = 0;
+        }
         mPref = new PreferredComponent(this, parser);
     }
 
     public void writeToXml(XmlSerializer serializer) throws IOException {
+        serializer.attribute(null, ATTR_USER_ID, Integer.toString(mUserId));
         mPref.writeToXml(serializer);
         serializer.startTag(null, "filter");
-        super.writeToXml(serializer);
+            super.writeToXml(serializer);
         serializer.endTag(null, "filter");
     }
 

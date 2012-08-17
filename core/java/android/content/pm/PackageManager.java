@@ -2460,6 +2460,17 @@ public abstract class PackageManager {
             ComponentName[] set, ComponentName activity);
 
     /**
+     * Same as {@link #addPreferredActivity(IntentFilter, int,
+            ComponentName[], ComponentName)}, but with a specific userId to apply the preference
+            to.
+     * @hide
+     */
+    public void addPreferredActivity(IntentFilter filter, int match,
+            ComponentName[] set, ComponentName activity, int userId) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
      * @deprecated This is a protected API that should not have been available
      * to third party applications.  It is the platform's responsibility for
      * assigning preferred activities and this can not be directly modified.
