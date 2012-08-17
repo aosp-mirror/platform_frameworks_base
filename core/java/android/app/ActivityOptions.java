@@ -97,9 +97,9 @@ public class ActivityOptions {
     /** @hide */
     public static final int ANIM_SCALE_UP = 2;
     /** @hide */
-    public static final int ANIM_THUMBNAIL = 3;
+    public static final int ANIM_THUMBNAIL_SCALE_UP = 3;
     /** @hide */
-    public static final int ANIM_THUMBNAIL_DELAYED = 4;
+    public static final int ANIM_THUMBNAIL_SCALE_DOWN = 4;
 
     private String mPackageName;
     private int mAnimationType = ANIM_NONE;
@@ -262,20 +262,19 @@ public class ActivityOptions {
      */
     public static ActivityOptions makeThumbnailScaleUpAnimation(View source,
             Bitmap thumbnail, int startX, int startY, OnAnimationStartedListener listener) {
-        return makeThumbnailScaleUpAnimation(source, thumbnail, startX, startY, listener, false);
+        return makeThumbnailAnimation(source, thumbnail, startX, startY, listener, true);
     }
 
     /**
-     * Create an ActivityOptions specifying an animation where a thumbnail
-     * is scaled from a given position to the new activity window that is
-     * being started. Before the animation, there is a short delay.
+     * Create an ActivityOptions specifying an animation where an activity window
+     * is scaled from a given position to a thumbnail at a specified location.
      *
-     * @param source The View that this thumbnail is animating from.  This
+     * @param source The View that this thumbnail is animating to.  This
      * defines the coordinate space for <var>startX</var> and <var>startY</var>.
-     * @param thumbnail The bitmap that will be shown as the initial thumbnail
+     * @param thumbnail The bitmap that will be shown as the final thumbnail
      * of the animation.
-     * @param startX The x starting location of the bitmap, relative to <var>source</var>.
-     * @param startY The y starting location of the bitmap, relative to <var>source</var>.
+     * @param startX The x end location of the bitmap, relative to <var>source</var>.
+     * @param startY The y end location of the bitmap, relative to <var>source</var>.
      * @param listener Optional OnAnimationStartedListener to find out when the
      * requested animation has started running.  If for some reason the animation
      * is not executed, the callback will happen immediately.
@@ -283,17 +282,17 @@ public class ActivityOptions {
      * supply these options as the options Bundle when starting an activity.
      * @hide
      */
-    public static ActivityOptions makeDelayedThumbnailScaleUpAnimation(View source,
+    public static ActivityOptions makeThumbnailScaleDownAnimation(View source,
             Bitmap thumbnail, int startX, int startY, OnAnimationStartedListener listener) {
-        return makeThumbnailScaleUpAnimation(source, thumbnail, startX, startY, listener, true);
+        return makeThumbnailAnimation(source, thumbnail, startX, startY, listener, false);
     }
 
-    private static ActivityOptions makeThumbnailScaleUpAnimation(View source,
+    private static ActivityOptions makeThumbnailAnimation(View source,
             Bitmap thumbnail, int startX, int startY, OnAnimationStartedListener listener,
-            boolean delayed) {
+            boolean scaleUp) {
         ActivityOptions opts = new ActivityOptions();
         opts.mPackageName = source.getContext().getPackageName();
-        opts.mAnimationType = delayed ? ANIM_THUMBNAIL_DELAYED : ANIM_THUMBNAIL;
+        opts.mAnimationType = scaleUp ? ANIM_THUMBNAIL_SCALE_UP : ANIM_THUMBNAIL_SCALE_DOWN;
         opts.mThumbnail = thumbnail;
         int[] pts = new int[2];
         source.getLocationOnScreen(pts);
@@ -320,8 +319,8 @@ public class ActivityOptions {
             mStartY = opts.getInt(KEY_ANIM_START_Y, 0);
             mStartWidth = opts.getInt(KEY_ANIM_START_WIDTH, 0);
             mStartHeight = opts.getInt(KEY_ANIM_START_HEIGHT, 0);
-        } else if (mAnimationType == ANIM_THUMBNAIL ||
-                mAnimationType == ANIM_THUMBNAIL_DELAYED) {
+        } else if (mAnimationType == ANIM_THUMBNAIL_SCALE_UP ||
+                mAnimationType == ANIM_THUMBNAIL_SCALE_DOWN) {
             mThumbnail = (Bitmap)opts.getParcelable(KEY_ANIM_THUMBNAIL);
             mStartX = opts.getInt(KEY_ANIM_START_X, 0);
             mStartY = opts.getInt(KEY_ANIM_START_Y, 0);
@@ -434,8 +433,8 @@ public class ActivityOptions {
                 }
                 mAnimationStartedListener = null;
                 break;
-            case ANIM_THUMBNAIL:
-            case ANIM_THUMBNAIL_DELAYED:
+            case ANIM_THUMBNAIL_SCALE_UP:
+            case ANIM_THUMBNAIL_SCALE_DOWN:
                 mAnimationType = otherOptions.mAnimationType;
                 mThumbnail = otherOptions.mThumbnail;
                 mStartX = otherOptions.mStartX;
@@ -479,8 +478,8 @@ public class ActivityOptions {
                 b.putInt(KEY_ANIM_START_WIDTH, mStartWidth);
                 b.putInt(KEY_ANIM_START_HEIGHT, mStartHeight);
                 break;
-            case ANIM_THUMBNAIL:
-            case ANIM_THUMBNAIL_DELAYED:
+            case ANIM_THUMBNAIL_SCALE_UP:
+            case ANIM_THUMBNAIL_SCALE_DOWN:
                 b.putInt(KEY_ANIM_TYPE, mAnimationType);
                 b.putParcelable(KEY_ANIM_THUMBNAIL, mThumbnail);
                 b.putInt(KEY_ANIM_START_X, mStartX);
