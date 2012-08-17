@@ -19,9 +19,11 @@ package com.android.location.provider;
 import com.android.internal.location.ProviderProperties;
 
 /**
- * This class is a public API for unbundled providers,
- * that hides the (hidden framework) ProviderProperties.
- * <p>Do _not_ remove public methods on this class.
+ * This class is an interface to Provider Properties for unbundled applications.
+ *
+ * <p>IMPORTANT: This class is effectively a public API for unbundled
+ * applications, and must remain API stable. See README.txt in the root
+ * of this package for more information.
  */
 public final class ProviderPropertiesUnbundled {
     private final ProviderProperties mProperties;
