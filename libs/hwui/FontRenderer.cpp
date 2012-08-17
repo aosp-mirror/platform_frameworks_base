@@ -148,8 +148,8 @@ bool CacheTexture::fitBitmap(const SkGlyph& glyph, uint32_t *retOriginX, uint32_
                 cacheBlock->mX += roundedUpW;
                 if (mHeight - glyphH >= glyphH) {
                     // There's enough height left over to create a new CacheBlock
-                    CacheBlock *newBlock = new CacheBlock(oldX, glyphH, roundedUpW,
-                            mHeight - glyphH);
+                    CacheBlock *newBlock = new CacheBlock(oldX, glyphH + TEXTURE_BORDER_SIZE,
+                            roundedUpW, mHeight - glyphH - TEXTURE_BORDER_SIZE);
 #if DEBUG_FONT_RENDERER
                     ALOGD("fitBitmap: Created new block: this, x, y, w, h = %p, %d, %d, %d, %d",
                             newBlock, newBlock->mX, newBlock->mY,
