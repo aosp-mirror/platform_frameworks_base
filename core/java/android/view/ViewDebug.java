@@ -497,8 +497,8 @@ public class ViewDebug {
             throws IOException {
 
         long durationMeasure =
-                (root || (view.mPrivateFlags & View.MEASURED_DIMENSION_SET) != 0) ? profileViewOperation(
-                        view, new ViewOperation<Void>() {
+                (root || (view.mPrivateFlags & View.PFLAG_MEASURED_DIMENSION_SET) != 0)
+                ? profileViewOperation(view, new ViewOperation<Void>() {
                             public Void[] pre() {
                                 forceLayout(view);
                                 return null;
@@ -524,8 +524,8 @@ public class ViewDebug {
                         })
                         : 0;
         long durationLayout =
-                (root || (view.mPrivateFlags & View.LAYOUT_REQUIRED) != 0) ? profileViewOperation(
-                        view, new ViewOperation<Void>() {
+                (root || (view.mPrivateFlags & View.PFLAG_LAYOUT_REQUIRED) != 0)
+                ? profileViewOperation(view, new ViewOperation<Void>() {
                             public Void[] pre() {
                                 return null;
                             }
@@ -538,9 +538,8 @@ public class ViewDebug {
                             }
                         }) : 0;
         long durationDraw =
-                (root || !view.willNotDraw() || (view.mPrivateFlags & View.DRAWN) != 0) ? profileViewOperation(
-                        view,
-                        new ViewOperation<Object>() {
+                (root || !view.willNotDraw() || (view.mPrivateFlags & View.PFLAG_DRAWN) != 0)
+                ? profileViewOperation(view, new ViewOperation<Object>() {
                             public Object[] pre() {
                                 final DisplayMetrics metrics =
                                         (view != null && view.getResources() != null) ?
@@ -651,7 +650,7 @@ public class ViewDebug {
 
         final boolean localVisible = view.getVisibility() == View.VISIBLE && visible;
 
-        if ((view.mPrivateFlags & View.SKIP_DRAW) != View.SKIP_DRAW) {
+        if ((view.mPrivateFlags & View.PFLAG_SKIP_DRAW) != View.PFLAG_SKIP_DRAW) {
             final int id = view.getId();
             String name = view.getClass().getSimpleName();
             if (id != View.NO_ID) {

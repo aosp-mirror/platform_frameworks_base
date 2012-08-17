@@ -296,7 +296,7 @@ public class SurfaceView extends View {
         }
         
         boolean opaque = true;
-        if ((mPrivateFlags & SKIP_DRAW) == 0) {
+        if ((mPrivateFlags & PFLAG_SKIP_DRAW) == 0) {
             // this view draws, remove it from the transparent region
             opaque = super.gatherTransparentRegion(region);
         } else if (region != null) {
@@ -320,7 +320,7 @@ public class SurfaceView extends View {
     public void draw(Canvas canvas) {
         if (mWindowType != WindowManager.LayoutParams.TYPE_APPLICATION_PANEL) {
             // draw() is not called when SKIP_DRAW is set
-            if ((mPrivateFlags & SKIP_DRAW) == 0) {
+            if ((mPrivateFlags & PFLAG_SKIP_DRAW) == 0) {
                 // punch a whole in the view-hierarchy below us
                 canvas.drawColor(0, PorterDuff.Mode.CLEAR);
             }
@@ -332,7 +332,7 @@ public class SurfaceView extends View {
     protected void dispatchDraw(Canvas canvas) {
         if (mWindowType != WindowManager.LayoutParams.TYPE_APPLICATION_PANEL) {
             // if SKIP_DRAW is cleared, draw() has already punched a hole
-            if ((mPrivateFlags & SKIP_DRAW) == SKIP_DRAW) {
+            if ((mPrivateFlags & PFLAG_SKIP_DRAW) == PFLAG_SKIP_DRAW) {
                 // punch a whole in the view-hierarchy below us
                 canvas.drawColor(0, PorterDuff.Mode.CLEAR);
             }
