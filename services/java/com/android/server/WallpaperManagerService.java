@@ -423,9 +423,9 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
                 if (Intent.ACTION_USER_SWITCHED.equals(action)) {
-                    switchUser(intent.getIntExtra(Intent.EXTRA_USERID, 0));
+                    switchUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0));
                 } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
-                    removeUser(intent.getIntExtra(Intent.EXTRA_USERID, 0));
+                    removeUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0));
                 }
             }
         }, userFilter);

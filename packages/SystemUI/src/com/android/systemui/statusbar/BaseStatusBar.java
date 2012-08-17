@@ -274,7 +274,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
                 if (Intent.ACTION_USER_SWITCHED.equals(action)) {
-                    mCurrentUserId = intent.getIntExtra(Intent.EXTRA_USERID, -1);
+                    mCurrentUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
                     if (true) Slog.v(TAG, "userId " + mCurrentUserId + " is in the house");
                     userSwitched(mCurrentUserId);
                 }

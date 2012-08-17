@@ -53,6 +53,7 @@ public class UserInfo implements Parcelable {
     public static final int FLAG_RESTRICTED = 0x00000008;
 
     public int id;
+    public int serialNumber;
     public String name;
     public String iconPath;
     public int flags;
@@ -88,6 +89,7 @@ public class UserInfo implements Parcelable {
         iconPath = orig.iconPath;
         id = orig.id;
         flags = orig.flags;
+        serialNumber = orig.serialNumber;
     }
 
     @Override
@@ -104,6 +106,7 @@ public class UserInfo implements Parcelable {
         dest.writeString(name);
         dest.writeString(iconPath);
         dest.writeInt(flags);
+        dest.writeInt(serialNumber);
     }
 
     public static final Parcelable.Creator<UserInfo> CREATOR
@@ -121,5 +124,6 @@ public class UserInfo implements Parcelable {
         name = source.readString();
         iconPath = source.readString();
         flags = source.readInt();
+        serialNumber = source.readInt();
     }
 }

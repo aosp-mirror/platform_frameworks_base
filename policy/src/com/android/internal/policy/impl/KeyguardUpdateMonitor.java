@@ -178,10 +178,10 @@ public class KeyguardUpdateMonitor {
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_DPM_STATE_CHANGED));
             } else if (Intent.ACTION_USER_SWITCHED.equals(action)) {
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_SWITCHED,
-                        intent.getIntExtra(Intent.EXTRA_USERID, 0), 0));
+                        intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0), 0));
             } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_REMOVED,
-                        intent.getIntExtra(Intent.EXTRA_USERID, 0), 0));
+                        intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0), 0));
             }
         }
     };

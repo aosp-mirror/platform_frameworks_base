@@ -33,4 +33,6 @@ interface IUserManager {
     void setGuestEnabled(boolean enable);
     boolean isGuestEnabled();
     void wipeUser(int userHandle);
+    int getUserSerialNumber(int userHandle);
+    int getUserHandle(int userSerialNumber);
 }
