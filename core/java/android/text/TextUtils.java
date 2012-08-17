@@ -27,6 +27,7 @@ import android.text.style.CharacterStyle;
 import android.text.style.EasyEditSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.LeadingMarginSpan;
+import android.text.style.LocaleSpan;
 import android.text.style.MetricAffectingSpan;
 import android.text.style.QuoteSpan;
 import android.text.style.RelativeSizeSpan;
@@ -587,6 +588,8 @@ public class TextUtils {
     public static final int SUGGESTION_RANGE_SPAN = 21;
     /** @hide */
     public static final int EASY_EDIT_SPAN = 22;
+    /** @hide */
+    public static final int LOCALE_SPAN = 23;
 
     /**
      * Flatten a CharSequence and whatever styles can be copied across processes
@@ -752,6 +755,10 @@ public class TextUtils {
 
                 case EASY_EDIT_SPAN:
                     readSpan(p, sp, new EasyEditSpan());
+                    break;
+
+                case LOCALE_SPAN:
+                    readSpan(p, sp, new LocaleSpan(p));
                     break;
 
                 default:
