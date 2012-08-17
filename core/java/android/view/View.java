@@ -2790,6 +2790,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     int mUserPaddingEnd;
 
     /**
+     * Whether a left padding has been defined during layout inflation.
+     *
+     * @hide
+     */
+    boolean mUserPaddingLeftDefined = false;
+
+    /**
+     * Whether a right padding has been defined during layout inflation.
+     *
+     * @hide
+     */
+    boolean mUserPaddingRightDefined = false;
+
+    /**
      * Default undefined padding
      */
     private static final int UNDEFINED_PADDING = Integer.MIN_VALUE;
@@ -3195,8 +3209,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         boolean transformSet = false;
 
         int scrollbarStyle = SCROLLBARS_INSIDE_OVERLAY;
-
         int overScrollMode = mOverScrollMode;
+        boolean initializeScrollbars = false;
+
+        final int targetSdkVersion = context.getApplicationInfo().targetSdkVersion;
+
         final int N = a.getIndexCount();
         for (int i = 0; i < N; i++) {
             int attr = a.getIndex(i);
@@ -3206,15 +3223,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     break;
                 case com.android.internal.R.styleable.View_padding:
                     padding = a.getDimensionPixelSize(attr, -1);
+                    mUserPaddingLeftDefined = true;
+                    mUserPaddingRightDefined = true;
                     break;
                  case com.android.internal.R.styleable.View_paddingLeft:
                     leftPadding = a.getDimensionPixelSize(attr, -1);
+                    mUserPaddingLeftDefined = true;
                     break;
                 case com.android.internal.R.styleable.View_paddingTop:
                     topPadding = a.getDimensionPixelSize(attr, -1);
                     break;
                 case com.android.internal.R.styleable.View_paddingRight:
                     rightPadding = a.getDimensionPixelSize(attr, -1);
+                    mUserPaddingRightDefined = true;
                     break;
                 case com.android.internal.R.styleable.View_paddingBottom:
                     bottomPadding = a.getDimensionPixelSize(attr, -1);
@@ -3359,12 +3380,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     if (scrollbars != SCROLLBARS_NONE) {
                         viewFlagValues |= scrollbars;
                         viewFlagMasks |= SCROLLBARS_MASK;
-                        initializeScrollbars(a);
+                        initializeScrollbars = true;
                     }
                     break;
                 //noinspection deprecation
                 case R.styleable.View_fadingEdge:
-                    if (context.getApplicationInfo().targetSdkVersion >= ICE_CREAM_SANDWICH) {
+                    if (targetSdkVersion >= ICE_CREAM_SANDWICH) {
                         // Ignore the attribute starting with ICS
                         break;
                     }
@@ -3496,12 +3517,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
         }
 
-        a.recycle();
-
         setOverScrollMode(overScrollMode);
 
-        // Cache user padding as we cannot fully resolve padding here (we dont have yet the resolved
-        // layout direction). Those cached values will be used later during padding resolution.
+        // Cache start/end user padding as we cannot fully resolve padding here (we dont have yet
+        // the resolved layout direction). Those cached values will be used later during padding
+        // resolution.
         mUserPaddingStart = startPadding;
         mUserPaddingEnd = endPadding;
 
@@ -3528,6 +3548,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (viewFlagMasks != 0) {
             setFlags(viewFlagValues, viewFlagMasks);
         }
+
+        if (initializeScrollbars) {
+            initializeScrollbars(a);
+        }
+
+        a.recycle();
 
         // Needs to be called after mViewFlags is set
         if (scrollbarStyle != SCROLLBARS_INSIDE_OVERLAY) {
@@ -5533,10 +5559,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // Reset the current layout direction and the resolved one
             mPrivateFlags2 &= ~LAYOUT_DIRECTION_MASK;
             resetResolvedLayoutDirection();
-            // Set the new layout direction (filtered) and ask for a layout pass
+            // Reset padding resolution
+            mPrivateFlags2 &= ~PADDING_RESOLVED;
+            // Set the new layout direction (filtered)
             mPrivateFlags2 |=
                     ((layoutDirection << LAYOUT_DIRECTION_MASK_SHIFT) & LAYOUT_DIRECTION_MASK);
-            resolvePadding();
+            resolveRtlProperties();
+            // ... and ask for a layout pass
             requestLayout();
         }
     }
@@ -5552,6 +5581,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         @ViewDebug.IntToString(from = LAYOUT_DIRECTION_RTL, to = "RESOLVED_DIRECTION_RTL")
     })
     public int getResolvedLayoutDirection() {
+        final int targetSdkVersion = getContext().getApplicationInfo().targetSdkVersion;
+        if (targetSdkVersion < JELLY_BEAN_MR1) {
+            mPrivateFlags2 |= LAYOUT_DIRECTION_RESOLVED;
+            return LAYOUT_DIRECTION_LTR;
+        }
         // The layout direction will be resolved only if needed
         if ((mPrivateFlags2 & LAYOUT_DIRECTION_RESOLVED) != LAYOUT_DIRECTION_RESOLVED) {
             resolveLayoutDirection();
@@ -9657,10 +9691,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             throw new NullPointerException("Layout parameters cannot be null");
         }
         mLayoutParams = params;
+        resolveLayoutParams();
         if (mParent instanceof ViewGroup) {
             ((ViewGroup) mParent).onSetLayoutParams(this, params);
         }
         requestLayout();
+    }
+
+    /**
+     * Resolve the layout parameters depending on the resolved layout direction
+     */
+    private void resolveLayoutParams() {
+        if (mLayoutParams != null) {
+            mLayoutParams.onResolveLayoutDirection(getResolvedLayoutDirection());
+        }
     }
 
     /**
@@ -11197,12 +11241,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         jumpDrawablesToCurrentState();
 
-        // Order is important here: LayoutDirection MUST be resolved before Padding
-        // and TextDirection
-        resolveLayoutDirection();
-        resolvePadding();
-        resolveTextDirection();
-        resolveTextAlignment();
+        resolveRtlProperties();
 
         clearAccessibilityFocus();
         if (isFocused()) {
@@ -11213,6 +11252,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (mAttachInfo != null && mDisplayList != null) {
             mAttachInfo.mViewRootImpl.dequeueDisplayList(mDisplayList);
         }
+    }
+
+    void resolveRtlProperties() {
+        // Order is important here: LayoutDirection MUST be resolved first...
+        resolveLayoutDirection();
+        // ... then we can resolve the others properties depending on the resolved LayoutDirection.
+        resolvePadding();
+        resolveLayoutParams();
+        resolveTextDirection();
+        resolveTextAlignment();
     }
 
     /**
@@ -11295,55 +11344,65 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Return if padding has been resolved
+     */
+    boolean isPaddingResolved() {
+        return (mPrivateFlags2 & PADDING_RESOLVED) != 0;
+    }
+
+    /**
      * Resolve padding depending on layout direction.
      */
     public void resolvePadding() {
-        // If the user specified the absolute padding (either with android:padding or
-        // android:paddingLeft/Top/Right/Bottom), use this padding, otherwise
-        // use the default padding or the padding from the background drawable
-        // (stored at this point in mPadding*)
-        int resolvedLayoutDirection = getResolvedLayoutDirection();
-        switch (resolvedLayoutDirection) {
-            case LAYOUT_DIRECTION_RTL:
-                // Start user padding override Right user padding. Otherwise, if Right user
-                // padding is not defined, use the default Right padding. If Right user padding
-                // is defined, just use it.
-                if (mUserPaddingStart != UNDEFINED_PADDING) {
-                    mUserPaddingRight = mUserPaddingStart;
-                }
-                if (mUserPaddingRight == UNDEFINED_PADDING) {
-                    mUserPaddingRight = mPaddingRight;
-                }
-                if (mUserPaddingEnd != UNDEFINED_PADDING) {
-                    mUserPaddingLeft = mUserPaddingEnd;
-                }
-                if (mUserPaddingLeft == UNDEFINED_PADDING) {
-                    mUserPaddingLeft = mPaddingLeft;
-                }
-                break;
-            case LAYOUT_DIRECTION_LTR:
-            default:
-                // Start user padding override Left user padding. Otherwise, if Left user
-                // padding is not defined, use the default left padding. If Left user padding
-                // is defined, just use it.
-                if (mUserPaddingStart != UNDEFINED_PADDING) {
-                    mUserPaddingLeft = mUserPaddingStart;
-                }
-                if (mUserPaddingLeft == UNDEFINED_PADDING) {
-                    mUserPaddingLeft = mPaddingLeft;
-                }
-                if (mUserPaddingEnd != UNDEFINED_PADDING) {
-                    mUserPaddingRight = mUserPaddingEnd;
-                }
-                if (mUserPaddingRight == UNDEFINED_PADDING) {
-                    mUserPaddingRight = mPaddingRight;
-                }
+        final int targetSdkVersion = getContext().getApplicationInfo().targetSdkVersion;
+        if (targetSdkVersion < JELLY_BEAN_MR1 || !hasRtlSupport()) {
+            // Pre Jelly Bean MR1 case (compatibility mode) OR no RTL support case:
+            // left / right padding are used if defined. If they are not defined and start / end
+            // padding are defined (e.g. in Frameworks resources), then we use start / end and
+            // resolve them as left / right (layout direction is not taken into account).
+            if (!mUserPaddingLeftDefined && mUserPaddingStart != UNDEFINED_PADDING) {
+                mUserPaddingLeft = mUserPaddingStart;
+            }
+            if (!mUserPaddingRightDefined && mUserPaddingEnd != UNDEFINED_PADDING) {
+                mUserPaddingRight = mUserPaddingEnd;
+            }
+
+            mUserPaddingBottom = (mUserPaddingBottom >= 0) ? mUserPaddingBottom : mPaddingBottom;
+
+            internalSetPadding(mUserPaddingLeft, mPaddingTop, mUserPaddingRight,
+                    mUserPaddingBottom);
+        } else {
+            // Post Jelly Bean MR1 case: we need to take the resolved layout direction into account.
+            // If start / end padding are defined, they will be resolved (hence overriding) to
+            // left / right or right / left depending on the resolved layout direction.
+            // If start / end padding are not defined, use the left / right ones.
+            int resolvedLayoutDirection = getResolvedLayoutDirection();
+            switch (resolvedLayoutDirection) {
+                case LAYOUT_DIRECTION_RTL:
+                    if (mUserPaddingStart != UNDEFINED_PADDING) {
+                        mUserPaddingRight = mUserPaddingStart;
+                    }
+                    if (mUserPaddingEnd != UNDEFINED_PADDING) {
+                        mUserPaddingLeft = mUserPaddingEnd;
+                    }
+                    break;
+                case LAYOUT_DIRECTION_LTR:
+                default:
+                    if (mUserPaddingStart != UNDEFINED_PADDING) {
+                        mUserPaddingLeft = mUserPaddingStart;
+                    }
+                    if (mUserPaddingEnd != UNDEFINED_PADDING) {
+                        mUserPaddingRight = mUserPaddingEnd;
+                    }
+            }
+
+            mUserPaddingBottom = (mUserPaddingBottom >= 0) ? mUserPaddingBottom : mPaddingBottom;
+
+            internalSetPadding(mUserPaddingLeft, mPaddingTop, mUserPaddingRight,
+                    mUserPaddingBottom);
+            onPaddingChanged(resolvedLayoutDirection);
         }
 
-        mUserPaddingBottom = (mUserPaddingBottom >= 0) ? mUserPaddingBottom : mPaddingBottom;
-
-        internalSetPadding(mUserPaddingLeft, mPaddingTop, mUserPaddingRight, mUserPaddingBottom);
-        onPaddingChanged(resolvedLayoutDirection);
         mPrivateFlags2 |= PADDING_RESOLVED;
     }
 
@@ -14016,6 +14075,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
             background.setLayoutDirection(getResolvedLayoutDirection());
             if (background.getPadding(padding)) {
+                // Reset padding resolution
+                mPrivateFlags2 &= ~PADDING_RESOLVED;
                 switch (background.getLayoutDirection()) {
                     case LAYOUT_DIRECTION_RTL:
                         internalSetPadding(padding.right, padding.top, padding.left, padding.bottom);
@@ -14112,13 +14173,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param bottom the bottom padding in pixels
      */
     public void setPadding(int left, int top, int right, int bottom) {
+        // Reset padding resolution
+        mPrivateFlags2 &= ~PADDING_RESOLVED;
+
         mUserPaddingStart = UNDEFINED_PADDING;
         mUserPaddingEnd = UNDEFINED_PADDING;
 
         internalSetPadding(left, top, right, bottom);
     }
 
-    void internalSetPadding(int left, int top, int right, int bottom) {
+    /**
+     * @hide
+     */
+    protected void internalSetPadding(int left, int top, int right, int bottom) {
         mUserPaddingLeft = left;
         mUserPaddingRight = right;
         mUserPaddingBottom = bottom;
@@ -14193,6 +14260,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param bottom the bottom padding in pixels
      */
     public void setPaddingRelative(int start, int top, int end, int bottom) {
+        // Reset padding resolution
+        mPrivateFlags2 &= ~PADDING_RESOLVED;
+
         mUserPaddingStart = start;
         mUserPaddingEnd = end;
 
@@ -14234,6 +14304,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return the left padding in pixels
      */
     public int getPaddingLeft() {
+        if (!isPaddingResolved()) {
+            resolvePadding();
+        }
         return mPaddingLeft;
     }
 
@@ -14245,6 +14318,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return the start padding in pixels
      */
     public int getPaddingStart() {
+        if (!isPaddingResolved()) {
+            resolvePadding();
+        }
         return (getResolvedLayoutDirection() == LAYOUT_DIRECTION_RTL) ?
                 mPaddingRight : mPaddingLeft;
     }
@@ -14257,6 +14333,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return the right padding in pixels
      */
     public int getPaddingRight() {
+        if (!isPaddingResolved()) {
+            resolvePadding();
+        }
         return mPaddingRight;
     }
 
@@ -14268,6 +14347,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return the end padding in pixels
      */
     public int getPaddingEnd() {
+        if (!isPaddingResolved()) {
+            resolvePadding();
+        }
         return (getResolvedLayoutDirection() == LAYOUT_DIRECTION_RTL) ?
                 mPaddingLeft : mPaddingRight;
     }
@@ -14913,10 +14995,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         mPrivateFlags |= FORCE_LAYOUT;
         mPrivateFlags |= INVALIDATED;
 
-        if (mLayoutParams != null) {
-            mLayoutParams.onResolveLayoutDirection(getResolvedLayoutDirection());
-        }
-
         if (mParent != null && !mParent.isLayoutRequested()) {
             mParent.requestLayout();
         }
@@ -14960,7 +15038,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // first clears the measured dimension flag
             mPrivateFlags &= ~MEASURED_DIMENSION_SET;
 
-            if ((mPrivateFlags2 & PADDING_RESOLVED) == 0) {
+            if (!isPaddingResolved()) {
                 resolvePadding();
             }
 
