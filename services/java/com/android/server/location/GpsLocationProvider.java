@@ -845,6 +845,9 @@ public class GpsLocationProvider implements LocationProviderInterface {
                 }
             }
         }
+
+        // save current uids
+        mClientUids = uids;
     }
 
     @Override
