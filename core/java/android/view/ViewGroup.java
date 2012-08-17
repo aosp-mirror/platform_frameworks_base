@@ -2517,8 +2517,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         super.dispatchDetachedFromWindow();
     }
 
+    /**
+     * @hide
+     */
     @Override
-    void internalSetPadding(int left, int top, int right, int bottom) {
+    protected void internalSetPadding(int left, int top, int right, int bottom) {
         super.internalSetPadding(left, top, right, bottom);
 
         if ((mPaddingLeft | mPaddingTop | mPaddingRight | mPaddingBottom) != 0) {
@@ -3372,6 +3375,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         if (child.hasTransientState()) {
             childHasTransientStateChanged(child, true);
         }
+
+        if (child.getLayoutDirection() == View.LAYOUT_DIRECTION_INHERIT) {
+            child.resetResolvedLayoutDirection();
+            child.resolveRtlProperties();
+        }
     }
 
     private void addInArray(View child, int index) {
@@ -3596,6 +3604,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         if (view.hasTransientState()) {
             childHasTransientStateChanged(view, false);
         }
+
+        view.resetResolvedLayoutDirection();
 
         onViewRemoved(view);
 
