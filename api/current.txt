@@ -10556,7 +10556,7 @@ package android.location {
     method public android.os.Bundle getExtras();
     method public double getLatitude();
     method public double getLongitude();
-    method public java.lang.String getProvider();
+    method public deprecated java.lang.String getProvider();
     method public float getSpeed();
     method public long getTime();
     method public boolean hasAccuracy();
@@ -10594,6 +10594,7 @@ package android.location {
   }
 
   public class LocationManager {
+    method public void addGeofence(android.location.LocationRequest, android.location.Geofence, android.app.PendingIntent);
     method public boolean addGpsStatusListener(android.location.GpsStatus.Listener);
     method public boolean addNmeaListener(android.location.GpsStatus.NmeaListener);
     method public deprecated void addProximityAlert(double, double, float, long, android.app.PendingIntent);
@@ -10605,7 +10606,7 @@ package android.location {
     method public deprecated java.lang.String getBestProvider(android.location.Criteria, boolean);
     method public android.location.GpsStatus getGpsStatus(android.location.GpsStatus);
     method public deprecated android.location.Location getLastKnownLocation(java.lang.String);
-    method public android.location.Location getLastLocation(android.location.LocationRequest);
+    method public android.location.Location getLastLocation();
     method public deprecated android.location.LocationProvider getProvider(java.lang.String);
     method public deprecated java.util.List<java.lang.String> getProviders(boolean);
     method public deprecated java.util.List<java.lang.String> getProviders(android.location.Criteria, boolean);
@@ -10618,7 +10619,6 @@ package android.location {
     method public deprecated void removeTestProvider(java.lang.String);
     method public void removeUpdates(android.location.LocationListener);
     method public void removeUpdates(android.app.PendingIntent);
-    method public void requestGeofence(android.location.LocationRequest, android.location.Geofence, android.app.PendingIntent);
     method public deprecated void requestLocationUpdates(java.lang.String, long, float, android.location.LocationListener);
     method public deprecated void requestLocationUpdates(java.lang.String, long, float, android.location.LocationListener, android.os.Looper);
     method public deprecated void requestLocationUpdates(long, float, android.location.Criteria, android.location.LocationListener, android.os.Looper);
