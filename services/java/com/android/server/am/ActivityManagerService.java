@@ -2539,7 +2539,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         
         // This is so super not safe, that only the system (or okay root)
         // can do it.
-        int userId = Binder.getOrigCallingUser();
         final int callingUid = Binder.getCallingUid();
         if (callingUid != 0 && callingUid != Process.myUid()) {
             throw new SecurityException(
@@ -2548,7 +2547,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         int ret = mMainStack.startActivityMayWait(null, uid, intent, resolvedType,
                 resultTo, resultWho, requestCode, startFlags,
-                null, null, null, null, options, userId);
+                null, null, null, null, options, UserHandle.getUserId(uid));
         return ret;
     }
 
