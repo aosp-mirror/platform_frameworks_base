@@ -428,92 +428,26 @@ final class FragmentManagerImpl extends FragmentManager {
         }
     };
 
-    private void logViewHierarchy(String prefix, View view) {
-        StringBuilder builder = new StringBuilder(128);
-        builder.append(prefix);
-        DebugUtils.buildShortClassTag(view, builder);
-        int id = view.getId();
-        if (id != -1) {
-            builder.append(" #");
-            builder.append(Integer.toHexString(id));
-            if (id != 0 && id != -1) {
-                try {
-                    String pkgname;
-                    switch (id&0xff000000) {
-                        case 0x7f000000:
-                            pkgname="app";
-                            break;
-                        case 0x01000000:
-                            pkgname="android";
-                            break;
-                        default:
-                            pkgname = view.getResources().getResourcePackageName(id);
-                            break;
-                    }
-                    String typename = view.getResources().getResourceTypeName(id);
-                    String entryname = view.getResources().getResourceEntryName(id);
-                    builder.append(" (");
-                    builder.append(pkgname);
-                    builder.append(":");
-                    builder.append(typename);
-                    builder.append("/");
-                    builder.append(entryname);
-                    builder.append(")");
-                } catch (Resources.NotFoundException e) {
-                }
-            }
-        }
-        Object tag = view.getTag();
-        if (tag != null) {
-            builder.append(" ");
-            builder.append(tag);
-        }
-        builder.append("}");
-        Log.e(TAG, builder.toString());
-
-        if (!(view instanceof ViewGroup)) {
-            return;
-        }
-        ViewGroup grp = (ViewGroup)view;
-        final int N = grp.getChildCount();
-        if (N <= 0) {
-            return;
-        }
-        prefix = prefix + "  ";
-        for (int i=0; i<N; i++) {
-            logViewHierarchy(prefix, grp.getChildAt(i));
-        }
-    }
-
-    private void throwNoViewFound(Fragment f) {
-        String msg = "No view found for id 0x"
-                + Integer.toHexString(f.mContainerId) + " ("
-                + f.getResources().getResourceName(f.mContainerId)
-                + ") for fragment " + f;
-        Log.e(TAG, msg);
-        Log.e(TAG, "Activity state:");
-        if (f.getActivity() != null) {
+    private void throwException(RuntimeException ex) {
+        Log.e(TAG, ex.getMessage());
+        LogWriter logw = new LogWriter(Log.ERROR, TAG);
+        PrintWriter pw = new PrintWriter(logw);
+        if (mActivity != null) {
+            Log.e(TAG, "Activity state:");
             try {
-                LogWriter logw = new LogWriter(Log.ERROR, TAG);
-                PrintWriter pw = new PrintWriter(logw);
-                f.getActivity().dump("  ", null, pw, new String[] { });
+                mActivity.dump("  ", null, pw, new String[] { });
             } catch (Exception e) {
                 Log.e(TAG, "Failed dumping state", e);
             }
         } else {
-            Log.e(TAG, "  NULL ACTIVITY!");
-        }
-        Log.e(TAG, "View hierarchy:");
-        if (f.getActivity() != null) {
+            Log.e(TAG, "Fragment manager state:");
             try {
-                logViewHierarchy("  ", f.getActivity().getWindow().getDecorView());
+                dump("  ", null, pw, new String[] { });
             } catch (Exception e) {
-                Log.e(TAG, "Failed dumping view hierarchy", e);
+                Log.e(TAG, "Failed dumping state", e);
             }
-        } else {
-            Log.e(TAG, "  NULL ACTIVITY!");
         }
-        throw new IllegalArgumentException(msg);
+        throw ex;
     }
 
     @Override
@@ -608,8 +542,8 @@ final class FragmentManagerImpl extends FragmentManager {
     @Override
     public void putFragment(Bundle bundle, String key, Fragment fragment) {
         if (fragment.mIndex < 0) {
-            throw new IllegalStateException("Fragment " + fragment
-                    + " is not currently in the FragmentManager");
+            throwException(new IllegalStateException("Fragment " + fragment
+                    + " is not currently in the FragmentManager"));
         }
         bundle.putInt(key, fragment.mIndex);
     }
@@ -621,13 +555,13 @@ final class FragmentManagerImpl extends FragmentManager {
             return null;
         }
         if (index >= mActive.size()) {
-            throw new IllegalStateException("Fragement no longer exists for key "
-                    + key + ": index " + index);
+            throwException(new IllegalStateException("Fragement no longer exists for key "
+                    + key + ": index " + index));
         }
         Fragment f = mActive.get(index);
         if (f == null) {
-            throw new IllegalStateException("Fragement no longer exists for key "
-                    + key + ": index " + index);
+            throwException(new IllegalStateException("Fragement no longer exists for key "
+                    + key + ": index " + index));
         }
         return f;
     }
@@ -635,8 +569,8 @@ final class FragmentManagerImpl extends FragmentManager {
     @Override
     public Fragment.SavedState saveFragmentInstanceState(Fragment fragment) {
         if (fragment.mIndex < 0) {
-            throw new IllegalStateException("Fragment " + fragment
-                    + " is not currently in the FragmentManager");
+            throwException(new IllegalStateException("Fragment " + fragment
+                    + " is not currently in the FragmentManager"));
         }
         if (fragment.mState > Fragment.INITIALIZING) {
             Bundle result = saveFragmentBasicState(fragment);
@@ -913,7 +847,11 @@ final class FragmentManagerImpl extends FragmentManager {
                             if (f.mContainerId != 0) {
                                 container = (ViewGroup)mActivity.findViewById(f.mContainerId);
                                 if (container == null && !f.mRestored) {
-                                    throwNoViewFound(f);
+                                    throwException(new IllegalArgumentException(
+                                            "No view found for id 0x"
+                                            + Integer.toHexString(f.mContainerId) + " ("
+                                            + f.getResources().getResourceName(f.mContainerId)
+                                            + ") for fragment " + f));
                                 }
                             }
                             f.mContainer = container;
@@ -1674,12 +1612,9 @@ final class FragmentManagerImpl extends FragmentManager {
             Fragment f = mActive.get(i);
             if (f != null) {
                 if (f.mIndex < 0) {
-                    String msg = "Failure saving state: active " + f
-                            + " has cleared index: " + f.mIndex;
-                    Slog.e(TAG, msg);
-                    dump("  ", null, new PrintWriter(new LogWriter(
-                            Log.ERROR, TAG, Log.LOG_ID_SYSTEM)), new String[] { });
-                    throw new IllegalStateException(msg);
+                    throwException(new IllegalStateException(
+                            "Failure saving state: active " + f
+                            + " has cleared index: " + f.mIndex));
                 }
 
                 haveFragments = true;
@@ -1692,12 +1627,9 @@ final class FragmentManagerImpl extends FragmentManager {
 
                     if (f.mTarget != null) {
                         if (f.mTarget.mIndex < 0) {
-                            String msg = "Failure saving state: " + f
-                                + " has target not in fragment manager: " + f.mTarget;
-                            Slog.e(TAG, msg);
-                            dump("  ", null, new PrintWriter(new LogWriter(
-                                    Log.ERROR, TAG, Log.LOG_ID_SYSTEM)), new String[] { });
-                            throw new IllegalStateException(msg);
+                            throwException(new IllegalStateException(
+                                    "Failure saving state: " + f
+                                    + " has target not in fragment manager: " + f.mTarget));
                         }
                         if (fs.mSavedFragmentState == null) {
                             fs.mSavedFragmentState = new Bundle();
@@ -1736,12 +1668,9 @@ final class FragmentManagerImpl extends FragmentManager {
                 for (int i=0; i<N; i++) {
                     added[i] = mAdded.get(i).mIndex;
                     if (added[i] < 0) {
-                        String msg = "Failure saving state: active " + mAdded.get(i)
-                                + " has cleared index: " + added[i];
-                        Slog.e(TAG, msg);
-                        dump("  ", null, new PrintWriter(new LogWriter(
-                                Log.ERROR, TAG, Log.LOG_ID_SYSTEM)), new String[] { });
-                        throw new IllegalStateException(msg);
+                        throwException(new IllegalStateException(
+                                "Failure saving state: active " + mAdded.get(i)
+                                + " has cleared index: " + added[i]));
                     }
                     if (DEBUG) Log.v(TAG, "saveAllState: adding fragment #" + i
                             + ": " + mAdded.get(i));
@@ -1846,8 +1775,8 @@ final class FragmentManagerImpl extends FragmentManager {
             for (int i=0; i<fms.mAdded.length; i++) {
                 Fragment f = mActive.get(fms.mAdded[i]);
                 if (f == null) {
-                    throw new IllegalStateException(
-                            "No instantiated fragment for index #" + fms.mAdded[i]);
+                    throwException(new IllegalStateException(
+                            "No instantiated fragment for index #" + fms.mAdded[i]));
                 }
                 f.mAdded = true;
                 if (DEBUG) Log.v(TAG, "restoreAllState: making added #" + i + ": " + f);
@@ -1875,7 +1804,7 @@ final class FragmentManagerImpl extends FragmentManager {
     }
     
     public void attachActivity(Activity activity) {
-        if (mActivity != null) throw new IllegalStateException();
+        if (mActivity != null) throw new IllegalStateException("Already attached");
         mActivity = activity;
     }
     

@@ -24500,7 +24500,6 @@ package android.view {
     field public static final int SYSTEM_UI_FLAG_VISIBLE = 0; // 0x0
     field public static final int SYSTEM_UI_LAYOUT_FLAGS = 1536; // 0x600
     field public static final int TEXT_ALIGNMENT_INHERIT = 0; // 0x0
-    field public static final int TEXT_ALIGNMENT_RESOLVED_DEFAULT = 131072; // 0x20000
     field public static final android.util.Property TRANSLATION_X;
     field public static final android.util.Property TRANSLATION_Y;
     field protected static final java.lang.String VIEW_LOG_TAG = "View";

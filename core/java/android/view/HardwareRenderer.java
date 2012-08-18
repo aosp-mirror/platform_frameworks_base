@@ -1101,7 +1101,7 @@ public abstract class HardwareRenderer {
                 attachInfo.mIgnoreDirtyState = true;
                 attachInfo.mDrawingTime = SystemClock.uptimeMillis();
 
-                view.mPrivateFlags |= View.DRAWN;
+                view.mPrivateFlags |= View.PFLAG_DRAWN;
 
                 final int surfaceState = checkCurrent();
                 if (surfaceState != SURFACE_STATE_ERROR) {
@@ -1135,9 +1135,9 @@ public abstract class HardwareRenderer {
                     callbacks.onHardwarePreDraw(canvas);
 
                     try {
-                        view.mRecreateDisplayList =
-                                (view.mPrivateFlags & View.INVALIDATED) == View.INVALIDATED;
-                        view.mPrivateFlags &= ~View.INVALIDATED;
+                        view.mRecreateDisplayList = (view.mPrivateFlags & View.PFLAG_INVALIDATED)
+                                == View.PFLAG_INVALIDATED;
+                        view.mPrivateFlags &= ~View.PFLAG_INVALIDATED;
 
                         long getDisplayListStartTime = 0;
                         if (mProfileEnabled) {
