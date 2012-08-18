@@ -279,7 +279,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             final int uid = Binder.getCallingUid();
             String missingPerm = null;
 
-            if (uid == mMyUid) {
+            if (UserHandle.isSameApp(uid, mMyUid)) {
                 return;
             }
 
@@ -340,7 +340,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             final int uid = Binder.getCallingUid();
             String missingPerm = null;
 
-            if (uid == mMyUid) {
+            if (UserHandle.isSameApp(uid, mMyUid)) {
                 return;
             }
 
