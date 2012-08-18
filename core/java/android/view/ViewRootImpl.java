@@ -1303,7 +1303,7 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
-        if (params != null && (host.mPrivateFlags & View.REQUEST_TRANSPARENT_REGIONS) != 0) {
+        if (params != null && (host.mPrivateFlags & View.PFLAG_REQUEST_TRANSPARENT_REGIONS) != 0) {
             if (!PixelFormat.formatHasAlpha(params.format)) {
                 params.format = PixelFormat.TRANSLUCENT;
             }
@@ -1709,7 +1709,7 @@ public final class ViewRootImpl implements ViewParent,
             // By this point all views have been sized and positionned
             // We can compute the transparent area
 
-            if ((host.mPrivateFlags & View.REQUEST_TRANSPARENT_REGIONS) != 0) {
+            if ((host.mPrivateFlags & View.PFLAG_REQUEST_TRANSPARENT_REGIONS) != 0) {
                 // start out transparent
                 // TODO: AVOID THAT CALL BY CACHING THE RESULT?
                 host.getLocationInWindow(mTmpLocation);
@@ -1893,7 +1893,7 @@ public final class ViewRootImpl implements ViewParent,
         // the test below should not fail unless someone is messing with us
         checkThread();
         if (mView == child) {
-            mView.mPrivateFlags |= View.REQUEST_TRANSPARENT_REGIONS;
+            mView.mPrivateFlags |= View.PFLAG_REQUEST_TRANSPARENT_REGIONS;
             // Need to make sure we re-evaluate the window attributes next
             // time around, to ensure the window has the correct format.
             mWindowAttributesChanged = true;
@@ -2256,7 +2256,7 @@ public final class ViewRootImpl implements ViewParent,
             dirty.setEmpty();
             mIsAnimating = false;
             attachInfo.mDrawingTime = SystemClock.uptimeMillis();
-            mView.mPrivateFlags |= View.DRAWN;
+            mView.mPrivateFlags |= View.PFLAG_DRAWN;
 
             if (DEBUG_DRAW) {
                 Context cxt = mView.getContext();
