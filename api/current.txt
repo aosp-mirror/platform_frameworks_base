@@ -25040,16 +25040,15 @@ package android.view {
     field public static final int SYSTEM_UI_FLAG_VISIBLE = 0; // 0x0
     field public static final int SYSTEM_UI_LAYOUT_FLAGS = 1536; // 0x600
     field public static final int TEXT_ALIGNMENT_CENTER = 4; // 0x4
-    field protected static int TEXT_ALIGNMENT_DEFAULT;
+    field public static int TEXT_ALIGNMENT_DEFAULT;
     field public static final int TEXT_ALIGNMENT_GRAVITY = 1; // 0x1
     field public static final int TEXT_ALIGNMENT_INHERIT = 0; // 0x0
-    field public static final int TEXT_ALIGNMENT_RESOLVED_DEFAULT = 131072; // 0x20000
     field public static final int TEXT_ALIGNMENT_TEXT_END = 3; // 0x3
     field public static final int TEXT_ALIGNMENT_TEXT_START = 2; // 0x2
     field public static final int TEXT_ALIGNMENT_VIEW_END = 6; // 0x6
     field public static final int TEXT_ALIGNMENT_VIEW_START = 5; // 0x5
     field public static final int TEXT_DIRECTION_ANY_RTL = 2; // 0x2
-    field protected static int TEXT_DIRECTION_DEFAULT;
+    field public static int TEXT_DIRECTION_DEFAULT;
     field public static final int TEXT_DIRECTION_FIRST_STRONG = 1; // 0x1
     field public static final int TEXT_DIRECTION_INHERIT = 0; // 0x0
     field public static final int TEXT_DIRECTION_LOCALE = 5; // 0x5

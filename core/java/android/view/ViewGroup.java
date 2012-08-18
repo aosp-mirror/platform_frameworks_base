@@ -804,7 +804,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     @Override
     public boolean hasFocus() {
-        return (mPrivateFlags & FOCUSED) != 0 || mFocused != null;
+        return (mPrivateFlags & PFLAG_FOCUSED) != 0 || mFocused != null;
     }
 
     /*
@@ -898,7 +898,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         for (int i = 0; i < childrenCount; i++) {
             View child = children[i];
             if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE
-                    && (child.mPrivateFlags & IS_ROOT_NAMESPACE) == 0) {
+                    && (child.mPrivateFlags & PFLAG_IS_ROOT_NAMESPACE) == 0) {
                 child.findViewsWithText(outViews, text, flags);
             }
         }
@@ -1177,7 +1177,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     final View view = mCurrentDragView;
                     event.mAction = DragEvent.ACTION_DRAG_EXITED;
                     view.dispatchDragEvent(event);
-                    view.mPrivateFlags2 &= ~View.DRAG_HOVERED;
+                    view.mPrivateFlags2 &= ~View.PFLAG2_DRAG_HOVERED;
                     view.refreshDrawableState();
                 }
                 mCurrentDragView = target;
@@ -1186,7 +1186,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 if (target != null) {
                     event.mAction = DragEvent.ACTION_DRAG_ENTERED;
                     target.dispatchDragEvent(event);
-                    target.mPrivateFlags2 |= View.DRAG_HOVERED;
+                    target.mPrivateFlags2 |= View.PFLAG2_DRAG_HOVERED;
                     target.refreshDrawableState();
                 }
                 event.mAction = action;  // restore the event's original state
@@ -1220,7 +1220,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             if (mCurrentDragView != null) {
                 final View view = mCurrentDragView;
                 view.dispatchDragEvent(event);
-                view.mPrivateFlags2 &= ~View.DRAG_HOVERED;
+                view.mPrivateFlags2 &= ~View.PFLAG2_DRAG_HOVERED;
                 view.refreshDrawableState();
 
                 mCurrentDragView = null;
@@ -1281,7 +1281,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             mDragNotifiedChildren.add(child);
             canAccept = child.dispatchDragEvent(mCurrentDrag);
             if (canAccept && !child.canAcceptDrag()) {
-                child.mPrivateFlags2 |= View.DRAG_CAN_ACCEPT;
+                child.mPrivateFlags2 |= View.PFLAG2_DRAG_CAN_ACCEPT;
                 child.refreshDrawableState();
             }
         }
@@ -1330,9 +1330,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     @Override
     public boolean dispatchKeyEventPreIme(KeyEvent event) {
-        if ((mPrivateFlags & (FOCUSED | HAS_BOUNDS)) == (FOCUSED | HAS_BOUNDS)) {
+        if ((mPrivateFlags & (PFLAG_FOCUSED | PFLAG_HAS_BOUNDS))
+                == (PFLAG_FOCUSED | PFLAG_HAS_BOUNDS)) {
             return super.dispatchKeyEventPreIme(event);
-        } else if (mFocused != null && (mFocused.mPrivateFlags & HAS_BOUNDS) == HAS_BOUNDS) {
+        } else if (mFocused != null && (mFocused.mPrivateFlags & PFLAG_HAS_BOUNDS)
+                == PFLAG_HAS_BOUNDS) {
             return mFocused.dispatchKeyEventPreIme(event);
         }
         return false;
@@ -1347,11 +1349,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             mInputEventConsistencyVerifier.onKeyEvent(event, 1);
         }
 
-        if ((mPrivateFlags & (FOCUSED | HAS_BOUNDS)) == (FOCUSED | HAS_BOUNDS)) {
+        if ((mPrivateFlags & (PFLAG_FOCUSED | PFLAG_HAS_BOUNDS))
+                == (PFLAG_FOCUSED | PFLAG_HAS_BOUNDS)) {
             if (super.dispatchKeyEvent(event)) {
                 return true;
             }
-        } else if (mFocused != null && (mFocused.mPrivateFlags & HAS_BOUNDS) == HAS_BOUNDS) {
+        } else if (mFocused != null && (mFocused.mPrivateFlags & PFLAG_HAS_BOUNDS)
+                == PFLAG_HAS_BOUNDS) {
             if (mFocused.dispatchKeyEvent(event)) {
                 return true;
             }
@@ -1368,9 +1372,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     @Override
     public boolean dispatchKeyShortcutEvent(KeyEvent event) {
-        if ((mPrivateFlags & (FOCUSED | HAS_BOUNDS)) == (FOCUSED | HAS_BOUNDS)) {
+        if ((mPrivateFlags & (PFLAG_FOCUSED | PFLAG_HAS_BOUNDS))
+                == (PFLAG_FOCUSED | PFLAG_HAS_BOUNDS)) {
             return super.dispatchKeyShortcutEvent(event);
-        } else if (mFocused != null && (mFocused.mPrivateFlags & HAS_BOUNDS) == HAS_BOUNDS) {
+        } else if (mFocused != null && (mFocused.mPrivateFlags & PFLAG_HAS_BOUNDS)
+                == PFLAG_HAS_BOUNDS) {
             return mFocused.dispatchKeyShortcutEvent(event);
         }
         return false;
@@ -1385,11 +1391,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             mInputEventConsistencyVerifier.onTrackballEvent(event, 1);
         }
 
-        if ((mPrivateFlags & (FOCUSED | HAS_BOUNDS)) == (FOCUSED | HAS_BOUNDS)) {
+        if ((mPrivateFlags & (PFLAG_FOCUSED | PFLAG_HAS_BOUNDS))
+                == (PFLAG_FOCUSED | PFLAG_HAS_BOUNDS)) {
             if (super.dispatchTrackballEvent(event)) {
                 return true;
             }
-        } else if (mFocused != null && (mFocused.mPrivateFlags & HAS_BOUNDS) == HAS_BOUNDS) {
+        } else if (mFocused != null && (mFocused.mPrivateFlags & PFLAG_HAS_BOUNDS)
+                == PFLAG_HAS_BOUNDS) {
             if (mFocused.dispatchTrackballEvent(event)) {
                 return true;
             }
@@ -1738,9 +1746,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     @Override
     protected boolean dispatchGenericFocusedEvent(MotionEvent event) {
         // Send the event to the focused child or to this view group if it has focus.
-        if ((mPrivateFlags & (FOCUSED | HAS_BOUNDS)) == (FOCUSED | HAS_BOUNDS)) {
+        if ((mPrivateFlags & (PFLAG_FOCUSED | PFLAG_HAS_BOUNDS))
+                == (PFLAG_FOCUSED | PFLAG_HAS_BOUNDS)) {
             return super.dispatchGenericFocusedEvent(event);
-        } else if (mFocused != null && (mFocused.mPrivateFlags & HAS_BOUNDS) == HAS_BOUNDS) {
+        } else if (mFocused != null && (mFocused.mPrivateFlags & PFLAG_HAS_BOUNDS)
+                == PFLAG_HAS_BOUNDS) {
             return mFocused.dispatchGenericMotionEvent(event);
         }
         return false;
@@ -1951,8 +1961,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * Returns true if the flag was previously set.
      */
     private static boolean resetCancelNextUpFlag(View view) {
-        if ((view.mPrivateFlags & CANCEL_NEXT_UP_EVENT) != 0) {
-            view.mPrivateFlags &= ~CANCEL_NEXT_UP_EVENT;
+        if ((view.mPrivateFlags & PFLAG_CANCEL_NEXT_UP_EVENT) != 0) {
+            view.mPrivateFlags &= ~PFLAG_CANCEL_NEXT_UP_EVENT;
             return true;
         }
         return false;
@@ -2769,7 +2779,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         // We will draw our child's animation, let's reset the flag
-        mPrivateFlags &= ~DRAW_ANIMATION;
+        mPrivateFlags &= ~PFLAG_DRAW_ANIMATION;
         mGroupFlags &= ~FLAG_INVALIDATE_REQUIRED;
 
         boolean more = false;
@@ -2889,8 +2899,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             final View child = children[i];
             if (((child.mViewFlags & VISIBILITY_MASK) == VISIBLE || child.getAnimation() != null) &&
                     child.hasStaticLayer()) {
-                child.mRecreateDisplayList = (child.mPrivateFlags & INVALIDATED) == INVALIDATED;
-                child.mPrivateFlags &= ~INVALIDATED;
+                child.mRecreateDisplayList = (child.mPrivateFlags & PFLAG_INVALIDATED)
+                        == PFLAG_INVALIDATED;
+                child.mPrivateFlags &= ~PFLAG_INVALIDATED;
                 child.getDisplayList();
                 child.mRecreateDisplayList = false;
             }
@@ -3033,7 +3044,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         for (int i = 0; i < len; i++) {
             View v = where[i];
 
-            if ((v.mPrivateFlags & IS_ROOT_NAMESPACE) == 0) {
+            if ((v.mPrivateFlags & PFLAG_IS_ROOT_NAMESPACE) == 0) {
                 v = v.findViewById(id);
 
                 if (v != null) {
@@ -3060,7 +3071,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         for (int i = 0; i < len; i++) {
             View v = where[i];
 
-            if ((v.mPrivateFlags & IS_ROOT_NAMESPACE) == 0) {
+            if ((v.mPrivateFlags & PFLAG_IS_ROOT_NAMESPACE) == 0) {
                 v = v.findViewWithTag(tag);
 
                 if (v != null) {
@@ -3087,7 +3098,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         for (int i = 0; i < len; i++) {
             View v = where[i];
 
-            if (v != childToSkip && (v.mPrivateFlags & IS_ROOT_NAMESPACE) == 0) {
+            if (v != childToSkip && (v.mPrivateFlags & PFLAG_IS_ROOT_NAMESPACE) == 0) {
                 v = v.findViewByPredicate(predicate);
 
                 if (v != null) {
@@ -3297,7 +3308,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             boolean preventRequestLayout) {
         child.mParent = null;
         addViewInner(child, index, params, preventRequestLayout);
-        child.mPrivateFlags = (child.mPrivateFlags & ~DIRTY_MASK) | DRAWN;
+        child.mPrivateFlags = (child.mPrivateFlags & ~PFLAG_DIRTY_MASK) | PFLAG_DRAWN;
         return true;
     }
 
@@ -3307,7 +3318,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @param child the child on which to perform the cleanup
      */
     protected void cleanupLayoutState(View child) {
-        child.mPrivateFlags &= ~View.FORCE_LAYOUT;
+        child.mPrivateFlags &= ~View.PFLAG_FORCE_LAYOUT;
     }
 
     private void addViewInner(View child, int index, LayoutParams params,
@@ -3854,9 +3865,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         addInArray(child, index);
 
         child.mParent = this;
-        child.mPrivateFlags = (child.mPrivateFlags & ~DIRTY_MASK & ~DRAWING_CACHE_VALID) |
-                DRAWN | INVALIDATED;
-        this.mPrivateFlags |= INVALIDATED;
+        child.mPrivateFlags = (child.mPrivateFlags & ~PFLAG_DIRTY_MASK
+                        & ~PFLAG_DRAWING_CACHE_VALID)
+                | PFLAG_DRAWN | PFLAG_INVALIDATED;
+        this.mPrivateFlags |= PFLAG_INVALIDATED;
 
         if (child.hasFocus()) {
             requestChildFocus(child, child.findFocus());
@@ -3957,7 +3969,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             // If the child is drawing an animation, we want to copy this flag onto
             // ourselves and the parent to make sure the invalidate request goes
             // through
-            final boolean drawAnimation = (child.mPrivateFlags & DRAW_ANIMATION) == DRAW_ANIMATION;
+            final boolean drawAnimation = (child.mPrivateFlags & PFLAG_DRAW_ANIMATION)
+                    == PFLAG_DRAW_ANIMATION;
 
             // Check whether the child that requests the invalidate is fully opaque
             // Views being animated or transformed are not considered opaque because we may
@@ -3967,11 +3980,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     child.getAnimation() == null && childMatrix.isIdentity();
             // Mark the child as dirty, using the appropriate flag
             // Make sure we do not set both flags at the same time
-            int opaqueFlag = isOpaque ? DIRTY_OPAQUE : DIRTY;
+            int opaqueFlag = isOpaque ? PFLAG_DIRTY_OPAQUE : PFLAG_DIRTY;
 
             if (child.mLayerType != LAYER_TYPE_NONE) {
-                mPrivateFlags |= INVALIDATED;
-                mPrivateFlags &= ~DRAWING_CACHE_VALID;
+                mPrivateFlags |= PFLAG_INVALIDATED;
+                mPrivateFlags &= ~PFLAG_DRAWING_CACHE_VALID;
                 child.mLocalDirtyRect.union(dirty);
             }
 
@@ -4013,7 +4026,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
                 if (drawAnimation) {
                     if (view != null) {
-                        view.mPrivateFlags |= DRAW_ANIMATION;
+                        view.mPrivateFlags |= PFLAG_DRAW_ANIMATION;
                     } else if (parent instanceof ViewRootImpl) {
                         ((ViewRootImpl) parent).mIsAnimating = true;
                     }
@@ -4024,10 +4037,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 if (view != null) {
                     if ((view.mViewFlags & FADING_EDGE_MASK) != 0 &&
                             view.getSolidColor() == 0) {
-                        opaqueFlag = DIRTY;
+                        opaqueFlag = PFLAG_DIRTY;
                     }
-                    if ((view.mPrivateFlags & DIRTY_MASK) != DIRTY) {
-                        view.mPrivateFlags = (view.mPrivateFlags & ~DIRTY_MASK) | opaqueFlag;
+                    if ((view.mPrivateFlags & PFLAG_DIRTY_MASK) != PFLAG_DIRTY) {
+                        view.mPrivateFlags = (view.mPrivateFlags & ~PFLAG_DIRTY_MASK) | opaqueFlag;
                     }
                 }
 
@@ -4058,8 +4071,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * does not intersect with this ViewGroup's bounds.
      */
     public ViewParent invalidateChildInParent(final int[] location, final Rect dirty) {
-        if ((mPrivateFlags & DRAWN) == DRAWN ||
-                (mPrivateFlags & DRAWING_CACHE_VALID) == DRAWING_CACHE_VALID) {
+        if ((mPrivateFlags & PFLAG_DRAWN) == PFLAG_DRAWN ||
+                (mPrivateFlags & PFLAG_DRAWING_CACHE_VALID) == PFLAG_DRAWING_CACHE_VALID) {
             if ((mGroupFlags & (FLAG_OPTIMIZE_INVALIDATE | FLAG_ANIMATION_DONE)) !=
                         FLAG_OPTIMIZE_INVALIDATE) {
                 dirty.offset(location[CHILD_LEFT_INDEX] - mScrollX,
@@ -4073,20 +4086,20 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                         dirty.setEmpty();
                     }
                 }
-                mPrivateFlags &= ~DRAWING_CACHE_VALID;
+                mPrivateFlags &= ~PFLAG_DRAWING_CACHE_VALID;
 
                 location[CHILD_LEFT_INDEX] = left;
                 location[CHILD_TOP_INDEX] = top;
 
                 if (mLayerType != LAYER_TYPE_NONE) {
-                    mPrivateFlags |= INVALIDATED;
+                    mPrivateFlags |= PFLAG_INVALIDATED;
                     mLocalDirtyRect.union(dirty);
                 }
 
                 return mParent;
 
             } else {
-                mPrivateFlags &= ~DRAWN & ~DRAWING_CACHE_VALID;
+                mPrivateFlags &= ~PFLAG_DRAWN & ~PFLAG_DRAWING_CACHE_VALID;
 
                 location[CHILD_LEFT_INDEX] = mLeft;
                 location[CHILD_TOP_INDEX] = mTop;
@@ -4098,7 +4111,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 }
 
                 if (mLayerType != LAYER_TYPE_NONE) {
-                    mPrivateFlags |= INVALIDATED;
+                    mPrivateFlags |= PFLAG_INVALIDATED;
                     mLocalDirtyRect.union(dirty);
                 }
 
@@ -4160,8 +4173,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * coordinate system, pruning the invalidation if the parent has already been invalidated.
      */
     private ViewParent invalidateChildInParentFast(int left, int top, final Rect dirty) {
-        if ((mPrivateFlags & DRAWN) == DRAWN ||
-                (mPrivateFlags & DRAWING_CACHE_VALID) == DRAWING_CACHE_VALID) {
+        if ((mPrivateFlags & PFLAG_DRAWN) == PFLAG_DRAWN ||
+                (mPrivateFlags & PFLAG_DRAWING_CACHE_VALID) == PFLAG_DRAWING_CACHE_VALID) {
             dirty.offset(left - mScrollX, top - mScrollY);
 
             if ((mGroupFlags & FLAG_CLIP_CHILDREN) == 0 ||
@@ -4924,11 +4937,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             view.clearAnimation();
         }
 
-        if ((view.mPrivateFlags & ANIMATION_STARTED) == ANIMATION_STARTED) {
+        if ((view.mPrivateFlags & PFLAG_ANIMATION_STARTED) == PFLAG_ANIMATION_STARTED) {
             view.onAnimationEnd();
             // Should be performed by onAnimationEnd() but this avoid an infinite loop,
             // so we'd rather be safe than sorry
-            view.mPrivateFlags &= ~ANIMATION_STARTED;
+            view.mPrivateFlags &= ~PFLAG_ANIMATION_STARTED;
             // Draw one more frame after the animation is done
             mGroupFlags |= FLAG_INVALIDATE_REQUIRED;
         }
@@ -5027,7 +5040,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     @Override
     public boolean gatherTransparentRegion(Region region) {
         // If no transparent regions requested, we are always opaque.
-        final boolean meOpaque = (mPrivateFlags & View.REQUEST_TRANSPARENT_REGIONS) == 0;
+        final boolean meOpaque = (mPrivateFlags & View.PFLAG_REQUEST_TRANSPARENT_REGIONS) == 0;
         if (meOpaque && region == null) {
             // The caller doesn't care about the region, so stop now.
             return true;
@@ -5052,7 +5065,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     public void requestTransparentRegion(View child) {
         if (child != null) {
-            child.mPrivateFlags |= View.REQUEST_TRANSPARENT_REGIONS;
+            child.mPrivateFlags |= View.PFLAG_REQUEST_TRANSPARENT_REGIONS;
             if (mParent != null) {
                 mParent.requestTransparentRegion(this);
             }
