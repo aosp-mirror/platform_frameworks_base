@@ -85,6 +85,8 @@ def main(options, args):
 
   run_load_test_cmd += run_load_test_cmd_postfix
 
+  print run_load_test_cmd
+
   (adb_output, adb_error) = subprocess.Popen(run_load_test_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
   fail_flag = False
   for line in adb_output.splitlines():
@@ -113,7 +115,7 @@ def main(options, args):
     logging.error("Cannot create results dir: " + results_dir)
     sys.exit(1)
 
-  result_file = "/sdcard/load_test_result.txt"
+  result_file = "/sdcard/0/load_test_result.txt"
   shell_cmd_str = adb_cmd + " pull " + result_file + " " + results_dir
   (adb_output, err) = subprocess.Popen(
       shell_cmd_str, shell=True,
