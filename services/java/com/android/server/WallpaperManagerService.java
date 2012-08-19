@@ -768,10 +768,6 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
             WallpaperConnection newConn = new WallpaperConnection(wi, wallpaper);
             intent.setComponent(componentName);
             int serviceUserId = wallpaper.userId;
-            // Because the image wallpaper is running in the system ui
-            if (componentName.equals(wallpaper.imageWallpaperComponent)) {
-                serviceUserId = 0;
-            }
             intent.putExtra(Intent.EXTRA_CLIENT_LABEL,
                     com.android.internal.R.string.wallpaper_binding_label);
             intent.putExtra(Intent.EXTRA_CLIENT_INTENT, PendingIntent.getActivity(
