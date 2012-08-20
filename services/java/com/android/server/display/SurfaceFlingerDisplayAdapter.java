@@ -16,18 +16,21 @@
 
 package com.android.server.display;
 
+import android.content.Context;
+
 /**
  * A display adapter for the displays managed by Surface Flinger.
  */
 public final class SurfaceFlingerDisplayAdapter extends DisplayAdapter {
+    private final Context mContext;
+    private final SurfaceFlingerDisplayDevice mDefaultDisplayDevice;
+
     private static native void nativeGetDefaultDisplayDeviceInfo(DisplayDeviceInfo outInfo);
 
-    private final DisplayDevice mDefaultDisplay = new DisplayDevice() {
-        @Override
-        public void getInfo(DisplayDeviceInfo outInfo) {
-            nativeGetDefaultDisplayDeviceInfo(outInfo);
-        }
-    };
+    public SurfaceFlingerDisplayAdapter(Context context) {
+        mContext = context;
+        mDefaultDisplayDevice = new SurfaceFlingerDisplayDevice();
+    }
 
     @Override
     public String getName() {
@@ -35,7 +38,21 @@ public final class SurfaceFlingerDisplayAdapter extends DisplayAdapter {
     }
 
     @Override
-    public DisplayDevice getDisplayDevice() {
-        return mDefaultDisplay;
+    public void register(Listener listener) {
+        listener.onDisplayDeviceAdded(mDefaultDisplayDevice);
+    }
+
+    private final class SurfaceFlingerDisplayDevice extends DisplayDevice {
+        @Override
+        public DisplayAdapter getAdapter() {
+            return SurfaceFlingerDisplayAdapter.this;
+        }
+
+        @Override
+        public void getInfo(DisplayDeviceInfo outInfo) {
+            outInfo.name = mContext.getResources().getString(
+                    com.android.internal.R.string.display_manager_built_in_display);
+            nativeGetDefaultDisplayDeviceInfo(outInfo);
+        }
     }
 }

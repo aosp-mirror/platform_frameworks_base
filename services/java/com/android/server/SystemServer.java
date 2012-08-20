@@ -155,13 +155,12 @@ class ServerThread extends Thread {
             power = new PowerManagerService();
             ServiceManager.addService(Context.POWER_SERVICE, power);
 
-            Slog.i(TAG, "Display Manager");
-            display = new DisplayManagerService();
-            ServiceManager.addService(Context.DISPLAY_SERVICE, display, true);
-
             Slog.i(TAG, "Activity Manager");
             context = ActivityManagerService.main(factoryTest);
-            display.setContext(context);
+
+            Slog.i(TAG, "Display Manager");
+            display = new DisplayManagerService(context);
+            ServiceManager.addService(Context.DISPLAY_SERVICE, display, true);
 
             Slog.i(TAG, "Telephony Registry");
             ServiceManager.addService("telephony.registry", new TelephonyRegistry(context));

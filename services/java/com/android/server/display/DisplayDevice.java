@@ -18,8 +18,20 @@ package com.android.server.display;
 
 /**
  * Represents a physical display device such as the built-in display
- * or an external monitor.
+ * an external monitor, or a WiFi display.
  */
 public abstract class DisplayDevice {
+    /**
+     * Gets the display adapter that makes the display device available.
+     *
+     * @return The display adapter.
+     */
+    public abstract DisplayAdapter getAdapter();
+
+    /**
+     * Gets information about the display device.
+     *
+     * @param outInfo The object to populate with the information.
+     */
     public abstract void getInfo(DisplayDeviceInfo outInfo);
 }
