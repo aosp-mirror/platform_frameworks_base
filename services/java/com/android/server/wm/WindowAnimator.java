@@ -190,8 +190,8 @@ public class WindowAnimator {
             for (int i = 0; i < N; i++) {
                 final AppWindowAnimParams params = layoutToAnim.mAppWindowAnimParams.get(i);
                 AppWindowAnimator appAnimator = params.mAppAnimator;
-                appAnimator.mAllAppWinAnimators =
-                        new ArrayList<WindowStateAnimator>(params.mWinAnimators);
+                appAnimator.mAllAppWinAnimators.clear();
+                appAnimator.mAllAppWinAnimators.addAll(params.mWinAnimators);
                 mAppAnimators.add(appAnimator);
             }
         }
