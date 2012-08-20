@@ -21,6 +21,12 @@ package com.android.server.display;
  */
 public final class DisplayDeviceInfo {
     /**
+     * Gets the name of the display device, which may be derived from
+     * EDID or other sources.  The name may be displayed to the user.
+     */
+    public String name;
+
+    /**
      * The width of the display in its natural orientation, in pixels.
      * This value is not affected by display rotation.
      */
@@ -38,6 +44,7 @@ public final class DisplayDeviceInfo {
     public float yDpi;
 
     public void copyFrom(DisplayDeviceInfo other) {
+        name = other.name;
         width = other.width;
         height = other.height;
         refreshRate = other.refreshRate;
@@ -46,9 +53,10 @@ public final class DisplayDeviceInfo {
         yDpi = other.yDpi;
     }
 
+    // For debugging purposes
     @Override
     public String toString() {
-        return width + " x " + height + ", " + refreshRate + " fps, "
+        return "\"" + name + "\": " + width + " x " + height + ", " + refreshRate + " fps, "
                 + "density " + densityDpi + ", " + xDpi + " x " + yDpi + " dpi";
     }
 }

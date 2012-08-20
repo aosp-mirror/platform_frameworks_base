@@ -16,23 +16,20 @@
 
 package com.android.server.display;
 
+import android.content.Context;
 import android.util.DisplayMetrics;
 
 /**
  * Provides a fake default display for headless systems.
  */
 public final class HeadlessDisplayAdapter extends DisplayAdapter {
-    private final DisplayDevice mDefaultDisplay = new DisplayDevice() {
-        @Override
-        public void getInfo(DisplayDeviceInfo outInfo) {
-            outInfo.width = 640;
-            outInfo.height = 480;
-            outInfo.refreshRate = 60;
-            outInfo.densityDpi = DisplayMetrics.DENSITY_DEFAULT;
-            outInfo.xDpi = 160;
-            outInfo.yDpi = 160;
-        }
-    };
+    private final Context mContext;
+    private final HeadlessDisplayDevice mDefaultDisplayDevice;
+
+    public HeadlessDisplayAdapter(Context context) {
+        mContext = context;
+        mDefaultDisplayDevice = new HeadlessDisplayDevice();
+    }
 
     @Override
     public String getName() {
@@ -40,7 +37,26 @@ public final class HeadlessDisplayAdapter extends DisplayAdapter {
     }
 
     @Override
-    public DisplayDevice getDisplayDevice() {
-        return mDefaultDisplay;
+    public void register(Listener listener) {
+        listener.onDisplayDeviceAdded(mDefaultDisplayDevice);
+    }
+
+    private final class HeadlessDisplayDevice extends DisplayDevice {
+        @Override
+        public DisplayAdapter getAdapter() {
+            return HeadlessDisplayAdapter.this;
+        }
+
+        @Override
+        public void getInfo(DisplayDeviceInfo outInfo) {
+            outInfo.name = mContext.getResources().getString(
+                    com.android.internal.R.string.display_manager_built_in_display);
+            outInfo.width = 640;
+            outInfo.height = 480;
+            outInfo.refreshRate = 60;
+            outInfo.densityDpi = DisplayMetrics.DENSITY_DEFAULT;
+            outInfo.xDpi = 160;
+            outInfo.yDpi = 160;
+        }
     }
 }

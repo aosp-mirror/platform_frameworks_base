@@ -22,8 +22,6 @@ import android.content.pm.PackageManager;
 import android.hardware.display.IDisplayManager;
 import android.os.Binder;
 import android.os.SystemProperties;
-import android.util.Slog;
-import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Surface;
@@ -47,39 +45,25 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
 
     private final Object mLock = new Object();
 
-    private Context mContext;
+    private final Context mContext;
     private final boolean mHeadless;
 
-    private int mDisplayIdSeq = Display.DEFAULT_DISPLAY;
-
-    /** All registered DisplayAdapters. */
     private final ArrayList<DisplayAdapter> mDisplayAdapters = new ArrayList<DisplayAdapter>();
+    private final DisplayInfo mDefaultDisplayInfo = new DisplayInfo();
 
-    /** All the DisplayAdapters showing the given displayId. */
-    private final SparseArray<ArrayList<DisplayAdapter>> mLogicalToPhysicals =
-            new SparseArray<ArrayList<DisplayAdapter>>();
-
-    /** All the DisplayInfos in the system indexed by deviceId */
-    private final SparseArray<DisplayInfo> mDisplayInfos = new SparseArray<DisplayInfo>();
-
-    private final ArrayList<DisplayCallback> mCallbacks =
-            new ArrayList<DisplayManagerService.DisplayCallback>();
-
-    public DisplayManagerService() {
+    public DisplayManagerService(Context context) {
+        mContext = context;
         mHeadless = SystemProperties.get(SYSTEM_HEADLESS).equals("1");
+
         registerDefaultDisplayAdapter();
     }
 
     private void registerDefaultDisplayAdapter() {
         if (mHeadless) {
-            registerDisplayAdapter(new HeadlessDisplayAdapter());
+            registerDisplayAdapter(new HeadlessDisplayAdapter(mContext));
         } else {
-            registerDisplayAdapter(new SurfaceFlingerDisplayAdapter());
+            registerDisplayAdapter(new SurfaceFlingerDisplayAdapter(mContext));
         }
-    }
-
-    public void setContext(Context context) {
-        mContext = context;
     }
 
     // FIXME: this isn't the right API for the long term
@@ -90,6 +74,11 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
         info.height = 720;
     }
 
+    /**
+     * Returns true if the device is headless.
+     *
+     * @return True if the device is headless.
+     */
     public boolean isHeadless() {
         return mHeadless;
     }
@@ -101,12 +90,10 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
      */
     public void setDisplayInfo(int displayId, DisplayInfo info) {
         synchronized (mLock) {
-            DisplayInfo localInfo = mDisplayInfos.get(displayId);
-            if (localInfo == null) {
-                localInfo = new DisplayInfo();
-                mDisplayInfos.put(displayId, localInfo);
+            if (displayId != Display.DEFAULT_DISPLAY) {
+                throw new UnsupportedOperationException();
             }
-            localInfo.copyFrom(info);
+            mDefaultDisplayInfo.copyFrom(info);
         }
     }
 
@@ -118,177 +105,32 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
     @Override // Binder call
     public boolean getDisplayInfo(int displayId, DisplayInfo outInfo) {
         synchronized (mLock) {
-            DisplayInfo localInfo = mDisplayInfos.get(displayId);
-            if (localInfo == null) {
+            if (displayId != Display.DEFAULT_DISPLAY) {
                 return false;
             }
-            outInfo.copyFrom(localInfo);
+            outInfo.copyFrom(mDefaultDisplayInfo);
             return true;
         }
     }
 
-    /**
-     * Inform the service of a new physical display. A new logical displayId is created and the new
-     * physical display is immediately bound to it. Use removeAdapterFromDisplay to disconnect it.
-     *
-     * @param adapter The wrapper for information associated with the physical display.
-     */
-    public void registerDisplayAdapter(DisplayAdapter adapter) {
-
-        int displayId;
-        DisplayCallback[] callbacks;
-
-        synchronized (mLock) {
-            displayId = mDisplayIdSeq;
-            do {
-                // Find the next unused displayId. (Pretend like it might ever wrap around).
-                mDisplayIdSeq++;
-                if (mDisplayIdSeq < 0) {
-                    mDisplayIdSeq = Display.DEFAULT_DISPLAY + 1;
-                }
-            } while (mDisplayInfos.get(mDisplayIdSeq) != null);
-
-            adapter.setDisplayId(displayId);
-
-            createDisplayInfoLocked(displayId, adapter);
-
-            ArrayList<DisplayAdapter> list = new ArrayList<DisplayAdapter>();
-            list.add(adapter);
-            mLogicalToPhysicals.put(displayId, list);
-
-            mDisplayAdapters.add(adapter);
-            callbacks = mCallbacks.toArray(new DisplayCallback[mCallbacks.size()]);
-        }
-
-        for (int i = callbacks.length - 1; i >= 0; i--) {
-            callbacks[i].displayAdded(displayId);
-        }
-
-        // TODO: Notify SurfaceFlinger of new addition.
-    }
-
-    /**
-     * Connect a logical display to a physical display. Will remove the physical display from any
-     * logical display it is currently attached to.
-     *
-     * @param displayId The logical display. Will be created if it does not already exist.
-     * @param adapter The physical display.
-     */
-    public void addAdapterToDisplay(int displayId, DisplayAdapter adapter) {
-        if (adapter == null) {
-            // TODO: Or throw NPE?
-            Slog.e(TAG, "addDeviceToDisplay: Attempt to add null adapter");
-            return;
-        }
-
-        synchronized (mLock) {
-            if (!mDisplayAdapters.contains(adapter)) {
-                // TOOD: Handle unregistered adapter with exception or return value.
-                Slog.e(TAG, "addDeviceToDisplay: Attempt to add an unregistered adapter");
-                return;
+    private void registerDisplayAdapter(DisplayAdapter adapter) {
+        mDisplayAdapters.add(adapter);
+        adapter.register(new DisplayAdapter.Listener() {
+            @Override
+            public void onDisplayDeviceAdded(DisplayDevice device) {
+                DisplayDeviceInfo deviceInfo = new DisplayDeviceInfo();
+                device.getInfo(deviceInfo);
+                copyDisplayInfoFromDeviceInfo(mDefaultDisplayInfo, deviceInfo);
             }
 
-            DisplayInfo displayInfo = mDisplayInfos.get(displayId);
-            if (displayInfo == null) {
-                createDisplayInfoLocked(displayId, adapter);
+            @Override
+            public void onDisplayDeviceRemoved(DisplayDevice device) {
             }
-
-            Integer oldDisplayId = adapter.getDisplayId();
-            if (oldDisplayId != Display.NO_DISPLAY) {
-                if (oldDisplayId == displayId) {
-                    // adapter already added to displayId.
-                    return;
-                }
-
-                removeAdapterLocked(adapter);
-            }
-
-            ArrayList<DisplayAdapter> list = mLogicalToPhysicals.get(displayId);
-            if (list == null) {
-                list = new ArrayList<DisplayAdapter>();
-                mLogicalToPhysicals.put(displayId, list);
-            }
-            list.add(adapter);
-            adapter.setDisplayId(displayId);
-        }
-
-        // TODO: Notify SurfaceFlinger of new addition.
+        });
     }
 
-    /**
-     * Disconnect the physical display from whichever logical display it is attached to.
-     * @param adapter The physical display to detach.
-     */
-    public void removeAdapterFromDisplay(DisplayAdapter adapter) {
-        if (adapter == null) {
-            // TODO: Or throw NPE?
-            return;
-        }
-
-        synchronized (mLock) {
-            if (!mDisplayAdapters.contains(adapter)) {
-                // TOOD: Handle unregistered adapter with exception or return value.
-                Slog.e(TAG, "removeDeviceFromDisplay: Attempt to remove an unregistered adapter");
-                return;
-            }
-
-            removeAdapterLocked(adapter);
-        }
-
-        // TODO: Notify SurfaceFlinger of removal.
-    }
-
-    public void registerDisplayCallback(final DisplayCallback callback) {
-        synchronized (mLock) {
-            if (!mCallbacks.contains(callback)) {
-                mCallbacks.add(callback);
-            }
-        }
-    }
-
-    public void unregisterDisplayCallback(final DisplayCallback callback) {
-        synchronized (mLock) {
-            mCallbacks.remove(callback);
-        }
-    }
-
-    /**
-     * Create a new logical DisplayInfo and fill it in with information from the physical display.
-     * @param displayId The logical identifier.
-     * @param adapter The physical display for initial values.
-     */
-    private void createDisplayInfoLocked(int displayId, DisplayAdapter adapter) {
-        DisplayInfo displayInfo = new DisplayInfo();
-        DisplayDeviceInfo deviceInfo = new DisplayDeviceInfo();
-        adapter.getDisplayDevice().getInfo(deviceInfo);
-        copyDisplayInfoFromDeviceInfo(displayInfo, deviceInfo);
-        mDisplayInfos.put(displayId, displayInfo);
-    }
-
-    /**
-     * Disconnect a physical display from its logical display. If there are no more physical
-     * displays attached to the logical display, delete the logical display.
-     * @param adapter The physical display to detach.
-     */
-    void removeAdapterLocked(DisplayAdapter adapter) {
-        int displayId = adapter.getDisplayId();
-        adapter.setDisplayId(Display.NO_DISPLAY);
-
-        ArrayList<DisplayAdapter> list = mLogicalToPhysicals.get(displayId);
-        if (list != null) {
-            list.remove(adapter);
-            if (list.isEmpty()) {
-                mLogicalToPhysicals.remove(displayId);
-                // TODO: Keep count of Windows attached to logical display and don't delete if
-                // there are any outstanding. Also, what keeps the WindowManager from continuing
-                // to use the logical display?
-                mDisplayInfos.remove(displayId);
-            }
-        }
-    }
-
-    private void copyDisplayInfoFromDeviceInfo(DisplayInfo displayInfo,
-                                               DisplayDeviceInfo deviceInfo) {
+    private void copyDisplayInfoFromDeviceInfo(
+            DisplayInfo displayInfo, DisplayDeviceInfo deviceInfo) {
         // Bootstrap the logical display using the physical display.
         displayInfo.appWidth = deviceInfo.width;
         displayInfo.appHeight = deviceInfo.height;
@@ -319,19 +161,12 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
 
         pw.println("Headless: " + mHeadless);
 
-        DisplayDeviceInfo info = new DisplayDeviceInfo();
-        for (DisplayAdapter adapter : mDisplayAdapters) {
-            pw.println("Display for adapter " + adapter.getName()
-                + " assigned to Display " + adapter.getDisplayId());
-            DisplayDevice device = adapter.getDisplayDevice();
-            pw.print("  ");
-            device.getInfo(info);
-            pw.println(info);
-        }
-    }
+        synchronized (mLock) {
+            for (DisplayAdapter adapter : mDisplayAdapters) {
+                pw.println("Adapter: " + adapter.getName());
+            }
 
-    public interface DisplayCallback {
-        public void displayAdded(int displayId);
-        public void displayRemoved(int displayId);
+            pw.println("Default display: " + mDefaultDisplayInfo);
+        }
     }
 }
