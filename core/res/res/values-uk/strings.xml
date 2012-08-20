@@ -224,6 +224,10 @@
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Дозволяє програмі виконувати дії щодо різних користувачів на пристрої. Шкідливі програми можуть використовувати це для порушення захисту окремих користувачів."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"повна ліцензія на взаємодію між користувачами"</string>
     <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Дозволяє всі можливі взаємодії щодо користувачів."</string>
+    <!-- no translation found for permlab_manageUsers (1676150911672282428) -->
+    <skip />
+    <!-- no translation found for permdesc_manageUsers (8409306667645355638) -->
+    <skip />
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"отримувати дані про запущені програми"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Дозволяє програмі отримувати інформацію про поточні й останні запущені завдання. Шкідливі програми можуть виявляти особисту інформацію про інші програми."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"змінювати порядок запущених програм"</string>
@@ -1309,4 +1313,6 @@
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Аудіо Bluetooth"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Готово"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Вивід медіа-даних"</string>
+    <!-- no translation found for display_manager_built_in_display (9042666544146043569) -->
+    <skip />
 </resources>

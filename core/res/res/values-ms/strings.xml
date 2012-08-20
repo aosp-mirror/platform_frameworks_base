@@ -224,6 +224,8 @@
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Membenarkan apl melakukan tindakan merentasi pengguna berbeza pada peranti. Apl hasad boleh menggunakan ini untuk melanggar perlindungan antara pengguna."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"lesen penuh untuk berinteraksi sesama pengguna"</string>
     <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Membenarkan semua interaksi yang mungkin sesama pengguna."</string>
+    <string name="permlab_manageUsers" msgid="1676150911672282428">"urus pengguna"</string>
+    <string name="permdesc_manageUsers" msgid="8409306667645355638">"Membenarkan apl mengurus pengguna pada peranti ini, termasuk pertanyaan, pembuatan dan pemadaman."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"dapatkan butiran apl yang berjalan"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Membenarkan apl untuk mendapatkan maklumat terperinci tentang tugasan yang sedang dan baru berjalan. Apl hasad boleh mendapat maklumat peribadi tentang apl lain."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"susun semula tertib apl yang dijalankan"</string>
@@ -1309,4 +1311,6 @@
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Audio Bluetooth"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Selesai"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Output media"</string>
+    <!-- no translation found for display_manager_built_in_display (9042666544146043569) -->
+    <skip />
 </resources>
