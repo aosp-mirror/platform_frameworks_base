@@ -22503,6 +22503,17 @@ package android.text.style {
     method public abstract void chooseHeight(java.lang.CharSequence, int, int, int, int, android.graphics.Paint.FontMetricsInt, android.text.TextPaint);
   }
 
+  public class LocaleSpan extends android.text.style.MetricAffectingSpan implements android.text.ParcelableSpan {
+    ctor public LocaleSpan(java.util.Locale);
+    ctor public LocaleSpan(android.os.Parcel);
+    method public int describeContents();
+    method public java.util.Locale getLocale();
+    method public int getSpanTypeId();
+    method public void updateDrawState(android.text.TextPaint);
+    method public void updateMeasureState(android.text.TextPaint);
+    method public void writeToParcel(android.os.Parcel, int);
+  }
+
   public class MaskFilterSpan extends android.text.style.CharacterStyle implements android.text.style.UpdateAppearance {
     ctor public MaskFilterSpan(android.graphics.MaskFilter);
     method public android.graphics.MaskFilter getMaskFilter();
@@ -29303,6 +29314,7 @@ package android.widget {
     method public static int getTextColor(android.content.Context, android.content.res.TypedArray, int);
     method public final android.content.res.ColorStateList getTextColors();
     method public static android.content.res.ColorStateList getTextColors(android.content.Context, android.content.res.TypedArray);
+    method public java.util.Locale getTextLocale();
     method public float getTextScaleX();
     method public float getTextSize();
     method public int getTotalPaddingBottom();
@@ -29405,6 +29417,7 @@ package android.widget {
     method public void setTextIsSelectable(boolean);
     method public final void setTextKeepState(java.lang.CharSequence);
     method public final void setTextKeepState(java.lang.CharSequence, android.widget.TextView.BufferType);
+    method public void setTextLocale(java.util.Locale);
     method public void setTextScaleX(float);
     method public void setTextSize(float);
     method public void setTextSize(int, float);
