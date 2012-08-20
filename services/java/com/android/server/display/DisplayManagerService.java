@@ -19,6 +19,7 @@ package com.android.server.display;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.hardware.display.DisplayManager;
 import android.hardware.display.IDisplayManager;
 import android.os.Binder;
 import android.os.SystemProperties;
@@ -166,7 +167,10 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
                 pw.println("Adapter: " + adapter.getName());
             }
 
-            pw.println("Default display: " + mDefaultDisplayInfo);
+            pw.println("Default display info: " + mDefaultDisplayInfo);
         }
+
+        pw.println("Default display: "
+                + DisplayManager.getInstance().getRealDisplay(Display.DEFAULT_DISPLAY));
     }
 }
