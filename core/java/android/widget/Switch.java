@@ -664,7 +664,7 @@ public class Switch extends CompoundButton {
     @Override
     public void setChecked(boolean checked) {
         super.setChecked(checked);
-        setThumbPosition(checked);
+        setThumbPosition(isChecked());
         invalidate();
     }
 
