@@ -18,13 +18,11 @@ package com.android.systemui.statusbar.phone;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.ObjectAnimator;
 import android.app.StatusBarManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
@@ -34,19 +32,14 @@ import android.util.Slog;
 import android.view.animation.AccelerateInterpolator;
 import android.view.Display;
 import android.view.MotionEvent;
-import android.view.VelocityTracker;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Surface;
-import android.view.Window;
 import android.view.WindowManager;
-import android.view.WindowManagerImpl;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.lang.StringBuilder;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.R;
@@ -244,7 +237,8 @@ public class NavigationBarView extends LinearLayout {
             } else {
                 return;
             }
-            WindowManagerImpl.getDefault().updateViewLayout(this, lp);
+            WindowManager wm = (WindowManager)getContext().getSystemService(Context.WINDOW_SERVICE);
+            wm.updateViewLayout(this, lp);
         }
     }
 

@@ -16,7 +16,6 @@
 
 package android.view;
 
-import android.app.Application;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
@@ -455,7 +454,7 @@ public abstract class Window {
      * display panels.  This is <em>not</em> used for displaying the
      * Window itself -- that must be done by the client.
      *
-     * @param wm The ViewManager for adding new windows.
+     * @param wm The window manager for adding new windows.
      */
     public void setWindowManager(WindowManager wm, IBinder appToken, String appName) {
         setWindowManager(wm, appToken, appName, false);
@@ -466,7 +465,7 @@ public abstract class Window {
      * display panels.  This is <em>not</em> used for displaying the
      * Window itself -- that must be done by the client.
      *
-     * @param wm The ViewManager for adding new windows.
+     * @param wm The window manager for adding new windows.
      */
     public void setWindowManager(WindowManager wm, IBinder appToken, String appName,
             boolean hardwareAccelerated) {
@@ -475,14 +474,9 @@ public abstract class Window {
         mHardwareAccelerated = hardwareAccelerated
                 || SystemProperties.getBoolean(PROPERTY_HARDWARE_UI, false);
         if (wm == null) {
-            wm = WindowManagerImpl.getDefault();
+            wm = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
         }
-        mWindowManager = ((WindowManagerImpl)wm).makeLocal(this);
-    }
-
-    CompatibilityInfoHolder getCompatibilityInfo() {
-        Application app = (Application)mContext.getApplicationContext();
-        return app != null ? app.mLoadedApk.mCompatibilityInfo : null;
+        mWindowManager = ((WindowManagerImpl)wm).createLocalWindowManager(this);
     }
 
     void adjustLayoutParamsForSubWindow(WindowManager.LayoutParams wp) {

@@ -30,6 +30,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Point;
+import android.hardware.display.DisplayManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Debug;
@@ -366,7 +367,7 @@ public class ActivityManager {
      * (which tends to consume a lot more RAM).
      * @hide
      */
-    static public boolean isHighEndGfx(Display display) {
+    static public boolean isHighEndGfx() {
         MemInfoReader reader = new MemInfoReader();
         reader.readMemInfo();
         if (reader.getTotalSize() >= (512*1024*1024)) {
@@ -374,6 +375,8 @@ public class ActivityManager {
             // we can afford the overhead of graphics acceleration.
             return true;
         }
+
+        Display display = DisplayManager.getInstance().getRealDisplay(Display.DEFAULT_DISPLAY);
         Point p = new Point();
         display.getRealSize(p);
         int pixels = p.x * p.y;

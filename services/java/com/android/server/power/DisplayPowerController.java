@@ -27,6 +27,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.hardware.SystemSensorManager;
+import android.hardware.display.DisplayManager;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
@@ -35,6 +36,7 @@ import android.os.SystemClock;
 import android.util.Slog;
 import android.util.Spline;
 import android.util.TimeUtils;
+import android.view.Display;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -428,7 +430,8 @@ final class DisplayPowerController {
 
     private void initialize() {
         final Executor executor = AsyncTask.THREAD_POOL_EXECUTOR;
-        mPowerState = new DisplayPowerState(new ElectronBeam(),
+        Display display = DisplayManager.getInstance().getRealDisplay(Display.DEFAULT_DISPLAY);
+        mPowerState = new DisplayPowerState(new ElectronBeam(display),
                 new PhotonicModulator(executor,
                         mLights.getLight(LightsService.LIGHT_ID_BACKLIGHT),
                         mSuspendBlocker));

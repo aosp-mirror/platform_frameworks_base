@@ -35,7 +35,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.WindowManagerImpl;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.FrameLayout;
@@ -62,7 +61,8 @@ public class TabletTicker
 
     private static final int ADVANCE_DELAY = 5000; // 5 seconds
 
-    private Context mContext;
+    private final Context mContext;
+    private final WindowManager mWindowManager;
 
     private ViewGroup mWindow;
     private IBinder mCurrentKey;
@@ -83,6 +83,7 @@ public class TabletTicker
     public TabletTicker(TabletStatusBar bar) {
         mBar = bar;
         mContext = bar.getContext();
+        mWindowManager = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
         final Resources res = mContext.getResources();
         mLargeIconHeight = res.getDimensionPixelSize(
                 android.R.dimen.notification_large_icon_height);
@@ -178,7 +179,7 @@ public class TabletTicker
             if (mCurrentView != null) {
                 if (mWindow == null) {
                     mWindow = makeWindow();
-                    WindowManagerImpl.getDefault().addView(mWindow, mWindow.getLayoutParams());
+                    mWindowManager.addView(mWindow, mWindow.getLayoutParams());
                 }
 
                 mWindow.addView(mCurrentView);
@@ -242,7 +243,7 @@ public class TabletTicker
     public void endTransition(LayoutTransition transition, ViewGroup container,
             View view, int transitionType) {
         if (mWindowShouldClose) {
-            WindowManagerImpl.getDefault().removeView(mWindow);
+            mWindowManager.removeView(mWindow);
             mWindow = null;
             mWindowShouldClose = false;
             mBar.doneTicking();

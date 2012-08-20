@@ -95,7 +95,9 @@ import android.telephony.TelephonyManager;
 import android.content.ClipboardManager;
 import android.util.AndroidRuntimeException;
 import android.util.Log;
+import android.view.CompatibilityInfoHolder;
 import android.view.ContextThemeWrapper;
+import android.view.Display;
 import android.view.WindowManagerImpl;
 import android.view.accessibility.AccessibilityManager;
 import android.view.inputmethod.InputMethodManager;
@@ -499,8 +501,8 @@ class ContextImpl extends Context {
 
         registerService(WINDOW_SERVICE, new ServiceFetcher() {
                 public Object getService(ContextImpl ctx) {
-                    return WindowManagerImpl.getDefault().makeCompatible(
-                            ctx.mPackageInfo.mCompatibilityInfo);
+                    return new WindowManagerImpl(ctx.getOuterContext(),
+                            Display.DEFAULT_DISPLAY);
                 }});
 
         registerService(USER_SERVICE, new ServiceFetcher() {
@@ -1607,6 +1609,11 @@ class ContextImpl extends Context {
     @Override
     public boolean isRestricted() {
         return mRestricted;
+    }
+
+    @Override
+    public CompatibilityInfoHolder getCompatibilityInfo() {
+        return mPackageInfo.mCompatibilityInfo;
     }
 
     private File getDataDirFile() {

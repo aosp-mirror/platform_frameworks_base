@@ -36,7 +36,6 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
-import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.LogPrinter;
@@ -51,9 +50,8 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewRootImpl;
 import android.view.WindowManager;
-import android.view.WindowManagerImpl;
+import android.view.WindowManagerGlobal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -674,8 +672,8 @@ public abstract class WallpaperService extends Service {
                             }
                         }
 
-                        redrawNeeded |= creating
-                                || (relayoutResult&WindowManagerImpl.RELAYOUT_RES_FIRST_TIME) != 0;
+                        redrawNeeded |= creating || (relayoutResult
+                                & WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME) != 0;
 
                         if (forceReport || creating || surfaceCreating
                                 || formatChanged || sizeChanged) {
@@ -762,7 +760,7 @@ public abstract class WallpaperService extends Service {
             mWindowToken = wrapper.mWindowToken;
             mSurfaceHolder.setSizeFromLayout();
             mInitializing = true;
-            mSession = ViewRootImpl.getWindowSession(getMainLooper());
+            mSession = WindowManagerGlobal.getWindowSession(getMainLooper());
             
             mWindow.setSession(mSession);
 

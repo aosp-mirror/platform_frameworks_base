@@ -39,6 +39,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
+import android.view.CompatibilityInfoHolder;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -486,5 +487,11 @@ public class MockContext extends Context {
     @Override
     public boolean isRestricted() {
         throw new UnsupportedOperationException();        
+    }
+
+    /** @hide */
+    @Override
+    public CompatibilityInfoHolder getCompatibilityInfo() {
+        throw new UnsupportedOperationException();
     }
 }

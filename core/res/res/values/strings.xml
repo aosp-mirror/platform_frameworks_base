@@ -3639,4 +3639,9 @@
     <!-- Content description of a MediaRouteButton for accessibility support -->
     <string name="media_route_button_content_description">Media output</string>
 
+    <!-- Display manager service -->
+
+    <!-- Name of the built-in display.  [CHAR LIMIT=50] -->
+    <string name="display_manager_built_in_display">Built-in Screen</string>
+
 </resources>

@@ -66,6 +66,7 @@ import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.BridgeInflater;
+import android.view.CompatibilityInfoHolder;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
@@ -1316,6 +1317,12 @@ public final class BridgeContext extends Context {
     @Override
     public File getObbDir() {
         Bridge.getLog().error(LayoutLog.TAG_UNSUPPORTED, "OBB not supported", null);
+        return null;
+    }
+
+    @Override
+    public CompatibilityInfoHolder getCompatibilityInfo() {
+        // pass
         return null;
     }
 }

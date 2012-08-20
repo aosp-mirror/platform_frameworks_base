@@ -140,7 +140,7 @@ public class PhoneStatusBarView extends PanelBar {
         super.panelExpansionChanged(pv, frac);
 
         if (mFadingPanel == pv 
-                && mScrimColor != 0 && ActivityManager.isHighEndGfx(mBar.mDisplay)) {
+                && mScrimColor != 0 && ActivityManager.isHighEndGfx()) {
             // woo, special effects
             final float k = (float)(1f-0.5f*(1f-Math.cos(3.14159f * Math.pow(1f-frac, 2.2f))));
             // attenuate background color alpha by k

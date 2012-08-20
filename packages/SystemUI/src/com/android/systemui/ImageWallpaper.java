@@ -74,10 +74,7 @@ public class ImageWallpaper extends WallpaperService {
         //noinspection PointlessBooleanExpression,ConstantConditions
         if (FIXED_SIZED_SURFACE && USE_OPENGL) {
             if (!isEmulator()) {
-                WindowManager windowManager =
-                        (WindowManager) getSystemService(Context.WINDOW_SERVICE);
-                Display display = windowManager.getDefaultDisplay();
-                mIsHwAccelerated = ActivityManager.isHighEndGfx(display);
+                mIsHwAccelerated = ActivityManager.isHighEndGfx();
             }
         }
     }

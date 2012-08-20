@@ -39,6 +39,7 @@ import android.graphics.Region;
 import android.graphics.Shader;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.hardware.display.DisplayManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -7346,7 +7347,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             outRect.bottom -= insets.bottom;
             return;
         }
-        Display d = WindowManagerImpl.getDefault().getDefaultDisplay();
+        Display d = DisplayManager.getInstance().getRealDisplay(Display.DEFAULT_DISPLAY);
         d.getRectSize(outRect);
     }
 
@@ -11619,6 +11620,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return appWindowToken;
         }
         return null;
+    }
+
+    /**
+     * Gets the logical display to which the view's window has been attached.
+     *
+     * @return The logical display, or null if the view is not currently attached to a window.
+     */
+    public Display getDisplay() {
+        return mAttachInfo != null ? mAttachInfo.mDisplay : null;
     }
 
     /**
@@ -17260,6 +17270,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         final IBinder mWindowToken;
 
+        final Display mDisplay;
+
         final Callbacks mRootCallbacks;
 
         HardwareCanvas mHardwareCanvas;
@@ -17519,11 +17531,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          *
          * @param handler the events handler the view must use
          */
-        AttachInfo(IWindowSession session, IWindow window,
+        AttachInfo(IWindowSession session, IWindow window, Display display,
                 ViewRootImpl viewRootImpl, Handler handler, Callbacks effectPlayer) {
             mSession = session;
             mWindow = window;
             mWindowToken = window.asBinder();
+            mDisplay = display;
             mViewRootImpl = viewRootImpl;
             mHandler = handler;
             mRootCallbacks = effectPlayer;
