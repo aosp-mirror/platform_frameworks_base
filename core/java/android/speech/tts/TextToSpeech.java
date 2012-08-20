@@ -1282,6 +1282,7 @@ public class TextToSpeech {
             }
         };
 
+        @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             Log.i(TAG, "Connected to " + name);
             synchronized(mStartLock) {
@@ -1305,6 +1306,7 @@ public class TextToSpeech {
             return mCallback;
         }
 
+        @Override
         public void onServiceDisconnected(ComponentName name) {
             synchronized(mStartLock) {
                 mService = null;
@@ -1317,24 +1319,33 @@ public class TextToSpeech {
 
         public void disconnect() {
             mContext.unbindService(this);
+
+            synchronized (mStartLock) {
+                mService = null;
+                // If this is the active connection, clear it
+                if (mServiceConnection == this) {
+                    mServiceConnection = null;
+                }
+
+            }
         }
 
         public <R> R runAction(Action<R> action, R errorResult, String method, boolean reconnect) {
-            try {
-                synchronized (mStartLock) {
+            synchronized (mStartLock) {
+                try {
                     if (mService == null) {
                         Log.w(TAG, method + " failed: not connected to TTS engine");
                         return errorResult;
                     }
                     return action.run(mService);
+                } catch (RemoteException ex) {
+                    Log.e(TAG, method + " failed", ex);
+                    if (reconnect) {
+                        disconnect();
+                        initTts();
+                    }
+                    return errorResult;
                 }
-            } catch (RemoteException ex) {
-                Log.e(TAG, method + " failed", ex);
-                if (reconnect) {
-                    disconnect();
-                    initTts();
-                }
-                return errorResult;
             }
         }
     }
