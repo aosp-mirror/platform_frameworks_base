@@ -47,19 +47,37 @@ public class ScanResult implements Parcelable {
     public int frequency;
 
     /**
+     * Time Synchronization Function (tsf) timestamp in microseconds when
+     * this result was last seen.
+     */
+     public long timestamp;
+
+    /**
      * We'd like to obtain the following attributes,
      * but they are not reported via the socket
      * interface, even though they are known
      * internally by wpa_supplicant.
      * {@hide}
      */
-    public ScanResult(String SSID, String BSSID, String caps, int level, int frequency) {
+    public ScanResult(String SSID, String BSSID, String caps, int level, int frequency, long tsf) {
         this.SSID = SSID;
         this.BSSID = BSSID;
         this.capabilities = caps;
         this.level = level;
         this.frequency = frequency;
-        //networkConfig = null;
+        this.timestamp = tsf;
+    }
+
+    /** copy constructor {@hide} */
+    public ScanResult(ScanResult source) {
+        if (source != null) {
+            SSID = source.SSID;
+            BSSID = source.BSSID;
+            capabilities = source.capabilities;
+            level = source.level;
+            frequency = source.frequency;
+            timestamp = source.timestamp;
+        }
     }
 
     @Override
@@ -76,7 +94,9 @@ public class ScanResult implements Parcelable {
             append(", level: ").
             append(level).
             append(", frequency: ").
-            append(frequency);
+            append(frequency).
+            append(", timestamp: ").
+            append(timestamp);
 
         return sb.toString();
     }
@@ -93,6 +113,7 @@ public class ScanResult implements Parcelable {
         dest.writeString(capabilities);
         dest.writeInt(level);
         dest.writeInt(frequency);
+        dest.writeLong(timestamp);
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -104,7 +125,8 @@ public class ScanResult implements Parcelable {
                     in.readString(),
                     in.readString(),
                     in.readInt(),
-                    in.readInt()
+                    in.readInt(),
+                    in.readLong()
                 );
             }
 

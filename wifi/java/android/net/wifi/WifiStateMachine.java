@@ -891,7 +891,13 @@ public class WifiStateMachine extends StateMachine {
      * TODO: doc
      */
     public List<ScanResult> syncGetScanResultsList() {
-        return mScanResults;
+        synchronized (mScanResultCache) {
+            List<ScanResult> scanList = new ArrayList<ScanResult>();
+            for(ScanResult result: mScanResults) {
+                scanList.add(new ScanResult(result));
+            }
+            return scanList;
+        }
     }
 
     /**
@@ -1357,131 +1363,103 @@ public class WifiStateMachine extends StateMachine {
         mContext.sendStickyBroadcast(intent);
     }
 
+    private static final String BSSID_STR = "bssid=";
+    private static final String FREQ_STR = "freq=";
+    private static final String LEVEL_STR = "level=";
+    private static final String TSF_STR = "tsf=";
+    private static final String FLAGS_STR = "flags=";
+    private static final String SSID_STR = "ssid=";
+    private static final String DELIMITER_STR = "====";
     /**
-     * Parse the scan result line passed to us by wpa_supplicant (helper).
-     * @param line the line to parse
-     * @return the {@link ScanResult} object
-     */
-    private ScanResult parseScanResult(String line) {
-        ScanResult scanResult = null;
-        if (line != null) {
-            /*
-             * Cache implementation (LinkedHashMap) is not synchronized, thus,
-             * must synchronized here!
-             */
-            synchronized (mScanResultCache) {
-                String[] result = scanResultPattern.split(line);
-                if (3 <= result.length && result.length <= 5) {
-                    String bssid = result[0];
-                    // bssid | frequency | level | flags | ssid
-                    int frequency;
-                    int level;
-                    try {
-                        frequency = Integer.parseInt(result[1]);
-                        level = Integer.parseInt(result[2]);
-                        /* some implementations avoid negative values by adding 256
-                         * so we need to adjust for that here.
-                         */
-                        if (level > 0) level -= 256;
-                    } catch (NumberFormatException e) {
-                        frequency = 0;
-                        level = 0;
-                    }
-
-                    /*
-                     * The formatting of the results returned by
-                     * wpa_supplicant is intended to make the fields
-                     * line up nicely when printed,
-                     * not to make them easy to parse. So we have to
-                     * apply some heuristics to figure out which field
-                     * is the SSID and which field is the flags.
-                     */
-                    String ssid;
-                    String flags;
-                    if (result.length == 4) {
-                        if (result[3].charAt(0) == '[') {
-                            flags = result[3];
-                            ssid = "";
-                        } else {
-                            flags = "";
-                            ssid = result[3];
-                        }
-                    } else if (result.length == 5) {
-                        flags = result[3];
-                        ssid = result[4];
-                    } else {
-                        // Here, we must have 3 fields: no flags and ssid
-                        // set
-                        flags = "";
-                        ssid = "";
-                    }
-
-                    // bssid + ssid is the hash key
-                    String key = bssid + ssid;
-                    scanResult = mScanResultCache.get(key);
-                    if (scanResult != null) {
-                        scanResult.level = level;
-                        scanResult.SSID = ssid;
-                        scanResult.capabilities = flags;
-                        scanResult.frequency = frequency;
-                    } else {
-                        // Do not add scan results that have no SSID set
-                        if (0 < ssid.trim().length()) {
-                            scanResult =
-                                new ScanResult(
-                                    ssid, bssid, flags, level, frequency);
-                            mScanResultCache.put(key, scanResult);
-                        }
-                    }
-                } else {
-                    loge("Misformatted scan result text with " +
-                          result.length + " fields: " + line);
-                }
-            }
-        }
-
-        return scanResult;
-    }
-
-    /**
-     * scanResults input format
-     * 00:bb:cc:dd:cc:ee       2427    166     [WPA-EAP-TKIP][WPA2-EAP-CCMP]   Net1
-     * 00:bb:cc:dd:cc:ff       2412    165     [WPA-EAP-TKIP][WPA2-EAP-CCMP]   Net2
+     * Format:
+     * bssid=68:7f:76:d7:1a:6e
+     * freq=2412
+     * level=-44
+     * tsf=1344626243700342
+     * flags=[WPA2-PSK-CCMP][WPS][ESS]
+     * ssid=zfdy
+     * ====
+     * bssid=68:5f:74:d7:1a:6f
+     * freq=5180
+     * level=-73
+     * tsf=1344626243700373
+     * flags=[WPA2-PSK-CCMP][WPS][ESS]
+     * ssid=zuby
+     * ====
      */
     private void setScanResults(String scanResults) {
+        String bssid = "";
+        int level = 0;
+        int freq = 0;
+        long tsf = 0;
+        String flags = "";
+        String ssid = "";
+
         if (scanResults == null) {
             return;
         }
 
-        List<ScanResult> scanList = new ArrayList<ScanResult>();
+        synchronized(mScanResultCache) {
+            mScanResults = new ArrayList<ScanResult>();
+            String[] lines = scanResults.split("\n");
 
-        int lineCount = 0;
-
-        int scanResultsLen = scanResults.length();
-        // Parse the result string, keeping in mind that the last line does
-        // not end with a newline.
-        for (int lineBeg = 0, lineEnd = 0; lineEnd <= scanResultsLen; ++lineEnd) {
-            if (lineEnd == scanResultsLen || scanResults.charAt(lineEnd) == '\n') {
-                ++lineCount;
-
-                if (lineCount == 1) {
-                    lineBeg = lineEnd + 1;
-                    continue;
-                }
-                if (lineEnd > lineBeg) {
-                    String line = scanResults.substring(lineBeg, lineEnd);
-                    ScanResult scanResult = parseScanResult(line);
-                    if (scanResult != null) {
-                        scanList.add(scanResult);
-                    } else {
-                        //TODO: hidden network handling
+            for (String line : lines) {
+                if (line.startsWith(BSSID_STR)) {
+                    bssid = line.substring(BSSID_STR.length());
+                } else if (line.startsWith(FREQ_STR)) {
+                    try {
+                        freq = Integer.parseInt(line.substring(FREQ_STR.length()));
+                    } catch (NumberFormatException e) {
+                        freq = 0;
                     }
+                } else if (line.startsWith(LEVEL_STR)) {
+                    try {
+                        level = Integer.parseInt(line.substring(LEVEL_STR.length()));
+                        /* some implementations avoid negative values by adding 256
+                         * so we need to adjust for that here.
+                         */
+                        if (level > 0) level -= 256;
+                    } catch(NumberFormatException e) {
+                        level = 0;
+                    }
+                } else if (line.startsWith(TSF_STR)) {
+                    try {
+                        tsf = Long.parseLong(line.substring(TSF_STR.length()));
+                    } catch (NumberFormatException e) {
+                        tsf = 0;
+                    }
+                } else if (line.startsWith(FLAGS_STR)) {
+                    flags = line.substring(FLAGS_STR.length());
+                } else if (line.startsWith(SSID_STR)) {
+                    ssid = line.substring(SSID_STR.length());
+                    if (ssid == null) ssid = "";
+                } else if (line.startsWith(DELIMITER_STR)) {
+                    if (bssid != null) {
+                        String key = bssid + ssid;
+                        ScanResult scanResult = mScanResultCache.get(key);
+                        if (scanResult != null) {
+                            scanResult.level = level;
+                            scanResult.SSID = ssid;
+                            scanResult.capabilities = flags;
+                            scanResult.frequency = freq;
+                            scanResult.timestamp = tsf;
+                        } else {
+                            scanResult =
+                                new ScanResult(
+                                        ssid, bssid, flags, level, freq, tsf);
+                            mScanResultCache.put(key, scanResult);
+                        }
+                        mScanResults.add(scanResult);
+                    }
+                    bssid = null;
+                    level = 0;
+                    freq = 0;
+                    tsf = 0;
+                    flags = "";
+                    ssid = "";
                 }
-                lineBeg = lineEnd + 1;
             }
         }
-
-        mScanResults = scanList;
     }
 
     /*
@@ -2827,7 +2805,7 @@ public class WifiStateMachine extends StateMachine {
             if (DBG) log(getName() + "\n");
             mIsRunning = false;
             updateBatteryWorkSource(null);
-            mScanResults = null;
+            mScanResults = new ArrayList<ScanResult>();
 
             if (mP2pSupported) mWifiP2pChannel.sendMessage(WifiStateMachine.CMD_DISABLE_P2P);
             mContext.unregisterReceiver(mScreenReceiver);

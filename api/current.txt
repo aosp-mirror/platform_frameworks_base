@@ -13210,6 +13210,7 @@ package android.net.wifi {
     field public java.lang.String capabilities;
     field public int frequency;
     field public int level;
+    field public long timestamp;
   }
 
   public final class SupplicantState extends java.lang.Enum implements android.os.Parcelable {
