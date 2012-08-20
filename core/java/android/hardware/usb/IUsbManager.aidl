@@ -87,4 +87,12 @@ interface IUsbManager
 
     /* Sets the file path for USB mass storage backing file. */
     void setMassStorageBackingFile(String path);
+
+    /* Allow USB debugging from the attached host. If alwaysAllow is true, add the
+     * the public key to list of host keys that the user has approved.
+     */
+    void allowUsbDebugging(boolean alwaysAllow, String publicKey);
+
+    /* Deny USB debugging from the attached host */
+    void denyUsbDebugging();
 }

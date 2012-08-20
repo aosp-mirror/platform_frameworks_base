@@ -164,6 +164,16 @@ public class UsbService extends IUsbManager.Stub {
         }
     }
 
+    public void allowUsbDebugging(boolean alwaysAllow, String publicKey) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+        mDeviceManager.allowUsbDebugging(alwaysAllow, publicKey);
+    }
+
+    public void denyUsbDebugging() {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+        mDeviceManager.denyUsbDebugging();
+    }
+
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)

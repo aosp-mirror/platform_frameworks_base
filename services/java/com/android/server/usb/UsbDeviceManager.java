@@ -114,6 +114,7 @@ public class UsbDeviceManager {
     private boolean mAudioSourceEnabled;
     private Map<String, List<Pair<String, String>>> mOemModeMap;
     private String[] mAccessoryStrings;
+    private UsbDebuggingManager mDebuggingManager;
 
     private class AdbSettingsObserver extends ContentObserver {
         public AdbSettingsObserver() {
@@ -165,6 +166,10 @@ public class UsbDeviceManager {
         if (nativeIsStartRequested()) {
             if (DEBUG) Slog.d(TAG, "accessory attached at boot");
             startAccessoryMode();
+        }
+
+        if ("1".equals(SystemProperties.get("ro.adb.secure"))) {
+            mDebuggingManager = new UsbDebuggingManager(context);
         }
     }
 
@@ -425,6 +430,9 @@ public class UsbDeviceManager {
                 setEnabledFunctions(mDefaultFunctions, true);
                 updateAdbNotification();
             }
+            if (mDebuggingManager != null) {
+                mDebuggingManager.setAdbEnabled(mAdbEnabled);
+            }
         }
 
         private void setEnabledFunctions(String functions, boolean makeDefault) {
@@ -600,6 +608,9 @@ public class UsbDeviceManager {
                     mBootCompleted = true;
                     if (mCurrentAccessory != null) {
                         mSettingsManager.accessoryAttached(mCurrentAccessory);
+                    }
+                    if (mDebuggingManager != null) {
+                        mDebuggingManager.setAdbEnabled(mAdbEnabled);
                     }
                     break;
             }
@@ -802,9 +813,24 @@ public class UsbDeviceManager {
         return usbFunctions;
     }
 
+    public void allowUsbDebugging(boolean alwaysAllow, String publicKey) {
+        if (mDebuggingManager != null) {
+            mDebuggingManager.allowUsbDebugging(alwaysAllow, publicKey);
+        }
+    }
+
+    public void denyUsbDebugging() {
+        if (mDebuggingManager != null) {
+            mDebuggingManager.denyUsbDebugging();
+        }
+    }
+
     public void dump(FileDescriptor fd, PrintWriter pw) {
         if (mHandler != null) {
             mHandler.dump(fd, pw);
+        }
+        if (mDebuggingManager != null) {
+            mDebuggingManager.dump(fd, pw);
         }
     }
 
