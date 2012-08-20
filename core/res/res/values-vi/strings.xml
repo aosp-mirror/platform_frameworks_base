@@ -224,6 +224,10 @@
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Cho phép ứng dụng thực hiện hành động giữa những người dùng khác trên thiết bị. Ứng dụng độc hại có thể sử dụng quyền này để vi phạm khả năng bảo vệ giữa người dùng."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"cấp phép đầy đủ để tương tác giữa người dùng"</string>
     <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Cho phép tất cả các tương tác giữa người dùng."</string>
+    <!-- no translation found for permlab_manageUsers (1676150911672282428) -->
+    <skip />
+    <!-- no translation found for permdesc_manageUsers (8409306667645355638) -->
+    <skip />
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"truy xuất chi tiết về các ứng dụng đang chạy"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Cho phép ứng dụng truy xuất thông tin chi tiết về các tác vụ đã và đang chạy gần đây. Ứng dụng độc hại có thể phát hiện thông tin riêng tư về các ứng dụng khác."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"sắp xếp lại những ứng dụng đang chạy"</string>
@@ -1309,4 +1313,6 @@
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Âm thanh Bluetooth"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Xong"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Đầu ra phương tiện"</string>
+    <!-- no translation found for display_manager_built_in_display (9042666544146043569) -->
+    <skip />
 </resources>

@@ -224,6 +224,10 @@
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"อนุญาตให้แอปพลิเคชันทำงานได้กับผู้ใช้หลายรายบนอุปกรณ์นี้ แอปพลิเคชันที่เป็นอันตรายอาจใช้การทำงานนี้ในการบุกรุกการป้องกันระหว่างผู้ใช้"</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"ใบอนุญาตฉบับเต็มสำหรับการโต้ตอบระหว่างผู้ใช้"</string>
     <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"อนุญาตให้ทำการโต้ตอบทุกชนิดที่เป็นไปได้กับผู้ใช้ต่างๆ"</string>
+    <!-- no translation found for permlab_manageUsers (1676150911672282428) -->
+    <skip />
+    <!-- no translation found for permdesc_manageUsers (8409306667645355638) -->
+    <skip />
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"ดึงรายละเอียดของแอปที่ทำงานอยู่"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"อนุญาตให้แอปพลิเคชันดึงข้อมูลเกี่ยวกับงานที่กำลังเรียกใช้อยู่ในปัจจุบันและงานล่าสุด แอปพลิเคชันที่เป็นอันตรายอาจค้นพบข้อมูลเฉพาะตัวเกี่ยวกับแอปพลิเคชันอื่นๆ"</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"จัดลำดับแอปพลิเคชันที่ทำงานอยู่ใหม่"</string>
@@ -1309,4 +1313,6 @@
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"เสียงบลูทูธ"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"เสร็จสิ้น"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"เอาต์พุตสื่อ"</string>
+    <!-- no translation found for display_manager_built_in_display (9042666544146043569) -->
+    <skip />
 </resources>
