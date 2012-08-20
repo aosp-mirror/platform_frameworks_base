@@ -79,6 +79,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.Signature;
 import android.content.pm.ManifestDigest;
+import android.content.pm.VerificationParams;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.pm.VerifierInfo;
 import android.net.Uri;
@@ -5351,7 +5352,17 @@ public class PackageManagerService extends IPackageManager.Stub {
     public void installPackageWithVerification(Uri packageURI, IPackageInstallObserver observer,
             int flags, String installerPackageName, Uri verificationURI,
             ManifestDigest manifestDigest, ContainerEncryptionParams encryptionParams) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.INSTALL_PACKAGES, null);
+        VerificationParams verificationParams = new VerificationParams(verificationURI, null, null,
+                manifestDigest);
+        installPackageWithVerificationAndEncryption(packageURI, observer, flags,
+                installerPackageName, verificationParams, encryptionParams);
+    }
+
+    public void installPackageWithVerificationAndEncryption(Uri packageURI,
+            IPackageInstallObserver observer, int flags, String installerPackageName,
+            VerificationParams verificationParams, ContainerEncryptionParams encryptionParams) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.INSTALL_PACKAGES,
+                null);
 
         final int uid = Binder.getCallingUid();
 
@@ -5368,7 +5379,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         final Message msg = mHandler.obtainMessage(INIT_COPY);
         msg.obj = new InstallParams(packageURI, observer, filteredFlags, installerPackageName,
-                verificationURI, manifestDigest, encryptionParams);
+                verificationParams, encryptionParams);
         mHandler.sendMessage(msg);
     }
 
@@ -5798,8 +5809,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         private final Uri mPackageURI;
         final String installerPackageName;
-        final Uri verificationURI;
-        final ManifestDigest manifestDigest;
+        final VerificationParams verificationParams;
         private InstallArgs mArgs;
         private int mRet;
         private File mTempPackage;
@@ -5807,15 +5817,21 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         InstallParams(Uri packageURI,
                 IPackageInstallObserver observer, int flags,
-                String installerPackageName, Uri verificationURI, ManifestDigest manifestDigest,
+                String installerPackageName, VerificationParams verificationParams,
                 ContainerEncryptionParams encryptionParams) {
             this.mPackageURI = packageURI;
             this.flags = flags;
             this.observer = observer;
             this.installerPackageName = installerPackageName;
-            this.verificationURI = verificationURI;
-            this.manifestDigest = manifestDigest;
+            this.verificationParams = verificationParams;
             this.encryptionParams = encryptionParams;
+        }
+
+        public ManifestDigest getManifestDigest() {
+            if (verificationParams == null) {
+                return null;
+            }
+            return verificationParams.getManifestDigest();
         }
 
         private int installLocationPolicy(PackageInfoLite pkgLite, int flags) {
@@ -6006,9 +6022,19 @@ public class PackageManagerService extends IPackageManager.Stub {
 
                     verification.putExtra(PackageManager.EXTRA_VERIFICATION_INSTALL_FLAGS, flags);
 
-                    if (verificationURI != null) {
-                        verification.putExtra(PackageManager.EXTRA_VERIFICATION_URI,
-                                verificationURI);
+                    if (verificationParams != null) {
+                        if (verificationParams.getVerificationURI() != null) {
+                           verification.putExtra(PackageManager.EXTRA_VERIFICATION_URI,
+                                 verificationParams.getVerificationURI());
+                        }
+                        if (verificationParams.getOriginatingURI() != null) {
+                            verification.putExtra(Intent.EXTRA_ORIGINATING_URI,
+                                  verificationParams.getOriginatingURI());
+                        }
+                        if (verificationParams.getReferrer() != null) {
+                            verification.putExtra(Intent.EXTRA_REFERRER,
+                                  verificationParams.getReferrer());
+                        }
                     }
 
                     final PackageVerificationState verificationState = new PackageVerificationState(
@@ -6344,7 +6370,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         FileInstallArgs(InstallParams params) {
             super(params.getPackageUri(), params.observer, params.flags,
-                    params.installerPackageName, params.manifestDigest);
+                    params.installerPackageName, params.getManifestDigest());
         }
 
         FileInstallArgs(String fullCodePath, String fullResourcePath, String nativeLibraryPath) {
@@ -6631,7 +6657,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         AsecInstallArgs(InstallParams params) {
             super(params.getPackageUri(), params.observer, params.flags,
-                    params.installerPackageName, params.manifestDigest);
+                    params.installerPackageName, params.getManifestDigest());
         }
 
         AsecInstallArgs(String fullCodePath, String fullResourcePath, String nativeLibraryPath,

@@ -43,6 +43,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.ManifestDigest;
 import android.content.pm.UserInfo;
+import android.content.pm.VerificationParams;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
@@ -978,6 +979,18 @@ final class ApplicationPackageManager extends PackageManager {
         try {
             mPM.installPackageWithVerification(packageURI, observer, flags, installerPackageName,
                     verificationURI, manifestDigest, encryptionParams);
+        } catch (RemoteException e) {
+            // Should never happen!
+        }
+    }
+
+    @Override
+	  public void installPackageWithVerificationAndEncryption(Uri packageURI,
+            IPackageInstallObserver observer, int flags, String installerPackageName,
+            VerificationParams verificationParams, ContainerEncryptionParams encryptionParams) {
+        try {
+            mPM.installPackageWithVerificationAndEncryption(packageURI, observer, flags,
+                    installerPackageName, verificationParams, encryptionParams);
         } catch (RemoteException e) {
             // Should never happen!
         }

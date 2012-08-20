@@ -39,6 +39,7 @@ import android.content.pm.PermissionInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
+import android.content.pm.VerificationParams;
 import android.content.pm.VerifierDeviceIdentity;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
@@ -361,6 +362,11 @@ interface IPackageManager {
     void installPackageWithVerification(in Uri packageURI, in IPackageInstallObserver observer,
             int flags, in String installerPackageName, in Uri verificationURI,
             in ManifestDigest manifestDigest, in ContainerEncryptionParams encryptionParams);
+
+    void installPackageWithVerificationAndEncryption(in Uri packageURI,
+            in IPackageInstallObserver observer, int flags, in String installerPackageName,
+            in VerificationParams verificationParams,
+            in ContainerEncryptionParams encryptionParams);
 
     void verifyPendingInstall(int id, int verificationCode);
 
