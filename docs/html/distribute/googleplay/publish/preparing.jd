@@ -6,20 +6,21 @@ page.title=Publishing Checklist for Google Play
 <ol>
 <li><a href="#process">1. Understand the publishing process</a></li>
 <li><a href="#policies">2. Understand Google Play policies</a></li>
-<li><a href="#rating">3. Determine your content rating</a></li>
-<li><a href="#countries">4. Determine country distribution</a></li>
-<li><a href="#size">5. Confirm the app's overall size</a></li>
-<li><a href="#compatibility">6. Confirm app compatibility ranges</a></li>
-<li><a href="#free-priced">7. Decide on free or priced</a></li>
-<li><a href="#inapp-billing">8. Consider In-app Billing</a></li>
-<li><a href="#pricing">9. Set prices for your apps</a></li>
-<li><a href="#localize">10. Start localization</a></li>
-<li><a href="#localize">11. Prepare promotional graphics</a></li>
-<li><a href="#apk">12. Build the release-ready APK</a></li>
-<li><a href="#product-page">13. Complete the product details</a></li>
-<li><a href="#badges">14. Use Google Play badges and links to your promotional campaigns</a></li>
-<li><a href="#final-checks">15. Final checks and publishing</a></li>
-<li><a href="#support">16. Support users after launch</a></li>
+<li><a href="#core-app-quality">3. Test for Core App Quality</a></li>
+<li><a href="#rating">4. Determine your content rating</a></li>
+<li><a href="#countries">5. Determine country distribution</a></li>
+<li><a href="#size">6. Confirm the app's overall size</a></li>
+<li><a href="#compatibility">7. Confirm app compatibility ranges</a></li>
+<li><a href="#free-priced">8. Decide on free or priced</a></li>
+<li><a href="#inapp-billing">9. Consider In-app Billing</a></li>
+<li><a href="#pricing">10. Set prices for your apps</a></li>
+<li><a href="#localize">11. Start localization early</a></li>
+<li><a href="#localize">12. Prepare promotional graphics</a></li>
+<li><a href="#apk">13. Build the release-ready APK</a></li>
+<li><a href="#product-page">14. Complete the product details</a></li>
+<li><a href="#badges">15. Use Google Play badges</a></li>
+<li><a href="#final-checks">16. Final checks and publishing</a></li>
+<li><a href="#support">17. Support users after launch</a></li>
 </ol>
 </div></div>
 
@@ -86,7 +87,39 @@ violations, termination of your developer account. </p>
 </tr>
 </table>
 
-<h2 id="rating">3. Determine your app's content rating</h2>
+<h2 id="core-app-quality">3. Test for Core App Quality</h2>
+
+<p>Before you publish an app on Google Play, it's important to make sure that
+it meets the basic quality expectations for all Android apps, on all of the devices that you
+are targeting. You can check your app's quality by setting up a test
+environment and testing the app against a short set of <strong>core app quality criteria</strong>.
+For complete information, see the <a
+href="{@docRoot}distribute/googleplay/quality/core.html">Core App Quality Guidelines</a>. 
+</p>
+
+<p>If your app is targeting tablet devices, make sure that it delivers a rich, compelling
+experience to your tablet customers. See the <a
+href="{@docRoot}distribute/googleplay/quality/tablet.html">Tablet App Quality Checklist</a>
+for recommendations on ways to optimize your app for tablets.</p>
+
+<table>
+<tr>
+<td><p>Related resources:</p>
+<ul style="margin-top:-.5em;">
+<li><strong><a
+href="{@docRoot}distribute/googleplay/quality/core.html">Core App Quality
+Guidelines</a></strong> &mdash; A set of core quality criteria that all Android
+apps should meet on all targeted devices.</li>
+<li><strong><a
+href="{@docRoot}distribute/googleplay/quality/tablet.html">Tablet App Quality
+Checklist</a></strong> &mdash; A set recommendations for delivering the best
+possible experience to tablet users.</li>
+</ul>
+</td>
+</tr>
+</table>
+
+<h2 id="rating">4. Determine your app's content rating</h2>
 
 <p>Google Play requires you to set a content rating for your app, which informs
 Google Play users of its maturity level. Before you publish, you should confirm
@@ -115,7 +148,7 @@ are required in your app binary.</p>
 </tr>
 </table>
 
-<h2 id="countries">4. Determine country distribution</h2>
+<h2 id="countries">5. Determine country distribution</h2>
 
 <p>Google Play lets you control what countries and territories your app is
 distributed to. For widest reach and the largest potential customer base, you
@@ -149,7 +182,7 @@ launch target date.</p>
 </tr>
 </table>
 
-<h2 id="size">5. Confirm the app's overall size</h2>
+<h2 id="size">6. Confirm the app's overall size</h2>
 
 <p>The overall size of your app can affect its design and how you publish it on
 Google Play. Currently, the maximum size for an APK published on Google Play is
@@ -180,7 +213,7 @@ creating your release-ready APK.</p>
 </tr>
 </table>
 
-<h2 id="compatibility">6. Confirm the app's platform and screen compatibility ranges</h2>
+<h2 id="compatibility">7. Confirm the app's platform and screen compatibility ranges</h2>
 
 <p>Before publishing, it's important to make sure that your app is designed to
 run properly on the Android platform versions and device screen sizes that you
@@ -217,7 +250,7 @@ charts.</p>
 </tr>
 </table>
 
-<h2 id="free-priced">7. Decide whether your app will be free or priced</h2>
+<h2 id="free-priced">8. Decide whether your app will be free or priced</h2>
 
 <p>On Google Play, you can publish apps as free to download or priced. Free apps
 can be downloaded by any Android user in Google Play.
@@ -249,7 +282,7 @@ you need set up a Checkout Merchant Account before you can publish.</p>
 </tr>
 </table>
 
-<h2 id="inapp-billing">8. Consider using In-app Billing</h2>
+<h2 id="inapp-billing">9. Consider using In-app Billing</h2>
 
 <p>Google Play <a href="{@docRoot}guide/google/play/billing/index.html">In-app
 Billing</a> lets you sell digital content in your applications. You can use the
@@ -275,7 +308,7 @@ before creating your release-ready APK.</p>
 </tr>
 </table>
 
-<h2 id="pricing">9. Set prices for your products</h2>
+<h2 id="pricing">10. Set prices for your products</h2>
 
 <p>If your app is priced or you will sell in-app products, Google Play lets you
 set prices for your products in a variety of currencies, for users in markets
@@ -308,7 +341,7 @@ in all available currencies through the Developer Console.</p>
 </tr>
 </table>
 
-<h2 id="localize">10. Start localization</h2>
+<h2 id="localize">11. Start localization</h2>
 
 <p>With your country targeting in mind, it's a good idea to assess your localization
 needs and start the work of localizing well in advance of your target
@@ -344,7 +377,7 @@ when you upload assets and configure your product details.</p>
 </tr>
 </table>
 
-<h2 id="graphics">11. Prepare promotional graphics</h2>
+<h2 id="graphics">12. Prepare promotional graphics</h2>
 
 <p>When you publish on Google Play, you can supply a variety of high-quality
 graphic assets to showcase your app or brand. After you publish, these appear on
@@ -375,7 +408,7 @@ advance of your target publishing date. </p>
 </tr>
 </table>
 
-<h2 id="apk">12. Build and upload the release-ready APK</h2>
+<h2 id="apk">13. Build and upload the release-ready APK</h2>
 
 <p>When you are satisfied that your app meets your UI, compatibility, and
 quality requirements, you can build the release-ready version of the app. The
@@ -407,7 +440,7 @@ recent version before publishing. </p>
 </tr>
 </table>
 
-<h2 id="product-page">13. Complete the app's product details</h2>
+<h2 id="product-page">14. Complete the app's product details</h2>
 
 <p>On Google Play, your app's product information is shown to users on its
 product details page, the page that users visit to learn more about your app and
@@ -431,6 +464,10 @@ page in the Developer Console. As you collect the information and assets for the
 page, make sure that you can enter or upload it to the Developer Console, until 
 the page is complete and ready for publishing. </p>
 
+<p>If your app is targeting tablet devices, make sure to include at least one screen
+shot of the app running on a tablet, and highlight your app's support for tablets
+in the app description, release notes, promotional campaigns, and elsewhere.</p>
+
 <table>
 <tr>
 <td><p>Related resources:</p>
@@ -444,7 +481,7 @@ the page is complete and ready for publishing. </p>
 </tr>
 </table>
 
-<h2 id="badges">14. Use Google Play badges and links in your promotional
+<h2 id="badges">15. Use Google Play badges and links in your promotional
 campaigns</h2>
 
 <p>Google Play badges give you an officially branded way of promoting your app
@@ -473,7 +510,7 @@ and reviews, or any other channel available.</p>
 </tr>
 </table>
 
-<h2 id="final-checks">15. Final checks and publishing</h2> 
+<h2 id="final-checks">16. Final checks and publishing</h2> 
 
 <p>When you think you are ready to publish, sign in to the Developer Console and take a few moments for a few
 final checks:</p>
@@ -511,7 +548,7 @@ final checks:</p>
 </table>
 
 
-<h2 id="support">16. Support users after launch</h2>
+<h2 id="support">17. Support users after launch</h2>
 
 <p>After you publish an app or an app update, it's crucial for you to support
 your customers. Prompt and courteous support can provide a better experience for

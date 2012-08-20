@@ -1,10 +1,10 @@
-page.title=Improving App Quality
+page.title=Improving App Quality After Launch
 @jd:body
 
 <div id="qv-wrapper">
 <div id="qv">
-<h2>Strategies:</h2>
-<ul>
+<h2>Strategies</h2>
+<ol>
 <li><a href="#listen">Listen to Your Users</a></li>
 <li><a href="#stability">Improve Stability and Eliminate Bugs</a></li>
 <li><a href="#responsiveness">Improve UI Responsiveness</a></li>
@@ -13,7 +13,14 @@ page.title=Improving App Quality
 <li><a href="#features">Deliver the Right Set of Features</a></li>
 <li><a href="#integrate">Integrate with the System and Third-Party Apps</a></li>
 <li><a href="#details">Pay Attention to Details</a></li>
-</ul>
+</ol>
+
+<h2>You Should Also Read</h2>
+<ol>
+<li><a href="{@docRoot}distribute/googleplay/quality/core.html">Core App Quality Guidelines</a></li>
+<li><a href="{@docRoot}distribute/googleplay/quality/tablet.html">Tablet App Quality Checklist</a></li>
+</ol>
+
 </div>
 </div>
 
@@ -22,7 +29,7 @@ With thousands of new apps being published in Google Play every week, it's impor
 <p>
 A better app can go a very long way: a higher quality app will translate to higher user ratings, generally better rankings, more downloads, and higher retention (longer install periods). High-quality apps also have a much higher likelihood of getting some unanticipated positive publicity such as being featured in Google Play or getting social media buzz.</p>
 <p>
-The upside to having a higher-quality app is obvious. However, it's not always clear how to make an app "better". The path to improving app quality isn't always well-lit. The term "quality" &mdash; along with "polish" and "fit and finish" &mdash; aren't always well-defined. Here we'll light the path by looking at some of the key factors in app quality and ways of improving your app along these dimensions.</p>
+The upside to having a higher-quality app is obvious. However, it's not always clear how to make an app "better".  This document looks at some of the key factors in app quality and ways of improving your app over time, after you've launched the app.</p>
 
 <h2 id="listen">Listen to Your Users</h2>
 <p>
@@ -52,15 +59,14 @@ One sure-fire way to lose your users is to give them a slow, unresponsive UI. Re
 <p>
 You can improve your apps's UI responsiveness by moving long-running operations off the main thread to worker threads. Android offers built-in debugging facilities such as StrictMode for analyzing your app's performance and activities on the main thread. You can see more recommendations in <a href="http://www.youtube.com/watch?v=c4znvD-7VDA">Writing Zippy Android Apps</a>, a developer session from Google I/O 2010,</p>
 
-
 <div class="sidebox-wrapper">
 <div class="sidebox">
-<h2>More resources</h2>
+<h3>More resources</h3>
 <ul>
 <li><a href="{@docRoot}design/index.html">Android Design</a></li>
 <li><a href="{@docRoot}guide/practices/performance.html">Designing for Performance</a></li>
 <li><a href="{@docRoot}guide/practices/responsiveness.html">Designing for Responsiveness</a>
-<li><a href="{@docRoot}guide/practices/seamlessness.html">Designing for seamlessness</a>
+<li><a href="{@docRoot}guide/practices/seamlessness.html">Designing for Seamlessness</a>
 </li>
 </ul>
 </div></div>
@@ -73,16 +79,15 @@ Lastly, pointed out in the blog post <a href="http://android-developers.blogspot
 <h2 id="usability">Improve Usability</h2>
 <p>
 In usability and in app design too, you should listen carefully to your users. Ask a handful of real Android device users (friends, family, etc.) to try out your app and observe them as they interact with it. Look for cases where they get confused, are unsure of how to proceed, or are surprised by certain behaviors. Minimize these cases by rethinking some of the interactions in your app, perhaps working in some of the <a href="http://www.youtube.com/watch?v=M1ZBjlCRfz0">user interface patterns</a> the Android UI team discussed at Google I/O.</p>
-<p>
-In the same vein, two problems that can plague some Android user interfaces are small tap targets and excessively small font sizes. These are generally easy to fix and can make a big impact on usability and user satisfaction. As a general rule, optimize for ease of use and legibility, while minimizing, or at least carefully balancing, information density.</p>
 
 <div class="sidebox-wrapper">
 <div class="sidebox">
-<h2>More resources</h2>
-<ul>
-As you are designing or evaluating your app's UI, make sure to read and become familiar with the <a href="{@docRoot}design/index.html">Android Design</a> guidelines. Included are many examples of UI patterns, styles, and building blocks, as well as tools for the design process.</li>
-</ul>
+<p>
+As you are designing or evaluating your app's UI, make sure to read and become familiar with the <a href="/design/index.html">Android Design</a> guidelines. Included are many examples of UI patterns, styles, and building blocks, as well as tools for the design process.</p>
 </div></div>
+
+<p>
+In the same vein, two problems that can plague some Android user interfaces are small tap targets and excessively small font sizes. These are generally easy to fix and can make a big impact on usability and user satisfaction. As a general rule, optimize for ease of use and legibility, while minimizing, or at least carefully balancing, information density.</p>
 
 <p>
 Another way to incrementally improve usability, based on real-world data, is to implement <a href="http://code.google.com/mobile/analytics/docs/">Analytics</a> throughout your app to log usage of particular sections. Consider demoting infrequently used sections to the overflow menu in the <a href="{@docRoot}design/patterns/actionbar.html">Action bar</a>, or removing them altogether. For often-used sections and UI elements, make sure they're immediately obvious and easily accessible in your app's UI so that users can get to them quickly.</p>
