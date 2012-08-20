@@ -224,6 +224,10 @@
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Permet que l\'aplicació dugui a terme accions en diferents usuaris del dispositiu. Les aplicacions malicioses poden fer servir aquest permís per infringir la protecció entre usuaris."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"llicència completa per interaccionar entre usuaris"</string>
     <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Permet totes les interaccions possibles entre usuaris."</string>
+    <!-- no translation found for permlab_manageUsers (1676150911672282428) -->
+    <skip />
+    <!-- no translation found for permdesc_manageUsers (8409306667645355638) -->
+    <skip />
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"recupera els detalls d\'aplicacions en execució"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Permet que l\'aplicació recuperi informació detallada sobre les tasques que s\'estan executant actualment i que s\'han executat recentment. Les aplicacions malicioses poden descobrir informació privada sobre altres aplicacions."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"canvia l\'ordre de les aplicacions en execució"</string>
@@ -1309,4 +1313,6 @@
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Àudio per Bluetooth"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Fet"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Sortida de contingut multimèdia"</string>
+    <!-- no translation found for display_manager_built_in_display (9042666544146043569) -->
+    <skip />
 </resources>

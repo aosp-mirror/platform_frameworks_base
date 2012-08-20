@@ -224,6 +224,8 @@
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Lubab rakendusel teha toiminguid seadme erinevatel kasutajakontodel. Pahatahtlikud rakendused võivad kasutada seda kasutajatevahelise kaitse rikkumiseks."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"täielik litsents teha toiminguid erinevatel kasutajakontodel"</string>
     <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Lubab kõiki võimalikke toiminguid erinevatel kasutajakontodel."</string>
+    <string name="permlab_manageUsers" msgid="1676150911672282428">"kasutajate haldamine"</string>
+    <string name="permdesc_manageUsers" msgid="8409306667645355638">"Võimaldab rakendustel hallata seadme kasutajaid, sealhulgas päringuid, loomist ja kustutamist."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"töötavate rakenduste üksikasjade toomine"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Võimaldab rakendusel tuua üksikasjalikku teavet praegu töötavate ja hiljuti käitatud ülesannete kohta. Pahatahtlikud rakendused võivad tuvastada privaatset teavet muude rakenduste kohta."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"käitatud rakenduste ümberjärjestamine"</string>
@@ -1309,4 +1311,6 @@
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth-heli"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Valmis"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Meediaväljund"</string>
+    <!-- no translation found for display_manager_built_in_display (9042666544146043569) -->
+    <skip />
 </resources>
