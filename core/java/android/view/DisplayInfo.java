@@ -223,4 +223,17 @@ public final class DisplayInfo implements Parcelable {
             }
         }
     }
+
+    // For debugging purposes
+    @Override
+    public String toString() {
+        return "app " + appWidth + " x " + appHeight
+                + ", real " + logicalWidth + " x " + logicalHeight
+                + ", largest app " + largestNominalAppWidth + " x " + largestNominalAppHeight
+                + ", smallest app " + smallestNominalAppWidth + " x " + smallestNominalAppHeight
+                + ", " + refreshRate + " fps"
+                + ", rotation " + rotation
+                + ", density " + logicalDensityDpi
+                + ", " + physicalXDpi + " x " + physicalYDpi + " dpi";
+    }
 }
