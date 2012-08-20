@@ -2071,6 +2071,9 @@ public abstract class BatteryStats implements Parcelable {
                         case BatteryManager.BATTERY_PLUGGED_USB:
                             pw.print("usb");
                             break;
+                        case BatteryManager.BATTERY_PLUGGED_WIRELESS:
+                            pw.print("wireless");
+                            break;
                         default:
                             pw.print(oldPlug);
                             break;
