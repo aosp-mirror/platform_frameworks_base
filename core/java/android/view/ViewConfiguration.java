@@ -279,7 +279,8 @@ public class ViewConfiguration {
         mWindowTouchSlop = (int) (sizeAndDensity * WINDOW_TOUCH_SLOP + 0.5f);
 
         // Size of the screen in bytes, in ARGB_8888 format
-        final Display display = WindowManagerImpl.getDefault().getDefaultDisplay();
+        final WindowManager win = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
+        final Display display = win.getDefaultDisplay();
         final Point size = new Point();
         display.getRealSize(size);
         mMaximumDrawingCacheSize = 4 * size.x * size.y;
@@ -288,7 +289,7 @@ public class ViewConfiguration {
         mOverflingDistance = (int) (sizeAndDensity * OVERFLING_DISTANCE + 0.5f);
 
         if (!sHasPermanentMenuKeySet) {
-            IWindowManager wm = WindowManagerImpl.getWindowManagerService();
+            IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
             try {
                 sHasPermanentMenuKey = !wm.hasSystemNavBar() && !wm.hasNavigationBar();
                 sHasPermanentMenuKeySet = true;

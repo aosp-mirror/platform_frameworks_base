@@ -59,8 +59,8 @@ interface IWindowSession {
      * @param requestedWidth The width the window wants to be.
      * @param requestedHeight The height the window wants to be.
      * @param viewVisibility Window root view's visibility.
-     * @param flags Request flags: {@link WindowManagerImpl#RELAYOUT_INSETS_PENDING},
-     * {@link WindowManagerImpl#RELAYOUT_DEFER_SURFACE_DESTROY}.
+     * @param flags Request flags: {@link WindowManagerGlobal#RELAYOUT_INSETS_PENDING},
+     * {@link WindowManagerGlobal#RELAYOUT_DEFER_SURFACE_DESTROY}.
      * @param outFrame Rect in which is placed the new position/size on
      * screen.
      * @param outContentInsets Rect in which is placed the offsets from
@@ -79,8 +79,8 @@ interface IWindowSession {
      * was last displayed.
      * @param outSurface Object in which is placed the new display surface.
      * 
-     * @return int Result flags: {@link WindowManagerImpl#RELAYOUT_SHOW_FOCUS},
-     * {@link WindowManagerImpl#RELAYOUT_FIRST_TIME}.
+     * @return int Result flags: {@link WindowManagerGlobal#RELAYOUT_SHOW_FOCUS},
+     * {@link WindowManagerGlobal#RELAYOUT_FIRST_TIME}.
      */
     int relayout(IWindow window, int seq, in WindowManager.LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewVisibility,

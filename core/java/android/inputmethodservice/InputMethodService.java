@@ -39,7 +39,6 @@ import android.text.method.MovementMethod;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
-import android.view.Display;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -630,7 +629,7 @@ public class InputMethodService extends AbstractInputMethodService {
         if (mWindow != null) {
             throw new IllegalStateException("Must be called before onCreate()");
         }
-        if (ActivityManager.isHighEndGfx(new Display(Display.DEFAULT_DISPLAY, null))) {
+        if (ActivityManager.isHighEndGfx()) {
             mHardwareAccelerated = true;
             return true;
         }

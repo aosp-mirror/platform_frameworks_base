@@ -7279,11 +7279,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     // nativeCreate sets mNativeClass to a non-zero value
                     String drawableDir = BrowserFrame.getRawResFilename(
                             BrowserFrame.DRAWABLEDIR, mContext);
-                    WindowManager windowManager =
-                            (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-                    Display display = windowManager.getDefaultDisplay();
-                    nativeCreate(msg.arg1, drawableDir,
-                            ActivityManager.isHighEndGfx(display));
+                    nativeCreate(msg.arg1, drawableDir, ActivityManager.isHighEndGfx());
                     if (mDelaySetPicture != null) {
                         setNewPicture(mDelaySetPicture, true);
                         mDelaySetPicture = null;

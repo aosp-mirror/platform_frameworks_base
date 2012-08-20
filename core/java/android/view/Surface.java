@@ -246,22 +246,9 @@ public class Surface implements Parcelable {
     native private static void nativeClassInit();
     static { nativeClassInit(); }
 
-    /** create a surface @hide */
-    public Surface(SurfaceSession s,
-            int pid, int displayId, int w, int h, int format, int flags)
-        throws OutOfResourcesException {
-        checkHeadless();
-
-        if (DEBUG_RELEASE) {
-            mCreationStack = new Exception();
-        }
-        mCanvas = new CompatibleCanvas();
-        init(s,pid,null,displayId,w,h,format,flags);
-    }
-
     /** create a surface with a name @hide */
     public Surface(SurfaceSession s,
-            int pid, String name, int displayId, int w, int h, int format, int flags)
+            int pid, String name, int layerStack, int w, int h, int format, int flags)
         throws OutOfResourcesException {
         checkHeadless();
 
@@ -269,7 +256,7 @@ public class Surface implements Parcelable {
             mCreationStack = new Exception();
         }
         mCanvas = new CompatibleCanvas();
-        init(s,pid,name,displayId,w,h,format,flags);
+        init(s, pid, name, layerStack, w, h, format, flags);
         mName = name;
     }
 
@@ -470,7 +457,7 @@ public class Surface implements Parcelable {
     /** @hide */
     public native   void setWindowCrop(Rect crop);
     /** @hide */
-    public native   void setDisplayId(int displayId);
+    public native   void setLayerStack(int layerStack);
 
 
    

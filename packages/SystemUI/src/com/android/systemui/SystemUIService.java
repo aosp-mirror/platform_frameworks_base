@@ -31,6 +31,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Slog;
 import android.view.IWindowManager;
+import android.view.WindowManagerGlobal;
 
 public class SystemUIService extends Service {
     static final String TAG = "SystemUIService";
@@ -67,8 +68,7 @@ public class SystemUIService extends Service {
     @Override
     public void onCreate() {
         // Pick status bar or system bar.
-        IWindowManager wm = IWindowManager.Stub.asInterface(
-                ServiceManager.getService(Context.WINDOW_SERVICE));
+        IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
         try {
             SERVICES[0] = wm.hasSystemNavBar()
                     ? R.string.config_systemBarComponent

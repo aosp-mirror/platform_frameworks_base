@@ -487,9 +487,9 @@ public interface WindowManagerPolicy {
      * 
      * @param attrs The window's LayoutParams. 
      *  
-     * @return {@link WindowManagerImpl#ADD_OKAY} if the add can proceed;
+     * @return {@link WindowManagerGlobal#ADD_OKAY} if the add can proceed;
      *      else an error code, usually
-     *      {@link WindowManagerImpl#ADD_PERMISSION_DENIED}, to abort the add.
+     *      {@link WindowManagerGlobal#ADD_PERMISSION_DENIED}, to abort the add.
      */
     public int checkAddPermission(WindowManager.LayoutParams attrs);
 
@@ -662,7 +662,7 @@ public interface WindowManagerPolicy {
      * @param win The window being added.
      * @param attrs The window's LayoutParams. 
      *  
-     * @return {@link WindowManagerImpl#ADD_OKAY} if the add can proceed, else an 
+     * @return {@link WindowManagerGlobal#ADD_OKAY} if the add can proceed, else an
      *         error code to abort the add.
      */
     public int prepareAddWindowLw(WindowState win,

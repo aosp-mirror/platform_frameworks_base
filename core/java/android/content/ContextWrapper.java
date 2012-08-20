@@ -31,6 +31,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
+import android.view.CompatibilityInfoHolder;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -542,5 +543,11 @@ public class ContextWrapper extends Context {
     @Override
     public boolean isRestricted() {
         return mBase.isRestricted();
+    }
+
+    /** @hide */
+    @Override
+    public CompatibilityInfoHolder getCompatibilityInfo() {
+        return mBase.getCompatibilityInfo();
     }
 }

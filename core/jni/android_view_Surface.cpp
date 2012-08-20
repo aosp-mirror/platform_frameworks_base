@@ -221,7 +221,7 @@ void setSurface(JNIEnv* env, jobject clazz, const sp<Surface>& surface)
 static void Surface_init(
         JNIEnv* env, jobject clazz,
         jobject session,
-        jint, jstring jname, jint dpy, jint w, jint h, jint format, jint flags)
+        jint, jstring jname, jint layerStack, jint w, jint h, jint format, jint flags)
 {
     if (session == NULL) {
         doThrowNPE(env);
@@ -233,12 +233,12 @@ static void Surface_init(
 
     sp<SurfaceControl> surface;
     if (jname == NULL) {
-        surface = client->createSurface(dpy, w, h, format, flags);
+        surface = client->createSurface(layerStack, w, h, format, flags);
     } else {
         const jchar* str = env->GetStringCritical(jname, 0);
         const String8 name(str, env->GetStringLength(jname));
         env->ReleaseStringCritical(jname, str);
-        surface = client->createSurface(name, dpy, w, h, format, flags);
+        surface = client->createSurface(name, layerStack, w, h, format, flags);
     }
 
     if (surface == 0) {
@@ -717,7 +717,7 @@ static void Surface_setWindowCrop(JNIEnv* env, jobject thiz, jobject crop)
     }
 }
 
-static void Surface_setDisplayId(JNIEnv* env, jobject thiz, jint displayId)
+static void Surface_setLayerStack(JNIEnv* env, jobject thiz, jint layerStack)
 {
     const sp<SurfaceControl>& surface(getSurfaceControl(env, thiz));
     if (surface == 0) return;
@@ -863,7 +863,7 @@ static JNINativeMethod gSurfaceMethods[] = {
     {"writeToParcel",       "(Landroid/os/Parcel;I)V", (void*)Surface_writeToParcel },
     {"isConsumerRunningBehind", "()Z", (void*)Surface_isConsumerRunningBehind },
     {"setWindowCrop",       "(Landroid/graphics/Rect;)V", (void*)Surface_setWindowCrop },
-    {"setDisplayId",        "(I)V", (void*)Surface_setDisplayId },
+    {"setLayerStack",        "(I)V", (void*)Surface_setLayerStack },
 };
 
 void nativeClassInit(JNIEnv* env, jclass clazz)

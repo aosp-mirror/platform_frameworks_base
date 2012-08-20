@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -165,7 +166,7 @@ public final class Choreographer {
         mDisplayEventReceiver = USE_VSYNC ? new FrameDisplayEventReceiver(looper) : null;
         mLastFrameTimeNanos = Long.MIN_VALUE;
 
-        Display d = WindowManagerImpl.getDefault().getDefaultDisplay();
+        Display d = DisplayManager.getInstance().getRealDisplay(Display.DEFAULT_DISPLAY);
         mFrameIntervalNanos = (long)(1000000000 / d.getRefreshRate());
 
         mCallbackQueues = new CallbackQueue[CALLBACK_LAST + 1];

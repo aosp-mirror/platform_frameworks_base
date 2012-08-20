@@ -42,6 +42,7 @@ class ScreenRotationAnimation {
     static final int FREEZE_LAYER = WindowManagerService.TYPE_LAYER_MULTIPLIER * 200;
 
     final Context mContext;
+    final Display mDisplay;
     Surface mSurface;
     BlackFrame mCustomBlackFrame;
     BlackFrame mExitingBlackFrame;
@@ -186,9 +187,10 @@ class ScreenRotationAnimation {
                 pw.println();
     }
 
-    public ScreenRotationAnimation(Context context, SurfaceSession session,
+    public ScreenRotationAnimation(Context context, Display display, SurfaceSession session,
             boolean inTransaction, int originalWidth, int originalHeight, int originalRotation) {
         mContext = context;
+        mDisplay = display;
 
         // Screenshot does NOT include rotation!
         if (originalRotation == Surface.ROTATION_90
@@ -213,13 +215,13 @@ class ScreenRotationAnimation {
         try {
             try {
                 if (WindowManagerService.DEBUG_SURFACE_TRACE) {
-                    mSurface = new SurfaceTrace(session, 0, "FreezeSurface", Display.DEFAULT_DISPLAY,
-                        mWidth, mHeight,
-                        PixelFormat.OPAQUE, Surface.FX_SURFACE_SCREENSHOT | Surface.HIDDEN);
+                    mSurface = new SurfaceTrace(session, 0, "FreezeSurface",
+                            mDisplay.getLayerStack(), mWidth, mHeight,
+                            PixelFormat.OPAQUE, Surface.FX_SURFACE_SCREENSHOT | Surface.HIDDEN);
                 } else {
-                    mSurface = new Surface(session, 0, "FreezeSurface", Display.DEFAULT_DISPLAY,
-                        mWidth, mHeight,
-                        PixelFormat.OPAQUE, Surface.FX_SURFACE_SCREENSHOT | Surface.HIDDEN);
+                    mSurface = new Surface(session, 0, "FreezeSurface",
+                            mDisplay.getLayerStack(), mWidth, mHeight,
+                            PixelFormat.OPAQUE, Surface.FX_SURFACE_SCREENSHOT | Surface.HIDDEN);
                 }
                 if (!mSurface.isValid()) {
                     // Screenshot failed, punt.

@@ -34,6 +34,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.util.AttributeSet;
+import android.view.CompatibilityInfoHolder;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -2462,6 +2463,16 @@ public abstract class Context {
      * @return A Context for the application.
      */
     public abstract Context createConfigurationContext(Configuration overrideConfiguration);
+
+    /**
+     * Gets the compatibility info holder for this context.  This information
+     * is provided on a per-application basis and is used to simulate lower density
+     * display metrics for legacy applications.
+     *
+     * @return The compatibility info holder, or null if not required by the application.
+     * @hide
+     */
+    public abstract CompatibilityInfoHolder getCompatibilityInfo();
 
     /**
      * Indicates whether this Context is restricted.

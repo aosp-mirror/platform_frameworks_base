@@ -33,7 +33,6 @@ import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Surface;
 import android.view.SurfaceSession;
-import android.view.WindowManagerImpl;
 
 import java.io.PrintWriter;
 import java.nio.ByteBuffer;
@@ -68,6 +67,7 @@ final class ElectronBeam {
     private boolean mPrepared;
     private boolean mWarmUp;
 
+    private final Display mDisplay;
     private final DisplayInfo mDisplayInfo = new DisplayInfo();
     private int mDisplayLayerStack; // layer stack associated with primary display
     private int mDisplayRotation;
@@ -90,7 +90,8 @@ final class ElectronBeam {
     private final FloatBuffer mVertexBuffer = createNativeFloatBuffer(8);
     private final FloatBuffer mTexCoordBuffer = createNativeFloatBuffer(8);
 
-    public ElectronBeam() {
+    public ElectronBeam(Display display) {
+        mDisplay = display;
     }
 
     /**
@@ -109,9 +110,8 @@ final class ElectronBeam {
         mWarmUp = warmUp;
 
         // Get the display size and adjust it for rotation.
-        Display display = WindowManagerImpl.getDefault().getDefaultDisplay();
-        display.getDisplayInfo(mDisplayInfo);
-        mDisplayLayerStack = display.getDisplayId();
+        mDisplay.getDisplayInfo(mDisplayInfo);
+        mDisplayLayerStack = mDisplay.getLayerStack();
         mDisplayRotation = mDisplayInfo.rotation;
         if (mDisplayRotation == Surface.ROTATION_90
                 || mDisplayRotation == Surface.ROTATION_270) {

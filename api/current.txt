@@ -9981,6 +9981,15 @@ package android.hardware {
 package android.hardware.display {
 
   public final class DisplayManager {
+    method public android.view.Display getDisplay(int, android.content.Context);
+    method public void registerDisplayListener(android.hardware.display.DisplayManager.DisplayListener, android.os.Handler);
+    method public void unregisterDisplayListener(android.hardware.display.DisplayManager.DisplayListener);
+  }
+
+  public static abstract interface DisplayManager.DisplayListener {
+    method public abstract void onDisplayAdded(int);
+    method public abstract void onDisplayChanged(int);
+    method public abstract void onDisplayRemoved(int);
   }
 
 }
@@ -24590,6 +24599,7 @@ package android.view {
     method public final android.content.Context getContext();
     method protected android.view.ContextMenu.ContextMenuInfo getContextMenuInfo();
     method public static int getDefaultSize(int, int);
+    method public android.view.Display getDisplay();
     method public final int[] getDrawableState();
     method public android.graphics.Bitmap getDrawingCache();
     method public android.graphics.Bitmap getDrawingCache(boolean);

@@ -82,6 +82,7 @@ import android.view.InputEventReceiver;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.WindowManagerGlobal;
 import android.view.WindowOrientationListener;
 import android.view.Surface;
 import android.view.View;
@@ -132,7 +133,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_POINTER;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
-import android.view.WindowManagerImpl;
 import android.view.WindowManagerPolicy;
 import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_ABSENT;
 import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_OPEN;
@@ -1172,7 +1172,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         
         if (type < WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW
                 || type > WindowManager.LayoutParams.LAST_SYSTEM_WINDOW) {
-            return WindowManagerImpl.ADD_OKAY;
+            return WindowManagerGlobal.ADD_OKAY;
         }
         String permission = null;
         switch (type) {
@@ -1199,10 +1199,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (permission != null) {
             if (mContext.checkCallingOrSelfPermission(permission)
                     != PackageManager.PERMISSION_GRANTED) {
-                return WindowManagerImpl.ADD_PERMISSION_DENIED;
+                return WindowManagerGlobal.ADD_PERMISSION_DENIED;
             }
         }
-        return WindowManagerImpl.ADD_OKAY;
+        return WindowManagerGlobal.ADD_OKAY;
     }
     
     public void adjustWindowParamsLw(WindowManager.LayoutParams attrs) {
@@ -1499,7 +1499,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // Only return the view if it was successfully added to the
             // window manager... which we can tell by it having a parent.
             return view.getParent() != null ? view : null;
-        } catch (WindowManagerImpl.BadTokenException e) {
+        } catch (WindowManager.BadTokenException e) {
             // ignore
             Log.w(TAG, appToken + " already running, starting window not displayed");
         } catch (RuntimeException e) {
@@ -1538,7 +1538,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * @param win The window to be added
      * @param attrs Information about the window to be added
      * 
-     * @return If ok, WindowManagerImpl.ADD_OKAY.  If too many singletons, WindowManagerImpl.ADD_MULTIPLE_SINGLETON
+     * @return If ok, WindowManagerImpl.ADD_OKAY.  If too many singletons,
+     * WindowManagerImpl.ADD_MULTIPLE_SINGLETON
      */
     public int prepareAddWindowLw(WindowState win, WindowManager.LayoutParams attrs) {
         switch (attrs.type) {
@@ -1548,7 +1549,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         "PhoneWindowManager");
                 if (mStatusBar != null) {
                     if (mStatusBar.isAlive()) {
-                        return WindowManagerImpl.ADD_MULTIPLE_SINGLETON;
+                        return WindowManagerGlobal.ADD_MULTIPLE_SINGLETON;
                     }
                 }
                 mStatusBar = win;
@@ -1559,7 +1560,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         "PhoneWindowManager");
                 if (mNavigationBar != null) {
                     if (mNavigationBar.isAlive()) {
-                        return WindowManagerImpl.ADD_MULTIPLE_SINGLETON;
+                        return WindowManagerGlobal.ADD_MULTIPLE_SINGLETON;
                     }
                 }
                 mNavigationBar = win;
@@ -1582,12 +1583,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 break;
             case TYPE_KEYGUARD:
                 if (mKeyguard != null) {
-                    return WindowManagerImpl.ADD_MULTIPLE_SINGLETON;
+                    return WindowManagerGlobal.ADD_MULTIPLE_SINGLETON;
                 }
                 mKeyguard = win;
                 break;
         }
-        return WindowManagerImpl.ADD_OKAY;
+        return WindowManagerGlobal.ADD_OKAY;
     }
 
     /** {@inheritDoc} */

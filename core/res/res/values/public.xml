@@ -450,6 +450,7 @@
   <java-symbol type="string" name="decline" />
   <java-symbol type="string" name="default_text_encoding" />
   <java-symbol type="string" name="description_target_unlock_tablet" />
+  <java-symbol type="string" name="display_manager_built_in_display" />
   <java-symbol type="string" name="double_tap_toast" />
   <java-symbol type="string" name="elapsed_time_short_format_h_mm_ss" />
   <java-symbol type="string" name="elapsed_time_short_format_mm_ss" />

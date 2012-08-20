@@ -44,7 +44,7 @@ import android.telephony.TelephonyManager;
 import android.util.EventLog;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.WindowManagerImpl;
+import android.view.WindowManager;
 import android.view.WindowManagerPolicy;
 
 
@@ -376,9 +376,9 @@ public class KeyguardViewMediator implements KeyguardViewCallback {
         mKeyguardViewProperties
                 = new LockPatternKeyguardViewProperties(mLockPatternUtils, mUpdateMonitor);
 
+        WindowManager wm = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
         mKeyguardViewManager = new KeyguardViewManager(
-                context, WindowManagerImpl.getDefault(), this,
-                mKeyguardViewProperties, mUpdateMonitor);
+                context, wm, this, mKeyguardViewProperties, mUpdateMonitor);
 
         mUserPresentIntent = new Intent(Intent.ACTION_USER_PRESENT);
         mUserPresentIntent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING

@@ -60,9 +60,9 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManagerGlobal;
 import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
-import android.view.WindowManagerImpl;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -150,7 +150,6 @@ public class PhoneStatusBar extends BaseStatusBar {
     int mIconHPadding = -1;
     Display mDisplay;
 
-    IWindowManager mWindowManager;
     IDreamManager mDreamManager;
 
     StatusBarWindowView mStatusBarWindow;
@@ -261,9 +260,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         mDisplay = ((WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE))
                 .getDefaultDisplay();
 
-        mWindowManager = IWindowManager.Stub.asInterface(
-                ServiceManager.getService(Context.WINDOW_SERVICE));
-
         mDreamManager = IDreamManager.Stub.asInterface(
                 ServiceManager.checkService("dreams"));
 
@@ -332,7 +328,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         mSettingsPanel = (PanelView) mStatusBarWindow.findViewById(R.id.settings_panel);
         mSettingsPanel.setOnTouchListener(clickStopper);
 
-        if (!ActivityManager.isHighEndGfx(mDisplay)) {
+        if (!ActivityManager.isHighEndGfx()) {
             mStatusBarWindow.setBackground(null);
             mNotificationPanel.setBackground(new FastColorDrawable(context.getResources().getColor(
                     R.color.notification_panel_solid_background)));
@@ -352,7 +348,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         updateShowSearchHoldoff();
 
         try {
-            boolean showNav = mWindowManager.hasNavigationBar();
+            boolean showNav = mWindowManagerService.hasNavigationBar();
             if (DEBUG) Slog.v(TAG, "hasNavigationBar=" + showNav);
             if (showNav) {
                 mNavigationBarView =
@@ -474,7 +470,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                 | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
                 | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
                 (opaque ? PixelFormat.OPAQUE : PixelFormat.TRANSLUCENT));
-        if (ActivityManager.isHighEndGfx(mDisplay)) {
+        if (ActivityManager.isHighEndGfx()) {
             lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
         } else {
             lp.flags |= WindowManager.LayoutParams.FLAG_DIM_BEHIND;
@@ -499,7 +495,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                 | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
                 | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
                 (opaque ? PixelFormat.OPAQUE : PixelFormat.TRANSLUCENT));
-        if (ActivityManager.isHighEndGfx(mDisplay)) {
+        if (ActivityManager.isHighEndGfx()) {
             lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
         }
         lp.gravity = Gravity.BOTTOM | Gravity.LEFT;
@@ -535,7 +531,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         WindowManager.LayoutParams lp =
             (android.view.WindowManager.LayoutParams) mNavigationBarView.getLayoutParams();
         lp.flags &= ~WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
-        WindowManagerImpl.getDefault().updateViewLayout(mNavigationBarView, lp);
+        mWindowManager.updateViewLayout(mNavigationBarView, lp);
     }
 
     @Override
@@ -544,7 +540,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         WindowManager.LayoutParams lp =
             (android.view.WindowManager.LayoutParams) mNavigationBarView.getLayoutParams();
         lp.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
-        WindowManagerImpl.getDefault().updateViewLayout(mNavigationBarView, lp);
+        mWindowManager.updateViewLayout(mNavigationBarView, lp);
     }
 
     protected int getStatusBarGravity() {
@@ -620,8 +616,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         prepareNavigationBarView();
 
-        WindowManagerImpl.getDefault().addView(
-                mNavigationBarView, getNavigationBarLayoutParams());
+        mWindowManager.addView(mNavigationBarView, getNavigationBarLayoutParams());
     }
 
     private void repositionNavigationBar() {
@@ -629,8 +624,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         prepareNavigationBarView();
 
-        WindowManagerImpl.getDefault().updateViewLayout(
-                mNavigationBarView, getNavigationBarLayoutParams());
+        mWindowManager.updateViewLayout(mNavigationBarView, getNavigationBarLayoutParams());
     }
 
     private WindowManager.LayoutParams getNavigationBarLayoutParams() {
@@ -644,7 +638,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                     | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
                 PixelFormat.OPAQUE);
         // this will allow the navbar to run in an overlay on devices that support this
-        if (ActivityManager.isHighEndGfx(mDisplay)) {
+        if (ActivityManager.isHighEndGfx()) {
             lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
         }
 
@@ -671,7 +665,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         lp.packageName = mContext.getPackageName();
         lp.windowAnimations = R.style.Animation_StatusBar_IntruderAlert;
 
-        WindowManagerImpl.getDefault().addView(mIntruderAlertView, lp);
+        mWindowManager.addView(mIntruderAlertView, lp);
     }
 
     public void addIcon(String slot, int index, int viewIndex, StatusBarIcon icon) {
@@ -1157,8 +1151,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         lp.flags &= ~WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         lp.flags |= WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
         lp.height = ViewGroup.LayoutParams.MATCH_PARENT;
-        final WindowManager wm = WindowManagerImpl.getDefault();
-        wm.updateViewLayout(mStatusBarWindow, lp);
+        mWindowManager.updateViewLayout(mStatusBarWindow, lp);
 
         // Updating the window layout will force an expensive traversal/redraw.
         // Kick off the reveal animation after this is complete to avoid animation latency.
@@ -1231,8 +1224,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         lp.height = getStatusBarHeight();
         lp.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         lp.flags &= ~WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
-        final WindowManager wm = WindowManagerImpl.getDefault();
-        wm.updateViewLayout(mStatusBarWindow, lp);
+        mWindowManager.updateViewLayout(mStatusBarWindow, lp);
 
         if ((mDisabled & StatusBarManager.DISABLE_NOTIFICATION_ICONS) == 0) {
             setNotificationIconVisibility(true, com.android.internal.R.anim.fade_in);
@@ -1409,7 +1401,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     private void notifyUiVisibilityChanged() {
         try {
-            mWindowManager.statusBarVisibilityChanged(mSystemUiVisibility);
+            mWindowManagerService.statusBarVisibilityChanged(mSystemUiVisibility);
         } catch (RemoteException ex) {
         }
     }
@@ -1615,7 +1607,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         lp.packageName = mContext.getPackageName();
 
         makeStatusBarView();
-        WindowManagerImpl.getDefault().addView(mStatusBarWindow, lp);
+        mWindowManager.addView(mStatusBarWindow, lp);
     }
 
     void setNotificationIconVisibility(boolean visible, int anim) {
