@@ -479,11 +479,13 @@ final class DisplayPowerController {
             if (mPowerRequest == null) {
                 mPowerRequest = new DisplayPowerRequest(mPendingRequestLocked);
                 mWaitingForNegativeProximity = mPendingWaitForNegativeProximityLocked;
+                mPendingWaitForNegativeProximityLocked = false;
                 mPendingRequestChangedLocked = false;
                 mustInitialize = true;
             } else if (mPendingRequestChangedLocked) {
                 mPowerRequest.copyFrom(mPendingRequestLocked);
                 mWaitingForNegativeProximity |= mPendingWaitForNegativeProximityLocked;
+                mPendingWaitForNegativeProximityLocked = false;
                 mPendingRequestChangedLocked = false;
                 mDisplayReadyLocked = false;
             }
@@ -496,24 +498,33 @@ final class DisplayPowerController {
             initialize();
         }
 
-        // Clear a request to wait for negative proximity if needed.
-        if (mPowerRequest.screenState == DisplayPowerRequest.SCREEN_STATE_OFF
-                || mProximity == PROXIMITY_NEGATIVE
-                || mProximitySensor == null) {
-            mWaitingForNegativeProximity = false;
-        }
-
-        // Turn on the proximity sensor if needed.
+        // Apply the proximity sensor.
         if (mProximitySensor != null) {
-            setProximitySensorEnabled(mPowerRequest.useProximitySensor
-                    || mWaitingForNegativeProximity);
-            if (mProximitySensorEnabled && mProximity == PROXIMITY_POSITIVE) {
-                mScreenOffBecauseOfProximity = true;
-                setScreenOn(false);
-            } else if (mScreenOffBecauseOfProximity) {
+            if (mPowerRequest.useProximitySensor
+                    && mPowerRequest.screenState != DisplayPowerRequest.SCREEN_STATE_OFF) {
+                setProximitySensorEnabled(true);
+                if (!mScreenOffBecauseOfProximity
+                        && mProximity == PROXIMITY_POSITIVE) {
+                    mScreenOffBecauseOfProximity = true;
+                    setScreenOn(false);
+                }
+            } else if (mWaitingForNegativeProximity
+                    && mScreenOffBecauseOfProximity
+                    && mProximity == PROXIMITY_POSITIVE
+                    && mPowerRequest.screenState != DisplayPowerRequest.SCREEN_STATE_OFF) {
+                setProximitySensorEnabled(true);
+            } else {
+                setProximitySensorEnabled(false);
+                mWaitingForNegativeProximity = false;
+            }
+            if (mScreenOffBecauseOfProximity
+                    && mProximity != PROXIMITY_POSITIVE) {
                 mScreenOffBecauseOfProximity = false;
+                setScreenOn(true);
                 sendOnProximityNegative();
             }
+        } else {
+            mWaitingForNegativeProximity = false;
         }
 
         // Turn on the light sensor if needed.
