@@ -387,6 +387,9 @@ videoEditJava_getString(
                 (*pLength) = length;
             }
         }
+
+        // Delete local references to avoid memory leaks
+        pEnv->DeleteLocalRef(string);
     }
 
     // Return the string.
