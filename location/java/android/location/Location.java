@@ -825,9 +825,8 @@ public class Location implements Parcelable {
         if (mElapsedRealtimeNano == 0) {
             s.append(" et=?!?");
         } else {
-            long age = SystemClock.elapsedRealtimeNano() - mElapsedRealtimeNano;
-            s.append(" age=");
-            TimeUtils.formatDuration(age / 1000000L, s);
+            s.append(" et=");
+            TimeUtils.formatDuration(mElapsedRealtimeNano / 1000000L, s);
         }
         if (mHasAltitude) s.append(" alt=").append(mAltitude);
         if (mHasSpeed) s.append(" vel=").append(mSpeed);
