@@ -100,15 +100,15 @@ final class DisplayPowerController {
 
     // Brightness animation ramp rate in brightness units per second.
     private static final int BRIGHTNESS_RAMP_RATE_FAST = 200;
-    private static final int BRIGHTNESS_RAMP_RATE_SLOW = 50;
+    private static final int BRIGHTNESS_RAMP_RATE_SLOW = 40;
 
     // Filter time constant in milliseconds for computing a moving
     // average of light samples.  Different constants are used
     // to calculate the average light level when adapting to brighter or
     // dimmer environments.
     // This parameter only controls the filtering of light samples.
-    private static final long BRIGHTENING_LIGHT_TIME_CONSTANT = 500;
-    private static final long DIMMING_LIGHT_TIME_CONSTANT = 2000;
+    private static final long BRIGHTENING_LIGHT_TIME_CONSTANT = 600;
+    private static final long DIMMING_LIGHT_TIME_CONSTANT = 4000;
 
     // Stability requirements in milliseconds for accepting a new brightness
     // level.  This is used for debouncing the light sensor.  Different constants
