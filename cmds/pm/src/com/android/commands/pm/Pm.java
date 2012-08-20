@@ -36,6 +36,7 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.pm.UserInfo;
+import android.content.pm.VerificationParams;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.net.Uri;
@@ -787,6 +788,8 @@ public final class Pm {
         String macAlgo = null;
         byte[] macKey = null;
         byte[] tag = null;
+        String originatingUriString = null;
+        String referrer = null;
 
         while ((opt=nextOption()) != null) {
             if (opt.equals("-l")) {
@@ -850,6 +853,20 @@ public final class Pm {
                     showUsage();
                     return;
                 }
+            } else if (opt.equals("--originating-uri")) {
+                originatingUriString = nextOptionData();
+                if (originatingUriString == null) {
+                    System.err.println("Error: must supply argument for --originating-uri");
+                    showUsage();
+                    return;
+                }
+            } else if (opt.equals("--referrer")) {
+                referrer = nextOptionData();
+                if (referrer == null) {
+                    System.err.println("Error: must supply argument for --referrer");
+                    showUsage();
+                    return;
+                }
             } else {
                 System.err.println("Error: Unknown option: " + opt);
                 showUsage();
@@ -897,6 +914,20 @@ public final class Pm {
 
         final Uri apkURI;
         final Uri verificationURI;
+        final Uri originatingURI;
+        final Uri referrerURI;
+
+        if (originatingUriString != null) {
+            originatingURI = Uri.parse(originatingUriString);
+        } else {
+            originatingURI = null;
+        }
+
+        if (referrer != null) {
+            referrerURI = Uri.parse(referrer);
+        } else {
+            referrerURI = null;
+        }
 
         // Populate apkURI, must be present
         final String apkFilePath = nextArg();
@@ -920,8 +951,11 @@ public final class Pm {
 
         PackageInstallObserver obs = new PackageInstallObserver();
         try {
-            mPm.installPackageWithVerification(apkURI, obs, installFlags, installerPackageName,
-                    verificationURI, null, encryptionParams);
+            VerificationParams verificationParams = new VerificationParams(verificationURI,
+                    originatingURI, referrerURI, null);
+
+            mPm.installPackageWithVerificationAndEncryption(apkURI, obs, installFlags,
+                    installerPackageName, verificationParams, encryptionParams);
 
             synchronized (obs) {
                 while (!obs.finished) {
@@ -1441,7 +1475,8 @@ public final class Pm {
         System.err.println("       pm list libraries");
         System.err.println("       pm path PACKAGE");
         System.err.println("       pm install [-l] [-r] [-t] [-i INSTALLER_PACKAGE_NAME] [-s] [-f]");
-        System.err.println("                  [--algo <algorithm name> --key <key-in-hex> --iv <IV-in-hex>] PATH");
+        System.err.println("                  [--algo <algorithm name> --key <key-in-hex> --iv <IV-in-hex>]");
+        System.err.println("                  [--originating-uri <URI>] [--referrer <URI>] PATH");
         System.err.println("       pm uninstall [-k] PACKAGE");
         System.err.println("       pm clear PACKAGE");
         System.err.println("       pm enable PACKAGE_OR_COMPONENT");
