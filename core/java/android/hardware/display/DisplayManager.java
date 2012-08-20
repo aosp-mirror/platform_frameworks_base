@@ -45,14 +45,19 @@ public final class DisplayManager {
 
     /**
      * Gets an instance of the display manager.
-     * @return The display manager instance.
+     *
+     * @return The display manager instance, may be null early in system startup
+     * before the display manager has been fully initialized.
+     *
      * @hide
      */
     public static DisplayManager getInstance() {
         synchronized (DisplayManager.class) {
             if (sInstance == null) {
                 IBinder b = ServiceManager.getService(Context.DISPLAY_SERVICE);
-                sInstance = new DisplayManager(IDisplayManager.Stub.asInterface(b));
+                if (b != null) {
+                    sInstance = new DisplayManager(IDisplayManager.Stub.asInterface(b));
+                }
             }
             return sInstance;
         }

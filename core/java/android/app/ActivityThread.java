@@ -1553,10 +1553,20 @@ public final class ActivityThread {
         if (dm != null && !forceUpdate) {
             return dm;
         }
+
+        DisplayManager displayManager = DisplayManager.getInstance();
+        if (displayManager == null) {
+            // may be null early in system startup
+            dm = new DisplayMetrics();
+            dm.setToDefaults();
+            return dm;
+        }
+
         if (dm == null) {
             dm = new DisplayMetrics();
             mDisplayMetrics.put(ci, dm);
         }
+
         CompatibilityInfoHolder cih = new CompatibilityInfoHolder();
         cih.set(ci);
         Display d = WindowManagerImpl.getDefault().makeCompatible(cih).getDefaultDisplay();
