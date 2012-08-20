@@ -47,7 +47,7 @@ public class AppWindowAnimator {
     final Transformation thumbnailTransformation = new Transformation();
 
     /** WindowStateAnimator from mAppAnimator.allAppWindows as of last performLayout */
-    ArrayList<WindowStateAnimator> mAllAppWinAnimators;
+    ArrayList<WindowStateAnimator> mAllAppWinAnimators = new ArrayList<WindowStateAnimator>();
 
     static final Animation sDummyAnimation = new DummyAnimation();
 
