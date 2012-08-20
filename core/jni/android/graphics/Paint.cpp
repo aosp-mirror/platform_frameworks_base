@@ -22,6 +22,7 @@
 #include "jni.h"
 #include "GraphicsJNI.h"
 #include <android_runtime/AndroidRuntime.h>
+#include <ScopedUtfChars.h>
 
 #include "SkBlurDrawLooper.h"
 #include "SkColorFilter.h"
@@ -30,6 +31,7 @@
 #include "SkShader.h"
 #include "SkTypeface.h"
 #include "SkXfermode.h"
+#include "unicode/uloc.h"
 #include "unicode/ushape.h"
 #include "TextLayout.h"
 
@@ -254,11 +256,51 @@ public:
         obj->setTextAlign(align);
     }
 
+    // generate bcp47 identifier for the supplied locale
+    static void toLanguageTag(char* output, size_t outSize,
+            const char* locale) {
+        if (output == NULL || outSize <= 0) {
+            return;
+        }
+        if (locale == NULL) {
+            output[0] = '\0';
+            return;
+        }
+        char canonicalChars[ULOC_FULLNAME_CAPACITY];
+        UErrorCode uErr = U_ZERO_ERROR;
+        uloc_canonicalize(locale, canonicalChars, ULOC_FULLNAME_CAPACITY,
+                &uErr);
+        if (U_SUCCESS(uErr)) {
+            char likelyChars[ULOC_FULLNAME_CAPACITY];
+            uErr = U_ZERO_ERROR;
+            uloc_addLikelySubtags(canonicalChars, likelyChars,
+                    ULOC_FULLNAME_CAPACITY, &uErr);
+            if (U_SUCCESS(uErr)) {
+                uErr = U_ZERO_ERROR;
+                uloc_toLanguageTag(likelyChars, output, outSize, FALSE, &uErr);
+                if (U_SUCCESS(uErr)) {
+                    return;
+                } else {
+                    ALOGD("uloc_toLanguageTag(\"%s\") failed: %s", likelyChars,
+                            u_errorName(uErr));
+                }
+            } else {
+                ALOGD("uloc_addLikelySubtags(\"%s\") failed: %s",
+                        canonicalChars, u_errorName(uErr));
+            }
+        } else {
+            ALOGD("uloc_canonicalize(\"%s\") failed: %s", locale,
+                    u_errorName(uErr));
+        }
+        // unable to build a proper language identifier
+        output[0] = '\0';
+    }
+
     static void setTextLocale(JNIEnv* env, jobject clazz, SkPaint* obj, jstring locale) {
-        const char* localeArray = env->GetStringUTFChars(locale, NULL);
-        SkString skLocale(localeArray);
-        obj->setTextLocale(skLocale);
-        env->ReleaseStringUTFChars(locale, localeArray);
+        ScopedUtfChars localeChars(env, locale);
+        char langTag[ULOC_FULLNAME_CAPACITY];
+        toLanguageTag(langTag, ULOC_FULLNAME_CAPACITY, localeChars.c_str());
+        obj->setLanguage(SkLanguage(langTag));
     }
 
     static jfloat getTextSize(JNIEnv* env, jobject paint) {
