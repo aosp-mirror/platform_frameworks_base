@@ -22,8 +22,6 @@ import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.util.DisplayMetrics;
-import android.util.Slog;
 import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceSession;
@@ -39,7 +37,7 @@ class StrictModeFlash {
 
     public StrictModeFlash(Display display, SurfaceSession session) {
         try {
-            mSurface = new Surface(session, 0, "StrictModeFlash", Display.DEFAULT_DISPLAY,
+            mSurface = new Surface(session, 0, "StrictModeFlash", display.getLayerStack(),
                 1, 1, PixelFormat.TRANSLUCENT, 0);
         } catch (Surface.OutOfResourcesException e) {
             return;

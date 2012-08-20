@@ -49,6 +49,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
@@ -488,9 +489,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         mChoreo = new Choreographer(this, mRecentsScrim, mRecentsContainer, mRecentsNoApps, this);
 
         if (mRecentsScrim != null) {
-            Display d = ((WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE))
-                .getDefaultDisplay();
-            mHighEndGfx = ActivityManager.isHighEndGfx(d);
+            mHighEndGfx = ActivityManager.isHighEndGfx();
             if (!mHighEndGfx) {
                 mRecentsScrim.setBackground(null);
             } else if (mRecentsScrim.getBackground() instanceof BitmapDrawable) {
@@ -733,8 +732,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         if (mTransitionBg == null) {
             mTransitionBg = (View) findViewById(R.id.recents_transition_background);
 
-            IWindowManager wm = IWindowManager.Stub.asInterface(
-                    ServiceManager.getService(Context.WINDOW_SERVICE));
+            IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
             try {
                 if (!wm.hasSystemNavBar()) {
                     FrameLayout.LayoutParams lp =

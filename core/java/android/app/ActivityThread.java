@@ -42,6 +42,7 @@ import android.database.sqlite.SQLiteDebug;
 import android.database.sqlite.SQLiteDebug.DbStats;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.hardware.display.DisplayManager;
 import android.net.IConnectivityManager;
 import android.net.Proxy;
 import android.net.ProxyProperties;
@@ -79,7 +80,7 @@ import android.view.ViewManager;
 import android.view.ViewRootImpl;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.WindowManagerImpl;
+import android.view.WindowManagerGlobal;
 import android.renderscript.RenderScript;
 
 import com.android.internal.os.BinderInternal;
@@ -1055,7 +1056,7 @@ public final class ActivityThread {
         @Override
         public void dumpGfxInfo(FileDescriptor fd, String[] args) {
             dumpGraphicsInfo(fd);
-            WindowManagerImpl.getDefault().dumpGfxInfo(fd);
+            WindowManagerGlobal.getInstance().dumpGfxInfo(fd);
         }
 
         @Override
@@ -1569,7 +1570,7 @@ public final class ActivityThread {
 
         CompatibilityInfoHolder cih = new CompatibilityInfoHolder();
         cih.set(ci);
-        Display d = WindowManagerImpl.getDefault().makeCompatible(cih).getDefaultDisplay();
+        Display d = displayManager.getCompatibleDisplay(Display.DEFAULT_DISPLAY, cih);
         d.getMetrics(dm);
         //Slog.i("foo", "New metrics: w=" + metrics.widthPixels + " h="
         //        + metrics.heightPixels + " den=" + metrics.density
@@ -2641,7 +2642,7 @@ public final class ActivityThread {
             r.mPendingRemoveWindowManager.removeViewImmediate(r.mPendingRemoveWindow);
             IBinder wtoken = r.mPendingRemoveWindow.getWindowToken();
             if (wtoken != null) {
-                WindowManagerImpl.getDefault().closeAll(wtoken,
+                WindowManagerGlobal.getInstance().closeAll(wtoken,
                         r.activity.getClass().getName(), "Activity");
             }
         }
@@ -3176,7 +3177,7 @@ public final class ActivityThread {
             apk.mCompatibilityInfo.set(data.info);
         }
         handleConfigurationChanged(mConfiguration, data.info);
-        WindowManagerImpl.getDefault().reportNewConfiguration(mConfiguration);
+        WindowManagerGlobal.getInstance().reportNewConfiguration(mConfiguration);
     }
 
     private void deliverResults(ActivityClientRecord r, List<ResultInfo> results) {
@@ -3365,7 +3366,7 @@ public final class ActivityThread {
                     }
                 }
                 if (wtoken != null && r.mPendingRemoveWindow == null) {
-                    WindowManagerImpl.getDefault().closeAll(wtoken,
+                    WindowManagerGlobal.getInstance().closeAll(wtoken,
                             r.activity.getClass().getName(), "Activity");
                 }
                 r.activity.mDecor = null;
@@ -3377,7 +3378,7 @@ public final class ActivityThread {
                 // by the app will leak.  Well we try to warning them a lot
                 // about leaking windows, because that is a bug, so if they are
                 // using this recreate facility then they get to live with leaks.
-                WindowManagerImpl.getDefault().closeAll(token,
+                WindowManagerGlobal.getInstance().closeAll(token,
                         r.activity.getClass().getName(), "Activity");
             }
 
@@ -3805,7 +3806,7 @@ public final class ActivityThread {
         }
         
         // Cleanup hardware accelerated stuff
-        WindowManagerImpl.getDefault().trimLocalMemory();
+        WindowManagerGlobal.getInstance().trimLocalMemory();
 
         freeTextLayoutCachesIfNeeded(configDiff);
 
@@ -3945,7 +3946,7 @@ public final class ActivityThread {
     final void handleTrimMemory(int level) {
         if (DEBUG_MEMORY_TRIM) Slog.v(TAG, "Trimming memory to level: " + level);
 
-        final WindowManagerImpl windowManager = WindowManagerImpl.getDefault();
+        final WindowManagerGlobal windowManager = WindowManagerGlobal.getInstance();
         windowManager.startTrimMemory(level);
 
         ArrayList<ComponentCallbacks2> callbacks;
@@ -3958,7 +3959,7 @@ public final class ActivityThread {
             callbacks.get(i).onTrimMemory(level);
         }
 
-        windowManager.endTrimMemory();        
+        windowManager.endTrimMemory();
     }
 
     private void setupGraphicsSupport(LoadedApk info, File cacheDir) {
@@ -4011,8 +4012,7 @@ public final class ActivityThread {
             // Persistent processes on low-memory devices do not get to
             // use hardware accelerated drawing, since this can add too much
             // overhead to the process.
-            final Display display = WindowManagerImpl.getDefault().getDefaultDisplay();
-            if (!ActivityManager.isHighEndGfx(display)) {
+            if (!ActivityManager.isHighEndGfx()) {
                 HardwareRenderer.disable(false);
             }
         }

@@ -123,8 +123,7 @@ public class KeyguardViewManager implements KeyguardWindowController {
             if (!mNeedsInput) {
                 flags |= WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
             }
-            if (ActivityManager.isHighEndGfx(((WindowManager)mContext.getSystemService(
-                    Context.WINDOW_SERVICE)).getDefaultDisplay())) {
+            if (ActivityManager.isHighEndGfx()) {
                 flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
             }
             WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
@@ -132,8 +131,7 @@ public class KeyguardViewManager implements KeyguardWindowController {
                     flags, PixelFormat.TRANSLUCENT);
             lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
             lp.windowAnimations = com.android.internal.R.style.Animation_LockScreen;
-            if (ActivityManager.isHighEndGfx(((WindowManager)mContext.getSystemService(
-                    Context.WINDOW_SERVICE)).getDefaultDisplay())) {
+            if (ActivityManager.isHighEndGfx()) {
                 lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
                 lp.privateFlags |=
                         WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_HARDWARE_ACCELERATED;

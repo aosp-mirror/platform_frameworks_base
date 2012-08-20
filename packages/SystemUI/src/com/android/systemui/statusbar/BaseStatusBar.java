@@ -61,9 +61,9 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManagerGlobal;
 import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
-import android.view.WindowManagerImpl;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
@@ -127,17 +127,11 @@ public abstract class BaseStatusBar extends SystemUI implements
      */
     protected abstract void createAndAddWindows();
 
+    protected WindowManager mWindowManager;
+    protected IWindowManager mWindowManagerService;
     protected Display mDisplay;
-    private IWindowManager mWindowManager;
+
     private boolean mDeviceProvisioned = false;
-
-    public IWindowManager getWindowManager() {
-        return mWindowManager;
-    }
-
-    public Display getDisplay() {
-        return mDisplay;
-    }
 
     public IStatusBarService getStatusBarService() {
         return mBarService;
@@ -189,16 +183,14 @@ public abstract class BaseStatusBar extends SystemUI implements
     };
 
     public void start() {
-        mDisplay = ((WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE))
-                .getDefaultDisplay();
+        mWindowManager = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
+        mWindowManagerService = WindowManagerGlobal.getWindowManagerService();
+        mDisplay = mWindowManager.getDefaultDisplay();
 
         mProvisioningObserver.onChange(false); // set up
         mContext.getContentResolver().registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.DEVICE_PROVISIONED), true,
                 mProvisioningObserver);
-
-        mWindowManager = IWindowManager.Stub.asInterface(
-                ServiceManager.getService(Context.WINDOW_SERVICE));
 
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
@@ -436,7 +428,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         boolean firstScreenful = false;
         if (mRecentsPanel != null) {
             visible = mRecentsPanel.isShowing();
-            WindowManagerImpl.getDefault().removeView(mRecentsPanel);
+            mWindowManager.removeView(mRecentsPanel);
             if (visible) {
                 recentTasksList = mRecentsPanel.getRecentTasksList();
                 firstScreenful = mRecentsPanel.getFirstScreenful();
@@ -456,7 +448,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         WindowManager.LayoutParams lp = getRecentsLayoutParams(mRecentsPanel.getLayoutParams());
 
-        WindowManagerImpl.getDefault().addView(mRecentsPanel, lp);
+        mWindowManager.addView(mRecentsPanel, lp);
         mRecentsPanel.setBar(this);
         if (visible) {
             mRecentsPanel.show(true, false, recentTasksList, firstScreenful);
@@ -469,7 +461,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         boolean visible = false;
         if (mSearchPanelView != null) {
             visible = mSearchPanelView.isShowing();
-            WindowManagerImpl.getDefault().removeView(mSearchPanelView);
+            mWindowManager.removeView(mSearchPanelView);
         }
 
         // Provide SearchPanel with a temporary parent to allow layout params to work.
@@ -482,7 +474,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         WindowManager.LayoutParams lp = getSearchLayoutParams(mSearchPanelView.getLayoutParams());
 
-        WindowManagerImpl.getDefault().addView(mSearchPanelView, lp);
+        mWindowManager.addView(mSearchPanelView, lp);
         mSearchPanelView.setBar(this);
         if (visible) {
             mSearchPanelView.show(true, false);

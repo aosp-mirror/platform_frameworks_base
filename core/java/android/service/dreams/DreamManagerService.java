@@ -18,6 +18,7 @@ import android.provider.Settings;
 import android.util.Slog;
 import android.view.IWindowManager;
 import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
 
 /**
  *
@@ -44,8 +45,7 @@ public class DreamManagerService
     public DreamManagerService(Context context) {
         if (DEBUG) Slog.v(TAG, "DreamManagerService startup");
         mContext = context;
-        mIWindowManager = IWindowManager.Stub.asInterface(
-                ServiceManager.getService(Context.WINDOW_SERVICE));
+        mIWindowManager = WindowManagerGlobal.getWindowManagerService();
     }
 
     private void checkPermission(String permission) {

@@ -53,7 +53,6 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
-import android.view.WindowManagerImpl;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -123,8 +122,6 @@ public class TabletStatusBar extends BaseStatusBar implements
     int mNavIconWidth = -1;
     int mMenuNavIconWidth = -1;
     private int mMaxNotificationIcons = 5;
-
-    IWindowManager mWindowManager;
 
     TabletStatusBarView mStatusBarView;
     View mNotificationArea;
@@ -241,7 +238,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         lp.gravity = getStatusBarGravity();
         lp.setTitle("SystemBar");
         lp.packageName = mContext.getPackageName();
-        WindowManagerImpl.getDefault().addView(sb, lp);
+        mWindowManager.addView(sb, lp);
     }
 
     protected void addPanelWindows() {
@@ -306,7 +303,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         lp.windowAnimations = com.android.internal.R.style.Animation; // == no animation
 //        lp.windowAnimations = com.android.internal.R.style.Animation_ZoomButtons; // simple fade
 
-        WindowManagerImpl.getDefault().addView(mNotificationPanel, lp);
+        mWindowManager.addView(mNotificationPanel, lp);
 
         // Recents Panel
         mRecentTasksLoader = new RecentTasksLoader(context);
@@ -338,7 +335,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         lp.setTitle("InputMethodsPanel");
         lp.windowAnimations = R.style.Animation_RecentPanel;
 
-        WindowManagerImpl.getDefault().addView(mInputMethodsPanel, lp);
+        mWindowManager.addView(mInputMethodsPanel, lp);
 
         // Compatibility mode selector panel
         mCompatModePanel = (CompatModePanel) View.inflate(context,
@@ -361,7 +358,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         lp.setTitle("CompatModePanel");
         lp.windowAnimations = android.R.style.Animation_Dialog;
 
-        WindowManagerImpl.getDefault().addView(mCompatModePanel, lp);
+        mWindowManager.addView(mCompatModePanel, lp);
 
         mRecentButton.setOnTouchListener(mRecentsPanel);
 
@@ -380,7 +377,7 @@ public class TabletStatusBar extends BaseStatusBar implements
 
     private int getNotificationPanelHeight() {
         final Resources res = mContext.getResources();
-        final Display d = WindowManagerImpl.getDefault().getDefaultDisplay();
+        final Display d = mWindowManager.getDefaultDisplay();
         final Point size = new Point();
         d.getRealSize(size);
         return Math.max(res.getDimensionPixelSize(R.dimen.notification_panel_min_height), size.y);
@@ -395,8 +392,7 @@ public class TabletStatusBar extends BaseStatusBar implements
     protected void onConfigurationChanged(Configuration newConfig) {
         loadDimens();
         mNotificationPanelParams.height = getNotificationPanelHeight();
-        WindowManagerImpl.getDefault().updateViewLayout(mNotificationPanel,
-                mNotificationPanelParams);
+        mWindowManager.updateViewLayout(mNotificationPanel, mNotificationPanelParams);
         mRecentsPanel.updateValuesFromResources();
         mShowSearchHoldoff = mContext.getResources().getInteger(
                 R.integer.config_show_search_delay);
@@ -456,9 +452,6 @@ public class TabletStatusBar extends BaseStatusBar implements
     protected View makeStatusBarView() {
         final Context context = mContext;
 
-        mWindowManager = IWindowManager.Stub.asInterface(
-                ServiceManager.getService(Context.WINDOW_SERVICE));
-
         loadDimens();
 
         final TabletStatusBarView sb = (TabletStatusBarView)View.inflate(
@@ -470,7 +463,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         try {
             // Sanity-check that someone hasn't set up the config wrong and asked for a navigation
             // bar on a tablet that has only the system bar
-            if (mWindowManager.hasNavigationBar()) {
+            if (mWindowManagerService.hasNavigationBar()) {
                 Slog.e(TAG, "Tablet device cannot show navigation bar and system bar");
             }
         } catch (RemoteException ex) {
@@ -648,7 +641,7 @@ public class TabletStatusBar extends BaseStatusBar implements
                         | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
                         | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
                 (opaque ? PixelFormat.OPAQUE : PixelFormat.TRANSLUCENT));
-        if (ActivityManager.isHighEndGfx(mDisplay)) {
+        if (ActivityManager.isHighEndGfx()) {
             lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
         } else {
             lp.flags |= WindowManager.LayoutParams.FLAG_DIM_BEHIND;
@@ -681,7 +674,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         WindowManager.LayoutParams lp =
             (android.view.WindowManager.LayoutParams) mStatusBarView.getLayoutParams();
         lp.flags &= ~WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
-        WindowManagerImpl.getDefault().updateViewLayout(mStatusBarView, lp);
+        mWindowManager.updateViewLayout(mStatusBarView, lp);
     }
 
     @Override
@@ -690,7 +683,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         WindowManager.LayoutParams lp =
             (android.view.WindowManager.LayoutParams) mStatusBarView.getLayoutParams();
         lp.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
-        WindowManagerImpl.getDefault().updateViewLayout(mStatusBarView, lp);
+        mWindowManager.updateViewLayout(mStatusBarView, lp);
     }
 
     public int getStatusBarHeight() {
@@ -712,8 +705,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         }
         if (lp.height != height) {
             lp.height = height;
-            final WindowManager wm = WindowManagerImpl.getDefault();
-            wm.updateViewLayout(mStatusBarView, lp);
+            mWindowManager.updateViewLayout(mStatusBarView, lp);
         }
     }
 
@@ -1068,7 +1060,7 @@ public class TabletStatusBar extends BaseStatusBar implements
 
     private void notifyUiVisibilityChanged() {
         try {
-            mWindowManager.statusBarVisibilityChanged(mSystemUiVisibility);
+            mWindowManagerService.statusBarVisibilityChanged(mSystemUiVisibility);
         } catch (RemoteException ex) {
         }
     }
@@ -1160,12 +1152,12 @@ public class TabletStatusBar extends BaseStatusBar implements
                 | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
         lp.windowAnimations = com.android.internal.R.style.Animation_ZoomButtons; // simple fade
 
-        WindowManagerImpl.getDefault().addView(mCompatibilityHelpDialog, lp);
+        mWindowManager.addView(mCompatibilityHelpDialog, lp);
     }
 
     private void hideCompatibilityHelp() {
         if (mCompatibilityHelpDialog != null) {
-            WindowManagerImpl.getDefault().removeView(mCompatibilityHelpDialog);
+            mWindowManager.removeView(mCompatibilityHelpDialog);
             mCompatibilityHelpDialog = null;
         }
     }

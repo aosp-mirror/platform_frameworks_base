@@ -27,6 +27,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.IWindowManager;
 import android.view.Surface;
+import android.view.WindowManagerGlobal;
 
 /**
  * Provides helper functions for configuring the display rotation policy.
@@ -79,8 +80,7 @@ public final class RotationPolicy {
             @Override
             public void run() {
                 try {
-                    IWindowManager wm = IWindowManager.Stub.asInterface(
-                            ServiceManager.getService(Context.WINDOW_SERVICE));
+                    IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
                     if (enabled) {
                         wm.freezeRotation(-1);
                     } else {
@@ -107,8 +107,7 @@ public final class RotationPolicy {
             @Override
             public void run() {
                 try {
-                    IWindowManager wm = IWindowManager.Stub.asInterface(
-                            ServiceManager.getService(Context.WINDOW_SERVICE));
+                    IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
                     if (enabled) {
                         wm.freezeRotation(Surface.ROTATION_0);
                     } else {

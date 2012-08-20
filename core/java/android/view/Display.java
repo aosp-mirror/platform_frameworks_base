@@ -67,20 +67,16 @@ public final class Display {
     private int mCachedAppHeightCompat;
 
     /**
-     * The default Display id.
+     * The default Display id, which is the id of the built-in primary display
+     * assuming there is one.
      */
     public static final int DEFAULT_DISPLAY = 0;
 
     /**
-     * Uninitialized display.
-     * @hide
-     */
-    public static final int NO_DISPLAY = -1;
-
-    /**
      * Internal method to create a display.
      * Applications should use {@link android.view.WindowManager#getDefaultDisplay()}
-     * to get a display object for the default display.
+     * or {@link android.hardware.display.DisplayManager#getDisplay}
+     * to get a display object.
      *
      * @hide
      */
@@ -111,6 +107,31 @@ public final class Display {
             updateDisplayInfoLocked();
             outDisplayInfo.copyFrom(mDisplayInfo);
         }
+    }
+
+    /**
+     * Gets the display's layer stack.
+     *
+     * Each display has its own independent layer stack upon which surfaces
+     * are placed to be managed by surface flinger.
+     *
+     * @return The layer stack number.
+     * @hide
+     */
+    public int getLayerStack() {
+        // Note: This is the current convention but there is no requirement that
+        // the display id and layer stack id be the same.
+        return mDisplayId;
+    }
+
+    /**
+     * Gets the compatibility info used by this display instance.
+     *
+     * @return The compatibility info holder, or null if none is required.
+     * @hide
+     */
+    public CompatibilityInfoHolder getCompatibilityInfo() {
+        return mCompatibilityInfo;
     }
 
     /**

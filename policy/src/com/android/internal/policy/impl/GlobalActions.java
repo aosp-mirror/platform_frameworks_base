@@ -50,6 +50,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicy.WindowManagerFuncs;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
@@ -89,8 +90,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     private boolean mIsWaitingForEcmExit = false;
     private boolean mHasTelephony;
     private boolean mHasVibrator;
-
-    private IWindowManager mIWindowManager;
 
     /**
      * @param context everything needs a context :(
@@ -300,7 +299,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                     public void onPress() {
                         try {
                             ActivityManagerNative.getDefault().switchUser(user.id);
-                            getWindowManager().lockNow();
+                            WindowManagerGlobal.getWindowManagerService().lockNow();
                         } catch (RemoteException re) {
                             Log.e(TAG, "Couldn't switch user " + re);
                         }
@@ -872,13 +871,5 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         if (!mHasTelephony) {
             mAirplaneState = on ? ToggleAction.State.On : ToggleAction.State.Off;
         }
-    }
-
-    private IWindowManager getWindowManager() {
-        if (mIWindowManager == null) {
-            IBinder b = ServiceManager.getService(Context.WINDOW_SERVICE);
-            mIWindowManager = IWindowManager.Stub.asInterface(b);
-        }
-        return mIWindowManager;
     }
 }

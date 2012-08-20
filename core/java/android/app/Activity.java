@@ -74,7 +74,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.ViewManager;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.WindowManagerImpl;
+import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.AdapterView;
 
@@ -5018,7 +5018,9 @@ public class Activity extends ContextThemeWrapper
         mEmbeddedID = id;
         mLastNonConfigurationInstances = lastNonConfigurationInstances;
 
-        mWindow.setWindowManager(null, mToken, mComponent.flattenToString(),
+        mWindow.setWindowManager(
+                (WindowManager)context.getSystemService(Context.WINDOW_SERVICE),
+                mToken, mComponent.flattenToString(),
                 (info.flags & ActivityInfo.FLAG_HARDWARE_ACCELERATED) != 0);
         if (mParent != null) {
             mWindow.setContainer(mParent.getWindow());
@@ -5065,7 +5067,7 @@ public class Activity extends ContextThemeWrapper
         if (mStopped) {
             mStopped = false;
             if (mToken != null && mParent == null) {
-                WindowManagerImpl.getDefault().setStoppedState(mToken, false);
+                WindowManagerGlobal.getInstance().setStoppedState(mToken, false);
             }
 
             synchronized (mManagedCursors) {
@@ -5165,7 +5167,7 @@ public class Activity extends ContextThemeWrapper
             }
 
             if (mToken != null && mParent == null) {
-                WindowManagerImpl.getDefault().setStoppedState(mToken, true);
+                WindowManagerGlobal.getInstance().setStoppedState(mToken, true);
             }
             
             mFragments.dispatchStop();

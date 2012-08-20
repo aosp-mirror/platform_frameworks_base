@@ -33,6 +33,7 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewRootImpl;
 import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
 import android.view.animation.Transformation;
 import android.widget.FrameLayout;
 
@@ -96,7 +97,7 @@ public class UniverseBackground extends FrameLayout {
     public UniverseBackground(Context context) {
         super(context);
         setBackgroundColor(0xff000000);
-        mSession = ViewRootImpl.getWindowSession(context.getMainLooper());
+        mSession = WindowManagerGlobal.getWindowSession(context.getMainLooper());
         mContent = View.inflate(context, R.layout.universe, null);
         addView(mContent);
         mContent.findViewById(R.id.close).setOnClickListener(new View.OnClickListener() {
@@ -155,7 +156,7 @@ public class UniverseBackground extends FrameLayout {
         }
     }
 
-    public WindowManager.LayoutParams getLayoutParams(Display display) {
+    public WindowManager.LayoutParams getLayoutParams() {
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.TYPE_UNIVERSE_BACKGROUND,
@@ -165,7 +166,7 @@ public class UniverseBackground extends FrameLayout {
                     | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
                 PixelFormat.OPAQUE);
         // this will allow the window to run in an overlay on devices that support this
-        if (ActivityManager.isHighEndGfx(display)) {
+        if (ActivityManager.isHighEndGfx()) {
             lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
         }
         lp.setTitle("UniverseBackground");

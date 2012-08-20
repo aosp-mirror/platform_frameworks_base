@@ -480,10 +480,10 @@ public class SurfaceView extends View {
                     relayoutResult = mSession.relayout(
                         mWindow, mWindow.mSeq, mLayout, mWidth, mHeight,
                             visible ? VISIBLE : GONE,
-                            WindowManagerImpl.RELAYOUT_DEFER_SURFACE_DESTROY,
+                            WindowManagerGlobal.RELAYOUT_DEFER_SURFACE_DESTROY,
                             mWinFrame, mContentInsets,
                             mVisibleInsets, mConfiguration, mNewSurface);
-                    if ((relayoutResult&WindowManagerImpl.RELAYOUT_RES_FIRST_TIME) != 0) {
+                    if ((relayoutResult & WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME) != 0) {
                         mReportDrawNeeded = true;
                     }
 
@@ -516,8 +516,8 @@ public class SurfaceView extends View {
 
                     SurfaceHolder.Callback callbacks[] = null;
 
-                    final boolean surfaceChanged =
-                            (relayoutResult&WindowManagerImpl.RELAYOUT_RES_SURFACE_CHANGED) != 0;
+                    final boolean surfaceChanged = (relayoutResult
+                            & WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED) != 0;
                     if (mSurfaceCreated && (surfaceChanged || (!visible && visibleChanged))) {
                         mSurfaceCreated = false;
                         if (mSurface.isValid()) {

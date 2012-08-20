@@ -127,7 +127,7 @@ import android.view.SurfaceSession;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
-import android.view.WindowManagerImpl;
+import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicy;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManagerPolicy.FakeWindow;
@@ -2141,7 +2141,7 @@ public class WindowManagerService extends IWindowManager.Stub
             WindowManager.LayoutParams attrs, int viewVisibility, int displayId,
             Rect outContentInsets, InputChannel outInputChannel) {
         int res = mPolicy.checkAddPermission(attrs);
-        if (res != WindowManagerImpl.ADD_OKAY) {
+        if (res != WindowManagerGlobal.ADD_OKAY) {
             return res;
         }
 
@@ -2157,7 +2157,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (mWindowMap.containsKey(client.asBinder())) {
                 Slog.w(TAG, "Window " + client + " is already added");
-                return WindowManagerImpl.ADD_DUPLICATE_ADD;
+                return WindowManagerGlobal.ADD_DUPLICATE_ADD;
             }
 
             if (attrs.type >= FIRST_SUB_WINDOW && attrs.type <= LAST_SUB_WINDOW) {
@@ -2165,13 +2165,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (attachedWindow == null) {
                     Slog.w(TAG, "Attempted to add window with token that is not a window: "
                           + attrs.token + ".  Aborting.");
-                    return WindowManagerImpl.ADD_BAD_SUBWINDOW_TOKEN;
+                    return WindowManagerGlobal.ADD_BAD_SUBWINDOW_TOKEN;
                 }
                 if (attachedWindow.mAttrs.type >= FIRST_SUB_WINDOW
                         && attachedWindow.mAttrs.type <= LAST_SUB_WINDOW) {
                     Slog.w(TAG, "Attempted to add window with token that is a sub-window: "
                             + attrs.token + ".  Aborting.");
-                    return WindowManagerImpl.ADD_BAD_SUBWINDOW_TOKEN;
+                    return WindowManagerGlobal.ADD_BAD_SUBWINDOW_TOKEN;
                 }
             }
 
@@ -2182,22 +2182,22 @@ public class WindowManagerService extends IWindowManager.Stub
                         && attrs.type <= LAST_APPLICATION_WINDOW) {
                     Slog.w(TAG, "Attempted to add application window with unknown token "
                           + attrs.token + ".  Aborting.");
-                    return WindowManagerImpl.ADD_BAD_APP_TOKEN;
+                    return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
                 if (attrs.type == TYPE_INPUT_METHOD) {
                     Slog.w(TAG, "Attempted to add input method window with unknown token "
                           + attrs.token + ".  Aborting.");
-                    return WindowManagerImpl.ADD_BAD_APP_TOKEN;
+                    return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
                 if (attrs.type == TYPE_WALLPAPER) {
                     Slog.w(TAG, "Attempted to add wallpaper window with unknown token "
                           + attrs.token + ".  Aborting.");
-                    return WindowManagerImpl.ADD_BAD_APP_TOKEN;
+                    return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
                 if (attrs.type == TYPE_DREAM) {
                     Slog.w(TAG, "Attempted to add Dream window with unknown token "
                           + attrs.token + ".  Aborting.");
-                    return WindowManagerImpl.ADD_BAD_APP_TOKEN;
+                    return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
                 token = new WindowToken(this, attrs.token, -1, false);
                 addToken = true;
@@ -2207,35 +2207,35 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (atoken == null) {
                     Slog.w(TAG, "Attempted to add window with non-application token "
                           + token + ".  Aborting.");
-                    return WindowManagerImpl.ADD_NOT_APP_TOKEN;
+                    return WindowManagerGlobal.ADD_NOT_APP_TOKEN;
                 } else if (atoken.removed) {
                     Slog.w(TAG, "Attempted to add window with exiting application token "
                           + token + ".  Aborting.");
-                    return WindowManagerImpl.ADD_APP_EXITING;
+                    return WindowManagerGlobal.ADD_APP_EXITING;
                 }
                 if (attrs.type == TYPE_APPLICATION_STARTING && atoken.firstWindowDrawn) {
                     // No need for this guy!
                     if (localLOGV) Slog.v(
                             TAG, "**** NO NEED TO START: " + attrs.getTitle());
-                    return WindowManagerImpl.ADD_STARTING_NOT_NEEDED;
+                    return WindowManagerGlobal.ADD_STARTING_NOT_NEEDED;
                 }
             } else if (attrs.type == TYPE_INPUT_METHOD) {
                 if (token.windowType != TYPE_INPUT_METHOD) {
                     Slog.w(TAG, "Attempted to add input method window with bad token "
                             + attrs.token + ".  Aborting.");
-                      return WindowManagerImpl.ADD_BAD_APP_TOKEN;
+                      return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
             } else if (attrs.type == TYPE_WALLPAPER) {
                 if (token.windowType != TYPE_WALLPAPER) {
                     Slog.w(TAG, "Attempted to add wallpaper window with bad token "
                             + attrs.token + ".  Aborting.");
-                      return WindowManagerImpl.ADD_BAD_APP_TOKEN;
+                      return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
             } else if (attrs.type == TYPE_DREAM) {
                 if (token.windowType != TYPE_DREAM) {
                     Slog.w(TAG, "Attempted to add Dream window with bad token "
                             + attrs.token + ".  Aborting.");
-                      return WindowManagerImpl.ADD_BAD_APP_TOKEN;
+                      return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
             }
 
@@ -2247,13 +2247,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 // continue.
                 Slog.w(TAG, "Adding window client " + client.asBinder()
                         + " that is dead, aborting.");
-                return WindowManagerImpl.ADD_APP_EXITING;
+                return WindowManagerGlobal.ADD_APP_EXITING;
             }
 
             mPolicy.adjustWindowParamsLw(win.mAttrs);
 
             res = mPolicy.prepareAddWindowLw(win, attrs);
-            if (res != WindowManagerImpl.ADD_OKAY) {
+            if (res != WindowManagerGlobal.ADD_OKAY) {
                 return res;
             }
 
@@ -2269,7 +2269,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             // From now on, no exceptions or errors allowed!
 
-            res = WindowManagerImpl.ADD_OKAY;
+            res = WindowManagerGlobal.ADD_OKAY;
 
             origId = Binder.clearCallingIdentity();
 
@@ -2313,10 +2313,10 @@ public class WindowManagerService extends IWindowManager.Stub
             mPolicy.getContentInsetHintLw(attrs, outContentInsets);
 
             if (mInTouchMode) {
-                res |= WindowManagerImpl.ADD_FLAG_IN_TOUCH_MODE;
+                res |= WindowManagerGlobal.ADD_FLAG_IN_TOUCH_MODE;
             }
             if (win.mAppToken == null || !win.mAppToken.clientHidden) {
-                res |= WindowManagerImpl.ADD_FLAG_APP_VISIBLE;
+                res |= WindowManagerGlobal.ADD_FLAG_APP_VISIBLE;
             }
 
             mInputMonitor.setUpdateInputWindowsNeededLw();
@@ -2748,7 +2748,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             winAnimator.mSurfaceDestroyDeferred =
-                    (flags&WindowManagerImpl.RELAYOUT_DEFER_SURFACE_DESTROY) != 0;
+                    (flags&WindowManagerGlobal.RELAYOUT_DEFER_SURFACE_DESTROY) != 0;
 
             int attrChanges = 0;
             int flagChanges = 0;
@@ -2967,7 +2967,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             mLayoutNeeded = true;
-            win.mGivenInsetsPending = (flags&WindowManagerImpl.RELAYOUT_INSETS_PENDING) != 0;
+            win.mGivenInsetsPending = (flags&WindowManagerGlobal.RELAYOUT_INSETS_PENDING) != 0;
             if (assignLayers) {
                 assignLayersLocked(win.getWindowList());
             }
@@ -3010,10 +3010,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
         Binder.restoreCallingIdentity(origId);
 
-        return (inTouchMode ? WindowManagerImpl.RELAYOUT_RES_IN_TOUCH_MODE : 0)
-                | (toBeDisplayed ? WindowManagerImpl.RELAYOUT_RES_FIRST_TIME : 0)
-                | (surfaceChanged ? WindowManagerImpl.RELAYOUT_RES_SURFACE_CHANGED : 0)
-                | (animating ? WindowManagerImpl.RELAYOUT_RES_ANIMATING : 0);
+        return (inTouchMode ? WindowManagerGlobal.RELAYOUT_RES_IN_TOUCH_MODE : 0)
+                | (toBeDisplayed ? WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME : 0)
+                | (surfaceChanged ? WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED : 0)
+                | (animating ? WindowManagerGlobal.RELAYOUT_RES_ANIMATING : 0);
     }
 
     public void performDeferredDestroyWindow(Session session, IWindow client) {
@@ -9629,7 +9629,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             // TODO(multidisplay): rotation on main screen only.
             DisplayInfo displayInfo = getDefaultDisplayContent().getDisplayInfo();
-            mAnimator.mScreenRotationAnimation = new ScreenRotationAnimation(mContext,
+            mAnimator.mScreenRotationAnimation = new ScreenRotationAnimation(mContext, mDisplay,
                     mFxSession, inTransaction, displayInfo.logicalWidth, displayInfo.logicalHeight,
                     mDisplay.getRotation());
         }
@@ -9742,7 +9742,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (line != null) {
                 String[] toks = line.split("%");
                 if (toks != null && toks.length > 0) {
-                    mWatermark = new Watermark(mRealDisplayMetrics, mFxSession, toks);
+                    mWatermark = new Watermark(mDisplay, mRealDisplayMetrics, mFxSession, toks);
                 }
             }
         } catch (FileNotFoundException e) {

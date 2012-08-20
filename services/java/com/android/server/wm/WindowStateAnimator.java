@@ -474,24 +474,14 @@ class WindowStateAnimator {
         private final Point mSize = new Point();
         private final Rect mWindowCrop = new Rect();
         private boolean mShown = false;
-        private int mDisplayId;
-        private String mName = "Not named";
+        private int mLayerStack;
+        private String mName;
 
         public SurfaceTrace(SurfaceSession s,
-                       int pid, int displayId, int w, int h, int format, int flags) throws
-                       OutOfResourcesException {
-            super(s, pid, displayId, w, h, format, flags);
-            mSize.set(w, h);
-            mDisplayId = displayId;
-            Slog.v(SURFACE_TAG, "ctor: " + this + ". Called by "
-                    + Debug.getCallers(3));
-        }
-
-        public SurfaceTrace(SurfaceSession s,
-                       int pid, String name, int displayId, int w, int h, int format, int flags)
+                       int pid, String name, int layerStack, int w, int h, int format, int flags)
                    throws OutOfResourcesException {
-            super(s, pid, name, displayId, w, h, format, flags);
-            mName = name;
+            super(s, pid, name, layerStack, w, h, format, flags);
+            mName = name != null ? name : "Not named";
             mSize.set(w, h);
             Slog.v(SURFACE_TAG, "ctor: " + this + ". Called by "
                     + Debug.getCallers(3));
@@ -550,10 +540,10 @@ class WindowStateAnimator {
         }
 
         @Override
-        public void setDisplayId(int displayId) {
-            super.setDisplayId(displayId);
-            mDisplayId = displayId;
-            Slog.v(SURFACE_TAG, "setDisplayId: " + this + ". Called by " + Debug.getCallers(3));
+        public void setLayerStack(int layerStack) {
+            super.setLayerStack(layerStack);
+            mLayerStack = layerStack;
+            Slog.v(SURFACE_TAG, "setLayerStack: " + this + ". Called by " + Debug.getCallers(3));
         }
 
         @Override
@@ -597,7 +587,7 @@ class WindowStateAnimator {
         @Override
         public String toString() {
             return "Surface " + Integer.toHexString(System.identityHashCode(this)) + " "
-                    + mName + " (" + mDisplayId + "): shown=" + mShown + " layer=" + mLayer
+                    + mName + " (" + mLayerStack + "): shown=" + mShown + " layer=" + mLayer
                     + " alpha=" + mSurfaceTraceAlpha + " " + mPosition.x + "," + mPosition.y
                     + " " + mSize.x + "x" + mSize.y
                     + " crop=" + mWindowCrop.toShortString();
