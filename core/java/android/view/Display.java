@@ -382,5 +382,16 @@ public final class Display {
             mLastCachedAppSizeUpdate = now;
         }
     }
+
+    // For debugging purposes
+    @Override
+    public String toString() {
+        synchronized (this) {
+            updateDisplayInfoLocked();
+            mDisplayInfo.getAppMetrics(mTempMetrics, mCompatibilityInfo);
+            return "Display id " + mDisplayId + ": " + mDisplayInfo
+                    + ", " + mTempMetrics;
+        }
+    }
 }
 
