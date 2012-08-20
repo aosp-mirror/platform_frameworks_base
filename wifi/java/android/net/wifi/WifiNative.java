@@ -197,8 +197,22 @@ public class WifiNative {
         return null;
     }
 
+    /**
+     * Format of results:
+     * =================
+     * bssid=68:7f:74:d7:1b:6e
+     * freq=2412
+     * level=-43
+     * tsf=1344621975160944
+     * age=2623
+     * flags=[WPA2-PSK-CCMP][WPS][ESS]
+     * ssid=zubyb
+     *
+     * RANGE=ALL gets all scan results
+     * MASK=<N> see wpa_supplicant/src/common/wpa_ctrl.h for details
+     */
     public String scanResults() {
-        return doStringCommand("SCAN_RESULTS");
+        return doStringCommand("BSS RANGE=ALL MASK=0x1986");
     }
 
     public boolean startDriver() {
