@@ -8367,15 +8367,23 @@ public class WindowManagerService extends IWindowManager.Stub
             NN = mOpeningApps.size();
             for (i=0; i<NN; i++) {
                 AppWindowToken wtoken = mOpeningApps.get(i);
+                final AppWindowAnimator appAnimator = wtoken.mAppAnimator;
                 if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Now opening app" + wtoken);
-                wtoken.mAppAnimator.clearThumbnail();
+                appAnimator.clearThumbnail();
                 wtoken.reportedVisible = false;
                 wtoken.inPendingTransaction = false;
-                wtoken.mAppAnimator.animation = null;
+                appAnimator.animation = null;
                 setTokenVisibilityLocked(wtoken, animLp, true, transit, false);
                 wtoken.updateReportedVisibilityLocked();
                 wtoken.waitingToShow = false;
-                mAnimator.mAnimating |= wtoken.mAppAnimator.showAllWindowsLocked();
+
+                appAnimator.mAllAppWinAnimators.clear();
+                final int N = wtoken.allAppWindows.size();
+                for (int j = 0; j < N; j++) {
+                    appAnimator.mAllAppWinAnimators.add(wtoken.allAppWindows.get(j).mWinAnimator);
+                }
+                mAnimator.mAnimating |= appAnimator.showAllWindowsLocked();
+
                 if (animLp != null) {
                     int layer = -1;
                     for (int j=0; j<wtoken.windows.size(); j++) {
