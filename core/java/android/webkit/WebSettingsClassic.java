@@ -374,6 +374,21 @@ public class WebSettingsClassic extends WebSettings {
         synchronized(sLockForLocaleSettings) {
             locale = sLocale;
         }
+        return getDefaultUserAgentForLocale(mContext, locale);
+    }
+
+    /**
+     * Returns the default User-Agent used by a WebView.
+     * An instance of WebView could use a different User-Agent if a call
+     * is made to {@link WebSettings#setUserAgent(int)} or
+     * {@link WebSettings#setUserAgentString(String)}.
+     *
+     * @param context a Context object used to access application assets
+     * @param locale The Locale to use in the User-Agent string.
+     * @see WebViewFactoryProvider#getDefaultUserAgent(Context)
+     * @see WebView#getDefaultUserAgent(Context)
+     */
+    public static String getDefaultUserAgentForLocale(Context context, Locale locale) {
         StringBuffer buffer = new StringBuffer();
         // Add version
         final String version = Build.VERSION.RELEASE;
@@ -417,9 +432,9 @@ public class WebSettingsClassic extends WebSettings {
             buffer.append(" Build/");
             buffer.append(id);
         }
-        String mobile = mContext.getResources().getText(
+        String mobile = context.getResources().getText(
             com.android.internal.R.string.web_user_agent_target_content).toString();
-        final String base = mContext.getResources().getText(
+        final String base = context.getResources().getText(
                 com.android.internal.R.string.web_user_agent).toString();
         return String.format(base, buffer, mobile);
     }

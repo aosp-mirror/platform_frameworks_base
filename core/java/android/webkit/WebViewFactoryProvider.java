@@ -93,4 +93,14 @@ public interface WebViewFactoryProvider {
      * @return the singleton WebViewDatabase instance
      */
     WebViewDatabase getWebViewDatabase(Context context);
+
+    /**
+     * Returns the default User-Agent used by a WebView.
+     * An instance of WebView could use a different User-Agent if a call
+     * is made to {@link WebSettings#setUserAgent(int)} or
+     * {@link WebSettings#setUserAgentString(String)}.
+     *
+     * @param context a Context object used to access application assets
+     */
+    String getDefaultUserAgent(Context context);
 }
