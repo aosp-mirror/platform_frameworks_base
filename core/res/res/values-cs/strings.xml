@@ -224,6 +224,8 @@
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Umožňuje aplikaci provádět akce napříč různými uživateli zařízení. Škodlivé aplikace toto oprávnění mohou zneužít k obejití ochrany mezi uživateli."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"úplné oprávnění k interakcím napříč uživateli"</string>
     <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Povoluje všechny možné interakce napříč uživateli."</string>
+    <string name="permlab_manageUsers" msgid="1676150911672282428">"správa uživatelů"</string>
+    <string name="permdesc_manageUsers" msgid="8409306667645355638">"Umožňuje aplikacím spravovat uživatele v zařízení, včetně vytváření a mazání dotazů."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"získání podrobností o spuštěných aplikacích"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Umožňuje aplikaci získat podrobné informace o aktuálně a naposledy spuštěných úlohách. Škodlivé aplikace mohou odhalit soukromé informace o ostatních aplikacích."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"změna uspořádání spuštěných aplikací"</string>
@@ -1309,4 +1311,6 @@
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth Audio"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Hotovo"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Výstup médií"</string>
+    <!-- no translation found for display_manager_built_in_display (9042666544146043569) -->
+    <skip />
 </resources>

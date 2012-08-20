@@ -224,6 +224,10 @@
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Ivumela uhlelo lokusebenza ukwenza izenzo kubasebenzisi bonke kudivayisi. Izinhlelo zokusebenza ezingalungile zingasebenzisa lokhu ukwephula ukuvikela phakathi kwabasebenzisi."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"ilayisensi egcwele yokuhlanganyela kubasebenzisi"</string>
     <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Ivumela konke ukuhlanganyela phakathi kwabasebenzisi."</string>
+    <!-- no translation found for permlab_manageUsers (1676150911672282428) -->
+    <skip />
+    <!-- no translation found for permdesc_manageUsers (8409306667645355638) -->
+    <skip />
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"thola kabusha imininingwane yezinhlelo zokusebenza ezisebenzayo"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Ivumela uhlelo lokusebenza ukuthola kabusha ulwazi mayelana nezinto ezenzeka manje nezisanda kwenzeka. Izinhlelo zokusebenza ezingalungile zingathola imininingwane eyimfihlo mayelana nezinye izinhlelo zokusebenza."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"misa kabusha izinsiza ezisebenzayo"</string>
@@ -1309,4 +1313,6 @@
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Umsindo we-Bluetooth"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Qedile"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Okukhiphayo kwemidiya"</string>
+    <!-- no translation found for display_manager_built_in_display (9042666544146043569) -->
+    <skip />
 </resources>
