@@ -26947,6 +26947,7 @@ package android.webkit {
     method public synchronized boolean getUseWideViewPort();
     method public deprecated synchronized int getUserAgent();
     method public synchronized java.lang.String getUserAgentString();
+    method public static java.lang.String getDefaultUserAgent(android.content.Context);
     method public void setAllowContentAccess(boolean);
     method public void setAllowFileAccess(boolean);
     method public abstract void setAllowFileAccessFromFileURLs(boolean);

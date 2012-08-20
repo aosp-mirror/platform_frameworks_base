@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.content.Context;
 import android.os.Message;
 import android.os.Build;
 
@@ -1254,6 +1255,18 @@ public abstract class WebSettings {
      */
     public synchronized String getUserAgentString() {
         throw new MustOverrideException();
+    }
+
+    /**
+     * Returns the default User-Agent used by a WebView.
+     * An instance of WebView could use a different User-Agent if a call
+     * is made to {@link WebSettings#setUserAgent(int)} or
+     * {@link WebSettings#setUserAgentString(String)}.
+     *
+     * @param context a Context object used to access application assets
+     */
+    public static String getDefaultUserAgent(Context context) {
+        return WebView.getFactory().getDefaultUserAgent(context);
     }
 
     /**
