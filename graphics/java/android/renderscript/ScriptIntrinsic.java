@@ -28,8 +28,4 @@ public class ScriptIntrinsic extends Script {
     ScriptIntrinsic(int id, RenderScript rs) {
         super(id, rs);
     }
-
-    public void forEach(Allocation ain, Allocation aout) {
-        forEach(0, ain, aout, null);
-    }
 }
