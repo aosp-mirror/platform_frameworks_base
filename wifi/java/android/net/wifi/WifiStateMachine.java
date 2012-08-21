@@ -114,7 +114,7 @@ public class WifiStateMachine extends StateMachine {
     private final String mPrimaryDeviceType;
 
     /* Scan results handling */
-    private List<ScanResult> mScanResults;
+    private List<ScanResult> mScanResults = new ArrayList<ScanResult>();
     private static final Pattern scanResultPattern = Pattern.compile("\t+");
     private static final int SCAN_RESULT_CACHE_SIZE = 80;
     private final LruCache<String, ScanResult> mScanResultCache;
