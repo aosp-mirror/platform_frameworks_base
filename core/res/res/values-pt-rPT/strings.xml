@@ -224,10 +224,8 @@
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Permite que a aplicação execute ações com diferentes utilizadores no dispositivo. Aplicações maliciosas poderão utilizar esta opção para violar a proteção entre utilizadores."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"licença completa para interagir entre utilizadores"</string>
     <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Permite todas as interações possíveis entre utilizadores."</string>
-    <!-- no translation found for permlab_manageUsers (1676150911672282428) -->
-    <skip />
-    <!-- no translation found for permdesc_manageUsers (8409306667645355638) -->
-    <skip />
+    <string name="permlab_manageUsers" msgid="1676150911672282428">"gerir utilizadores"</string>
+    <string name="permdesc_manageUsers" msgid="8409306667645355638">"Permite às aplicações a gestão de utilizadores no dispositivo, incluindo a criação e eliminação de consultas."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"obter detalhes das aplicações em execução"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Permite à aplicação obter informações detalhadas sobre tarefas atualmente em execução e recentemente executadas. As aplicações maliciosas poderão descobrir informações privadas de outras aplicações."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"reordenar as aplicações em execução"</string>
@@ -1136,7 +1134,7 @@
     <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"O armazenamento USB foi removido. Insira um novo suporte de dados."</string>
     <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"Cartão SD removido. Insira um novo cartão."</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Não foi encontrada nenhuma atividade correspondente."</string>
-    <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"actualizar estatísticas de utilização de componentes"</string>
+    <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"atualizar estatísticas de utilização de componentes"</string>
     <string name="permdesc_pkgUsageStats" msgid="1106612424254277630">"Permite que a aplicação modifique as estatísticas de utilização de componentes recolhidas. Não se destina a utilização por aplicações normais."</string>
     <string name="permlab_copyProtectedData" msgid="4341036311211406692">"copiar conteúdo"</string>
     <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"Permite à aplicação invocar o serviço de contentor predefinido para copiar conteúdo. Não se destina a ser utilizado por aplicações normais."</string>
