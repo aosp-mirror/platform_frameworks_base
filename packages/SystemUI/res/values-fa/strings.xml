@@ -58,6 +58,12 @@
     <string name="label_view" msgid="6304565553218192990">"مشاهده"</string>
     <string name="always_use_device" msgid="1450287437017315906">"استفاده به صورت پیش‌فرض برای این دستگاه USB"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"استفاده به صورت پیش‌فرض برای این دستگاه USB"</string>
+    <!-- no translation found for usb_debugging_title (1114766024068112429) -->
+    <skip />
+    <!-- no translation found for usb_debugging_message (719863946976291180) -->
+    <skip />
+    <!-- no translation found for usb_debugging_always (4253099426793114693) -->
+    <skip />
     <string name="compat_mode_on" msgid="6623839244840638213">"بزرگنمایی برای پر کردن صفحه"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"گسترده کردن برای پر کردن صفحه"</string>
     <string name="compat_mode_help_header" msgid="7969493989397529910">"بزرگنمایی سازگاری"</string>

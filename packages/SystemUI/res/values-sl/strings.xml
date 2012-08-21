@@ -58,6 +58,9 @@
     <string name="label_view" msgid="6304565553218192990">"Prikaži"</string>
     <string name="always_use_device" msgid="1450287437017315906">"Privzeto uporabi za to napravo USB"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"Privzeto uporabi za ta dodatek USB"</string>
+    <string name="usb_debugging_title" msgid="1114766024068112429">"Ali dovolite odpravljanje težav s povezavo USB?"</string>
+    <string name="usb_debugging_message" msgid="719863946976291180">"Ali dovolite odpravljanje težav s povezavo USB v tem računalniku?"\n"Prstni odtis ključa RSA je"\n"<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_always" msgid="4253099426793114693">"Vedno dovoli za ta računalnik"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Povečava čez cel zaslon"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Raztegnitev čez zaslon"</string>
     <string name="compat_mode_help_header" msgid="7969493989397529910">"Razširitev združljivosti"</string>
