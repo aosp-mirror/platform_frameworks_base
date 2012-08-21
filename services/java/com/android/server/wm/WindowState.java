@@ -22,6 +22,9 @@ import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
+import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 
 import com.android.server.input.InputWindowHandle;
 
@@ -34,6 +37,7 @@ import android.graphics.RectF;
 import android.graphics.Region;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.Slog;
 import android.view.DisplayInfo;
 import android.view.Gravity;
@@ -257,6 +261,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     DisplayContent  mDisplayContent;
 
+    // UserId of the owner. Don't display windows of non-current user.
+    final int mOwnerUserId;
+
     WindowState(WindowManagerService service, Session s, IWindow c, WindowToken token,
            WindowState attachedWindow, int seq, WindowManager.LayoutParams a,
            int viewVisibility, final DisplayContent displayContent) {
@@ -264,6 +271,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mSession = s;
         mClient = c;
         mToken = token;
+        mOwnerUserId = UserHandle.getUserId(s.mUid);
         mAttrs.copyFrom(a);
         mViewVisibility = viewVisibility;
         mDisplayContent = displayContent;
@@ -894,6 +902,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     boolean showLw(boolean doAnimation, boolean requestAnim) {
+        if (isOtherUsersAppWindow()) {
+            Slog.w(TAG, "Current user " + mService.mCurrentUserId + " trying to display "
+                    + this + ", type " + mAttrs.type + ", belonging to " + mOwnerUserId);
+            return false;
+        }
         if (mPolicyVisibility && mPolicyVisibilityAfterAnim) {
             // Already showing.
             return false;
@@ -968,6 +981,16 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     @Override
     public boolean isAlive() {
         return mClient.asBinder().isBinderAlive();
+    }
+
+    boolean isOtherUsersAppWindow() {
+        final int type = mAttrs.type;
+        if ((mOwnerUserId != mService.mCurrentUserId)
+                && (type >= TYPE_BASE_APPLICATION) && (type <= LAST_APPLICATION_WINDOW)
+                && (type !=  TYPE_APPLICATION_STARTING)) {
+            return true;
+        }
+        return false;
     }
 
     private static void applyInsets(Region outRegion, Rect frame, Rect inset) {
