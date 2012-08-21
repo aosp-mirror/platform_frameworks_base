@@ -58,7 +58,7 @@ def DumpRenderTreeFinished(adb_cmd):
   """
 
   # pull /sdcard/webkit/running_test.txt, if the content is "#DONE", it's done
-  shell_cmd_str = adb_cmd + " shell cat /sdcard/0/webkit/running_test.txt"
+  shell_cmd_str = adb_cmd + " shell cat /sdcard/webkit/running_test.txt"
   adb_output = subprocess.Popen(shell_cmd_str, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
   return adb_output.strip() == "#DONE"
 
@@ -207,7 +207,7 @@ def main(options, args):
     # Get the running_test.txt
     logging.error("DumpRenderTree crashed, output:\n" + adb_output)
 
-    shell_cmd_str = adb_cmd + " shell cat /sdcard/0/webkit/running_test.txt"
+    shell_cmd_str = adb_cmd + " shell cat /sdcard/webkit/running_test.txt"
     crashed_test = ""
     while not crashed_test:
       (crashed_test, err) = subprocess.Popen(
@@ -244,10 +244,10 @@ def main(options, args):
     logging.error("Cannot create results dir: " + results_dir);
     sys.exit(1);
 
-  result_files = ["/sdcard/0/layout_tests_passed.txt",
-                  "/sdcard/0/layout_tests_failed.txt",
-                  "/sdcard/0/layout_tests_ignored.txt",
-                  "/sdcard/0/layout_tests_nontext.txt"]
+  result_files = ["/sdcard/layout_tests_passed.txt",
+                  "/sdcard/layout_tests_failed.txt",
+                  "/sdcard/layout_tests_ignored.txt",
+                  "/sdcard/layout_tests_nontext.txt"]
   for file in result_files:
     shell_cmd_str = adb_cmd + " pull " + file + " " + results_dir
     adb_output = subprocess.Popen(shell_cmd_str, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
