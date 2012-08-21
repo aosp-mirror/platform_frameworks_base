@@ -66,6 +66,7 @@ public class PanelView extends FrameLayout {
     private final Runnable mStopAnimator = new Runnable() { public void run() {
         if (mTimeAnimator.isStarted()) {
             mTimeAnimator.end();
+            mRubberbanding = false;
         }
     }};
 
