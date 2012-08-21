@@ -42,6 +42,7 @@ import android.media.AudioManager;
 import android.media.IAudioService;
 import android.os.BatteryManager;
 import android.os.Bundle;
+import android.os.FactoryTest;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
@@ -172,6 +173,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int LONG_PRESS_POWER_NOTHING = 0;
     static final int LONG_PRESS_POWER_GLOBAL_ACTIONS = 1;
     static final int LONG_PRESS_POWER_SHUT_OFF = 2;
+    static final int LONG_PRESS_POWER_SHUT_OFF_NO_CONFIRM = 3;
 
     // These need to match the documentation/constant in
     // core/res/res/values/config.xml
@@ -716,8 +718,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         public void run() {
             // The context isn't read
             if (mLongPressOnPowerBehavior < 0) {
-                mLongPressOnPowerBehavior = mContext.getResources().getInteger(
-                        com.android.internal.R.integer.config_longPressOnPowerBehavior);
+                if (FactoryTest.isLongPressOnPowerOffEnabled()) {
+                    mLongPressOnPowerBehavior = LONG_PRESS_POWER_SHUT_OFF_NO_CONFIRM;
+                } else {
+                    mLongPressOnPowerBehavior = mContext.getResources().getInteger(
+                            com.android.internal.R.integer.config_longPressOnPowerBehavior);
+                }
             }
             switch (mLongPressOnPowerBehavior) {
             case LONG_PRESS_POWER_NOTHING:
@@ -729,10 +735,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 showGlobalActionsDialog();
                 break;
             case LONG_PRESS_POWER_SHUT_OFF:
+            case LONG_PRESS_POWER_SHUT_OFF_NO_CONFIRM:
                 mPowerKeyHandled = true;
                 performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
                 sendCloseSystemWindows(SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS);
-                mWindowManagerFuncs.shutdown();
+                mWindowManagerFuncs.shutdown(
+                        mLongPressOnPowerBehavior == LONG_PRESS_POWER_SHUT_OFF);
                 break;
             }
         }
