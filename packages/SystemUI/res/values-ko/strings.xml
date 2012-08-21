@@ -58,6 +58,12 @@
     <string name="label_view" msgid="6304565553218192990">"보기"</string>
     <string name="always_use_device" msgid="1450287437017315906">"이 USB 기기에 기본값으로 사용"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"이 USB 액세서리에 기본값으로 사용"</string>
+    <!-- no translation found for usb_debugging_title (1114766024068112429) -->
+    <skip />
+    <!-- no translation found for usb_debugging_message (719863946976291180) -->
+    <skip />
+    <!-- no translation found for usb_debugging_always (4253099426793114693) -->
+    <skip />
     <string name="compat_mode_on" msgid="6623839244840638213">"전체화면 모드로 확대"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"전체화면 모드로 확대"</string>
     <string name="compat_mode_help_header" msgid="7969493989397529910">"호환성 확대/축소"</string>

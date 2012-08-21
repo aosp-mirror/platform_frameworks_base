@@ -25,7 +25,7 @@
     <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Показать уведомления"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Удаление из списка"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"О приложении"</string>
-    <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Нет данных"</string>
+    <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"В последнее время вы не запускали приложения."</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Закрыть недавние приложения"</string>
   <plurals name="status_bar_accessibility_recent_apps">
     <item quantity="one" msgid="5854176083865845541">"Недавних приложений: 1"</item>
@@ -58,6 +58,12 @@
     <string name="label_view" msgid="6304565553218192990">"Просмотр"</string>
     <string name="always_use_device" msgid="1450287437017315906">"Использовать по умолчанию для этого USB-устройства"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"Использовать по умолчанию для этого USB-аксессуара"</string>
+    <!-- no translation found for usb_debugging_title (1114766024068112429) -->
+    <skip />
+    <!-- no translation found for usb_debugging_message (719863946976291180) -->
+    <skip />
+    <!-- no translation found for usb_debugging_always (4253099426793114693) -->
+    <skip />
     <string name="compat_mode_on" msgid="6623839244840638213">"Подогнать по размерам экрана"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Растянуть на весь экран"</string>
     <string name="compat_mode_help_header" msgid="7969493989397529910">"Масштаб и совместимость"</string>

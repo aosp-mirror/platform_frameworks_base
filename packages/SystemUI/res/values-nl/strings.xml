@@ -58,6 +58,9 @@
     <string name="label_view" msgid="6304565553218192990">"Weergeven"</string>
     <string name="always_use_device" msgid="1450287437017315906">"Standaard gebruiken voor dit USB-apparaat"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"Standaard gebruiken voor dit USB-accessoire"</string>
+    <string name="usb_debugging_title" msgid="1114766024068112429">"USB-foutopsporing toestaan?"</string>
+    <string name="usb_debugging_message" msgid="719863946976291180">"USB-foutopsporing toestaan vanaf deze computer?"\n"Uw RSA-sleutelvingerafdruk is"\n"<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_always" msgid="4253099426793114693">"Deze computer altijd toestaan"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom om scherm te vullen"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Rek uit v. schermvulling"</string>
     <string name="compat_mode_help_header" msgid="7969493989397529910">"Compatibiliteitszoom"</string>

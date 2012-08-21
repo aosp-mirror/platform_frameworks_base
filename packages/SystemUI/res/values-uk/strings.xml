@@ -58,6 +58,9 @@
     <string name="label_view" msgid="6304565553218192990">"Переглянути"</string>
     <string name="always_use_device" msgid="1450287437017315906">"Використовувати за умовчанням для пристрою USB"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"Використовувати за умовчанням для аксесуара USB"</string>
+    <string name="usb_debugging_title" msgid="1114766024068112429">"Дозволити налагодження USB?"</string>
+    <string name="usb_debugging_message" msgid="719863946976291180">"Дозволити налагодження USB на цьому комп’ютері?"\n"Цифровий відбиток вашого ключа RSA:"\n"<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_always" msgid="4253099426793114693">"Завжди дозволяти цьому комп’ютеру"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Масштабув. на весь екран"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Розтягнути на весь екран"</string>
     <string name="compat_mode_help_header" msgid="7969493989397529910">"Масштабування для сумісності"</string>

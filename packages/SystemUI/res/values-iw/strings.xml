@@ -58,6 +58,9 @@
     <string name="label_view" msgid="6304565553218192990">"הצג"</string>
     <string name="always_use_device" msgid="1450287437017315906">"השתמש כברירת מחדל עבור מכשיר USB זה"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"השתמש כברירת מחדל עבור אביזר USB זה"</string>
+    <string name="usb_debugging_title" msgid="1114766024068112429">"האם לאפשר ניקוי באגים ב-USB?"</string>
+    <string name="usb_debugging_message" msgid="719863946976291180">"האם להרשות ניקוי באגים ב-USB ממחשב זה?"\n"טביעת האצבע של מפתח ה-RSA שלך היא"\n"<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_always" msgid="4253099426793114693">"הרשה תמיד במחשב זה"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"הגדל תצוגה כדי למלא את המסך"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"מתח כדי למלא את המסך"</string>
     <string name="compat_mode_help_header" msgid="7969493989397529910">"שינוי מרחק מתצוגה לצורך תאימות"</string>

@@ -58,6 +58,12 @@
     <string name="label_view" msgid="6304565553218192990">"Afficher"</string>
     <string name="always_use_device" msgid="1450287437017315906">"Utiliser par défaut pour ce périphérique USB"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"Utiliser par défaut pour cet accessoire USB"</string>
+    <!-- no translation found for usb_debugging_title (1114766024068112429) -->
+    <skip />
+    <!-- no translation found for usb_debugging_message (719863946976291180) -->
+    <skip />
+    <!-- no translation found for usb_debugging_always (4253099426793114693) -->
+    <skip />
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoomer pour remplir l\'écran"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Étirer pour remplir l\'écran"</string>
     <string name="compat_mode_help_header" msgid="7969493989397529910">"Zoom de compatibilité"</string>
@@ -135,7 +141,7 @@
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Données désactivées"</string>
     <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Vous avez atteint le plafond de consommation de données spécifié."\n\n"Si vous utilisez des données supplémentaires, celles-ci pourront être facturées par l\'opérateur."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Réactiver connexion données"</string>
-    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Aucune connexion"</string>
+    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Aucune connexion Internet"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Connecté au Wi-Fi"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Recherche de GPS..."</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Position définie par GPS"</string>
