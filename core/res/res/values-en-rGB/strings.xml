@@ -224,10 +224,8 @@
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Allows the app to perform actions across different users on the device. Malicious apps may use this to violate the protection between users."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"full license to interact across users"</string>
     <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Allows all possible interactions across users."</string>
-    <!-- no translation found for permlab_manageUsers (1676150911672282428) -->
-    <skip />
-    <!-- no translation found for permdesc_manageUsers (8409306667645355638) -->
-    <skip />
+    <string name="permlab_manageUsers" msgid="1676150911672282428">"manage users"</string>
+    <string name="permdesc_manageUsers" msgid="8409306667645355638">"Allows apps to manage users on the device, including query, creation and deletion."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"retrieve details of running apps"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Allows the app to retrieve detailed information about currently and recently running tasks. Malicious apps may discover private information about other apps."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"re-order running apps"</string>
@@ -1313,6 +1311,5 @@
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth audio"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Done"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Media output"</string>
-    <!-- no translation found for display_manager_built_in_display (9042666544146043569) -->
-    <skip />
+    <string name="display_manager_built_in_display" msgid="9042666544146043569">"Built-in Screen"</string>
 </resources>

@@ -224,10 +224,8 @@
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Permet à l\'application d\'effectuer des actions entre les différents utilisateurs de l\'appareil. Les applications malveillantes peuvent utiliser cette autorisation pour passer outre la protection entre les utilisateurs."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"autorisation totale d\'interagir entre les utilisateurs"</string>
     <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Permet toutes les interactions possibles entre les utilisateurs."</string>
-    <!-- no translation found for permlab_manageUsers (1676150911672282428) -->
-    <skip />
-    <!-- no translation found for permdesc_manageUsers (8409306667645355638) -->
-    <skip />
+    <string name="permlab_manageUsers" msgid="1676150911672282428">"Gérer les utilisateurs"</string>
+    <string name="permdesc_manageUsers" msgid="8409306667645355638">"Permet aux applications de gérer les utilisateurs de l\'appareil, y compris la recherche, la création et la suppression d\'utilisateurs."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"récupérer les détails des applications en cours d\'exécution"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Permet à l\'application de récupérer des informations détaillées sur les tâches en cours d\'exécution ou récemment exécutées. Des applications malveillantes peuvent utiliser cette fonctionnalité pour obtenir des informations confidentielles relatives à d\'autres applications."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"réorganiser les applications en cours d\'exécution"</string>
