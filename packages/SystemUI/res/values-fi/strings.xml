@@ -58,6 +58,9 @@
     <string name="label_view" msgid="6304565553218192990">"Näytä"</string>
     <string name="always_use_device" msgid="1450287437017315906">"Käytä oletuksena tällä USB-laitteella"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"Käytä oletuksena tällä USB-lisälaitteella"</string>
+    <string name="usb_debugging_title" msgid="1114766024068112429">"Sallitaanko USB-vianetsintä?"</string>
+    <string name="usb_debugging_message" msgid="719863946976291180">"Sallitaanko USB-vianetsintä tällä tietokoneella?"\n"RSA-avaimesi sormenjälki on"\n"<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_always" msgid="4253099426793114693">"Salli vianetsintä tällä tietokoneella aina"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoomaa koko näyttöön"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Venytä koko näyttöön"</string>
     <string name="compat_mode_help_header" msgid="7969493989397529910">"Yhteensopivuuszoomaus"</string>
