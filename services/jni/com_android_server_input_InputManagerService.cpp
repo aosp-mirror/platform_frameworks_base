@@ -63,7 +63,7 @@ static const float POINTER_SPEED_EXPONENT = 1.0f / 4;
 static struct {
     jmethodID notifyConfigurationChanged;
     jmethodID notifyInputDevicesChanged;
-    jmethodID notifyLidSwitchChanged;
+    jmethodID notifySwitch;
     jmethodID notifyInputChannelBroken;
     jmethodID notifyANR;
     jmethodID filterInputEvent;
@@ -578,14 +578,9 @@ void NativeInputManager::notifySwitch(nsecs_t when, int32_t switchCode,
 
     JNIEnv* env = jniEnv();
 
-    switch (switchCode) {
-    case SW_LID:
-        // When switch value is set indicates lid is closed.
-        env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyLidSwitchChanged,
-                when, switchValue == 0 /*lidOpen*/);
-        checkAndClearExceptionFromCallback(env, "notifyLidSwitchChanged");
-        break;
-    }
+    env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifySwitch,
+            when, switchCode, switchValue);
+    checkAndClearExceptionFromCallback(env, "notifySwitch");
 }
 
 void NativeInputManager::notifyConfigurationChanged(nsecs_t when) {
@@ -1410,8 +1405,8 @@ int register_android_server_InputManager(JNIEnv* env) {
     GET_METHOD_ID(gServiceClassInfo.notifyInputDevicesChanged, clazz,
             "notifyInputDevicesChanged", "([Landroid/view/InputDevice;)V");
 
-    GET_METHOD_ID(gServiceClassInfo.notifyLidSwitchChanged, clazz,
-            "notifyLidSwitchChanged", "(JZ)V");
+    GET_METHOD_ID(gServiceClassInfo.notifySwitch, clazz,
+            "notifySwitch", "(JII)V");
 
     GET_METHOD_ID(gServiceClassInfo.notifyInputChannelBroken, clazz,
             "notifyInputChannelBroken", "(Lcom/android/server/input/InputWindowHandle;)V");
