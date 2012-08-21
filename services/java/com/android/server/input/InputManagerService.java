@@ -1218,8 +1218,12 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
     }
 
     // Native callback.
-    private void notifyLidSwitchChanged(long whenNanos, boolean lidOpen) {
-        mCallbacks.notifyLidSwitchChanged(whenNanos, lidOpen);
+    private void notifySwitch(long whenNanos, int switchCode, int switchValue) {
+        switch (switchCode) {
+            case SW_LID:
+                mCallbacks.notifyLidSwitchChanged(whenNanos, switchValue == 0);
+                break;
+        }
     }
 
     // Native callback.
