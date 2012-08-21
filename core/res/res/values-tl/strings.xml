@@ -224,10 +224,8 @@
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Binibigyang-daan ang app upang magsagawa ng mga pagkilos sa kabuuan ng iba\'t ibang mga user sa device. Maaari itong gamitin ng nakakahamak na apps upang lumabag sa proteksyon sa pagitan ng mga user."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"ganap na lisensya upang makipag-ugnayan sa kabuuan ng mga user"</string>
     <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Pinapayagan ang lahat ng posibleng pakikipag-ugnayan sa kabuuan ng mga user."</string>
-    <!-- no translation found for permlab_manageUsers (1676150911672282428) -->
-    <skip />
-    <!-- no translation found for permdesc_manageUsers (8409306667645355638) -->
-    <skip />
+    <string name="permlab_manageUsers" msgid="1676150911672282428">"pamahalaan ang mga user"</string>
+    <string name="permdesc_manageUsers" msgid="8409306667645355638">"Binibigyang-daan ang apps na mamahala ng mga user sa device, kabilang ang query, paglikha at pagtanggal."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"bawiin ang mga detalye ng gumaganang apps"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Binibigyang-daan ang app na bawiin ang detalyadong impormasyon tungkol sa mga kasalukuyan at kamakailang gumaganang gawain. Maaaring makatuklas ang nakakahamak na apps ng pribadong impormasyon tungkol sa iba pang apps."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"muling isaayos ang tumatakbong apps"</string>
