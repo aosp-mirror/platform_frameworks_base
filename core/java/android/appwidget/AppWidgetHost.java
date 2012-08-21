@@ -29,6 +29,7 @@ import android.os.ServiceManager;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.widget.RemoteViews;
+import android.widget.RemoteViews.OnClickHandler;
 
 import com.android.internal.appwidget.IAppWidgetHost;
 import com.android.internal.appwidget.IAppWidgetService;
@@ -83,7 +84,7 @@ public class AppWidgetHost {
         public UpdateHandler(Looper looper) {
             super(looper);
         }
-        
+
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case HANDLE_UPDATE: {
@@ -105,16 +106,25 @@ public class AppWidgetHost {
             }
         }
     }
-    
+
     Handler mHandler;
 
     int mHostId;
     Callbacks mCallbacks = new Callbacks();
     final HashMap<Integer,AppWidgetHostView> mViews = new HashMap<Integer, AppWidgetHostView>();
+    private OnClickHandler mOnClickHandler;
 
     public AppWidgetHost(Context context, int hostId) {
+        this(context, hostId, null);
+    }
+
+    /**
+     * @hide
+     */
+    public AppWidgetHost(Context context, int hostId, OnClickHandler handler) {
         mContext = context;
         mHostId = hostId;
+        mOnClickHandler = handler;
         mHandler = new UpdateHandler(context.getMainLooper());
         mDisplayMetrics = context.getResources().getDisplayMetrics();
         synchronized (sServiceLock) {
@@ -132,7 +142,7 @@ public class AppWidgetHost {
     public void startListening() {
         int[] updatedIds;
         ArrayList<RemoteViews> updatedViews = new ArrayList<RemoteViews>();
-        
+
         try {
             if (mPackageName == null) {
                 mPackageName = mContext.getPackageName();
@@ -180,7 +190,7 @@ public class AppWidgetHost {
     }
 
     /**
-     * Stop listening to changes for this AppWidget.  
+     * Stop listening to changes for this AppWidget.
      */
     public void deleteAppWidgetId(int appWidgetId) {
         synchronized (mViews) {
@@ -235,6 +245,7 @@ public class AppWidgetHost {
     public final AppWidgetHostView createView(Context context, int appWidgetId,
             AppWidgetProviderInfo appWidget) {
         AppWidgetHostView view = onCreateView(context, appWidgetId, appWidget);
+        view.setOnClickHandler(mOnClickHandler);
         view.setAppWidget(appWidgetId, appWidget);
         synchronized (mViews) {
             mViews.put(appWidgetId, view);
@@ -246,6 +257,7 @@ public class AppWidgetHost {
             throw new RuntimeException("system server dead?", e);
         }
         view.updateAppWidget(views);
+
         return view;
     }
 
@@ -255,7 +267,7 @@ public class AppWidgetHost {
      */
     protected AppWidgetHostView onCreateView(Context context, int appWidgetId,
             AppWidgetProviderInfo appWidget) {
-        return new AppWidgetHostView(context);
+        return new AppWidgetHostView(context, mOnClickHandler);
     }
 
     /**
@@ -265,7 +277,7 @@ public class AppWidgetHost {
         AppWidgetHostView v;
 
         // Convert complex to dp -- we are getting the AppWidgetProviderInfo from the
-        // AppWidgetService, which doesn't have our context, hence we need to do the 
+        // AppWidgetService, which doesn't have our context, hence we need to do the
         // conversion here.
         appWidget.minWidth =
             TypedValue.complexToDimensionPixelSize(appWidget.minWidth, mDisplayMetrics);

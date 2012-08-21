@@ -44,6 +44,7 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.RemoteViews;
+import android.widget.RemoteViews.OnClickHandler;
 import android.widget.RemoteViewsAdapter.RemoteAdapterConnectionCallback;
 import android.widget.TextView;
 
@@ -83,7 +84,8 @@ public class AppWidgetHostView extends FrameLayout {
     long mFadeStartTime = -1;
     Bitmap mOld;
     Paint mOldPaint = new Paint();
-    
+    private OnClickHandler mOnClickHandler;
+
     /**
      * Create a host view.  Uses default fade animations.
      */
@@ -92,9 +94,17 @@ public class AppWidgetHostView extends FrameLayout {
     }
 
     /**
+     * @hide
+     */
+    public AppWidgetHostView(Context context, OnClickHandler handler) {
+        this(context, android.R.anim.fade_in, android.R.anim.fade_out);
+        mOnClickHandler = handler;
+    }
+
+    /**
      * Create a host view. Uses specified animations when pushing
      * {@link #updateAppWidget(RemoteViews)}.
-     * 
+     *
      * @param animationIn Resource ID of in animation to use
      * @param animationOut Resource ID of out animation to use
      */
@@ -106,6 +116,17 @@ public class AppWidgetHostView extends FrameLayout {
         // We want to segregate the view ids within AppWidgets to prevent
         // problems when those ids collide with view ids in the AppWidgetHost.
         setIsRootNamespace(true);
+    }
+
+    /**
+     * Pass the given handler to RemoteViews when updating this widget. Unless this
+     * is done immediatly after construction, a call to {@link #updateAppWidget(RemoteViews)}
+     * should be made.
+     * @param handler
+     * @hide
+     */
+    public void setOnClickHandler(OnClickHandler handler) {
+        mOnClickHandler = handler;
     }
 
     /**
@@ -177,7 +198,7 @@ public class AppWidgetHostView extends FrameLayout {
     public int getAppWidgetId() {
         return mAppWidgetId;
     }
-    
+
     public AppWidgetProviderInfo getAppWidgetInfo() {
         return mInfo;
     }
@@ -281,12 +302,13 @@ public class AppWidgetHostView extends FrameLayout {
      * AppWidget provider. Will animate into these new views as needed
      */
     public void updateAppWidget(RemoteViews remoteViews) {
+
         if (LOGD) Log.d(TAG, "updateAppWidget called mOld=" + mOld);
 
         boolean recycled = false;
         View content = null;
         Exception exception = null;
-        
+
         // Capture the old view into a bitmap so we can do the crossfade.
         if (CROSSFADE) {
             if (mFadeStartTime < 0) {
@@ -305,7 +327,7 @@ public class AppWidgetHostView extends FrameLayout {
                 }
             }
         }
-        
+
         if (remoteViews == null) {
             if (mViewMode == VIEW_MODE_DEFAULT) {
                 // We've already done this -- nothing to do.
@@ -324,7 +346,7 @@ public class AppWidgetHostView extends FrameLayout {
             // layout matches, try recycling it
             if (content == null && layoutId == mLayoutId) {
                 try {
-                    remoteViews.reapply(mContext, mView);
+                    remoteViews.reapply(mContext, mView, mOnClickHandler);
                     content = mView;
                     recycled = true;
                     if (LOGD) Log.d(TAG, "was able to recycled existing layout");
@@ -332,11 +354,11 @@ public class AppWidgetHostView extends FrameLayout {
                     exception = e;
                 }
             }
-            
+
             // Try normal RemoteView inflation
             if (content == null) {
                 try {
-                    content = remoteViews.apply(mContext, this);
+                    content = remoteViews.apply(mContext, this, mOnClickHandler);
                     if (LOGD) Log.d(TAG, "had to inflate new layout");
                 } catch (RuntimeException e) {
                     exception = e;
@@ -346,7 +368,7 @@ public class AppWidgetHostView extends FrameLayout {
             mLayoutId = layoutId;
             mViewMode = VIEW_MODE_CONTENT;
         }
-        
+
         if (content == null) {
             if (mViewMode == VIEW_MODE_ERROR) {
                 // We've already done this -- nothing to do.
@@ -356,7 +378,7 @@ public class AppWidgetHostView extends FrameLayout {
             content = getErrorView();
             mViewMode = VIEW_MODE_ERROR;
         }
-        
+
         if (!recycled) {
             prepareView(content);
             addView(content);
@@ -455,7 +477,7 @@ public class AppWidgetHostView extends FrameLayout {
             return super.drawChild(canvas, child, drawingTime);
         }
     }
-    
+
     /**
      * Prepare the given view to be shown. This might include adjusting
      * {@link FrameLayout.LayoutParams} before inserting.
@@ -471,7 +493,7 @@ public class AppWidgetHostView extends FrameLayout {
         requested.gravity = Gravity.CENTER;
         view.setLayoutParams(requested);
     }
-    
+
     /**
      * Inflate and return the default layout requested by AppWidget provider.
      */
@@ -481,7 +503,7 @@ public class AppWidgetHostView extends FrameLayout {
         }
         View defaultView = null;
         Exception exception = null;
-        
+
         try {
             if (mInfo != null) {
                 Context theirContext = mContext.createPackageContext(
@@ -500,19 +522,19 @@ public class AppWidgetHostView extends FrameLayout {
         } catch (RuntimeException e) {
             exception = e;
         }
-        
+
         if (exception != null) {
             Log.w(TAG, "Error inflating AppWidget " + mInfo + ": " + exception.toString());
         }
-        
+
         if (defaultView == null) {
             if (LOGD) Log.d(TAG, "getDefaultView couldn't find any view, so inflating error");
             defaultView = getErrorView();
         }
-        
+
         return defaultView;
     }
-    
+
     /**
      * Inflate and return a view that represents an error state.
      */
