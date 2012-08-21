@@ -1302,7 +1302,7 @@ class WindowStateAnimator {
     boolean performShowLocked() {
         if (mWin.isOtherUsersAppWindow()) {
             Slog.w(TAG, "Current user " + mService.mCurrentUserId + " trying to display "
-                    + this + ", type " + mWin.mAttrs.type + ", belonging to " + mWin.mOwnerUserId);
+                    + this + ", type " + mWin.mAttrs.type + ", belonging to " + mWin.mOwnerUid);
             return false;
         }
         if (DEBUG_VISIBILITY || (DEBUG_STARTING_WINDOW &&

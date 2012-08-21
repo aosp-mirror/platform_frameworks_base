@@ -36,6 +36,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
 import android.os.IBinder;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Slog;
@@ -261,8 +262,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     DisplayContent  mDisplayContent;
 
-    // UserId of the owner. Don't display windows of non-current user.
-    final int mOwnerUserId;
+    // UserId and appId of the owner. Don't display windows of non-current user.
+    final int mOwnerUid;
 
     WindowState(WindowManagerService service, Session s, IWindow c, WindowToken token,
            WindowState attachedWindow, int seq, WindowManager.LayoutParams a,
@@ -271,7 +272,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mSession = s;
         mClient = c;
         mToken = token;
-        mOwnerUserId = UserHandle.getUserId(s.mUid);
+        mOwnerUid = s.mUid;
         mAttrs.copyFrom(a);
         mViewVisibility = viewVisibility;
         mDisplayContent = displayContent;
@@ -904,7 +905,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     boolean showLw(boolean doAnimation, boolean requestAnim) {
         if (isOtherUsersAppWindow()) {
             Slog.w(TAG, "Current user " + mService.mCurrentUserId + " trying to display "
-                    + this + ", type " + mAttrs.type + ", belonging to " + mOwnerUserId);
+                    + this + ", type " + mAttrs.type + ", belonging to " + mOwnerUid);
             return false;
         }
         if (mPolicyVisibility && mPolicyVisibilityAfterAnim) {
@@ -985,9 +986,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     boolean isOtherUsersAppWindow() {
         final int type = mAttrs.type;
-        if ((mOwnerUserId != mService.mCurrentUserId)
+        if ((UserHandle.getUserId(mOwnerUid) != mService.mCurrentUserId)
+                && (mOwnerUid != Process.SYSTEM_UID)
                 && (type >= TYPE_BASE_APPLICATION) && (type <= LAST_APPLICATION_WINDOW)
-                && (type !=  TYPE_APPLICATION_STARTING)) {
+                && (type != TYPE_APPLICATION_STARTING)) {
             return true;
         }
         return false;
