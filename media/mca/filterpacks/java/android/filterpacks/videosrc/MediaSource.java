@@ -35,6 +35,7 @@ import android.filterfw.core.ShaderProgram;
 import android.filterfw.format.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.ConditionVariable;
 import android.opengl.Matrix;
 import android.view.Surface;
@@ -63,6 +64,12 @@ public class MediaSource extends Filter {
     /** An open asset file descriptor to a local media source. Default is null */
     @GenerateFieldPort(name = "sourceAsset", hasDefault = true)
     private AssetFileDescriptor mSourceAsset = null;
+
+    /** The context for the MediaPlayer to resolve the sourceUrl.
+     * Make sure this is set before the sourceUrl to avoid unexpected result.
+     * If the sourceUrl is not a content URI, it is OK to keep this as null. */
+    @GenerateFieldPort(name = "context", hasDefault = true)
+    private Context mContext = null;
 
     /** Whether the media source is a URL or an asset file descriptor. Defaults
      * to false.
@@ -459,7 +466,11 @@ public class MediaSource extends Filter {
         try {
             if (useUrl) {
                 if (mLogVerbose) Log.v(TAG, "Setting MediaPlayer source to URI " + mSourceUrl);
-                mMediaPlayer.setDataSource(mSourceUrl);
+                if (mContext == null) {
+                    mMediaPlayer.setDataSource(mSourceUrl);
+                } else {
+                    mMediaPlayer.setDataSource(mContext, Uri.parse(mSourceUrl.toString()));
+                }
             } else {
                 if (mLogVerbose) Log.v(TAG, "Setting MediaPlayer source to asset " + mSourceAsset);
                 mMediaPlayer.setDataSource(mSourceAsset.getFileDescriptor(), mSourceAsset.getStartOffset(), mSourceAsset.getLength());
