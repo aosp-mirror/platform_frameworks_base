@@ -90,8 +90,8 @@ static jint getBatteryStatus(const char* status)
     switch (status[0]) {
         case 'C': return gConstants.statusCharging;         // Charging
         case 'D': return gConstants.statusDischarging;      // Discharging
-        case 'F': return gConstants.statusFull;             // Not charging
-        case 'N': return gConstants.statusNotCharging;      // Full
+        case 'F': return gConstants.statusFull;             // Full
+        case 'N': return gConstants.statusNotCharging;      // Not charging
         case 'U': return gConstants.statusUnknown;          // Unknown
             
         default: {
