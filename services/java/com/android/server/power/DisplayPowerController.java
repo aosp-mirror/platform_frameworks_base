@@ -75,8 +75,8 @@ final class DisplayPowerController {
     // If true, uses the electron beam on animation.
     // We might want to turn this off if we cannot get a guarantee that the screen
     // actually turns on and starts showing new content after the call to set the
-    // screen state returns.
-    private static final boolean USE_ELECTRON_BEAM_ON_ANIMATION = true;
+    // screen state returns.  Playing the animation can also be somewhat slow.
+    private static final boolean USE_ELECTRON_BEAM_ON_ANIMATION = false;
 
     private static final int ELECTRON_BEAM_ON_ANIMATION_DURATION_MILLIS = 300;
     private static final int ELECTRON_BEAM_OFF_ANIMATION_DURATION_MILLIS = 600;
