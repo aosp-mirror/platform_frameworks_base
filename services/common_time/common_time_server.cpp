@@ -54,9 +54,9 @@ using std::numeric_limits;
 
 namespace android {
 
-const char*    CommonTimeServer::kDefaultMasterElectionAddr = "239.195.128.88";
-const uint16_t CommonTimeServer::kDefaultMasterElectionPort = 8887;
-const uint64_t CommonTimeServer::kDefaultSyncGroupID = 0;
+const char*    CommonTimeServer::kDefaultMasterElectionAddr = "255.255.255.255";
+const uint16_t CommonTimeServer::kDefaultMasterElectionPort = 8886;
+const uint64_t CommonTimeServer::kDefaultSyncGroupID = 1;
 const uint8_t  CommonTimeServer::kDefaultMasterPriority = 1;
 const uint32_t CommonTimeServer::kDefaultMasterAnnounceIntervalMs = 10000;
 const uint32_t CommonTimeServer::kDefaultSyncRequestIntervalMs = 1000;
@@ -752,6 +752,9 @@ bool CommonTimeServer::handleTimeoutWaitForElection() {
 bool CommonTimeServer::handleWhoIsMasterRequest(
         const WhoIsMasterRequestPacket* request,
         const sockaddr_storage& srcAddr) {
+    // Skip our own messages which come back via broadcast loopback.
+    if (request->senderDeviceID == mDeviceID)
+        return true;
 
     char srcEPStr[64];
     sockaddrToString(srcAddr, true, srcEPStr, sizeof(srcEPStr));
@@ -829,6 +832,10 @@ bool CommonTimeServer::handleWhoIsMasterRequest(
 bool CommonTimeServer::handleWhoIsMasterResponse(
         const WhoIsMasterResponsePacket* response,
         const sockaddr_storage& srcAddr) {
+    // Skip our own messages which come back via broadcast loopback.
+    if (response->deviceID == mDeviceID)
+        return true;
+
     char srcEPStr[64];
     sockaddrToString(srcAddr, true, srcEPStr, sizeof(srcEPStr));
     mElectionLog.log("RXed WhoIs master response while in state %s.  "
@@ -994,6 +1001,10 @@ bool CommonTimeServer::handleMasterAnnouncement(
     uint64_t newDeviceID   = packet->deviceID;
     uint8_t  newDevicePrio = packet->devicePriority;
     uint64_t newTimelineID = packet->timelineID;
+
+    // Skip our own messages which come back via broadcast loopback.
+    if (newDeviceID == mDeviceID)
+        return true;
 
     char srcEPStr[64];
     sockaddrToString(srcAddr, true, srcEPStr, sizeof(srcEPStr));
