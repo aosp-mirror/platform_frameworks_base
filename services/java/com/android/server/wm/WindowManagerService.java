@@ -318,14 +318,24 @@ public class WindowManagerService extends IWindowManager.Stub
     final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            mPolicy.enableKeyguard(true);
-            synchronized(mKeyguardTokenWatcher) {
-                // lazily evaluate this next time we're asked to disable keyguard
-                mAllowDisableKeyguard = ALLOW_DISABLE_UNKNOWN;
-                mKeyguardDisabled = false;
+            final String action = intent.getAction();
+            if (DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED.equals(action)) {
+                mPolicy.enableKeyguard(true);
+                synchronized(mKeyguardTokenWatcher) {
+                    // lazily evaluate this next time we're asked to disable keyguard
+                    mAllowDisableKeyguard = ALLOW_DISABLE_UNKNOWN;
+                    mKeyguardDisabled = false;
+                }
+            } else if (Intent.ACTION_USER_SWITCHED.equals(action)) {
+                final int newUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
+                Slog.v(TAG, "Switching user from " + mCurrentUserId + " to " + newUserId);
+                mCurrentUserId = newUserId;
             }
         }
     };
+
+    // Current user when multi-user is enabled. Don't show windows of non-current user.
+    int mCurrentUserId;
 
     final Context mContext;
 
@@ -908,6 +918,8 @@ public class WindowManagerService extends IWindowManager.Stub
         // Track changes to DevicePolicyManager state so we can enable/disable keyguard.
         IntentFilter filter = new IntentFilter();
         filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
+        // Track user switching.
+        filter.addAction(Intent.ACTION_USER_SWITCHED);
         mContext.registerReceiver(mBroadcastReceiver, filter);
 
         mHoldingScreenWakeLock = pmc.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK
