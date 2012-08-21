@@ -17,8 +17,6 @@
 package android.webkit;
 
 import android.content.Context;
-import android.os.Message;
-import android.os.Build;
 
 /**
  * Manages settings state for a WebView. When a WebView is first created, it
@@ -1248,7 +1246,7 @@ public abstract class WebSettings {
      * @param context a Context object used to access application assets
      */
     public static String getDefaultUserAgent(Context context) {
-        return WebView.getFactory().getDefaultUserAgent(context);
+        return WebViewFactory.getProvider().getStatics().getDefaultUserAgent(context);
     }
 
     /**
