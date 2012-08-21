@@ -480,7 +480,8 @@ public class MockPackageManager extends PackageManager {
      * @hide - to match hiding in superclass
      */
     @Override
-    public void getPackageSizeInfo(String packageName, IPackageStatsObserver observer) {
+    public void getPackageSizeInfo(String packageName, int userHandle,
+            IPackageStatsObserver observer) {
         throw new UnsupportedOperationException();
     }
 

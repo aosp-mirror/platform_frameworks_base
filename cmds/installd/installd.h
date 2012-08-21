@@ -199,7 +199,7 @@ int delete_cache(const char *pkgname);
 int move_dex(const char *src, const char *dst);
 int rm_dex(const char *path);
 int protect(char *pkgname, gid_t gid);
-int get_size(const char *pkgname, const char *apkpath, const char *fwdlock_apkpath,
+int get_size(const char *pkgname, int persona, const char *apkpath, const char *fwdlock_apkpath,
              const char *asecpath, int64_t *codesize, int64_t *datasize, int64_t *cachesize,
              int64_t *asecsize);
 int free_cache(int64_t free_size);

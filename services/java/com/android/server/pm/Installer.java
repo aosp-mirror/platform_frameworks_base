@@ -338,11 +338,13 @@ class Installer {
         return execute(builder.toString());
     }
 
-    public int getSizeInfo(String pkgName, String apkPath, String fwdLockApkPath,
+    public int getSizeInfo(String pkgName, int persona, String apkPath, String fwdLockApkPath,
             String asecPath, PackageStats pStats) {
         StringBuilder builder = new StringBuilder("getsize");
         builder.append(' ');
         builder.append(pkgName);
+        builder.append(' ');
+        builder.append(persona);
         builder.append(' ');
         builder.append(apkPath);
         builder.append(' ');
