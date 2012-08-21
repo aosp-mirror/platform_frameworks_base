@@ -58,6 +58,9 @@
     <string name="label_view" msgid="6304565553218192990">"Visualizza"</string>
     <string name="always_use_device" msgid="1450287437017315906">"Usa per impostazione predef. per dispositivo USB"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"Usa per impostazione predef. per accessorio USB"</string>
+    <string name="usb_debugging_title" msgid="1114766024068112429">"Consentire debug USB?"</string>
+    <string name="usb_debugging_message" msgid="719863946976291180">"Consentire il debug USB da questo computer? "\n"La fingerprint della tua chiave RSA è "\n"<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_always" msgid="4253099426793114693">"Consenti sempre da questo computer"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom per riempire schermo"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Estendi per riemp. schermo"</string>
     <string name="compat_mode_help_header" msgid="7969493989397529910">"Zoom compatibilità"</string>
