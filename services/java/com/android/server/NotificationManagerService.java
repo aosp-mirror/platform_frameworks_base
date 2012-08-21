@@ -1272,7 +1272,7 @@ public class NotificationManagerService extends INotificationManager.Stub
 
     void checkCallerIsSystem() {
         int uid = Binder.getCallingUid();
-        if (uid == Process.SYSTEM_UID || uid == 0) {
+        if (UserHandle.getAppId(uid) == Process.SYSTEM_UID || uid == 0) {
             return;
         }
         throw new SecurityException("Disallowed call for uid " + uid);
@@ -1280,7 +1280,7 @@ public class NotificationManagerService extends INotificationManager.Stub
 
     void checkCallerIsSystemOrSameApp(String pkg) {
         int uid = Binder.getCallingUid();
-        if (uid == Process.SYSTEM_UID || uid == 0) {
+        if (UserHandle.getAppId(uid) == Process.SYSTEM_UID || uid == 0) {
             return;
         }
         try {

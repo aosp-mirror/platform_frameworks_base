@@ -570,7 +570,7 @@ public class AppCacheTest extends AndroidTestCase {
             PackageStatsObserver observer = new PackageStatsObserver();
             //wait on observer
             synchronized(observer) {
-                getPm().getPackageSizeInfo(packageName, observer);
+                getPm().getPackageSizeInfo(packageName, UserHandle.myUserId(), observer);
                 long waitTime = 0;
                 while((!observer.isDone()) || (waitTime > MAX_WAIT_TIME) ) {
                     observer.wait(WAIT_TIME_INCR);

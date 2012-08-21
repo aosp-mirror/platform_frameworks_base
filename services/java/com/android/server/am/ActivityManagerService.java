@@ -27,7 +27,6 @@ import com.android.server.ProcessMap;
 import com.android.server.SystemServer;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityStack.ActivityState;
-import com.android.server.pm.UserManagerService;
 import com.android.server.wm.WindowManagerService;
 
 import dalvik.system.Zygote;
@@ -52,7 +51,6 @@ import android.app.Instrumentation;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.Service;
 import android.app.backup.IBackupManager;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -145,7 +143,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -8391,11 +8388,19 @@ public final class ActivityManagerService extends ActivityManagerNative
         // assume our apps are happy - lazy create the list
         List<ActivityManager.ProcessErrorStateInfo> errList = null;
 
+        final boolean allUsers = ActivityManager.checkUidPermission(
+                android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                Binder.getCallingUid()) == PackageManager.PERMISSION_GRANTED;
+        int userId = UserHandle.getUserId(Binder.getCallingUid());
+
         synchronized (this) {
 
             // iterate across all processes
             for (int i=mLruProcesses.size()-1; i>=0; i--) {
                 ProcessRecord app = mLruProcesses.get(i);
+                if (!allUsers && app.userId != userId) {
+                    continue;
+                }
                 if ((app.thread != null) && (app.crashing || app.notResponding)) {
                     // This one's in trouble, so we'll generate a report for it
                     // crashes are higher priority (in case there's a crash *and* an anr)
@@ -8459,6 +8464,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (app.persistent) {
             outInfo.flags |= ActivityManager.RunningAppProcessInfo.FLAG_PERSISTENT;
         }
+        if (app.hasActivities) {
+            outInfo.flags |= ActivityManager.RunningAppProcessInfo.FLAG_HAS_ACTIVITIES;
+        }
         outInfo.lastTrimLevel = app.trimMemoryLevel;
         int adj = app.curAdj;
         outInfo.importance = oomAdjToImportance(adj, outInfo);
@@ -8469,10 +8477,17 @@ public final class ActivityManagerService extends ActivityManagerNative
         enforceNotIsolatedCaller("getRunningAppProcesses");
         // Lazy instantiation of list
         List<ActivityManager.RunningAppProcessInfo> runList = null;
+        final boolean allUsers = ActivityManager.checkUidPermission(
+                android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                Binder.getCallingUid()) == PackageManager.PERMISSION_GRANTED;
+        int userId = UserHandle.getUserId(Binder.getCallingUid());
         synchronized (this) {
             // Iterate across all processes
             for (int i=mLruProcesses.size()-1; i>=0; i--) {
                 ProcessRecord app = mLruProcesses.get(i);
+                if (!allUsers && app.userId != userId) {
+                    continue;
+                }
                 if ((app.thread != null) && (!app.crashing && !app.notResponding)) {
                     // Generate process state info for running application
                     ActivityManager.RunningAppProcessInfo currApp = 

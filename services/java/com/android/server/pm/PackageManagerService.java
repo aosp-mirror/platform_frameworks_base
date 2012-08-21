@@ -5743,7 +5743,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         @Override
         void handleStartCopy() throws RemoteException {
             synchronized (mInstallLock) {
-                mSuccess = getPackageSizeInfoLI(mStats.packageName, mStats);
+                mSuccess = getPackageSizeInfoLI(mStats.packageName, mStats.userHandle, mStats);
             }
 
             final boolean mounted;
@@ -8036,12 +8036,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         return true;
     }
 
-    public void getPackageSizeInfo(final String packageName,
+    public void getPackageSizeInfo(final String packageName, int userHandle,
             final IPackageStatsObserver observer) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.GET_PACKAGE_SIZE, null);
 
-        PackageStats stats = new PackageStats(packageName);
+        PackageStats stats = new PackageStats(packageName, userHandle);
 
         /*
          * Queue up an async operation since the package measurement may take a
@@ -8052,7 +8052,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         mHandler.sendMessage(msg);
     }
 
-    private boolean getPackageSizeInfoLI(String packageName, PackageStats pStats) {
+    private boolean getPackageSizeInfoLI(String packageName, int userHandle,
+            PackageStats pStats) {
         if (packageName == null) {
             Slog.w(TAG, "Attempt to get size of null packageName.");
             return false;
@@ -8089,7 +8090,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 publicSrcDir = applicationInfo.publicSourceDir;
             }
         }
-        int res = mInstaller.getSizeInfo(packageName, p.mPath, publicSrcDir,
+        int res = mInstaller.getSizeInfo(packageName, userHandle, p.mPath, publicSrcDir,
                 asecPath, pStats);
         if (res < 0) {
             return false;

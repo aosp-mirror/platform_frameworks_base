@@ -432,7 +432,7 @@ int protect(char *pkgname, gid_t gid)
     return 0;
 }
 
-int get_size(const char *pkgname, const char *apkpath,
+int get_size(const char *pkgname, int persona, const char *apkpath,
              const char *fwdlock_apkpath, const char *asecpath,
              int64_t *_codesize, int64_t *_datasize, int64_t *_cachesize,
              int64_t* _asecsize)
@@ -479,7 +479,7 @@ int get_size(const char *pkgname, const char *apkpath,
         }
     }
 
-    if (create_pkg_path(path, pkgname, PKG_DIR_POSTFIX, 0)) {
+    if (create_pkg_path(path, pkgname, PKG_DIR_POSTFIX, persona)) {
         goto done;
     }
 

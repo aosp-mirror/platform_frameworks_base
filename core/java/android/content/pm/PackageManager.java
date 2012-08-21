@@ -28,6 +28,7 @@ import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Environment;
+import android.os.UserHandle;
 import android.util.AndroidException;
 import android.util.DisplayMetrics;
 
@@ -2407,6 +2408,7 @@ public abstract class PackageManager {
      * should have the {@link android.Manifest.permission#GET_PACKAGE_SIZE} permission.
      *
      * @param packageName The name of the package whose size information is to be retrieved
+     * @param userHandle The user whose size information should be retrieved.
      * @param observer An observer callback to get notified when the operation
      * is complete.
      * {@link android.content.pm.IPackageStatsObserver#onGetStatsCompleted(PackageStats, boolean)}
@@ -2417,8 +2419,18 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    public abstract void getPackageSizeInfo(String packageName,
+    public abstract void getPackageSizeInfo(String packageName, int userHandle,
             IPackageStatsObserver observer);
+
+    /**
+     * Like {@link #getPackageSizeInfo(String, int, IPackageStatsObserver)}, but
+     * returns the size for the calling user.
+     *
+     * @hide
+     */
+    public void getPackageSizeInfo(String packageName, IPackageStatsObserver observer) {
+        getPackageSizeInfo(packageName, UserHandle.myUserId(), observer);
+    }
 
     /**
      * @deprecated This function no longer does anything; it was an old
