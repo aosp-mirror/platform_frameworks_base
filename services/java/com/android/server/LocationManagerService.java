@@ -1566,7 +1566,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Obs
             MockProvider provider = new MockProvider(name, this, properties);
             // remove the real provider if we are replacing GPS or network provider
             if (LocationManager.GPS_PROVIDER.equals(name)
-                    || LocationManager.NETWORK_PROVIDER.equals(name)) {
+                    || LocationManager.NETWORK_PROVIDER.equals(name)
+                    || LocationManager.FUSED_PROVIDER.equals(name)) {
                 LocationProviderInterface p = mProvidersByName.get(name);
                 if (p != null) {
                     removeProviderLocked(p);
