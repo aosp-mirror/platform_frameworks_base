@@ -224,10 +224,8 @@
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"允許應用程式對裝置上的所有使用者執行各種動作。請注意，惡意應用程式可能利用此功能侵害使用者之間的保護機制。"</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"完整授權對所有使用者執行各種動作"</string>
     <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"允許對所有使用者執行各種可能的動作。"</string>
-    <!-- no translation found for permlab_manageUsers (1676150911672282428) -->
-    <skip />
-    <!-- no translation found for permdesc_manageUsers (8409306667645355638) -->
-    <skip />
+    <string name="permlab_manageUsers" msgid="1676150911672282428">"管理使用者"</string>
+    <string name="permdesc_manageUsers" msgid="8409306667645355638">"允許應用程式管理裝置上的使用者，包括查詢、建立及刪除使用者。"</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"擷取執行中應用程式的詳細資訊"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"允許應用程式擷取目前及最近所執行任務的詳細資訊。請注意，惡意應用程式可能會找出其他應用程式的不公開資訊。"</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"重新排序正在執行的應用程式"</string>

@@ -224,10 +224,8 @@
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Mengizinkan aplikasi melakukan tindakan antar-pengguna yang berbeda pada perangkat. Aplikasi berbahaya dapat menggunakan ini untuk mengganggu perlindungan antar-pengguna."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"lisensi penuh untuk berinteraksi antar-pengguna"</string>
     <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Mengizinkan semua interaksi yang mungkin antar-pengguna."</string>
-    <!-- no translation found for permlab_manageUsers (1676150911672282428) -->
-    <skip />
-    <!-- no translation found for permdesc_manageUsers (8409306667645355638) -->
-    <skip />
+    <string name="permlab_manageUsers" msgid="1676150911672282428">"kelola pengguna"</string>
+    <string name="permdesc_manageUsers" msgid="8409306667645355638">"Memungkinkan aplikasi mengelola pengguna pada perangkat, termasuk kueri, pembuatan, dan penghapusan."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"mengambil detail aplikasi yang sedang berjalan"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Izinkan aplikasi mengambil informasi mendetail tentang tugas yang saat ini dan baru-baru ini dijalankan. Aplikasi berbahaya dapat menemukan informasi pribadi tentang aplikasi lain."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"menyusun ulang apl yang berjalan"</string>
@@ -1313,6 +1311,5 @@
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Audio Bluetooth"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Selesai"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Keluaran media"</string>
-    <!-- no translation found for display_manager_built_in_display (9042666544146043569) -->
-    <skip />
+    <string name="display_manager_built_in_display" msgid="9042666544146043569">"Layar Ada Di Dalamnya"</string>
 </resources>

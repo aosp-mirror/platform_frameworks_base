@@ -224,10 +224,8 @@
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Lehetővé teszi az alkalmazás számára, hogy több felhasználó között végezzen különféle műveleteket az eszközön. A rosszindulatú alkalmazások arra használhatják ezt, hogy megsértsék a felhasználók biztonságát."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"teljes licenc a felhasználók közötti interakcióhoz"</string>
     <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Lehetővé teszi az összes lehetséges interakciót a felhasználók között."</string>
-    <!-- no translation found for permlab_manageUsers (1676150911672282428) -->
-    <skip />
-    <!-- no translation found for permdesc_manageUsers (8409306667645355638) -->
-    <skip />
+    <string name="permlab_manageUsers" msgid="1676150911672282428">"Felhasználók kezelése"</string>
+    <string name="permdesc_manageUsers" msgid="8409306667645355638">"Lehetővé teszi az alkalmazások számára a készüléken beállított felhasználók kezelését, beleértve a lekérdezéseket, a létrehozásokat és törléseket."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"futó alkalmazások részleteinek lekérése"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Lehetővé teszi az alkalmazás számára a jelenleg és a nemrég futó feladatok részletes adatainak lekérését. A rosszindulatú alkalmazások más alkalmazásokkal kapcsolatos privát adatokhoz férhetnek hozzá."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"futó alkalmazások átrendezése"</string>

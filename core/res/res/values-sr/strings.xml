@@ -224,10 +224,8 @@
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Дозвољава апликацији да обавља радње између различитих корисника на уређају. Злонамерне апликације могу да користе ово да би угрозиле заштиту између корисника."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"пуна лиценца за интеракцију између корисника"</string>
     <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Дозвољава све могуће интеракције између корисника."</string>
-    <!-- no translation found for permlab_manageUsers (1676150911672282428) -->
-    <skip />
-    <!-- no translation found for permdesc_manageUsers (8409306667645355638) -->
-    <skip />
+    <string name="permlab_manageUsers" msgid="1676150911672282428">"управљање корисницима"</string>
+    <string name="permdesc_manageUsers" msgid="8409306667645355638">"Дозвољава апликацијама да управљају корисницима на уређају, укључујући постављање упита, прављење и брисање."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"преузимање детаља о покренутим апликацијама"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Дозвољава апликацији да преузима детаљне информације о актуелним и недавно покренутим задацима. Злонамерне апликације могу да открију приватне информације о другим апликацијама."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"промена редоследа покренутих апликација"</string>

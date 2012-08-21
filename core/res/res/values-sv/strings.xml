@@ -224,10 +224,8 @@
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Tillåter att appen utför åtgärder mellan användare på enheten. Skadliga appar kan använda detta som ett sätt att kringgå skyddet mellan användare."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"fullständig behörighet att interagera mellan användare"</string>
     <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Tillåter all slags interaktion mellan användare."</string>
-    <!-- no translation found for permlab_manageUsers (1676150911672282428) -->
-    <skip />
-    <!-- no translation found for permdesc_manageUsers (8409306667645355638) -->
-    <skip />
+    <string name="permlab_manageUsers" msgid="1676150911672282428">"hantera användare"</string>
+    <string name="permdesc_manageUsers" msgid="8409306667645355638">"Tillåter att appen hanterar användare på enheten, inklusive att söka efter, skapa och radera användarinformation."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"hämta information om aktiva appar"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Tillåter att appen hämtar detaljerad information om uppgifter som körs och har körts. Skadliga appar kan upptäcka personliga uppgifter om andra appar."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"byt ordning på appar som körs"</string>
@@ -1313,6 +1311,5 @@
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth-ljud"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Klar"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Medieuppspelning"</string>
-    <!-- no translation found for display_manager_built_in_display (9042666544146043569) -->
-    <skip />
+    <string name="display_manager_built_in_display" msgid="9042666544146043569">"Inbyggd skärm"</string>
 </resources>

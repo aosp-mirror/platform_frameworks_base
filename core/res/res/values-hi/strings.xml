@@ -224,10 +224,8 @@
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"एप्लिकेशन को उपकरण पर भिन्न उपयोगकर्ताओं के बीच कार्य निष्पादित करने देता है. दुर्भावनापूर्ण एप्लिकेशन उपयोगकर्ताओं के बीच सुरक्षा का उल्लंघन करने के लिए इसका उपयोग कर सकते हैं."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"उपयोगकर्ताओं के बीच सहभागिता करने के लिए पूर्ण लाइसेंस"</string>
     <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"उपयोगकर्ताओं के बीच सभी संभव सहभागिता करने देता है."</string>
-    <!-- no translation found for permlab_manageUsers (1676150911672282428) -->
-    <skip />
-    <!-- no translation found for permdesc_manageUsers (8409306667645355638) -->
-    <skip />
+    <string name="permlab_manageUsers" msgid="1676150911672282428">"उपयोगकर्ता प्रबंधित करें"</string>
+    <string name="permdesc_manageUsers" msgid="8409306667645355638">"एप्लिकेशन को उपकरण पर क्वेरी, निर्माण और हटाने सहित उपयोगकर्ताओं को प्रबंधित करने की सुविधा देता है."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"चल रहे एप्‍लिकेशन के विवरण प्राप्त करें"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"एप्लिकेशन को वर्तमान में और हाल ही में चल रहे कार्यों की जानकारी प्राप्त करने देता है. दुर्भावनापूर्ण एप्लिकेशन अन्य एप्लिकेशन के बारे में निजी जानकारी खोज सकते हैं."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"चल रहे एप्‍लिकेशन पुन: क्रमित करें"</string>
@@ -726,7 +724,7 @@
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"आपका सिम कार्ड स्‍थायी रूप से अक्षम कर दिया गया है."\n" दूसरे SIM कार्ड के लिए अपने वायरलेस सेवा प्रदाता से संपर्क करें."</string>
     <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"पिछला ट्रैक बटन"</string>
     <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"अगला ट्रैक बटन"</string>
-    <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"रोकें बटन"</string>
+    <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"पॉज़ करें बटन"</string>
     <string name="lockscreen_transport_play_description" msgid="5888422938351019426">"चलाएं बटन"</string>
     <string name="lockscreen_transport_stop_description" msgid="4562318378766987601">"रोकें बटन"</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"केवल आपातकालीन कॉल"</string>
