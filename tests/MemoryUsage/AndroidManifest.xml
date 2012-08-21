@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.android.tests.memoryusage">
+    <instrumentation android:label="Memory usage instrumentation"
+                     android:name="com.android.tests.memoryusage.MemoryUsageInstrumentation"
+                     android:targetPackage="com.android.tests.memoryusage" />
+
+    <application android:label="Memory Usage Test">
+        <uses-library android:name="android.test.runner" />
+    </application>
+</manifest>
