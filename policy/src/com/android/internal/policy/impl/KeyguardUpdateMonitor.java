@@ -259,7 +259,8 @@ public class KeyguardUpdateMonitor {
          */
         boolean isPluggedIn() {
             return plugged == BatteryManager.BATTERY_PLUGGED_AC
-                    || plugged == BatteryManager.BATTERY_PLUGGED_USB;
+                    || plugged == BatteryManager.BATTERY_PLUGGED_USB
+                    || plugged == BatteryManager.BATTERY_PLUGGED_WIRELESS;
         }
 
         /**

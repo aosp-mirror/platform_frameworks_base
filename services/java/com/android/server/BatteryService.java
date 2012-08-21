@@ -93,6 +93,7 @@ public class BatteryService extends Binder {
 
     private boolean mAcOnline;
     private boolean mUsbOnline;
+    private boolean mWirelessOnline;
     private int mBatteryStatus;
     private int mBatteryHealth;
     private boolean mBatteryPresent;
@@ -150,7 +151,8 @@ public class BatteryService extends Binder {
 
     public final boolean isPowered() {
         // assume we are powered if battery state is unknown so the "stay on while plugged in" option will work.
-        return (mAcOnline || mUsbOnline || mBatteryStatus == BatteryManager.BATTERY_STATUS_UNKNOWN);
+        return (mAcOnline || mUsbOnline || mWirelessOnline
+                || mBatteryStatus == BatteryManager.BATTERY_STATUS_UNKNOWN);
     }
 
     public final boolean isPowered(int plugTypeSet) {
@@ -168,6 +170,9 @@ public class BatteryService extends Binder {
         }
         if (mUsbOnline) {
             plugTypeBit |= BatteryManager.BATTERY_PLUGGED_USB;
+        }
+        if (mWirelessOnline) {
+            plugTypeBit |= BatteryManager.BATTERY_PLUGGED_WIRELESS;
         }
         return (plugTypeSet & plugTypeBit) != 0;
     }
@@ -243,6 +248,8 @@ public class BatteryService extends Binder {
             mPlugType = BatteryManager.BATTERY_PLUGGED_AC;
         } else if (mUsbOnline) {
             mPlugType = BatteryManager.BATTERY_PLUGGED_USB;
+        } else if (mWirelessOnline) {
+            mPlugType = BatteryManager.BATTERY_PLUGGED_WIRELESS;
         } else {
             mPlugType = BATTERY_PLUGGED_NONE;
         }
@@ -398,6 +405,7 @@ public class BatteryService extends Binder {
                     " temperature: " + mBatteryTemperature +
                     " technology: " + mBatteryTechnology +
                     " AC powered:" + mAcOnline + " USB powered:" + mUsbOnline +
+                    " Wireless powered:" + mWirelessOnline +
                     " icon:" + icon  + " invalid charger:" + mInvalidCharger);
         }
 
@@ -503,6 +511,7 @@ public class BatteryService extends Binder {
                 pw.println("Current Battery Service state:");
                 pw.println("  AC powered: " + mAcOnline);
                 pw.println("  USB powered: " + mUsbOnline);
+                pw.println("  Wireless powered: " + mWirelessOnline);
                 pw.println("  status: " + mBatteryStatus);
                 pw.println("  health: " + mBatteryHealth);
                 pw.println("  present: " + mBatteryPresent);
@@ -523,6 +532,8 @@ public class BatteryService extends Binder {
                         mAcOnline = Integer.parseInt(value) != 0;
                     } else if ("usb".equals(key)) {
                         mUsbOnline = Integer.parseInt(value) != 0;
+                    } else if ("wireless".equals(key)) {
+                        mWirelessOnline = Integer.parseInt(value) != 0;
                     } else if ("status".equals(key)) {
                         mBatteryStatus = Integer.parseInt(value);
                     } else if ("level".equals(key)) {
@@ -603,4 +614,3 @@ public class BatteryService extends Binder {
         }
     }
 }
-
