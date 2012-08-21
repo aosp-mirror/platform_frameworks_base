@@ -23,6 +23,7 @@ import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -260,6 +261,9 @@ class ServiceRecord extends Binder {
                 IntentBindRecord b = it.next();
                 pw.print(prefix); pw.print("* IntentBindRecord{");
                         pw.print(Integer.toHexString(System.identityHashCode(b)));
+                        if ((b.collectFlags()&Context.BIND_AUTO_CREATE) != 0) {
+                            pw.append(" CREATE");
+                        }
                         pw.println("}:");
                 b.dumpInService(pw, prefix + "  ");
             }
