@@ -224,10 +224,8 @@
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Umožňuje aplikácii vykonávať akcie naprieč rôznymi používateľmi zariadenia. Škodlivé aplikácie môžu toto povolenie zneužiť na obídenie ochrany medzi používateľmi."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"plná licencia na interakcie naprieč používateľmi"</string>
     <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Umožňuje všetky možné interakcie naprieč používateľmi."</string>
-    <!-- no translation found for permlab_manageUsers (1676150911672282428) -->
-    <skip />
-    <!-- no translation found for permdesc_manageUsers (8409306667645355638) -->
-    <skip />
+    <string name="permlab_manageUsers" msgid="1676150911672282428">"správa používateľov"</string>
+    <string name="permdesc_manageUsers" msgid="8409306667645355638">"Umožňuje aplikáciám spravovať používateľov v zariadení, vrátane vyhľadávania dopytov, vytvorenia a odstránenia."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"načítať podrobnosti o spustených aplikáciách"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Umožňuje aplikácii načítať podrobné informácie o aktuálnych a nedávno spustených úlohách. Škodlivé aplikácie môžu odhaliť súkromné informácie o iných aplikáciách."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"zmeniť poradie spustených aplikácií"</string>

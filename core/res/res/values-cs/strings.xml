@@ -844,7 +844,7 @@
     <item quantity="other" msgid="3903706804349556379">"před <xliff:g id="COUNT">%d</xliff:g> s"</item>
   </plurals>
   <plurals name="num_minutes_ago">
-    <item quantity="one" msgid="3306787433088810191">"před 1 minutou"</item>
+    <item quantity="one" msgid="3306787433088810191">"před 1 min"</item>
     <item quantity="other" msgid="2176942008915455116">"před <xliff:g id="COUNT">%d</xliff:g> min"</item>
   </plurals>
   <plurals name="num_hours_ago">

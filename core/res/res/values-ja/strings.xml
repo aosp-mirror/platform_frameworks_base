@@ -224,10 +224,8 @@
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"端末上の各ユーザーに対して操作を実行することをアプリに許可します。この許可を悪意のあるアプリに利用されると、ユーザー間の保護が侵害される恐れがあります。"</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"ユーザー間で交流するための完全ライセンス"</string>
     <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"ユーザー間の交流をすべて許可します。"</string>
-    <!-- no translation found for permlab_manageUsers (1676150911672282428) -->
-    <skip />
-    <!-- no translation found for permdesc_manageUsers (8409306667645355638) -->
-    <skip />
+    <string name="permlab_manageUsers" msgid="1676150911672282428">"ユーザーの管理"</string>
+    <string name="permdesc_manageUsers" msgid="8409306667645355638">"ユーザーの問い合わせ、作成、削除を含め、端末上のユーザーを管理することをアプリに許可します。"</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"実行中のアプリの詳細の取得"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"現在実行中のタスクまたは最近実行したタスクに関する情報の取得をアプリに許可します。この許可を悪意のあるアプリに利用されると、他のアプリに関する非公開情報が読み取られる恐れがあります。"</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"実行中のアプリの順序変更"</string>
