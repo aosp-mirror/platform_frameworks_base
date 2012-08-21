@@ -18,10 +18,6 @@ package com.android.server;
 
 import static android.provider.Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK;
 
-import com.android.server.power.PowerManagerService;
-
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -30,6 +26,7 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -47,7 +44,7 @@ import java.io.FileReader;
 /**
  * <p>DockObserver monitors for a docking station.
  */
-class DockObserver extends UEventObserver {
+final class DockObserver extends UEventObserver {
     private static final String TAG = DockObserver.class.getSimpleName();
     private static final boolean LOG = false;
 
@@ -56,7 +53,9 @@ class DockObserver extends UEventObserver {
 
     private static final int DEFAULT_DOCK = 1;
 
-    private static final int MSG_DOCK_STATE = 0;
+    private static final int MSG_DOCK_STATE_CHANGED = 0;
+
+    private final Object mLock = new Object();
 
     private int mDockState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
     private int mPreviousDockState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
@@ -78,7 +77,7 @@ class DockObserver extends UEventObserver {
             Slog.v(TAG, "Dock UEVENT: " + event.toString());
         }
 
-        synchronized (this) {
+        synchronized (mLock) {
             try {
                 int newState = Integer.parseInt(event.get("SWITCH_STATE"));
                 if (newState != mDockState) {
@@ -96,7 +95,7 @@ class DockObserver extends UEventObserver {
                                     (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
                             pm.wakeUp(SystemClock.uptimeMillis());
                         }
-                        update();
+                        updateLocked();
                     }
                 }
             } catch (NumberFormatException e) {
@@ -105,132 +104,142 @@ class DockObserver extends UEventObserver {
         }
     }
 
-    private final void init() {
-        char[] buffer = new char[1024];
-
-        try {
-            FileReader file = new FileReader(DOCK_STATE_PATH);
-            int len = file.read(buffer, 0, 1024);
-            file.close();
-            mPreviousDockState = mDockState = Integer.valueOf((new String(buffer, 0, len)).trim());
-        } catch (FileNotFoundException e) {
-            Slog.w(TAG, "This kernel does not have dock station support");
-        } catch (Exception e) {
-            Slog.e(TAG, "" , e);
+    private void init() {
+        synchronized (mLock) {
+            try {
+                char[] buffer = new char[1024];
+                FileReader file = new FileReader(DOCK_STATE_PATH);
+                try {
+                    int len = file.read(buffer, 0, 1024);
+                    mDockState = Integer.valueOf((new String(buffer, 0, len)).trim());
+                    mPreviousDockState = mDockState;
+                } finally {
+                    file.close();
+                }
+            } catch (FileNotFoundException e) {
+                Slog.w(TAG, "This kernel does not have dock station support");
+            } catch (Exception e) {
+                Slog.e(TAG, "" , e);
+            }
         }
     }
 
     void systemReady() {
-        synchronized (this) {
+        synchronized (mLock) {
             // don't bother broadcasting undocked here
             if (mDockState != Intent.EXTRA_DOCK_STATE_UNDOCKED) {
-                update();
+                updateLocked();
             }
             mSystemReady = true;
         }
     }
 
-    private final void update() {
-        mHandler.sendEmptyMessage(MSG_DOCK_STATE);
+    private void updateLocked() {
+        mHandler.sendEmptyMessage(MSG_DOCK_STATE_CHANGED);
+    }
+
+    private void handleDockStateChange() {
+        synchronized (mLock) {
+            Slog.i(TAG, "Dock state changed: " + mDockState);
+
+            final ContentResolver cr = mContext.getContentResolver();
+
+            if (Settings.Secure.getInt(cr,
+                    Settings.Secure.DEVICE_PROVISIONED, 0) == 0) {
+                Slog.i(TAG, "Device not provisioned, skipping dock broadcast");
+                return;
+            }
+
+            // Pack up the values and broadcast them to everyone
+            Intent intent = new Intent(Intent.ACTION_DOCK_EVENT);
+            intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+            intent.putExtra(Intent.EXTRA_DOCK_STATE, mDockState);
+
+            // Check if this is Bluetooth Dock
+            // TODO(BT): Get Dock address.
+            // String address = null;
+            // if (address != null) {
+            //    intent.putExtra(BluetoothDevice.EXTRA_DEVICE,
+            //            BluetoothAdapter.getDefaultAdapter().getRemoteDevice(address));
+            // }
+
+            // User feedback to confirm dock connection. Particularly
+            // useful for flaky contact pins...
+            if (Settings.System.getInt(cr,
+                    Settings.System.DOCK_SOUNDS_ENABLED, 1) == 1) {
+                String whichSound = null;
+                if (mDockState == Intent.EXTRA_DOCK_STATE_UNDOCKED) {
+                    if ((mPreviousDockState == Intent.EXTRA_DOCK_STATE_DESK) ||
+                        (mPreviousDockState == Intent.EXTRA_DOCK_STATE_LE_DESK) ||
+                        (mPreviousDockState == Intent.EXTRA_DOCK_STATE_HE_DESK)) {
+                        whichSound = Settings.System.DESK_UNDOCK_SOUND;
+                    } else if (mPreviousDockState == Intent.EXTRA_DOCK_STATE_CAR) {
+                        whichSound = Settings.System.CAR_UNDOCK_SOUND;
+                    }
+                } else {
+                    if ((mDockState == Intent.EXTRA_DOCK_STATE_DESK) ||
+                        (mDockState == Intent.EXTRA_DOCK_STATE_LE_DESK) ||
+                        (mDockState == Intent.EXTRA_DOCK_STATE_HE_DESK)) {
+                        whichSound = Settings.System.DESK_DOCK_SOUND;
+                    } else if (mDockState == Intent.EXTRA_DOCK_STATE_CAR) {
+                        whichSound = Settings.System.CAR_DOCK_SOUND;
+                    }
+                }
+
+                if (whichSound != null) {
+                    final String soundPath = Settings.System.getString(cr, whichSound);
+                    if (soundPath != null) {
+                        final Uri soundUri = Uri.parse("file://" + soundPath);
+                        if (soundUri != null) {
+                            final Ringtone sfx = RingtoneManager.getRingtone(mContext, soundUri);
+                            if (sfx != null) {
+                                sfx.setStreamType(AudioManager.STREAM_SYSTEM);
+                                sfx.play();
+                            }
+                        }
+                    }
+                }
+            }
+
+            IDreamManager mgr = IDreamManager.Stub.asInterface(ServiceManager.getService("dreams"));
+            if (mgr != null) {
+                // dreams feature enabled
+                boolean undocked = mDockState == Intent.EXTRA_DOCK_STATE_UNDOCKED;
+                if (undocked) {
+                    try {
+                        if (mgr.isDreaming()) {
+                            mgr.awaken();
+                        }
+                    } catch (RemoteException e) {
+                        Slog.w(TAG, "Unable to awaken!", e);
+                    }
+                } else {
+                    if (isScreenSaverActivatedOnDock(mContext)) {
+                        try {
+                            mgr.dream();
+                        } catch (RemoteException e) {
+                            Slog.w(TAG, "Unable to dream!", e);
+                        }
+                    }
+                }
+            } else {
+                // dreams feature not enabled, send legacy intent
+                mContext.sendStickyBroadcast(intent);
+            }
+        }
     }
 
     private static boolean isScreenSaverActivatedOnDock(Context context) {
-        return 0 != Settings.Secure.getInt(
-                    context.getContentResolver(), SCREENSAVER_ACTIVATE_ON_DOCK, DEFAULT_DOCK);
+        return Settings.Secure.getInt(context.getContentResolver(),
+                SCREENSAVER_ACTIVATE_ON_DOCK, DEFAULT_DOCK) != 0;
     }
 
-    private final Handler mHandler = new Handler() {
+    private final Handler mHandler = new Handler(Looper.myLooper(), null, true) {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_DOCK_STATE:
-                    synchronized (this) {
-                        Slog.i(TAG, "Dock state changed: " + mDockState);
-
-                        final ContentResolver cr = mContext.getContentResolver();
-
-                        if (Settings.Secure.getInt(cr,
-                                Settings.Secure.DEVICE_PROVISIONED, 0) == 0) {
-                            Slog.i(TAG, "Device not provisioned, skipping dock broadcast");
-                            return;
-                        }
-                        // Pack up the values and broadcast them to everyone
-                        Intent intent = new Intent(Intent.ACTION_DOCK_EVENT);
-                        intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
-                        intent.putExtra(Intent.EXTRA_DOCK_STATE, mDockState);
-
-                        // Check if this is Bluetooth Dock
-                        // TODO(BT): Get Dock address.
-                        String address = null;
-                        if (address != null)
-                            intent.putExtra(BluetoothDevice.EXTRA_DEVICE,
-                                    BluetoothAdapter.getDefaultAdapter().getRemoteDevice(address));
-
-                        // User feedback to confirm dock connection. Particularly
-                        // useful for flaky contact pins...
-                        if (Settings.System.getInt(cr,
-                                Settings.System.DOCK_SOUNDS_ENABLED, 1) == 1)
-                        {
-                            String whichSound = null;
-                            if (mDockState == Intent.EXTRA_DOCK_STATE_UNDOCKED) {
-                                if ((mPreviousDockState == Intent.EXTRA_DOCK_STATE_DESK) ||
-                                    (mPreviousDockState == Intent.EXTRA_DOCK_STATE_LE_DESK) ||
-                                    (mPreviousDockState == Intent.EXTRA_DOCK_STATE_HE_DESK)) {
-                                    whichSound = Settings.System.DESK_UNDOCK_SOUND;
-                                } else if (mPreviousDockState == Intent.EXTRA_DOCK_STATE_CAR) {
-                                    whichSound = Settings.System.CAR_UNDOCK_SOUND;
-                                }
-                            } else {
-                                if ((mDockState == Intent.EXTRA_DOCK_STATE_DESK) ||
-                                    (mDockState == Intent.EXTRA_DOCK_STATE_LE_DESK) ||
-                                    (mDockState == Intent.EXTRA_DOCK_STATE_HE_DESK)) {
-                                    whichSound = Settings.System.DESK_DOCK_SOUND;
-                                } else if (mDockState == Intent.EXTRA_DOCK_STATE_CAR) {
-                                    whichSound = Settings.System.CAR_DOCK_SOUND;
-                                }
-                            }
-
-                            if (whichSound != null) {
-                                final String soundPath = Settings.System.getString(cr, whichSound);
-                                if (soundPath != null) {
-                                    final Uri soundUri = Uri.parse("file://" + soundPath);
-                                    if (soundUri != null) {
-                                        final Ringtone sfx = RingtoneManager.getRingtone(mContext, soundUri);
-                                        if (sfx != null) {
-                                            sfx.setStreamType(AudioManager.STREAM_SYSTEM);
-                                            sfx.play();
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        IDreamManager mgr = IDreamManager.Stub.asInterface(ServiceManager.getService("dreams"));
-                        if (mgr != null) {
-                            // dreams feature enabled
-                            boolean undocked = mDockState == Intent.EXTRA_DOCK_STATE_UNDOCKED;
-                            if (undocked) {
-                                try {
-                                    if (mgr.isDreaming()) {
-                                        mgr.awaken();
-                                    }
-                                } catch (RemoteException e) {
-                                    Slog.w(TAG, "Unable to awaken!", e);
-                                }
-                            } else {
-                                if (isScreenSaverActivatedOnDock(mContext)) {
-                                    try {
-                                        mgr.dream();
-                                    } catch (RemoteException e) {
-                                        Slog.w(TAG, "Unable to dream!", e);
-                                    }
-                                }
-                            }
-                        } else {
-                            // dreams feature not enabled, send legacy intent
-                            mContext.sendStickyBroadcast(intent);
-                        }
-                    }
+                case MSG_DOCK_STATE_CHANGED:
+                    handleDockStateChange();
                     break;
             }
         }

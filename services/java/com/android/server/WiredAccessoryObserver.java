@@ -16,12 +16,12 @@
 
 package com.android.server;
 
-import android.app.ActivityManagerNative;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
@@ -39,7 +39,7 @@ import java.util.List;
 /**
  * <p>WiredAccessoryObserver monitors for a wired headset on the main board or dock.
  */
-class WiredAccessoryObserver extends UEventObserver {
+final class WiredAccessoryObserver extends UEventObserver {
     private static final String TAG = WiredAccessoryObserver.class.getSimpleName();
     private static final boolean LOG = true;
     private static final int BIT_HEADSET = (1 << 0);
@@ -50,40 +50,177 @@ class WiredAccessoryObserver extends UEventObserver {
     private static final int SUPPORTED_HEADSETS = (BIT_HEADSET|BIT_HEADSET_NO_MIC|
                                                    BIT_USB_HEADSET_ANLG|BIT_USB_HEADSET_DGTL|
                                                    BIT_HDMI_AUDIO);
-    private static final int HEADSETS_WITH_MIC = BIT_HEADSET;
 
-    private static class UEventInfo {
-        private final String mDevName;
-        private final int mState1Bits;
-        private final int mState2Bits;
+    private final Object mLock = new Object();
 
-        public UEventInfo(String devName, int state1Bits, int state2Bits) {
-            mDevName = devName;
-            mState1Bits = state1Bits;
-            mState2Bits = state2Bits;
+    private final Context mContext;
+    private final WakeLock mWakeLock;  // held while there is a pending route change
+    private final AudioManager mAudioManager;
+    private final List<UEventInfo> mUEventInfo;
+
+    private int mHeadsetState;
+    private int mPrevHeadsetState;
+    private String mHeadsetName;
+
+    public WiredAccessoryObserver(Context context) {
+        mContext = context;
+
+        PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
+        mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "WiredAccessoryObserver");
+        mWakeLock.setReferenceCounted(false);
+        mAudioManager = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
+
+        mUEventInfo = makeObservedUEventList();
+
+        context.registerReceiver(new BootCompletedReceiver(),
+            new IntentFilter(Intent.ACTION_BOOT_COMPLETED), null, null);
+    }
+
+    @Override
+    public void onUEvent(UEventObserver.UEvent event) {
+        if (LOG) Slog.v(TAG, "Headset UEVENT: " + event.toString());
+
+        try {
+            String devPath = event.get("DEVPATH");
+            String name = event.get("SWITCH_NAME");
+            int state = Integer.parseInt(event.get("SWITCH_STATE"));
+            synchronized (mLock) {
+                updateStateLocked(devPath, name, state);
+            }
+        } catch (NumberFormatException e) {
+            Slog.e(TAG, "Could not parse switch state from event " + event);
+        }
+    }
+
+    private void bootCompleted() {
+        synchronized (mLock) {
+            char[] buffer = new char[1024];
+            mPrevHeadsetState = mHeadsetState;
+
+            if (LOG) Slog.v(TAG, "init()");
+
+            for (int i = 0; i < mUEventInfo.size(); ++i) {
+                UEventInfo uei = mUEventInfo.get(i);
+                try {
+                    int curState;
+                    FileReader file = new FileReader(uei.getSwitchStatePath());
+                    int len = file.read(buffer, 0, 1024);
+                    file.close();
+                    curState = Integer.valueOf((new String(buffer, 0, len)).trim());
+
+                    if (curState > 0) {
+                        updateStateLocked(uei.getDevPath(), uei.getDevName(), curState);
+                    }
+                } catch (FileNotFoundException e) {
+                    Slog.w(TAG, uei.getSwitchStatePath() +
+                            " not found while attempting to determine initial switch state");
+                } catch (Exception e) {
+                    Slog.e(TAG, "" , e);
+                }
+            }
         }
 
-        public String getDevName() { return mDevName; }
+        // At any given time accessories could be inserted
+        // one on the board, one on the dock and one on HDMI:
+        // observe three UEVENTs
+        for (int i = 0; i < mUEventInfo.size(); ++i) {
+            UEventInfo uei = mUEventInfo.get(i);
+            startObserving("DEVPATH="+uei.getDevPath());
+        }
+    }
 
-        public String getDevPath() {
-            return String.format("/devices/virtual/switch/%s", mDevName);
+    private void updateStateLocked(String devPath, String name, int state) {
+        for (int i = 0; i < mUEventInfo.size(); ++i) {
+            UEventInfo uei = mUEventInfo.get(i);
+            if (devPath.equals(uei.getDevPath())) {
+                updateLocked(name, uei.computeNewHeadsetState(mHeadsetState, state));
+                return;
+            }
+        }
+    }
+
+    private void updateLocked(String newName, int newState) {
+        // Retain only relevant bits
+        int headsetState = newState & SUPPORTED_HEADSETS;
+        int usb_headset_anlg = headsetState & BIT_USB_HEADSET_ANLG;
+        int usb_headset_dgtl = headsetState & BIT_USB_HEADSET_DGTL;
+        int h2w_headset = headsetState & (BIT_HEADSET | BIT_HEADSET_NO_MIC);
+        boolean h2wStateChange = true;
+        boolean usbStateChange = true;
+        // reject all suspect transitions: only accept state changes from:
+        // - a: 0 heaset to 1 headset
+        // - b: 1 headset to 0 headset
+        if (LOG) Slog.v(TAG, "newState = "+newState+", headsetState = "+headsetState+","
+            + "mHeadsetState = "+mHeadsetState);
+        if (mHeadsetState == headsetState || ((h2w_headset & (h2w_headset - 1)) != 0)) {
+            Log.e(TAG, "unsetting h2w flag");
+            h2wStateChange = false;
+        }
+        // - c: 0 usb headset to 1 usb headset
+        // - d: 1 usb headset to 0 usb headset
+        if ((usb_headset_anlg >> 2) == 1 && (usb_headset_dgtl >> 3) == 1) {
+            Log.e(TAG, "unsetting usb flag");
+            usbStateChange = false;
+        }
+        if (!h2wStateChange && !usbStateChange) {
+            Log.e(TAG, "invalid transition, returning ...");
+            return;
         }
 
-        public String getSwitchStatePath() {
-            return String.format("/sys/class/switch/%s/state", mDevName);
+        mHeadsetName = newName;
+        mPrevHeadsetState = mHeadsetState;
+        mHeadsetState = headsetState;
+
+        mWakeLock.acquire();
+
+        Message msg = mHandler.obtainMessage(0, mHeadsetState, mPrevHeadsetState, mHeadsetName);
+        mHandler.sendMessage(msg);
+    }
+
+    private void setDevicesState(
+            int headsetState, int prevHeadsetState, String headsetName) {
+        synchronized (mLock) {
+            int allHeadsets = SUPPORTED_HEADSETS;
+            for (int curHeadset = 1; allHeadsets != 0; curHeadset <<= 1) {
+                if ((curHeadset & allHeadsets) != 0) {
+                    setDeviceStateLocked(curHeadset, headsetState, prevHeadsetState, headsetName);
+                    allHeadsets &= ~curHeadset;
+                }
+            }
         }
+    }
 
-        public boolean checkSwitchExists() {
-            File f = new File(getSwitchStatePath());
-            return ((null != f) && f.exists());
-        }
+    private void setDeviceStateLocked(int headset,
+            int headsetState, int prevHeadsetState, String headsetName) {
+        if ((headsetState & headset) != (prevHeadsetState & headset)) {
+            int device;
+            int state;
 
-        public int computeNewHeadsetState(int headsetState, int switchState) {
-            int preserveMask = ~(mState1Bits | mState2Bits);
-            int setBits = ((switchState == 1) ? mState1Bits :
-                          ((switchState == 2) ? mState2Bits : 0));
+            if ((headsetState & headset) != 0) {
+                state = 1;
+            } else {
+                state = 0;
+            }
 
-            return ((headsetState & preserveMask) | setBits);
+            if (headset == BIT_HEADSET) {
+                device = AudioManager.DEVICE_OUT_WIRED_HEADSET;
+            } else if (headset == BIT_HEADSET_NO_MIC){
+                device = AudioManager.DEVICE_OUT_WIRED_HEADPHONE;
+            } else if (headset == BIT_USB_HEADSET_ANLG) {
+                device = AudioManager.DEVICE_OUT_ANLG_DOCK_HEADSET;
+            } else if (headset == BIT_USB_HEADSET_DGTL) {
+                device = AudioManager.DEVICE_OUT_DGTL_DOCK_HEADSET;
+            } else if (headset == BIT_HDMI_AUDIO) {
+                device = AudioManager.DEVICE_OUT_AUX_DIGITAL;
+            } else {
+                Slog.e(TAG, "setDeviceState() invalid headset type: "+headset);
+                return;
+            }
+
+            if (LOG)
+                Slog.v(TAG, "device "+headsetName+((state == 1) ? " connected" : " disconnected"));
+
+            mAudioManager.setWiredDeviceConnectionState(device, state, headsetName);
         }
     }
 
@@ -130,189 +267,53 @@ class WiredAccessoryObserver extends UEventObserver {
         return retVal;
     }
 
-    private static List<UEventInfo> uEventInfo = makeObservedUEventList();
-
-    private int mHeadsetState;
-    private int mPrevHeadsetState;
-    private String mHeadsetName;
-
-    private final Context mContext;
-    private final WakeLock mWakeLock;  // held while there is a pending route change
-
-    private final AudioManager mAudioManager;
-
-    public WiredAccessoryObserver(Context context) {
-        mContext = context;
-        PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
-        mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "WiredAccessoryObserver");
-        mWakeLock.setReferenceCounted(false);
-        mAudioManager = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
-
-        context.registerReceiver(new BootCompletedReceiver(),
-            new IntentFilter(Intent.ACTION_BOOT_COMPLETED), null, null);
-    }
-
-    private final class BootCompletedReceiver extends BroadcastReceiver {
-      @Override
-      public void onReceive(Context context, Intent intent) {
-        // At any given time accessories could be inserted
-        // one on the board, one on the dock and one on HDMI:
-        // observe three UEVENTs
-        init();  // set initial status
-        for (int i = 0; i < uEventInfo.size(); ++i) {
-            UEventInfo uei = uEventInfo.get(i);
-            startObserving("DEVPATH="+uei.getDevPath());
-        }
-      }
-    }
-
-    @Override
-    public void onUEvent(UEventObserver.UEvent event) {
-        if (LOG) Slog.v(TAG, "Headset UEVENT: " + event.toString());
-
-        try {
-            String devPath = event.get("DEVPATH");
-            String name = event.get("SWITCH_NAME");
-            int state = Integer.parseInt(event.get("SWITCH_STATE"));
-            updateState(devPath, name, state);
-        } catch (NumberFormatException e) {
-            Slog.e(TAG, "Could not parse switch state from event " + event);
-        }
-    }
-
-    private synchronized final void updateState(String devPath, String name, int state)
-    {
-        for (int i = 0; i < uEventInfo.size(); ++i) {
-            UEventInfo uei = uEventInfo.get(i);
-            if (devPath.equals(uei.getDevPath())) {
-                update(name, uei.computeNewHeadsetState(mHeadsetState, state));
-                return;
-            }
-        }
-    }
-
-    private synchronized final void init() {
-        char[] buffer = new char[1024];
-        mPrevHeadsetState = mHeadsetState;
-
-        if (LOG) Slog.v(TAG, "init()");
-
-        for (int i = 0; i < uEventInfo.size(); ++i) {
-            UEventInfo uei = uEventInfo.get(i);
-            try {
-                int curState;
-                FileReader file = new FileReader(uei.getSwitchStatePath());
-                int len = file.read(buffer, 0, 1024);
-                file.close();
-                curState = Integer.valueOf((new String(buffer, 0, len)).trim());
-
-                if (curState > 0) {
-                    updateState(uei.getDevPath(), uei.getDevName(), curState);
-                }
-
-            } catch (FileNotFoundException e) {
-                Slog.w(TAG, uei.getSwitchStatePath() +
-                        " not found while attempting to determine initial switch state");
-            } catch (Exception e) {
-                Slog.e(TAG, "" , e);
-            }
-        }
-    }
-
-    private synchronized final void update(String newName, int newState) {
-        // Retain only relevant bits
-        int headsetState = newState & SUPPORTED_HEADSETS;
-        int newOrOld = headsetState | mHeadsetState;
-        int delay = 0;
-        int usb_headset_anlg = headsetState & BIT_USB_HEADSET_ANLG;
-        int usb_headset_dgtl = headsetState & BIT_USB_HEADSET_DGTL;
-        int h2w_headset = headsetState & (BIT_HEADSET | BIT_HEADSET_NO_MIC);
-        boolean h2wStateChange = true;
-        boolean usbStateChange = true;
-        // reject all suspect transitions: only accept state changes from:
-        // - a: 0 heaset to 1 headset
-        // - b: 1 headset to 0 headset
-        if (LOG) Slog.v(TAG, "newState = "+newState+", headsetState = "+headsetState+","
-            + "mHeadsetState = "+mHeadsetState);
-        if (mHeadsetState == headsetState || ((h2w_headset & (h2w_headset - 1)) != 0)) {
-            Log.e(TAG, "unsetting h2w flag");
-            h2wStateChange = false;
-        }
-        // - c: 0 usb headset to 1 usb headset
-        // - d: 1 usb headset to 0 usb headset
-        if ((usb_headset_anlg >> 2) == 1 && (usb_headset_dgtl >> 3) == 1) {
-            Log.e(TAG, "unsetting usb flag");
-            usbStateChange = false;
-        }
-        if (!h2wStateChange && !usbStateChange) {
-            Log.e(TAG, "invalid transition, returning ...");
-            return;
-        }
-
-        mHeadsetName = newName;
-        mPrevHeadsetState = mHeadsetState;
-        mHeadsetState = headsetState;
-
-        mWakeLock.acquire();
-        mHandler.sendMessage(mHandler.obtainMessage(0,
-                                                    mHeadsetState,
-                                                    mPrevHeadsetState,
-                                                    mHeadsetName));
-    }
-
-    private synchronized final void setDevicesState(int headsetState,
-                                                    int prevHeadsetState,
-                                                    String headsetName) {
-        int allHeadsets = SUPPORTED_HEADSETS;
-        for (int curHeadset = 1; allHeadsets != 0; curHeadset <<= 1) {
-            if ((curHeadset & allHeadsets) != 0) {
-                setDeviceState(curHeadset, headsetState, prevHeadsetState, headsetName);
-                allHeadsets &= ~curHeadset;
-            }
-        }
-    }
-
-    private final void setDeviceState(int headset,
-                                      int headsetState,
-                                      int prevHeadsetState,
-                                      String headsetName) {
-        if ((headsetState & headset) != (prevHeadsetState & headset)) {
-            int device;
-            int state;
-
-            if ((headsetState & headset) != 0) {
-                state = 1;
-            } else {
-                state = 0;
-            }
-
-            if (headset == BIT_HEADSET) {
-                device = AudioManager.DEVICE_OUT_WIRED_HEADSET;
-            } else if (headset == BIT_HEADSET_NO_MIC){
-                device = AudioManager.DEVICE_OUT_WIRED_HEADPHONE;
-            } else if (headset == BIT_USB_HEADSET_ANLG) {
-                device = AudioManager.DEVICE_OUT_ANLG_DOCK_HEADSET;
-            } else if (headset == BIT_USB_HEADSET_DGTL) {
-                device = AudioManager.DEVICE_OUT_DGTL_DOCK_HEADSET;
-            } else if (headset == BIT_HDMI_AUDIO) {
-                device = AudioManager.DEVICE_OUT_AUX_DIGITAL;
-            } else {
-                Slog.e(TAG, "setDeviceState() invalid headset type: "+headset);
-                return;
-            }
-
-            if (LOG)
-                Slog.v(TAG, "device "+headsetName+((state == 1) ? " connected" : " disconnected"));
-
-            mAudioManager.setWiredDeviceConnectionState(device, state, headsetName);
-        }
-    }
-
-    private final Handler mHandler = new Handler() {
+    private final Handler mHandler = new Handler(Looper.myLooper(), null, true) {
         @Override
         public void handleMessage(Message msg) {
             setDevicesState(msg.arg1, msg.arg2, (String)msg.obj);
             mWakeLock.release();
         }
     };
+
+    private static final class UEventInfo {
+        private final String mDevName;
+        private final int mState1Bits;
+        private final int mState2Bits;
+
+        public UEventInfo(String devName, int state1Bits, int state2Bits) {
+            mDevName = devName;
+            mState1Bits = state1Bits;
+            mState2Bits = state2Bits;
+        }
+
+        public String getDevName() { return mDevName; }
+
+        public String getDevPath() {
+            return String.format("/devices/virtual/switch/%s", mDevName);
+        }
+
+        public String getSwitchStatePath() {
+            return String.format("/sys/class/switch/%s/state", mDevName);
+        }
+
+        public boolean checkSwitchExists() {
+            File f = new File(getSwitchStatePath());
+            return ((null != f) && f.exists());
+        }
+
+        public int computeNewHeadsetState(int headsetState, int switchState) {
+            int preserveMask = ~(mState1Bits | mState2Bits);
+            int setBits = ((switchState == 1) ? mState1Bits :
+                          ((switchState == 2) ? mState2Bits : 0));
+
+            return ((headsetState & preserveMask) | setBits);
+        }
+    }
+
+    private final class BootCompletedReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            bootCompleted();
+        }
+    }
 }

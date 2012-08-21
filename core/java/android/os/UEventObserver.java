@@ -37,14 +37,79 @@ import java.util.HashMap;
  * @hide
 */
 public abstract class UEventObserver {
-    private static final String TAG = UEventObserver.class.getSimpleName();
+    private static UEventThread sThread;
+
+    private static native void native_setup();
+    private static native int next_event(byte[] buffer);
+
+    public UEventObserver() {
+    }
+
+    protected void finalize() throws Throwable {
+        try {
+            stopObserving();
+        } finally {
+            super.finalize();
+        }
+    }
+
+    private static UEventThread getThread() {
+        synchronized (UEventObserver.class) {
+            if (sThread == null) {
+                sThread = new UEventThread();
+                sThread.start();
+            }
+            return sThread;
+        }
+    }
+
+    private static UEventThread peekThread() {
+        synchronized (UEventObserver.class) {
+            return sThread;
+        }
+    }
+
+    /**
+     * Begin observation of UEvent's.<p>
+     * This method will cause the UEvent thread to start if this is the first
+     * invocation of startObserving in this process.<p>
+     * Once called, the UEvent thread will call onUEvent() when an incoming
+     * UEvent matches the specified string.<p>
+     * This method can be called multiple times to register multiple matches.
+     * Only one call to stopObserving is required even with multiple registered
+     * matches.
+     * @param match A substring of the UEvent to match. Use "" to match all
+     *              UEvent's
+     */
+    public final void startObserving(String match) {
+        final UEventThread t = getThread();
+        t.addObserver(match, this);
+    }
+
+    /**
+     * End observation of UEvent's.<p>
+     * This process's UEvent thread will never call onUEvent() on this
+     * UEventObserver after this call. Repeated calls have no effect.
+     */
+    public final void stopObserving() {
+        final UEventThread t = getThread();
+        if (t != null) {
+            t.removeObserver(this);
+        }
+    }
+
+    /**
+     * Subclasses of UEventObserver should override this method to handle
+     * UEvents.
+     */
+    public abstract void onUEvent(UEvent event);
 
     /**
      * Representation of a UEvent.
      */
-    static public class UEvent {
+    public static final class UEvent {
         // collection of key=value pairs parsed from the uevent message
-        public HashMap<String,String> mMap = new HashMap<String,String>();
+        private final HashMap<String,String> mMap = new HashMap<String,String>();
 
         public UEvent(String message) {
             int offset = 0;
@@ -79,20 +144,20 @@ public abstract class UEventObserver {
         }
     }
 
-    private static UEventThread sThread;
-    private static boolean sThreadStarted = false;
-
-    private static class UEventThread extends Thread {
+    private static final class UEventThread extends Thread {
         /** Many to many mapping of string match to observer.
          *  Multimap would be better, but not available in android, so use
          *  an ArrayList where even elements are the String match and odd
          *  elements the corresponding UEventObserver observer */
-        private ArrayList<Object> mObservers = new ArrayList<Object>();
-        
-        UEventThread() {
+        private final ArrayList<Object> mKeysAndObservers = new ArrayList<Object>();
+
+        private final ArrayList<UEventObserver> mTempObserversToSignal =
+                new ArrayList<UEventObserver>();
+
+        public UEventThread() {
             super("UEventObserver");
         }
-        
+
         public void run() {
             native_setup();
 
@@ -101,91 +166,54 @@ public abstract class UEventObserver {
             while (true) {
                 len = next_event(buffer);
                 if (len > 0) {
-                    String bufferStr = new String(buffer, 0, len);  // easier to search a String
-                    synchronized (mObservers) {
-                        for (int i = 0; i < mObservers.size(); i += 2) {
-                            if (bufferStr.indexOf((String)mObservers.get(i)) != -1) {
-                                ((UEventObserver)mObservers.get(i+1))
-                                        .onUEvent(new UEvent(bufferStr));
-                            }
-                        }
-                    }
+                    sendEvent(new String(buffer, 0, len));
                 }
             }
         }
-        public void addObserver(String match, UEventObserver observer) {
-            synchronized(mObservers) {
-                mObservers.add(match);
-                mObservers.add(observer);
+
+        private void sendEvent(String message) {
+            synchronized (mKeysAndObservers) {
+                final int N = mKeysAndObservers.size();
+                for (int i = 0; i < N; i += 2) {
+                    final String key = (String)mKeysAndObservers.get(i);
+                    if (message.indexOf(key) != -1) {
+                        final UEventObserver observer =
+                                (UEventObserver)mKeysAndObservers.get(i + 1);
+                        mTempObserversToSignal.add(observer);
+                    }
+                }
+            }
+
+            if (!mTempObserversToSignal.isEmpty()) {
+                final UEvent event = new UEvent(message);
+                final int N = mTempObserversToSignal.size();
+                for (int i = 0; i < N; i++) {
+                    final UEventObserver observer = mTempObserversToSignal.get(i);
+                    observer.onUEvent(event);
+                }
+                mTempObserversToSignal.clear();
             }
         }
+
+        public void addObserver(String match, UEventObserver observer) {
+            synchronized (mKeysAndObservers) {
+                mKeysAndObservers.add(match);
+                mKeysAndObservers.add(observer);
+            }
+        }
+
         /** Removes every key/value pair where value=observer from mObservers */
         public void removeObserver(UEventObserver observer) {
-            synchronized(mObservers) {
-                boolean found = true;
-                while (found) {
-                    found = false;
-                    for (int i = 0; i < mObservers.size(); i += 2) {
-                        if (mObservers.get(i+1) == observer) {
-                            mObservers.remove(i+1);
-                            mObservers.remove(i);
-                            found = true;
-                            break;
-                        }
+            synchronized (mKeysAndObservers) {
+                for (int i = 0; i < mKeysAndObservers.size(); ) {
+                    if (mKeysAndObservers.get(i + 1) == observer) {
+                        mKeysAndObservers.remove(i + 1);
+                        mKeysAndObservers.remove(i);
+                    } else {
+                        i += 2;
                     }
                 }
             }
-        }
-    }
-
-    private static native void native_setup();
-    private static native int next_event(byte[] buffer);
-
-    private static final synchronized void ensureThreadStarted() {
-        if (sThreadStarted == false) {
-            sThread = new UEventThread();
-            sThread.start();
-            sThreadStarted = true;
-        }
-    }
-
-    /**
-     * Begin observation of UEvent's.<p>
-     * This method will cause the UEvent thread to start if this is the first
-     * invocation of startObserving in this process.<p>
-     * Once called, the UEvent thread will call onUEvent() when an incoming
-     * UEvent matches the specified string.<p>
-     * This method can be called multiple times to register multiple matches.
-     * Only one call to stopObserving is required even with multiple registered
-     * matches.
-     * @param match A substring of the UEvent to match. Use "" to match all
-     *              UEvent's
-     */
-    public final synchronized void startObserving(String match) {
-        ensureThreadStarted();
-        sThread.addObserver(match, this);
-    }
-
-    /**
-     * End observation of UEvent's.<p>
-     * This process's UEvent thread will never call onUEvent() on this
-     * UEventObserver after this call. Repeated calls have no effect.
-     */
-    public final synchronized void stopObserving() {
-        sThread.removeObserver(this);
-    }
-
-    /**
-     * Subclasses of UEventObserver should override this method to handle
-     * UEvents.
-     */
-    public abstract void onUEvent(UEvent event);
-
-    protected void finalize() throws Throwable {
-        try {
-            stopObserving();
-        } finally {
-            super.finalize();
         }
     }
 }
