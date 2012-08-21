@@ -6441,9 +6441,13 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                                 mWebViewPrivate.getVerticalScrollFactor());
                         final int hdelta = (int) (hscroll *
                                 mWebViewPrivate.getHorizontalScrollFactor());
-                        if (pinScrollBy(hdelta, vdelta, false, 0)) {
-                            return true;
-                        }
+
+                        abortAnimation();
+                        int oldTouchMode = mTouchMode;
+                        startScrollingLayer(event.getX(), event.getY());
+                        doDrag(hdelta, vdelta);
+                        mTouchMode = oldTouchMode;
+                        return true;
                     }
                 }
             }
