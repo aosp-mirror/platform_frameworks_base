@@ -145,7 +145,7 @@ public final class ProviderProperties implements Parcelable {
         parcel.writeInt(mHasMonetaryCost ? 1 : 0);
         parcel.writeInt(mSupportsAltitude ? 1 : 0);
         parcel.writeInt(mSupportsSpeed ? 1 : 0);
-        parcel.writeInt(mSupportsSpeed ? 1 : 0);
+        parcel.writeInt(mSupportsBearing ? 1 : 0);
         parcel.writeInt(mPowerRequirement);
         parcel.writeInt(mAccuracy);
     }
