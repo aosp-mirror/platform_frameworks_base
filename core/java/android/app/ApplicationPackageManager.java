@@ -1079,10 +1079,10 @@ final class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public void getPackageSizeInfo(String packageName,
-                                   IPackageStatsObserver observer) {
+    public void getPackageSizeInfo(String packageName, int userHandle,
+            IPackageStatsObserver observer) {
         try {
-            mPM.getPackageSizeInfo(packageName, observer);
+            mPM.getPackageSizeInfo(packageName, userHandle, observer);
         } catch (RemoteException e) {
             // Should never happen!
         }

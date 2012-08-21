@@ -1725,21 +1725,53 @@ public class ActiveServices {
         ArrayList<ActivityManager.RunningServiceInfo> res
                 = new ArrayList<ActivityManager.RunningServiceInfo>();
 
-        int userId = UserHandle.getUserId(Binder.getCallingUid());
-        if (mServiceMap.getAllServices(userId).size() > 0) {
-            Iterator<ServiceRecord> it
-                    = mServiceMap.getAllServices(userId).iterator();
-            while (it.hasNext() && res.size() < maxNum) {
-                res.add(makeRunningServiceInfoLocked(it.next()));
-            }
-        }
+        final int uid = Binder.getCallingUid();
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            if (ActivityManager.checkUidPermission(
+                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                    uid) == PackageManager.PERMISSION_GRANTED) {
+                List<UserInfo> users = mAm.getUserManager().getUsers();
+                for (int ui=0; ui<users.size() && res.size() < maxNum; ui++) {
+                    final UserInfo user = users.get(ui);
+                    if (mServiceMap.getAllServices(user.id).size() > 0) {
+                        Iterator<ServiceRecord> it = mServiceMap.getAllServices(
+                                user.id).iterator();
+                        while (it.hasNext() && res.size() < maxNum) {
+                            res.add(makeRunningServiceInfoLocked(it.next()));
+                        }
+                    }
+                }
 
-        for (int i=0; i<mRestartingServices.size() && res.size() < maxNum; i++) {
-            ServiceRecord r = mRestartingServices.get(i);
-            ActivityManager.RunningServiceInfo info =
-                    makeRunningServiceInfoLocked(r);
-            info.restarting = r.nextRestartTime;
-            res.add(info);
+                for (int i=0; i<mRestartingServices.size() && res.size() < maxNum; i++) {
+                    ServiceRecord r = mRestartingServices.get(i);
+                    ActivityManager.RunningServiceInfo info =
+                            makeRunningServiceInfoLocked(r);
+                    info.restarting = r.nextRestartTime;
+                    res.add(info);
+                }
+            } else {
+                int userId = UserHandle.getUserId(uid);
+                if (mServiceMap.getAllServices(userId).size() > 0) {
+                    Iterator<ServiceRecord> it
+                            = mServiceMap.getAllServices(userId).iterator();
+                    while (it.hasNext() && res.size() < maxNum) {
+                        res.add(makeRunningServiceInfoLocked(it.next()));
+                    }
+                }
+
+                for (int i=0; i<mRestartingServices.size() && res.size() < maxNum; i++) {
+                    ServiceRecord r = mRestartingServices.get(i);
+                    if (r.userId == userId) {
+                        ActivityManager.RunningServiceInfo info =
+                                makeRunningServiceInfoLocked(r);
+                        info.restarting = r.nextRestartTime;
+                        res.add(info);
+                    }
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
 
         return res;

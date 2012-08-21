@@ -305,10 +305,11 @@ interface IPackageManager {
      * Get package statistics including the code, data and cache size for
      * an already installed package
      * @param packageName The package name of the application
+     * @param userHandle Which user the size should be retrieved for
      * @param observer a callback to use to notify when the asynchronous
      * retrieval of information is complete.
      */
-    void getPackageSizeInfo(in String packageName, IPackageStatsObserver observer);
+    void getPackageSizeInfo(in String packageName, int userHandle, IPackageStatsObserver observer);
     
     /**
      * Get a list of shared libraries that are available on the
