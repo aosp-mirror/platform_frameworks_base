@@ -1006,6 +1006,16 @@ final class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    public void extendVerificationTimeout(int id, int verificationCodeAtTimeout,
+            long millisecondsToDelay) {
+        try {
+            mPM.extendVerificationTimeout(id, verificationCodeAtTimeout, millisecondsToDelay);
+        } catch (RemoteException e) {
+            // Should never happen!
+        }
+    }
+
+    @Override
     public void setInstallerPackageName(String targetPackage,
             String installerPackageName) {
         try {
