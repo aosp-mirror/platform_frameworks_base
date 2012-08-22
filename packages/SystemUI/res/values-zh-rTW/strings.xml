@@ -58,12 +58,9 @@
     <string name="label_view" msgid="6304565553218192990">"查看"</string>
     <string name="always_use_device" msgid="1450287437017315906">"預設用於這個 USB 裝置"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"預設用於這個 USB 配件"</string>
-    <!-- no translation found for usb_debugging_title (1114766024068112429) -->
-    <skip />
-    <!-- no translation found for usb_debugging_message (719863946976291180) -->
-    <skip />
-    <!-- no translation found for usb_debugging_always (4253099426793114693) -->
-    <skip />
+    <string name="usb_debugging_title" msgid="1114766024068112429">"允許 USB 偵錯嗎？"</string>
+    <string name="usb_debugging_message" msgid="719863946976291180">"允許透過這台電腦進行 USB 偵錯嗎？"\n"您的 RSA 金鑰指紋如下"\n"<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_always" msgid="4253099426793114693">"一律允許這台電腦"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"放大為全螢幕"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"放大為全螢幕"</string>
     <string name="compat_mode_help_header" msgid="7969493989397529910">"相容性縮放"</string>

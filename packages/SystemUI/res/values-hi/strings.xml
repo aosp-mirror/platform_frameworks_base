@@ -58,12 +58,9 @@
     <string name="label_view" msgid="6304565553218192990">"देखें"</string>
     <string name="always_use_device" msgid="1450287437017315906">"इस USB उपकरण के लिए डिफ़ॉल्‍ट रूप से उपयोग करें"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"इस USB एसेसरी के लिए डिफ़ॉल्‍ट रूप से उपयोग करें"</string>
-    <!-- no translation found for usb_debugging_title (1114766024068112429) -->
-    <skip />
-    <!-- no translation found for usb_debugging_message (719863946976291180) -->
-    <skip />
-    <!-- no translation found for usb_debugging_always (4253099426793114693) -->
-    <skip />
+    <string name="usb_debugging_title" msgid="1114766024068112429">"USB डीबग करने दें?"</string>
+    <string name="usb_debugging_message" msgid="719863946976291180">"इस कंप्यूटर से USB डीबग करने दें?"\n"आपका RSA कुंजी फ़िंगरप्रिंट यह है:"\n"<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_always" msgid="4253099426793114693">"इस कंप्यूटर को हमेशा अनुमति दें"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"स्‍क्रीन भरने हेतु ज़ूम करें"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"स्‍क्रीन को भरने के लिए खींचें"</string>
     <string name="compat_mode_help_header" msgid="7969493989397529910">"संगतता ज़ूम"</string>
