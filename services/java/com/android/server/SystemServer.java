@@ -139,6 +139,7 @@ class ServerThread extends Thread {
         DockObserver dock = null;
         UsbService usb = null;
         SerialService serial = null;
+        TwilightService twilight = null;
         UiModeManagerService uiMode = null;
         RecognitionManagerService recognition = null;
         ThrottleService throttle = null;
@@ -586,9 +587,16 @@ class ServerThread extends Thread {
             }
 
             try {
+                Slog.i(TAG, "Twilight Service");
+                twilight = new TwilightService(context);
+            } catch (Throwable e) {
+                reportWtf("starting TwilightService", e);
+            }
+
+            try {
                 Slog.i(TAG, "UI Mode Manager Service");
                 // Listen for UI mode changes
-                uiMode = new UiModeManagerService(context);
+                uiMode = new UiModeManagerService(context, twilight);
             } catch (Throwable e) {
                 reportWtf("starting UiModeManagerService", e);
             }
@@ -750,6 +758,7 @@ class ServerThread extends Thread {
         final DockObserver dockF = dock;
         final UsbService usbF = usb;
         final ThrottleService throttleF = throttle;
+        final TwilightService twilightF = twilight;
         final UiModeManagerService uiModeF = uiMode;
         final AppWidgetService appWidgetF = appWidget;
         final WallpaperManagerService wallpaperF = wallpaper;
@@ -808,6 +817,11 @@ class ServerThread extends Thread {
                     if (usbF != null) usbF.systemReady();
                 } catch (Throwable e) {
                     reportWtf("making USB Service ready", e);
+                }
+                try {
+                    if (twilightF != null) twilightF.systemReady();
+                } catch (Throwable e) {
+                    reportWtf("makin Twilight Service ready", e);
                 }
                 try {
                     if (uiModeF != null) uiModeF.systemReady();

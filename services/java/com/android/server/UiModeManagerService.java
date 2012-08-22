@@ -18,7 +18,6 @@ package com.android.server;
 
 import android.app.Activity;
 import android.app.ActivityManagerNative;
-import android.app.AlarmManager;
 import android.app.IUiModeManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -32,55 +31,33 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.location.Criteria;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.BatteryManager;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.SystemClock;
 import android.provider.Settings;
-import android.text.format.DateUtils;
-import android.text.format.Time;
 import android.util.Slog;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.Iterator;
 
 import com.android.internal.R;
 import com.android.internal.app.DisableCarModeActivity;
+import com.android.server.TwilightService.TwilightState;
 
 class UiModeManagerService extends IUiModeManager.Stub {
     private static final String TAG = UiModeManager.class.getSimpleName();
     private static final boolean LOG = false;
 
-    private static final String KEY_LAST_UPDATE_INTERVAL = "LAST_UPDATE_INTERVAL";
-
     // Enable launching of applications when entering the dock.
     private static final boolean ENABLE_LAUNCH_CAR_DOCK_APP = true;
     private static final boolean ENABLE_LAUNCH_DESK_DOCK_APP = true;
 
-    private static final int MSG_UPDATE_TWILIGHT = 0;
-    private static final int MSG_ENABLE_LOCATION_UPDATES = 1;
-    private static final int MSG_GET_NEW_LOCATION_UPDATE = 2;
-
-    private static final long LOCATION_UPDATE_MS = 24 * DateUtils.HOUR_IN_MILLIS;
-    private static final long MIN_LOCATION_UPDATE_MS = 30 * DateUtils.MINUTE_IN_MILLIS;
-    private static final float LOCATION_UPDATE_DISTANCE_METER = 1000 * 20;
-    private static final long LOCATION_UPDATE_ENABLE_INTERVAL_MIN = 5000;
-    private static final long LOCATION_UPDATE_ENABLE_INTERVAL_MAX = 15 * DateUtils.MINUTE_IN_MILLIS;
-    private static final double FACTOR_GMT_OFFSET_LONGITUDE = 1000.0 * 360.0 / DateUtils.DAY_IN_MILLIS;
-
-    private static final String ACTION_UPDATE_NIGHT_MODE = "com.android.server.action.UPDATE_NIGHT_MODE";
-
     private final Context mContext;
+    private final TwilightService mTwilightService;
+    private final Handler mHandler = new Handler();
 
     final Object mLock = new Object();
 
@@ -106,10 +83,6 @@ class UiModeManagerService extends IUiModeManager.Stub {
 
     private NotificationManager mNotificationManager;
 
-    private AlarmManager mAlarmManager;
-
-    private LocationManager mLocationManager;
-    private Location mLocation;
     private StatusBarManager mStatusBarManager;
     private final PowerManager.WakeLock mWakeLock;
 
@@ -206,15 +179,6 @@ class UiModeManagerService extends IUiModeManager.Stub {
         }
     };
 
-    private final BroadcastReceiver mTwilightUpdateReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (isDoingNightMode() && mNightMode == UiModeManager.MODE_NIGHT_AUTO) {
-                mHandler.sendEmptyMessage(MSG_UPDATE_TWILIGHT);
-            }
-        }
-    };
-
     private final BroadcastReceiver mDockModeReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -236,113 +200,24 @@ class UiModeManagerService extends IUiModeManager.Stub {
         }
     };
 
-    private final BroadcastReceiver mUpdateLocationReceiver = new BroadcastReceiver() {
+    private final TwilightService.TwilightListener mTwilightListener =
+            new TwilightService.TwilightListener() {
         @Override
-        public void onReceive(Context context, Intent intent) {
-            if (Intent.ACTION_AIRPLANE_MODE_CHANGED.equals(intent.getAction())) {
-                if (!intent.getBooleanExtra("state", false)) {
-                    // Airplane mode is now off!
-                    mHandler.sendEmptyMessage(MSG_GET_NEW_LOCATION_UPDATE);
-                }
-            } else {
-                // Time zone has changed!
-                mHandler.sendEmptyMessage(MSG_GET_NEW_LOCATION_UPDATE);
-            }
+        public void onTwilightStateChanged() {
+            updateTwilight();
         }
     };
 
-    // A LocationListener to initialize the network location provider. The location updates
-    // are handled through the passive location provider.
-    private final LocationListener mEmptyLocationListener =  new LocationListener() {
-        public void onLocationChanged(Location location) {
-        }
-
-        public void onProviderDisabled(String provider) {
-        }
-
-        public void onProviderEnabled(String provider) {
-        }
-
-        public void onStatusChanged(String provider, int status, Bundle extras) {
-        }
-    };
-
-    private final LocationListener mLocationListener = new LocationListener() {
-
-        public void onLocationChanged(Location location) {
-            final boolean hasMoved = hasMoved(location);
-            final boolean hasBetterAccuracy = mLocation == null
-                    || location.getAccuracy() < mLocation.getAccuracy();
-            if (hasMoved || hasBetterAccuracy) {
-                synchronized (mLock) {
-                    mLocation = location;
-                    if (hasMoved && isDoingNightMode()
-                            && mNightMode == UiModeManager.MODE_NIGHT_AUTO) {
-                        mHandler.sendEmptyMessage(MSG_UPDATE_TWILIGHT);
-                    }
-                }
-            }
-        }
-
-        public void onProviderDisabled(String provider) {
-        }
-
-        public void onProviderEnabled(String provider) {
-        }
-
-        public void onStatusChanged(String provider, int status, Bundle extras) {
-        }
-
-        /*
-         * The user has moved if the accuracy circles of the two locations
-         * don't overlap.
-         */
-        private boolean hasMoved(Location location) {
-            if (location == null) {
-                return false;
-            }
-            if (mLocation == null) {
-                return true;
-            }
-
-            /* if new location is older than the current one, the devices hasn't
-             * moved.
-             */
-            if (location.getElapsedRealtimeNano() < mLocation.getElapsedRealtimeNano()) {
-                return false;
-            }
-
-            /* Get the distance between the two points */
-            float distance = mLocation.distanceTo(location);
-
-            /* Get the total accuracy radius for both locations */
-            float totalAccuracy = mLocation.getAccuracy() + location.getAccuracy();
-
-            /* If the distance is greater than the combined accuracy of the two
-             * points then they can't overlap and hence the user has moved.
-             */
-            return distance >= totalAccuracy;
-        }
-    };
-
-    public UiModeManagerService(Context context) {
+    public UiModeManagerService(Context context, TwilightService twilight) {
         mContext = context;
+        mTwilightService = twilight;
 
         ServiceManager.addService(Context.UI_MODE_SERVICE, this);
 
-        mAlarmManager =
-            (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
-        mLocationManager =
-            (LocationManager)mContext.getSystemService(Context.LOCATION_SERVICE);
-        mContext.registerReceiver(mTwilightUpdateReceiver,
-                new IntentFilter(ACTION_UPDATE_NIGHT_MODE));
         mContext.registerReceiver(mDockModeReceiver,
                 new IntentFilter(Intent.ACTION_DOCK_EVENT));
         mContext.registerReceiver(mBatteryReceiver,
                 new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-        IntentFilter filter = new IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
-        mContext.registerReceiver(mUpdateLocationReceiver, filter);
 
         PowerManager powerManager = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         mWakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, TAG);
@@ -360,6 +235,8 @@ class UiModeManagerService extends IUiModeManager.Stub {
 
         mNightMode = Settings.Secure.getInt(mContext.getContentResolver(),
                 Settings.Secure.UI_NIGHT_MODE, UiModeManager.MODE_NIGHT_AUTO);
+
+        mTwilightService.registerListener(mTwilightListener, mHandler);
     }
 
     public void disableCarMode(int flags) {
@@ -419,8 +296,8 @@ class UiModeManagerService extends IUiModeManager.Stub {
         synchronized (mLock) {
             mSystemReady = true;
             mCarModeEnabled = mDockState == Intent.EXTRA_DOCK_STATE_CAR;
+            updateComputedNightModeLocked();
             updateLocked(0, 0);
-            mHandler.sendEmptyMessage(MSG_ENABLE_LOCATION_UPDATES);
         }
     }
 
@@ -467,7 +344,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
         }
         if (mCarModeEnabled) {
             if (mNightMode == UiModeManager.MODE_NIGHT_AUTO) {
-                updateTwilightLocked();
+                updateComputedNightModeLocked();
                 uiMode |= mComputedNightMode ? Configuration.UI_MODE_NIGHT_YES
                         : Configuration.UI_MODE_NIGHT_NO;
             } else {
@@ -651,191 +528,20 @@ class UiModeManagerService extends IUiModeManager.Stub {
         }
     }
 
-    private final Handler mHandler = new Handler() {
-
-        boolean mPassiveListenerEnabled;
-        boolean mNetworkListenerEnabled;
-        boolean mDidFirstInit;
-        long mLastNetworkRegisterTime = -MIN_LOCATION_UPDATE_MS;
-
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_UPDATE_TWILIGHT:
-                    synchronized (mLock) {
-                        if (isDoingNightMode() && mLocation != null
-                                && mNightMode == UiModeManager.MODE_NIGHT_AUTO) {
-                            updateTwilightLocked();
-                            updateLocked(0, 0);
-                        }
-                    }
-                    break;
-                case MSG_GET_NEW_LOCATION_UPDATE:
-                    if (!mNetworkListenerEnabled) {
-                        // Don't do anything -- we are still trying to get a
-                        // location.
-                        return;
-                    }
-                    if ((mLastNetworkRegisterTime+MIN_LOCATION_UPDATE_MS)
-                            >= SystemClock.elapsedRealtime()) {
-                        // Don't do anything -- it hasn't been long enough
-                        // since we last requested an update.
-                        return;
-                    }
-
-                    // Unregister the current location monitor, so we can
-                    // register a new one for it to get an immediate update.
-                    mNetworkListenerEnabled = false;
-                    mLocationManager.removeUpdates(mEmptyLocationListener);
-
-                    // Fall through to re-register listener.
-                case MSG_ENABLE_LOCATION_UPDATES:
-                    // enable network provider to receive at least location updates for a given
-                    // distance.
-                    boolean networkLocationEnabled;
-                    try {
-                        networkLocationEnabled =
-                            mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-                    } catch (Exception e) {
-                        // we may get IllegalArgumentException if network location provider
-                        // does not exist or is not yet installed.
-                        networkLocationEnabled = false;
-                    }
-                    if (!mNetworkListenerEnabled && networkLocationEnabled) {
-                        mNetworkListenerEnabled = true;
-                        mLastNetworkRegisterTime = SystemClock.elapsedRealtime();
-                        mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
-                                LOCATION_UPDATE_MS, 0, mEmptyLocationListener);
-
-                        if (!mDidFirstInit) {
-                            mDidFirstInit = true;
-                            if (mLocation == null) {
-                                retrieveLocation();
-                            }
-                            synchronized (mLock) {
-                                if (isDoingNightMode() && mLocation != null
-                                        && mNightMode == UiModeManager.MODE_NIGHT_AUTO) {
-                                    updateTwilightLocked();
-                                    updateLocked(0, 0);
-                                }
-                            }
-                        }
-                    }
-                   // enable passive provider to receive updates from location fixes (gps
-                   // and network).
-                   boolean passiveLocationEnabled;
-                    try {
-                        passiveLocationEnabled =
-                            mLocationManager.isProviderEnabled(LocationManager.PASSIVE_PROVIDER);
-                    } catch (Exception e) {
-                        // we may get IllegalArgumentException if passive location provider
-                        // does not exist or is not yet installed.
-                        passiveLocationEnabled = false;
-                    }
-                    if (!mPassiveListenerEnabled && passiveLocationEnabled) {
-                        mPassiveListenerEnabled = true;
-                        mLocationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER,
-                                0, LOCATION_UPDATE_DISTANCE_METER , mLocationListener);
-                    }
-                    if (!(mNetworkListenerEnabled && mPassiveListenerEnabled)) {
-                        long interval = msg.getData().getLong(KEY_LAST_UPDATE_INTERVAL);
-                        interval *= 1.5;
-                        if (interval == 0) {
-                            interval = LOCATION_UPDATE_ENABLE_INTERVAL_MIN;
-                        } else if (interval > LOCATION_UPDATE_ENABLE_INTERVAL_MAX) {
-                            interval = LOCATION_UPDATE_ENABLE_INTERVAL_MAX;
-                        }
-                        Bundle bundle = new Bundle();
-                        bundle.putLong(KEY_LAST_UPDATE_INTERVAL, interval);
-                        Message newMsg = mHandler.obtainMessage(MSG_ENABLE_LOCATION_UPDATES);
-                        newMsg.setData(bundle);
-                        mHandler.sendMessageDelayed(newMsg, interval);
-                    }
-                    break;
+    private void updateTwilight() {
+        synchronized (mLock) {
+            if (isDoingNightMode() && mNightMode == UiModeManager.MODE_NIGHT_AUTO) {
+                updateComputedNightModeLocked();
+                updateLocked(0, 0);
             }
         }
+    }
 
-        private void retrieveLocation() {
-            Location location = null;
-            final Iterator<String> providers =
-                    mLocationManager.getProviders(new Criteria(), true).iterator();
-            while (providers.hasNext()) {
-                final Location lastKnownLocation =
-                        mLocationManager.getLastKnownLocation(providers.next());
-                // pick the most recent location
-                if (location == null || (lastKnownLocation != null &&
-                        location.getElapsedRealtimeNano() <
-                        lastKnownLocation.getElapsedRealtimeNano())) {
-                    location = lastKnownLocation;
-                }
-            }
-            // In the case there is no location available (e.g. GPS fix or network location
-            // is not available yet), the longitude of the location is estimated using the timezone,
-            // latitude and accuracy are set to get a good average.
-            if (location == null) {
-                Time currentTime = new Time();
-                currentTime.set(System.currentTimeMillis());
-                double lngOffset = FACTOR_GMT_OFFSET_LONGITUDE *
-                        (currentTime.gmtoff - (currentTime.isDst > 0 ? 3600 : 0));
-                location = new Location("fake");
-                location.setLongitude(lngOffset);
-                location.setLatitude(0);
-                location.setAccuracy(417000.0f);
-                location.setTime(System.currentTimeMillis());
-                location.setElapsedRealtimeNano(SystemClock.elapsedRealtimeNano());
-            }
-            synchronized (mLock) {
-                mLocation = location;
-            }
+    private void updateComputedNightModeLocked() {
+        TwilightState state = mTwilightService.getCurrentState();
+        if (state != null) {
+            mComputedNightMode = state.isNight();
         }
-    };
-
-    void updateTwilightLocked() {
-        if (mLocation == null) {
-            return;
-        }
-        final long currentTime = System.currentTimeMillis();
-        boolean nightMode;
-        // calculate current twilight
-        TwilightCalculator tw = new TwilightCalculator();
-        tw.calculateTwilight(currentTime,
-                mLocation.getLatitude(), mLocation.getLongitude());
-        if (tw.mState == TwilightCalculator.DAY) {
-            nightMode = false;
-        } else {
-            nightMode = true;
-        }
-
-        // schedule next update
-        long nextUpdate = 0;
-        if (tw.mSunrise == -1 || tw.mSunset == -1) {
-            // In the case the day or night never ends the update is scheduled 12 hours later.
-            nextUpdate = currentTime + 12 * DateUtils.HOUR_IN_MILLIS;
-        } else {
-            final int mLastTwilightState = tw.mState;
-            // add some extra time to be on the save side.
-            nextUpdate += DateUtils.MINUTE_IN_MILLIS;
-            if (currentTime > tw.mSunset) {
-                // next update should be on the following day
-                tw.calculateTwilight(currentTime
-                        + DateUtils.DAY_IN_MILLIS, mLocation.getLatitude(),
-                        mLocation.getLongitude());
-            }
-
-            if (mLastTwilightState == TwilightCalculator.NIGHT) {
-                nextUpdate += tw.mSunrise;
-            } else {
-                nextUpdate += tw.mSunset;
-            }
-        }
-
-        Intent updateIntent = new Intent(ACTION_UPDATE_NIGHT_MODE);
-        PendingIntent pendingIntent =
-                PendingIntent.getBroadcast(mContext, 0, updateIntent, 0);
-        mAlarmManager.cancel(pendingIntent);
-        mAlarmManager.set(AlarmManager.RTC_WAKEUP, nextUpdate, pendingIntent);
-
-        mComputedNightMode = nightMode;
     }
 
     @Override
@@ -860,9 +566,8 @@ class UiModeManagerService extends IUiModeManager.Stub {
                     pw.print(" mSetUiMode=0x"); pw.println(Integer.toHexString(mSetUiMode));
             pw.print("  mHoldingConfiguration="); pw.print(mHoldingConfiguration);
                     pw.print(" mSystemReady="); pw.println(mSystemReady);
-            if (mLocation != null) {
-                pw.print("  mLocation="); pw.println(mLocation);
-            }
+            pw.print("  mTwilightService.getCurrentState()=");
+                    pw.println(mTwilightService.getCurrentState());
         }
     }
 }
