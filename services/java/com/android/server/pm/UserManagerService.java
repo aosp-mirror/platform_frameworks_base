@@ -137,9 +137,15 @@ public class UserManagerService extends IUserManager.Stub {
     public UserInfo getUserInfo(int userId) {
         checkManageUsersPermission("query user");
         synchronized (mUsers) {
-            UserInfo info = mUsers.get(userId);
-            return info;
+            return getUserInfoLocked(userId);
         }
+    }
+
+    /*
+     * Should be locked on mUsers before calling this.
+     */
+    private UserInfo getUserInfoLocked(int userId) {
+        return mUsers.get(userId);
     }
 
     public boolean exists(int userId) {
@@ -212,8 +218,9 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     /**
-     * Enforces that only the system UID or root's UID can call a method exposed
-     * via Binder.
+     * Enforces that only the system UID or root's UID or apps that have the
+     * {@link android.Manifest.permission.MANAGE_USERS MANAGE_USERS}
+     * permission can make certain calls to the UserManager.
      *
      * @param message used as message if SecurityException is thrown
      * @throws SecurityException if the caller is not system or root
@@ -534,7 +541,7 @@ public class UserManagerService extends IUserManager.Stub {
     public int getUserSerialNumber(int userHandle) {
         synchronized (mUsers) {
             if (!exists(userHandle)) return -1;
-            return getUserInfo(userHandle).serialNumber;
+            return getUserInfoLocked(userHandle).serialNumber;
         }
     }
 
@@ -542,7 +549,7 @@ public class UserManagerService extends IUserManager.Stub {
     public int getUserHandle(int userSerialNumber) {
         synchronized (mUsers) {
             for (int userId : mUserIds) {
-                if (getUserInfo(userId).serialNumber == userSerialNumber) return userId;
+                if (getUserInfoLocked(userId).serialNumber == userSerialNumber) return userId;
             }
             // Not found
             return -1;
@@ -617,14 +624,16 @@ public class UserManagerService extends IUserManager.Stub {
      * @return
      */
     private int getNextAvailableId() {
-        int i = 0;
-        while (i < Integer.MAX_VALUE) {
-            if (mUsers.indexOfKey(i) < 0) {
-                break;
+        synchronized (mUsers) {
+            int i = 0;
+            while (i < Integer.MAX_VALUE) {
+                if (mUsers.indexOfKey(i) < 0) {
+                    break;
+                }
+                i++;
             }
-            i++;
+            return i;
         }
-        return i;
     }
 
     private boolean createPackageFolders(int id, File userPath) {
