@@ -50,7 +50,7 @@ import libcore.util.Objects;
 public final class TwilightService {
     private static final String TAG = "TwilightService";
 
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     private static final String ACTION_UPDATE_TWILIGHT_STATE =
             "com.android.server.action.UPDATE_TWILIGHT_STATE";
@@ -463,6 +463,11 @@ public final class TwilightService {
         }
 
         private void updateTwilightState() {
+            if (mLocation == null) {
+                setTwilightState(null);
+                return;
+            }
+
             final long now = System.currentTimeMillis();
 
             // calculate yesterday's twilight
