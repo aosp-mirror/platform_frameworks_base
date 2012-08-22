@@ -17,6 +17,8 @@
 package com.android.server.power;
 
 import com.android.server.LightsService;
+import com.android.server.TwilightService;
+import com.android.server.TwilightService.TwilightState;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
@@ -88,6 +90,22 @@ final class DisplayPowerController {
     // auto-brightness adjustment setting.
     private static final float SCREEN_AUTO_BRIGHTNESS_ADJUSTMENT_MAX_GAMMA = 3.0f;
 
+    // If true, enables the use of the current time as an auto-brightness adjustment.
+    // The basic idea here is to expand the dynamic range of auto-brightness
+    // when it is especially dark outside.  The light sensor tends to perform
+    // poorly at low light levels so we compensate for it by making an
+    // assumption about the environment.
+    private static final boolean USE_TWILIGHT_ADJUSTMENT = true;
+
+    // Specifies the maximum magnitude of the time of day adjustment.
+    private static final float TWILIGHT_ADJUSTMENT_MAX_GAMMA = 1.5f;
+
+    // The amount of time after or before sunrise over which to start adjusting
+    // the gamma.  We want the change to happen gradually so that it is below the
+    // threshold of perceptibility and so that the adjustment has maximum effect
+    // well after dusk.
+    private static final long TWILIGHT_ADJUSTMENT_TIME = DateUtils.HOUR_IN_MILLIS * 2;
+
     private static final int ELECTRON_BEAM_ON_ANIMATION_DURATION_MILLIS = 300;
     private static final int ELECTRON_BEAM_OFF_ANIMATION_DURATION_MILLIS = 600;
 
@@ -147,6 +165,9 @@ final class DisplayPowerController {
 
     // The lights service.
     private final LightsService mLights;
+
+    // The twilight service.
+    private final TwilightService mTwilight;
 
     // The sensor manager.
     private final SensorManager mSensorManager;
@@ -291,11 +312,14 @@ final class DisplayPowerController {
     private ObjectAnimator mElectronBeamOffAnimator;
     private RampAnimator<DisplayPowerState> mScreenBrightnessRampAnimator;
 
+    // Twilight changed.  We might recalculate auto-brightness values.
+    private boolean mTwilightChanged;
+
     /**
      * Creates the display power controller.
      */
     public DisplayPowerController(Looper looper, Context context, Notifier notifier,
-            LightsService lights, SuspendBlocker suspendBlocker,
+            LightsService lights, TwilightService twilight, SuspendBlocker suspendBlocker,
             Callbacks callbacks, Handler callbackHandler) {
         mHandler = new DisplayControllerHandler(looper);
         mNotifier = notifier;
@@ -304,6 +328,7 @@ final class DisplayPowerController {
         mCallbackHandler = callbackHandler;
 
         mLights = lights;
+        mTwilight = twilight;
         mSensorManager = new SystemSensorManager(mHandler.getLooper());
 
         final Resources resources = context.getResources();
@@ -343,6 +368,10 @@ final class DisplayPowerController {
         if (mUseSoftwareAutoBrightnessConfig
                 && !DEBUG_PRETEND_LIGHT_SENSOR_ABSENT) {
             mLightSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+        }
+
+        if (mUseSoftwareAutoBrightnessConfig && USE_TWILIGHT_ADJUSTMENT) {
+            mTwilight.registerListener(mTwilightListener, mHandler);
         }
     }
 
@@ -486,7 +515,8 @@ final class DisplayPowerController {
         // Update the power state request.
         final boolean mustNotify;
         boolean mustInitialize = false;
-        boolean updateAutoBrightness = false;
+        boolean updateAutoBrightness = mTwilightChanged;
+        mTwilightChanged = false;
 
         synchronized (mLock) {
             mPendingUpdatePowerStateLocked = false;
@@ -863,6 +893,22 @@ final class DisplayPowerController {
             }
         }
 
+        if (USE_TWILIGHT_ADJUSTMENT) {
+            TwilightState state = mTwilight.getCurrentState();
+            if (state != null && state.isNight()) {
+                final long now = System.currentTimeMillis();
+                final float earlyGamma =
+                        getTwilightGamma(now, state.getYesterdaySunset(), state.getTodaySunrise());
+                final float lateGamma =
+                        getTwilightGamma(now, state.getTodaySunset(), state.getTomorrowSunrise());
+                gamma *= earlyGamma * lateGamma;
+                if (DEBUG) {
+                    Slog.d(TAG, "updateAutoBrightness: earlyGamma=" + earlyGamma
+                            + ", lateGamma=" + lateGamma);
+                }
+            }
+        }
+
         if (gamma != 1.0f) {
             final float in = value;
             value = FloatMath.pow(value, gamma);
@@ -887,6 +933,29 @@ final class DisplayPowerController {
                 sendUpdatePowerState();
             }
         }
+    }
+
+    private static float getTwilightGamma(long now, long lastSunset, long nextSunrise) {
+        if (lastSunset < 0 || nextSunrise < 0
+                || now < lastSunset || now > nextSunrise) {
+            return 1.0f;
+        }
+
+        if (now < lastSunset + TWILIGHT_ADJUSTMENT_TIME) {
+            return lerp(1.0f, TWILIGHT_ADJUSTMENT_MAX_GAMMA,
+                    (float)(now - lastSunset) / TWILIGHT_ADJUSTMENT_TIME);
+        }
+
+        if (now > nextSunrise - TWILIGHT_ADJUSTMENT_TIME) {
+            return lerp(1.0f, TWILIGHT_ADJUSTMENT_MAX_GAMMA,
+                    (float)(nextSunrise - now) / TWILIGHT_ADJUSTMENT_TIME);
+        }
+
+        return TWILIGHT_ADJUSTMENT_MAX_GAMMA;
+    }
+
+    private static float lerp(float x, float y, float alpha) {
+        return x + (y - x) * alpha;
     }
 
     private void sendOnStateChanged() {
@@ -995,6 +1064,7 @@ final class DisplayPowerController {
         pw.println("  mScreenAutoBrightness=" + mScreenAutoBrightness);
         pw.println("  mUsingScreenAutoBrightness=" + mUsingScreenAutoBrightness);
         pw.println("  mLastScreenAutoBrightnessGamma=" + mLastScreenAutoBrightnessGamma);
+        pw.println("  mTwilight.getCurrentState()=" + mTwilight.getCurrentState());
 
         if (mElectronBeamOnAnimator != null) {
             pw.println("  mElectronBeamOnAnimator.isStarted()=" +
@@ -1093,6 +1163,15 @@ final class DisplayPowerController {
         @Override
         public void onAccuracyChanged(Sensor sensor, int accuracy) {
             // Not used.
+        }
+    };
+
+    private final TwilightService.TwilightListener mTwilightListener =
+            new TwilightService.TwilightListener() {
+        @Override
+        public void onTwilightStateChanged() {
+            mTwilightChanged = true;
+            updatePowerState();
         }
     };
 }
