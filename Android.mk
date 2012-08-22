@@ -237,9 +237,6 @@ LOCAL_JAVA_LIBRARIES := bouncycastle core core-junit ext
 LOCAL_MODULE := framework
 LOCAL_MODULE_CLASS := JAVA_LIBRARIES
 
-LOCAL_NO_EMMA_INSTRUMENT := true
-LOCAL_NO_EMMA_COMPILE := true
-
 # List of classes and interfaces which should be loaded by the Zygote.
 LOCAL_JAVA_RESOURCE_FILES += $(LOCAL_PATH)/preloaded-classes
 
@@ -724,9 +721,6 @@ LOCAL_JAVA_LIBRARIES := core
 LOCAL_JAVA_RESOURCE_DIRS := $(ext_res_dirs)
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE := ext
-
-LOCAL_NO_EMMA_INSTRUMENT := true
-LOCAL_NO_EMMA_COMPILE := true
 
 LOCAL_DX_FLAGS := --core-library
 
