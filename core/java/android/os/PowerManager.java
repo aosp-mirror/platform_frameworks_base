@@ -275,13 +275,6 @@ public final class PowerManager {
     public static final int USER_ACTIVITY_FLAG_NO_CHANGE_LIGHTS = 1 << 0;
 
     /**
-     * Special wake lock tag used for the wake lock in the Window Manager that handles the
-     * {@link android.view.WindowManager.LayoutParams#FLAG_KEEP_SCREEN_ON} flag.
-     * @hide
-     */
-    public static final String KEEP_SCREEN_ON_FLAG_TAG = "KEEP_SCREEN_ON_FLAG";
-
-    /**
      * Go to sleep reason code: Going to sleep due by user request.
      * @hide
      */
