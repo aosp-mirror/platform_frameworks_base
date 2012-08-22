@@ -496,6 +496,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ALARM_WAKEUP);
         intentFilter.addAction(ALARM_TIMEOUT);
+        intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         mContext.registerReceiver(mBroadcastReciever, intentFilter);
     }
 
