@@ -405,7 +405,7 @@ public final class PowerManagerService extends IPowerManager.Stub
         mScreenAutoBrightnessAdjustmentSetting = Settings.System.getFloat(resolver,
                 Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ, 0.0f);
         if (oldScreenAutoBrightnessAdjustmentSetting != mScreenAutoBrightnessAdjustmentSetting) {
-            mTemporaryScreenAutoBrightnessAdjustmentSettingOverride = -1;
+            mTemporaryScreenAutoBrightnessAdjustmentSettingOverride = Float.NaN;
         }
 
         mScreenBrightnessModeSetting = Settings.System.getInt(resolver,
@@ -1347,7 +1347,8 @@ public final class PowerManagerService extends IPowerManager.Stub
     }
 
     private static boolean isValidAutoBrightnessAdjustment(float value) {
-        return !Float.isNaN(value);
+        // Handles NaN by always returning false.
+        return value >= -1.0f && value <= 1.0f;
     }
 
     private int getDesiredScreenPowerState() {
