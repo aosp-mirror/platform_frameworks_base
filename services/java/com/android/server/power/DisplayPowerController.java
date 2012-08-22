@@ -106,8 +106,8 @@ final class DisplayPowerController {
     // well after dusk.
     private static final long TWILIGHT_ADJUSTMENT_TIME = DateUtils.HOUR_IN_MILLIS * 2;
 
-    private static final int ELECTRON_BEAM_ON_ANIMATION_DURATION_MILLIS = 300;
-    private static final int ELECTRON_BEAM_OFF_ANIMATION_DURATION_MILLIS = 600;
+    private static final int ELECTRON_BEAM_ON_ANIMATION_DURATION_MILLIS = 250;
+    private static final int ELECTRON_BEAM_OFF_ANIMATION_DURATION_MILLIS = 450;
 
     private static final int MSG_UPDATE_POWER_STATE = 1;
     private static final int MSG_PROXIMITY_SENSOR_DEBOUNCED = 2;
