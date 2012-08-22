@@ -249,6 +249,10 @@ public final class PowerManagerService extends IPowerManager.Stub
     // Use -1 if no value has been set.
     private int mScreenBrightnessSetting;
 
+    // The screen auto-brightness adjustment setting, from -1 to 1.
+    // Use 0 if there is no adjustment.
+    private float mScreenAutoBrightnessAdjustmentSetting;
+
     // The screen brightness mode.
     // One of the Settings.System.SCREEN_BRIGHTNESS_MODE_* constants.
     private int mScreenBrightnessModeSetting;
@@ -262,6 +266,12 @@ public final class PowerManagerService extends IPowerManager.Stub
     // to temporarily adjust the brightness until next updated,
     // Use -1 to disable.
     private int mTemporaryScreenBrightnessSettingOverride = -1;
+
+    // The screen brightness adjustment setting override from the settings
+    // application to temporarily adjust the auto-brightness adjustment factor
+    // until next updated, in the range -1..1.
+    // Use NaN to disable.
+    private float mTemporaryScreenAutoBrightnessAdjustmentSettingOverride = Float.NaN;
 
     private native void nativeInit();
     private static native void nativeShutdown();
@@ -387,6 +397,14 @@ public final class PowerManagerService extends IPowerManager.Stub
                 Settings.System.SCREEN_BRIGHTNESS, mScreenBrightnessSettingDefault);
         if (oldScreenBrightnessSetting != mScreenBrightnessSetting) {
             mTemporaryScreenBrightnessSettingOverride = -1;
+        }
+
+        final float oldScreenAutoBrightnessAdjustmentSetting =
+                mScreenAutoBrightnessAdjustmentSetting;
+        mScreenAutoBrightnessAdjustmentSetting = Settings.System.getFloat(resolver,
+                Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ, 0.0f);
+        if (oldScreenAutoBrightnessAdjustmentSetting != mScreenAutoBrightnessAdjustmentSetting) {
+            mTemporaryScreenAutoBrightnessAdjustmentSettingOverride = -1;
         }
 
         mScreenBrightnessModeSetting = Settings.System.getInt(resolver,
@@ -1275,6 +1293,7 @@ public final class PowerManagerService extends IPowerManager.Stub
             }
 
             int screenBrightness = mScreenBrightnessSettingDefault;
+            float screenAutoBrightnessAdjustment = 0.0f;
             boolean autoBrightness = (mScreenBrightnessModeSetting ==
                     Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
             if (isValidBrightness(mScreenBrightnessOverrideFromWindowManager)) {
@@ -1283,14 +1302,26 @@ public final class PowerManagerService extends IPowerManager.Stub
             } else if (isValidBrightness(mTemporaryScreenBrightnessSettingOverride)) {
                 screenBrightness = mTemporaryScreenBrightnessSettingOverride;
             } else if (isValidBrightness(mScreenBrightnessSetting)) {
-                screenBrightness =  mScreenBrightnessSetting;
+                screenBrightness = mScreenBrightnessSetting;
             }
             if (autoBrightness) {
                 screenBrightness = mScreenBrightnessSettingDefault;
+                if (isValidAutoBrightnessAdjustment(
+                        mTemporaryScreenAutoBrightnessAdjustmentSettingOverride)) {
+                    screenAutoBrightnessAdjustment =
+                            mTemporaryScreenAutoBrightnessAdjustmentSettingOverride;
+                } else if (isValidAutoBrightnessAdjustment(
+                        mScreenAutoBrightnessAdjustmentSetting)) {
+                    screenAutoBrightnessAdjustment = mScreenAutoBrightnessAdjustmentSetting;
+                }
             }
             screenBrightness = Math.max(Math.min(screenBrightness,
                     mScreenBrightnessSettingMaximum), mScreenBrightnessSettingMinimum);
+            screenAutoBrightnessAdjustment = Math.max(Math.min(
+                    screenAutoBrightnessAdjustment, 1.0f), -1.0f);
             mDisplayPowerRequest.screenBrightness = screenBrightness;
+            mDisplayPowerRequest.screenAutoBrightnessAdjustment =
+                    screenAutoBrightnessAdjustment;
             mDisplayPowerRequest.useAutoBrightness = autoBrightness;
 
             mDisplayPowerRequest.useProximitySensor = shouldUseProximitySensorLocked();
@@ -1312,6 +1343,10 @@ public final class PowerManagerService extends IPowerManager.Stub
 
     private static boolean isValidBrightness(int value) {
         return value >= 0 && value <= 255;
+    }
+
+    private static boolean isValidAutoBrightnessAdjustment(float value) {
+        return !Float.isNaN(value);
     }
 
     private int getDesiredScreenPowerState() {
@@ -1690,15 +1725,32 @@ public final class PowerManagerService extends IPowerManager.Stub
      *
      * The override will be canceled when the setting value is next updated.
      *
-     * @param adj The overridden brightness, or -1 to disable the override.
+     * @param adj The overridden brightness, or Float.NaN to disable the override.
      *
      * @see Settings.System#SCREEN_AUTO_BRIGHTNESS_ADJ
      */
     @Override // Binder call
     public void setTemporaryScreenAutoBrightnessAdjustmentSettingOverride(float adj) {
-        // Not implemented.
-        // The SCREEN_AUTO_BRIGHTNESS_ADJ setting is not currently supported.
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            setTemporaryScreenAutoBrightnessAdjustmentSettingOverrideInternal(adj);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    private void setTemporaryScreenAutoBrightnessAdjustmentSettingOverrideInternal(float adj) {
+        synchronized (mLock) {
+            // Note: This condition handles NaN because NaN is not equal to any other
+            // value, including itself.
+            if (mTemporaryScreenAutoBrightnessAdjustmentSettingOverride != adj) {
+                mTemporaryScreenAutoBrightnessAdjustmentSettingOverride = adj;
+                mDirty |= DIRTY_SETTINGS;
+                updatePowerStateLocked();
+            }
+        }
     }
 
     /**
@@ -1774,11 +1826,15 @@ public final class PowerManagerService extends IPowerManager.Stub
                     + isMaximumScreenOffTimeoutFromDeviceAdminEnforcedLocked() + ")");
             pw.println("  mStayOnWhilePluggedInSetting=" + mStayOnWhilePluggedInSetting);
             pw.println("  mScreenBrightnessSetting=" + mScreenBrightnessSetting);
+            pw.println("  mScreenAutoBrightnessAdjustmentSetting="
+                    + mScreenAutoBrightnessAdjustmentSetting);
             pw.println("  mScreenBrightnessModeSetting=" + mScreenBrightnessModeSetting);
             pw.println("  mScreenBrightnessOverrideFromWindowManager="
                     + mScreenBrightnessOverrideFromWindowManager);
             pw.println("  mTemporaryScreenBrightnessSettingOverride="
                     + mTemporaryScreenBrightnessSettingOverride);
+            pw.println("  mTemporaryScreenAutoBrightnessAdjustmentSettingOverride="
+                    + mTemporaryScreenAutoBrightnessAdjustmentSettingOverride);
             pw.println("  mScreenBrightnessSettingMinimum=" + mScreenBrightnessSettingMinimum);
             pw.println("  mScreenBrightnessSettingMaximum=" + mScreenBrightnessSettingMaximum);
             pw.println("  mScreenBrightnessSettingDefault=" + mScreenBrightnessSettingDefault);

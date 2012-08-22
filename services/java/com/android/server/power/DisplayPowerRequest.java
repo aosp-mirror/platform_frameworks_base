@@ -46,6 +46,9 @@ final class DisplayPowerRequest {
     // value to use while waiting for the light sensor to report enough data.
     public int screenBrightness;
 
+    // The screen auto-brightness adjustment factor in the range -1 (dimmer) to 1 (brighter).
+    public float screenAutoBrightnessAdjustment;
+
     // If true, enables automatic brightness control.
     public boolean useAutoBrightness;
 
@@ -53,6 +56,7 @@ final class DisplayPowerRequest {
         screenState = SCREEN_STATE_BRIGHT;
         useProximitySensor = false;
         screenBrightness = PowerManager.BRIGHTNESS_ON;
+        screenAutoBrightnessAdjustment = 0.0f;
         useAutoBrightness = false;
     }
 
@@ -64,6 +68,7 @@ final class DisplayPowerRequest {
         screenState = other.screenState;
         useProximitySensor = other.useProximitySensor;
         screenBrightness = other.screenBrightness;
+        screenAutoBrightnessAdjustment = other.screenAutoBrightnessAdjustment;
         useAutoBrightness = other.useAutoBrightness;
     }
 
@@ -78,6 +83,7 @@ final class DisplayPowerRequest {
                 && screenState == other.screenState
                 && useProximitySensor == other.useProximitySensor
                 && screenBrightness == other.screenBrightness
+                && screenAutoBrightnessAdjustment == other.screenAutoBrightnessAdjustment
                 && useAutoBrightness == other.useAutoBrightness;
     }
 
@@ -91,6 +97,7 @@ final class DisplayPowerRequest {
         return "screenState=" + screenState
                 + ", useProximitySensor=" + useProximitySensor
                 + ", screenBrightness=" + screenBrightness
+                + ", screenAutoBrightnessAdjustment=" + screenAutoBrightnessAdjustment
                 + ", useAutoBrightness=" + useAutoBrightness;
     }
 }
