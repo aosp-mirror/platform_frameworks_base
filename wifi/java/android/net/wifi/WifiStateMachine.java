@@ -3535,6 +3535,13 @@ public class WifiStateMachine extends StateMachine {
                     if (DBG) log("Network connection lost");
                     handleNetworkDisconnect();
                     break;
+                case WifiMonitor.AUTHENTICATION_FAILURE_EVENT:
+                    // Disregard auth failure events during WPS connection. The
+                    // EAP sequence is retried several times, and there might be
+                    // failures (especially for wps pin). We will get a WPS_XXX
+                    // event at the end of the sequence anyway.
+                    if (DBG) log("Ignore auth failure during WPS connection");
+                    break;
                 case WifiMonitor.SUPPLICANT_STATE_CHANGE_EVENT:
                     //Throw away supplicant state changes when WPS is running.
                     //We will start getting supplicant state changes once we get
