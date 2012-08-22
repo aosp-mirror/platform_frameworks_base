@@ -105,6 +105,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.SELinux;
 import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.os.SystemClock;
@@ -3040,7 +3041,12 @@ public final class ActivityManagerService extends ActivityManagerNative
         File tracesFile = new File(tracesPath);
         try {
             File tracesDir = tracesFile.getParentFile();
-            if (!tracesDir.exists()) tracesFile.mkdirs();
+            if (!tracesDir.exists()) {
+                tracesFile.mkdirs();
+                if (!SELinux.restorecon(tracesDir)) {
+                    return null;
+                }
+            }
             FileUtils.setPermissions(tracesDir.getPath(), 0775, -1, -1);  // drwxrwxr-x
 
             if (clearTraces && tracesFile.exists()) tracesFile.delete();
@@ -3144,7 +3150,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             final File tracesDir = tracesFile.getParentFile();
             final File tracesTmp = new File(tracesDir, "__tmp__");
             try {
-                if (!tracesDir.exists()) tracesFile.mkdirs();
+                if (!tracesDir.exists()) {
+                    tracesFile.mkdirs();
+                    if (!SELinux.restorecon(tracesDir.getPath())) {
+                        return;
+                    }
+                }
                 FileUtils.setPermissions(tracesDir.getPath(), 0775, -1, -1);  // drwxrwxr-x
 
                 if (tracesFile.exists()) {
