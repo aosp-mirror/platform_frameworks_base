@@ -227,6 +227,9 @@ public final class PowerManagerService extends IPowerManager.Stub
     // True if dreams are enabled by the user.
     private boolean mDreamsEnabledSetting;
 
+    // True if dreams should be activated on sleep.
+    private boolean mDreamsActivateOnSleepSetting;
+
     // The screen off timeout setting value in milliseconds.
     private int mScreenOffTimeoutSetting;
 
@@ -356,6 +359,8 @@ public final class PowerManagerService extends IPowerManager.Stub
             final ContentResolver resolver = mContext.getContentResolver();
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.SCREENSAVER_ENABLED), false, mSettingsObserver);
+            resolver.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP), false, mSettingsObserver);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.SCREEN_OFF_TIMEOUT), false, mSettingsObserver);
             resolver.registerContentObserver(Settings.System.getUriFor(
@@ -387,6 +392,8 @@ public final class PowerManagerService extends IPowerManager.Stub
 
         mDreamsEnabledSetting = (Settings.Secure.getInt(resolver,
                 Settings.Secure.SCREENSAVER_ENABLED, 0) != 0);
+        mDreamsActivateOnSleepSetting = (Settings.Secure.getInt(resolver,
+                Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP, 0) != 0);
         mScreenOffTimeoutSetting = Settings.System.getInt(resolver,
                 Settings.System.SCREEN_OFF_TIMEOUT, DEFAULT_SCREEN_OFF_TIMEOUT);
         mStayOnWhilePluggedInSetting = Settings.System.getInt(resolver,
@@ -1246,7 +1253,8 @@ public final class PowerManagerService extends IPowerManager.Stub
      * assuming there has been no recent user activity and no wake locks are held.
      */
     private boolean canDreamLocked() {
-        return mIsPowered && mDreamsSupportedConfig && mDreamsEnabledSetting;
+        return mIsPowered && mDreamsSupportedConfig
+                && mDreamsEnabledSetting && mDreamsActivateOnSleepSetting;
     }
 
     /**
@@ -1821,6 +1829,7 @@ public final class PowerManagerService extends IPowerManager.Stub
             pw.println("Settings and Configuration:");
             pw.println("  mDreamsSupportedConfig=" + mDreamsSupportedConfig);
             pw.println("  mDreamsEnabledSetting=" + mDreamsEnabledSetting);
+            pw.println("  mDreamsActivateOnSleepSetting=" + mDreamsActivateOnSleepSetting);
             pw.println("  mScreenOffTimeoutSetting=" + mScreenOffTimeoutSetting);
             pw.println("  mMaximumScreenOffTimeoutFromDeviceAdmin="
                     + mMaximumScreenOffTimeoutFromDeviceAdmin + " (enforced="

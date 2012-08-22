@@ -24,8 +24,9 @@ import android.content.ComponentName;
 interface IDreamManager {
     void dream();
     void awaken();
-    void setDreamComponent(in ComponentName componentName);
-    ComponentName getDreamComponent();
+    void setDreamComponents(in ComponentName[] componentNames);
+    ComponentName[] getDreamComponents();
+    ComponentName getDefaultDreamComponent();
     void testDream(in ComponentName componentName);
     boolean isDreaming();
 }
