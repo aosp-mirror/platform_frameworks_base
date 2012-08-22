@@ -53,9 +53,11 @@ public class ArpPeer {
         mInterfaceName = interfaceName;
         mMyAddr = myAddr;
 
-        for (int i = 0; i < MAC_ADDR_LENGTH; i++) {
-            mMyMac[i] = (byte) Integer.parseInt(mac.substring(
-                        i*3, (i*3) + 2), 16);
+        if (mac != null) {
+            for (int i = 0; i < MAC_ADDR_LENGTH; i++) {
+                mMyMac[i] = (byte) Integer.parseInt(mac.substring(
+                            i*3, (i*3) + 2), 16);
+            }
         }
 
         if (myAddr instanceof Inet6Address || peer instanceof Inet6Address) {
