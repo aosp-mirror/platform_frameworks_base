@@ -60,7 +60,7 @@ final class ElectronBeam {
     // The relative proportion of the animation to spend performing
     // the horizontal stretch effect.  The remainder is spent performing
     // the vertical stretch effect.
-    private static final float HSTRETCH_DURATION = 0.3f;
+    private static final float HSTRETCH_DURATION = 0.4f;
     private static final float VSTRETCH_DURATION = 1.0f - HSTRETCH_DURATION;
 
     // Set to true when the animation context has been fully prepared.
