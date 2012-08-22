@@ -20,6 +20,7 @@ import com.android.internal.app.IBatteryStats;
 import com.android.server.BatteryService;
 import com.android.server.EventLogTags;
 import com.android.server.LightsService;
+import com.android.server.TwilightService;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.display.DisplayManagerService;
@@ -318,7 +319,7 @@ public final class PowerManagerService extends IPowerManager.Stub
         }
     }
 
-    public void systemReady() {
+    public void systemReady(TwilightService twilight) {
         synchronized (mLock) {
             mSystemReady = true;
 
@@ -331,7 +332,7 @@ public final class PowerManagerService extends IPowerManager.Stub
                     createSuspendBlockerLocked("PowerManagerService.Broadcasts"),
                     mPolicy, mScreenOnListener);
             mDisplayPowerController = new DisplayPowerController(mHandler.getLooper(),
-                    mContext, mNotifier, mLightsService,
+                    mContext, mNotifier, mLightsService, twilight,
                     createSuspendBlockerLocked("PowerManagerService.Display"),
                     mDisplayPowerControllerCallbacks, mHandler);
 

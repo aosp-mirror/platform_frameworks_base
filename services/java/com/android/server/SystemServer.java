@@ -741,7 +741,12 @@ class ServerThread extends Thread {
         w.getDefaultDisplay().getMetrics(metrics);
         context.getResources().updateConfiguration(config, metrics);
 
-        power.systemReady();
+        try {
+            power.systemReady(twilight);
+        } catch (Throwable e) {
+            reportWtf("making Power Manager Service ready", e);
+        }
+
         try {
             pm.systemReady();
         } catch (Throwable e) {
