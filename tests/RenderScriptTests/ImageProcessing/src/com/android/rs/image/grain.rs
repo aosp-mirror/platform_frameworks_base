@@ -43,10 +43,10 @@ int32_t gHeight;
 
 rs_allocation gBlendSource;
 void blend9(uchar *out, uint32_t x, uint32_t y) {
-    uint32_t x1 = min(x+1, (uint32_t)gWidth);
-    uint32_t x2 = max(x-1, (uint32_t)0);
-    uint32_t y1 = min(y+1, (uint32_t)gHeight);
-    uint32_t y2 = max(y-1, (uint32_t)0);
+    uint32_t x1 = min((int32_t)x+1, (int32_t)gWidth);
+    uint32_t x2 = max((int32_t)x-1, (int32_t)0);
+    uint32_t y1 = min((int32_t)y+1, (int32_t)gHeight);
+    uint32_t y2 = max((int32_t)y-1, (int32_t)0);
 
     uint p00 = 56 *  ((uchar *)rsGetElementAt(gBlendSource, x1, y1))[0];
     uint p01 = 114 * ((uchar *)rsGetElementAt(gBlendSource, x, y1))[0];
