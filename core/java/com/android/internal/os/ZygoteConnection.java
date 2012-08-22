@@ -527,8 +527,6 @@ class ZygoteConnection {
                                 "Duplicate arg specified");
                     }
                     niceName = arg.substring(arg.indexOf('=') + 1);
-                } else if (arg.equals("--mount-external-singleuser")) {
-                    mountExternal = Zygote.MOUNT_EXTERNAL_SINGLEUSER;
                 } else if (arg.equals("--mount-external-multiuser")) {
                     mountExternal = Zygote.MOUNT_EXTERNAL_MULTIUSER;
                 } else {
