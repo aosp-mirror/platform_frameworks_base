@@ -587,22 +587,28 @@ static jint android_drm_DrmManagerClient_getDrmObjectType(
 }
 
 static jstring android_drm_DrmManagerClient_getOriginalMimeType(
-            JNIEnv* env, jobject thiz, jint uniqueId, jstring path) {
+            JNIEnv* env, jobject thiz, jint uniqueId, jstring path, jobject fileDescriptor) {
     ALOGV("getOriginalMimeType Enter");
+
+    int fd = (fileDescriptor == NULL)
+                ? -1
+                : jniGetFDFromFileDescriptor(env, fileDescriptor);
+
     String8 mimeType
         = getDrmManagerClientImpl(env, thiz)
-            ->getOriginalMimeType(uniqueId, Utility::getStringValue(env, path));
+            ->getOriginalMimeType(uniqueId,
+                                  Utility::getStringValue(env, path), fd);
     ALOGV("getOriginalMimeType Exit");
     return env->NewStringUTF(mimeType.string());
 }
 
 static jint android_drm_DrmManagerClient_checkRightsStatus(
             JNIEnv* env, jobject thiz, jint uniqueId, jstring path, int action) {
-    ALOGV("getOriginalMimeType Enter");
+    ALOGV("checkRightsStatus Enter");
     int rightsStatus
         = getDrmManagerClientImpl(env, thiz)
             ->checkRightsStatus(uniqueId, Utility::getStringValue(env, path), action);
-    ALOGV("getOriginalMimeType Exit");
+    ALOGV("checkRightsStatus Exit");
     return rightsStatus;
 }
 
@@ -730,7 +736,7 @@ static JNINativeMethod nativeMethods[] = {
     {"_getDrmObjectType", "(ILjava/lang/String;Ljava/lang/String;)I",
                                     (void*)android_drm_DrmManagerClient_getDrmObjectType},
 
-    {"_getOriginalMimeType", "(ILjava/lang/String;)Ljava/lang/String;",
+    {"_getOriginalMimeType", "(ILjava/lang/String;Ljava/io/FileDescriptor;)Ljava/lang/String;",
                                     (void*)android_drm_DrmManagerClient_getOriginalMimeType},
 
     {"_checkRightsStatus", "(ILjava/lang/String;I)I",
