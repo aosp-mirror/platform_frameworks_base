@@ -94,6 +94,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.TokenWatcher;
 import android.os.Trace;
+import android.os.WorkSource;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
@@ -923,7 +924,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mContext.registerReceiver(mBroadcastReceiver, filter);
 
         mHoldingScreenWakeLock = pmc.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK
-                | PowerManager.ON_AFTER_RELEASE, PowerManager.KEEP_SCREEN_ON_FLAG_TAG);
+                | PowerManager.ON_AFTER_RELEASE, TAG);
         mHoldingScreenWakeLock.setReferenceCounted(false);
 
         mInputManager = new InputManagerService(context, mInputMonitor);
@@ -7020,7 +7021,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int REPORT_APPLICATION_TOKEN_WINDOWS = 8;
         public static final int REPORT_APPLICATION_TOKEN_DRAWN = 9;
         public static final int WINDOW_FREEZE_TIMEOUT = 11;
-        public static final int HOLD_SCREEN_CHANGED = 12;
+
         public static final int APP_TRANSITION_TIMEOUT = 13;
         public static final int PERSIST_ANIMATION_SCALE = 14;
         public static final int FORCE_GC = 15;
@@ -7040,8 +7041,6 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int ANIMATOR_WHAT_OFFSET = 100000;
         public static final int SET_TRANSPARENT_REGION = ANIMATOR_WHAT_OFFSET + 1;
         public static final int CLEAR_PENDING_ACTIONS = ANIMATOR_WHAT_OFFSET + 2;
-
-        private Session mLastReportedHold;
 
         public H() {
         }
@@ -7290,33 +7289,6 @@ public class WindowManagerService extends IWindowManager.Stub
                             }
                         }
                         performLayoutAndPlaceSurfacesLocked();
-                    }
-                    break;
-                }
-
-                case HOLD_SCREEN_CHANGED: {
-                    Session oldHold;
-                    Session newHold;
-                    synchronized (mWindowMap) {
-                        oldHold = mLastReportedHold;
-                        newHold = (Session)msg.obj;
-                        mLastReportedHold = newHold;
-                    }
-
-                    if (oldHold != newHold) {
-                        try {
-                            if (oldHold != null) {
-                                mBatteryStats.noteStopWakelock(oldHold.mUid, -1,
-                                        "window",
-                                        BatteryStats.WAKE_TYPE_WINDOW);
-                            }
-                            if (newHold != null) {
-                                mBatteryStats.noteStartWakelock(newHold.mUid, -1,
-                                        "window",
-                                        BatteryStats.WAKE_TYPE_WINDOW);
-                            }
-                        } catch (RemoteException e) {
-                        }
                     }
                     break;
                 }
@@ -9134,7 +9106,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // Finally update all input windows now that the window changes have stabilized.
         mInputMonitor.updateInputWindowsLw(true /*force*/);
 
-        setHoldScreenLocked(mInnerFields.mHoldScreen != null);
+        setHoldScreenLocked(mInnerFields.mHoldScreen);
         if (!mDisplayFrozen) {
             if (mInnerFields.mScreenBrightness < 0 || mInnerFields.mScreenBrightness > 1.0f) {
                 mPowerManager.setScreenBrightnessOverrideFromWindowManager(-1);
@@ -9148,11 +9120,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 mPowerManager.setButtonBrightnessOverrideFromWindowManager(
                         toBrightnessOverride(mInnerFields.mButtonBrightness));
             }
-        }
-        if (mInnerFields.mHoldScreen != mHoldingScreenOn) {
-            mHoldingScreenOn = mInnerFields.mHoldScreen;
-            Message m = mH.obtainMessage(H.HOLD_SCREEN_CHANGED, mInnerFields.mHoldScreen);
-            mH.sendMessage(m);
         }
 
         if (mTurnOnScreen) {
@@ -9237,13 +9204,17 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    /**
-     * Must be called with the main window manager lock held.
-     */
-    void setHoldScreenLocked(boolean holding) {
-        boolean state = mHoldingScreenWakeLock.isHeld();
-        if (holding != state) {
-            if (holding) {
+    void setHoldScreenLocked(final Session newHoldScreen) {
+        final boolean hold = newHoldScreen != null;
+
+        if (hold && mHoldingScreenOn != newHoldScreen) {
+            mHoldingScreenWakeLock.setWorkSource(new WorkSource(newHoldScreen.mUid));
+        }
+        mHoldingScreenOn = newHoldScreen;
+
+        final boolean state = mHoldingScreenWakeLock.isHeld();
+        if (hold != state) {
+            if (hold) {
                 mPolicy.screenOnStartedLw();
                 mHoldingScreenWakeLock.acquire();
             } else {
