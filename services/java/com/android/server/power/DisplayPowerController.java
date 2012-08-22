@@ -32,7 +32,10 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PowerManager;
 import android.os.SystemClock;
+import android.text.format.DateUtils;
+import android.util.FloatMath;
 import android.util.Slog;
 import android.util.Spline;
 import android.util.TimeUtils;
@@ -77,6 +80,13 @@ final class DisplayPowerController {
     // actually turns on and starts showing new content after the call to set the
     // screen state returns.  Playing the animation can also be somewhat slow.
     private static final boolean USE_ELECTRON_BEAM_ON_ANIMATION = false;
+
+    // If true, enables the use of the screen auto-brightness adjustment setting.
+    private static final boolean USE_SCREEN_AUTO_BRIGHTNESS_ADJUSTMENT = false;
+
+    // The maximum range of gamma adjustment possible using the screen
+    // auto-brightness adjustment setting.
+    private static final float SCREEN_AUTO_BRIGHTNESS_ADJUSTMENT_MAX_GAMMA = 3.0f;
 
     private static final int ELECTRON_BEAM_ON_ANIMATION_DURATION_MILLIS = 300;
     private static final int ELECTRON_BEAM_OFF_ANIMATION_DURATION_MILLIS = 600;
@@ -150,8 +160,11 @@ final class DisplayPowerController {
     // The dim screen brightness.
     private final int mScreenBrightnessDimConfig;
 
-    // Auto-brightness.
+    // True if auto-brightness should be used.
     private boolean mUseSoftwareAutoBrightnessConfig;
+
+    // The auto-brightness spline adjustment.
+    // The brightness values have been scaled to a range of 0..1.
     private Spline mScreenAutoBrightnessSpline;
 
     // Amount of time to delay auto-brightness after screen on while waiting for
@@ -266,6 +279,9 @@ final class DisplayPowerController {
     // Use -1 if there is no current auto-brightness value available.
     private int mScreenAutoBrightness = -1;
 
+    // The last screen auto-brightness gamma.  (For printing in dump() only.)
+    private float mLastScreenAutoBrightnessGamma = 1.0f;
+
     // True if the screen auto-brightness value is actually being used to
     // set the display brightness.
     private boolean mUsingScreenAutoBrightness;
@@ -335,10 +351,10 @@ final class DisplayPowerController {
             final int n = brightness.length;
             float[] x = new float[n];
             float[] y = new float[n];
-            y[0] = brightness[0];
+            y[0] = (float)brightness[0] / PowerManager.BRIGHTNESS_ON;
             for (int i = 1; i < n; i++) {
                 x[i] = lux[i - 1];
-                y[i] = brightness[i];
+                y[i] = (float)brightness[i] / PowerManager.BRIGHTNESS_ON;
             }
 
             Spline spline = Spline.createMonotoneCubicSpline(x, y);
@@ -470,6 +486,8 @@ final class DisplayPowerController {
         // Update the power state request.
         final boolean mustNotify;
         boolean mustInitialize = false;
+        boolean updateAutoBrightness = false;
+
         synchronized (mLock) {
             mPendingUpdatePowerStateLocked = false;
             if (mPendingRequestLocked == null) {
@@ -483,6 +501,10 @@ final class DisplayPowerController {
                 mPendingRequestChangedLocked = false;
                 mustInitialize = true;
             } else if (mPendingRequestChangedLocked) {
+                if (mPowerRequest.screenAutoBrightnessAdjustment
+                        != mPendingRequestLocked.screenAutoBrightnessAdjustment) {
+                    updateAutoBrightness = true;
+                }
                 mPowerRequest.copyFrom(mPendingRequestLocked);
                 mWaitingForNegativeProximity |= mPendingWaitForNegativeProximityLocked;
                 mPendingWaitForNegativeProximityLocked = false;
@@ -530,19 +552,21 @@ final class DisplayPowerController {
         // Turn on the light sensor if needed.
         if (mLightSensor != null) {
             setLightSensorEnabled(mPowerRequest.useAutoBrightness
-                    && wantScreenOn(mPowerRequest.screenState));
+                    && wantScreenOn(mPowerRequest.screenState), updateAutoBrightness);
         }
 
         // Set the screen brightness.
         if (mPowerRequest.screenState == DisplayPowerRequest.SCREEN_STATE_DIM) {
             // Screen is dimmed.  Overrides everything else.
-            animateScreenBrightness(mScreenBrightnessDimConfig, BRIGHTNESS_RAMP_RATE_FAST);
+            animateScreenBrightness(
+                    clampScreenBrightness(mScreenBrightnessDimConfig),
+                    BRIGHTNESS_RAMP_RATE_FAST);
             mUsingScreenAutoBrightness = false;
         } else if (mPowerRequest.screenState == DisplayPowerRequest.SCREEN_STATE_BRIGHT) {
             if (mScreenAutoBrightness >= 0 && mLightSensorEnabled) {
                 // Use current auto-brightness value.
                 animateScreenBrightness(
-                        Math.max(mScreenAutoBrightness, mScreenBrightnessDimConfig),
+                        clampScreenBrightness(mScreenAutoBrightness),
                         mUsingScreenAutoBrightness ? BRIGHTNESS_RAMP_RATE_SLOW :
                                 BRIGHTNESS_RAMP_RATE_FAST);
                 mUsingScreenAutoBrightness = true;
@@ -552,7 +576,7 @@ final class DisplayPowerController {
                 // provide a nominal default value for the case where auto-brightness
                 // is not ready yet.
                 animateScreenBrightness(
-                        Math.max(mPowerRequest.screenBrightness, mScreenBrightnessDimConfig),
+                        clampScreenBrightness(mPowerRequest.screenBrightness),
                         BRIGHTNESS_RAMP_RATE_FAST);
                 mUsingScreenAutoBrightness = false;
             }
@@ -630,6 +654,10 @@ final class DisplayPowerController {
         }
     }
 
+    private int clampScreenBrightness(int value) {
+        return Math.min(Math.max(Math.max(value, mScreenBrightnessDimConfig), 0), 255);
+    }
+
     private void animateScreenBrightness(int target, int rate) {
         if (mScreenBrightnessRampAnimator.animateTo(target, rate)) {
             mNotifier.onScreenBrightness(target);
@@ -691,9 +719,10 @@ final class DisplayPowerController {
         }
     }
 
-    private void setLightSensorEnabled(boolean enable) {
+    private void setLightSensorEnabled(boolean enable, boolean updateAutoBrightness) {
         if (enable) {
             if (!mLightSensorEnabled) {
+                updateAutoBrightness = true;
                 mLightSensorEnabled = true;
                 mLightSensorEnableTime = SystemClock.uptimeMillis();
                 mSensorManager.registerListener(mLightSensorListener, mLightSensor,
@@ -703,10 +732,12 @@ final class DisplayPowerController {
             if (mLightSensorEnabled) {
                 mLightSensorEnabled = false;
                 mLightMeasurementValid = false;
-                updateAutoBrightness(false);
                 mHandler.removeMessages(MSG_LIGHT_SENSOR_DEBOUNCED);
                 mSensorManager.unregisterListener(mLightSensorListener);
             }
+        }
+        if (updateAutoBrightness) {
+            updateAutoBrightness(false);
         }
     }
 
@@ -818,24 +849,44 @@ final class DisplayPowerController {
             return;
         }
 
-        final int newScreenAutoBrightness = interpolateBrightness(
-                mScreenAutoBrightnessSpline, mLightMeasurement);
+        float value = mScreenAutoBrightnessSpline.interpolate(mLightMeasurement);
+        float gamma = 1.0f;
+
+        if (USE_SCREEN_AUTO_BRIGHTNESS_ADJUSTMENT
+                && mPowerRequest.screenAutoBrightnessAdjustment != 0.0f) {
+            final float adjGamma = FloatMath.pow(SCREEN_AUTO_BRIGHTNESS_ADJUSTMENT_MAX_GAMMA,
+                    Math.min(1.0f, Math.max(-1.0f,
+                            -mPowerRequest.screenAutoBrightnessAdjustment)));
+            gamma *= adjGamma;
+            if (DEBUG) {
+                Slog.d(TAG, "updateAutoBrightness: adjGamma=" + adjGamma);
+            }
+        }
+
+        if (gamma != 1.0f) {
+            final float in = value;
+            value = FloatMath.pow(value, gamma);
+            if (DEBUG) {
+                Slog.d(TAG, "updateAutoBrightness: gamma=" + gamma
+                        + ", in=" + in + ", out=" + value);
+            }
+        }
+
+        int newScreenAutoBrightness = clampScreenBrightness(
+                (int)Math.round(value * PowerManager.BRIGHTNESS_ON));
         if (mScreenAutoBrightness != newScreenAutoBrightness) {
             if (DEBUG) {
                 Slog.d(TAG, "updateAutoBrightness: mScreenAutoBrightness="
-                        + mScreenAutoBrightness + "newScreenAutoBrightness="
+                        + mScreenAutoBrightness + ", newScreenAutoBrightness="
                         + newScreenAutoBrightness);
             }
 
             mScreenAutoBrightness = newScreenAutoBrightness;
+            mLastScreenAutoBrightnessGamma = gamma;
             if (sendUpdate) {
                 sendUpdatePowerState();
             }
         }
-    }
-
-    private static int interpolateBrightness(Spline spline, float lux) {
-        return Math.min(255, Math.max(0, (int)Math.round(spline.interpolate(lux))));
     }
 
     private void sendOnStateChanged() {
@@ -943,6 +994,7 @@ final class DisplayPowerController {
                 + TimeUtils.formatUptime(mPendingLightSensorDebounceTime));
         pw.println("  mScreenAutoBrightness=" + mScreenAutoBrightness);
         pw.println("  mUsingScreenAutoBrightness=" + mUsingScreenAutoBrightness);
+        pw.println("  mLastScreenAutoBrightnessGamma=" + mLastScreenAutoBrightnessGamma);
 
         if (mElectronBeamOnAnimator != null) {
             pw.println("  mElectronBeamOnAnimator.isStarted()=" +
