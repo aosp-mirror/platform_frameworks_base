@@ -46,9 +46,8 @@ import java.util.Iterator;
 import java.util.Set;
 
 /**
- * A java.security.KeyStore interface for the Android KeyStore. This class is
- * hidden from the Android API, but an instance of it can be created via the
- * {@link java.security.KeyStore#getInstance(String)
+ * A java.security.KeyStore interface for the Android KeyStore. An instance of
+ * it can be created via the {@link java.security.KeyStore#getInstance(String)
  * KeyStore.getInstance("AndroidKeyStore")} interface. This returns a
  * java.security.KeyStore backed by this "AndroidKeyStore" implementation.
  * <p>
@@ -277,7 +276,7 @@ public class AndroidKeyStore extends KeyStoreSpi {
          * Make sure we clear out all the types we know about before trying to
          * write.
          */
-        deleteAllTypesForAlias(alias);
+        Credentials.deleteAllTypesForAlias(mKeyStore, alias);
 
         if (!mKeyStore.importKey(Credentials.USER_PRIVATE_KEY + alias, keyBytes)) {
             throw new KeyStoreException("Couldn't put private key in keystore");
@@ -315,24 +314,9 @@ public class AndroidKeyStore extends KeyStoreSpi {
 
     @Override
     public void engineDeleteEntry(String alias) throws KeyStoreException {
-        if (!deleteAllTypesForAlias(alias)) {
+        if (!Credentials.deleteAllTypesForAlias(mKeyStore, alias)) {
             throw new KeyStoreException("No such entry " + alias);
         }
-    }
-
-    /**
-     * Delete all types (private key, certificate, CA certificate) for a
-     * particular {@code alias}. All three can exist for any given alias.
-     * Returns {@code true} if there was at least one of those types.
-     */
-    private boolean deleteAllTypesForAlias(String alias) {
-        /*
-         * Make sure every type is deleted. There can be all three types, so
-         * don't use a conditional here.
-         */
-        return mKeyStore.delKey(Credentials.USER_PRIVATE_KEY + alias)
-                | mKeyStore.delete(Credentials.USER_CERTIFICATE + alias)
-                | mKeyStore.delete(Credentials.CA_CERTIFICATE + alias);
     }
 
     private Set<String> getUniqueAliases() {

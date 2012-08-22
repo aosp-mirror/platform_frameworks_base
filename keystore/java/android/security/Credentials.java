@@ -185,4 +185,19 @@ public class Credentials {
             Log.w(LOGTAG, e.toString());
         }
     }
+
+    /**
+     * Delete all types (private key, certificate, CA certificate) for a
+     * particular {@code alias}. All three can exist for any given alias.
+     * Returns {@code true} if there was at least one of those types.
+     */
+    static boolean deleteAllTypesForAlias(KeyStore keystore, String alias) {
+        /*
+         * Make sure every type is deleted. There can be all three types, so
+         * don't use a conditional here.
+         */
+        return keystore.delKey(Credentials.USER_PRIVATE_KEY + alias)
+                | keystore.delete(Credentials.USER_CERTIFICATE + alias)
+                | keystore.delete(Credentials.CA_CERTIFICATE + alias);
+    }
 }

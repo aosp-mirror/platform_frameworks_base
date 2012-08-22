@@ -29,6 +29,11 @@ public class AndroidKeyStoreProvider extends Provider {
     public AndroidKeyStoreProvider() {
         super(PROVIDER_NAME, 1.0, "Android KeyStore security provider");
 
+        // java.security.KeyStore
         put("KeyStore." + AndroidKeyStore.NAME, AndroidKeyStore.class.getName());
+
+        // java.security.KeyPairGenerator
+        put("KeyPairGenerator." + AndroidKeyPairGenerator.NAME,
+                AndroidKeyPairGenerator.class.getName());
     }
 }
