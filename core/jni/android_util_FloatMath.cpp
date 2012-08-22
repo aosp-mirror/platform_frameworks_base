@@ -30,6 +30,10 @@ public:
         return expf(x);
     }
 
+    static float PowF(JNIEnv* env, jobject clazz, float x, float y) {
+        return powf(x, y);
+    }
+
     static float HypotF(JNIEnv* env, jobject clazz, float x, float y) {
         return hypotf(x, y);
     }
@@ -42,6 +46,7 @@ static JNINativeMethod gMathUtilsMethods[] = {
     {"cos", "(F)F", (void*) MathUtilsGlue::CosF},
     {"sqrt", "(F)F", (void*) MathUtilsGlue::SqrtF},
     {"exp", "(F)F", (void*) MathUtilsGlue::ExpF},
+    {"pow", "(FF)F", (void*) MathUtilsGlue::PowF},
     {"hypot", "(FF)F", (void*) MathUtilsGlue::HypotF},
 };
 
