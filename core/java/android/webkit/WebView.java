@@ -310,15 +310,15 @@ public class WebView extends AbsoluteLayout
         /**
          * Notifies the listener about progress made by a find operation.
          *
-         * @param numberOfMatches how many matches have been found
          * @param activeMatchOrdinal the zero-based ordinal of the currently selected match
+         * @param numberOfMatches how many matches have been found
          * @param isDoneCounting whether the find operation has actually completed. The listener
          *                       may be notified multiple times while the
          *                       operation is underway, and the numberOfMatches
          *                       value should not be considered final unless
          *                       isDoneCounting is true.
          */
-        public void onFindResultReceived(int numberOfMatches, int activeMatchOrdinal,
+        public void onFindResultReceived(int activeMatchOrdinal, int numberOfMatches,
             boolean isDoneCounting);
     }
 
