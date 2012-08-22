@@ -22,6 +22,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.INetworkManagementService;
 import android.os.Message;
+import android.os.Messenger;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
@@ -416,5 +417,10 @@ public class EthernetDataTracker implements NetworkStateTracker {
     @Override
     public void removeStackedLink(LinkProperties link) {
         mLinkProperties.removeStackedLink(link);
+    }
+
+    @Override
+    public void supplyMessenger(Messenger messenger) {
+        // not supported on this network
     }
 }

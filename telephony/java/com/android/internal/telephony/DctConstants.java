@@ -111,7 +111,4 @@ public class DctConstants {
     public static final int ENABLED = 1;
 
     public static final String APN_TYPE_KEY = "apnType";
-    public static String ACTION_DATA_CONNECTION_TRACKER_MESSENGER =
-        "com.android.internal.telephony";
-    public static String EXTRA_MESSENGER = "EXTRA_MESSENGER";
 }
