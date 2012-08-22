@@ -32,6 +32,7 @@ import java.util.HashMap;
  **/
 public class ScriptIntrinsicConvolve3x3 extends ScriptIntrinsic {
     private float[] mValues = new float[9];
+    private Allocation mInput;
 
     ScriptIntrinsicConvolve3x3(int id, RenderScript rs) {
         super(id, rs);
@@ -52,8 +53,12 @@ public class ScriptIntrinsicConvolve3x3 extends ScriptIntrinsic {
 
     }
 
+    public void setInput(Allocation ain) {
+        mInput = ain;
+        bindAllocation(ain, 1);
+    }
 
-    public void setValues(float v[]) {
+    public void setColorMatrix(float v[]) {
         FieldPacker fp = new FieldPacker(9*4);
         for (int ct=0; ct < mValues.length; ct++) {
             mValues[ct] = v[ct];
@@ -61,5 +66,10 @@ public class ScriptIntrinsicConvolve3x3 extends ScriptIntrinsic {
         }
         setVar(0, fp);
     }
+
+    public void forEach(Allocation aout) {
+        forEach(0, null, aout, null);
+    }
+
 }
 

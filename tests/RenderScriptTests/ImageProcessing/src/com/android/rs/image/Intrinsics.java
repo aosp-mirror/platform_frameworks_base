@@ -46,7 +46,7 @@ public class Intrinsics extends TestBase {
         v[0] = 0.f;     v[1] = -s;      v[2] = 0.f;
         v[3] = -s;      v[4] = s*4+1;   v[5] = -s;
         v[6] = 0.f;     v[7] = -s;      v[8] = 0.f;
-        mScript.setValues(v);
+        mScript.setColorMatrix(v);
     }
 
 
@@ -55,7 +55,8 @@ public class Intrinsics extends TestBase {
     }
 
     public void runTest() {
-        mScript.forEach(mInPixelsAllocation, mOutPixelsAllocation);
+        mScript.setInput(mInPixelsAllocation);
+        mScript.forEach(mOutPixelsAllocation);
     }
 
 }
