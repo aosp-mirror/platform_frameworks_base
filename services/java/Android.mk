@@ -13,9 +13,6 @@ LOCAL_MODULE:= services
 
 LOCAL_JAVA_LIBRARIES := android.policy telephony-common
 
-LOCAL_NO_EMMA_INSTRUMENT := true
-LOCAL_NO_EMMA_COMPILE := true
-
 include $(BUILD_JAVA_LIBRARY)
 
 include $(BUILD_DROIDDOC)
