@@ -629,7 +629,6 @@ public class NetworkController extends BroadcastReceiver {
                 case TelephonyManager.NETWORK_TYPE_HSDPA:
                 case TelephonyManager.NETWORK_TYPE_HSUPA:
                 case TelephonyManager.NETWORK_TYPE_HSPA:
-                case TelephonyManager.NETWORK_TYPE_HSPAP:
                     if (mHspaDataDistinguishable) {
                         mDataIconList = TelephonyIcons.DATA_H[mInetCondition];
                         mDataTypeIconId = R.drawable.stat_sys_data_connected_h;
@@ -643,6 +642,12 @@ public class NetworkController extends BroadcastReceiver {
                         mContentDescriptionDataType = mContext.getString(
                                 R.string.accessibility_data_connection_3g);
                     }
+                    break;
+                case TelephonyManager.NETWORK_TYPE_HSPAP:
+                    mDataIconList = TelephonyIcons.DATA_HP[mInetCondition];
+                    mDataTypeIconId = R.drawable.stat_sys_data_connected_hp;
+                    mContentDescriptionDataType = mContext.getString(
+                            R.string.accessibility_data_connection_HP);
                     break;
                 case TelephonyManager.NETWORK_TYPE_CDMA:
                     if (!mShowAtLeastThreeGees) {
