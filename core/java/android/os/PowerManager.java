@@ -239,13 +239,6 @@ public final class PowerManager {
      */
     public static final int BRIGHTNESS_OFF = 0;
 
-    /**
-     * A nominal default brightness value.
-     * Use {@link #getDefaultScreenBrightnessSetting()} instead.
-     * @hide
-     */
-    private static final int BRIGHTNESS_DEFAULT = 102;
-
     // Note: Be sure to update android.os.BatteryStats and PowerManager.h
     // if adding or modifying user activity event constants.
 
@@ -321,7 +314,7 @@ public final class PowerManager {
      */
     public int getMinimumScreenBrightnessSetting() {
         return mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_screenBrightnessDim);
+                com.android.internal.R.integer.config_screenBrightnessSettingMinimum);
     }
 
     /**
@@ -331,7 +324,8 @@ public final class PowerManager {
      * @hide
      */
     public int getMaximumScreenBrightnessSetting() {
-        return BRIGHTNESS_ON;
+        return mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_screenBrightnessSettingMaximum);
     }
 
     /**
@@ -339,7 +333,8 @@ public final class PowerManager {
      * @hide
      */
     public int getDefaultScreenBrightnessSetting() {
-        return BRIGHTNESS_DEFAULT;
+        return mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_screenBrightnessSettingDefault);
     }
 
     /**
