@@ -17,11 +17,23 @@
 package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import com.android.systemui.R;
 
 public class NotificationPanelView extends PanelView {
+
+    Drawable mHandleBar;
+    float mHandleBarHeight;
+
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
+
+        Resources resources = context.getResources();
+        mHandleBar = resources.getDrawable(R.drawable.status_bar_close);
+        mHandleBarHeight = resources.getDimension(R.dimen.close_handle_height);
     }
 
     @Override
@@ -30,5 +42,21 @@ public class NotificationPanelView extends PanelView {
             "fling " + ((vel > 0) ? "open" : "closed"),
             "notifications,v=" + vel);
         super.fling(vel, always);
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        if (changed) {
+            mHandleBar.setBounds(0, 0, getWidth(), (int) mHandleBarHeight);
+        }
+    }
+
+    @Override
+    public void draw(Canvas canvas) {
+        super.draw(canvas);
+        canvas.translate(0, getHeight() - mHandleBarHeight);
+        mHandleBar.draw(canvas);
+        canvas.translate(0, -getHeight() + mHandleBarHeight);
     }
 }
