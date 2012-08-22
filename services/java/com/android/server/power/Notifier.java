@@ -28,7 +28,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.WorkSource;
@@ -117,19 +116,15 @@ final class Notifier {
                     + ", workSource=" + workSource);
         }
 
-        if (!isWakeLockAlreadyReportedToBatteryStats(tag, ownerUid)) {
-            try {
-                final int monitorType = getBatteryStatsWakeLockMonitorType(flags);
-                if (workSource != null) {
-                    mBatteryStats.noteStartWakelockFromSource(
-                            workSource, ownerPid, tag, monitorType);
-                } else {
-                    mBatteryStats.noteStartWakelock(
-                            ownerUid, ownerPid, tag, monitorType);
-                }
-            } catch (RemoteException ex) {
-                // Ignore
+        try {
+            final int monitorType = getBatteryStatsWakeLockMonitorType(flags);
+            if (workSource != null) {
+                mBatteryStats.noteStartWakelockFromSource(workSource, ownerPid, tag, monitorType);
+            } else {
+                mBatteryStats.noteStartWakelock(ownerUid, ownerPid, tag, monitorType);
             }
+        } catch (RemoteException ex) {
+            // Ignore
         }
     }
 
@@ -144,28 +139,16 @@ final class Notifier {
                     + ", workSource=" + workSource);
         }
 
-        if (!isWakeLockAlreadyReportedToBatteryStats(tag, ownerUid)) {
-            try {
-                final int monitorType = getBatteryStatsWakeLockMonitorType(flags);
-                if (workSource != null) {
-                    mBatteryStats.noteStopWakelockFromSource(
-                            workSource, ownerPid, tag, monitorType);
-                } else {
-                    mBatteryStats.noteStopWakelock(
-                            ownerUid, ownerPid, tag, monitorType);
-                }
-            } catch (RemoteException ex) {
-                // Ignore
+        try {
+            final int monitorType = getBatteryStatsWakeLockMonitorType(flags);
+            if (workSource != null) {
+                mBatteryStats.noteStopWakelockFromSource(workSource, ownerPid, tag, monitorType);
+            } else {
+                mBatteryStats.noteStopWakelock(ownerUid, ownerPid, tag, monitorType);
             }
+        } catch (RemoteException ex) {
+            // Ignore
         }
-    }
-
-    private static boolean isWakeLockAlreadyReportedToBatteryStats(String tag, int uid) {
-        // The window manager already takes care of reporting battery stats associated
-        // with the use of the KEEP_SCREEN_ON_FLAG.
-        // TODO: Use a WorkSource to handle this situation instead of hardcoding it here.
-        return uid == Process.SYSTEM_UID
-                && tag.equals(PowerManager.KEEP_SCREEN_ON_FLAG_TAG);
     }
 
     private static int getBatteryStatsWakeLockMonitorType(int flags) {
