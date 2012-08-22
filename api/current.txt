@@ -19988,6 +19988,10 @@ package android.sax {
 
 package android.security {
 
+  public class AndroidKeyPairGeneratorSpec implements java.security.spec.AlgorithmParameterSpec {
+    ctor public AndroidKeyPairGeneratorSpec(android.content.Context, java.lang.String, javax.security.auth.x500.X500Principal, java.math.BigInteger, java.util.Date, java.util.Date);
+  }
+
   public final class KeyChain {
     ctor public KeyChain();
     method public static void choosePrivateKeyAlias(android.app.Activity, android.security.KeyChainAliasCallback, java.lang.String[], java.security.Principal[], java.lang.String, int, java.lang.String);
