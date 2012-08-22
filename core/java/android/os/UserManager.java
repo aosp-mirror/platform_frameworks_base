@@ -56,6 +56,7 @@ public class UserManager {
 
     /**
      * Returns the user name of the user making this call.
+     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
      * @return the user name
      */
     public String getUserName() {
@@ -69,6 +70,7 @@ public class UserManager {
 
     /**
      * Returns the UserInfo object describing a specific user.
+     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
      * @param userHandle the user handle of the user whose information is being requested.
      * @return the UserInfo object for a specific user.
      * @hide
@@ -84,6 +86,7 @@ public class UserManager {
 
     /**
      * Creates a user with the specified name and options.
+     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
      *
      * @param name the user's name
      * @param flags flags that identify the type of user and other properties.
@@ -103,6 +106,7 @@ public class UserManager {
 
     /**
      * Returns information for all users on this device.
+     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
      * @return the list of users that were created.
      * @hide
      */
@@ -117,6 +121,7 @@ public class UserManager {
 
     /**
      * Removes a user and all associated data.
+     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
      * @param userHandle the integer handle of the user, where 0 is the primary user.
      * @hide
      */
@@ -131,6 +136,7 @@ public class UserManager {
 
     /**
      * Updates the user's name.
+     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
      *
      * @param userHandle the user's integer handle
      * @param name the new name for the user
@@ -162,6 +168,7 @@ public class UserManager {
     /**
      * Enable or disable the use of a guest account. If disabled, the existing guest account
      * will be wiped.
+     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
      * @param enable whether to enable a guest account.
      * @hide
      */
@@ -175,6 +182,7 @@ public class UserManager {
 
     /**
      * Checks if a guest user is enabled for this device.
+     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
      * @return whether a guest user is enabled
      * @hide
      */
@@ -189,6 +197,7 @@ public class UserManager {
 
     /**
      * Wipes all the data for a user, but doesn't remove the user.
+     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
      * @param userHandle
      * @hide
      */
