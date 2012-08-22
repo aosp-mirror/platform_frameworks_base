@@ -27,7 +27,6 @@
     android:background="@drawable/notification_panel_bg"
     android:paddingTop="@dimen/notification_panel_padding_top"
     android:layout_marginLeft="@dimen/notification_panel_margin_left"
-    android:animateLayoutChanges="true"
     >
 
     <TextView
@@ -80,18 +79,10 @@
         </ScrollView>
     </LinearLayout>
 
-    <LinearLayout android:id="@+id/handle"
+    <View android:id="@+id/handle"
         android:layout_width="match_parent"
         android:layout_height="@dimen/close_handle_height"
         android:layout_gravity="bottom"
-        android:orientation="vertical"
-        >
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/close_handle_height"
-            android:layout_gravity="bottom"
-            android:scaleType="fitXY"
-            android:src="@drawable/status_bar_close"
-            />
-    </LinearLayout>
+        />
+
 </com.android.systemui.statusbar.phone.NotificationPanelView><!-- end of sliding panel -->
