@@ -582,9 +582,7 @@ public class Process {
             if ((debugFlags & Zygote.DEBUG_ENABLE_ASSERT) != 0) {
                 argsForZygote.add("--enable-assert");
             }
-            if (mountExternal == Zygote.MOUNT_EXTERNAL_SINGLEUSER) {
-                argsForZygote.add("--mount-external-singleuser");
-            } else if (mountExternal == Zygote.MOUNT_EXTERNAL_MULTIUSER) {
+            if (mountExternal == Zygote.MOUNT_EXTERNAL_MULTIUSER) {
                 argsForZygote.add("--mount-external-multiuser");
             }
             argsForZygote.add("--target-sdk-version=" + targetSdkVersion);
