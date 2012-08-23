@@ -28,9 +28,12 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.text.Collator;
 import java.util.Arrays;
@@ -86,7 +89,7 @@ public class LocalePicker extends ListFragment {
     }
 
     public static ArrayAdapter<LocaleInfo> constructAdapter(Context context,
-            int layoutId, int fieldId) {
+            final int layoutId, final int fieldId) {
         final Resources resources = context.getResources();
         final String[] locales = Resources.getSystem().getAssets().getLocales();
         final String[] specialLocaleCodes = resources.getStringArray(R.array.special_locale_codes);
@@ -154,7 +157,29 @@ public class LocalePicker extends ListFragment {
             localeInfos[i] = preprocess[i];
         }
         Arrays.sort(localeInfos);
-        return new ArrayAdapter<LocaleInfo>(context, layoutId, fieldId, localeInfos);
+
+        final LayoutInflater inflater =
+                (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        return new ArrayAdapter<LocaleInfo>(context, layoutId, fieldId, localeInfos) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View view;
+                TextView text;
+                if (convertView == null) {
+                    view = inflater.inflate(layoutId, parent, false);
+                    text = (TextView) view.findViewById(fieldId);
+                    view.setTag(text);
+                } else {
+                    view = convertView;
+                    text = (TextView) view.getTag();
+                }
+                LocaleInfo item = getItem(position);
+                text.setText(item.toString());
+                text.setTextLocale(item.getLocale());
+
+                return view;
+            }
+        };
     }
 
     private static String toTitleCase(String s) {
