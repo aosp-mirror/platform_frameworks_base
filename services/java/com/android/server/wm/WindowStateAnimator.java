@@ -148,6 +148,8 @@ class WindowStateAnimator {
     int mAttrFlags;
     int mAttrType;
 
+    final int mLayerStack;
+
     public WindowStateAnimator(final WindowState win) {
         final WindowManagerService service = win.mService;
 
@@ -167,6 +169,7 @@ class WindowStateAnimator {
         mAttrFlags = win.mAttrs.flags;
         mAttrType = win.mAttrs.type;
         mIsWallpaper = win.mIsWallpaper;
+        mLayerStack = win.mDisplayContent.getDisplay().getLayerStack();
     }
 
     public void setAnimation(Animation anim) {
@@ -651,12 +654,12 @@ class WindowStateAnimator {
                     mSurface = new SurfaceTrace(
                             mSession.mSurfaceSession, mSession.mPid,
                             attrs.getTitle().toString(),
-                            mWin.mDisplayContent.getDisplayId(), w, h, format, flags);
+                            mLayerStack, w, h, format, flags);
                 } else {
                     mSurface = new Surface(
                         mSession.mSurfaceSession, mSession.mPid,
                         attrs.getTitle().toString(),
-                        mWin.mDisplayContent.getDisplayId(), w, h, format, flags);
+                        mLayerStack, w, h, format, flags);
                 }
                 mWin.mHasSurface = true;
                 if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) Slog.i(TAG,

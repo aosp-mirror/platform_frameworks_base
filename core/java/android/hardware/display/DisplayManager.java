@@ -24,7 +24,6 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
-import android.util.SparseArray;
 import android.view.CompatibilityInfoHolder;
 import android.view.Display;
 import android.view.DisplayInfo;

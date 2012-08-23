@@ -39,18 +39,18 @@ class DimAnimator {
     
     int mLastDimWidth, mLastDimHeight;
 
-    DimAnimator (SurfaceSession session, final int displayId) {
+    DimAnimator (SurfaceSession session, final int layerStack) {
         if (mDimSurface == null) {
             try {
                 if (WindowManagerService.DEBUG_SURFACE_TRACE) {
                     mDimSurface = new WindowStateAnimator.SurfaceTrace(session, 0,
                         "DimAnimator",
-                        displayId, 16, 16, PixelFormat.OPAQUE,
+                        layerStack, 16, 16, PixelFormat.OPAQUE,
                         Surface.FX_SURFACE_DIM);
                 } else {
                     mDimSurface = new Surface(session, 0,
                         "DimAnimator",
-                        displayId, 16, 16, PixelFormat.OPAQUE,
+                        layerStack, 16, 16, PixelFormat.OPAQUE,
                         Surface.FX_SURFACE_DIM);
                 }
                 if (WindowManagerService.SHOW_TRANSACTIONS ||
