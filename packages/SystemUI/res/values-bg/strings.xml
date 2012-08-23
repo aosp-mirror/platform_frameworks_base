@@ -58,12 +58,9 @@
     <string name="label_view" msgid="6304565553218192990">"Преглед"</string>
     <string name="always_use_device" msgid="1450287437017315906">"Използване по подразб. за това USB устройство"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"Използване по подразб. за този аксесоар за USB"</string>
-    <!-- no translation found for usb_debugging_title (1114766024068112429) -->
-    <skip />
-    <!-- no translation found for usb_debugging_message (719863946976291180) -->
-    <skip />
-    <!-- no translation found for usb_debugging_always (4253099426793114693) -->
-    <skip />
+    <string name="usb_debugging_title" msgid="1114766024068112429">"Да се разреши ли отстраняването на грешки през USB?"</string>
+    <string name="usb_debugging_message" msgid="719863946976291180">"Да се разреши ли отстраняването на грешки през USB от този компютър?"\n"Отпечатъкът на вашия RSA ключ е"\n"<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_always" msgid="4253099426793114693">"Този компютър винаги да е разрешен"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Мащаб – запълва екрана"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Разпъване – запълва екрана"</string>
     <string name="compat_mode_help_header" msgid="7969493989397529910">"Промяна на мащаба за съвместимост"</string>
