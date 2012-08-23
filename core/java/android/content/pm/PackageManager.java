@@ -762,6 +762,14 @@ public abstract class PackageManager {
     public static final int VERIFICATION_REJECT = -1;
 
     /**
+     * Can be used as the {@code millisecondsToDelay} argument for
+     * {@link PackageManager#extendVerificationTimeout}. This is the
+     * maximum time {@code PackageManager} waits for the verification
+     * agent to return (in milliseconds).
+     */
+    public static final long MAXIMUM_VERIFICATION_TIMEOUT = 60*60*1000;
+
+    /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device's
      * audio pipeline is low-latency, more suitable for audio applications sensitive to delays or
      * lag in sound input or output.
@@ -2272,6 +2280,33 @@ public abstract class PackageManager {
      *            or {@link PackageManager#VERIFICATION_REJECT}.
      */
     public abstract void verifyPendingInstall(int id, int verificationCode);
+
+    /**
+     * Allows a package listening to the
+     * {@link Intent#ACTION_PACKAGE_NEEDS_VERIFICATION package verification
+     * broadcast} to extend the default timeout for a response and declare what
+     * action to perform after the timeout occurs. The response must include
+     * the {@code verificationCodeAtTimeout} which is one of
+     * {@link PackageManager#VERIFICATION_ALLOW} or
+     * {@link PackageManager#VERIFICATION_REJECT}.
+     *
+     * This method may only be called once per package id. Additional calls
+     * will have no effect.
+     *
+     * @param id pending package identifier as passed via the
+     *            {@link PackageManager#EXTRA_VERIFICATION_ID} Intent extra
+     * @param verificationCodeAtTimeout either
+     *            {@link PackageManager#VERIFICATION_ALLOW} or
+     *            {@link PackageManager#VERIFICATION_REJECT}.
+     * @param millisecondsToDelay the amount of time requested for the timeout.
+     *            Must be positive and less than
+     *            {@link PackageManager#MAXIMUM_VERIFICATION_TIMEOUT}.
+     *
+     * @throws IllegalArgumentException if {@code millisecondsToDelay} is out
+     *            of bounds or {@code verificationCodeAtTimeout} is unknown.
+     */
+    public abstract void extendVerificationTimeout(int id,
+            int verificationCodeAtTimeout, long millisecondsToDelay);
 
     /**
      * Change the installer associated with a given package.  There are limitations

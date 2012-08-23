@@ -43,6 +43,8 @@ class PackageVerificationState {
 
     private boolean mRequiredVerificationPassed;
 
+    private boolean mExtendedTimeout;
+
     /**
      * Create a new package verification state where {@code requiredVerifierUid}
      * is the user ID for the package that must reply affirmative before things
@@ -55,6 +57,7 @@ class PackageVerificationState {
         mRequiredVerifierUid = requiredVerifierUid;
         mArgs = args;
         mSufficientVerifierUids = new SparseBooleanArray();
+        mExtendedTimeout = false;
     }
 
     public InstallArgs getInstallArgs() {
@@ -145,5 +148,23 @@ class PackageVerificationState {
         }
 
         return true;
+    }
+
+    /**
+     * Extend the timeout for this Package to be verified.
+     */
+    public void extendTimeout() {
+        if (!mExtendedTimeout) {
+            mExtendedTimeout = true;
+        }
+    }
+
+    /**
+     * Returns whether the timeout was extended for verification.
+     *
+     * @return {@code true} if a timeout was already extended.
+     */
+    public boolean timeoutExtended() {
+        return mExtendedTimeout;
     }
 }
