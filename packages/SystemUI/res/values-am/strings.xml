@@ -56,11 +56,11 @@
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"ምንም የተጫኑ መተግበሪያዎች ከዚህ የUSB ተቀጥላ ጋር አይሰሩም። በ<xliff:g id="URL">%1$s</xliff:g> ስለዚህ ተቀጥላ የበለጠ ለመረዳት።"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"የUSB  ተቀጥላ"</string>
     <string name="label_view" msgid="6304565553218192990">"ዕይታ"</string>
-    <string name="always_use_device" msgid="1450287437017315906">"ለዚህ USB  መሣሪያ በነባሪነት ተጠቀም"</string>
-    <string name="always_use_accessory" msgid="1210954576979621596">"ለዚህ USB  ተቀጥላ በነባሪነት ተጠቀም"</string>
+    <string name="always_use_device" msgid="1450287437017315906">"ለእዚህ USB  መሣሪያ በነባሪነት ተጠቀም"</string>
+    <string name="always_use_accessory" msgid="1210954576979621596">"ለእዚህ USB  ተቀጥላ በነባሪነት ተጠቀም"</string>
     <string name="usb_debugging_title" msgid="1114766024068112429">"የUSB ማረሚያ ይፈቀድ?"</string>
     <string name="usb_debugging_message" msgid="719863946976291180">"የUSB ማረም ከዚህ ኮምፒውተር ይፈቀድ?"\n"የእርስዎ RSA ቁልፍ ጣት አሻራ "\n"<xliff:g id="FINGERPRINT">%1$s</xliff:g> ነው"</string>
-    <string name="usb_debugging_always" msgid="4253099426793114693">"ለዚህ ኮምፒውተር ሁልጊዜ ፍቀድ"</string>
+    <string name="usb_debugging_always" msgid="4253099426793114693">"ለእዚህ ኮምፒውተር ሁልጊዜ ፍቀድ"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"ማያ እንዲሞላ አጉላ"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"ማያ ለመሙለት ሳብ"</string>
     <string name="compat_mode_help_header" msgid="7969493989397529910">"የተኳኋኝነት አጉላ"</string>
