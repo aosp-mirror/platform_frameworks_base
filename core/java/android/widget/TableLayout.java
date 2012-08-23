@@ -184,6 +184,10 @@ public class TableLayout extends LinearLayout {
             mShrinkableColumns = new SparseBooleanArray();
         }
 
+        // TableLayouts are always in vertical orientation; keep this tracked
+        // for shared LinearLayout code.
+        setOrientation(VERTICAL);
+
         mPassThroughListener = new PassThroughHierarchyChangeListener();
         // make sure to call the parent class method to avoid potential
         // infinite loops
