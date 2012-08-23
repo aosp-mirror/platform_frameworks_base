@@ -175,7 +175,8 @@ registerReceiver(mRetryReceiver, filter);
   <li>The end user uninstalls the application.</li>
   <li>The 3rd-party server sends a message to GCM server.</li>
   <li>The GCM server sends the message to the device.</li>
-  <li>The GCM client receives the message and queries Package Manager, which returns a &quot;package not found&quot; error.</li>
+  <li>The GCM client receives the message and queries Package Manager about whether there are broadcast receivers configured to receive it, which returns <code>false</code>.
+</li>
   <li>The GCM client informs the GCM server that the application was uninstalled.</li>
   <li>The GCM server marks the registration ID for deletion.</li>
   <li>The 3rd-party server sends a message to  GCM.</li>
