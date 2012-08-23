@@ -6603,7 +6603,7 @@ package android.content.pm {
     field public static final int SIGNATURE_UNKNOWN_PACKAGE = -4; // 0xfffffffc
     field public static final int VERIFICATION_ALLOW = 1; // 0x1
     field public static final int VERIFICATION_REJECT = -1; // 0xffffffff
-    field public static final long MAXIMUM_VERIFICATION_TIMEOUT = 360000L; // 0x36ee80L
+    field public static final long MAXIMUM_VERIFICATION_TIMEOUT = 3600000L; // 0x36ee80
   }
 
   public static class PackageManager.NameNotFoundException extends android.util.AndroidException {
