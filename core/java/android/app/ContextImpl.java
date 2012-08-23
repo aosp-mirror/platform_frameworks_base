@@ -769,7 +769,7 @@ class ContextImpl extends Context {
             }
             if (!mCacheDir.exists()) {
                 if(!mCacheDir.mkdirs()) {
-                    Log.w(TAG, "Unable to create cache directory");
+                    Log.w(TAG, "Unable to create cache directory " + mCacheDir.getAbsolutePath());
                     return null;
                 }
                 FileUtils.setPermissions(
