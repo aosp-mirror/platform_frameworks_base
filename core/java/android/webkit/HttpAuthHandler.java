@@ -28,9 +28,9 @@ import android.os.Handler;
 public class HttpAuthHandler extends Handler {
 
     /**
-     * Package-private constructor needed for API compatibility.
+     * @hide Only for use by WebViewProvider implementations.
      */
-    HttpAuthHandler() {
+    public HttpAuthHandler() {
     }
 
     /**
