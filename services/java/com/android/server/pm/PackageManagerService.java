@@ -780,7 +780,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     final int verificationId = msg.arg1;
                     final PackageVerificationState state = mPendingVerification.get(verificationId);
 
-                    if (state != null) {
+                    if ((state != null) && !state.timeoutExtended()) {
                         final InstallArgs args = state.getInstallArgs();
                         Slog.i(TAG, "Verification timed out for " + args.packageURI.toString());
                         mPendingVerification.remove(verificationId);
@@ -788,20 +788,20 @@ public class PackageManagerService extends IPackageManager.Stub {
                         int ret = PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE;
 
                         if (getDefaultVerificationResponse() == PackageManager.VERIFICATION_ALLOW) {
-                          Slog.i(TAG, "Continuing with installation of " + args.packageURI.toString());
-                          state.setVerifierResponse(Binder.getCallingUid(), PackageManager.VERIFICATION_ALLOW_WITHOUT_SUFFICIENT);
-                          try {
-                              ret = args.copyApk(mContainerService, true);
-                          } catch (RemoteException e) {
-                              Slog.e(TAG, "Could not contact the ContainerService");
-                          }
+                            Slog.i(TAG, "Continuing with installation of "
+                                    + args.packageURI.toString());
+                            state.setVerifierResponse(Binder.getCallingUid(),
+                                    PackageManager.VERIFICATION_ALLOW_WITHOUT_SUFFICIENT);
+                            try {
+                                ret = args.copyApk(mContainerService, true);
+                            } catch (RemoteException e) {
+                                Slog.e(TAG, "Could not contact the ContainerService");
+                            }
                         }
 
                         processPendingInstall(args, ret);
-
                         mHandler.sendEmptyMessage(MCS_UNBIND);
                     }
-
                     break;
                 }
                 case PACKAGE_VERIFIED: {
@@ -5391,6 +5391,32 @@ public class PackageManagerService extends IPackageManager.Stub {
         msg.arg1 = id;
         msg.obj = response;
         mHandler.sendMessage(msg);
+    }
+
+    @Override
+    public void extendVerificationTimeout(int id, int verificationCodeAtTimeout,
+            long millisecondsToDelay) {
+        final PackageVerificationState state = mPendingVerification.get(id);
+        final PackageVerificationResponse response = new PackageVerificationResponse(
+                verificationCodeAtTimeout, Binder.getCallingUid());
+
+        if ((millisecondsToDelay > PackageManager.MAXIMUM_VERIFICATION_TIMEOUT)
+                || (millisecondsToDelay < 0)) {
+            throw new IllegalArgumentException("millisecondsToDelay is out of bounds.");
+        }
+        if ((verificationCodeAtTimeout != PackageManager.VERIFICATION_ALLOW)
+              || (verificationCodeAtTimeout != PackageManager.VERIFICATION_REJECT)) {
+            throw new IllegalArgumentException("verificationCodeAtTimeout is unknown.");
+        }
+
+        if ((state != null) && !state.timeoutExtended()) {
+            state.extendTimeout();
+
+            final Message msg = mHandler.obtainMessage(PACKAGE_VERIFIED);
+            msg.arg1 = id;
+            msg.obj = response;
+            mHandler.sendMessageDelayed(msg, millisecondsToDelay);
+        }
     }
 
     private ComponentName matchComponentForVerifier(String packageName,

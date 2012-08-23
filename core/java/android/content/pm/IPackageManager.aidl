@@ -370,6 +370,7 @@ interface IPackageManager {
             in ContainerEncryptionParams encryptionParams);
 
     void verifyPendingInstall(int id, int verificationCode);
+    void extendVerificationTimeout(int id, int verificationCodeAtTimeout, long millisecondsToDelay);
 
     VerifierDeviceIdentity getVerifierDeviceIdentity();
 

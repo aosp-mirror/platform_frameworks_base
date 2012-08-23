@@ -6532,6 +6532,7 @@ package android.content.pm {
     method public abstract void setComponentEnabledSetting(android.content.ComponentName, int, int);
     method public abstract void setInstallerPackageName(java.lang.String, java.lang.String);
     method public abstract void verifyPendingInstall(int, int);
+    method public abstract void extendVerificationTimeout(int, int, long);
     field public static final int COMPONENT_ENABLED_STATE_DEFAULT = 0; // 0x0
     field public static final int COMPONENT_ENABLED_STATE_DISABLED = 2; // 0x2
     field public static final int COMPONENT_ENABLED_STATE_DISABLED_USER = 3; // 0x3
@@ -6602,6 +6603,7 @@ package android.content.pm {
     field public static final int SIGNATURE_UNKNOWN_PACKAGE = -4; // 0xfffffffc
     field public static final int VERIFICATION_ALLOW = 1; // 0x1
     field public static final int VERIFICATION_REJECT = -1; // 0xffffffff
+    field public static final long MAXIMUM_VERIFICATION_TIMEOUT = 360000L; // 0x36ee80L
   }
 
   public static class PackageManager.NameNotFoundException extends android.util.AndroidException {
@@ -21371,6 +21373,7 @@ package android.test.mock {
     method public void setComponentEnabledSetting(android.content.ComponentName, int, int);
     method public void setInstallerPackageName(java.lang.String, java.lang.String);
     method public void verifyPendingInstall(int, int);
+    method public void extendVerificationTimeout(int, int, long);
   }
 
   public class MockResources extends android.content.res.Resources {
