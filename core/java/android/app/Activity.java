@@ -48,6 +48,7 @@ import android.os.Looper;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.StrictMode;
+import android.os.UserHandle;
 import android.text.Selection;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
@@ -3380,6 +3381,31 @@ public class Activity extends ContextThemeWrapper
                 // existing applications that may have overridden it.
                 mParent.startActivityFromChild(this, intent, requestCode);
             }
+        }
+    }
+
+    /**
+     * @hide Implement to provide correct calling token.
+     */
+    public void startActivityAsUser(Intent intent, UserHandle user) {
+        startActivityAsUser(intent, null, user);
+    }
+
+    /**
+     * @hide Implement to provide correct calling token.
+     */
+    public void startActivityAsUser(Intent intent, Bundle options, UserHandle user) {
+        if (mParent != null) {
+            throw new RuntimeException("Called be called from a child");
+        }
+        Instrumentation.ActivityResult ar =
+                mInstrumentation.execStartActivity(
+                        this, mMainThread.getApplicationThread(), mToken, this,
+                        intent, -1, options, user);
+        if (ar != null) {
+            mMainThread.sendActivityResult(
+                mToken, mEmbeddedID, -1, ar.getResultCode(),
+                ar.getResultData());
         }
     }
 
