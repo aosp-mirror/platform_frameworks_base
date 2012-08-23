@@ -16,6 +16,8 @@
 
 package android.os;
 
+import android.util.Slog;
+
 import com.google.android.collect.Maps;
 
 import java.util.HashMap;
@@ -81,7 +83,7 @@ public class SystemService {
         if (state != null) {
             return state;
         } else {
-            throw new IllegalStateException("Service " + service + " in unknown state " + rawState);
+            return State.STOPPED;
         }
     }
 

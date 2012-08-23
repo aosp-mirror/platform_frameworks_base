@@ -115,12 +115,14 @@ import java.util.List;
  * @hide
  */
 public class ConnectivityService extends IConnectivityManager.Stub {
+    private static final String TAG = "ConnectivityService";
 
     private static final boolean DBG = true;
     private static final boolean VDBG = false;
-    private static final String TAG = "ConnectivityService";
 
     private static final boolean LOGD_RULES = false;
+
+    // TODO: create better separation between radio types and network types
 
     // how long to wait before switching back to a radio's default network
     private static final int RESTORE_DEFAULT_NETWORK_DELAY = 1 * 60 * 1000;
@@ -136,6 +138,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private boolean mTetheringConfigValid = false;
 
     private Vpn mVpn;
+    private VpnCallback mVpnCallback = new VpnCallback();
 
     /** Lock around {@link #mUidRules} and {@link #mMeteredIfaces}. */
     private Object mRulesLock = new Object();
@@ -328,7 +331,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         this(context, netd, statsService, policyManager, null);
     }
 
-    public ConnectivityService(Context context, INetworkManagementService netd,
+    public ConnectivityService(Context context, INetworkManagementService netManager,
             INetworkStatsService statsService, INetworkPolicyManager policyManager,
             NetworkFactory netFactory) {
         if (DBG) log("ConnectivityService starting up");
@@ -366,7 +369,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
 
         mContext = checkNotNull(context, "missing Context");
-        mNetd = checkNotNull(netd, "missing INetworkManagementService");
+        mNetd = checkNotNull(netManager, "missing INetworkManagementService");
         mPolicyManager = checkNotNull(policyManager, "missing INetworkPolicyManager");
 
         try {
@@ -506,11 +509,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                                   mTethering.getTetherableBluetoothRegexs().length != 0) &&
                                  mTethering.getUpstreamIfaceTypes().length != 0);
 
-        mVpn = new Vpn(mContext, new VpnCallback());
+        mVpn = new Vpn(mContext, mVpnCallback, mNetd);
+        mVpn.startMonitoring(mContext, mTrackerHandler);
 
         try {
             mNetd.registerObserver(mTethering);
-            mNetd.registerObserver(mVpn);
             mNetd.registerObserver(mDataActivityObserver);
         } catch (RemoteException e) {
             loge("Error registering observer :" + e);
@@ -2240,9 +2243,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      */
    public void updateNetworkSettings(NetworkStateTracker nt) {
         String key = nt.getTcpBufferSizesPropName();
-        String bufferSizes = SystemProperties.get(key);
+        String bufferSizes = key == null ? null : SystemProperties.get(key);
 
-        if (bufferSizes.length() == 0) {
+        if (TextUtils.isEmpty(bufferSizes)) {
             if (VDBG) log(key + " not found in system properties. Using defaults");
 
             // Setting to default values so we won't be stuck to previous values
@@ -3155,8 +3158,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      * be done whenever a better abstraction is developed.
      */
     public class VpnCallback {
-
         private VpnCallback() {
+        }
+
+        public void onStateChanged(NetworkInfo info) {
+            // TODO: if connected, release delayed broadcast
+            // TODO: if disconnected, consider kicking off reconnect
         }
 
         public void override(List<String> dnsServers, List<String> searchDomains) {

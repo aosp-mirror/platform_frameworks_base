@@ -79,7 +79,7 @@ public class ManageDialog extends AlertActivity implements
             mDataReceived = (TextView) view.findViewById(R.id.data_received);
             mDataRowsHidden = true;
 
-            if (mConfig.user.equals(VpnConfig.LEGACY_VPN)) {
+            if (mConfig.legacy) {
                 mAlertParams.mIconId = android.R.drawable.ic_dialog_info;
                 mAlertParams.mTitle = getText(R.string.legacy_title);
             } else {
