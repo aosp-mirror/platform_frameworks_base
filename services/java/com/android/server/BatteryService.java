@@ -204,6 +204,11 @@ public class BatteryService extends Binder {
         return mBatteryLevel;
     }
 
+    // true if battery level is below the first warning threshold
+    public final boolean isBatteryLow() {
+        return mBatteryPresent && mBatteryLevel <= mLowBatteryWarningLevel;
+    }
+
     void systemReady() {
         // check our power situation now that it is safe to display the shutdown dialog.
         shutdownIfNoPower();
