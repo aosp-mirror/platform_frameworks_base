@@ -1311,6 +1311,5 @@
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"블루투스 오디오"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"완료"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"미디어 출력"</string>
-    <!-- no translation found for display_manager_built_in_display (9042666544146043569) -->
-    <skip />
+    <string name="display_manager_built_in_display" msgid="9042666544146043569">"기본으로 제공되는 화면"</string>
 </resources>
