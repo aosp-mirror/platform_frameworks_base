@@ -530,6 +530,10 @@ public class UserManagerService extends IUserManager.Stub {
         synchronized (mUsers) {
             result = removeUserLocked(userHandle);
         }
+
+        // Cleanup package manager settings
+        mPm.cleanUpUser(userHandle);
+
         // Let other services shutdown any activity
         Intent addedIntent = new Intent(Intent.ACTION_USER_REMOVED);
         addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userHandle);
@@ -561,8 +565,6 @@ public class UserManagerService extends IUserManager.Stub {
         if (userHandle == 0 || user == null) {
             return false;
         }
-
-        mPm.cleanUpUser(userHandle);
 
         // Remove this user from the list
         mUsers.remove(userHandle);
