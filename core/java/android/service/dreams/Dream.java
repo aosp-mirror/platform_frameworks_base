@@ -56,6 +56,10 @@ public class Dream extends Service implements Window.Callback {
     public static final String SERVICE_INTERFACE =
             "android.service.dreams.Dream";
 
+    /** Service meta-data key for declaring an optional configuration activity. */
+    public static final String METADATA_NAME_CONFIG_ACTIVITY =
+            "android.service.dreams.config_activity";
+
     private Window mWindow;
 
     private WindowManager mWindowManager;
