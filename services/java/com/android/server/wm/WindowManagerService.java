@@ -75,7 +75,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
 import android.hardware.display.DisplayManager;
-import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Debug;
@@ -93,7 +92,6 @@ import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.os.TokenWatcher;
 import android.os.Trace;
 import android.os.WorkSource;
 import android.provider.Settings;
@@ -279,55 +277,19 @@ public class WindowManagerService extends IWindowManager.Stub
     private static final String SYSTEM_SECURE = "ro.secure";
     private static final String SYSTEM_DEBUGGABLE = "ro.debuggable";
 
-    /**
-     * Condition waited on by {@link #reenableKeyguard} to know the call to
-     * the window policy has finished.
-     * This is set to true only if mKeyguardTokenWatcher.acquired() has
-     * actually disabled the keyguard.
-     */
-    private boolean mKeyguardDisabled = false;
+    final private KeyguardDisableHandler mKeyguardDisableHandler;
 
     private final boolean mHeadless;
 
-    private static final int ALLOW_DISABLE_YES = 1;
-    private static final int ALLOW_DISABLE_NO = 0;
-    private static final int ALLOW_DISABLE_UNKNOWN = -1; // check with DevicePolicyManager
-    private int mAllowDisableKeyguard = ALLOW_DISABLE_UNKNOWN; // sync'd by mKeyguardTokenWatcher
-
     private static final float THUMBNAIL_ANIMATION_DECELERATE_FACTOR = 1.5f;
-
-    final TokenWatcher mKeyguardTokenWatcher = new TokenWatcher(
-            new Handler(), "WindowManagerService.mKeyguardTokenWatcher") {
-        @Override
-        public void acquired() {
-            if (shouldAllowDisableKeyguard()) {
-                mPolicy.enableKeyguard(false);
-                mKeyguardDisabled = true;
-            } else {
-                Log.v(TAG, "Not disabling keyguard since device policy is enforced");
-            }
-        }
-        @Override
-        public void released() {
-            mPolicy.enableKeyguard(true);
-            synchronized (mKeyguardTokenWatcher) {
-                mKeyguardDisabled = false;
-                mKeyguardTokenWatcher.notifyAll();
-            }
-        }
-    };
 
     final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
             if (DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED.equals(action)) {
-                mPolicy.enableKeyguard(true);
-                synchronized(mKeyguardTokenWatcher) {
-                    // lazily evaluate this next time we're asked to disable keyguard
-                    mAllowDisableKeyguard = ALLOW_DISABLE_UNKNOWN;
-                    mKeyguardDisabled = false;
-                }
+                mKeyguardDisableHandler.sendEmptyMessage(
+                    KeyguardDisableHandler.KEYGUARD_POLICY_CHANGED);
             } else if (Intent.ACTION_USER_SWITCHED.equals(action)) {
                 final int newUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
                 Slog.v(TAG, "Switching user from " + mCurrentUserId + " to " + newUserId);
@@ -897,6 +859,8 @@ public class WindowManagerService extends IWindowManager.Stub
         mDisplayManagerService = displayManager;
         mDisplayManager = DisplayManager.getInstance();
         mHeadless = displayManager.isHeadless();
+
+        mKeyguardDisableHandler = new KeyguardDisableHandler(mContext, mPolicy);
 
         mPowerManager = pm;
         mPowerManager.setPolicy(mPolicy);
@@ -5062,59 +5026,26 @@ public class WindowManagerService extends IWindowManager.Stub
     // Misc IWindowSession methods
     // -------------------------------------------------------------
 
-    private boolean shouldAllowDisableKeyguard()
-    {
-        // We fail safe and prevent disabling keyguard in the unlikely event this gets
-        // called before DevicePolicyManagerService has started.
-        if (mAllowDisableKeyguard == ALLOW_DISABLE_UNKNOWN) {
-            DevicePolicyManager dpm = (DevicePolicyManager) mContext.getSystemService(
-                    Context.DEVICE_POLICY_SERVICE);
-            if (dpm != null) {
-                mAllowDisableKeyguard = dpm.getPasswordQuality(null)
-                        == DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED ?
-                                ALLOW_DISABLE_YES : ALLOW_DISABLE_NO;
-            }
-        }
-        return mAllowDisableKeyguard == ALLOW_DISABLE_YES;
-    }
-
+    @Override
     public void disableKeyguard(IBinder token, String tag) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DISABLE_KEYGUARD)
             != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires DISABLE_KEYGUARD permission");
         }
 
-        synchronized (mKeyguardTokenWatcher) {
-            mKeyguardTokenWatcher.acquire(token, tag);
-        }
+        mKeyguardDisableHandler.sendMessage(mKeyguardDisableHandler.obtainMessage(
+                KeyguardDisableHandler.KEYGUARD_DISABLE, new Pair<IBinder, String>(token, tag)));
     }
 
+    @Override
     public void reenableKeyguard(IBinder token) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DISABLE_KEYGUARD)
             != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires DISABLE_KEYGUARD permission");
         }
 
-        synchronized (mKeyguardTokenWatcher) {
-            mKeyguardTokenWatcher.release(token);
-
-            if (!mKeyguardTokenWatcher.isAcquired()) {
-                // If we are the last one to reenable the keyguard wait until
-                // we have actually finished reenabling until returning.
-                // It is possible that reenableKeyguard() can be called before
-                // the previous disableKeyguard() is handled, in which case
-                // neither mKeyguardTokenWatcher.acquired() or released() would
-                // be called. In that case mKeyguardDisabled will be false here
-                // and we have nothing to wait for.
-                while (mKeyguardDisabled) {
-                    try {
-                        mKeyguardTokenWatcher.wait();
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
-                }
-            }
-        }
+        mKeyguardDisableHandler.sendMessage(mKeyguardDisableHandler.obtainMessage(
+                KeyguardDisableHandler.KEYGUARD_REENABLE, token));
     }
 
     /**
@@ -10416,7 +10347,6 @@ public class WindowManagerService extends IWindowManager.Stub
     // Called by the heartbeat to ensure locks are not held indefnitely (for deadlock detection).
     public void monitor() {
         synchronized (mWindowMap) { }
-        synchronized (mKeyguardTokenWatcher) { }
     }
 
     public interface OnHardKeyboardStatusChangeListener {
