@@ -17,6 +17,7 @@
 package com.android.server;
 
 import static android.provider.Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK;
+import static android.provider.Settings.Secure.SCREENSAVER_ENABLED;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -51,7 +52,8 @@ final class DockObserver extends UEventObserver {
     private static final String DOCK_UEVENT_MATCH = "DEVPATH=/devices/virtual/switch/dock";
     private static final String DOCK_STATE_PATH = "/sys/class/switch/dock/state";
 
-    private static final int DEFAULT_DOCK = 1;
+    private static final int DEFAULT_SCREENSAVER_ENABLED = 1;
+    private static final int DEFAULT_SCREENSAVER_ACTIVATED_ON_DOCK = 1;
 
     private static final int MSG_DOCK_STATE_CHANGED = 0;
 
@@ -214,7 +216,7 @@ final class DockObserver extends UEventObserver {
                         Slog.w(TAG, "Unable to awaken!", e);
                     }
                 } else {
-                    if (isScreenSaverActivatedOnDock(mContext)) {
+                    if (isScreenSaverEnabled(mContext) && isScreenSaverActivatedOnDock(mContext)) {
                         try {
                             mgr.dream();
                         } catch (RemoteException e) {
@@ -229,9 +231,14 @@ final class DockObserver extends UEventObserver {
         }
     }
 
+    private static boolean isScreenSaverEnabled(Context context) {
+        return Settings.Secure.getInt(context.getContentResolver(),
+                SCREENSAVER_ENABLED, DEFAULT_SCREENSAVER_ENABLED) != 0;
+    }
+
     private static boolean isScreenSaverActivatedOnDock(Context context) {
         return Settings.Secure.getInt(context.getContentResolver(),
-                SCREENSAVER_ACTIVATE_ON_DOCK, DEFAULT_DOCK) != 0;
+                SCREENSAVER_ACTIVATE_ON_DOCK, DEFAULT_SCREENSAVER_ACTIVATED_ON_DOCK) != 0;
     }
 
     private final Handler mHandler = new Handler(Looper.myLooper(), null, true) {

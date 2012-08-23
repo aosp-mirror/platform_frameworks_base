@@ -157,6 +157,8 @@
     <bool name="def_screensaver_enabled">true</bool>
     <!-- Whether the feature activates when docked (SCREENSAVER_ACTIVATE_ON_DOCK) -->
     <bool name="def_screensaver_activate_on_dock">true</bool>
+    <!-- Whether the feature activates when docked (SCREENSAVER_ACTIVATE_ON_SLEEP) -->
+    <bool name="def_screensaver_activate_on_sleep">true</bool>
     <!-- ComponentName of the default screen saver (Settings.Secure.SCREENSAVER_COMPONENT) -->
     <string name="def_screensaver_component">com.google.android.deskclock/com.android.deskclock.Screensaver</string>
 </resources>

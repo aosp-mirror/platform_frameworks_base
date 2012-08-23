@@ -4248,26 +4248,39 @@ public final class Settings {
                 "setup_prepaid_detection_redir_host";
 
         /**
-         * Whether the screensaver is enabled.
+         * Whether screensavers are enabled.
          * @hide
          */
         public static final String SCREENSAVER_ENABLED = "screensaver_enabled";
 
         /**
-         * The user's chosen screensaver component.
+         * The user's chosen screensaver components.
          *
-         * This component will be launched by the PhoneWindowManager after a timeout when not on
+         * These will be launched by the PhoneWindowManager after a timeout when not on
          * battery, or upon dock insertion (if SCREENSAVER_ACTIVATE_ON_DOCK is set to 1).
          * @hide
          */
-        public static final String SCREENSAVER_COMPONENT = "screensaver_component";
+        public static final String SCREENSAVER_COMPONENTS = "screensaver_components";
 
         /**
-         * Whether the screensaver should be automatically launched when the device is inserted
-         * into a (desk) dock.
+         * If screensavers are enabled, whether the screensaver should be automatically launched
+         * when the device is inserted into a (desk) dock.
          * @hide
          */
         public static final String SCREENSAVER_ACTIVATE_ON_DOCK = "screensaver_activate_on_dock";
+
+        /**
+         * If screensavers are enabled, whether the screensaver should be automatically launched
+         * when the screen times out when not on battery.
+         * @hide
+         */
+        public static final String SCREENSAVER_ACTIVATE_ON_SLEEP = "screensaver_activate_on_sleep";
+
+        /**
+         * If screensavers are enabled, the default screensaver component.
+         * @hide
+         */
+        public static final String SCREENSAVER_DEFAULT_COMPONENT = "screensaver_default_component";
 
         /** {@hide} */
         public static final String NETSTATS_ENABLED = "netstats_enabled";
