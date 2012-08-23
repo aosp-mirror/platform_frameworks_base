@@ -536,6 +536,12 @@ public class MockPackageManager extends PackageManager {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public void extendVerificationTimeout(int id, int verificationCodeAtTimeout,
+            long millisecondsToDelay) {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * @hide
      */
