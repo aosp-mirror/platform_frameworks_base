@@ -477,6 +477,7 @@ class ScreenRotationAnimation {
             mRotateFrameAnimation.scaleCurrentDuration(animationScale);
         }
 
+        final int layerStack = mDisplay.getLayerStack();
         if (USE_CUSTOM_BLACK_FRAME && mCustomBlackFrame == null) {
             if (WindowManagerService.SHOW_LIGHT_TRANSACTIONS || DEBUG_STATE) Slog.i(
                     WindowManagerService.TAG,
@@ -495,7 +496,8 @@ class ScreenRotationAnimation {
                 Rect outer = new Rect(-mOriginalWidth*1, -mOriginalHeight*1,
                         mOriginalWidth*2, mOriginalHeight*2);
                 Rect inner = new Rect(0, 0, mOriginalWidth, mOriginalHeight);
-                mCustomBlackFrame = new BlackFrame(session, outer, inner, FREEZE_LAYER + 3);
+                mCustomBlackFrame = new BlackFrame(session, outer, inner, FREEZE_LAYER + 3,
+                        layerStack);
                 mCustomBlackFrame.setMatrix(mFrameInitialMatrix);
             } catch (Surface.OutOfResourcesException e) {
                 Slog.w(TAG, "Unable to allocate black surface", e);
@@ -525,7 +527,8 @@ class ScreenRotationAnimation {
                 Rect outer = new Rect(-mOriginalWidth*1, -mOriginalHeight*1,
                         mOriginalWidth*2, mOriginalHeight*2);
                 Rect inner = new Rect(0, 0, mOriginalWidth, mOriginalHeight);
-                mExitingBlackFrame = new BlackFrame(session, outer, inner, FREEZE_LAYER + 2);
+                mExitingBlackFrame = new BlackFrame(session, outer, inner, FREEZE_LAYER + 2,
+                        layerStack);
                 mExitingBlackFrame.setMatrix(mFrameInitialMatrix);
             } catch (Surface.OutOfResourcesException e) {
                 Slog.w(TAG, "Unable to allocate black surface", e);
@@ -547,7 +550,8 @@ class ScreenRotationAnimation {
                 Rect outer = new Rect(-finalWidth*1, -finalHeight*1,
                         finalWidth*2, finalHeight*2);
                 Rect inner = new Rect(0, 0, finalWidth, finalHeight);
-                mEnteringBlackFrame = new BlackFrame(session, outer, inner, FREEZE_LAYER);
+                mEnteringBlackFrame = new BlackFrame(session, outer, inner, FREEZE_LAYER,
+                        layerStack);
             } catch (Surface.OutOfResourcesException e) {
                 Slog.w(TAG, "Unable to allocate black surface", e);
             } finally {

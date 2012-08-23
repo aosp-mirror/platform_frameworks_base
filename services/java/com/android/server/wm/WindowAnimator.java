@@ -103,6 +103,8 @@ public class WindowAnimator {
     /** Do not modify unless holding mService.mWindowMap or this and mAnimToLayout in that order */
     final AnimatorToLayoutParams mAnimToLayout = new AnimatorToLayoutParams();
 
+    boolean mInitialized = false;
+
     WindowAnimator(final WindowManagerService service) {
         mService = service;
         mContext = service.mContext;
@@ -121,10 +123,13 @@ public class WindowAnimator {
                 }
             }
         };
+    }
 
+    void initializeLocked(final int layerStack) {
         mWindowAnimationBackgroundSurface =
-                new DimSurface(mService.mFxSession, Display.DEFAULT_DISPLAY);
-        mDimAnimator = new DimAnimator(mService.mFxSession, Display.DEFAULT_DISPLAY);
+                new DimSurface(mService.mFxSession, layerStack);
+        mDimAnimator = new DimAnimator(mService.mFxSession, layerStack);
+        mInitialized = true;
     }
 
     /** Locked on mAnimToLayout */
@@ -563,6 +568,9 @@ public class WindowAnimator {
     // TODO(cmautner): Change the following comment when no longer locked on mWindowMap */
     /** Locked on mService.mWindowMap and this. */
     private void animateLocked() {
+        if (!mInitialized) {
+            return;
+        }
         for (int i = mWinAnimatorLists.size() - 1; i >= 0; i--) {
             animateLocked(mWinAnimatorLists.get(i));
         }

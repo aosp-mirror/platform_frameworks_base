@@ -22,7 +22,6 @@ import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.util.Slog;
-import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceSession;
 
@@ -36,7 +35,7 @@ public class BlackFrame {
         final int layer;
         final Surface surface;
 
-        BlackSurface(SurfaceSession session, int layer, int l, int t, int r, int b)
+        BlackSurface(SurfaceSession session, int layer, int l, int t, int r, int b, int layerStack)
                 throws Surface.OutOfResourcesException {
             left = l;
             top = t;
@@ -45,10 +44,10 @@ public class BlackFrame {
             int h = b-t;
             if (WindowManagerService.DEBUG_SURFACE_TRACE) {
                 surface = new WindowStateAnimator.SurfaceTrace(session, 0, "BlackSurface("
-                        + l + ", " + t + ")", Display.DEFAULT_DISPLAY,
+                        + l + ", " + t + ")", layerStack,
                         w, h, PixelFormat.OPAQUE, Surface.FX_SURFACE_DIM);
             } else {
-                surface = new Surface(session, 0, "BlackSurface", Display.DEFAULT_DISPLAY,
+                surface = new Surface(session, 0, "BlackSurface", layerStack,
                         w, h, PixelFormat.OPAQUE, Surface.FX_SURFACE_DIM);
             }
             surface.setAlpha(1);
@@ -104,7 +103,7 @@ public class BlackFrame {
     }
 
     public BlackFrame(SurfaceSession session, Rect outer, Rect inner,
-            int layer) throws Surface.OutOfResourcesException {
+            int layer, final int layerStack) throws Surface.OutOfResourcesException {
         boolean success = false;
 
         mOuterRect = new Rect(outer);
@@ -112,19 +111,19 @@ public class BlackFrame {
         try {
             if (outer.top < inner.top) {
                 mBlackSurfaces[0] = new BlackSurface(session, layer,
-                        outer.left, outer.top, inner.right, inner.top);
+                        outer.left, outer.top, inner.right, inner.top, layerStack);
             }
             if (outer.left < inner.left) {
                 mBlackSurfaces[1] = new BlackSurface(session, layer,
-                        outer.left, inner.top, inner.left, outer.bottom);
+                        outer.left, inner.top, inner.left, outer.bottom, layerStack);
             }
             if (outer.bottom > inner.bottom) {
                 mBlackSurfaces[2] = new BlackSurface(session, layer,
-                        inner.left, inner.bottom, outer.right, outer.bottom);
+                        inner.left, inner.bottom, outer.right, outer.bottom, layerStack);
             }
             if (outer.right > inner.right) {
                 mBlackSurfaces[3] = new BlackSurface(session, layer,
-                        inner.right, outer.top, outer.right, inner.bottom);
+                        inner.right, outer.top, outer.right, inner.bottom, layerStack);
             }
             success = true;
         } finally {
