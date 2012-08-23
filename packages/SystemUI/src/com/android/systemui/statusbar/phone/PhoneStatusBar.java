@@ -445,9 +445,6 @@ public class PhoneStatusBar extends BaseStatusBar {
 //        if (wimaxRSSI != null) {
 //            mNetworkController.addWimaxIconView(wimaxRSSI);
 //        }
-        // Recents Panel
-        mRecentTasksLoader = new RecentTasksLoader(context);
-        updateRecentsPanel();
 
         // receive broadcasts
         IntentFilter filter = new IntentFilter();
@@ -456,6 +453,11 @@ public class PhoneStatusBar extends BaseStatusBar {
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         context.registerReceiver(mBroadcastReceiver, filter);
 
+        return mStatusBarView;
+    }
+
+    @Override
+    protected View getStatusBarView() {
         return mStatusBarView;
     }
 
@@ -507,6 +509,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         return lp;
     }
 
+    /*
     protected void updateRecentsPanel() {
         super.updateRecentsPanel(R.layout.status_bar_recent_panel);
         // Make .03 alpha the minimum so you always see the item a bit-- slightly below
@@ -517,6 +520,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             mNavigationBarView.getRecentsButton().setOnTouchListener(mRecentsPanel);
         }
     }
+    */
 
     @Override
     protected void updateSearchPanel() {
@@ -604,7 +608,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         mNavigationBarView.reorient();
 
         mNavigationBarView.getRecentsButton().setOnClickListener(mRecentsClickListener);
-        mNavigationBarView.getRecentsButton().setOnTouchListener(mRecentsPanel);
+        mNavigationBarView.getRecentsButton().setOnTouchListener(getRecentTasksLoader());
         mNavigationBarView.getHomeButton().setOnTouchListener(mHomeSearchActionListener);
         updateSearchPanel();
     }
@@ -785,7 +789,6 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
-        updateRecentsPanel();
         updateShowSearchHoldoff();
     }
 

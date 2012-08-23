@@ -29,20 +29,17 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
-import android.graphics.Rect;
 import android.graphics.Shader.TileMode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
-import android.view.IWindowManager;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -71,7 +68,7 @@ import com.android.systemui.statusbar.tablet.TabletStatusBar;
 import java.util.ArrayList;
 
 public class RecentsPanelView extends FrameLayout implements OnItemClickListener, RecentsCallback,
-        StatusBarPanel, Animator.AnimatorListener, View.OnTouchListener {
+        StatusBarPanel, Animator.AnimatorListener {
     static final String TAG = "RecentsPanelView";
     static final boolean DEBUG = TabletStatusBar.DEBUG || PhoneStatusBar.DEBUG || false;
     private Context mContext;
@@ -84,36 +81,22 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
 
     private boolean mShowing;
     private boolean mWaitingToShow;
-    private boolean mWaitingToShowAnimated;
-    private boolean mReadyToShow;
     private int mNumItemsWaitingForThumbnailsAndIcons;
-    private Choreographer mChoreo;
-    OnRecentsPanelVisibilityChangedListener mVisibilityChangedListener;
-
-    ImageView mPlaceholderThumbnail;
-    View mTransitionBg;
-    boolean mHideRecentsAfterThumbnailScaleUpStarted;
 
     private RecentTasksLoader mRecentTasksLoader;
     private ArrayList<TaskDescription> mRecentTaskDescriptions;
-    private Runnable mPreloadTasksRunnable;
-    private boolean mRecentTasksDirty = true;
     private TaskDescriptionAdapter mListAdapter;
     private int mThumbnailWidth;
     private boolean mFitThumbnailToXY;
     private int mRecentItemLayoutId;
-    private boolean mFirstScreenful = true;
     private boolean mHighEndGfx;
-
-    public static interface OnRecentsPanelVisibilityChangedListener {
-        public void onRecentsPanelVisibilityChanged(boolean visible);
-    }
 
     public static interface RecentsScrollView {
         public int numItemsInOneScreenful();
         public void setAdapter(TaskDescriptionAdapter adapter);
         public void setCallback(RecentsCallback callback);
         public void setMinSwipeAlpha(float minAlpha);
+        public View findViewForTask(TaskDescription task);
     }
 
     private final class OnLongClickDelegate implements View.OnLongClickListener {
@@ -252,15 +235,6 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         }
     }
 
-    @Override
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK && !event.isCanceled()) {
-            show(false, false);
-            return true;
-        }
-        return super.onKeyUp(keyCode, event);
-    }
-
     private boolean pointInside(int x, int y, View v) {
         final int l = v.getLeft();
         final int r = v.getRight();
@@ -280,22 +254,26 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         }
     }
 
-    public void show(boolean show, boolean animate) {
+    public void show(boolean show) {
+        show(show, null, false);
+    }
+
+    public void show(boolean show, ArrayList<TaskDescription> recentTaskDescriptions,
+            boolean firstScreenful) {
         if (show) {
-            refreshRecentTasksList(null, true);
             mWaitingToShow = true;
-            mWaitingToShowAnimated = animate;
+            refreshRecentTasksList(recentTaskDescriptions, firstScreenful);
             showIfReady();
         } else {
-            show(show, animate, null, false);
+            showImpl(false);
         }
     }
 
     private void showIfReady() {
-        // mWaitingToShow = there was a touch up on the recents button
-        // mReadyToShow = we've created views for the first screenful of items
-        if (mWaitingToShow && mReadyToShow) { // && mNumItemsWaitingForThumbnailsAndIcons <= 0
-            show(true, mWaitingToShowAnimated, null, false);
+        // mWaitingToShow => there was a touch up on the recents button
+        // mRecentTaskDescriptions != null => we've created views for the first screenful of items
+        if (mWaitingToShow && mRecentTaskDescriptions != null) {
+            showImpl(true);
         }
     }
 
@@ -308,79 +286,44 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         }
     }
 
-    public void show(boolean show, boolean animate,
-            ArrayList<TaskDescription> recentTaskDescriptions, boolean firstScreenful) {
+    private void showImpl(boolean show) {
         sendCloseSystemWindows(mContext, BaseStatusBar.SYSTEM_DIALOG_REASON_RECENT_APPS);
 
+        mShowing = show;
+
         if (show) {
-            // Need to update list of recent apps before we set visibility so this view's
-            // content description is updated before it gets focus for TalkBack mode
-            refreshRecentTasksList(recentTaskDescriptions, firstScreenful);
+            // if there are no apps, bring up a "No recent apps" message
+            boolean noApps = mRecentTaskDescriptions != null
+                    && (mRecentTaskDescriptions.size() == 0);
+            mRecentsNoApps.setAlpha(1f);
+            mRecentsNoApps.setVisibility(noApps ? View.VISIBLE : View.INVISIBLE);
 
-            // if there are no apps, either bring up a "No recent apps" message, or just
-            // quit early
-            boolean noApps = !mFirstScreenful && (mRecentTaskDescriptions.size() == 0);
-            if (mRecentsNoApps != null) {
-                mRecentsNoApps.setAlpha(1f);
-                mRecentsNoApps.setVisibility(noApps ? View.VISIBLE : View.INVISIBLE);
-            } else {
-                if (noApps) {
-                   if (DEBUG) Log.v(TAG, "Nothing to show");
-                    // Need to set recent tasks to dirty so that next time we load, we
-                    // refresh the list of tasks
-                    mRecentTasksLoader.cancelLoadingThumbnailsAndIcons();
-                    mRecentTasksDirty = true;
-
-                    mWaitingToShow = false;
-                    mReadyToShow = false;
-                    return;
-                }
-            }
-        } else {
-            // Need to set recent tasks to dirty so that next time we load, we
-            // refresh the list of tasks
-            mRecentTasksLoader.cancelLoadingThumbnailsAndIcons();
-            mRecentTasksDirty = true;
-            mWaitingToShow = false;
-            mReadyToShow = false;
-        }
-        if (animate) {
-            if (mShowing != show) {
-                mShowing = show;
-                if (show) {
-                    setVisibility(View.VISIBLE);
-                }
-                mChoreo.startAnimation(show);
-            }
-        } else {
-            mShowing = show;
-            setVisibility(show ? View.VISIBLE : View.GONE);
-            mChoreo.jumpTo(show);
             onAnimationEnd(null);
-        }
-        if (show) {
             setFocusable(true);
             setFocusableInTouchMode(true);
             requestFocus();
         } else {
+            mWaitingToShow = false;
+            // call onAnimationEnd() and clearRecentTasksList() in onUiHidden()
             if (mPopup != null) {
                 mPopup.dismiss();
             }
         }
     }
 
-    public void dismiss() {
-        hide(true);
+    public void onUiHidden() {
+        if (!mShowing && mRecentTaskDescriptions != null) {
+            onAnimationEnd(null);
+            clearRecentTasksList();
+        }
     }
 
-    public void hide(boolean animate) {
-        if (!animate) {
-            setVisibility(View.GONE);
-        }
-        if (mBar != null) {
-            // This will indirectly cause show(false, ...) to get called
-            mBar.animateCollapse(CommandQueue.FLAG_EXCLUDE_NONE);
-        }
+    public void dismiss() {
+        ((RecentsActivity) mContext).dismissAndGoHome();
+    }
+
+    public void dismissAndGoBack() {
+        ((RecentsActivity) mContext).dismissAndGoBack();
     }
 
     public void onAnimationCancel(Animator animation) {
@@ -393,7 +336,6 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             createCustomAnimations(transitioner);
         } else {
             ((ViewGroup)mRecentsContainer).setLayoutTransition(null);
-            clearRecentTasksList();
         }
     }
 
@@ -401,16 +343,6 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     }
 
     public void onAnimationStart(Animator animation) {
-    }
-
-    /**
-     * We need to be aligned at the bottom.  LinearLayout can't do this, so instead,
-     * let LinearLayout do all the hard work, and then shift everything down to the bottom.
-     */
-    @Override
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        super.onLayout(changed, l, t, r, b);
-        mChoreo.setPanelHeight(mRecentsContainer.getHeight());
     }
 
     @Override
@@ -449,18 +381,6 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         mRecentTasksLoader = loader;
     }
 
-    public void setOnVisibilityChangedListener(OnRecentsPanelVisibilityChangedListener l) {
-        mVisibilityChangedListener = l;
-
-    }
-
-    public void setVisibility(int visibility) {
-        if (mVisibilityChangedListener != null) {
-            mVisibilityChangedListener.onRecentsPanelVisibilityChanged(visibility == VISIBLE);
-        }
-        super.setVisibility(visibility);
-    }
-
     public void updateValuesFromResources() {
         final Resources res = mContext.getResources();
         mThumbnailWidth = Math.round(res.getDimension(R.dimen.status_bar_recents_thumbnail_width));
@@ -486,7 +406,6 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
 
         mRecentsScrim = findViewById(R.id.recents_bg_protect);
         mRecentsNoApps = findViewById(R.id.recents_no_apps);
-        mChoreo = new Choreographer(this, mRecentsScrim, mRecentsContainer, mRecentsNoApps, this);
 
         if (mRecentsScrim != null) {
             mHighEndGfx = ActivityManager.isHighEndGfx();
@@ -497,18 +416,6 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                 ((BitmapDrawable) mRecentsScrim.getBackground()).setTileModeY(TileMode.REPEAT);
             }
         }
-
-        mPreloadTasksRunnable = new Runnable() {
-            public void run() {
-                // If we set our visibility to INVISIBLE here, we avoid an extra call to
-                // onLayout later when we become visible (because onLayout is always called
-                // when going from GONE)
-                if (!mShowing) {
-                    setVisibility(INVISIBLE);
-                    refreshRecentTasksList();
-                }
-            }
-        };
     }
 
     public void setMinSwipeAlpha(float minAlpha) {
@@ -602,44 +509,19 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         showIfReady();
     }
 
-    // additional optimization when we have software system buttons - start loading the recent
-    // tasks on touch down
-    @Override
-    public boolean onTouch(View v, MotionEvent ev) {
-        if (!mShowing) {
-            int action = ev.getAction() & MotionEvent.ACTION_MASK;
-            if (action == MotionEvent.ACTION_DOWN) {
-                post(mPreloadTasksRunnable);
-            } else if (action == MotionEvent.ACTION_CANCEL) {
-                setVisibility(GONE);
-                clearRecentTasksList();
-                // Remove the preloader if we haven't called it yet
-                removeCallbacks(mPreloadTasksRunnable);
-            } else if (action == MotionEvent.ACTION_UP) {
-                // Remove the preloader if we haven't called it yet
-                removeCallbacks(mPreloadTasksRunnable);
-                if (!v.isPressed()) {
-                    setVisibility(GONE);
-                    clearRecentTasksList();
-                }
-            }
-        }
-        return false;
-    }
-
-    public void preloadRecentTasksList() {
-        if (!mShowing) {
-            mPreloadTasksRunnable.run();
-        }
-    }
-
     public void clearRecentTasksList() {
         // Clear memory used by screenshots
-        if (!mShowing && mRecentTaskDescriptions != null) {
-            mRecentTasksLoader.cancelLoadingThumbnailsAndIcons();
-            mRecentTaskDescriptions.clear();
+        if (mRecentTaskDescriptions != null) {
+            mRecentTasksLoader.cancelLoadingThumbnailsAndIcons(this);
+            onTaskLoadingCancelled();
+        }
+    }
+
+    public void onTaskLoadingCancelled() {
+        // Gets called by RecentTasksLoader when it's cancelled
+        if (mRecentTaskDescriptions != null) {
+            mRecentTaskDescriptions = null;
             mListAdapter.notifyDataSetInvalidated();
-            mRecentTasksDirty = true;
         }
     }
 
@@ -649,23 +531,15 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
 
     private void refreshRecentTasksList(
             ArrayList<TaskDescription> recentTasksList, boolean firstScreenful) {
-        if (mRecentTasksDirty) {
-            if (recentTasksList != null) {
-                mFirstScreenful = true;
-                onTasksLoaded(recentTasksList);
-            } else {
-                mFirstScreenful = true;
-                mRecentTasksLoader.loadTasksInBackground();
-            }
-            mRecentTasksDirty = false;
+        if (mRecentTaskDescriptions == null && recentTasksList != null) {
+            onTasksLoaded(recentTasksList, firstScreenful);
+        } else {
+            mRecentTasksLoader.loadTasksInBackground();
         }
     }
 
-    public void onTasksLoaded(ArrayList<TaskDescription> tasks) {
-        if (!mFirstScreenful && tasks.size() == 0) {
-            return;
-        }
-        mNumItemsWaitingForThumbnailsAndIcons = mFirstScreenful 
+    public void onTasksLoaded(ArrayList<TaskDescription> tasks, boolean firstScreenful) {
+        mNumItemsWaitingForThumbnailsAndIcons = firstScreenful
                 ? tasks.size() : mRecentTaskDescriptions == null 
                         ? 0 : mRecentTaskDescriptions.size();
         if (mRecentTaskDescriptions == null) {
@@ -675,17 +549,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         }
         mListAdapter.notifyDataSetInvalidated();
         updateUiElements(getResources().getConfiguration());
-        mReadyToShow = true;
-        mFirstScreenful = false;
         showIfReady();
-    }
-
-    public ArrayList<TaskDescription> getRecentTasksList() {
-        return mRecentTaskDescriptions;
-    }
-
-    public boolean getFirstScreenful() {
-        return mFirstScreenful;
     }
 
     private void updateUiElements(Configuration config) {
@@ -706,8 +570,19 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         setContentDescription(recentAppsAccessibilityDescription);
     }
 
+    public boolean simulateClick(TaskDescription task) {
+        if (mRecentsContainer instanceof RecentsScrollView){
+            RecentsScrollView scrollView
+                = (RecentsScrollView) mRecentsContainer;
+            View v = scrollView.findViewForTask(task);
+            if (v != null) {
+                handleOnClick(v);
+                return true;
+            }
+        }
+        return false;
+    }
 
-    boolean mThumbnailScaleUpStarted;
     public void handleOnClick(View view) {
         ViewHolder holder = (ViewHolder)view.getTag();
         TaskDescription ad = holder.taskDescription;
@@ -725,59 +600,10 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             usingDrawingCache = true;
         }
 
-        if (mPlaceholderThumbnail == null) {
-            mPlaceholderThumbnail =
-                    (ImageView) findViewById(R.id.recents_transition_placeholder_icon);
-        }
-        if (mTransitionBg == null) {
-            mTransitionBg = (View) findViewById(R.id.recents_transition_background);
-
-            IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
-            try {
-                if (!wm.hasSystemNavBar()) {
-                    FrameLayout.LayoutParams lp =
-                            (FrameLayout.LayoutParams) mTransitionBg.getLayoutParams();
-                    int statusBarHeight = getResources().
-                            getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
-                    lp.setMargins(0, statusBarHeight, 0, 0);
-                    mTransitionBg.setLayoutParams(lp);
-                }
-            } catch (RemoteException e) {
-                Log.w(TAG, "Failing checking whether status bar is visible", e);
-            }
-        }
-
-        final ImageView placeholderThumbnail = mPlaceholderThumbnail;
-        mHideRecentsAfterThumbnailScaleUpStarted = false;
-        placeholderThumbnail.setVisibility(VISIBLE);
-        if (!usingDrawingCache) {
-            placeholderThumbnail.setImageBitmap(bm);
-        } else {
-            Bitmap b2 = bm.copy(bm.getConfig(), true);
-            placeholderThumbnail.setImageBitmap(b2);
-        }
-        Rect r = new Rect();
-        holder.thumbnailViewImage.getGlobalVisibleRect(r);
-
-        placeholderThumbnail.setTranslationX(r.left);
-        placeholderThumbnail.setTranslationY(r.top);
-
-        show(false, true);
-
-        mThumbnailScaleUpStarted = false;
         ActivityOptions opts = ActivityOptions.makeThumbnailScaleUpAnimation(
-                holder.thumbnailViewImage, bm, 0, 0,
-                new ActivityOptions.OnAnimationStartedListener() {
-                    @Override public void onAnimationStarted() {
-                        mThumbnailScaleUpStarted = true;
-                        if (!mHighEndGfx) {
-                            mPlaceholderThumbnail.setVisibility(INVISIBLE);
-                        }
-                        if (mHideRecentsAfterThumbnailScaleUpStarted) {
-                            hideWindow();
-                        }
-                    }
-                });
+                holder.thumbnailViewImage, bm, 0, 0, null);
+
+        show(false);
         if (ad.taskId >= 0) {
             // This is an active task; it should just go to the foreground.
             am.moveTaskToFront(ad.taskId, ActivityManager.MOVE_TASK_WITH_HOME,
@@ -793,17 +619,6 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         }
         if (usingDrawingCache) {
             holder.thumbnailViewImage.setDrawingCacheEnabled(false);
-        }
-    }
-
-    public void hideWindow() {
-        if (!mThumbnailScaleUpStarted) {
-            mHideRecentsAfterThumbnailScaleUpStarted = true;
-        } else {
-            setVisibility(GONE);
-            mTransitionBg.setVisibility(INVISIBLE);
-            mPlaceholderThumbnail.setVisibility(INVISIBLE);
-            mHideRecentsAfterThumbnailScaleUpStarted = false;
         }
     }
 
@@ -825,7 +640,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         // mListAdapter.notifyDataSetChanged();
 
         if (mRecentTaskDescriptions.size() == 0) {
-            hide(false);
+            dismissAndGoBack();
         }
 
         // Currently, either direction means the same thing, so ignore direction and remove
@@ -875,7 +690,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                     if (viewHolder != null) {
                         final TaskDescription ad = viewHolder.taskDescription;
                         startApplicationDetailsActivity(ad.packageName);
-                        mBar.animateCollapse(CommandQueue.FLAG_EXCLUDE_NONE);
+                        show(false);
                     } else {
                         throw new IllegalStateException("Oops, no tag on view " + selectedView);
                     }

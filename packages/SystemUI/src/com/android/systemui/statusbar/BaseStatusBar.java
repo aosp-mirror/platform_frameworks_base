@@ -1,3 +1,4 @@
+
 /*
  * Copyright (C) 2010 The Android Open Source Project
  *
@@ -24,23 +25,31 @@ import com.android.internal.widget.SizeAdaptiveLayout;
 import com.android.systemui.R;
 import com.android.systemui.SearchPanelView;
 import com.android.systemui.SystemUI;
+import com.android.systemui.SystemUIApplication;
 import com.android.systemui.recent.RecentTasksLoader;
-import com.android.systemui.recent.RecentsPanelView;
+import com.android.systemui.recent.RecentsActivity;
 import com.android.systemui.recent.TaskDescription;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
 import com.android.systemui.statusbar.tablet.StatusBarPanel;
 
 import android.app.ActivityManagerNative;
+import android.app.ActivityOptions;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
+import android.app.Service;
 import android.app.TaskStackBuilder;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.graphics.Bitmap;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
@@ -52,6 +61,7 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Slog;
 import android.view.Display;
@@ -73,12 +83,12 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 public abstract class BaseStatusBar extends SystemUI implements
-    CommandQueue.Callbacks, RecentsPanelView.OnRecentsPanelVisibilityChangedListener {
+        CommandQueue.Callbacks {
     static final String TAG = "StatusBar";
     private static final boolean DEBUG = false;
     public static final boolean MULTIUSER_DEBUG = false;
 
-    protected static final int MSG_OPEN_RECENTS_PANEL = 1020;
+    protected static final int MSG_TOGGLE_RECENTS_PANEL = 1020;
     protected static final int MSG_CLOSE_RECENTS_PANEL = 1021;
     protected static final int MSG_PRELOAD_RECENT_APPS = 1022;
     protected static final int MSG_CANCEL_PRELOAD_RECENT_APPS = 1023;
@@ -110,10 +120,6 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     // Search panel
     protected SearchPanelView mSearchPanelView;
-
-    // Recent apps
-    protected RecentsPanelView mRecentsPanel;
-    protected RecentTasksLoader mRecentTasksLoader;
 
     protected PopupMenu mNotificationBlamePopup;
 
@@ -377,8 +383,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     @Override
     public void toggleRecentApps() {
-        int msg = (mRecentsPanel.getVisibility() == View.VISIBLE)
-            ? MSG_CLOSE_RECENTS_PANEL : MSG_OPEN_RECENTS_PANEL;
+        int msg = MSG_TOGGLE_RECENTS_PANEL;
         mHandler.removeMessages(msg);
         mHandler.sendEmptyMessage(msg);
     }
@@ -411,49 +416,15 @@ public abstract class BaseStatusBar extends SystemUI implements
         mHandler.sendEmptyMessage(msg);
     }
 
-    @Override
-    public void onRecentsPanelVisibilityChanged(boolean visible) {
-    }
-
     protected abstract WindowManager.LayoutParams getRecentsLayoutParams(
             LayoutParams layoutParams);
 
     protected abstract WindowManager.LayoutParams getSearchLayoutParams(
             LayoutParams layoutParams);
 
-    protected void updateRecentsPanel(int recentsResId) {
-        // Recents Panel
-        boolean visible = false;
-        ArrayList<TaskDescription> recentTasksList = null;
-        boolean firstScreenful = false;
-        if (mRecentsPanel != null) {
-            visible = mRecentsPanel.isShowing();
-            mWindowManager.removeView(mRecentsPanel);
-            if (visible) {
-                recentTasksList = mRecentsPanel.getRecentTasksList();
-                firstScreenful = mRecentsPanel.getFirstScreenful();
-            }
-        }
-
-        // Provide RecentsPanelView with a temporary parent to allow layout params to work.
-        LinearLayout tmpRoot = new LinearLayout(mContext);
-        mRecentsPanel = (RecentsPanelView) LayoutInflater.from(mContext).inflate(
-                recentsResId, tmpRoot, false);
-        mRecentsPanel.setRecentTasksLoader(mRecentTasksLoader);
-        mRecentTasksLoader.setRecentsPanel(mRecentsPanel);
-        mRecentsPanel.setOnTouchListener(
-                 new TouchOutsideListener(MSG_CLOSE_RECENTS_PANEL, mRecentsPanel));
-        mRecentsPanel.setVisibility(View.GONE);
-
-
-        WindowManager.LayoutParams lp = getRecentsLayoutParams(mRecentsPanel.getLayoutParams());
-
-        mWindowManager.addView(mRecentsPanel, lp);
-        mRecentsPanel.setBar(this);
-        if (visible) {
-            mRecentsPanel.show(true, false, recentTasksList, firstScreenful);
-        }
-
+    protected RecentTasksLoader getRecentTasksLoader() {
+        final SystemUIApplication app = (SystemUIApplication) ((Service) mContext).getApplication();
+        return app.getRecentTasksLoader();
     }
 
     protected void updateSearchPanel() {
@@ -494,28 +465,148 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
+    protected abstract View getStatusBarView();
+
+    protected void toggleRecentsActivity() {
+        try {
+            final RecentTasksLoader recentTasksLoader = getRecentTasksLoader();
+            TaskDescription firstTask = recentTasksLoader.getFirstTask();
+
+            Intent intent = new Intent(RecentsActivity.TOGGLE_RECENTS_INTENT);
+            intent.setClassName("com.android.systemui",
+                    "com.android.systemui.recent.RecentsActivity");
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                    | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+
+            if (firstTask == null) {
+                mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
+            } else {
+                Bitmap first = firstTask.getThumbnail();
+                final Resources res = mContext.getResources();
+
+                float thumbWidth = res
+                        .getDimensionPixelSize(R.dimen.status_bar_recents_thumbnail_width);
+                float thumbHeight = res
+                        .getDimensionPixelSize(R.dimen.status_bar_recents_thumbnail_height);
+                if (first.getWidth() != thumbWidth || first.getHeight() != thumbHeight) {
+                    first = Bitmap.createScaledBitmap(first, (int) thumbWidth, (int) thumbHeight,
+                            true);
+                }
+
+                DisplayMetrics dm = new DisplayMetrics();
+                mDisplay.getMetrics(dm);
+                // calculate it here, but consider moving it elsewhere
+                // first, determine which orientation you're in.
+                // todo: move the system_bar layouts to sw600dp ?
+                final Configuration config = res.getConfiguration();
+                int x, y;
+
+                if (config.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                    float appLabelLeftMargin = res
+                            .getDimensionPixelSize(R.dimen.status_bar_recents_app_label_left_margin);
+                    float appLabelWidth = res
+                            .getDimensionPixelSize(R.dimen.status_bar_recents_app_label_width);
+                    float thumbLeftMargin = res
+                            .getDimensionPixelSize(R.dimen.status_bar_recents_thumbnail_left_margin);
+                    float thumbBgPadding = res
+                            .getDimensionPixelSize(R.dimen.status_bar_recents_thumbnail_bg_padding);
+
+                    float width = appLabelLeftMargin +
+                            +appLabelWidth
+                            + thumbLeftMargin
+                            + thumbWidth
+                            + 2 * thumbBgPadding;
+
+                    x = (int) ((dm.widthPixels - width) / 2f + appLabelLeftMargin + appLabelWidth
+                            + thumbBgPadding + thumbLeftMargin);
+                    y = (int) (dm.heightPixels
+                            - res.getDimensionPixelSize(R.dimen.status_bar_recents_thumbnail_height) - thumbBgPadding);
+                } else { // if (config.orientation ==
+                         // Configuration.ORIENTATION_LANDSCAPE) {
+                    float thumbTopMargin = res
+                            .getDimensionPixelSize(R.dimen.status_bar_recents_thumbnail_top_margin);
+                    float thumbBgPadding = res
+                            .getDimensionPixelSize(R.dimen.status_bar_recents_thumbnail_bg_padding);
+                    float textPadding = res
+                            .getDimensionPixelSize(R.dimen.status_bar_recents_text_description_padding);
+                    float labelTextSize = res
+                            .getDimensionPixelSize(R.dimen.status_bar_recents_app_label_text_size);
+                    Paint p = new Paint();
+                    p.setTextSize(labelTextSize);
+                    float labelTextHeight = p.getFontMetricsInt().bottom
+                            - p.getFontMetricsInt().top;
+                    float descriptionTextSize = res
+                            .getDimensionPixelSize(R.dimen.status_bar_recents_app_description_text_size);
+                    p.setTextSize(labelTextSize);
+                    float descriptionTextHeight = p.getFontMetricsInt().bottom
+                            - p.getFontMetricsInt().top;
+
+                    float statusBarHeight = res
+                            .getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
+                    float recentsItemTopPadding = statusBarHeight;
+
+                    float height = thumbTopMargin
+                            + thumbHeight
+                            + 2 * thumbBgPadding + textPadding + labelTextHeight
+                            + recentsItemTopPadding + textPadding + descriptionTextHeight;
+                    float recentsItemRightPadding = res
+                            .getDimensionPixelSize(R.dimen.status_bar_recents_item_padding);
+                    float recentsScrollViewRightPadding = res
+                            .getDimensionPixelSize(R.dimen.status_bar_recents_right_glow_margin);
+                    x = (int) (dm.widthPixels - res
+                            .getDimensionPixelSize(R.dimen.status_bar_recents_thumbnail_width)
+                            - thumbBgPadding - recentsItemRightPadding - recentsScrollViewRightPadding);
+                    y = (int) ((dm.heightPixels - statusBarHeight - height) / 2f + thumbTopMargin
+                            + recentsItemTopPadding + thumbBgPadding + statusBarHeight);
+                }
+
+                ActivityOptions opts = ActivityOptions.makeThumbnailScaleDownAnimation(
+                        getStatusBarView(),
+                        first, x, y,
+                        null);
+                mContext.startActivityAsUser(intent, opts.toBundle(), new UserHandle(
+                        UserHandle.USER_CURRENT));
+            }
+            return;
+        } catch (ActivityNotFoundException e) {
+            Log.e(TAG, "Failed to launch RecentAppsIntent", e);
+        }
+    }
+
     protected class H extends Handler {
         public void handleMessage(Message m) {
             switch (m.what) {
-             case MSG_OPEN_RECENTS_PANEL:
-                  if (DEBUG) Slog.d(TAG, "opening recents panel");
-                  if (mRecentsPanel != null) {
-                      mRecentsPanel.show(true, false);
-                  }
-                  break;
+             case MSG_TOGGLE_RECENTS_PANEL:
+                 if (DEBUG) Slog.d(TAG, "toggle recents panel");
+                 toggleRecentsActivity();
+                 break;
              case MSG_CLOSE_RECENTS_PANEL:
-                  if (DEBUG) Slog.d(TAG, "closing recents panel");
-                  if (mRecentsPanel != null && mRecentsPanel.isShowing()) {
-                      mRecentsPanel.show(false, false);
-                  }
-                  break;
+                 if (DEBUG) Slog.d(TAG, "closing recents panel");
+                 Intent intent = new Intent(RecentsActivity.CLOSE_RECENTS_INTENT);
+                 intent.setPackage("com.android.systemui");
+                 mContext.sendBroadcastAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
+                 break;
              case MSG_PRELOAD_RECENT_APPS:
                   if (DEBUG) Slog.d(TAG, "preloading recents");
-                  mRecentsPanel.preloadRecentTasksList();
+                  {
+                      // TODO:
+                      // need to implement this
+                      //final RecentsPanelView recentsPanel = getRecentsPanel();
+                      //if (recentsPanel != null) {
+                      //recentsPanel.preloadRecentTasksList();
+                      //}
+                  }
                   break;
              case MSG_CANCEL_PRELOAD_RECENT_APPS:
                   if (DEBUG) Slog.d(TAG, "cancel preloading recents");
-                  mRecentsPanel.clearRecentTasksList();
+                  {
+                      // TODO:
+                      // need to implement this
+                      //final RecentsPanelView recentsPanel = getRecentsPanel();
+                      //if (recentsPanel != null) {
+                      //recentsPanel.clearRecentTasksList();
+                      //}
+                  }
                   break;
              case MSG_OPEN_SEARCH_PANEL:
                  if (DEBUG) Slog.d(TAG, "opening search panel");
@@ -559,8 +650,6 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     protected  boolean inflateViews(NotificationData.Entry entry, ViewGroup parent) {
-        int rowHeight =
-                mContext.getResources().getDimensionPixelSize(R.dimen.notification_row_min_height);
         int minHeight =
                 mContext.getResources().getDimensionPixelSize(R.dimen.notification_min_height);
         int maxHeight =
@@ -605,7 +694,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         // TODO(cwren) normalize variable names with those in updateNotification
         View expandedOneU = null;
         View expandedLarge = null;
-        Exception exception = null;
         try {
             expandedOneU = oneU.apply(mContext, adaptive, mOnClickHandler);
             if (large != null) {

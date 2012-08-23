@@ -84,8 +84,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 public class TabletStatusBar extends BaseStatusBar implements
-        InputMethodsPanel.OnHardKeyboardEnabledChangeListener,
-        RecentsPanelView.OnRecentsPanelVisibilityChangedListener {
+        InputMethodsPanel.OnHardKeyboardEnabledChangeListener {
     public static final boolean DEBUG = false;
     public static final boolean DEBUG_COMPAT_HELP = false;
     public static final String TAG = "TabletStatusBar";
@@ -305,10 +304,6 @@ public class TabletStatusBar extends BaseStatusBar implements
 
         mWindowManager.addView(mNotificationPanel, lp);
 
-        // Recents Panel
-        mRecentTasksLoader = new RecentTasksLoader(context);
-        updateRecentsPanel();
-
         // Search Panel
         mStatusBarView.setBar(this);
         mHomeButton.setOnTouchListener(mHomeSearchActionListener);
@@ -360,7 +355,7 @@ public class TabletStatusBar extends BaseStatusBar implements
 
         mWindowManager.addView(mCompatModePanel, lp);
 
-        mRecentButton.setOnTouchListener(mRecentsPanel);
+        //mRecentButton.setOnTouchListener(mRecentsPanel); //TODO: plumb this
 
         mPile = (NotificationRowLayout)mNotificationPanel.findViewById(R.id.content);
         mPile.removeAllViews();
@@ -393,7 +388,6 @@ public class TabletStatusBar extends BaseStatusBar implements
         loadDimens();
         mNotificationPanelParams.height = getNotificationPanelHeight();
         mWindowManager.updateViewLayout(mNotificationPanel, mNotificationPanelParams);
-        mRecentsPanel.updateValuesFromResources();
         mShowSearchHoldoff = mContext.getResources().getInteger(
                 R.integer.config_show_search_delay);
         updateSearchPanel();
@@ -445,6 +439,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         }
     }
 
+    @Override
     public View getStatusBarView() {
         return mStatusBarView;
     }
@@ -654,11 +649,6 @@ public class TabletStatusBar extends BaseStatusBar implements
         lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_STATE_UNCHANGED
                 | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
         return lp;
-    }
-
-    protected void updateRecentsPanel() {
-        super.updateRecentsPanel(R.layout.system_bar_recent_panel);
-        mRecentsPanel.setStatusBarView(mStatusBarView);
     }
 
     @Override
@@ -1183,14 +1173,6 @@ public class TabletStatusBar extends BaseStatusBar implements
     }
 
     @Override
-    public void onRecentsPanelVisibilityChanged(boolean visible) {
-        boolean altBack = visible || mAltBackButtonEnabledForIme;
-        mCommandQueue.setNavigationIconHints(
-                altBack ? (mNavigationIconHints | StatusBarManager.NAVIGATION_HINT_BACK_ALT)
-                        : (mNavigationIconHints & ~StatusBarManager.NAVIGATION_HINT_BACK_ALT));
-    }
-
-    @Override
     public void setHardKeyboardStatus(boolean available, boolean enabled) {
         if (DEBUG) {
             Slog.d(TAG, "Set hard keyboard status: available=" + available
@@ -1241,10 +1223,7 @@ public class TabletStatusBar extends BaseStatusBar implements
     public void onClickRecentButton() {
         if (DEBUG) Slog.d(TAG, "clicked recent apps; disabled=" + mDisabled);
         if ((mDisabled & StatusBarManager.DISABLE_EXPAND) == 0) {
-            int msg = (mRecentsPanel.getVisibility() == View.VISIBLE)
-                ? MSG_CLOSE_RECENTS_PANEL : MSG_OPEN_RECENTS_PANEL;
-            mHandler.removeMessages(msg);
-            mHandler.sendEmptyMessage(msg);
+            toggleRecentApps();
         }
     }
 
@@ -1522,14 +1501,6 @@ public class TabletStatusBar extends BaseStatusBar implements
                     if (reason != null && reason.equals(SYSTEM_DIALOG_REASON_RECENT_APPS)) {
                         flags |= CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL;
                     }
-                }
-                if (Intent.ACTION_SCREEN_OFF.equals(action)) {
-                    // If we're turning the screen off, we want to hide the
-                    // recents panel with no animation
-                    // TODO: hide other things, like the notification tray,
-                    // with no animation as well
-                    mRecentsPanel.show(false, false);
-                    flags |= CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL;
                 }
                 animateCollapse(flags);
             }
