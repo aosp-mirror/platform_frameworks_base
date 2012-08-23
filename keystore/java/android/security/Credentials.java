@@ -197,7 +197,20 @@ public class Credentials {
          * don't use a conditional here.
          */
         return keystore.delKey(Credentials.USER_PRIVATE_KEY + alias)
-                | keystore.delete(Credentials.USER_CERTIFICATE + alias)
+                | deleteCertificateTypesForAlias(keystore, alias);
+    }
+
+    /**
+     * Delete all types (private key, certificate, CA certificate) for a
+     * particular {@code alias}. All three can exist for any given alias.
+     * Returns {@code true} if there was at least one of those types.
+     */
+    static boolean deleteCertificateTypesForAlias(KeyStore keystore, String alias) {
+        /*
+         * Make sure every certificate type is deleted. There can be two types,
+         * so don't use a conditional here.
+         */
+        return keystore.delete(Credentials.USER_CERTIFICATE + alias)
                 | keystore.delete(Credentials.CA_CERTIFICATE + alias);
     }
 }
