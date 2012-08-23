@@ -388,8 +388,8 @@ public class Surface implements Parcelable {
     /** Free all server-side state associated with this surface and
      * release this object's reference. @hide */
     public native void destroy();
-    
-    private native Canvas lockCanvasNative(Rect dirty);   
+
+    private native Canvas lockCanvasNative(Rect dirty) throws OutOfResourcesException;
 
     /**
      * set the orientation of the given display.
@@ -497,10 +497,10 @@ public class Surface implements Parcelable {
     }
     
     private native void init(SurfaceSession s,
-            int pid, String name, int displayId, int w, int h, int format, int flags)
+            int pid, String name, int layerStack, int w, int h, int format, int flags)
             throws OutOfResourcesException;
 
-    private native void init(Parcel source);
+    private native void init(Parcel source) throws OutOfResourcesException;
 
     private native void initFromSurfaceTexture(SurfaceTexture surfaceTexture);
 
