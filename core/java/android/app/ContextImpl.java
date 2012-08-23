@@ -909,14 +909,7 @@ class ContextImpl extends Context {
     /** @hide */
     @Override
     public void startActivityAsUser(Intent intent, UserHandle user) {
-        try {
-            ActivityManagerNative.getDefault().startActivityAsUser(
-                mMainThread.getApplicationThread(), intent,
-                intent.resolveTypeIfNeeded(getContentResolver()),
-                null, null, 0, Intent.FLAG_ACTIVITY_NEW_TASK, null, null, null,
-                user.getIdentifier());
-        } catch (RemoteException re) {
-        }
+        startActivityAsUser(intent, null, user);
     }
 
     @Override
