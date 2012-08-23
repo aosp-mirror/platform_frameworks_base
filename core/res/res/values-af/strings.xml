@@ -224,10 +224,8 @@
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Laat die program toe om aksies vir verskillende gebruikers op die toestel uit te voer. Kwaadwillige programme kan dit gebruik om die beskerming tussen gebruikers te skend."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"volle lisensie vir interaksie tussen gebruikers"</string>
     <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Laat alle moontlike interaksies tussen gebruikers toe."</string>
-    <!-- no translation found for permlab_manageUsers (1676150911672282428) -->
-    <skip />
-    <!-- no translation found for permdesc_manageUsers (8409306667645355638) -->
-    <skip />
+    <string name="permlab_manageUsers" msgid="1676150911672282428">"bestuur gebruikers"</string>
+    <string name="permdesc_manageUsers" msgid="8409306667645355638">"Laat programme toe om gebruikers op die toestel te bestuur, insluitend navrae, skepping en uitvee."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"haal besonderhede van lopende programme op"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Laat die program toe om inligting op te haal oor huidige en onlangse lopende take. Kwaadwillige programme kan dalk private inligting oor ander programme ontdek."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"herrangskik lopende programme"</string>
@@ -1313,6 +1311,5 @@
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth-oudio"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Klaar"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Media-uitvoer"</string>
-    <!-- no translation found for display_manager_built_in_display (9042666544146043569) -->
-    <skip />
+    <string name="display_manager_built_in_display" msgid="9042666544146043569">"Ingeboude skerm"</string>
 </resources>
