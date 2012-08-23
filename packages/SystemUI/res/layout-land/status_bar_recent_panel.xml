@@ -26,11 +26,6 @@
     android:layout_width="match_parent"
     systemui:recentItemLayout="@layout/status_bar_recent_item"
     >
-    <View
-        android:id="@+id/recents_transition_background"
-        android:layout_height="match_parent"
-        android:layout_width="match_parent"
-        android:visibility="invisible" />
     <FrameLayout
         android:id="@+id/recents_bg_protect"
         android:background="@drawable/status_bar_recents_background"
@@ -39,12 +34,6 @@
         android:layout_alignParentBottom="true"
         android:clipToPadding="false"
         android:clipChildren="false">
-
-        <ImageView
-            android:id="@+id/recents_transition_placeholder_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="invisible" />
 
         <com.android.systemui.recent.RecentsHorizontalScrollView android:id="@+id/recents_container"
             android:layout_width="wrap_content"
