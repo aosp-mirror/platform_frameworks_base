@@ -16,12 +16,17 @@
 
 package android.security;
 
+import com.android.org.bouncycastle.x509.X509V3CertificateGenerator;
+
+import org.apache.harmony.xnet.provider.jsse.OpenSSLEngine;
+
 import android.test.AndroidTestCase;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
+import java.math.BigInteger;
+import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.KeyStore.Entry;
@@ -30,12 +35,14 @@ import java.security.KeyStore.TrustedCertificateEntry;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -43,6 +50,8 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+
+import javax.security.auth.x500.X500Principal;
 
 public class AndroidKeyStoreTest extends AndroidTestCase {
     private android.security.KeyStore mAndroidKeyStore;
@@ -54,6 +63,22 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
     private static final String TEST_ALIAS_2 = "test2";
 
     private static final String TEST_ALIAS_3 = "test3";
+
+    private static final X500Principal TEST_DN_1 = new X500Principal("CN=test1");
+
+    private static final X500Principal TEST_DN_2 = new X500Principal("CN=test2");
+
+    private static final BigInteger TEST_SERIAL_1 = BigInteger.ONE;
+
+    private static final BigInteger TEST_SERIAL_2 = BigInteger.valueOf(2L);
+
+    private static final long NOW_MILLIS = System.currentTimeMillis();
+
+    /* We have to round this off because X509v3 doesn't store milliseconds. */
+    private static final Date NOW = new Date(NOW_MILLIS - (NOW_MILLIS % 1000L));
+
+    @SuppressWarnings("deprecation")
+    private static final Date NOW_PLUS_10_YEARS = new Date(NOW.getYear() + 10, 0, 1);
 
     /*
      * The keys and certificates below are generated with:
@@ -759,16 +784,30 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
         assertPrivateKeyEntryEquals(keyEntry, FAKE_KEY_1, FAKE_USER_1, FAKE_CA_1);
     }
 
+    @SuppressWarnings("unchecked")
     private void assertPrivateKeyEntryEquals(PrivateKeyEntry keyEntry, byte[] key, byte[] cert,
             byte[] ca) throws Exception {
         KeyFactory keyFact = KeyFactory.getInstance("RSA");
         PrivateKey expectedKey = keyFact.generatePrivate(new PKCS8EncodedKeySpec(key));
 
-        assertEquals("Returned PrivateKey should be what we inserted", expectedKey,
-                keyEntry.getPrivateKey());
-
         CertificateFactory certFact = CertificateFactory.getInstance("X.509");
         Certificate expectedCert = certFact.generateCertificate(new ByteArrayInputStream(cert));
+
+        final Collection<Certificate> expectedChain;
+        if (ca != null) {
+            expectedChain = (Collection<Certificate>) certFact
+                    .generateCertificates(new ByteArrayInputStream(ca));
+        } else {
+            expectedChain = null;
+        }
+
+        assertPrivateKeyEntryEquals(keyEntry, expectedKey, expectedCert, expectedChain);
+    }
+
+    private void assertPrivateKeyEntryEquals(PrivateKeyEntry keyEntry, PrivateKey expectedKey,
+            Certificate expectedCert, Collection<Certificate> expectedChain) throws Exception {
+        assertEquals("Returned PrivateKey should be what we inserted", expectedKey,
+                keyEntry.getPrivateKey());
 
         assertEquals("Returned Certificate should be what we inserted", expectedCert,
                 keyEntry.getCertificate());
@@ -777,13 +816,9 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
 
         assertEquals("First certificate in chain should be user cert", expectedCert, actualChain[0]);
 
-        if (ca == null) {
+        if (expectedChain == null) {
             assertEquals("Certificate chain should not include CAs", 1, actualChain.length);
         } else {
-            @SuppressWarnings("unchecked")
-            Collection<Certificate> expectedChain = (Collection<Certificate>) certFact
-                    .generateCertificates(new ByteArrayInputStream(ca));
-
             int i = 1;
             final Iterator<Certificate> it = expectedChain.iterator();
             while (it.hasNext()) {
@@ -1303,6 +1338,142 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
             PrivateKeyEntry actual = (PrivateKeyEntry) actualEntry;
 
             assertPrivateKeyEntryEquals(actual, FAKE_KEY_1, FAKE_USER_1, FAKE_CA_1);
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    private static X509Certificate generateCertificate(android.security.KeyStore keyStore,
+            String alias, BigInteger serialNumber, X500Principal subjectDN, Date notBefore,
+            Date notAfter) throws Exception {
+        final String privateKeyAlias = Credentials.USER_PRIVATE_KEY + alias;
+
+        final PrivateKey privKey;
+        final OpenSSLEngine engine = OpenSSLEngine.getInstance("keystore");
+        try {
+            privKey = engine.getPrivateKeyById(privateKeyAlias);
+        } catch (InvalidKeyException e) {
+            throw new RuntimeException("Can't get key", e);
+        }
+
+        final byte[] pubKeyBytes = keyStore.getPubkey(privateKeyAlias);
+
+        final PublicKey pubKey;
+        try {
+            final KeyFactory keyFact = KeyFactory.getInstance("RSA");
+            pubKey = keyFact.generatePublic(new X509EncodedKeySpec(pubKeyBytes));
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("Can't instantiate RSA key generator", e);
+        } catch (InvalidKeySpecException e) {
+            throw new IllegalStateException("keystore returned invalid key encoding", e);
+        }
+
+        final X509V3CertificateGenerator certGen = new X509V3CertificateGenerator();
+        certGen.setPublicKey(pubKey);
+        certGen.setSerialNumber(serialNumber);
+        certGen.setSubjectDN(subjectDN);
+        certGen.setIssuerDN(subjectDN);
+        certGen.setNotBefore(notBefore);
+        certGen.setNotAfter(notAfter);
+        certGen.setSignatureAlgorithm("sha1WithRSA");
+
+        final X509Certificate cert = certGen.generate(privKey);
+
+        return cert;
+    }
+
+    public void testKeyStore_SetKeyEntry_ReplacedChain_Success() throws Exception {
+        mKeyStore.load(null, null);
+
+        // Create key #1
+        {
+            final String privateKeyAlias = Credentials.USER_PRIVATE_KEY + TEST_ALIAS_1;
+            assertTrue(mAndroidKeyStore.generate(privateKeyAlias));
+
+            Key key = mKeyStore.getKey(TEST_ALIAS_1, null);
+
+            assertTrue(key instanceof PrivateKey);
+
+            PrivateKey expectedKey = (PrivateKey) key;
+
+            X509Certificate expectedCert = generateCertificate(mAndroidKeyStore, TEST_ALIAS_1,
+                    TEST_SERIAL_1, TEST_DN_1, NOW, NOW_PLUS_10_YEARS);
+
+            assertTrue(mAndroidKeyStore.put(Credentials.USER_CERTIFICATE + TEST_ALIAS_1,
+                    expectedCert.getEncoded()));
+
+            Entry entry = mKeyStore.getEntry(TEST_ALIAS_1, null);
+
+            assertTrue(entry instanceof PrivateKeyEntry);
+
+            PrivateKeyEntry keyEntry = (PrivateKeyEntry) entry;
+
+            assertPrivateKeyEntryEquals(keyEntry, expectedKey, expectedCert, null);
+        }
+
+        // Replace key #1 with new chain
+        {
+            Key key = mKeyStore.getKey(TEST_ALIAS_1, null);
+
+            assertTrue(key instanceof PrivateKey);
+
+            PrivateKey expectedKey = (PrivateKey) key;
+
+            X509Certificate expectedCert = generateCertificate(mAndroidKeyStore, TEST_ALIAS_1,
+                    TEST_SERIAL_2, TEST_DN_2, NOW, NOW_PLUS_10_YEARS);
+
+            mKeyStore.setKeyEntry(TEST_ALIAS_1, expectedKey, null,
+                    new Certificate[] { expectedCert });
+
+            Entry entry = mKeyStore.getEntry(TEST_ALIAS_1, null);
+
+            assertTrue(entry instanceof PrivateKeyEntry);
+
+            PrivateKeyEntry keyEntry = (PrivateKeyEntry) entry;
+
+            assertPrivateKeyEntryEquals(keyEntry, expectedKey, expectedCert, null);
+        }
+    }
+
+    public void testKeyStore_SetKeyEntry_ReplacedChain_DifferentPrivateKey_Failure()
+            throws Exception {
+        mKeyStore.load(null, null);
+
+        // Create key #1
+        {
+            final String privateKeyAlias = Credentials.USER_PRIVATE_KEY + TEST_ALIAS_1;
+            assertTrue(mAndroidKeyStore.generate(privateKeyAlias));
+
+            X509Certificate cert = generateCertificate(mAndroidKeyStore, TEST_ALIAS_1,
+                    TEST_SERIAL_1, TEST_DN_1, NOW, NOW_PLUS_10_YEARS);
+
+            assertTrue(mAndroidKeyStore.put(Credentials.USER_CERTIFICATE + TEST_ALIAS_1,
+                    cert.getEncoded()));
+        }
+
+        // Create key #2
+        {
+            final String privateKeyAlias = Credentials.USER_PRIVATE_KEY + TEST_ALIAS_2;
+            assertTrue(mAndroidKeyStore.generate(privateKeyAlias));
+
+            X509Certificate cert = generateCertificate(mAndroidKeyStore, TEST_ALIAS_2,
+                    TEST_SERIAL_2, TEST_DN_2, NOW, NOW_PLUS_10_YEARS);
+
+            assertTrue(mAndroidKeyStore.put(Credentials.USER_CERTIFICATE + TEST_ALIAS_2,
+                    cert.getEncoded()));
+        }
+
+        // Replace key #1 with key #2
+        {
+            Key key1 = mKeyStore.getKey(TEST_ALIAS_2, null);
+
+            X509Certificate cert = generateCertificate(mAndroidKeyStore, TEST_ALIAS_2,
+                    TEST_SERIAL_2, TEST_DN_2, NOW, NOW_PLUS_10_YEARS);
+
+            try {
+                mKeyStore.setKeyEntry(TEST_ALIAS_1, key1, null, new Certificate[] { cert });
+                fail("Should not allow setting of KeyEntry with wrong PrivaetKey");
+            } catch (KeyStoreException success) {
+            }
         }
     }
 

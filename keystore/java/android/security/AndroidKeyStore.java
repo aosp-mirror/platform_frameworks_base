@@ -16,7 +16,9 @@
 
 package android.security;
 
+import org.apache.harmony.xnet.provider.jsse.OpenSSLDSAPrivateKey;
 import org.apache.harmony.xnet.provider.jsse.OpenSSLEngine;
+import org.apache.harmony.xnet.provider.jsse.OpenSSLRSAPrivateKey;
 
 import android.util.Log;
 
@@ -193,17 +195,41 @@ public class AndroidKeyStore extends KeyStoreSpi {
 
     private void setPrivateKeyEntry(String alias, PrivateKey key, Certificate[] chain)
             throws KeyStoreException {
-        // Make sure the PrivateKey format is the one we support.
-        final String keyFormat = key.getFormat();
-        if ((keyFormat == null) || (!"PKCS#8".equals(keyFormat))) {
-            throw new KeyStoreException(
-                    "Only PrivateKeys that can be encoded into PKCS#8 are supported");
+        byte[] keyBytes = null;
+
+        final String pkeyAlias;
+        if (key instanceof OpenSSLRSAPrivateKey) {
+            pkeyAlias = ((OpenSSLRSAPrivateKey) key).getPkeyAlias();
+        } else if (key instanceof OpenSSLDSAPrivateKey) {
+            pkeyAlias = ((OpenSSLDSAPrivateKey) key).getPkeyAlias();
+        } else {
+            pkeyAlias = null;
         }
 
-        // Make sure we can actually encode the key.
-        final byte[] keyBytes = key.getEncoded();
-        if (keyBytes == null) {
-            throw new KeyStoreException("PrivateKey has no encoding");
+        final boolean shouldReplacePrivateKey;
+        if (pkeyAlias != null && pkeyAlias.startsWith(Credentials.USER_PRIVATE_KEY)) {
+            final String keySubalias = pkeyAlias.substring(Credentials.USER_PRIVATE_KEY.length());
+            if (!alias.equals(keySubalias)) {
+                throw new KeyStoreException("Can only replace keys with same alias: " + alias
+                        + " != " + keySubalias);
+            }
+
+            shouldReplacePrivateKey = false;
+        } else {
+            // Make sure the PrivateKey format is the one we support.
+            final String keyFormat = key.getFormat();
+            if ((keyFormat == null) || (!"PKCS#8".equals(keyFormat))) {
+                throw new KeyStoreException(
+                        "Only PrivateKeys that can be encoded into PKCS#8 are supported");
+            }
+
+            // Make sure we can actually encode the key.
+            keyBytes = key.getEncoded();
+            if (keyBytes == null) {
+                throw new KeyStoreException("PrivateKey has no encoding");
+            }
+
+            shouldReplacePrivateKey = true;
         }
 
         // Make sure the chain exists since this is a PrivateKey
@@ -273,17 +299,25 @@ public class AndroidKeyStore extends KeyStoreSpi {
         }
 
         /*
-         * Make sure we clear out all the types we know about before trying to
+         * Make sure we clear out all the appropriate types before trying to
          * write.
          */
-        Credentials.deleteAllTypesForAlias(mKeyStore, alias);
+        if (shouldReplacePrivateKey) {
+            Credentials.deleteAllTypesForAlias(mKeyStore, alias);
+        } else {
+            Credentials.deleteCertificateTypesForAlias(mKeyStore, alias);
+        }
 
-        if (!mKeyStore.importKey(Credentials.USER_PRIVATE_KEY + alias, keyBytes)) {
+        if (shouldReplacePrivateKey
+                && !mKeyStore.importKey(Credentials.USER_PRIVATE_KEY + alias, keyBytes)) {
+            Credentials.deleteAllTypesForAlias(mKeyStore, alias);
             throw new KeyStoreException("Couldn't put private key in keystore");
         } else if (!mKeyStore.put(Credentials.USER_CERTIFICATE + alias, userCertBytes)) {
+            Credentials.deleteAllTypesForAlias(mKeyStore, alias);
             throw new KeyStoreException("Couldn't put certificate #1 in keystore");
         } else if (chainBytes != null
                 && !mKeyStore.put(Credentials.CA_CERTIFICATE + alias, chainBytes)) {
+            Credentials.deleteAllTypesForAlias(mKeyStore, alias);
             throw new KeyStoreException("Couldn't put certificate chain in keystore");
         }
     }
