@@ -1137,7 +1137,7 @@ public final class PowerManagerService extends IPowerManager.Stub
      */
     private void updateDreamLocked(int dirty) {
         if ((dirty & (DIRTY_WAKEFULNESS | DIRTY_SETTINGS
-                | DIRTY_IS_POWERED | DIRTY_STAY_ON)) != 0) {
+                | DIRTY_IS_POWERED | DIRTY_STAY_ON | DIRTY_BATTERY_STATE)) != 0) {
             scheduleSandmanLocked();
         }
     }
@@ -1163,13 +1163,13 @@ public final class PowerManagerService extends IPowerManager.Stub
         boolean startDreaming = false;
         synchronized (mLock) {
             mSandmanScheduled = false;
-
+            boolean canDream = canDreamLocked();
             if (DEBUG_SPEW) {
-                Log.d(TAG, "handleSandman: canDream=" + canDreamLocked()
+                Log.d(TAG, "handleSandman: canDream=" + canDream
                         + ", mWakefulness=" + wakefulnessToString(mWakefulness));
             }
 
-            if (canDreamLocked() && mWakefulness == WAKEFULNESS_NAPPING) {
+            if (canDream && mWakefulness == WAKEFULNESS_NAPPING) {
                 startDreaming = true;
             }
         }
@@ -1253,8 +1253,11 @@ public final class PowerManagerService extends IPowerManager.Stub
      * assuming there has been no recent user activity and no wake locks are held.
      */
     private boolean canDreamLocked() {
-        return mIsPowered && mDreamsSupportedConfig
-                && mDreamsEnabledSetting && mDreamsActivateOnSleepSetting;
+        return mIsPowered
+                && mDreamsSupportedConfig
+                && mDreamsEnabledSetting
+                && mDreamsActivateOnSleepSetting
+                && !mBatteryService.isBatteryLow();
     }
 
     /**
