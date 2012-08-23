@@ -76,6 +76,17 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
         }
     }
 
+    public View findViewForTask(TaskDescription task) {
+        for (int i = 0; i < mLinearLayout.getChildCount(); i++) {
+            View v = mLinearLayout.getChildAt(i);
+            RecentsPanelView.ViewHolder holder = (RecentsPanelView.ViewHolder) v.getTag();
+            if (holder.taskDescription == task) {
+                return v;
+            }
+        }
+        return null;
+    }
+
     private void update() {
         for (int i = 0; i < mLinearLayout.getChildCount(); i++) {
             View v = mLinearLayout.getChildAt(i);
