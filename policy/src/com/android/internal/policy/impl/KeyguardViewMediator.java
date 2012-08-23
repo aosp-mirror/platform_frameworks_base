@@ -39,6 +39,7 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.EventLog;
@@ -1030,7 +1031,9 @@ public class KeyguardViewMediator implements KeyguardViewCallback {
             mPM.wakeUp(SystemClock.uptimeMillis());
         }
         mWakeLock.release();
-        mContext.sendBroadcast(mUserPresentIntent);
+
+        final UserHandle currentUser = new UserHandle(mLockPatternUtils.getCurrentUser());
+        mContext.sendBroadcastAsUser(mUserPresentIntent, currentUser);
     }
 
     /**
