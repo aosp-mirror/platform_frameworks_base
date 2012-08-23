@@ -1131,7 +1131,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         R.bool.def_screensaver_enabled);
                 loadBooleanSetting(stmt, Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK,
                         R.bool.def_screensaver_activate_on_dock);
-                loadStringSetting(stmt, Settings.Secure.SCREENSAVER_COMPONENT,
+                loadBooleanSetting(stmt, Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP,
+                        R.bool.def_screensaver_activate_on_sleep);
+                loadStringSetting(stmt, Settings.Secure.SCREENSAVER_DEFAULT_COMPONENT,
+                        R.string.def_screensaver_component);
+                loadStringSetting(stmt, Settings.Secure.SCREENSAVER_COMPONENTS,
                         R.string.def_screensaver_component);
                 db.setTransactionSuccessful();
             } finally {
@@ -1746,7 +1750,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     R.bool.def_screensaver_enabled);
             loadBooleanSetting(stmt, Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK,
                     R.bool.def_screensaver_activate_on_dock);
-            loadStringSetting(stmt, Settings.Secure.SCREENSAVER_COMPONENT,
+            loadBooleanSetting(stmt, Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP,
+                    R.bool.def_screensaver_activate_on_sleep);
+            loadStringSetting(stmt, Settings.Secure.SCREENSAVER_COMPONENTS,
+                    R.string.def_screensaver_component);
+            loadStringSetting(stmt, Settings.Secure.SCREENSAVER_DEFAULT_COMPONENT,
                     R.string.def_screensaver_component);
         } finally {
             if (stmt != null) stmt.close();

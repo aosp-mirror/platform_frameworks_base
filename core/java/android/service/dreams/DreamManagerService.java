@@ -1,7 +1,7 @@
 package android.service.dreams;
 
-import static android.provider.Settings.Secure.SCREENSAVER_COMPONENT;
-
+import static android.provider.Settings.Secure.SCREENSAVER_COMPONENTS;
+import static android.provider.Settings.Secure.SCREENSAVER_DEFAULT_COMPONENT;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
@@ -58,7 +58,8 @@ public class DreamManagerService
     // IDreamManager method
     @Override
     public void dream() {
-        ComponentName name = getDreamComponent();
+        ComponentName[] dreams = getDreamComponents();
+        ComponentName name = dreams != null && dreams.length > 0 ? dreams[0] : null;
         if (name != null) {
             synchronized (mLock) {
                 final long ident = Binder.clearCallingIdentity();
@@ -73,21 +74,45 @@ public class DreamManagerService
 
     // IDreamManager method
     @Override
-    public void setDreamComponent(ComponentName name) {
-        Settings.Secure.putString(mContext.getContentResolver(), SCREENSAVER_COMPONENT, name.flattenToString());
+    public void setDreamComponents(ComponentName[] componentNames) {
+        Settings.Secure.putString(mContext.getContentResolver(),
+                SCREENSAVER_COMPONENTS,
+                componentsToString(componentNames));
+    }
+
+    private static String componentsToString(ComponentName[] componentNames) {
+        StringBuilder names = new StringBuilder();
+        if (componentNames != null) {
+            for (ComponentName componentName : componentNames) {
+                if (names.length() > 0)
+                    names.append(',');
+                names.append(componentName.flattenToString());
+            }
+        }
+        return names.toString();
+    }
+
+    private static ComponentName[] componentsFromString(String names) {
+        String[] namesArray = names.split(",");
+        ComponentName[] componentNames = new ComponentName[namesArray.length];
+        for (int i = 0; i < namesArray.length; i++)
+            componentNames[i] = ComponentName.unflattenFromString(namesArray[i]);
+        return componentNames;
     }
 
     // IDreamManager method
     @Override
-    public ComponentName getDreamComponent() {
+    public ComponentName[] getDreamComponents() {
         // TODO(dsandler) don't load this every time, watch the value
-        String component = Settings.Secure.getString(mContext.getContentResolver(), SCREENSAVER_COMPONENT);
-        if (component != null) {
-            return ComponentName.unflattenFromString(component);
-        } else {
-            // We rely on DatabaseHelper to set a sane default for us when the settings DB is upgraded
-            return null;
-        }
+        String names = Settings.Secure.getString(mContext.getContentResolver(), SCREENSAVER_COMPONENTS);
+        return componentsFromString(names);
+    }
+
+    // IDreamManager method
+    @Override
+    public ComponentName getDefaultDreamComponent() {
+        String name = Settings.Secure.getString(mContext.getContentResolver(), SCREENSAVER_DEFAULT_COMPONENT);
+        return name == null ? null : ComponentName.unflattenFromString(name);
     }
 
     // IDreamManager method
