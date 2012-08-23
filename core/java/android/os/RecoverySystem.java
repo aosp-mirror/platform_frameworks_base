@@ -40,6 +40,7 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -326,7 +327,8 @@ public class RecoverySystem {
         throws IOException {
         String filename = packageFile.getCanonicalPath();
         Log.w(TAG, "!!! REBOOTING TO INSTALL " + filename + " !!!");
-        String arg = "--update_package=" + filename;
+        String arg = "--update_package=" + filename +
+            "\n--locale=" + Locale.getDefault().toString();
         bootCommand(context, arg);
     }
 
@@ -357,7 +359,7 @@ public class RecoverySystem {
         // Block until the ordered broadcast has completed.
         condition.block();
 
-        bootCommand(context, "--wipe_data");
+        bootCommand(context, "--wipe_data\n--locale=" + Locale.getDefault().toString());
     }
 
     /**
@@ -365,7 +367,7 @@ public class RecoverySystem {
      * @throws IOException if something goes wrong.
      */
     public static void rebootWipeCache(Context context) throws IOException {
-        bootCommand(context, "--wipe_cache");
+        bootCommand(context, "--wipe_cache\n--locale=" + Locale.getDefault().toString());
     }
 
     /**
