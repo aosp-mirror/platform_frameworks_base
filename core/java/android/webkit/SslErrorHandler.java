@@ -26,9 +26,9 @@ import android.os.Handler;
 public class SslErrorHandler extends Handler {
 
     /**
-     * Package-private constructor needed for API compatibility.
+     * @hide Only for use by WebViewProvider implementations.
      */
-    SslErrorHandler() {}
+    public SslErrorHandler() {}
 
     /**
      * Proceed with the SSL certificate.
