@@ -214,10 +214,6 @@ public class LocationManagerService extends ILocationManager.Stub implements Obs
         mGeofenceManager = new GeofenceManager(mContext, mBlacklist);
         mLocationFudger = new LocationFudger();
 
-        // Register for Network (Wifi or Mobile) updates
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-
         // listen for settings changes
         ContentResolver resolver = mContext.getContentResolver();
         Cursor settingsCursor = resolver.query(Settings.Secure.CONTENT_URI, null,
