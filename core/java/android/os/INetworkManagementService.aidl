@@ -365,8 +365,8 @@ interface INetworkManagementService
 
     void setFirewallEnabled(boolean enabled);
     boolean isFirewallEnabled();
-    void setInterfaceFirewallRule(String iface, boolean allow);
-    void setEgressSourceFirewallRule(String addr, boolean allow);
-    void setEgressDestFirewallRule(String addr, int port, boolean allow);
-    void setUidFirewallRule(int uid, boolean allow);
+    void setFirewallInterfaceRule(String iface, boolean allow);
+    void setFirewallEgressSourceRule(String addr, boolean allow);
+    void setFirewallEgressDestRule(String addr, int port, boolean allow);
+    void setFirewallUidRule(int uid, boolean allow);
 }
