@@ -194,6 +194,11 @@ int make_user_data(const char *pkgname, uid_t uid, uid_t persona)
         ALOGE("cannot create dir '%s': %s\n", pkgdir, strerror(errno));
         return -errno;
     }
+    if (chmod(pkgdir, 0751) < 0) {
+        ALOGE("cannot chmod dir '%s': %s\n", pkgdir, strerror(errno));
+        unlink(pkgdir);
+        return -errno;
+    }
     if (chown(pkgdir, uid, uid) < 0) {
         ALOGE("cannot chown dir '%s': %s\n", pkgdir, strerror(errno));
         unlink(pkgdir);
