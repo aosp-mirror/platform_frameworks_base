@@ -114,6 +114,7 @@
       <li><a href="<?cs var:toroot ?>tools/debugging/improving-w-lint.html"><span class="en">Improving Your Code with lint</span></a></li>
       <li><a href="<?cs var:toroot ?>tools/debugging/debugging-ui.html"><span class="en">Optimizing your UI</span></a></li>
       <li><a href="<?cs var:toroot ?>tools/debugging/debugging-tracing.html"><span class="en">Profiling with Traceview and dmtracedump</span></a></li>
+      <li><a href="<?cs var:toroot ?>tools/debugging/systrace.html"><span class="en">Analysing Display and Performance with Systrace</span></a></li>
       <li><a href="<?cs var:toroot ?>tools/debugging/debugging-devtools.html"><span class="en">Using the Dev Tools App</span></a></li>
     </ul>
   </li>
@@ -159,6 +160,7 @@ class="en">MonkeyRunner</span></a></li>
         </ul>
       </li>
        <li><a href="<?cs var:toroot ?>tools/help/proguard.html">ProGuard</a></li>
+       <li><a href="<?cs var:toroot ?>tools/help/systrace.html">Systrace</a></li>
        <li><a href="<?cs var:toroot ?>tools/help/gltracer.html">Tracer for OpenGL ES</a></li>
        <li><a href="<?cs var:toroot ?>tools/help/traceview.html">Traceview</a></li>
        <li><a href="<?cs var:toroot ?>tools/help/zipalign.html">zipalign</a></li>
