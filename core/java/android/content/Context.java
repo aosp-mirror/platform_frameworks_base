@@ -1414,6 +1414,16 @@ public abstract class Context {
     public abstract boolean stopService(Intent service);
 
     /**
+     * @hide like {@link #startService(Intent)} but for a specific user.
+     */
+    public abstract ComponentName startServiceAsUser(Intent service, UserHandle user);
+
+    /**
+     * @hide like {@link #stopService(Intent)} but for a specific user.
+     */
+    public abstract boolean stopServiceAsUser(Intent service, UserHandle user);
+    
+    /**
      * Connect to an application service, creating it if needed.  This defines
      * a dependency between your application and the service.  The given
      * <var>conn</var> will receive the service object when it is created and be

@@ -310,6 +310,23 @@ public abstract class PackageManager {
     public static final int INSTALL_FROM_ADB = 0x00000020;
 
     /**
+     * Flag parameter for {@link #installPackage} to indicate that this install
+     * should immediately be visible to all users.
+     *
+     * @hide
+     */
+    public static final int INSTALL_ALL_USERS = 0x00000040;
+
+    /**
+     * Flag parameter for {@link #installPackage} to indicate that it is okay
+     * to install an update to an app where the newly installed app has a lower
+     * version code than the currently installed app.
+     *
+     * @hide
+     */
+    public static final int INSTALL_ALLOW_DOWNGRADE = 0x00000080;
+
+    /**
      * Flag parameter for
      * {@link #setComponentEnabledSetting(android.content.ComponentName, int, int)} to indicate
      * that you don't want to kill the app containing the component.  Be careful when you set this
@@ -529,6 +546,14 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_UID_CHANGED = -24;
 
     /**
+     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
+     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
+     * the new package has an older version code than the currently installed package.
+     * @hide
+     */
+    public static final int INSTALL_FAILED_VERSION_DOWNGRADE = -25;
+
+    /**
      * Installation parse return code: this is passed to the {@link IPackageInstallObserver} by
      * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)}
      * if the parser was given a path that is not a file, or does not end with the expected
@@ -625,7 +650,15 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    public static final int DONT_DELETE_DATA = 0x00000001;
+    public static final int DELETE_KEEP_DATA = 0x00000001;
+
+    /**
+     * Flag parameter for {@link #deletePackage} to indicate that you want the
+     * package deleted for all users.
+     *
+     * @hide
+     */
+    public static final int DELETE_ALL_USERS = 0x00000002;
 
     /**
      * Return code for when package deletion succeeds. This is passed to the
@@ -2175,8 +2208,8 @@ public abstract class PackageManager {
         if ((flags & GET_SIGNATURES) != 0) {
             packageParser.collectCertificates(pkg, 0);
         }
-        return PackageParser.generatePackageInfo(pkg, null, flags, 0, 0, null, false,
-                COMPONENT_ENABLED_STATE_DEFAULT);
+        PackageUserState state = new PackageUserState();
+        return PackageParser.generatePackageInfo(pkg, null, flags, 0, 0, null, state);
     }
 
     /**
@@ -2267,6 +2300,14 @@ public abstract class PackageManager {
             ContainerEncryptionParams encryptionParams);
 
     /**
+     * If there is already an application with the given package name installed
+     * on the system for other users, also install it for the calling user.
+     * @hide
+     */
+    public abstract int installExistingPackage(String packageName)
+            throws NameNotFoundException;
+
+    /**
      * Allows a package listening to the
      * {@link Intent#ACTION_PACKAGE_NEEDS_VERIFICATION package verification
      * broadcast} to respond to the package manager. The response must include
@@ -2337,7 +2378,8 @@ public abstract class PackageManager {
      * @param observer An observer callback to get notified when the package deletion is
      * complete. {@link android.content.pm.IPackageDeleteObserver#packageDeleted(boolean)} will be
      * called when that happens.  observer may be null to indicate that no callback is desired.
-     * @param flags - possible values: {@link #DONT_DELETE_DATA}
+     * @param flags - possible values: {@link #DELETE_KEEP_DATA},
+     * {@link #DELETE_ALL_USERS}.
      *
      * @hide
      */

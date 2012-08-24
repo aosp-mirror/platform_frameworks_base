@@ -6293,6 +6293,7 @@ package android.content.pm {
     field public static final int FLAG_EXTERNAL_STORAGE = 262144; // 0x40000
     field public static final int FLAG_FACTORY_TEST = 16; // 0x10
     field public static final int FLAG_HAS_CODE = 4; // 0x4
+    field public static final int FLAG_INSTALLED = 8388608; // 0x800000
     field public static final int FLAG_KILL_AFTER_RESTORE = 65536; // 0x10000
     field public static final int FLAG_LARGE_HEAP = 1048576; // 0x100000
     field public static final int FLAG_PERSISTENT = 8; // 0x8
@@ -6627,6 +6628,17 @@ package android.content.pm {
     field public long externalMediaSize;
     field public long externalObbSize;
     field public java.lang.String packageName;
+  }
+
+  public class PackageUserState {
+    ctor public PackageUserState();
+    ctor public PackageUserState(android.content.pm.PackageUserState);
+    field public java.util.HashSet disabledComponents;
+    field public int enabled;
+    field public java.util.HashSet enabledComponents;
+    field public boolean installed;
+    field public boolean notLaunched;
+    field public boolean stopped;
   }
 
   public class PathPermission extends android.os.PatternMatcher {
@@ -26928,6 +26940,7 @@ package android.webkit {
     method public synchronized int getDefaultFixedFontSize();
     method public synchronized int getDefaultFontSize();
     method public synchronized java.lang.String getDefaultTextEncodingName();
+    method public static java.lang.String getDefaultUserAgent(android.content.Context);
     method public android.webkit.WebSettings.ZoomDensity getDefaultZoom();
     method public boolean getDisplayZoomControls();
     method public synchronized boolean getDomStorageEnabled();
@@ -26958,7 +26971,6 @@ package android.webkit {
     method public synchronized boolean getUseWideViewPort();
     method public deprecated synchronized int getUserAgent();
     method public synchronized java.lang.String getUserAgentString();
-    method public static java.lang.String getDefaultUserAgent(android.content.Context);
     method public void setAllowContentAccess(boolean);
     method public void setAllowFileAccess(boolean);
     method public abstract void setAllowFileAccessFromFileURLs(boolean);
