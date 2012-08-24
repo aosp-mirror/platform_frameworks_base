@@ -55,6 +55,9 @@ outside of Android code.</dd>
   <dt><a href="proguard.html">ProGuard</a></dt>
     <dd>Shrinks, optimizes, and obfuscates your code by removing unused code and renaming
 classes, fields, and methods with semantically obscure names.</dd>
+  <dt><a href="systrace.html">Systrace</a></dt>
+    <dd>Lets you analyze the execution of your application in the context of system processes,
+    to help diagnose display and performance issues.</dd>
   <dt><a href="sqlite3.html">sqlite3</a></dt>
     <dd>Lets you access the SQLite data files created and used by Android applications.</dd>
   <dt><a href="traceview.html">traceview</a></dt>
