@@ -357,11 +357,6 @@ public class StaticLayout extends Layout {
 
                         // From the Unicode Line Breaking Algorithm (at least approximately)
                         boolean isLineBreak = isSpaceOrTab ||
-                                // .,:; are class IS breakpoints, except when adjacent to digits
-                                ((c == CHAR_DOT || c == CHAR_COMMA ||
-                                c == CHAR_COLON || c == CHAR_SEMICOLON) &&
-                                (j - 1 < here || !Character.isDigit(chs[j - 1 - paraStart])) &&
-                                (j + 1 >= spanEnd || !Character.isDigit(chs[j + 1 - paraStart]))) ||
                                 // / is class SY and - is class HY, except when followed by a digit
                                 ((c == CHAR_SLASH || c == CHAR_HYPHEN) &&
                                 (j + 1 >= spanEnd || !Character.isDigit(chs[j + 1 - paraStart]))) ||
@@ -959,10 +954,6 @@ public class StaticLayout extends Layout {
     private static final char CHAR_NEW_LINE = '\n';
     private static final char CHAR_TAB = '\t';
     private static final char CHAR_SPACE = ' ';
-    private static final char CHAR_DOT = '.';
-    private static final char CHAR_COMMA = ',';
-    private static final char CHAR_COLON = ':';
-    private static final char CHAR_SEMICOLON = ';';
     private static final char CHAR_SLASH = '/';
     private static final char CHAR_HYPHEN = '-';
 
