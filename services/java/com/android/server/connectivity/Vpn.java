@@ -34,9 +34,11 @@ import android.graphics.drawable.Drawable;
 import android.net.BaseNetworkStateTracker;
 import android.net.ConnectivityManager;
 import android.net.INetworkManagementEventObserver;
+import android.net.LinkProperties;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
 import android.net.NetworkInfo;
+import android.net.RouteInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.os.Binder;
 import android.os.FileUtils;
@@ -48,11 +50,15 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemService;
+import android.security.Credentials;
+import android.security.KeyStore;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.android.internal.R;
 import com.android.internal.net.LegacyVpnInfo;
 import com.android.internal.net.VpnConfig;
+import com.android.internal.net.VpnProfile;
 import com.android.internal.util.Preconditions;
 import com.android.server.ConnectivityService.VpnCallback;
 import com.android.server.net.BaseNetworkObserver;
@@ -60,6 +66,8 @@ import com.android.server.net.BaseNetworkObserver;
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.nio.charset.Charsets;
 import java.util.Arrays;
 
@@ -430,20 +438,127 @@ public class Vpn extends BaseNetworkStateTracker {
     private native int jniCheck(String interfaze);
     private native void jniProtect(int socket, String interfaze);
 
-    /**
-     * Start legacy VPN. This method stops the daemons and restart them
-     * if arguments are not null. Heavy things are offloaded to another
-     * thread, so callers will not be blocked for a long time.
-     *
-     * @param config The parameters to configure the network.
-     * @param racoon The arguments to be passed to racoon.
-     * @param mtpd The arguments to be passed to mtpd.
-     */
-    public synchronized void startLegacyVpn(VpnConfig config, String[] racoon, String[] mtpd) {
-        stopLegacyVpn();
+    private static String findLegacyVpnGateway(LinkProperties prop) {
+        for (RouteInfo route : prop.getRoutes()) {
+            // Currently legacy VPN only works on IPv4.
+            if (route.isDefaultRoute() && route.getGateway() instanceof Inet4Address) {
+                return route.getGateway().getHostAddress();
+            }
+        }
 
-        // TODO: move legacy definition to settings
+        throw new IllegalStateException("Unable to find suitable gateway");
+    }
+
+    /**
+     * Start legacy VPN, controlling native daemons as needed. Creates a
+     * secondary thread to perform connection work, returning quickly.
+     */
+    public void startLegacyVpn(VpnProfile profile, KeyStore keyStore, LinkProperties egress) {
+        if (keyStore.state() != KeyStore.State.UNLOCKED) {
+            throw new IllegalStateException("KeyStore isn't unlocked");
+        }
+
+        final String iface = egress.getInterfaceName();
+        final String gateway = findLegacyVpnGateway(egress);
+
+        // Load certificates.
+        String privateKey = "";
+        String userCert = "";
+        String caCert = "";
+        String serverCert = "";
+        if (!profile.ipsecUserCert.isEmpty()) {
+            privateKey = Credentials.USER_PRIVATE_KEY + profile.ipsecUserCert;
+            byte[] value = keyStore.get(Credentials.USER_CERTIFICATE + profile.ipsecUserCert);
+            userCert = (value == null) ? null : new String(value, Charsets.UTF_8);
+        }
+        if (!profile.ipsecCaCert.isEmpty()) {
+            byte[] value = keyStore.get(Credentials.CA_CERTIFICATE + profile.ipsecCaCert);
+            caCert = (value == null) ? null : new String(value, Charsets.UTF_8);
+        }
+        if (!profile.ipsecServerCert.isEmpty()) {
+            byte[] value = keyStore.get(Credentials.USER_CERTIFICATE + profile.ipsecServerCert);
+            serverCert = (value == null) ? null : new String(value, Charsets.UTF_8);
+        }
+        if (privateKey == null || userCert == null || caCert == null || serverCert == null) {
+            throw new IllegalStateException("Cannot load credentials");
+        }
+
+        // Prepare arguments for racoon.
+        String[] racoon = null;
+        switch (profile.type) {
+            case VpnProfile.TYPE_L2TP_IPSEC_PSK:
+                racoon = new String[] {
+                    iface, profile.server, "udppsk", profile.ipsecIdentifier,
+                    profile.ipsecSecret, "1701",
+                };
+                break;
+            case VpnProfile.TYPE_L2TP_IPSEC_RSA:
+                racoon = new String[] {
+                    iface, profile.server, "udprsa", privateKey, userCert,
+                    caCert, serverCert, "1701",
+                };
+                break;
+            case VpnProfile.TYPE_IPSEC_XAUTH_PSK:
+                racoon = new String[] {
+                    iface, profile.server, "xauthpsk", profile.ipsecIdentifier,
+                    profile.ipsecSecret, profile.username, profile.password, "", gateway,
+                };
+                break;
+            case VpnProfile.TYPE_IPSEC_XAUTH_RSA:
+                racoon = new String[] {
+                    iface, profile.server, "xauthrsa", privateKey, userCert,
+                    caCert, serverCert, profile.username, profile.password, "", gateway,
+                };
+                break;
+            case VpnProfile.TYPE_IPSEC_HYBRID_RSA:
+                racoon = new String[] {
+                    iface, profile.server, "hybridrsa",
+                    caCert, serverCert, profile.username, profile.password, "", gateway,
+                };
+                break;
+        }
+
+        // Prepare arguments for mtpd.
+        String[] mtpd = null;
+        switch (profile.type) {
+            case VpnProfile.TYPE_PPTP:
+                mtpd = new String[] {
+                    iface, "pptp", profile.server, "1723",
+                    "name", profile.username, "password", profile.password,
+                    "linkname", "vpn", "refuse-eap", "nodefaultroute",
+                    "usepeerdns", "idle", "1800", "mtu", "1400", "mru", "1400",
+                    (profile.mppe ? "+mppe" : "nomppe"),
+                };
+                break;
+            case VpnProfile.TYPE_L2TP_IPSEC_PSK:
+            case VpnProfile.TYPE_L2TP_IPSEC_RSA:
+                mtpd = new String[] {
+                    iface, "l2tp", profile.server, "1701", profile.l2tpSecret,
+                    "name", profile.username, "password", profile.password,
+                    "linkname", "vpn", "refuse-eap", "nodefaultroute",
+                    "usepeerdns", "idle", "1800", "mtu", "1400", "mru", "1400",
+                };
+                break;
+        }
+
+        VpnConfig config = new VpnConfig();
         config.legacy = true;
+        config.user = profile.key;
+        config.interfaze = iface;
+        config.session = profile.name;
+        config.routes = profile.routes;
+        if (!profile.dnsServers.isEmpty()) {
+            config.dnsServers = Arrays.asList(profile.dnsServers.split(" +"));
+        }
+        if (!profile.searchDomains.isEmpty()) {
+            config.searchDomains = Arrays.asList(profile.searchDomains.split(" +"));
+        }
+
+        startLegacyVpn(config, racoon, mtpd);
+    }
+
+    private synchronized void startLegacyVpn(VpnConfig config, String[] racoon, String[] mtpd) {
+        stopLegacyVpn();
 
         // Prepare for the new request. This also checks the caller.
         prepare(null, VpnConfig.LEGACY_VPN);
