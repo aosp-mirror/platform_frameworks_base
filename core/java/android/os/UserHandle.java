@@ -28,6 +28,9 @@ public final class UserHandle implements Parcelable {
     /** @hide A user id to indicate all users on the device */
     public static final int USER_ALL = -1;
 
+    /** @hide A user handle to indicate all users on the device */
+    public static final UserHandle ALL = new UserHandle(USER_ALL);
+
     /** @hide A user id to indicate the currently active user */
     public static final int USER_CURRENT = -2;
 

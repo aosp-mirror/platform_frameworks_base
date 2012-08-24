@@ -1281,6 +1281,18 @@ public final class BridgeContext extends Context {
     }
 
     @Override
+    public ComponentName startServiceAsUser(Intent arg0, UserHandle arg1) {
+        // pass
+        return null;
+    }
+
+    @Override
+    public boolean stopServiceAsUser(Intent arg0, UserHandle arg1) {
+        // pass
+        return false;
+    }
+
+    @Override
     public void unbindService(ServiceConnection arg0) {
         // pass
 

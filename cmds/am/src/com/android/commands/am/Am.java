@@ -393,7 +393,7 @@ public class Am {
     private void runStartService() throws Exception {
         Intent intent = makeIntent();
         System.out.println("Starting service: " + intent);
-        ComponentName cn = mAm.startService(null, intent, intent.getType());
+        ComponentName cn = mAm.startService(null, intent, intent.getType(), 0);
         if (cn == null) {
             System.err.println("Error: Not found; no service started.");
         }

@@ -26,6 +26,7 @@ import android.content.pm.MacAuthenticatedInputStream;
 import android.content.pm.ContainerEncryptionParams;
 import android.content.pm.IPackageManager;
 import android.content.pm.LimitedLengthInputStream;
+import android.content.pm.PackageCleanItem;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageManager;
@@ -181,6 +182,7 @@ public class DefaultContainerService extends IntentService {
             }
 
             ret.packageName = pkg.packageName;
+            ret.versionCode = pkg.versionCode;
             ret.installLocation = pkg.installLocation;
             ret.verifiers = pkg.verifiers;
 
@@ -268,12 +270,14 @@ public class DefaultContainerService extends IntentService {
         if (PackageManager.ACTION_CLEAN_EXTERNAL_STORAGE.equals(intent.getAction())) {
             IPackageManager pm = IPackageManager.Stub.asInterface(
                     ServiceManager.getService("package"));
-            String pkg = null;
+            PackageCleanItem pkg = null;
             try {
                 while ((pkg=pm.nextPackageToClean(pkg)) != null) {
-                    eraseFiles(Environment.getExternalStorageAppDataDirectory(pkg));
-                    eraseFiles(Environment.getExternalStorageAppMediaDirectory(pkg));
-                    eraseFiles(Environment.getExternalStorageAppObbDirectory(pkg));
+                    eraseFiles(Environment.getExternalStorageAppDataDirectory(pkg.packageName));
+                    eraseFiles(Environment.getExternalStorageAppMediaDirectory(pkg.packageName));
+                    if (pkg.andCode) {
+                        eraseFiles(Environment.getExternalStorageAppObbDirectory(pkg.packageName));
+                    }
                 }
             } catch (RemoteException e) {
             }

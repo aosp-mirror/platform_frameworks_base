@@ -133,9 +133,9 @@ public interface IActivityManager extends IInterface {
     public PendingIntent getRunningServiceControlPanel(ComponentName service)
             throws RemoteException;
     public ComponentName startService(IApplicationThread caller, Intent service,
-            String resolvedType) throws RemoteException;
+            String resolvedType, int userId) throws RemoteException;
     public int stopService(IApplicationThread caller, Intent service,
-            String resolvedType) throws RemoteException;
+            String resolvedType, int userId) throws RemoteException;
     public boolean stopServiceToken(ComponentName className, IBinder token,
             int startId) throws RemoteException;
     public void setServiceForeground(ComponentName className, IBinder token,

@@ -776,7 +776,7 @@ public final class Pm {
     }
 
     private void runInstall() {
-        int installFlags = 0;
+        int installFlags = PackageManager.INSTALL_ALL_USERS;
         String installerPackageName = null;
 
         String opt;
@@ -811,6 +811,8 @@ public final class Pm {
             } else if (opt.equals("-f")) {
                 // Override if -s option is specified.
                 installFlags |= PackageManager.INSTALL_INTERNAL;
+            } else if (opt.equals("-d")) {
+                installFlags |= PackageManager.INSTALL_ALLOW_DOWNGRADE;
             } else if (opt.equals("--algo")) {
                 algo = nextOptionData();
                 if (algo == null) {
@@ -1105,7 +1107,7 @@ public final class Pm {
 
         String opt = nextOption();
         if (opt != null && opt.equals("-k")) {
-            unInstallFlags = PackageManager.DONT_DELETE_DATA;
+            unInstallFlags = PackageManager.DELETE_KEEP_DATA;
         }
 
         String pkg = nextArg();
@@ -1525,6 +1527,7 @@ public final class Pm {
         System.err.println("    -i: specify the installer package name.");
         System.err.println("    -s: install package on sdcard.");
         System.err.println("    -f: install package on internal flash.");
+        System.err.println("    -d: allow version code downgrade.");
         System.err.println("");
         System.err.println("pm uninstall: removes a package from the system. Options:");
         System.err.println("    -k: keep the data and cache directories around after package removal.");
