@@ -1523,6 +1523,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return null;
         }
 
+        WindowManager wm = null;
+        View view = null;
+
         try {
             Context context = mContext;
             if (DEBUG_STARTING_WINDOW) Slog.d(TAG, "addStartingWindow " + packageName
@@ -1582,8 +1585,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             params.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
             params.setTitle("Starting " + packageName);
 
-            WindowManager wm = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
-            View view = win.getDecorView();
+            wm = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
+            view = win.getDecorView();
 
             if (win.isFloating()) {
                 // Whoops, there is no way to display an animation/preview
@@ -1613,6 +1616,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // failure loading resources because we are loading from an app
             // on external storage that has been unmounted.
             Log.w(TAG, appToken + " failed creating starting window", e);
+        } finally {
+            if (view != null && view.getParent() == null) {
+                Log.w(TAG, "view not successfully added to wm, removing view");
+                wm.removeViewImmediate(view);
+            }
         }
 
         return null;
