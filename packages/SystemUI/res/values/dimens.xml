@@ -164,6 +164,9 @@
     <integer name="notification_panel_layout_gravity">0x37</integer>
     <integer name="settings_panel_layout_gravity">0x37</integer>
 
+    <!-- Quick settings panels minimum fling open target width. -->
+    <dimen name="settings_panel_fling_gutter">90dp</dimen>
+
     <!-- Height of the carrier/wifi name label -->
     <dimen name="carrier_label_height">24dp</dimen>
 
