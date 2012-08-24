@@ -67,6 +67,7 @@ import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.BridgeInflater;
 import android.view.CompatibilityInfoHolder;
+import android.view.Display;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
@@ -925,6 +926,12 @@ public final class BridgeContext extends Context {
     }
 
     @Override
+    public Context createDisplayContext(Display display) {
+        // pass
+        return null;
+    }
+
+    @Override
     public String[] databaseList() {
         // pass
         return null;
@@ -1357,7 +1364,7 @@ public final class BridgeContext extends Context {
     }
 
     @Override
-    public CompatibilityInfoHolder getCompatibilityInfo() {
+    public CompatibilityInfoHolder getCompatibilityInfo(int displayId) {
         // pass
         return null;
     }

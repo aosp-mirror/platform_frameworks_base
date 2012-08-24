@@ -87,9 +87,14 @@ easier.
         <item name="android:windowAnimationStyle">@android:style/Animation.DeviceDefault.Activity</item>
 
         <!-- Dialog attributes -->
-        <item name="alertDialogStyle">@android:style/AlertDialog.DeviceDefault</item>
         <item name="dialogTheme">@android:style/Theme.DeviceDefault.Dialog</item>
+
+        <!-- AlertDialog attributes -->
         <item name="alertDialogTheme">@android:style/Theme.DeviceDefault.Dialog.Alert</item>
+        <item name="alertDialogStyle">@android:style/AlertDialog.DeviceDefault</item>
+
+        <!-- Presentation attributes -->
+        <item name="presentationTheme">@android:style/Theme.DeviceDefault.Dialog.Presentation</item>
 
         <!-- Text selection handle attributes -->
         <item name="textSelectHandleWindowStyle">@android:style/Widget.DeviceDefault.TextSelectHandle</item>
@@ -239,9 +244,14 @@ easier.
         <item name="android:windowAnimationStyle">@android:style/Animation.DeviceDefault.Activity</item>
 
         <!-- Dialog attributes -->
-        <item name="alertDialogStyle">@android:style/AlertDialog.DeviceDefault.Light</item>
         <item name="dialogTheme">@android:style/Theme.DeviceDefault.Light.Dialog</item>
+
+        <!-- AlertDialog attributes -->
         <item name="alertDialogTheme">@android:style/Theme.DeviceDefault.Light.Dialog.Alert</item>
+        <item name="alertDialogStyle">@android:style/AlertDialog.DeviceDefault.Light</item>
+
+        <!-- Presentation attributes -->
+        <item name="presentationTheme">@android:style/Theme.DeviceDefault.Light.Dialog.Presentation</item>
 
         <!-- Text selection handle attributes -->
         <item name="textSelectHandleWindowStyle">@android:style/Widget.DeviceDefault.TextSelectHandle</item>
@@ -460,6 +470,15 @@ easier.
     <style name="Theme.DeviceDefault.Light.DialogWhenLarge.NoActionBar" parent="Theme.Holo.Light.DialogWhenLarge.NoActionBar" >
 
     </style>
+
+    <!-- DeviceDefault theme for a presentation window on a secondary display. -->
+    <style name="Theme.DeviceDefault.Dialog.Presentation" parent="Theme.Holo.Dialog.Presentation">
+    </style>
+
+    <!-- DeviceDefault light theme for a presentation window on a secondary display. -->
+    <style name="Theme.DeviceDefault.Light.Dialog.Presentation" parent="Theme.Holo.Light.Dialog.Presentation">
+    </style>
+
     <!-- DeviceDefault theme for panel windows. This removes all extraneous window
     decorations, so you basically have an empty rectangle in which to place your content. It makes
     the window floating, with a transparent background, and turns off dimming behind the window. -->

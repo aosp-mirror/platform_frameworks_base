@@ -673,7 +673,6 @@ easier.
 
     </style>
 
-
     <!-- Animation Styles -->
     <style name="Animation.DeviceDefault.Activity" parent="Animation.Holo.Activity">
 
