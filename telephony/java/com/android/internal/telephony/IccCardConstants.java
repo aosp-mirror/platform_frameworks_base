@@ -22,6 +22,8 @@ public class IccCardConstants {
 
     /* The extra data for broacasting intent INTENT_ICC_STATE_CHANGE */
     public static final String INTENT_KEY_ICC_STATE = "ss";
+    /* UNKNOWN means the ICC state is unknown */
+    public static final String INTENT_VALUE_ICC_UNKNOWN = "UNKNOWN";
     /* NOT_READY means the ICC interface is not ready (eg, radio is off or powering on) */
     public static final String INTENT_VALUE_ICC_NOT_READY = "NOT_READY";
     /* ABSENT means ICC is missing */
