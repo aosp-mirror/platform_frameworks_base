@@ -12,7 +12,7 @@ You can also download individual files listed below.</p>
   <div class="layout-content-col span-4">
 
 <p>
-  <a class="download-button" href="{@docRoot}downloads/design/Android_Design_Downloads_20120814.zip">Download All</a>
+  <a class="download-button" href="{@docRoot}downloads/design/Android_Design_Downloads_20120823.zip">Download All</a>
 </p>
 
   </div>
@@ -91,7 +91,7 @@ requirements of UI and high-resolution screens.</p>
   <div class="layout-content-col span-4">
 
 <p>
-  <a class="download-button" href="{@docRoot}downloads/design/Roboto_Hinted_20111129.zip">Roboto</a>
+  <a class="download-button" href="{@docRoot}downloads/design/Roboto_Hinted_20120823.zip">Roboto</a>
   <a class="download-button" href="{@docRoot}downloads/design/Roboto_Specimen_Book_20111129.pdf">Specimen Book</a>
 </p>
 
