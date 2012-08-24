@@ -35,6 +35,7 @@ import static com.android.server.NetworkManagementService.NetdResponseCode.Tethe
 import static com.android.server.NetworkManagementService.NetdResponseCode.TtyListResult;
 import static com.android.server.NetworkManagementSocketTagger.PROP_QTAGUID_ENABLED;
 
+import android.bluetooth.BluetoothTetheringDataTracker;
 import android.content.Context;
 import android.net.INetworkManagementEventObserver;
 import android.net.InterfaceConfiguration;
@@ -55,6 +56,7 @@ import android.util.Slog;
 import android.util.SparseBooleanArray;
 
 import com.android.internal.net.NetworkStatsFactory;
+import com.android.internal.util.Preconditions;
 import com.android.server.NativeDaemonConnector.Command;
 import com.google.android.collect.Maps;
 
@@ -78,7 +80,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 import java.util.concurrent.CountDownLatch;
-import android.bluetooth.BluetoothTetheringDataTracker;
 
 /**
  * @hide
@@ -91,6 +92,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     private static final String ADD = "add";
     private static final String REMOVE = "remove";
+
+    private static final String ALLOW = "allow";
+    private static final String DENY = "deny";
 
     private static final String DEFAULT = "default";
     private static final String SECONDARY = "secondary";
@@ -169,6 +173,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     private HashMap<String, IdleTimerParams> mActiveIdleTimers = Maps.newHashMap();
 
     private volatile boolean mBandwidthControlEnabled;
+    private volatile boolean mFirewallEnabled;
 
     /**
      * Constructs a new NetworkManagementService instance
@@ -363,6 +368,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 }
             }
         }
+
+        // TODO: Push any existing firewall state
+        setFirewallEnabled(mFirewallEnabled);
     }
 
     //
@@ -1425,7 +1433,72 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
     }
 
-    /** {@inheritDoc} */
+    @Override
+    public void setFirewallEnabled(boolean enabled) {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+        try {
+            mConnector.execute("firewall", enabled ? "enable" : "disable");
+            mFirewallEnabled = enabled;
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+    }
+
+    @Override
+    public boolean isFirewallEnabled() {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+        return mFirewallEnabled;
+    }
+
+    @Override
+    public void setInterfaceFirewallRule(String iface, boolean allow) {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+        Preconditions.checkState(mFirewallEnabled);
+        final String rule = allow ? ALLOW : DENY;
+        try {
+            mConnector.execute("firewall", "set_interface_rule", iface, rule);
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+    }
+
+    @Override
+    public void setEgressSourceFirewallRule(String addr, boolean allow) {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+        Preconditions.checkState(mFirewallEnabled);
+        final String rule = allow ? ALLOW : DENY;
+        try {
+            mConnector.execute("firewall", "set_egress_source_rule", addr, rule);
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+    }
+
+    @Override
+    public void setEgressDestFirewallRule(String addr, int port, boolean allow) {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+        Preconditions.checkState(mFirewallEnabled);
+        final String rule = allow ? ALLOW : DENY;
+        try {
+            mConnector.execute("firewall", "set_egress_dest_rule", addr, port, rule);
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+    }
+
+    @Override
+    public void setUidFirewallRule(int uid, boolean allow) {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+        Preconditions.checkState(mFirewallEnabled);
+        final String rule = allow ? ALLOW : DENY;
+        try {
+            mConnector.execute("firewall", "set_uid_rule", uid, rule);
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+    }
+
+    @Override
     public void monitor() {
         if (mConnector != null) {
             mConnector.monitor();
@@ -1456,5 +1529,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             }
             pw.println("]");
         }
+
+        pw.print("Firewall enabled: "); pw.println(mFirewallEnabled);
     }
 }
