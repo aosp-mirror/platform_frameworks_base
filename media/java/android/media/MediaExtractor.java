@@ -22,6 +22,7 @@ import android.content.res.AssetFileDescriptor;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
 import android.net.Uri;
+
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -58,6 +59,12 @@ final public class MediaExtractor {
     public MediaExtractor() {
         native_setup();
     }
+
+    /**
+     * Sets the DataSource object to be used as the data source for this extractor
+     * {@hide}
+     */
+    public native final void setDataSource(DataSource source);
 
     /**
      * Sets the data source as a content Uri.
