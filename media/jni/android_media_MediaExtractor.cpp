@@ -44,6 +44,72 @@ struct fields_t {
 
 static fields_t gFields;
 
+class JavaDataSourceBridge : public DataSource {
+    jmethodID mReadMethod;
+    jmethodID mGetSizeMethod;
+    jmethodID mCloseMethod;
+    jobject   mDataSource;
+ public:
+    JavaDataSourceBridge(JNIEnv *env, jobject source) {
+        mDataSource = env->NewGlobalRef(source);
+
+        jclass datasourceclass = env->GetObjectClass(mDataSource);
+        CHECK(datasourceclass != NULL);
+
+        mReadMethod = env->GetMethodID(datasourceclass, "readAt", "(J[BI)I");
+        CHECK(mReadMethod != NULL);
+
+        mGetSizeMethod = env->GetMethodID(datasourceclass, "getSize", "()J");
+        CHECK(mGetSizeMethod != NULL);
+
+        mCloseMethod = env->GetMethodID(datasourceclass, "close", "()V");
+        CHECK(mCloseMethod != NULL);
+    }
+
+    ~JavaDataSourceBridge() {
+        JNIEnv *env = AndroidRuntime::getJNIEnv();
+        env->CallVoidMethod(mDataSource, mCloseMethod);
+        env->DeleteGlobalRef(mDataSource);
+    }
+
+    virtual status_t initCheck() const {
+        return OK;
+    }
+
+    virtual ssize_t readAt(off64_t offset, void* buffer, size_t size) {
+        JNIEnv *env = AndroidRuntime::getJNIEnv();
+
+        // XXX could optimize this by reusing the same array
+        jbyteArray byteArrayObj = env->NewByteArray(size);
+        env->DeleteLocalRef(env->GetObjectClass(mDataSource));
+        env->DeleteLocalRef(env->GetObjectClass(byteArrayObj));
+        ssize_t numread = env->CallIntMethod(mDataSource, mReadMethod, offset, byteArrayObj, size);
+        env->GetByteArrayRegion(byteArrayObj, 0, size, (jbyte*) buffer);
+        env->DeleteLocalRef(byteArrayObj);
+        if (env->ExceptionCheck()) {
+            ALOGW("Exception occurred while reading %d at %lld", size, offset);
+            LOGW_EX(env);
+            env->ExceptionClear();
+            return -1;
+        }
+        return numread;
+    }
+
+    virtual status_t getSize(off64_t *size) {
+        JNIEnv *env = AndroidRuntime::getJNIEnv();
+
+        CHECK(size != NULL);
+
+        int64_t len = env->CallLongMethod(mDataSource, mGetSizeMethod);
+        if (len < 0) {
+            *size = ERROR_UNSUPPORTED;
+        } else {
+            *size = len;
+        }
+        return OK;
+    }
+};
+
 ////////////////////////////////////////////////////////////////////////////////
 
 JMediaExtractor::JMediaExtractor(JNIEnv *env, jobject thiz)
@@ -74,6 +140,10 @@ status_t JMediaExtractor::setDataSource(
 
 status_t JMediaExtractor::setDataSource(int fd, off64_t offset, off64_t size) {
     return mImpl->setDataSource(fd, offset, size);
+}
+
+status_t JMediaExtractor::setDataSource(const sp<DataSource> &datasource) {
+    return mImpl->setDataSource(datasource);
 }
 
 size_t JMediaExtractor::countTracks() const {
@@ -625,6 +695,33 @@ static void android_media_MediaExtractor_setDataSourceFd(
     }
 }
 
+static void android_media_MediaExtractor_setDataSourceCallback(
+        JNIEnv *env, jobject thiz,
+        jobject callbackObj) {
+    sp<JMediaExtractor> extractor = getMediaExtractor(env, thiz);
+
+    if (extractor == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return;
+    }
+
+    if (callbackObj == NULL) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        return;
+    }
+
+    sp<JavaDataSourceBridge> bridge = new JavaDataSourceBridge(env, callbackObj);
+    status_t err = extractor->setDataSource(bridge);
+
+    if (err != OK) {
+        jniThrowException(
+                env,
+                "java/io/IOException",
+                "Failed to instantiate extractor.");
+        return;
+    }
+}
+
 static jlong android_media_MediaExtractor_getCachedDurationUs(
         JNIEnv *env, jobject thiz) {
     sp<JMediaExtractor> extractor = getMediaExtractor(env, thiz);
@@ -712,6 +809,9 @@ static JNINativeMethod gMethods[] = {
 
     { "setDataSource", "(Ljava/io/FileDescriptor;JJ)V",
       (void *)android_media_MediaExtractor_setDataSourceFd },
+
+    { "setDataSource", "(Landroid/media/DataSource;)V",
+      (void *)android_media_MediaExtractor_setDataSourceCallback },
 
     { "getCachedDuration", "()J",
       (void *)android_media_MediaExtractor_getCachedDurationUs },
