@@ -1451,7 +1451,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
-    public void setInterfaceFirewallRule(String iface, boolean allow) {
+    public void setFirewallInterfaceRule(String iface, boolean allow) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         Preconditions.checkState(mFirewallEnabled);
         final String rule = allow ? ALLOW : DENY;
@@ -1463,7 +1463,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
-    public void setEgressSourceFirewallRule(String addr, boolean allow) {
+    public void setFirewallEgressSourceRule(String addr, boolean allow) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         Preconditions.checkState(mFirewallEnabled);
         final String rule = allow ? ALLOW : DENY;
@@ -1475,7 +1475,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
-    public void setEgressDestFirewallRule(String addr, int port, boolean allow) {
+    public void setFirewallEgressDestRule(String addr, int port, boolean allow) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         Preconditions.checkState(mFirewallEnabled);
         final String rule = allow ? ALLOW : DENY;
@@ -1487,7 +1487,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
-    public void setUidFirewallRule(int uid, boolean allow) {
+    public void setFirewallUidRule(int uid, boolean allow) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         Preconditions.checkState(mFirewallEnabled);
         final String rule = allow ? ALLOW : DENY;
