@@ -18,53 +18,73 @@ package com.android.providers.settings;
 
 import java.io.FileNotFoundException;
 import java.security.SecureRandom;
+import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import android.app.ActivityManagerNative;
 import android.app.backup.BackupManager;
+import android.content.BroadcastReceiver;
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.pm.UserInfo;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteQueryBuilder;
+import android.database.sqlite.SQLiteStatement;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.FileObserver;
 import android.os.ParcelFileDescriptor;
+import android.os.RemoteException;
 import android.os.SystemProperties;
+import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.DrmStore;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.LruCache;
+import android.util.Slog;
+import android.util.SparseArray;
 
 public class SettingsProvider extends ContentProvider {
     private static final String TAG = "SettingsProvider";
     private static final boolean LOCAL_LOGV = false;
 
+    private static final String TABLE_SYSTEM = "system";
+    private static final String TABLE_SECURE = "secure";
+    private static final String TABLE_GLOBAL = "global";
     private static final String TABLE_FAVORITES = "favorites";
     private static final String TABLE_OLD_FAVORITES = "old_favorites";
 
     private static final String[] COLUMN_VALUE = new String[] { "value" };
 
-    // Cache for settings, access-ordered for acting as LRU.
+    // Caches for each user's settings, access-ordered for acting as LRU.
     // Guarded by themselves.
     private static final int MAX_CACHE_ENTRIES = 200;
-    private static final SettingsCache sSystemCache = new SettingsCache("system");
-    private static final SettingsCache sSecureCache = new SettingsCache("secure");
+    private static final SparseArray<SettingsCache> sSystemCaches
+            = new SparseArray<SettingsCache>();
+    private static final SparseArray<SettingsCache> sSecureCaches
+            = new SparseArray<SettingsCache>();
+    private static final SettingsCache sGlobalCache = new SettingsCache(TABLE_GLOBAL);
 
     // The count of how many known (handled by SettingsProvider)
-    // database mutations are currently being handled.  Used by
-    // sFileObserver to not reload the database when it's ourselves
+    // database mutations are currently being handled for this user.
+    // Used by file observers to not reload the database when it's ourselves
     // modifying it.
-    private static final AtomicInteger sKnownMutationsInFlight = new AtomicInteger(0);
+    private static final SparseArray<AtomicInteger> sKnownMutationsInFlight
+            = new SparseArray<AtomicInteger>();
 
     // Over this size we don't reject loading or saving settings but
     // we do consider them broken/malicious and don't keep them in
@@ -77,8 +97,129 @@ public class SettingsProvider extends ContentProvider {
     // want to cache the existence of a key, but not store its value.
     private static final Bundle TOO_LARGE_TO_CACHE_MARKER = Bundle.forPair("_dummy", null);
 
-    protected DatabaseHelper mOpenHelper;
+    // Each defined user has their own settings
+    protected final SparseArray<DatabaseHelper> mOpenHelpers = new SparseArray<DatabaseHelper>();
+    //protected DatabaseHelper mOpenHelper;
+    private UserManager mUserManager;
     private BackupManager mBackupManager;
+
+    /**
+     * Settings which need to be treated as global/shared in multi-user environments.
+     */
+    static final HashSet<String> sSecureGlobalKeys;
+    static final HashSet<String> sSystemGlobalKeys;
+    static {
+        // Keys (name column) from the 'secure' table that are now in the owner user's 'global'
+        // table, shared across all users
+        // These must match Settings.Secure.MOVED_TO_GLOBAL
+        sSecureGlobalKeys = new HashSet<String>();
+        sSecureGlobalKeys.add(Settings.Secure.ASSISTED_GPS_ENABLED);
+        sSecureGlobalKeys.add(Settings.Secure.CDMA_CELL_BROADCAST_SMS);
+        sSecureGlobalKeys.add(Settings.Secure.CDMA_ROAMING_MODE);
+        sSecureGlobalKeys.add(Settings.Secure.CDMA_SUBSCRIPTION_MODE);
+        sSecureGlobalKeys.add(Settings.Secure.DATA_ACTIVITY_TIMEOUT_MOBILE);
+        sSecureGlobalKeys.add(Settings.Secure.DATA_ACTIVITY_TIMEOUT_WIFI);
+        sSecureGlobalKeys.add(Settings.Secure.DEVELOPMENT_SETTINGS_ENABLED);
+        sSecureGlobalKeys.add(Settings.Secure.DISPLAY_DENSITY_FORCED);
+        sSecureGlobalKeys.add(Settings.Secure.DISPLAY_SIZE_FORCED);
+        sSecureGlobalKeys.add(Settings.Secure.DOWNLOAD_MAX_BYTES_OVER_MOBILE);
+        sSecureGlobalKeys.add(Settings.Secure.DOWNLOAD_RECOMMENDED_MAX_BYTES_OVER_MOBILE);
+        sSecureGlobalKeys.add(Settings.Secure.MOBILE_DATA);
+        sSecureGlobalKeys.add(Settings.Secure.NETSTATS_DEV_BUCKET_DURATION);
+        sSecureGlobalKeys.add(Settings.Secure.NETSTATS_DEV_DELETE_AGE);
+        sSecureGlobalKeys.add(Settings.Secure.NETSTATS_DEV_PERSIST_BYTES);
+        sSecureGlobalKeys.add(Settings.Secure.NETSTATS_DEV_ROTATE_AGE);
+        sSecureGlobalKeys.add(Settings.Secure.NETSTATS_ENABLED);
+        sSecureGlobalKeys.add(Settings.Secure.NETSTATS_GLOBAL_ALERT_BYTES);
+        sSecureGlobalKeys.add(Settings.Secure.NETSTATS_POLL_INTERVAL);
+        sSecureGlobalKeys.add(Settings.Secure.NETSTATS_REPORT_XT_OVER_DEV);
+        sSecureGlobalKeys.add(Settings.Secure.NETSTATS_SAMPLE_ENABLED);
+        sSecureGlobalKeys.add(Settings.Secure.NETSTATS_TIME_CACHE_MAX_AGE);
+        sSecureGlobalKeys.add(Settings.Secure.NETSTATS_UID_BUCKET_DURATION);
+        sSecureGlobalKeys.add(Settings.Secure.NETSTATS_UID_DELETE_AGE);
+        sSecureGlobalKeys.add(Settings.Secure.NETSTATS_UID_PERSIST_BYTES);
+        sSecureGlobalKeys.add(Settings.Secure.NETSTATS_UID_ROTATE_AGE);
+        sSecureGlobalKeys.add(Settings.Secure.NETSTATS_UID_TAG_BUCKET_DURATION);
+        sSecureGlobalKeys.add(Settings.Secure.NETSTATS_UID_TAG_DELETE_AGE);
+        sSecureGlobalKeys.add(Settings.Secure.NETSTATS_UID_TAG_PERSIST_BYTES);
+        sSecureGlobalKeys.add(Settings.Secure.NETSTATS_UID_TAG_ROTATE_AGE);
+        sSecureGlobalKeys.add(Settings.Secure.NETWORK_PREFERENCE);
+        sSecureGlobalKeys.add(Settings.Secure.NITZ_UPDATE_DIFF);
+        sSecureGlobalKeys.add(Settings.Secure.NITZ_UPDATE_SPACING);
+        sSecureGlobalKeys.add(Settings.Secure.NTP_SERVER);
+        sSecureGlobalKeys.add(Settings.Secure.NTP_TIMEOUT);
+        sSecureGlobalKeys.add(Settings.Secure.PDP_WATCHDOG_ERROR_POLL_COUNT);
+        sSecureGlobalKeys.add(Settings.Secure.PDP_WATCHDOG_LONG_POLL_INTERVAL_MS);
+        sSecureGlobalKeys.add(Settings.Secure.PDP_WATCHDOG_MAX_PDP_RESET_FAIL_COUNT);
+        sSecureGlobalKeys.add(Settings.Secure.PDP_WATCHDOG_POLL_INTERVAL_MS);
+        sSecureGlobalKeys.add(Settings.Secure.PDP_WATCHDOG_TRIGGER_PACKET_COUNT);
+        sSecureGlobalKeys.add(Settings.Secure.SAMPLING_PROFILER_MS);
+        sSecureGlobalKeys.add(Settings.Secure.SETUP_PREPAID_DATA_SERVICE_URL);
+        sSecureGlobalKeys.add(Settings.Secure.SETUP_PREPAID_DETECTION_REDIR_HOST);
+        sSecureGlobalKeys.add(Settings.Secure.SETUP_PREPAID_DETECTION_TARGET_URL);
+        sSecureGlobalKeys.add(Settings.Secure.TETHER_DUN_APN);
+        sSecureGlobalKeys.add(Settings.Secure.TETHER_DUN_REQUIRED);
+        sSecureGlobalKeys.add(Settings.Secure.TETHER_SUPPORTED);
+        sSecureGlobalKeys.add(Settings.Secure.THROTTLE_HELP_URI);
+        sSecureGlobalKeys.add(Settings.Secure.THROTTLE_MAX_NTP_CACHE_AGE_SEC);
+        sSecureGlobalKeys.add(Settings.Secure.THROTTLE_NOTIFICATION_TYPE);
+        sSecureGlobalKeys.add(Settings.Secure.THROTTLE_POLLING_SEC);
+        sSecureGlobalKeys.add(Settings.Secure.THROTTLE_RESET_DAY);
+        sSecureGlobalKeys.add(Settings.Secure.THROTTLE_THRESHOLD_BYTES);
+        sSecureGlobalKeys.add(Settings.Secure.THROTTLE_VALUE_KBITSPS);
+        sSecureGlobalKeys.add(Settings.Secure.USE_GOOGLE_MAIL);
+        sSecureGlobalKeys.add(Settings.Secure.WEB_AUTOFILL_QUERY_URL);
+        sSecureGlobalKeys.add(Settings.Secure.WIFI_COUNTRY_CODE);
+        sSecureGlobalKeys.add(Settings.Secure.WIFI_FRAMEWORK_SCAN_INTERVAL_MS);
+        sSecureGlobalKeys.add(Settings.Secure.WIFI_FREQUENCY_BAND);
+        sSecureGlobalKeys.add(Settings.Secure.WIFI_IDLE_MS);
+        sSecureGlobalKeys.add(Settings.Secure.WIFI_MAX_DHCP_RETRY_COUNT);
+        sSecureGlobalKeys.add(Settings.Secure.WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS);
+        sSecureGlobalKeys.add(Settings.Secure.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON);
+        sSecureGlobalKeys.add(Settings.Secure.WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY);
+        sSecureGlobalKeys.add(Settings.Secure.WIFI_NUM_OPEN_NETWORKS_KEPT);
+        sSecureGlobalKeys.add(Settings.Secure.WIFI_ON);
+        sSecureGlobalKeys.add(Settings.Secure.WIFI_P2P_DEVICE_NAME);
+        sSecureGlobalKeys.add(Settings.Secure.WIFI_SAVED_STATE);
+        sSecureGlobalKeys.add(Settings.Secure.WIFI_SUPPLICANT_SCAN_INTERVAL_MS);
+        sSecureGlobalKeys.add(Settings.Secure.WIFI_SUSPEND_OPTIMIZATIONS_ENABLED);
+        sSecureGlobalKeys.add(Settings.Secure.WIFI_WATCHDOG_NUM_ARP_PINGS);
+        sSecureGlobalKeys.add(Settings.Secure.WIFI_WATCHDOG_ON);
+        sSecureGlobalKeys.add(Settings.Secure.WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED);
+        sSecureGlobalKeys.add(Settings.Secure.WIFI_WATCHDOG_RSSI_FETCH_INTERVAL_MS);
+        sSecureGlobalKeys.add(Settings.Secure.WIMAX_NETWORKS_AVAILABLE_NOTIFICATION_ON);
+        sSecureGlobalKeys.add(Settings.Secure.WTF_IS_FATAL);
+
+        // Keys from the 'system' table now moved to 'global'
+        // These must match Settings.System.MOVED_TO_GLOBAL
+        sSystemGlobalKeys = new HashSet<String>();
+        sSystemGlobalKeys.add(Settings.Secure.ADB_ENABLED);
+        sSystemGlobalKeys.add(Settings.Secure.BLUETOOTH_ON);
+        sSystemGlobalKeys.add(Settings.Secure.DATA_ROAMING);
+        sSystemGlobalKeys.add(Settings.Secure.DEVICE_PROVISIONED);
+        sSystemGlobalKeys.add(Settings.Secure.INSTALL_NON_MARKET_APPS);
+        sSystemGlobalKeys.add(Settings.Secure.USB_MASS_STORAGE_ENABLED);
+
+        sSystemGlobalKeys.add(Settings.System.AIRPLANE_MODE_ON);
+        sSystemGlobalKeys.add(Settings.System.AIRPLANE_MODE_RADIOS);
+        sSystemGlobalKeys.add(Settings.System.AIRPLANE_MODE_TOGGLEABLE_RADIOS);
+        sSystemGlobalKeys.add(Settings.System.AUTO_TIME);
+        sSystemGlobalKeys.add(Settings.System.AUTO_TIME_ZONE);
+        sSystemGlobalKeys.add(Settings.System.CAR_DOCK_SOUND);
+        sSystemGlobalKeys.add(Settings.System.CAR_UNDOCK_SOUND);
+        sSystemGlobalKeys.add(Settings.System.DESK_DOCK_SOUND);
+        sSystemGlobalKeys.add(Settings.System.DESK_UNDOCK_SOUND);
+        sSystemGlobalKeys.add(Settings.System.DOCK_SOUNDS_ENABLED);
+        sSystemGlobalKeys.add(Settings.System.LOCK_SOUND);
+        sSystemGlobalKeys.add(Settings.System.UNLOCK_SOUND);
+        sSystemGlobalKeys.add(Settings.System.LOW_BATTERY_SOUND);
+        sSystemGlobalKeys.add(Settings.System.POWER_SOUNDS_ENABLED);
+        sSystemGlobalKeys.add(Settings.System.WIFI_SLEEP_POLICY);
+    }
+
+    private boolean settingMovedToGlobal(final String name) {
+        return sSecureGlobalKeys.contains(name) || sSystemGlobalKeys.contains(name);
+    }
 
     /**
      * Decode a content URL into the table, projection, and arguments
@@ -107,7 +248,7 @@ public class SettingsProvider extends ContentProvider {
                 if (!DatabaseHelper.isValidTable(this.table)) {
                     throw new IllegalArgumentException("Bad root path: " + this.table);
                 }
-                if ("system".equals(this.table) || "secure".equals(this.table)) {
+                if (TABLE_SYSTEM.equals(this.table) || TABLE_SECURE.equals(this.table)) {
                     this.where = Settings.NameValueTable.NAME + "=?";
                     this.args = new String[] { url.getPathSegments().get(1) };
                 } else {
@@ -144,7 +285,9 @@ public class SettingsProvider extends ContentProvider {
             throw new IllegalArgumentException("Invalid URI: " + tableUri);
         }
         String table = tableUri.getPathSegments().get(0);
-        if ("system".equals(table) || "secure".equals(table)) {
+        if (TABLE_SYSTEM.equals(table) ||
+                TABLE_SECURE.equals(table) ||
+                TABLE_GLOBAL.equals(table)) {
             String name = values.getAsString(Settings.NameValueTable.NAME);
             return Uri.withAppendedPath(tableUri, name);
         } else {
@@ -159,18 +302,21 @@ public class SettingsProvider extends ContentProvider {
      * contract class uses these to provide client-side caches.)
      * @param uri to send notifications for
      */
-    private void sendNotify(Uri uri) {
+    private void sendNotify(Uri uri, int userHandle) {
         // Update the system property *first*, so if someone is listening for
         // a notification and then using the contract class to get their data,
         // the system property will be updated and they'll get the new data.
 
         boolean backedUpDataChanged = false;
         String property = null, table = uri.getPathSegments().get(0);
-        if (table.equals("system")) {
-            property = Settings.System.SYS_PROP_SETTING_VERSION;
+        if (table.equals(TABLE_SYSTEM)) {
+            property = Settings.System.SYS_PROP_SETTING_VERSION + '_' + userHandle;
             backedUpDataChanged = true;
-        } else if (table.equals("secure")) {
-            property = Settings.Secure.SYS_PROP_SETTING_VERSION;
+        } else if (table.equals(TABLE_SECURE)) {
+            property = Settings.Secure.SYS_PROP_SETTING_VERSION + '_' + userHandle;
+            backedUpDataChanged = true;
+        } else if (table.equals(TABLE_GLOBAL)) {
+            property = Settings.Global.SYS_PROP_SETTING_VERSION;    // this one is global
             backedUpDataChanged = true;
         }
 
@@ -201,7 +347,7 @@ public class SettingsProvider extends ContentProvider {
      * @throws SecurityException if the caller is forbidden to write.
      */
     private void checkWritePermissions(SqlArguments args) {
-        if ("secure".equals(args.table) &&
+        if ((TABLE_SECURE.equals(args.table) || TABLE_GLOBAL.equals(args.table)) &&
             getContext().checkCallingOrSelfPermission(
                     android.Manifest.permission.WRITE_SECURE_SETTINGS) !=
             PackageManager.PERMISSION_GRANTED) {
@@ -218,70 +364,147 @@ public class SettingsProvider extends ContentProvider {
     // normally the exclusive owner of the database.  But we keep this
     // enabled all the time to minimize development-vs-user
     // differences in testing.
-    private static SettingsFileObserver sObserverInstance;
+    private static SparseArray<SettingsFileObserver> sObserverInstances
+            = new SparseArray<SettingsFileObserver>();
     private class SettingsFileObserver extends FileObserver {
         private final AtomicBoolean mIsDirty = new AtomicBoolean(false);
+        private final int mUserHandle;
         private final String mPath;
 
-        public SettingsFileObserver(String path) {
+        public SettingsFileObserver(int userHandle, String path) {
             super(path, FileObserver.CLOSE_WRITE |
                   FileObserver.CREATE | FileObserver.DELETE |
                   FileObserver.MOVED_TO | FileObserver.MODIFY);
+            mUserHandle = userHandle;
             mPath = path;
         }
 
         public void onEvent(int event, String path) {
-            int modsInFlight = sKnownMutationsInFlight.get();
+            int modsInFlight = sKnownMutationsInFlight.get(mUserHandle).get();
             if (modsInFlight > 0) {
                 // our own modification.
                 return;
             }
-            Log.d(TAG, "external modification to " + mPath + "; event=" + event);
+            Log.d(TAG, "User " + mUserHandle + " external modification to " + mPath
+                    + "; event=" + event);
             if (!mIsDirty.compareAndSet(false, true)) {
                 // already handled. (we get a few update events
                 // during an sqlite write)
                 return;
             }
-            Log.d(TAG, "updating our caches for " + mPath);
-            fullyPopulateCaches();
+            Log.d(TAG, "User " + mUserHandle + " updating our caches for " + mPath);
+            fullyPopulateCaches(mUserHandle);
             mIsDirty.set(false);
         }
     }
 
     @Override
     public boolean onCreate() {
-        mOpenHelper = new DatabaseHelper(getContext());
         mBackupManager = new BackupManager(getContext());
+        mUserManager = (UserManager) getContext().getSystemService(Context.USER_SERVICE);
 
-        if (!ensureAndroidIdIsSet()) {
-            return false;
+        synchronized (this) {
+            establishDbTrackingLocked(UserHandle.USER_OWNER);
+
+            IntentFilter userFilter = new IntentFilter();
+            userFilter.addAction(Intent.ACTION_USER_REMOVED);
+            getContext().registerReceiver(new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if (intent.getAction().equals(Intent.ACTION_USER_REMOVED)) {
+                        final int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
+                                UserHandle.USER_OWNER);
+                        if (userHandle != UserHandle.USER_OWNER) {
+                            onUserRemoved(userHandle);
+                        }
+                    }
+                }
+            }, userFilter);
+
+            if (!ensureAndroidIdIsSet()) {
+                return false;
+            }
         }
-
-        // Watch for external modifications to the database file,
-        // keeping our cache in sync.
-        SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-        sObserverInstance = new SettingsFileObserver(db.getPath());
-        sObserverInstance.startWatching();
-        startAsyncCachePopulation();
         return true;
     }
 
-    private void startAsyncCachePopulation() {
-        new Thread("populate-settings-caches") {
-            public void run() {
-                fullyPopulateCaches();
+    void onUserRemoved(int userHandle) {
+        // the db file itself will be deleted automatically, but we need to tear down
+        // our caches and other internal bookkeeping.  Creation/deletion of a user's
+        // settings db infrastructure is synchronized on 'this'
+        synchronized (this) {
+            FileObserver observer = sObserverInstances.get(userHandle);
+            if (observer != null) {
+                observer.stopWatching();
+                sObserverInstances.delete(userHandle);
             }
-        }.start();
+
+            mOpenHelpers.delete(userHandle);
+            sSystemCaches.delete(userHandle);
+            sSecureCaches.delete(userHandle);
+            sKnownMutationsInFlight.delete(userHandle);
+
+            String property = Settings.System.SYS_PROP_SETTING_VERSION + '_' + userHandle;
+            SystemProperties.set(property, "");
+            property = Settings.Secure.SYS_PROP_SETTING_VERSION + '_' + userHandle;
+            SystemProperties.set(property, "");
+        }
     }
 
-    private void fullyPopulateCaches() {
-        fullyPopulateCache("secure", sSecureCache);
-        fullyPopulateCache("system", sSystemCache);
+    private void establishDbTrackingLocked(int userHandle) {
+        if (LOCAL_LOGV) {
+            Slog.i(TAG, "Installing settings db helper and caches for user " + userHandle);
+        }
+
+        DatabaseHelper dbhelper = new DatabaseHelper(getContext(), userHandle);
+        mOpenHelpers.append(userHandle, dbhelper);
+
+        // Watch for external modifications to the database files,
+        // keeping our caches in sync.
+        sSystemCaches.append(userHandle, new SettingsCache(TABLE_SYSTEM));
+        sSecureCaches.append(userHandle, new SettingsCache(TABLE_SECURE));
+        sKnownMutationsInFlight.append(userHandle, new AtomicInteger(0));
+        SQLiteDatabase db = dbhelper.getWritableDatabase();
+
+        // Now we can start observing it for changes
+        SettingsFileObserver observer = new SettingsFileObserver(userHandle, db.getPath());
+        sObserverInstances.append(userHandle, observer);
+        observer.startWatching();
+
+        startAsyncCachePopulation(userHandle);
+    }
+
+    class CachePrefetchThread extends Thread {
+        private int mUserHandle;
+
+        CachePrefetchThread(int userHandle) {
+            super("populate-settings-caches");
+            mUserHandle = userHandle;
+        }
+
+        @Override
+        public void run() {
+            fullyPopulateCaches(mUserHandle);
+        }
+    }
+
+    private void startAsyncCachePopulation(int userHandle) {
+        new CachePrefetchThread(userHandle).start();
+    }
+
+    private void fullyPopulateCaches(final int userHandle) {
+        DatabaseHelper dbHelper = mOpenHelpers.get(userHandle);
+        // Only populate the globals cache once, for the owning user
+        if (userHandle == UserHandle.USER_OWNER) {
+            fullyPopulateCache(dbHelper, TABLE_GLOBAL, sGlobalCache);
+        }
+        fullyPopulateCache(dbHelper, TABLE_SECURE, sSecureCaches.get(userHandle));
+        fullyPopulateCache(dbHelper, TABLE_SYSTEM, sSystemCaches.get(userHandle));
     }
 
     // Slurp all values (if sane in number & size) into cache.
-    private void fullyPopulateCache(String table, SettingsCache cache) {
-        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+    private void fullyPopulateCache(DatabaseHelper dbHelper, String table, SettingsCache cache) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
         Cursor c = db.query(
             table,
             new String[] { Settings.NameValueTable.NAME, Settings.NameValueTable.VALUE },
@@ -337,23 +560,154 @@ public class SettingsProvider extends ContentProvider {
         }
     }
 
+    // Lazy-initialize the settings caches for non-primary users
+    private SettingsCache getOrConstructCache(int callingUser, SparseArray<SettingsCache> which) {
+        synchronized (this) {
+            getOrEstablishDatabaseLocked(callingUser); // ignore return value; we don't need it
+            return which.get(callingUser);
+        }
+    }
+
+    // Lazy initialize the database helper and caches for this user, if necessary
+    private DatabaseHelper getOrEstablishDatabaseLocked(int callingUser) {
+        long oldId = Binder.clearCallingIdentity();
+        try {
+            DatabaseHelper dbHelper = mOpenHelpers.get(callingUser);
+            if (null == dbHelper) {
+                establishDbTrackingLocked(callingUser);
+                dbHelper = mOpenHelpers.get(callingUser);
+            }
+            return dbHelper;
+        } finally {
+            Binder.restoreCallingIdentity(oldId);
+        }
+    }
+
+    public SettingsCache cacheForTable(final int callingUser, String tableName) {
+        if (TABLE_SYSTEM.equals(tableName)) {
+            return getOrConstructCache(callingUser, sSystemCaches);
+        }
+        if (TABLE_SECURE.equals(tableName)) {
+            return getOrConstructCache(callingUser, sSecureCaches);
+        }
+        if (TABLE_GLOBAL.equals(tableName)) {
+            return sGlobalCache;
+        }
+        return null;
+    }
+
+    /**
+     * Used for wiping a whole cache on deletes when we're not
+     * sure what exactly was deleted or changed.
+     */
+    public void invalidateCache(final int callingUser, String tableName) {
+        SettingsCache cache = cacheForTable(callingUser, tableName);
+        if (cache == null) {
+            return;
+        }
+        synchronized (cache) {
+            cache.evictAll();
+            cache.mCacheFullyMatchesDisk = false;
+        }
+    }
+
     /**
      * Fast path that avoids the use of chatty remoted Cursors.
      */
     @Override
     public Bundle call(String method, String request, Bundle args) {
+        int callingUser = UserHandle.getCallingUserId();
+        if (args != null) {
+            int reqUser = args.getInt(Settings.CALL_METHOD_USER_KEY, callingUser);
+            if (reqUser != callingUser) {
+                getContext().enforceCallingPermission(
+                        android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                        "Not permitted to access settings for other users");
+                if (reqUser == UserHandle.USER_CURRENT) {
+                    try {
+                        reqUser = ActivityManagerNative.getDefault().getCurrentUser().id;
+                    } catch (RemoteException e) {
+                        // can't happen
+                    }
+                    if (LOCAL_LOGV) {
+                        Slog.v(TAG, "   USER_CURRENT resolved to " + reqUser);
+                    }
+                }
+                if (reqUser < 0) {
+                    throw new IllegalArgumentException("Bad user handle " + reqUser);
+                }
+                callingUser = reqUser;
+                if (LOCAL_LOGV) Slog.v(TAG, "   fetching setting for user " + callingUser);
+            }
+        }
+
+        // Note: we assume that get/put operations for moved-to-global names have already
+        // been directed to the new location on the caller side (otherwise we'd fix them
+        // up here).
+
+        DatabaseHelper dbHelper;
+        SettingsCache cache;
+
+        // Get methods
         if (Settings.CALL_METHOD_GET_SYSTEM.equals(method)) {
-            return lookupValue("system", sSystemCache, request);
+            if (LOCAL_LOGV) Slog.v(TAG, "call(system:" + request + ") for " + callingUser);
+            synchronized (this) {
+                dbHelper = getOrEstablishDatabaseLocked(callingUser);
+                cache = sSystemCaches.get(callingUser);
+            }
+            return lookupValue(dbHelper, TABLE_SYSTEM, cache, request);
         }
         if (Settings.CALL_METHOD_GET_SECURE.equals(method)) {
-            return lookupValue("secure", sSecureCache, request);
+            if (LOCAL_LOGV) Slog.v(TAG, "call(secure:" + request + ") for " + callingUser);
+            synchronized (this) {
+                dbHelper = getOrEstablishDatabaseLocked(callingUser);
+                cache = sSecureCaches.get(callingUser);
+            }
+            return lookupValue(dbHelper, TABLE_SECURE, cache, request);
         }
+        if (Settings.CALL_METHOD_GET_GLOBAL.equals(method)) {
+            if (LOCAL_LOGV) Slog.v(TAG, "call(global:" + request + ") for " + callingUser);
+            // fast path: owner db & cache are immutable after onCreate() so we need not
+            // guard on the attempt to look them up
+            return lookupValue(getOrEstablishDatabaseLocked(UserHandle.USER_OWNER), TABLE_GLOBAL,
+                    sGlobalCache, request);
+        }
+
+        // Put methods - new value is in the args bundle under the key named by
+        // the Settings.NameValueTable.VALUE static.
+        final String newValue = (args == null)
+                ? null : args.getString(Settings.NameValueTable.VALUE);
+        if (newValue == null) {
+            throw new IllegalArgumentException("Bad value for " + method);
+        }
+
+        final ContentValues values = new ContentValues();
+        values.put(Settings.NameValueTable.NAME, request);
+        values.put(Settings.NameValueTable.VALUE, newValue);
+        if (Settings.CALL_METHOD_PUT_SYSTEM.equals(method)) {
+            if (LOCAL_LOGV) Slog.v(TAG, "call_put(system:" + request + "=" + newValue + ") for " + callingUser);
+            insert(Settings.System.CONTENT_URI, values);
+        } else if (Settings.CALL_METHOD_PUT_SECURE.equals(method)) {
+            if (LOCAL_LOGV) Slog.v(TAG, "call_put(secure:" + request + "=" + newValue + ") for " + callingUser);
+            insert(Settings.Secure.CONTENT_URI, values);
+        } else if (Settings.CALL_METHOD_PUT_GLOBAL.equals(method)) {
+            if (LOCAL_LOGV) Slog.v(TAG, "call_put(global:" + request + "=" + newValue + ") for " + callingUser);
+            insert(Settings.Global.CONTENT_URI, values);
+        } else {
+            Slog.w(TAG, "call() with invalid method: " + method);
+        }
+
         return null;
     }
 
     // Looks up value 'key' in 'table' and returns either a single-pair Bundle,
     // possibly with a null value, or null on failure.
-    private Bundle lookupValue(String table, SettingsCache cache, String key) {
+    private Bundle lookupValue(DatabaseHelper dbHelper, String table,
+            final SettingsCache cache, String key) {
+        if (cache == null) {
+           Slog.e(TAG, "cache is null for user " + UserHandle.getCallingUserId() + " : key=" + key);
+           return null;
+        }
         synchronized (cache) {
             Bundle value = cache.get(key);
             if (value != null) {
@@ -372,7 +726,7 @@ public class SettingsProvider extends ContentProvider {
             }
         }
 
-        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
         Cursor cursor = null;
         try {
             cursor = db.query(table, COLUMN_VALUE, "name=?", new String[]{key},
@@ -393,8 +747,14 @@ public class SettingsProvider extends ContentProvider {
 
     @Override
     public Cursor query(Uri url, String[] select, String where, String[] whereArgs, String sort) {
+        final int callingUser = UserHandle.getCallingUserId();
+        if (LOCAL_LOGV) Slog.v(TAG, "query() for user " + callingUser);
         SqlArguments args = new SqlArguments(url, where, whereArgs);
-        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+        DatabaseHelper dbH;
+        synchronized (this) {
+            dbH = getOrEstablishDatabaseLocked(callingUser);
+        }
+        SQLiteDatabase db = dbH.getReadableDatabase();
 
         // The favorites table was moved from this provider to a provider inside Home
         // Home still need to query this table to upgrade from pre-cupcake builds
@@ -437,15 +797,22 @@ public class SettingsProvider extends ContentProvider {
 
     @Override
     public int bulkInsert(Uri uri, ContentValues[] values) {
+        final int callingUser = UserHandle.getCallingUserId();
+        if (LOCAL_LOGV) Slog.v(TAG, "bulkInsert() for user " + callingUser);
         SqlArguments args = new SqlArguments(uri);
         if (TABLE_FAVORITES.equals(args.table)) {
             return 0;
         }
         checkWritePermissions(args);
-        SettingsCache cache = SettingsCache.forTable(args.table);
+        SettingsCache cache = cacheForTable(callingUser, args.table);
 
-        sKnownMutationsInFlight.incrementAndGet();
-        SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        final AtomicInteger mutationCount = sKnownMutationsInFlight.get(callingUser);
+        mutationCount.incrementAndGet();
+        DatabaseHelper dbH;
+        synchronized (this) {
+            dbH = getOrEstablishDatabaseLocked(callingUser);
+        }
+        SQLiteDatabase db = dbH.getWritableDatabase();
         db.beginTransaction();
         try {
             int numValues = values.length;
@@ -457,10 +824,10 @@ public class SettingsProvider extends ContentProvider {
             db.setTransactionSuccessful();
         } finally {
             db.endTransaction();
-            sKnownMutationsInFlight.decrementAndGet();
+            mutationCount.decrementAndGet();
         }
 
-        sendNotify(uri);
+        sendNotify(uri, callingUser);
         return values.length;
     }
 
@@ -538,6 +905,22 @@ public class SettingsProvider extends ContentProvider {
 
     @Override
     public Uri insert(Uri url, ContentValues initialValues) {
+        return insertForUser(url, initialValues, UserHandle.getCallingUserId());
+    }
+
+    // Settings.put*ForUser() always winds up here, so this is where we apply
+    // policy around permission to write settings for other users.
+    private Uri insertForUser(Uri url, ContentValues initialValues, int desiredUserHandle) {
+        final int callingUser = UserHandle.getCallingUserId();
+        if (callingUser != desiredUserHandle) {
+            getContext().enforceCallingPermission(
+                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                    "Not permitted to access settings for other users");
+        }
+
+        if (LOCAL_LOGV) Slog.v(TAG, "insert(" + url + ") for user " + desiredUserHandle
+                + " by " + callingUser);
+
         SqlArguments args = new SqlArguments(url);
         if (TABLE_FAVORITES.equals(args.table)) {
             return null;
@@ -551,28 +934,41 @@ public class SettingsProvider extends ContentProvider {
             if (!parseProviderList(url, initialValues)) return null;
         }
 
-        SettingsCache cache = SettingsCache.forTable(args.table);
+        // The global table is stored under the owner, always
+        if (TABLE_GLOBAL.equals(args.table)) {
+            desiredUserHandle = UserHandle.USER_OWNER;
+        }
+
+        SettingsCache cache = cacheForTable(desiredUserHandle, args.table);
         String value = initialValues.getAsString(Settings.NameValueTable.VALUE);
         if (SettingsCache.isRedundantSetValue(cache, name, value)) {
             return Uri.withAppendedPath(url, name);
         }
 
-        sKnownMutationsInFlight.incrementAndGet();
-        SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        final AtomicInteger mutationCount = sKnownMutationsInFlight.get(desiredUserHandle);
+        mutationCount.incrementAndGet();
+        DatabaseHelper dbH;
+        synchronized (this) {
+            dbH = getOrEstablishDatabaseLocked(callingUser);
+        }
+        SQLiteDatabase db = dbH.getWritableDatabase();
         final long rowId = db.insert(args.table, null, initialValues);
-        sKnownMutationsInFlight.decrementAndGet();
+        mutationCount.decrementAndGet();
         if (rowId <= 0) return null;
 
         SettingsCache.populate(cache, initialValues);  // before we notify
 
         if (LOCAL_LOGV) Log.v(TAG, args.table + " <- " + initialValues);
+        // Note that we use the original url here, not the potentially-rewritten table name
         url = getUriFor(url, initialValues, rowId);
-        sendNotify(url);
+        sendNotify(url, desiredUserHandle);
         return url;
     }
 
     @Override
     public int delete(Uri url, String where, String[] whereArgs) {
+        final int callingUser = UserHandle.getCallingUserId();
+        if (LOCAL_LOGV) Slog.v(TAG, "delete() for user " + callingUser);
         SqlArguments args = new SqlArguments(url, where, whereArgs);
         if (TABLE_FAVORITES.equals(args.table)) {
             return 0;
@@ -581,36 +977,53 @@ public class SettingsProvider extends ContentProvider {
         }
         checkWritePermissions(args);
 
-        sKnownMutationsInFlight.incrementAndGet();
-        SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-        int count = db.delete(args.table, args.where, args.args);
-        sKnownMutationsInFlight.decrementAndGet();
-        if (count > 0) {
-            SettingsCache.invalidate(args.table);  // before we notify
-            sendNotify(url);
+        final AtomicInteger mutationCount = sKnownMutationsInFlight.get(callingUser);
+        mutationCount.incrementAndGet();
+        DatabaseHelper dbH;
+        synchronized (this) {
+            dbH = getOrEstablishDatabaseLocked(callingUser);
         }
-        startAsyncCachePopulation();
+        SQLiteDatabase db = dbH.getWritableDatabase();
+        int count = db.delete(args.table, args.where, args.args);
+        mutationCount.decrementAndGet();
+        if (count > 0) {
+            invalidateCache(callingUser, args.table);  // before we notify
+            sendNotify(url, callingUser);
+        }
+        startAsyncCachePopulation(callingUser);
         if (LOCAL_LOGV) Log.v(TAG, args.table + ": " + count + " row(s) deleted");
         return count;
     }
 
     @Override
     public int update(Uri url, ContentValues initialValues, String where, String[] whereArgs) {
+        // NOTE: update() is never called by the front-end Settings API, and updates that
+        // wind up affecting rows in Secure that are globally shared will not have the
+        // intended effect (the update will be invisible to the rest of the system).
+        // This should have no practical effect, since writes to the Secure db can only
+        // be done by system code, and that code should be using the correct API up front.
+        final int callingUser = UserHandle.getCallingUserId();
+        if (LOCAL_LOGV) Slog.v(TAG, "update() for user " + callingUser);
         SqlArguments args = new SqlArguments(url, where, whereArgs);
         if (TABLE_FAVORITES.equals(args.table)) {
             return 0;
         }
         checkWritePermissions(args);
 
-        sKnownMutationsInFlight.incrementAndGet();
-        SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-        int count = db.update(args.table, initialValues, args.where, args.args);
-        sKnownMutationsInFlight.decrementAndGet();
-        if (count > 0) {
-            SettingsCache.invalidate(args.table);  // before we notify
-            sendNotify(url);
+        final AtomicInteger mutationCount = sKnownMutationsInFlight.get(callingUser);
+        mutationCount.incrementAndGet();
+        DatabaseHelper dbH;
+        synchronized (this) {
+            dbH = getOrEstablishDatabaseLocked(callingUser);
         }
-        startAsyncCachePopulation();
+        SQLiteDatabase db = dbH.getWritableDatabase();
+        int count = db.update(args.table, initialValues, args.where, args.args);
+        mutationCount.decrementAndGet();
+        if (count > 0) {
+            invalidateCache(callingUser, args.table);  // before we notify
+            sendNotify(url, callingUser);
+        }
+        startAsyncCachePopulation(callingUser);
         if (LOCAL_LOGV) Log.v(TAG, args.table + ": " + count + " row(s) <- " + initialValues);
         return count;
     }
@@ -772,16 +1185,6 @@ public class SettingsProvider extends ContentProvider {
             return bundle;
         }
 
-        public static SettingsCache forTable(String tableName) {
-            if ("system".equals(tableName)) {
-                return SettingsProvider.sSystemCache;
-            }
-            if ("secure".equals(tableName)) {
-                return SettingsProvider.sSecureCache;
-            }
-            return null;
-        }
-
         /**
          * Populates a key in a given (possibly-null) cache.
          */
@@ -805,21 +1208,6 @@ public class SettingsProvider extends ContentProvider {
                 } else {
                     put(name, TOO_LARGE_TO_CACHE_MARKER);
                 }
-            }
-        }
-
-        /**
-         * Used for wiping a whole cache on deletes when we're not
-         * sure what exactly was deleted or changed.
-         */
-        public static void invalidate(String tableName) {
-            SettingsCache cache = SettingsCache.forTable(tableName);
-            if (cache == null) {
-                return;
-            }
-            synchronized (cache) {
-                cache.evictAll();
-                cache.mCacheFullyMatchesDisk = false;
             }
         }
 
