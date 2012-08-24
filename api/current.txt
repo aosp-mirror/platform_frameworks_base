@@ -10215,6 +10215,7 @@ package android.inputmethodservice {
     method public final android.os.IBinder onBind(android.content.Intent);
     method public abstract android.inputmethodservice.AbstractInputMethodService.AbstractInputMethodImpl onCreateInputMethodInterface();
     method public abstract android.inputmethodservice.AbstractInputMethodService.AbstractInputMethodSessionImpl onCreateInputMethodSessionInterface();
+    method public boolean onGenericMotionEvent(android.view.MotionEvent);
     method public boolean onTrackballEvent(android.view.MotionEvent);
   }
 
@@ -10227,6 +10228,7 @@ package android.inputmethodservice {
 
   public abstract class AbstractInputMethodService.AbstractInputMethodSessionImpl implements android.view.inputmethod.InputMethodSession {
     ctor public AbstractInputMethodService.AbstractInputMethodSessionImpl();
+    method public void dispatchGenericMotionEvent(int, android.view.MotionEvent, android.view.inputmethod.InputMethodSession.EventCallback);
     method public void dispatchKeyEvent(int, android.view.KeyEvent, android.view.inputmethod.InputMethodSession.EventCallback);
     method public void dispatchTrackballEvent(int, android.view.MotionEvent, android.view.inputmethod.InputMethodSession.EventCallback);
     method public boolean isEnabled();
@@ -26692,6 +26694,7 @@ package android.view.inputmethod {
 
   public abstract interface InputMethodSession {
     method public abstract void appPrivateCommand(java.lang.String, android.os.Bundle);
+    method public abstract void dispatchGenericMotionEvent(int, android.view.MotionEvent, android.view.inputmethod.InputMethodSession.EventCallback);
     method public abstract void dispatchKeyEvent(int, android.view.KeyEvent, android.view.inputmethod.InputMethodSession.EventCallback);
     method public abstract void dispatchTrackballEvent(int, android.view.MotionEvent, android.view.inputmethod.InputMethodSession.EventCallback);
     method public abstract void displayCompletions(android.view.inputmethod.CompletionInfo[]);
