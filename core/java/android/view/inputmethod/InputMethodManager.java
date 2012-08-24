@@ -1577,8 +1577,8 @@ public final class InputMethodManager {
                     try {
                         if (DEBUG) Log.v(TAG, "DISPATCH KEY: " + mCurMethod);
                         final long startTime = SystemClock.uptimeMillis();
-                        mCurMethod.dispatchKeyEvent(seq, key, mInputMethodCallback);
                         enqueuePendingEventLocked(startTime, seq, mCurId, callback);
+                        mCurMethod.dispatchKeyEvent(seq, key, mInputMethodCallback);
                         return;
                     } catch (RemoteException e) {
                         Log.w(TAG, "IME died: " + mCurId + " dropping: " + key, e);
@@ -1602,8 +1602,8 @@ public final class InputMethodManager {
                 try {
                     if (DEBUG) Log.v(TAG, "DISPATCH TRACKBALL: " + mCurMethod);
                     final long startTime = SystemClock.uptimeMillis();
-                    mCurMethod.dispatchTrackballEvent(seq, motion, mInputMethodCallback);
                     enqueuePendingEventLocked(startTime, seq, mCurId, callback);
+                    mCurMethod.dispatchTrackballEvent(seq, motion, mInputMethodCallback);
                     return;
                 } catch (RemoteException e) {
                     Log.w(TAG, "IME died: " + mCurId + " dropping trackball: " + motion, e);
