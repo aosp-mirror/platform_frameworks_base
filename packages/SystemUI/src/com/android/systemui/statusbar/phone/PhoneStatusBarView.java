@@ -43,6 +43,9 @@ public class PhoneStatusBarView extends PanelBar {
     private static final String TAG = "PhoneStatusBarView";
     PhoneStatusBar mBar;
     int mScrimColor;
+    float mMinFlingGutter;
+    float mNotificationWidth;
+    boolean mFullWidthNotifications;
     PanelView mFadingPanel = null;
     PanelView mNotificationPanel, mSettingsPanel;
 
@@ -58,6 +61,13 @@ public class PhoneStatusBarView extends PanelBar {
     public void onAttachedToWindow() {
         Resources res = getContext().getResources();
         mScrimColor = res.getColor(R.color.notification_panel_scrim_color);
+        mMinFlingGutter = res.getDimension(R.dimen.settings_panel_fling_gutter);
+        mFullWidthNotifications = false;
+        try {
+            mNotificationWidth = res.getDimension(R.dimen.notification_panel_width);
+        } catch (Resources.NotFoundException ex) {
+            mFullWidthNotifications = true;
+        }
     }
 
     @Override
@@ -96,9 +106,12 @@ public class PhoneStatusBarView extends PanelBar {
         // right 1/3 for quick settings. If you pull the status bar down a second time you'll
         // toggle panels no matter where you pull it down.
         final float w = (float) getMeasuredWidth();
+        final float gutter = w - mNotificationWidth;
+        final boolean useGutter = !mFullWidthNotifications && gutter > mMinFlingGutter;
+        final float threshold = 1.0f - (gutter / w);
         final float f = x / w;
-        if (f > 0.67f && mSettingsPanel.getExpandedFraction() != 1.0f
-                || mNotificationPanel.getExpandedFraction() == 1.0f) {
+        if ((useGutter && f > threshold && mSettingsPanel.getExpandedFraction() != 1.0f) ||
+            mNotificationPanel.getExpandedFraction() == 1.0f) {
             return mSettingsPanel;
         }
         return mNotificationPanel;
