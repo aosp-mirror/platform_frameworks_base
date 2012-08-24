@@ -32,6 +32,7 @@ import android.content.pm.IPackageStatsObserver;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.ManifestDigest;
+import android.content.pm.PackageCleanItem;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ProviderInfo;
 import android.content.pm.PermissionGroupInfo;
@@ -351,7 +352,7 @@ interface IPackageManager {
      */
     void updateExternalMediaStatus(boolean mounted, boolean reportStatus);
 
-    String nextPackageToClean(String lastPackage);
+    PackageCleanItem nextPackageToClean(in PackageCleanItem lastPackage);
 
     void movePackage(String packageName, IPackageMoveObserver observer, int flags);
     
@@ -368,6 +369,8 @@ interface IPackageManager {
             in IPackageInstallObserver observer, int flags, in String installerPackageName,
             in VerificationParams verificationParams,
             in ContainerEncryptionParams encryptionParams);
+
+    int installExistingPackage(String packageName);
 
     void verifyPendingInstall(int id, int verificationCode);
     void extendVerificationTimeout(int id, int verificationCodeAtTimeout, long millisecondsToDelay);

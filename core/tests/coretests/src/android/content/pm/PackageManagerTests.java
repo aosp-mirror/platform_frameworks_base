@@ -864,7 +864,7 @@ public class PackageManagerTests extends AndroidTestCase {
 
     public void deleteFromRawResource(int iFlags, int dFlags) {
         InstallParams ip = sampleInstallFromRawResource(iFlags, false);
-        boolean retainData = ((dFlags & PackageManager.DONT_DELETE_DATA) != 0);
+        boolean retainData = ((dFlags & PackageManager.DELETE_KEEP_DATA) != 0);
         GenericReceiver receiver = new DeleteReceiver(ip.pkg.packageName);
         DeleteObserver observer = new DeleteObserver();
         try {
@@ -914,12 +914,12 @@ public class PackageManagerTests extends AndroidTestCase {
 
     @LargeTest
     public void testDeleteNormalInternalRetainData() {
-        deleteFromRawResource(0, PackageManager.DONT_DELETE_DATA);
+        deleteFromRawResource(0, PackageManager.DELETE_KEEP_DATA);
     }
 
     @LargeTest
     public void testDeleteFwdLockedInternalRetainData() {
-        deleteFromRawResource(PackageManager.INSTALL_FORWARD_LOCK, PackageManager.DONT_DELETE_DATA);
+        deleteFromRawResource(PackageManager.INSTALL_FORWARD_LOCK, PackageManager.DELETE_KEEP_DATA);
     }
 
     @LargeTest
@@ -929,7 +929,7 @@ public class PackageManagerTests extends AndroidTestCase {
             return;
         }
 
-        deleteFromRawResource(PackageManager.INSTALL_EXTERNAL, PackageManager.DONT_DELETE_DATA);
+        deleteFromRawResource(PackageManager.INSTALL_EXTERNAL, PackageManager.DELETE_KEEP_DATA);
     }
 
     /* sdcard mount/unmount tests ******/
@@ -1656,7 +1656,7 @@ public class PackageManagerTests extends AndroidTestCase {
                     false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
             // Delete the package now retaining data.
             GenericReceiver receiver = new DeleteReceiver(ip.pkg.packageName);
-            invokeDeletePackage(ip.pkg.packageName, PackageManager.DONT_DELETE_DATA, receiver);
+            invokeDeletePackage(ip.pkg.packageName, PackageManager.DELETE_KEEP_DATA, receiver);
             assertTrue(invokeMovePackageFail(ip.pkg.packageName, moveFlags, result));
         } catch (Exception e) {
             failStr(e);
@@ -2532,7 +2532,7 @@ public class PackageManagerTests extends AndroidTestCase {
             GenericReceiver receiver = new DeleteReceiver(ip.pkg.packageName);
 
             try {
-                invokeDeletePackage(ip.pkg.packageName, PackageManager.DONT_DELETE_DATA, receiver);
+                invokeDeletePackage(ip.pkg.packageName, PackageManager.DELETE_KEEP_DATA, receiver);
             } catch (Exception e) {
                 failStr(e);
             }

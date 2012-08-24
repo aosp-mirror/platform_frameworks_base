@@ -262,7 +262,9 @@ public class UserManagerService extends IUserManager.Stub {
      * @return the array of user ids.
      */
     int[] getUserIds() {
-        return mUserIds;
+        synchronized (mUsers) {
+            return mUserIds;
+        }
     }
 
     private void readUserList() {
@@ -611,12 +613,11 @@ public class UserManagerService extends IUserManager.Stub {
      * Caches the list of user ids in an array, adjusting the array size when necessary.
      */
     private void updateUserIdsLocked() {
-        if (mUserIds == null || mUserIds.length != mUsers.size()) {
-            mUserIds = new int[mUsers.size()];
-        }
+        int[] newUsers = new int[mUsers.size()];
         for (int i = 0; i < mUsers.size(); i++) {
-            mUserIds[i] = mUsers.keyAt(i);
+            newUsers[i] = mUsers.keyAt(i);
         }
+        mUserIds = newUsers;
     }
 
     /**

@@ -210,7 +210,7 @@ public class ActiveServices {
 
     ComponentName startServiceLocked(IApplicationThread caller,
             Intent service, String resolvedType,
-            int callingPid, int callingUid) {
+            int callingPid, int callingUid, int userId) {
         if (DEBUG_SERVICE) Slog.v(TAG, "startService: " + service
                 + " type=" + resolvedType + " args=" + service.getExtras());
 
@@ -226,7 +226,7 @@ public class ActiveServices {
 
         ServiceLookupResult res =
             retrieveServiceLocked(service, resolvedType,
-                    callingPid, callingUid, UserHandle.getUserId(callingUid), true);
+                    callingPid, callingUid, userId, true);
         if (res == null) {
             return null;
         }
@@ -264,7 +264,7 @@ public class ActiveServices {
     }
 
     int stopServiceLocked(IApplicationThread caller, Intent service,
-            String resolvedType) {
+            String resolvedType, int userId) {
         if (DEBUG_SERVICE) Slog.v(TAG, "stopService: " + service
                 + " type=" + resolvedType);
 
@@ -278,9 +278,7 @@ public class ActiveServices {
 
         // If this service is active, make sure it is stopped.
         ServiceLookupResult r = retrieveServiceLocked(service, resolvedType,
-                Binder.getCallingPid(), Binder.getCallingUid(),
-                callerApp == null ? UserHandle.getCallingUserId() : callerApp.userId,
-                false);
+                Binder.getCallingPid(), Binder.getCallingUid(), userId, false);
         if (r != null) {
             if (r.record != null) {
                 final long origId = Binder.clearCallingIdentity();
