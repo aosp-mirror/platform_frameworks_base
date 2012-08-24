@@ -8362,7 +8362,7 @@ public final class ContactsContract {
                 // Line contains the query string - now search for it at the start of tokens.
                 List<String> lineTokens = new ArrayList<String>();
                 List<Integer> tokenOffsets = new ArrayList<Integer>();
-                split(contentLine.trim(), lineTokens, tokenOffsets);
+                split(contentLine, lineTokens, tokenOffsets);
 
                 // As we find matches against the query, we'll populate this list with the marked
                 // (or unchanged) tokens.
