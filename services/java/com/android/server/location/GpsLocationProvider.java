@@ -35,6 +35,7 @@ import android.location.LocationProvider;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -164,6 +165,8 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private static final int UPDATE_LOCATION = 7;
     private static final int ADD_LISTENER = 8;
     private static final int REMOVE_LISTENER = 9;
+    private static final int INJECT_NTP_TIME_FINISHED = 10;
+    private static final int DOWNLOAD_XTRA_DATA_FINISHED = 11;
 
     // Request setid
     private static final int AGPS_RIL_REQUEST_SETID_IMSI = 1;
@@ -229,10 +232,15 @@ public class GpsLocationProvider implements LocationProviderInterface {
     // true if we have network connectivity
     private boolean mNetworkAvailable;
 
+    // states for injecting ntp and downloading xtra data
+    private static final int STATE_PENDING_NETWORK = 0;
+    private static final int STATE_DOWNLOADING = 1;
+    private static final int STATE_IDLE = 2;
+
     // flags to trigger NTP or XTRA data download when network becomes available
     // initialized to true so we do NTP and XTRA when the network comes up after booting
-    private boolean mInjectNtpTimePending = true;
-    private boolean mDownloadXtraDataPending = true;
+    private int mInjectNtpTimePending = STATE_PENDING_NETWORK;
+    private int mDownloadXtraDataPending = STATE_PENDING_NETWORK;
 
     // set to true if the GPS engine does not do on-demand NTP time requests
     private boolean mPeriodicTimeInjection;
@@ -569,81 +577,105 @@ public class GpsLocationProvider implements LocationProviderInterface {
         }
 
         if (mNetworkAvailable) {
-            if (mInjectNtpTimePending) {
+            if (mInjectNtpTimePending == STATE_PENDING_NETWORK) {
                 sendMessage(INJECT_NTP_TIME, 0, null);
             }
-            if (mDownloadXtraDataPending) {
+            if (mDownloadXtraDataPending == STATE_PENDING_NETWORK) {
                 sendMessage(DOWNLOAD_XTRA_DATA, 0, null);
             }
         }
     }
 
     private void handleInjectNtpTime() {
-        if (!mNetworkAvailable) {
-            // try again when network is up
-            mInjectNtpTimePending = true;
+        if (mInjectNtpTimePending == STATE_DOWNLOADING) {
+            // already downloading data
             return;
         }
-        mInjectNtpTimePending = false;
-
-        long delay;
-
-        // force refresh NTP cache when outdated
-        if (mNtpTime.getCacheAge() >= NTP_INTERVAL) {
-            mNtpTime.forceRefresh();
+        if (!mNetworkAvailable) {
+            // try again when network is up
+            mInjectNtpTimePending = STATE_PENDING_NETWORK;
+            return;
         }
+        mInjectNtpTimePending = STATE_DOWNLOADING;
 
-        // only update when NTP time is fresh
-        if (mNtpTime.getCacheAge() < NTP_INTERVAL) {
-            long time = mNtpTime.getCachedNtpTime();
-            long timeReference = mNtpTime.getCachedNtpTimeReference();
-            long certainty = mNtpTime.getCacheCertainty();
-            long now = System.currentTimeMillis();
+        AsyncTask.THREAD_POOL_EXECUTOR.execute(new Runnable() {
+            @Override
+            public void run() {
+                long delay;
 
-            Log.d(TAG, "NTP server returned: "
-                    + time + " (" + new Date(time)
-                    + ") reference: " + timeReference
-                    + " certainty: " + certainty
-                    + " system time offset: " + (time - now));
+                // force refresh NTP cache when outdated
+                if (mNtpTime.getCacheAge() >= NTP_INTERVAL) {
+                    mNtpTime.forceRefresh();
+                }
 
-            native_inject_time(time, timeReference, (int) certainty);
-            delay = NTP_INTERVAL;
-        } else {
-            if (DEBUG) Log.d(TAG, "requestTime failed");
-            delay = RETRY_INTERVAL;
-        }
+                // only update when NTP time is fresh
+                if (mNtpTime.getCacheAge() < NTP_INTERVAL) {
+                    long time = mNtpTime.getCachedNtpTime();
+                    long timeReference = mNtpTime.getCachedNtpTimeReference();
+                    long certainty = mNtpTime.getCacheCertainty();
+                    long now = System.currentTimeMillis();
 
-        if (mPeriodicTimeInjection) {
-            // send delayed message for next NTP injection
-            // since this is delayed and not urgent we do not hold a wake lock here
-            mHandler.removeMessages(INJECT_NTP_TIME);
-            mHandler.sendMessageDelayed(Message.obtain(mHandler, INJECT_NTP_TIME), delay);
-        }
+                    Log.d(TAG, "NTP server returned: "
+                            + time + " (" + new Date(time)
+                            + ") reference: " + timeReference
+                            + " certainty: " + certainty
+                            + " system time offset: " + (time - now));
+
+                    native_inject_time(time, timeReference, (int) certainty);
+                    delay = NTP_INTERVAL;
+                } else {
+                    if (DEBUG) Log.d(TAG, "requestTime failed");
+                    delay = RETRY_INTERVAL;
+                }
+
+                mHandler.sendMessage(Message.obtain(mHandler, INJECT_NTP_TIME_FINISHED));
+
+                if (mPeriodicTimeInjection) {
+                    // send delayed message for next NTP injection
+                    // since this is delayed and not urgent we do not hold a wake lock here
+                    mHandler.removeMessages(INJECT_NTP_TIME);
+                    mHandler.sendMessageDelayed(Message.obtain(mHandler, INJECT_NTP_TIME), delay);
+                }
+            }
+        });
     }
 
     private void handleDownloadXtraData() {
-        if (!mNetworkAvailable) {
-            // try again when network is up
-            mDownloadXtraDataPending = true;
+        if (mDownloadXtraDataPending == STATE_DOWNLOADING) {
+            // already downloading data
             return;
         }
-        mDownloadXtraDataPending = false;
-
-
-        GpsXtraDownloader xtraDownloader = new GpsXtraDownloader(mContext, mProperties);
-        byte[] data = xtraDownloader.downloadXtraData();
-        if (data != null) {
-            if (DEBUG) {
-                Log.d(TAG, "calling native_inject_xtra_data");
-            }
-            native_inject_xtra_data(data, data.length);
-        } else {
-            // try again later
-            // since this is delayed and not urgent we do not hold a wake lock here
-            mHandler.removeMessages(DOWNLOAD_XTRA_DATA);
-            mHandler.sendMessageDelayed(Message.obtain(mHandler, DOWNLOAD_XTRA_DATA),
-                    RETRY_INTERVAL);
+        if (!mNetworkAvailable) {
+            // try again when network is up
+            mDownloadXtraDataPending = STATE_PENDING_NETWORK;
+            return;
         }
+        mDownloadXtraDataPending = STATE_DOWNLOADING;
+
+        AsyncTask.THREAD_POOL_EXECUTOR.execute(new Runnable() {
+            @Override
+            public void run() {
+                GpsXtraDownloader xtraDownloader = new GpsXtraDownloader(mContext, mProperties);
+                byte[] data = xtraDownloader.downloadXtraData();
+                if (data != null) {
+                    if (DEBUG) {
+                        Log.d(TAG, "calling native_inject_xtra_data");
+                    }
+                    native_inject_xtra_data(data, data.length);
+                }
+
+                mHandler.sendMessage(Message.obtain(mHandler, DOWNLOAD_XTRA_DATA_FINISHED));
+
+                if (data == null) {
+                    // try again later
+                    // since this is delayed and not urgent we do not hold a wake lock here
+                    mHandler.removeMessages(DOWNLOAD_XTRA_DATA);
+                    mHandler.sendMessageDelayed(Message.obtain(mHandler, DOWNLOAD_XTRA_DATA),
+                            RETRY_INTERVAL);
+                }
+            }
+
+        });
     }
 
     private void handleUpdateLocation(Location location) {
@@ -1473,6 +1505,12 @@ public class GpsLocationProvider implements LocationProviderInterface {
                     if (mSupportsXtra) {
                         handleDownloadXtraData();
                     }
+                    break;
+                case INJECT_NTP_TIME_FINISHED:
+                    mInjectNtpTimePending = STATE_IDLE;
+                    break;
+                case DOWNLOAD_XTRA_DATA_FINISHED:
+                    mDownloadXtraDataPending = STATE_IDLE;
                     break;
                 case UPDATE_LOCATION:
                     handleUpdateLocation((Location)msg.obj);
