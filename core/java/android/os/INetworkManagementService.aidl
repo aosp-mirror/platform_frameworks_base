@@ -362,4 +362,11 @@ interface INetworkManagementService
      * Flush the DNS cache associated with the specified interface.
      */
     void flushInterfaceDnsCache(String iface);
+
+    void setFirewallEnabled(boolean enabled);
+    boolean isFirewallEnabled();
+    void setInterfaceFirewallRule(String iface, boolean allow);
+    void setEgressSourceFirewallRule(String addr, boolean allow);
+    void setEgressDestFirewallRule(String addr, int port, boolean allow);
+    void setUidFirewallRule(int uid, boolean allow);
 }
