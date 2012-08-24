@@ -973,6 +973,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         // Start selection mode if needed. We don't need to if we're unchecking something.
         if (value && mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL && mChoiceActionMode == null) {
+            if (mMultiChoiceModeCallback == null ||
+                    !mMultiChoiceModeCallback.hasWrappedCallback()) {
+                throw new IllegalStateException("AbsListView: attempted to start selection mode " +
+                        "for CHOICE_MODE_MULTIPLE_MODAL but no choice mode callback was " +
+                        "supplied. Call setMultiChoiceModeListener to set a callback.");
+            }
             mChoiceActionMode = startActionMode(mMultiChoiceModeCallback);
         }
 
@@ -5943,6 +5949,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         public void setWrapped(MultiChoiceModeListener wrapped) {
             mWrapped = wrapped;
+        }
+
+        public boolean hasWrappedCallback() {
+            return mWrapped != null;
         }
 
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
