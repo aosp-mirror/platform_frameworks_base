@@ -45,6 +45,7 @@ import android.content.pm.ManifestDigest;
 import android.content.pm.UserInfo;
 import android.content.pm.VerificationParams;
 import android.content.pm.VerifierDeviceIdentity;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
@@ -993,6 +994,21 @@ final class ApplicationPackageManager extends PackageManager {
                     installerPackageName, verificationParams, encryptionParams);
         } catch (RemoteException e) {
             // Should never happen!
+        }
+    }
+
+    @Override
+    public int installExistingPackage(String packageName)
+            throws NameNotFoundException {
+        try {
+            int res = mPM.installExistingPackage(packageName);
+            if (res == INSTALL_FAILED_INVALID_URI) {
+                throw new NameNotFoundException("Package " + packageName + " doesn't exist");
+            }
+            return res;
+        } catch (RemoteException e) {
+            // Should never happen!
+            throw new NameNotFoundException("Package " + packageName + " doesn't exist");
         }
     }
 

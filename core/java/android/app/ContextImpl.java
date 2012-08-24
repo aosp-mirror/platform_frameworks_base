@@ -1220,11 +1220,21 @@ class ContextImpl extends Context {
 
     @Override
     public ComponentName startService(Intent service) {
+        return startServiceAsUser(service, Process.myUserHandle());
+    }
+
+    @Override
+    public boolean stopService(Intent service) {
+        return stopServiceAsUser(service, Process.myUserHandle());
+    }
+
+    @Override
+    public ComponentName startServiceAsUser(Intent service, UserHandle user) {
         try {
             service.setAllowFds(false);
             ComponentName cn = ActivityManagerNative.getDefault().startService(
                 mMainThread.getApplicationThread(), service,
-                service.resolveTypeIfNeeded(getContentResolver()));
+                service.resolveTypeIfNeeded(getContentResolver()), user.getIdentifier());
             if (cn != null && cn.getPackageName().equals("!")) {
                 throw new SecurityException(
                         "Not allowed to start service " + service
@@ -1237,12 +1247,12 @@ class ContextImpl extends Context {
     }
 
     @Override
-    public boolean stopService(Intent service) {
+    public boolean stopServiceAsUser(Intent service, UserHandle user) {
         try {
             service.setAllowFds(false);
             int res = ActivityManagerNative.getDefault().stopService(
                 mMainThread.getApplicationThread(), service,
-                service.resolveTypeIfNeeded(getContentResolver()));
+                service.resolveTypeIfNeeded(getContentResolver()), user.getIdentifier());
             if (res < 0) {
                 throw new SecurityException(
                         "Not allowed to stop service " + service);

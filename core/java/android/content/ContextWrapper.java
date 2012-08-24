@@ -410,6 +410,18 @@ public class ContextWrapper extends Context {
         return mBase.stopService(name);
     }
 
+    /** @hide */
+    @Override
+    public ComponentName startServiceAsUser(Intent service, UserHandle user) {
+        return mBase.startServiceAsUser(service, user);
+    }
+
+    /** @hide */
+    @Override
+    public boolean stopServiceAsUser(Intent name, UserHandle user) {
+        return mBase.stopServiceAsUser(name, user);
+    }
+
     @Override
     public boolean bindService(Intent service, ServiceConnection conn,
             int flags) {

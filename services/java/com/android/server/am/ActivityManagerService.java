@@ -10554,7 +10554,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
     
     public ComponentName startService(IApplicationThread caller, Intent service,
-            String resolvedType) {
+            String resolvedType, int userId) {
         enforceNotIsolatedCaller("startService");
         // Refuse possible leaked file descriptors
         if (service != null && service.hasFileDescriptors() == true) {
@@ -10566,9 +10566,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized(this) {
             final int callingPid = Binder.getCallingPid();
             final int callingUid = Binder.getCallingUid();
+            checkValidCaller(callingUid, userId);
             final long origId = Binder.clearCallingIdentity();
             ComponentName res = mServices.startServiceLocked(caller, service,
-                    resolvedType, callingPid, callingUid);
+                    resolvedType, callingPid, callingUid, userId);
             Binder.restoreCallingIdentity(origId);
             return res;
         }
@@ -10581,22 +10582,24 @@ public final class ActivityManagerService extends ActivityManagerNative
                 Slog.v(TAG, "startServiceInPackage: " + service + " type=" + resolvedType);
             final long origId = Binder.clearCallingIdentity();
             ComponentName res = mServices.startServiceLocked(null, service,
-                    resolvedType, -1, uid);
+                    resolvedType, -1, uid, UserHandle.getUserId(uid));
             Binder.restoreCallingIdentity(origId);
             return res;
         }
     }
 
     public int stopService(IApplicationThread caller, Intent service,
-            String resolvedType) {
+            String resolvedType, int userId) {
         enforceNotIsolatedCaller("stopService");
         // Refuse possible leaked file descriptors
         if (service != null && service.hasFileDescriptors() == true) {
             throw new IllegalArgumentException("File descriptors passed in Intent");
         }
 
+        checkValidCaller(Binder.getCallingUid(), userId);
+
         synchronized(this) {
-            return mServices.stopServiceLocked(caller, service, resolvedType);
+            return mServices.stopServiceLocked(caller, service, resolvedType, userId);
         }
     }
 
