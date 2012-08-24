@@ -16,6 +16,9 @@
 
 package com.android.internal.net;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.nio.charset.Charsets;
 
 /**
@@ -27,7 +30,7 @@ import java.nio.charset.Charsets;
  *
  * @hide
  */
-public class VpnProfile implements Cloneable {
+public class VpnProfile implements Cloneable, Parcelable {
     // Match these constants with R.array.vpn_types.
     public static final int TYPE_PPTP = 0;
     public static final int TYPE_L2TP_IPSEC_PSK = 1;
@@ -119,5 +122,29 @@ public class VpnProfile implements Cloneable {
         builder.append('\0').append(ipsecCaCert);
         builder.append('\0').append(ipsecServerCert);
         return builder.toString().getBytes(Charsets.UTF_8);
+    }
+
+    @Override
+    public void writeToParcel(Parcel out, int flags) {
+        out.writeString(key);
+        out.writeByteArray(encode());
+    }
+
+    public static final Creator<VpnProfile> CREATOR = new Creator<VpnProfile>() {
+        @Override
+        public VpnProfile createFromParcel(Parcel in) {
+            final String key = in.readString();
+            return decode(key, in.createByteArray());
+        }
+
+        @Override
+        public VpnProfile[] newArray(int size) {
+            return new VpnProfile[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 }
