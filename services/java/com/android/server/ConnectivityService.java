@@ -31,6 +31,8 @@ import static android.net.ConnectivityManager.isNetworkTypeValid;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.bluetooth.BluetoothTetheringDataTracker;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -78,6 +80,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.provider.Settings;
+import android.security.KeyStore;
 import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Slog;
@@ -85,8 +88,10 @@ import android.util.SparseIntArray;
 
 import com.android.internal.net.LegacyVpnInfo;
 import com.android.internal.net.VpnConfig;
+import com.android.internal.net.VpnProfile;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneConstants;
+import com.android.internal.util.Preconditions;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.connectivity.Tethering;
 import com.android.server.connectivity.Vpn;
@@ -136,6 +141,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private Tethering mTethering;
     private boolean mTetheringConfigValid = false;
+
+    private final KeyStore mKeyStore;
 
     private Vpn mVpn;
     private VpnCallback mVpnCallback = new VpnCallback();
@@ -371,6 +378,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         mContext = checkNotNull(context, "missing Context");
         mNetd = checkNotNull(netManager, "missing INetworkManagementService");
         mPolicyManager = checkNotNull(policyManager, "missing INetworkPolicyManager");
+        mKeyStore = KeyStore.getInstance();
 
         try {
             mPolicyManager.registerListener(mPolicyListener);
@@ -3126,14 +3134,16 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     /**
-     * Start legacy VPN and return an intent to VpnDialogs. This method is
-     * used by VpnSettings and not available in ConnectivityManager.
-     * Permissions are checked in Vpn class.
-     * @hide
+     * Start legacy VPN, controlling native daemons as needed. Creates a
+     * secondary thread to perform connection work, returning quickly.
      */
     @Override
-    public void startLegacyVpn(VpnConfig config, String[] racoon, String[] mtpd) {
-        mVpn.startLegacyVpn(config, racoon, mtpd);
+    public void startLegacyVpn(VpnProfile profile) {
+        final LinkProperties egress = getActiveLinkProperties();
+        if (egress == null) {
+            throw new IllegalStateException("Missing active network connection");
+        }
+        mVpn.startLegacyVpn(profile, mKeyStore, egress);
     }
 
     /**
