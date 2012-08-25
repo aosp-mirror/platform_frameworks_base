@@ -1438,6 +1438,10 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
      * Private handler for the input manager.
      */
     private final class InputManagerHandler extends Handler {
+        public InputManagerHandler() {
+            super(true /*async*/);
+        }
+
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
