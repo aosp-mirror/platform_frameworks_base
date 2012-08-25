@@ -331,12 +331,16 @@ public abstract class RegisteredServicesCache<V> {
                 notifyListener(v1, true /* removed */);
             }
             if (changes.length() > 0) {
-                Log.d(TAG, "generateServicesMap(" + mInterfaceName + "): " +
-                        serviceInfos.size() + " services:\n" + changes);
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.d(TAG, "generateServicesMap(" + mInterfaceName + "): " +
+                            serviceInfos.size() + " services:\n" + changes);
+                }
                 writePersistentServicesLocked();
             } else {
-                Log.d(TAG, "generateServicesMap(" + mInterfaceName + "): " +
-                        serviceInfos.size() + " services unchanged");
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.d(TAG, "generateServicesMap(" + mInterfaceName + "): " +
+                            serviceInfos.size() + " services unchanged");
+                }
             }
             mPersistentServicesFileDidNotExist = false;
         }

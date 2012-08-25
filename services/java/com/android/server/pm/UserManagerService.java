@@ -25,7 +25,6 @@ import com.android.internal.util.FastXmlSerializer;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.os.Binder;
@@ -34,10 +33,8 @@ import android.os.FileUtils;
 import android.os.IUserManager;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
-import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.AtomicFile;
-import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Xml;
@@ -72,59 +69,79 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String USER_LIST_FILENAME = "userlist.xml";
     private static final String USER_PHOTO_FILENAME = "photo.png";
 
-    private SparseArray<UserInfo> mUsers = new SparseArray<UserInfo>();
+    private final Context mContext;
+    private final PackageManagerService mPm;
+    private final Object mInstallLock;
+    private final Object mPackagesLock;
 
     private final File mUsersDir;
     private final File mUserListFile;
+    private final File mBaseUserPath;
+
+    private SparseArray<UserInfo> mUsers = new SparseArray<UserInfo>();
+
     private int[] mUserIds;
     private boolean mGuestEnabled;
     private int mNextSerialNumber;
 
-    private Installer mInstaller;
-    private File mBaseUserPath;
-    private Context mContext;
     private static UserManagerService sInstance;
-    private PackageManagerService mPm;
 
-    public synchronized static UserManagerService getInstance(Context context) {
-        if (sInstance == null) {
-            sInstance = new UserManagerService(context);
+    public static UserManagerService getInstance() {
+        synchronized (UserManagerService.class) {
+            return sInstance;
         }
-        return sInstance;
     }
 
     /**
      * Available for testing purposes.
      */
     UserManagerService(File dataDir, File baseUserPath) {
-        mUsersDir = new File(dataDir, USER_INFO_DIR);
-        mUsersDir.mkdirs();
-        // Make zeroth user directory, for services to migrate their files to that location
-        File userZeroDir = new File(mUsersDir, "0");
-        userZeroDir.mkdirs();
-        mBaseUserPath = baseUserPath;
-        FileUtils.setPermissions(mUsersDir.toString(),
-                FileUtils.S_IRWXU|FileUtils.S_IRWXG
-                |FileUtils.S_IROTH|FileUtils.S_IXOTH,
-                -1, -1);
-        mUserListFile = new File(mUsersDir, USER_LIST_FILENAME);
-        readUserList();
+        this(null, null, new Object(), new Object(), dataDir, baseUserPath);
     }
 
-    public UserManagerService(Context context) {
-        this(Environment.getDataDirectory(), new File(Environment.getDataDirectory(), "user"));
-        mContext = context;
+    /**
+     * Called by package manager to create the service.  This is closely
+     * associated with the package manager, and the given lock is the
+     * package manager's own lock.
+     */
+    UserManagerService(Context context, PackageManagerService pm,
+            Object installLock, Object packagesLock) {
+        this(context, pm, installLock, packagesLock,
+                Environment.getDataDirectory(),
+                new File(Environment.getDataDirectory(), "user"));
     }
 
-    void setInstaller(PackageManagerService pm, Installer installer) {
-        mInstaller = installer;
-        mPm = pm;
+    /**
+     * Available for testing purposes.
+     */
+    private UserManagerService(Context context, PackageManagerService pm,
+            Object installLock, Object packagesLock,
+            File dataDir, File baseUserPath) {
+        synchronized (UserManagerService.class) {
+            mContext = context;
+            mPm = pm;
+            mInstallLock = installLock;
+            mPackagesLock = packagesLock;
+            mUsersDir = new File(dataDir, USER_INFO_DIR);
+            mUsersDir.mkdirs();
+            // Make zeroth user directory, for services to migrate their files to that location
+            File userZeroDir = new File(mUsersDir, "0");
+            userZeroDir.mkdirs();
+            mBaseUserPath = baseUserPath;
+            FileUtils.setPermissions(mUsersDir.toString(),
+                    FileUtils.S_IRWXU|FileUtils.S_IRWXG
+                    |FileUtils.S_IROTH|FileUtils.S_IXOTH,
+                    -1, -1);
+            mUserListFile = new File(mUsersDir, USER_LIST_FILENAME);
+            readUserList();
+            sInstance = this;
+        }
     }
 
     @Override
     public List<UserInfo> getUsers() {
         checkManageUsersPermission("query users");
-        synchronized (mUsers) {
+        synchronized (mPackagesLock) {
             ArrayList<UserInfo> users = new ArrayList<UserInfo>(mUsers.size());
             for (int i = 0; i < mUsers.size(); i++) {
                 users.add(mUsers.valueAt(i));
@@ -136,7 +153,7 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public UserInfo getUserInfo(int userId) {
         checkManageUsersPermission("query user");
-        synchronized (mUsers) {
+        synchronized (mPackagesLock) {
             return getUserInfoLocked(userId);
         }
     }
@@ -149,7 +166,7 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     public boolean exists(int userId) {
-        synchronized (mUsers) {
+        synchronized (mPackagesLock) {
             return ArrayUtils.contains(mUserIds, userId);
         }
     }
@@ -157,7 +174,7 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public void setUserName(int userId, String name) {
         checkManageUsersPermission("rename users");
-        synchronized (mUsers) {
+        synchronized (mPackagesLock) {
             UserInfo info = mUsers.get(userId);
             if (name != null && !name.equals(info.name)) {
                 info.name = name;
@@ -169,7 +186,7 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public ParcelFileDescriptor setUserIcon(int userId) {
         checkManageUsersPermission("update users");
-        synchronized (mUsers) {
+        synchronized (mPackagesLock) {
             UserInfo info = mUsers.get(userId);
             if (info == null) return null;
             ParcelFileDescriptor fd = updateIconBitmapLocked(info);
@@ -183,7 +200,7 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public void setGuestEnabled(boolean enable) {
         checkManageUsersPermission("enable guest users");
-        synchronized (mUsers) {
+        synchronized (mPackagesLock) {
             if (mGuestEnabled != enable) {
                 mGuestEnabled = enable;
                 // Erase any guest user that currently exists
@@ -206,7 +223,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public boolean isGuestEnabled() {
-        synchronized (mUsers) {
+        synchronized (mPackagesLock) {
             return mGuestEnabled;
         }
     }
@@ -262,13 +279,17 @@ public class UserManagerService extends IUserManager.Stub {
      * @return the array of user ids.
      */
     int[] getUserIds() {
-        synchronized (mUsers) {
+        synchronized (mPackagesLock) {
             return mUserIds;
         }
     }
 
+    int[] getUserIdsLPr() {
+        return mUserIds;
+    }
+
     private void readUserList() {
-        synchronized (mUsers) {
+        synchronized (mPackagesLock) {
             readUserListLocked();
         }
     }
@@ -501,15 +522,15 @@ public class UserManagerService extends IUserManager.Stub {
         int userId = getNextAvailableId();
         UserInfo userInfo = new UserInfo(userId, name, null, flags);
         File userPath = new File(mBaseUserPath, Integer.toString(userId));
-        if (!createPackageFolders(userId, userPath)) {
-            return null;
-        }
-        synchronized (mUsers) {
-            userInfo.serialNumber = mNextSerialNumber++;
-            mUsers.put(userId, userInfo);
-            writeUserListLocked();
-            writeUserLocked(userInfo);
-            updateUserIdsLocked();
+        synchronized (mInstallLock) {
+            synchronized (mPackagesLock) {
+                userInfo.serialNumber = mNextSerialNumber++;
+                mUsers.put(userId, userInfo);
+                writeUserListLocked();
+                writeUserLocked(userInfo);
+                updateUserIdsLocked();
+                mPm.createNewUserLILPw(userId, userPath);
+            }
         }
         if (userInfo != null) {
             Intent addedIntent = new Intent(Intent.ACTION_USER_ADDED);
@@ -528,24 +549,37 @@ public class UserManagerService extends IUserManager.Stub {
      */
     public boolean removeUser(int userHandle) {
         checkManageUsersPermission("Only the system can remove users");
-        boolean result;
-        synchronized (mUsers) {
-            result = removeUserLocked(userHandle);
-        }
+        synchronized (mInstallLock) {
+            synchronized (mPackagesLock) {
+                final UserInfo user = mUsers.get(userHandle);
+                if (userHandle == 0 || user == null) {
+                    return false;
+                }
 
-        // Cleanup package manager settings
-        mPm.cleanUpUser(userHandle);
+                // Cleanup package manager settings
+                mPm.cleanUpUserLILPw(userHandle);
+
+                // Remove this user from the list
+                mUsers.remove(userHandle);
+                // Remove user file
+                AtomicFile userFile = new AtomicFile(new File(mUsersDir, userHandle + ".xml"));
+                userFile.delete();
+                // Update the user list
+                writeUserListLocked();
+                updateUserIdsLocked();
+            }
+        }
 
         // Let other services shutdown any activity
         Intent addedIntent = new Intent(Intent.ACTION_USER_REMOVED);
         addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userHandle);
         mContext.sendBroadcast(addedIntent, android.Manifest.permission.MANAGE_USERS);
-        return result;
+        return true;
     }
 
     @Override
     public int getUserSerialNumber(int userHandle) {
-        synchronized (mUsers) {
+        synchronized (mPackagesLock) {
             if (!exists(userHandle)) return -1;
             return getUserInfoLocked(userHandle).serialNumber;
         }
@@ -553,59 +587,12 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public int getUserHandle(int userSerialNumber) {
-        synchronized (mUsers) {
+        synchronized (mPackagesLock) {
             for (int userId : mUserIds) {
                 if (getUserInfoLocked(userId).serialNumber == userSerialNumber) return userId;
             }
             // Not found
             return -1;
-        }
-    }
-
-    private boolean removeUserLocked(int userHandle) {
-        final UserInfo user = mUsers.get(userHandle);
-        if (userHandle == 0 || user == null) {
-            return false;
-        }
-
-        // Remove this user from the list
-        mUsers.remove(userHandle);
-        // Remove user file
-        AtomicFile userFile = new AtomicFile(new File(mUsersDir, userHandle + ".xml"));
-        userFile.delete();
-        // Update the user list
-        writeUserListLocked();
-        updateUserIdsLocked();
-
-        removePackageFolders(userHandle);
-        return true;
-    }
-
-    public void installPackageForAllUsers(String packageName, int uid) {
-        for (int userId : mUserIds) {
-            // Don't do it for the primary user, it will become recursive.
-            if (userId == 0)
-                continue;
-            mInstaller.createUserData(packageName, UserHandle.getUid(userId, uid),
-                    userId);
-        }
-    }
-
-    public void clearUserDataForAllUsers(String packageName) {
-        for (int userId : mUserIds) {
-            // Don't do it for the primary user, it will become recursive.
-            if (userId == 0)
-                continue;
-            mInstaller.clearUserData(packageName, userId);
-        }
-    }
-
-    public void removePackageForAllUsers(String packageName) {
-        for (int userId : mUserIds) {
-            // Don't do it for the primary user, it will become recursive.
-            if (userId == 0)
-                continue;
-            mInstaller.remove(packageName, userId);
         }
     }
 
@@ -627,7 +614,7 @@ public class UserManagerService extends IUserManager.Stub {
      * @return
      */
     private int getNextAvailableId() {
-        synchronized (mUsers) {
+        synchronized (mPackagesLock) {
             int i = 0;
             while (i < Integer.MAX_VALUE) {
                 if (mUsers.indexOfKey(i) < 0) {
@@ -637,27 +624,5 @@ public class UserManagerService extends IUserManager.Stub {
             }
             return i;
         }
-    }
-
-    private boolean createPackageFolders(int id, File userPath) {
-        // mInstaller may not be available for unit-tests.
-        if (mInstaller == null) return true;
-
-        // Create the user path
-        userPath.mkdir();
-        FileUtils.setPermissions(userPath.toString(), FileUtils.S_IRWXU | FileUtils.S_IRWXG
-                | FileUtils.S_IXOTH, -1, -1);
-
-        mInstaller.cloneUserData(0, id, false);
-
-        return true;
-    }
-
-    boolean removePackageFolders(int id) {
-        // mInstaller may not be available for unit-tests.
-        if (mInstaller == null) return true;
-
-        mInstaller.removeUserDataDirs(id);
-        return true;
     }
 }

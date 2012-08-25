@@ -197,7 +197,7 @@ class ServerThread extends Thread {
             
             Slog.i(TAG, "User Service");
             ServiceManager.addService(Context.USER_SERVICE,
-                    UserManagerService.getInstance(context));
+                    UserManagerService.getInstance());
 
 
             mContentResolver = context.getContentResolver();
