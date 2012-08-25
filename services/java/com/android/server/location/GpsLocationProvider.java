@@ -598,6 +598,8 @@ public class GpsLocationProvider implements LocationProviderInterface {
         }
         mInjectNtpTimePending = STATE_DOWNLOADING;
 
+        // hold wake lock while task runs
+        mWakeLock.acquire();
         AsyncTask.THREAD_POOL_EXECUTOR.execute(new Runnable() {
             @Override
             public void run() {
@@ -628,14 +630,16 @@ public class GpsLocationProvider implements LocationProviderInterface {
                     delay = RETRY_INTERVAL;
                 }
 
-                mHandler.sendMessage(Message.obtain(mHandler, INJECT_NTP_TIME_FINISHED));
+                sendMessage(INJECT_NTP_TIME_FINISHED, 0, null);
 
                 if (mPeriodicTimeInjection) {
                     // send delayed message for next NTP injection
                     // since this is delayed and not urgent we do not hold a wake lock here
-                    mHandler.removeMessages(INJECT_NTP_TIME);
-                    mHandler.sendMessageDelayed(Message.obtain(mHandler, INJECT_NTP_TIME), delay);
+                    mHandler.sendEmptyMessageDelayed(INJECT_NTP_TIME, delay);
                 }
+
+                // release wake lock held by task
+                mWakeLock.release();
             }
         });
     }
@@ -652,6 +656,8 @@ public class GpsLocationProvider implements LocationProviderInterface {
         }
         mDownloadXtraDataPending = STATE_DOWNLOADING;
 
+        // hold wake lock while task runs
+        mWakeLock.acquire();
         AsyncTask.THREAD_POOL_EXECUTOR.execute(new Runnable() {
             @Override
             public void run() {
@@ -664,17 +670,17 @@ public class GpsLocationProvider implements LocationProviderInterface {
                     native_inject_xtra_data(data, data.length);
                 }
 
-                mHandler.sendMessage(Message.obtain(mHandler, DOWNLOAD_XTRA_DATA_FINISHED));
+                sendMessage(DOWNLOAD_XTRA_DATA_FINISHED, 0, null);
 
                 if (data == null) {
                     // try again later
                     // since this is delayed and not urgent we do not hold a wake lock here
-                    mHandler.removeMessages(DOWNLOAD_XTRA_DATA);
-                    mHandler.sendMessageDelayed(Message.obtain(mHandler, DOWNLOAD_XTRA_DATA),
-                            RETRY_INTERVAL);
+                    mHandler.sendEmptyMessageDelayed(DOWNLOAD_XTRA_DATA, RETRY_INTERVAL);
                 }
-            }
 
+                // release wake lock held by task
+                mWakeLock.release();
+            }
         });
     }
 
@@ -1475,11 +1481,17 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
     private void sendMessage(int message, int arg, Object obj) {
         // hold a wake lock until this message is delivered
+        // note that this assumes the message will not be removed from the queue before
+        // it is handled (otherwise the wake lock would be leaked).
         mWakeLock.acquire();
         mHandler.obtainMessage(message, arg, 1, obj).sendToTarget();
     }
 
     private final class ProviderHandler extends Handler {
+        public ProviderHandler() {
+            super(true /*async*/);
+        }
+
         @Override
         public void handleMessage(Message msg) {
             int message = msg.what;
