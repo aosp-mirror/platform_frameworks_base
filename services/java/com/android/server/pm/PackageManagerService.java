@@ -401,6 +401,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     // package uri's from external media onto secure containers
     // or internal storage.
     private IMediaContainerService mContainerService = null;
+    private int mContainerServiceUserId;
 
     static final int SEND_PENDING_BROADCAST = 1;
     static final int MCS_BOUND = 3;
@@ -469,8 +470,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                     " DefaultContainerService");
             Intent service = new Intent().setComponent(DEFAULT_CONTAINER_COMPONENT);
             Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
+            mContainerServiceUserId = 0;
+            if (mPendingInstalls.size() > 0) {
+                mContainerServiceUserId = mPendingInstalls.get(0).getUser().getIdentifier();
+            }
             if (mContext.bindService(service, mDefContainerConn,
-                    Context.BIND_AUTO_CREATE)) {
+                    Context.BIND_AUTO_CREATE, mContainerServiceUserId)) {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                 mBound = true;
                 return true;
@@ -547,6 +552,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                     } else if (mPendingInstalls.size() > 0) {
                         HandlerParams params = mPendingInstalls.get(0);
                         if (params != null) {
+                            // Check if we're connected to the correct service, if it's an install
+                            // request.
+                            if (params.getUser().getIdentifier() != mContainerServiceUserId) {
+                                mHandler.sendEmptyMessage(MCS_RECONNECT);
+                                return;
+                            }
                             if (params.startCopy()) {
                                 // We are done...  look for more work or to
                                 // go idle.
@@ -5850,6 +5861,17 @@ public class PackageManagerService extends IPackageManager.Stub {
          */
         private int mRetries = 0;
 
+        /** User handle for the user requesting the information or installation. */
+        private final UserHandle mUser;
+
+        HandlerParams(UserHandle user) {
+            mUser = user;
+        }
+
+        UserHandle getUser() {
+            return mUser;
+        }
+
         final boolean startCopy() {
             boolean res;
             try {
@@ -5891,6 +5913,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         private final IPackageStatsObserver mObserver;
 
         public MeasureParams(PackageStats stats, IPackageStatsObserver observer) {
+            super(new UserHandle(stats.userHandle));
             mObserver = observer;
             mStats = stats;
         }
@@ -5969,19 +5992,18 @@ public class PackageManagerService extends IPackageManager.Stub {
         private int mRet;
         private File mTempPackage;
         final ContainerEncryptionParams encryptionParams;
-        final UserHandle user;
 
         InstallParams(Uri packageURI,
                 IPackageInstallObserver observer, int flags,
                 String installerPackageName, VerificationParams verificationParams,
                 ContainerEncryptionParams encryptionParams, UserHandle user) {
+            super(user);
             this.mPackageURI = packageURI;
             this.flags = flags;
             this.observer = observer;
             this.installerPackageName = installerPackageName;
             this.verificationParams = verificationParams;
             this.encryptionParams = encryptionParams;
-            this.user = user;
         }
 
         public ManifestDigest getManifestDigest() {
@@ -5989,10 +6011,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return null;
             }
             return verificationParams.getManifestDigest();
-        }
-
-        public UserHandle getUser() {
-            return user;
         }
 
         private int installLocationPolicy(PackageInfoLite pkgLite, int flags) {
@@ -6332,7 +6350,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         int mRet;
 
         MoveParams(InstallArgs srcArgs, IPackageMoveObserver observer, int flags,
-                String packageName, String dataDir, int uid) {
+                String packageName, String dataDir, int uid, UserHandle user) {
+            super(user);
             this.srcArgs = srcArgs;
             this.observer = observer;
             this.flags = flags;
@@ -9506,9 +9525,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    /** Binder call */
+    @Override
     public void movePackage(final String packageName, final IPackageMoveObserver observer,
             final int flags) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MOVE_PACKAGE, null);
+        UserHandle user = new UserHandle(UserHandle.getCallingUserId());
         int returnCode = PackageManager.MOVE_SUCCEEDED;
         int currFlags = 0;
         int newFlags = 0;
@@ -9559,14 +9581,15 @@ public class PackageManagerService extends IPackageManager.Stub {
              * anyway.
              */
             if (returnCode != PackageManager.MOVE_SUCCEEDED) {
-                processPendingMove(new MoveParams(null, observer, 0, packageName, null, -1),
+                processPendingMove(new MoveParams(null, observer, 0, packageName,
+                        null, -1, user),
                         returnCode);
             } else {
                 Message msg = mHandler.obtainMessage(INIT_COPY);
                 InstallArgs srcArgs = createInstallArgs(currFlags, pkg.applicationInfo.sourceDir,
                         pkg.applicationInfo.publicSourceDir, pkg.applicationInfo.nativeLibraryDir);
                 MoveParams mp = new MoveParams(srcArgs, observer, newFlags, packageName,
-                        pkg.applicationInfo.dataDir, pkg.applicationInfo.uid);
+                        pkg.applicationInfo.dataDir, pkg.applicationInfo.uid, user);
                 msg.obj = mp;
                 mHandler.sendMessage(msg);
             }
