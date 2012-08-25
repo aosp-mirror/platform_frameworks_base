@@ -950,8 +950,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             mUserAppDataDir = new File(dataDir, "user");
             mDrmAppPrivateInstallDir = new File(dataDir, "app-private");
 
-            sUserManager = UserManagerService.getInstance(context);
-            sUserManager.setInstaller(this, mInstaller);
+            sUserManager = new UserManagerService(context, this,
+                    mInstallLock, mPackages);
 
             readPermissions();
 
@@ -1145,8 +1145,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         String msg = "System package " + ps.name
                                 + " no longer exists; wiping its data";
                         reportSettingsProblem(Log.WARN, msg);
-                        mInstaller.remove(ps.name, 0);
-                        sUserManager.removePackageForAllUsers(ps.name);
+                        removeDataDirsLI(ps.name);
                     } else {
                         final PackageSetting disabledPs = mSettings.getDisabledSystemPkgLPr(ps.name);
                         if (disabledPs.codePath == null || !disabledPs.codePath.exists()) {
@@ -1195,9 +1194,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     if (deletedPkg == null) {
                         msg = "Updated system package " + deletedAppName
                                 + " no longer exists; wiping its data";
-
-                        mInstaller.remove(deletedAppName, 0);
-                        sUserManager.removePackageForAllUsers(deletedAppName);
+                        removeDataDirsLI(deletedAppName);
                     } else {
                         msg = "Updated system app + " + deletedAppName
                                 + " no longer present; removing system privileges for "
@@ -1332,13 +1329,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     void cleanupInstallFailedPackage(PackageSetting ps) {
         Slog.i(TAG, "Cleaning up incompletely installed app: " + ps.name);
-        int retCode = mInstaller.remove(ps.name, 0);
-        if (retCode < 0) {
-            Slog.w(TAG, "Couldn't remove app data directory for package: "
-                       + ps.name + ", retcode=" + retCode);
-        } else {
-            sUserManager.removePackageForAllUsers(ps.name);
-        }
+        removeDataDirsLI(ps.name);
         if (ps.codePath != null) {
             if (!ps.codePath.delete()) {
                 Slog.w(TAG, "Unable to remove old code file: " + ps.codePath);
@@ -1818,9 +1809,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             public void run() {
                 mHandler.removeCallbacks(this);
                 int retCode = -1;
-                retCode = mInstaller.freeCache(freeStorageSize);
-                if (retCode < 0) {
-                    Slog.w(TAG, "Couldn't clear application caches");
+                synchronized (mInstallLock) {
+                    retCode = mInstaller.freeCache(freeStorageSize);
+                    if (retCode < 0) {
+                        Slog.w(TAG, "Couldn't clear application caches");
+                    }
                 }
                 if (observer != null) {
                     try {
@@ -1841,9 +1834,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             public void run() {
                 mHandler.removeCallbacks(this);
                 int retCode = -1;
-                retCode = mInstaller.freeCache(freeStorageSize);
-                if (retCode < 0) {
-                    Slog.w(TAG, "Couldn't clear application caches");
+                synchronized (mInstallLock) {
+                    retCode = mInstaller.freeCache(freeStorageSize);
+                    if (retCode < 0) {
+                        Slog.w(TAG, "Couldn't clear application caches");
+                    }
                 }
                 if(pi != null) {
                     try {
@@ -2994,7 +2989,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                     ProviderInfo info = PackageParser.generateProviderInfo(p, flags,
                             ps.readUserState(userId), userId);
-                    finalList.add(info);
+                    if (info != null) {
+                        finalList.add(info);
+                    }
                 }
             }
         }
@@ -3027,8 +3024,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                 final PackageParser.Instrumentation p = i.next();
                 if (targetPackage == null
                         || targetPackage.equals(p.info.targetPackage)) {
-                    finalList.add(PackageParser.generateInstrumentationInfo(p,
-                            flags));
+                    InstrumentationInfo ii = PackageParser.generateInstrumentationInfo(p,
+                            flags);
+                    if (ii != null) {
+                        finalList.add(ii);
+                    }
                 }
             }
         }
@@ -3189,7 +3189,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
                     InstallArgs args = createInstallArgs(packageFlagsToInstallFlags(ps),
                             ps.codePathString, ps.resourcePathString, ps.nativeLibraryPathString);
-                    synchronized (mInstaller) {
+                    synchronized (mInstallLock) {
                         args.cleanUpResourcesLI();
                     }
                     synchronized (mPackages) {
@@ -3245,7 +3245,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                             + " better than installed " + ps.versionCode);
                     InstallArgs args = createInstallArgs(packageFlagsToInstallFlags(ps),
                             ps.codePathString, ps.resourcePathString, ps.nativeLibraryPathString);
-                    synchronized (mInstaller) {
+                    synchronized (mInstallLock) {
                         args.cleanUpResourcesLI();
                     }
                 }
@@ -3477,6 +3477,36 @@ public class PackageManagerService extends IPackageManager.Stub {
             return new File(mUserAppDataDir.getAbsolutePath() + File.separator + userId
                 + File.separator + packageName);
         }
+    }
+
+    private int createDataDirsLI(String packageName, int uid) {
+        int[] users = sUserManager.getUserIds();
+        int res = mInstaller.install(packageName, uid, uid);
+        if (res < 0) {
+            return res;
+        }
+        for (int user : users) {
+            if (user != 0) {
+                res = mInstaller.createUserData(packageName,
+                        UserHandle.getUid(user, uid), user);
+                if (res < 0) {
+                    return res;
+                }
+            }
+        }
+        return res;
+    }
+
+    private int removeDataDirsLI(String packageName) {
+        int[] users = sUserManager.getUserIds();
+        int res = 0;
+        for (int user : users) {
+            int resInner = mInstaller.remove(packageName, user);
+            if (resInner < 0) {
+                res = resInner;
+            }
+        }
+        return res;
     }
 
     private PackageParser.Package scanPackageLI(PackageParser.Package pkg,
@@ -3831,11 +3861,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                             || (scanMode&SCAN_BOOTING) != 0)) {
                         // If this is a system app, we can at least delete its
                         // current data so the application will still work.
-                        int ret = mInstaller.remove(pkgName, 0);
+                        int ret = removeDataDirsLI(pkgName);
                         if (ret >= 0) {
                             // TODO: Kill the processes first
-                            // Remove the data directories for all users
-                            sUserManager.removePackageForAllUsers(pkgName);
                             // Old data gone!
                             String prefix = (parseFlags&PackageParser.PARSE_IS_SYSTEM) != 0
                                     ? "System package " : "Third party package ";
@@ -3847,8 +3875,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                             recovered = true;
 
                             // And now re-install the app.
-                            ret = mInstaller.install(pkgName, pkg.applicationInfo.uid,
-                                    pkg.applicationInfo.uid);
+                            ret = createDataDirsLI(pkgName, pkg.applicationInfo.uid);
                             if (ret == -1) {
                                 // Ack should not happen!
                                 msg = prefix + pkg.packageName
@@ -3857,9 +3884,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                                 mLastScanError = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
                                 return null;
                             }
-                            // Create data directories for all users
-                            sUserManager.installPackageForAllUsers(pkgName,
-                                    pkg.applicationInfo.uid);
                         }
                         if (!recovered) {
                             mHasSystemUidErrors = true;
@@ -3897,15 +3921,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                         Log.v(TAG, "Want this data dir: " + dataPath);
                 }
                 //invoke installer to do the actual installation
-                int ret = mInstaller.install(pkgName, pkg.applicationInfo.uid,
-                        pkg.applicationInfo.uid);
+                int ret = createDataDirsLI(pkgName, pkg.applicationInfo.uid);
                 if (ret < 0) {
                     // Error from installer
                     mLastScanError = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
                     return null;
                 }
-                // Create data directories for all users
-                sUserManager.installPackageForAllUsers(pkgName, pkg.applicationInfo.uid);
 
                 if (dataPath.exists()) {
                     pkg.applicationInfo.dataDir = dataPath.getPath();
@@ -5078,6 +5099,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             ServiceInfo si = PackageParser.generateServiceInfo(service, mFlags,
                     ps.readUserState(userId), userId);
+            if (si == null) {
+                return null;
+            }
             final ResolveInfo res = new ResolveInfo();
             res.serviceInfo = si;
             if ((mFlags&PackageManager.GET_RESOLVED_FILTER) != 0) {
@@ -7819,15 +7843,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
         if ((flags&PackageManager.DELETE_KEEP_DATA) == 0) {
-            int retCode = mInstaller.remove(packageName, 0);
-            if (retCode < 0) {
-                Slog.w(TAG, "Couldn't remove app data or cache directory for package: "
-                           + packageName + ", retcode=" + retCode);
-                // we don't consider this to be a failure of the core package deletion
-            } else {
-                // TODO: Kill the processes first
-                sUserManager.removePackageForAllUsers(packageName);
-            }
+            removeDataDirsLI(packageName);
             schedulePackageCleaning(packageName, UserHandle.USER_ALL, true);
         }
         // writer
@@ -9742,15 +9758,36 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     /** Called by UserManagerService */
-    void cleanUpUser(int userHandle) {
+    void cleanUpUserLILPw(int userHandle) {
         // Disable all the packages for the user first
-        synchronized (mPackages) {
-            Set<Entry<String, PackageSetting>> entries = mSettings.mPackages.entrySet();
-            for (Entry<String, PackageSetting> entry : entries) {
-                entry.getValue().removeUser(userHandle);
+        Set<Entry<String, PackageSetting>> entries = mSettings.mPackages.entrySet();
+        for (Entry<String, PackageSetting> entry : entries) {
+            entry.getValue().removeUser(userHandle);
+        }
+        if (mDirtyUsers.remove(userHandle));
+        mSettings.removeUserLPr(userHandle);
+        if (mInstaller != null) {
+            // Technically, we shouldn't be doing this with the package lock
+            // held.  However, this is very rare, and there is already so much
+            // other disk I/O going on, that we'll let it slide for now.
+            mInstaller.removeUserDataDirs(userHandle);
+        }
+    }
+
+    /** Called by UserManagerService */
+    void createNewUserLILPw(int userHandle, File path) {
+        if (mInstaller != null) {
+            path.mkdir();
+            FileUtils.setPermissions(path.toString(), FileUtils.S_IRWXU | FileUtils.S_IRWXG
+                    | FileUtils.S_IXOTH, -1, -1);
+            for (PackageSetting ps : mSettings.mPackages.values()) {
+                // Only system apps are initially installed.
+                ps.setInstalled((ps.pkgFlags&ApplicationInfo.FLAG_SYSTEM) != 0, userHandle);
+                // Need to create a data directory for all apps under this user.
+                mInstaller.createUserData(ps.name,
+                        UserHandle.getUid(userHandle, ps.appId), userHandle);
             }
-            if (mDirtyUsers.remove(userHandle));
-            mSettings.removeUserLPr(userHandle);
+            mSettings.writePackageRestrictionsLPr(userHandle);
         }
     }
 
