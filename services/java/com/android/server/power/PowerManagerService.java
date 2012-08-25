@@ -50,6 +50,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.WorkSource;
 import android.provider.Settings;
+import android.service.dreams.Dream;
 import android.service.dreams.IDreamManager;
 import android.util.EventLog;
 import android.util.Log;
@@ -98,6 +99,8 @@ public final class PowerManagerService extends IPowerManager.Stub
     private static final int DIRTY_STAY_ON = 1 << 7;
     // Dirty bit: battery state changed
     private static final int DIRTY_BATTERY_STATE = 1 << 8;
+    // Dirty bit: dream ended
+    private static final int DIRTY_DREAM_ENDED = 1 << 9;
 
     // Wakefulness: The device is asleep and can only be awoken by a call to wakeUp().
     // The screen should be off or in the process of being turned off by the display controller.
@@ -363,6 +366,10 @@ public final class PowerManagerService extends IPowerManager.Stub
             filter = new IntentFilter();
             filter.addAction(Intent.ACTION_DOCK_EVENT);
             mContext.registerReceiver(new DockReceiver(), filter);
+
+            filter = new IntentFilter();
+            filter.addAction(Dream.ACTION_DREAMING_STOPPED);
+            mContext.registerReceiver(new DreamReceiver(), filter);
 
             // Register for settings changes.
             final ContentResolver resolver = mContext.getContentResolver();
@@ -1146,8 +1153,12 @@ public final class PowerManagerService extends IPowerManager.Stub
      * Determines whether to post a message to the sandman to update the dream state.
      */
     private void updateDreamLocked(int dirty) {
-        if ((dirty & (DIRTY_WAKEFULNESS | DIRTY_SETTINGS
-                | DIRTY_IS_POWERED | DIRTY_STAY_ON | DIRTY_BATTERY_STATE)) != 0) {
+        if ((dirty & (DIRTY_WAKEFULNESS
+                | DIRTY_SETTINGS
+                | DIRTY_IS_POWERED
+                | DIRTY_STAY_ON
+                | DIRTY_BATTERY_STATE
+                | DIRTY_DREAM_ENDED)) != 0) {
             scheduleSandmanLocked();
         }
     }
@@ -1230,15 +1241,15 @@ public final class PowerManagerService extends IPowerManager.Stub
                 handleDreamFinishedLocked();
             }
 
-            // Allow the sandman to detect when the dream has ended.
-            // FIXME: The DreamManagerService should tell us explicitly.
+            // In addition to listening for the intent, poll the sandman periodically to detect
+            // when the dream has ended (as a watchdog only, ensuring our state is always correct).
             if (mWakefulness == WAKEFULNESS_DREAMING
                     || mWakefulness == WAKEFULNESS_NAPPING) {
                 if (!mSandmanScheduled) {
                     mSandmanScheduled = true;
                     Message msg = mHandler.obtainMessage(MSG_SANDMAN);
                     msg.setAsynchronous(true);
-                    mHandler.sendMessageDelayed(msg, 1000);
+                    mHandler.sendMessageDelayed(msg, 5000);
                 }
             }
         }
@@ -1470,6 +1481,11 @@ public final class PowerManagerService extends IPowerManager.Stub
 
     private void handleDockStateChangedLocked(int dockState) {
         // TODO
+    }
+
+    private void handleDreamEndedLocked() {
+        mDirty |= DIRTY_DREAM_ENDED;
+        updatePowerStateLocked();
     }
 
     /**
@@ -1933,6 +1949,15 @@ public final class PowerManagerService extends IPowerManager.Stub
                 int dockState = intent.getIntExtra(Intent.EXTRA_DOCK_STATE,
                         Intent.EXTRA_DOCK_STATE_UNDOCKED);
                 handleDockStateChangedLocked(dockState);
+            }
+        }
+    }
+
+    private final class DreamReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            synchronized (mLock) {
+                handleDreamEndedLocked();
             }
         }
     }

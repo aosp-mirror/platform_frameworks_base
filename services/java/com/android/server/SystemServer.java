@@ -38,7 +38,6 @@ import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.server.search.SearchManagerService;
-import android.service.dreams.DreamManagerService;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
