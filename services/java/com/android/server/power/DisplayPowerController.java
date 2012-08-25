@@ -1112,7 +1112,7 @@ final class DisplayPowerController {
 
     private final class DisplayControllerHandler extends Handler {
         public DisplayControllerHandler(Looper looper) {
-            super(looper);
+            super(looper, null, true /*async*/);
         }
 
         @Override

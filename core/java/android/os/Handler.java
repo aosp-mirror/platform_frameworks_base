@@ -101,37 +101,88 @@ public class Handler {
     }
 
     /**
-     * Default constructor associates this handler with the queue for the
+     * Default constructor associates this handler with the {@link Looper} for the
      * current thread.
      *
-     * If there isn't one, this handler won't be able to receive messages.
+     * If this thread does not have a looper, this handler won't be able to receive messages
+     * so an exception is thrown.
      */
     public Handler() {
-        if (FIND_POTENTIAL_LEAKS) {
-            final Class<? extends Handler> klass = getClass();
-            if ((klass.isAnonymousClass() || klass.isMemberClass() || klass.isLocalClass()) &&
-                    (klass.getModifiers() & Modifier.STATIC) == 0) {
-                Log.w(TAG, "The following Handler class should be static or leaks might occur: " +
-                    klass.getCanonicalName());
-            }
-        }
-
-        mLooper = Looper.myLooper();
-        if (mLooper == null) {
-            throw new RuntimeException(
-                "Can't create handler inside thread that has not called Looper.prepare()");
-        }
-        mQueue = mLooper.mQueue;
-        mCallback = null;
-        mAsynchronous = false;
+        this(null, false);
     }
 
     /**
-     * Constructor associates this handler with the queue for the
+     * Constructor associates this handler with the {@link Looper} for the
      * current thread and takes a callback interface in which you can handle
      * messages.
+     *
+     * If this thread does not have a looper, this handler won't be able to receive messages
+     * so an exception is thrown.
+     *
+     * @param callback The callback interface in which to handle messages, or null.
      */
     public Handler(Callback callback) {
+        this(callback, false);
+    }
+
+    /**
+     * Use the provided {@link Looper} instead of the default one.
+     *
+     * @param looper The looper, must not be null.
+     */
+    public Handler(Looper looper) {
+        this(looper, null, false);
+    }
+
+    /**
+     * Use the provided {@link Looper} instead of the default one and take a callback
+     * interface in which to handle messages.
+     *
+     * @param looper The looper, must not be null.
+     * @param callback The callback interface in which to handle messages, or null.
+     */
+    public Handler(Looper looper, Callback callback) {
+        this(looper, callback, false);
+    }
+
+    /**
+     * Use the {@link Looper} for the current thread
+     * and set whether the handler should be asynchronous.
+     *
+     * Handlers are synchronous by default unless this constructor is used to make
+     * one that is strictly asynchronous.
+     *
+     * Asynchronous messages represent interrupts or events that do not require global ordering
+     * with represent to synchronous messages.  Asynchronous messages are not subject to
+     * the synchronization barriers introduced by {@link MessageQueue#enqueueSyncBarrier(long)}.
+     *
+     * @param async If true, the handler calls {@link Message#setAsynchronous(boolean)} for
+     * each {@link Message} that is sent to it or {@link Runnable} that is posted to it.
+     *
+     * @hide
+     */
+    public Handler(boolean async) {
+        this(null, async);
+    }
+
+    /**
+     * Use the {@link Looper} for the current thread with the specified callback interface
+     * and set whether the handler should be asynchronous.
+     *
+     * Handlers are synchronous by default unless this constructor is used to make
+     * one that is strictly asynchronous.
+     *
+     * Asynchronous messages represent interrupts or events that do not require global ordering
+     * with represent to synchronous messages.  Asynchronous messages are not subject to
+     * the synchronization barriers introduced by {@link MessageQueue#enqueueSyncBarrier(long)}.
+     *
+     * @param callback The callback interface in which to handle messages, or null.
+     * @param async If true, the handler calls {@link Message#setAsynchronous(boolean)} for
+     * each {@link Message} that is sent to it or {@link Runnable} that is posted to it.
+     *
+     * @hide
+     */
+    public Handler(Callback callback, boolean async) {
         if (FIND_POTENTIAL_LEAKS) {
             final Class<? extends Handler> klass = getClass();
             if ((klass.isAnonymousClass() || klass.isMemberClass() || klass.isLocalClass()) &&
@@ -148,32 +199,11 @@ public class Handler {
         }
         mQueue = mLooper.mQueue;
         mCallback = callback;
-        mAsynchronous = false;
+        mAsynchronous = async;
     }
 
     /**
-     * Use the provided queue instead of the default one.
-     */
-    public Handler(Looper looper) {
-        mLooper = looper;
-        mQueue = looper.mQueue;
-        mCallback = null;
-        mAsynchronous = false;
-    }
-
-    /**
-     * Use the provided queue instead of the default one and take a callback
-     * interface in which to handle messages.
-     */
-    public Handler(Looper looper, Callback callback) {
-        mLooper = looper;
-        mQueue = looper.mQueue;
-        mCallback = callback;
-        mAsynchronous = false;
-    }
-
-    /**
-     * Use the provided queue instead of the default one and take a callback
+     * Use the provided {@link Looper} instead of the default one and take a callback
      * interface in which to handle messages.  Also set whether the handler
      * should be asynchronous.
      *
@@ -184,6 +214,8 @@ public class Handler {
      * with represent to synchronous messages.  Asynchronous messages are not subject to
      * the synchronization barriers introduced by {@link MessageQueue#enqueueSyncBarrier(long)}.
      *
+     * @param looper The looper, must not be null.
+     * @param callback The callback interface in which to handle messages, or null.
      * @param async If true, the handler calls {@link Message#setAsynchronous(boolean)} for
      * each {@link Message} that is sent to it or {@link Runnable} that is posted to it.
      *

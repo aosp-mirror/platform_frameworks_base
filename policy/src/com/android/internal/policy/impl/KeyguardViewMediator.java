@@ -971,7 +971,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback {
      * interacts with the keyguard ui should be posted to this handler, rather
      * than called directly.
      */
-    private Handler mHandler = new Handler(Looper.myLooper(), null, true /*async*/) {
+    private Handler mHandler = new Handler(true /*async*/) {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
