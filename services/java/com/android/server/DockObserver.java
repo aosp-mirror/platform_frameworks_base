@@ -241,7 +241,7 @@ final class DockObserver extends UEventObserver {
                 SCREENSAVER_ACTIVATE_ON_DOCK, DEFAULT_SCREENSAVER_ACTIVATED_ON_DOCK) != 0;
     }
 
-    private final Handler mHandler = new Handler(Looper.myLooper(), null, true) {
+    private final Handler mHandler = new Handler(true /*async*/) {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {

@@ -422,7 +422,7 @@ final class Notifier {
 
     private final class NotifierHandler extends Handler {
         public NotifierHandler(Looper looper) {
-            super(looper);
+            super(looper, null, true /*async*/);
         }
 
         @Override

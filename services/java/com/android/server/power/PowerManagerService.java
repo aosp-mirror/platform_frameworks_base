@@ -1952,7 +1952,7 @@ public final class PowerManagerService extends IPowerManager.Stub
      */
     private final class PowerManagerHandler extends Handler {
         public PowerManagerHandler(Looper looper) {
-            super(looper);
+            super(looper, null, true /*async*/);
         }
 
         @Override
