@@ -49,8 +49,6 @@ final class DisplayPowerState {
     private static final int DIRTY_ELECTRON_BEAM = 1 << 1;
     private static final int DIRTY_BRIGHTNESS = 1 << 2;
 
-    private static final int DIRTY_ALL = 0xffffffff;
-
     private final Choreographer mChoreographer;
     private final ElectronBeam mElectronBeam;
     private final PhotonicModulator mScreenBrightnessModulator;
@@ -68,10 +66,16 @@ final class DisplayPowerState {
         mElectronBeam = electronBean;
         mScreenBrightnessModulator = screenBrightnessModulator;
 
+        // At boot time, we know that the screen is on and the electron beam
+        // animation is not playing.  We don't know the screen's brightness though,
+        // so prepare to set it to a known state when the state is next applied.
+        // Although we set the brightness to full on here, the display power controller
+        // will reset the brightness to a new level immediately before the changes
+        // actually have a chance to be applied.
         mScreenOn = true;
         mElectronBeamLevel = 1.0f;
         mScreenBrightness = PowerManager.BRIGHTNESS_ON;
-        invalidate(DIRTY_ALL);
+        invalidate(DIRTY_BRIGHTNESS);
     }
 
     public static final FloatProperty<DisplayPowerState> ELECTRON_BEAM_LEVEL =

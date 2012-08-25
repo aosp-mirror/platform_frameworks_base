@@ -296,6 +296,7 @@ public final class PowerManagerService extends IPowerManager.Stub
         }
 
         nativeInit();
+        nativeSetPowerState(true, true);
     }
 
     /**
@@ -305,6 +306,14 @@ public final class PowerManagerService extends IPowerManager.Stub
     public void init(Context context, LightsService ls,
             ActivityManagerService am, BatteryService bs, IBatteryStats bss,
             DisplayManagerService dm) {
+        // Forcibly turn the screen on at boot so that it is in a known power state.
+        // We do this in init() rather than in the constructor because setting the
+        // screen state requires a call into surface flinger which then needs to call back
+        // into the activity manager to check permissions.  Unfortunately the
+        // activity manager is not running when the constructor is called, so we
+        // have to defer setting the screen state until this point.
+        nativeSetScreenState(true);
+
         mContext = context;
         mLightsService = ls;
         mBatteryService = bs;
