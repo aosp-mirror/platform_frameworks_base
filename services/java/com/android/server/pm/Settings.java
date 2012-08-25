@@ -2476,7 +2476,7 @@ final class Settings {
     private List<UserInfo> getAllUsers() {
         long id = Binder.clearCallingIdentity();
         try {
-            return UserManagerService.getInstance(mContext).getUsers();
+            return UserManagerService.getInstance().getUsers();
         } catch (NullPointerException npe) {
             // packagemanager not yet initialized
         } finally {
