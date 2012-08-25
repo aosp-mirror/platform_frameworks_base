@@ -105,7 +105,7 @@ public class DreamManagerService
     public ComponentName[] getDreamComponents() {
         // TODO(dsandler) don't load this every time, watch the value
         String names = Settings.Secure.getString(mContext.getContentResolver(), SCREENSAVER_COMPONENTS);
-        return componentsFromString(names);
+        return names == null ? null : componentsFromString(names);
     }
 
     // IDreamManager method
