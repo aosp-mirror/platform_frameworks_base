@@ -23,7 +23,9 @@ import android.animation.TimeInterpolator;
 import android.app.ActionBar;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.text.TextUtils;
 import android.text.TextUtils.TruncateAt;
 import android.view.Gravity;
 import android.view.View;
@@ -38,6 +40,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 /**
  * This widget implements the dynamic action bar tab behavior that can change
@@ -352,7 +355,7 @@ public class ScrollingTabContainerView extends HorizontalScrollView
         tabView.getTab().select();
     }
 
-    private class TabView extends LinearLayout {
+    private class TabView extends LinearLayout implements OnLongClickListener {
         private ActionBar.Tab mTab;
         private TextView mTextView;
         private ImageView mIconView;
@@ -426,7 +429,8 @@ public class ScrollingTabContainerView extends HorizontalScrollView
                     mIconView.setImageDrawable(null);
                 }
 
-                if (text != null) {
+                final boolean hasText = !TextUtils.isEmpty(text);
+                if (hasText) {
                     if (mTextView == null) {
                         TextView textView = new TextView(getContext(), null,
                                 com.android.internal.R.attr.actionBarTabTextStyle);
@@ -448,7 +452,33 @@ public class ScrollingTabContainerView extends HorizontalScrollView
                 if (mIconView != null) {
                     mIconView.setContentDescription(tab.getContentDescription());
                 }
+
+                if (!hasText && !TextUtils.isEmpty(tab.getContentDescription())) {
+                    setOnLongClickListener(this);
+                } else {
+                    setOnLongClickListener(null);
+                    setLongClickable(false);
+                }
             }
+        }
+
+        public boolean onLongClick(View v) {
+            final int[] screenPos = new int[2];
+            getLocationOnScreen(screenPos);
+
+            final Context context = getContext();
+            final int width = getWidth();
+            final int height = getHeight();
+            final int screenWidth = context.getResources().getDisplayMetrics().widthPixels;
+
+            Toast cheatSheet = Toast.makeText(context, mTab.getContentDescription(),
+                    Toast.LENGTH_SHORT);
+            // Show under the tab
+            cheatSheet.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL,
+                    (screenPos[0] + width / 2) - screenWidth / 2, height);
+
+            cheatSheet.show();
+            return true;
         }
 
         public ActionBar.Tab getTab() {
