@@ -17,10 +17,9 @@
 package android.app;
 
 import android.content.Context;
-import android.os.Binder;
-import android.os.RemoteException;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
 
@@ -86,6 +85,11 @@ public class NotificationManager
     /*package*/ NotificationManager(Context context, Handler handler)
     {
         mContext = context;
+    }
+
+    /** {@hide} */
+    public static NotificationManager from(Context context) {
+        return (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
     }
 
     /**

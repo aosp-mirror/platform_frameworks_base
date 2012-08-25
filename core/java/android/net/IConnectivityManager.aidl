@@ -122,4 +122,6 @@ interface IConnectivityManager
     void startLegacyVpn(in VpnProfile profile);
 
     LegacyVpnInfo getLegacyVpnInfo();
+
+    boolean updateLockdownVpn();
 }

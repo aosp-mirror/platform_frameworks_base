@@ -90,6 +90,7 @@ public class Vpn extends BaseNetworkStateTracker {
     private Connection mConnection;
     private LegacyVpnRunner mLegacyVpnRunner;
     private PendingIntent mStatusIntent;
+    private boolean mEnableNotif = true;
 
     public Vpn(Context context, VpnCallback callback, INetworkManagementService netService) {
         // TODO: create dedicated TYPE_VPN network type
@@ -102,6 +103,10 @@ public class Vpn extends BaseNetworkStateTracker {
         } catch (RemoteException e) {
             Log.wtf(TAG, "Problem registering observer", e);
         }
+    }
+
+    public void setEnableNotifications(boolean enableNotif) {
+        mEnableNotif = enableNotif;
     }
 
     @Override
@@ -394,6 +399,7 @@ public class Vpn extends BaseNetworkStateTracker {
     }
 
     private void showNotification(VpnConfig config, String label, Bitmap icon) {
+        if (!mEnableNotif) return;
         mStatusIntent = VpnConfig.getIntentForStatusPanel(mContext, config);
 
         NotificationManager nm = (NotificationManager)
@@ -420,6 +426,7 @@ public class Vpn extends BaseNetworkStateTracker {
     }
 
     private void hideNotification() {
+        if (!mEnableNotif) return;
         mStatusIntent = null;
 
         NotificationManager nm = (NotificationManager)
@@ -596,6 +603,14 @@ public class Vpn extends BaseNetworkStateTracker {
             info.intent = mStatusIntent;
         }
         return info;
+    }
+
+    public VpnConfig getLegacyVpnConfig() {
+        if (mLegacyVpnRunner != null) {
+            return mLegacyVpnRunner.mConfig;
+        } else {
+            return null;
+        }
     }
 
     /**
