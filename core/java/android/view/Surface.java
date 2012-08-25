@@ -17,9 +17,15 @@
 package android.view;
 
 import android.content.res.CompatibilityInfo.Translator;
-import android.graphics.*;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
+import android.graphics.Rect;
+import android.graphics.Region;
+import android.graphics.SurfaceTexture;
 import android.os.Parcelable;
 import android.os.Parcel;
+import android.os.Process;
 import android.os.SystemProperties;
 import android.util.Log;
 
@@ -250,13 +256,20 @@ public class Surface implements Parcelable {
     public Surface(SurfaceSession s,
             int pid, String name, int layerStack, int w, int h, int format, int flags)
         throws OutOfResourcesException {
+        // FIXME: remove pid and layerstack arguments
         checkHeadless();
 
         if (DEBUG_RELEASE) {
             mCreationStack = new Exception();
         }
+
+        if (name == null) {
+            name = "<pid " + Process.myPid() + ">";
+        }
+
         mCanvas = new CompatibleCanvas();
-        init(s, pid, name, layerStack, w, h, format, flags);
+        init(s, name, w, h, format, flags);
+        setLayerStack(layerStack);
         mName = name;
     }
 
@@ -496,8 +509,8 @@ public class Surface implements Parcelable {
         }
     }
     
-    private native void init(SurfaceSession s,
-            int pid, String name, int layerStack, int w, int h, int format, int flags)
+    private native void init(SurfaceSession s, String name,
+            int w, int h, int format, int flags)
             throws OutOfResourcesException;
 
     private native void init(Parcel source) throws OutOfResourcesException;
