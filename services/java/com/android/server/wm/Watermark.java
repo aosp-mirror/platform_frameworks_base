@@ -113,9 +113,9 @@ class Watermark {
         mTextPaint.setShadowLayer(shadowRadius, shadowDx, shadowDy, shadowColor);
 
         try {
-            mSurface = new Surface(session, 0,
-                    "WatermarkSurface", mDisplay.getLayerStack(),
-                    1, 1, PixelFormat.TRANSLUCENT, 0);
+            mSurface = new Surface(session, "WatermarkSurface",
+                    1, 1, PixelFormat.TRANSLUCENT, Surface.HIDDEN);
+            mSurface.setLayerStack(mDisplay.getLayerStack());
             mSurface.setLayer(WindowManagerService.TYPE_LAYER_MULTIPLIER*100);
             mSurface.setPosition(0, 0);
             mSurface.show();

@@ -6475,6 +6475,7 @@ package android.content.pm {
     method public abstract int checkSignatures(int, int);
     method public abstract void clearPackagePreferredActivities(java.lang.String);
     method public abstract java.lang.String[] currentToCanonicalPackageNames(java.lang.String[]);
+    method public abstract void extendVerificationTimeout(int, int, long);
     method public abstract android.graphics.drawable.Drawable getActivityIcon(android.content.ComponentName) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract android.graphics.drawable.Drawable getActivityIcon(android.content.Intent) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract android.content.pm.ActivityInfo getActivityInfo(android.content.ComponentName, int) throws android.content.pm.PackageManager.NameNotFoundException;
@@ -6533,7 +6534,6 @@ package android.content.pm {
     method public abstract void setComponentEnabledSetting(android.content.ComponentName, int, int);
     method public abstract void setInstallerPackageName(java.lang.String, java.lang.String);
     method public abstract void verifyPendingInstall(int, int);
-    method public abstract void extendVerificationTimeout(int, int, long);
     field public static final int COMPONENT_ENABLED_STATE_DEFAULT = 0; // 0x0
     field public static final int COMPONENT_ENABLED_STATE_DISABLED = 2; // 0x2
     field public static final int COMPONENT_ENABLED_STATE_DISABLED_USER = 3; // 0x3
@@ -6594,6 +6594,7 @@ package android.content.pm {
     field public static final int GET_UNINSTALLED_PACKAGES = 8192; // 0x2000
     field public static final int GET_URI_PERMISSION_PATTERNS = 2048; // 0x800
     field public static final int MATCH_DEFAULT_ONLY = 65536; // 0x10000
+    field public static final long MAXIMUM_VERIFICATION_TIMEOUT = 3600000L; // 0x36ee80L
     field public static final int PERMISSION_DENIED = -1; // 0xffffffff
     field public static final int PERMISSION_GRANTED = 0; // 0x0
     field public static final int SIGNATURE_FIRST_NOT_SIGNED = -1; // 0xffffffff
@@ -6604,7 +6605,6 @@ package android.content.pm {
     field public static final int SIGNATURE_UNKNOWN_PACKAGE = -4; // 0xfffffffc
     field public static final int VERIFICATION_ALLOW = 1; // 0x1
     field public static final int VERIFICATION_REJECT = -1; // 0xffffffff
-    field public static final long MAXIMUM_VERIFICATION_TIMEOUT = 3600000L; // 0x36ee80
   }
 
   public static class PackageManager.NameNotFoundException extends android.util.AndroidException {
@@ -20069,8 +20069,8 @@ package android.service.dreams {
     method public void setContentView(android.view.View);
     method public void setContentView(android.view.View, android.view.ViewGroup.LayoutParams);
     method public void setInteractive(boolean);
-    field public static final java.lang.String SERVICE_INTERFACE = "android.service.dreams.Dream";
     field public static final java.lang.String METADATA_NAME_CONFIG_ACTIVITY = "android.service.dreams.config_activity";
+    field public static final java.lang.String SERVICE_INTERFACE = "android.service.dreams.Dream";
   }
 
 }
@@ -21328,6 +21328,7 @@ package android.test.mock {
     method public int checkSignatures(int, int);
     method public void clearPackagePreferredActivities(java.lang.String);
     method public java.lang.String[] currentToCanonicalPackageNames(java.lang.String[]);
+    method public void extendVerificationTimeout(int, int, long);
     method public android.graphics.drawable.Drawable getActivityIcon(android.content.ComponentName) throws android.content.pm.PackageManager.NameNotFoundException;
     method public android.graphics.drawable.Drawable getActivityIcon(android.content.Intent) throws android.content.pm.PackageManager.NameNotFoundException;
     method public android.content.pm.ActivityInfo getActivityInfo(android.content.ComponentName, int) throws android.content.pm.PackageManager.NameNotFoundException;
@@ -21385,7 +21386,6 @@ package android.test.mock {
     method public void setComponentEnabledSetting(android.content.ComponentName, int, int);
     method public void setInstallerPackageName(java.lang.String, java.lang.String);
     method public void verifyPendingInstall(int, int);
-    method public void extendVerificationTimeout(int, int, long);
   }
 
   public class MockResources extends android.content.res.Resources {
@@ -24422,7 +24422,7 @@ package android.view {
     method public android.graphics.Canvas lockCanvas(android.graphics.Rect) throws java.lang.IllegalArgumentException, android.view.Surface.OutOfResourcesException;
     method public void readFromParcel(android.os.Parcel);
     method public void release();
-    method public void unlockCanvas(android.graphics.Canvas);
+    method public deprecated void unlockCanvas(android.graphics.Canvas);
     method public void unlockCanvasAndPost(android.graphics.Canvas);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;

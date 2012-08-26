@@ -215,12 +215,12 @@ class ScreenRotationAnimation {
         try {
             try {
                 if (WindowManagerService.DEBUG_SURFACE_TRACE) {
-                    mSurface = new SurfaceTrace(session, 0, "FreezeSurface",
-                            mDisplay.getLayerStack(), mWidth, mHeight,
+                    mSurface = new SurfaceTrace(session, "FreezeSurface",
+                            mWidth, mHeight,
                             PixelFormat.OPAQUE, Surface.FX_SURFACE_SCREENSHOT | Surface.HIDDEN);
                 } else {
-                    mSurface = new Surface(session, 0, "FreezeSurface",
-                            mDisplay.getLayerStack(), mWidth, mHeight,
+                    mSurface = new Surface(session, "FreezeSurface",
+                            mWidth, mHeight,
                             PixelFormat.OPAQUE, Surface.FX_SURFACE_SCREENSHOT | Surface.HIDDEN);
                 }
                 if (!mSurface.isValid()) {
@@ -228,6 +228,7 @@ class ScreenRotationAnimation {
                     mSurface = null;
                     return;
                 }
+                mSurface.setLayerStack(mDisplay.getLayerStack());
                 mSurface.setLayer(FREEZE_LAYER + 1);
                 mSurface.setAlpha(0);
                 mSurface.show();

@@ -481,8 +481,8 @@ final class ElectronBeam {
         try {
             if (mSurface == null) {
                 try {
-                    mSurface = new Surface(mSurfaceSession, Process.myPid(),
-                            "ElectronBeam", mDisplayLayerStack, mDisplayWidth, mDisplayHeight,
+                    mSurface = new Surface(mSurfaceSession,
+                            "ElectronBeam", mDisplayWidth, mDisplayHeight,
                             PixelFormat.OPAQUE, Surface.OPAQUE | Surface.HIDDEN);
                 } catch (Surface.OutOfResourcesException ex) {
                     Slog.e(TAG, "Unable to create surface.", ex);
@@ -490,6 +490,7 @@ final class ElectronBeam {
                 }
             }
 
+            mSurface.setLayerStack(mDisplayLayerStack);
             mSurface.setSize(mDisplayWidth, mDisplayHeight);
 
             switch (mDisplayRotation) {

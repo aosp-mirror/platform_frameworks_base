@@ -481,9 +481,9 @@ class WindowStateAnimator {
         private String mName;
 
         public SurfaceTrace(SurfaceSession s,
-                       int pid, String name, int layerStack, int w, int h, int format, int flags)
+                       String name, int w, int h, int format, int flags)
                    throws OutOfResourcesException {
-            super(s, pid, name, layerStack, w, h, format, flags);
+            super(s, name, w, h, format, flags);
             mName = name != null ? name : "Not named";
             mSize.set(w, h);
             Slog.v(SURFACE_TAG, "ctor: " + this + ". Called by "
@@ -608,7 +608,7 @@ class WindowStateAnimator {
 
             mService.makeWindowFreezingScreenIfNeededLocked(mWin);
 
-            int flags = 0;
+            int flags = Surface.HIDDEN;
             final WindowManager.LayoutParams attrs = mWin.mAttrs;
 
             if ((attrs.flags&WindowManager.LayoutParams.FLAG_SECURE) != 0) {
@@ -652,14 +652,14 @@ class WindowStateAnimator {
                 }
                 if (DEBUG_SURFACE_TRACE) {
                     mSurface = new SurfaceTrace(
-                            mSession.mSurfaceSession, mSession.mPid,
+                            mSession.mSurfaceSession,
                             attrs.getTitle().toString(),
-                            mLayerStack, w, h, format, flags);
+                            w, h, format, flags);
                 } else {
                     mSurface = new Surface(
-                        mSession.mSurfaceSession, mSession.mPid,
+                        mSession.mSurfaceSession,
                         attrs.getTitle().toString(),
-                        mLayerStack, w, h, format, flags);
+                        w, h, format, flags);
                 }
                 mWin.mHasSurface = true;
                 if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) Slog.i(TAG,
@@ -701,10 +701,10 @@ class WindowStateAnimator {
                     mSurfaceY = mWin.mFrame.top + mWin.mYOffset;
                     mSurface.setPosition(mSurfaceX, mSurfaceY);
                     mSurfaceLayer = mAnimLayer;
+                    mSurface.setLayerStack(mLayerStack);
                     mSurface.setLayer(mAnimLayer);
                     mSurface.setAlpha(0);
                     mSurfaceShown = false;
-                    mSurface.hide();
                 } catch (RuntimeException e) {
                     Slog.w(TAG, "Error creating surface in " + w, e);
                     mService.reclaimSomeSurfaceMemoryLocked(this, "create-init", true);

@@ -5847,7 +5847,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     updateLayoutToAnimationLocked();
                 }
             }
-            Surface.setOrientation(0, rotation);
+            mDisplayManagerService.setDisplayOrientation(
+                    displayContent.getDisplayId(), rotation);
         } finally {
             if (!inTransaction) {
                 Surface.closeTransaction();
@@ -6711,9 +6712,9 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized (mWindowMap) {
                 try {
                     if (mDragState == null) {
-                        Surface surface = new Surface(session, callerPid, "drag surface",
-                                mDefaultDisplay.getLayerStack(),
+                        Surface surface = new Surface(session, "drag surface",
                                 width, height, PixelFormat.TRANSLUCENT, Surface.HIDDEN);
+                        surface.setLayerStack(mDefaultDisplay.getLayerStack());
                         if (SHOW_TRANSACTIONS) Slog.i(TAG, "  DRAG "
                                 + surface + ": CREATE");
                         outSurface.copyFrom(surface);
@@ -8342,10 +8343,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 Rect dirty = new Rect(0, 0, mNextAppTransitionThumbnail.getWidth(),
                         mNextAppTransitionThumbnail.getHeight());
                 try {
-                    Surface surface = new Surface(mFxSession, Process.myPid(),
-                            "thumbnail anim", mDefaultDisplay.getLayerStack(),
+                    Surface surface = new Surface(mFxSession,
+                            "thumbnail anim",
                             dirty.width(), dirty.height(),
                             PixelFormat.TRANSLUCENT, Surface.HIDDEN);
+                    surface.setLayerStack(mDefaultDisplay.getLayerStack());
                     topOpeningApp.mAppAnimator.thumbnail = surface;
                     if (SHOW_TRANSACTIONS) Slog.i(TAG, "  THUMBNAIL "
                             + surface + ": CREATE");

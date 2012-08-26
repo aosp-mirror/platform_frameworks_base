@@ -230,7 +230,7 @@ nContextSetSurface(JNIEnv *_env, jobject _this, RsContext con, jint width, jint 
     if (wnd == NULL) {
 
     } else {
-        window = android_Surface_getNativeWindow(_env, wnd).get();
+        window = android_view_Surface_getNativeWindow(_env, wnd).get();
     }
 
     rsContextSetSurface(con, width, height, window);
@@ -494,7 +494,7 @@ nAllocationSetSurface(JNIEnv *_env, jobject _this, RsContext con, RsAllocation a
 
     sp<Surface> s;
     if (sur != 0) {
-        s = Surface_getSurface(_env, sur);
+        s = android_view_Surface_getSurface(_env, sur);
     }
 
     rsAllocationSetSurface(con, alloc, static_cast<ANativeWindow *>(s.get()));

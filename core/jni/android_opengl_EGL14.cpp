@@ -549,7 +549,7 @@ not_valid_surface:
         goto exit;
     }
 
-    window = android::android_Surface_getNativeWindow(_env, win);
+    window = android::android_view_Surface_getNativeWindow(_env, win);
 
     if (window == NULL)
         goto not_valid_surface;

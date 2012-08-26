@@ -18,23 +18,26 @@ package com.android.server.display;
 
 import android.content.Context;
 import android.os.IBinder;
-import android.util.DisplayMetrics;
+import android.view.Surface;
+import android.view.Surface.PhysicalDisplayInfo;
 
 /**
- * Provides a fake default display for headless systems.
+ * A display adapter for the local displays managed by Surface Flinger.
  */
-public final class HeadlessDisplayAdapter extends DisplayAdapter {
+public final class LocalDisplayAdapter extends DisplayAdapter {
     private final Context mContext;
-    private final HeadlessDisplayDevice mDefaultDisplayDevice;
+    private final LocalDisplayDevice mDefaultDisplayDevice;
 
-    public HeadlessDisplayAdapter(Context context) {
+    public LocalDisplayAdapter(Context context) {
         mContext = context;
-        mDefaultDisplayDevice = new HeadlessDisplayDevice();
+
+        IBinder token = Surface.getBuiltInDisplay(Surface.BUILT_IN_DISPLAY_ID_MAIN);
+        mDefaultDisplayDevice = new LocalDisplayDevice(token);
     }
 
     @Override
     public String getName() {
-        return "HeadlessDisplayAdapter";
+        return "LocalDisplayAdapter";
     }
 
     @Override
@@ -42,27 +45,36 @@ public final class HeadlessDisplayAdapter extends DisplayAdapter {
         listener.onDisplayDeviceAdded(mDefaultDisplayDevice);
     }
 
-    private final class HeadlessDisplayDevice extends DisplayDevice {
+    private final class LocalDisplayDevice extends DisplayDevice {
+        private final IBinder mDisplayToken;
+
+        public LocalDisplayDevice(IBinder token) {
+            mDisplayToken = token;
+        }
+
         @Override
         public DisplayAdapter getAdapter() {
-            return HeadlessDisplayAdapter.this;
+            return LocalDisplayAdapter.this;
         }
 
         @Override
         public IBinder getDisplayToken() {
-            return null;
+            return mDisplayToken;
         }
 
         @Override
         public void getInfo(DisplayDeviceInfo outInfo) {
+            PhysicalDisplayInfo phys = new PhysicalDisplayInfo();
+            Surface.getDisplayInfo(mDisplayToken, phys);
+
             outInfo.name = mContext.getResources().getString(
                     com.android.internal.R.string.display_manager_built_in_display);
-            outInfo.width = 640;
-            outInfo.height = 480;
-            outInfo.refreshRate = 60;
-            outInfo.densityDpi = DisplayMetrics.DENSITY_DEFAULT;
-            outInfo.xDpi = 160;
-            outInfo.yDpi = 160;
+            outInfo.width = phys.width;
+            outInfo.height = phys.height;
+            outInfo.refreshRate = phys.refreshRate;
+            outInfo.densityDpi = (int)(phys.density * 160 + 0.5f);
+            outInfo.xDpi = phys.xDpi;
+            outInfo.yDpi = phys.yDpi;
         }
     }
 }
