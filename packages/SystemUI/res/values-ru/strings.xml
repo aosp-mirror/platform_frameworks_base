@@ -138,7 +138,7 @@
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Передача данных отключена"</string>
     <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Достигнут лимит трафика."\n\n"При восстановлении подключения оператор может взимать плату за передачу данных."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Восстановить подключение"</string>
-    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Нет подключения к Интернету"</string>
+    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Нет интернет-подключения"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi подключено"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Поиск GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Координаты по GPS"</string>
