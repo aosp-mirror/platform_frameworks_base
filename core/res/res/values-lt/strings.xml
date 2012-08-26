@@ -225,7 +225,7 @@
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"visa licencija, leidžianti sąveikauti su naudotojais"</string>
     <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Leidžiama bet kokia sąveika tarp naudotojų."</string>
     <string name="permlab_manageUsers" msgid="1676150911672282428">"tvarkyti naudotojus"</string>
-    <string name="permdesc_manageUsers" msgid="8409306667645355638">"Leidžia tvarkyti įrenginio naudotojų duomenis, įskaitant užklausų teikimą, duomenų kūrimą ir ištrynimą."</string>
+    <string name="permdesc_manageUsers" msgid="8409306667645355638">"Leidžia programoms tvarkyti įrenginio naudotojų duomenis, įskaitant užklausų teikimą, duomenų kūrimą ir ištrynimą."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"nuskaityti veikiančių programų išsamią informaciją"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Leidžiama programai nuskaityti išsamią informaciją apie šiuo ir pastaruoju metu vykdomas užduotis. Kenkėjiškos programos gali surasti privačios informacijos apie kitas programas."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"pertvarkyti vykdomas programas"</string>
