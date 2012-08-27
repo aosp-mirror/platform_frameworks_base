@@ -6201,8 +6201,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                     verification.setDataAndType(getPackageUri(), PACKAGE_MIME_TYPE);
                     verification.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-                    final List<ResolveInfo> receivers = queryIntentReceivers(verification, null,
-                            PackageManager.GET_DISABLED_COMPONENTS, 0 /* TODO: Which userId? */);
+                    final List<ResolveInfo> receivers = queryIntentReceivers(verification,
+                            PACKAGE_MIME_TYPE, PackageManager.GET_DISABLED_COMPONENTS,
+                            0 /* TODO: Which userId? */);
 
                     if (DEBUG_VERIFY) {
                         Slog.d(TAG, "Found " + receivers.size() + " verifiers for intent "
