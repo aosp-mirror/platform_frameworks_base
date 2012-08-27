@@ -1618,7 +1618,7 @@ public class DateUtils
 
         String result;
         long now = System.currentTimeMillis();
-        long span = now - millis;
+        long span = Math.abs(now - millis);
 
         synchronized (DateUtils.class) {
             if (sNowTime == null) {
