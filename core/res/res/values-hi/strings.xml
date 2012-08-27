@@ -468,7 +468,7 @@
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"फ़ोन हार्डवेयर में पूर्ण पहुंच की अनुमति देते हुए निम्‍न-स्‍तर निर्माता परीक्षण के रूप में चलाएं. केवल तभी उपलब्‍ध जब कोई फ़ोन निर्माता परीक्षण मोड में चल रहा हो."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"वॉलपेपर सेट करें"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"एप्‍लिकेशन को सिस्‍टम वॉलपेपर सेट करने देता है."</string>
-    <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"अपने वॉलपेपर का आकार समायोजित करें"</string>
+    <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"अपने वॉलपेपर का आकार एडजस्ट करें"</string>
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"एप्‍लिकेशन को सिस्‍टम वॉलपेपर आकार संकेत सेट करने देता है."</string>
     <string name="permlab_masterClear" msgid="2315750423139697397">"फ़ैक्‍ट्री डिफ़ॉल्‍ट पर सिस्‍टम रीसेट करें"</string>
     <string name="permdesc_masterClear" msgid="3665380492633910226">"एप्लिकेशन को सभी डेटा, कॉन्फ़िगरेशन, और इंस्टॉल एप्लिकेशन मिटाकर, सिस्टम को पूरी तरह उसकी फ़ैक्टरी सेटिंग पर रीसेट करने देता है."</string>
