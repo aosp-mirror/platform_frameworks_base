@@ -18,7 +18,10 @@ package com.android.internal.net;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
+import android.util.Log;
 
+import java.net.InetAddress;
 import java.nio.charset.Charsets;
 
 /**
@@ -31,6 +34,8 @@ import java.nio.charset.Charsets;
  * @hide
  */
 public class VpnProfile implements Cloneable, Parcelable {
+    private static final String TAG = "VpnProfile";
+
     // Match these constants with R.array.vpn_types.
     public static final int TYPE_PPTP = 0;
     public static final int TYPE_L2TP_IPSEC_PSK = 1;
@@ -122,6 +127,32 @@ public class VpnProfile implements Cloneable, Parcelable {
         builder.append('\0').append(ipsecCaCert);
         builder.append('\0').append(ipsecServerCert);
         return builder.toString().getBytes(Charsets.UTF_8);
+    }
+
+    /**
+     * Test if profile is valid for lockdown, which requires IPv4 address for
+     * both server and DNS. Server hostnames would require using DNS before
+     * connection.
+     */
+    public boolean isValidLockdownProfile() {
+        try {
+            InetAddress.parseNumericAddress(server);
+
+            for (String dnsServer : dnsServers.split(" +")) {
+                InetAddress.parseNumericAddress(this.dnsServers);
+            }
+            if (TextUtils.isEmpty(dnsServers)) {
+                Log.w(TAG, "DNS required");
+                return false;
+            }
+
+            // Everything checked out above
+            return true;
+
+        } catch (IllegalArgumentException e) {
+            Log.w(TAG, "Invalid address", e);
+            return false;
+        }
     }
 
     @Override

@@ -1364,6 +1364,7 @@
   <java-symbol type="drawable" name="stat_sys_tether_usb" />
   <java-symbol type="drawable" name="stat_sys_throttled" />
   <java-symbol type="drawable" name="vpn_connected" />
+  <java-symbol type="drawable" name="vpn_disconnected" />
   <java-symbol type="id" name="ask_checkbox" />
   <java-symbol type="id" name="compat_checkbox" />
   <java-symbol type="id" name="original_app_icon" />
@@ -1479,6 +1480,10 @@
   <java-symbol type="string" name="vpn_text_long" />
   <java-symbol type="string" name="vpn_title" />
   <java-symbol type="string" name="vpn_title_long" />
+  <java-symbol type="string" name="vpn_lockdown_connecting" />
+  <java-symbol type="string" name="vpn_lockdown_connected" />
+  <java-symbol type="string" name="vpn_lockdown_error" />
+  <java-symbol type="string" name="vpn_lockdown_reset" />
   <java-symbol type="string" name="wallpaper_binding_label" />
   <java-symbol type="style" name="Theme.Dialog.AppError" />
   <java-symbol type="style" name="Theme.Toast" />

@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import static android.Manifest.permission.CONNECTIVITY_INTERNAL;
 import static android.Manifest.permission.MANAGE_NETWORK_POLICY;
 import static android.Manifest.permission.RECEIVE_DATA_ACTIVITY_CHANGE;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
@@ -31,13 +32,13 @@ import static android.net.ConnectivityManager.isNetworkTypeValid;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.bluetooth.BluetoothTetheringDataTracker;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -80,6 +81,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.provider.Settings;
+import android.security.Credentials;
 import android.security.KeyStore;
 import android.text.TextUtils;
 import android.util.EventLog;
@@ -91,11 +93,11 @@ import com.android.internal.net.VpnConfig;
 import com.android.internal.net.VpnProfile;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneConstants;
-import com.android.internal.util.Preconditions;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.connectivity.Tethering;
 import com.android.server.connectivity.Vpn;
 import com.android.server.net.BaseNetworkObserver;
+import com.android.server.net.LockdownVpnTracker;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Sets;
 
@@ -142,10 +144,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private Tethering mTethering;
     private boolean mTetheringConfigValid = false;
 
-    private final KeyStore mKeyStore;
+    private KeyStore mKeyStore;
 
     private Vpn mVpn;
     private VpnCallback mVpnCallback = new VpnCallback();
+
+    private boolean mLockdownEnabled;
+    private LockdownVpnTracker mLockdownTracker;
 
     /** Lock around {@link #mUidRules} and {@link #mMeteredIfaces}. */
     private Object mRulesLock = new Object();
@@ -275,6 +280,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      * {@link NetworkStateTracker#setPolicyDataEnable(boolean)}.
      */
     private static final int EVENT_SET_POLICY_DATA_ENABLE = 13;
+
+    private static final int EVENT_VPN_STATE_CHANGED = 14;
 
     /** Handler used for internal events. */
     private InternalHandler mHandler;
@@ -786,6 +793,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             info = new NetworkInfo(info);
             info.setDetailedState(DetailedState.BLOCKED, null, null);
         }
+        if (mLockdownTracker != null) {
+            info = mLockdownTracker.augmentNetworkInfo(info);
+        }
         return info;
     }
 
@@ -801,6 +811,17 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         enforceAccessPermission();
         final int uid = Binder.getCallingUid();
         return getNetworkInfo(mActiveDefaultNetwork, uid);
+    }
+
+    public NetworkInfo getActiveNetworkInfoUnfiltered() {
+        enforceAccessPermission();
+        if (isNetworkTypeValid(mActiveDefaultNetwork)) {
+            final NetworkStateTracker tracker = mNetTrackers[mActiveDefaultNetwork];
+            if (tracker != null) {
+                return tracker.getNetworkInfo();
+            }
+        }
+        return null;
     }
 
     @Override
@@ -1061,6 +1082,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
             // TODO - move this into individual networktrackers
             int usedNetworkType = convertFeatureToNetworkType(networkType, feature);
+
+            if (mLockdownEnabled) {
+                // Since carrier APNs usually aren't available from VPN
+                // endpoint, mark them as unavailable.
+                return PhoneConstants.APN_TYPE_NOT_AVAILABLE;
+            }
 
             if (mProtectedNetworks.contains(usedNetworkType)) {
                 enforceConnectivityInternalPermission();
@@ -1769,7 +1796,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
     }
 
-    private void sendConnectedBroadcast(NetworkInfo info) {
+    public void sendConnectedBroadcast(NetworkInfo info) {
         sendGeneralBroadcast(info, CONNECTIVITY_ACTION_IMMEDIATE);
         sendGeneralBroadcast(info, CONNECTIVITY_ACTION);
     }
@@ -1784,6 +1811,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     private Intent makeGeneralIntent(NetworkInfo info, String bcastType) {
+        if (mLockdownTracker != null) {
+            info = mLockdownTracker.augmentNetworkInfo(info);
+        }
+
         Intent intent = new Intent(bcastType);
         intent.putExtra(ConnectivityManager.EXTRA_NETWORK_INFO, info);
         intent.putExtra(ConnectivityManager.EXTRA_NETWORK_TYPE, info.getType());
@@ -1915,7 +1946,25 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
         // load the global proxy at startup
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_APPLY_GLOBAL_HTTP_PROXY));
+
+        // Try bringing up tracker, but if KeyStore isn't ready yet, wait
+        // for user to unlock device.
+        if (!updateLockdownVpn()) {
+            final IntentFilter filter = new IntentFilter(Intent.ACTION_USER_PRESENT);
+            mContext.registerReceiver(mUserPresentReceiver, filter);
+        }
     }
+
+    private BroadcastReceiver mUserPresentReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Try creating lockdown tracker, since user present usually means
+            // unlocked keystore.
+            if (updateLockdownVpn()) {
+                mContext.unregisterReceiver(this);
+            }
+        }
+    };
 
     private void handleConnect(NetworkInfo info) {
         final int type = info.getType();
@@ -2597,6 +2646,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     } else if (state == NetworkInfo.State.CONNECTED) {
                         handleConnect(info);
                     }
+                    if (mLockdownTracker != null) {
+                        mLockdownTracker.onNetworkInfoChanged(info);
+                    }
                     break;
                 case NetworkStateTracker.EVENT_CONFIGURATION_CHANGED:
                     info = (NetworkInfo) msg.obj;
@@ -2694,6 +2746,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     final int networkType = msg.arg1;
                     final boolean enabled = msg.arg2 == ENABLED;
                     handleSetPolicyDataEnable(networkType, enabled);
+                    break;
+                }
+                case EVENT_VPN_STATE_CHANGED: {
+                    if (mLockdownTracker != null) {
+                        mLockdownTracker.onVpnStateChanged((NetworkInfo) msg.obj);
+                    }
+                    break;
                 }
             }
         }
@@ -3092,6 +3151,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      */
     @Override
     public boolean protectVpn(ParcelFileDescriptor socket) {
+        throwIfLockdownEnabled();
         try {
             int type = mActiveDefaultNetwork;
             if (ConnectivityManager.isNetworkTypeValid(type)) {
@@ -3118,6 +3178,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      */
     @Override
     public boolean prepareVpn(String oldPackage, String newPackage) {
+        throwIfLockdownEnabled();
         return mVpn.prepare(oldPackage, newPackage);
     }
 
@@ -3130,6 +3191,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      */
     @Override
     public ParcelFileDescriptor establishVpn(VpnConfig config) {
+        throwIfLockdownEnabled();
         return mVpn.establish(config);
     }
 
@@ -3139,6 +3201,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      */
     @Override
     public void startLegacyVpn(VpnProfile profile) {
+        throwIfLockdownEnabled();
         final LinkProperties egress = getActiveLinkProperties();
         if (egress == null) {
             throw new IllegalStateException("Missing active network connection");
@@ -3154,6 +3217,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      */
     @Override
     public LegacyVpnInfo getLegacyVpnInfo() {
+        throwIfLockdownEnabled();
         return mVpn.getLegacyVpnInfo();
     }
 
@@ -3172,8 +3236,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
 
         public void onStateChanged(NetworkInfo info) {
-            // TODO: if connected, release delayed broadcast
-            // TODO: if disconnected, consider kicking off reconnect
+            mHandler.obtainMessage(EVENT_VPN_STATE_CHANGED, info).sendToTarget();
         }
 
         public void override(List<String> dnsServers, List<String> searchDomains) {
@@ -3240,6 +3303,60 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     sendProxyBroadcast(mDefaultProxy);
                 }
             }
+        }
+    }
+
+    @Override
+    public boolean updateLockdownVpn() {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+
+        // Tear down existing lockdown if profile was removed
+        mLockdownEnabled = LockdownVpnTracker.isEnabled();
+        if (mLockdownEnabled) {
+            if (mKeyStore.state() != KeyStore.State.UNLOCKED) {
+                Slog.w(TAG, "KeyStore locked; unable to create LockdownTracker");
+                return false;
+            }
+
+            final String profileName = new String(mKeyStore.get(Credentials.LOCKDOWN_VPN));
+            final VpnProfile profile = VpnProfile.decode(
+                    profileName, mKeyStore.get(Credentials.VPN + profileName));
+            setLockdownTracker(new LockdownVpnTracker(mContext, mNetd, this, mVpn, profile));
+        } else {
+            setLockdownTracker(null);
+        }
+
+        return true;
+    }
+
+    /**
+     * Internally set new {@link LockdownVpnTracker}, shutting down any existing
+     * {@link LockdownVpnTracker}. Can be {@code null} to disable lockdown.
+     */
+    private void setLockdownTracker(LockdownVpnTracker tracker) {
+        // Shutdown any existing tracker
+        final LockdownVpnTracker existing = mLockdownTracker;
+        mLockdownTracker = null;
+        if (existing != null) {
+            existing.shutdown();
+        }
+
+        try {
+            if (tracker != null) {
+                mNetd.setFirewallEnabled(true);
+                mLockdownTracker = tracker;
+                mLockdownTracker.init();
+            } else {
+                mNetd.setFirewallEnabled(false);
+            }
+        } catch (RemoteException e) {
+            // ignored; NMS lives inside system_server
+        }
+    }
+
+    private void throwIfLockdownEnabled() {
+        if (mLockdownEnabled) {
+            throw new IllegalStateException("Unavailable in lockdown mode");
         }
     }
 }

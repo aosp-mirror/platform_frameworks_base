@@ -58,6 +58,7 @@ import android.util.SparseBooleanArray;
 import com.android.internal.net.NetworkStatsFactory;
 import com.android.internal.util.Preconditions;
 import com.android.server.NativeDaemonConnector.Command;
+import com.android.server.net.LockdownVpnTracker;
 import com.google.android.collect.Maps;
 
 import java.io.BufferedReader;
@@ -370,7 +371,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
 
         // TODO: Push any existing firewall state
-        setFirewallEnabled(mFirewallEnabled);
+        setFirewallEnabled(mFirewallEnabled || LockdownVpnTracker.isEnabled());
     }
 
     //
