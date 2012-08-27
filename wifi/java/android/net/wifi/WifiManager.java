@@ -1358,7 +1358,11 @@ public class WifiManager {
 
     private void init() {
         mWifiServiceMessenger = getWifiServiceMessenger();
-        if (mWifiServiceMessenger == null) throw new RuntimeException("Failed to initialize");
+        if (mWifiServiceMessenger == null) {
+            mAsyncChannel = null;
+            return;
+        }
+
         HandlerThread t = new HandlerThread("WifiManager");
         t.start();
         mHandler = new ServiceHandler(t.getLooper());
@@ -1372,7 +1376,7 @@ public class WifiManager {
 
     private void validateChannel() {
         if (mAsyncChannel == null) throw new IllegalStateException(
-                "Bad WifiManager instance state, re-initialize");
+                "No permission to access and change wifi or a bad initialization");
     }
 
     /**
@@ -1516,6 +1520,8 @@ public class WifiManager {
         try {
             return mService.getWifiServiceMessenger();
         } catch (RemoteException e) {
+            return null;
+        } catch (SecurityException e) {
             return null;
         }
     }
