@@ -32,6 +32,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#include <cutils/fs.h>
 #include <cutils/sockets.h>
 #include <cutils/log.h>
 #include <cutils/properties.h>
