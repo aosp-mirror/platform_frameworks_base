@@ -959,10 +959,8 @@ public class WifiService extends IWifiManager.Stub {
      * an AsyncChannel communication with WifiService
      */
     public Messenger getWifiServiceMessenger() {
-         /* STOPSHIP: Fix this to have old sync API not need these new permissions
-          * enforceAccessPermission();
-          * enforceChangePermission();
-          */
+        enforceAccessPermission();
+        enforceChangePermission();
         return new Messenger(mAsyncServiceHandler);
     }
 
