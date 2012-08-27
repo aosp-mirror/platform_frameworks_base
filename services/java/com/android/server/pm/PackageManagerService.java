@@ -710,20 +710,56 @@ public class PackageManagerService extends IPackageManager.Stub {
                             res.removedInfo.sendBroadcast(false, true);
                             Bundle extras = new Bundle(1);
                             extras.putInt(Intent.EXTRA_UID, res.uid);
+                            // Determine the set of users who are adding this
+                            // package for the first time vs. those who are seeing
+                            // an update.
+                            int[] firstUsers;
+                            int[] updateUsers = new int[0];
+                            if (res.origUsers == null || res.origUsers.length == 0) {
+                                firstUsers = res.newUsers;
+                            } else {
+                                firstUsers = new int[0];
+                                for (int i=0; i<res.newUsers.length; i++) {
+                                    int user = res.newUsers[i];
+                                    boolean isNew = true;
+                                    for (int j=0; j<res.origUsers.length; j++) {
+                                        if (res.origUsers[j] == user) {
+                                            isNew = false;
+                                            break;
+                                        }
+                                    }
+                                    if (isNew) {
+                                        int[] newFirst = new int[firstUsers.length+1];
+                                        System.arraycopy(firstUsers, 0, newFirst, 0,
+                                                firstUsers.length);
+                                        newFirst[firstUsers.length] = user;
+                                        firstUsers = newFirst;
+                                    } else {
+                                        int[] newUpdate = new int[updateUsers.length+1];
+                                        System.arraycopy(updateUsers, 0, newUpdate, 0,
+                                                updateUsers.length);
+                                        newUpdate[updateUsers.length] = user;
+                                        updateUsers = newUpdate;
+                                    }
+                                }
+                            }
+                            sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
+                                    res.pkg.applicationInfo.packageName,
+                                    extras, null, null, firstUsers);
                             final boolean update = res.removedInfo.removedPackage != null;
                             if (update) {
                                 extras.putBoolean(Intent.EXTRA_REPLACING, true);
                             }
                             sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
                                     res.pkg.applicationInfo.packageName,
-                                    extras, null, null, res.users);
+                                    extras, null, null, updateUsers);
                             if (update) {
                                 sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED,
                                         res.pkg.applicationInfo.packageName,
-                                        extras, null, null, res.users);
+                                        extras, null, null, updateUsers);
                                 sendPackageBroadcast(Intent.ACTION_MY_PACKAGE_REPLACED,
                                         null, null,
-                                        res.pkg.applicationInfo.packageName, null, res.users);
+                                        res.pkg.applicationInfo.packageName, null, updateUsers);
                             }
                             if (res.removedInfo.args != null) {
                                 // Remove the replaced package's older resources safely now
@@ -5343,8 +5379,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         public void onEvent(int event, String path) {
             String removedPackage = null;
             int removedUid = -1;
+            int[] removedUsers = null;
             String addedPackage = null;
             int addedUid = -1;
+            int[] addedUsers = null;
 
             // TODO post a message to the handler to obtain serial ordering
             synchronized (mInstallLock) {
@@ -5373,6 +5411,15 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // reader
                 synchronized (mPackages) {
                     p = mAppDirs.get(fullPathStr);
+                    if (p != null) {
+                        PackageSetting ps = mSettings.mPackages.get(p.applicationInfo.packageName);
+                        if (ps != null) {
+                            removedUsers = ps.queryInstalledUsers(sUserManager.getUserIds(), true);
+                        } else {
+                            removedUsers = sUserManager.getUserIds();
+                        }
+                    }
+                    addedUsers = sUserManager.getUserIds();
                 }
                 if ((event&REMOVE_EVENTS) != 0) {
                     if (p != null) {
@@ -5390,7 +5437,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                                 PackageParser.PARSE_CHATTY |
                                 PackageParser.PARSE_MUST_BE_APK,
                                 SCAN_MONITOR | SCAN_NO_PATHS | SCAN_UPDATE_TIME,
-                                System.currentTimeMillis(), null);
+                                System.currentTimeMillis(), UserHandle.ALL);
                         if (p != null) {
                             /*
                              * TODO this seems dangerous as the package may have
@@ -5419,13 +5466,13 @@ public class PackageManagerService extends IPackageManager.Stub {
                 extras.putInt(Intent.EXTRA_UID, removedUid);
                 extras.putBoolean(Intent.EXTRA_DATA_REMOVED, false);
                 sendPackageBroadcast(Intent.ACTION_PACKAGE_REMOVED, removedPackage,
-                        extras, null, null, null);
+                        extras, null, null, removedUsers);
             }
             if (addedPackage != null) {
                 Bundle extras = new Bundle(1);
                 extras.putInt(Intent.EXTRA_UID, addedUid);
                 sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, addedPackage,
-                        extras, null, null, null);
+                        extras, null, null, addedUsers);
             }
         }
 
@@ -5468,7 +5515,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         if ((flags&PackageManager.INSTALL_ALL_USERS) != 0) {
             user = UserHandle.ALL;
         } else {
-            user = Process.myUserHandle();
+            user = new UserHandle(UserHandle.getUserId(uid));
         }
 
         final int filteredFlags;
@@ -7212,7 +7259,10 @@ public class PackageManagerService extends IPackageManager.Stub {
     class PackageInstalledInfo {
         String name;
         int uid;
-        int[] users;
+        // The set of users that originally had this package installed.
+        int[] origUsers;
+        // The set of users that now have this package installed.
+        int[] newUsers;
         PackageParser.Package pkg;
         int returnCode;
         PackageRemovedInfo removedInfo;
@@ -7362,7 +7412,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 int oldScanMode = (oldOnSd ? 0 : SCAN_MONITOR) | SCAN_UPDATE_SIGNATURE
                         | SCAN_UPDATE_TIME;
                 if (scanPackageLI(restoreFile, oldParseFlags, oldScanMode,
-                        origUpdateTime, user) == null) {
+                        origUpdateTime, null) == null) {
                     Slog.e(TAG, "Failed to restore package : " + pkgName + " after failed upgrade");
                     return;
                 }
@@ -7511,10 +7561,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                     UPDATE_PERMISSIONS_REPLACE_PKG | (newPackage.permissions.size() > 0
                             ? UPDATE_PERMISSIONS_ALL : 0));
             res.name = pkgName;
-            PackageSetting ps = mSettings.mPackages.get(pkgName);
-            if (ps != null) {
-                res.users = ps.getInstalledUsers(sUserManager.getUserIds());
-            }
             res.uid = newPackage.applicationInfo.uid;
             res.pkg = newPackage;
             mSettings.setInstallStatus(pkgName, PackageSettingBase.PKG_INSTALL_COMPLETE);
@@ -7612,6 +7658,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     systemApp = (ps.pkg.applicationInfo.flags &
                             ApplicationInfo.FLAG_SYSTEM) != 0;
                 }
+                res.origUsers = ps.queryInstalledUsers(sUserManager.getUserIds(), true);
             }
         }
 
@@ -7634,12 +7681,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                     installerPackageName, res);
         } else {
             installNewPackageLI(pkg, parseFlags, scanMode, args.user,
-                    installerPackageName,res);
+                    installerPackageName, res);
         }
         synchronized (mPackages) {
-            PackageSetting ps = mSettings.mPackages.get(pkgName);
+            final PackageSetting ps = mSettings.mPackages.get(pkgName);
             if (ps != null) {
-                res.users = ps.getInstalledUsers(sUserManager.getUserIds());
+                res.newUsers = ps.queryInstalledUsers(sUserManager.getUserIds(), true);
             }
         }
     }
@@ -7865,7 +7912,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (outInfo != null) {
                 outInfo.removedPackage = packageName;
                 outInfo.removedUsers = deletedPs != null
-                        ? deletedPs.getInstalledUsers(sUserManager.getUserIds()) : null;
+                        ? deletedPs.queryInstalledUsers(sUserManager.getUserIds(), true)
+                        : null;
             }
         }
         if ((flags&PackageManager.DELETE_KEEP_DATA) == 0) {
