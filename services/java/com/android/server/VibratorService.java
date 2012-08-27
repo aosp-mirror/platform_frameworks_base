@@ -441,7 +441,7 @@ public class VibratorService extends IVibratorService.Stub
 
         private void delay(long duration) {
             if (duration > 0) {
-                long bedtime = SystemClock.uptimeMillis();
+                long bedtime = duration + SystemClock.uptimeMillis();
                 do {
                     try {
                         this.wait(duration);
@@ -451,8 +451,7 @@ public class VibratorService extends IVibratorService.Stub
                     if (mDone) {
                         break;
                     }
-                    duration = duration
-                            - SystemClock.uptimeMillis() - bedtime;
+                    duration = bedtime - SystemClock.uptimeMillis();
                 } while (duration > 0);
             }
         }
