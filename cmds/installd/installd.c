@@ -384,6 +384,11 @@ int initialize_directories() {
         // Introducing multi-user, so migrate /data/media contents into /data/media/0
         ALOGD("Migrating /data/media for multi-user");
 
+        // Ensure /data/media
+        if (ensure_dir(android_media_dir.path, 0770, AID_MEDIA_RW, AID_MEDIA_RW) == -1) {
+            goto fail;
+        }
+
         // /data/media.tmp
         char media_tmp_dir[PATH_MAX];
         snprintf(media_tmp_dir, PATH_MAX, "%smedia.tmp", android_data_dir.path);
