@@ -1106,10 +1106,12 @@ public class Dialog implements DialogInterface, Window.Callback,
 
     /**
      * Set a listener to be invoked when the dialog is canceled.
-     * <p>
-     * This will only be invoked when the dialog is canceled, if the creator
-     * needs to know when it is dismissed in general, use
-     * {@link #setOnDismissListener}.
+     *
+     * <p>This will only be invoked when the dialog is canceled.
+     * Cancel events alone will not capture all ways that
+     * the dialog might be dismissed. If the creator needs
+     * to know when a dialog is dismissed in general, use
+     * {@link #setOnDismissListener}.</p>
      * 
      * @param listener The {@link DialogInterface.OnCancelListener} to use.
      */
