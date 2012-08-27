@@ -3272,6 +3272,15 @@
     <!-- The text of the notification when VPN is active with a session name. -->
     <string name="vpn_text_long">Connected to <xliff:g id="session" example="office">%s</xliff:g>. Touch to manage the network.</string>
 
+    <!-- Notification title when connecting to lockdown VPN. -->
+    <string name="vpn_lockdown_connecting">Always-on VPN connecting\u2026</string>
+    <!-- Notification title when connected to lockdown VPN. -->
+    <string name="vpn_lockdown_connected">Always-on VPN connected</string>
+    <!-- Notification title when error connecting to lockdown VPN. -->
+    <string name="vpn_lockdown_error">Always-on VPN error</string>
+    <!-- Notification body that indicates user can touch to cycle lockdown VPN connection. -->
+    <string name="vpn_lockdown_reset">Touch to reset connection</string>
+
     <!-- Localized strings for WebView -->
     <!-- Label for button in a WebView that will open a chooser to choose a file to upload -->
     <string name="upload_file">Choose file</string>
