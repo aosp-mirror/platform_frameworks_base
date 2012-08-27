@@ -6987,6 +6987,8 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
     @Override
     public boolean requestFocus(int direction, Rect previouslyFocusedRect) {
+        // Check if we are destroyed
+        if (mWebViewCore == null) return false;
         // FIXME: If a subwindow is showing find, and the user touches the
         // background window, it can steal focus.
         if (mFindIsUp) return false;
