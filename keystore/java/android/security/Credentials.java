@@ -61,6 +61,9 @@ public class Credentials {
     /** Key prefix for WIFI. */
     public static final String WIFI = "WIFI_";
 
+    /** Key containing suffix of lockdown VPN profile. */
+    public static final String LOCKDOWN_VPN = "LOCKDOWN_VPN";
+
     /** Data type for public keys. */
     public static final String EXTRA_PUBLIC_KEY = "KEY";
 

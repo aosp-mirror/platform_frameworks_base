@@ -912,4 +912,13 @@ public class ConnectivityManager {
             return false;
         }
     }
+
+    /** {@hide} */
+    public boolean updateLockdownVpn() {
+        try {
+            return mService.updateLockdownVpn();
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
 }
