@@ -59,7 +59,7 @@
     <string name="always_use_device" msgid="1450287437017315906">"Sử dụng theo mặc định cho thiết bị USB này"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"Sử dụng theo mặc định cho phụ kiện USB này"</string>
     <string name="usb_debugging_title" msgid="1114766024068112429">"Cho phép gỡ lỗi USB?"</string>
-    <string name="usb_debugging_message" msgid="719863946976291180">"Cho phép gỡ lỗi USB từ máy tính này?"\n"Tệp tham chiếu chính của RSA của bạn là"\n"<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_message" msgid="719863946976291180">"Cho phép gỡ lỗi USB từ máy tính này?"\n"Dấu tay khóa RSA của bạn là"\n"<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="4253099426793114693">"Luôn cho phép máy tính này"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"T.phóng để lấp đầy m.hình"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Giãn ra để lấp đầy m.hình"</string>
