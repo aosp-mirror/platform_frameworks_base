@@ -307,6 +307,7 @@ following layout classes:</p>
   <li>{@link android.widget.FrameLayout}</li>
   <li>{@link android.widget.LinearLayout}</li>
   <li>{@link android.widget.RelativeLayout}</li>
+  <li>{@link android.widget.GridLayout}</li>
 </ul>
 
 <p>And the following widget classes:</p>
@@ -326,6 +327,9 @@ following layout classes:</p>
 </ul>
 
 <p>Descendants of these classes are not supported.</p>
+
+<p>RemoteViews also supports {@link android.view.ViewStub}, which is an invisible, zero-sized View you can use 
+to lazily inflate layout resources at runtime.</p>
 
 
 <h3 id="AddingMargins">Adding margins to App Widgets</h3>
@@ -410,6 +414,25 @@ App Widget,
 done.
     (See <a href="#Configuring">Creating an App Widget Configuration
 Activity</a> below.)</dd> 
+
+<dt>
+  {@link android.appwidget.AppWidgetProvider#onAppWidgetOptionsChanged onAppWidgetOptionsChanged()} 
+</dt>
+<dd>
+This is called when the widget is first placed and any time the widget is resized. You can use this callback to show or hide content based on the widget's size ranges. You get the size ranges by calling {@link android.appwidget.AppWidgetManager#getAppWidgetOptions getAppWidgetOptions()}, which returns a  {@link android.os.Bundle} that includes the following:<br /><br />
+<ul>
+  <li>{@link android.appwidget.AppWidgetManager#OPTION_APPWIDGET_MIN_WIDTH}&mdash;Contains 
+the lower bound on the current width, in dp units, of a widget instance.</li>
+  <li>{@link android.appwidget.AppWidgetManager#OPTION_APPWIDGET_MIN_HEIGHT}&mdash;Contains 
+the lower bound on the current height, in dp units, of a widget instance.</li>
+  <li>{@link android.appwidget.AppWidgetManager#OPTION_APPWIDGET_MAX_WIDTH}&mdash;Contains
+ the upper bound on the current width, in dp units, of a widget instance.</li>
+  <li>{@link android.appwidget.AppWidgetManager#OPTION_APPWIDGET_MAX_HEIGHT}&mdash;Contains 
+the upper bound on the current width, in dp units, of a widget instance.</li>
+</ul>
+
+This callback was introduced in API Level 16 (Android 4.1). If you implement this callback, make sure that your app doesn't depend on it since it won't be called on older devices.
+</dd>
   <dt>{@link android.appwidget.AppWidgetProvider#onDeleted(Context,int[])}</dt>
     <dd>This is called every time an App Widget is deleted from the App Widget
 host.</dd>
@@ -533,12 +556,13 @@ you would like
 to receive the App Widget broadcasts directly, you can implement your own 
 {@link android.content.BroadcastReceiver} or override the 
 {@link android.appwidget.AppWidgetProvider#onReceive(Context,Intent)} callback. 
-The four Intents you need to care about are:</p>
+The Intents you need to care about are as follows:</p>
 <ul>
   <li>{@link android.appwidget.AppWidgetManager#ACTION_APPWIDGET_UPDATE}</li>
   <li>{@link android.appwidget.AppWidgetManager#ACTION_APPWIDGET_DELETED}</li>
   <li>{@link android.appwidget.AppWidgetManager#ACTION_APPWIDGET_ENABLED}</li>
   <li>{@link android.appwidget.AppWidgetManager#ACTION_APPWIDGET_DISABLED}</li>
+  <li>{@link android.appwidget.AppWidgetManager#ACTION_APPWIDGET_OPTIONS_CHANGED}</li>
 </ul>
 
 
