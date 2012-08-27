@@ -473,6 +473,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             mContainerServiceUserId = 0;
             if (mPendingInstalls.size() > 0) {
                 mContainerServiceUserId = mPendingInstalls.get(0).getUser().getIdentifier();
+                if (mContainerServiceUserId == UserHandle.USER_ALL) {
+                    mContainerServiceUserId = 0;
+                }
             }
             if (mContext.bindService(service, mDefContainerConn,
                     Context.BIND_AUTO_CREATE, mContainerServiceUserId)) {
@@ -554,7 +557,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                         if (params != null) {
                             // Check if we're connected to the correct service, if it's an install
                             // request.
-                            if (params.getUser().getIdentifier() != mContainerServiceUserId) {
+                            final int installFor = params.getUser().getIdentifier();
+                            if (installFor != mContainerServiceUserId
+                                    && (installFor == UserHandle.USER_ALL
+                                            && mContainerServiceUserId != 0)) {
                                 mHandler.sendEmptyMessage(MCS_RECONNECT);
                                 return;
                             }
