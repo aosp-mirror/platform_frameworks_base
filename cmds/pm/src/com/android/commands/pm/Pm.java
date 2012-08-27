@@ -178,11 +178,6 @@ public final class Pm {
             return;
         }
 
-        if ("list-users".equals(op)) {
-            runListUsers();
-            return;
-        }
-
         try {
             if (args.length == 1) {
                 if (args[0].equalsIgnoreCase("-l")) {
@@ -222,7 +217,6 @@ public final class Pm {
         String type = nextArg();
         if (type == null) {
             System.err.println("Error: didn't specify type of data to list");
-            showUsage();
             return;
         }
         if ("package".equals(type) || "packages".equals(type)) {
@@ -241,7 +235,6 @@ public final class Pm {
             runListUsers();
         } else {
             System.err.println("Error: unknown list type '" + type + "'");
-            showUsage();
         }
     }
 
@@ -276,13 +269,11 @@ public final class Pm {
                     getFlags |= PackageManager.GET_UNINSTALLED_PACKAGES;
                 } else {
                     System.err.println("Error: Unknown option: " + opt);
-                    showUsage();
                     return;
                 }
             }
         } catch (RuntimeException ex) {
             System.err.println("Error: " + ex.toString());
-            showUsage();
             return;
         }
 
@@ -431,13 +422,11 @@ public final class Pm {
                     targetPackage = opt;
                 } else {
                     System.err.println("Error: Unknown option: " + opt);
-                    showUsage();
                     return;
                 }
             }
         } catch (RuntimeException ex) {
             System.err.println("Error: " + ex.toString());
-            showUsage();
             return;
         }
 
@@ -529,7 +518,6 @@ public final class Pm {
                     dangerousOnly = true;
                 } else {
                     System.err.println("Error: Unknown option: " + opt);
-                    showUsage();
                     return;
                 }
             }
@@ -678,7 +666,6 @@ public final class Pm {
         String pkg = nextArg();
         if (pkg == null) {
             System.err.println("Error: no package specified");
-            showUsage();
             return;
         }
         displayPackageFilePath(pkg);
@@ -736,20 +723,17 @@ public final class Pm {
         String arg = nextArg();
         if (arg == null) {
             System.err.println("Error: no install location specified.");
-            showUsage();
             return;
         }
         try {
             loc = Integer.parseInt(arg);
         } catch (NumberFormatException e) {
             System.err.println("Error: install location has to be a number.");
-            showUsage();
             return;
         }
         try {
             if (!mPm.setInstallLocation(loc)) {
                 System.err.println("Error: install location has to be a number.");
-                showUsage();
             }
         } catch (RemoteException e) {
             System.err.println(e.toString());
@@ -800,7 +784,6 @@ public final class Pm {
                 installerPackageName = nextOptionData();
                 if (installerPackageName == null) {
                     System.err.println("Error: no value specified for -i");
-                    showUsage();
                     return;
                 }
             } else if (opt.equals("-t")) {
@@ -817,61 +800,52 @@ public final class Pm {
                 algo = nextOptionData();
                 if (algo == null) {
                     System.err.println("Error: must supply argument for --algo");
-                    showUsage();
                     return;
                 }
             } else if (opt.equals("--iv")) {
                 iv = hexToBytes(nextOptionData());
                 if (iv == null) {
                     System.err.println("Error: must supply argument for --iv");
-                    showUsage();
                     return;
                 }
             } else if (opt.equals("--key")) {
                 key = hexToBytes(nextOptionData());
                 if (key == null) {
                     System.err.println("Error: must supply argument for --key");
-                    showUsage();
                     return;
                 }
             } else if (opt.equals("--macalgo")) {
                 macAlgo = nextOptionData();
                 if (macAlgo == null) {
                     System.err.println("Error: must supply argument for --macalgo");
-                    showUsage();
                     return;
                 }
             } else if (opt.equals("--mackey")) {
                 macKey = hexToBytes(nextOptionData());
                 if (macKey == null) {
                     System.err.println("Error: must supply argument for --mackey");
-                    showUsage();
                     return;
                 }
             } else if (opt.equals("--tag")) {
                 tag = hexToBytes(nextOptionData());
                 if (tag == null) {
                     System.err.println("Error: must supply argument for --tag");
-                    showUsage();
                     return;
                 }
             } else if (opt.equals("--originating-uri")) {
                 originatingUriString = nextOptionData();
                 if (originatingUriString == null) {
                     System.err.println("Error: must supply argument for --originating-uri");
-                    showUsage();
                     return;
                 }
             } else if (opt.equals("--referrer")) {
                 referrer = nextOptionData();
                 if (referrer == null) {
                     System.err.println("Error: must supply argument for --referrer");
-                    showUsage();
                     return;
                 }
             } else {
                 System.err.println("Error: Unknown option: " + opt);
-                showUsage();
                 return;
             }
         }
@@ -881,7 +855,6 @@ public final class Pm {
                 || tag != null) {
             if (algo == null || iv == null || key == null) {
                 System.err.println("Error: all of --algo, --iv, and --key must be specified");
-                showUsage();
                 return;
             }
 
@@ -889,7 +862,6 @@ public final class Pm {
                 if (macAlgo == null || macKey == null || tag == null) {
                     System.err.println("Error: all of --macalgo, --mackey, and --tag must "
                             + "be specified");
-                    showUsage();
                     return;
                 }
             }
@@ -938,7 +910,6 @@ public final class Pm {
             apkURI = Uri.fromFile(new File(apkFilePath));
         } else {
             System.err.println("Error: no package specified");
-            showUsage();
             return;
         }
 
@@ -1012,23 +983,16 @@ public final class Pm {
     }
 
     public void runCreateUser() {
-        // Need to be run as root
-        if (Process.myUid() != ROOT_UID) {
-            System.err.println("Error: create-user must be run as root");
-            return;
-        }
         String name;
         String arg = nextArg();
         if (arg == null) {
             System.err.println("Error: no user name specified.");
-            showUsage();
             return;
         }
         name = arg;
         try {
             if (mUm.createUser(name, 0) == null) {
                 System.err.println("Error: couldn't create User.");
-                showUsage();
             }
         } catch (RemoteException e) {
             System.err.println(e.toString());
@@ -1038,29 +1002,21 @@ public final class Pm {
     }
 
     public void runRemoveUser() {
-        // Need to be run as root
-        if (Process.myUid() != ROOT_UID) {
-            System.err.println("Error: remove-user must be run as root");
-            return;
-        }
         int userId;
         String arg = nextArg();
         if (arg == null) {
             System.err.println("Error: no user id specified.");
-            showUsage();
             return;
         }
         try {
             userId = Integer.parseInt(arg);
         } catch (NumberFormatException e) {
-            System.err.println("Error: user id has to be a number.");
-            showUsage();
+            System.err.println("Error: user id '" + arg + "' is not a number.");
             return;
         }
         try {
             if (!mUm.removeUser(userId)) {
-                System.err.println("Error: couldn't remove user.");
-                showUsage();
+                System.err.println("Error: couldn't remove user #" + userId + ".");
             }
         } catch (RemoteException e) {
             System.err.println(e.toString());
@@ -1069,11 +1025,6 @@ public final class Pm {
     }
 
     public void runListUsers() {
-        // Need to be run as root
-        if (Process.myUid() != ROOT_UID) {
-            System.err.println("Error: list-users must be run as root");
-            return;
-        }
         try {
             List<UserInfo> users = mUm.getUsers();
             if (users == null) {
@@ -1521,6 +1472,8 @@ public final class Pm {
         System.err.println("");
         System.err.println("pm list features: prints all features of the system.");
         System.err.println("");
+        System.err.println("pm list users: prints all users on the system.");
+        System.err.println("");
         System.err.println("pm path: print the path to the .apk of the given PACKAGE.");
         System.err.println("");
         System.err.println("pm install: installs a package to the system.  Options:");
@@ -1557,5 +1510,11 @@ public final class Pm {
         System.err.println("    2 [external]: Install on external media");
         System.err.println("");
         System.err.println("pm trim-caches: trim cache files to reach the given free space.");
+        System.err.println("");
+        System.err.println("pm create-user: create a new user with the given USER_NAME,");
+        System.err.println("  printing the new user identifier of the user.");
+        System.err.println("");
+        System.err.println("pm remove-user: remove the user with the given USER_IDENTIFIER,");
+        System.err.println("  deleting all data associated with that user");
     }
 }

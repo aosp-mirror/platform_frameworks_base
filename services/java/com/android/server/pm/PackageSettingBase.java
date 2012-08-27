@@ -210,17 +210,17 @@ class PackageSettingBase extends GrantedPermissions {
         return false;
     }
 
-    int[] getInstalledUsers(int[] users) {
+    int[] queryInstalledUsers(int[] users, boolean installed) {
         int num = 0;
         for (int user : users) {
-            if (getInstalled(user)) {
+            if (getInstalled(user) == installed) {
                 num++;
             }
         }
         int[] res = new int[num];
         num = 0;
         for (int user : users) {
-            if (getInstalled(user)) {
+            if (getInstalled(user) == installed) {
                 res[num] = user;
                 num++;
             }
