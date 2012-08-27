@@ -9404,9 +9404,15 @@ public final class ActivityManagerService extends ActivityManagerNative
     boolean dumpBroadcastsLocked(FileDescriptor fd, PrintWriter pw, String[] args,
             int opti, boolean dumpAll, String dumpPackage) {
         boolean needSep = false;
-        
+        boolean onlyHistory = false;
+
+        if ("history".equals(dumpPackage)) {
+            onlyHistory = true;
+            dumpPackage = null;
+        }
+
         pw.println("ACTIVITY MANAGER BROADCAST STATE (dumpsys activity broadcasts)");
-        if (dumpAll) {
+        if (!onlyHistory && dumpAll) {
             if (mRegisteredReceivers.size() > 0) {
                 boolean printed = false;
                 Iterator it = mRegisteredReceivers.values().iterator();
@@ -9439,7 +9445,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         needSep = true;
         
-        if (mStickyBroadcasts != null && dumpPackage == null) {
+        if (!onlyHistory && mStickyBroadcasts != null && dumpPackage == null) {
             if (needSep) {
                 pw.println();
             }
@@ -9471,7 +9477,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             needSep = true;
         }
         
-        if (dumpAll) {
+        if (!onlyHistory && dumpAll) {
             pw.println();
             for (BroadcastQueue queue : mBroadcastQueues) {
                 pw.println("  mBroadcastsScheduled [" + queue.mQueueName + "]="
@@ -10982,7 +10988,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     BroadcastQueue queue = broadcastQueueForIntent(intent);
                     BroadcastRecord r = new BroadcastRecord(queue, intent, null,
                             null, -1, -1, null, receivers, null, 0, null, null,
-                            false, true, true, false);
+                            false, true, true, false, -1);
                     queue.enqueueParallelBroadcastLocked(r);
                     queue.scheduleBroadcastsLocked();
                 }
@@ -11288,7 +11294,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             BroadcastRecord r = new BroadcastRecord(queue, intent, callerApp,
                     callerPackage, callingPid, callingUid, requiredPermission,
                     registeredReceivers, resultTo, resultCode, resultData, map,
-                    ordered, sticky, false, onlySendToCaller);
+                    ordered, sticky, false, onlySendToCaller, userId);
             if (DEBUG_BROADCAST) Slog.v(
                     TAG, "Enqueueing parallel broadcast " + r);
             final boolean replaced = replacePending && queue.replaceParallelBroadcastLocked(r);
@@ -11378,7 +11384,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             BroadcastRecord r = new BroadcastRecord(queue, intent, callerApp,
                     callerPackage, callingPid, callingUid, requiredPermission,
                     receivers, resultTo, resultCode, resultData, map, ordered,
-                    sticky, false, onlySendToCaller);
+                    sticky, false, onlySendToCaller, userId);
             if (DEBUG_BROADCAST) Slog.v(
                     TAG, "Enqueueing ordered broadcast " + r
                     + ": prev had " + queue.mOrderedBroadcasts.size());
