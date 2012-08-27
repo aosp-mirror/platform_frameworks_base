@@ -751,6 +751,7 @@ public class AlertController {
         public DialogInterface.OnClickListener mNeutralButtonListener;
         public boolean mCancelable;
         public DialogInterface.OnCancelListener mOnCancelListener;
+        public DialogInterface.OnDismissListener mOnDismissListener;
         public DialogInterface.OnKeyListener mOnKeyListener;
         public CharSequence[] mItems;
         public ListAdapter mAdapter;
