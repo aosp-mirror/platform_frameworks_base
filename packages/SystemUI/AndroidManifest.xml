@@ -179,5 +179,17 @@
 <!--            <category android:name="android.intent.category.LAUNCHER" />-->
             </intent-filter>
         </activity>
+
+        <!-- Beans in space -->
+        <service
+            android:name=".BeanBagDream"
+            android:exported="true"
+            android:label="Beans in space">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.DREAM" />
+            </intent-filter>
+        </service>
     </application>
 </manifest>
