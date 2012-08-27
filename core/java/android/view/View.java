@@ -4925,6 +4925,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Returns the delegate for implementing accessibility support via
+     * composition. For more details see {@link AccessibilityDelegate}.
+     *
+     * @return The delegate, or null if none set.
+     *
+     * @hide
+     */
+    public AccessibilityDelegate getAccessibilityDelegate() {
+        return mAccessibilityDelegate;
+    }
+
+    /**
      * Sets a delegate for implementing accessibility support via compositon as
      * opposed to inheritance. The delegate's primary use is for implementing
      * backwards compatible widgets. For more details see {@link AccessibilityDelegate}.

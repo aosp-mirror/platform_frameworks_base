@@ -2158,7 +2158,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             if (mAccessibilityDelegate == null) {
                 mAccessibilityDelegate = new ListItemAccessibilityDelegate();
             }
-            child.setAccessibilityDelegate(mAccessibilityDelegate);
+            if (child.getAccessibilityDelegate() == null) {
+                child.setAccessibilityDelegate(mAccessibilityDelegate);
+            }
         }
 
         return child;
