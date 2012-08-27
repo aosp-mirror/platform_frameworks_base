@@ -225,7 +225,7 @@
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"በተለያዩ ተጠቃሚዎች መካከል መስተጋብር ለመፍጠር ሙሉ ፍቃድ"</string>
     <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"በተለያዩ ተጠቃሚዎች ላይ ሊኖሩ የሚችሉ መስተጋብሮችን ሁሉ ይፈቅዳል።"</string>
     <string name="permlab_manageUsers" msgid="1676150911672282428">"ተጠቃሚዎችን ያስተዳድሩ"</string>
-    <string name="permdesc_manageUsers" msgid="8409306667645355638">"መተግበሪያዎች በመሣሪያዎች ላይ ያሉ ተጠቃሚዎችን እንዲያቀናብር ያስችለዋል፣ መጠየቅን፣ መፍጠርንና መሰረዝን ጨምሮ።"</string>
+    <string name="permdesc_manageUsers" msgid="8409306667645355638">"መተግበሪያዎች በመሣሪያው ላይ ያሉ ተጠቃሚዎችን እንዲያቀናብር ያስችለዋል፣ መጠየቅን፣ መፍጠርንና መሰረዝን ጨምሮ።"</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"እየሄዱ ስላሉ የመተግበሪያዎች ዝርዝሮች አምጣ"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"መተግበሪያው በአሁኑ ጊዜ እየተካሄዱ ስላሉና በቅርብ ጊዜ ስለተካሄዱ ተግባሮች መረጃ ዝርዝር እንዲያወጣ ይፈቅድለታል። ተንኮል-አዘል መተግበሪያዎች ስለ ሌሎች መተግበሪያዎች የግል መረጃ ሊያገኙ ይችላሉ።"</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"አሂድ ትግበራዎችን ድጋሚ ደርድር"</string>
