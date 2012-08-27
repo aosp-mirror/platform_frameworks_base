@@ -298,7 +298,7 @@ void SpriteController::doUpdateSprites() {
             }
 
             if (becomingVisible) {
-                status = update.state.surfaceControl->show(surfaceLayer);
+                status = update.state.surfaceControl->show();
                 if (status) {
                     ALOGE("Error %d showing sprite surface.", status);
                 } else {
