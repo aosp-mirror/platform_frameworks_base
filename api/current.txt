@@ -3012,6 +3012,7 @@ package android.app {
     method public android.app.AlertDialog.Builder setNeutralButton(int, android.content.DialogInterface.OnClickListener);
     method public android.app.AlertDialog.Builder setNeutralButton(java.lang.CharSequence, android.content.DialogInterface.OnClickListener);
     method public android.app.AlertDialog.Builder setOnCancelListener(android.content.DialogInterface.OnCancelListener);
+    method public android.app.AlertDialog.Builder setOnDismissListener(android.content.DialogInterface.OnDismissListener);
     method public android.app.AlertDialog.Builder setOnItemSelectedListener(android.widget.AdapterView.OnItemSelectedListener);
     method public android.app.AlertDialog.Builder setOnKeyListener(android.content.DialogInterface.OnKeyListener);
     method public android.app.AlertDialog.Builder setPositiveButton(int, android.content.DialogInterface.OnClickListener);
