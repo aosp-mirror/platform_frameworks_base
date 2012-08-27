@@ -225,7 +225,7 @@
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"pilna licence ar atļauju darboties visos lietotāju kontos"</string>
     <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Ļauj veikt jebkādas darbības visos lietotāju kontos."</string>
     <string name="permlab_manageUsers" msgid="1676150911672282428">"Lietotāju pārvaldība"</string>
-    <string name="permdesc_manageUsers" msgid="8409306667645355638">"Ļauj lietotnēm pārvaldīt ierīces lietotājus, tostarp izveidot un dzēst lietotājus vai veidot vaicājumus."</string>
+    <string name="permdesc_manageUsers" msgid="8409306667645355638">"Ļauj lietotnēm pārvaldīt ierīces lietotājus, tostarp izveidot un dzēst lietotājus un veidot vaicājumus."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"Informācijas izguve par izmantotajām lietotnēm"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Ļauj lietotnei izgūt informāciju par šobrīd un nesen veiktajiem uzdevumiem. Ļaunprātīgas lietotnes var atklāt privātu informāciju par citām lietotnēm."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"pārkārtot izmantotās lietotnes"</string>
