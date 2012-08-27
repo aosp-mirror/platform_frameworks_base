@@ -71,12 +71,6 @@ class DragState {
         mFlags = flags;
         mLocalWin = localWin;
         mNotifiedWindows = new ArrayList<WindowState>();
-        WindowState win = service.mWindowMap.get(token);
-        if (win != null) {
-            mDisplayContent = win.mDisplayContent;
-        } else {
-            Slog.e(WindowManagerService.TAG, "No window associated with token");
-        }
     }
 
     void reset() {
@@ -92,7 +86,11 @@ class DragState {
         mNotifiedWindows = null;
     }
 
-    void register() {
+    /**
+     * @param displayContent The display parameters associated with the window being dragged.
+     */
+    void register(DisplayContent displayContent) {
+        mDisplayContent = displayContent;
         if (WindowManagerService.DEBUG_DRAG) Slog.d(WindowManagerService.TAG, "registering drag input channel");
         if (mClientChannel != null) {
             Slog.e(WindowManagerService.TAG, "Duplicate register of drag input channel");
