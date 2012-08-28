@@ -3279,13 +3279,6 @@ public final class Settings {
 
 
         /**
-         * ms delay before rechecking a connect SSID for walled garden with a http download.
-         * @hide
-         */
-        public static final String WIFI_WATCHDOG_WALLED_GARDEN_INTERVAL_MS =
-                "wifi_watchdog_walled_garden_interval_ms";
-
-        /**
          * Number of ARP pings per check.
          * @hide
          */
@@ -3322,23 +3315,6 @@ public final class Settings {
                 "wifi_suspend_optimizations_enabled";
 
         /**
-         * Setting to turn off walled garden test on Wi-Fi. Feature is enabled by default and
-         * the setting needs to be set to 0 to disable it.
-         * @hide
-         */
-        public static final String WIFI_WATCHDOG_WALLED_GARDEN_TEST_ENABLED =
-                "wifi_watchdog_walled_garden_test_enabled";
-
-        /**
-         * The URL used for walled garden check upon a new conection. WifiWatchdogService
-         * fetches the URL and checks to see if {@link #WIFI_WATCHDOG_WALLED_GARDEN_PATTERN}
-         * is not part of the title string to notify the user on the presence of a walled garden.
-         * @hide
-         */
-        public static final String WIFI_WATCHDOG_WALLED_GARDEN_URL =
-                "wifi_watchdog_walled_garden_url";
-
-        /**
          * The maximum number of times we will retry a connection to an access
          * point for which we have failed in acquiring an IP address from DHCP.
          * A value of N means that we will make N+1 connection attempts in all.
@@ -3360,6 +3336,21 @@ public final class Settings {
          * @hide
          */
         public static final String WIFI_P2P_DEVICE_NAME = "wifi_p2p_device_name";
+
+        /**
+         * Setting to turn off captive portal detection. Feature is enabled by default and
+         * the setting needs to be set to 0 to disable it.
+         * @hide
+         */
+        public static final String CAPTIVE_PORTAL_DETECTION_ENABLED =
+                "captive_portal_detection_enabled";
+
+        /**
+         * The server used for captive portal detection upon a new conection. A 204 response
+         * code from the server is used for validation.
+         * @hide
+         */
+        public static final String CAPTIVE_PORTAL_SERVER = "captive_portal_server";
 
         /**
          * Maximum amount of time in milliseconds to hold a wakelock while waiting for mobile

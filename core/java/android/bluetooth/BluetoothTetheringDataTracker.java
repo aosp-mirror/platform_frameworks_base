@@ -133,6 +133,11 @@ public class BluetoothTetheringDataTracker implements NetworkStateTracker {
         return true;
     }
 
+    @Override
+    public void captivePortalCheckComplete() {
+        // not implemented
+    }
+
     /**
      * Re-enable connectivity to a network after a {@link #teardown()}.
      */

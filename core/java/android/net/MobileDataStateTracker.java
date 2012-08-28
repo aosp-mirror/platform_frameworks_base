@@ -381,6 +381,11 @@ public class MobileDataStateTracker implements NetworkStateTracker {
         return (setEnableApn(mApnType, false) != PhoneConstants.APN_REQUEST_FAILED);
     }
 
+    @Override
+    public void captivePortalCheckComplete() {
+        // not implemented
+    }
+
     /**
      * Record the detailed state of a network, and if it is a
      * change from the previous state, send a notification to

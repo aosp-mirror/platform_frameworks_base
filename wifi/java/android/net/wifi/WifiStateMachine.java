@@ -256,6 +256,8 @@ public class WifiStateMachine extends StateMachine {
     static final int CMD_DELAYED_STOP_DRIVER              = BASE + 18;
     /* A delayed message sent to start driver when it fail to come up */
     static final int CMD_DRIVER_START_TIMED_OUT           = BASE + 19;
+    /* Ready to switch to network as default */
+    static final int CMD_CAPTIVE_CHECK_COMPLETE           = BASE + 20;
 
     /* Start the soft access point */
     static final int CMD_START_AP                         = BASE + 21;
@@ -459,6 +461,8 @@ public class WifiStateMachine extends StateMachine {
     private State mObtainingIpState = new ObtainingIpState();
     /* Waiting for link quality verification to be complete */
     private State mVerifyingLinkState = new VerifyingLinkState();
+    /* Waiting for captive portal check to be complete */
+    private State mCaptivePortalCheckState = new CaptivePortalCheckState();
     /* Connected with IP addr */
     private State mConnectedState = new ConnectedState();
     /* disconnect issued, waiting for network disconnect confirmation */
@@ -695,6 +699,7 @@ public class WifiStateMachine extends StateMachine {
                         addState(mL2ConnectedState, mConnectModeState);
                             addState(mObtainingIpState, mL2ConnectedState);
                             addState(mVerifyingLinkState, mL2ConnectedState);
+                            addState(mCaptivePortalCheckState, mL2ConnectedState);
                             addState(mConnectedState, mL2ConnectedState);
                         addState(mDisconnectingState, mConnectModeState);
                         addState(mDisconnectedState, mConnectModeState);
@@ -863,6 +868,10 @@ public class WifiStateMachine extends StateMachine {
         } else {
             sendMessage(obtainMessage(CMD_STOP_DRIVER, ecm ? IN_ECM_STATE : NOT_IN_ECM_STATE, 0));
         }
+    }
+
+    public void captivePortalCheckComplete() {
+        sendMessage(obtainMessage(CMD_CAPTIVE_CHECK_COMPLETE));
     }
 
     /**
@@ -1616,7 +1625,7 @@ public class WifiStateMachine extends StateMachine {
         }
 
         if (state != mNetworkInfo.getDetailedState()) {
-            mNetworkInfo.setDetailedState(state, null, null);
+            mNetworkInfo.setDetailedState(state, null, mWifiInfo.getSSID());
         }
     }
 
@@ -3253,6 +3262,26 @@ public class WifiStateMachine extends StateMachine {
                     //stay here
                     break;
                 case WifiWatchdogStateMachine.GOOD_LINK_DETECTED:
+                    transitionTo(mCaptivePortalCheckState);
+                    break;
+                default:
+                    return NOT_HANDLED;
+            }
+            return HANDLED;
+        }
+    }
+
+    class CaptivePortalCheckState extends State {
+        @Override
+        public void enter() {
+            setNetworkDetailedState(DetailedState.CAPTIVE_PORTAL_CHECK);
+            mWifiConfigStore.updateStatus(mLastNetworkId, DetailedState.CAPTIVE_PORTAL_CHECK);
+            sendNetworkStateChangeBroadcast(mLastBssid);
+        }
+        @Override
+        public boolean processMessage(Message message) {
+            switch (message.what) {
+                case CMD_CAPTIVE_CHECK_COMPLETE:
                     try {
                         mNwService.enableIpv6(mInterfaceName);
                     } catch (RemoteException re) {
@@ -3260,7 +3289,6 @@ public class WifiStateMachine extends StateMachine {
                     } catch (IllegalStateException e) {
                         loge("Failed to enable IPv6: " + e);
                     }
-
                     setNetworkDetailedState(DetailedState.CONNECTED);
                     mWifiConfigStore.updateStatus(mLastNetworkId, DetailedState.CONNECTED);
                     sendNetworkStateChangeBroadcast(mLastBssid);
