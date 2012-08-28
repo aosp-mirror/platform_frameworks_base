@@ -725,6 +725,13 @@
         android:description="@string/permdesc_mediaStorageWrite"
         android:protectionLevel="signature|system" />
 
+    <!-- Allows an application to access all multi-user external storage @hide -->
+    <permission android:name="android.permission.ACCESS_ALL_EXTERNAL_STORAGE"
+        android:permissionGroup="android.permission-group.DEVELOPMENT_TOOLS"
+        android:label="@string/permlab_sdcardAccessAll"
+        android:description="@string/permdesc_sdcardAccessAll"
+        android:protectionLevel="signature" />
+
     <!-- ============================================ -->
     <!-- Permissions for low-level system interaction -->
     <!-- ============================================ -->
