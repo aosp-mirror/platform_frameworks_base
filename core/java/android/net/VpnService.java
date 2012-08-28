@@ -329,7 +329,7 @@ public class VpnService extends Service {
                 throw new IllegalArgumentException("Bad address");
             }
 
-            mAddresses.append(String.format(" %s/%d", address.getHostAddress(), prefixLength));
+            mAddresses.append(' ' + address.getHostAddress() + '/' +  prefixLength);
             return this;
         }
 
