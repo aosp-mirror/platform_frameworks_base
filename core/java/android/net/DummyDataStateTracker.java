@@ -119,6 +119,10 @@ public class DummyDataStateTracker implements NetworkStateTracker {
         return true;
     }
 
+    public void captivePortalCheckComplete() {
+        // not implemented
+    }
+
     /**
      * Record the detailed state of a network, and if it is a
      * change from the previous state, send a notification to

@@ -12606,6 +12606,7 @@ package android.net {
     method public static final android.net.NetworkInfo.DetailedState[] values();
     enum_constant public static final android.net.NetworkInfo.DetailedState AUTHENTICATING;
     enum_constant public static final android.net.NetworkInfo.DetailedState BLOCKED;
+    enum_constant public static final android.net.NetworkInfo.DetailedState CAPTIVE_PORTAL_CHECK;
     enum_constant public static final android.net.NetworkInfo.DetailedState CONNECTED;
     enum_constant public static final android.net.NetworkInfo.DetailedState CONNECTING;
     enum_constant public static final android.net.NetworkInfo.DetailedState DISCONNECTED;

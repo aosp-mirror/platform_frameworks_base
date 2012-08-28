@@ -1971,4 +1971,11 @@ public class WifiManager {
              return false;
         }
     }
+
+    /** @hide */
+    public void captivePortalCheckComplete() {
+        try {
+            mService.captivePortalCheckComplete();
+        } catch (RemoteException e) {}
+    }
 }

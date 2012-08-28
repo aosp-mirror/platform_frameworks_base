@@ -123,6 +123,11 @@ public interface NetworkStateTracker {
     public boolean reconnect();
 
     /**
+     * Ready to switch on to the network after captive portal check
+     */
+    public void captivePortalCheckComplete();
+
+    /**
      * Turn the wireless radio off for a network.
      * @param turnOn {@code true} to turn the radio on, {@code false}
      */

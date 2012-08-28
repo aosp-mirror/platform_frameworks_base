@@ -42,6 +42,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.net.CaptivePortalTracker;
 import android.net.ConnectivityManager;
 import android.net.DummyDataStateTracker;
 import android.net.EthernetDataTracker;
@@ -165,6 +166,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      * abstractly.
      */
     private NetworkStateTracker mNetTrackers[];
+
+    /* Handles captive portal check on a network */
+    private CaptivePortalTracker mCaptivePortalTracker;
 
     /**
      * The link properties that define the current links
@@ -1363,8 +1367,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             return false;
         }
         NetworkStateTracker tracker = mNetTrackers[networkType];
+        DetailedState netState = tracker.getNetworkInfo().getDetailedState();
 
-        if (tracker == null || !tracker.getNetworkInfo().isConnected() ||
+        if (tracker == null || (netState != DetailedState.CONNECTED &&
+                netState != DetailedState.CAPTIVE_PORTAL_CHECK) ||
                 tracker.isTeardownRequested()) {
             if (VDBG) {
                 log("requestRouteToHostAddress on down network " +
@@ -1966,34 +1972,29 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
     };
 
+    private boolean isNewNetTypePreferredOverCurrentNetType(int type) {
+        if ((type != mNetworkPreference &&
+                    mNetConfigs[mActiveDefaultNetwork].priority >
+                    mNetConfigs[type].priority) ||
+                mNetworkPreference == mActiveDefaultNetwork) return false;
+        return true;
+    }
+
     private void handleConnect(NetworkInfo info) {
-        final int type = info.getType();
-        final NetworkStateTracker thisNet = mNetTrackers[type];
+        final int newNetType = info.getType();
 
-        setupDataActivityTracking(type);
-
-        setupDataActivityTracking(type);
+        setupDataActivityTracking(newNetType);
 
         // snapshot isFailover, because sendConnectedBroadcast() resets it
         boolean isFailover = info.isFailover();
+        final NetworkStateTracker thisNet = mNetTrackers[newNetType];
         final String thisIface = thisNet.getLinkProperties().getInterfaceName();
 
         // if this is a default net and other default is running
         // kill the one not preferred
-        if (mNetConfigs[type].isDefault()) {
-            if (mActiveDefaultNetwork != -1 && mActiveDefaultNetwork != type) {
-                if ((type != mNetworkPreference &&
-                        mNetConfigs[mActiveDefaultNetwork].priority >
-                        mNetConfigs[type].priority) ||
-                        mNetworkPreference == mActiveDefaultNetwork) {
-                        // don't accept this one
-                        if (VDBG) {
-                            log("Not broadcasting CONNECT_ACTION " +
-                                "to torn down network " + info.getTypeName());
-                        }
-                        teardown(thisNet);
-                        return;
-                } else {
+        if (mNetConfigs[newNetType].isDefault()) {
+            if (mActiveDefaultNetwork != -1 && mActiveDefaultNetwork != newNetType) {
+                if (isNewNetTypePreferredOverCurrentNetType(newNetType)) {
                     // tear down the other
                     NetworkStateTracker otherNet =
                             mNetTrackers[mActiveDefaultNetwork];
@@ -2006,6 +2007,14 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         teardown(thisNet);
                         return;
                     }
+                } else {
+                       // don't accept this one
+                        if (VDBG) {
+                            log("Not broadcasting CONNECT_ACTION " +
+                                "to torn down network " + info.getTypeName());
+                        }
+                        teardown(thisNet);
+                        return;
                 }
             }
             synchronized (ConnectivityService.this) {
@@ -2019,7 +2028,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                             1000);
                 }
             }
-            mActiveDefaultNetwork = type;
+            mActiveDefaultNetwork = newNetType;
             // this will cause us to come up initially as unconnected and switching
             // to connected after our normal pause unless somebody reports us as reall
             // disconnected
@@ -2031,17 +2040,45 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
         thisNet.setTeardownRequested(false);
         updateNetworkSettings(thisNet);
-        handleConnectivityChange(type, false);
+        handleConnectivityChange(newNetType, false);
         sendConnectedBroadcastDelayed(info, getConnectivityChangeDelay());
 
         // notify battery stats service about this network
         if (thisIface != null) {
             try {
-                BatteryStatsService.getService().noteNetworkInterfaceType(thisIface, type);
+                BatteryStatsService.getService().noteNetworkInterfaceType(thisIface, newNetType);
             } catch (RemoteException e) {
                 // ignored; service lives in system_server
             }
         }
+    }
+
+    private void handleCaptivePortalTrackerCheck(NetworkInfo info) {
+        if (DBG) log("Captive portal check " + info);
+        int type = info.getType();
+        final NetworkStateTracker thisNet = mNetTrackers[type];
+        if (mNetConfigs[type].isDefault()) {
+            if (mActiveDefaultNetwork != -1 && mActiveDefaultNetwork != type) {
+                if (isNewNetTypePreferredOverCurrentNetType(type)) {
+                    if (DBG) log("Captive check on " + info.getTypeName());
+                    mCaptivePortalTracker = CaptivePortalTracker.detect(mContext, info,
+                            ConnectivityService.this);
+                    return;
+                } else {
+                    if (DBG) log("Tear down low priority net " + info.getTypeName());
+                    teardown(thisNet);
+                    return;
+                }
+            }
+        }
+
+        thisNet.captivePortalCheckComplete();
+    }
+
+    /** @hide */
+    public void captivePortalCheckComplete(NetworkInfo info) {
+        mNetTrackers[info.getType()].captivePortalCheckComplete();
+        mCaptivePortalTracker = null;
     }
 
     /**
@@ -2632,6 +2669,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     if (info.getDetailedState() ==
                             NetworkInfo.DetailedState.FAILED) {
                         handleConnectionFailure(info);
+                    } else if (info.getDetailedState() ==
+                            DetailedState.CAPTIVE_PORTAL_CHECK) {
+                        handleCaptivePortalTrackerCheck(info);
                     } else if (state == NetworkInfo.State.DISCONNECTED) {
                         handleDisconnect(info);
                     } else if (state == NetworkInfo.State.SUSPENDED) {
