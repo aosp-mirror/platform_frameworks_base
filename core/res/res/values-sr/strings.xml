@@ -1167,6 +1167,14 @@
     <string name="vpn_title_long" msgid="6400714798049252294">"Апликација <xliff:g id="APP">%s</xliff:g> је активирала VPN"</string>
     <string name="vpn_text" msgid="3011306607126450322">"Додирните да бисте управљали мрежом."</string>
     <string name="vpn_text_long" msgid="6407351006249174473">"Повезано са сесијом <xliff:g id="SESSION">%s</xliff:g>. Додирните да бисте управљали мрежом."</string>
+    <!-- no translation found for vpn_lockdown_connecting (6443438964440960745) -->
+    <skip />
+    <!-- no translation found for vpn_lockdown_connected (8202679674819213931) -->
+    <skip />
+    <!-- no translation found for vpn_lockdown_error (6009249814034708175) -->
+    <skip />
+    <!-- no translation found for vpn_lockdown_reset (5365010427963548932) -->
+    <skip />
     <string name="upload_file" msgid="2897957172366730416">"Одабери датотеку"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Није изабрана ниједна датотека"</string>
     <string name="reset" msgid="2448168080964209908">"Поново постави"</string>
