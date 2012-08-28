@@ -96,6 +96,11 @@ public abstract class BaseNetworkStateTracker implements NetworkStateTracker {
     }
 
     @Override
+    public void captivePortalCheckComplete() {
+        // not implemented
+    }
+
+    @Override
     public boolean setRadio(boolean turnOn) {
         // Base tracker doesn't handle radios
         return true;
