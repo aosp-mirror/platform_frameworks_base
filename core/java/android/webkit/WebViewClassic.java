@@ -1364,7 +1364,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         if (action == MotionEvent.ACTION_POINTER_DOWN) {
             cancelTouch();
             action = MotionEvent.ACTION_DOWN;
-        } else if (action == MotionEvent.ACTION_POINTER_UP && ev.getPointerCount() >= 2) {
+        } else if (action == MotionEvent.ACTION_POINTER_UP) {
             // set mLastTouchX/Y to the remaining points for multi-touch.
             mLastTouchX = Math.round(x);
             mLastTouchY = Math.round(y);
