@@ -69,7 +69,8 @@ class BlockingAudioTrack {
 
     // Need to be seen by stop() which can be called from another thread. mAudioTrack will be
     // set to null only after waitAndRelease().
-    private volatile AudioTrack mAudioTrack;
+    private Object mAudioTrackLock = new Object();
+    private AudioTrack mAudioTrack;
     private volatile boolean mStopped;
 
     BlockingAudioTrack(int streamType, int sampleRate,
@@ -93,7 +94,9 @@ class BlockingAudioTrack {
 
     public boolean init() {
         AudioTrack track = createStreamingAudioTrack();
-        mAudioTrack = track;
+        synchronized (mAudioTrackLock) {
+            mAudioTrack = track;
+        }
 
         if (track == null) {
             return false;
@@ -103,24 +106,34 @@ class BlockingAudioTrack {
     }
 
     public void stop() {
-        AudioTrack track = mAudioTrack;
-        if (track != null) {
-            track.stop();
+        synchronized (mAudioTrackLock) {
+            if (mAudioTrack != null) {
+                mAudioTrack.stop();
+            }
+            mStopped = true;
         }
-        mStopped = true;
     }
 
     public int write(byte[] data) {
-        if (mAudioTrack == null || mStopped) {
+        AudioTrack track = null;
+        synchronized (mAudioTrackLock) {
+            track = mAudioTrack;
+        }
+
+        if (track == null || mStopped) {
             return -1;
         }
-        final int bytesWritten = writeToAudioTrack(mAudioTrack, data);
+        final int bytesWritten = writeToAudioTrack(track, data);
+
         mBytesWritten += bytesWritten;
         return bytesWritten;
     }
 
     public void waitAndRelease() {
-        AudioTrack track = mAudioTrack;
+        AudioTrack track = null;
+        synchronized (mAudioTrackLock) {
+            track = mAudioTrack;
+        }
         if (track == null) {
             if (DBG) Log.d(TAG, "Audio track null [duplicate call to waitAndRelease ?]");
             return;
@@ -152,8 +165,10 @@ class BlockingAudioTrack {
         // all data from the audioTrack has been sent to the mixer, so
         // it's safe to release at this point.
         if (DBG) Log.d(TAG, "Releasing audio track [" + track.hashCode() + "]");
+        synchronized(mAudioTrackLock) {
+            mAudioTrack = null;
+        }
         track.release();
-        mAudioTrack = null;
     }
 
 
