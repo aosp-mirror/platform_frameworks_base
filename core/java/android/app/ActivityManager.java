@@ -210,6 +210,15 @@ public class ActivityManager {
      */
     public static final int INTENT_SENDER_SERVICE = 4;
 
+    /** @hide User operation call: success! */
+    public static final int USER_OP_SUCCESS = 0;
+
+    /** @hide User operation call: given user id is not known. */
+    public static final int USER_OP_UNKNOWN_USER = -1;
+
+    /** @hide User operation call: given user id is the current user, can't be stopped. */
+    public static final int USER_OP_IS_CURRENT = -2;
+
     /*package*/ ActivityManager(Context context, Handler handler) {
         mContext = context;
         mHandler = handler;

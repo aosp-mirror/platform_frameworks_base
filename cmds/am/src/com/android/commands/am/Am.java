@@ -31,7 +31,6 @@ import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -141,6 +140,8 @@ public class Am {
             runToUri(true);
         } else if (op.equals("switch-user")) {
             runSwitchUser();
+        } else if (op.equals("stop-user")) {
+            runStopUser();
         } else {
             throw new IllegalArgumentException("Unknown command: " + op);
         }
@@ -323,7 +324,6 @@ public class Am {
                 mUserId = Integer.parseInt(nextArgRequired());
             } else {
                 System.err.println("Error: Unknown option: " + opt);
-                showUsage();
                 return null;
             }
         }
@@ -594,7 +594,6 @@ public class Am {
                 no_window_animation = true;
             } else {
                 System.err.println("Error: Unknown option: " + opt);
-                showUsage();
                 return;
             }
         }
@@ -738,7 +737,6 @@ public class Am {
                 persistent = true;
             } else {
                 System.err.println("Error: Unknown option: " + opt);
-                showUsage();
                 return;
             }
         }
@@ -752,11 +750,25 @@ public class Am {
     }
 
     private void runSwitchUser() throws Exception {
-        if (android.os.Process.myUid() != 0) {
-            throw new RuntimeException("switchuser can only be run as root");
-        }
         String user = nextArgRequired();
         mAm.switchUser(Integer.parseInt(user));
+    }
+
+    private void runStopUser() throws Exception {
+        String user = nextArgRequired();
+        int res = mAm.stopUser(Integer.parseInt(user), null);
+        if (res != ActivityManager.USER_OP_SUCCESS) {
+            String txt = "";
+            switch (res) {
+                case ActivityManager.USER_OP_IS_CURRENT:
+                    txt = " (Can't stop current user)";
+                    break;
+                case ActivityManager.USER_OP_UNKNOWN_USER:
+                    txt = " (Unknown user " + user + ")";
+                    break;
+            }
+            System.err.println("Switch failed: " + res + txt);
+        }
     }
 
     class MyActivityController extends IActivityController.Stub {
@@ -1047,7 +1059,6 @@ public class Am {
                 gdbPort = nextArgRequired();
             } else {
                 System.err.println("Error: Unknown option: " + opt);
-                showUsage();
                 return;
             }
         }
@@ -1065,7 +1076,6 @@ public class Am {
             enabled = false;
         } else {
             System.err.println("Error: enabled mode must be 'on' or 'off' at " + mode);
-            showUsage();
             return;
         }
 
@@ -1090,7 +1100,6 @@ public class Am {
             int div = size.indexOf('x');
             if (div <= 0 || div >= (size.length()-1)) {
                 System.err.println("Error: bad size " + size);
-                showUsage();
                 return;
             }
             String mstr = size.substring(0, div);
@@ -1100,7 +1109,6 @@ public class Am {
                 n = Integer.parseInt(nstr);
             } catch (NumberFormatException e) {
                 System.err.println("Error: bad number " + e);
-                showUsage();
                 return;
             }
         }
@@ -1139,12 +1147,10 @@ public class Am {
                 density = Integer.parseInt(densityStr);
             } catch (NumberFormatException e) {
                 System.err.println("Error: bad number " + e);
-                showUsage();
                 return;
             }
             if (density < 72) {
                 System.err.println("Error: density must be >= 72");
-                showUsage();
                 return;
             }
         }
@@ -1345,6 +1351,7 @@ public class Am {
                 "       am to-uri [INTENT]\n" +
                 "       am to-intent-uri [INTENT]\n" +
                 "       am switch-user <USER_ID>\n" +
+                "       am stop-user <USER_ID>\n" +
                 "\n" +
                 "am start: start an Activity.  Options are:\n" +
                 "    -D: enable debugging\n" +
@@ -1402,6 +1409,12 @@ public class Am {
                 "am to-uri: print the given Intent specification as a URI.\n" +
                 "\n" +
                 "am to-intent-uri: print the given Intent specification as an intent: URI.\n" +
+                "\n" +
+                "am switch-user: switch to put USER_ID in the foreground, starting" +
+                "  execution of that user if it is currently stopped.\n" +
+                "\n" +
+                "am stop-user: stop execution of USER_ID, not allowing it to run any" +
+                "  code until a later explicit switch to it.\n" +
                 "\n" +
                 "<INTENT> specifications include these flags and arguments:\n" +
                 "    [-a <ACTION>] [-d <DATA_URI>] [-t <MIME_TYPE>]\n" +

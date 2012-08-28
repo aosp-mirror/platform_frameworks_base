@@ -27,7 +27,6 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
-import android.media.RemoteControlClient;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -2285,6 +2284,15 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final String ACTION_USER_ADDED =
             "android.intent.action.USER_ADDED";
+
+    /**
+     * Broadcast sent to the system when a user is stopped. Carries an extra EXTRA_USER_HANDLE that has
+     * the userHandle of the user.  This is similar to {@link #ACTION_PACKAGE_RESTARTED},
+     * but for an entire user instead of a specific package.
+     * @hide
+     */
+    public static final String ACTION_USER_STOPPED =
+            "android.intent.action.USER_STOPPED";
 
     /**
      * Broadcast sent to the system when a user is removed. Carries an extra EXTRA_USER_HANDLE that has

@@ -34,6 +34,7 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.os.WorkSource;
 import android.text.TextUtils;
 import android.text.format.Time;
@@ -303,7 +304,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
             }
         }
     }
-    
+
     public void removeLocked(String packageName) {
         removeLocked(mRtcWakeupAlarms, packageName);
         removeLocked(mRtcAlarms, packageName);
@@ -323,6 +324,29 @@ class AlarmManagerService extends IAlarmManager.Stub {
         while (it.hasNext()) {
             Alarm alarm = it.next();
             if (alarm.operation.getTargetPackage().equals(packageName)) {
+                it.remove();
+            }
+        }
+    }
+
+    public void removeUserLocked(int userHandle) {
+        removeUserLocked(mRtcWakeupAlarms, userHandle);
+        removeUserLocked(mRtcAlarms, userHandle);
+        removeUserLocked(mElapsedRealtimeWakeupAlarms, userHandle);
+        removeUserLocked(mElapsedRealtimeAlarms, userHandle);
+    }
+
+    private void removeUserLocked(ArrayList<Alarm> alarmList, int userHandle) {
+        if (alarmList.size() <= 0) {
+            return;
+        }
+
+        // iterator over the list removing any it where the intent match
+        Iterator<Alarm> it = alarmList.iterator();
+
+        while (it.hasNext()) {
+            Alarm alarm = it.next();
+            if (UserHandle.getUserId(alarm.operation.getTargetUid()) == userHandle) {
                 it.remove();
             }
         }
@@ -822,6 +846,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
              // Register for events related to sdcard installation.
             IntentFilter sdFilter = new IntentFilter();
             sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
+            sdFilter.addAction(Intent.ACTION_USER_STOPPED);
             mContext.registerReceiver(this, sdFilter);
         }
         
@@ -841,6 +866,11 @@ class AlarmManagerService extends IAlarmManager.Stub {
                     return;
                 } else if (Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(action)) {
                     pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
+                } else if (Intent.ACTION_USER_STOPPED.equals(action)) {
+                    int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+                    if (userHandle >= 0) {
+                        removeUserLocked(userHandle);
+                    }
                 } else {
                     if (Intent.ACTION_PACKAGE_REMOVED.equals(action)
                             && intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
