@@ -10988,7 +10988,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     BroadcastQueue queue = broadcastQueueForIntent(intent);
                     BroadcastRecord r = new BroadcastRecord(queue, intent, null,
                             null, -1, -1, null, receivers, null, 0, null, null,
-                            false, true, true, false, -1);
+                            false, true, true, -1);
                     queue.enqueueParallelBroadcastLocked(r);
                     queue.scheduleBroadcastsLocked();
                 }
@@ -11081,29 +11081,27 @@ public final class ActivityManagerService extends ActivityManagerNative
             Slog.w(TAG, "Broadcast " + intent + " not ordered but result callback requested!");
         }
 
-        boolean onlySendToCaller = false;
-
         // If the caller is trying to send this broadcast to a different
         // user, verify that is allowed.
         if (UserHandle.getUserId(callingUid) != userId) {
             if (checkComponentPermission(
-                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
-                    callingPid, callingUid, -1, true)
-                    != PackageManager.PERMISSION_GRANTED) {
-                if (checkComponentPermission(
-                        android.Manifest.permission.INTERACT_ACROSS_USERS,
-                        callingPid, callingUid, -1, true)
-                        == PackageManager.PERMISSION_GRANTED) {
-                    onlySendToCaller = true;
-                } else {
-                    String msg = "Permission Denial: " + intent.getAction()
-                            + " broadcast from " + callerPackage
-                            + " asks to send as user " + userId
-                            + " but is calling from user " + UserHandle.getUserId(callingUid)
-                            + "; this requires "
-                            + android.Manifest.permission.INTERACT_ACROSS_USERS;
-                    Slog.w(TAG, msg);
-                    throw new SecurityException(msg);
+                    android.Manifest.permission.INTERACT_ACROSS_USERS,
+                    callingPid, callingUid, -1, true) != PackageManager.PERMISSION_GRANTED
+                    && checkComponentPermission(
+                            android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                            callingPid, callingUid, -1, true)
+                            != PackageManager.PERMISSION_GRANTED) {
+                String msg = "Permission Denial: " + intent.getAction()
+                        + " broadcast from " + callerPackage
+                        + " asks to send as user " + userId
+                        + " but is calling from user " + UserHandle.getUserId(callingUid)
+                        + "; this requires "
+                        + android.Manifest.permission.INTERACT_ACROSS_USERS;
+                Slog.w(TAG, msg);
+                throw new SecurityException(msg);
+            } else {
+                if (userId == UserHandle.USER_CURRENT) {
+                    userId = mCurrentUserId;
                 }
             }
         }
@@ -11294,7 +11292,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             BroadcastRecord r = new BroadcastRecord(queue, intent, callerApp,
                     callerPackage, callingPid, callingUid, requiredPermission,
                     registeredReceivers, resultTo, resultCode, resultData, map,
-                    ordered, sticky, false, onlySendToCaller, userId);
+                    ordered, sticky, false, userId);
             if (DEBUG_BROADCAST) Slog.v(
                     TAG, "Enqueueing parallel broadcast " + r);
             final boolean replaced = replacePending && queue.replaceParallelBroadcastLocked(r);
@@ -11384,7 +11382,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             BroadcastRecord r = new BroadcastRecord(queue, intent, callerApp,
                     callerPackage, callingPid, callingUid, requiredPermission,
                     receivers, resultTo, resultCode, resultData, map, ordered,
-                    sticky, false, onlySendToCaller, userId);
+                    sticky, false, userId);
             if (DEBUG_BROADCAST) Slog.v(
                     TAG, "Enqueueing ordered broadcast " + r
                     + ": prev had " + queue.mOrderedBroadcasts.size());
