@@ -2319,6 +2319,9 @@ public abstract class PackageManager {
      *            {@link PackageManager#EXTRA_VERIFICATION_ID} Intent extra
      * @param verificationCode either {@link PackageManager#VERIFICATION_ALLOW}
      *            or {@link PackageManager#VERIFICATION_REJECT}.
+     * @throws SecurityException if the caller does not have the
+     *            {@link android.Manifest.permission#PACKAGE_VERIFICATION_AGENT}
+     *            permission.
      */
     public abstract void verifyPendingInstall(int id, int verificationCode);
 
@@ -2342,9 +2345,11 @@ public abstract class PackageManager {
      * @param millisecondsToDelay the amount of time requested for the timeout.
      *            Must be positive and less than
      *            {@link PackageManager#MAXIMUM_VERIFICATION_TIMEOUT}.
-     *
      * @throws IllegalArgumentException if {@code millisecondsToDelay} is out
      *            of bounds or {@code verificationCodeAtTimeout} is unknown.
+     * @throws SecurityException if the caller does not have the
+     *            {@link android.Manifest.permission#PACKAGE_VERIFICATION_AGENT}
+     *            permission.
      */
     public abstract void extendVerificationTimeout(int id,
             int verificationCodeAtTimeout, long millisecondsToDelay);
