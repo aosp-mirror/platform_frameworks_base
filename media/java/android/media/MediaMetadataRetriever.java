@@ -59,6 +59,10 @@ public class MediaMetadataRetriever
      * @throws IllegalArgumentException If the path is invalid.
      */
     public void setDataSource(String path) throws IllegalArgumentException {
+        if (path == null) {
+            throw new IllegalArgumentException();
+        }
+
         FileInputStream is = null;
         try {
             is = new FileInputStream(path);
