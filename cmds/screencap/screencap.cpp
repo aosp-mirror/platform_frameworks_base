@@ -25,6 +25,7 @@
 
 #include <binder/IMemory.h>
 #include <gui/SurfaceComposerClient.h>
+#include <gui/ISurfaceComposer.h>
 
 #include <SkImageEncoder.h>
 #include <SkBitmap.h>
@@ -33,15 +34,18 @@
 
 using namespace android;
 
+static uint32_t DEFAULT_DISPLAY_ID = ISurfaceComposer::eDisplayIdMain;
+
 static void usage(const char* pname)
 {
     fprintf(stderr,
-            "usage: %s [-hp] [FILENAME]\n"
+            "usage: %s [-hp] [-d display-id] [FILENAME]\n"
             "   -h: this message\n"
             "   -p: save the file as a png.\n"
+            "   -d: specify the display id to capture, default %d.\n"
             "If FILENAME ends with .png it will be saved as a png.\n"
             "If FILENAME is not given, the results will be printed to stdout.\n",
-            pname
+            pname, DEFAULT_DISPLAY_ID
     );
 }
 
@@ -87,11 +91,15 @@ int main(int argc, char** argv)
 {
     const char* pname = argv[0];
     bool png = false;
+    int32_t displayId = DEFAULT_DISPLAY_ID;
     int c;
-    while ((c = getopt(argc, argv, "ph")) != -1) {
+    while ((c = getopt(argc, argv, "phd:")) != -1) {
         switch (c) {
             case 'p':
                 png = true;
+                break;
+            case 'd':
+                displayId = atoi(optarg);
                 break;
             case '?':
             case 'h':
@@ -131,7 +139,8 @@ int main(int argc, char** argv)
     size_t size = 0;
 
     ScreenshotClient screenshot;
-    if (screenshot.update() == NO_ERROR) {
+    sp<IBinder> display = SurfaceComposerClient::getBuiltInDisplay(displayId);
+    if (display != NULL && screenshot.update(display) == NO_ERROR) {
         base = screenshot.getPixels();
         w = screenshot.getWidth();
         h = screenshot.getHeight();

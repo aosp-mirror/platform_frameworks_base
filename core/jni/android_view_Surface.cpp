@@ -23,6 +23,7 @@
 
 #include <binder/IMemory.h>
 
+#include <gui/ISurfaceComposer.h>
 #include <gui/Surface.h>
 #include <gui/SurfaceComposerClient.h>
 #include <gui/SurfaceTexture.h>
@@ -107,14 +108,14 @@ static no_t no;
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
-static void SurfaceSession_init(JNIEnv* env, jobject clazz)
+static void SurfaceSession_nativeInit(JNIEnv* env, jobject clazz)
 {
     sp<SurfaceComposerClient> client = new SurfaceComposerClient;
     client->incStrong(clazz);
     env->SetIntField(clazz, sso.client, (int)client.get());
 }
 
-static void SurfaceSession_destroy(JNIEnv* env, jobject clazz)
+static void SurfaceSession_nativeDestroy(JNIEnv* env, jobject clazz)
 {
     SurfaceComposerClient* client =
             (SurfaceComposerClient*)env->GetIntField(clazz, sso.client);
@@ -124,7 +125,7 @@ static void SurfaceSession_destroy(JNIEnv* env, jobject clazz)
     }
 }
 
-static void SurfaceSession_kill(JNIEnv* env, jobject clazz)
+static void SurfaceSession_nativeKill(JNIEnv* env, jobject clazz)
 {
     SurfaceComposerClient* client =
             (SurfaceComposerClient*)env->GetIntField(clazz, sso.client);
@@ -221,7 +222,7 @@ void setSurface(JNIEnv* env, jobject clazz, const sp<Surface>& surface)
 static void Surface_init(
         JNIEnv* env, jobject clazz,
         jobject session,
-        jint, jstring jname, jint layerStack, jint w, jint h, jint format, jint flags)
+        jstring jname, jint w, jint h, jint format, jint flags)
 {
     if (session == NULL) {
         doThrowNPE(env);
@@ -231,15 +232,10 @@ static void Surface_init(
     SurfaceComposerClient* client =
             (SurfaceComposerClient*)env->GetIntField(session, sso.client);
 
-    sp<SurfaceControl> surface;
-    if (jname == NULL) {
-        surface = client->createSurface(layerStack, w, h, format, flags);
-    } else {
-        const jchar* str = env->GetStringCritical(jname, 0);
-        const String8 name(str, env->GetStringLength(jname));
-        env->ReleaseStringCritical(jname, str);
-        surface = client->createSurface(name, layerStack, w, h, format, flags);
-    }
+    const jchar* str = env->GetStringCritical(jname, 0);
+    const String8 name(str, env->GetStringLength(jname));
+    env->ReleaseStringCritical(jname, str);
+    sp<SurfaceControl> surface = client->createSurface(name, w, h, format, flags);
 
     if (surface == 0) {
         jniThrowException(env, OutOfResourcesException, NULL);
@@ -473,12 +469,11 @@ static void Surface_closeTransaction(
 }
 
 static void Surface_setOrientation(
-        JNIEnv* env, jobject clazz, jint display, jint orientation)
+        JNIEnv* env, jobject clazz, jint, jint orientation)
 {
-    int err = SurfaceComposerClient::setOrientation(display, orientation, 0);
-    if (err < 0) {
-        doThrowIAE(env);
-    }
+    sp<IBinder> display = SurfaceComposerClient::getBuiltInDisplay(
+            ISurfaceComposer::eDisplayIdMain);
+    SurfaceComposerClient::setDisplayOrientation(display, orientation);
 }
 
 class ScreenshotPixelRef : public SkPixelRef {
@@ -492,12 +487,13 @@ public:
         SkSafeUnref(fCTable);
     }
 
-    status_t update(int width, int height, int minLayer, int maxLayer, bool allLayers) {
+    status_t update(const sp<IBinder>& display, int width, int height,
+            int minLayer, int maxLayer, bool allLayers) {
         status_t res = (width > 0 && height > 0)
                 ? (allLayers
-                        ? mScreenshot.update(width, height)
-                        : mScreenshot.update(width, height, minLayer, maxLayer))
-                : mScreenshot.update();
+                        ? mScreenshot.update(display, width, height)
+                        : mScreenshot.update(display, width, height, minLayer, maxLayer))
+                : mScreenshot.update(display);
         if (res != NO_ERROR) {
             return res;
         }
@@ -538,11 +534,15 @@ private:
     typedef SkPixelRef INHERITED;
 };
 
-static jobject doScreenshot(JNIEnv* env, jobject clazz, jint width, jint height,
+static jobject doScreenshot(JNIEnv* env, jobject clazz,
+        jint width, jint height,
         jint minLayer, jint maxLayer, bool allLayers)
 {
+    sp<IBinder> display = SurfaceComposerClient::getBuiltInDisplay(
+            ISurfaceComposer::eDisplayIdMain);
     ScreenshotPixelRef* pixels = new ScreenshotPixelRef(NULL);
-    if (pixels->update(width, height, minLayer, maxLayer, allLayers) != NO_ERROR) {
+    if (pixels->update(display, width, height,
+            minLayer, maxLayer, allLayers) != NO_ERROR) {
         delete pixels;
         return 0;
     }
@@ -721,8 +721,10 @@ static void Surface_setLayerStack(JNIEnv* env, jobject thiz, jint layerStack)
 {
     const sp<SurfaceControl>& surface(getSurfaceControl(env, thiz));
     if (surface == 0) return;
-
-    // TODO(mathias): Everything.
+    status_t err = surface->setLayerStack(layerStack);
+    if (err<0 && err!=NO_INIT) {
+        doThrowIAE(env);
+    }
 }
 
 // ----------------------------------------------------------------------------
@@ -826,14 +828,14 @@ static void Surface_writeToParcel(
 static void nativeClassInit(JNIEnv* env, jclass clazz);
 
 static JNINativeMethod gSurfaceSessionMethods[] = {
-    {"init",     "()V",  (void*)SurfaceSession_init },
-    {"destroy",  "()V",  (void*)SurfaceSession_destroy },
-    {"kill",     "()V",  (void*)SurfaceSession_kill },
+    {"nativeInit",     "()V",  (void*)SurfaceSession_nativeInit },
+    {"nativeDestroy",  "()V",  (void*)SurfaceSession_nativeDestroy },
+    {"nativeKill",     "()V",  (void*)SurfaceSession_nativeKill },
 };
 
 static JNINativeMethod gSurfaceMethods[] = {
     {"nativeClassInit",     "()V",  (void*)nativeClassInit },
-    {"init",                "(Landroid/view/SurfaceSession;ILjava/lang/String;IIIII)V",  (void*)Surface_init },
+    {"init",                "(Landroid/view/SurfaceSession;Ljava/lang/String;IIII)V",  (void*)Surface_init },
     {"init",                "(Landroid/os/Parcel;)V",  (void*)Surface_initParcel },
     {"initFromSurfaceTexture", "(Landroid/graphics/SurfaceTexture;)V", (void*)Surface_initFromSurfaceTexture },
     {"getIdentity",         "()I",  (void*)Surface_getIdentity },
