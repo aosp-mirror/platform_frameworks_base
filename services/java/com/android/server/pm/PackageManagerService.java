@@ -5314,6 +5314,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     return pkgs.get(0);
                 }
             }
+            mSettings.mPackagesToBeCleaned.remove(userId);
         }
         // Move on to the next user to clean.
         long ident = Binder.clearCallingIdentity();
