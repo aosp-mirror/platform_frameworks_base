@@ -108,6 +108,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVE
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_DISPLAY_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_DRAG;
 import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
 import static android.view.WindowManager.LayoutParams.TYPE_HIDDEN_NAV_CONSUMER;
@@ -218,14 +219,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int NAVIGATION_BAR_PANEL_LAYER = 20;
     // system-level error dialogs
     static final int SYSTEM_ERROR_LAYER = 21;
+    // used to simulate secondary display devices
+    static final int DISPLAY_OVERLAY_LAYER = 22;
     // the drag layer: input for drag-and-drop is associated with this window,
     // which sits above all other focusable windows
-    static final int DRAG_LAYER = 22;
-    static final int SECURE_SYSTEM_OVERLAY_LAYER = 23;
-    static final int BOOT_PROGRESS_LAYER = 24;
+    static final int DRAG_LAYER = 23;
+    static final int SECURE_SYSTEM_OVERLAY_LAYER = 24;
+    static final int BOOT_PROGRESS_LAYER = 25;
     // the (mouse) pointer layer
-    static final int POINTER_LAYER = 25;
-    static final int HIDDEN_NAV_CONSUMER_LAYER = 26;
+    static final int POINTER_LAYER = 26;
+    static final int HIDDEN_NAV_CONSUMER_LAYER = 27;
 
     static final int APPLICATION_MEDIA_SUBLAYER = -2;
     static final int APPLICATION_MEDIA_OVERLAY_SUBLAYER = -1;
@@ -1327,6 +1330,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return SCREENSAVER_LAYER;
         case TYPE_UNIVERSE_BACKGROUND:
             return UNIVERSE_BACKGROUND_LAYER;
+        case TYPE_DISPLAY_OVERLAY:
+            return DISPLAY_OVERLAY_LAYER;
         }
         Log.e(TAG, "Unknown window type: " + type);
         return APPLICATION_LAYER;

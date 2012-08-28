@@ -28,6 +28,8 @@ import android.content.pm.IPackageManager;
 import android.content.res.Configuration;
 import android.media.AudioService;
 import android.net.wifi.p2p.WifiP2pService;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.SchedulingPolicyService;
@@ -147,7 +149,52 @@ class ServerThread extends Thread {
         CommonTimeManagementService commonTimeMgmtService = null;
         InputManagerService inputManager = null;
 
+        // Create a shared handler thread for UI within the system server.
+        // This thread is used by at least the following components:
+        // - WindowManagerPolicy
+        // - KeyguardViewManager
+        // - DisplayManagerService
+        HandlerThread uiHandlerThread = new HandlerThread("UI");
+        uiHandlerThread.start();
+        Handler uiHandler = new Handler(uiHandlerThread.getLooper());
+        uiHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                //Looper.myLooper().setMessageLogging(new LogPrinter(
+                //        Log.VERBOSE, "WindowManagerPolicy", Log.LOG_ID_SYSTEM));
+                android.os.Process.setThreadPriority(
+                        android.os.Process.THREAD_PRIORITY_FOREGROUND);
+                android.os.Process.setCanSelfBackground(false);
+
+                // For debug builds, log event loop stalls to dropbox for analysis.
+                if (StrictMode.conditionallyEnableDebugLogging()) {
+                    Slog.i(TAG, "Enabled StrictMode logging for UI Looper");
+                }
+            }
+        });
+
+        // Create a handler thread just for the window manager to enjoy.
+        HandlerThread wmHandlerThread = new HandlerThread("WindowManager");
+        wmHandlerThread.start();
+        Handler wmHandler = new Handler(wmHandlerThread.getLooper());
+        wmHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                //Looper.myLooper().setMessageLogging(new LogPrinter(
+                //        android.util.Log.DEBUG, TAG, android.util.Log.LOG_ID_SYSTEM));
+                android.os.Process.setThreadPriority(
+                        android.os.Process.THREAD_PRIORITY_DISPLAY);
+                android.os.Process.setCanSelfBackground(false);
+
+                // For debug builds, log event loop stalls to dropbox for analysis.
+                if (StrictMode.conditionallyEnableDebugLogging()) {
+                    Slog.i(TAG, "Enabled StrictMode logging for UI Looper");
+                }
+            }
+        });
+
         // Critical services...
+        boolean onlyCore = false;
         try {
             Slog.i(TAG, "Entropy Mixer");
             ServiceManager.addService("entropy", new EntropyMixer());
@@ -160,7 +207,7 @@ class ServerThread extends Thread {
             context = ActivityManagerService.main(factoryTest);
 
             Slog.i(TAG, "Display Manager");
-            display = new DisplayManagerService(context);
+            display = new DisplayManagerService(context, uiHandler);
             ServiceManager.addService(Context.DISPLAY_SERVICE, display, true);
 
             Slog.i(TAG, "Telephony Registry");
@@ -172,10 +219,14 @@ class ServerThread extends Thread {
 
             AttributeCache.init(context);
 
+            if (!display.waitForDefaultDisplay()) {
+                reportWtf("Timeout waiting for default display to be initialized.",
+                        new Throwable());
+            }
+
             Slog.i(TAG, "Package Manager");
             // Only run "core" apps if we're encrypting the device.
             String cryptState = SystemProperties.get("vold.decrypt");
-            boolean onlyCore = false;
             if (ENCRYPTING_STATE.equals(cryptState)) {
                 Slog.w(TAG, "Detected encryption in progress - only parsing core apps");
                 onlyCore = true;
@@ -244,6 +295,7 @@ class ServerThread extends Thread {
 
             Slog.i(TAG, "Window Manager");
             wm = WindowManagerService.main(context, power, display,
+                    uiHandler, wmHandler,
                     factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL,
                     !firstBoot, onlyCore);
             ServiceManager.addService(Context.WINDOW_SERVICE, wm);
@@ -751,6 +803,12 @@ class ServerThread extends Thread {
             pm.systemReady();
         } catch (Throwable e) {
             reportWtf("making Package Manager Service ready", e);
+        }
+
+        try {
+            display.systemReady(safeMode, onlyCore);
+        } catch (Throwable e) {
+            reportWtf("making Display Manager Service ready", e);
         }
 
         // These are needed to propagate to the runnable below.

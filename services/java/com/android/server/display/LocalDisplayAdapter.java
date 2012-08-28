@@ -23,58 +23,52 @@ import android.view.Surface.PhysicalDisplayInfo;
 
 /**
  * A display adapter for the local displays managed by Surface Flinger.
+ * <p>
+ * Display adapters are not thread-safe and must only be accessed
+ * on the display manager service's handler thread.
+ * </p>
  */
 public final class LocalDisplayAdapter extends DisplayAdapter {
-    private final Context mContext;
-    private final LocalDisplayDevice mDefaultDisplayDevice;
+    private static final String TAG = "LocalDisplayAdapter";
 
     public LocalDisplayAdapter(Context context) {
-        mContext = context;
-
-        IBinder token = Surface.getBuiltInDisplay(Surface.BUILT_IN_DISPLAY_ID_MAIN);
-        mDefaultDisplayDevice = new LocalDisplayDevice(token);
+        super(context, TAG);
     }
 
     @Override
-    public String getName() {
-        return "LocalDisplayAdapter";
-    }
-
-    @Override
-    public void register(Listener listener) {
-        listener.onDisplayDeviceAdded(mDefaultDisplayDevice);
+    protected void onRegister() {
+        // TODO: listen for notifications from Surface Flinger about
+        // built-in displays being added or removed and rescan as needed.
+        IBinder displayToken = Surface.getBuiltInDisplay(Surface.BUILT_IN_DISPLAY_ID_MAIN);
+        sendDisplayDeviceEvent(new LocalDisplayDevice(displayToken, true),
+                DISPLAY_DEVICE_EVENT_ADDED);
     }
 
     private final class LocalDisplayDevice extends DisplayDevice {
-        private final IBinder mDisplayToken;
+        private final boolean mIsDefault;
 
-        public LocalDisplayDevice(IBinder token) {
-            mDisplayToken = token;
-        }
-
-        @Override
-        public DisplayAdapter getAdapter() {
-            return LocalDisplayAdapter.this;
-        }
-
-        @Override
-        public IBinder getDisplayToken() {
-            return mDisplayToken;
+        public LocalDisplayDevice(IBinder displayToken, boolean isDefault) {
+            super(LocalDisplayAdapter.this, displayToken);
+            mIsDefault = isDefault;
         }
 
         @Override
         public void getInfo(DisplayDeviceInfo outInfo) {
             PhysicalDisplayInfo phys = new PhysicalDisplayInfo();
-            Surface.getDisplayInfo(mDisplayToken, phys);
+            Surface.getDisplayInfo(getDisplayToken(), phys);
 
-            outInfo.name = mContext.getResources().getString(
-                    com.android.internal.R.string.display_manager_built_in_display);
+            outInfo.name = getContext().getResources().getString(
+                    com.android.internal.R.string.display_manager_built_in_display_name);
             outInfo.width = phys.width;
             outInfo.height = phys.height;
             outInfo.refreshRate = phys.refreshRate;
             outInfo.densityDpi = (int)(phys.density * 160 + 0.5f);
             outInfo.xDpi = phys.xDpi;
             outInfo.yDpi = phys.yDpi;
+            if (mIsDefault) {
+                outInfo.flags = DisplayDeviceInfo.FLAG_DEFAULT_DISPLAY
+                        | DisplayDeviceInfo.FLAG_SECURE;
+            }
         }
     }
 }

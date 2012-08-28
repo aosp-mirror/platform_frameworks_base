@@ -20,6 +20,9 @@ package com.android.server.display;
  * Describes the characteristics of a physical display device.
  */
 public final class DisplayDeviceInfo {
+    public static final int FLAG_DEFAULT_DISPLAY = 1 << 0;
+    public static final int FLAG_SECURE = 1 << 1;
+
     /**
      * Gets the name of the display device, which may be derived from
      * EDID or other sources.  The name may be displayed to the user.
@@ -43,6 +46,8 @@ public final class DisplayDeviceInfo {
     public float xDpi;
     public float yDpi;
 
+    public int flags;
+
     public void copyFrom(DisplayDeviceInfo other) {
         name = other.name;
         width = other.width;
@@ -51,12 +56,25 @@ public final class DisplayDeviceInfo {
         densityDpi = other.densityDpi;
         xDpi = other.xDpi;
         yDpi = other.yDpi;
+        flags = other.flags;
     }
 
     // For debugging purposes
     @Override
     public String toString() {
         return "\"" + name + "\": " + width + " x " + height + ", " + refreshRate + " fps, "
-                + "density " + densityDpi + ", " + xDpi + " x " + yDpi + " dpi";
+                + "density " + densityDpi + ", " + xDpi + " x " + yDpi + " dpi"
+                + flagsToString(flags);
+    }
+
+    private static String flagsToString(int flags) {
+        StringBuilder msg = new StringBuilder();
+        if ((flags & FLAG_DEFAULT_DISPLAY) != 0) {
+            msg.append(", FLAG_DEFAULT_DISPLAY");
+        }
+        if ((flags & FLAG_SECURE) != 0) {
+            msg.append(", FLAG_SECURE");
+        }
+        return msg.toString();
     }
 }

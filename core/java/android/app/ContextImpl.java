@@ -349,10 +349,11 @@ class ContextImpl extends Context {
                     return InputManager.getInstance();
                 }});
 
-        registerService(DISPLAY_SERVICE, new StaticServiceFetcher() {
-            public Object createStaticService() {
-                return DisplayManager.getInstance();
-            }});
+        registerService(DISPLAY_SERVICE, new ServiceFetcher() {
+                @Override
+                public Object createService(ContextImpl ctx) {
+                    return new DisplayManager(ctx.getOuterContext());
+                }});
 
         registerService(INPUT_METHOD_SERVICE, new ServiceFetcher() {
                 public Object createService(ContextImpl ctx) {

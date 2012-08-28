@@ -16,33 +16,96 @@
 
 package com.android.server.display;
 
+import android.content.Context;
+import android.os.Handler;
+
+import java.io.PrintWriter;
+
 /**
  * A display adapter makes zero or more display devices available to the system
  * and provides facilities for discovering when displays are connected or disconnected.
  * <p>
  * For now, all display adapters are registered in the system server but
  * in principle it could be done from other processes.
+ * </p><p>
+ * Display devices are not thread-safe and must only be accessed
+ * on the display manager service's handler thread.
  * </p>
  */
-public abstract class DisplayAdapter {
+public class DisplayAdapter {
+    private final Context mContext;
+    private final String mName;
+    private final Handler mHandler;
+    private Listener mListener;
+
+    public static final int DISPLAY_DEVICE_EVENT_ADDED = 1;
+    public static final int DISPLAY_DEVICE_EVENT_CHANGED = 2;
+    public static final int DISPLAY_DEVICE_EVENT_REMOVED = 3;
+
+    public DisplayAdapter(Context context, String name) {
+        mContext = context;
+        mName = name;
+        mHandler = new Handler();
+    }
+
+    public final Context getContext() {
+        return mContext;
+    }
+
+    public final Handler getHandler() {
+        return mHandler;
+    }
+
     /**
      * Gets the display adapter name for debugging purposes.
      *
      * @return The display adapter name.
      */
-    public abstract String getName();
+    public final String getName() {
+        return mName;
+    }
 
     /**
      * Registers the display adapter with the display manager.
-     * The display adapter should register any built-in display devices now.
-     * Other display devices can be registered dynamically later.
      *
-     * @param listener The listener for callbacks.
+     * @param listener The listener for callbacks.  The listener will
+     * be invoked on the display manager service's handler thread.
      */
-    public abstract void register(Listener listener);
+    public final void register(Listener listener) {
+        mListener = listener;
+        onRegister();
+    }
+
+    /**
+     * Dumps the local state of the display adapter.
+     */
+    public void dump(PrintWriter pw) {
+    }
+
+    /**
+     * Called when the display adapter is registered.
+     *
+     * The display adapter should register any built-in display devices as soon as possible.
+     * The boot process will wait for the default display to be registered.
+     *
+     * Other display devices can be registered dynamically later.
+     */
+    protected void onRegister() {
+    }
+
+    /**
+     * Sends a display device event to the display adapter listener asynchronously.
+     */
+    protected void sendDisplayDeviceEvent(final DisplayDevice device, final int event) {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mListener.onDisplayDeviceEvent(device, event);
+            }
+        });
+    }
 
     public interface Listener {
-        public void onDisplayDeviceAdded(DisplayDevice device);
-        public void onDisplayDeviceRemoved(DisplayDevice device);
+        public void onDisplayDeviceEvent(DisplayDevice device, int event);
     }
 }

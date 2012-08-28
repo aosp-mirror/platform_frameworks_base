@@ -31,6 +31,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.hardware.display.DisplayManager;
+import android.hardware.display.DisplayManagerGlobal;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Debug;
@@ -376,7 +377,8 @@ public class ActivityManager {
             return true;
         }
 
-        Display display = DisplayManager.getInstance().getRealDisplay(Display.DEFAULT_DISPLAY);
+        Display display = DisplayManagerGlobal.getInstance().getRealDisplay(
+                Display.DEFAULT_DISPLAY);
         Point p = new Point();
         display.getRealSize(p);
         int pixels = p.x * p.y;

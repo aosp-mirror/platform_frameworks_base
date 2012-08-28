@@ -18,20 +18,12 @@ package android.hardware.display;
 
 import android.content.Context;
 import android.os.Handler;
-import android.os.IBinder;
-import android.os.Looper;
-import android.os.Message;
-import android.os.RemoteException;
-import android.os.ServiceManager;
-import android.util.Log;
+import android.util.SparseArray;
 import android.view.CompatibilityInfoHolder;
 import android.view.Display;
-import android.view.DisplayInfo;
-
-import java.util.ArrayList;
 
 /**
- * Manages the properties, media routing and power state of attached displays.
+ * Manages the properties of attached displays.
  * <p>
  * Get an instance of this class by calling
  * {@link android.content.Context#getSystemService(java.lang.String)
@@ -43,110 +35,79 @@ public final class DisplayManager {
     private static final String TAG = "DisplayManager";
     private static final boolean DEBUG = false;
 
-    private static final int MSG_DISPLAY_ADDED = 1;
-    private static final int MSG_DISPLAY_REMOVED = 2;
-    private static final int MSG_DISPLAY_CHANGED = 3;
+    private final Context mContext;
+    private final DisplayManagerGlobal mGlobal;
 
-    private static DisplayManager sInstance;
+    private final Object mLock = new Object();
+    private final SparseArray<Display> mDisplays = new SparseArray<Display>();
 
-    private final IDisplayManager mDm;
-
-    // Guarded by mDisplayLock
-    private final Object mDisplayLock = new Object();
-    private final ArrayList<DisplayListenerDelegate> mDisplayListeners =
-            new ArrayList<DisplayListenerDelegate>();
-
-
-    private DisplayManager(IDisplayManager dm) {
-        mDm = dm;
+    /** @hide */
+    public DisplayManager(Context context) {
+        mContext = context;
+        mGlobal = DisplayManagerGlobal.getInstance();
     }
 
     /**
-     * Gets an instance of the display manager.
+     * Gets information about a logical display.
      *
-     * @return The display manager instance, may be null early in system startup
-     * before the display manager has been fully initialized.
+     * The display metrics may be adjusted to provide compatibility
+     * for legacy applications.
      *
-     * @hide
+     * @param displayId The logical display id.
+     * @return The display object, or null if there is no valid display with the given id.
      */
-    public static DisplayManager getInstance() {
-        synchronized (DisplayManager.class) {
-            if (sInstance == null) {
-                IBinder b = ServiceManager.getService(Context.DISPLAY_SERVICE);
-                if (b != null) {
-                    sInstance = new DisplayManager(IDisplayManager.Stub.asInterface(b));
+    public Display getDisplay(int displayId) {
+        synchronized (mLock) {
+            return getOrCreateDisplayLocked(displayId, false /*assumeValid*/);
+        }
+    }
+
+    /**
+     * Gets all currently valid logical displays.
+     *
+     * @return An array containing all displays.
+     */
+    public Display[] getDisplays() {
+        int[] displayIds = mGlobal.getDisplayIds();
+        int expectedCount = displayIds.length;
+        Display[] displays = new Display[expectedCount];
+        synchronized (mLock) {
+            int actualCount = 0;
+            for (int i = 0; i < expectedCount; i++) {
+                Display display = getOrCreateDisplayLocked(displayIds[i], true /*assumeValid*/);
+                if (display != null) {
+                    displays[actualCount++] = display;
                 }
             }
-            return sInstance;
+            if (actualCount != expectedCount) {
+                Display[] oldDisplays = displays;
+                displays = new Display[actualCount];
+                System.arraycopy(oldDisplays, 0, displays, 0, actualCount);
+            }
         }
+        return displays;
     }
 
-    /**
-     * Get information about a particular logical display.
-     *
-     * @param displayId The logical display id.
-     * @param outInfo A structure to populate with the display info.
-     * @return True if the logical display exists, false otherwise.
-     * @hide
-     */
-    public boolean getDisplayInfo(int displayId, DisplayInfo outInfo) {
-        try {
-            return mDm.getDisplayInfo(displayId, outInfo);
-        } catch (RemoteException ex) {
-            Log.e(TAG, "Could not get display information from display manager.", ex);
-            return false;
+    private Display getOrCreateDisplayLocked(int displayId, boolean assumeValid) {
+        Display display = mDisplays.get(displayId);
+        if (display == null) {
+            display = mGlobal.getCompatibleDisplay(displayId,
+                    getCompatibilityInfoForDisplayLocked(displayId));
+            if (display != null) {
+                mDisplays.put(displayId, display);
+            }
+        } else if (!assumeValid && !display.isValid()) {
+            display = null;
         }
+        return display;
     }
 
-    /**
-     * Gets information about a logical display.
-     *
-     * The display metrics may be adjusted to provide compatibility
-     * for legacy applications.
-     *
-     * @param displayId The logical display id.
-     * @param applicationContext The application context from which to obtain
-     * compatible metrics.
-     * @return The display object.
-     */
-    public Display getDisplay(int displayId, Context applicationContext) {
-        if (applicationContext == null) {
-            throw new IllegalArgumentException("applicationContext must not be null");
-        }
-
+    private CompatibilityInfoHolder getCompatibilityInfoForDisplayLocked(int displayId) {
         CompatibilityInfoHolder cih = null;
         if (displayId == Display.DEFAULT_DISPLAY) {
-            cih = applicationContext.getCompatibilityInfo();
+            cih = mContext.getCompatibilityInfo();
         }
-        return getCompatibleDisplay(displayId, cih);
-    }
-
-    /**
-     * Gets information about a logical display.
-     *
-     * The display metrics may be adjusted to provide compatibility
-     * for legacy applications.
-     *
-     * @param displayId The logical display id.
-     * @param cih The compatibility info, or null if none is required.
-     * @return The display object.
-     *
-     * @hide
-     */
-    public Display getCompatibleDisplay(int displayId, CompatibilityInfoHolder cih) {
-        return new Display(displayId, cih);
-    }
-
-    /**
-     * Gets information about a logical display without applying any compatibility metrics.
-     *
-     * @param displayId The logical display id.
-     * @return The display object.
-     *
-     * @hide
-     */
-    public Display getRealDisplay(int displayId) {
-        return getCompatibleDisplay(displayId, null);
+        return cih;
     }
 
     /**
@@ -160,16 +121,7 @@ public final class DisplayManager {
      * @see #unregisterDisplayListener
      */
     public void registerDisplayListener(DisplayListener listener, Handler handler) {
-        if (listener == null) {
-            throw new IllegalArgumentException("listener must not be null");
-        }
-
-        synchronized (mDisplayLock) {
-            int index = findDisplayListenerLocked(listener);
-            if (index < 0) {
-                mDisplayListeners.add(new DisplayListenerDelegate(listener, handler));
-            }
-        }
+        mGlobal.registerDisplayListener(listener, handler);
     }
 
     /**
@@ -180,28 +132,7 @@ public final class DisplayManager {
      * @see #registerDisplayListener
      */
     public void unregisterDisplayListener(DisplayListener listener) {
-        if (listener == null) {
-            throw new IllegalArgumentException("listener must not be null");
-        }
-
-        synchronized (mDisplayLock) {
-            int index = findDisplayListenerLocked(listener);
-            if (index >= 0) {
-                DisplayListenerDelegate d = mDisplayListeners.get(index);
-                d.removeCallbacksAndMessages(null);
-                mDisplayListeners.remove(index);
-            }
-        }
-    }
-
-    private int findDisplayListenerLocked(DisplayListener listener) {
-        final int numListeners = mDisplayListeners.size();
-        for (int i = 0; i < numListeners; i++) {
-            if (mDisplayListeners.get(i).mListener == listener) {
-                return i;
-            }
-        }
-        return -1;
+        mGlobal.unregisterDisplayListener(listener);
     }
 
     /**
@@ -210,7 +141,8 @@ public final class DisplayManager {
     public interface DisplayListener {
         /**
          * Called whenever a logical display has been added to the system.
-         * Use {@link DisplayManager#getDisplay} to get more information about the display.
+         * Use {@link DisplayManager#getDisplay} to get more information about
+         * the display.
          *
          * @param displayId The id of the logical display that was added.
          */
@@ -229,29 +161,5 @@ public final class DisplayManager {
          * @param displayId The id of the logical display that changed.
          */
         void onDisplayChanged(int displayId);
-    }
-
-    private static final class DisplayListenerDelegate extends Handler {
-        public final DisplayListener mListener;
-
-        public DisplayListenerDelegate(DisplayListener listener, Handler handler) {
-            super(handler != null ? handler.getLooper() : Looper.myLooper());
-            mListener = listener;
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_DISPLAY_ADDED:
-                    mListener.onDisplayAdded(msg.arg1);
-                    break;
-                case MSG_DISPLAY_REMOVED:
-                    mListener.onDisplayRemoved(msg.arg1);
-                    break;
-                case MSG_DISPLAY_CHANGED:
-                    mListener.onDisplayChanged(msg.arg1);
-                    break;
-            }
-        }
     }
 }
