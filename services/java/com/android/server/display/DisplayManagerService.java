@@ -22,6 +22,7 @@ import android.content.pm.PackageManager;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.IDisplayManager;
 import android.os.Binder;
+import android.os.IBinder;
 import android.os.SystemProperties;
 import android.view.Display;
 import android.view.DisplayInfo;
@@ -51,6 +52,7 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
 
     private final ArrayList<DisplayAdapter> mDisplayAdapters = new ArrayList<DisplayAdapter>();
     private final DisplayInfo mDefaultDisplayInfo = new DisplayInfo();
+    private DisplayDevice mDefaultDisplayDevice;
 
     public DisplayManagerService(Context context) {
         mContext = context;
@@ -63,7 +65,7 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
         if (mHeadless) {
             registerDisplayAdapter(new HeadlessDisplayAdapter(mContext));
         } else {
-            registerDisplayAdapter(new SurfaceFlingerDisplayAdapter(mContext));
+            registerDisplayAdapter(new LocalDisplayAdapter(mContext));
         }
     }
 
@@ -85,8 +87,31 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
     }
 
     /**
+     * Set the new display orientation.
+     * @param displayId The logical display id.
+     * @param orientation One of the Surface.ROTATION_* constants.
+     */
+    public void setDisplayOrientation(int displayId, int orientation) {
+        synchronized (mLock) {
+            if (displayId != Display.DEFAULT_DISPLAY) {
+                throw new UnsupportedOperationException();
+            }
+
+            IBinder displayToken = mDefaultDisplayDevice.getDisplayToken();
+            if (displayToken != null) {
+                Surface.openTransaction();
+                try {
+                    Surface.setDisplayOrientation(displayToken, orientation);
+                } finally {
+                    Surface.closeTransaction();
+                }
+            }
+        }
+    }
+
+    /**
      * Save away new DisplayInfo data.
-     * @param displayId The local DisplayInfo to store the new data in.
+     * @param displayId The logical display id.
      * @param info The new data to be stored.
      */
     public void setDisplayInfo(int displayId, DisplayInfo info) {
@@ -119,6 +144,7 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
         adapter.register(new DisplayAdapter.Listener() {
             @Override
             public void onDisplayDeviceAdded(DisplayDevice device) {
+                mDefaultDisplayDevice = device;
                 DisplayDeviceInfo deviceInfo = new DisplayDeviceInfo();
                 device.getInfo(deviceInfo);
                 copyDisplayInfoFromDeviceInfo(mDefaultDisplayInfo, deviceInfo);

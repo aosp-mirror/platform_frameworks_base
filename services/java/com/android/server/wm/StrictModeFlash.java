@@ -37,14 +37,16 @@ class StrictModeFlash {
 
     public StrictModeFlash(Display display, SurfaceSession session) {
         try {
-            mSurface = new Surface(session, 0, "StrictModeFlash", display.getLayerStack(),
-                1, 1, PixelFormat.TRANSLUCENT, 0);
+            mSurface = new Surface(session, "StrictModeFlash",
+                1, 1, PixelFormat.TRANSLUCENT, Surface.HIDDEN);
         } catch (Surface.OutOfResourcesException e) {
             return;
         }
 
+        mSurface.setLayerStack(display.getLayerStack());
         mSurface.setLayer(WindowManagerService.TYPE_LAYER_MULTIPLIER * 101);  // one more than Watermark? arbitrary.
         mSurface.setPosition(0, 0);
+        mSurface.show();
         mDrawNeeded = true;
     }
 

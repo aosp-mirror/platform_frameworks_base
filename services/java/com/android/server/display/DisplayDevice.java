@@ -16,6 +16,8 @@
 
 package com.android.server.display;
 
+import android.os.IBinder;
+
 /**
  * Represents a physical display device such as the built-in display
  * an external monitor, or a WiFi display.
@@ -27,6 +29,14 @@ public abstract class DisplayDevice {
      * @return The display adapter.
      */
     public abstract DisplayAdapter getAdapter();
+
+    /**
+     * Gets the Surface Flinger display token for this display.
+     *
+     * @return The display token, or null if the display is not being managed
+     * by Surface Flinger.
+     */
+    public abstract IBinder getDisplayToken();
 
     /**
      * Gets information about the display device.

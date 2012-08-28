@@ -25,12 +25,15 @@ namespace android {
 
 class Surface;
 
-extern sp<ANativeWindow> android_Surface_getNativeWindow(
-        JNIEnv* env, jobject clazz);
-extern bool android_Surface_isInstanceOf(JNIEnv* env, jobject obj);
+/* Gets the underlying ANativeWindow for a Surface. */
+extern sp<ANativeWindow> android_view_Surface_getNativeWindow(
+        JNIEnv* env, jobject surfaceObj);
+
+/* Returns true if the object is an instance of Surface. */
+extern bool android_view_Surface_isInstanceOf(JNIEnv* env, jobject obj);
 
 /* Gets the underlying Surface from a Surface Java object. */
-extern sp<Surface> Surface_getSurface(JNIEnv* env, jobject thiz);
+extern sp<Surface> android_view_Surface_getSurface(JNIEnv* env, jobject surfaceObj);
 
 } // namespace android
 

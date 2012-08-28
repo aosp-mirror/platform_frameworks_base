@@ -22,7 +22,6 @@
 namespace android {
 int register_android_server_AlarmManagerService(JNIEnv* env);
 int register_android_server_BatteryService(JNIEnv* env);
-int register_android_server_display_SurfaceFlingerDisplayAdapter(JNIEnv* env);
 int register_android_server_InputApplicationHandle(JNIEnv* env);
 int register_android_server_InputWindowHandle(JNIEnv* env);
 int register_android_server_InputManager(JNIEnv* env);
@@ -52,7 +51,6 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* reserved)
 
     register_android_server_PowerManagerService(env);
     register_android_server_SerialService(env);
-    register_android_server_display_SurfaceFlingerDisplayAdapter(env);
     register_android_server_InputApplicationHandle(env);
     register_android_server_InputWindowHandle(env);
     register_android_server_InputManager(env);

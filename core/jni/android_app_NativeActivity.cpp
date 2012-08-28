@@ -436,7 +436,7 @@ struct NativeCode : public ANativeActivity {
     
     void setSurface(jobject _surface) {
         if (_surface != NULL) {
-            nativeWindow = android_Surface_getNativeWindow(env, _surface);
+            nativeWindow = android_view_Surface_getNativeWindow(env, _surface);
         } else {
             nativeWindow = NULL;
         }
