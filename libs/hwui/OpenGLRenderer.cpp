@@ -1403,10 +1403,6 @@ void OpenGLRenderer::setupDrawAALine(GLvoid* vertices, GLvoid* widthCoords,
 
     int boundaryWidthSlot = mCaches.currentProgram->getUniform("boundaryWidth");
     glUniform1f(boundaryWidthSlot, boundaryWidthProportion);
-
-    // Setting the inverse value saves computations per-fragment in the shader
-    int inverseBoundaryWidthSlot = mCaches.currentProgram->getUniform("inverseBoundaryWidth");
-    glUniform1f(inverseBoundaryWidthSlot, 1.0f / boundaryWidthProportion);
 }
 
 void OpenGLRenderer::finishDrawAALine(const int widthSlot, const int lengthSlot) {
@@ -1810,15 +1806,13 @@ void OpenGLRenderer::drawAARect(float left, float top, float right, float bottom
         float width = right - left;
         float height = bottom - top;
 
-        float boundaryWidthProportion = (width != 0) ? (2 * boundarySizeX) / width : 0;
-        float boundaryHeightProportion = (height != 0) ? (2 * boundarySizeY) / height : 0;
+        float boundaryWidthProportion = .5 - ((width != 0) ? (2 * boundarySizeX) / width : 0);
+        float boundaryHeightProportion = .5 - ((height != 0) ? (2 * boundarySizeY) / height : 0);
         setupDrawAALine((void*) aaVertices, widthCoords, lengthCoords,
                 boundaryWidthProportion, widthSlot, lengthSlot);
 
         int boundaryLengthSlot = mCaches.currentProgram->getUniform("boundaryLength");
-        int inverseBoundaryLengthSlot = mCaches.currentProgram->getUniform("inverseBoundaryLength");
         glUniform1f(boundaryLengthSlot, boundaryHeightProportion);
-        glUniform1f(inverseBoundaryLengthSlot, (1.0f / boundaryHeightProportion));
 
         AAVertex::set(aaVertices++, left, bottom, 1, 1);
         AAVertex::set(aaVertices++, left, top, 1, 0);
@@ -1955,9 +1949,7 @@ status_t OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
     Vertex* prevVertex = NULL;
 
     int boundaryLengthSlot = -1;
-    int inverseBoundaryLengthSlot = -1;
     int boundaryWidthSlot = -1;
-    int inverseBoundaryWidthSlot = -1;
 
     for (int i = 0; i < count; i += 4) {
         // a = start point, b = end point
@@ -2060,22 +2052,16 @@ status_t OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
                     if (boundaryWidthSlot < 0) {
                         boundaryWidthSlot =
                                 mCaches.currentProgram->getUniform("boundaryWidth");
-                        inverseBoundaryWidthSlot =
-                                mCaches.currentProgram->getUniform("inverseBoundaryWidth");
                     }
 
                     glUniform1f(boundaryWidthSlot, boundaryWidthProportion);
-                    glUniform1f(inverseBoundaryWidthSlot, (1 / boundaryWidthProportion));
                 }
 
                 if (boundaryLengthSlot < 0) {
                     boundaryLengthSlot = mCaches.currentProgram->getUniform("boundaryLength");
-                    inverseBoundaryLengthSlot =
-                            mCaches.currentProgram->getUniform("inverseBoundaryLength");
                 }
 
                 glUniform1f(boundaryLengthSlot, boundaryLengthProportion);
-                glUniform1f(inverseBoundaryLengthSlot, (1 / boundaryLengthProportion));
 
                 if (prevAAVertex != NULL) {
                     // Issue two repeat vertices to create degenerate triangles to bridge
