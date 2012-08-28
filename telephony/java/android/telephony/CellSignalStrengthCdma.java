@@ -113,9 +113,7 @@ public class CellSignalStrengthCdma extends CellSignalStrength implements Parcel
     }
 
     /**
-     * Get LTE as level 0..4
-     *
-     * @hide
+     * Get signal level as an int from 0..4
      */
     @Override
     public int getLevel() {
@@ -140,8 +138,6 @@ public class CellSignalStrengthCdma extends CellSignalStrength implements Parcel
     /**
      * Get the LTE signal level as an asu value between 0..97, 99 is unknown
      * Asu is calculated based on 3GPP RSRP. Refer to 3GPP 27.007 (Ver 10.3.0) Sec 8.69
-     *
-     * @hide
      */
     @Override
     public int getAsuLevel() {
@@ -172,8 +168,6 @@ public class CellSignalStrengthCdma extends CellSignalStrength implements Parcel
 
     /**
      * Get cdma as level 0..4
-     *
-     * @hide
      */
     public int getCdmaLevel() {
         final int cdmaDbm = getCdmaDbm();
@@ -201,8 +195,6 @@ public class CellSignalStrengthCdma extends CellSignalStrength implements Parcel
 
     /**
      * Get Evdo as level 0..4
-     *
-     * @hide
      */
     public int getEvdoLevel() {
         int evdoDbm = getEvdoDbm();
@@ -228,9 +220,7 @@ public class CellSignalStrengthCdma extends CellSignalStrength implements Parcel
     }
 
     /**
-     * Get as dBm
-     *
-     * @hide
+     * Get the signal strength as dBm
      */
     @Override
     public int getDbm() {

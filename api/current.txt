@@ -20433,6 +20433,9 @@ package android.telephony {
   public abstract class CellSignalStrength implements android.os.Parcelable {
     method public int describeContents();
     method public abstract boolean equals(java.lang.Object);
+    method public abstract int getAsuLevel();
+    method public abstract int getDbm();
+    method public abstract int getLevel();
     method public abstract int hashCode();
     method public abstract void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
@@ -20440,11 +20443,16 @@ package android.telephony {
 
   public class CellSignalStrengthCdma extends android.telephony.CellSignalStrength implements android.os.Parcelable {
     method public boolean equals(java.lang.Object);
+    method public int getAsuLevel();
     method public int getCdmaDbm();
     method public int getCdmaEcio();
+    method public int getCdmaLevel();
+    method public int getDbm();
     method public int getEvdoDbm();
     method public int getEvdoEcio();
+    method public int getEvdoLevel();
     method public int getEvdoSnr();
+    method public int getLevel();
     method public int hashCode();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
@@ -20452,6 +20460,9 @@ package android.telephony {
 
   public class CellSignalStrengthGsm extends android.telephony.CellSignalStrength implements android.os.Parcelable {
     method public boolean equals(java.lang.Object);
+    method public int getAsuLevel();
+    method public int getDbm();
+    method public int getLevel();
     method public int hashCode();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
@@ -20459,6 +20470,9 @@ package android.telephony {
 
   public class CellSignalStrengthLte extends android.telephony.CellSignalStrength implements android.os.Parcelable {
     method public boolean equals(java.lang.Object);
+    method public int getAsuLevel();
+    method public int getDbm();
+    method public int getLevel();
     method public int getTimingAdvance();
     method public int hashCode();
     method public void writeToParcel(android.os.Parcel, int);

@@ -100,9 +100,7 @@ public class CellSignalStrengthGsm extends CellSignalStrength implements Parcela
     }
 
     /**
-     * Get LTE as level 0..4
-     *
-     * @hide
+     * Get signal level as an int from 0..4
      */
     @Override
     public int getLevel() {
@@ -123,9 +121,7 @@ public class CellSignalStrengthGsm extends CellSignalStrength implements Parcela
     }
 
     /**
-     * Get LTE as dBm
-     *
-     * @hide
+     * Get the signal strength as dBm
      */
     @Override
     public int getDbm() {
@@ -145,8 +141,6 @@ public class CellSignalStrengthGsm extends CellSignalStrength implements Parcela
     /**
      * Get the LTE signal level as an asu value between 0..97, 99 is unknown
      * Asu is calculated based on 3GPP RSRP. Refer to 3GPP 27.007 (Ver 10.3.0) Sec 8.69
-     *
-     * @hide
      */
     @Override
     public int getAsuLevel() {
