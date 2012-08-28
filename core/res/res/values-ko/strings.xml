@@ -794,7 +794,7 @@
     <string name="autofill_department" msgid="5343279462564453309">"지역"</string>
     <string name="autofill_prefecture" msgid="2028499485065800419">"현"</string>
     <string name="autofill_parish" msgid="8202206105468820057">"군"</string>
-    <string name="autofill_area" msgid="3547409050889952423">"구역"</string>
+    <string name="autofill_area" msgid="3547409050889952423">"주소"</string>
     <string name="autofill_emirate" msgid="2893880978835698818">"에미리트"</string>
     <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"웹 북마크 및 기록 읽기"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"앱이 브라우저가 방문한 모든 URL의 기록과 모든 브라우저 북마크를 읽을 수 있도록 허용합니다. 참고: 이 권한은 타사 브라우저 또는 브라우저 기능을 가진 기타 애플리케이션에 적용되지 않습니다."</string>
@@ -1167,6 +1167,14 @@
     <string name="vpn_title_long" msgid="6400714798049252294">"VPN이 <xliff:g id="APP">%s</xliff:g>에 의해 활성화됨"</string>
     <string name="vpn_text" msgid="3011306607126450322">"네트워크를 관리하려면 터치하세요."</string>
     <string name="vpn_text_long" msgid="6407351006249174473">"<xliff:g id="SESSION">%s</xliff:g>에 연결되어 있습니다. 네트워크를 관리하려면 터치하세요."</string>
+    <!-- no translation found for vpn_lockdown_connecting (6443438964440960745) -->
+    <skip />
+    <!-- no translation found for vpn_lockdown_connected (8202679674819213931) -->
+    <skip />
+    <!-- no translation found for vpn_lockdown_error (6009249814034708175) -->
+    <skip />
+    <!-- no translation found for vpn_lockdown_reset (5365010427963548932) -->
+    <skip />
     <string name="upload_file" msgid="2897957172366730416">"파일 선택"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"파일을 선택하지 않았습니다."</string>
     <string name="reset" msgid="2448168080964209908">"초기화"</string>
