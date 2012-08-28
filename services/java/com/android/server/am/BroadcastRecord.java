@@ -44,7 +44,6 @@ class BroadcastRecord extends Binder {
     final boolean ordered;  // serialize the send to receivers?
     final boolean sticky;   // originated from existing sticky data?
     final boolean initialSticky; // initial broadcast from register to sticky?
-    final boolean onlySendToCaller; // only allow receipt by sender's components?
     final int userId;       // user id this broadcast was for
     final String requiredPermission; // a permission the caller has required
     final List receivers;   // contains BroadcastFilter and ResolveInfo
@@ -170,7 +169,7 @@ class BroadcastRecord extends Binder {
             int _callingPid, int _callingUid, String _requiredPermission,
             List _receivers, IIntentReceiver _resultTo, int _resultCode,
             String _resultData, Bundle _resultExtras, boolean _serialized,
-            boolean _sticky, boolean _initialSticky, boolean _onlySendToCaller,
+            boolean _sticky, boolean _initialSticky,
             int _userId) {
         queue = _queue;
         intent = _intent;
@@ -187,7 +186,6 @@ class BroadcastRecord extends Binder {
         ordered = _serialized;
         sticky = _sticky;
         initialSticky = _initialSticky;
-        onlySendToCaller = _onlySendToCaller;
         userId = _userId;
         nextReceiver = 0;
         state = IDLE;
