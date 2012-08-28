@@ -33,6 +33,16 @@ import java.util.regex.Matcher;
  */
 public class WifiP2pGroup implements Parcelable {
 
+    /** The temporary network id.
+     * {@hide} */
+    public static final int TEMPORARY_NET_ID = -1;
+
+    /** The persistent network id.
+     * If a matching persistent profile is found, use it.
+     * Otherwise, create a new persistent profile.
+     * {@hide} */
+    public static final int PERSISTENT_NET_ID = -2;
+
     /** The network name */
     private String mNetworkName;
 
@@ -50,13 +60,17 @@ public class WifiP2pGroup implements Parcelable {
 
     private String mInterface;
 
+    /** The network id in the wpa_supplicant */
+    private int mNetId;
+
     /** P2P group started string pattern */
     private static final Pattern groupStartedPattern = Pattern.compile(
         "ssid=\"(.+)\" " +
         "freq=(\\d+) " +
         "(?:psk=)?([0-9a-fA-F]{64})?" +
         "(?:passphrase=)?(?:\"(.{8,63})\")? " +
-        "go_dev_addr=((?:[0-9a-f]{2}:){5}[0-9a-f]{2})"
+        "go_dev_addr=((?:[0-9a-f]{2}:){5}[0-9a-f]{2})" +
+        " ?(\\[PERSISTENT\\])?"
     );
 
     public WifiP2pGroup() {
@@ -67,12 +81,14 @@ public class WifiP2pGroup implements Parcelable {
      *
      *  P2P-GROUP-STARTED p2p-wlan0-0 [client|GO] ssid="DIRECT-W8" freq=2437
      *  [psk=2182b2e50e53f260d04f3c7b25ef33c965a3291b9b36b455a82d77fd82ca15bc|
-     *  passphrase="fKG4jMe3"] go_dev_addr=fa:7b:7a:42:02:13
+     *  passphrase="fKG4jMe3"] go_dev_addr=fa:7b:7a:42:02:13 [PERSISTENT]
      *
      *  P2P-GROUP-REMOVED p2p-wlan0-0 [client|GO] reason=REQUESTED
      *
      *  P2P-INVITATION-RECEIVED sa=fa:7b:7a:42:02:13 go_dev_addr=f8:7b:7a:42:02:13
      *  bssid=fa:7b:7a:42:82:13 unknown-network
+     *
+     *  P2P-INVITATION-RECEIVED sa=b8:f9:34:2a:c7:9d persistent=0
      *
      *  Note: The events formats can be looked up in the wpa_supplicant code
      *  @hide
@@ -100,14 +116,36 @@ public class WifiP2pGroup implements Parcelable {
             //String psk = match.group(3);
             mPassphrase = match.group(4);
             mOwner = new WifiP2pDevice(match.group(5));
-
+            if (match.group(6) != null) {
+                mNetId = PERSISTENT_NET_ID;
+            } else {
+                mNetId = TEMPORARY_NET_ID;
+            }
         } else if (tokens[0].equals("P2P-INVITATION-RECEIVED")) {
+            String sa = null;
+            mNetId = PERSISTENT_NET_ID;
             for (String token : tokens) {
                 String[] nameValue = token.split("=");
                 if (nameValue.length != 2) continue;
 
+                if (nameValue[0].equals("sa")) {
+                    sa = nameValue[1];
+
+                    // set source address into the client list.
+                    WifiP2pDevice dev = new WifiP2pDevice();
+                    dev.deviceAddress = nameValue[1];
+                    mClients.add(dev);
+                    continue;
+                }
+
                 if (nameValue[0].equals("go_dev_addr")) {
                     mOwner = new WifiP2pDevice(nameValue[1]);
+                    continue;
+                }
+
+                if (nameValue[0].equals("persistent")) {
+                    mOwner = new WifiP2pDevice(sa);
+                    mNetId = Integer.parseInt(nameValue[1]);
                     continue;
                 }
             }
@@ -212,6 +250,16 @@ public class WifiP2pGroup implements Parcelable {
         return mInterface;
     }
 
+    /** @hide */
+    public int getNetworkId() {
+        return mNetId;
+    }
+
+    /** @hide */
+    public void setNetworkId(int netId) {
+        this.mNetId = netId;
+    }
+
     public String toString() {
         StringBuffer sbuf = new StringBuffer();
         sbuf.append("network: ").append(mNetworkName);
@@ -221,6 +269,7 @@ public class WifiP2pGroup implements Parcelable {
             sbuf.append("\n Client: ").append(client);
         }
         sbuf.append("\n interface: ").append(mInterface);
+        sbuf.append("\n networkId: ").append(mNetId);
         return sbuf.toString();
     }
 
@@ -238,6 +287,7 @@ public class WifiP2pGroup implements Parcelable {
             for (WifiP2pDevice d : source.getClientList()) mClients.add(d);
             mPassphrase = source.getPassphrase();
             mInterface = source.getInterface();
+            mNetId = source.getNetworkId();
         }
     }
 
@@ -252,6 +302,7 @@ public class WifiP2pGroup implements Parcelable {
         }
         dest.writeString(mPassphrase);
         dest.writeString(mInterface);
+        dest.writeInt(mNetId);
     }
 
     /** Implement the Parcelable interface */
@@ -268,6 +319,7 @@ public class WifiP2pGroup implements Parcelable {
                 }
                 group.setPassphrase(in.readString());
                 group.setInterface(in.readString());
+                group.setNetworkId(in.readInt());
                 return group;
             }
 
