@@ -20,6 +20,7 @@
 #include "jni.h"
 #include <android_runtime/AndroidRuntime.h>
 
+#include <gui/ISurfaceComposer.h>
 #include <gui/SurfaceComposerClient.h>
 #include <ui/DisplayInfo.h>
 
@@ -38,8 +39,11 @@ static struct {
 
 
 static void nativeGetDefaultDisplayDeviceInfo(JNIEnv* env, jclass clazz, jobject infoObj) {
+    sp<IBinder> display(SurfaceComposerClient::getBuiltInDisplay(
+            ISurfaceComposer::eDisplayIdMain));
+
     DisplayInfo info;
-    status_t err = SurfaceComposerClient::getDisplayInfo(0, &info);
+    status_t err = SurfaceComposerClient::getDisplayInfo(display, &info);
     if (err < 0) {
         jniThrowExceptionFmt(env, "java/lang/RuntimeException",
                 "Could not get display info.  err=%d", err);
