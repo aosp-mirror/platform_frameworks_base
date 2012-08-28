@@ -59,22 +59,16 @@ public abstract class CellSignalStrength implements Parcelable {
 
     /**
      * Get signal level as an int from 0..4
-     *
-     * @hide
      */
     public abstract int getLevel();
 
     /**
      * Get the signal level as an asu value between 0..31, 99 is unknown
-     *
-     * @hide
      */
     public abstract int getAsuLevel();
 
     /**
      * Get the signal strength as dBm
-     *
-     * @hide
      */
     public abstract int getDbm();
 
