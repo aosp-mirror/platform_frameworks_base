@@ -5578,6 +5578,10 @@ public class PackageManagerService extends IPackageManager.Stub {
     
     @Override
     public void verifyPendingInstall(int id, int verificationCode) throws RemoteException {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.PACKAGE_VERIFICATION_AGENT,
+                "Only package verification agents can verify applications");
+
         final Message msg = mHandler.obtainMessage(PACKAGE_VERIFIED);
         final PackageVerificationResponse response = new PackageVerificationResponse(
                 verificationCode, Binder.getCallingUid());
@@ -5589,6 +5593,10 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public void extendVerificationTimeout(int id, int verificationCodeAtTimeout,
             long millisecondsToDelay) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.PACKAGE_VERIFICATION_AGENT,
+                "Only package verification agents can extend verification timeouts");
+
         final PackageVerificationState state = mPendingVerification.get(id);
         final PackageVerificationResponse response = new PackageVerificationResponse(
                 verificationCodeAtTimeout, Binder.getCallingUid());

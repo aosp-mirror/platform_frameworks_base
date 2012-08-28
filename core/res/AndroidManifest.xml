@@ -1662,7 +1662,6 @@
 
     <!-- Package verifier needs to have this permission before the PackageManager will
          trust it to verify packages.
-         @hide
     -->
     <permission android:name="android.permission.PACKAGE_VERIFICATION_AGENT"
         android:label="@string/permlab_packageVerificationAgent"
