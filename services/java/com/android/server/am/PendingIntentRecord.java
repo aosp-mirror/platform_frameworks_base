@@ -54,11 +54,12 @@ class PendingIntentRecord extends IIntentSender.Stub {
         String[] allResolvedTypes;
         final int flags;
         final int hashCode;
+        final int userId;
         
         private static final int ODD_PRIME_NUMBER = 37;
         
         Key(int _t, String _p, ActivityRecord _a, String _w,
-                int _r, Intent[] _i, String[] _it, int _f, Bundle _o) {
+                int _r, Intent[] _i, String[] _it, int _f, Bundle _o, int _userId) {
             type = _t;
             packageName = _p;
             activity = _a;
@@ -70,10 +71,12 @@ class PendingIntentRecord extends IIntentSender.Stub {
             allResolvedTypes = _it;
             flags = _f;
             options = _o;
-            
+            userId = _userId;
+
             int hash = 23;
             hash = (ODD_PRIME_NUMBER*hash) + _f;
             hash = (ODD_PRIME_NUMBER*hash) + _r;
+            hash = (ODD_PRIME_NUMBER*hash) + _userId;
             if (_w != null) {
                 hash = (ODD_PRIME_NUMBER*hash) + _w.hashCode();
             }
@@ -100,6 +103,9 @@ class PendingIntentRecord extends IIntentSender.Stub {
             try {
                 Key other = (Key)otherObj;
                 if (type != other.type) {
+                    return false;
+                }
+                if (userId != other.userId){
                     return false;
                 }
                 if (!packageName.equals(other.packageName)) {
@@ -156,7 +162,7 @@ class PendingIntentRecord extends IIntentSender.Stub {
                 + " intent="
                 + (requestIntent != null
                         ? requestIntent.toShortString(false, true, false, false) : "<null>")
-                + " flags=0x" + Integer.toHexString(flags) + "}";
+                + " flags=0x" + Integer.toHexString(flags) + " u=" + userId + "}";
         }
         
         String typeName() {
