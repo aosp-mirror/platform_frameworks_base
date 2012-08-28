@@ -20,6 +20,8 @@ import android.net.NetworkInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pGroup;
+import android.net.wifi.p2p.WifiP2pService;
+import android.net.wifi.p2p.WifiP2pService.P2pStatus;
 import android.net.wifi.p2p.WifiP2pProvDiscEvent;
 import android.net.wifi.p2p.nsd.WifiP2pServiceResponse;
 import android.net.wifi.StateChangeResult;
@@ -186,7 +188,7 @@ public class WifiMonitor {
 
     /* P2P-GROUP-STARTED p2p-wlan0-0 [client|GO] ssid="DIRECT-W8" freq=2437
        [psk=2182b2e50e53f260d04f3c7b25ef33c965a3291b9b36b455a82d77fd82ca15bc|passphrase="fKG4jMe3"]
-       go_dev_addr=fa:7b:7a:42:02:13 */
+       go_dev_addr=fa:7b:7a:42:02:13 [PERSISTENT] */
     private static final String P2P_GROUP_STARTED_STR = "P2P-GROUP-STARTED";
 
     /* P2P-GROUP-REMOVED p2p-wlan0-0 [client|GO] reason=REQUESTED */
@@ -594,7 +596,13 @@ public class WifiMonitor {
                 if (tokens.length != 2) return;
                 String[] nameValue = tokens[1].split("=");
                 if (nameValue.length != 2) return;
-                mStateMachine.sendMessage(P2P_INVITATION_RESULT_EVENT, nameValue[1]);
+                P2pStatus err = P2pStatus.UNKNOWN;
+                try {
+                    err = P2pStatus.valueOf(Integer.parseInt(nameValue[1]));
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
+                mStateMachine.sendMessage(P2P_INVITATION_RESULT_EVENT, err);
             } else if (dataString.startsWith(P2P_PROV_DISC_PBC_REQ_STR)) {
                 mStateMachine.sendMessage(P2P_PROV_DISC_PBC_REQ_EVENT,
                         new WifiP2pProvDiscEvent(dataString));
