@@ -38,6 +38,7 @@
 #include <ui/DisplayInfo.h>
 #include <ui/FramebufferNativeWindow.h>
 
+#include <gui/ISurfaceComposer.h>
 #include <gui/Surface.h>
 #include <gui/SurfaceComposerClient.h>
 
@@ -216,14 +217,16 @@ status_t BootAnimation::initTexture(void* buffer, size_t len)
 status_t BootAnimation::readyToRun() {
     mAssets.addDefaultAssets();
 
+    sp<IBinder> dtoken(SurfaceComposerClient::getBuiltInDisplay(
+            ISurfaceComposer::eDisplayIdMain));
     DisplayInfo dinfo;
-    status_t status = SurfaceComposerClient::getDisplayInfo(0, &dinfo);
+    status_t status = SurfaceComposerClient::getDisplayInfo(dtoken, &dinfo);
     if (status)
         return -1;
 
     // create the native surface
-    sp<SurfaceControl> control = session()->createSurface(
-            0, dinfo.w, dinfo.h, PIXEL_FORMAT_RGB_565);
+    sp<SurfaceControl> control = session()->createSurface(String8("BootAnimation"),
+            dinfo.w, dinfo.h, PIXEL_FORMAT_RGB_565);
 
     SurfaceComposerClient::openGlobalTransaction();
     control->setLayer(0x40000000);

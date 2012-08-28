@@ -24,26 +24,34 @@ package android.view;
  * {@hide}
  */
 public class SurfaceSession {
+    private int mClient;
+
+    private native void nativeInit();
+    private native void nativeDestroy();
+    private native void nativeKill();
+
     /** Create a new connection with the surface flinger. */
     public SurfaceSession() {
-        init();
+        nativeInit();
     }
-
-    /** Forcibly detach native resources associated with this object.
-     *  Unlike destroy(), after this call any surfaces that were created
-     *  from the session will no longer work. The session itself is destroyed.
-     */
-    public native void kill();
 
     /* no user serviceable parts here ... */
     @Override
     protected void finalize() throws Throwable {
-        destroy();
+        try {
+            nativeDestroy();
+        } finally {
+            super.finalize();
+        }
     }
-    
-    private native void init();
-    private native void destroy();
-    
-    private int mClient;
+
+    /**
+     * Forcibly detach native resources associated with this object.
+     * Unlike destroy(), after this call any surfaces that were created
+     * from the session will no longer work. The session itself is destroyed.
+     */
+    public void kill() {
+        nativeKill();
+    }
 }
 
