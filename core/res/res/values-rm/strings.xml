@@ -1799,6 +1799,14 @@
     <skip />
     <!-- no translation found for vpn_text_long (6407351006249174473) -->
     <skip />
+    <!-- no translation found for vpn_lockdown_connecting (6443438964440960745) -->
+    <skip />
+    <!-- no translation found for vpn_lockdown_connected (8202679674819213931) -->
+    <skip />
+    <!-- no translation found for vpn_lockdown_error (6009249814034708175) -->
+    <skip />
+    <!-- no translation found for vpn_lockdown_reset (5365010427963548932) -->
+    <skip />
     <string name="upload_file" msgid="2897957172366730416">"Tscherner ina datoteca"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Nagina datoteca tschernida"</string>
     <string name="reset" msgid="2448168080964209908">"Reinizialisar"</string>
