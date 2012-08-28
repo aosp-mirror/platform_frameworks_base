@@ -21,6 +21,9 @@ import android.content.res.Resources;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
+
+import libcore.icu.LocaleData;
 
 /**
  * Sorts dates into the following groups:
@@ -63,8 +66,13 @@ public class DateSorter {
         mBins[3] = c.getTimeInMillis();  // One month ago
 
         // build labels
-        mLabels[0] = context.getText(com.android.internal.R.string.today).toString();
-        mLabels[1] = context.getText(com.android.internal.R.string.yesterday).toString();
+        Locale locale = resources.getConfiguration().locale;
+        if (locale == null) {
+            locale = Locale.getDefault();
+        }
+        LocaleData localeData = LocaleData.get(locale);
+        mLabels[0] = localeData.today;
+        mLabels[1] = localeData.yesterday;
 
         int resId = com.android.internal.R.plurals.last_num_days;
         String format = resources.getQuantityString(resId, NUM_DAYS_AGO);
