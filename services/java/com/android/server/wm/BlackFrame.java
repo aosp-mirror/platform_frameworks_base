@@ -43,14 +43,15 @@ public class BlackFrame {
             int w = r-l;
             int h = b-t;
             if (WindowManagerService.DEBUG_SURFACE_TRACE) {
-                surface = new WindowStateAnimator.SurfaceTrace(session, 0, "BlackSurface("
-                        + l + ", " + t + ")", layerStack,
-                        w, h, PixelFormat.OPAQUE, Surface.FX_SURFACE_DIM);
+                surface = new WindowStateAnimator.SurfaceTrace(session, "BlackSurface("
+                        + l + ", " + t + ")",
+                        w, h, PixelFormat.OPAQUE, Surface.FX_SURFACE_DIM | Surface.HIDDEN);
             } else {
-                surface = new Surface(session, 0, "BlackSurface", layerStack,
-                        w, h, PixelFormat.OPAQUE, Surface.FX_SURFACE_DIM);
+                surface = new Surface(session, "BlackSurface",
+                        w, h, PixelFormat.OPAQUE, Surface.FX_SURFACE_DIM | Surface.HIDDEN);
             }
             surface.setAlpha(1);
+            surface.setLayerStack(layerStack);
             surface.setLayer(layer);
             surface.show();
             if (WindowManagerService.SHOW_TRANSACTIONS ||
