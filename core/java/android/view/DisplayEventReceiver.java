@@ -66,7 +66,7 @@ public abstract class DisplayEventReceiver {
     @Override
     protected void finalize() throws Throwable {
         try {
-            dispose();
+            dispose(true);
         } finally {
             super.finalize();
         }
@@ -76,9 +76,17 @@ public abstract class DisplayEventReceiver {
      * Disposes the receiver.
      */
     public void dispose() {
+        dispose(false);
+    }
+
+    private void dispose(boolean finalized) {
         if (mCloseGuard != null) {
+            if (finalized) {
+                mCloseGuard.warnIfOpen();
+            }
             mCloseGuard.close();
         }
+
         if (mReceiverPtr != 0) {
             nativeDispose(mReceiverPtr);
             mReceiverPtr = 0;
