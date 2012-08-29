@@ -129,9 +129,7 @@ const char* gFS_Uniforms_Color =
         "uniform vec4 color;\n";
 const char* gFS_Uniforms_AA =
         "uniform float boundaryWidth;\n"
-        "uniform float inverseBoundaryWidth;\n"
-        "uniform float boundaryLength;\n"
-        "uniform float inverseBoundaryLength;\n";
+        "uniform float boundaryLength;\n";
 const char* gFS_Header_Uniforms_PointHasBitmap =
         "uniform vec2 textureDimension;\n"
         "uniform float pointSize;\n";
@@ -242,16 +240,9 @@ const char* gFS_Main_ModulateColor =
 const char* gFS_Main_ModulateColor_ApplyGamma =
         "    fragColor *= pow(color.a, gamma);\n";
 const char* gFS_Main_AccountForAA =
-        "    if (widthProportion < boundaryWidth) {\n"
-        "        fragColor *= (widthProportion * inverseBoundaryWidth);\n"
-        "    } else if (widthProportion > (1.0 - boundaryWidth)) {\n"
-        "        fragColor *= ((1.0 - widthProportion) * inverseBoundaryWidth);\n"
-        "    }\n"
-        "    if (lengthProportion < boundaryLength) {\n"
-        "        fragColor *= (lengthProportion * inverseBoundaryLength);\n"
-        "    } else if (lengthProportion > (1.0 - boundaryLength)) {\n"
-        "        fragColor *= ((1.0 - lengthProportion) * inverseBoundaryLength);\n"
-        "    }\n";
+        "    fragColor *= (1.0 - smoothstep(boundaryWidth, 0.5, abs(0.5 - widthProportion)))\n"
+        "               * (1.0 - smoothstep(boundaryLength, 0.5, abs(0.5 - lengthProportion)));\n";
+
 const char* gFS_Main_FetchTexture[2] = {
         // Don't modulate
         "    fragColor = texture2D(sampler, outTexCoords);\n",
