@@ -237,4 +237,18 @@
     <dimen name="notification_title_text_size">18dp</dimen>
     <!-- Size of smaller notification text (see TextAppearance.StatusBar.EventContent.Line2, Info, Time) -->
     <dimen name="notification_subtext_size">12dp</dimen>
+
+    <!-- Keyguard dimensions -->
+    <!-- Width of security view in keyguard. -->
+    <dimen name="kg_security_view_width">500dp</dimen>
+
+    <!-- Height of security view in keyguard. -->
+    <dimen name="kg_security_view_height">0dp</dimen>
+
+    <!-- Width of widget view in keyguard. -->
+    <dimen name="kg_widget_view_width">0dp</dimen>
+
+    <!-- Height of widget view in keyguard. -->
+    <dimen name="kg_widget_view_height">0dp</dimen>
+
 </resources>

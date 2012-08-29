@@ -61,6 +61,8 @@ import android.provider.Settings;
 
 import com.android.internal.R;
 import com.android.internal.policy.PolicyManager;
+import com.android.internal.policy.impl.keyguard_obsolete.KeyguardViewManager;
+import com.android.internal.policy.impl.keyguard_obsolete.KeyguardViewMediator;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.widget.PointerLocationView;
