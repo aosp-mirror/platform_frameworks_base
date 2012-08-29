@@ -221,6 +221,11 @@ public class KeyguardHostView extends KeyguardViewBase {
             mViewMediatorCallback.keyguardDoneDrawing();
         }
 
+        @Override
+        public void setOnDismissRunnable(Runnable runnable) {
+            KeyguardHostView.this.setOnDismissRunnable(runnable);
+        }
+
     };
 
     public void takeEmergencyCallAction() {
@@ -273,7 +278,7 @@ public class KeyguardHostView extends KeyguardViewBase {
                 final android.app.PendingIntent pendingIntent,
                 final Intent fillInIntent) {
             if (pendingIntent.isActivity()) {
-                mLaunchRunnable = new Runnable() {
+                setOnDismissRunnable(new Runnable() {
                     public void run() {
                         try {
                               // TODO: Unregister this handler if PendingIntent.FLAG_ONE_SHOT?
@@ -292,7 +297,7 @@ public class KeyguardHostView extends KeyguardViewBase {
                                       "unknown exception: ", e);
                           }
                     }
-                };
+                });
 
                 mCallback.dismiss(false);
                 return true;
@@ -305,6 +310,14 @@ public class KeyguardHostView extends KeyguardViewBase {
     @Override
     public void reset() {
         requestFocus();
+    }
+
+    /**
+     *  Sets a runnable to run when keyguard is dismissed
+     * @param runnable
+     */
+    protected void setOnDismissRunnable(Runnable runnable) {
+        mLaunchRunnable = runnable;
     }
 
     private KeyguardSecurityView getSecurityView(int securitySelectorId) {
