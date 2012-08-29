@@ -61,8 +61,8 @@ import android.provider.Settings;
 
 import com.android.internal.R;
 import com.android.internal.policy.PolicyManager;
-import com.android.internal.policy.impl.keyguard_obsolete.KeyguardViewManager;
-import com.android.internal.policy.impl.keyguard_obsolete.KeyguardViewMediator;
+import com.android.internal.policy.impl.keyguard.KeyguardViewManager;
+import com.android.internal.policy.impl.keyguard.KeyguardViewMediator;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.widget.PointerLocationView;
@@ -863,7 +863,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mHeadless = "1".equals(SystemProperties.get("ro.config.headless", "0"));
         if (!mHeadless) {
             // don't create KeyguardViewMediator if headless
-            mKeyguardMediator = new KeyguardViewMediator(context, this);
+            mKeyguardMediator = new KeyguardViewMediator(context, null);
         }
         mHandler = new PolicyHandler();
         mOrientationListener = new MyOrientationListener(mContext);
