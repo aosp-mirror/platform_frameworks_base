@@ -452,10 +452,16 @@ class CallbackProxy extends Handler {
                     String contentDisposition =
                         msg.getData().getString("contentDisposition");
                     String mimetype = msg.getData().getString("mimetype");
+                    String referer = msg.getData().getString("referer");
                     Long contentLength = msg.getData().getLong("contentLength");
 
-                    mDownloadListener.onDownloadStart(url, userAgent,
-                            contentDisposition, mimetype, contentLength);
+                    if (mDownloadListener instanceof BrowserDownloadListener) {
+                        ((BrowserDownloadListener) mDownloadListener).onDownloadStart(url,
+                             userAgent, contentDisposition, mimetype, referer, contentLength);
+                    } else {
+                        mDownloadListener.onDownloadStart(url, userAgent,
+                             contentDisposition, mimetype, contentLength);
+                    }
                 }
                 break;
 
@@ -1179,7 +1185,8 @@ class CallbackProxy extends Handler {
      * return false.
      */
     public boolean onDownloadStart(String url, String userAgent,
-            String contentDisposition, String mimetype, long contentLength) {
+            String contentDisposition, String mimetype, String referer,
+            long contentLength) {
         // Do an unsynchronized quick check to avoid posting if no callback has
         // been set.
         if (mDownloadListener == null) {
@@ -1192,6 +1199,7 @@ class CallbackProxy extends Handler {
         bundle.putString("url", url);
         bundle.putString("userAgent", userAgent);
         bundle.putString("mimetype", mimetype);
+        bundle.putString("referer", referer);
         bundle.putLong("contentLength", contentLength);
         bundle.putString("contentDisposition", contentDisposition);
         sendMessage(msg);
