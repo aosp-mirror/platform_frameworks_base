@@ -1137,7 +1137,7 @@ class BrowserFrame extends Handler {
      * DownloadListener.
      */
     private void downloadStart(String url, String userAgent,
-            String contentDisposition, String mimeType, long contentLength) {
+            String contentDisposition, String mimeType, String referer, long contentLength) {
         // This will only work if the url ends with the filename
         if (mimeType.isEmpty()) {
             try {
@@ -1157,7 +1157,7 @@ class BrowserFrame extends Handler {
             mKeyStoreHandler = new KeyStoreHandler(mimeType);
         } else {
             mCallbackProxy.onDownloadStart(url, userAgent,
-                contentDisposition, mimeType, contentLength);
+                contentDisposition, mimeType, referer, contentLength);
         }
     }
 
