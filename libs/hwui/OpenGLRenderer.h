@@ -380,7 +380,7 @@ private:
      *
      * @return True if the layer was successfully created, false otherwise
      */
-    bool createLayer(sp<Snapshot> snapshot, float left, float top, float right, float bottom,
+    bool createLayer(float left, float top, float right, float bottom,
             int alpha, SkXfermode::Mode mode, int flags, GLuint previousFbo);
 
     /**
@@ -391,8 +391,7 @@ private:
      * @param bounds The bounds of the layer
      * @param previousFbo The name of the current framebuffer
      */
-    bool createFboLayer(Layer* layer, Rect& bounds, sp<Snapshot> snapshot,
-            GLuint previousFbo);
+    bool createFboLayer(Layer* layer, Rect& bounds, Rect& clip, GLuint previousFbo);
 
     /**
      * Compose the specified layer as a region.

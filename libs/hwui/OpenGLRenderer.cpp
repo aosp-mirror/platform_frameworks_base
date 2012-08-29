@@ -440,7 +440,7 @@ int OpenGLRenderer::saveLayer(float left, float top, float right, float bottom,
             mode = SkXfermode::kSrcOver_Mode;
         }
 
-        createLayer(mSnapshot, left, top, right, bottom, alpha, mode, flags, previousFbo);
+        createLayer(left, top, right, bottom, alpha, mode, flags, previousFbo);
     }
 
     return count;
@@ -508,44 +508,56 @@ int OpenGLRenderer::saveLayerAlpha(float left, float top, float right, float bot
  *     buffer is left untouched until the first drawing operation. Only when
  *     something actually gets drawn are the layers regions cleared.
  */
-bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
-        float right, float bottom, int alpha, SkXfermode::Mode mode,
-        int flags, GLuint previousFbo) {
+bool OpenGLRenderer::createLayer(float left, float top, float right, float bottom,
+        int alpha, SkXfermode::Mode mode, int flags, GLuint previousFbo) {
     LAYER_LOGD("Requesting layer %.2fx%.2f", right - left, bottom - top);
     LAYER_LOGD("Layer cache size = %d", mCaches.layerCache.getSize());
 
     const bool fboLayer = flags & SkCanvas::kClipToLayer_SaveFlag;
 
     // Window coordinates of the layer
+    Rect clip;
     Rect bounds(left, top, right, bottom);
-    if (!fboLayer) {
-        mSnapshot->transform->mapRect(bounds);
+    Rect untransformedBounds(bounds);
+    mSnapshot->transform->mapRect(bounds);
 
-        // Layers only make sense if they are in the framebuffer's bounds
-        if (bounds.intersect(*snapshot->clipRect)) {
-            // We cannot work with sub-pixels in this case
-            bounds.snapToPixelBoundaries();
+    // Layers only make sense if they are in the framebuffer's bounds
+    if (bounds.intersect(*mSnapshot->clipRect)) {
+        // We cannot work with sub-pixels in this case
+        bounds.snapToPixelBoundaries();
 
-            // When the layer is not an FBO, we may use glCopyTexImage so we
-            // need to make sure the layer does not extend outside the bounds
-            // of the framebuffer
-            if (!bounds.intersect(snapshot->previous->viewport)) {
-                bounds.setEmpty();
-            }
-        } else {
+        // When the layer is not an FBO, we may use glCopyTexImage so we
+        // need to make sure the layer does not extend outside the bounds
+        // of the framebuffer
+        if (!bounds.intersect(mSnapshot->previous->viewport)) {
             bounds.setEmpty();
+        } else if (fboLayer) {
+            clip.set(bounds);
+            mat4 inverse;
+            inverse.loadInverse(*mSnapshot->transform);
+            inverse.mapRect(clip);
+            clip.snapToPixelBoundaries();
+            if (clip.intersect(untransformedBounds)) {
+                clip.translate(-left, -top);
+                bounds.set(untransformedBounds);
+            } else {
+                clip.setEmpty();
+            }
         }
+    } else {
+        bounds.setEmpty();
     }
 
     if (bounds.isEmpty() || bounds.getWidth() > mCaches.maxTextureSize ||
-            bounds.getHeight() > mCaches.maxTextureSize) {
-        snapshot->empty = fboLayer;
+            bounds.getHeight() > mCaches.maxTextureSize ||
+            (fboLayer && clip.isEmpty())) {
+        mSnapshot->empty = fboLayer;
     } else {
-        snapshot->invisible = snapshot->invisible || (alpha <= ALPHA_THRESHOLD && fboLayer);
+        mSnapshot->invisible = mSnapshot->invisible || (alpha <= ALPHA_THRESHOLD && fboLayer);
     }
 
     // Bail out if we won't draw in this snapshot
-    if (snapshot->invisible || snapshot->empty) {
+    if (mSnapshot->invisible || mSnapshot->empty) {
         return false;
     }
 
@@ -563,23 +575,23 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
     layer->setBlend(true);
 
     // Save the layer in the snapshot
-    snapshot->flags |= Snapshot::kFlagIsLayer;
-    snapshot->layer = layer;
+    mSnapshot->flags |= Snapshot::kFlagIsLayer;
+    mSnapshot->layer = layer;
 
     if (fboLayer) {
-        return createFboLayer(layer, bounds, snapshot, previousFbo);
+        return createFboLayer(layer, bounds, clip, previousFbo);
     } else {
         // Copy the framebuffer into the layer
         layer->bindTexture();
         if (!bounds.isEmpty()) {
             if (layer->isEmpty()) {
                 glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
-                        bounds.left, snapshot->height - bounds.bottom,
+                        bounds.left, mSnapshot->height - bounds.bottom,
                         layer->getWidth(), layer->getHeight(), 0);
                 layer->setEmpty(false);
             } else {
                 glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bounds.left,
-                        snapshot->height - bounds.bottom, bounds.getWidth(), bounds.getHeight());
+                        mSnapshot->height - bounds.bottom, bounds.getWidth(), bounds.getHeight());
             }
 
             // Enqueue the buffer coordinates to clear the corresponding region later
@@ -590,35 +602,20 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
     return true;
 }
 
-bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, sp<Snapshot> snapshot,
-        GLuint previousFbo) {
+bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, Rect& clip, GLuint previousFbo) {
     layer->setFbo(mCaches.fboCache.get());
 
-    snapshot->region = &snapshot->layer->region;
-    snapshot->flags |= Snapshot::kFlagFboTarget;
+    mSnapshot->region = &mSnapshot->layer->region;
+    mSnapshot->flags |= Snapshot::kFlagFboTarget;
 
-    Rect clip(bounds);
-    snapshot->transform->mapRect(clip);
-    clip.intersect(*snapshot->clipRect);
-    clip.snapToPixelBoundaries();
-    clip.intersect(snapshot->previous->viewport);
-
-    mat4 inverse;
-    inverse.loadInverse(*mSnapshot->transform);
-
-    inverse.mapRect(clip);
-    clip.snapToPixelBoundaries();
-    clip.intersect(bounds);
-    clip.translate(-bounds.left, -bounds.top);
-
-    snapshot->flags |= Snapshot::kFlagIsFboLayer;
-    snapshot->fbo = layer->getFbo();
-    snapshot->resetTransform(-bounds.left, -bounds.top, 0.0f);
-    snapshot->resetClip(clip.left, clip.top, clip.right, clip.bottom);
-    snapshot->viewport.set(0.0f, 0.0f, bounds.getWidth(), bounds.getHeight());
-    snapshot->height = bounds.getHeight();
-    snapshot->flags |= Snapshot::kFlagDirtyOrtho;
-    snapshot->orthoMatrix.load(mOrthoMatrix);
+    mSnapshot->flags |= Snapshot::kFlagIsFboLayer;
+    mSnapshot->fbo = layer->getFbo();
+    mSnapshot->resetTransform(-bounds.left, -bounds.top, 0.0f);
+    mSnapshot->resetClip(clip.left, clip.top, clip.right, clip.bottom);
+    mSnapshot->viewport.set(0.0f, 0.0f, bounds.getWidth(), bounds.getHeight());
+    mSnapshot->height = bounds.getHeight();
+    mSnapshot->flags |= Snapshot::kFlagDirtyOrtho;
+    mSnapshot->orthoMatrix.load(mOrthoMatrix);
 
     // Bind texture to FBO
     glBindFramebuffer(GL_FRAMEBUFFER, layer->getFbo());
