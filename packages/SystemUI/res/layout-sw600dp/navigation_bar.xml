@@ -143,8 +143,13 @@
 
         <com.android.systemui.statusbar.policy.DeadZone
             android:id="@+id/deadzone"
-            android:layout_height="@dimen/navigation_bar_deadzone_size"
+            android:layout_height="match_parent"
             android:layout_width="match_parent"
+            systemui:minSize="@dimen/navigation_bar_deadzone_size"
+            systemui:maxSize="@dimen/navigation_bar_deadzone_size_max"
+            systemui:holdTime="@integer/navigation_bar_deadzone_hold"
+            systemui:decayTime="@integer/navigation_bar_deadzone_decay"
+            systemui:orientation="horizontal"
             android:layout_gravity="top"
             />
     </FrameLayout>
@@ -269,8 +274,13 @@
 
         <com.android.systemui.statusbar.policy.DeadZone
             android:id="@+id/deadzone"
-            android:layout_height="@dimen/navigation_bar_deadzone_size"
+            android:layout_height="match_parent"
             android:layout_width="match_parent"
+            systemui:minSize="@dimen/navigation_bar_deadzone_size"
+            systemui:maxSize="@dimen/navigation_bar_deadzone_size_max"
+            systemui:holdTime="@integer/navigation_bar_deadzone_hold"
+            systemui:decayTime="@integer/navigation_bar_deadzone_decay"
+            systemui:orientation="vertical"
             android:layout_gravity="top"
             />
     </FrameLayout>

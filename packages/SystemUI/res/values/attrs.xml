@@ -35,5 +35,17 @@
     <declare-styleable name="RecentsPanelView">
         <attr name="recentItemLayout" format="reference" />
     </declare-styleable>
+    <declare-styleable name="DeadZone">
+        <attr name="minSize" format="dimension" />
+        <attr name="maxSize" format="dimension" />
+        <attr name="holdTime" format="integer" />
+        <attr name="decayTime" format="integer" />
+        <attr name="orientation" />
+    </declare-styleable>
+
+    <attr name="orientation">
+        <enum name="horizontal" value="0" />
+        <enum name="vertical" value="1" />
+    </attr>
 </resources>
 
