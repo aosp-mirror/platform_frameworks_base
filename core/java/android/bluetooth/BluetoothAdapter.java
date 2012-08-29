@@ -75,6 +75,7 @@ import java.util.UUID;
 public final class BluetoothAdapter {
     private static final String TAG = "BluetoothAdapter";
     private static final boolean DBG = true;
+    private static final boolean VDBG = false;
 
     /**
      * Sentinel error value for this class. Guaranteed to not equal any other
@@ -465,7 +466,7 @@ public final class BluetoothAdapter {
                 if (mService != null)
                 {
                     int state=  mService.getState();
-                    if (DBG) Log.d(TAG, "" + hashCode() + ": getState(). Returning " + state);
+                    if (VDBG) Log.d(TAG, "" + hashCode() + ": getState(). Returning " + state);
                     return state;
                 }
                 // TODO(BT) there might be a small gap during STATE_TURNING_ON that
