@@ -2604,15 +2604,10 @@ public class Editor {
                         suggestionStart, suggestionEnd).toString();
                 mTextView.replaceText_internal(spanStart, spanEnd, suggestion);
 
-                // Notify source IME of the suggestion pick. Do this before swaping texts.
-                if (!TextUtils.isEmpty(
-                        suggestionInfo.suggestionSpan.getNotificationTargetClassName())) {
-                    InputMethodManager imm = InputMethodManager.peekInstance();
-                    if (imm != null) {
-                        imm.notifySuggestionPicked(suggestionInfo.suggestionSpan, originalText,
-                                suggestionInfo.suggestionIndex);
-                    }
-                }
+                // Notify source IME of the suggestion pick. Do this before
+                // swaping texts.
+                suggestionInfo.suggestionSpan.notifySelection(
+                        mTextView.getContext(), originalText, suggestionInfo.suggestionIndex);
 
                 // Swap text content between actual text and Suggestion span
                 String[] suggestions = suggestionInfo.suggestionSpan.getSuggestions();

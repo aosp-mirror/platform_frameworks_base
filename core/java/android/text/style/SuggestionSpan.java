@@ -17,6 +17,7 @@
 package android.text.style;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.os.Parcel;
@@ -26,6 +27,7 @@ import android.text.ParcelableSpan;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 
 import java.util.Arrays;
@@ -44,6 +46,8 @@ import java.util.Locale;
  * @see TextView#isSuggestionsEnabled()
  */
 public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
+
+    private static final String TAG = "SuggestionSpan";
 
     /**
      * Sets this flag if the suggestions should be easily accessible with few interactions.
@@ -82,6 +86,7 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
     private final String[] mSuggestions;
     private final String mLocaleString;
     private final String mNotificationTargetClassName;
+    private final String mNotificationTargetPackageName;
     private final int mHashCode;
 
     private float mEasyCorrectUnderlineThickness;
@@ -132,6 +137,12 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
         } else {
             Log.e("SuggestionSpan", "No locale or context specified in SuggestionSpan constructor");
             mLocaleString = "";
+        }
+
+        if (context != null) {
+            mNotificationTargetPackageName = context.getPackageName();
+        } else {
+            mNotificationTargetPackageName = null;
         }
 
         if (notificationTargetClass != null) {
@@ -185,6 +196,7 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
         mFlags = src.readInt();
         mLocaleString = src.readString();
         mNotificationTargetClassName = src.readString();
+        mNotificationTargetPackageName = src.readString();
         mHashCode = src.readInt();
         mEasyCorrectUnderlineColor = src.readInt();
         mEasyCorrectUnderlineThickness = src.readFloat();
@@ -240,6 +252,7 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
         dest.writeInt(mFlags);
         dest.writeString(mLocaleString);
         dest.writeString(mNotificationTargetClassName);
+        dest.writeString(mNotificationTargetPackageName);
         dest.writeInt(mHashCode);
         dest.writeInt(mEasyCorrectUnderlineColor);
         dest.writeFloat(mEasyCorrectUnderlineThickness);
@@ -324,5 +337,41 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
             return mAutoCorrectionUnderlineColor;
         }
         return 0;
+    }
+
+    /**
+     * Notifies a suggestion selection.
+     *
+     * @hide
+     */
+    public void notifySelection(Context context, String original, int index) {
+        final Intent intent = new Intent();
+
+        if (context == null || mNotificationTargetClassName == null) {
+            return;
+        }
+        // Ensures that only a class in the original IME package will receive the
+        // notification.
+        if (mSuggestions == null || index < 0 || index >= mSuggestions.length) {
+            Log.w(TAG, "Unable to notify the suggestion as the index is out of range index=" + index
+                    + " length=" + mSuggestions.length);
+            return;
+        }
+
+        // The package name is not mandatory (legacy from JB), and if the package name
+        // is missing, we try to notify the suggestion through the input method manager.
+        if (mNotificationTargetPackageName != null) {
+            intent.setClassName(mNotificationTargetPackageName, mNotificationTargetClassName);
+            intent.setAction(SuggestionSpan.ACTION_SUGGESTION_PICKED);
+            intent.putExtra(SuggestionSpan.SUGGESTION_SPAN_PICKED_BEFORE, original);
+            intent.putExtra(SuggestionSpan.SUGGESTION_SPAN_PICKED_AFTER, mSuggestions[index]);
+            intent.putExtra(SuggestionSpan.SUGGESTION_SPAN_PICKED_HASHCODE, hashCode());
+            context.sendBroadcast(intent);
+        } else {
+            InputMethodManager imm = InputMethodManager.peekInstance();
+            if (imm != null) {
+                imm.notifySuggestionPicked(this, original, index);
+            }
+        }
     }
 }
