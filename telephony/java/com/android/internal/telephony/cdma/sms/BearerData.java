@@ -595,7 +595,6 @@ public final class BearerData {
         byte[] payload = encodeUtf16(uData.payloadStr);
         int udhBytes = udhData.length + 1;  // Add length octet.
         int udhCodeUnits = (udhBytes + 1) / 2;
-        int udhPadding = udhBytes % 2;
         int payloadCodeUnits = payload.length / 2;
         uData.msgEncoding = UserData.ENCODING_UNICODE_16;
         uData.msgEncodingSet = true;
@@ -603,7 +602,7 @@ public final class BearerData {
         uData.payload = new byte[uData.numFields * 2];
         uData.payload[0] = (byte)udhData.length;
         System.arraycopy(udhData, 0, uData.payload, 1, udhData.length);
-        System.arraycopy(payload, 0, uData.payload, udhBytes + udhPadding, payload.length);
+        System.arraycopy(payload, 0, uData.payload, udhBytes, payload.length);
     }
 
     private static void encodeEmsUserDataPayload(UserData uData)
@@ -997,27 +996,37 @@ public final class BearerData {
     private static String decodeUtf8(byte[] data, int offset, int numFields)
         throws CodingException
     {
-        if (numFields < 0 || (numFields + offset) > data.length) {
-            throw new CodingException("UTF-8 decode failed: offset or length out of range");
-        }
-        try {
-            return new String(data, offset, numFields, "UTF-8");
-        } catch (java.io.UnsupportedEncodingException ex) {
-            throw new CodingException("UTF-8 decode failed: " + ex);
-        }
+        return decodeCharset(data, offset, numFields, 1, "UTF-8");
     }
 
     private static String decodeUtf16(byte[] data, int offset, int numFields)
         throws CodingException
     {
-        int byteCount = numFields * 2;
-        if (byteCount < 0 || (byteCount + offset) > data.length) {
-            throw new CodingException("UTF-16 decode failed: offset or length out of range");
+        // Subtract header and possible padding byte (at end) from num fields.
+        int padding = offset % 2;
+        numFields -= (offset + padding) / 2;
+        return decodeCharset(data, offset, numFields, 2, "utf-16be");
+    }
+
+    private static String decodeCharset(byte[] data, int offset, int numFields, int width,
+            String charset) throws CodingException
+    {
+        if (numFields < 0 || (numFields * width + offset) > data.length) {
+            // Try to decode the max number of characters in payload
+            int padding = offset % width;
+            int maxNumFields = (data.length - offset - padding) / width;
+            if (maxNumFields < 0) {
+                throw new CodingException(charset + " decode failed: offset out of range");
+            }
+            Log.e(LOG_TAG, charset + " decode error: offset = " + offset + " numFields = "
+                    + numFields + " data.length = " + data.length + " maxNumFields = "
+                    + maxNumFields);
+            numFields = maxNumFields;
         }
         try {
-            return new String(data, offset, byteCount, "utf-16be");
+            return new String(data, offset, numFields * width, charset);
         } catch (java.io.UnsupportedEncodingException ex) {
-            throw new CodingException("UTF-16 decode failed: " + ex);
+            throw new CodingException(charset + " decode failed: " + ex);
         }
     }
 
@@ -1073,14 +1082,7 @@ public final class BearerData {
     private static String decodeLatin(byte[] data, int offset, int numFields)
         throws CodingException
     {
-        if (numFields < 0 || (numFields + offset) > data.length) {
-            throw new CodingException("ISO-8859-1 decode failed: offset or length out of range");
-        }
-        try {
-            return new String(data, offset, numFields, "ISO-8859-1");
-        } catch (java.io.UnsupportedEncodingException ex) {
-            throw new CodingException("ISO-8859-1 decode failed: " + ex);
-        }
+        return decodeCharset(data, offset, numFields, 1, "ISO-8859-1");
     }
 
     private static void decodeUserDataPayload(UserData userData, boolean hasUserDataHeader)
