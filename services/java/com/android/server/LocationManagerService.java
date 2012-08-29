@@ -26,6 +26,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.database.Cursor;
 import android.location.Address;
 import android.location.Criteria;
@@ -87,7 +88,7 @@ import java.util.Set;
  * The service class that manages LocationProviders and issues location
  * updates and alerts.
  */
-public class LocationManagerService extends ILocationManager.Stub implements Observer, Runnable {
+public class LocationManagerService extends ILocationManager.Stub implements Runnable {
     private static final String TAG = "LocationManagerService";
     public static final boolean D = false;
 
@@ -207,24 +208,30 @@ public class LocationManagerService extends ILocationManager.Stub implements Obs
         mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_KEY);
         mPackageManager = mContext.getPackageManager();
 
+        mBlacklist = new LocationBlacklist(mContext, mLocationHandler);
+        mBlacklist.init();
+        mLocationFudger = new LocationFudger();
+
         synchronized (mLock) {
             loadProvidersLocked();
         }
-        mBlacklist = new LocationBlacklist(mContext, mLocationHandler);
-        mBlacklist.init();
+
         mGeofenceManager = new GeofenceManager(mContext, mBlacklist);
-        mLocationFudger = new LocationFudger();
 
         // listen for settings changes
-        ContentResolver resolver = mContext.getContentResolver();
-        Cursor settingsCursor = resolver.query(Settings.Secure.CONTENT_URI, null,
-                "(" + NameValueTable.NAME + "=?)",
-                new String[]{Settings.Secure.LOCATION_PROVIDERS_ALLOWED}, null);
-        ContentQueryMap query = new ContentQueryMap(settingsCursor, NameValueTable.NAME, true,
-                mLocationHandler);
-        settingsCursor.close();
-        query.addObserver(this);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.LOCATION_PROVIDERS_ALLOWED), true, 
+                new ContentObserver(mLocationHandler) {
+           @Override
+            public void onChange(boolean selfChange) {
+               synchronized (mLock) {
+                   updateProvidersLocked();
+               }
+            }
+        });
         mPackageMonitor.register(mContext, Looper.myLooper(), true);
+
+        updateProvidersLocked();
     }
 
     private void loadProvidersLocked() {
@@ -299,8 +306,6 @@ public class LocationManagerService extends ILocationManager.Stub implements Obs
         if (mGeocodeProvider == null) {
             Slog.e(TAG,  "no geocoder provider found");
         }
-
-        updateProvidersLocked();
     }
 
     /**
@@ -541,14 +546,6 @@ public class LocationManagerService extends ILocationManager.Stub implements Obs
                 receiver.decrementPendingBroadcastsLocked();
                 Binder.restoreCallingIdentity(identity);
            }
-        }
-    }
-
-    /** Settings Observer callback */
-    @Override
-    public void update(Observable o, Object arg) {
-        synchronized (mLock) {
-            updateProvidersLocked();
         }
     }
 
