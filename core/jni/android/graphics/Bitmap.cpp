@@ -298,8 +298,18 @@ static bool Bitmap_compress(JNIEnv* env, jobject clazz, SkBitmap* bitmap,
     }
 
     bool success = false;
-    SkWStream* strm = CreateJavaOutputStreamAdaptor(env, jstream, jstorage);
-    if (NULL != strm) {
+    if (NULL != bitmap) {
+        SkAutoLockPixels alp(*bitmap);
+
+        if (NULL == bitmap->getPixels()) {
+            return false;
+        }
+
+        SkWStream* strm = CreateJavaOutputStreamAdaptor(env, jstream, jstorage);
+        if (NULL == strm) {
+            return false;
+        }
+
         SkImageEncoder* encoder = SkImageEncoder::Create(fm);
         if (NULL != encoder) {
             success = encoder->encodeStream(strm, *bitmap, quality);
