@@ -3653,4 +3653,34 @@
     <!-- Name of the built-in display.  [CHAR LIMIT=50] -->
     <string name="display_manager_built_in_display">Built-in Screen</string>
 
+    <!-- Keyguard strings -->
+    <string name="kg_emergency_call_label">Emergency call</string>
+    <string name="kg_forgot_pattern_button_text">Forgot Pattern</string>
+    <string name="kg_wrong_pattern">Wrong Pattern</string>
+    <string name="kg_wrong_password">Wrong Password</string>
+    <string name="kg_wrong_pin">Wrong PIN</string>
+    <string name="kg_too_many_failed_attempts_countdown">Too many attempts</string>
+    <string name="kg_pattern_instructions">Draw your pattern</string>
+    <string name="kg_sim_pin_instructions">Enter SIM PIN</string>
+    <string name="kg_pin_instructions">Enter PIN</string>
+    <string name="kg_password_instructions">Enter Password</string>
+    <string name="kg_puk_enter_puk_hint">PUK code</string>
+    <string name="kg_puk_enter_pin_hint">New PIN code</string>
+    <string name="kg_sim_unlock_progress_dialog_message">Unlocking SIM card\u2026</string>
+    <string name="kg_password_wrong_pin_code">Incorrect PIN code.</string>
+    <string name="kg_invalid_sim_pin_hint">Type a PIN that is 4 to 8 numbers.</string>
+    <string name="kg_invalid_sim_puk_hint">Type a PUK that is 8 numbers or longer.</string>
+    <string name="kg_sim_puk_recovery_hint">Type PUK and new PIN code</string>
+    <string name="kg_invalid_puk">The PUK you typed isn\'t correct.</string>
+
+    <string name="kg_login_too_many_attempts">Too many pattern attempts</string>
+    <string name="kg_login_instructions">To unlock, sign in with your Google account.</string>
+    <string name="kg_login_username_hint">Username (email)</string>
+    <string name="kg_login_password_hint">Password</string>
+    <string name="kg_login_submit_button">Sign in</string>
+    <string name="kg_login_invalid_input">Invalid username or password.</string>
+    <string name="kg_login_account_recovery_hint">Forgot your username or password\?\nVisit <b>google.com/accounts/recovery</b>.</string>
+    <string name="kg_login_checking_password">Checking\u2026</string>
+    <string name="kg_temp_back_string"> &lt; </string> <!-- TODO: remove this -->
+
 </resources>
