@@ -57,9 +57,15 @@ page.title=GCM Architectural Overview
 </div>
 
 <p>Google Cloud Messaging for Android (GCM) is a free service that helps
-developers  send data from servers to their Android applications on  Android devices. This could be a lightweight message telling the Android application that there is new data to be fetched from the server (for instance, a movie uploaded by a friend), or it could be a message containing up to 4kb of payload data (so apps like instant messaging can consume the message directly). The GCM service handles all aspects  of queueing of
-  messages and delivery to the target Android application running  on the target
-  device.</p>
+developers  send data from servers to their Android applications on  Android
+devices. This could be a lightweight message telling the Android application
+that there is new data to be fetched from the server (for instance, a movie
+uploaded by a friend), or it could be a message containing up to 4kb of payload
+data (so apps like instant messaging can consume the message directly). The GCM
+service handles all aspects  of queueing of messages and delivery to the target
+Android application running  on the target device.</p>
+  
+  
 <p class="note"> To jump right into using GCM with your Android
   applications, see the instructions in <a href="gs.html">Getting Started</a>.</p>
 
@@ -647,7 +653,7 @@ when the device is offline, so that only the last message gets sent to the
 client. This is intended to avoid sending too many messages to the phone when it
 comes back online. Note that since there is no guarantee of the order in which
 messages get sent, the &quot;last&quot; message may not actually be the last
-message sent by the application server. See <a href="adv.html#collapsible">Advanced Topics</a> for more discussion of this topic. Optional, unless you are using the <code>time_to_live</code> parameter&mdash;in that case, you must also specify a <code>collapse_key</code>.</td>
+message sent by the application server. See <a href="adv.html#collapsible">Advanced Topics</a> for more discussion of this topic. Optional.</td>
   </tr>
   <tr>
     <td><code>data</code></td>
@@ -665,7 +671,7 @@ sent. Optional. The default value is <code>false</code>, and must be a JSON bool
   </tr>
   <tr>
     <td><code>time_to_live</code></td>
-    <td>How long (in seconds) the message should be kept on GCM storage if the device is offline. Optional (default time-to-live is 4 weeks, and must be set as a JSON number). If you use this parameter, you must also specify a <code>collapse_key</code>.</td>
+    <td>How long (in seconds) the message should be kept on GCM storage if the device is offline. Optional (default time-to-live is 4 weeks, and must be set as a JSON number).</td>
   </tr>
 </table>
 
