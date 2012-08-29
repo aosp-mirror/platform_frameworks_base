@@ -40,6 +40,7 @@ import android.graphics.Shader;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManager;
+import android.hardware.display.DisplayManagerGlobal;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -7359,7 +7360,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             outRect.bottom -= insets.bottom;
             return;
         }
-        Display d = DisplayManager.getInstance().getRealDisplay(Display.DEFAULT_DISPLAY);
+        // The view is not attached to a display so we don't have a context.
+        // Make a best guess about the display size.
+        Display d = DisplayManagerGlobal.getInstance().getRealDisplay(Display.DEFAULT_DISPLAY);
         d.getRectSize(outRect);
     }
 

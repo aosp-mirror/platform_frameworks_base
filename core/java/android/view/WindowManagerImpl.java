@@ -52,8 +52,9 @@ public final class WindowManagerImpl implements WindowManager {
     private final Window mParentWindow;
 
     public WindowManagerImpl(Context context, int displayId) {
+        DisplayManager dm = (DisplayManager)context.getSystemService(Context.DISPLAY_SERVICE);
         mContext = context;
-        mDisplay = DisplayManager.getInstance().getDisplay(displayId, mContext);
+        mDisplay = dm.getDisplay(displayId);
         mParentWindow = null;
     }
 
