@@ -53,16 +53,15 @@ public class UsbDebuggingManager implements Runnable {
     private final int BUFFER_SIZE = 4096;
 
     private final Context mContext;
-    private final Thread mThread;
     private final Handler mHandler;
     private final HandlerThread mHandlerThread;
+    private Thread mThread;
     private boolean mAdbEnabled = false;
     private String mFingerprints;
     private LocalSocket mSocket = null;
     private OutputStream mOutputStream = null;
 
     public UsbDebuggingManager(Context context) {
-        mThread = new Thread(this);
         mHandlerThread = new HandlerThread("UsbDebuggingHandler");
         mHandlerThread.start();
         mHandler = new UsbDebuggingHandler(mHandlerThread.getLooper());
@@ -165,6 +164,7 @@ public class UsbDebuggingManager implements Runnable {
 
                     mAdbEnabled = true;
 
+                    mThread = new Thread(UsbDebuggingManager.this);
                     mThread.start();
 
                     break;
@@ -181,6 +181,7 @@ public class UsbDebuggingManager implements Runnable {
                     } catch (Exception ex) {
                     }
 
+                    mThread = null;
                     mOutputStream = null;
                     mSocket = null;
                     break;
