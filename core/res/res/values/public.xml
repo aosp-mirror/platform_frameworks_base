@@ -1203,6 +1203,8 @@
   <java-symbol type="anim" name="dock_left_exit" />
   <java-symbol type="anim" name="dock_right_enter" />
   <java-symbol type="anim" name="dock_right_exit" />
+  <java-symbol type="anim" name="keyguard_security_animate_in" />
+  <java-symbol type="anim" name="keyguard_security_animate_out" />
   <java-symbol type="array" name="config_keyboardTapVibePattern" />
   <java-symbol type="array" name="config_longPressVibePattern" />
   <java-symbol type="array" name="config_safeModeDisabledVibePattern" />
@@ -1299,6 +1301,28 @@
   <java-symbol type="id" name="two" />
   <java-symbol type="id" name="unlock_widget" />
   <java-symbol type="id" name="zero" />
+  <java-symbol type="id" name="message_area" />
+  <java-symbol type="id" name="keyguard_selector_view" />
+  <java-symbol type="id" name="keyguard_pattern_view" />
+  <java-symbol type="id" name="keyguard_password_view" />
+  <java-symbol type="id" name="keyguard_face_unlock_view" />
+  <java-symbol type="id" name="keyguard_sim_pin_view" />
+  <java-symbol type="id" name="keyguard_sim_puk_view" />
+  <java-symbol type="id" name="keyguard_account_view" />
+  <java-symbol type="id" name="app_widget_container" />
+  <java-symbol type="id" name="view_flipper" />
+  <java-symbol type="id" name="emergency_call_button" />
+  <java-symbol type="id" name="keyguard_host_view" />
+  <java-symbol type="id" name="delete_button" />
+  <java-symbol type="id" name="lockPatternView" />
+  <java-symbol type="id" name="forgot_password_button" />
+  <java-symbol type="id" name="glow_pad_view" />
+  <java-symbol type="id" name="sim_pin_entry" />
+  <java-symbol type="id" name="delete_button" />
+  <java-symbol type="id" name="sim_puk_entry" />
+  <java-symbol type="id" name="sim_pin_entry" />
+  <java-symbol type="id" name="puk_delete_button" />
+  <java-symbol type="id" name="pin_delete_button" />
   <java-symbol type="integer" name="config_carDockRotation" />
   <java-symbol type="integer" name="config_defaultUiModeType" />
   <java-symbol type="integer" name="config_deskDockRotation" />
@@ -1328,6 +1352,7 @@
   <java-symbol type="layout" name="screen_simple_overlay_action_mode" />
   <java-symbol type="layout" name="screen_title" />
   <java-symbol type="layout" name="screen_title_icons" />
+  <java-symbol type="layout" name="keyguard_host_view" />
   <java-symbol type="string" name="abbrev_wday_month_day_no_year" />
   <java-symbol type="string" name="android_upgrading_title" />
   <java-symbol type="string" name="bugreport_title" />
@@ -1381,6 +1406,33 @@
   <java-symbol type="style" name="Animation.LockScreen" />
   <java-symbol type="style" name="Theme.Dialog.RecentApplications" />
   <java-symbol type="style" name="Theme.ExpandedMenu" />
+  <java-symbol type="string" name="kg_emergency_call_label" />
+  <java-symbol type="string" name="kg_forgot_pattern_button_text" />
+  <java-symbol type="string" name="kg_wrong_pattern" />
+  <java-symbol type="string" name="kg_wrong_password" />
+  <java-symbol type="string" name="kg_wrong_pin" />
+  <java-symbol type="string" name="kg_too_many_failed_attempts_countdown" />
+  <java-symbol type="string" name="kg_pattern_instructions" />
+  <java-symbol type="string" name="kg_sim_pin_instructions" />
+  <java-symbol type="string" name="kg_pin_instructions" />
+  <java-symbol type="string" name="kg_password_instructions" />
+  <java-symbol type="string" name="kg_puk_enter_puk_hint" />
+  <java-symbol type="string" name="kg_puk_enter_pin_hint" />
+  <java-symbol type="string" name="kg_sim_unlock_progress_dialog_message" />
+  <java-symbol type="string" name="kg_password_wrong_pin_code" />
+  <java-symbol type="string" name="kg_invalid_sim_pin_hint" />
+  <java-symbol type="string" name="kg_invalid_sim_puk_hint" />
+  <java-symbol type="string" name="kg_sim_puk_recovery_hint" />
+  <java-symbol type="string" name="kg_invalid_puk" />
+  <java-symbol type="string" name="kg_login_too_many_attempts" />
+  <java-symbol type="string" name="kg_login_instructions" />
+  <java-symbol type="string" name="kg_login_username_hint" />
+  <java-symbol type="string" name="kg_login_password_hint" />
+  <java-symbol type="string" name="kg_login_submit_button" />
+  <java-symbol type="string" name="kg_login_invalid_input" />
+  <java-symbol type="string" name="kg_login_account_recovery_hint" />
+  <java-symbol type="string" name="kg_login_checking_password" />
+
 
   <!-- From services -->
   <java-symbol type="anim" name="screen_rotate_0_enter" />

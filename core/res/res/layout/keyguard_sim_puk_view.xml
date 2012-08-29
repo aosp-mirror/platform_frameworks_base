@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+**
+** Copyright 2008, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License")
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+<com.android.internal.policy.impl.keyguard.KeyguardSimPukView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/keyguard_sim_puk_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center_horizontal">
+
+    <include layout="@layout/keyguard_navigation"/>
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="0dip"
+        android:layout_weight="1"/>
+
+    <LinearLayout android:id="@+id/topDisplayGroup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                  android:orientation="vertical"
+                  android:layout_width="wrap_content"
+                  android:layout_weight="1"
+                  android:layout_height="match_parent"
+                  android:paddingEnd="0dip"
+                  android:layout_marginEnd="10dip"
+                  android:layout_marginStart="10dip">
+
+                  <LinearLayout
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:orientation="horizontal"
+                      android:layout_marginEnd="6dip"
+                      android:layout_marginStart="6dip"
+                      android:gravity="center_vertical"
+                      android:background="@*android:drawable/edit_text">
+
+                      <!-- displays dots as user enters puk -->
+                      <EditText android:id="@+id/sim_puk_entry"
+                          android:layout_width="0dip"
+                          android:layout_height="wrap_content"
+                          android:layout_weight="1"
+                          android:maxLines="1"
+                          android:textStyle="bold"
+                          android:inputType="textPassword"
+                          android:textColor="#000"
+                          android:hint="@string/kg_puk_enter_puk_hint"
+                      />
+
+                      <ImageButton android:id="@+id/puk_delete_button"
+                          android:src="@*android:drawable/ic_input_delete"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:layout_marginEnd="-3dip"
+                          android:layout_marginBottom="-3dip"
+                      />
+
+                  </LinearLayout>
+
+
+                  <LinearLayout
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:orientation="horizontal"
+                      android:layout_marginEnd="6dip"
+                      android:layout_marginStart="6dip"
+                      android:gravity="center_vertical"
+                      android:background="@*android:drawable/edit_text">
+
+                      <!-- displays dots as user enters new pin -->
+                      <EditText android:id="@+id/sim_pin_entry"
+                          android:layout_width="0dip"
+                          android:layout_height="wrap_content"
+                          android:layout_weight="1"
+                          android:maxLines="1"
+                          android:textStyle="bold"
+                          android:inputType="textPassword"
+                          android:textColor="#000"
+                          android:hint="@string/kg_puk_enter_pin_hint"
+                      />
+
+                      <ImageButton android:id="@+id/pin_delete_button"
+                          android:src="@*android:drawable/ic_input_delete"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:layout_marginEnd="-3dip"
+                          android:layout_marginBottom="-3dip"
+                      />
+                  </LinearLayout>
+
+             </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- Numeric keyboard -->
+    <com.android.internal.widget.PasswordEntryKeyboardView android:id="@+id/keyboard"
+        android:layout_width="match_parent"
+        android:layout_marginStart="4dip"
+        android:layout_marginEnd="4dip"
+        android:paddingTop="4dip"
+        android:paddingBottom="4dip"
+        android:background="#80ffffff"
+        android:keyBackground="@*android:drawable/btn_keyboard_key_ics"
+        android:clickable="true"
+    />
+
+</com.android.internal.policy.impl.keyguard.KeyguardSimPukView>
