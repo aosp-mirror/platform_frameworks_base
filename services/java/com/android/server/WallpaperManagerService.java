@@ -19,6 +19,7 @@ package com.android.server;
 import static android.os.FileObserver.*;
 import static android.os.ParcelFileDescriptor.*;
 
+import android.app.AppGlobals;
 import android.app.IWallpaperManager;
 import android.app.IWallpaperManagerCallback;
 import android.app.PendingIntent;
@@ -31,6 +32,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
@@ -146,6 +148,7 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
 
     final Context mContext;
     final IWindowManager mIWindowManager;
+    final IPackageManager mIPackageManager;
     final MyPackageMonitor mMonitor;
     WallpaperData mLastWallpaper;
 
@@ -389,6 +392,7 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
         mContext = context;
         mIWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
+        mIPackageManager = AppGlobals.getPackageManager();
         mMonitor = new MyPackageMonitor();
         mMonitor.register(context, null, true);
         WALLPAPER_BASE_DIR.mkdirs();
@@ -710,8 +714,9 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
                     if (DEBUG) Slog.v(TAG, "Using image wallpaper");
                 }
             }
-            ServiceInfo si = mContext.getPackageManager().getServiceInfo(componentName,
-                    PackageManager.GET_META_DATA | PackageManager.GET_PERMISSIONS);
+            int serviceUserId = wallpaper.userId;
+            ServiceInfo si = mIPackageManager.getServiceInfo(componentName,
+                    PackageManager.GET_META_DATA | PackageManager.GET_PERMISSIONS, serviceUserId);
             if (!android.Manifest.permission.BIND_WALLPAPER.equals(si.permission)) {
                 String msg = "Selected service does not require "
                         + android.Manifest.permission.BIND_WALLPAPER
@@ -728,8 +733,10 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
             Intent intent = new Intent(WallpaperService.SERVICE_INTERFACE);
             if (componentName != null && !componentName.equals(wallpaper.imageWallpaperComponent)) {
                 // Make sure the selected service is actually a wallpaper service.
-                List<ResolveInfo> ris = mContext.getPackageManager()
-                        .queryIntentServices(intent, PackageManager.GET_META_DATA);
+                List<ResolveInfo> ris =
+                        mIPackageManager.queryIntentServices(intent,
+                                intent.resolveTypeIfNeeded(mContext.getContentResolver()),
+                                PackageManager.GET_META_DATA, serviceUserId);
                 for (int i=0; i<ris.size(); i++) {
                     ServiceInfo rsi = ris.get(i).serviceInfo;
                     if (rsi.name.equals(si.name) &&
@@ -767,7 +774,6 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
             if (DEBUG) Slog.v(TAG, "Binding to:" + componentName);
             WallpaperConnection newConn = new WallpaperConnection(wi, wallpaper);
             intent.setComponent(componentName);
-            int serviceUserId = wallpaper.userId;
             intent.putExtra(Intent.EXTRA_CLIENT_LABEL,
                     com.android.internal.R.string.wallpaper_binding_label);
             intent.putExtra(Intent.EXTRA_CLIENT_INTENT, PendingIntent.getActivity(
@@ -800,8 +806,8 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
                 }
             } catch (RemoteException e) {
             }
-        } catch (PackageManager.NameNotFoundException e) {
-            String msg = "Unknown component " + componentName;
+        } catch (RemoteException e) {
+            String msg = "Remote exception for " + componentName + "\n" + e;
             if (fromUser) {
                 throw new IllegalArgumentException(msg);
             }
