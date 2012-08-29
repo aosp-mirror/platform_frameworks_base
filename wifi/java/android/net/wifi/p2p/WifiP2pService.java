@@ -1120,7 +1120,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
 
                     if (mSavedPeerConfig.wps.setup == WpsInfo.PBC) {
                         if (DBG) logd("Found a match " + mSavedPeerConfig);
-                        mWifiNative.p2pConnect(mSavedPeerConfig, FORM_GROUP);
+                        p2pConnectWithPinDisplay(mSavedPeerConfig);
                         transitionTo(mGroupNegotiationState);
                     }
                     break;
@@ -1133,7 +1133,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                         if (DBG) logd("Found a match " + mSavedPeerConfig);
                         /* we already have the pin */
                         if (!TextUtils.isEmpty(mSavedPeerConfig.wps.pin)) {
-                            mWifiNative.p2pConnect(mSavedPeerConfig, FORM_GROUP);
+                            p2pConnectWithPinDisplay(mSavedPeerConfig);
                             transitionTo(mGroupNegotiationState);
                         } else {
                             mJoinExistingGroup = false;
@@ -1152,7 +1152,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     if (mSavedPeerConfig.wps.setup == WpsInfo.DISPLAY) {
                         if (DBG) logd("Found a match " + mSavedPeerConfig);
                         mSavedPeerConfig.wps.pin = provDisc.pin;
-                        mWifiNative.p2pConnect(mSavedPeerConfig, FORM_GROUP);
+                        p2pConnectWithPinDisplay(mSavedPeerConfig);
                         if (!sendShowPinReqToFrontApp(provDisc.pin)) {
                             notifyInvitationSent(provDisc.pin, device.deviceAddress);
                         }
@@ -1861,7 +1861,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
             return NEEDS_PROVISION_REQ;
         }
 
-        p2pConnectWithPinDisplay(config, join);
+        p2pConnectWithPinDisplay(config);
         return CONNECT_SUCCESS;
     }
 
@@ -1968,8 +1968,14 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         return deviceAddress;
     }
 
-    private void p2pConnectWithPinDisplay(WifiP2pConfig config, boolean join) {
-        String pin = mWifiNative.p2pConnect(config, join);
+    private void p2pConnectWithPinDisplay(WifiP2pConfig config) {
+        WifiP2pDevice dev = mPeers.get(config.deviceAddress);
+        if (dev == null) {
+            loge("target device is not found " + config.deviceAddress);
+            return;
+        }
+
+        String pin = mWifiNative.p2pConnect(config, dev.isGroupOwner());
         try {
             Integer.parseInt(pin);
             if (!sendShowPinReqToFrontApp(pin)) {
