@@ -1672,10 +1672,7 @@ public class WifiStateMachine extends StateMachine {
             /* In case we were in middle of DHCP operation
                restore back powermode */
             handlePostDhcpSetup();
-
             mDhcpStateMachine.sendMessage(DhcpStateMachine.CMD_STOP_DHCP);
-            mDhcpStateMachine.doQuit();
-            mDhcpStateMachine = null;
         }
 
         try {
@@ -1927,6 +1924,9 @@ public class WifiStateMachine extends StateMachine {
                 case WifiWatchdogStateMachine.GOOD_LINK_DETECTED:
                 case CMD_CLEAR_SUSPEND_OPTIMIZATIONS:
                 case CMD_NO_NETWORKS_PERIODIC_SCAN:
+                    break;
+                case DhcpStateMachine.CMD_ON_QUIT:
+                    mDhcpStateMachine = null;
                     break;
                 case CMD_SET_SUSPEND_OPTIMIZATIONS:
                     mSuspendWakeLock.release();
@@ -2498,6 +2498,9 @@ public class WifiStateMachine extends StateMachine {
 
             /* Send any reset commands to supplicant before shutting it down */
             handleNetworkDisconnect();
+            if (mDhcpStateMachine != null) {
+                mDhcpStateMachine.doQuit();
+            }
 
             if (DBG) log("stopping supplicant");
             if (!mWifiNative.stopSupplicant()) {
@@ -3197,8 +3200,11 @@ public class WifiStateMachine extends StateMachine {
 
             if (!mWifiConfigStore.isUsingStaticIp(mLastNetworkId)) {
                 //start DHCP
-                mDhcpStateMachine = DhcpStateMachine.makeDhcpStateMachine(
-                        mContext, WifiStateMachine.this, mInterfaceName);
+                if (mDhcpStateMachine == null) {
+                    mDhcpStateMachine = DhcpStateMachine.makeDhcpStateMachine(
+                            mContext, WifiStateMachine.this, mInterfaceName);
+
+                }
                 mDhcpStateMachine.registerForPreDhcpNotification();
                 mDhcpStateMachine.sendMessage(DhcpStateMachine.CMD_START_DHCP);
             } else {
