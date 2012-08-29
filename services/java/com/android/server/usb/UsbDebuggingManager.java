@@ -183,6 +183,7 @@ public class UsbDebuggingManager implements Runnable {
 
                     mOutputStream = null;
                     mSocket = null;
+                    break;
 
                 case MESSAGE_ADB_ALLOW: {
                     String key = (String)msg.obj;
