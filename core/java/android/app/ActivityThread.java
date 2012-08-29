@@ -43,6 +43,7 @@ import android.database.sqlite.SQLiteDebug.DbStats;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.hardware.display.DisplayManager;
+import android.hardware.display.DisplayManagerGlobal;
 import android.net.IConnectivityManager;
 import android.net.Proxy;
 import android.net.ProxyProperties;
@@ -1557,7 +1558,7 @@ public final class ActivityThread {
             return dm;
         }
 
-        DisplayManager displayManager = DisplayManager.getInstance();
+        DisplayManagerGlobal displayManager = DisplayManagerGlobal.getInstance();
         if (displayManager == null) {
             // may be null early in system startup
             dm = new DisplayMetrics();

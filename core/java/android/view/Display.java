@@ -19,7 +19,7 @@ package android.view;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.hardware.display.DisplayManager;
+import android.hardware.display.DisplayManagerGlobal;
 import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -49,10 +49,14 @@ import android.util.Log;
  */
 public final class Display {
     private static final String TAG = "Display";
+    private static final boolean DEBUG = false;
 
+    private final DisplayManagerGlobal mGlobal;
     private final int mDisplayId;
     private final CompatibilityInfoHolder mCompatibilityInfo;
-    private final DisplayInfo mDisplayInfo = new DisplayInfo();
+
+    private DisplayInfo mDisplayInfo; // never null
+    private boolean mIsValid;
 
     // Temporary display metrics structure used for compatibility mode.
     private final DisplayMetrics mTempMetrics = new DisplayMetrics();
@@ -80,9 +84,14 @@ public final class Display {
      *
      * @hide
      */
-    public Display(int displayId, CompatibilityInfoHolder compatibilityInfo) {
+    public Display(DisplayManagerGlobal global,
+            int displayId, DisplayInfo displayInfo /*not null*/,
+            CompatibilityInfoHolder compatibilityInfo) {
+        mGlobal = global;
         mDisplayId = displayId;
+        mDisplayInfo = displayInfo;
         mCompatibilityInfo = compatibilityInfo;
+        mIsValid = true;
     }
 
     /**
@@ -97,15 +106,37 @@ public final class Display {
     }
 
     /**
+     * Returns true if this display is still valid, false if the display has been removed.
+     *
+     * If the display is invalid, then the methods of this class will
+     * continue to report the most recently observed display information.
+     * However, it is unwise (and rather fruitless) to continue using a
+     * {@link Display} object after the display's demise.
+     *
+     * It's possible for a display that was previously invalid to become
+     * valid again if a display with the same id is reconnected.
+     *
+     * @return True if the display is still valid.
+     */
+    public boolean isValid() {
+        synchronized (this) {
+            updateDisplayInfoLocked();
+            return mIsValid;
+        }
+    }
+
+    /**
      * Gets a full copy of the display information.
      *
      * @param outDisplayInfo The object to receive the copy of the display information.
+     * @return True if the display is still valid.
      * @hide
      */
-    public void getDisplayInfo(DisplayInfo outDisplayInfo) {
+    public boolean getDisplayInfo(DisplayInfo outDisplayInfo) {
         synchronized (this) {
             updateDisplayInfoLocked();
             outDisplayInfo.copyFrom(mDisplayInfo);
+            return mIsValid;
         }
     }
 
@@ -366,9 +397,25 @@ public final class Display {
     }
 
     private void updateDisplayInfoLocked() {
-        // TODO: only refresh the display information when needed
-        if (!DisplayManager.getInstance().getDisplayInfo(mDisplayId, mDisplayInfo)) {
-            Log.e(TAG, "Could not get information about logical display " + mDisplayId);
+        // Note: The display manager caches display info objects on our behalf.
+        DisplayInfo newInfo = mGlobal.getDisplayInfo(mDisplayId);
+        if (newInfo == null) {
+            // Preserve the old mDisplayInfo after the display is removed.
+            if (mIsValid) {
+                mIsValid = false;
+                if (DEBUG) {
+                    Log.d(TAG, "Logical display " + mDisplayId + " was removed.");
+                }
+            }
+        } else {
+            // Use the new display info.  (It might be the same object if nothing changed.)
+            mDisplayInfo = newInfo;
+            if (!mIsValid) {
+                mIsValid = true;
+                if (DEBUG) {
+                    Log.d(TAG, "Logical display " + mDisplayId + " was recreated.");
+                }
+            }
         }
     }
 
@@ -390,7 +437,7 @@ public final class Display {
             updateDisplayInfoLocked();
             mDisplayInfo.getAppMetrics(mTempMetrics, mCompatibilityInfo);
             return "Display id " + mDisplayId + ": " + mDisplayInfo
-                    + ", " + mTempMetrics;
+                    + ", " + mTempMetrics + ", isValid=" + mIsValid;
         }
     }
 }
