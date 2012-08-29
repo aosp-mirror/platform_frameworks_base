@@ -1136,7 +1136,8 @@ public final class PowerManagerService extends IPowerManager.Stub
     private boolean isItBedTimeYetLocked() {
         return mBootCompleted && !mStayOn
                 && (mWakeLockSummary
-                        & (WAKE_LOCK_SCREEN_BRIGHT | WAKE_LOCK_SCREEN_DIM)) == 0
+                        & (WAKE_LOCK_SCREEN_BRIGHT | WAKE_LOCK_SCREEN_DIM
+                                | WAKE_LOCK_PROXIMITY_SCREEN_OFF)) == 0
                 && (mUserActivitySummary
                         & (USER_ACTIVITY_SCREEN_BRIGHT | USER_ACTIVITY_SCREEN_DIM)) == 0;
     }
