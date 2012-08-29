@@ -35,9 +35,20 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class CdmaSmsTest extends AndroidTestCase {
     private final static String LOG_TAG = "XXX CdmaSmsTest XXX";
+
+    // CJK ideographs, Hiragana, Katakana, full width letters, Cyrillic, etc.
+    private static final String sUnicodeChars = "\u4e00\u4e01\u4e02\u4e03" +
+            "\u4e04\u4e05\u4e06\u4e07\u4e08\u4e09\u4e0a\u4e0b\u4e0c\u4e0d" +
+            "\u4e0e\u4e0f\u3041\u3042\u3043\u3044\u3045\u3046\u3047\u3048" +
+            "\u30a1\u30a2\u30a3\u30a4\u30a5\u30a6\u30a7\u30a8" +
+            "\uff10\uff11\uff12\uff13\uff14\uff15\uff16\uff17\uff18" +
+            "\uff70\uff71\uff72\uff73\uff74\uff75\uff76\uff77\uff78" +
+            "\u0400\u0401\u0402\u0403\u0404\u0405\u0406\u0407\u0408" +
+            "\u00a2\u00a9\u00ae\u2122";
 
     @SmallTest
     public void testCdmaSmsAddrParsing() throws Exception {
@@ -811,23 +822,51 @@ public class CdmaSmsTest extends AndroidTestCase {
 
     @SmallTest
     public void testUserDataHeaderWithEightCharMsg() throws Exception {
+        encodeDecodeAssertEquals("01234567", 2, 2, false);
+    }
+
+    private void encodeDecodeAssertEquals(String payload, int index, int total,
+            boolean oddLengthHeader) throws Exception {
         BearerData bearerData = new BearerData();
         bearerData.messageType = BearerData.MESSAGE_TYPE_DELIVER;
         bearerData.messageId = 55;
-        SmsHeader.ConcatRef concatRef = new SmsHeader.ConcatRef();
-        concatRef.refNumber = 0xEE;
-        concatRef.msgCount = 2;
-        concatRef.seqNumber = 2;
-        concatRef.isEightBits = true;
         SmsHeader smsHeader = new SmsHeader();
-        smsHeader.concatRef = concatRef;
+        if (oddLengthHeader) {
+            // Odd length header to verify correct UTF-16 header padding
+            SmsHeader.MiscElt miscElt = new SmsHeader.MiscElt();
+            miscElt.id = 0x27;  // reserved for future use; ignored on decode
+            miscElt.data = new byte[]{0x12, 0x34};
+            smsHeader.miscEltList.add(miscElt);
+        } else {
+            // Even length header normally generated for concatenated SMS.
+            SmsHeader.ConcatRef concatRef = new SmsHeader.ConcatRef();
+            concatRef.refNumber = 0xEE;
+            concatRef.msgCount = total;
+            concatRef.seqNumber = index;
+            concatRef.isEightBits = true;
+            smsHeader.concatRef = concatRef;
+        }
+        byte[] encodeHeader = SmsHeader.toByteArray(smsHeader);
+        if (oddLengthHeader) {
+            assertEquals(4, encodeHeader.length);     // 5 bytes with UDH length
+        } else {
+            assertEquals(5, encodeHeader.length);     // 6 bytes with UDH length
+        }
         UserData userData = new UserData();
-        userData.payloadStr = "01234567";
+        userData.payloadStr = payload;
         userData.userDataHeader = smsHeader;
         bearerData.userData = userData;
         byte[] encodedSms = BearerData.encode(bearerData);
         BearerData revBearerData = BearerData.decode(encodedSms);
         assertEquals(userData.payloadStr, revBearerData.userData.payloadStr);
+        assertTrue(revBearerData.hasUserDataHeader);
+        byte[] header = SmsHeader.toByteArray(revBearerData.userData.userDataHeader);
+        if (oddLengthHeader) {
+            assertEquals(4, header.length);     // 5 bytes with UDH length
+        } else {
+            assertEquals(5, header.length);     // 6 bytes with UDH length
+        }
+        assertTrue(Arrays.equals(encodeHeader, header));
     }
 
     @SmallTest
@@ -881,7 +920,27 @@ public class CdmaSmsTest extends AndroidTestCase {
         if (isCdmaPhone) {
             ArrayList<String> fragments = android.telephony.SmsMessage.fragmentText(text2);
             assertEquals(3, fragments.size());
+
+            for (int i = 0; i < 3; i++) {
+                encodeDecodeAssertEquals(fragments.get(i), i + 1, 3, false);
+                encodeDecodeAssertEquals(fragments.get(i), i + 1, 3, true);
+            }
         }
 
+        // Test case for multi-part UTF-16 message.
+        String text3 = sUnicodeChars + sUnicodeChars + sUnicodeChars;
+        ted = SmsMessage.calculateLength(text3, false);
+        assertEquals(3, ted.msgCount);
+        assertEquals(189, ted.codeUnitCount);
+        assertEquals(3, ted.codeUnitSize);
+        if (isCdmaPhone) {
+            ArrayList<String> fragments = android.telephony.SmsMessage.fragmentText(text3);
+            assertEquals(3, fragments.size());
+
+            for (int i = 0; i < 3; i++) {
+                encodeDecodeAssertEquals(fragments.get(i), i + 1, 3, false);
+                encodeDecodeAssertEquals(fragments.get(i), i + 1, 3, true);
+            }
+        }
     }
 }
