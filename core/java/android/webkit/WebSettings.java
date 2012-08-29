@@ -1120,9 +1120,22 @@ public abstract class WebSettings {
     }
 
     /**
-     * Sets whether Geolocation is enabled. The default is true. See also
-     * {@link #setGeolocationDatabasePath} for how to correctly set up
-     * Geolocation.
+     * Sets whether Geolocation is enabled. The default is true.
+     * <p>
+     * Please note that in order for the Geolocation API to be usable
+     * by a page in the WebView, the following requirements must be met:
+     * <ul>
+     *   <li>an application must have permission to access the device location,
+     *   see {@link android.Manifest.permission#ACCESS_COARSE_LOCATION},
+     *   {@link android.Manifest.permission#ACCESS_FINE_LOCATION};
+     *   <li>an application must provide an implementation of the
+     *   {@link WebChromeClient#onGeolocationPermissionsShowPrompt} callback
+     *   to receive notifications that a page is requesting access to location
+     *   via the JavaScript Geolocation API.
+     * </ul>
+     * <p>
+     * As an option, it is possible to store previous locations and web origin
+     * permissions in a database. See {@link #setGeolocationDatabasePath}.
      *
      * @param flag whether Geolocation should be enabled
      */
