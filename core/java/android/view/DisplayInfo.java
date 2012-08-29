@@ -138,6 +138,10 @@ public final class DisplayInfo implements Parcelable {
     public DisplayInfo() {
     }
 
+    public DisplayInfo(DisplayInfo other) {
+        copyFrom(other);
+    }
+
     private DisplayInfo(Parcel source) {
         readFromParcel(source);
     }

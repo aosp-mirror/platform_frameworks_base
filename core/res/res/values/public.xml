@@ -120,6 +120,8 @@
   <java-symbol type="id" name="old_app_action" />
   <java-symbol type="id" name="old_app_description" />
   <java-symbol type="id" name="old_app_icon" />
+  <java-symbol type="id" name="overlay_display_window_texture" />
+  <java-symbol type="id" name="overlay_display_window_title" />
   <java-symbol type="id" name="package_label" />
   <java-symbol type="id" name="packages_list" />
   <java-symbol type="id" name="pause" />
@@ -479,7 +481,9 @@
   <java-symbol type="string" name="decline" />
   <java-symbol type="string" name="default_text_encoding" />
   <java-symbol type="string" name="description_target_unlock_tablet" />
-  <java-symbol type="string" name="display_manager_built_in_display" />
+  <java-symbol type="string" name="display_manager_built_in_display_name" />
+  <java-symbol type="string" name="display_manager_overlay_display_name" />
+  <java-symbol type="string" name="display_manager_overlay_display_title" />
   <java-symbol type="string" name="double_tap_toast" />
   <java-symbol type="string" name="elapsed_time_short_format_h_mm_ss" />
   <java-symbol type="string" name="elapsed_time_short_format_mm_ss" />
@@ -1093,6 +1097,7 @@
   <java-symbol type="layout" name="list_menu_item_radio" />
   <java-symbol type="layout" name="locale_picker_item" />
   <java-symbol type="layout" name="media_controller" />
+  <java-symbol type="layout" name="overlay_display_window" />
   <java-symbol type="layout" name="preference" />
   <java-symbol type="layout" name="preference_header_item" />
   <java-symbol type="layout" name="preference_list_content" />

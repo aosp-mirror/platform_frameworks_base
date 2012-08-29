@@ -45,7 +45,6 @@ import android.view.Display;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 
 /**
@@ -168,6 +167,9 @@ final class DisplayPowerController {
 
     // The twilight service.
     private final TwilightService mTwilight;
+
+    // The display manager.
+    private final DisplayManager mDisplayManager;
 
     // The sensor manager.
     private final SensorManager mSensorManager;
@@ -330,6 +332,7 @@ final class DisplayPowerController {
         mLights = lights;
         mTwilight = twilight;
         mSensorManager = new SystemSensorManager(mHandler.getLooper());
+        mDisplayManager = (DisplayManager)context.getSystemService(Context.DISPLAY_SERVICE);
 
         final Resources resources = context.getResources();
         mScreenBrightnessDimConfig = resources.getInteger(
@@ -475,7 +478,7 @@ final class DisplayPowerController {
 
     private void initialize() {
         final Executor executor = AsyncTask.THREAD_POOL_EXECUTOR;
-        Display display = DisplayManager.getInstance().getRealDisplay(Display.DEFAULT_DISPLAY);
+        Display display = mDisplayManager.getDisplay(Display.DEFAULT_DISPLAY);
         mPowerState = new DisplayPowerState(new ElectronBeam(display),
                 new PhotonicModulator(executor,
                         mLights.getLight(LightsService.LIGHT_ID_BACKLIGHT),
@@ -980,7 +983,7 @@ final class DisplayPowerController {
         }
     };
 
-    public void dump(PrintWriter pw) {
+    public void dump(final PrintWriter pw) {
         synchronized (mLock) {
             pw.println();
             pw.println("Display Controller Locked State:");
@@ -1000,33 +1003,12 @@ final class DisplayPowerController {
         pw.println("  mScreenAutoBrightnessSpline=" + mScreenAutoBrightnessSpline);
         pw.println("  mLightSensorWarmUpTimeConfig=" + mLightSensorWarmUpTimeConfig);
 
-        if (Looper.myLooper() == mHandler.getLooper()) {
-            dumpLocal(pw);
-        } else {
-            final StringWriter out = new StringWriter();
-            final CountDownLatch latch = new CountDownLatch(1);
-            Message msg = Message.obtain(mHandler,  new Runnable() {
-                @Override
-                public void run() {
-                    PrintWriter localpw = new PrintWriter(out);
-                    try {
-                        dumpLocal(localpw);
-                    } finally {
-                        localpw.flush();
-                        latch.countDown();
-                    }
-                }
-            });
-            msg.setAsynchronous(true);
-            mHandler.sendMessage(msg);
-            try {
-                latch.await();
-                pw.print(out.toString());
-            } catch (InterruptedException ex) {
-                pw.println();
-                pw.println("Failed to dump thread state due to interrupted exception!");
+        mHandler.runWithScissors(new Runnable() {
+            @Override
+            public void run() {
+                dumpLocal(pw);
             }
-        }
+        });
     }
 
     private void dumpLocal(PrintWriter pw) {

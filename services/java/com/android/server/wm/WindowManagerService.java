@@ -739,116 +739,38 @@ public class WindowManagerService extends IWindowManager.Stub
     // For example, when this flag is true, there will be no wallpaper service.
     final boolean mOnlyCore;
 
-    public static WindowManagerService main(Context context,
-            PowerManagerService pm, DisplayManagerService dm,
-            boolean haveInputMethods, boolean allowBootMsgs,
-            boolean onlyCore) {
-        WMThread thr = new WMThread(context, pm, dm, haveInputMethods, allowBootMsgs, onlyCore);
-        thr.start();
-
-        synchronized (thr) {
-            while (thr.mService == null) {
-                try {
-                    thr.wait();
-                } catch (InterruptedException e) {
-                }
+    public static WindowManagerService main(final Context context,
+            final PowerManagerService pm, final DisplayManagerService dm,
+            final Handler uiHandler, final Handler wmHandler,
+            final boolean haveInputMethods, final boolean showBootMsgs,
+            final boolean onlyCore) {
+        final WindowManagerService[] holder = new WindowManagerService[1];
+        wmHandler.runWithScissors(new Runnable() {
+            @Override
+            public void run() {
+                holder[0] = new WindowManagerService(context, pm, dm,
+                        uiHandler, haveInputMethods, showBootMsgs, onlyCore);
             }
-            return thr.mService;
-        }
+        });
+        return holder[0];
     }
 
-    static class WMThread extends Thread {
-        WindowManagerService mService;
+    private void initPolicy(Handler uiHandler) {
+        uiHandler.runWithScissors(new Runnable() {
+            @Override
+            public void run() {
+                WindowManagerPolicyThread.set(Thread.currentThread(), Looper.myLooper());
 
-        private final Context mContext;
-        private final PowerManagerService mPM;
-        private final DisplayManagerService mDisplayManager;
-        private final boolean mHaveInputMethods;
-        private final boolean mAllowBootMessages;
-        private final boolean mOnlyCore;
-
-        public WMThread(Context context, PowerManagerService pm,
-                DisplayManagerService dm,
-                boolean haveInputMethods, boolean allowBootMsgs, boolean onlyCore) {
-            super("WindowManager");
-            mContext = context;
-            mPM = pm;
-            mDisplayManager = dm;
-            mHaveInputMethods = haveInputMethods;
-            mAllowBootMessages = allowBootMsgs;
-            mOnlyCore = onlyCore;
-        }
-
-        @Override
-        public void run() {
-            Looper.prepare();
-            //Looper.myLooper().setMessageLogging(new LogPrinter(
-            //        android.util.Log.DEBUG, TAG, android.util.Log.LOG_ID_SYSTEM));
-            WindowManagerService s = new WindowManagerService(mContext, mPM, mDisplayManager,
-                    mHaveInputMethods, mAllowBootMessages, mOnlyCore);
-            android.os.Process.setThreadPriority(
-                    android.os.Process.THREAD_PRIORITY_DISPLAY);
-            android.os.Process.setCanSelfBackground(false);
-
-            synchronized (this) {
-                mService = s;
-                notifyAll();
+                mPolicy.init(mContext, WindowManagerService.this, WindowManagerService.this);
+                mAnimator.mAboveUniverseLayer = mPolicy.getAboveUniverseLayer()
+                        * TYPE_LAYER_MULTIPLIER
+                        + TYPE_LAYER_OFFSET;
             }
-
-            // For debug builds, log event loop stalls to dropbox for analysis.
-            if (StrictMode.conditionallyEnableDebugLogging()) {
-                Slog.i(TAG, "Enabled StrictMode logging for WMThread's Looper");
-            }
-
-            Looper.loop();
-        }
-    }
-
-    static class PolicyThread extends Thread {
-        private final WindowManagerPolicy mPolicy;
-        private final WindowManagerService mService;
-        private final Context mContext;
-        boolean mRunning = false;
-
-        public PolicyThread(WindowManagerPolicy policy,
-                WindowManagerService service, Context context) {
-            super("WindowManagerPolicy");
-            mPolicy = policy;
-            mService = service;
-            mContext = context;
-        }
-
-        @Override
-        public void run() {
-            Looper.prepare();
-            WindowManagerPolicyThread.set(this, Looper.myLooper());
-
-            //Looper.myLooper().setMessageLogging(new LogPrinter(
-            //        Log.VERBOSE, "WindowManagerPolicy", Log.LOG_ID_SYSTEM));
-            android.os.Process.setThreadPriority(
-                    android.os.Process.THREAD_PRIORITY_FOREGROUND);
-            android.os.Process.setCanSelfBackground(false);
-            mPolicy.init(mContext, mService, mService);
-            mService.mAnimator.mAboveUniverseLayer = mPolicy.getAboveUniverseLayer()
-                    * TYPE_LAYER_MULTIPLIER
-                    + TYPE_LAYER_OFFSET;
-
-            synchronized (this) {
-                mRunning = true;
-                notifyAll();
-            }
-
-            // For debug builds, log event loop stalls to dropbox for analysis.
-            if (StrictMode.conditionallyEnableDebugLogging()) {
-                Slog.i(TAG, "Enabled StrictMode for PolicyThread's Looper");
-            }
-
-            Looper.loop();
-        }
+        });
     }
 
     private WindowManagerService(Context context, PowerManagerService pm,
-            DisplayManagerService displayManager,
+            DisplayManagerService displayManager, Handler uiHandler,
             boolean haveInputMethods, boolean showBootMsgs, boolean onlyCore) {
         mContext = context;
         mHaveInputMethods = haveInputMethods;
@@ -857,7 +779,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mLimitedAlphaCompositing = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_sf_limitedAlpha);
         mDisplayManagerService = displayManager;
-        mDisplayManager = DisplayManager.getInstance();
+        mDisplayManager = (DisplayManager)context.getSystemService(Context.DISPLAY_SERVICE);
         mHeadless = displayManager.isHeadless();
 
         mKeyguardDisableHandler = new KeyguardDisableHandler(mContext, mPolicy);
@@ -895,17 +817,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mFxSession = new SurfaceSession();
         mAnimator = new WindowAnimator(this);
 
-        PolicyThread thr = new PolicyThread(mPolicy, this, context);
-        thr.start();
-
-        synchronized (thr) {
-            while (!thr.mRunning) {
-                try {
-                    thr.wait();
-                } catch (InterruptedException e) {
-                }
-            }
-        }
+        initPolicy(uiHandler);
 
         mInputManager.start();
 
@@ -6562,7 +6474,8 @@ public class WindowManagerService extends IWindowManager.Stub
             displayInfo.appHeight = appHeight;
             displayInfo.getLogicalMetrics(mRealDisplayMetrics, null);
             displayInfo.getAppMetrics(mDisplayMetrics, null);
-            mDisplayManagerService.setDisplayInfo(displayContent.getDisplayId(), displayInfo);
+            mDisplayManagerService.setDisplayInfoOverrideFromWindowManager(
+                    displayContent.getDisplayId(), displayInfo);
 
             mAnimator.setDisplayDimensions(dw, dh, appWidth, appHeight);
         }
@@ -6914,7 +6827,10 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized(displayContent.mDisplaySizeLock) {
                 // Bootstrap the default logical display from the display manager.
                 displayInfo = displayContent.getDisplayInfo();
-                mDisplayManagerService.getDisplayInfo(displayId, displayInfo);
+                DisplayInfo newDisplayInfo = mDisplayManagerService.getDisplayInfo(displayId);
+                if (newDisplayInfo != null) {
+                    displayInfo.copyFrom(newDisplayInfo);
+                }
                 displayContent.mInitialDisplayWidth = displayInfo.logicalWidth;
                 displayContent.mInitialDisplayHeight = displayInfo.logicalHeight;
                 displayContent.mInitialDisplayDensity = displayInfo.logicalDensityDpi;
@@ -10365,7 +10281,7 @@ public class WindowManagerService extends IWindowManager.Stub
     public DisplayContent getDisplayContent(final int displayId) {
         DisplayContent displayContent = mDisplayContents.get(displayId);
         if (displayContent == null) {
-            displayContent = new DisplayContent(mDisplayManager.getRealDisplay(displayId));
+            displayContent = new DisplayContent(mDisplayManager.getDisplay(displayId));
             mDisplayContents.put(displayId, displayContent);
         }
         return displayContent;

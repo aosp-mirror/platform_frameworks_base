@@ -21,14 +21,28 @@ import android.os.IBinder;
 /**
  * Represents a physical display device such as the built-in display
  * an external monitor, or a WiFi display.
+ * <p>
+ * Display devices are not thread-safe and must only be accessed
+ * on the display manager service's handler thread.
+ * </p>
  */
 public abstract class DisplayDevice {
+    private final DisplayAdapter mDisplayAdapter;
+    private final IBinder mDisplayToken;
+
+    public DisplayDevice(DisplayAdapter displayAdapter, IBinder displayToken) {
+        mDisplayAdapter = displayAdapter;
+        mDisplayToken = displayToken;
+    }
+
     /**
-     * Gets the display adapter that makes the display device available.
+     * Gets the display adapter that owns the display device.
      *
      * @return The display adapter.
      */
-    public abstract DisplayAdapter getAdapter();
+    public final DisplayAdapter getAdapter() {
+        return mDisplayAdapter;
+    }
 
     /**
      * Gets the Surface Flinger display token for this display.
@@ -36,7 +50,9 @@ public abstract class DisplayDevice {
      * @return The display token, or null if the display is not being managed
      * by Surface Flinger.
      */
-    public abstract IBinder getDisplayToken();
+    public final IBinder getDisplayToken() {
+        return mDisplayToken;
+    }
 
     /**
      * Gets information about the display device.
@@ -44,4 +60,12 @@ public abstract class DisplayDevice {
      * @param outInfo The object to populate with the information.
      */
     public abstract void getInfo(DisplayDeviceInfo outInfo);
+
+    // For debugging purposes.
+    @Override
+    public String toString() {
+        DisplayDeviceInfo info = new DisplayDeviceInfo();
+        getInfo(info);
+        return info.toString() + ", owner=\"" + mDisplayAdapter.getName() + "\"";
+    }
 }

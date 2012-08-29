@@ -4351,6 +4351,25 @@ public final class Settings {
         public static final String SMS_SHORT_CODES_PREFIX = "sms_short_codes_";
 
         /**
+         * Overlay display devices setting.
+         * The associated value is a specially formatted string that describes the
+         * size and density of simulated secondary display devices.
+         * <p>
+         * Format: {width}x{height}/{dpi};...
+         * </p><p>
+         * Example:
+         * <ul>
+         * <li><code>1280x720/213</code>: make one overlay that is 1280x720 at 213dpi.</li>
+         * <li><code>1920x1080/320;1280x720/213</code>: make two overlays, the first
+         * at 1080p and the second at 720p.</li>
+         * <li>If the value is empty, then no overlay display devices are created.</li>
+         * </ul></p>
+         *
+         * @hide
+         */
+        public static final String OVERLAY_DISPLAY_DEVICES = "overlay_display_devices";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
