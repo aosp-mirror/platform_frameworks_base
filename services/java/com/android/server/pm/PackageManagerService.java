@@ -851,11 +851,16 @@ public class PackageManagerService extends IPackageManager.Stub {
                                     + args.packageURI.toString());
                             state.setVerifierResponse(Binder.getCallingUid(),
                                     PackageManager.VERIFICATION_ALLOW_WITHOUT_SUFFICIENT);
+                            broadcastPackageVerified(verificationId, args.packageURI,
+                                    PackageManager.VERIFICATION_ALLOW);
                             try {
                                 ret = args.copyApk(mContainerService, true);
                             } catch (RemoteException e) {
                                 Slog.e(TAG, "Could not contact the ContainerService");
                             }
+                        } else {
+                            broadcastPackageVerified(verificationId, args.packageURI,
+                                    PackageManager.VERIFICATION_REJECT);
                         }
 
                         processPendingInstall(args, ret);
@@ -884,6 +889,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                         int ret;
                         if (state.isInstallAllowed()) {
                             ret = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
+                            broadcastPackageVerified(verificationId, args.packageURI,
+                                    response.code);
                             try {
                                 ret = args.copyApk(mContainerService, true);
                             } catch (RemoteException e) {
@@ -5602,13 +5609,15 @@ public class PackageManagerService extends IPackageManager.Stub {
         final PackageVerificationResponse response = new PackageVerificationResponse(
                 verificationCodeAtTimeout, Binder.getCallingUid());
 
-        if ((millisecondsToDelay > PackageManager.MAXIMUM_VERIFICATION_TIMEOUT)
-                || (millisecondsToDelay < 0)) {
-            throw new IllegalArgumentException("millisecondsToDelay is out of bounds.");
+        if (millisecondsToDelay > PackageManager.MAXIMUM_VERIFICATION_TIMEOUT) {
+            millisecondsToDelay = PackageManager.MAXIMUM_VERIFICATION_TIMEOUT;
+        }
+        if (millisecondsToDelay < 0) {
+            millisecondsToDelay = 0;
         }
         if ((verificationCodeAtTimeout != PackageManager.VERIFICATION_ALLOW)
-              || (verificationCodeAtTimeout != PackageManager.VERIFICATION_REJECT)) {
-            throw new IllegalArgumentException("verificationCodeAtTimeout is unknown.");
+                && (verificationCodeAtTimeout != PackageManager.VERIFICATION_REJECT)) {
+            verificationCodeAtTimeout = PackageManager.VERIFICATION_REJECT;
         }
 
         if ((state != null) && !state.timeoutExtended()) {
@@ -5619,6 +5628,17 @@ public class PackageManagerService extends IPackageManager.Stub {
             msg.obj = response;
             mHandler.sendMessageDelayed(msg, millisecondsToDelay);
         }
+    }
+
+    private void broadcastPackageVerified(int verificationId, Uri packageUri,
+            int verificationCode) {
+        final Intent intent = new Intent(Intent.ACTION_PACKAGE_VERIFIED);
+        intent.setDataAndType(packageUri, PACKAGE_MIME_TYPE);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        intent.putExtra(PackageManager.EXTRA_VERIFICATION_ID, verificationId);
+        intent.putExtra(PackageManager.EXTRA_VERIFICATION_RESULT, verificationCode);
+
+        mContext.sendBroadcast(intent, android.Manifest.permission.PACKAGE_VERIFICATION_AGENT);
     }
 
     private ComponentName matchComponentForVerifier(String packageName,
