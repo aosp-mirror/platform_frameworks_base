@@ -240,7 +240,7 @@ public class WifiService extends IWifiManager.Stub {
             switch (msg.what) {
                 case AsyncChannel.CMD_CHANNEL_HALF_CONNECTED: {
                     if (msg.arg1 == AsyncChannel.STATUS_SUCCESSFUL) {
-                        Slog.d(TAG, "New client listening to asynchronous messages");
+                        if (DBG) Slog.d(TAG, "New client listening to asynchronous messages");
                         mClients.add((AsyncChannel) msg.obj);
                     } else {
                         Slog.e(TAG, "Client connection failure, error=" + msg.arg1);
@@ -249,9 +249,9 @@ public class WifiService extends IWifiManager.Stub {
                 }
                 case AsyncChannel.CMD_CHANNEL_DISCONNECTED: {
                     if (msg.arg1 == AsyncChannel.STATUS_SEND_UNSUCCESSFUL) {
-                        Slog.d(TAG, "Send failed, client connection lost");
+                        if (DBG) Slog.d(TAG, "Send failed, client connection lost");
                     } else {
-                        Slog.d(TAG, "Client connection lost with reason: " + msg.arg1);
+                        if (DBG) Slog.d(TAG, "Client connection lost with reason: " + msg.arg1);
                     }
                     mClients.remove((AsyncChannel) msg.obj);
                     break;
