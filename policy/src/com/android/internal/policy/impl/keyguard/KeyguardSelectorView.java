@@ -61,7 +61,7 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
                             ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
                             .getAssistIntent(mContext, UserHandle.USER_CURRENT);
                     if (assistIntent != null) {
-                        launchActivity(assistIntent);
+                        launchActivity(assistIntent, false);
                     } else {
                         Log.w(TAG, "Failed to get intent for assist activity");
                     }
@@ -69,7 +69,7 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
                     break;
 
                 case com.android.internal.R.drawable.ic_lockscreen_camera:
-                    launchActivity(new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA));
+                    launchCamera();
                     mCallback.userActivity(0);
                     break;
 
@@ -126,6 +126,16 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
 
     public KeyguardSelectorView(Context context) {
         this(context, null);
+    }
+
+    protected void launchCamera() {
+        if (mLockPatternUtils.isSecure()) {
+            // Launch the secure version of the camera
+            launchActivity(new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE), true);
+        } else {
+            // Launch the normal camera
+            launchActivity(new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA), false);
+        }
     }
 
     public KeyguardSelectorView(Context context, AttributeSet attrs) {
@@ -217,21 +227,36 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
     /**
      * Launches the said intent for the current foreground user.
      * @param intent
+     * @param showsWhileLocked true if the activity can be run on top of keyguard.
+     * See {@link WindowManager#FLAG_SHOW_WHEN_LOCKED}
      */
-    private void launchActivity(Intent intent) {
+    private void launchActivity(final Intent intent, boolean showsWhileLocked) {
         intent.setFlags(
                 Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_SINGLE_TOP
                 | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        try {
-            ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
-        } catch (RemoteException e) {
-            Log.w(TAG, "can't dismiss keyguard on launch");
-        }
-        try {
-            mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
-        } catch (ActivityNotFoundException e) {
-            Log.w(TAG, "Activity not found for intent + " + intent.getAction());
+        boolean isSecure = mLockPatternUtils.isSecure();
+        if (!isSecure || showsWhileLocked) {
+            if (!isSecure) try {
+                ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
+            } catch (RemoteException e) {
+                Log.w(TAG, "can't dismiss keyguard on launch");
+            }
+            try {
+                mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
+            } catch (ActivityNotFoundException e) {
+                Log.w(TAG, "Activity not found for intent + " + intent.getAction());
+            }
+        } else {
+            // Create a runnable to start the activity and ask the user to enter their
+            // credentials.
+            mCallback.setOnDismissRunnable(new Runnable() {
+                @Override
+                public void run() {
+                    mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
+                }
+            });
+            mCallback.dismiss(false);
         }
     }
 
