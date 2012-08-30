@@ -34,11 +34,27 @@ public final class UserHandle implements Parcelable {
     /** @hide A user id to indicate the currently active user */
     public static final int USER_CURRENT = -2;
 
+    /** @hide A user handle to indicate the current user of the device */
+    public static final UserHandle CURRENT = new UserHandle(USER_CURRENT);
+
+    /** @hide A user id to indicate that we would like to send to the current
+     *  user, but if this is calling from a user process then we will send it
+     *  to the caller's user instead of failing wiht a security exception */
+    public static final int USER_CURRENT_OR_SELF = -2;
+
+    /** @hide A user handle to indicate that we would like to send to the current
+     *  user, but if this is calling from a user process then we will send it
+     *  to the caller's user instead of failing wiht a security exception */
+    public static final UserHandle CURRENT_OR_SELF = new UserHandle(USER_CURRENT_OR_SELF);
+
     /** @hide An undefined user id */
     public static final int USER_NULL = -10000;
 
     /** @hide A user id constant to indicate the "owner" user of the device */
     public static final int USER_OWNER = 0;
+
+    /** @hide A user handle to indicate the primary/owner user of the device */
+    public static final UserHandle OWNER = new UserHandle(USER_OWNER);
 
     /**
      * @hide Enable multi-user related side effects. Set this to false if

@@ -47,6 +47,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.provider.Telephony.Carriers;
@@ -1092,7 +1093,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
             // send an intent to notify that the GPS is receiving fixes.
             Intent intent = new Intent(LocationManager.GPS_FIX_CHANGE_ACTION);
             intent.putExtra(LocationManager.EXTRA_GPS_ENABLED, true);
-            mContext.sendBroadcast(intent);
+            mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
             updateStatus(LocationProvider.AVAILABLE, mSvCount);
         }
 
@@ -1150,7 +1151,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
                 // send an intent to notify that the GPS has been enabled or disabled.
                 Intent intent = new Intent(LocationManager.GPS_ENABLED_CHANGE_ACTION);
                 intent.putExtra(LocationManager.EXTRA_GPS_ENABLED, mNavigating);
-                mContext.sendBroadcast(intent);
+                mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
             }
         }
     }
@@ -1202,7 +1203,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
             // send an intent to notify that the GPS is no longer receiving fixes.
             Intent intent = new Intent(LocationManager.GPS_FIX_CHANGE_ACTION);
             intent.putExtra(LocationManager.EXTRA_GPS_ENABLED, false);
-            mContext.sendBroadcast(intent);
+            mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
             updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE, mSvCount);
         }
     }

@@ -713,6 +713,9 @@ public class ActiveServices {
         if (DEBUG_SERVICE) Slog.v(TAG, "retrieveServiceLocked: " + service
                 + " type=" + resolvedType + " callingUid=" + callingUid);
 
+        userId = mAm.handleIncomingUserLocked(callingPid, callingUid, userId,
+                false, true, "service", null);
+
         if (service.getComponent() != null) {
             r = mServiceMap.getServiceByName(service.getComponent(), userId);
         }

@@ -44,6 +44,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -368,7 +369,7 @@ public class ThrottleService extends IThrottleManager.Stub {
         }
 
         if (mPollStickyBroadcast != null) {
-            mContext.removeStickyBroadcast(mPollStickyBroadcast);
+            mContext.removeStickyBroadcastAsUser(mPollStickyBroadcast, UserHandle.ALL);
         }
     }
 
@@ -494,7 +495,7 @@ public class ThrottleService extends IThrottleManager.Stub {
             onPollAlarm();
 
             Intent broadcast = new Intent(ThrottleManager.POLICY_CHANGED_ACTION);
-            mContext.sendBroadcast(broadcast);
+            mContext.sendBroadcastAsUser(broadcast, UserHandle.ALL);
         }
 
         private void onPollAlarm() {
@@ -563,7 +564,7 @@ public class ThrottleService extends IThrottleManager.Stub {
             broadcast.putExtra(ThrottleManager.EXTRA_CYCLE_WRITE, periodTx);
             broadcast.putExtra(ThrottleManager.EXTRA_CYCLE_START, getPeriodStartTime(mIface));
             broadcast.putExtra(ThrottleManager.EXTRA_CYCLE_END, getResetTime(mIface));
-            mContext.sendStickyBroadcast(broadcast);
+            mContext.sendStickyBroadcastAsUser(broadcast, UserHandle.ALL);
             mPollStickyBroadcast = broadcast;
 
             mAlarmManager.cancel(mPendingPollIntent);
@@ -621,7 +622,7 @@ public class ThrottleService extends IThrottleManager.Stub {
                     Intent broadcast = new Intent(ThrottleManager.THROTTLE_ACTION);
                     broadcast.putExtra(ThrottleManager.EXTRA_THROTTLE_LEVEL,
                             mPolicyThrottleValue.get());
-                    mContext.sendStickyBroadcast(broadcast);
+                    mContext.sendStickyBroadcastAsUser(broadcast, UserHandle.ALL);
 
                 } // else already up!
             } else {
@@ -699,7 +700,7 @@ public class ThrottleService extends IThrottleManager.Stub {
                 }
                 Intent broadcast = new Intent(ThrottleManager.THROTTLE_ACTION);
                 broadcast.putExtra(ThrottleManager.EXTRA_THROTTLE_LEVEL, -1);
-                mContext.sendStickyBroadcast(broadcast);
+                mContext.sendStickyBroadcastAsUser(broadcast, UserHandle.ALL);
                 mNotificationManager.cancel(R.drawable.stat_sys_throttled);
                 mWarningNotificationSent = false;
             }

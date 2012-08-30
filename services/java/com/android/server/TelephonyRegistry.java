@@ -25,6 +25,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.telephony.CellLocation;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
@@ -588,7 +589,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         Bundle data = new Bundle();
         state.fillInNotifierBundle(data);
         intent.putExtras(data);
-        mContext.sendStickyBroadcast(intent);
+        mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
     }
 
     private void broadcastSignalStrengthChanged(SignalStrength signalStrength) {
@@ -606,7 +607,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         Bundle data = new Bundle();
         signalStrength.fillInNotifierBundle(data);
         intent.putExtras(data);
-        mContext.sendStickyBroadcast(intent);
+        mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
     }
 
     private void broadcastCallStateChanged(int state, String incomingNumber) {
@@ -629,7 +630,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if (!TextUtils.isEmpty(incomingNumber)) {
             intent.putExtra(TelephonyManager.EXTRA_INCOMING_NUMBER, incomingNumber);
         }
-        mContext.sendBroadcast(intent, android.Manifest.permission.READ_PHONE_STATE);
+        mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
+                android.Manifest.permission.READ_PHONE_STATE);
     }
 
     private void broadcastDataConnectionStateChanged(int state,
@@ -662,14 +664,14 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
         intent.putExtra(PhoneConstants.DATA_APN_KEY, apn);
         intent.putExtra(PhoneConstants.DATA_APN_TYPE_KEY, apnType);
-        mContext.sendStickyBroadcast(intent);
+        mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
     }
 
     private void broadcastDataConnectionFailed(String reason, String apnType) {
         Intent intent = new Intent(TelephonyIntents.ACTION_DATA_CONNECTION_FAILED);
         intent.putExtra(PhoneConstants.FAILURE_REASON_KEY, reason);
         intent.putExtra(PhoneConstants.DATA_APN_TYPE_KEY, apnType);
-        mContext.sendStickyBroadcast(intent);
+        mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
     }
 
     private boolean checkNotifyPermission(String method) {

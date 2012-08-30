@@ -348,7 +348,8 @@ public class RecoverySystem {
         final ConditionVariable condition = new ConditionVariable();
 
         Intent intent = new Intent("android.intent.action.MASTER_CLEAR_NOTIFICATION");
-        context.sendOrderedBroadcast(intent, android.Manifest.permission.MASTER_CLEAR,
+        context.sendOrderedBroadcastAsUser(intent, UserHandle.OWNER,
+                android.Manifest.permission.MASTER_CLEAR,
                 new BroadcastReceiver() {
                     @Override
                     public void onReceive(Context context, Intent intent) {

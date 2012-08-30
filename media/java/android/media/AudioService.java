@@ -57,6 +57,7 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.provider.Settings.System;
@@ -930,6 +931,24 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         return delta;
     }
 
+    private void sendBroadcastToAll(Intent intent) {
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    private void sendStickyBroadcastToAll(Intent intent) {
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
     // UI update and Broadcast Intent
     private void sendVolumeUpdate(int streamType, int oldIndex, int index, int flags) {
         if (!mVoiceCapable && (streamType == AudioSystem.STREAM_RING)) {
@@ -944,7 +963,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         intent.putExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, streamType);
         intent.putExtra(AudioManager.EXTRA_VOLUME_STREAM_VALUE, index);
         intent.putExtra(AudioManager.EXTRA_PREV_VOLUME_STREAM_VALUE, oldIndex);
-        mContext.sendBroadcast(intent);
+        sendBroadcastToAll(intent);
     }
 
     // UI update and Broadcast Intent
@@ -954,7 +973,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         Intent intent = new Intent(AudioManager.MASTER_VOLUME_CHANGED_ACTION);
         intent.putExtra(AudioManager.EXTRA_PREV_MASTER_VOLUME_VALUE, oldVolume);
         intent.putExtra(AudioManager.EXTRA_MASTER_VOLUME_VALUE, newVolume);
-        mContext.sendBroadcast(intent);
+        sendBroadcastToAll(intent);
     }
 
     // UI update and Broadcast Intent
@@ -968,9 +987,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         intent.putExtra(AudioManager.EXTRA_MASTER_VOLUME_MUTED, muted);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
                 | Intent.FLAG_RECEIVER_REPLACE_PENDING);
-        long origCallerIdentityToken = Binder.clearCallingIdentity();
-        mContext.sendStickyBroadcast(intent);
-        Binder.restoreCallingIdentity(origCallerIdentityToken);
+        sendStickyBroadcastToAll(intent);
     }
 
     /**
@@ -1992,7 +2009,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             newIntent.putExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, state);
             newIntent.putExtra(AudioManager.EXTRA_SCO_AUDIO_PREVIOUS_STATE,
                     mScoConnectionState);
-            mContext.sendStickyBroadcast(newIntent);
+            sendStickyBroadcastToAll(newIntent);
             mScoConnectionState = state;
         }
     }
@@ -2283,9 +2300,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         broadcast.putExtra(AudioManager.EXTRA_RINGER_MODE, ringerMode);
         broadcast.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
                 | Intent.FLAG_RECEIVER_REPLACE_PENDING);
-        long origCallerIdentityToken = Binder.clearCallingIdentity();
-        mContext.sendStickyBroadcast(broadcast);
-        Binder.restoreCallingIdentity(origCallerIdentityToken);
+        sendStickyBroadcastToAll(broadcast);
     }
 
     private void broadcastVibrateSetting(int vibrateType) {
@@ -2294,7 +2309,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             Intent broadcast = new Intent(AudioManager.VIBRATE_SETTING_CHANGED_ACTION);
             broadcast.putExtra(AudioManager.EXTRA_VIBRATE_TYPE, vibrateType);
             broadcast.putExtra(AudioManager.EXTRA_VIBRATE_SETTING, getVibrateSetting(vibrateType));
-            mContext.sendBroadcast(broadcast);
+            sendBroadcastToAll(broadcast);
         }
     }
 
@@ -3175,7 +3190,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     }
 
     private void sendBecomingNoisyIntent() {
-        mContext.sendBroadcast(new Intent(AudioManager.ACTION_AUDIO_BECOMING_NOISY));
+        sendBroadcastToAll(new Intent(AudioManager.ACTION_AUDIO_BECOMING_NOISY));
     }
 
     // must be called synchronized on mConnectedDevices
@@ -3366,7 +3381,12 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             }
         }
 
-        ActivityManagerNative.broadcastStickyIntent(intent, null);
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            ActivityManagerNative.broadcastStickyIntent(intent, null, UserHandle.USER_ALL);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 
     private void onSetWiredDeviceConnectionState(int device, int state, String name)
@@ -3518,7 +3538,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     // AudioManager.ACTION_SCO_AUDIO_STATE_CHANGED. Remove when appropriate.
                     Intent newIntent = new Intent(AudioManager.ACTION_SCO_AUDIO_STATE_CHANGED);
                     newIntent.putExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, scoAudioState);
-                    mContext.sendStickyBroadcast(newIntent);
+                    sendStickyBroadcastToAll(newIntent);
                 }
             } else if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
                 mBootCompleted = true;
@@ -3535,7 +3555,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 Intent newIntent = new Intent(AudioManager.ACTION_SCO_AUDIO_STATE_CHANGED);
                 newIntent.putExtra(AudioManager.EXTRA_SCO_AUDIO_STATE,
                         AudioManager.SCO_AUDIO_STATE_DISCONNECTED);
-                mContext.sendStickyBroadcast(newIntent);
+                sendStickyBroadcastToAll(newIntent);
 
                 BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
                 if (adapter != null) {
@@ -3926,8 +3946,13 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             mMediaEventWakeLock.acquire();
             keyIntent.putExtra(EXTRA_WAKELOCK_ACQUIRED, WAKELOCK_RELEASE_ON_FINISHED);
         }
-        mContext.sendOrderedBroadcast(keyIntent, null, mKeyEventDone,
-                mAudioHandler, Activity.RESULT_OK, null, null);
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            mContext.sendOrderedBroadcastAsUser(keyIntent, UserHandle.ALL,
+                    null, mKeyEventDone, mAudioHandler, Activity.RESULT_OK, null, null);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 
     /**
@@ -3960,8 +3985,14 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 if (needWakeLock) {
                     keyIntent.putExtra(EXTRA_WAKELOCK_ACQUIRED, WAKELOCK_RELEASE_ON_FINISHED);
                 }
-                mContext.sendOrderedBroadcast(keyIntent, null, mKeyEventDone,
-                        mAudioHandler, Activity.RESULT_OK, null, null);
+                final long ident = Binder.clearCallingIdentity();
+                try {
+                    mContext.sendOrderedBroadcastAsUser(keyIntent, UserHandle.ALL,
+                            null, mKeyEventDone,
+                            mAudioHandler, Activity.RESULT_OK, null, null);
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
             }
         }
     }

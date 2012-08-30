@@ -55,6 +55,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
@@ -570,10 +571,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             intent.putExtra("expiration", admin.passwordExpirationDate);
         }
         if (result != null) {
-            mContext.sendOrderedBroadcast(intent, null, result, mHandler,
-                    Activity.RESULT_OK, null, null);
+            mContext.sendOrderedBroadcastAsUser(intent, UserHandle.OWNER,
+                    null, result, mHandler, Activity.RESULT_OK, null, null);
         } else {
-            mContext.sendBroadcast(intent);
+            mContext.sendBroadcastAsUser(intent, UserHandle.OWNER);
         }
     }
 
@@ -712,7 +713,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private void sendChangedNotification() {
         Intent intent = new Intent(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
         intent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-        mContext.sendBroadcast(intent);
+        mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
     }
 
     private void loadSettingsLocked() {
@@ -1734,7 +1735,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             Intent intent = new Intent(DeviceAdminReceiver.ACTION_DEVICE_ADMIN_DISABLE_REQUESTED);
             intent.setComponent(admin.info.getComponent());
-            mContext.sendOrderedBroadcast(intent, null, new BroadcastReceiver() {
+            mContext.sendOrderedBroadcastAsUser(intent, UserHandle.OWNER,
+                    null, new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
                     try {

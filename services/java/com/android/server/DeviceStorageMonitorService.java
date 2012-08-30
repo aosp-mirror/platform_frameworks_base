@@ -39,6 +39,7 @@ import android.os.ServiceManager;
 import android.os.StatFs;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.format.Formatter;
 import android.util.EventLog;
@@ -416,8 +417,8 @@ public class DeviceStorageMonitorService extends Binder {
         //cancel notification since memory has been freed
         mNotificationMgr.cancel(LOW_MEMORY_NOTIFICATION_ID);
 
-        mContext.removeStickyBroadcast(mStorageLowIntent);
-        mContext.sendBroadcast(mStorageOkIntent);
+        mContext.removeStickyBroadcastAsUser(mStorageLowIntent, UserHandle.ALL);
+        mContext.sendBroadcastAsUser(mStorageOkIntent, UserHandle.ALL);
     }
 
     /**
@@ -433,8 +434,8 @@ public class DeviceStorageMonitorService extends Binder {
      */
     private final void cancelFullNotification() {
         if(localLOGV) Slog.i(TAG, "Canceling memory full notification");
-        mContext.removeStickyBroadcast(mStorageFullIntent);
-        mContext.sendBroadcast(mStorageNotFullIntent);
+        mContext.removeStickyBroadcastAsUser(mStorageFullIntent, UserHandle.ALL);
+        mContext.sendBroadcastAsUser(mStorageNotFullIntent, UserHandle.ALL);
     }
 
     public void updateMemory() {

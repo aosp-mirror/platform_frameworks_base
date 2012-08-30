@@ -1820,7 +1820,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (down && repeatCount == 0) {
                 if (mEnableShiftMenuBugReports && (metaState & chordBug) == chordBug) {
                     Intent intent = new Intent(Intent.ACTION_BUG_REPORT);
-                    mContext.sendOrderedBroadcast(intent, null);
+                    mContext.sendOrderedBroadcastAsUser(intent, UserHandle.CURRENT,
+                            null, null, null, 0, null, null);
                     return -1;
                 } else if (SHOW_PROCESSES_ON_ALT_MENU &&
                         (metaState & KeyEvent.META_ALT_ON) == KeyEvent.META_ALT_ON) {
@@ -3003,7 +3004,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             Intent intent = new Intent(ACTION_HDMI_PLUGGED);
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
             intent.putExtra(EXTRA_HDMI_PLUGGED_STATE, plugged);
-            mContext.sendStickyBroadcast(intent);
+            mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
         }
     }
 

@@ -36,6 +36,7 @@ import android.os.Environment;
 import android.os.Message;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -601,7 +602,7 @@ class WifiConfigStore {
         intent.putExtra(WifiManager.EXTRA_MULTIPLE_NETWORKS_CHANGED, false);
         intent.putExtra(WifiManager.EXTRA_WIFI_CONFIGURATION, network);
         intent.putExtra(WifiManager.EXTRA_CHANGE_REASON, reason);
-        mContext.sendBroadcast(intent);
+        mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
     }
 
     /**
@@ -611,7 +612,7 @@ class WifiConfigStore {
         Intent intent = new Intent(WifiManager.CONFIGURED_NETWORKS_CHANGED_ACTION);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         intent.putExtra(WifiManager.EXTRA_MULTIPLE_NETWORKS_CHANGED, true);
-        mContext.sendBroadcast(intent);
+        mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
     }
 
     void loadConfiguredNetworks() {

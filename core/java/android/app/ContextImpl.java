@@ -1072,8 +1072,22 @@ class ContextImpl extends Context {
     }
 
     @Override
+    public void sendBroadcastAsUser(Intent intent, UserHandle user,
+            String receiverPermission) {
+        String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
+        try {
+            intent.setAllowFds(false);
+            ActivityManagerNative.getDefault().broadcastIntent(
+                mMainThread.getApplicationThread(), intent, resolvedType, null,
+                Activity.RESULT_OK, null, null, receiverPermission, false, false,
+                user.getIdentifier());
+        } catch (RemoteException e) {
+        }
+    }
+
+    @Override
     public void sendOrderedBroadcastAsUser(Intent intent, UserHandle user,
-            BroadcastReceiver resultReceiver, Handler scheduler,
+            String receiverPermission, BroadcastReceiver resultReceiver, Handler scheduler,
             int initialCode, String initialData, Bundle initialExtras) {
         IIntentReceiver rd = null;
         if (resultReceiver != null) {
@@ -1097,7 +1111,7 @@ class ContextImpl extends Context {
             intent.setAllowFds(false);
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, rd,
-                initialCode, initialData, initialExtras, null,
+                initialCode, initialData, initialExtras, receiverPermission,
                 true, false, user.getIdentifier());
         } catch (RemoteException e) {
         }
@@ -1160,6 +1174,66 @@ class ContextImpl extends Context {
             intent.setAllowFds(false);
             ActivityManagerNative.getDefault().unbroadcastIntent(
                     mMainThread.getApplicationThread(), intent, Binder.getOrigCallingUser());
+        } catch (RemoteException e) {
+        }
+    }
+
+    @Override
+    public void sendStickyBroadcastAsUser(Intent intent, UserHandle user) {
+        String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
+        try {
+            intent.setAllowFds(false);
+            ActivityManagerNative.getDefault().broadcastIntent(
+                mMainThread.getApplicationThread(), intent, resolvedType, null,
+                Activity.RESULT_OK, null, null, null, false, true, user.getIdentifier());
+        } catch (RemoteException e) {
+        }
+    }
+
+    @Override
+    public void sendStickyOrderedBroadcastAsUser(Intent intent,
+            UserHandle user, BroadcastReceiver resultReceiver,
+            Handler scheduler, int initialCode, String initialData,
+            Bundle initialExtras) {
+        IIntentReceiver rd = null;
+        if (resultReceiver != null) {
+            if (mPackageInfo != null) {
+                if (scheduler == null) {
+                    scheduler = mMainThread.getHandler();
+                }
+                rd = mPackageInfo.getReceiverDispatcher(
+                    resultReceiver, getOuterContext(), scheduler,
+                    mMainThread.getInstrumentation(), false);
+            } else {
+                if (scheduler == null) {
+                    scheduler = mMainThread.getHandler();
+                }
+                rd = new LoadedApk.ReceiverDispatcher(
+                        resultReceiver, getOuterContext(), scheduler, null, false).getIIntentReceiver();
+            }
+        }
+        String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
+        try {
+            intent.setAllowFds(false);
+            ActivityManagerNative.getDefault().broadcastIntent(
+                mMainThread.getApplicationThread(), intent, resolvedType, rd,
+                initialCode, initialData, initialExtras, null,
+                true, true, user.getIdentifier());
+        } catch (RemoteException e) {
+        }
+    }
+
+    @Override
+    public void removeStickyBroadcastAsUser(Intent intent, UserHandle user) {
+        String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
+        if (resolvedType != null) {
+            intent = new Intent(intent);
+            intent.setDataAndType(intent.getData(), resolvedType);
+        }
+        try {
+            intent.setAllowFds(false);
+            ActivityManagerNative.getDefault().unbroadcastIntent(
+                    mMainThread.getApplicationThread(), intent, user.getIdentifier());
         } catch (RemoteException e) {
         }
     }

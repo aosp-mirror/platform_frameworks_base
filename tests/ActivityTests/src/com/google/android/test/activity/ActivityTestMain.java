@@ -188,7 +188,8 @@ public class ActivityTestMain extends Activity {
         menu.add("Send to user 1!").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override public boolean onMenuItemClick(MenuItem item) {
                 Intent intent = new Intent(ActivityTestMain.this, UserTarget.class);
-                sendOrderedBroadcastAsUser(intent, new UserHandle(1), new BroadcastResultReceiver(), 
+                sendOrderedBroadcastAsUser(intent, new UserHandle(1), null,
+                        new BroadcastResultReceiver(), 
                         null, Activity.RESULT_OK, null, null);
                 return true;
             }

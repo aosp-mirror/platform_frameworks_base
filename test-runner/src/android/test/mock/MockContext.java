@@ -311,8 +311,14 @@ public class MockContext extends Context {
     }
 
     @Override
+    public void sendBroadcastAsUser(Intent intent, UserHandle user,
+            String receiverPermission) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void sendOrderedBroadcastAsUser(Intent intent, UserHandle user,
-            BroadcastReceiver resultReceiver, Handler scheduler,
+            String receiverPermission, BroadcastReceiver resultReceiver, Handler scheduler,
             int initialCode, String initialData, Bundle initialExtras) {
         throw new UnsupportedOperationException();
     }
@@ -331,6 +337,24 @@ public class MockContext extends Context {
 
     @Override
     public void removeStickyBroadcast(Intent intent) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void sendStickyBroadcastAsUser(Intent intent, UserHandle user) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void sendStickyOrderedBroadcastAsUser(Intent intent,
+            UserHandle user, BroadcastReceiver resultReceiver,
+            Handler scheduler, int initialCode, String initialData,
+            Bundle initialExtras) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void removeStickyBroadcastAsUser(Intent intent, UserHandle user) {
         throw new UnsupportedOperationException();
     }
 

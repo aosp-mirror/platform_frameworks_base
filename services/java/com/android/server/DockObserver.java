@@ -34,6 +34,7 @@ import android.os.ServiceManager;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.UEventObserver;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.dreams.IDreamManager;
 import android.util.Log;
@@ -226,7 +227,7 @@ final class DockObserver extends UEventObserver {
                 }
             } else {
                 // dreams feature not enabled, send legacy intent
-                mContext.sendStickyBroadcast(intent);
+                mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
             }
         }
     }
