@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Parcelable;
+import android.os.UserHandle;
 import android.util.Log;
 
 /**
@@ -145,7 +146,7 @@ class SupplicantStateTracker extends StateMachine {
                 WifiManager.EXTRA_SUPPLICANT_ERROR,
                 WifiManager.ERROR_AUTHENTICATING);
         }
-        mContext.sendStickyBroadcast(intent);
+        mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
     }
 
     /********************************************************

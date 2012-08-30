@@ -268,7 +268,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
             Intent intent = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
             intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
             intent.putExtra("time-zone", zone.getID());
-            mContext.sendBroadcast(intent);
+            mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
         }
     }
     
@@ -661,7 +661,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
                     Intent intent = new Intent(Intent.ACTION_TIME_CHANGED);
                     intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING
                             | Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-                    mContext.sendBroadcast(intent);
+                    mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
                 }
                 
                 synchronized (mLock) {

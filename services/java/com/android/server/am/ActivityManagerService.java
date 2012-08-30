@@ -494,6 +494,14 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         @Override
+        protected BroadcastFilter newResult(BroadcastFilter filter, int match, int userId) {
+            if (userId == UserHandle.USER_ALL || userId == filter.owningUserId) {
+                return super.newResult(filter, match, userId);
+            }
+            return null;
+        }
+
+        @Override
         protected BroadcastFilter[] newArray(int size) {
             return new BroadcastFilter[size];
         }
@@ -505,12 +513,14 @@ public final class ActivityManagerService extends ActivityManagerNative
     };
 
     /**
-     * State of all active sticky broadcasts.  Keys are the action of the
+     * State of all active sticky broadcasts per user.  Keys are the action of the
      * sticky Intent, values are an ArrayList of all broadcasted intents with
-     * that action (which should usually be one).
+     * that action (which should usually be one).  The SparseArray is keyed
+     * by the user ID the sticky is for, and can include UserHandle.USER_ALL
+     * for stickies that are sent to all users.
      */
-    final HashMap<String, ArrayList<Intent>> mStickyBroadcasts =
-            new HashMap<String, ArrayList<Intent>>();
+    final SparseArray<HashMap<String, ArrayList<Intent>>> mStickyBroadcasts =
+            new SparseArray<HashMap<String, ArrayList<Intent>>>();
 
     final ActiveServices mServices;
 
@@ -2353,24 +2363,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             String profileFile, ParcelFileDescriptor profileFd, Bundle options, int userId) {
         enforceNotIsolatedCaller("startActivity");
         if (userId != UserHandle.getCallingUserId()) {
-            // Requesting a different user, make sure that they have the permission
-            if (checkComponentPermission(
-                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
-                    Binder.getCallingPid(), Binder.getCallingUid(), -1, true)
-                    == PackageManager.PERMISSION_GRANTED) {
-                // Translate to the current user id, if caller wasn't aware
-                if (userId == UserHandle.USER_CURRENT) {
-                    userId = mCurrentUserId;
-                }
-            } else {
-                String msg = "Permission Denial: "
-                        + "Request to startActivity as user " + userId
-                        + " but is calling from user " + UserHandle.getCallingUserId()
-                        + "; this requires "
-                        + android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
-                Slog.w(TAG, msg);
-                throw new SecurityException(msg);
-            }
+            userId = handleIncomingUserLocked(Binder.getCallingPid(), Binder.getCallingUid(), userId,
+                    false, true, "startActivity", null);
         } else {
             if (intent.getCategories() != null
                     && intent.getCategories().contains(Intent.CATEGORY_HOME)) {
@@ -3605,7 +3599,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             intent.putExtra("reason", reason);
         }
         mWindowManager.closeSystemDialogs(reason);
-        
+
         for (int i=mMainStack.mHistory.size()-1; i>=0; i--) {
             ActivityRecord r = (ActivityRecord)mMainStack.mHistory.get(i);
             if ((r.info.flags&ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS) != 0) {
@@ -3613,10 +3607,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                         Activity.RESULT_CANCELED, null, "close-sys");
             }
         }
-        
-        broadcastIntentLocked(null, null, intent, null,
-                null, 0, null, null, null, false, false, -1,
-                callingUid, 0 /* TODO: Verify */);
+
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            broadcastIntentLocked(null, null, intent, null,
+                    null, 0, null, null, null, false, false, -1,
+                    callingUid, UserHandle.USER_ALL);
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
     }
 
     public Debug.MemoryInfo[] getProcessMemoryInfo(int[] pids)
@@ -3834,6 +3833,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                 return true;
             }
             didSomething = true;
+        }
+
+        if (name == null) {
+            // Remove all sticky broadcasts from this user.
+            mStickyBroadcasts.remove(userId);
         }
 
         ArrayList<ContentProviderRecord> providers = new ArrayList<ContentProviderRecord>();
@@ -7573,10 +7577,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                             };
                         }
                         Slog.i(TAG, "Sending system update to: " + intent.getComponent());
-                        /* TODO: Send this to all users */
+                        // XXX also need to send this to stopped users(!!!)
                         broadcastIntentLocked(null, null, intent, null, finisher,
                                 0, null, null, null, true, false, MY_PID, Process.SYSTEM_UID,
-                                0 /* UserId zero */);
+                                UserHandle.USER_ALL);
                         if (finisher != null) {
                             mWaitingUpdate = true;
                         }
@@ -9521,35 +9525,37 @@ public final class ActivityManagerService extends ActivityManagerNative
         needSep = true;
         
         if (!onlyHistory && mStickyBroadcasts != null && dumpPackage == null) {
-            if (needSep) {
-                pw.println();
-            }
-            needSep = true;
-            pw.println("  Sticky broadcasts:");
-            StringBuilder sb = new StringBuilder(128);
-            for (Map.Entry<String, ArrayList<Intent>> ent
-                    : mStickyBroadcasts.entrySet()) {
-                pw.print("  * Sticky action "); pw.print(ent.getKey());
-                if (dumpAll) {
-                    pw.println(":");
-                    ArrayList<Intent> intents = ent.getValue();
-                    final int N = intents.size();
-                    for (int i=0; i<N; i++) {
-                        sb.setLength(0);
-                        sb.append("    Intent: ");
-                        intents.get(i).toShortString(sb, false, true, false, false);
-                        pw.println(sb.toString());
-                        Bundle bundle = intents.get(i).getExtras();
-                        if (bundle != null) {
-                            pw.print("      ");
-                            pw.println(bundle.toString());
+            for (int user=0; user<mStickyBroadcasts.size(); user++) {
+                if (needSep) {
+                    pw.println();
+                }
+                needSep = true;
+                pw.print("  Sticky broadcasts for user ");
+                        pw.print(mStickyBroadcasts.keyAt(user)); pw.println(":");
+                StringBuilder sb = new StringBuilder(128);
+                for (Map.Entry<String, ArrayList<Intent>> ent
+                        : mStickyBroadcasts.valueAt(user).entrySet()) {
+                    pw.print("  * Sticky action "); pw.print(ent.getKey());
+                    if (dumpAll) {
+                        pw.println(":");
+                        ArrayList<Intent> intents = ent.getValue();
+                        final int N = intents.size();
+                        for (int i=0; i<N; i++) {
+                            sb.setLength(0);
+                            sb.append("    Intent: ");
+                            intents.get(i).toShortString(sb, false, true, false, false);
+                            pw.println(sb.toString());
+                            Bundle bundle = intents.get(i).getExtras();
+                            if (bundle != null) {
+                                pw.print("      ");
+                                pw.println(bundle.toString());
+                            }
                         }
+                    } else {
+                        pw.println("");
                     }
-                } else {
-                    pw.println("");
                 }
             }
-            needSep = true;
         }
         
         if (!onlyHistory && dumpAll) {
@@ -10710,6 +10716,47 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    int handleIncomingUserLocked(int callingPid, int callingUid, int userId, boolean allowAll,
+            boolean requireFull, String name, String callerPackage) {
+        final int callingUserId = UserHandle.getUserId(callingUid);
+        if (callingUserId != userId) {
+            if (callingUid != 0 && callingUid != Process.SYSTEM_UID) {
+                if ((requireFull || checkComponentPermission(
+                        android.Manifest.permission.INTERACT_ACROSS_USERS,
+                        callingPid, callingUid, -1, true) != PackageManager.PERMISSION_GRANTED)
+                        && checkComponentPermission(
+                                android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                                callingPid, callingUid, -1, true)
+                                != PackageManager.PERMISSION_GRANTED) {
+                    if (userId == UserHandle.USER_CURRENT_OR_SELF) {
+                        // In this case, they would like to just execute as their
+                        // owner user instead of failing.
+                        userId = callingUserId;
+                    } else {
+                        String msg = "Permission Denial: " + name + " from " + callerPackage
+                                + " asks to run as user " + userId
+                                + " but is calling from user " + UserHandle.getUserId(callingUid)
+                                + "; this requires "
+                                + (requireFull
+                                        ? android.Manifest.permission.INTERACT_ACROSS_USERS_FULL
+                                        : android.Manifest.permission.INTERACT_ACROSS_USERS);
+                        Slog.w(TAG, msg);
+                        throw new SecurityException(msg);
+                    }
+                }
+            }
+            if (userId == UserHandle.USER_CURRENT
+                    || userId == UserHandle.USER_CURRENT_OR_SELF) {
+                userId = mCurrentUserId;
+            }
+            if (!allowAll && userId < 0) {
+                throw new IllegalArgumentException(
+                        "Call does not support special user #" + userId);
+            }
+        }
+        return userId;
+    }
+
     boolean isSingleton(String componentProcessName, ApplicationInfo aInfo,
             String className, int flags) {
         boolean result = false;
@@ -10746,26 +10793,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         // Refuse possible leaked file descriptors
         if (service != null && service.hasFileDescriptors() == true) {
             throw new IllegalArgumentException("File descriptors passed in Intent");
-        }
-
-        if (userId != UserHandle.getCallingUserId()) {
-            // Requesting a different user, make sure that they have permission
-            if (checkComponentPermission(
-                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
-                    Binder.getCallingPid(), Binder.getCallingUid(), -1, true)
-                    == PackageManager.PERMISSION_GRANTED) {
-                // Translate to the current user id, if caller wasn't aware
-                if (userId == UserHandle.USER_CURRENT) {
-                    userId = mCurrentUserId;
-                }
-            } else {
-                String msg = "Permission Denial: Request to bindService as user " + userId
-                        + " but is calling from user " + UserHandle.getCallingUserId()
-                        + "; this requires "
-                        + android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
-                Slog.w(TAG, msg);
-                throw new SecurityException(msg);
-            }
         }
 
         synchronized(this) {
@@ -10954,9 +10981,13 @@ public final class ActivityManagerService extends ActivityManagerNative
     // =========================================================
 
     private final List getStickiesLocked(String action, IntentFilter filter,
-            List cur) {
+            List cur, int userId) {
         final ContentResolver resolver = mContext.getContentResolver();
-        final ArrayList<Intent> list = mStickyBroadcasts.get(action);
+        HashMap<String, ArrayList<Intent>> stickies = mStickyBroadcasts.get(userId);
+        if (stickies == null) {
+            return cur;
+        }
+        final ArrayList<Intent> list = stickies.get(action);
         if (list == null) {
             return cur;
         }
@@ -11026,10 +11057,16 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (actions != null) {
                 while (actions.hasNext()) {
                     String action = (String)actions.next();
-                    allSticky = getStickiesLocked(action, filter, allSticky);
+                    allSticky = getStickiesLocked(action, filter, allSticky,
+                            UserHandle.USER_ALL);
+                    allSticky = getStickiesLocked(action, filter, allSticky,
+                            UserHandle.getUserId(callingUid));
                 }
             } else {
-                allSticky = getStickiesLocked(null, filter, allSticky);
+                allSticky = getStickiesLocked(null, filter, allSticky,
+                        UserHandle.USER_ALL);
+                allSticky = getStickiesLocked(null, filter, allSticky,
+                        UserHandle.getUserId(callingUid));
             }
 
             // The first sticky in the list is returned directly back to
@@ -11144,10 +11181,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
     
-    private final void sendPackageBroadcastLocked(int cmd, String[] packages) {
+    private final void sendPackageBroadcastLocked(int cmd, String[] packages, int userId) {
         for (int i = mLruProcesses.size() - 1 ; i >= 0 ; i--) {
             ProcessRecord r = mLruProcesses.get(i);
-            if (r.thread != null) {
+            if (r.thread != null && (userId == UserHandle.USER_ALL || r.userId == userId)) {
                 try {
                     r.thread.dispatchPackageBroadcast(cmd, packages);
                 } catch (RemoteException ex) {
@@ -11155,7 +11192,67 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
     }
-    
+
+    private List<ResolveInfo> collectReceiverComponents(Intent intent, String resolvedType,
+            int[] users) {
+        List<ResolveInfo> receivers = null;
+        try {
+            HashSet<ComponentName> singleUserReceivers = null;
+            boolean scannedFirstReceivers = false;
+            for (int user : users) {
+                List<ResolveInfo> newReceivers = AppGlobals.getPackageManager()
+                        .queryIntentReceivers(intent, resolvedType, STOCK_PM_FLAGS, user);
+                if (newReceivers != null && newReceivers.size() == 0) {
+                    newReceivers = null;
+                }
+                if (receivers == null) {
+                    receivers = newReceivers;
+                } else if (newReceivers != null) {
+                    // We need to concatenate the additional receivers
+                    // found with what we have do far.  This would be easy,
+                    // but we also need to de-dup any receivers that are
+                    // singleUser.
+                    if (!scannedFirstReceivers) {
+                        // Collect any single user receivers we had already retrieved.
+                        scannedFirstReceivers = true;
+                        for (int i=0; i<receivers.size(); i++) {
+                            ResolveInfo ri = receivers.get(i);
+                            if ((ri.activityInfo.flags&ActivityInfo.FLAG_SINGLE_USER) != 0) {
+                                ComponentName cn = new ComponentName(
+                                        ri.activityInfo.packageName, ri.activityInfo.name);
+                                if (singleUserReceivers == null) {
+                                    singleUserReceivers = new HashSet<ComponentName>();
+                                }
+                                singleUserReceivers.add(cn);
+                            }
+                        }
+                    }
+                    // Add the new results to the existing results, tracking
+                    // and de-dupping single user receivers.
+                    for (int i=0; i<newReceivers.size(); i++) {
+                        ResolveInfo ri = receivers.get(i);
+                        if ((ri.activityInfo.flags&ActivityInfo.FLAG_SINGLE_USER) != 0) {
+                            ComponentName cn = new ComponentName(
+                                    ri.activityInfo.packageName, ri.activityInfo.name);
+                            if (singleUserReceivers == null) {
+                                singleUserReceivers = new HashSet<ComponentName>();
+                            }
+                            if (!singleUserReceivers.contains(cn)) {
+                                singleUserReceivers.add(cn);
+                                receivers.add(ri);
+                            }
+                        } else {
+                            receivers.add(ri);
+                        }
+                    }
+                }
+            }
+        } catch (RemoteException ex) {
+            // pm is in same process, this will never happen.
+        }
+        return receivers;
+    }
+
     private final int broadcastIntentLocked(ProcessRecord callerApp,
             String callerPackage, Intent intent, String resolvedType,
             IIntentReceiver resultTo, int resultCode, String resultData,
@@ -11174,37 +11271,39 @@ public final class ActivityManagerService extends ActivityManagerNative
             Slog.w(TAG, "Broadcast " + intent + " not ordered but result callback requested!");
         }
 
-        // If the caller is trying to send this broadcast to a different
-        // user, verify that is allowed.
-        if (UserHandle.getUserId(callingUid) != userId) {
-            if (checkComponentPermission(
-                    android.Manifest.permission.INTERACT_ACROSS_USERS,
-                    callingPid, callingUid, -1, true) != PackageManager.PERMISSION_GRANTED
-                    && checkComponentPermission(
-                            android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
-                            callingPid, callingUid, -1, true)
-                            != PackageManager.PERMISSION_GRANTED) {
-                String msg = "Permission Denial: " + intent.getAction()
-                        + " broadcast from " + callerPackage
-                        + " asks to send as user " + userId
-                        + " but is calling from user " + UserHandle.getUserId(callingUid)
-                        + "; this requires "
-                        + android.Manifest.permission.INTERACT_ACROSS_USERS;
-                Slog.w(TAG, msg);
-                throw new SecurityException(msg);
-            } else {
-                if (userId == UserHandle.USER_CURRENT) {
-                    userId = mCurrentUserId;
-                }
-            }
-        }
+        userId = handleIncomingUserLocked(callingPid, callingUid, userId,
+                true, false, "broadcast", callerPackage);
 
         // Make sure that the user who is receiving this broadcast is started
         // If not, we will just skip it.
-        if (mStartedUsers.get(userId) == null) {
+        if (userId != UserHandle.USER_ALL && mStartedUsers.get(userId) == null) {
             Slog.w(TAG, "Skipping broadcast of " + intent
                     + ": user " + userId + " is stopped");
             return ActivityManager.BROADCAST_SUCCESS;
+        }
+
+        /*
+         * Prevent non-system code (defined here to be non-persistent
+         * processes) from sending protected broadcasts.
+         */
+        if (callingUid == Process.SYSTEM_UID || callingUid == Process.PHONE_UID
+            || callingUid == Process.SHELL_UID || callingUid == Process.BLUETOOTH_UID ||
+            callingUid == 0) {
+            // Always okay.
+        } else if (callerApp == null || !callerApp.persistent) {
+            try {
+                if (AppGlobals.getPackageManager().isProtectedBroadcast(
+                        intent.getAction())) {
+                    String msg = "Permission Denial: not allowed to send broadcast "
+                            + intent.getAction() + " from pid="
+                            + callingPid + ", uid=" + callingUid;
+                    Slog.w(TAG, msg);
+                    throw new SecurityException(msg);
+                }
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Remote exception", e);
+                return ActivityManager.BROADCAST_SUCCESS;
+            }
         }
 
         // Handle special intents: if this broadcast is from the package
@@ -11231,7 +11330,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         }
                     }
                 } else {
-                    // If resources are unvailble just force stop all
+                    // If resources are unavailable just force stop all
                     // those packages and flush the attribute cache as well.
                     if (Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(intent.getAction())) {
                         String list[] = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
@@ -11240,7 +11339,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 forceStopPackageLocked(pkg, -1, false, true, true, false, userId);
                             }
                             sendPackageBroadcastLocked(
-                                    IApplicationThread.EXTERNAL_STORAGE_UNAVAILABLE, list);
+                                    IApplicationThread.EXTERNAL_STORAGE_UNAVAILABLE, list, userId);
                         }
                     } else {
                         Uri data = intent.getData();
@@ -11253,7 +11352,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             }
                             if (Intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction())) {
                                 sendPackageBroadcastLocked(IApplicationThread.PACKAGE_REMOVED,
-                                        new String[] {ssp});
+                                        new String[] {ssp}, userId);
                             }
                         }
                     }
@@ -11297,30 +11396,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             mHandler.sendMessage(mHandler.obtainMessage(UPDATE_HTTP_PROXY, proxy));
         }
 
-        /*
-         * Prevent non-system code (defined here to be non-persistent
-         * processes) from sending protected broadcasts.
-         */
-        if (callingUid == Process.SYSTEM_UID || callingUid == Process.PHONE_UID
-            || callingUid == Process.SHELL_UID || callingUid == Process.BLUETOOTH_UID ||
-            callingUid == 0) {
-            // Always okay.
-        } else if (callerApp == null || !callerApp.persistent) {
-            try {
-                if (AppGlobals.getPackageManager().isProtectedBroadcast(
-                        intent.getAction())) {
-                    String msg = "Permission Denial: not allowed to send broadcast "
-                            + intent.getAction() + " from pid="
-                            + callingPid + ", uid=" + callingUid;
-                    Slog.w(TAG, msg);
-                    throw new SecurityException(msg);
-                }
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Remote exception", e);
-                return ActivityManager.BROADCAST_SUCCESS;
-            }
-        }
-        
         // Add to the sticky list if requested.
         if (sticky) {
             if (checkPermission(android.Manifest.permission.BROADCAST_STICKY,
@@ -11341,10 +11416,38 @@ public final class ActivityManagerService extends ActivityManagerNative
                 throw new SecurityException(
                         "Sticky broadcasts can't target a specific component");
             }
-            ArrayList<Intent> list = mStickyBroadcasts.get(intent.getAction());
+            // We use userId directly here, since the "all" target is maintained
+            // as a separate set of sticky broadcasts.
+            if (userId != UserHandle.USER_ALL) {
+                // But first, if this is not a broadcast to all users, then
+                // make sure it doesn't conflict with an existing broadcast to
+                // all users.
+                HashMap<String, ArrayList<Intent>> stickies = mStickyBroadcasts.get(
+                        UserHandle.USER_ALL);
+                if (stickies != null) {
+                    ArrayList<Intent> list = stickies.get(intent.getAction());
+                    if (list != null) {
+                        int N = list.size();
+                        int i;
+                        for (i=0; i<N; i++) {
+                            if (intent.filterEquals(list.get(i))) {
+                                throw new IllegalArgumentException(
+                                        "Sticky broadcast " + intent + " for user "
+                                        + userId + " conflicts with existing global broadcast");
+                            }
+                        }
+                    }
+                }
+            }
+            HashMap<String, ArrayList<Intent>> stickies = mStickyBroadcasts.get(userId);
+            if (stickies == null) {
+                stickies = new HashMap<String, ArrayList<Intent>>();
+                mStickyBroadcasts.put(userId, stickies);
+            }
+            ArrayList<Intent> list = stickies.get(intent.getAction());
             if (list == null) {
                 list = new ArrayList<Intent>();
-                mStickyBroadcasts.put(intent.getAction(), list);
+                stickies.put(intent.getAction(), list);
             }
             int N = list.size();
             int i;
@@ -11360,22 +11463,29 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
 
+        int[] users;
+        if (userId == UserHandle.USER_ALL) {
+            // Caller wants broadcast to go to all started users.
+            users = new int[mStartedUsers.size()];
+            for (int i=0; i<mStartedUsers.size(); i++) {
+                users[i] = mStartedUsers.keyAt(i);
+            }
+        } else {
+            // Caller wants broadcast to go to one specific user.
+            users = new int[] {userId};
+        }
+
         // Figure out who all will receive this broadcast.
         List receivers = null;
         List<BroadcastFilter> registeredReceivers = null;
-        try {
-            // Need to resolve the intent to interested receivers...
-            if ((intent.getFlags()&Intent.FLAG_RECEIVER_REGISTERED_ONLY)
-                     == 0) {
-                receivers = AppGlobals.getPackageManager().queryIntentReceivers(
-                        intent, resolvedType, STOCK_PM_FLAGS, userId);
-            }
-            if (intent.getComponent() == null) {
-                registeredReceivers = mReceiverResolver.queryIntent(intent,
-                        resolvedType, false, userId);
-            }
-        } catch (RemoteException ex) {
-            // pm is in same process, this will never happen.
+        // Need to resolve the intent to interested receivers...
+        if ((intent.getFlags()&Intent.FLAG_RECEIVER_REGISTERED_ONLY)
+                 == 0) {
+            receivers = collectReceiverComponents(intent, resolvedType, users);
+        }
+        if (intent.getComponent() == null) {
+            registeredReceivers = mReceiverResolver.queryIntent(intent,
+                    resolvedType, false, userId);
         }
 
         final boolean replacePending =
@@ -11568,12 +11678,14 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    // TODO: Use the userId; maybe mStickyBroadcasts need to be tied to the user.
     public final void unbroadcastIntent(IApplicationThread caller, Intent intent, int userId) {
         // Refuse possible leaked file descriptors
         if (intent != null && intent.hasFileDescriptors() == true) {
             throw new IllegalArgumentException("File descriptors passed in Intent");
         }
+
+        userId = handleIncomingUserLocked(Binder.getCallingPid(),
+                Binder.getCallingUid(), userId, true, false, "removeStickyBroadcast", null);
 
         synchronized(this) {
             if (checkCallingPermission(android.Manifest.permission.BROADCAST_STICKY)
@@ -11585,15 +11697,24 @@ public final class ActivityManagerService extends ActivityManagerNative
                 Slog.w(TAG, msg);
                 throw new SecurityException(msg);
             }
-            ArrayList<Intent> list = mStickyBroadcasts.get(intent.getAction());
-            if (list != null) {
-                int N = list.size();
-                int i;
-                for (i=0; i<N; i++) {
-                    if (intent.filterEquals(list.get(i))) {
-                        list.remove(i);
-                        break;
+            HashMap<String, ArrayList<Intent>> stickies = mStickyBroadcasts.get(userId);
+            if (stickies != null) {
+                ArrayList<Intent> list = stickies.get(intent.getAction());
+                if (list != null) {
+                    int N = list.size();
+                    int i;
+                    for (i=0; i<N; i++) {
+                        if (intent.filterEquals(list.get(i))) {
+                            list.remove(i);
+                            break;
+                        }
                     }
+                    if (list.size() <= 0) {
+                        stickies.remove(intent.getAction());
+                    }
+                }
+                if (stickies.size() <= 0) {
+                    mStickyBroadcasts.remove(userId);
                 }
             }
         }
@@ -11924,12 +12045,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                 intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
                         | Intent.FLAG_RECEIVER_REPLACE_PENDING);
                 broadcastIntentLocked(null, null, intent, null, null, 0, null, null,
-                        null, false, false, MY_PID, Process.SYSTEM_UID, 0 /* TODO: Verify */);
+                        null, false, false, MY_PID, Process.SYSTEM_UID, UserHandle.USER_ALL);
                 if ((changes&ActivityInfo.CONFIG_LOCALE) != 0) {
                     broadcastIntentLocked(null, null,
                             new Intent(Intent.ACTION_LOCALE_CHANGED),
                             null, null, 0, null, null,
-                            null, false, false, MY_PID, Process.SYSTEM_UID, 0 /* TODO: Verify */);
+                            null, false, false, MY_PID, Process.SYSTEM_UID, UserHandle.USER_ALL);
                 }
             }
         }
@@ -13625,7 +13746,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             // Inform of user switch
             Intent addedIntent = new Intent(Intent.ACTION_USER_SWITCHED);
             addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
-            mContext.sendBroadcast(addedIntent, android.Manifest.permission.MANAGE_USERS);
+            mContext.sendBroadcastAsUser(addedIntent, UserHandle.ALL,
+                    android.Manifest.permission.MANAGE_USERS);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }

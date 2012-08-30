@@ -35,6 +35,7 @@ import android.hardware.usb.UsbManager;
 import android.os.Binder;
 import android.os.FileUtils;
 import android.os.Process;
+import android.os.UserHandle;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.util.Xml;
@@ -546,7 +547,7 @@ class UsbSettingsManager {
         }
 
         // Send broadcast to running activity with registered intent
-        mContext.sendBroadcast(intent);
+        mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
 
         // Start activity with registered intent
         resolveActivity(intent, matches, defaultPackage, device, null);
@@ -559,7 +560,7 @@ class UsbSettingsManager {
         Intent intent = new Intent(UsbManager.ACTION_USB_DEVICE_DETACHED);
         intent.putExtra(UsbManager.EXTRA_DEVICE, device);
         if (DEBUG) Slog.d(TAG, "usbDeviceRemoved, sending " + intent);
-        mContext.sendBroadcast(intent);
+        mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
     }
 
     public void accessoryAttached(UsbAccessory accessory) {
@@ -586,7 +587,7 @@ class UsbSettingsManager {
         Intent intent = new Intent(
                 UsbManager.ACTION_USB_ACCESSORY_DETACHED);
         intent.putExtra(UsbManager.EXTRA_ACCESSORY, accessory);
-        mContext.sendBroadcast(intent);
+        mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
     }
 
     private void resolveActivity(Intent intent, ArrayList<ResolveInfo> matches,

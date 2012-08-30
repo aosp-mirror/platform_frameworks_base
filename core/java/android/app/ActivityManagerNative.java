@@ -89,11 +89,11 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
      * Convenience for sending a sticky broadcast.  For internal use only.
      * If you don't care about permission, use null.
      */
-    static public void broadcastStickyIntent(Intent intent, String permission) {
+    static public void broadcastStickyIntent(Intent intent, String permission, int userId) {
         try {
             getDefault().broadcastIntent(
                 null, intent, null, null, Activity.RESULT_OK, null, null,
-                null /*permission*/, false, true, Binder.getOrigCallingUser());
+                null /*permission*/, false, true, userId);
         } catch (RemoteException ex) {
         }
     }

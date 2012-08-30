@@ -30,6 +30,7 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.os.WorkSource;
 import android.util.EventLog;
 import android.util.Slog;
@@ -361,7 +362,7 @@ final class Notifier {
         }
 
         if (ActivityManagerNative.isSystemReady()) {
-            mContext.sendOrderedBroadcast(mScreenOnIntent, null,
+            mContext.sendOrderedBroadcastAsUser(mScreenOnIntent, UserHandle.ALL, null,
                     mWakeUpBroadcastDone, mHandler, 0, null, null);
         } else {
             EventLog.writeEvent(EventLogTags.POWER_SCREEN_BROADCAST_STOP, 2, 1);
@@ -403,7 +404,7 @@ final class Notifier {
         }
 
         if (ActivityManagerNative.isSystemReady()) {
-            mContext.sendOrderedBroadcast(mScreenOffIntent, null,
+            mContext.sendOrderedBroadcastAsUser(mScreenOffIntent, UserHandle.ALL, null,
                     mGoToSleepBroadcastDone, mHandler, 0, null, null);
         } else {
             EventLog.writeEvent(EventLogTags.POWER_SCREEN_BROADCAST_STOP, 3, 1);

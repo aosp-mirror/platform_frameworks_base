@@ -37,6 +37,7 @@ import android.os.Handler;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
 
@@ -397,7 +398,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
                     adjustStatusBarCarModeLocked();
 
                     if (oldAction != null) {
-                        mContext.sendBroadcast(new Intent(oldAction));
+                        mContext.sendBroadcastAsUser(new Intent(oldAction), UserHandle.ALL);
                     }
                     mLastBroadcastState = Intent.EXTRA_DOCK_STATE_CAR;
                     action = UiModeManager.ACTION_ENTER_CAR_MODE;
@@ -405,7 +406,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
             } else if (isDeskDockState(mDockState)) {
                 if (!isDeskDockState(mLastBroadcastState)) {
                     if (oldAction != null) {
-                        mContext.sendBroadcast(new Intent(oldAction));
+                        mContext.sendBroadcastAsUser(new Intent(oldAction), UserHandle.ALL);
                     }
                     mLastBroadcastState = mDockState;
                     action = UiModeManager.ACTION_ENTER_DESK_MODE;
@@ -431,7 +432,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
                 Intent intent = new Intent(action);
                 intent.putExtra("enableFlags", enableFlags);
                 intent.putExtra("disableFlags", disableFlags);
-                mContext.sendOrderedBroadcast(intent, null,
+                mContext.sendOrderedBroadcastAsUser(intent, UserHandle.CURRENT, null,
                         mResultReceiver, null, Activity.RESULT_OK, null, null);
                 // Attempting to make this transition a little more clean, we are going
                 // to hold off on doing a configuration change until we have finished
