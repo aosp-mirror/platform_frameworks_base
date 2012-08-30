@@ -328,19 +328,19 @@ void Font::drawCachedGlyph(CachedGlyphInfo* glyph, float x, float hOffset, float
             glyph->mCacheTexture);
 }
 
-CachedGlyphInfo* Font::getCachedGlyph(SkPaint* paint, glyph_t textUnit) {
+CachedGlyphInfo* Font::getCachedGlyph(SkPaint* paint, glyph_t textUnit, bool precaching) {
     CachedGlyphInfo* cachedGlyph = NULL;
     ssize_t index = mCachedGlyphs.indexOfKey(textUnit);
     if (index >= 0) {
         cachedGlyph = mCachedGlyphs.valueAt(index);
     } else {
-        cachedGlyph = cacheGlyph(paint, textUnit);
+        cachedGlyph = cacheGlyph(paint, textUnit, precaching);
     }
 
     // Is the glyph still in texture cache?
     if (!cachedGlyph->mIsValid) {
         const SkGlyph& skiaGlyph = GET_METRICS(paint, textUnit);
-        updateGlyphCache(paint, skiaGlyph, cachedGlyph);
+        updateGlyphCache(paint, skiaGlyph, cachedGlyph, precaching);
     }
 
     return cachedGlyph;
@@ -438,7 +438,7 @@ void Font::precache(SkPaint* paint, const char* text, int numGlyphs) {
             break;
         }
 
-        CachedGlyphInfo* cachedGlyph = getCachedGlyph(paint, glyph);
+        CachedGlyphInfo* cachedGlyph = getCachedGlyph(paint, glyph, true);
 
         glyphsCount++;
     }
@@ -529,7 +529,8 @@ void Font::render(SkPaint* paint, const char* text, uint32_t start, uint32_t len
     }
 }
 
-void Font::updateGlyphCache(SkPaint* paint, const SkGlyph& skiaGlyph, CachedGlyphInfo* glyph) {
+void Font::updateGlyphCache(SkPaint* paint, const SkGlyph& skiaGlyph, CachedGlyphInfo* glyph,
+        bool precaching) {
     glyph->mAdvanceX = skiaGlyph.fAdvanceX;
     glyph->mAdvanceY = skiaGlyph.fAdvanceY;
     glyph->mBitmapLeft = skiaGlyph.fLeft;
@@ -542,7 +543,7 @@ void Font::updateGlyphCache(SkPaint* paint, const SkGlyph& skiaGlyph, CachedGlyp
 
     // Get the bitmap for the glyph
     paint->findImage(skiaGlyph);
-    mState->cacheBitmap(skiaGlyph, glyph, &startX, &startY);
+    mState->cacheBitmap(skiaGlyph, glyph, &startX, &startY, precaching);
 
     if (!glyph->mIsValid) {
         return;
@@ -567,7 +568,7 @@ void Font::updateGlyphCache(SkPaint* paint, const SkGlyph& skiaGlyph, CachedGlyp
     mState->mUploadTexture = true;
 }
 
-CachedGlyphInfo* Font::cacheGlyph(SkPaint* paint, glyph_t glyph) {
+CachedGlyphInfo* Font::cacheGlyph(SkPaint* paint, glyph_t glyph, bool precaching) {
     CachedGlyphInfo* newGlyph = new CachedGlyphInfo();
     mCachedGlyphs.add(glyph, newGlyph);
 
@@ -575,7 +576,7 @@ CachedGlyphInfo* Font::cacheGlyph(SkPaint* paint, glyph_t glyph) {
     newGlyph->mGlyphIndex = skiaGlyph.fID;
     newGlyph->mIsValid = false;
 
-    updateGlyphCache(paint, skiaGlyph, newGlyph);
+    updateGlyphCache(paint, skiaGlyph, newGlyph, precaching);
 
     return newGlyph;
 }
@@ -762,7 +763,7 @@ CacheTexture* FontRenderer::cacheBitmapInTexture(const SkGlyph& glyph,
 }
 
 void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyph,
-        uint32_t* retOriginX, uint32_t* retOriginY) {
+        uint32_t* retOriginX, uint32_t* retOriginY, bool precaching) {
     checkInit();
     cachedGlyph->mIsValid = false;
     // If the glyph is too tall, don't cache it
@@ -779,15 +780,16 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
 
     CacheTexture* cacheTexture = cacheBitmapInTexture(glyph, &startX, &startY);
 
-    // If the new glyph didn't fit, flush the state so far and invalidate everything
     if (!cacheTexture) {
-        flushAllAndInvalidate();
+        if (!precaching) {
+            // If the new glyph didn't fit and we are not just trying to precache it,
+            // clear out the cache and try again
+            flushAllAndInvalidate();
+            cacheTexture = cacheBitmapInTexture(glyph, &startX, &startY);
+        }
 
-        // Try to fit it again
-        cacheTexture = cacheBitmapInTexture(glyph, &startX, &startY);
-
-        // if we still don't fit, something is wrong and we shouldn't draw
         if (!cacheTexture) {
+            // either the glyph didn't fit or we're precaching and will cache it when we draw
             return;
         }
     }

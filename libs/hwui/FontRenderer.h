@@ -243,8 +243,9 @@ protected:
 
     void invalidateTextureCache(CacheTexture *cacheTexture = NULL);
 
-    CachedGlyphInfo* cacheGlyph(SkPaint* paint, glyph_t glyph);
-    void updateGlyphCache(SkPaint* paint, const SkGlyph& skiaGlyph, CachedGlyphInfo* glyph);
+    CachedGlyphInfo* cacheGlyph(SkPaint* paint, glyph_t glyph, bool precaching);
+    void updateGlyphCache(SkPaint* paint, const SkGlyph& skiaGlyph, CachedGlyphInfo* glyph,
+            bool precaching);
 
     void measureCachedGlyph(CachedGlyphInfo* glyph, int x, int y,
             uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH,
@@ -258,7 +259,7 @@ protected:
     void drawCachedGlyph(CachedGlyphInfo* glyph, float x, float hOffset, float vOffset,
             SkPathMeasure& measure, SkPoint* position, SkVector* tangent);
 
-    CachedGlyphInfo* getCachedGlyph(SkPaint* paint, glyph_t textUnit);
+    CachedGlyphInfo* getCachedGlyph(SkPaint* paint, glyph_t textUnit, bool precaching = false);
 
     static glyph_t nextGlyph(const uint16_t** srcPtr) {
         const uint16_t* src = *srcPtr;
@@ -364,7 +365,7 @@ protected:
     void initTextTexture();
     CacheTexture* createCacheTexture(int width, int height, bool allocate);
     void cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyph,
-            uint32_t *retOriginX, uint32_t *retOriginY);
+            uint32_t *retOriginX, uint32_t *retOriginY, bool precaching);
     CacheTexture* cacheBitmapInTexture(const SkGlyph& glyph, uint32_t* startX, uint32_t* startY);
 
     void flushAllAndInvalidate();
