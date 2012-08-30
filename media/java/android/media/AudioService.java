@@ -3294,7 +3294,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     // sent if none of these devices is connected.
     int mBecomingNoisyIntentDevices =
             AudioSystem.DEVICE_OUT_WIRED_HEADSET | AudioSystem.DEVICE_OUT_WIRED_HEADPHONE |
-            AudioSystem.DEVICE_OUT_ALL_A2DP;
+            AudioSystem.DEVICE_OUT_ALL_A2DP | AudioSystem.DEVICE_OUT_AUX_DIGITAL |
+            AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET | AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET |
+            AudioSystem.DEVICE_OUT_ALL_USB;
 
     // must be called before removing the device from mConnectedDevices
     private int checkSendBecomingNoisyIntent(int device, int state) {
