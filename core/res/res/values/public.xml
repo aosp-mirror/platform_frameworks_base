@@ -1156,6 +1156,7 @@
   <java-symbol type="dimen" name="navigation_bar_height_landscape" />
   <java-symbol type="dimen" name="navigation_bar_width" />
   <java-symbol type="dimen" name="status_bar_height" />
+  <java-symbol type="dimen" name="kg_widget_page_padding" />
   <java-symbol type="drawable" name="ic_jog_dial_sound_off" />
   <java-symbol type="drawable" name="ic_jog_dial_sound_on" />
   <java-symbol type="drawable" name="ic_jog_dial_unlock" />
@@ -1173,6 +1174,8 @@
   <java-symbol type="drawable" name="jog_tab_target_yellow" />
   <java-symbol type="drawable" name="menu_background" />
   <java-symbol type="drawable" name="stat_sys_secure" />
+  <java-symbol type="drawable" name="kg_widget_overscroll_layer_left" />
+  <java-symbol type="drawable" name="kg_widget_overscroll_layer_right" />
   <java-symbol type="id" name="action_mode_bar_stub" />
   <java-symbol type="id" name="alarm_status" />
   <java-symbol type="id" name="backspace" />
@@ -3668,5 +3671,5 @@
   <public type="attr" name="listPreferredItemPaddingStart" />
   <public type="attr" name="listPreferredItemPaddingEnd" />
   <public type="attr" name="singleUser" />
-  
+
 </resources>
