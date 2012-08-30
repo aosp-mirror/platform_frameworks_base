@@ -214,6 +214,9 @@ public final class ViewRootImpl implements ViewParent,
     boolean mTraversalScheduled;
     int mTraversalBarrier;
     boolean mWillDrawSoon;
+    /** Set to true while in performTraversals for detecting when die(true) is called from internal
+     * callbacks such as onMeasure, onPreDraw, onDraw and deferring doDie() until later. */
+    boolean mIsInTraversal;
     boolean mFitSystemWindowsRequested;
     boolean mLayoutRequested;
     boolean mFirst;
@@ -1104,6 +1107,7 @@ public final class ViewRootImpl implements ViewParent,
         if (host == null || !mAdded)
             return;
 
+        mIsInTraversal = true;
         mWillDrawSoon = true;
         boolean windowSizeMayChange = false;
         boolean newSurface = false;
@@ -1842,6 +1846,8 @@ public final class ViewRootImpl implements ViewParent,
                 mPendingTransitions.clear();
             }
         }
+
+        mIsInTraversal = false;
     }
 
     private void performMeasure(int childWidthMeasureSpec, int childHeightMeasureSpec) {
@@ -3956,7 +3962,9 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     public void die(boolean immediate) {
-        if (immediate) {
+        // Make sure we do execute immediately if we are in the middle of a traversal or the damage
+        // done by dispatchDetachedFromWindow will cause havoc on return.
+        if (immediate && !mIsInTraversal) {
             doDie();
         } else {
             if (!mIsDrawing) {
