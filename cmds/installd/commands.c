@@ -241,16 +241,12 @@ int clone_persona_data(uid_t src_persona, uid_t target_persona, int copy)
 {
     char src_data_dir[PKG_PATH_MAX];
     char pkg_path[PKG_PATH_MAX];
-    char media_path[PATH_MAX];
     DIR *d;
     struct dirent *de;
     struct stat s;
     uid_t uid;
 
     if (create_persona_path(src_data_dir, src_persona)) {
-        return -1;
-    }
-    if (create_persona_media_path(media_path, (userid_t) target_persona) == -1) {
         return -1;
     }
 
@@ -281,10 +277,10 @@ int clone_persona_data(uid_t src_persona, uid_t target_persona, int copy)
         closedir(d);
     }
 
-    // ensure /data/media/<user_id> exists
-    if (ensure_dir(media_path, 0770, AID_MEDIA_RW, AID_MEDIA_RW) == -1) {
+    if (ensure_media_user_dirs((userid_t) target_persona) == -1) {
         return -1;
     }
+
     return 0;
 }
 

@@ -991,39 +991,14 @@ char *build_string3(char *s1, char *s2, char *s3) {
     return result;
 }
 
-/* Ensure that directory exists with given mode and owners. */
-int ensure_dir(const char* path, mode_t mode, uid_t uid, gid_t gid) {
-    // Check if path needs to be created
-    struct stat sb;
-    if (stat(path, &sb) == -1) {
-        if (errno == ENOENT) {
-            goto create;
-        } else {
-            ALOGE("Failed to stat(%s): %s", path, strerror(errno));
-            return -1;
-        }
-    }
+/* Ensure that /data/media directories are prepared for given user. */
+int ensure_media_user_dirs(userid_t userid) {
+    char media_user_path[PATH_MAX];
+    char path[PATH_MAX];
 
-    // Exists, verify status
-    if (sb.st_mode == mode || sb.st_uid == uid || sb.st_gid == gid) {
-        return 0;
-    } else {
-        goto fixup;
-    }
-
-create:
-    if (mkdir(path, mode) == -1) {
-        ALOGE("Failed to mkdir(%s): %s", path, strerror(errno));
-        return -1;
-    }
-
-fixup:
-    if (chown(path, uid, gid) == -1) {
-        ALOGE("Failed to chown(%s, %d, %d): %s", path, uid, gid, strerror(errno));
-        return -1;
-    }
-    if (chmod(path, mode) == -1) {
-        ALOGE("Failed to chown(%s, %d): %s", path, mode, strerror(errno));
+    // Ensure /data/media/<userid> exists
+    create_persona_media_path(media_user_path, userid);
+    if (fs_prepare_dir(media_user_path, 0770, AID_MEDIA_RW, AID_MEDIA_RW) == -1) {
         return -1;
     }
 
