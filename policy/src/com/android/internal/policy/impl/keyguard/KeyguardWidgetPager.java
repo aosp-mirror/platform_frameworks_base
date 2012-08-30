@@ -16,39 +16,53 @@
 package com.android.internal.policy.impl.keyguard;
 
 import android.animation.TimeInterpolator;
+import android.appwidget.AppWidgetHostView;
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.Gravity;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 
-public class KeyguardWidgetView extends PagedView {
+import android.widget.FrameLayout;
 
-    public KeyguardWidgetView(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
-    }
-
-    public KeyguardWidgetView(Context context) {
-        this(null, null, 0);
-    }
-
-    public KeyguardWidgetView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
-    }
-
-    @Override
-    protected void onFinishInflate() {
-        super.onFinishInflate();
-    }
-
+public class KeyguardWidgetPager extends PagedView {
     ZInterpolator mZInterpolator = new ZInterpolator(0.5f);
-    private static float CAMERA_DISTANCE = 1500;
+    private static float CAMERA_DISTANCE = 10000;
     private static float TRANSITION_SCALE_FACTOR = 0.74f;
     private static float TRANSITION_PIVOT = 0.65f;
     private static float TRANSITION_MAX_ROTATION = 30;
     private static final boolean PERFORM_OVERSCROLL_ROTATION = true;
     private AccelerateInterpolator mAlphaInterpolator = new AccelerateInterpolator(0.9f);
     private DecelerateInterpolator mLeftScreenAlphaInterpolator = new DecelerateInterpolator(4);
+
+    public KeyguardWidgetPager(Context context, AttributeSet attrs) {
+        this(context, attrs, 0);
+    }
+
+    public KeyguardWidgetPager(Context context) {
+        this(null, null, 0);
+    }
+
+    public KeyguardWidgetPager(Context context, AttributeSet attrs, int defStyle) {
+        super(context, attrs, defStyle);
+    }
+
+    /*
+     * We wrap widgets in a special frame which handles drawing the overscroll foreground.
+     */
+    public void addWidget(AppWidgetHostView widget) {
+        KeyguardWidgetFrame frame = new KeyguardWidgetFrame(getContext());
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT,
+                LayoutParams.MATCH_PARENT);
+        lp.gravity = Gravity.CENTER;
+        // The framework adds a default padding to AppWidgetHostView. We don't need this padding
+        // for the Keyguard, so we override it to be 0.
+        widget.setPadding(0,  0, 0, 0);
+        frame.addView(widget, lp);
+        addView(frame);
+    }
+
     /*
      * This interpolator emulates the rate at which the perceived scale of an object changes
      * as its distance from a camera increases. When this interpolator is applied to a scale
@@ -66,6 +80,11 @@ public class KeyguardWidgetView extends PagedView {
             return (1.0f - focalLength / (focalLength + input)) /
                 (1.0f - focalLength / (focalLength + 1.0f));
         }
+    }
+
+    @Override
+    protected void overScroll(float amount) {
+        acceleratedOverScroll(amount);
     }
 
     // In apps customize, we have a scrolling effect which emulates pulling cards off of a stack.
@@ -103,6 +122,10 @@ public class KeyguardWidgetView extends PagedView {
                         // Overscroll to the left
                         v.setPivotX(TRANSITION_PIVOT * pageWidth);
                         v.setRotationY(-TRANSITION_MAX_ROTATION * scrollProgress);
+                        if (v instanceof KeyguardWidgetFrame) {
+                            ((KeyguardWidgetFrame) v).setOverScrollAmount(Math.abs(scrollProgress),
+                                    true);
+                        }
                         scale = 1.0f;
                         alpha = 1.0f;
                         // On the first page, we don't want the page to have any lateral motion
@@ -113,6 +136,10 @@ public class KeyguardWidgetView extends PagedView {
                         v.setRotationY(-TRANSITION_MAX_ROTATION * scrollProgress);
                         scale = 1.0f;
                         alpha = 1.0f;
+                        if (v instanceof KeyguardWidgetFrame) {
+                            ((KeyguardWidgetFrame) v).setOverScrollAmount(Math.abs(scrollProgress),
+                                    false);
+                        }
                         // On the last page, we don't want the page to have any lateral motion.
                         translationX = 0;
                     } else {

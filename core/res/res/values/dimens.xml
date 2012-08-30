@@ -251,4 +251,6 @@
     <!-- Height of widget view in keyguard. -->
     <dimen name="kg_widget_view_height">0dp</dimen>
 
+    <!-- Padding surrounding each widget page -->
+    <dimen name="kg_widget_page_padding">10dp</dimen>
 </resources>
