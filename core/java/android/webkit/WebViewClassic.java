@@ -2173,6 +2173,10 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             mAccessibilityInjector.destroy();
             mAccessibilityInjector = null;
         }
+        if (mSavePasswordDialog != null) {
+            mSavePasswordDialog.dismiss();
+            mSavePasswordDialog = null;
+        }
         if (mWebViewCore != null) {
             // Tell WebViewCore to destroy itself
             synchronized (this) {
