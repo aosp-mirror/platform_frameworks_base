@@ -13055,7 +13055,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         // to call invalidate() successfully when doing animations
         mPrivateFlags |= PFLAG_DRAWN;
 
-        if (!concatMatrix && (flags & ViewGroup.FLAG_SUPPORT_STATIC_TRANSFORMATIONS) == 0 &&
+        if (!concatMatrix &&
+                (flags & (ViewGroup.FLAG_SUPPORT_STATIC_TRANSFORMATIONS |
+                        ViewGroup.FLAG_CLIP_CHILDREN)) == ViewGroup.FLAG_CLIP_CHILDREN &&
                 canvas.quickReject(mLeft, mTop, mRight, mBottom, Canvas.EdgeType.BW) &&
                 (mPrivateFlags & PFLAG_DRAW_ANIMATION) == 0) {
             mPrivateFlags2 |= PFLAG2_VIEW_QUICK_REJECTED;
