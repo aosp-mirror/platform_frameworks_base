@@ -62,6 +62,7 @@
     <protected-broadcast android:name="android.intent.action.MASTER_CLEAR_NOTIFICATION" />
     <protected-broadcast android:name="android.intent.action.USER_ADDED" />
     <protected-broadcast android:name="android.intent.action.USER_REMOVED" />
+    <protected-broadcast android:name="android.intent.action.USER_STOPPED" />
     <protected-broadcast android:name="android.intent.action.USER_SWITCHED" />
 
     <protected-broadcast android:name="android.app.action.ENTER_CAR_MODE" />

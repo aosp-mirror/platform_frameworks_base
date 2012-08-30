@@ -331,6 +331,7 @@ public interface IActivityManager extends IInterface {
 
     // Multi-user APIs
     public boolean switchUser(int userid) throws RemoteException;
+    public int stopUser(int userid, IStopUserCallback callback) throws RemoteException;
     public UserInfo getCurrentUser() throws RemoteException;
 
     public boolean removeSubTask(int taskId, int subTaskIndex) throws RemoteException;
@@ -611,4 +612,5 @@ public interface IActivityManager extends IInterface {
     int UNSTABLE_PROVIDER_DIED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+150;
     int IS_INTENT_SENDER_AN_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+151;
     int START_ACTIVITY_AS_USER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+152;
+    int STOP_USER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+153;
 }
