@@ -1047,12 +1047,13 @@ class MountService extends IMountService.Stub
         // add StorageVolume extra
         intent.putExtra(StorageVolume.EXTRA_STORAGE_VOLUME, mVolumeMap.get(path));
         Slog.d(TAG, "sendStorageIntent " + intent);
-        mContext.sendBroadcast(intent);
+        mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
     }
 
     private void sendUmsIntent(boolean c) {
-        mContext.sendBroadcast(
-                new Intent((c ? Intent.ACTION_UMS_CONNECTED : Intent.ACTION_UMS_DISCONNECTED)));
+        mContext.sendBroadcastAsUser(
+                new Intent((c ? Intent.ACTION_UMS_CONNECTED : Intent.ACTION_UMS_DISCONNECTED)),
+                UserHandle.ALL);
     }
 
     private void validatePermission(String perm) {

@@ -16,6 +16,9 @@
 
 package android.content;
 
+import android.app.Activity;
+import android.app.ActivityManagerNative;
+import android.app.LoadedApk;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
@@ -30,6 +33,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.view.CompatibilityInfoHolder;
 
@@ -354,10 +358,16 @@ public class ContextWrapper extends Context {
     }
 
     @Override
+    public void sendBroadcastAsUser(Intent intent, UserHandle user,
+            String receiverPermission) {
+        mBase.sendBroadcastAsUser(intent, user, receiverPermission);
+    }
+
+    @Override
     public void sendOrderedBroadcastAsUser(Intent intent, UserHandle user,
-            BroadcastReceiver resultReceiver, Handler scheduler,
+            String receiverPermission, BroadcastReceiver resultReceiver, Handler scheduler,
             int initialCode, String initialData, Bundle initialExtras) {
-        mBase.sendOrderedBroadcastAsUser(intent, user, resultReceiver,
+        mBase.sendOrderedBroadcastAsUser(intent, user, receiverPermission, resultReceiver,
                 scheduler, initialCode, initialData, initialExtras);
     }
 
@@ -379,6 +389,25 @@ public class ContextWrapper extends Context {
     @Override
     public void removeStickyBroadcast(Intent intent) {
         mBase.removeStickyBroadcast(intent);
+    }
+
+    @Override
+    public void sendStickyBroadcastAsUser(Intent intent, UserHandle user) {
+        mBase.sendStickyBroadcastAsUser(intent, user);
+    }
+
+    @Override
+    public void sendStickyOrderedBroadcastAsUser(Intent intent,
+            UserHandle user, BroadcastReceiver resultReceiver,
+            Handler scheduler, int initialCode, String initialData,
+            Bundle initialExtras) {
+        mBase.sendStickyOrderedBroadcastAsUser(intent, user, resultReceiver,
+                scheduler, initialCode, initialData, initialExtras);
+    }
+
+    @Override
+    public void removeStickyBroadcastAsUser(Intent intent, UserHandle user) {
+        mBase.removeStickyBroadcastAsUser(intent, user);
     }
 
     @Override

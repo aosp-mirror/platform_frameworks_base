@@ -41,6 +41,7 @@ import android.os.Message;
 import android.os.Parcelable;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
+import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
 import android.os.SystemClock;
@@ -540,7 +541,7 @@ public class UsbDeviceManager {
                 }
             }
 
-            mContext.sendStickyBroadcast(intent);
+            mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
         }
 
         private void updateAudioSourceFunction() {
@@ -563,7 +564,7 @@ public class UsbDeviceManager {
                         Slog.e(TAG, "could not open audio source PCM file", e);
                     }
                 }
-                mContext.sendStickyBroadcast(intent);
+                mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
                 mAudioSourceEnabled = enabled;
             }
         }

@@ -43,6 +43,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -417,7 +418,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         broadcast.putStringArrayListExtra(ConnectivityManager.EXTRA_ACTIVE_TETHER, activeList);
         broadcast.putStringArrayListExtra(ConnectivityManager.EXTRA_ERRORED_TETHER,
                 erroredList);
-        mContext.sendStickyBroadcast(broadcast);
+        mContext.sendStickyBroadcastAsUser(broadcast, UserHandle.ALL);
         if (DBG) {
             Log.d(TAG, "sendTetherStateChangedBroadcast " + availableList.size() + ", " +
                     activeList.size() + ", " + erroredList.size());

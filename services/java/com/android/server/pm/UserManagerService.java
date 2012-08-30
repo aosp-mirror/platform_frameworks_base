@@ -538,9 +538,10 @@ public class UserManagerService extends IUserManager.Stub {
         if (userInfo != null) {
             Intent addedIntent = new Intent(Intent.ACTION_USER_ADDED);
             addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userInfo.id);
-            mContext.sendBroadcast(addedIntent, android.Manifest.permission.MANAGE_USERS);
             mContext.sendBroadcastAsUser(new Intent(Intent.ACTION_BOOT_COMPLETED),
                     new UserHandle(userInfo.id));
+            mContext.sendBroadcastAsUser(addedIntent, UserHandle.ALL,
+                    android.Manifest.permission.MANAGE_USERS);
         }
         return userInfo;
     }

@@ -99,6 +99,7 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.telephony.PhoneStateListener;
@@ -989,7 +990,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         // finally, dispatch updated event to any listeners
         final Intent updatedIntent = new Intent(ACTION_NETWORK_STATS_UPDATED);
         updatedIntent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-        mContext.sendBroadcast(updatedIntent, READ_NETWORK_USAGE_HISTORY);
+        mContext.sendBroadcastAsUser(updatedIntent, UserHandle.ALL,
+                READ_NETWORK_USAGE_HISTORY);
     }
 
     /**

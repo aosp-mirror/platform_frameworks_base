@@ -23,6 +23,7 @@ import android.os.Message;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.Binder;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
 import java.util.List;
@@ -650,7 +651,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                         intent.putExtra(BluetoothAdapter.EXTRA_STATE, newState);
                         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
                         if (DBG) Log.d(TAG,"Bluetooth State Change Intent: " + prevState + " -> " + newState);
-                        mContext.sendBroadcast(intent,BLUETOOTH_PERM);
+                        mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
+                                BLUETOOTH_PERM);
                     }
                     break;
                 }

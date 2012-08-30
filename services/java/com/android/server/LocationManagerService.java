@@ -51,6 +51,7 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.provider.Settings.NameValueTable;
@@ -719,7 +720,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Obs
             }
         }
         if (changesMade) {
-            mContext.sendBroadcast(new Intent(LocationManager.PROVIDERS_CHANGED_ACTION));
+            mContext.sendBroadcastAsUser(new Intent(LocationManager.PROVIDERS_CHANGED_ACTION),
+                    UserHandle.ALL);
         }
     }
 

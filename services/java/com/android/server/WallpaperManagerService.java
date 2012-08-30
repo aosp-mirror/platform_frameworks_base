@@ -869,7 +869,7 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
         }
         wallpaper.callbacks.finishBroadcast();
         final Intent intent = new Intent(Intent.ACTION_WALLPAPER_CHANGED);
-        mContext.sendBroadcast(intent);
+        mContext.sendBroadcastAsUser(intent, new UserHandle(mCurrentUserId));
     }
 
     private void checkPermission(String permission) {
