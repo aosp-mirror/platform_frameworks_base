@@ -1127,6 +1127,24 @@ public abstract class Context {
     public abstract void sendBroadcastAsUser(Intent intent, UserHandle user);
 
     /**
+     * Same as {@link #sendBroadcast(Intent, String)}, but for a specific user.  This broadcast
+     * can only be sent to receivers that are part of the calling application.  It
+     * requires holding the {@link android.Manifest.permission#INTERACT_ACROSS_USERS}
+     * permission.
+     *
+     * @param intent The Intent to broadcast; all receivers matching this
+     *               Intent will receive the broadcast.
+     * @param user UserHandle to send the intent to.
+     * @param receiverPermission (optional) String naming a permission that
+     *               a receiver must hold in order to receive your broadcast.
+     *               If null, no permission is required.
+     *
+     * @see #sendBroadcast(Intent, String)
+     */
+    public abstract void sendBroadcastAsUser(Intent intent, UserHandle user,
+            String receiverPermission);
+
+    /**
      * Same as
      * {@link #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)},
      * but for a specific user.  This broadcast
@@ -1139,6 +1157,9 @@ public abstract class Context {
      * @param intent The Intent to broadcast; all receivers matching this
      *               Intent will receive the broadcast.
      * @param user UserHandle to send the intent to.
+     * @param receiverPermission String naming a permissions that
+     *               a receiver must hold in order to receive your broadcast.
+     *               If null, no permission is required.
      * @param resultReceiver Your own BroadcastReceiver to treat as the final
      *                       receiver of the broadcast.
      * @param scheduler A custom Handler with which to schedule the
@@ -1154,7 +1175,7 @@ public abstract class Context {
      * @see #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)
      */
     public abstract void sendOrderedBroadcastAsUser(Intent intent, UserHandle user,
-            BroadcastReceiver resultReceiver, Handler scheduler,
+            String receiverPermission, BroadcastReceiver resultReceiver, Handler scheduler,
             int initialCode, String initialData, Bundle initialExtras);
 
     /**
@@ -1223,7 +1244,6 @@ public abstract class Context {
             Handler scheduler, int initialCode, String initialData,
             Bundle initialExtras);
 
-
     /**
      * Remove the data previously sent with {@link #sendStickyBroadcast},
      * so that it is as if the sticky broadcast had never happened.
@@ -1237,6 +1257,73 @@ public abstract class Context {
      * @see #sendStickyBroadcast
      */
     public abstract void removeStickyBroadcast(Intent intent);
+
+    /**
+     * Same as {@link #sendStickyBroadcast(Intent)},
+     * but for a specific user.  This broadcast
+     * can only be sent to receivers that are part of the calling application.  It
+     * requires holding the {@link android.Manifest.permission#INTERACT_ACROSS_USERS}
+     * permission.
+     *
+     * @param intent The Intent to broadcast; all receivers matching this
+     * Intent will receive the broadcast, and the Intent will be held to
+     * be re-broadcast to future receivers.
+     * @param user UserHandle to send the intent to.
+     *
+     * @see #sendBroadcast(Intent)
+     */
+    public abstract void sendStickyBroadcastAsUser(Intent intent, UserHandle user);
+
+    /**
+     * Same as
+     * {@link #sendStickyOrderedBroadcast(Intent, BroadcastReceiver, Handler, int, String, Bundle)
+     * but for a specific user.  This broadcast
+     * can only be sent to receivers that are part of the calling application.  It
+     * requires holding the {@link android.Manifest.permission#INTERACT_ACROSS_USERS}
+     * permission.
+     *
+     * <p>See {@link BroadcastReceiver} for more information on Intent broadcasts.
+     *
+     * @param intent The Intent to broadcast; all receivers matching this
+     *               Intent will receive the broadcast.
+     * @param user UserHandle to send the intent to.
+     * @param resultReceiver Your own BroadcastReceiver to treat as the final
+     *                       receiver of the broadcast.
+     * @param scheduler A custom Handler with which to schedule the
+     *                  resultReceiver callback; if null it will be
+     *                  scheduled in the Context's main thread.
+     * @param initialCode An initial value for the result code.  Often
+     *                    Activity.RESULT_OK.
+     * @param initialData An initial value for the result data.  Often
+     *                    null.
+     * @param initialExtras An initial value for the result extras.  Often
+     *                      null.
+     *
+     * @see #sendStickyOrderedBroadcast(Intent, BroadcastReceiver, Handler, int, String, Bundle)
+     */
+    public abstract void sendStickyOrderedBroadcastAsUser(Intent intent,
+            UserHandle user, BroadcastReceiver resultReceiver,
+            Handler scheduler, int initialCode, String initialData,
+            Bundle initialExtras);
+
+    /**
+     * Same as
+     * {@link #sendStickyOrderedBroadcast(Intent, BroadcastReceiver, Handler, int, String, Bundle)
+     * but for a specific user.  This broadcast
+     * can only be sent to receivers that are part of the calling application.  It
+     * requires holding the {@link android.Manifest.permission#INTERACT_ACROSS_USERS}
+     * permission.
+     *
+     * <p>You must hold the {@link android.Manifest.permission#BROADCAST_STICKY}
+     * permission in order to use this API.  If you do not hold that
+     * permission, {@link SecurityException} will be thrown.
+     *
+     * @param intent The Intent that was previously broadcast.
+     * @param user UserHandle to remove the sticky broadcast from.
+     *
+     * @see #sendStickyBroadcastAsUser
+     */
+    public abstract void removeStickyBroadcastAsUser(Intent intent, UserHandle user);
 
     /**
      * Register a BroadcastReceiver to be run in the main activity thread.  The

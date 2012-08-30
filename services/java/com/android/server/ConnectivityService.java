@@ -81,6 +81,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.security.Credentials;
 import android.security.KeyStore;
@@ -1851,7 +1852,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         Intent intent = new Intent(ConnectivityManager.ACTION_DATA_ACTIVITY_CHANGE);
         intent.putExtra(ConnectivityManager.EXTRA_DEVICE_TYPE, deviceType);
         intent.putExtra(ConnectivityManager.EXTRA_IS_ACTIVE, active);
-        mContext.sendOrderedBroadcast(intent, RECEIVE_DATA_ACTIVITY_CHANGE);
+        mContext.sendOrderedBroadcastAsUser(intent, UserHandle.ALL,
+                RECEIVE_DATA_ACTIVITY_CHANGE, null, null, 0, null, null);
     }
 
     /**
@@ -1925,7 +1927,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 log("sendStickyBroadcast: action=" + intent.getAction());
             }
 
-            mContext.sendStickyBroadcast(intent);
+            mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
         }
     }
 
@@ -1946,7 +1948,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         synchronized(this) {
             mSystemReady = true;
             if (mInitialBroadcast != null) {
-                mContext.sendStickyBroadcast(mInitialBroadcast);
+                mContext.sendStickyBroadcastAsUser(mInitialBroadcast, UserHandle.ALL);
                 mInitialBroadcast = null;
             }
         }
@@ -2465,7 +2467,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
          * Connectivity events can happen before boot has completed ...
          */
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-        mContext.sendBroadcast(intent);
+        mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
     }
 
     // Caller must grab mDnsLock.
@@ -3110,7 +3112,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING |
             Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         intent.putExtra(Proxy.EXTRA_PROXY_INFO, proxy);
-        mContext.sendStickyBroadcast(intent);
+        mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
     }
 
     private static class SettingsObserver extends ContentObserver {

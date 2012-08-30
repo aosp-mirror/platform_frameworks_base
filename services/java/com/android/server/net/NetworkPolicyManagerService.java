@@ -1231,7 +1231,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         if (mRestrictBackground) {
             final Intent broadcast = new Intent(
                     ConnectivityManager.ACTION_BACKGROUND_DATA_SETTING_CHANGED);
-            mContext.sendBroadcast(broadcast);
+            mContext.sendBroadcastAsUser(broadcast, UserHandle.ALL);
         }
     }
 

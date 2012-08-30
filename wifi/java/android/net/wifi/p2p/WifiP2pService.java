@@ -62,6 +62,7 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.os.Parcelable.Creator;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -1534,7 +1535,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
             intent.putExtra(WifiP2pManager.EXTRA_WIFI_STATE,
                     WifiP2pManager.WIFI_P2P_STATE_DISABLED);
         }
-        mContext.sendStickyBroadcast(intent);
+        mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
     }
 
     private void sendP2pDiscoveryChangedBroadcast(boolean started) {
@@ -1548,20 +1549,20 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         intent.putExtra(WifiP2pManager.EXTRA_DISCOVERY_STATE, started ?
                 WifiP2pManager.WIFI_P2P_DISCOVERY_STARTED :
                 WifiP2pManager.WIFI_P2P_DISCOVERY_STOPPED);
-        mContext.sendStickyBroadcast(intent);
+        mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
     }
 
     private void sendThisDeviceChangedBroadcast() {
         final Intent intent = new Intent(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         intent.putExtra(WifiP2pManager.EXTRA_WIFI_P2P_DEVICE, new WifiP2pDevice(mThisDevice));
-        mContext.sendStickyBroadcast(intent);
+        mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
     }
 
     private void sendP2pPeersChangedBroadcast() {
         final Intent intent = new Intent(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-        mContext.sendBroadcast(intent);
+        mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
     }
 
     private void sendP2pConnectionChangedBroadcast() {
@@ -1571,14 +1572,14 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                 | Intent.FLAG_RECEIVER_REPLACE_PENDING);
         intent.putExtra(WifiP2pManager.EXTRA_WIFI_P2P_INFO, new WifiP2pInfo(mWifiP2pInfo));
         intent.putExtra(WifiP2pManager.EXTRA_NETWORK_INFO, new NetworkInfo(mNetworkInfo));
-        mContext.sendStickyBroadcast(intent);
+        mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
     }
 
     private void sendP2pPersistentGroupsChangedBroadcast() {
         if (DBG) logd("sending p2p persistent groups changed broadcast");
         Intent intent = new Intent(WifiP2pManager.WIFI_P2P_PERSISTENT_GROUPS_CHANGED_ACTION);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-        mContext.sendStickyBroadcast(intent);   
+        mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
     }
 
     private void startDhcpServer(String intf) {

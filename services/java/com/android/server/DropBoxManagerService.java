@@ -31,6 +31,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.StatFs;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.format.Time;
 import android.util.Slog;
@@ -157,7 +158,8 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
             @Override
             public void handleMessage(Message msg) {
                 if (msg.what == MSG_SEND_BROADCAST) {
-                    mContext.sendBroadcast((Intent)msg.obj, android.Manifest.permission.READ_LOGS);
+                    mContext.sendBroadcastAsUser((Intent)msg.obj, UserHandle.OWNER,
+                            android.Manifest.permission.READ_LOGS);
                 }
             }
         };

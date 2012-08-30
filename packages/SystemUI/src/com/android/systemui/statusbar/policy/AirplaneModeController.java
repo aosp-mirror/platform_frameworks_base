@@ -24,6 +24,7 @@ import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
 import android.widget.CompoundButton;
@@ -88,7 +89,7 @@ public class AirplaneModeController extends BroadcastReceiver
                     Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
                     intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
                     intent.putExtra("state", enabled);
-                    mContext.sendBroadcast(intent);
+                    mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
                 }
             });
     }

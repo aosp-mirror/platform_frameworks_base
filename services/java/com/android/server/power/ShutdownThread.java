@@ -37,6 +37,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.os.Vibrator;
 import android.os.SystemVibrator;
 import android.os.storage.IMountService;
@@ -296,8 +297,8 @@ public final class ShutdownThread extends Thread {
         
         // First send the high-level shut down broadcast.
         mActionDone = false;
-        mContext.sendOrderedBroadcast(new Intent(Intent.ACTION_SHUTDOWN), null,
-                br, mHandler, 0, null, null);
+        mContext.sendOrderedBroadcastAsUser(new Intent(Intent.ACTION_SHUTDOWN),
+                UserHandle.ALL, null, br, mHandler, 0, null, null);
         
         final long endTime = SystemClock.elapsedRealtime() + MAX_BROADCAST_TIME;
         synchronized (mActionDoneSync) {

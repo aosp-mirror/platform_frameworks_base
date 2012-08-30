@@ -293,7 +293,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback {
 
         @Override
         public void onDeviceProvisioned() {
-            mContext.sendBroadcast(mUserPresentIntent);
+            mContext.sendBroadcastAsUser(mUserPresentIntent, UserHandle.ALL);
         }
 
         @Override

@@ -33,6 +33,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UEventObserver;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.EventLog;
 import android.util.Slog;
@@ -345,21 +346,21 @@ public class BatteryService extends Binder {
             statusIntent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
             if (mPlugType != 0 && mLastPlugType == 0) {
                 statusIntent.setAction(Intent.ACTION_POWER_CONNECTED);
-                mContext.sendBroadcast(statusIntent);
+                mContext.sendBroadcastAsUser(statusIntent, UserHandle.ALL);
             }
             else if (mPlugType == 0 && mLastPlugType != 0) {
                 statusIntent.setAction(Intent.ACTION_POWER_DISCONNECTED);
-                mContext.sendBroadcast(statusIntent);
+                mContext.sendBroadcastAsUser(statusIntent, UserHandle.ALL);
             }
 
             if (sendBatteryLow) {
                 mSentLowBatteryBroadcast = true;
                 statusIntent.setAction(Intent.ACTION_BATTERY_LOW);
-                mContext.sendBroadcast(statusIntent);
+                mContext.sendBroadcastAsUser(statusIntent, UserHandle.ALL);
             } else if (mSentLowBatteryBroadcast && mLastBatteryLevel >= mLowBatteryCloseWarningLevel) {
                 mSentLowBatteryBroadcast = false;
                 statusIntent.setAction(Intent.ACTION_BATTERY_OKAY);
-                mContext.sendBroadcast(statusIntent);
+                mContext.sendBroadcastAsUser(statusIntent, UserHandle.ALL);
             }
 
             // Update the battery LED
@@ -414,7 +415,7 @@ public class BatteryService extends Binder {
                     " icon:" + icon  + " invalid charger:" + mInvalidCharger);
         }
 
-        ActivityManagerNative.broadcastStickyIntent(intent, null);
+        ActivityManagerNative.broadcastStickyIntent(intent, null, UserHandle.USER_ALL);
     }
 
     private final void logBatteryStats() {
