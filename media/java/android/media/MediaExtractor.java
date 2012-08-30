@@ -45,7 +45,7 @@ import java.util.Map;
  * }
  * ByteBuffer inputBuffer = ByteBuffer.allocate(...)
  * while (extractor.readSampleData(inputBuffer, ...) &gt;= 0) {
- *   int trackIndex = extractor.getTrackIndex();
+ *   int trackIndex = extractor.getSampleTrackIndex();
  *   long presentationTimeUs = extractor.getSampleTime();
  *   ...
  *   extractor.advance();
