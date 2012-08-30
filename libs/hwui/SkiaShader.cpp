@@ -46,11 +46,12 @@ static inline bool isPowerOfTwo(unsigned int n) {
 }
 
 static inline void bindUniformColor(int slot, uint32_t color) {
+    const float a = ((color >> 24) & 0xff) / 255.0f;
     glUniform4f(slot,
-            ((color >> 16) & 0xff) / 255.0f,
-            ((color >>  8) & 0xff) / 255.0f,
-            ((color      ) & 0xff) / 255.0f,
-            ((color >> 24) & 0xff) / 255.0f);
+            a * ((color >> 16) & 0xff) / 255.0f,
+            a * ((color >>  8) & 0xff) / 255.0f,
+            a * ((color      ) & 0xff) / 255.0f,
+            a);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -154,24 +155,12 @@ void SkiaBitmapShader::setupProgram(Program* program, const mat4& modelView,
 
     // Uniforms
     bindTexture(texture, mWrapS, mWrapT);
-    // Assume linear here; we should really check the transform in
-    // ::updateTransforms() but we don't have the texture object
-    // available at that point. The optimization is not worth the
-    // effort for now.
     texture->setFilter(GL_LINEAR);
 
     glUniform1i(program->getUniform("bitmapSampler"), textureSlot);
     glUniformMatrix4fv(program->getUniform("textureTransform"), 1,
             GL_FALSE, &textureTransform.data[0]);
     glUniform2f(program->getUniform("textureDimension"), 1.0f / width, 1.0f / height);
-}
-
-void SkiaBitmapShader::updateTransforms(Program* program, const mat4& modelView,
-        const Snapshot& snapshot) {
-    mat4 textureTransform;
-    computeScreenSpaceMatrix(textureTransform, modelView);
-    glUniformMatrix4fv(program->getUniform("textureTransform"), 1,
-            GL_FALSE, &textureTransform.data[0]);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -252,13 +241,6 @@ void SkiaLinearGradientShader::setupProgram(Program* program, const mat4& modelV
 
     Caches::getInstance().dither.setupProgram(program, textureUnit);
 
-    mat4 screenSpace;
-    computeScreenSpaceMatrix(screenSpace, modelView);
-    glUniformMatrix4fv(program->getUniform("screenSpace"), 1, GL_FALSE, &screenSpace.data[0]);
-}
-
-void SkiaLinearGradientShader::updateTransforms(Program* program, const mat4& modelView,
-        const Snapshot& snapshot) {
     mat4 screenSpace;
     computeScreenSpaceMatrix(screenSpace, modelView);
     glUniformMatrix4fv(program->getUniform("screenSpace"), 1, GL_FALSE, &screenSpace.data[0]);
@@ -379,13 +361,6 @@ void SkiaSweepGradientShader::setupProgram(Program* program, const mat4& modelVi
 
     Caches::getInstance().dither.setupProgram(program, textureUnit);
 
-    mat4 screenSpace;
-    computeScreenSpaceMatrix(screenSpace, modelView);
-    glUniformMatrix4fv(program->getUniform("screenSpace"), 1, GL_FALSE, &screenSpace.data[0]);
-}
-
-void SkiaSweepGradientShader::updateTransforms(Program* program, const mat4& modelView,
-        const Snapshot& snapshot) {
     mat4 screenSpace;
     computeScreenSpaceMatrix(screenSpace, modelView);
     glUniformMatrix4fv(program->getUniform("screenSpace"), 1, GL_FALSE, &screenSpace.data[0]);

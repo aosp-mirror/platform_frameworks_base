@@ -17610,23 +17610,27 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // use use a height of 1, and then wack the matrix each time we
             // actually use it.
             shader = new LinearGradient(0, 0, 0, 1, 0xFF000000, 0, Shader.TileMode.CLAMP);
-
             paint.setShader(shader);
             paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_OUT));
+
             this.host = host;
         }
 
         public void setFadeColor(int color) {
-            if (color != 0 && color != mLastColor) {
+            if (color != mLastColor) {
                 mLastColor = color;
-                color |= 0xFF000000;
 
-                shader = new LinearGradient(0, 0, 0, 1, color | 0xFF000000,
-                        color & 0x00FFFFFF, Shader.TileMode.CLAMP);
-
-                paint.setShader(shader);
-                // Restore the default transfer mode (src_over)
-                paint.setXfermode(null);
+                if (color != 0) {
+                    shader = new LinearGradient(0, 0, 0, 1, color | 0xFF000000,
+                            color & 0x00FFFFFF, Shader.TileMode.CLAMP);
+                    paint.setShader(shader);
+                    // Restore the default transfer mode (src_over)
+                    paint.setXfermode(null);
+                } else {
+                    shader = new LinearGradient(0, 0, 0, 1, 0xFF000000, 0, Shader.TileMode.CLAMP);
+                    paint.setShader(shader);
+                    paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_OUT));
+                }
             }
         }
 
