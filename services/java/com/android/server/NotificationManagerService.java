@@ -21,6 +21,7 @@ import static org.xmlpull.v1.XmlPullParser.END_TAG;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
 import android.app.ActivityManagerNative;
+import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.app.INotificationManager;
 import android.app.ITransientNotification;
@@ -1313,14 +1314,14 @@ public class NotificationManagerService extends INotificationManager.Stub
             return;
         }
         try {
-            ApplicationInfo ai = mContext.getPackageManager().getApplicationInfo(
-                    pkg, 0);
+            ApplicationInfo ai = AppGlobals.getPackageManager().getApplicationInfo(
+                    pkg, 0, UserHandle.getCallingUserId());
             if (!UserHandle.isSameApp(ai.uid, uid)) {
                 throw new SecurityException("Calling uid " + uid + " gave package"
                         + pkg + " which is owned by uid " + ai.uid);
             }
-        } catch (PackageManager.NameNotFoundException e) {
-            throw new SecurityException("Unknown package " + pkg);
+        } catch (RemoteException re) {
+            throw new SecurityException("Unknown package " + pkg + "\n" + re);
         }
     }
 

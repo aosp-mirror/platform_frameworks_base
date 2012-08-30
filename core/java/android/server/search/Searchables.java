@@ -27,6 +27,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.provider.Settings;
@@ -70,7 +71,7 @@ public class Searchables {
             "com.google.android.providers.enhancedgooglesearch/.Launcher";
 
     // Cache the package manager instance
-    private IPackageManager mPm;
+    final private IPackageManager mPm;
     // User for which this Searchables caches information
     private int mUserId;
 
@@ -81,6 +82,7 @@ public class Searchables {
     public Searchables (Context context, int userId) {
         mContext = context;
         mUserId = userId;
+        mPm = AppGlobals.getPackageManager();
     }
 
     /**
@@ -125,50 +127,50 @@ public class Searchables {
 
         ActivityInfo ai = null;
         try {
-            ai = mContext.getPackageManager().
-                       getActivityInfo(activity, PackageManager.GET_META_DATA );
-            String refActivityName = null;
+            ai = mPm.getActivityInfo(activity, PackageManager.GET_META_DATA, mUserId);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error getting activity info " + re);
+            return null;
+        }
+        String refActivityName = null;
 
-            // First look for activity-specific reference
-            Bundle md = ai.metaData;
+        // First look for activity-specific reference
+        Bundle md = ai.metaData;
+        if (md != null) {
+            refActivityName = md.getString(MD_LABEL_DEFAULT_SEARCHABLE);
+        }
+        // If not found, try for app-wide reference
+        if (refActivityName == null) {
+            md = ai.applicationInfo.metaData;
             if (md != null) {
                 refActivityName = md.getString(MD_LABEL_DEFAULT_SEARCHABLE);
             }
-            // If not found, try for app-wide reference
-            if (refActivityName == null) {
-                md = ai.applicationInfo.metaData;
-                if (md != null) {
-                    refActivityName = md.getString(MD_LABEL_DEFAULT_SEARCHABLE);
-                }
+        }
+
+        // Irrespective of source, if a reference was found, follow it.
+        if (refActivityName != null)
+        {
+            // This value is deprecated, return null
+            if (refActivityName.equals(MD_SEARCHABLE_SYSTEM_SEARCH)) {
+                return null;
+            }
+            String pkg = activity.getPackageName();
+            ComponentName referredActivity;
+            if (refActivityName.charAt(0) == '.') {
+                referredActivity = new ComponentName(pkg, pkg + refActivityName);
+            } else {
+                referredActivity = new ComponentName(pkg, refActivityName);
             }
 
-            // Irrespective of source, if a reference was found, follow it.
-            if (refActivityName != null)
-            {
-                // This value is deprecated, return null
-                if (refActivityName.equals(MD_SEARCHABLE_SYSTEM_SEARCH)) {
-                    return null;
-                }
-                String pkg = activity.getPackageName();
-                ComponentName referredActivity;
-                if (refActivityName.charAt(0) == '.') {
-                    referredActivity = new ComponentName(pkg, pkg + refActivityName);
-                } else {
-                    referredActivity = new ComponentName(pkg, refActivityName);
-                }
-
-                // Now try the referred activity, and if found, cache
-                // it against the original name so we can skip the check
-                synchronized (this) {
-                    result = mSearchablesMap.get(referredActivity);
-                    if (result != null) {
-                        mSearchablesMap.put(activity, result);
-                        return result;
-                    }
+            // Now try the referred activity, and if found, cache
+            // it against the original name so we can skip the check
+            synchronized (this) {
+                result = mSearchablesMap.get(referredActivity);
+                if (result != null) {
+                    mSearchablesMap.put(activity, result);
+                    return result;
                 }
             }
-        } catch (PackageManager.NameNotFoundException e) {
-            // case 3: no metadata
         }
 
         // Step 3.  None found. Return null.
@@ -208,6 +210,7 @@ public class Searchables {
         // Use intent resolver to generate list of ACTION_SEARCH & ACTION_WEB_SEARCH receivers.
         List<ResolveInfo> searchList;
         final Intent intent = new Intent(Intent.ACTION_SEARCH);
+        
         searchList = queryIntentActivities(intent, PackageManager.GET_META_DATA);
 
         List<ResolveInfo> webSearchInfoList;
@@ -219,6 +222,7 @@ public class Searchables {
             int search_count = (searchList == null ? 0 : searchList.size());
             int web_search_count = (webSearchInfoList == null ? 0 : webSearchInfoList.size());
             int count = search_count + web_search_count;
+            long token = Binder.clearCallingIdentity();
             for (int ii = 0; ii < count; ii++) {
                 // for each component, try to find metadata
                 ResolveInfo info = (ii < search_count)
@@ -237,6 +241,7 @@ public class Searchables {
                     }
                 }
             }
+            Binder.restoreCallingIdentity(token);
         }
 
         List<ResolveInfo> newGlobalSearchActivities = findGlobalSearchActivities();
@@ -391,9 +396,6 @@ public class Searchables {
     }
 
     private List<ResolveInfo> queryIntentActivities(Intent intent, int flags) {
-        if (mPm == null) {
-            mPm = AppGlobals.getPackageManager();
-        }
         List<ResolveInfo> activities = null;
         try {
             activities =
