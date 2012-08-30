@@ -29583,6 +29583,7 @@ package android.widget {
   public class ViewAnimator extends android.widget.FrameLayout {
     ctor public ViewAnimator(android.content.Context);
     ctor public ViewAnimator(android.content.Context, android.util.AttributeSet);
+    method public boolean getAnimateFirstView();
     method public android.view.View getCurrentView();
     method public int getDisplayedChild();
     method public android.view.animation.Animation getInAnimation();
