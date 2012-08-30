@@ -35,6 +35,8 @@ public class DeadZone extends View {
     public static final int HORIZONTAL = 0;
     public static final int VERTICAL = 1;
 
+    private static final boolean CHATTY = true; // print to logcat when we eat a click
+
     private boolean mShouldFlash;
     private float mFlashFrac = 0f;
 
@@ -76,7 +78,7 @@ public class DeadZone extends View {
             Slog.v(TAG, this + " size=[" + mSizeMin + "-" + mSizeMax + "] hold=" + mHold
                     + (mVertical ? " vertical" : " horizontal"));
 
-        setFlashOnTouchCapture(true);
+        setFlashOnTouchCapture(context.getResources().getBoolean(R.bool.config_dead_zone_flash));
     }
 
     static float lerp(float a, float b, float f) {
@@ -100,27 +102,30 @@ public class DeadZone extends View {
         postInvalidate();
     }
 
-    // I made you a touch event
+    // I made you a touch event...
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (DEBUG)
+        if (DEBUG) {
             Slog.v(TAG, this + " onTouch: " + MotionEvent.actionToString(event.getAction()));
+        }
 
         final int action = event.getAction();
         if (action == MotionEvent.ACTION_OUTSIDE) {
             poke(event);
         } else if (action == MotionEvent.ACTION_DOWN) {
-            if (DEBUG)
+            if (DEBUG) {
                 Slog.v(TAG, this + " ACTION_DOWN: " + event.getX() + "," + event.getY());
+            }
             int size = (int) getSize(event.getEventTime());
             if ((mVertical && event.getX() < size) || event.getY() < size) {
-                if (DEBUG)
-                    Slog.v(TAG, "eating click!");
+                if (CHATTY) {
+                    Slog.v(TAG, "consuming errant click: (" + event.getX() + "," + event.getY() + ")");
+                }
                 if (mShouldFlash) {
                     post(mDebugFlash);
                     postInvalidate();
                 }
-                return true; // but I eated it
+                return true; // ...but I eated it
             }
         }
         return false;
