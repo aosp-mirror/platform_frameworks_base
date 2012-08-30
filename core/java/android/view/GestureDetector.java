@@ -226,17 +226,12 @@ public class GestureDetector {
      */
     private boolean mIsDoubleTapping;
 
-    private float mLastMotionY;
-    private float mLastMotionX;
+    private float mLastFocusX;
+    private float mLastFocusY;
+    private float mDownFocusX;
+    private float mDownFocusY;
 
     private boolean mIsLongpressEnabled;
-    
-    /**
-     * True if we are at a target API level of >= Froyo or the developer can
-     * explicitly set it. If true, input events with > 1 pointer will be ignored
-     * so we can work side by side with multitouch gesture detectors.
-     */
-    private boolean mIgnoreMultitouch;
 
     /**
      * Determines speed during touch scrolling
@@ -349,8 +344,16 @@ public class GestureDetector {
      * @throws NullPointerException if {@code listener} is null.
      */
     public GestureDetector(Context context, OnGestureListener listener, Handler handler) {
-        this(context, listener, handler, context != null &&
-                context.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.FROYO);
+        if (handler != null) {
+            mHandler = new GestureHandler(handler);
+        } else {
+            mHandler = new GestureHandler();
+        }
+        mListener = listener;
+        if (listener instanceof OnDoubleTapListener) {
+            setOnDoubleTapListener((OnDoubleTapListener) listener);
+        }
+        init(context);
     }
     
     /**
@@ -362,31 +365,19 @@ public class GestureDetector {
      * @param listener the listener invoked for all the callbacks, this must
      * not be null.
      * @param handler the handler to use
-     * @param ignoreMultitouch whether events involving more than one pointer should
-     * be ignored.
      *
      * @throws NullPointerException if {@code listener} is null.
      */
     public GestureDetector(Context context, OnGestureListener listener, Handler handler,
-            boolean ignoreMultitouch) {
-        if (handler != null) {
-            mHandler = new GestureHandler(handler);
-        } else {
-            mHandler = new GestureHandler();
-        }
-        mListener = listener;
-        if (listener instanceof OnDoubleTapListener) {
-            setOnDoubleTapListener((OnDoubleTapListener) listener);
-        }
-        init(context, ignoreMultitouch);
+            boolean unused) {
+        this(context, listener, handler);
     }
 
-    private void init(Context context, boolean ignoreMultitouch) {
+    private void init(Context context) {
         if (mListener == null) {
             throw new NullPointerException("OnGestureListener must not be null");
         }
         mIsLongpressEnabled = true;
-        mIgnoreMultitouch = ignoreMultitouch;
 
         // Fallback to support pre-donuts releases
         int touchSlop, doubleTapSlop, doubleTapTouchSlop;
@@ -456,34 +447,40 @@ public class GestureDetector {
         }
 
         final int action = ev.getAction();
-        final float y = ev.getY();
-        final float x = ev.getX();
 
         if (mVelocityTracker == null) {
             mVelocityTracker = VelocityTracker.obtain();
         }
         mVelocityTracker.addMovement(ev);
 
+        final boolean pointerUp = action == MotionEvent.ACTION_POINTER_UP;
+        final int skipIndex = pointerUp ? ev.getActionIndex() : -1;
+
+        // Determine focal point
+        float sumX = 0, sumY = 0;
+        final int count = ev.getPointerCount();
+        for (int i = 0; i < count; i++) {
+            if (skipIndex == i) continue;
+            sumX += ev.getX(i);
+            sumY += ev.getY(i);
+        }
+        final int div = pointerUp ? count - 1 : count;
+        final float focusX = sumX / div;
+        final float focusY = sumY / div;
+
         boolean handled = false;
 
         switch (action & MotionEvent.ACTION_MASK) {
         case MotionEvent.ACTION_POINTER_DOWN:
-            if (mIgnoreMultitouch) {
-                // Multitouch event - abort.
-                cancel();
-            }
+            mDownFocusX = mLastFocusX = focusX;
+            mDownFocusY = mLastFocusY = focusY;
+            // Cancel long press and taps
+            cancelTaps();
             break;
 
         case MotionEvent.ACTION_POINTER_UP:
-            // Ending a multitouch gesture and going back to 1 finger
-            if (mIgnoreMultitouch && ev.getPointerCount() == 2) {
-                int index = (((action & MotionEvent.ACTION_POINTER_INDEX_MASK)
-                        >> MotionEvent.ACTION_POINTER_INDEX_SHIFT) == 0) ? 1 : 0;
-                mLastMotionX = ev.getX(index);
-                mLastMotionY = ev.getY(index);
-                mVelocityTracker.recycle();
-                mVelocityTracker = VelocityTracker.obtain();
-            }
+            mDownFocusX = mLastFocusX = focusX;
+            mDownFocusY = mLastFocusY = focusY;
             break;
 
         case MotionEvent.ACTION_DOWN:
@@ -504,8 +501,8 @@ public class GestureDetector {
                 }
             }
 
-            mLastMotionX = x;
-            mLastMotionY = y;
+            mDownFocusX = mLastFocusX = focusX;
+            mDownFocusY = mLastFocusY = focusY;
             if (mCurrentDownEvent != null) {
                 mCurrentDownEvent.recycle();
             }
@@ -525,22 +522,22 @@ public class GestureDetector {
             break;
 
         case MotionEvent.ACTION_MOVE:
-            if (mInLongPress || (mIgnoreMultitouch && ev.getPointerCount() > 1)) {
+            if (mInLongPress) {
                 break;
             }
-            final float scrollX = mLastMotionX - x;
-            final float scrollY = mLastMotionY - y;
+            final float scrollX = mLastFocusX - focusX;
+            final float scrollY = mLastFocusY - focusY;
             if (mIsDoubleTapping) {
                 // Give the move events of the double-tap
                 handled |= mDoubleTapListener.onDoubleTapEvent(ev);
             } else if (mAlwaysInTapRegion) {
-                final int deltaX = (int) (x - mCurrentDownEvent.getX());
-                final int deltaY = (int) (y - mCurrentDownEvent.getY());
+                final int deltaX = (int) (focusX - mDownFocusX);
+                final int deltaY = (int) (focusY - mDownFocusY);
                 int distance = (deltaX * deltaX) + (deltaY * deltaY);
                 if (distance > mTouchSlopSquare) {
                     handled = mListener.onScroll(mCurrentDownEvent, ev, scrollX, scrollY);
-                    mLastMotionX = x;
-                    mLastMotionY = y;
+                    mLastFocusX = focusX;
+                    mLastFocusY = focusY;
                     mAlwaysInTapRegion = false;
                     mHandler.removeMessages(TAP);
                     mHandler.removeMessages(SHOW_PRESS);
@@ -551,8 +548,8 @@ public class GestureDetector {
                 }
             } else if ((Math.abs(scrollX) >= 1) || (Math.abs(scrollY) >= 1)) {
                 handled = mListener.onScroll(mCurrentDownEvent, ev, scrollX, scrollY);
-                mLastMotionX = x;
-                mLastMotionY = y;
+                mLastFocusX = focusX;
+                mLastFocusY = focusY;
             }
             break;
 
@@ -571,9 +568,10 @@ public class GestureDetector {
 
                 // A fling must travel the minimum tap distance
                 final VelocityTracker velocityTracker = mVelocityTracker;
+                final int pointerId = ev.getPointerId(0);
                 velocityTracker.computeCurrentVelocity(1000, mMaximumFlingVelocity);
-                final float velocityY = velocityTracker.getYVelocity();
-                final float velocityX = velocityTracker.getXVelocity();
+                final float velocityY = velocityTracker.getYVelocity(pointerId);
+                final float velocityX = velocityTracker.getXVelocity(pointerId);
 
                 if ((Math.abs(velocityY) > mMinimumFlingVelocity)
                         || (Math.abs(velocityX) > mMinimumFlingVelocity)){
@@ -615,6 +613,18 @@ public class GestureDetector {
         mVelocityTracker = null;
         mIsDoubleTapping = false;
         mStillDown = false;
+        mAlwaysInTapRegion = false;
+        mAlwaysInBiggerTapRegion = false;
+        if (mInLongPress) {
+            mInLongPress = false;
+        }
+    }
+
+    private void cancelTaps() {
+        mHandler.removeMessages(SHOW_PRESS);
+        mHandler.removeMessages(LONG_PRESS);
+        mHandler.removeMessages(TAP);
+        mIsDoubleTapping = false;
         mAlwaysInTapRegion = false;
         mAlwaysInBiggerTapRegion = false;
         if (mInLongPress) {
