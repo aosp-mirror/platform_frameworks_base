@@ -1993,12 +1993,18 @@ public final class ActivityManagerService extends ActivityManagerNative
                 try {
                     final PackageManager pm = mContext.getPackageManager();
                     gids = pm.getPackageGids(app.info.packageName);
+
+                    if (Environment.isExternalStorageEmulated()) {
+                        if (pm.checkPermission(
+                                android.Manifest.permission.ACCESS_ALL_EXTERNAL_STORAGE,
+                                app.info.packageName) == PERMISSION_GRANTED) {
+                            mountExternal = Zygote.MOUNT_EXTERNAL_MULTIUSER_ALL;
+                        } else {
+                            mountExternal = Zygote.MOUNT_EXTERNAL_MULTIUSER;
+                        }
+                    }
                 } catch (PackageManager.NameNotFoundException e) {
                     Slog.w(TAG, "Unable to retrieve gids", e);
-                }
-
-                if (Environment.isExternalStorageEmulated()) {
-                    mountExternal = Zygote.MOUNT_EXTERNAL_MULTIUSER;
                 }
             }
             if (mFactoryTest != SystemServer.FACTORY_TEST_OFF) {
