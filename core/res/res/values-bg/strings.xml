@@ -1319,5 +1319,64 @@
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Звук през Bluetooth"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Готово"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Изходяща мултимедия"</string>
-    <string name="display_manager_built_in_display" msgid="9042666544146043569">"Вграден екран"</string>
+    <!-- no translation found for display_manager_built_in_display_name (2583134294292563941) -->
+    <skip />
+    <!-- no translation found for display_manager_overlay_display_name (5142365982271620716) -->
+    <skip />
+    <!-- no translation found for display_manager_overlay_display_title (8186674340178573982) -->
+    <skip />
+    <!-- no translation found for kg_emergency_call_label (684946192523830531) -->
+    <skip />
+    <!-- no translation found for kg_forgot_pattern_button_text (8852021467868220608) -->
+    <skip />
+    <!-- no translation found for kg_wrong_pattern (1850806070801358830) -->
+    <skip />
+    <!-- no translation found for kg_wrong_password (2333281762128113157) -->
+    <skip />
+    <!-- no translation found for kg_wrong_pin (1131306510833563801) -->
+    <skip />
+    <!-- no translation found for kg_too_many_failed_attempts_countdown (353963338189371686) -->
+    <skip />
+    <!-- no translation found for kg_pattern_instructions (398978611683075868) -->
+    <skip />
+    <!-- no translation found for kg_sim_pin_instructions (2319508550934557331) -->
+    <skip />
+    <!-- no translation found for kg_pin_instructions (2377242233495111557) -->
+    <skip />
+    <!-- no translation found for kg_password_instructions (5753646556186936819) -->
+    <skip />
+    <!-- no translation found for kg_puk_enter_puk_hint (5183097160254244459) -->
+    <skip />
+    <!-- no translation found for kg_puk_enter_pin_hint (597821135578014901) -->
+    <skip />
+    <!-- no translation found for kg_sim_unlock_progress_dialog_message (8950398016976865762) -->
+    <skip />
+    <!-- no translation found for kg_password_wrong_pin_code (1139324887413846912) -->
+    <skip />
+    <!-- no translation found for kg_invalid_sim_pin_hint (8795159358110620001) -->
+    <skip />
+    <!-- no translation found for kg_invalid_sim_puk_hint (5216603185442368307) -->
+    <skip />
+    <!-- no translation found for kg_sim_puk_recovery_hint (5577753137718442566) -->
+    <skip />
+    <!-- no translation found for kg_invalid_puk (5809955359950817326) -->
+    <skip />
+    <!-- no translation found for kg_login_too_many_attempts (6486842094005698475) -->
+    <skip />
+    <!-- no translation found for kg_login_instructions (1100551261265506448) -->
+    <skip />
+    <!-- no translation found for kg_login_username_hint (5718534272070920364) -->
+    <skip />
+    <!-- no translation found for kg_login_password_hint (9057289103827298549) -->
+    <skip />
+    <!-- no translation found for kg_login_submit_button (5355904582674054702) -->
+    <skip />
+    <!-- no translation found for kg_login_invalid_input (5754664119319872197) -->
+    <skip />
+    <!-- no translation found for kg_login_account_recovery_hint (5690709132841752974) -->
+    <skip />
+    <!-- no translation found for kg_login_checking_password (8849589033659332457) -->
+    <skip />
+    <!-- no translation found for kg_temp_back_string (5812983904056640466) -->
+    <skip />
 </resources>
