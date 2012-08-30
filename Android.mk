@@ -74,6 +74,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/ISearchManager.aidl \
 	core/java/android/app/ISearchManagerCallback.aidl \
 	core/java/android/app/IServiceConnection.aidl \
+	core/java/android/app/IStopUserCallback.aidl \
 	core/java/android/app/IThumbnailReceiver.aidl \
 	core/java/android/app/IThumbnailRetriever.aidl \
 	core/java/android/app/ITransientNotification.aidl \

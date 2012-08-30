@@ -1570,6 +1570,17 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case STOP_USER_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            int userid = data.readInt();
+            IStopUserCallback callback = IStopUserCallback.Stub.asInterface(
+                    data.readStrongBinder());
+            int result = stopUser(userid, callback);
+            reply.writeNoException();
+            reply.writeInt(result);
+            return true;
+        }
+
         case GET_CURRENT_USER_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             UserInfo userInfo = getCurrentUser();
@@ -3756,11 +3767,25 @@ class ActivityManagerProxy implements IActivityManager
         return result;
     }
 
+    public int stopUser(int userid, IStopUserCallback callback) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeInt(userid);
+        data.writeStrongInterface(callback);
+        mRemote.transact(STOP_USER_TRANSACTION, data, reply, 0);
+        reply.readException();
+        int result = reply.readInt();
+        reply.recycle();
+        data.recycle();
+        return result;
+    }
+
     public UserInfo getCurrentUser() throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
-        mRemote.transact(SWITCH_USER_TRANSACTION, data, reply, 0);
+        mRemote.transact(GET_CURRENT_USER_TRANSACTION, data, reply, 0);
         reply.readException();
         UserInfo userInfo = UserInfo.CREATOR.createFromParcel(reply);
         reply.recycle();

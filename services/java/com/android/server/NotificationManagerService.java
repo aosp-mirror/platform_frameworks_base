@@ -544,6 +544,11 @@ public class NotificationManagerService extends INotificationManager.Stub
                 mInCall = (intent.getStringExtra(TelephonyManager.EXTRA_STATE).equals(
                         TelephonyManager.EXTRA_STATE_OFFHOOK));
                 updateNotificationPulse();
+            } else if (action.equals(Intent.ACTION_USER_STOPPED)) {
+                int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+                if (userHandle >= 0) {
+                    cancelAllNotificationsUser(userHandle);
+                }
             } else if (action.equals(Intent.ACTION_USER_PRESENT)) {
                 // turn off LED when user passes through lock screen
                 mNotificationLight.turnOff();
@@ -619,6 +624,7 @@ public class NotificationManagerService extends INotificationManager.Stub
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
         filter.addAction(Intent.ACTION_USER_PRESENT);
+        filter.addAction(Intent.ACTION_USER_STOPPED);
         mContext.registerReceiver(mIntentReceiver, filter);
         IntentFilter pkgFilter = new IntentFilter();
         pkgFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
@@ -1239,6 +1245,29 @@ public class NotificationManagerService extends INotificationManager.Stub
                 if (!doit) {
                     return true;
                 }
+                mNotificationList.remove(i);
+                cancelNotificationLocked(r, false);
+            }
+            if (canceledSomething) {
+                updateLightsLocked();
+            }
+            return canceledSomething;
+        }
+    }
+
+    /**
+     * Cancels all notifications from a given user.
+     */
+    boolean cancelAllNotificationsUser(int userHandle) {
+        synchronized (mNotificationList) {
+            final int N = mNotificationList.size();
+            boolean canceledSomething = false;
+            for (int i = N-1; i >= 0; --i) {
+                NotificationRecord r = mNotificationList.get(i);
+                if (UserHandle.getUserId(r.uid) != userHandle) {
+                    continue;
+                }
+                canceledSomething = true;
                 mNotificationList.remove(i);
                 cancelNotificationLocked(r, false);
             }

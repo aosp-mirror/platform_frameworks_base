@@ -989,6 +989,17 @@ public class ActiveServices {
         // restarting state.
         mRestartingServices.remove(r);
 
+        // Make sure that the user who owns this service is started.  If not,
+        // we don't want to allow it to run.
+        if (mAm.mStartedUsers.get(r.userId) == null) {
+            Slog.w(TAG, "Unable to launch app "
+                    + r.appInfo.packageName + "/"
+                    + r.appInfo.uid + " for service "
+                    + r.intent.getIntent() + ": user " + r.userId + " is stopped");
+            bringDownServiceLocked(r, true);
+            return false;
+        }
+
         // Service is now being launched, its package can't be stopped.
         try {
             AppGlobals.getPackageManager().setPackageStoppedState(
@@ -1509,7 +1520,7 @@ public class ActiveServices {
         boolean didSomething = false;
         ArrayList<ServiceRecord> services = new ArrayList<ServiceRecord>();
         for (ServiceRecord service : mServiceMap.getAllServices(userId)) {
-            if (service.packageName.equals(name)
+            if ((name == null || service.packageName.equals(name))
                     && (service.app == null || evenPersistent || !service.app.persistent)) {
                 if (!doit) {
                     return true;

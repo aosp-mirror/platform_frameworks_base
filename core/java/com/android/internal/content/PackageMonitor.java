@@ -49,6 +49,7 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
         sPackageFilt.addAction(Intent.ACTION_UID_REMOVED);
         sPackageFilt.addDataScheme("package");
         sNonDataFilt.addAction(Intent.ACTION_UID_REMOVED);
+        sNonDataFilt.addAction(Intent.ACTION_USER_STOPPED);
         sExternalFilt.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE);
         sExternalFilt.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
     }
@@ -135,6 +136,9 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
     
     public boolean onHandleForceStop(Intent intent, String[] packages, int uid, boolean doit) {
         return false;
+    }
+
+    public void onHandleUserStop(Intent intent, int userHandle) {
     }
     
     public void onUidRemoved(int uid) {
@@ -307,6 +311,10 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
                     intent.getIntExtra(Intent.EXTRA_UID, 0), true);
         } else if (Intent.ACTION_UID_REMOVED.equals(action)) {
             onUidRemoved(intent.getIntExtra(Intent.EXTRA_UID, 0));
+        } else if (Intent.ACTION_USER_STOPPED.equals(action)) {
+            if (intent.hasExtra(Intent.EXTRA_USER_HANDLE)) {
+                onHandleUserStop(intent, intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0));
+            }
         } else if (Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE.equals(action)) {
             String[] pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
             mAppearingPackages = pkgList;

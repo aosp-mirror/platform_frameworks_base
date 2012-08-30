@@ -46,6 +46,7 @@ import android.app.IInstrumentationWatcher;
 import android.app.INotificationManager;
 import android.app.IProcessObserver;
 import android.app.IServiceConnection;
+import android.app.IStopUserCallback;
 import android.app.IThumbnailReceiver;
 import android.app.Instrumentation;
 import android.app.Notification;
@@ -428,6 +429,11 @@ public final class ActivityManagerService extends ActivityManagerNative
     long mPreviousProcessVisibleTime;
 
     /**
+     * Which uses have been started, so are allowed to run code.
+     */
+    final SparseArray<UserStartedState> mStartedUsers = new SparseArray<UserStartedState>();
+
+    /**
      * Packages that the user has asked to have run in screen size
      * compatibility mode instead of filling the screen.
      */
@@ -791,7 +797,6 @@ public final class ActivityManagerService extends ActivityManagerNative
     static ActivityThread mSystemThread;
 
     private int mCurrentUserId;
-    private SparseIntArray mLoggedInUsers = new SparseIntArray(5);
     private UserManager mUserManager;
 
     private final class AppDeathRecipient implements IBinder.DeathRecipient {
@@ -1506,6 +1511,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 systemDir, "usagestats").toString());
         mHeadless = "1".equals(SystemProperties.get("ro.config.headless", "0"));
 
+        // User 0 is the first and only user that runs at boot.
+        mStartedUsers.put(0, new UserStartedState(new UserHandle(0), true));
+
         GL_ES_VERSION = SystemProperties.getInt("ro.opengles.version",
             ConfigurationInfo.GL_ES_VERSION_UNDEFINED);
 
@@ -2095,7 +2103,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    boolean startHomeActivityLocked(int userId) {
+    boolean startHomeActivityLocked(int userId, UserStartedState startingUser) {
         if (mHeadless) {
             // Added because none of the other calls to ensureBootCompleted seem to fire
             // when running headless.
@@ -2134,6 +2142,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mMainStack.startActivityLocked(null, intent, null, aInfo,
                         null, null, 0, 0, 0, 0, null, false, null);
             }
+        }
+        if (startingUser != null) {
+            mMainStack.addStartingUserLocked(startingUser);
         }
 
         return true;
@@ -3454,7 +3465,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     Slog.w(TAG, "Invalid packageName: " + packageName);
                     return;
                 }
-                killPackageProcessesLocked(packageName, pkgUid,
+                killPackageProcessesLocked(packageName, pkgUid, -1,
                         ProcessList.SERVICE_ADJ, false, true, true, false, "kill background");
             }
         } finally {
@@ -3650,7 +3661,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private void forceStopPackageLocked(final String packageName, int uid) {
-        forceStopPackageLocked(packageName, uid, false, false, true, false, UserHandle.getUserId(uid));
+        forceStopPackageLocked(packageName, uid, false, false, true, false,
+                UserHandle.getUserId(uid));
         Intent intent = new Intent(Intent.ACTION_PACKAGE_RESTARTED,
                 Uri.fromParts("package", packageName, null));
         if (!mProcessesReady) {
@@ -3662,16 +3674,27 @@ public final class ActivityManagerService extends ActivityManagerNative
                 false, false,
                 MY_PID, Process.SYSTEM_UID, UserHandle.getUserId(uid));
     }
-    
+
+    private void forceStopUserLocked(int userId) {
+        forceStopPackageLocked(null, -1, false, false, true, false, userId);
+        Intent intent = new Intent(Intent.ACTION_USER_STOPPED);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+        intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
+        broadcastIntentLocked(null, null, intent,
+                null, null, 0, null, null, null,
+                false, false,
+                MY_PID, Process.SYSTEM_UID, userId);
+    }
+
     private final boolean killPackageProcessesLocked(String packageName, int uid,
-            int minOomAdj, boolean callerWillRestart, boolean allowRestart, boolean doit,
-            boolean evenPersistent, String reason) {
+            int userId, int minOomAdj, boolean callerWillRestart, boolean allowRestart,
+            boolean doit, boolean evenPersistent, String reason) {
         ArrayList<ProcessRecord> procs = new ArrayList<ProcessRecord>();
 
         // Remove all processes this package may have touched: all with the
         // same UID (except for the system or root user), and all whose name
         // matches the package name.
-        final String procNamePrefix = packageName + ":";
+        final String procNamePrefix = packageName != null ? (packageName + ":") : null;
         for (SparseArray<ProcessRecord> apps : mProcessNames.getMap().values()) {
             final int NA = apps.size();
             for (int ia=0; ia<NA; ia++) {
@@ -3683,6 +3706,18 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (app.removed) {
                     if (doit) {
                         procs.add(app);
+                    }
+                // If no package is specified, we call all processes under the
+                // give user id.
+                } else if (packageName == null) {
+                    if (app.userId == userId) {
+                        if (app.setAdj >= minOomAdj) {
+                            if (!doit) {
+                                return true;
+                            }
+                            app.removed = true;
+                            procs.add(app);
+                        }
                     }
                 // If uid is specified and the uid and process name match
                 // Or, the uid is not specified and the process name matches
@@ -3714,7 +3749,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         int i;
         int N;
 
-        if (uid < 0) {
+        if (uid < 0 && name != null) {
             try {
                 uid = AppGlobals.getPackageManager().getPackageUid(name, userId);
             } catch (RemoteException e) {
@@ -3722,24 +3757,45 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         if (doit) {
-            Slog.i(TAG, "Force stopping package " + name + " uid=" + uid);
+            if (name != null) {
+                Slog.i(TAG, "Force stopping package " + name + " uid=" + uid);
+            } else {
+                Slog.i(TAG, "Force stopping user " + userId);
+            }
 
             Iterator<SparseArray<Long>> badApps = mProcessCrashTimes.getMap().values().iterator();
             while (badApps.hasNext()) {
                 SparseArray<Long> ba = badApps.next();
-                if (ba.get(uid) != null) {
+                for (i=ba.size()-1; i>=0; i--) {
+                    boolean remove = false;
+                    final int entUid = ba.keyAt(i);
+                    if (name != null) {
+                        if (entUid == uid) {
+                            remove = true;
+                        }
+                    } else if (UserHandle.getUserId(entUid) == userId) {
+                        remove = true;
+                    }
+                    if (remove) {
+                        ba.removeAt(i);
+                    }
+                }
+                if (ba.size() == 0) {
                     badApps.remove();
                 }
             }
         }
-        
-        boolean didSomething = killPackageProcessesLocked(name, uid, -100,
-                callerWillRestart, false, doit, evenPersistent, "force stop");
+
+        boolean didSomething = killPackageProcessesLocked(name, uid,
+                name == null ? userId : -1 , -100, callerWillRestart, false,
+                doit, evenPersistent,
+                name == null ? ("force stop user " + userId) : ("force stop " + name));
         
         TaskRecord lastTask = null;
         for (i=0; i<mMainStack.mHistory.size(); i++) {
             ActivityRecord r = (ActivityRecord)mMainStack.mHistory.get(i);
-            final boolean samePackage = r.packageName.equals(name);
+            final boolean samePackage = r.packageName.equals(name)
+                    || (name == null && r.userId == userId);
             if (r.userId == userId
                     && (samePackage || r.task == lastTask)
                     && (r.app == null || evenPersistent || !r.app.persistent)) {
@@ -3776,7 +3832,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         ArrayList<ContentProviderRecord> providers = new ArrayList<ContentProviderRecord>();
         for (ContentProviderRecord provider : mProviderMap.getProvidersByClass(userId).values()) {
-            if (provider.info.packageName.equals(name)
+            if ((name == null || provider.info.packageName.equals(name))
                     && (provider.proc == null || evenPersistent || !provider.proc.persistent)) {
                 if (!doit) {
                     return true;
@@ -3792,7 +3848,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         if (doit) {
-            if (purgeCache) {
+            if (purgeCache && name != null) {
                 AttributeCache ac = AttributeCache.instance();
                 if (ac != null) {
                     ac.removePackage(name);
@@ -4197,15 +4253,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }, pkgFilter);
 
-        IntentFilter userFilter = new IntentFilter();
-        userFilter.addAction(Intent.ACTION_USER_REMOVED);
-        mContext.registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                onUserRemoved(intent);
-            }
-        }, userFilter);
-
         synchronized (this) {
             // Ensure that any processes we had put on hold are now started
             // up.
@@ -4227,13 +4274,17 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // Tell anyone interested that we are done booting!
                 SystemProperties.set("sys.boot_completed", "1");
                 SystemProperties.set("dev.bootcomplete", "1");
-                List<UserInfo> users = getUserManager().getUsers();
-                for (UserInfo user : users) {
-                    broadcastIntentLocked(null, null,
-                            new Intent(Intent.ACTION_BOOT_COMPLETED, null),
-                            null, null, 0, null, null,
-                            android.Manifest.permission.RECEIVE_BOOT_COMPLETED,
-                            false, false, MY_PID, Process.SYSTEM_UID, user.id);
+                for (int i=0; i<mStartedUsers.size(); i++) {
+                    UserStartedState uss = mStartedUsers.valueAt(i);
+                    if (uss.mState == UserStartedState.STATE_BOOTING) {
+                        uss.mState = UserStartedState.STATE_RUNNING;
+                        broadcastIntentLocked(null, null,
+                                new Intent(Intent.ACTION_BOOT_COMPLETED, null),
+                                null, null, 0, null, null,
+                                android.Manifest.permission.RECEIVE_BOOT_COMPLETED,
+                                false, false, MY_PID, Process.SYSTEM_UID,
+                                mStartedUsers.keyAt(i));
+                    }
                 }
             }
         }
@@ -6295,6 +6346,16 @@ public final class ActivityManagerService extends ActivityManagerNative
                     // processes, then fail fast instead of hanging.
                     throw new IllegalArgumentException(
                             "Attempt to launch content provider before system ready");
+                }
+
+                // Make sure that the user who owns this provider is started.  If not,
+                // we don't want to allow it to run.
+                if (mStartedUsers.get(userId) == null) {
+                    Slog.w(TAG, "Unable to launch app "
+                            + cpi.applicationInfo.packageName + "/"
+                            + cpi.applicationInfo.uid + " for provider "
+                            + name + ": user " + userId + " is stopped");
+                    return null;
                 }
 
                 ComponentName comp = new ComponentName(cpi.packageName, cpi.name);
@@ -9048,6 +9109,13 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         pw.println();
+        pw.println("  mStartedUsers:");
+        for (int i=0; i<mStartedUsers.size(); i++) {
+            UserStartedState uss = mStartedUsers.valueAt(i);
+            pw.print("    User #"); pw.print(uss.mHandle.getIdentifier());
+                    pw.println(":");
+            uss.dump("      ", pw);
+        }
         pw.println("  mHomeProcess: " + mHomeProcess);
         pw.println("  mPreviousProcess: " + mPreviousProcess);
         if (dumpAll) {
@@ -11107,6 +11175,14 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
 
+        // Make sure that the user who is receiving this broadcast is started
+        // If not, we will just skip it.
+        if (mStartedUsers.get(userId) == null) {
+            Slog.w(TAG, "Skipping broadcast of " + intent
+                    + ": user " + userId + " is stopped");
+            return ActivityManager.BROADCAST_SUCCESS;
+        }
+
         // Handle special intents: if this broadcast is from the package
         // manager about a package being removed, we need to remove all of
         // its activities from the history stack.
@@ -11649,7 +11725,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         app.instrumentationProfileFile = null;
         app.instrumentationArguments = null;
 
-        forceStopPackageLocked(app.processName, -1, false, false, true, true, app.userId);
+        forceStopPackageLocked(app.info.packageName, -1, false, false, true, true, app.userId);
     }
 
     public void finishInstrumentation(IApplicationThread target,
@@ -13491,72 +13567,171 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     // Multi-user methods
 
+    @Override
     public boolean switchUser(int userId) {
-        final int callingUid = Binder.getCallingUid();
-        if (callingUid != 0 && callingUid != Process.myUid()) {
-            Slog.e(TAG, "Trying to switch user from unauthorized app");
-            return false;
+        if (checkCallingPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+                != PackageManager.PERMISSION_GRANTED) {
+            String msg = "Permission Denial: switchUser() from pid="
+                    + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid()
+                    + " requires " + android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
         }
-        if (mCurrentUserId == userId)
-            return true;
-
         synchronized (this) {
-            // Check if user is already logged in, otherwise check if user exists first before
-            // adding to the list of logged in users.
-            if (mLoggedInUsers.indexOfKey(userId) < 0) {
-                if (!userExists(userId)) {
-                    return false;
-                }
-                mLoggedInUsers.append(userId, userId);
+            if (mCurrentUserId == userId) {
+                return true;
+            }
+
+            // If the user we are switching to is not currently started, then
+            // we need to start it now.
+            if (mStartedUsers.get(userId) == null) {
+                mStartedUsers.put(userId, new UserStartedState(new UserHandle(userId), false));
             }
 
             mCurrentUserId = userId;
             boolean haveActivities = mMainStack.switchUser(userId);
             if (!haveActivities) {
-                startHomeActivityLocked(userId);
+                startHomeActivityLocked(userId, mStartedUsers.get(userId));
             }
-
         }
 
-        // Inform of user switch
-        Intent addedIntent = new Intent(Intent.ACTION_USER_SWITCHED);
-        addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
-        mContext.sendBroadcast(addedIntent, android.Manifest.permission.MANAGE_USERS);
+        long ident = Binder.clearCallingIdentity();
+        try {
+            // Inform of user switch
+            Intent addedIntent = new Intent(Intent.ACTION_USER_SWITCHED);
+            addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
+            mContext.sendBroadcast(addedIntent, android.Manifest.permission.MANAGE_USERS);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
 
         return true;
     }
 
-    @Override
-    public UserInfo getCurrentUser() throws RemoteException {
-        final int callingUid = Binder.getCallingUid();
-        if (callingUid != 0 && callingUid != Process.myUid()) {
-            Slog.e(TAG, "Trying to get user from unauthorized app");
-            return null;
+    void finishUserSwitch(UserStartedState uss) {
+        synchronized (this) {
+            if (uss.mState == UserStartedState.STATE_BOOTING
+                    && mStartedUsers.get(uss.mHandle.getIdentifier()) == uss) {
+                uss.mState = UserStartedState.STATE_RUNNING;
+                broadcastIntentLocked(null, null,
+                        new Intent(Intent.ACTION_BOOT_COMPLETED, null),
+                        null, null, 0, null, null,
+                        android.Manifest.permission.RECEIVE_BOOT_COMPLETED,
+                        false, false, MY_PID, Process.SYSTEM_UID, uss.mHandle.getIdentifier());
+            }
         }
-        return getUserManager().getUserInfo(mCurrentUserId);
     }
 
-    private void onUserRemoved(Intent intent) {
-        int extraUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
-        if (extraUserId < 1) return;
-
-        // Kill all the processes for the user
-        ArrayList<Pair<String, Integer>> pkgAndUids = new ArrayList<Pair<String,Integer>>();
+    @Override
+    public int stopUser(final int userId, final IStopUserCallback callback) {
+        if (checkCallingPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+                != PackageManager.PERMISSION_GRANTED) {
+            String msg = "Permission Denial: switchUser() from pid="
+                    + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid()
+                    + " requires " + android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
+        if (userId <= 0) {
+            throw new IllegalArgumentException("Can't stop primary user " + userId);
+        }
         synchronized (this) {
-            HashMap<String,SparseArray<ProcessRecord>> map = mProcessNames.getMap();
-            for (Entry<String, SparseArray<ProcessRecord>> uidMap : map.entrySet()) {
-                SparseArray<ProcessRecord> uids = uidMap.getValue();
-                for (int i = 0; i < uids.size(); i++) {
-                    if (UserHandle.getUserId(uids.keyAt(i)) == extraUserId) {
-                        pkgAndUids.add(new Pair<String,Integer>(uidMap.getKey(), uids.keyAt(i)));
-                    }
+            if (mCurrentUserId == userId) {
+                return ActivityManager.USER_OP_IS_CURRENT;
+            }
+
+            final UserStartedState uss = mStartedUsers.get(userId);
+            if (uss == null) {
+                // User is not started, nothing to do...  but we do need to
+                // callback if requested.
+                if (callback != null) {
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                callback.userStopped(userId);
+                            } catch (RemoteException e) {
+                            }
+                        }
+                    });
+                }
+                return ActivityManager.USER_OP_SUCCESS;
+            }
+
+            if (callback != null) {
+                uss.mStopCallbacks.add(callback);
+            }
+
+            if (uss.mState != UserStartedState.STATE_STOPPING) {
+                uss.mState = UserStartedState.STATE_STOPPING;
+
+                long ident = Binder.clearCallingIdentity();
+                try {
+                    // Inform of user switch
+                    Intent intent = new Intent(Intent.ACTION_SHUTDOWN);
+                    final IIntentReceiver resultReceiver = new IIntentReceiver.Stub() {
+                        @Override
+                        public void performReceive(Intent intent, int resultCode, String data,
+                                Bundle extras, boolean ordered, boolean sticky) {
+                            finishUserStop(uss);
+                        }
+                    };
+                    broadcastIntentLocked(null, null, intent,
+                            null, resultReceiver, 0, null, null, null,
+                            true, false, MY_PID, Process.SYSTEM_UID, userId);
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
                 }
             }
+        }
 
-            for (Pair<String,Integer> pkgAndUid : pkgAndUids) {
-                forceStopPackageLocked(pkgAndUid.first, pkgAndUid.second,
-                        false, false, true, true, extraUserId);
+        return ActivityManager.USER_OP_SUCCESS;
+    }
+
+    void finishUserStop(UserStartedState uss) {
+        final int userId = uss.mHandle.getIdentifier();
+        boolean stopped;
+        ArrayList<IStopUserCallback> callbacks;
+        synchronized (this) {
+            callbacks = new ArrayList<IStopUserCallback>(uss.mStopCallbacks);
+            if (uss.mState != UserStartedState.STATE_STOPPING
+                    || mStartedUsers.get(userId) != uss) {
+                stopped = false;
+            } else {
+                stopped = true;
+                // User can no longer run.
+                mStartedUsers.remove(userId);
+
+                // Clean up all state and processes associated with the user.
+                // Kill all the processes for the user.
+                forceStopUserLocked(userId);
             }
+        }
+
+        for (int i=0; i<callbacks.size(); i++) {
+            try {
+                if (stopped) callbacks.get(i).userStopped(userId);
+                else callbacks.get(i).userStopAborted(userId);
+            } catch (RemoteException e) {
+            }
+        }
+    }
+
+    @Override
+    public UserInfo getCurrentUser() {
+        if (checkCallingPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+                != PackageManager.PERMISSION_GRANTED) {
+            String msg = "Permission Denial: getCurrentUser() from pid="
+                    + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid()
+                    + " requires " + android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
+        synchronized (this) {
+            return getUserManager().getUserInfo(mCurrentUserId);
         }
     }
 
