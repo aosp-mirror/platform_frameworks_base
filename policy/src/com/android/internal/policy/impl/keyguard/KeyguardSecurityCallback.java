@@ -57,6 +57,15 @@ public interface KeyguardSecurityCallback {
      */
     void showBackupUnlock();
 
+    /**
+     * Used to inform keyguard when the current view is done drawing.
+     */
     void keyguardDoneDrawing();
+
+    /**
+     * Sets a runnable to launch after the user enters their
+     * @param runnable
+     */
+    void setOnDismissRunnable(Runnable runnable);
 
 }
