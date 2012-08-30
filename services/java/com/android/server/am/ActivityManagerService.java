@@ -10742,7 +10742,25 @@ public final class ActivityManagerService extends ActivityManagerNative
             throw new IllegalArgumentException("File descriptors passed in Intent");
         }
 
-        checkValidCaller(Binder.getCallingUid(), userId);
+        if (userId != UserHandle.getCallingUserId()) {
+            // Requesting a different user, make sure that they have permission
+            if (checkComponentPermission(
+                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                    Binder.getCallingPid(), Binder.getCallingUid(), -1, true)
+                    == PackageManager.PERMISSION_GRANTED) {
+                // Translate to the current user id, if caller wasn't aware
+                if (userId == UserHandle.USER_CURRENT) {
+                    userId = mCurrentUserId;
+                }
+            } else {
+                String msg = "Permission Denial: Request to bindService as user " + userId
+                        + " but is calling from user " + UserHandle.getCallingUserId()
+                        + "; this requires "
+                        + android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+                Slog.w(TAG, msg);
+                throw new SecurityException(msg);
+            }
+        }
 
         synchronized(this) {
             return mServices.bindServiceLocked(caller, token, service, resolvedType,
