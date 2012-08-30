@@ -17,5 +17,5 @@
 */
 -->
 <resources>
-    <integer name="flip_duration">300</integer>
+    <integer name="kg_security_flip_duration">150</integer>
 </resources>

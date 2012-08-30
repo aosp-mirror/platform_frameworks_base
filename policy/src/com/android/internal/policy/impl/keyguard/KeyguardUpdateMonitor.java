@@ -53,8 +53,8 @@ import java.util.ArrayList;
  *
  * Note: under time crunch, this has been extended to include some stuff that
  * doesn't really belong here.  see {@link #handleBatteryUpdate} where it shutdowns
- * the device, and {@link #getFailedAttempts()}, {@link #reportFailedAttempt()}
- * and {@link #clearFailedAttempts()}.  Maybe we should rename this 'KeyguardContext'...
+ * the device, and {@link #getFailedUnlockAttempts()}, {@link #reportFailedAttempt()}
+ * and {@link #clearFailedUnlockAttempts()}.  Maybe we should rename this 'KeyguardContext'...
  */
 public class KeyguardUpdateMonitor {
 
@@ -658,16 +658,16 @@ public class KeyguardUpdateMonitor {
         return mDeviceProvisioned;
     }
 
-    public int getFailedAttempts() {
+    public int getFailedUnlockAttempts() {
         return mFailedAttempts;
     }
 
-    public void clearFailedAttempts() {
+    public void clearFailedUnlockAttempts() {
         mFailedAttempts = 0;
         mFailedBiometricUnlockAttempts = 0;
     }
 
-    public void reportFailedAttempt() {
+    public void reportFailedUnlockAttempt() {
         mFailedAttempts++;
     }
 

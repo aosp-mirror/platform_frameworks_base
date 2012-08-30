@@ -48,38 +48,85 @@ public class KeyguardSecurityModel {
         mLockPatternUtils = utils;
     }
 
+    /**
+     * This returns false if there is any condition that indicates that the biometric unlock should
+     * not be used before the next time the unlock screen is recreated.  In other words, if this
+     * returns false there is no need to even construct the biometric unlock.
+     */
+    private boolean isBiometricUnlockEnabled() {
+        KeyguardUpdateMonitor monitor = KeyguardUpdateMonitor.getInstance(mContext);
+        final boolean backupIsTimedOut =
+                monitor.getFailedUnlockAttempts() >= LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT;
+        return mLockPatternUtils.usingBiometricWeak()
+                && mLockPatternUtils.isBiometricWeakInstalled()
+                && !monitor.getMaxBiometricUnlockAttemptsReached()
+                && !backupIsTimedOut;
+    }
+
     SecurityMode getSecurityMode() {
         KeyguardUpdateMonitor mUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
         final IccCardConstants.State simState = mUpdateMonitor.getSimState();
+        SecurityMode mode = SecurityMode.None;
         if (simState == IccCardConstants.State.PIN_REQUIRED) {
-            return SecurityMode.SimPin;
+            mode = SecurityMode.SimPin;
         } else if (simState == IccCardConstants.State.PUK_REQUIRED) {
-            return SecurityMode.SimPuk;
+            mode = SecurityMode.SimPuk;
         } else {
-            final int mode = mLockPatternUtils.getKeyguardStoredPasswordQuality();
-            switch (mode) {
+            final int security = mLockPatternUtils.getKeyguardStoredPasswordQuality();
+            switch (security) {
                 case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC:
                 case DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC:
                 case DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC:
                 case DevicePolicyManager.PASSWORD_QUALITY_COMPLEX:
-                    return mLockPatternUtils.isLockPasswordEnabled() ?
+                    mode = mLockPatternUtils.isLockPasswordEnabled() ?
                             SecurityMode.Password : SecurityMode.None;
+                    break;
 
                 case DevicePolicyManager.PASSWORD_QUALITY_SOMETHING:
                 case DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED:
                     if (mLockPatternUtils.isLockPatternEnabled()) {
-                        return mLockPatternUtils.isPermanentlyLocked() ?
+                        mode = mLockPatternUtils.isPermanentlyLocked() ?
                             SecurityMode.Account : SecurityMode.Pattern;
-                    } else {
-                        return SecurityMode.None;
                     }
+                    break;
+
                 default:
-                   throw new IllegalStateException("Unknown unlock mode:" + mode);
+                    throw new IllegalStateException("Unknown unlock mode:" + mode);
             }
         }
+        return mode;
     }
 
+    /**
+     * Some unlock methods can have an alternate, such as biometric unlocks (e.g. face unlock).
+     * This function decides if an alternate unlock is available and returns it. Otherwise,
+     * returns @param mode.
+     *
+     * @param mode the mode we want the alternate for
+     * @return alternate or the given mode
+     */
+    SecurityMode getAlternateFor(SecurityMode mode) {
+        if (isBiometricUnlockEnabled()
+                && (mode == SecurityMode.Password || mode == SecurityMode.Pattern)) {
+            return SecurityMode.Biometric;
+        }
+        return mode; // no alternate, return what was given
+    }
+
+    /**
+     * Some unlock methods can have a backup which gives the user another way to get into
+     * the device. This is currently only supported for Biometric and Pattern unlock.
+     *
+     * @param mode the mode we want the backup for
+     * @return backup method or given mode
+     */
     SecurityMode getBackupFor(SecurityMode mode) {
-        return SecurityMode.None;  // TODO: handle biometric unlock, etc.
+        switch(mode) {
+            case Biometric:
+                return getSecurityMode();
+            case Pattern:
+                return SecurityMode.Account;
+        }
+        return mode; // no backup, return what was given
     }
 }
