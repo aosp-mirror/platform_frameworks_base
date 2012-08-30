@@ -1818,7 +1818,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 pkg.applicationInfo.publicSourceDir = ps.resourcePathString;
                 pkg.applicationInfo.sourceDir = ps.codePathString;
                 pkg.applicationInfo.dataDir =
-                        getDataPathForPackage(ps.pkg.packageName, 0).getPath();
+                        getDataPathForPackage(packageName, 0).getPath();
                 pkg.applicationInfo.nativeLibraryDir = ps.nativeLibraryPathString;
             }
             // pkg.mSetEnabled = ps.getEnabled(userId);
