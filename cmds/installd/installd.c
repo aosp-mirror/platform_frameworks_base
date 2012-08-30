@@ -333,19 +333,16 @@ int initialize_globals() {
 
 int initialize_directories() {
     int res = -1;
-    int version = 0;
-    FILE* file;
 
     // Read current filesystem layout version to handle upgrade paths
     char version_path[PATH_MAX];
-    if (snprintf(version_path, PATH_MAX, "%s.layout_version", android_data_dir.path) > PATH_MAX) {
-        return -1;
+    snprintf(version_path, PATH_MAX, "%s.layout_version", android_data_dir.path);
+
+    int oldVersion;
+    if (fs_read_atomic_int(version_path, &oldVersion) == -1) {
+        oldVersion = 0;
     }
-    file = fopen(version_path, "r");
-    if (file != NULL) {
-        fscanf(file, "%d", &version);
-        fclose(file);
-    }
+    int version = oldVersion;
 
     // /data/user
     char *user_data_dir = build_string2(android_data_dir.path, SECONDARY_USER_PREFIX);
@@ -376,16 +373,12 @@ int initialize_directories() {
         }
     }
 
-    // /data/media/0
-    char owner_media_dir[PATH_MAX];
-    create_persona_media_path(owner_media_dir, 0);
-
     if (version == 0) {
         // Introducing multi-user, so migrate /data/media contents into /data/media/0
-        ALOGD("Migrating /data/media for multi-user");
+        ALOGD("Upgrading /data/media for multi-user");
 
         // Ensure /data/media
-        if (ensure_dir(android_media_dir.path, 0770, AID_MEDIA_RW, AID_MEDIA_RW) == -1) {
+        if (fs_prepare_dir(android_media_dir.path, 0770, AID_MEDIA_RW, AID_MEDIA_RW) == -1) {
             goto fail;
         }
 
@@ -402,9 +395,13 @@ int initialize_directories() {
         }
 
         // Create /data/media again
-        if (ensure_dir(android_media_dir.path, 0770, AID_MEDIA_RW, AID_MEDIA_RW) == -1) {
+        if (fs_prepare_dir(android_media_dir.path, 0770, AID_MEDIA_RW, AID_MEDIA_RW) == -1) {
             goto fail;
         }
+
+        // /data/media/0
+        char owner_media_dir[PATH_MAX];
+        snprintf(owner_media_dir, PATH_MAX, "%s0", android_media_dir.path);
 
         // Move any owner data into place
         if (access(media_tmp_dir, F_OK) == 0) {
@@ -433,8 +430,7 @@ int initialize_directories() {
 
                     // /data/media/<user_id>
                     snprintf(user_media_dir, PATH_MAX, "%s%s", android_media_dir.path, name);
-                    if (ensure_dir(user_media_dir, 0770, AID_MEDIA_RW, AID_MEDIA_RW) == -1) {
-                        ALOGE("Failed to ensure %s: %s", user_media_dir, strerror(errno));
+                    if (fs_prepare_dir(user_media_dir, 0770, AID_MEDIA_RW, AID_MEDIA_RW) == -1) {
                         goto fail;
                     }
                 }
@@ -445,20 +441,44 @@ int initialize_directories() {
         version = 1;
     }
 
-    // Ensure /data/media/0 is always ready
-    if (ensure_dir(owner_media_dir, 0770, AID_MEDIA_RW, AID_MEDIA_RW) == -1) {
+    // /data/media/obb
+    char media_obb_dir[PATH_MAX];
+    snprintf(media_obb_dir, PATH_MAX, "%sobb", android_media_dir.path);
+
+    if (version == 1) {
+        // Introducing /data/media/obb for sharing OBB across users; migrate
+        // any existing OBB files from owner.
+        ALOGD("Upgrading to shared /data/media/obb");
+
+        // /data/media/0/Android/obb
+        char owner_obb_path[PATH_MAX];
+        snprintf(owner_obb_path, PATH_MAX, "%s0/Android/obb", android_media_dir.path);
+
+        // Only move if target doesn't already exist
+        if (access(media_obb_dir, F_OK) != 0 && access(owner_obb_path, F_OK) == 0) {
+            if (rename(owner_obb_path, media_obb_dir) == -1) {
+                ALOGE("Failed to move OBB from owner: %s", strerror(errno));
+                goto fail;
+            }
+        }
+
+        version = 2;
+    }
+
+    if (ensure_media_user_dirs(0) == -1) {
+        ALOGE("Failed to setup media for user 0");
+        goto fail;
+    }
+    if (fs_prepare_dir(media_obb_dir, 0770, AID_MEDIA_RW, AID_MEDIA_RW) == -1) {
         goto fail;
     }
 
-    // Persist our current version
-    file = fopen(version_path, "w");
-    if (file != NULL) {
-        fprintf(file, "%d", version);
-        fsync(fileno(file));
-        fclose(file);
-    } else {
-        ALOGE("Failed to save version to %s: %s", version_path, strerror(errno));
-        goto fail;
+    // Persist layout version if changed
+    if (version != oldVersion) {
+        if (fs_write_atomic_int(version_path, version) == -1) {
+            ALOGE("Failed to save version to %s: %s", version_path, strerror(errno));
+            goto fail;
+        }
     }
 
     // Success!
