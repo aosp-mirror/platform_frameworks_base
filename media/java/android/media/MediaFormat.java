@@ -40,7 +40,8 @@ import java.util.Map;
  * <tr><th>Name</th><th>Value Type</th><th>Description</th></tr>
  * <tr><td>{@link #KEY_WIDTH}</td><td>Integer</td><td></td></tr>
  * <tr><td>{@link #KEY_HEIGHT}</td><td>Integer</td><td></td></tr>
- * <tr><td>{@link #KEY_COLOR_FORMAT}</td><td>Integer</td><td><b>encoder-only</b></td></tr>
+ * <tr><td>{@link #KEY_COLOR_FORMAT}</td><td>Integer</td><td>set by the user
+ *         for encoders, readable in the output format of decoders</b></td></tr>
  * <tr><td>{@link #KEY_FRAME_RATE}</td><td>Integer or Float</td><td><b>encoder-only</b></td></tr>
  * <tr><td>{@link #KEY_I_FRAME_INTERVAL}</td><td>Integer</td><td><b>encoder-only</b></td></tr>
  * </table>
