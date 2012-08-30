@@ -1616,6 +1616,11 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE] -->
     <string name="permdesc_mediaStorageWrite" product="default">Allows the app to modify the contents of the internal media storage.</string>
 
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=30] -->
+    <string name="permlab_sdcardAccessAll">access external storage of all users</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_sdcardAccessAll">Allows the app to access external storage for all users.</string>
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_cache_filesystem">access the cache filesystem</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

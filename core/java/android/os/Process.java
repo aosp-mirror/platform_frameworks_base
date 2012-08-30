@@ -584,6 +584,8 @@ public class Process {
             }
             if (mountExternal == Zygote.MOUNT_EXTERNAL_MULTIUSER) {
                 argsForZygote.add("--mount-external-multiuser");
+            } else if (mountExternal == Zygote.MOUNT_EXTERNAL_MULTIUSER_ALL) {
+                argsForZygote.add("--mount-external-multiuser-all");
             }
             argsForZygote.add("--target-sdk-version=" + targetSdkVersion);
 
