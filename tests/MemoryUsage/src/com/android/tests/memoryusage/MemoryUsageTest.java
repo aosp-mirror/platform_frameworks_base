@@ -54,9 +54,9 @@ public class MemoryUsageTest extends InstrumentationTestCase {
     private static final String TAG = "MemoryUsageInstrumentation";
     private static final String KEY_APPS = "apps";
 
-    private Map<String, Intent> nameToIntent;
-    private Map<String, String> nameToProcess;
-    private Map<String, String> nameToResultKey;
+    private Map<String, Intent> mNameToIntent;
+    private Map<String, String> mNameToProcess;
+    private Map<String, String> mNameToResultKey;
 
     public void testMemory() {
         MemoryUsageInstrumentation instrumentation =
@@ -67,7 +67,7 @@ public class MemoryUsageTest extends InstrumentationTestCase {
         parseArgs(args);
 
         Bundle results = new Bundle();
-        for (String app : nameToResultKey.keySet()) {
+        for (String app : mNameToResultKey.keySet()) {
             String processName;
             try {
                 processName = startApp(app);
@@ -81,7 +81,7 @@ public class MemoryUsageTest extends InstrumentationTestCase {
     }
 
     private void parseArgs(Bundle args) {
-        nameToResultKey = new HashMap<String, String>();
+        mNameToResultKey = new HashMap<String, String>();
         String appList = args.getString(KEY_APPS);
 
         if (appList == null)
@@ -95,13 +95,13 @@ public class MemoryUsageTest extends InstrumentationTestCase {
                 fail();
             }
 
-            nameToResultKey.put(parts[0], parts[1]);
+            mNameToResultKey.put(parts[0], parts[1]);
         }
     }
 
     private void createMappings() {
-        nameToIntent = new HashMap<String, Intent>();
-        nameToProcess = new HashMap<String, String>();
+        mNameToIntent = new HashMap<String, Intent>();
+        mNameToProcess = new HashMap<String, String>();
 
         PackageManager pm = getInstrumentation().getContext()
                 .getPackageManager();
@@ -120,8 +120,8 @@ public class MemoryUsageTest extends InstrumentationTestCase {
                         | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
                 startIntent.setClassName(ri.activityInfo.packageName,
                         ri.activityInfo.name);
-                nameToIntent.put(ri.loadLabel(pm).toString(), startIntent);
-                nameToProcess.put(ri.loadLabel(pm).toString(),
+                mNameToIntent.put(ri.loadLabel(pm).toString(), startIntent);
+                mNameToProcess.put(ri.loadLabel(pm).toString(),
                         ri.activityInfo.processName);
             }
         }
@@ -130,11 +130,11 @@ public class MemoryUsageTest extends InstrumentationTestCase {
     private String startApp(String appName) throws NameNotFoundException {
         Log.i(TAG, "Starting " + appName);
 
-        if (!nameToProcess.containsKey(appName))
+        if (!mNameToProcess.containsKey(appName))
             throw new NameNotFoundException("Could not find: " + appName);
 
-        String process = nameToProcess.get(appName);
-        Intent startIntent = nameToIntent.get(appName);
+        String process = mNameToProcess.get(appName);
+        Intent startIntent = mNameToIntent.get(appName);
         getInstrumentation().getContext().startActivity(startIntent);
         return process;
     }
@@ -154,14 +154,14 @@ public class MemoryUsageTest extends InstrumentationTestCase {
             }
             pssData.add(pss);
             if (iteration >= MIN_ITERATIONS && stabilized(pssData)) {
-                results.putInt(nameToResultKey.get(appName), pss);
+                results.putInt(mNameToResultKey.get(appName), pss);
                 return;
             }
             iteration++;
         }
 
         Log.w(TAG, appName + " memory usage did not stabilize");
-        results.putInt(appName, average(pssData));
+        results.putInt(mNameToResultKey.get(appName), average(pssData));
     }
 
     private int average(List<Integer> pssData) {
@@ -202,12 +202,12 @@ public class MemoryUsageTest extends InstrumentationTestCase {
                     continue;
 
                 Log.w(TAG, appName + " crashed: " + crash.shortMsg);
-                results.putString(nameToResultKey.get(appName), crash.shortMsg);
+                results.putString(mNameToResultKey.get(appName), crash.shortMsg);
                 return;
             }
         }
 
-        results.putString(nameToResultKey.get(appName),
+        results.putString(mNameToResultKey.get(appName),
                 "Crashed for unknown reason");
         Log.w(TAG, appName
                 + " not found in process list, most likely it is crashed");
