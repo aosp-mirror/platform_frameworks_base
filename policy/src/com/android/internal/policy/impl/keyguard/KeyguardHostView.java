@@ -70,7 +70,7 @@ public class KeyguardHostView extends KeyguardViewBase {
     private static final int SECURITY_ACCOUNT_ID = R.id.keyguard_account_view;
 
     private AppWidgetHost mAppWidgetHost;
-    private ViewGroup mAppWidgetContainer;
+    private KeyguardWidgetPager mAppWidgetContainer;
     private ViewFlipper mViewFlipper;
     private Button mEmergencyDialerButton;
     private boolean mEnableMenuKey;
@@ -121,7 +121,7 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     @Override
     protected void onFinishInflate() {
-        mAppWidgetContainer = (ViewGroup) findViewById(R.id.app_widget_container);
+        mAppWidgetContainer = (KeyguardWidgetPager) findViewById(R.id.app_widget_container);
         mAppWidgetContainer.setVisibility(VISIBLE);
 
         // View Flipper
@@ -182,7 +182,7 @@ public class KeyguardHostView extends KeyguardViewBase {
     }
 
     void addWidget(AppWidgetHostView view) {
-        mAppWidgetContainer.addView(view);
+        mAppWidgetContainer.addWidget(view);
     }
 
     private KeyguardSecurityCallback mCallback = new KeyguardSecurityCallback() {
