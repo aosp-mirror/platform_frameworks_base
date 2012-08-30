@@ -6664,7 +6664,7 @@ public class WebView extends AbsoluteLayout
         if (action == MotionEvent.ACTION_POINTER_DOWN) {
             cancelTouch();
             action = MotionEvent.ACTION_DOWN;
-        } else if (action == MotionEvent.ACTION_POINTER_UP && ev.getPointerCount() >= 2) {
+        } else if (action == MotionEvent.ACTION_POINTER_UP) {
             // set mLastTouchX/Y to the remaining points for multi-touch.
             mLastTouchX = Math.round(x);
             mLastTouchY = Math.round(y);
@@ -8193,19 +8193,7 @@ public class WebView extends AbsoluteLayout
         private void handleQueuedMotionEvent(MotionEvent ev) {
             mLastEventTime = ev.getEventTime();
             int action = ev.getActionMasked();
-            if (ev.getPointerCount() > 1) {  // Multi-touch
-                handleMultiTouchInWebView(ev);
-            } else {
-                final ScaleGestureDetector detector = mZoomManager.getMultiTouchGestureDetector();
-                if (detector != null && mPreventDefault != PREVENT_DEFAULT_YES) {
-                    // ScaleGestureDetector needs a consistent event stream to operate properly.
-                    // It won't take any action with fewer than two pointers, but it needs to
-                    // update internal bookkeeping state.
-                    detector.onTouchEvent(ev);
-                }
-
-                handleTouchEventCommon(ev, action, Math.round(ev.getX()), Math.round(ev.getY()));
-            }
+            handleMultiTouchInWebView(ev);
         }
 
         private void handleQueuedTouchEventData(TouchEventData ted) {
