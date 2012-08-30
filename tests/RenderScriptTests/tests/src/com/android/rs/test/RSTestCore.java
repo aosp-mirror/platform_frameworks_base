@@ -87,6 +87,7 @@ public class RSTestCore {
         unitTests.add(new UT_math_conformance(this, mRes, mCtx));
         unitTests.add(new UT_math_agree(this, mRes, mCtx));
         unitTests.add(new UT_min(this, mRes, mCtx));
+        unitTests.add(new UT_int4(this, mRes, mCtx));
         unitTests.add(new UT_element(this, mRes, mCtx));
         unitTests.add(new UT_sampler(this, mRes, mCtx));
         unitTests.add(new UT_program_store(this, mRes, mCtx));
