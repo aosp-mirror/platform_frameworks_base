@@ -16,6 +16,7 @@
 
 package com.android.internal.policy.impl.keyguard;
 
+import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.appwidget.AppWidgetHost;
 import android.appwidget.AppWidgetHostView;
@@ -25,8 +26,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
-import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.telephony.TelephonyManager;
 import android.util.AttributeSet;
@@ -43,6 +43,7 @@ import com.android.internal.policy.impl.keyguard.KeyguardSecurityModel.SecurityM
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.R;
 
+import java.io.File;
 import java.util.ArrayList;
 
 public class KeyguardHostView extends KeyguardViewBase {
@@ -72,7 +73,7 @@ public class KeyguardHostView extends KeyguardViewBase {
     private ViewGroup mAppWidgetContainer;
     private ViewFlipper mViewFlipper;
     private Button mEmergencyDialerButton;
-
+    private boolean mEnableMenuKey;
     private boolean mScreenOn;
     private boolean mIsVerifyUnlockOnly;
     private int mCurrentSecurityId = SECURITY_SELECTOR_ID;
@@ -105,6 +106,11 @@ public class KeyguardHostView extends KeyguardViewBase {
         super(context, attrs);
         mAppWidgetHost = new AppWidgetHost(mContext, APPWIDGET_HOST_ID, mOnClickHandler);
         mSecurityModel = new KeyguardSecurityModel(mContext);
+
+        // The following enables the MENU key to work for testing automation
+        mEnableMenuKey = shouldEnableMenuKey();
+        setFocusable(true);
+        setFocusableInTouchMode(true);
     }
 
     @Override
@@ -298,7 +304,7 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     @Override
     public void reset() {
-
+        requestFocus();
     }
 
     private KeyguardSecurityView getSecurityView(int securitySelectorId) {
@@ -438,6 +444,32 @@ public class KeyguardHostView extends KeyguardViewBase {
     @Override
     public void cleanUp() {
 
+    }
+
+    /**
+     * In general, we enable unlocking the insecure keyguard with the menu key. However, there are
+     * some cases where we wish to disable it, notably when the menu button placement or technology
+     * is prone to false positives.
+     *
+     * @return true if the menu key should be enabled
+     */
+    private static final String ENABLE_MENU_KEY_FILE = "/data/local/enable_menu_key";
+    private boolean shouldEnableMenuKey() {
+        final Resources res = getResources();
+        final boolean configDisabled = res.getBoolean(R.bool.config_disableMenuKeyInLockScreen);
+        final boolean isTestHarness = ActivityManager.isRunningInTestHarness();
+        final boolean fileOverride = (new File(ENABLE_MENU_KEY_FILE)).exists();
+        return !configDisabled || isTestHarness || fileOverride;
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_MENU && mEnableMenuKey) {
+            showNextSecurityScreenOrFinish(false);
+            return true;
+        } else {
+            return super.onKeyDown(keyCode, event);
+        }
     }
 
 }
