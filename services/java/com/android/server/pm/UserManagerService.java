@@ -23,6 +23,8 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 
 import android.app.ActivityManager;
+import android.app.ActivityManagerNative;
+import android.app.IStopUserCallback;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -33,6 +35,7 @@ import android.os.FileUtils;
 import android.os.IUserManager;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.AtomicFile;
 import android.util.Slog;
@@ -549,13 +552,36 @@ public class UserManagerService extends IUserManager.Stub {
      */
     public boolean removeUser(int userHandle) {
         checkManageUsersPermission("Only the system can remove users");
+        final UserInfo user;
+        synchronized (mPackagesLock) {
+            user = mUsers.get(userHandle);
+            if (userHandle == 0 || user == null) {
+                return false;
+            }
+        }
+
+        int res;
+        try {
+            res = ActivityManagerNative.getDefault().stopUser(userHandle,
+                    new IStopUserCallback.Stub() {
+                        @Override
+                        public void userStopped(int userId) {
+                            finishRemoveUser(userId);
+                        }
+                        @Override
+                        public void userStopAborted(int userId) {
+                        }
+            });
+        } catch (RemoteException e) {
+            return false;
+        }
+
+        return res == ActivityManager.USER_OP_SUCCESS;
+    }
+
+    void finishRemoveUser(int userHandle) {
         synchronized (mInstallLock) {
             synchronized (mPackagesLock) {
-                final UserInfo user = mUsers.get(userHandle);
-                if (userHandle == 0 || user == null) {
-                    return false;
-                }
-
                 // Cleanup package manager settings
                 mPm.cleanUpUserLILPw(userHandle);
 
@@ -574,7 +600,6 @@ public class UserManagerService extends IUserManager.Stub {
         Intent addedIntent = new Intent(Intent.ACTION_USER_REMOVED);
         addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userHandle);
         mContext.sendBroadcast(addedIntent, android.Manifest.permission.MANAGE_USERS);
-        return true;
     }
 
     @Override

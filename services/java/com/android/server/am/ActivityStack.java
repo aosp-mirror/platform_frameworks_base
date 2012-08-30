@@ -211,7 +211,10 @@ final class ActivityStack {
      */
     final ArrayList<IActivityManager.WaitResult> mWaitingActivityVisible
             = new ArrayList<IActivityManager.WaitResult>();
-    
+
+    final ArrayList<UserStartedState> mStartingUsers
+            = new ArrayList<UserStartedState>();
+
     /**
      * Set when the system is going to sleep, until we have
      * successfully paused the current activity and released our wake lock.
@@ -1397,7 +1400,7 @@ final class ActivityStack {
             // Launcher...
             if (mMainStack) {
                 ActivityOptions.abort(options);
-                return mService.startHomeActivityLocked(0);
+                return mService.startHomeActivityLocked(0, null);
             }
         }
 
@@ -1427,7 +1430,16 @@ final class ActivityStack {
             ActivityOptions.abort(options);
             return false;
         }
-        
+
+        // Make sure that the user who owns this activity is started.  If not,
+        // we will just leave it as is because someone should be bringing
+        // another user's activities to the top of the stack.
+        if (mService.mStartedUsers.get(next.userId) == null) {
+            Slog.w(TAG, "Skipping resume of top activity " + next
+                    + ": user " + next.userId + " is stopped");
+            return false;
+        }
+
         // The activity may be waiting for stop, but that is no longer
         // appropriate for it.
         mStoppingActivities.remove(next);
@@ -1494,7 +1506,7 @@ final class ActivityStack {
                     Slog.d(TAG, "no-history finish of " + last + " on new resume");
                 }
                 requestFinishActivityLocked(last.appToken, Activity.RESULT_CANCELED, null,
-                "no-history");
+                        "no-history");
             }
         }
 
@@ -3414,6 +3426,7 @@ final class ActivityStack {
         ArrayList<ActivityRecord> stops = null;
         ArrayList<ActivityRecord> finishes = null;
         ArrayList<ActivityRecord> thumbnails = null;
+        ArrayList<UserStartedState> startingUsers = null;
         int NS = 0;
         int NF = 0;
         int NT = 0;
@@ -3495,6 +3508,10 @@ final class ActivityStack {
                 booting = mService.mBooting;
                 mService.mBooting = false;
             }
+            if (mStartingUsers.size() > 0) {
+                startingUsers = new ArrayList<UserStartedState>(mStartingUsers);
+                mStartingUsers.clear();
+            }
         }
 
         int i;
@@ -3539,6 +3556,10 @@ final class ActivityStack {
 
         if (booting) {
             mService.finishBooting();
+        } else if (startingUsers != null) {
+            for (i=0; i<startingUsers.size(); i++) {
+                mService.finishUserSwitch(startingUsers.get(i));
+            }
         }
 
         mService.trimApplications();
@@ -3554,6 +3575,10 @@ final class ActivityStack {
         }
 
         return res;
+    }
+
+    final void addStartingUserLocked(UserStartedState uss) {
+        mStartingUsers.add(uss);
     }
 
     /**
