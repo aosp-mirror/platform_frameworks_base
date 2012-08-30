@@ -63,6 +63,8 @@
     <!-- thickness (height) of the dead zone at the top of the navigation bar,
          reducing false presses on navbar buttons; approx 2mm -->
     <dimen name="navigation_bar_deadzone_size">12dp</dimen>
+    <!-- size of the dead zone when touches have recently occurred elsewhere on screen -->
+    <dimen name="navigation_bar_deadzone_size_max">32dp</dimen>
 
     <!-- Height of notification icons in the status bar -->
     <dimen name="status_bar_icon_size">@*android:dimen/status_bar_icon_size</dimen>

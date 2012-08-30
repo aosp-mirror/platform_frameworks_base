@@ -72,5 +72,9 @@
     <!-- Whether we're using the tablet-optimized recents interface (we use this
      value at runtime for some things) -->
     <integer name="status_bar_recents_bg_gradient_degrees">90</integer>
+
+    <!-- decay duration (from size_max -> size), in ms -->
+    <integer name="navigation_bar_deadzone_hold">333</integer>
+    <integer name="navigation_bar_deadzone_decay">333</integer>
 </resources>
 
