@@ -217,10 +217,12 @@ void GradientCache::generateTexture(uint32_t* colors, float* positions,
         float amount = (pos - start) / distance;
         float oppAmount = 1.0f - amount;
 
-        *p++ = uint8_t(startR * oppAmount + endR * amount);
-        *p++ = uint8_t(startG * oppAmount + endG * amount);
-        *p++ = uint8_t(startB * oppAmount + endB * amount);
-        *p++ = uint8_t(startA * oppAmount + endA * amount);
+        const float alpha = startA * oppAmount + endA * amount;
+        const float a = alpha / 255.0f;
+        *p++ = uint8_t(a * (startR * oppAmount + endR * amount));
+        *p++ = uint8_t(a * (startG * oppAmount + endG * amount));
+        *p++ = uint8_t(a * (startB * oppAmount + endB * amount));
+        *p++ = uint8_t(alpha);
     }
 
     for (int i = 1; i < GRADIENT_TEXTURE_HEIGHT; i++) {
