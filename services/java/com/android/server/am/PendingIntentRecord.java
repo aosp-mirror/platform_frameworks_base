@@ -243,11 +243,10 @@ class PendingIntentRecord extends IIntentSender.Stub {
                                 allIntents[allIntents.length-1] = finalIntent;
                                 allResolvedTypes[allResolvedTypes.length-1] = resolvedType;
                                 owner.startActivitiesInPackage(uid, allIntents,
-                                        allResolvedTypes, resultTo, options);
+                                        allResolvedTypes, resultTo, options, key.userId);
                             } else {
-                                owner.startActivityInPackage(uid,
-                                        finalIntent, resolvedType,
-                                        resultTo, resultWho, requestCode, 0, options);
+                                owner.startActivityInPackage(uid, finalIntent, resolvedType,
+                                        resultTo, resultWho, requestCode, 0, options, key.userId);
                             }
                         } catch (RuntimeException e) {
                             Slog.w(ActivityManagerService.TAG,
@@ -265,8 +264,7 @@ class PendingIntentRecord extends IIntentSender.Stub {
                             owner.broadcastIntentInPackage(key.packageName, uid,
                                     finalIntent, resolvedType,
                                     finishedReceiver, code, null, null,
-                                requiredPermission, (finishedReceiver != null), false, UserHandle
-                                        .getUserId(uid));
+                                requiredPermission, (finishedReceiver != null), false, key.userId);
                             sendFinish = false;
                         } catch (RuntimeException e) {
                             Slog.w(ActivityManagerService.TAG,
@@ -276,7 +274,7 @@ class PendingIntentRecord extends IIntentSender.Stub {
                     case ActivityManager.INTENT_SENDER_SERVICE:
                         try {
                             owner.startServiceInPackage(uid,
-                                    finalIntent, resolvedType);
+                                    finalIntent, resolvedType, key.userId);
                         } catch (RuntimeException e) {
                             Slog.w(ActivityManagerService.TAG,
                                     "Unable to send startService intent", e);

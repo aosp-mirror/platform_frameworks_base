@@ -4278,7 +4278,8 @@ public class Activity extends ContextThemeWrapper
                 ActivityManagerNative.getDefault().getIntentSender(
                         ActivityManager.INTENT_SENDER_ACTIVITY_RESULT, packageName,
                         mParent == null ? mToken : mParent.mToken,
-                        mEmbeddedID, requestCode, new Intent[] { data }, null, flags, null);
+                        mEmbeddedID, requestCode, new Intent[] { data }, null, flags, null,
+                        UserHandle.myUserId());
             return target != null ? new PendingIntent(target) : null;
         } catch (RemoteException e) {
             // Empty

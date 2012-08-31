@@ -66,7 +66,7 @@ public interface IActivityManager extends IInterface {
     public int startActivityWithConfig(IApplicationThread caller,
             Intent intent, String resolvedType, IBinder resultTo, String resultWho,
             int requestCode, int startFlags, Configuration newConfig,
-            Bundle options) throws RemoteException;
+            Bundle options, int userId) throws RemoteException;
     public int startActivityIntentSender(IApplicationThread caller,
             IntentSender intent, Intent fillInIntent, String resolvedType,
             IBinder resultTo, String resultWho, int requestCode,
@@ -177,13 +177,16 @@ public interface IActivityManager extends IInterface {
     public IIntentSender getIntentSender(int type,
             String packageName, IBinder token, String resultWho,
             int requestCode, Intent[] intents, String[] resolvedTypes,
-            int flags, Bundle options) throws RemoteException;
+            int flags, Bundle options, int userId) throws RemoteException;
     public void cancelIntentSender(IIntentSender sender) throws RemoteException;
     public boolean clearApplicationUserData(final String packageName,
             final IPackageDataObserver observer, int userId) throws RemoteException;
     public String getPackageForIntentSender(IIntentSender sender) throws RemoteException;
     public int getUidForIntentSender(IIntentSender sender) throws RemoteException;
     
+    public int handleIncomingUser(int callingPid, int callingUid, int userId, boolean allowAll,
+            boolean requireFull, String name, String callerPackage) throws RemoteException;
+
     public void setProcessLimit(int max) throws RemoteException;
     public int getProcessLimit() throws RemoteException;
     
@@ -272,11 +275,6 @@ public interface IActivityManager extends IInterface {
     public void stopAppSwitches() throws RemoteException;
     public void resumeAppSwitches() throws RemoteException;
     
-    public int startActivityInPackage(int uid,
-            Intent intent, String resolvedType, IBinder resultTo,
-            String resultWho, int requestCode, int startFlags, Bundle options)
-            throws RemoteException;
-
     public void killApplicationWithUid(String pkg, int uid) throws RemoteException;
     
     public void closeSystemDialogs(String reason) throws RemoteException;
@@ -314,9 +312,6 @@ public interface IActivityManager extends IInterface {
         ParcelFileDescriptor fd) throws RemoteException;
 
     public int startActivities(IApplicationThread caller,
-            Intent[] intents, String[] resolvedTypes, IBinder resultTo,
-            Bundle options) throws RemoteException;
-    public int startActivitiesInPackage(int uid,
             Intent[] intents, String[] resolvedTypes, IBinder resultTo,
             Bundle options) throws RemoteException;
 
@@ -551,9 +546,8 @@ public interface IActivityManager extends IInterface {
     int BACKUP_AGENT_CREATED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+90;
     int UNBIND_BACKUP_AGENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+91;
     int GET_UID_FOR_INTENT_SENDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+92;
+    int HANDLE_INCOMING_USER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+93;
 
-
-    int START_ACTIVITY_IN_PACKAGE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+94;
     int KILL_APPLICATION_WITH_UID_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+95;
     int CLOSE_SYSTEM_DIALOGS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+96;
     int GET_PROCESS_MEMORY_INFO_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+97;
@@ -580,7 +574,7 @@ public interface IActivityManager extends IInterface {
     int CHECK_GRANT_URI_PERMISSION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+118;
     int DUMP_HEAP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+119;
     int START_ACTIVITIES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+120;
-    int START_ACTIVITIES_IN_PACKAGE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+121;
+
     int ACTIVITY_SLEPT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+122;
     int GET_FRONT_ACTIVITY_SCREEN_COMPAT_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+123;
     int SET_FRONT_ACTIVITY_SCREEN_COMPAT_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+124;

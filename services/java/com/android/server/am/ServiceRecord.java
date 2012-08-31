@@ -370,7 +370,7 @@ class ServiceRecord extends Binder {
                     try {
                         int[] outId = new int[1];
                         nm.enqueueNotificationInternal(localPackageName, appUid, appPid,
-                                null, localForegroundId, localForegroundNoti, outId);
+                                null, localForegroundId, localForegroundNoti, outId, userId);
                     } catch (RuntimeException e) {
                         Slog.w(ActivityManagerService.TAG,
                                 "Error showing notification for service", e);
@@ -399,7 +399,8 @@ class ServiceRecord extends Binder {
                         return;
                     }
                     try {
-                        inm.cancelNotification(localPackageName, localForegroundId);
+                        inm.cancelNotificationWithTag(localPackageName, null,
+                                localForegroundId, userId);
                     } catch (RuntimeException e) {
                         Slog.w(ActivityManagerService.TAG,
                                 "Error canceling notification for service", e);
