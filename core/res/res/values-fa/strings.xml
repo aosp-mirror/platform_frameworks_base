@@ -85,7 +85,7 @@
     <string name="serviceClassFAX" msgid="5566624998840486475">"نمابر"</string>
     <string name="serviceClassSMS" msgid="2015460373701527489">"پیامک"</string>
     <string name="serviceClassDataAsync" msgid="4523454783498551468">"غیر همگام"</string>
-    <string name="serviceClassDataSync" msgid="7530000519646054776">"همگام سازی"</string>
+    <string name="serviceClassDataSync" msgid="7530000519646054776">"همگام‌سازی"</string>
     <string name="serviceClassPacket" msgid="6991006557993423453">"بسته"</string>
     <string name="serviceClassPAD" msgid="3235259085648271037">"PAD"</string>
     <string name="roamingText0" msgid="7170335472198694945">"نشانگر رومینگ روشن"</string>
@@ -126,8 +126,8 @@
     <string name="httpErrorFileNotFound" msgid="6203856612042655084">"فایل درخواستی پیدا نشد."</string>
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"درخواست‌های زیادی در حال پردازش است. بعداً دوباره امتحان کنید."</string>
     <string name="notification_title" msgid="8967710025036163822">"خطای ورود به سیستم برای <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
-    <string name="contentServiceSync" msgid="8353523060269335667">"همگام سازی"</string>
-    <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"همگام سازی"</string>
+    <string name="contentServiceSync" msgid="8353523060269335667">"همگام‌سازی"</string>
+    <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"همگام‌سازی"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"تعداد موارد حذف شده <xliff:g id="CONTENT_TYPE">%s</xliff:g> بسیار زیاد است."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"حافظه رایانهٔ لوحی پر است! برخی از فایل‎ها را حذف کنید تا فضا آزاد شود."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"حافظه تلفن پر است. بعضی از فایل‌ها را حذف کنید تا فضا آزاد شود."</string>
@@ -464,8 +464,8 @@
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"به برنامه اجازه می‎دهد رایانهٔ لوحی را روشن یا خاموش کند."</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"به برنامه اجازه می‎دهد گوشی را روشن یا خاموش کند."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"اجرا در حالت تست کارخانه"</string>
-    <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"اجرا به عنوان تست سازنده سطح پایین، امکان دسترسی کامل به سخت‌افزار رایانهٔ لوحی شما را فراهم می‌آورد. فقط زمانی که رایانهٔ لوحی در حالت تست سازنده در حال اجراست قابل دسترسی است."</string>
-    <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"اجرا به عنوان تست سازنده سطح پایین، امکان دسترسی کامل به سخت‌افزار تلفن شما را فراهم می‌آورد. فقط زمانی که تلفن در حالت تست سازنده در حال اجراست قابل دسترسی است."</string>
+    <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"اجرا به‌عنوان تست سازنده سطح پایین، امکان دسترسی کامل به سخت‌افزار رایانهٔ لوحی شما را فراهم می‌آورد. فقط زمانی که رایانهٔ لوحی در حالت تست سازنده در حال اجراست قابل دسترسی است."</string>
+    <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"اجرا به‌عنوان تست سازنده سطح پایین، امکان دسترسی کامل به سخت‌افزار تلفن شما را فراهم می‌آورد. فقط زمانی که تلفن در حالت تست سازنده در حال اجراست قابل دسترسی است."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"تنظیم تصویر زمینه"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"به برنامه اجازه می‎دهد تا تصویر زمینه سیستم را تنظیم کند."</string>
     <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"تنظیم اندازه تصویر زمینه"</string>
@@ -478,7 +478,7 @@
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"تنظیم منطقهٔ زمانی"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"به برنامه اجازه می‎دهد تا منطقهٔ زمانی رایانهٔ لوحی را تغییر دهد."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"به برنامه اجازه می‎دهد تا منطقهٔ زمانی تلفن را تغییر دهد."</string>
-    <string name="permlab_accountManagerService" msgid="4829262349691386986">"عملکرد به عنوان AccountManagerService"</string>
+    <string name="permlab_accountManagerService" msgid="4829262349691386986">"عملکرد به‌عنوان AccountManagerService"</string>
     <string name="permdesc_accountManagerService" msgid="1948455552333615954">"به برنامه اجازه می‎دهد با AccountAuthenticators تماس برقرار کند."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"یافتن حساب‌ها در دستگاه"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"به برنامه اجازه می‌دهد به لیست حساب‌های شناخته شده توسط رایانهٔ لوحی دسترسی پیدا کند. این ممکن است حسا‌ب‌های ایجاد شده توسط برنامه‌هایی را که نصب کرده‌اید، شامل شود."</string>
@@ -502,7 +502,7 @@
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"تغییر تنظیمات میزان استفاده داده در پس‌زمینه"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"به برنامه اجازه می‎دهد تا تنظیم کاربرد داده‎های پس‌زمینه را تغییر دهد."</string>
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"مشاهدهٔ اتصالات Wi-Fi"</string>
-    <string name="permdesc_accessWifiState" msgid="5002798077387803726">"به برنامه امکان می‌دهد اطلاعات مربوط به شبکه Wi-Fi را مشاهده کند، به عنوان مثال فعال بودن Wi-Fi و نام دستگاه‌های Wi-Fi متصل."</string>
+    <string name="permdesc_accessWifiState" msgid="5002798077387803726">"به برنامه امکان می‌دهد اطلاعات مربوط به شبکه Wi-Fi را مشاهده کند، به‌عنوان مثال فعال بودن Wi-Fi و نام دستگاه‌های Wi-Fi متصل."</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"اتصال به Wi-Fi و قطع اتصال از آن"</string>
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"به برنامه اجازه می‎دهد تا به نقاط دسترسی Wi-Fi وصل شود و ارتباط خود را با آن‌ها قطع کند و تغییراتی را در پیکربندی دستگاه برای شبکه‎های Wi-Fi ایجاد کند."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"دریافت چندگانه Wi-Fi را مجاز می‌کند"</string>
@@ -522,12 +522,12 @@
     <string name="permlab_nfc" msgid="4423351274757876953">"کنترل ارتباط راه نزدیک"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"به برنامه اجازه می‎دهد تا با تگهای ارتباط میدان نزدیک (NFC)، کارتها و فایل خوان ارتباط برقرار کند."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"غیرفعال کردن قفل صفحه شما"</string>
-    <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"به برنامه امکان می‌دهد قفل کلید و هر گونه امنیت گذرواژه مرتبط را غیرفعال کند. به عنوان مثال تلفن هنگام دریافت یک تماس تلفنی ورودی قفل کلید را غیرفعال می‌کند و بعد از پایان تماس، قفل کلید را دوباره فعال می‌کند."</string>
-    <string name="permlab_readSyncSettings" msgid="6201810008230503052">"خواندن تنظیمات همگام سازی"</string>
-    <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"به برنامه اجازه می‌دهد تنظیمات را برای یک حساب بخواند. به عنوان مثال، این ویژگی می‌تواند تعیین کند آیا حساب «افراد» شما با یک حساب همگام‌سازی شده است."</string>
+    <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"به برنامه امکان می‌دهد قفل کلید و هر گونه امنیت گذرواژه مرتبط را غیرفعال کند. به‌عنوان مثال تلفن هنگام دریافت یک تماس تلفنی ورودی قفل کلید را غیرفعال می‌کند و بعد از پایان تماس، قفل کلید را دوباره فعال می‌کند."</string>
+    <string name="permlab_readSyncSettings" msgid="6201810008230503052">"خواندن تنظیمات همگام‌سازی"</string>
+    <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"به برنامه اجازه می‌دهد تنظیمات را برای یک حساب بخواند. به‌عنوان مثال، این ویژگی می‌تواند تعیین کند آیا حساب «افراد» شما با یک حساب همگام‌سازی شده است."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"تغییر وضعیت همگام‌سازی بین فعال و غیرفعال"</string>
-    <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"به یک برنامه اجازه می‌دهد تنظیمات همگام‌سازی را برای یک حساب اصلاح کند. به عنوان مثال، از این ویژگی می‌توان برای فعال کردن همگام‌سازی برنامه «افراد» با یک حساب استفاده کرد."</string>
-    <string name="permlab_readSyncStats" msgid="7396577451360202448">"خواندن اطلاعات آماری همگام سازی"</string>
+    <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"به یک برنامه اجازه می‌دهد تنظیمات همگام‌سازی را برای یک حساب اصلاح کند. به‌عنوان مثال، از این ویژگی می‌توان برای فعال کردن همگام‌سازی برنامه «افراد» با یک حساب استفاده کرد."</string>
+    <string name="permlab_readSyncStats" msgid="7396577451360202448">"خواندن اطلاعات آماری همگام‌سازی"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"به یک برنامه اجازه می‌دهد وضعیت همگام‌سازی یک حساب را بخواند، از جمله سابقه رویدادهای همگام‌سازی و میزان داده‌های همگام‌سازی شده."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"خواندن فیدهای مشترک"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"به برنامه اجازه می‎دهد تا جزئیات مربوط به فیدهای همگام شده کنونی را دریافت کند."</string>
@@ -547,6 +547,10 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"به برنامه اجازه می‎دهد تا در کارت SD بنویسد."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"تغییر/حذف محتواهای حافظه رسانه داخلی"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"به برنامه اجازه می‎دهد تا محتویات حافظه رسانه داخلی را تغییر دهد."</string>
+    <!-- no translation found for permlab_sdcardAccessAll (8150613823900460576) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardAccessAll (3215208357415891320) -->
+    <skip />
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"دسترسی به سیستم فایل حافظهٔ پنهان"</string>
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"به برنامه اجازه می‎دهد تا سیستم فایل حافظهٔ پنهان را بخواند و بنویسد."</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"علامتگذاری/دریافت تماس‌های اینترنتی"</string>
@@ -1089,9 +1093,9 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"در صورت فعال کردن حافظهٔ USB، برخی از برنامه‎هایی که از آن‌ها استفاده می‎کنید متوقف می‎شوند و تا زمانی که حافظهٔ USB را غیرفعال نکنید امکان استفاده از آن‌ها وجود نخواهد داشت."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"راه‌اندازی USB ناموفق بود."</string>
     <string name="dlg_ok" msgid="7376953167039865701">"تأیید"</string>
-    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"متصل شده به عنوان دستگاه رسانه‌ای"</string>
-    <string name="usb_ptp_notification_title" msgid="1960817192216064833">"متصل شده به عنوان دوربین"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"متصل شده به عنوان نصب کننده"</string>
+    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"متصل شده به‌عنوان دستگاه رسانه‌ای"</string>
+    <string name="usb_ptp_notification_title" msgid="1960817192216064833">"متصل شده به‌عنوان دوربین"</string>
+    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"متصل شده به‌عنوان نصب کننده"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"به یک وسیله جانبی USB وصل شده است"</string>
     <string name="usb_notification_message" msgid="2290859399983720271">"برای سایر گزینه‌های USB لمس کنید."</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"حافظهٔ USB فرمت شود؟"</string>
@@ -1159,7 +1163,7 @@
     <string name="permission_request_notification_title" msgid="6486759795926237907">"مجوز درخواست شد"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"مجوز"\n"برای حساب <xliff:g id="ACCOUNT">%s</xliff:g> درخواست شد."</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"روش ورودی"</string>
-    <string name="sync_binding_label" msgid="3687969138375092423">"همگام سازی"</string>
+    <string name="sync_binding_label" msgid="3687969138375092423">"همگام‌سازی"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"قابلیت دسترسی"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"تصویر زمینه"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"تغییر تصویر زمینه"</string>
@@ -1167,14 +1171,10 @@
     <string name="vpn_title_long" msgid="6400714798049252294">"VPN توسط <xliff:g id="APP">%s</xliff:g> فعال شده است"</string>
     <string name="vpn_text" msgid="3011306607126450322">"برای مدیریت شبکه لمس کنید."</string>
     <string name="vpn_text_long" msgid="6407351006249174473">"به <xliff:g id="SESSION">%s</xliff:g> وصل شد. برای مدیریت شبکه لمس کنید."</string>
-    <!-- no translation found for vpn_lockdown_connecting (6443438964440960745) -->
-    <skip />
-    <!-- no translation found for vpn_lockdown_connected (8202679674819213931) -->
-    <skip />
-    <!-- no translation found for vpn_lockdown_error (6009249814034708175) -->
-    <skip />
-    <!-- no translation found for vpn_lockdown_reset (5365010427963548932) -->
-    <skip />
+    <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"در حال اتصال VPN همیشه فعال…"</string>
+    <string name="vpn_lockdown_connected" msgid="8202679674819213931">"VPN همیشه فعال متصل شد"</string>
+    <string name="vpn_lockdown_error" msgid="6009249814034708175">"خطای VPN همیشه فعال"</string>
+    <string name="vpn_lockdown_reset" msgid="5365010427963548932">"برای بازنشانی اتصال لمس کنید"</string>
     <string name="upload_file" msgid="2897957172366730416">"انتخاب فایل"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"هیچ فایلی انتخاب نشد"</string>
     <string name="reset" msgid="2448168080964209908">"بازنشانی"</string>
