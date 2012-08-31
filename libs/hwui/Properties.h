@@ -74,8 +74,10 @@ enum DebugLevel {
 #define PROPERTY_TEXTURE_CACHE_FLUSH_RATE "ro.hwui.texture_cache_flush_rate"
 
 // These properties are defined in pixels
-#define PROPERTY_TEXT_CACHE_WIDTH "ro.hwui.text_cache_width"
-#define PROPERTY_TEXT_CACHE_HEIGHT "ro.hwui.text_cache_height"
+#define PROPERTY_TEXT_SMALL_CACHE_WIDTH "ro.hwui.text_small_cache_width"
+#define PROPERTY_TEXT_SMALL_CACHE_HEIGHT "ro.hwui.text_small_cache_height"
+#define PROPERTY_TEXT_LARGE_CACHE_WIDTH "ro.hwui.text_large_cache_width"
+#define PROPERTY_TEXT_LARGE_CACHE_HEIGHT "ro.hwui.text_large_cache_height"
 
 // Indicates whether gamma correction should be applied in the shaders
 // or in lookup tables. Accepted values:

@@ -34,9 +34,10 @@ namespace uirenderer {
 // Defines
 ///////////////////////////////////////////////////////////////////////////////
 
-#define DEFAULT_TEXT_CACHE_WIDTH 1024
-#define DEFAULT_TEXT_CACHE_HEIGHT 256
-#define MAX_TEXT_CACHE_WIDTH 2048
+#define DEFAULT_TEXT_SMALL_CACHE_WIDTH 1024
+#define DEFAULT_TEXT_SMALL_CACHE_HEIGHT 256
+#define DEFAULT_TEXT_LARGE_CACHE_WIDTH 2048
+#define DEFAULT_TEXT_LARGE_CACHE_HEIGHT 512
 #define CACHE_BLOCK_ROUNDING_SIZE 4
 
 #define AUTO_KERN(prev, next) (((next) - (prev) + 32) >> 6 << 16)
@@ -626,30 +627,35 @@ FontRenderer::FontRenderer() {
 
     mIndexBufferID = 0;
 
-    mSmallCacheWidth = DEFAULT_TEXT_CACHE_WIDTH;
-    mSmallCacheHeight = DEFAULT_TEXT_CACHE_HEIGHT;
+    mSmallCacheWidth = DEFAULT_TEXT_SMALL_CACHE_WIDTH;
+    mSmallCacheHeight = DEFAULT_TEXT_SMALL_CACHE_HEIGHT;
+    mLargeCacheWidth = DEFAULT_TEXT_LARGE_CACHE_WIDTH;
+    mLargeCacheHeight = DEFAULT_TEXT_LARGE_CACHE_HEIGHT;
 
     char property[PROPERTY_VALUE_MAX];
-    if (property_get(PROPERTY_TEXT_CACHE_WIDTH, property, NULL) > 0) {
-        if (sLogFontRendererCreate) {
-            INIT_LOGD("  Setting text cache width to %s pixels", property);
-        }
+    if (property_get(PROPERTY_TEXT_SMALL_CACHE_WIDTH, property, NULL) > 0) {
         mSmallCacheWidth = atoi(property);
-    } else {
-        if (sLogFontRendererCreate) {
-            INIT_LOGD("  Using default text cache width of %i pixels", mSmallCacheWidth);
-        }
     }
-
-    if (property_get(PROPERTY_TEXT_CACHE_HEIGHT, property, NULL) > 0) {
-        if (sLogFontRendererCreate) {
-            INIT_LOGD("  Setting text cache width to %s pixels", property);
-        }
+    if (property_get(PROPERTY_TEXT_SMALL_CACHE_HEIGHT, property, NULL) > 0) {
         mSmallCacheHeight = atoi(property);
-    } else {
-        if (sLogFontRendererCreate) {
-            INIT_LOGD("  Using default text cache height of %i pixels", mSmallCacheHeight);
-        }
+    }
+    if (property_get(PROPERTY_TEXT_LARGE_CACHE_WIDTH, property, NULL) > 0) {
+        mLargeCacheWidth = atoi(property);
+    }
+    if (property_get(PROPERTY_TEXT_LARGE_CACHE_HEIGHT, property, NULL) > 0) {
+        mLargeCacheHeight = atoi(property);
+    }
+    GLint maxTextureSize = Caches::getInstance().maxTextureSize;
+    mSmallCacheWidth = (mSmallCacheWidth > maxTextureSize) ? maxTextureSize : mSmallCacheWidth;
+    mSmallCacheHeight = (mSmallCacheHeight > maxTextureSize) ? maxTextureSize : mSmallCacheHeight;
+    mLargeCacheWidth = (mLargeCacheWidth > maxTextureSize) ? maxTextureSize : mLargeCacheWidth;
+    mLargeCacheHeight = (mLargeCacheHeight > maxTextureSize) ? maxTextureSize : mLargeCacheHeight;
+    if (sLogFontRendererCreate) {
+        INIT_LOGD("  Text cache sizes, in pixels: %i x %i, %i x %i, %i x %i, %i x %i",
+                mSmallCacheWidth, mSmallCacheHeight,
+                mLargeCacheWidth, mLargeCacheHeight >> 1,
+                mLargeCacheWidth, mLargeCacheHeight >> 1,
+                mLargeCacheWidth, mLargeCacheHeight);
     }
 
     sLogFontRendererCreate = false;
@@ -861,21 +867,11 @@ void FontRenderer::initTextTexture() {
     }
     mCacheTextures.clear();
 
-    // Next, use other, separate caches for large glyphs.
-    uint16_t maxWidth = 0;
-    if (Caches::hasInstance()) {
-        maxWidth = Caches::getInstance().maxTextureSize;
-    }
-
-    if (maxWidth > MAX_TEXT_CACHE_WIDTH || maxWidth == 0) {
-        maxWidth = MAX_TEXT_CACHE_WIDTH;
-    }
-
     mUploadTexture = false;
     mCacheTextures.push(createCacheTexture(mSmallCacheWidth, mSmallCacheHeight, true));
-    mCacheTextures.push(createCacheTexture(maxWidth, 256, false));
-    mCacheTextures.push(createCacheTexture(maxWidth, 256, false));
-    mCacheTextures.push(createCacheTexture(maxWidth, 512, false));
+    mCacheTextures.push(createCacheTexture(mLargeCacheWidth, mLargeCacheHeight >> 1, false));
+    mCacheTextures.push(createCacheTexture(mLargeCacheWidth, mLargeCacheHeight >> 1, false));
+    mCacheTextures.push(createCacheTexture(mLargeCacheWidth, mLargeCacheHeight, false));
     mCurrentCacheTexture = mCacheTextures[0];
 }
 
