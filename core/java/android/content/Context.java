@@ -35,6 +35,8 @@ import android.os.Looper;
 import android.os.UserHandle;
 import android.util.AttributeSet;
 import android.view.CompatibilityInfoHolder;
+import android.view.Display;
+import android.view.WindowManager;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -2547,7 +2549,7 @@ public abstract class Context {
     /**
      * Return a new Context object for the current Context but whose resources
      * are adjusted to match the given Configuration.  Each call to this method
-     * returns a new instance of a Contex object; Context objects are not
+     * returns a new instance of a Context object; Context objects are not
      * shared, however common state (ClassLoader, other Resources for the
      * same configuration) may be so the Context itself can be fairly lightweight.
      *
@@ -2557,19 +2559,40 @@ public abstract class Context {
      * orientation change), the resources of this context will also change except
      * for those that have been explicitly overridden with a value here.
      *
-     * @return A Context for the application.
+     * @return A Context with the given configuration override.
      */
     public abstract Context createConfigurationContext(Configuration overrideConfiguration);
+
+    /**
+     * Return a new Context object for the current Context but whose resources
+     * are adjusted to match the metrics of the given Display.  Each call to this method
+     * returns a new instance of a Context object; Context objects are not
+     * shared, however common state (ClassLoader, other Resources for the
+     * same configuration) may be so the Context itself can be fairly lightweight.
+     *
+     * The returned display Context provides a {@link WindowManager}
+     * (see {@link #getSystemService(String)}) that is configured to show windows
+     * on the given display.  The WindowManager's {@link WindowManager#getDefaultDisplay}
+     * method can be used to retrieve the Display from the returned Context.
+     *
+     * @param display A {@link Display} object specifying the display
+     * for whose metrics the Context's resources should be tailored and upon which
+     * new windows should be shown.
+     *
+     * @return A Context for the display.
+     */
+    public abstract Context createDisplayContext(Display display);
 
     /**
      * Gets the compatibility info holder for this context.  This information
      * is provided on a per-application basis and is used to simulate lower density
      * display metrics for legacy applications.
      *
+     * @param displayId The display id for which to get compatibility info.
      * @return The compatibility info holder, or null if not required by the application.
      * @hide
      */
-    public abstract CompatibilityInfoHolder getCompatibilityInfo();
+    public abstract CompatibilityInfoHolder getCompatibilityInfo(int displayId);
 
     /**
      * Indicates whether this Context is restricted.

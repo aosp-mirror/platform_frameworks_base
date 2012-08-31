@@ -41,6 +41,7 @@ import android.os.UserHandle;
 import android.util.AndroidRuntimeException;
 import android.util.Slog;
 import android.view.CompatibilityInfoHolder;
+import android.view.Display;
 
 import java.io.File;
 import java.io.IOException;
@@ -139,7 +140,8 @@ public final class LoadedApk {
                     ContextImpl.createSystemContext(mainThread);
                 ActivityThread.mSystemContext.getResources().updateConfiguration(
                          mainThread.getConfiguration(),
-                         mainThread.getDisplayMetricsLocked(compatInfo, false),
+                         mainThread.getDisplayMetricsLocked(
+                                 Display.DEFAULT_DISPLAY, compatInfo),
                          compatInfo);
                 //Slog.i(TAG, "Created system resources "
                 //        + mSystemContext.getResources() + ": "
@@ -471,7 +473,8 @@ public final class LoadedApk {
 
     public Resources getResources(ActivityThread mainThread) {
         if (mResources == null) {
-            mResources = mainThread.getTopLevelResources(mResDir, null, this);
+            mResources = mainThread.getTopLevelResources(mResDir,
+                    Display.DEFAULT_DISPLAY, null, this);
         }
         return mResources;
     }

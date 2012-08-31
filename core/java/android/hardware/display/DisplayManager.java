@@ -19,7 +19,6 @@ package android.hardware.display;
 import android.content.Context;
 import android.os.Handler;
 import android.util.SparseArray;
-import android.view.CompatibilityInfoHolder;
 import android.view.Display;
 
 /**
@@ -92,7 +91,7 @@ public final class DisplayManager {
         Display display = mDisplays.get(displayId);
         if (display == null) {
             display = mGlobal.getCompatibleDisplay(displayId,
-                    getCompatibilityInfoForDisplayLocked(displayId));
+                    mContext.getCompatibilityInfo(displayId));
             if (display != null) {
                 mDisplays.put(displayId, display);
             }
@@ -100,14 +99,6 @@ public final class DisplayManager {
             display = null;
         }
         return display;
-    }
-
-    private CompatibilityInfoHolder getCompatibilityInfoForDisplayLocked(int displayId) {
-        CompatibilityInfoHolder cih = null;
-        if (displayId == Display.DEFAULT_DISPLAY) {
-            cih = mContext.getCompatibilityInfo();
-        }
-        return cih;
     }
 
     /**

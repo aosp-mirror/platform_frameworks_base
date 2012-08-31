@@ -36,6 +36,7 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.view.CompatibilityInfoHolder;
+import android.view.Display;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -582,13 +583,18 @@ public class ContextWrapper extends Context {
     }
 
     @Override
+    public Context createDisplayContext(Display display) {
+        return mBase.createDisplayContext(display);
+    }
+
+    @Override
     public boolean isRestricted() {
         return mBase.isRestricted();
     }
 
     /** @hide */
     @Override
-    public CompatibilityInfoHolder getCompatibilityInfo() {
-        return mBase.getCompatibilityInfo();
+    public CompatibilityInfoHolder getCompatibilityInfo(int displayId) {
+        return mBase.getCompatibilityInfo(displayId);
     }
 }

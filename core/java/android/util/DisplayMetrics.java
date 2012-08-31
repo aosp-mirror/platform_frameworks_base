@@ -206,13 +206,52 @@ public class DisplayMetrics {
     public void setToDefaults() {
         widthPixels = 0;
         heightPixels = 0;
-        density = noncompatDensity = DENSITY_DEVICE / (float) DENSITY_DEFAULT;
-        densityDpi = noncompatDensityDpi = DENSITY_DEVICE;
+        density =  DENSITY_DEVICE / (float) DENSITY_DEFAULT;
+        densityDpi =  DENSITY_DEVICE;
         scaledDensity = density;
-        xdpi = noncompatXdpi = DENSITY_DEVICE;
-        ydpi = noncompatYdpi = DENSITY_DEVICE;
-        noncompatWidthPixels = 0;
-        noncompatHeightPixels = 0;
+        xdpi = DENSITY_DEVICE;
+        ydpi = DENSITY_DEVICE;
+        noncompatWidthPixels = widthPixels;
+        noncompatHeightPixels = heightPixels;
+        noncompatDensity = density;
+        noncompatDensityDpi = densityDpi;
+        noncompatScaledDensity = scaledDensity;
+        noncompatXdpi = xdpi;
+        noncompatYdpi = ydpi;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof DisplayMetrics && equals((DisplayMetrics)o);
+    }
+
+    /**
+     * Returns true if these display metrics equal the other display metrics.
+     *
+     * @param other The display metrics with which to compare.
+     * @return True if the display metrics are equal.
+     */
+    public boolean equals(DisplayMetrics other) {
+        return other != null
+                && widthPixels == other.widthPixels
+                && heightPixels == other.heightPixels
+                && density == other.density
+                && densityDpi == other.densityDpi
+                && scaledDensity == other.scaledDensity
+                && xdpi == other.xdpi
+                && ydpi == other.ydpi
+                && noncompatWidthPixels == other.noncompatWidthPixels
+                && noncompatHeightPixels == other.noncompatHeightPixels
+                && noncompatDensity == other.noncompatDensity
+                && noncompatDensityDpi == other.noncompatDensityDpi
+                && noncompatScaledDensity == other.noncompatScaledDensity
+                && noncompatXdpi == other.noncompatXdpi
+                && noncompatYdpi == other.noncompatYdpi;
+    }
+
+    @Override
+    public int hashCode() {
+        return widthPixels * heightPixels * densityDpi;
     }
 
     @Override
