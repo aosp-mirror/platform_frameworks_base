@@ -25,12 +25,15 @@ public class KeyguardNavigationManager {
 
     private TextView mMessageArea;
     private KeyguardSecurityView mKeyguardSecurityView;
+    private View mClickArea;
 
     public KeyguardNavigationManager(KeyguardSecurityView view) {
         mKeyguardSecurityView = view;
-        mMessageArea = (TextView) ((View) view).findViewById(R.id.message_area);
+        mMessageArea = (TextView) ((View) view).findViewById(R.id.keyguard_message_area);
         mMessageArea.setSelected(true); // Make marquee work
-        mMessageArea.setOnClickListener(new View.OnClickListener() {
+
+        mClickArea = ((View) view).findViewById(R.id.keyguard_click_area);
+        mClickArea.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 mKeyguardSecurityView.getCallback().dismiss(false);
             }

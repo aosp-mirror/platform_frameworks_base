@@ -53,17 +53,12 @@ public interface KeyguardSecurityCallback {
     int getFailedAttempts();
 
     /**
-     * Shows the backup unlock for the current method.  If none available, this call is a NOP.
+     * Shows the backup security for the current method.  If none available, this call is a no-op.
      */
-    void showBackupUnlock();
+    void showBackupSecurity();
 
     /**
-     * Used to inform keyguard when the current view is done drawing.
-     */
-    void keyguardDoneDrawing();
-
-    /**
-     * Sets a runnable to launch after the user enters their
+     * Sets a runnable to launch after the user successfully enters their credentials.
      * @param runnable
      */
     void setOnDismissRunnable(Runnable runnable);
