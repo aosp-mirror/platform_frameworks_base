@@ -243,32 +243,39 @@ class AlarmManagerService extends IAlarmManager.Stub {
                 "android.permission.SET_TIME_ZONE",
                 "setTimeZone");
 
-        if (TextUtils.isEmpty(tz)) return;
-        TimeZone zone = TimeZone.getTimeZone(tz);
-        // Prevent reentrant calls from stepping on each other when writing
-        // the time zone property
-        boolean timeZoneWasChanged = false;
-        synchronized (this) {
-            String current = SystemProperties.get(TIMEZONE_PROPERTY);
-            if (current == null || !current.equals(zone.getID())) {
-                if (localLOGV) Slog.v(TAG, "timezone changed: " + current + ", new=" + zone.getID());
-                timeZoneWasChanged = true; 
-                SystemProperties.set(TIMEZONE_PROPERTY, zone.getID());
-            }
-            
-            // Update the kernel timezone information
-            // Kernel tracks time offsets as 'minutes west of GMT'
-            int gmtOffset = zone.getOffset(System.currentTimeMillis());
-            setKernelTimezone(mDescriptor, -(gmtOffset / 60000));
-        }
+        long oldId = Binder.clearCallingIdentity();
+        try {
+            if (TextUtils.isEmpty(tz)) return;
+            TimeZone zone = TimeZone.getTimeZone(tz);
+            // Prevent reentrant calls from stepping on each other when writing
+            // the time zone property
+            boolean timeZoneWasChanged = false;
+            synchronized (this) {
+                String current = SystemProperties.get(TIMEZONE_PROPERTY);
+                if (current == null || !current.equals(zone.getID())) {
+                    if (localLOGV) {
+                        Slog.v(TAG, "timezone changed: " + current + ", new=" + zone.getID());
+                    }
+                    timeZoneWasChanged = true;
+                    SystemProperties.set(TIMEZONE_PROPERTY, zone.getID());
+                }
 
-        TimeZone.setDefault(null);
-        
-        if (timeZoneWasChanged) {
-            Intent intent = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
-            intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
-            intent.putExtra("time-zone", zone.getID());
-            mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+                // Update the kernel timezone information
+                // Kernel tracks time offsets as 'minutes west of GMT'
+                int gmtOffset = zone.getOffset(System.currentTimeMillis());
+                setKernelTimezone(mDescriptor, -(gmtOffset / 60000));
+            }
+
+            TimeZone.setDefault(null);
+
+            if (timeZoneWasChanged) {
+                Intent intent = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
+                intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+                intent.putExtra("time-zone", zone.getID());
+                mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(oldId);
         }
     }
     
