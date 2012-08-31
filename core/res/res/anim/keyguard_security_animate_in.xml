@@ -26,8 +26,8 @@
         android:pivotY="50%"
         android:fillEnabled="true"
         android:fillAfter="true"
-        android:duration="@integer/flip_duration"
-        android:startOffset="@integer/flip_duration" />
+        android:duration="@integer/kg_security_flip_duration"
+        android:startOffset="@integer/kg_security_flip_duration" />
 
 </set>
 

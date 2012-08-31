@@ -23,12 +23,15 @@
     android:gravity="left">
 
     <LinearLayout
+        android:id="@+id/keyguard_click_area"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        style="?android:attr/buttonBarButtonStyle"
+        android:padding="10dip"
+        android:clickable="true">
 
         <TextView
-            android:id="@+id/back"
             android:layout_width="20dip"
             android:layout_height="wrap_content"
             android:textSize="28dp"
@@ -36,7 +39,7 @@
 
         <!-- message area for security screen -->
         <TextView
-            android:id="@+id/message_area"
+            android:id="@+id/keyguard_message_area"
             android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -47,15 +50,5 @@
             android:textAppearance="?android:attr/textAppearanceMedium"/>
 
     </LinearLayout>
-
-    <!-- This is currently only uses for pattern unlock -->
-    <Button android:id="@+id/forgot_password_button"
-        android:layout_gravity="right"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="@*android:dimen/keyguard_lockscreen_status_line_font_size"
-        android:drawableLeft="@*android:drawable/lockscreen_forgot_password_button"
-        android:drawablePadding="0dip"
-        android:visibility="gone"/>
 
 </LinearLayout>

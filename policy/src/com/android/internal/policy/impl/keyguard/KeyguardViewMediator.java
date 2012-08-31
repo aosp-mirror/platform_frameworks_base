@@ -986,7 +986,7 @@ public class KeyguardViewMediator {
             mHandler.sendMessage(msg);
 
             if (authenticated) {
-                mUpdateMonitor.clearFailedAttempts();
+                mUpdateMonitor.clearFailedUnlockAttempts();
             }
 
             if (mExitSecureCallback != null) {
