@@ -76,6 +76,7 @@ class GLES20RecordingCanvas extends GLES20Canvas implements Poolable<GLES20Recor
 
     void start() {
         mDisplayList.mBitmaps.clear();
+        mDisplayList.mChildDisplayLists.clear();
     }
 
     int end(int nativeDisplayList) {
@@ -153,6 +154,13 @@ class GLES20RecordingCanvas extends GLES20Canvas implements Poolable<GLES20Recor
     public void drawCircle(float cx, float cy, float radius, Paint paint) {
         super.drawCircle(cx, cy, radius, paint);
         recordShaderBitmap(paint);
+    }
+
+    @Override
+    public int drawDisplayList(DisplayList displayList, Rect dirty, int flags) {
+        int status = super.drawDisplayList(displayList, dirty, flags);
+        mDisplayList.mChildDisplayLists.add(displayList);
+        return status;
     }
 
     @Override

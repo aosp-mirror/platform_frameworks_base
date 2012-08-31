@@ -25,9 +25,12 @@ import java.util.ArrayList;
  * An implementation of display list for OpenGL ES 2.0.
  */
 class GLES20DisplayList extends DisplayList {
-    // These lists ensure that any Bitmaps recorded by a DisplayList are kept alive as long
-    // as the DisplayList is alive.  The Bitmaps are populated by the GLES20RecordingCanvas.
+    // These lists ensure that any Bitmaps and DisplayLists recorded by a DisplayList are kept
+    // alive as long as the DisplayList is alive.  The Bitmap and DisplayList lists
+    // are populated by the GLES20RecordingCanvas during appropriate drawing calls and are
+    // cleared at the start of a new drawing frame or when the view is detached from the window.
     final ArrayList<Bitmap> mBitmaps = new ArrayList<Bitmap>(5);
+    final ArrayList<DisplayList> mChildDisplayLists = new ArrayList<DisplayList>();
 
     private GLES20RecordingCanvas mCanvas;
     private boolean mValid;
@@ -79,6 +82,7 @@ class GLES20DisplayList extends DisplayList {
     public void clear() {
         if (!mValid) {
             mBitmaps.clear();
+            mChildDisplayLists.clear();
         }
     }
 
