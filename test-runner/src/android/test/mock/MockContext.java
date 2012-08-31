@@ -40,6 +40,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.view.CompatibilityInfoHolder;
+import android.view.Display;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -521,13 +522,18 @@ public class MockContext extends Context {
     }
 
     @Override
+    public Context createDisplayContext(Display display) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public boolean isRestricted() {
         throw new UnsupportedOperationException();        
     }
 
     /** @hide */
     @Override
-    public CompatibilityInfoHolder getCompatibilityInfo() {
+    public CompatibilityInfoHolder getCompatibilityInfo(int displayId) {
         throw new UnsupportedOperationException();
     }
 }

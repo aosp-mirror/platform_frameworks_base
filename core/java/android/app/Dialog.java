@@ -147,15 +147,19 @@ public class Dialog implements DialogInterface, Window.Callback,
         this(context, theme, true);
     }
 
-    Dialog(Context context, int theme, boolean createContextWrapper) {
-        if (theme == 0) {
-            TypedValue outValue = new TypedValue();
-            context.getTheme().resolveAttribute(com.android.internal.R.attr.dialogTheme,
-                    outValue, true);
-            theme = outValue.resourceId;
+    Dialog(Context context, int theme, boolean createContextThemeWrapper) {
+        if (createContextThemeWrapper) {
+            if (theme == 0) {
+                TypedValue outValue = new TypedValue();
+                context.getTheme().resolveAttribute(com.android.internal.R.attr.dialogTheme,
+                        outValue, true);
+                theme = outValue.resourceId;
+            }
+            mContext = new ContextThemeWrapper(context, theme);
+        } else {
+            mContext = context;
         }
 
-        mContext = createContextWrapper ? new ContextThemeWrapper(context, theme) : context;
         mWindowManager = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
         Window w = PolicyManager.makeNewWindow(mContext);
         mWindow = w;
@@ -164,7 +168,7 @@ public class Dialog implements DialogInterface, Window.Callback,
         w.setGravity(Gravity.CENTER);
         mListenersHandler = new ListenersHandler(this);
     }
-    
+
     /**
      * @deprecated
      * @hide

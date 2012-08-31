@@ -768,10 +768,14 @@
         <attr name="dialogCustomTitleDecorLayout" format="reference" />
         <!-- Window decor layout to use in dialog mode with title only -->
         <attr name="dialogTitleDecorLayout" format="reference" />
+
         <!-- Theme to use for alert dialogs spawned from this theme. -->
         <attr name="alertDialogTheme" format="reference" />
         <!-- Icon drawable to use for alerts -->
         <attr name="alertDialogIcon" format="reference" />
+
+        <!-- Theme to use for presentations spawned from this theme. -->
+        <attr name="presentationTheme" format="reference" />
 
         <!-- Drawable to use for generic vertical dividers. -->
         <attr name="dividerVertical" format="reference" />

@@ -54,6 +54,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
+import android.view.Display;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -722,8 +723,8 @@ final class ApplicationPackageManager extends PackageManager {
             return mContext.mMainThread.getSystemContext().getResources();
         }
         Resources r = mContext.mMainThread.getTopLevelResources(
-            app.uid == Process.myUid() ? app.sourceDir
-            : app.publicSourceDir, null, mContext.mPackageInfo);
+                app.uid == Process.myUid() ? app.sourceDir : app.publicSourceDir,
+                        Display.DEFAULT_DISPLAY, null, mContext.mPackageInfo);
         if (r != null) {
             return r;
         }
