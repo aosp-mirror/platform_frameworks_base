@@ -323,7 +323,7 @@ public class ActiveServices {
             int startId) {
         if (DEBUG_SERVICE) Slog.v(TAG, "stopServiceToken: " + className
                 + " " + token + " startId=" + startId);
-        ServiceRecord r = findServiceLocked(className, token);
+        ServiceRecord r = findServiceLocked(className, token, UserHandle.getCallingUserId());
         if (r != null) {
             if (startId >= 0) {
                 // Asked to only stop if done with all work.  Note that
@@ -366,9 +366,10 @@ public class ActiveServices {
 
     public void setServiceForegroundLocked(ComponentName className, IBinder token,
             int id, Notification notification, boolean removeNotification) {
+        final int userId = UserHandle.getCallingUserId();
         final long origId = Binder.clearCallingIdentity();
         try {
-            ServiceRecord r = findServiceLocked(className, token);
+            ServiceRecord r = findServiceLocked(className, token, userId);
             if (r != null) {
                 if (id != 0) {
                     if (notification == null) {
@@ -427,9 +428,6 @@ public class ActiveServices {
         if (DEBUG_SERVICE) Slog.v(TAG, "bindService: " + service
                 + " type=" + resolvedType + " conn=" + connection.asBinder()
                 + " flags=0x" + Integer.toHexString(flags));
-        if (DEBUG_MU)
-            Slog.i(TAG_MU, "bindService uid=" + Binder.getCallingUid() + " origUid="
-                    + Binder.getOrigCallingUid());
         final ProcessRecord callerApp = mAm.getRecordForAppLocked(caller);
         if (callerApp == null) {
             throw new SecurityException(
@@ -677,8 +675,8 @@ public class ActiveServices {
     }
 
     private final ServiceRecord findServiceLocked(ComponentName name,
-            IBinder token) {
-        ServiceRecord r = mServiceMap.getServiceByName(name, Binder.getOrigCallingUser());
+            IBinder token, int userId) {
+        ServiceRecord r = mServiceMap.getServiceByName(name, userId);
         return r == token ? r : null;
     }
 
@@ -1424,9 +1422,6 @@ public class ActiveServices {
                     r.callStart = false;
                 }
             }
-            if (DEBUG_MU)
-                Slog.v(TAG_MU, "before serviceDontExecutingLocked, uid="
-                        + Binder.getOrigCallingUid());
             final long origId = Binder.clearCallingIdentity();
             serviceDoneExecutingLocked(r, inStopping);
             Binder.restoreCallingIdentity(origId);

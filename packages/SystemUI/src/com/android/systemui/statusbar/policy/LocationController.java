@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.LocationManager;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
 import android.view.View;
@@ -84,10 +85,12 @@ public class LocationController extends BroadcastReceiver {
         }
         
         try {
+            // XXX WHAT TO DO ABOUT MULTI-USER?
             if (visible) {
                 Intent gpsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                 gpsIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, gpsIntent, 0);
+                PendingIntent pendingIntent = PendingIntent.getActivityAsUser(context, 0,
+                        gpsIntent, 0, null, UserHandle.CURRENT);
 
                 Notification n = new Notification.Builder(mContext)
                     .setSmallIcon(iconId)
@@ -108,11 +111,12 @@ public class LocationController extends BroadcastReceiver {
                         null, 
                         GPS_NOTIFICATION_ID, 
                         n,
-                        idOut);
+                        idOut,
+                        UserHandle.USER_CURRENT);
             } else {
-                mNotificationService.cancelNotification(
-                        mContext.getPackageName(),
-                        GPS_NOTIFICATION_ID);
+                mNotificationService.cancelNotificationWithTag(
+                        mContext.getPackageName(), null,
+                        GPS_NOTIFICATION_ID, UserHandle.USER_CURRENT);
             }
         } catch (android.os.RemoteException ex) {
             // well, it was worth a shot

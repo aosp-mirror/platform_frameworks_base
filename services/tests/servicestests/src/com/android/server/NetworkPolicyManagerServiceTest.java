@@ -880,7 +880,8 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
     private Future<Void> expectClearNotifications() throws Exception {
         final FutureAnswer future = new FutureAnswer();
-        mNotifManager.cancelNotificationWithTag(isA(String.class), isA(String.class), anyInt());
+        mNotifManager.cancelNotificationWithTag(isA(String.class), isA(String.class), anyInt(),
+                UserHandle.myUserId());
         expectLastCall().andAnswer(future).anyTimes();
         return future;
     }
@@ -888,7 +889,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
     private Future<String> expectEnqueueNotification() throws Exception {
         final FutureCapture<String> tag = new FutureCapture<String>();
         mNotifManager.enqueueNotificationWithTag(isA(String.class), capture(tag.capture), anyInt(),
-                isA(Notification.class), isA(int[].class));
+                isA(Notification.class), isA(int[].class), UserHandle.myUserId());
         return tag;
     }
 

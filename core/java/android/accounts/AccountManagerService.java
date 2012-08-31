@@ -1052,7 +1052,7 @@ public class AccountManagerService
         if (account == null) throw new IllegalArgumentException("account is null");
         if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
         checkBinderPermission(Manifest.permission.USE_CREDENTIALS);
-        UserAccounts accounts = getUserAccountsForCaller();
+        final UserAccounts accounts = getUserAccountsForCaller();
         AccountAuthenticatorCache.ServiceInfo<AuthenticatorDescription> authenticatorInfo =
             mAuthenticatorCache.getServiceInfo(
                     AuthenticatorDescription.newKey(account.type));
@@ -1141,7 +1141,7 @@ public class AccountManagerService
                         if (intent != null && notifyOnAuthFailure && !customTokens) {
                             doNotification(mAccounts,
                                     account, result.getString(AccountManager.KEY_AUTH_FAILED_MESSAGE),
-                                    intent);
+                                    intent, accounts.userId);
                         }
                     }
                     super.onResult(result);
@@ -1152,7 +1152,8 @@ public class AccountManagerService
         }
     }
 
-    private void createNoCredentialsPermissionNotification(Account account, Intent intent) {
+    private void createNoCredentialsPermissionNotification(Account account, Intent intent,
+            int userId) {
         int uid = intent.getIntExtra(
                 GrantCredentialsPermissionActivity.EXTRAS_REQUESTING_UID, -1);
         String authTokenType = intent.getStringExtra(
@@ -1172,9 +1173,10 @@ public class AccountManagerService
             title = titleAndSubtitle.substring(0, index);
             subtitle = titleAndSubtitle.substring(index + 1);            
         }
-        n.setLatestEventInfo(mContext,
-                title, subtitle,
-                PendingIntent.getActivity(mContext, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT));
+        n.setLatestEventInfo(mContext, title, subtitle,
+                PendingIntent.getActivityAsUser(mContext, 0, intent,
+                        PendingIntent.FLAG_CANCEL_CURRENT,
+                        null, new UserHandle(userId)));
         installNotification(getCredentialPermissionNotificationId(account, authTokenType, uid), n);
     }
 
@@ -2083,7 +2085,7 @@ public class AccountManagerService
     }
 
     private void doNotification(UserAccounts accounts, Account account, CharSequence message,
-            Intent intent) {
+            Intent intent, int userId) {
         long identityToken = clearCallingIdentity();
         try {
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -2093,7 +2095,7 @@ public class AccountManagerService
             if (intent.getComponent() != null &&
                     GrantCredentialsPermissionActivity.class.getName().equals(
                             intent.getComponent().getClassName())) {
-                createNoCredentialsPermissionNotification(account, intent);
+                createNoCredentialsPermissionNotification(account, intent, userId);
             } else {
                 final Integer notificationId = getSigninRequiredNotificationId(accounts, account);
                 intent.addCategory(String.valueOf(notificationId));
@@ -2103,8 +2105,9 @@ public class AccountManagerService
                         mContext.getText(R.string.notification_title).toString();
                 n.setLatestEventInfo(mContext,
                         String.format(notificationTitleFormat, account.name),
-                        message, PendingIntent.getActivity(
-                        mContext, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT));
+                        message, PendingIntent.getActivityAsUser(
+                        mContext, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT,
+                        null, new UserHandle(userId)));
                 installNotification(notificationId, n);
             }
         } finally {

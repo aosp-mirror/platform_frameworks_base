@@ -165,7 +165,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
                     try {
                         ActivityManagerNative.getDefault().startActivityWithConfig(
                                 null, homeIntent, null, null, null, 0, 0,
-                                newConfig, null);
+                                newConfig, null, UserHandle.USER_CURRENT);
                         mHoldingConfiguration = false;
                     } catch (RemoteException e) {
                         Slog.w(TAG, e.getCause());

@@ -980,7 +980,7 @@ public class SyncManager implements OnAccountsUpdateListener {
             mSyncHandler.sendMessage(msg);
         }
 
-        boolean bindToSyncAdapter(RegisteredServicesCache.ServiceInfo info) {
+        boolean bindToSyncAdapter(RegisteredServicesCache.ServiceInfo info, int userId) {
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.d(TAG, "bindToSyncAdapter: " + info.componentName + ", connection " + this);
             }
@@ -989,8 +989,9 @@ public class SyncManager implements OnAccountsUpdateListener {
             intent.setComponent(info.componentName);
             intent.putExtra(Intent.EXTRA_CLIENT_LABEL,
                     com.android.internal.R.string.sync_binding_label);
-            intent.putExtra(Intent.EXTRA_CLIENT_INTENT, PendingIntent.getActivity(
-                    mContext, 0, new Intent(Settings.ACTION_SYNC_SETTINGS), 0));
+            intent.putExtra(Intent.EXTRA_CLIENT_INTENT, PendingIntent.getActivityAsUser(
+                    mContext, 0, new Intent(Settings.ACTION_SYNC_SETTINGS), 0,
+                    null, new UserHandle(userId)));
             mBound = true;
             final boolean bindResult = mContext.bindService(intent, this,
                     Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND
@@ -2132,7 +2133,7 @@ public class SyncManager implements OnAccountsUpdateListener {
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.v(TAG, "dispatchSyncOperation: starting " + activeSyncContext);
             }
-            if (!activeSyncContext.bindToSyncAdapter(syncAdapterInfo)) {
+            if (!activeSyncContext.bindToSyncAdapter(syncAdapterInfo, op.userId)) {
                 Log.e(TAG, "Bind attempt failed to " + syncAdapterInfo);
                 closeActiveSyncContext(activeSyncContext);
                 return false;
@@ -2255,10 +2256,12 @@ public class SyncManager implements OnAccountsUpdateListener {
 
             if (syncResult != null && syncResult.tooManyDeletions) {
                 installHandleTooManyDeletesNotification(syncOperation.account,
-                        syncOperation.authority, syncResult.stats.numDeletes);
+                        syncOperation.authority, syncResult.stats.numDeletes,
+                        syncOperation.userId);
             } else {
-                mNotificationMgr.cancel(
-                        syncOperation.account.hashCode() ^ syncOperation.authority.hashCode());
+                mNotificationMgr.cancelAsUser(null,
+                        syncOperation.account.hashCode() ^ syncOperation.authority.hashCode(),
+                        new UserHandle(syncOperation.userId));
             }
 
             if (syncResult != null && syncResult.fullSyncRequested) {
@@ -2471,7 +2474,7 @@ public class SyncManager implements OnAccountsUpdateListener {
         }
 
         private void installHandleTooManyDeletesNotification(Account account, String authority,
-                long numDeletes) {
+                long numDeletes, int userId) {
             if (mNotificationMgr == null) return;
 
             final ProviderInfo providerInfo = mContext.getPackageManager().resolveContentProvider(
@@ -2493,7 +2496,8 @@ public class SyncManager implements OnAccountsUpdateListener {
             }
 
             final PendingIntent pendingIntent = PendingIntent
-                    .getActivity(mContext, 0, clickIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+                    .getActivityAsUser(mContext, 0, clickIntent,
+                            PendingIntent.FLAG_CANCEL_CURRENT, null, new UserHandle(userId));
 
             CharSequence tooManyDeletesDescFormat = mContext.getResources().getText(
                     R.string.contentServiceTooManyDeletesNotificationDesc);
@@ -2507,7 +2511,8 @@ public class SyncManager implements OnAccountsUpdateListener {
                     String.format(tooManyDeletesDescFormat.toString(), authorityName),
                     pendingIntent);
             notification.flags |= Notification.FLAG_ONGOING_EVENT;
-            mNotificationMgr.notify(account.hashCode() ^ authority.hashCode(), notification);
+            mNotificationMgr.notifyAsUser(null, account.hashCode() ^ authority.hashCode(),
+                    notification, new UserHandle(userId));
         }
 
         /**

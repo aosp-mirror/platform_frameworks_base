@@ -1129,13 +1129,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                     notification.vibrate = null;
                     notification.setLatestEventInfo(context, text,
                             mContext.getText(R.string.heavy_weight_notification_detail),
-                            PendingIntent.getActivity(mContext, 0, root.intent,
-                                    PendingIntent.FLAG_CANCEL_CURRENT));
+                            PendingIntent.getActivityAsUser(mContext, 0, root.intent,
+                                    PendingIntent.FLAG_CANCEL_CURRENT, null,
+                                    new UserHandle(root.userId)));
                     
                     try {
                         int[] outId = new int[1];
-                        inm.enqueueNotification("android", R.string.heavy_weight_notification,
-                                notification, outId);
+                        inm.enqueueNotificationWithTag("android", null,
+                                R.string.heavy_weight_notification,
+                                notification, outId, root.userId);
                     } catch (RuntimeException e) {
                         Slog.w(ActivityManagerService.TAG,
                                 "Error showing notification for heavy-weight app", e);
@@ -1151,8 +1153,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     return;
                 }
                 try {
-                    inm.cancelNotification("android",
-                            R.string.heavy_weight_notification);
+                    inm.cancelNotificationWithTag("android", null,
+                            R.string.heavy_weight_notification,  msg.arg1);
                 } catch (RuntimeException e) {
                     Slog.w(ActivityManagerService.TAG,
                             "Error canceling notification for service", e);
@@ -2371,14 +2373,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // Requesting home, set the identity to the current user
                 // HACK!
                 userId = mCurrentUserId;
-            } else {
-                // TODO: Fix this in a better way - calls coming from SystemUI should probably carry
-                // the current user's userId
-                if (Binder.getCallingUid() < Process.FIRST_APPLICATION_UID) {
-                    userId = 0;
-                } else {
-                    userId = Binder.getOrigCallingUser();
-                }
             }
         }
         return mMainStack.startActivityMayWait(caller, -1, intent, resolvedType,
@@ -2392,21 +2386,22 @@ public final class ActivityManagerService extends ActivityManagerNative
             ParcelFileDescriptor profileFd, Bundle options) {
         enforceNotIsolatedCaller("startActivityAndWait");
         WaitResult res = new WaitResult();
-        int userId = Binder.getOrigCallingUser();
         mMainStack.startActivityMayWait(caller, -1, intent, resolvedType,
                 resultTo, resultWho, requestCode, startFlags, profileFile, profileFd,
-                res, null, options, userId);
+                res, null, options, UserHandle.getCallingUserId());
         return res;
     }
 
     public final int startActivityWithConfig(IApplicationThread caller,
             Intent intent, String resolvedType, IBinder resultTo,
             String resultWho, int requestCode, int startFlags, Configuration config,
-            Bundle options) {
+            Bundle options, int userId) {
         enforceNotIsolatedCaller("startActivityWithConfig");
+        userId = handleIncomingUserLocked(Binder.getCallingPid(), Binder.getCallingUid(), userId,
+                false, true, "startActivityWithConfig", null);
         int ret = mMainStack.startActivityMayWait(caller, -1, intent, resolvedType,
                 resultTo, resultWho, requestCode, startFlags,
-                null, null, null, config, options, Binder.getOrigCallingUser());
+                null, null, null, config, options, userId);
         return ret;
     }
 
@@ -2537,21 +2532,16 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    public final int startActivityInPackage(int uid,
+    final int startActivityInPackage(int uid,
             Intent intent, String resolvedType, IBinder resultTo,
-            String resultWho, int requestCode, int startFlags, Bundle options) {
-        
-        // This is so super not safe, that only the system (or okay root)
-        // can do it.
-        final int callingUid = Binder.getCallingUid();
-        if (callingUid != 0 && callingUid != Process.myUid()) {
-            throw new SecurityException(
-                    "startActivityInPackage only available to the system");
-        }
+            String resultWho, int requestCode, int startFlags, Bundle options, int userId) {
+
+        userId = handleIncomingUserLocked(Binder.getCallingPid(), Binder.getCallingUid(), userId,
+                false, true, "startActivityInPackage", null);
 
         int ret = mMainStack.startActivityMayWait(null, uid, intent, resolvedType,
                 resultTo, resultWho, requestCode, startFlags,
-                null, null, null, null, options, UserHandle.getUserId(uid));
+                null, null, null, null, options, userId);
         return ret;
     }
 
@@ -2559,23 +2549,18 @@ public final class ActivityManagerService extends ActivityManagerNative
             Intent[] intents, String[] resolvedTypes, IBinder resultTo, Bundle options) {
         enforceNotIsolatedCaller("startActivities");
         int ret = mMainStack.startActivities(caller, -1, intents, resolvedTypes, resultTo,
-                options, Binder.getOrigCallingUser());
+                options, UserHandle.getCallingUserId());
         return ret;
     }
 
-    public final int startActivitiesInPackage(int uid,
+    final int startActivitiesInPackage(int uid,
             Intent[] intents, String[] resolvedTypes, IBinder resultTo,
-            Bundle options) {
+            Bundle options, int userId) {
 
-        // This is so super not safe, that only the system (or okay root)
-        // can do it.
-        final int callingUid = Binder.getCallingUid();
-        if (callingUid != 0 && callingUid != Process.myUid()) {
-            throw new SecurityException(
-                    "startActivityInPackage only available to the system");
-        }
+        userId = handleIncomingUserLocked(Binder.getCallingPid(), Binder.getCallingUid(), userId,
+                false, true, "startActivityInPackage", null);
         int ret = mMainStack.startActivities(null, uid, intents, resolvedTypes, resultTo,
-                options, UserHandle.getUserId(uid));
+                options, userId);
         return ret;
     }
 
@@ -2709,8 +2694,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
             
+            mHandler.sendMessage(mHandler.obtainMessage(CANCEL_HEAVY_NOTIFICATION_MSG,
+                    mHeavyWeightProcess.userId, 0));
             mHeavyWeightProcess = null;
-            mHandler.sendEmptyMessage(CANCEL_HEAVY_NOTIFICATION_MSG);
         }
     }
     
@@ -3884,8 +3870,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         mProcessNames.remove(name, uid);
         mIsolatedProcesses.remove(app.uid);
         if (mHeavyWeightProcess == app) {
+            mHandler.sendMessage(mHandler.obtainMessage(CANCEL_HEAVY_NOTIFICATION_MSG,
+                    mHeavyWeightProcess.userId, 0));
             mHeavyWeightProcess = null;
-            mHandler.sendEmptyMessage(CANCEL_HEAVY_NOTIFICATION_MSG);
         }
         boolean needRestart = false;
         if (app.pid > 0 && app.pid != MY_PID) {
@@ -3931,8 +3918,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             mProcessNames.remove(app.processName, app.uid);
             mIsolatedProcesses.remove(app.uid);
             if (mHeavyWeightProcess == app) {
+                mHandler.sendMessage(mHandler.obtainMessage(CANCEL_HEAVY_NOTIFICATION_MSG,
+                        mHeavyWeightProcess.userId, 0));
                 mHeavyWeightProcess = null;
-                mHandler.sendEmptyMessage(CANCEL_HEAVY_NOTIFICATION_MSG);
             }
             // Take care of any launching providers waiting for this process.
             checkAppInLaunchingProvidersLocked(app, true);
@@ -4288,12 +4276,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                     UserStartedState uss = mStartedUsers.valueAt(i);
                     if (uss.mState == UserStartedState.STATE_BOOTING) {
                         uss.mState = UserStartedState.STATE_RUNNING;
-                        broadcastIntentLocked(null, null,
-                                new Intent(Intent.ACTION_BOOT_COMPLETED, null),
+                        final int userId = mStartedUsers.keyAt(i);
+                        Intent intent = new Intent(Intent.ACTION_BOOT_COMPLETED, null);
+                        intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
+                        broadcastIntentLocked(null, null, intent,
                                 null, null, 0, null, null,
                                 android.Manifest.permission.RECEIVE_BOOT_COMPLETED,
-                                false, false, MY_PID, Process.SYSTEM_UID,
-                                mStartedUsers.keyAt(i));
+                                false, false, MY_PID, Process.SYSTEM_UID, userId);
                     }
                 }
             }
@@ -4405,7 +4394,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     public IIntentSender getIntentSender(int type,
             String packageName, IBinder token, String resultWho,
             int requestCode, Intent[] intents, String[] resolvedTypes,
-            int flags, Bundle options) {
+            int flags, Bundle options, int userId) {
         enforceNotIsolatedCaller("getIntentSender");
         // Refuse possible leaked file descriptors
         if (intents != null) {
@@ -4439,6 +4428,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         
         synchronized(this) {
             int callingUid = Binder.getCallingUid();
+            userId = handleIncomingUserLocked(Binder.getCallingPid(), callingUid, userId,
+                    false, true, "getIntentSender", null);
             try {
                 if (callingUid != 0 && callingUid != Process.SYSTEM_UID) {
                     int uid = AppGlobals.getPackageManager()
@@ -4453,11 +4444,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                         throw new SecurityException(msg);
                     }
                 }
-                
-                if (DEBUG_MU)
-                    Slog.i(TAG_MU, "Getting intent sender for origCallingUid="
-                            + Binder.getOrigCallingUid());
-                return getIntentSenderLocked(type, packageName, Binder.getOrigCallingUid(),
+
+                return getIntentSenderLocked(type, packageName, callingUid, userId,
                         token, resultWho, requestCode, intents, resolvedTypes, flags, options);
                 
             } catch (RemoteException e) {
@@ -4466,8 +4454,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
     
-    IIntentSender getIntentSenderLocked(int type,
-            String packageName, int callingUid, IBinder token, String resultWho,
+    IIntentSender getIntentSenderLocked(int type, String packageName,
+            int callingUid, int userId, IBinder token, String resultWho,
             int requestCode, Intent[] intents, String[] resolvedTypes, int flags,
             Bundle options) {
         if (DEBUG_MU)
@@ -4491,8 +4479,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         PendingIntentRecord.Key key = new PendingIntentRecord.Key(
                 type, packageName, activity, resultWho,
-                requestCode, intents, resolvedTypes, flags, options,
-                UserHandle.getUserId(callingUid));
+                requestCode, intents, resolvedTypes, flags, options, userId);
         WeakReference<PendingIntentRecord> ref;
         ref = mIntentSenderRecords.get(key);
         PendingIntentRecord rec = ref != null ? ref.get() : null;
@@ -6233,7 +6220,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private final ContentProviderHolder getContentProviderImpl(IApplicationThread caller,
-            String name, IBinder token, boolean stable) {
+            String name, IBinder token, boolean stable, int userId) {
         ContentProviderRecord cpr;
         ContentProviderConnection conn = null;
         ProviderInfo cpi = null;
@@ -6248,10 +6235,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                           + " (pid=" + Binder.getCallingPid()
                           + ") when getting content provider " + name);
                 }
+                if (r.userId != userId) {
+                    throw new SecurityException("Calling requested user " + userId
+                            + " but app is user " + r.userId);
+                }
             }
 
             // First check if this content provider has been published...
-            int userId = UserHandle.getUserId(r != null ? r.uid : Binder.getCallingUid());
             cpr = mProviderMap.getProviderByName(name, userId);
             boolean providerRunning = cpr != null;
             if (providerRunning) {
@@ -6506,17 +6496,19 @@ public final class ActivityManagerService extends ActivityManagerNative
             throw new SecurityException(msg);
         }
 
-        return getContentProviderImpl(caller, name, null, stable);
+        return getContentProviderImpl(caller, name, null, stable,
+                UserHandle.getCallingUserId());
     }
 
     public ContentProviderHolder getContentProviderExternal(String name, IBinder token) {
         enforceCallingPermission(android.Manifest.permission.ACCESS_CONTENT_PROVIDERS_EXTERNALLY,
             "Do not have permission in call getContentProviderExternal()");
-        return getContentProviderExternalUnchecked(name, token);
+        return getContentProviderExternalUnchecked(name, token, UserHandle.getCallingUserId());
     }
 
-    private ContentProviderHolder getContentProviderExternalUnchecked(String name,IBinder token) {
-        return getContentProviderImpl(null, name, token, true);
+    private ContentProviderHolder getContentProviderExternalUnchecked(String name,
+            IBinder token, int userId) {
+        return getContentProviderImpl(null, name, token, true, userId);
     }
 
     /**
@@ -6547,13 +6539,12 @@ public final class ActivityManagerService extends ActivityManagerNative
     public void removeContentProviderExternal(String name, IBinder token) {
         enforceCallingPermission(android.Manifest.permission.ACCESS_CONTENT_PROVIDERS_EXTERNALLY,
             "Do not have permission in call removeContentProviderExternal()");
-        removeContentProviderExternalUnchecked(name, token);
+        removeContentProviderExternalUnchecked(name, token, UserHandle.getCallingUserId());
     }
 
-    private void removeContentProviderExternalUnchecked(String name, IBinder token) {
+    private void removeContentProviderExternalUnchecked(String name, IBinder token, int userId) {
         synchronized (this) {
-            ContentProviderRecord cpr = mProviderMap.getProviderByName(name,
-                    Binder.getOrigCallingUser());
+            ContentProviderRecord cpr = mProviderMap.getProviderByName(name, userId);
             if(cpr == null) {
                 //remove from mProvidersByClass
                 if(localLOGV) Slog.v(TAG, name+" content provider not found in providers list");
@@ -6562,8 +6553,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
             //update content provider record entry info
             ComponentName comp = new ComponentName(cpr.info.packageName, cpr.info.name);
-            ContentProviderRecord localCpr = mProviderMap.getProviderByClass(comp,
-                    Binder.getOrigCallingUser());
+            ContentProviderRecord localCpr = mProviderMap.getProviderByClass(comp, userId);
             if (localCpr.hasExternalProcessHandles()) {
                 if (localCpr.removeExternalProcessHandleLocked(token)) {
                     updateOomAdjLocked();
@@ -6777,11 +6767,12 @@ public final class ActivityManagerService extends ActivityManagerNative
     public String getProviderMimeType(Uri uri) {
         enforceNotIsolatedCaller("getProviderMimeType");
         final String name = uri.getAuthority();
+        final int userId = UserHandle.getCallingUserId();
         final long ident = Binder.clearCallingIdentity();
         ContentProviderHolder holder = null;
 
         try {
-            holder = getContentProviderExternalUnchecked(name, null);
+            holder = getContentProviderExternalUnchecked(name, null, userId);
             if (holder != null) {
                 return holder.provider.getType(uri);
             }
@@ -6790,7 +6781,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             return null;
         } finally {
             if (holder != null) {
-                removeContentProviderExternalUnchecked(name, null);
+                removeContentProviderExternalUnchecked(name, null, userId);
             }
             Binder.restoreCallingIdentity(ident);
         }
@@ -6894,8 +6885,9 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     public ParcelFileDescriptor openContentUri(Uri uri) throws RemoteException {
         enforceNotIsolatedCaller("openContentUri");
+        final int userId = UserHandle.getCallingUserId();
         String name = uri.getAuthority();
-        ContentProviderHolder cph = getContentProviderExternalUnchecked(name, null);
+        ContentProviderHolder cph = getContentProviderExternalUnchecked(name, null, userId);
         ParcelFileDescriptor pfd = null;
         if (cph != null) {
             // We record the binder invoker's uid in thread-local storage before
@@ -6917,7 +6909,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
 
             // We've got the fd now, so we're done with the provider.
-            removeContentProviderExternalUnchecked(name, null);
+            removeContentProviderExternalUnchecked(name, null, userId);
         } else {
             Slog.d(TAG, "Failed to get provider for authority '" + name + "'");
         }
@@ -10562,8 +10554,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             mProcessNames.remove(app.processName, app.uid);
             mIsolatedProcesses.remove(app.uid);
             if (mHeavyWeightProcess == app) {
+                mHandler.sendMessage(mHandler.obtainMessage(CANCEL_HEAVY_NOTIFICATION_MSG,
+                        mHeavyWeightProcess.userId, 0));
                 mHeavyWeightProcess = null;
-                mHandler.sendEmptyMessage(CANCEL_HEAVY_NOTIFICATION_MSG);
             }
         } else if (!app.removed) {
             // This app is persistent, so we need to keep its record around.
@@ -10663,13 +10656,13 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     ComponentName startServiceInPackage(int uid,
-            Intent service, String resolvedType) {
+            Intent service, String resolvedType, int userId) {
         synchronized(this) {
             if (DEBUG_SERVICE)
                 Slog.v(TAG, "startServiceInPackage: " + service + " type=" + resolvedType);
             final long origId = Binder.clearCallingIdentity();
             ComponentName res = mServices.startServiceLocked(null, service,
-                    resolvedType, -1, uid, UserHandle.getUserId(uid));
+                    resolvedType, -1, uid, userId);
             Binder.restoreCallingIdentity(origId);
             return res;
         }
@@ -10716,6 +10709,14 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    public int handleIncomingUser(int callingPid, int callingUid, int userId, boolean allowAll,
+            boolean requireFull, String name, String callerPackage) {
+        synchronized(this) {
+            return handleIncomingUserLocked(callingPid, callingUid, userId, allowAll,
+                    requireFull, name, callerPackage);
+        }        
+    }
+
     int handleIncomingUserLocked(int callingPid, int callingUid, int userId, boolean allowAll,
             boolean requireFull, String name, String callerPackage) {
         final int callingUserId = UserHandle.getUserId(callingUid);
@@ -10733,13 +10734,24 @@ public final class ActivityManagerService extends ActivityManagerNative
                         // owner user instead of failing.
                         userId = callingUserId;
                     } else {
-                        String msg = "Permission Denial: " + name + " from " + callerPackage
-                                + " asks to run as user " + userId
-                                + " but is calling from user " + UserHandle.getUserId(callingUid)
-                                + "; this requires "
-                                + (requireFull
-                                        ? android.Manifest.permission.INTERACT_ACROSS_USERS_FULL
-                                        : android.Manifest.permission.INTERACT_ACROSS_USERS);
+                        StringBuilder builder = new StringBuilder(128);
+                        builder.append("Permission Denial: ");
+                        builder.append(name);
+                        if (callerPackage != null) {
+                            builder.append(" from ");
+                            builder.append(callerPackage);
+                        }
+                        builder.append(" asks to run as user ");
+                        builder.append(userId);
+                        builder.append(" but is calling from user ");
+                        builder.append(UserHandle.getUserId(callingUid));
+                        builder.append("; this requires ");
+                        builder.append(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL);
+                        if (!requireFull) {
+                            builder.append("or");
+                            builder.append(android.Manifest.permission.INTERACT_ACROSS_USERS);
+                        }
+                        String msg = builder.toString();
                         Slog.w(TAG, msg);
                         throw new SecurityException(msg);
                     }
@@ -13760,11 +13772,13 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (uss.mState == UserStartedState.STATE_BOOTING
                     && mStartedUsers.get(uss.mHandle.getIdentifier()) == uss) {
                 uss.mState = UserStartedState.STATE_RUNNING;
-                broadcastIntentLocked(null, null,
-                        new Intent(Intent.ACTION_BOOT_COMPLETED, null),
+                final int userId = uss.mHandle.getIdentifier();
+                Intent intent = new Intent(Intent.ACTION_BOOT_COMPLETED, null);
+                intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
+                broadcastIntentLocked(null, null, intent,
                         null, null, 0, null, null,
                         android.Manifest.permission.RECEIVE_BOOT_COMPLETED,
-                        false, false, MY_PID, Process.SYSTEM_UID, uss.mHandle.getIdentifier());
+                        false, false, MY_PID, Process.SYSTEM_UID, userId);
             }
         }
     }
