@@ -547,6 +547,10 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Ermöglicht der App, auf die SD-Karte zu schreiben"</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"Intern. Mediensp. änd./löschen"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Ermöglicht der App, den Inhalt des internen Medienspeichers zu ändern"</string>
+    <!-- no translation found for permlab_sdcardAccessAll (8150613823900460576) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardAccessAll (3215208357415891320) -->
+    <skip />
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"Zugriff auf das Cache-Dateisystem"</string>
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Ermöglicht der App Lese- und Schreibzugriff auf das Cache-Dateisystem"</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"Internetanrufe tätigen/annehmen"</string>
