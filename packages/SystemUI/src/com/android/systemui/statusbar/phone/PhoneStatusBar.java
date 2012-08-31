@@ -451,6 +451,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
+        filter.addAction(Intent.ACTION_SCREEN_ON);
         context.registerReceiver(mBroadcastReceiver, filter);
 
         return mStatusBarView;
@@ -786,11 +787,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
 
         setAreThereNotifications();
-    }
-
-    @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
-        updateShowSearchHoldoff();
     }
 
     private void updateShowSearchHoldoff() {
@@ -1804,9 +1800,17 @@ public class PhoneStatusBar extends BaseStatusBar {
                 makeExpandedInvisible();
             }
             else if (Intent.ACTION_CONFIGURATION_CHANGED.equals(action)) {
+                if (DEBUG) {
+                    Slog.v(TAG, "configuration changed: " + mContext.getResources().getConfiguration());
+                }
                 updateResources();
                 repositionNavigationBar();
                 updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
+                updateShowSearchHoldoff();
+            }
+            else if (Intent.ACTION_SCREEN_ON.equals(action)) {
+                // work around problem where mDisplay.getRotation() is not stable while screen is off (bug 7086018)
+                repositionNavigationBar();
             }
         }
     };
