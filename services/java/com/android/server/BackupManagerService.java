@@ -1663,8 +1663,7 @@ class BackupManagerService extends IBackupManager.Stub {
         synchronized(mClearDataLock) {
             mClearingData = true;
             try {
-                mActivityManager.clearApplicationUserData(packageName, observer,
-                        Binder.getOrigCallingUser());
+                mActivityManager.clearApplicationUserData(packageName, observer, 0);
             } catch (RemoteException e) {
                 // can't happen because the activity manager is in this process
             }

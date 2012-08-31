@@ -116,48 +116,46 @@ public class ProviderMap {
         }
     }
 
-    void removeProviderByName(String name, int optionalUserId) {
+    void removeProviderByName(String name, int userId) {
         if (mSingletonByName.containsKey(name)) {
             if (DBG)
                 Slog.i(TAG, "Removing from globalByName name=" + name);
             mSingletonByName.remove(name);
         } else {
-            // TODO: Verify this works, i.e., the caller happens to be from the correct user
+            if (userId < 0) throw new IllegalArgumentException("Bad user " + userId);
             if (DBG)
                 Slog.i(TAG,
-                        "Removing from providersByName name=" + name + " user="
-                        + (optionalUserId == -1 ? Binder.getOrigCallingUser() : optionalUserId));
-            HashMap<String, ContentProviderRecord> map = getProvidersByName(optionalUserId);
+                        "Removing from providersByName name=" + name + " user=" + userId);
+            HashMap<String, ContentProviderRecord> map = getProvidersByName(userId);
             // map returned by getProvidersByName wouldn't be null
             map.remove(name);
             if (map.size() == 0) {
-                mProvidersByNamePerUser.remove(optionalUserId);
+                mProvidersByNamePerUser.remove(userId);
             }
         }
     }
 
-    void removeProviderByClass(ComponentName name, int optionalUserId) {
+    void removeProviderByClass(ComponentName name, int userId) {
         if (mSingletonByClass.containsKey(name)) {
             if (DBG)
                 Slog.i(TAG, "Removing from globalByClass name=" + name);
             mSingletonByClass.remove(name);
         } else {
+            if (userId < 0) throw new IllegalArgumentException("Bad user " + userId);
             if (DBG)
                 Slog.i(TAG,
-                        "Removing from providersByClass name=" + name + " user="
-                        + (optionalUserId == -1 ? Binder.getOrigCallingUser() : optionalUserId));
-            HashMap<ComponentName, ContentProviderRecord> map = getProvidersByClass(optionalUserId);
+                        "Removing from providersByClass name=" + name + " user=" + userId);
+            HashMap<ComponentName, ContentProviderRecord> map = getProvidersByClass(userId);
             // map returned by getProvidersByClass wouldn't be null
             map.remove(name);
             if (map.size() == 0) {
-                mProvidersByClassPerUser.remove(optionalUserId);
+                mProvidersByClassPerUser.remove(userId);
             }
         }
     }
 
-    private HashMap<String, ContentProviderRecord> getProvidersByName(int optionalUserId) {
-        final int userId = optionalUserId >= 0
-                ? optionalUserId : Binder.getOrigCallingUser();
+    private HashMap<String, ContentProviderRecord> getProvidersByName(int userId) {
+        if (userId < 0) throw new IllegalArgumentException("Bad user " + userId);
         final HashMap<String, ContentProviderRecord> map = mProvidersByNamePerUser.get(userId);
         if (map == null) {
             HashMap<String, ContentProviderRecord> newMap = new HashMap<String, ContentProviderRecord>();
@@ -168,12 +166,13 @@ public class ProviderMap {
         }
     }
 
-    HashMap<ComponentName, ContentProviderRecord> getProvidersByClass(int optionalUserId) {
-        final int userId = optionalUserId >= 0
-                ? optionalUserId : Binder.getOrigCallingUser();
-        final HashMap<ComponentName, ContentProviderRecord> map = mProvidersByClassPerUser.get(userId);
+    HashMap<ComponentName, ContentProviderRecord> getProvidersByClass(int userId) {
+        if (userId < 0) throw new IllegalArgumentException("Bad user " + userId);
+        final HashMap<ComponentName, ContentProviderRecord> map
+                = mProvidersByClassPerUser.get(userId);
         if (map == null) {
-            HashMap<ComponentName, ContentProviderRecord> newMap = new HashMap<ComponentName, ContentProviderRecord>();
+            HashMap<ComponentName, ContentProviderRecord> newMap
+                    = new HashMap<ComponentName, ContentProviderRecord>();
             mProvidersByClassPerUser.put(userId, newMap);
             return newMap;
         } else {

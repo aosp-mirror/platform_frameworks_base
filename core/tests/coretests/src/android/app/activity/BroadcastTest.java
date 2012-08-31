@@ -305,7 +305,7 @@ public class BroadcastTest extends ActivityTestsBase {
         Intent intent = new Intent(LaunchpadActivity.BROADCAST_STICKY1, null);
         intent.putExtra("test", LaunchpadActivity.DATA_1);
         ActivityManagerNative.getDefault().unbroadcastIntent(null, intent,
-                Binder.getOrigCallingUser());
+                UserHandle.myUserId());
 
         ActivityManagerNative.broadcastStickyIntent(intent, null, UserHandle.myUserId());
         addIntermediate("finished-broadcast");
@@ -323,7 +323,7 @@ public class BroadcastTest extends ActivityTestsBase {
 
         ActivityManagerNative.getDefault().unbroadcastIntent(
                 null, new Intent(LaunchpadActivity.BROADCAST_STICKY1, null),
-                Binder.getOrigCallingUser());
+                UserHandle.myUserId());
         addIntermediate("finished-unbroadcast");
 
         IntentFilter filter = new IntentFilter(LaunchpadActivity.BROADCAST_STICKY1);

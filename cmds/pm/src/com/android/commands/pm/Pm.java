@@ -1120,8 +1120,8 @@ public final class Pm {
 
         ClearDataObserver obs = new ClearDataObserver();
         try {
-            if (!ActivityManagerNative.getDefault().clearApplicationUserData(pkg, obs,
-                    Binder.getOrigCallingUser())) {
+            // XXX TO DO: add user arg
+            if (!ActivityManagerNative.getDefault().clearApplicationUserData(pkg, obs, 0)) {
                 System.err.println("Failed");
             }
 

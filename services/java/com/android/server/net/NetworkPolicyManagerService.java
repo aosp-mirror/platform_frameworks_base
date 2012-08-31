@@ -788,11 +788,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
 
         // TODO: move to NotificationManager once we can mock it
+        // XXX what to do about multi-user?
         try {
             final String packageName = mContext.getPackageName();
             final int[] idReceived = new int[1];
             mNotifManager.enqueueNotificationWithTag(
-                    packageName, tag, 0x0, builder.getNotification(), idReceived);
+                    packageName, tag, 0x0, builder.getNotification(), idReceived,
+                    UserHandle.USER_OWNER);
             mActiveNotifs.add(tag);
         } catch (RemoteException e) {
             // ignored; service lives in system_server
@@ -822,11 +824,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 PendingIntent.getBroadcast(mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT));
 
         // TODO: move to NotificationManager once we can mock it
+        // XXX what to do about multi-user?
         try {
             final String packageName = mContext.getPackageName();
             final int[] idReceived = new int[1];
             mNotifManager.enqueueNotificationWithTag(packageName, tag,
-                    0x0, builder.getNotification(), idReceived);
+                    0x0, builder.getNotification(), idReceived, UserHandle.USER_OWNER);
             mActiveNotifs.add(tag);
         } catch (RemoteException e) {
             // ignored; service lives in system_server
@@ -835,10 +838,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private void cancelNotification(String tag) {
         // TODO: move to NotificationManager once we can mock it
+        // XXX what to do about multi-user?
         try {
             final String packageName = mContext.getPackageName();
             mNotifManager.cancelNotificationWithTag(
-                    packageName, tag, 0x0);
+                    packageName, tag, 0x0, UserHandle.USER_OWNER);
         } catch (RemoteException e) {
             // ignored; service lives in system_server
         }

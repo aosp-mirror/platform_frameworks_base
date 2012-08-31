@@ -21,6 +21,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.util.Log;
 
 /**
@@ -125,7 +126,27 @@ public class NotificationManager
         String pkg = mContext.getPackageName();
         if (localLOGV) Log.v(TAG, pkg + ": notify(" + id + ", " + notification + ")");
         try {
-            service.enqueueNotificationWithTag(pkg, tag, id, notification, idOut);
+            service.enqueueNotificationWithTag(pkg, tag, id, notification, idOut,
+                    UserHandle.myUserId());
+            if (id != idOut[0]) {
+                Log.w(TAG, "notify: id corrupted: sent " + id + ", got back " + idOut[0]);
+            }
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public void notifyAsUser(String tag, int id, Notification notification, UserHandle user)
+    {
+        int[] idOut = new int[1];
+        INotificationManager service = getService();
+        String pkg = mContext.getPackageName();
+        if (localLOGV) Log.v(TAG, pkg + ": notify(" + id + ", " + notification + ")");
+        try {
+            service.enqueueNotificationWithTag(pkg, tag, id, notification, idOut,
+                    user.getIdentifier());
             if (id != idOut[0]) {
                 Log.w(TAG, "notify: id corrupted: sent " + id + ", got back " + idOut[0]);
             }
@@ -154,7 +175,21 @@ public class NotificationManager
         String pkg = mContext.getPackageName();
         if (localLOGV) Log.v(TAG, pkg + ": cancel(" + id + ")");
         try {
-            service.cancelNotificationWithTag(pkg, tag, id);
+            service.cancelNotificationWithTag(pkg, tag, id, UserHandle.myUserId());
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public void cancelAsUser(String tag, int id, UserHandle user)
+    {
+        INotificationManager service = getService();
+        String pkg = mContext.getPackageName();
+        if (localLOGV) Log.v(TAG, pkg + ": cancel(" + id + ")");
+        try {
+            service.cancelNotificationWithTag(pkg, tag, id, user.getIdentifier());
         } catch (RemoteException e) {
         }
     }
@@ -169,7 +204,7 @@ public class NotificationManager
         String pkg = mContext.getPackageName();
         if (localLOGV) Log.v(TAG, pkg + ": cancelAll()");
         try {
-            service.cancelAllNotifications(pkg);
+            service.cancelAllNotifications(pkg, UserHandle.myUserId());
         } catch (RemoteException e) {
         }
     }
