@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.app.SearchManager.OnDismissListener;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
@@ -576,6 +577,23 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      */
     public AdapterView.OnItemSelectedListener getOnItemSelectedListener() {
         return mItemSelectedListener;
+    }
+
+    /**
+     * Set a listener that will be invoked whenever the AutoCompleteTextView's
+     * list of completions is dismissed.
+     * @param dismissListener Listener to invoke when completions are dismissed
+     */
+    public void setOnDismissListener(final OnDismissListener dismissListener) {
+        PopupWindow.OnDismissListener wrappedListener = null;
+        if (dismissListener != null) {
+            wrappedListener = new PopupWindow.OnDismissListener() {
+                @Override public void onDismiss() {
+                    dismissListener.onDismiss();
+                }
+            };
+        }
+        mPopup.setOnDismissListener(wrappedListener);
     }
 
     /**
@@ -1206,6 +1224,19 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         CharSequence fixText(CharSequence invalidText);
     }
     
+    /**
+     * Listener to respond to the AutoCompleteTextView's completion list being dismissed.
+     * @see AutoCompleteTextView#setOnDismissListener(OnDismissListener)
+     */
+    public interface OnDismissListener {
+        /**
+         * This method will be invoked whenever the AutoCompleteTextView's list
+         * of completion options has been dismissed and is no longer available
+         * for user interaction.
+         */
+        void onDismiss();
+    }
+
     /**
      * Allows us a private hook into the on click event without preventing users from setting
      * their own click listener.
