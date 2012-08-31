@@ -226,6 +226,12 @@ public class MockPackageManager extends PackageManager {
         throw new UnsupportedOperationException();
     }
 
+    /** @hide */
+    @Override
+    public List<ResolveInfo> queryBroadcastReceivers(Intent intent, int flags, int userId) {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public ResolveInfo resolveService(Intent intent, int flags) {
         throw new UnsupportedOperationException();

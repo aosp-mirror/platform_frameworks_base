@@ -1796,6 +1796,26 @@ public abstract class PackageManager {
             int flags);
 
     /**
+     * Retrieve all receivers that can handle a broadcast of the given intent, for a specific
+     * user.
+     *
+     * @param intent The desired intent as per resolveActivity().
+     * @param flags Additional option flags.
+     * @param userId The userId of the user being queried.
+     *
+     * @return A List&lt;ResolveInfo&gt; containing one entry for each matching
+     *         Receiver. These are ordered from first to last in priority.  If
+     *         there are no matching receivers, an empty list is returned.
+     *
+     * @see #MATCH_DEFAULT_ONLY
+     * @see #GET_INTENT_FILTERS
+     * @see #GET_RESOLVED_FILTER
+     * @hide
+     */
+    public abstract List<ResolveInfo> queryBroadcastReceivers(Intent intent,
+            int flags, int userId);
+
+    /**
      * Determine the best service to handle for a given Intent.
      *
      * @param intent An intent containing all of the desired specification

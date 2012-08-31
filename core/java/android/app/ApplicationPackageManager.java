@@ -502,17 +502,25 @@ final class ApplicationPackageManager extends PackageManager {
         }
     }
 
+    /**
+     * @hide
+     */
     @Override
-    public List<ResolveInfo> queryBroadcastReceivers(Intent intent, int flags) {
+    public List<ResolveInfo> queryBroadcastReceivers(Intent intent, int flags, int userId) {
         try {
             return mPM.queryIntentReceivers(
                 intent,
                 intent.resolveTypeIfNeeded(mContext.getContentResolver()),
                 flags,
-                UserHandle.myUserId());
+                userId);
         } catch (RemoteException e) {
             throw new RuntimeException("Package manager has died", e);
         }
+    }
+
+    @Override
+    public List<ResolveInfo> queryBroadcastReceivers(Intent intent, int flags) {
+        return queryBroadcastReceivers(intent, flags, UserHandle.myUserId());
     }
 
     @Override
