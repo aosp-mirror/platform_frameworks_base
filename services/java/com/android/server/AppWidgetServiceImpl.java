@@ -1514,11 +1514,12 @@ class AppWidgetServiceImpl {
                         String pkg = parser.getAttributeValue(null, "pkg");
                         String cl = parser.getAttributeValue(null, "cl");
 
-                        final PackageManager packageManager = mContext.getPackageManager();
+                        final IPackageManager packageManager = AppGlobals.getPackageManager();
                         try {
-                            packageManager.getReceiverInfo(new ComponentName(pkg, cl), 0);
-                        } catch (PackageManager.NameNotFoundException e) {
-                            String[] pkgs = packageManager
+                            packageManager.getReceiverInfo(new ComponentName(pkg, cl), 0,
+                                    UserHandle.getCallingUserId());
+                        } catch (RemoteException e) {
+                            String[] pkgs = mContext.getPackageManager()
                                     .currentToCanonicalPackageNames(new String[] { pkg });
                             pkg = pkgs[0];
                         }
