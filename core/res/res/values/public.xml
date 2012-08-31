@@ -3759,5 +3759,6 @@
   <public type="attr" name="listPreferredItemPaddingStart" />
   <public type="attr" name="listPreferredItemPaddingEnd" />
   <public type="attr" name="singleUser" />
+  <public type="attr" name="presentationTheme" />
 
 </resources>

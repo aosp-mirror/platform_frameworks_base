@@ -16,9 +16,6 @@
 
 package android.view;
 
-import android.content.Context;
-import android.hardware.display.DisplayManager;
-
 /**
  * Provides low-level communication with the system window manager for
  * operations that are bound to a particular context, display or parent window.
@@ -47,25 +44,24 @@ import android.hardware.display.DisplayManager;
  */
 public final class WindowManagerImpl implements WindowManager {
     private final WindowManagerGlobal mGlobal = WindowManagerGlobal.getInstance();
-    private final Context mContext;
     private final Display mDisplay;
     private final Window mParentWindow;
 
-    public WindowManagerImpl(Context context, int displayId) {
-        DisplayManager dm = (DisplayManager)context.getSystemService(Context.DISPLAY_SERVICE);
-        mContext = context;
-        mDisplay = dm.getDisplay(displayId);
-        mParentWindow = null;
+    public WindowManagerImpl(Display display) {
+        this(display, null);
     }
 
-    private WindowManagerImpl(Context context, Display display, Window parentWindow) {
-        mContext = context;
+    private WindowManagerImpl(Display display, Window parentWindow) {
         mDisplay = display;
         mParentWindow = parentWindow;
     }
 
     public WindowManagerImpl createLocalWindowManager(Window parentWindow) {
-        return new WindowManagerImpl(mContext, mDisplay, parentWindow);
+        return new WindowManagerImpl(mDisplay, parentWindow);
+    }
+
+    public WindowManagerImpl createPresentationWindowManager(Display display) {
+        return new WindowManagerImpl(display, mParentWindow);
     }
 
     @Override

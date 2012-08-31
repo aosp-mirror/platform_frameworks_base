@@ -168,6 +168,7 @@ class ContextImpl extends Context {
     private int mThemeResource = 0;
     private Resources.Theme mTheme = null;
     private PackageManager mPackageManager;
+    private Display mDisplay; // may be null if default display
     private Context mReceiverRestrictedContext = null;
     private boolean mRestricted;
 
@@ -502,8 +503,13 @@ class ContextImpl extends Context {
 
         registerService(WINDOW_SERVICE, new ServiceFetcher() {
                 public Object getService(ContextImpl ctx) {
-                    return new WindowManagerImpl(ctx.getOuterContext(),
-                            Display.DEFAULT_DISPLAY);
+                    Display display = ctx.mDisplay;
+                    if (display == null) {
+                        DisplayManager dm = (DisplayManager)ctx.getOuterContext().getSystemService(
+                                Context.DISPLAY_SERVICE);
+                        display = dm.getDisplay(Display.DEFAULT_DISPLAY);
+                    }
+                    return new WindowManagerImpl(display);
                 }});
 
         registerService(USER_SERVICE, new ServiceFetcher() {
@@ -1676,12 +1682,42 @@ class ContextImpl extends Context {
 
     @Override
     public Context createConfigurationContext(Configuration overrideConfiguration) {
+        if (overrideConfiguration == null) {
+            throw new IllegalArgumentException("overrideConfiguration must not be null");
+        }
+
         ContextImpl c = new ContextImpl();
         c.init(mPackageInfo, null, mMainThread);
         c.mResources = mMainThread.getTopLevelResources(
-                mPackageInfo.getResDir(), overrideConfiguration,
+                mPackageInfo.getResDir(),
+                getDisplayId(), overrideConfiguration,
                 mResources.getCompatibilityInfo());
         return c;
+    }
+
+    @Override
+    public Context createDisplayContext(Display display) {
+        if (display == null) {
+            throw new IllegalArgumentException("display must not be null");
+        }
+
+        int displayId = display.getDisplayId();
+        CompatibilityInfo ci = CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
+        CompatibilityInfoHolder cih = getCompatibilityInfo(displayId);
+        if (cih != null) {
+            ci = cih.get();
+        }
+
+        ContextImpl context = new ContextImpl();
+        context.init(mPackageInfo, null, mMainThread);
+        context.mDisplay = display;
+        context.mResources = mMainThread.getTopLevelResources(
+                mPackageInfo.getResDir(), displayId, null, ci);
+        return context;
+    }
+
+    private int getDisplayId() {
+        return mDisplay != null ? mDisplay.getDisplayId() : Display.DEFAULT_DISPLAY;
     }
 
     @Override
@@ -1690,8 +1726,8 @@ class ContextImpl extends Context {
     }
 
     @Override
-    public CompatibilityInfoHolder getCompatibilityInfo() {
-        return mPackageInfo.mCompatibilityInfo;
+    public CompatibilityInfoHolder getCompatibilityInfo(int displayId) {
+        return displayId == Display.DEFAULT_DISPLAY ? mPackageInfo.mCompatibilityInfo : null;
     }
 
     private File getDataDirFile() {
@@ -1735,6 +1771,7 @@ class ContextImpl extends Context {
         mResources = context.mResources;
         mMainThread = context.mMainThread;
         mContentResolver = context.mContentResolver;
+        mDisplay = context.mDisplay;
         mOuterContext = this;
     }
 
@@ -1758,7 +1795,8 @@ class ContextImpl extends Context {
                         " compatiblity info:" + container.getDisplayMetrics());
             }
             mResources = mainThread.getTopLevelResources(
-                    mPackageInfo.getResDir(), null, container.getCompatibilityInfo());
+                    mPackageInfo.getResDir(), Display.DEFAULT_DISPLAY,
+                    null, container.getCompatibilityInfo());
         }
         mMainThread = mainThread;
         mContentResolver = new ApplicationContentResolver(this, mainThread);
