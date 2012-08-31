@@ -1151,6 +1151,14 @@ public abstract class PackageManager {
             = "android.content.pm.extra.VERIFICATION_INSTALL_FLAGS";
 
     /**
+     * Extra field name for the result of a verification, either
+     * {@link #VERIFICATION_ALLOW}, or {@link #VERIFICATION_REJECT}.
+     * Passed to package verifiers after a package is verified.
+     */
+    public static final String EXTRA_VERIFICATION_RESULT
+            = "android.content.pm.extra.VERIFICATION_RESULT";
+
+    /**
      * Retrieve overall information about an application package that is
      * installed on the system.
      * <p>
@@ -2361,12 +2369,19 @@ public abstract class PackageManager {
      *            {@link PackageManager#EXTRA_VERIFICATION_ID} Intent extra
      * @param verificationCodeAtTimeout either
      *            {@link PackageManager#VERIFICATION_ALLOW} or
+     *            {@link PackageManager#VERIFICATION_REJECT}. If
+     *            {@code verificationCodeAtTimeout} is neither
+     *            {@link PackageManager#VERIFICATION_ALLOW} or
+     *            {@link PackageManager#VERIFICATION_REJECT}, then
+     *            {@code verificationCodeAtTimeout} will default to
      *            {@link PackageManager#VERIFICATION_REJECT}.
      * @param millisecondsToDelay the amount of time requested for the timeout.
      *            Must be positive and less than
+     *            {@link PackageManager#MAXIMUM_VERIFICATION_TIMEOUT}. If
+     *            {@code millisecondsToDelay} is out of bounds,
+     *            {@code millisecondsToDelay} will be set to the closest in
+     *            bounds value; namely, 0 or
      *            {@link PackageManager#MAXIMUM_VERIFICATION_TIMEOUT}.
-     * @throws IllegalArgumentException if {@code millisecondsToDelay} is out
-     *            of bounds or {@code verificationCodeAtTimeout} is unknown.
      * @throws SecurityException if the caller does not have the
      *            {@link android.Manifest.permission#PACKAGE_VERIFICATION_AGENT}
      *            permission.
