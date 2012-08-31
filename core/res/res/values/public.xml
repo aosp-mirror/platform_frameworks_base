@@ -1309,7 +1309,8 @@
   <java-symbol type="id" name="two" />
   <java-symbol type="id" name="unlock_widget" />
   <java-symbol type="id" name="zero" />
-  <java-symbol type="id" name="message_area" />
+  <java-symbol type="id" name="keyguard_message_area" />
+  <java-symbol type="id" name="keyguard_click_area" />
   <java-symbol type="id" name="keyguard_selector_view" />
   <java-symbol type="id" name="keyguard_pattern_view" />
   <java-symbol type="id" name="keyguard_password_view" />
@@ -1338,6 +1339,7 @@
   <java-symbol type="integer" name="config_lidNavigationAccessibility" />
   <java-symbol type="integer" name="config_lidOpenRotation" />
   <java-symbol type="integer" name="config_longPressOnHomeBehavior" />
+  <java-symbol type="integer" name="kg_security_flip_duration" />
   <java-symbol type="layout" name="global_actions_item" />
   <java-symbol type="layout" name="global_actions_silent_mode" />
   <java-symbol type="layout" name="keyguard_screen_glogin_unlock" />
@@ -1440,7 +1442,12 @@
   <java-symbol type="string" name="kg_login_invalid_input" />
   <java-symbol type="string" name="kg_login_account_recovery_hint" />
   <java-symbol type="string" name="kg_login_checking_password" />
-
+  <java-symbol type="string" name="kg_too_many_failed_pin_attempts_dialog_message" />
+  <java-symbol type="string" name="kg_too_many_failed_pattern_attempts_dialog_message" />
+  <java-symbol type="string" name="kg_too_many_failed_password_attempts_dialog_message" />
+  <java-symbol type="string" name="kg_failed_attempts_almost_at_wipe" />
+  <java-symbol type="string" name="kg_failed_attempts_now_wiping" />
+  <java-symbol type="string" name="kg_failed_attempts_almost_at_login" />
 
   <!-- From services -->
   <java-symbol type="anim" name="screen_rotate_0_enter" />

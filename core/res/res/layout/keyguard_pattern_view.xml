@@ -36,6 +36,15 @@
 
         <Space android:layout_gravity="fill" />
 
+        <Button android:id="@+id/forgot_password_button"
+            android:layout_gravity="right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@*android:dimen/keyguard_lockscreen_status_line_font_size"
+            android:drawableLeft="@*android:drawable/lockscreen_forgot_password_button"
+            android:drawablePadding="0dip"
+            android:visibility="gone"/>
+
         <!-- We need MATCH_PARENT here only to force the size of the parent to be passed to
         the pattern view for it to compute its size. This is an unusual case, caused by
         LockPatternView's requirement to maintain a square aspect ratio based on the width

@@ -129,7 +129,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
         mForgotPatternButton.setText(R.string.kg_forgot_pattern_button_text);
         mForgotPatternButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                mCallback.showBackupUnlock();
+                mCallback.showBackupSecurity();
             }
         });
 
@@ -233,6 +233,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
                 mLockPatternView.setDisplayMode(LockPatternView.DisplayMode.Correct);
                 mCallback.dismiss(true); // keyguardDone(true)
                 KeyStore.getInstance().password(LockPatternUtils.patternToString(pattern));
+                mTotalFailedPatternAttempts = 0;
             } else {
                 if (pattern.size() > MIN_PATTERN_BEFORE_POKE_WAKELOCK) {
                     mCallback.userActivity(UNLOCK_PATTERN_WAKE_INTERVAL_MS);
@@ -313,13 +314,15 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
         mLockPatternView.clearPattern();
         mLockPatternView.setEnabled(false);
         final long elapsedRealtime = SystemClock.elapsedRealtime();
+        updateFooter(FooterMode.ForgotLockPattern);
+
         mCountdownTimer = new CountDownTimer(elapsedRealtimeDeadline - elapsedRealtime, 1000) {
 
             @Override
             public void onTick(long millisUntilFinished) {
                 final int secondsRemaining = (int) (millisUntilFinished / 1000);
                 mNavigationManager.setMessage(
-                        R.string.kg_too_many_failed_attempts_countdown,secondsRemaining);
+                        R.string.kg_too_many_failed_attempts_countdown, secondsRemaining);
             }
 
             @Override

@@ -53,12 +53,9 @@ public class KeyguardWidgetFrame extends FrameLayout {
         super(context, attrs, defStyle);
         if (sLeftOverscrollDrawable == null) {
             Resources res = context.getResources();
-            sLeftOverscrollDrawable = res.getDrawable(
-                    com.android.internal.R.drawable.kg_widget_overscroll_layer_left);
-            sRightOverscrollDrawable = res.getDrawable(
-                    com.android.internal.R.drawable.kg_widget_overscroll_layer_right);
-            sWidgetPagePadding =
-                    res.getDimensionPixelSize(com.android.internal.R.dimen.kg_widget_page_padding);
+            sLeftOverscrollDrawable = res.getDrawable(R.drawable.kg_widget_overscroll_layer_left);
+            sRightOverscrollDrawable = res.getDrawable(R.drawable.kg_widget_overscroll_layer_right);
+            sWidgetPagePadding = res.getDimensionPixelSize(R.dimen.kg_widget_page_padding);
         }
         setPadding(sWidgetPagePadding, sWidgetPagePadding, sWidgetPagePadding, sWidgetPagePadding);
     }

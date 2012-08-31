@@ -16,8 +16,11 @@
 
 package com.android.internal.policy.impl.keyguard;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
+import android.app.AlertDialog;
+import android.app.admin.DevicePolicyManager;
 import android.appwidget.AppWidgetHost;
 import android.appwidget.AppWidgetHostView;
 import android.appwidget.AppWidgetManager;
@@ -31,9 +34,10 @@ import android.graphics.Canvas;
 import android.telephony.TelephonyManager;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Slog;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ViewFlipper;
@@ -74,8 +78,8 @@ public class KeyguardHostView extends KeyguardViewBase {
     private ViewFlipper mViewFlipper;
     private Button mEmergencyDialerButton;
     private boolean mEnableMenuKey;
-    private boolean mScreenOn;
     private boolean mIsVerifyUnlockOnly;
+    private boolean mEnableFallback; // TODO: This should get the value from KeyguardPatternView
     private int mCurrentSecurityId = SECURITY_SELECTOR_ID;
 
     // KeyguardSecurityViews
@@ -116,7 +120,7 @@ public class KeyguardHostView extends KeyguardViewBase {
     @Override
     protected void dispatchDraw(Canvas canvas) {
         super.dispatchDraw(canvas);
-        mCallback.keyguardDoneDrawing();
+        mViewMediatorCallback.keyguardDoneDrawing();
     }
 
     @Override
@@ -196,29 +200,25 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
 
         public boolean isVerifyUnlockOnly() {
-            // TODO
-            return false;
+            return mIsVerifyUnlockOnly;
         }
 
         public void reportSuccessfulUnlockAttempt() {
-            KeyguardUpdateMonitor.getInstance(mContext).clearFailedAttempts();
+            KeyguardUpdateMonitor.getInstance(mContext).clearFailedUnlockAttempts();
         }
 
         public void reportFailedUnlockAttempt() {
             // TODO: handle biometric attempt differently.
-            KeyguardUpdateMonitor.getInstance(mContext).reportFailedAttempt();
+            KeyguardHostView.this.reportFailedUnlockAttempt();
         }
 
         public int getFailedAttempts() {
-            return KeyguardUpdateMonitor.getInstance(mContext).getFailedAttempts();
+            return KeyguardUpdateMonitor.getInstance(mContext).getFailedUnlockAttempts();
         }
 
-        public void showBackupUnlock() {
-            // TODO
-        }
-
-        public void keyguardDoneDrawing() {
-            mViewMediatorCallback.keyguardDoneDrawing();
+        @Override
+        public void showBackupSecurity() {
+            KeyguardHostView.this.showBackupSecurity();
         }
 
         @Override
@@ -228,6 +228,9 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     };
 
+    /**
+     * Shows the emergency dialer or returns the user to the existing call.
+     */
     public void takeEmergencyCallAction() {
         mCallback.userActivity(EMERGENCY_CALL_TIMEOUT);
         if (TelephonyManager.getDefault().getCallState()
@@ -241,19 +244,147 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
     }
 
-    protected void showNextSecurityScreenOrFinish(boolean authenticated) {
+    private void showDialog(String title, String message) {
+        final AlertDialog dialog = new AlertDialog.Builder(mContext)
+            .setTitle(title)
+            .setMessage(message)
+            .setNeutralButton(com.android.internal.R.string.ok, null)
+            .create();
+        if (!(mContext instanceof Activity)) {
+            dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
+        }
+        dialog.show();
+    }
+
+    private void showTimeoutDialog() {
+        int timeoutInSeconds = (int) LockPatternUtils.FAILED_ATTEMPT_TIMEOUT_MS / 1000;
+        int messageId = 0;
+
+        switch (mSecurityModel.getSecurityMode()) {
+            case Pattern:
+                messageId = R.string.kg_too_many_failed_pattern_attempts_dialog_message;
+                break;
+
+            case Password: {
+                    final boolean isPin = mLockPatternUtils.getKeyguardStoredPasswordQuality() ==
+                        DevicePolicyManager.PASSWORD_QUALITY_NUMERIC;
+                    messageId = isPin ? R.string.kg_too_many_failed_pin_attempts_dialog_message
+                            : R.string.kg_too_many_failed_password_attempts_dialog_message;
+                }
+                break;
+        }
+
+        if (messageId != 0) {
+            final String message = mContext.getString(messageId,
+                    KeyguardUpdateMonitor.getInstance(mContext).getFailedUnlockAttempts(),
+                    timeoutInSeconds);
+            showDialog(null, message);
+        }
+    }
+
+    private void showAlmostAtWipeDialog(int attempts, int remaining) {
+        int timeoutInSeconds = (int) LockPatternUtils.FAILED_ATTEMPT_TIMEOUT_MS / 1000;
+        String message = mContext.getString(R.string.kg_failed_attempts_almost_at_wipe,
+                attempts, remaining);
+        showDialog(null, message);
+    }
+
+    private void showWipeDialog(int attempts) {
+        String message = mContext.getString(R.string.kg_failed_attempts_now_wiping, attempts);
+        showDialog(null, message);
+    }
+
+    private void showAlmostAtAccountLoginDialog() {
+        final int timeoutInSeconds = (int) LockPatternUtils.FAILED_ATTEMPT_TIMEOUT_MS / 1000;
+        final int count = LockPatternUtils.FAILED_ATTEMPTS_BEFORE_RESET
+                - LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT;
+        String message = mContext.getString(R.string.kg_failed_attempts_almost_at_login,
+                count, LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT, timeoutInSeconds);
+        showDialog(null, message);
+    }
+
+    private void reportFailedUnlockAttempt() {
+        final KeyguardUpdateMonitor monitor = KeyguardUpdateMonitor.getInstance(mContext);
+        final int failedAttempts = monitor.getFailedUnlockAttempts() + 1; // +1 for this time
+
+        if (DEBUG) Log.d(TAG, "reportFailedPatternAttempt: #" + failedAttempts);
+
+        SecurityMode mode = mSecurityModel.getSecurityMode();
+        final boolean usingPattern = mode == KeyguardSecurityModel.SecurityMode.Pattern;
+
+        final int failedAttemptsBeforeWipe = mLockPatternUtils.getDevicePolicyManager()
+                .getMaximumFailedPasswordsForWipe(null);
+
+        final int failedAttemptWarning = LockPatternUtils.FAILED_ATTEMPTS_BEFORE_RESET
+                - LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT;
+
+        final int remainingBeforeWipe = failedAttemptsBeforeWipe > 0 ?
+                (failedAttemptsBeforeWipe - failedAttempts)
+                : Integer.MAX_VALUE; // because DPM returns 0 if no restriction
+
+        if (remainingBeforeWipe < LockPatternUtils.FAILED_ATTEMPTS_BEFORE_WIPE_GRACE) {
+            // If we reach this code, it means the user has installed a DevicePolicyManager
+            // that requests device wipe after N attempts.  Once we get below the grace
+            // period, we'll post this dialog every time as a clear warning until the
+            // bombshell hits and the device is wiped.
+            if (remainingBeforeWipe > 0) {
+                showAlmostAtWipeDialog(failedAttempts, remainingBeforeWipe);
+            } else {
+                // Too many attempts. The device will be wiped shortly.
+                Slog.i(TAG, "Too many unlock attempts; device will be wiped!");
+                showWipeDialog(failedAttempts);
+            }
+        } else {
+            boolean showTimeout =
+                (failedAttempts % LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT) == 0;
+            if (usingPattern && mEnableFallback) {
+                if (failedAttempts == failedAttemptWarning) {
+                    showAlmostAtAccountLoginDialog();
+                    showTimeout = false; // don't show both dialogs
+                } else if (failedAttempts >= LockPatternUtils.FAILED_ATTEMPTS_BEFORE_RESET) {
+                    mLockPatternUtils.setPermanentlyLocked(true);
+                    showSecurityScreen(SECURITY_ACCOUNT_ID);
+                    // don't show timeout dialog because we show account unlock screen next
+                    showTimeout = false;
+                }
+            }
+            if (showTimeout) {
+                showTimeoutDialog();
+            }
+        }
+        monitor.reportFailedUnlockAttempt();
+        mLockPatternUtils.reportFailedPasswordAttempt();
+    }
+
+    /**
+     * Shows the backup security screen for the current security mode.  This could be used for
+     * password recovery screens but is currently only used for pattern unlock to show the
+     * account unlock screen and biometric unlock to show the user's normal unlock.
+     */
+    private void showBackupSecurity() {
+        SecurityMode currentMode = mSecurityModel.getSecurityMode();
+        SecurityMode backup = mSecurityModel.getBackupFor(currentMode);
+        showSecurityScreen(getSecurityViewIdForMode(backup));
+    }
+
+    private void showNextSecurityScreenOrFinish(boolean authenticated) {
         boolean finish = false;
         if (SECURITY_SELECTOR_ID == mCurrentSecurityId) {
-            int realSecurityId = getSecurityViewIdForMode(mSecurityModel.getSecurityMode());
-            if (realSecurityId == mCurrentSecurityId) {
+            SecurityMode securityMode = mSecurityModel.getSecurityMode();
+            // Allow an alternate, such as biometric unlock
+            // TODO: un-comment when face unlock is working again:
+            // securityMode = mSecurityModel.getAlternateFor(securityMode);
+            int realSecurityId = getSecurityViewIdForMode(securityMode);
+            if (SECURITY_SELECTOR_ID == realSecurityId) {
                 finish = true; // no security required
             } else {
                 showSecurityScreen(realSecurityId); // switch to the "real" security view
             }
         } else if (authenticated) {
-            if ((mCurrentSecurityId == SECURITY_PATTERN_ID
+            if (mCurrentSecurityId == SECURITY_PATTERN_ID
                 || mCurrentSecurityId == SECURITY_PASSWORD_ID
-                || mCurrentSecurityId == SECURITY_ACCOUNT_ID)) {
+                || mCurrentSecurityId == SECURITY_ACCOUNT_ID
+                || mCurrentSecurityId == SECURITY_BIOMETRIC_ID) {
                 finish = true;
             }
         } else {
@@ -309,6 +440,7 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     @Override
     public void reset() {
+        mIsVerifyUnlockOnly = false;
         requestFocus();
     }
 
@@ -330,6 +462,12 @@ public class KeyguardHostView extends KeyguardViewBase {
         return null;
     }
 
+    /**
+     * Switches to the given security view unless it's already being shown, in which case
+     * this is a no-op.
+     *
+     * @param securityViewId
+     */
     private void showSecurityScreen(int securityViewId) {
 
         if (securityViewId == mCurrentSecurityId) return;
@@ -352,19 +490,22 @@ public class KeyguardHostView extends KeyguardViewBase {
                 break;
             }
         }
+
+        // Discard current runnable if we're switching back to the selector view
+        if (securityViewId == SECURITY_SELECTOR_ID) {
+            setOnDismissRunnable(null);
+        }
     }
 
     @Override
     public void onScreenTurnedOn() {
         if (DEBUG) Log.d(TAG, "screen on");
-        mScreenOn = true;
         showSecurityScreen(mCurrentSecurityId);
     }
 
     @Override
     public void onScreenTurnedOff() {
         if (DEBUG) Log.d(TAG, "screen off");
-        mScreenOn = false;
         showSecurityScreen(SECURITY_SELECTOR_ID);
     }
 
@@ -469,7 +610,8 @@ public class KeyguardHostView extends KeyguardViewBase {
     private static final String ENABLE_MENU_KEY_FILE = "/data/local/enable_menu_key";
     private boolean shouldEnableMenuKey() {
         final Resources res = getResources();
-        final boolean configDisabled = res.getBoolean(R.bool.config_disableMenuKeyInLockScreen);
+        final boolean configDisabled = res.getBoolean(
+                com.android.internal.R.bool.config_disableMenuKeyInLockScreen);
         final boolean isTestHarness = ActivityManager.isRunningInTestHarness();
         final boolean fileOverride = (new File(ENABLE_MENU_KEY_FILE)).exists();
         return !configDisabled || isTestHarness || fileOverride;
