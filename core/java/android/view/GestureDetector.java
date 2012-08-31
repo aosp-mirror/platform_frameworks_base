@@ -453,7 +453,8 @@ public class GestureDetector {
         }
         mVelocityTracker.addMovement(ev);
 
-        final boolean pointerUp = action == MotionEvent.ACTION_POINTER_UP;
+        final boolean pointerUp =
+                (action & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_POINTER_UP;
         final int skipIndex = pointerUp ? ev.getActionIndex() : -1;
 
         // Determine focal point
