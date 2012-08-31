@@ -16,12 +16,29 @@
 
 package com.android.server.display;
 
+import libcore.util.Objects;
+
 /**
  * Describes the characteristics of a physical display device.
  */
-public final class DisplayDeviceInfo {
+final class DisplayDeviceInfo {
+    /**
+     * Flag: Indicates that this display device should be considered the default display
+     * device of the system.
+     */
     public static final int FLAG_DEFAULT_DISPLAY = 1 << 0;
+
+    /**
+     * Flag: Indicates that this display device can show secure surfaces.
+     */
     public static final int FLAG_SECURE = 1 << 1;
+
+    /**
+     * Flag: Indicates that this display device can rotate to show contents in a
+     * different orientation.  Otherwise the rotation is assumed to be fixed in the
+     * natural orientation and the display manager should transform the content to fit.
+     */
+    public static final int FLAG_SUPPORTS_ROTATION = 1 << 2;
 
     /**
      * Gets the name of the display device, which may be derived from
@@ -48,6 +65,28 @@ public final class DisplayDeviceInfo {
 
     public int flags;
 
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof DisplayDeviceInfo && equals((DisplayDeviceInfo)o);
+    }
+
+    public boolean equals(DisplayDeviceInfo other) {
+        return other != null
+                && Objects.equal(name, other.name)
+                && width == other.width
+                && height == other.height
+                && refreshRate == other.refreshRate
+                && densityDpi == other.densityDpi
+                && xDpi == other.xDpi
+                && yDpi == other.yDpi
+                && flags == other.flags;
+    }
+
+    @Override
+    public int hashCode() {
+        return 0; // don't care
+    }
+
     public void copyFrom(DisplayDeviceInfo other) {
         name = other.name;
         width = other.width;
@@ -62,9 +101,9 @@ public final class DisplayDeviceInfo {
     // For debugging purposes
     @Override
     public String toString() {
-        return "\"" + name + "\": " + width + " x " + height + ", " + refreshRate + " fps, "
+        return "DisplayDeviceInfo{\"" + name + "\": " + width + " x " + height + ", " + refreshRate + " fps, "
                 + "density " + densityDpi + ", " + xDpi + " x " + yDpi + " dpi"
-                + flagsToString(flags);
+                + flagsToString(flags) + "}";
     }
 
     private static String flagsToString(int flags) {

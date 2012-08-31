@@ -743,17 +743,59 @@ public class Surface implements Parcelable {
     }
 
     /**
-     * Describes the properties of a physical display.
+     * Describes the properties of a physical display known to surface flinger.
      * @hide
      */
     public static final class PhysicalDisplayInfo {
-        // TODO: redesign this
         public int width;
         public int height;
         public float refreshRate;
         public float density;
         public float xDpi;
         public float yDpi;
+
+        public PhysicalDisplayInfo() {
+        }
+
+        public PhysicalDisplayInfo(PhysicalDisplayInfo other) {
+            copyFrom(other);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return o instanceof PhysicalDisplayInfo && equals((PhysicalDisplayInfo)o);
+        }
+
+        public boolean equals(PhysicalDisplayInfo other) {
+            return other != null
+                    && width == other.width
+                    && height == other.height
+                    && refreshRate == other.refreshRate
+                    && density == other.density
+                    && xDpi == other.xDpi
+                    && yDpi == other.yDpi;
+        }
+
+        @Override
+        public int hashCode() {
+            return 0; // don't care
+        }
+
+        public void copyFrom(PhysicalDisplayInfo other) {
+            width = other.width;
+            height = other.height;
+            refreshRate = other.refreshRate;
+            density = other.density;
+            xDpi = other.xDpi;
+            yDpi = other.yDpi;
+        }
+
+        // For debugging purposes
+        @Override
+        public String toString() {
+            return "PhysicalDisplayInfo{" + width + " x " + height + ", " + refreshRate + " fps, "
+                    + "density " + density + ", " + xDpi + " x " + yDpi + " dpi}";
+        }
     }
 
     /**

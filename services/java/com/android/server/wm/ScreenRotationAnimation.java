@@ -240,7 +240,7 @@ class ScreenRotationAnimation {
                     WindowManagerService.SHOW_SURFACE_ALLOC) Slog.i(WindowManagerService.TAG,
                             "  FREEZE " + mSurface + ": CREATE");
 
-            setRotation(originalRotation);
+            setRotationInTransaction(originalRotation);
         } finally {
             if (!inTransaction) {
                 Surface.closeTransaction();
@@ -260,7 +260,7 @@ class ScreenRotationAnimation {
         return delta;
     }
 
-    void setSnapshotTransform(Matrix matrix, float alpha) {
+    private void setSnapshotTransformInTransaction(Matrix matrix, float alpha) {
         if (mSurface != null) {
             matrix.getValues(mTmpFloats);
             mSurface.setPosition(mTmpFloats[Matrix.MTRANS_X],
@@ -303,7 +303,7 @@ class ScreenRotationAnimation {
     }
 
     // Must be called while in a transaction.
-    private void setRotation(int rotation) {
+    private void setRotationInTransaction(int rotation) {
         mCurRotation = rotation;
 
         // Compute the transformation matrix that must be applied
@@ -313,13 +313,13 @@ class ScreenRotationAnimation {
         createRotationMatrix(delta, mWidth, mHeight, mSnapshotInitialMatrix);
 
         if (DEBUG_STATE) Slog.v(TAG, "**** ROTATION: " + delta);
-        setSnapshotTransform(mSnapshotInitialMatrix, 1.0f);
+        setSnapshotTransformInTransaction(mSnapshotInitialMatrix, 1.0f);
     }
 
     // Must be called while in a transaction.
-    public boolean setRotation(int rotation, SurfaceSession session,
+    public boolean setRotationInTransaction(int rotation, SurfaceSession session,
             long maxAnimationDuration, float animationScale, int finalWidth, int finalHeight) {
-        setRotation(rotation);
+        setRotationInTransaction(rotation);
         if (TWO_PHASE_ANIMATION) {
             return startAnimation(session, maxAnimationDuration, animationScale,
                     finalWidth, finalHeight, false);
@@ -515,16 +515,15 @@ class ScreenRotationAnimation {
                     WindowManagerService.TAG,
                     ">>> OPEN TRANSACTION ScreenRotationAnimation.startAnimation");
             Surface.openTransaction();
-
-            // Compute the transformation matrix that must be applied
-            // the the black frame to make it stay in the initial position
-            // before the new screen rotation.  This is different than the
-            // snapshot transformation because the snapshot is always based
-            // of the native orientation of the screen, not the orientation
-            // we were last in.
-            createRotationMatrix(delta, mOriginalWidth, mOriginalHeight, mFrameInitialMatrix);
-
             try {
+                // Compute the transformation matrix that must be applied
+                // the the black frame to make it stay in the initial position
+                // before the new screen rotation.  This is different than the
+                // snapshot transformation because the snapshot is always based
+                // of the native orientation of the screen, not the orientation
+                // we were last in.
+                createRotationMatrix(delta, mOriginalWidth, mOriginalHeight, mFrameInitialMatrix);
+
                 Rect outer = new Rect(-mOriginalWidth*1, -mOriginalHeight*1,
                         mOriginalWidth*2, mOriginalHeight*2);
                 Rect inner = new Rect(0, 0, mOriginalWidth, mOriginalHeight);
@@ -844,7 +843,7 @@ class ScreenRotationAnimation {
         return more;
     }
 
-    void updateSurfaces() {
+    void updateSurfacesInTransaction() {
         if (!mStarted) {
             return;
         }
@@ -884,7 +883,7 @@ class ScreenRotationAnimation {
             }
         }
 
-        setSnapshotTransform(mSnapshotFinalMatrix, mExitTransformation.getAlpha());
+        setSnapshotTransformInTransaction(mSnapshotFinalMatrix, mExitTransformation.getAlpha());
     }
 
     public boolean stepAnimationLocked(long now) {

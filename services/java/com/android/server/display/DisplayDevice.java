@@ -16,19 +16,34 @@
 
 package com.android.server.display;
 
+import android.graphics.Rect;
+import android.graphics.SurfaceTexture;
 import android.os.IBinder;
+import android.view.Surface;
+
+import java.io.PrintWriter;
 
 /**
  * Represents a physical display device such as the built-in display
  * an external monitor, or a WiFi display.
  * <p>
- * Display devices are not thread-safe and must only be accessed
- * on the display manager service's handler thread.
+ * Display devices are guarded by the {@link DisplayManagerService.SyncRoot} lock.
  * </p>
  */
-public abstract class DisplayDevice {
+abstract class DisplayDevice {
     private final DisplayAdapter mDisplayAdapter;
     private final IBinder mDisplayToken;
+
+    // The display device does not manage these properties itself, they are set by
+    // the display manager service.  The display device shouldn't really be looking at these.
+    private int mCurrentLayerStack = -1;
+    private int mCurrentOrientation = -1;
+    private Rect mCurrentViewport;
+    private Rect mCurrentFrame;
+
+    // The display device does own its surface texture, but it should only set it
+    // within a transaction from performTraversalInTransactionLocked.
+    private SurfaceTexture mCurrentSurfaceTexture;
 
     public DisplayDevice(DisplayAdapter displayAdapter, IBinder displayToken) {
         mDisplayAdapter = displayAdapter;
@@ -40,7 +55,7 @@ public abstract class DisplayDevice {
      *
      * @return The display adapter.
      */
-    public final DisplayAdapter getAdapter() {
+    public final DisplayAdapter getAdapterLocked() {
         return mDisplayAdapter;
     }
 
@@ -50,22 +65,119 @@ public abstract class DisplayDevice {
      * @return The display token, or null if the display is not being managed
      * by Surface Flinger.
      */
-    public final IBinder getDisplayToken() {
+    public final IBinder getDisplayTokenLocked() {
         return mDisplayToken;
+    }
+
+    /**
+     * Gets the name of the display device.
+     *
+     * @return The display device name.
+     */
+    public final String getNameLocked() {
+        return getDisplayDeviceInfoLocked().name;
     }
 
     /**
      * Gets information about the display device.
      *
-     * @param outInfo The object to populate with the information.
+     * The information returned should not change between calls unless the display
+     * adapter sent a {@link DisplayAdapter#DISPLAY_DEVICE_EVENT_CHANGED} event and
+     * {@link #applyPendingDisplayDeviceInfoChangesLocked()} has been called to apply
+     * the pending changes.
+     *
+     * @return The display device info, which should be treated as immutable by the caller.
+     * The display device should allocate a new display device info object whenever
+     * the data changes.
      */
-    public abstract void getInfo(DisplayDeviceInfo outInfo);
+    public abstract DisplayDeviceInfo getDisplayDeviceInfoLocked();
 
-    // For debugging purposes.
-    @Override
-    public String toString() {
-        DisplayDeviceInfo info = new DisplayDeviceInfo();
-        getInfo(info);
-        return info.toString() + ", owner=\"" + mDisplayAdapter.getName() + "\"";
+    /**
+     * Applies any pending changes to the observable state of the display device
+     * if the display adapter sent a {@link DisplayAdapter#DISPLAY_DEVICE_EVENT_CHANGED} event.
+     */
+    public void applyPendingDisplayDeviceInfoChangesLocked() {
+    }
+
+    /**
+     * Gives the display device a chance to update its properties while in a transaction.
+     */
+    public void performTraversalInTransactionLocked() {
+    }
+
+    /**
+     * Sets the display layer stack while in a transaction.
+     */
+    public final void setLayerStackInTransactionLocked(int layerStack) {
+        if (mCurrentLayerStack == layerStack) {
+            return;
+        }
+        mCurrentLayerStack = layerStack;
+        Surface.setDisplayLayerStack(mDisplayToken, layerStack);
+    }
+
+    /**
+     * Sets the display orientation while in a transaction.
+     */
+    public final void setOrientationInTransactionLocked(int orientation) {
+        if (mCurrentOrientation == orientation) {
+            return;
+        }
+        mCurrentOrientation = orientation;
+        Surface.setDisplayOrientation(mDisplayToken, orientation);
+    }
+
+    /**
+     * Sets the display viewport while in a transaction.
+     */
+    public final void setViewportInTransactionLocked(Rect viewport) {
+        if (mCurrentViewport != null) {
+            if (mCurrentViewport.equals(viewport)) {
+                return;
+            }
+        } else {
+            mCurrentViewport = new Rect();
+        }
+        mCurrentViewport.set(viewport);
+        Surface.setDisplayViewport(mDisplayToken, viewport);
+    }
+
+    /**
+     * Sets the display frame while in a transaction.
+     */
+    public final void setFrameInTransactionLocked(Rect frame) {
+        if (mCurrentFrame != null) {
+            if (mCurrentFrame.equals(frame)) {
+                return;
+            }
+        } else {
+            mCurrentFrame = new Rect();
+        }
+        mCurrentFrame.set(frame);
+        Surface.setDisplayFrame(mDisplayToken, frame);
+    }
+
+    /**
+     * Sets the surface texture while in a transaction.
+     */
+    public final void setSurfaceTextureInTransactionLocked(SurfaceTexture surfaceTexture) {
+        if (mCurrentSurfaceTexture == surfaceTexture) {
+            return;
+        }
+        mCurrentSurfaceTexture = surfaceTexture;
+        Surface.setDisplaySurface(mDisplayToken, surfaceTexture);
+    }
+
+    /**
+     * Dumps the local state of the display device.
+     * Does not need to dump the display device info because that is already dumped elsewhere.
+     */
+    public void dumpLocked(PrintWriter pw) {
+        pw.println("mAdapter=" + mDisplayAdapter.getName());
+        pw.println("mCurrentLayerStack=" + mCurrentLayerStack);
+        pw.println("mCurrentOrientation=" + mCurrentOrientation);
+        pw.println("mCurrentViewport=" + mCurrentViewport);
+        pw.println("mCurrentFrame=" + mCurrentFrame);
+        pw.println("mCurrentSurfaceTexture=" + mCurrentSurfaceTexture);
     }
 }

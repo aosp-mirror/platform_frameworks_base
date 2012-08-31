@@ -53,6 +53,8 @@ public final class Display {
 
     private final DisplayManagerGlobal mGlobal;
     private final int mDisplayId;
+    private final int mLayerStack;
+    private final String mName;
     private final CompatibilityInfoHolder mCompatibilityInfo;
 
     private DisplayInfo mDisplayInfo; // never null
@@ -90,6 +92,8 @@ public final class Display {
         mGlobal = global;
         mDisplayId = displayId;
         mDisplayInfo = displayInfo;
+        mLayerStack = displayInfo.layerStack; // can never change as long as the display is valid
+        mName = displayInfo.name; // cannot change as long as the display is valid
         mCompatibilityInfo = compatibilityInfo;
         mIsValid = true;
     }
@@ -146,13 +150,11 @@ public final class Display {
      * Each display has its own independent layer stack upon which surfaces
      * are placed to be managed by surface flinger.
      *
-     * @return The layer stack number.
+     * @return The display's layer stack number.
      * @hide
      */
     public int getLayerStack() {
-        // Note: This is the current convention but there is no requirement that
-        // the display id and layer stack id be the same.
-        return mDisplayId;
+        return mLayerStack;
     }
 
     /**
@@ -163,6 +165,14 @@ public final class Display {
      */
     public CompatibilityInfoHolder getCompatibilityInfo() {
         return mCompatibilityInfo;
+    }
+
+    /**
+     * Gets the name of the display.
+     * @return The display's name.
+     */
+    public String getName() {
+        return mName;
     }
 
     /**

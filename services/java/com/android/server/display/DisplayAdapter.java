@@ -28,38 +28,53 @@ import java.io.PrintWriter;
  * For now, all display adapters are registered in the system server but
  * in principle it could be done from other processes.
  * </p><p>
- * Display devices are not thread-safe and must only be accessed
- * on the display manager service's handler thread.
+ * Display adapters are guarded by the {@link DisplayManagerService.SyncRoot} lock.
  * </p>
  */
-public class DisplayAdapter {
+abstract class DisplayAdapter {
+    private final DisplayManagerService.SyncRoot mSyncRoot;
     private final Context mContext;
-    private final String mName;
     private final Handler mHandler;
-    private Listener mListener;
+    private final Listener mListener;
+    private final String mName;
 
     public static final int DISPLAY_DEVICE_EVENT_ADDED = 1;
     public static final int DISPLAY_DEVICE_EVENT_CHANGED = 2;
     public static final int DISPLAY_DEVICE_EVENT_REMOVED = 3;
 
-    public DisplayAdapter(Context context, String name) {
+    public DisplayAdapter(DisplayManagerService.SyncRoot syncRoot,
+            Context context, Handler handler, Listener listener, String name) {
+        mSyncRoot = syncRoot;
         mContext = context;
+        mHandler = handler;
+        mListener = listener;
         mName = name;
-        mHandler = new Handler();
     }
 
+    /**
+     * Gets the object that the display adapter should synchronize on when handling
+     * calls that come in from outside of the display manager service.
+     */
+    public final DisplayManagerService.SyncRoot getSyncRoot() {
+        return mSyncRoot;
+    }
+
+    /**
+     * Gets the display adapter's context.
+     */
     public final Context getContext() {
         return mContext;
     }
 
+    /**
+     * Gets a handler that the display adapter may use to post asynchronous messages.
+     */
     public final Handler getHandler() {
         return mHandler;
     }
 
     /**
      * Gets the display adapter name for debugging purposes.
-     *
-     * @return The display adapter name.
      */
     public final String getName() {
         return mName;
@@ -68,35 +83,24 @@ public class DisplayAdapter {
     /**
      * Registers the display adapter with the display manager.
      *
-     * @param listener The listener for callbacks.  The listener will
-     * be invoked on the display manager service's handler thread.
+     * The display adapter should register any built-in display devices as soon as possible.
+     * The boot process will wait for the default display to be registered.
+     * Other display devices can be registered dynamically later.
      */
-    public final void register(Listener listener) {
-        mListener = listener;
-        onRegister();
+    public void registerLocked() {
     }
 
     /**
      * Dumps the local state of the display adapter.
      */
-    public void dump(PrintWriter pw) {
-    }
-
-    /**
-     * Called when the display adapter is registered.
-     *
-     * The display adapter should register any built-in display devices as soon as possible.
-     * The boot process will wait for the default display to be registered.
-     *
-     * Other display devices can be registered dynamically later.
-     */
-    protected void onRegister() {
+    public void dumpLocked(PrintWriter pw) {
     }
 
     /**
      * Sends a display device event to the display adapter listener asynchronously.
      */
-    protected void sendDisplayDeviceEvent(final DisplayDevice device, final int event) {
+    protected final void sendDisplayDeviceEventLocked(
+            final DisplayDevice device, final int event) {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -105,7 +109,20 @@ public class DisplayAdapter {
         });
     }
 
+    /**
+     * Sends a request to perform traversals.
+     */
+    protected final void sendTraversalRequestLocked() {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mListener.onTraversalRequested();
+            }
+        });
+    }
+
     public interface Listener {
         public void onDisplayDeviceEvent(DisplayDevice device, int event);
+        public void onTraversalRequested();
     }
 }

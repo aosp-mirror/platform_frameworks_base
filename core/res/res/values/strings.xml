@@ -3658,11 +3658,14 @@
     <!-- Name of the built-in display.  [CHAR LIMIT=50] -->
     <string name="display_manager_built_in_display_name">Built-in Screen</string>
 
+    <!-- Name of the HDMI display.  [CHAR LIMIT=50] -->
+    <string name="display_manager_hdmi_display_name">HDMI Screen</string>
+
     <!-- Name of the N'th overlay display for testing.  [CHAR LIMIT=50] -->
     <string name="display_manager_overlay_display_name">Overlay #<xliff:g id="id">%1$d</xliff:g></string>
 
     <!-- Title text to show within the overlay.  [CHAR LIMIT=50] -->
-    <string name="display_manager_overlay_display_title">Overlay #<xliff:g id="id">%1$d</xliff:g>: <xliff:g id="width">%2$d</xliff:g>x<xliff:g id="height">%3$d</xliff:g>, <xliff:g id="dpi">%4$d</xliff:g> dpi</string>
+    <string name="display_manager_overlay_display_title"><xliff:g id="name">%1$s</xliff:g>: <xliff:g id="width">%2$d</xliff:g>x<xliff:g id="height">%3$d</xliff:g>, <xliff:g id="dpi">%4$d</xliff:g> dpi</string>
 
     <!-- Keyguard strings -->
     <!-- Label shown on emergency call button in keyguard -->
