@@ -14,6 +14,9 @@
 ** limitations under the License.
 */
 
+#include <linux/capability.h>
+#include <linux/prctl.h>
+
 #include "installd.h"
 
 
@@ -491,11 +494,52 @@ fail:
     return res;
 }
 
+static void drop_privileges() {
+    if (prctl(PR_SET_KEEPCAPS, 1) < 0) {
+        ALOGE("prctl(PR_SET_KEEPCAPS) failed: %s\n", strerror(errno));
+        exit(1);
+    }
+
+    if (setgid(AID_INSTALL) < 0) {
+        ALOGE("setgid() can't drop privileges; exiting.\n");
+        exit(1);
+    }
+
+    if (setuid(AID_INSTALL) < 0) {
+        ALOGE("setuid() can't drop privileges; exiting.\n");
+        exit(1);
+    }
+
+    struct __user_cap_header_struct capheader;
+    struct __user_cap_data_struct capdata[2];
+    memset(&capheader, 0, sizeof(capheader));
+    memset(&capdata, 0, sizeof(capdata));
+    capheader.version = _LINUX_CAPABILITY_VERSION_3;
+    capheader.pid = 0;
+
+    capdata[CAP_TO_INDEX(CAP_DAC_OVERRIDE)].permitted |= CAP_TO_MASK(CAP_DAC_OVERRIDE);
+    capdata[CAP_TO_INDEX(CAP_CHOWN)].permitted        |= CAP_TO_MASK(CAP_CHOWN);
+    capdata[CAP_TO_INDEX(CAP_SETUID)].permitted       |= CAP_TO_MASK(CAP_SETUID);
+    capdata[CAP_TO_INDEX(CAP_SETGID)].permitted       |= CAP_TO_MASK(CAP_SETGID);
+
+    capdata[0].effective = capdata[0].permitted;
+    capdata[1].effective = capdata[1].permitted;
+    capdata[0].inheritable = 0;
+    capdata[1].inheritable = 0;
+
+    if (capset(&capheader, &capdata[0]) < 0) {
+        ALOGE("capset failed: %s\n", strerror(errno));
+        exit(1);
+    }
+}
+
 int main(const int argc, const char *argv[]) {
     char buf[BUFFER_MAX];
     struct sockaddr addr;
     socklen_t alen;
     int lsocket, s, count;
+
+    ALOGI("installd firing up\n");
 
     if (initialize_globals() < 0) {
         ALOGE("Could not initialize globals; exiting.\n");
@@ -506,6 +550,8 @@ int main(const int argc, const char *argv[]) {
         ALOGE("Could not create directories; exiting.\n");
         exit(1);
     }
+
+    drop_privileges();
 
     lsocket = android_get_control_socket(SOCKET_PATH);
     if (lsocket < 0) {
