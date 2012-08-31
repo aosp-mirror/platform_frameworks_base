@@ -23,6 +23,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Binder;
+import android.os.Environment;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -173,7 +174,8 @@ public class LockSettingsService extends ILockSettings.Stub {
             // Leave it in the same place for user 0
             return dataSystemDirectory + LOCK_PATTERN_FILE;
         } else {
-            return  dataSystemDirectory + "users/" + userId + "/" + LOCK_PATTERN_FILE;
+            return  new File(Environment.getUserSystemDirectory(userId), LOCK_PATTERN_FILE)
+                    .getAbsolutePath();
         }
     }
 
@@ -185,7 +187,8 @@ public class LockSettingsService extends ILockSettings.Stub {
             // Leave it in the same place for user 0
             return dataSystemDirectory + LOCK_PASSWORD_FILE;
         } else {
-            return  dataSystemDirectory + "users/" + userId + "/" + LOCK_PASSWORD_FILE;
+            return  new File(Environment.getUserSystemDirectory(userId), LOCK_PASSWORD_FILE)
+                    .getAbsolutePath();
         }
     }
 
