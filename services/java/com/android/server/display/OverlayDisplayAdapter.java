@@ -53,6 +53,7 @@ import java.util.regex.Pattern;
  */
 public final class OverlayDisplayAdapter extends DisplayAdapter {
     private static final String TAG = "OverlayDisplayAdapter";
+    private static final boolean DEBUG = false;
 
     private static final int MIN_WIDTH = 100;
     private static final int MIN_HEIGHT = 100;
@@ -259,6 +260,10 @@ public final class OverlayDisplayAdapter extends DisplayAdapter {
             pw.println("    mWindowY=" + mWindowY);
             pw.println("    mWindowScale=" + mWindowScale);
             pw.println("    mWindowParams=" + mWindowParams);
+            if (mTextureView != null) {
+                pw.println("    mTextureView.getScaleX()=" + mTextureView.getScaleX());
+                pw.println("    mTextureView.getScaleY()=" + mTextureView.getScaleY());
+            }
             pw.println("    mLiveTranslationX=" + mLiveTranslationX);
             pw.println("    mLiveTranslationY=" + mLiveTranslationY);
             pw.println("    mLiveScale=" + mLiveScale);
@@ -328,12 +333,8 @@ public final class OverlayDisplayAdapter extends DisplayAdapter {
 
         private void updateWindowParams() {
             float scale = mWindowScale * mLiveScale;
-            if (mWidth * scale > mDefaultDisplayInfo.logicalWidth) {
-                scale = mDefaultDisplayInfo.logicalWidth / mWidth;
-            }
-            if (mHeight * scale > mDefaultDisplayInfo.logicalHeight) {
-                scale = mDefaultDisplayInfo.logicalHeight / mHeight;
-            }
+            scale = Math.min(scale, (float)mDefaultDisplayInfo.logicalWidth / mWidth);
+            scale = Math.min(scale, (float)mDefaultDisplayInfo.logicalHeight / mHeight);
             scale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, scale));
 
             float offsetScale = (scale / mWindowScale - 1.0f) * 0.5f;
@@ -343,6 +344,13 @@ public final class OverlayDisplayAdapter extends DisplayAdapter {
             int y = mWindowY + mLiveTranslationY - (int)(height * offsetScale);
             x = Math.max(0, Math.min(x, mDefaultDisplayInfo.logicalWidth - width));
             y = Math.max(0, Math.min(y, mDefaultDisplayInfo.logicalHeight - height));
+
+            if (DEBUG) {
+                Slog.d(TAG, "updateWindowParams: scale=" + scale
+                        + ", offsetScale=" + offsetScale
+                        + ", x=" + x + ", y=" + y
+                        + ", width=" + width + ", height=" + height);
+            }
 
             mTextureView.setScaleX(scale);
             mTextureView.setScaleY(scale);
