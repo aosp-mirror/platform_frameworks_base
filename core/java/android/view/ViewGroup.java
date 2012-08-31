@@ -3806,6 +3806,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     /**
      * Finishes the removal of a detached view. This method will dispatch the detached from
      * window event and notify the hierarchy change listener.
+     * <p>
+     * This method is intended to be lightweight and makes no assumptions about whether the
+     * parent or child should be redrawn. Proper use of this method will include also making
+     * any appropriate {@link #requestLayout()} or {@link #invalidate()} calls.
+     * For example, callers can {@link #post(Runnable) post} a {@link Runnable}
+     * which performs a {@link #requestLayout()} on the next frame, after all detach/remove
+     * calls are finished, causing layout to be run prior to redrawing the view hierarchy.
      *
      * @param child the child to be definitely removed from the view hierarchy
      * @param animate if true and the view has an animation, the view is placed in the
@@ -3846,10 +3853,17 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     /**
      * Attaches a view to this view group. Attaching a view assigns this group as the parent,
-     * sets the layout parameters and puts the view in the list of children so it can be retrieved
-     * by calling {@link #getChildAt(int)}.
-     *
-     * This method should be called only for view which were detached from their parent.
+     * sets the layout parameters and puts the view in the list of children so that
+     * it can be retrieved by calling {@link #getChildAt(int)}.
+     * <p>
+     * This method is intended to be lightweight and makes no assumptions about whether the
+     * parent or child should be redrawn. Proper use of this method will include also making
+     * any appropriate {@link #requestLayout()} or {@link #invalidate()} calls.
+     * For example, callers can {@link #post(Runnable) post} a {@link Runnable}
+     * which performs a {@link #requestLayout()} on the next frame, after all detach/attach
+     * calls are finished, causing layout to be run prior to redrawing the view hierarchy.
+     * <p>
+     * This method should be called only for views which were detached from their parent.
      *
      * @param child the child to attach
      * @param index the index at which the child should be attached
@@ -3881,10 +3895,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
-     * Detaches a view from its parent. Detaching a view should be temporary and followed
-     * either by a call to {@link #attachViewToParent(View, int, android.view.ViewGroup.LayoutParams)}
-     * or a call to {@link #removeDetachedView(View, boolean)}. When a view is detached,
-     * its parent is null and cannot be retrieved by a call to {@link #getChildAt(int)}.
+     * Detaches a view from its parent. Detaching a view should be followed
+     * either by a call to
+     * {@link #attachViewToParent(View, int, android.view.ViewGroup.LayoutParams)}
+     * or a call to {@link #removeDetachedView(View, boolean)}. Detachment should only be
+     * temporary; reattachment or removal should happen within the same drawing cycle as
+     * detachment. When a view is detached, its parent is null and cannot be retrieved by a
+     * call to {@link #getChildAt(int)}.
      *
      * @param child the child to detach
      *
@@ -3899,10 +3916,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
-     * Detaches a view from its parent. Detaching a view should be temporary and followed
-     * either by a call to {@link #attachViewToParent(View, int, android.view.ViewGroup.LayoutParams)}
-     * or a call to {@link #removeDetachedView(View, boolean)}. When a view is detached,
-     * its parent is null and cannot be retrieved by a call to {@link #getChildAt(int)}.
+     * Detaches a view from its parent. Detaching a view should be followed
+     * either by a call to
+     * {@link #attachViewToParent(View, int, android.view.ViewGroup.LayoutParams)}
+     * or a call to {@link #removeDetachedView(View, boolean)}. Detachment should only be
+     * temporary; reattachment or removal should happen within the same drawing cycle as
+     * detachment. When a view is detached, its parent is null and cannot be retrieved by a
+     * call to {@link #getChildAt(int)}.
      *
      * @param index the index of the child to detach
      *
@@ -3917,10 +3937,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
-     * Detaches a range of view from their parent. Detaching a view should be temporary and followed
-     * either by a call to {@link #attachViewToParent(View, int, android.view.ViewGroup.LayoutParams)}
-     * or a call to {@link #removeDetachedView(View, boolean)}. When a view is detached, its
-     * parent is null and cannot be retrieved by a call to {@link #getChildAt(int)}.
+     * Detaches a range of views from their parents. Detaching a view should be followed
+     * either by a call to
+     * {@link #attachViewToParent(View, int, android.view.ViewGroup.LayoutParams)}
+     * or a call to {@link #removeDetachedView(View, boolean)}. Detachment should only be
+     * temporary; reattachment or removal should happen within the same drawing cycle as
+     * detachment. When a view is detached, its parent is null and cannot be retrieved by a
+     * call to {@link #getChildAt(int)}.
      *
      * @param start the first index of the childrend range to detach
      * @param count the number of children to detach
@@ -3936,10 +3959,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
-     * Detaches all views from the parent. Detaching a view should be temporary and followed
-     * either by a call to {@link #attachViewToParent(View, int, android.view.ViewGroup.LayoutParams)}
-     * or a call to {@link #removeDetachedView(View, boolean)}. When a view is detached,
-     * its parent is null and cannot be retrieved by a call to {@link #getChildAt(int)}.
+     * Detaches all views from the parent. Detaching a view should be followed
+     * either by a call to
+     * {@link #attachViewToParent(View, int, android.view.ViewGroup.LayoutParams)}
+     * or a call to {@link #removeDetachedView(View, boolean)}. Detachment should only be
+     * temporary; reattachment or removal should happen within the same drawing cycle as
+     * detachment. When a view is detached, its parent is null and cannot be retrieved by a
+     * call to {@link #getChildAt(int)}.
      *
      * @see #detachViewFromParent(View)
      * @see #detachViewFromParent(int)
