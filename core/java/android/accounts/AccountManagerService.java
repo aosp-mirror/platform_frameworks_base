@@ -1879,7 +1879,7 @@ public class AccountManagerService
 
     private static String getDatabaseName(int userId) {
         File systemDir = Environment.getSystemSecureDirectory();
-        File databaseFile = new File(systemDir, "users/" + userId + "/" + DATABASE_NAME);
+        File databaseFile = new File(Environment.getUserSystemDirectory(userId), DATABASE_NAME);
         if (userId == 0) {
             // Migrate old file, if it exists, to the new location.
             // Make sure the new file doesn't already exist. A dummy file could have been
@@ -1888,7 +1888,7 @@ public class AccountManagerService
             File oldFile = new File(systemDir, DATABASE_NAME);
             if (oldFile.exists() && !databaseFile.exists()) {
                 // Check for use directory; create if it doesn't exist, else renameTo will fail
-                File userDir = new File(systemDir, "users/" + userId);
+                File userDir = Environment.getUserSystemDirectory(userId);
                 if (!userDir.exists()) {
                     if (!userDir.mkdirs()) {
                         throw new IllegalStateException("User dir cannot be created: " + userDir);

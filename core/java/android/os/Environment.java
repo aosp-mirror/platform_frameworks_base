@@ -104,6 +104,17 @@ public class Environment {
     }
 
     /**
+     * Return the system directory for a user. This is for use by system services to store
+     * files relating to the user. This directory will be automatically deleted when the user
+     * is removed.
+     *
+     * @hide
+     */
+    public static File getUserSystemDirectory(int userId) {
+        return new File(new File(getSystemSecureDirectory(), "users"), Integer.toString(userId));
+    }
+
+    /**
      * Returns whether the Encrypted File System feature is enabled on the device or not.
      * @return <code>true</code> if Encrypted File System feature is enabled, <code>false</code>
      * if disabled.

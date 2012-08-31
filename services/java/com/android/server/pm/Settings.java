@@ -745,13 +745,12 @@ final class Settings {
     }
 
     private File getUserPackagesStateFile(int userId) {
-        return new File(mSystemDir,
-                "users/" + userId + "/package-restrictions.xml");
+        return new File(Environment.getUserSystemDirectory(userId), "package-restrictions.xml");
     }
 
     private File getUserPackagesStateBackupFile(int userId) {
-        return new File(mSystemDir,
-                "users/" + userId + "/package-restrictions-backup.xml");
+        return new File(Environment.getUserSystemDirectory(userId),
+                "package-restrictions-backup.xml");
     }
 
     void writeAllUsersPackageRestrictionsLPr() {

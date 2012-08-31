@@ -20,7 +20,9 @@ import android.app.WallpaperManager;
 import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
+import android.os.Environment;
 import android.os.ParcelFileDescriptor;
+import android.os.UserHandle;
 import android.util.Slog;
 import android.view.Display;
 import android.view.WindowManager;
@@ -39,8 +41,12 @@ public class WallpaperBackupHelper extends FileBackupHelperBase implements Backu
 
     // This path must match what the WallpaperManagerService uses
     // TODO: Will need to change if backing up non-primary user's wallpaper
-    public static final String WALLPAPER_IMAGE = "/data/system/users/0/wallpaper";
-    public static final String WALLPAPER_INFO = "/data/system/users/0/wallpaper_info.xml";
+    public static final String WALLPAPER_IMAGE =
+            new File(Environment.getUserSystemDirectory(UserHandle.USER_OWNER),
+                    "wallpaper").getAbsolutePath();
+    public static final String WALLPAPER_INFO =
+            new File(Environment.getUserSystemDirectory(UserHandle.USER_OWNER),
+                    "wallpaper_info.xml").getAbsolutePath();
     // Use old keys to keep legacy data compatibility and avoid writing two wallpapers
     public static final String WALLPAPER_IMAGE_KEY =
             "/data/data/com.android.settings/files/wallpaper";
@@ -50,7 +56,9 @@ public class WallpaperBackupHelper extends FileBackupHelperBase implements Backu
     // will be saved to this file from the restore stream, then renamed to the proper
     // location if it's deemed suitable.
     // TODO: Will need to change if backing up non-primary user's wallpaper
-    private static final String STAGE_FILE = "/data/system/users/0/wallpaper-tmp";
+    private static final String STAGE_FILE =
+            new File(Environment.getUserSystemDirectory(UserHandle.USER_OWNER),
+                    "wallpaper-tmp").getAbsolutePath();
 
     Context mContext;
     String[] mFiles;

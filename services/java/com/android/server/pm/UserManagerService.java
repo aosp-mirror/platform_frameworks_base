@@ -594,6 +594,7 @@ public class UserManagerService extends IUserManager.Stub {
                 // Update the user list
                 writeUserListLocked();
                 updateUserIdsLocked();
+                removeDirectoryRecursive(Environment.getUserSystemDirectory(userHandle));
             }
         }
 
@@ -601,6 +602,17 @@ public class UserManagerService extends IUserManager.Stub {
         Intent addedIntent = new Intent(Intent.ACTION_USER_REMOVED);
         addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userHandle);
         mContext.sendBroadcast(addedIntent, android.Manifest.permission.MANAGE_USERS);
+    }
+
+    private void removeDirectoryRecursive(File parent) {
+        if (parent.isDirectory()) {
+            String[] files = parent.list();
+            for (String filename : files) {
+                File child = new File(parent, filename);
+                removeDirectoryRecursive(child);
+            }
+        }
+        parent.delete();
     }
 
     @Override

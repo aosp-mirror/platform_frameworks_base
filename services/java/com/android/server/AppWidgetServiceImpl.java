@@ -40,6 +40,7 @@ import android.graphics.Point;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -1634,11 +1635,11 @@ class AppWidgetServiceImpl {
     }
 
     static File getSettingsFile(int userId) {
-        return new File("/data/system/users/" + userId + "/" + SETTINGS_FILENAME);
+        return new File(Environment.getUserSystemDirectory(userId), SETTINGS_FILENAME);
     }
 
     AtomicFile savedStateFile() {
-        File dir = new File("/data/system/users/" + mUserId);
+        File dir = Environment.getUserSystemDirectory(mUserId);
         File settingsFile = getSettingsFile(mUserId);
         if (!settingsFile.exists() && mUserId == 0) {
             if (!dir.exists()) {

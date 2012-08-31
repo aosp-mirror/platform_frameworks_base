@@ -92,8 +92,6 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
      * restarting it vs. just reverting to the static wallpaper.
      */
     static final long MIN_WALLPAPER_CRASH_TIME = 10000;
-    
-    static final File WALLPAPER_BASE_DIR = new File("/data/system/users");
     static final String WALLPAPER = "wallpaper";
     static final String WALLPAPER_INFO = "wallpaper_info.xml";
 
@@ -395,12 +393,12 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
         mIPackageManager = AppGlobals.getPackageManager();
         mMonitor = new MyPackageMonitor();
         mMonitor.register(context, null, true);
-        WALLPAPER_BASE_DIR.mkdirs();
-        loadSettingsLocked(0);
+        getWallpaperDir(UserHandle.USER_OWNER).mkdirs();
+        loadSettingsLocked(UserHandle.USER_OWNER);
     }
     
     private static File getWallpaperDir(int userId) {
-        return new File(WALLPAPER_BASE_DIR + "/" + userId);
+        return Environment.getUserSystemDirectory(userId);
     }
 
     @Override
@@ -414,7 +412,7 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
 
     public void systemReady() {
         if (DEBUG) Slog.v(TAG, "systemReady");
-        WallpaperData wallpaper = mWallpaperMap.get(0);
+        WallpaperData wallpaper = mWallpaperMap.get(UserHandle.USER_OWNER);
         switchWallpaper(wallpaper);
         wallpaper.wallpaperObserver = new WallpaperObserver(wallpaper);
         wallpaper.wallpaperObserver.startWatching();
@@ -880,7 +878,7 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
     }
 
     private static JournaledFile makeJournaledFile(int userId) {
-        final String base = getWallpaperDir(userId) + "/" + WALLPAPER_INFO;
+        final String base = new File(getWallpaperDir(userId), WALLPAPER_INFO).getAbsolutePath();
         return new JournaledFile(new File(base), new File(base + ".tmp"));
     }
 
