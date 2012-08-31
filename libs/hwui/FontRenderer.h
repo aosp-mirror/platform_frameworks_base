@@ -391,6 +391,8 @@ protected:
 
     uint32_t mSmallCacheWidth;
     uint32_t mSmallCacheHeight;
+    uint32_t mLargeCacheWidth;
+    uint32_t mLargeCacheHeight;
 
     Vector<CacheTexture*> mCacheTextures;
 
