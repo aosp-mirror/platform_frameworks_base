@@ -17,44 +17,52 @@
 package com.android.server.display;
 
 import android.content.Context;
+import android.os.Handler;
 import android.util.DisplayMetrics;
 
 /**
  * Provides a fake default display for headless systems.
  * <p>
- * Display adapters are not thread-safe and must only be accessed
- * on the display manager service's handler thread.
+ * Display adapters are guarded by the {@link DisplayManagerService.SyncRoot} lock.
  * </p>
  */
-public final class HeadlessDisplayAdapter extends DisplayAdapter {
+final class HeadlessDisplayAdapter extends DisplayAdapter {
     private static final String TAG = "HeadlessDisplayAdapter";
 
-    public HeadlessDisplayAdapter(Context context) {
-        super(context, TAG);
+    public HeadlessDisplayAdapter(DisplayManagerService.SyncRoot syncRoot,
+            Context context, Handler handler, Listener listener) {
+        super(syncRoot, context, handler, listener, TAG);
     }
 
     @Override
-    protected void onRegister() {
-        sendDisplayDeviceEvent(new HeadlessDisplayDevice(), DISPLAY_DEVICE_EVENT_ADDED);
+    public void registerLocked() {
+        super.registerLocked();
+        sendDisplayDeviceEventLocked(new HeadlessDisplayDevice(), DISPLAY_DEVICE_EVENT_ADDED);
     }
 
     private final class HeadlessDisplayDevice extends DisplayDevice {
+        private DisplayDeviceInfo mInfo;
+
         public HeadlessDisplayDevice() {
             super(HeadlessDisplayAdapter.this, null);
         }
 
         @Override
-        public void getInfo(DisplayDeviceInfo outInfo) {
-            outInfo.name = getContext().getResources().getString(
-                    com.android.internal.R.string.display_manager_built_in_display_name);
-            outInfo.width = 640;
-            outInfo.height = 480;
-            outInfo.refreshRate = 60;
-            outInfo.densityDpi = DisplayMetrics.DENSITY_DEFAULT;
-            outInfo.xDpi = 160;
-            outInfo.yDpi = 160;
-            outInfo.flags = DisplayDeviceInfo.FLAG_DEFAULT_DISPLAY
-                    | DisplayDeviceInfo.FLAG_SECURE;
+        public DisplayDeviceInfo getDisplayDeviceInfoLocked() {
+            if (mInfo == null) {
+                mInfo = new DisplayDeviceInfo();
+                mInfo.name = getContext().getResources().getString(
+                        com.android.internal.R.string.display_manager_built_in_display_name);
+                mInfo.width = 640;
+                mInfo.height = 480;
+                mInfo.refreshRate = 60;
+                mInfo.densityDpi = DisplayMetrics.DENSITY_DEFAULT;
+                mInfo.xDpi = 160;
+                mInfo.yDpi = 160;
+                mInfo.flags = DisplayDeviceInfo.FLAG_DEFAULT_DISPLAY
+                        | DisplayDeviceInfo.FLAG_SECURE;
+            }
+            return mInfo;
         }
     }
 }

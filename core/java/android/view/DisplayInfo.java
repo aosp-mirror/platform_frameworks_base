@@ -21,11 +21,23 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.DisplayMetrics;
 
+import libcore.util.Objects;
+
 /**
  * Describes the characteristics of a particular logical display.
  * @hide
  */
 public final class DisplayInfo implements Parcelable {
+    /**
+     * The surface flinger layer stack associated with this logical display.
+     */
+    public int layerStack;
+
+    /**
+     * The human-readable name of the display.
+     */
+    public String name;
+
     /**
      * The width of the portion of the display that is available to applications, in pixels.
      * Represents the size of the display minus any system decorations.
@@ -147,11 +159,37 @@ public final class DisplayInfo implements Parcelable {
     }
 
     @Override
-    public int describeContents() {
-        return 0;
+    public boolean equals(Object o) {
+        return o instanceof DisplayInfo && equals((DisplayInfo)o);
+    }
+
+    public boolean equals(DisplayInfo other) {
+        return other != null
+                && layerStack == other.layerStack
+                && Objects.equal(name, other.name)
+                && appWidth == other.appWidth
+                && appHeight == other.appHeight
+                && smallestNominalAppWidth == other.smallestNominalAppWidth
+                && smallestNominalAppHeight == other.smallestNominalAppHeight
+                && largestNominalAppWidth == other.largestNominalAppWidth
+                && largestNominalAppHeight == other.largestNominalAppHeight
+                && logicalWidth == other.logicalWidth
+                && logicalHeight == other.logicalHeight
+                && rotation == other.rotation
+                && refreshRate == other.refreshRate
+                && logicalDensityDpi == other.logicalDensityDpi
+                && physicalXDpi == other.physicalXDpi
+                && physicalYDpi == other.physicalYDpi;
+    }
+
+    @Override
+    public int hashCode() {
+        return 0; // don't care
     }
 
     public void copyFrom(DisplayInfo other) {
+        layerStack = other.layerStack;
+        name = other.name;
         appWidth = other.appWidth;
         appHeight = other.appHeight;
         smallestNominalAppWidth = other.smallestNominalAppWidth;
@@ -168,6 +206,8 @@ public final class DisplayInfo implements Parcelable {
     }
 
     public void readFromParcel(Parcel source) {
+        layerStack = source.readInt();
+        name = source.readString();
         appWidth = source.readInt();
         appHeight = source.readInt();
         smallestNominalAppWidth = source.readInt();
@@ -185,6 +225,8 @@ public final class DisplayInfo implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(layerStack);
+        dest.writeString(name);
         dest.writeInt(appWidth);
         dest.writeInt(appHeight);
         dest.writeInt(smallestNominalAppWidth);
@@ -198,6 +240,11 @@ public final class DisplayInfo implements Parcelable {
         dest.writeInt(logicalDensityDpi);
         dest.writeFloat(physicalXDpi);
         dest.writeFloat(physicalYDpi);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     public void getAppMetrics(DisplayMetrics outMetrics, CompatibilityInfoHolder cih) {
@@ -231,13 +278,14 @@ public final class DisplayInfo implements Parcelable {
     // For debugging purposes
     @Override
     public String toString() {
-        return "app " + appWidth + " x " + appHeight
+        return "DisplayInfo{\"" + name + "\", app " + appWidth + " x " + appHeight
                 + ", real " + logicalWidth + " x " + logicalHeight
                 + ", largest app " + largestNominalAppWidth + " x " + largestNominalAppHeight
                 + ", smallest app " + smallestNominalAppWidth + " x " + smallestNominalAppHeight
                 + ", " + refreshRate + " fps"
                 + ", rotation " + rotation
                 + ", density " + logicalDensityDpi
-                + ", " + physicalXDpi + " x " + physicalYDpi + " dpi";
+                + ", " + physicalXDpi + " x " + physicalYDpi + " dpi"
+                + ", layerStack " + layerStack + "}";
     }
 }
