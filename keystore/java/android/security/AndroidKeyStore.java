@@ -90,6 +90,10 @@ public class AndroidKeyStore extends KeyStoreSpi {
 
     @Override
     public Certificate[] engineGetCertificateChain(String alias) {
+        if (alias == null) {
+            throw new NullPointerException("alias == null");
+        }
+
         final X509Certificate leaf = (X509Certificate) engineGetCertificate(alias);
         if (leaf == null) {
             return null;
@@ -119,6 +123,10 @@ public class AndroidKeyStore extends KeyStoreSpi {
 
     @Override
     public Certificate engineGetCertificate(String alias) {
+        if (alias == null) {
+            throw new NullPointerException("alias == null");
+        }
+
         byte[] certificate = mKeyStore.get(Credentials.USER_CERTIFICATE + alias);
         if (certificate != null) {
             return toCertificate(certificate);
@@ -166,6 +174,10 @@ public class AndroidKeyStore extends KeyStoreSpi {
 
     @Override
     public Date engineGetCreationDate(String alias) {
+        if (alias == null) {
+            throw new NullPointerException("alias == null");
+        }
+
         Date d = getModificationDate(Credentials.USER_PRIVATE_KEY + alias);
         if (d != null) {
             return d;
@@ -325,13 +337,18 @@ public class AndroidKeyStore extends KeyStoreSpi {
     @Override
     public void engineSetKeyEntry(String alias, byte[] userKey, Certificate[] chain)
             throws KeyStoreException {
-        throw new RuntimeException("Operation not supported because key encoding is unknown");
+        throw new KeyStoreException("Operation not supported because key encoding is unknown");
     }
 
     @Override
     public void engineSetCertificateEntry(String alias, Certificate cert) throws KeyStoreException {
         if (isKeyEntry(alias)) {
             throw new KeyStoreException("Entry exists and is not a trusted certificate");
+        }
+
+        // We can't set something to null.
+        if (cert == null) {
+            throw new NullPointerException("cert == null");
         }
 
         final byte[] encoded;
@@ -348,6 +365,10 @@ public class AndroidKeyStore extends KeyStoreSpi {
 
     @Override
     public void engineDeleteEntry(String alias) throws KeyStoreException {
+        if (!isKeyEntry(alias) && !isCertificateEntry(alias)) {
+            return;
+        }
+
         if (!Credentials.deleteAllTypesForAlias(mKeyStore, alias)) {
             throw new KeyStoreException("No such entry " + alias);
         }
@@ -380,6 +401,10 @@ public class AndroidKeyStore extends KeyStoreSpi {
 
     @Override
     public boolean engineContainsAlias(String alias) {
+        if (alias == null) {
+            throw new NullPointerException("alias == null");
+        }
+
         return mKeyStore.contains(Credentials.USER_PRIVATE_KEY + alias)
                 || mKeyStore.contains(Credentials.USER_CERTIFICATE + alias)
                 || mKeyStore.contains(Credentials.CA_CERTIFICATE + alias);
@@ -396,12 +421,24 @@ public class AndroidKeyStore extends KeyStoreSpi {
     }
 
     private boolean isKeyEntry(String alias) {
+        if (alias == null) {
+            throw new NullPointerException("alias == null");
+        }
+
         return mKeyStore.contains(Credentials.USER_PRIVATE_KEY + alias);
+    }
+
+    private boolean isCertificateEntry(String alias) {
+        if (alias == null) {
+            throw new NullPointerException("alias == null");
+        }
+
+        return mKeyStore.contains(Credentials.CA_CERTIFICATE + alias);
     }
 
     @Override
     public boolean engineIsCertificateEntry(String alias) {
-        return !isKeyEntry(alias) && mKeyStore.contains(Credentials.CA_CERTIFICATE + alias);
+        return !isKeyEntry(alias) && isCertificateEntry(alias);
     }
 
     @Override
