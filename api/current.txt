@@ -27675,12 +27675,17 @@ package android.widget {
     method public void setDropDownVerticalOffset(int);
     method public void setDropDownWidth(int);
     method public void setListSelection(int);
+    method public void setOnDismissListener(android.widget.AutoCompleteTextView.OnDismissListener);
     method public void setOnItemClickListener(android.widget.AdapterView.OnItemClickListener);
     method public void setOnItemSelectedListener(android.widget.AdapterView.OnItemSelectedListener);
     method public void setText(java.lang.CharSequence, boolean);
     method public void setThreshold(int);
     method public void setValidator(android.widget.AutoCompleteTextView.Validator);
     method public void showDropDown();
+  }
+
+  public static abstract interface AutoCompleteTextView.OnDismissListener {
+    method public abstract void onDismiss();
   }
 
   public static abstract interface AutoCompleteTextView.Validator {
