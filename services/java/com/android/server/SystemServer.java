@@ -207,7 +207,7 @@ class ServerThread extends Thread {
             context = ActivityManagerService.main(factoryTest);
 
             Slog.i(TAG, "Display Manager");
-            display = new DisplayManagerService(context, uiHandler);
+            display = new DisplayManagerService(context, wmHandler, uiHandler);
             ServiceManager.addService(Context.DISPLAY_SERVICE, display, true);
 
             Slog.i(TAG, "Telephony Registry");
@@ -303,6 +303,7 @@ class ServerThread extends Thread {
             ServiceManager.addService(Context.INPUT_SERVICE, inputManager);
 
             ActivityManagerService.self().setWindowManager(wm);
+            display.setWindowManager(wm);
 
             // Skip Bluetooth if we have an emulator kernel
             // TODO: Use a more reliable check to see if this product should

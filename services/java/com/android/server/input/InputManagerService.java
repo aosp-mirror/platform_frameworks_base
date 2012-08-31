@@ -282,29 +282,28 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
         nativeReloadDeviceAliases(mPtr);
     }
 
-    public void setDisplaySize(int displayId, int width, int height,
-            int externalWidth, int externalHeight) {
-        if (width <= 0 || height <= 0 || externalWidth <= 0 || externalHeight <= 0) {
+    public void setDisplaySize(int displayId, int width, int height) {
+        if (width <= 0 || height <= 0) {
             throw new IllegalArgumentException("Invalid display id or dimensions.");
         }
         
         if (DEBUG) {
-            Slog.d(TAG, "Setting display #" + displayId + " size to " + width + "x" + height
-                    + " external size " + externalWidth + "x" + externalHeight);
+            Slog.d(TAG, "Setting display #" + displayId + " size to " + width + "x" + height);
         }
-        nativeSetDisplaySize(mPtr, displayId, width, height, externalWidth, externalHeight);
+        // FIXME: external size is deprecated
+        nativeSetDisplaySize(mPtr, displayId, width, height, 1280, 720);
     }
-    
-    public void setDisplayOrientation(int displayId, int rotation, int externalRotation) {
+
+    public void setDisplayOrientation(int displayId, int rotation) {
         if (rotation < Surface.ROTATION_0 || rotation > Surface.ROTATION_270) {
             throw new IllegalArgumentException("Invalid rotation.");
         }
         
         if (DEBUG) {
-            Slog.d(TAG, "Setting display #" + displayId + " orientation to rotation " + rotation
-                    + " external rotation " + externalRotation);
+            Slog.d(TAG, "Setting display #" + displayId + " orientation to rotation " + rotation);
         }
-        nativeSetDisplayOrientation(mPtr, displayId, rotation, externalRotation);
+        // FIXME: external rotation is deprecated
+        nativeSetDisplayOrientation(mPtr, displayId, rotation, Surface.ROTATION_0);
     }
 
     /**

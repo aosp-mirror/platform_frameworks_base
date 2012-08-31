@@ -597,7 +597,7 @@ public class WindowAnimator {
             // THIRD LOOP: Update the surfaces of all windows.
 
             if (mScreenRotationAnimation != null) {
-                mScreenRotationAnimation.updateSurfaces();
+                mScreenRotationAnimation.updateSurfacesInTransaction();
             }
 
             final int N = winAnimatorList.size();

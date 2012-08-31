@@ -42,6 +42,16 @@ public final class DisplayManagerGlobal {
     private static final String TAG = "DisplayManager";
     private static final boolean DEBUG = false;
 
+    // True if display info and display ids should be cached.
+    //
+    // FIXME: The cache is currently disabled because it's unclear whether we have the
+    // necessary guarantees that the caches will always be flushed before clients
+    // attempt to observe their new state.  For example, depending on the order
+    // in which the binder transactions take place, we might have a problem where
+    // an application could start processing a configuration change due to a display
+    // orientation change before the display info cache has actually been invalidated.
+    private static final boolean USE_CACHE = false;
+
     public static final int EVENT_DISPLAY_ADDED = 1;
     public static final int EVENT_DISPLAY_CHANGED = 2;
     public static final int EVENT_DISPLAY_REMOVED = 3;
@@ -91,21 +101,27 @@ public final class DisplayManagerGlobal {
     public DisplayInfo getDisplayInfo(int displayId) {
         try {
             synchronized (mLock) {
-                DisplayInfo info = mDisplayInfoCache.get(displayId);
-                if (info != null) {
-                    return info;
+                DisplayInfo info;
+                if (USE_CACHE) {
+                    info = mDisplayInfoCache.get(displayId);
+                    if (info != null) {
+                        return info;
+                    }
                 }
 
                 info = mDm.getDisplayInfo(displayId);
                 if (info == null) {
                     return null;
                 }
+
+                if (USE_CACHE) {
+                    mDisplayInfoCache.put(displayId, info);
+                }
+                registerCallbackIfNeededLocked();
+
                 if (DEBUG) {
                     Log.d(TAG, "getDisplayInfo: displayId=" + displayId + ", info=" + info);
                 }
-
-                mDisplayInfoCache.put(displayId, info);
-                registerCallbackIfNeededLocked();
                 return info;
             }
         } catch (RemoteException ex) {
@@ -122,11 +138,18 @@ public final class DisplayManagerGlobal {
     public int[] getDisplayIds() {
         try {
             synchronized (mLock) {
-                if (mDisplayIdCache == null) {
-                    mDisplayIdCache = mDm.getDisplayIds();
-                    registerCallbackIfNeededLocked();
+                if (USE_CACHE) {
+                    if (mDisplayIdCache != null) {
+                        return mDisplayIdCache;
+                    }
                 }
-                return mDisplayIdCache;
+
+                int[] displayIds = mDm.getDisplayIds();
+                if (USE_CACHE) {
+                    mDisplayIdCache = displayIds;
+                }
+                registerCallbackIfNeededLocked();
+                return displayIds;
             }
         } catch (RemoteException ex) {
             Log.e(TAG, "Could not get display ids from display manager.", ex);
@@ -215,10 +238,12 @@ public final class DisplayManagerGlobal {
 
     private void handleDisplayEvent(int displayId, int event) {
         synchronized (mLock) {
-            mDisplayInfoCache.remove(displayId);
+            if (USE_CACHE) {
+                mDisplayInfoCache.remove(displayId);
 
-            if (event == EVENT_DISPLAY_ADDED || event == EVENT_DISPLAY_REMOVED) {
-                mDisplayIdCache = null;
+                if (event == EVENT_DISPLAY_ADDED || event == EVENT_DISPLAY_REMOVED) {
+                    mDisplayIdCache = null;
+                }
             }
 
             final int numListeners = mDisplayListeners.size();

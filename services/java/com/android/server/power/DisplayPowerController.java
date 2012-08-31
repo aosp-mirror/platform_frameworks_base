@@ -1008,7 +1008,7 @@ final class DisplayPowerController {
             public void run() {
                 dumpLocal(pw);
             }
-        });
+        }, 1000);
     }
 
     private void dumpLocal(PrintWriter pw) {

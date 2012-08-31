@@ -19,25 +19,16 @@ package com.android.server.display;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.graphics.SurfaceTexture;
-import android.hardware.display.DisplayManager;
+import android.os.Handler;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Slog;
-import android.view.Display;
-import android.view.DisplayInfo;
 import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.MotionEvent;
-import android.view.ScaleGestureDetector;
 import android.view.Surface;
-import android.view.TextureView;
-import android.view.TextureView.SurfaceTextureListener;
-import android.view.View;
-import android.view.WindowManager;
-import android.widget.TextView;
 
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -47,13 +38,16 @@ import java.util.regex.Pattern;
  * for development purposes.  Use Development Settings to enable one or more
  * overlay displays.
  * <p>
- * Display adapters are not thread-safe and must only be accessed
- * on the display manager service's handler thread.
+ * This object has two different handlers (which may be the same) which must not
+ * get confused.  The main handler is used to posting messages to the display manager
+ * service as usual.  The UI handler is only used by the {@link OverlayDisplayWindow}.
+ * </p><p>
+ * Display adapters are guarded by the {@link DisplayManagerService.SyncRoot} lock.
  * </p>
  */
-public final class OverlayDisplayAdapter extends DisplayAdapter {
-    private static final String TAG = "OverlayDisplayAdapter";
-    private static final boolean DEBUG = false;
+final class OverlayDisplayAdapter extends DisplayAdapter {
+    static final String TAG = "OverlayDisplayAdapter";
+    static final boolean DEBUG = false;
 
     private static final int MIN_WIDTH = 100;
     private static final int MIN_HEIGHT = 100;
@@ -63,36 +57,44 @@ public final class OverlayDisplayAdapter extends DisplayAdapter {
     private static final Pattern SETTING_PATTERN =
             Pattern.compile("(\\d+)x(\\d+)/(\\d+)");
 
-    private final ArrayList<Overlay> mOverlays = new ArrayList<Overlay>();
+    private final Handler mUiHandler;
+    private final ArrayList<OverlayDisplayHandle> mOverlays =
+            new ArrayList<OverlayDisplayHandle>();
     private String mCurrentOverlaySetting = "";
 
-    public OverlayDisplayAdapter(Context context) {
-        super(context, TAG);
+    public OverlayDisplayAdapter(DisplayManagerService.SyncRoot syncRoot,
+            Context context, Handler handler, Listener listener, Handler uiHandler) {
+        super(syncRoot, context, handler, listener, TAG);
+        mUiHandler = uiHandler;
     }
 
     @Override
-    public void dump(PrintWriter pw) {
+    public void dumpLocked(PrintWriter pw) {
+        super.dumpLocked(pw);
         pw.println("mCurrentOverlaySetting=" + mCurrentOverlaySetting);
         pw.println("mOverlays: size=" + mOverlays.size());
-        for (Overlay overlay : mOverlays) {
-            overlay.dump(pw);
+        for (OverlayDisplayHandle overlay : mOverlays) {
+            overlay.dumpLocked(pw);
         }
     }
 
     @Override
-    protected void onRegister() {
+    public void registerLocked() {
+        super.registerLocked();
         getContext().getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(Settings.Secure.OVERLAY_DISPLAY_DEVICES), true,
                 new ContentObserver(getHandler()) {
                     @Override
                     public void onChange(boolean selfChange) {
-                        updateOverlayDisplayDevices();
+                        synchronized (getSyncRoot()) {
+                            updateOverlayDisplayDevicesLocked();
+                        }
                     }
                 });
-        updateOverlayDisplayDevices();
+        updateOverlayDisplayDevicesLocked();
     }
 
-    private void updateOverlayDisplayDevices() {
+    private void updateOverlayDisplayDevicesLocked() {
         String value = Settings.System.getString(getContext().getContentResolver(),
                 Settings.Secure.OVERLAY_DISPLAY_DEVICES);
         if (value == null) {
@@ -106,19 +108,20 @@ public final class OverlayDisplayAdapter extends DisplayAdapter {
 
         if (!mOverlays.isEmpty()) {
             Slog.i(TAG, "Dismissing all overlay display devices.");
-            for (Overlay overlay : mOverlays) {
-                overlay.dismiss();
+            for (OverlayDisplayHandle overlay : mOverlays) {
+                overlay.dismissLocked();
             }
             mOverlays.clear();
         }
 
-        int number = 1;
+        int count = 0;
         for (String part : value.split(";")) {
-            if (number > 4) {
-                Slog.w(TAG, "Too many overlay display devices.");
-            }
             Matcher matcher = SETTING_PATTERN.matcher(part);
             if (matcher.matches()) {
+                if (count >= 4) {
+                    Slog.w(TAG, "Too many overlay display devices specified: " + value);
+                    break;
+                }
                 try {
                     int width = Integer.parseInt(matcher.group(1), 10);
                     int height = Integer.parseInt(matcher.group(2), 10);
@@ -127,10 +130,18 @@ public final class OverlayDisplayAdapter extends DisplayAdapter {
                             && height >= MIN_HEIGHT && height <= MAX_HEIGHT
                             && densityDpi >= DisplayMetrics.DENSITY_LOW
                             && densityDpi <= DisplayMetrics.DENSITY_XXHIGH) {
+                        int number = ++count;
+                        String name = getContext().getResources().getString(
+                                com.android.internal.R.string.display_manager_overlay_display_name,
+                                number);
+                        int gravity = chooseOverlayGravity(number);
+
                         Slog.i(TAG, "Showing overlay display device #" + number
-                                + ": width=" + width + ", height=" + height
+                                + ": name=" + name + ", width=" + width + ", height=" + height
                                 + ", densityDpi=" + densityDpi);
-                        mOverlays.add(new Overlay(number++, width, height, densityDpi));
+
+                        mOverlays.add(new OverlayDisplayHandle(name,
+                                width, height, densityDpi, gravity));
                         continue;
                     }
                 } catch (NumberFormatException ex) {
@@ -138,401 +149,195 @@ public final class OverlayDisplayAdapter extends DisplayAdapter {
             } else if (part.isEmpty()) {
                 continue;
             }
-            Slog.w(TAG, "Malformed overlay display devices setting: \"" + value + "\"");
-        }
-
-        for (Overlay overlay : mOverlays) {
-            overlay.show();
+            Slog.w(TAG, "Malformed overlay display devices setting: " + value);
         }
     }
 
-    // Manages an overlay window.
-    private final class Overlay {
-        private final float INITIAL_SCALE = 0.5f;
-        private final float MIN_SCALE = 0.3f;
-        private final float MAX_SCALE = 1.0f;
-        private final float WINDOW_ALPHA = 0.8f;
-
-        // When true, disables support for moving and resizing the overlay.
-        // The window is made non-touchable, which makes it possible to
-        // directly interact with the content underneath.
-        private final boolean DISABLE_MOVE_AND_RESIZE = false;
-
-        private final DisplayManager mDisplayManager;
-        private final WindowManager mWindowManager;
-
-        private final int mNumber;
-        private final int mWidth;
-        private final int mHeight;
-        private final int mDensityDpi;
-
-        private final String mName;
-        private final String mTitle;
-
-        private final Display mDefaultDisplay;
-        private final DisplayInfo mDefaultDisplayInfo = new DisplayInfo();
-        private final IBinder mDisplayToken;
-        private final OverlayDisplayDevice mDisplayDevice;
-
-        private View mWindowContent;
-        private WindowManager.LayoutParams mWindowParams;
-        private TextureView mTextureView;
-        private TextView mTitleTextView;
-        private ScaleGestureDetector mScaleGestureDetector;
-
-        private boolean mWindowVisible;
-        private int mWindowX;
-        private int mWindowY;
-        private float mWindowScale;
-
-        private int mLiveTranslationX;
-        private int mLiveTranslationY;
-        private float mLiveScale = 1.0f;
-
-        private int mDragPointerId;
-        private float mDragTouchX;
-        private float mDragTouchY;
-
-        public Overlay(int number, int width, int height, int densityDpi) {
-            Context context = getContext();
-            mDisplayManager = (DisplayManager)context.getSystemService(
-                    Context.DISPLAY_SERVICE);
-            mWindowManager = (WindowManager)context.getSystemService(
-                    Context.WINDOW_SERVICE);
-
-            mNumber = number;
-            mWidth = width;
-            mHeight = height;
-            mDensityDpi = densityDpi;
-
-            mName = context.getResources().getString(
-                    com.android.internal.R.string.display_manager_overlay_display_name, number);
-            mTitle = context.getResources().getString(
-                    com.android.internal.R.string.display_manager_overlay_display_title,
-                    mNumber, mWidth, mHeight, mDensityDpi);
-
-            mDefaultDisplay = mWindowManager.getDefaultDisplay();
-            updateDefaultDisplayInfo();
-
-            mDisplayToken = Surface.createDisplay(mName);
-            mDisplayDevice = new OverlayDisplayDevice(mDisplayToken, mName,
-                    mDefaultDisplayInfo.refreshRate, mDensityDpi);
-
-            createWindow();
+    private static int chooseOverlayGravity(int overlayNumber) {
+        switch (overlayNumber) {
+            case 1:
+                return Gravity.TOP | Gravity.LEFT;
+            case 2:
+                return Gravity.BOTTOM | Gravity.RIGHT;
+            case 3:
+                return Gravity.TOP | Gravity.RIGHT;
+            case 4:
+            default:
+                return Gravity.BOTTOM | Gravity.LEFT;
         }
-
-        public void show() {
-            if (!mWindowVisible) {
-                mDisplayManager.registerDisplayListener(mDisplayListener, null);
-                if (!updateDefaultDisplayInfo()) {
-                    mDisplayManager.unregisterDisplayListener(mDisplayListener);
-                    return;
-                }
-
-                clearLiveState();
-                updateWindowParams();
-                mWindowManager.addView(mWindowContent, mWindowParams);
-                mWindowVisible = true;
-            }
-        }
-
-        public void dismiss() {
-            if (mWindowVisible) {
-                mDisplayManager.unregisterDisplayListener(mDisplayListener);
-                mWindowManager.removeView(mWindowContent);
-                mWindowVisible = false;
-            }
-        }
-
-        public void relayout() {
-            if (mWindowVisible) {
-                updateWindowParams();
-                mWindowManager.updateViewLayout(mWindowContent, mWindowParams);
-            }
-        }
-
-        public void dump(PrintWriter pw) {
-            pw.println("  #" + mNumber + ": "
-                    + mWidth + "x" + mHeight + ", " + mDensityDpi + " dpi");
-            pw.println("    mName=" + mName);
-            pw.println("    mWindowVisible=" + mWindowVisible);
-            pw.println("    mWindowX=" + mWindowX);
-            pw.println("    mWindowY=" + mWindowY);
-            pw.println("    mWindowScale=" + mWindowScale);
-            pw.println("    mWindowParams=" + mWindowParams);
-            if (mTextureView != null) {
-                pw.println("    mTextureView.getScaleX()=" + mTextureView.getScaleX());
-                pw.println("    mTextureView.getScaleY()=" + mTextureView.getScaleY());
-            }
-            pw.println("    mLiveTranslationX=" + mLiveTranslationX);
-            pw.println("    mLiveTranslationY=" + mLiveTranslationY);
-            pw.println("    mLiveScale=" + mLiveScale);
-        }
-
-        private boolean updateDefaultDisplayInfo() {
-            if (!mDefaultDisplay.getDisplayInfo(mDefaultDisplayInfo)) {
-                Slog.w(TAG, "Cannot show overlay display because there is no "
-                        + "default display upon which to show it.");
-                return false;
-            }
-            return true;
-        }
-
-        private void createWindow() {
-            Context context = getContext();
-            LayoutInflater inflater = LayoutInflater.from(context);
-
-            mWindowContent = inflater.inflate(
-                    com.android.internal.R.layout.overlay_display_window, null);
-            mWindowContent.setOnTouchListener(mOnTouchListener);
-
-            mTextureView = (TextureView)mWindowContent.findViewById(
-                    com.android.internal.R.id.overlay_display_window_texture);
-            mTextureView.setPivotX(0);
-            mTextureView.setPivotY(0);
-            mTextureView.getLayoutParams().width = mWidth;
-            mTextureView.getLayoutParams().height = mHeight;
-            mTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
-
-            mTitleTextView = (TextView)mWindowContent.findViewById(
-                    com.android.internal.R.id.overlay_display_window_title);
-            mTitleTextView.setText(mTitle);
-
-            mWindowParams = new WindowManager.LayoutParams(
-                    WindowManager.LayoutParams.TYPE_DISPLAY_OVERLAY);
-            mWindowParams.flags |= WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                    | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
-                    | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                    | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                    | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
-            if (DISABLE_MOVE_AND_RESIZE) {
-                mWindowParams.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
-            }
-            mWindowParams.privateFlags |=
-                    WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_HARDWARE_ACCELERATED;
-            mWindowParams.alpha = WINDOW_ALPHA;
-            mWindowParams.gravity = Gravity.TOP | Gravity.LEFT;
-            mWindowParams.setTitle(mTitle);
-
-            mScaleGestureDetector = new ScaleGestureDetector(context, mOnScaleGestureListener);
-
-            // By default, arrange the displays in the four corners.
-            mWindowVisible = false;
-            mWindowScale = INITIAL_SCALE;
-            if (mNumber == 2 || mNumber == 3) {
-                mWindowX = mDefaultDisplayInfo.logicalWidth;
-            } else {
-                mWindowX = 0;
-            }
-            if (mNumber == 2 || mNumber == 4) {
-                mWindowY = mDefaultDisplayInfo.logicalHeight;
-            } else {
-                mWindowY = 0;
-            }
-        }
-
-        private void updateWindowParams() {
-            float scale = mWindowScale * mLiveScale;
-            scale = Math.min(scale, (float)mDefaultDisplayInfo.logicalWidth / mWidth);
-            scale = Math.min(scale, (float)mDefaultDisplayInfo.logicalHeight / mHeight);
-            scale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, scale));
-
-            float offsetScale = (scale / mWindowScale - 1.0f) * 0.5f;
-            int width = (int)(mWidth * scale);
-            int height = (int)(mHeight * scale);
-            int x = mWindowX + mLiveTranslationX - (int)(width * offsetScale);
-            int y = mWindowY + mLiveTranslationY - (int)(height * offsetScale);
-            x = Math.max(0, Math.min(x, mDefaultDisplayInfo.logicalWidth - width));
-            y = Math.max(0, Math.min(y, mDefaultDisplayInfo.logicalHeight - height));
-
-            if (DEBUG) {
-                Slog.d(TAG, "updateWindowParams: scale=" + scale
-                        + ", offsetScale=" + offsetScale
-                        + ", x=" + x + ", y=" + y
-                        + ", width=" + width + ", height=" + height);
-            }
-
-            mTextureView.setScaleX(scale);
-            mTextureView.setScaleY(scale);
-
-            mWindowParams.x = x;
-            mWindowParams.y = y;
-            mWindowParams.width = width;
-            mWindowParams.height = height;
-        }
-
-        private void saveWindowParams() {
-            mWindowX = mWindowParams.x;
-            mWindowY = mWindowParams.y;
-            mWindowScale = mTextureView.getScaleX();
-            clearLiveState();
-        }
-
-        private void clearLiveState() {
-            mLiveTranslationX = 0;
-            mLiveTranslationY = 0;
-            mLiveScale = 1.0f;
-        }
-
-        private final DisplayManager.DisplayListener mDisplayListener =
-                new DisplayManager.DisplayListener() {
-            @Override
-            public void onDisplayAdded(int displayId) {
-            }
-
-            @Override
-            public void onDisplayChanged(int displayId) {
-                if (displayId == mDefaultDisplay.getDisplayId()) {
-                    if (updateDefaultDisplayInfo()) {
-                        relayout();
-                    } else {
-                        dismiss();
-                    }
-                }
-            }
-
-            @Override
-            public void onDisplayRemoved(int displayId) {
-                if (displayId == mDefaultDisplay.getDisplayId()) {
-                    dismiss();
-                }
-            }
-        };
-
-        private final SurfaceTextureListener mSurfaceTextureListener =
-                new SurfaceTextureListener() {
-            @Override
-            public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-                Surface.openTransaction();
-                try {
-                    Surface.setDisplaySurface(mDisplayToken, surface);
-                } finally {
-                    Surface.closeTransaction();
-                }
-
-                mDisplayDevice.setSize(width, height);
-                sendDisplayDeviceEvent(mDisplayDevice, DISPLAY_DEVICE_EVENT_ADDED);
-            }
-
-            @Override
-            public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
-                sendDisplayDeviceEvent(mDisplayDevice, DISPLAY_DEVICE_EVENT_REMOVED);
-
-                Surface.openTransaction();
-                try {
-                    Surface.setDisplaySurface(mDisplayToken, null);
-                } finally {
-                    Surface.closeTransaction();
-                }
-                return true;
-            }
-
-            @Override
-            public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
-                mDisplayDevice.setSize(width, height);
-                sendDisplayDeviceEvent(mDisplayDevice, DISPLAY_DEVICE_EVENT_CHANGED);
-            }
-
-            @Override
-            public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-            }
-        };
-
-        private final View.OnTouchListener mOnTouchListener = new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent event) {
-                // Work in screen coordinates.
-                final float oldX = event.getX();
-                final float oldY = event.getY();
-                event.setLocation(event.getRawX(), event.getRawY());
-
-                mScaleGestureDetector.onTouchEvent(event);
-
-                switch (event.getActionMasked()) {
-                    case MotionEvent.ACTION_DOWN:
-                        resetDrag(event);
-                        break;
-
-                    case MotionEvent.ACTION_MOVE:
-                        if (event.getPointerCount() == 1) {
-                            int index = event.findPointerIndex(mDragPointerId);
-                            if (index < 0) {
-                                resetDrag(event);
-                            } else {
-                                mLiveTranslationX = (int)(event.getX(index) - mDragTouchX);
-                                mLiveTranslationY = (int)(event.getY(index) - mDragTouchY);
-                                relayout();
-                            }
-                        }
-                        break;
-
-                    case MotionEvent.ACTION_UP:
-                    case MotionEvent.ACTION_CANCEL:
-                        saveWindowParams();
-                        break;
-                }
-
-                // Revert to window coordinates.
-                event.setLocation(oldX, oldY);
-                return true;
-            }
-
-            private void resetDrag(MotionEvent event) {
-                saveWindowParams();
-                mDragPointerId = event.getPointerId(0);
-                mDragTouchX = event.getX();
-                mDragTouchY = event.getY();
-            }
-        };
-
-        private final ScaleGestureDetector.OnScaleGestureListener mOnScaleGestureListener =
-                new ScaleGestureDetector.SimpleOnScaleGestureListener() {
-            @Override
-            public boolean onScaleBegin(ScaleGestureDetector detector) {
-                saveWindowParams();
-                mDragPointerId = -1; // cause drag to be reset
-                return true;
-            }
-
-            @Override
-            public boolean onScale(ScaleGestureDetector detector) {
-                mLiveScale = detector.getScaleFactor();
-                relayout();
-                return false;
-            }
-        };
     }
 
     private final class OverlayDisplayDevice extends DisplayDevice {
         private final String mName;
+        private final int mWidth;
+        private final int mHeight;
         private final float mRefreshRate;
         private final int mDensityDpi;
-        private int mWidth;
-        private int mHeight;
+
+        private SurfaceTexture mSurfaceTexture;
+        private boolean mSurfaceTextureChanged;
+
+        private DisplayDeviceInfo mInfo;
 
         public OverlayDisplayDevice(IBinder displayToken, String name,
-                float refreshRate, int densityDpi) {
+                int width, int height, float refreshRate, int densityDpi) {
             super(OverlayDisplayAdapter.this, displayToken);
             mName = name;
+            mWidth = width;
+            mHeight = height;
             mRefreshRate = refreshRate;
             mDensityDpi = densityDpi;
         }
 
-        public void setSize(int width, int height) {
-            mWidth = width;
-            mHeight = height;
+        public void setSurfaceTextureLocked(SurfaceTexture surfaceTexture) {
+            if (surfaceTexture != mSurfaceTexture) {
+                mSurfaceTexture = surfaceTexture;
+                mSurfaceTextureChanged = true;
+                sendTraversalRequestLocked();
+            }
         }
 
         @Override
-        public void getInfo(DisplayDeviceInfo outInfo) {
-            outInfo.name = mName;
-            outInfo.width = mWidth;
-            outInfo.height = mHeight;
-            outInfo.refreshRate = mRefreshRate;
-            outInfo.densityDpi = mDensityDpi;
-            outInfo.xDpi = mDensityDpi;
-            outInfo.yDpi = mDensityDpi;
-            outInfo.flags = DisplayDeviceInfo.FLAG_SECURE;
+        public void performTraversalInTransactionLocked() {
+            if (mSurfaceTextureChanged) {
+                setSurfaceTextureInTransactionLocked(mSurfaceTexture);
+                mSurfaceTextureChanged = false;
+            }
         }
+
+        @Override
+        public DisplayDeviceInfo getDisplayDeviceInfoLocked() {
+            if (mInfo == null) {
+                mInfo = new DisplayDeviceInfo();
+                mInfo.name = mName;
+                mInfo.width = mWidth;
+                mInfo.height = mHeight;
+                mInfo.refreshRate = mRefreshRate;
+                mInfo.densityDpi = mDensityDpi;
+                mInfo.xDpi = mDensityDpi;
+                mInfo.yDpi = mDensityDpi;
+                mInfo.flags = DisplayDeviceInfo.FLAG_SECURE;
+            }
+            return mInfo;
+        }
+    }
+
+    /**
+     * Functions as a handle for overlay display devices which are created and
+     * destroyed asynchronously.
+     *
+     * Guarded by the {@link DisplayManagerService.SyncRoot} lock.
+     */
+    private final class OverlayDisplayHandle implements OverlayDisplayWindow.Listener {
+        private final String mName;
+        private final int mWidth;
+        private final int mHeight;
+        private final int mDensityDpi;
+        private final int mGravity;
+
+        private OverlayDisplayWindow mWindow;
+        private OverlayDisplayDevice mDevice;
+
+        public OverlayDisplayHandle(String name,
+                int width, int height, int densityDpi, int gravity) {
+            mName = name;
+            mWidth = width;
+            mHeight = height;
+            mDensityDpi = densityDpi;
+            mGravity = gravity;
+
+            mUiHandler.post(mShowRunnable);
+        }
+
+        public void dismissLocked() {
+            mUiHandler.removeCallbacks(mShowRunnable);
+            mUiHandler.post(mDismissRunnable);
+        }
+
+        // Called on the UI thread.
+        @Override
+        public void onWindowCreated(SurfaceTexture surfaceTexture, float refreshRate) {
+            synchronized (getSyncRoot()) {
+                IBinder displayToken = Surface.createDisplay(mName);
+                mDevice = new OverlayDisplayDevice(displayToken, mName,
+                        mWidth, mHeight, refreshRate, mDensityDpi);
+                mDevice.setSurfaceTextureLocked(surfaceTexture);
+
+                sendDisplayDeviceEventLocked(mDevice, DISPLAY_DEVICE_EVENT_ADDED);
+            }
+        }
+
+        // Called on the UI thread.
+        @Override
+        public void onWindowDestroyed() {
+            synchronized (getSyncRoot()) {
+                if (mDevice != null) {
+                    mDevice.setSurfaceTextureLocked(null);
+
+                    sendDisplayDeviceEventLocked(mDevice, DISPLAY_DEVICE_EVENT_REMOVED);
+                }
+            }
+        }
+
+        public void dumpLocked(PrintWriter pw) {
+            pw.println("  " + mName + ": ");
+            pw.println("    mWidth=" + mWidth);
+            pw.println("    mHeight=" + mHeight);
+            pw.println("    mDensityDpi=" + mDensityDpi);
+            pw.println("    mGravity=" + mGravity);
+
+            // Try to dump the window state.
+            // This call may hang if the UI thread is waiting to acquire our lock so
+            // we use a short timeout to recover just in case.
+            if (mWindow != null) {
+                final StringWriter sw = new StringWriter();
+                final OverlayDisplayWindow window = mWindow;
+                if (mUiHandler.runWithScissors(new Runnable() {
+                    @Override
+                    public void run() {
+                        PrintWriter lpw = new PrintWriter(sw);
+                        window.dump(lpw);
+                        lpw.close();
+                    }
+                }, 200)) {
+                    for (String line : sw.toString().split("\n")) {
+                        pw.println(line);
+                    }
+                } else {
+                    pw.println("    ... timed out while attempting to dump window state");
+                }
+            }
+        }
+
+        // Runs on the UI thread.
+        private final Runnable mShowRunnable = new Runnable() {
+            @Override
+            public void run() {
+                OverlayDisplayWindow window = new OverlayDisplayWindow(getContext(),
+                        mName, mWidth, mHeight, mDensityDpi, mGravity,
+                        OverlayDisplayHandle.this);
+                window.show();
+
+                synchronized (getSyncRoot()) {
+                    mWindow = window;
+                }
+            }
+        };
+
+        // Runs on the UI thread.
+        private final Runnable mDismissRunnable = new Runnable() {
+            @Override
+            public void run() {
+                OverlayDisplayWindow window;
+                synchronized (getSyncRoot()) {
+                    window = mWindow;
+                    mWindow = null;
+                }
+
+                if (window != null) {
+                    window.dismiss();
+                }
+            }
+        };
     }
 }

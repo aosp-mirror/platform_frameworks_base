@@ -17,58 +17,132 @@
 package com.android.server.display;
 
 import android.content.Context;
+import android.os.Handler;
 import android.os.IBinder;
+import android.util.SparseArray;
 import android.view.Surface;
 import android.view.Surface.PhysicalDisplayInfo;
+
+import java.io.PrintWriter;
 
 /**
  * A display adapter for the local displays managed by Surface Flinger.
  * <p>
- * Display adapters are not thread-safe and must only be accessed
- * on the display manager service's handler thread.
+ * Display adapters are guarded by the {@link DisplayManagerService.SyncRoot} lock.
  * </p>
  */
-public final class LocalDisplayAdapter extends DisplayAdapter {
+final class LocalDisplayAdapter extends DisplayAdapter {
     private static final String TAG = "LocalDisplayAdapter";
 
-    public LocalDisplayAdapter(Context context) {
-        super(context, TAG);
+    private static final int[] BUILT_IN_DISPLAY_IDS_TO_SCAN = new int[] {
+            Surface.BUILT_IN_DISPLAY_ID_MAIN,
+            Surface.BUILT_IN_DISPLAY_ID_HDMI,
+    };
+
+    private final SparseArray<LocalDisplayDevice> mDevices =
+            new SparseArray<LocalDisplayDevice>();
+
+    private final PhysicalDisplayInfo mTempPhys = new PhysicalDisplayInfo();
+
+    public LocalDisplayAdapter(DisplayManagerService.SyncRoot syncRoot,
+            Context context, Handler handler, Listener listener) {
+        super(syncRoot, context, handler, listener, TAG);
     }
 
     @Override
-    protected void onRegister() {
+    public void registerLocked() {
         // TODO: listen for notifications from Surface Flinger about
         // built-in displays being added or removed and rescan as needed.
-        IBinder displayToken = Surface.getBuiltInDisplay(Surface.BUILT_IN_DISPLAY_ID_MAIN);
-        sendDisplayDeviceEvent(new LocalDisplayDevice(displayToken, true),
-                DISPLAY_DEVICE_EVENT_ADDED);
+        super.registerLocked();
+        scanDisplaysLocked();
+    }
+
+    private void scanDisplaysLocked() {
+        for (int builtInDisplayId : BUILT_IN_DISPLAY_IDS_TO_SCAN) {
+            IBinder displayToken = Surface.getBuiltInDisplay(builtInDisplayId);
+            if (displayToken != null && Surface.getDisplayInfo(displayToken, mTempPhys)) {
+                LocalDisplayDevice device = mDevices.get(builtInDisplayId);
+                if (device == null) {
+                    // Display was added.
+                    device = new LocalDisplayDevice(displayToken, builtInDisplayId, mTempPhys);
+                    mDevices.put(builtInDisplayId, device);
+                    sendDisplayDeviceEventLocked(device, DISPLAY_DEVICE_EVENT_ADDED);
+                } else if (device.updatePhysicalDisplayInfoLocked(mTempPhys)) {
+                    // Display properties changed.
+                    sendDisplayDeviceEventLocked(device, DISPLAY_DEVICE_EVENT_CHANGED);
+                }
+            } else {
+                LocalDisplayDevice device = mDevices.get(builtInDisplayId);
+                if (device != null) {
+                    // Display was removed.
+                    mDevices.remove(builtInDisplayId);
+                    sendDisplayDeviceEventLocked(device, DISPLAY_DEVICE_EVENT_REMOVED);
+                }
+            }
+        }
     }
 
     private final class LocalDisplayDevice extends DisplayDevice {
-        private final boolean mIsDefault;
+        private final int mBuiltInDisplayId;
+        private final PhysicalDisplayInfo mPhys;
 
-        public LocalDisplayDevice(IBinder displayToken, boolean isDefault) {
+        private DisplayDeviceInfo mInfo;
+        private boolean mHavePendingChanges;
+
+        public LocalDisplayDevice(IBinder displayToken, int builtInDisplayId,
+                PhysicalDisplayInfo phys) {
             super(LocalDisplayAdapter.this, displayToken);
-            mIsDefault = isDefault;
+            mBuiltInDisplayId = builtInDisplayId;
+            mPhys = new PhysicalDisplayInfo(phys);
+        }
+
+        public boolean updatePhysicalDisplayInfoLocked(PhysicalDisplayInfo phys) {
+            if (!mPhys.equals(phys)) {
+                mPhys.copyFrom(phys);
+                mHavePendingChanges = true;
+                return true;
+            }
+            return false;
         }
 
         @Override
-        public void getInfo(DisplayDeviceInfo outInfo) {
-            PhysicalDisplayInfo phys = new PhysicalDisplayInfo();
-            Surface.getDisplayInfo(getDisplayToken(), phys);
-
-            outInfo.name = getContext().getResources().getString(
-                    com.android.internal.R.string.display_manager_built_in_display_name);
-            outInfo.width = phys.width;
-            outInfo.height = phys.height;
-            outInfo.refreshRate = phys.refreshRate;
-            outInfo.densityDpi = (int)(phys.density * 160 + 0.5f);
-            outInfo.xDpi = phys.xDpi;
-            outInfo.yDpi = phys.yDpi;
-            if (mIsDefault) {
-                outInfo.flags = DisplayDeviceInfo.FLAG_DEFAULT_DISPLAY
-                        | DisplayDeviceInfo.FLAG_SECURE;
+        public void applyPendingDisplayDeviceInfoChangesLocked() {
+            if (mHavePendingChanges) {
+                mInfo = null;
+                mHavePendingChanges = false;
             }
+        }
+
+        @Override
+        public DisplayDeviceInfo getDisplayDeviceInfoLocked() {
+            if (mInfo == null) {
+                mInfo = new DisplayDeviceInfo();
+                mInfo.width = mPhys.width;
+                mInfo.height = mPhys.height;
+                mInfo.refreshRate = mPhys.refreshRate;
+                mInfo.densityDpi = (int)(mPhys.density * 160 + 0.5f);
+                mInfo.xDpi = mPhys.xDpi;
+                mInfo.yDpi = mPhys.yDpi;
+                if (mBuiltInDisplayId == Surface.BUILT_IN_DISPLAY_ID_MAIN) {
+                    mInfo.name = getContext().getResources().getString(
+                            com.android.internal.R.string.display_manager_built_in_display_name);
+                    mInfo.flags = DisplayDeviceInfo.FLAG_DEFAULT_DISPLAY
+                            | DisplayDeviceInfo.FLAG_SECURE
+                            | DisplayDeviceInfo.FLAG_SUPPORTS_ROTATION;
+                } else {
+                    mInfo.name = getContext().getResources().getString(
+                            com.android.internal.R.string.display_manager_hdmi_display_name);
+                    mInfo.flags = DisplayDeviceInfo.FLAG_SECURE;
+                }
+            }
+            return mInfo;
+        }
+
+        @Override
+        public void dumpLocked(PrintWriter pw) {
+            super.dumpLocked(pw);
+            pw.println("mBuiltInDisplayId=" + mBuiltInDisplayId);
+            pw.println("mPhys=" + mPhys);
         }
     }
 }
