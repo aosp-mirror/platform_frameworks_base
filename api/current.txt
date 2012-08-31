@@ -23473,6 +23473,7 @@ package android.view {
     method public int getDisplayId();
     method public deprecated int getHeight();
     method public void getMetrics(android.util.DisplayMetrics);
+    method public java.lang.String getName();
     method public deprecated int getOrientation();
     method public deprecated int getPixelFormat();
     method public void getRealMetrics(android.util.DisplayMetrics);

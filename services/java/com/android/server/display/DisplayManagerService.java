@@ -36,11 +36,9 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayInfo;
-import android.view.Surface;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.ArrayList;
 
 /**
@@ -66,12 +64,24 @@ import java.util.ArrayList;
  * two classes: display adapters handle individual display devices whereas
  * the display manager service handles the global state.  Second, it eliminates
  * the potential for deadlocks resulting from asynchronous display device discovery.
+ * </p>
+ *
+ * <h3>Synchronization</h3>
+ * <p>
+ * Because the display manager may be accessed by multiple threads, the synchronization
+ * story gets a little complicated.  In particular, the window manager may call into
+ * the display manager while holding a surface transaction with the expectation that
+ * it can apply changes immediately.  Unfortunately, that means we can't just do
+ * everything asynchronously (*grump*).
  * </p><p>
- * To keep things simple, display adapters and display devices are single-threaded
- * and are only accessed on the display manager's handler thread.  Of course, the
- * display manager must be accessible by multiple thread (especially for
- * incoming binder calls) so all of the display manager's state is synchronized
- * and guarded by a lock.
+ * To make this work, all of the objects that belong to the display manager must
+ * use the same lock.  We call this lock the synchronization root and it has a unique
+ * type {@link DisplayManagerService.SyncRoot}.  Methods that require this lock are
+ * named with the "Locked" suffix.
+ * </p><p>
+ * Where things get tricky is that the display manager is not allowed to make
+ * any potentially reentrant calls, especially into the window manager.  We generally
+ * avoid this by making all potentially reentrant out-calls asynchronous.
  * </p>
  */
 public final class DisplayManagerService extends IDisplayManager.Stub {
@@ -84,15 +94,29 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
     private static final int MSG_REGISTER_DEFAULT_DISPLAY_ADAPTER = 1;
     private static final int MSG_REGISTER_ADDITIONAL_DISPLAY_ADAPTERS = 2;
     private static final int MSG_DELIVER_DISPLAY_EVENT = 3;
-
-    private final Object mLock = new Object();
+    private static final int MSG_REQUEST_TRAVERSAL = 4;
 
     private final Context mContext;
     private final boolean mHeadless;
-
     private final DisplayManagerHandler mHandler;
-    private final DisplayAdapterListener mDisplayAdapterListener = new DisplayAdapterListener();
-    private final SparseArray<CallbackRecord> mCallbacks =
+    private final Handler mUiHandler;
+    private final DisplayAdapterListener mDisplayAdapterListener;
+    private WindowManagerFuncs mWindowManagerFuncs;
+
+    // The synchronization root for the display manager.
+    // This lock guards most of the display manager's state.
+    private final SyncRoot mSyncRoot = new SyncRoot();
+
+    // True if in safe mode.
+    // This option may disable certain display adapters.
+    public boolean mSafeMode;
+
+    // True if we are in a special boot mode where only core applications and
+    // services should be started.  This option may disable certain display adapters.
+    public boolean mOnlyCore;
+
+    // All callback records indexed by calling process id.
+    public final SparseArray<CallbackRecord> mCallbacks =
             new SparseArray<CallbackRecord>();
 
     // List of all currently registered display adapters.
@@ -101,26 +125,33 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
     // List of all currently connected display devices.
     private final ArrayList<DisplayDevice> mDisplayDevices = new ArrayList<DisplayDevice>();
 
-    // List of all logical displays, indexed by logical display id.
-    private final SparseArray<LogicalDisplay> mLogicalDisplays = new SparseArray<LogicalDisplay>();
+    // List of all removed display devices.
+    private final ArrayList<DisplayDevice> mRemovedDisplayDevices = new ArrayList<DisplayDevice>();
+
+    // List of all logical displays indexed by logical display id.
+    private final SparseArray<LogicalDisplay> mLogicalDisplays =
+            new SparseArray<LogicalDisplay>();
     private int mNextNonDefaultDisplayId = Display.DEFAULT_DISPLAY + 1;
 
-    // True if in safe mode.
-    // This option may disable certain display adapters.
-    private boolean mSafeMode;
-
-    // True if we are in a special boot mode where only core applications and
-    // services should be started.  This option may disable certain display adapters.
-    private boolean mOnlyCore;
+    // Set to true when there are pending display changes that have yet to be applied
+    // to the surface flinger state.
+    private boolean mPendingTraversal;
 
     // Temporary callback list, used when sending display events to applications.
-    private ArrayList<CallbackRecord> mTempCallbacks = new ArrayList<CallbackRecord>();
+    // May be used outside of the lock but only on the handler thread.
+    private final ArrayList<CallbackRecord> mTempCallbacks = new ArrayList<CallbackRecord>();
 
-    public DisplayManagerService(Context context, Handler uiHandler) {
+    // Temporary display info, used for comparing display configurations.
+    private final DisplayInfo mTempDisplayInfo = new DisplayInfo();
+
+    public DisplayManagerService(Context context, Handler mainHandler, Handler uiHandler) {
         mContext = context;
         mHeadless = SystemProperties.get(SYSTEM_HEADLESS).equals("1");
 
-        mHandler = new DisplayManagerHandler(uiHandler.getLooper());
+        mHandler = new DisplayManagerHandler(mainHandler.getLooper());
+        mUiHandler = uiHandler;
+        mDisplayAdapterListener = new DisplayAdapterListener();
+
         mHandler.sendEmptyMessage(MSG_REGISTER_DEFAULT_DISPLAY_ADAPTER);
     }
 
@@ -128,7 +159,7 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
      * Pauses the boot process to wait for the first display to be initialized.
      */
     public boolean waitForDefaultDisplay() {
-        synchronized (mLock) {
+        synchronized (mSyncRoot) {
             long timeout = SystemClock.uptimeMillis() + WAIT_FOR_DEFAULT_DISPLAY_TIMEOUT;
             while (mLogicalDisplays.get(Display.DEFAULT_DISPLAY) == null) {
                 long delay = timeout - SystemClock.uptimeMillis();
@@ -139,7 +170,7 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
                     Slog.d(TAG, "waitForDefaultDisplay: waiting, timeout=" + delay);
                 }
                 try {
-                    mLock.wait(delay);
+                    mSyncRoot.wait(delay);
                 } catch (InterruptedException ex) {
                 }
             }
@@ -148,60 +179,26 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
     }
 
     /**
+     * Called during initialization to associated the display manager with the
+     * window manager.
+     */
+    public void setWindowManager(WindowManagerFuncs windowManagerFuncs) {
+        synchronized (mSyncRoot) {
+            mWindowManagerFuncs = windowManagerFuncs;
+            scheduleTraversalLocked();
+        }
+    }
+
+    /**
      * Called when the system is ready to go.
      */
     public void systemReady(boolean safeMode, boolean onlyCore) {
-        synchronized (mLock) {
+        synchronized (mSyncRoot) {
             mSafeMode = safeMode;
             mOnlyCore = onlyCore;
         }
+
         mHandler.sendEmptyMessage(MSG_REGISTER_ADDITIONAL_DISPLAY_ADAPTERS);
-    }
-
-    // Runs on handler.
-    private void registerDefaultDisplayAdapter() {
-        // Register default display adapter.
-        if (mHeadless) {
-            registerDisplayAdapter(new HeadlessDisplayAdapter(mContext));
-        } else {
-            registerDisplayAdapter(new LocalDisplayAdapter(mContext));
-        }
-    }
-
-    // Runs on handler.
-    private void registerAdditionalDisplayAdapters() {
-        if (shouldRegisterNonEssentialDisplayAdapters()) {
-            registerDisplayAdapter(new OverlayDisplayAdapter(mContext));
-        }
-    }
-
-    private boolean shouldRegisterNonEssentialDisplayAdapters() {
-        // In safe mode, we disable non-essential display adapters to give the user
-        // an opportunity to fix broken settings or other problems that might affect
-        // system stability.
-        // In only-core mode, we disable non-essential display adapters to minimize
-        // the number of dependencies that are started while in this mode and to
-        // prevent problems that might occur due to the device being encrypted.
-        synchronized (mLock) {
-            return !mSafeMode && !mOnlyCore;
-        }
-    }
-
-    // Runs on handler.
-    private void registerDisplayAdapter(DisplayAdapter adapter) {
-        synchronized (mLock) {
-            mDisplayAdapters.add(adapter);
-        }
-
-        adapter.register(mDisplayAdapterListener);
-    }
-
-    // FIXME: this isn't the right API for the long term
-    public void getDefaultExternalDisplayDeviceInfo(DisplayDeviceInfo info) {
-        // hardcoded assuming 720p touch screen plugged into HDMI and USB
-        // need to redesign this
-        info.width = 1280;
-        info.height = 720;
     }
 
     /**
@@ -214,55 +211,42 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
     }
 
     /**
-     * Sets the new logical display orientation.
+     * Overrides the display information of a particular logical display.
+     * This is used by the window manager to control the size and characteristics
+     * of the default display.  It is expected to apply the requested change
+     * to the display information synchronously so that applications will immediately
+     * observe the new state.
      *
      * @param displayId The logical display id.
-     * @param orientation One of the Surface.ROTATION_* constants.
+     * @param info The new data to be stored.
      */
-    public void setDisplayOrientation(int displayId, int orientation) {
-        synchronized (mLock) {
-            // TODO: update mirror transforms
+    public void setDisplayInfoOverrideFromWindowManager(
+            int displayId, DisplayInfo info) {
+        synchronized (mSyncRoot) {
             LogicalDisplay display = mLogicalDisplays.get(displayId);
-            if (display != null && display.mPrimaryDisplayDevice != null) {
-                IBinder displayToken = display.mPrimaryDisplayDevice.getDisplayToken();
-                if (displayToken != null) {
-                    Surface.openTransaction();
-                    try {
-                        Surface.setDisplayOrientation(displayToken, orientation);
-                    } finally {
-                        Surface.closeTransaction();
-                    }
+            if (display != null) {
+                mTempDisplayInfo.copyFrom(display.getDisplayInfoLocked());
+                display.setDisplayInfoOverrideFromWindowManagerLocked(info);
+                if (!mTempDisplayInfo.equals(display.getDisplayInfoLocked())) {
+                    sendDisplayEventLocked(displayId, DisplayManagerGlobal.EVENT_DISPLAY_CHANGED);
+                    scheduleTraversalLocked();
                 }
-
-                display.mBaseDisplayInfo.rotation = orientation;
-                sendDisplayEventLocked(displayId, DisplayManagerGlobal.EVENT_DISPLAY_CHANGED);
             }
         }
     }
 
     /**
-     * Overrides the display information of a particular logical display.
-     * This is used by the window manager to control the size and characteristics
-     * of the default display.
-     *
-     * @param displayId The logical display id.
-     * @param info The new data to be stored.
+     * Called by the window manager to perform traversals while holding a
+     * surface flinger transaction.
      */
-    public void setDisplayInfoOverrideFromWindowManager(int displayId, DisplayInfo info) {
-        synchronized (mLock) {
-            LogicalDisplay display = mLogicalDisplays.get(displayId);
-            if (display != null) {
-                if (info != null) {
-                    if (display.mOverrideDisplayInfo == null) {
-                        display.mOverrideDisplayInfo = new DisplayInfo();
-                    }
-                    display.mOverrideDisplayInfo.copyFrom(info);
-                } else {
-                    display.mOverrideDisplayInfo = null;
-                }
-
-                sendDisplayEventLocked(displayId, DisplayManagerGlobal.EVENT_DISPLAY_CHANGED);
+    public void performTraversalInTransactionFromWindowManager() {
+        synchronized (mSyncRoot) {
+            if (!mPendingTraversal) {
+                return;
             }
+            mPendingTraversal = false;
+
+            performTraversalInTransactionLocked();
         }
     }
 
@@ -271,27 +255,28 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
      *
      * @param displayId The logical display id.
      * @param The logical display info, or null if the display does not exist.
+     * This object must be treated as immutable.
      */
     @Override // Binder call
     public DisplayInfo getDisplayInfo(int displayId) {
-        synchronized (mLock) {
+        synchronized (mSyncRoot) {
             LogicalDisplay display = mLogicalDisplays.get(displayId);
             if (display != null) {
-                if (display.mOverrideDisplayInfo != null) {
-                    return new DisplayInfo(display.mOverrideDisplayInfo);
-                }
-                return new DisplayInfo(display.mBaseDisplayInfo);
+                return display.getDisplayInfoLocked();
             }
             return null;
         }
     }
 
+    /**
+     * Returns the list of all display ids.
+     */
     @Override // Binder call
     public int[] getDisplayIds() {
-        synchronized (mLock) {
+        synchronized (mSyncRoot) {
             final int count = mLogicalDisplays.size();
             int[] displayIds = new int[count];
-            for (int i = 0; i > count; i++) {
+            for (int i = 0; i < count; i++) {
                 displayIds[i] = mLogicalDisplays.keyAt(i);
             }
             return displayIds;
@@ -304,7 +289,7 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
             throw new IllegalArgumentException("listener must not be null");
         }
 
-        synchronized (mLock) {
+        synchronized (mSyncRoot) {
             int callingPid = Binder.getCallingPid();
             if (mCallbacks.get(callingPid) != null) {
                 throw new SecurityException("The calling process has already "
@@ -325,98 +310,234 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
     }
 
     private void onCallbackDied(int pid) {
-        synchronized (mLock) {
+        synchronized (mSyncRoot) {
             mCallbacks.remove(pid);
         }
     }
 
-    // Runs on handler.
+    private void registerDefaultDisplayAdapter() {
+        // Register default display adapter.
+        synchronized (mSyncRoot) {
+            if (mHeadless) {
+                registerDisplayAdapterLocked(new HeadlessDisplayAdapter(
+                        mSyncRoot, mContext, mHandler, mDisplayAdapterListener));
+            } else {
+                registerDisplayAdapterLocked(new LocalDisplayAdapter(
+                        mSyncRoot, mContext, mHandler, mDisplayAdapterListener));
+            }
+        }
+    }
+
+    private void registerAdditionalDisplayAdapters() {
+        synchronized (mSyncRoot) {
+            if (shouldRegisterNonEssentialDisplayAdaptersLocked()) {
+                registerDisplayAdapterLocked(new OverlayDisplayAdapter(
+                        mSyncRoot, mContext, mHandler, mDisplayAdapterListener, mUiHandler));
+            }
+        }
+    }
+
+    private boolean shouldRegisterNonEssentialDisplayAdaptersLocked() {
+        // In safe mode, we disable non-essential display adapters to give the user
+        // an opportunity to fix broken settings or other problems that might affect
+        // system stability.
+        // In only-core mode, we disable non-essential display adapters to minimize
+        // the number of dependencies that are started while in this mode and to
+        // prevent problems that might occur due to the device being encrypted.
+        return !mSafeMode && !mOnlyCore;
+    }
+
+    private void registerDisplayAdapterLocked(DisplayAdapter adapter) {
+        mDisplayAdapters.add(adapter);
+        adapter.registerLocked();
+    }
+
     private void handleDisplayDeviceAdded(DisplayDevice device) {
-        synchronized (mLock) {
+        synchronized (mSyncRoot) {
             if (mDisplayDevices.contains(device)) {
-                Slog.w(TAG, "Attempted to add already added display device: " + device);
+                Slog.w(TAG, "Attempted to add already added display device: "
+                        + device.getDisplayDeviceInfoLocked());
                 return;
             }
 
             mDisplayDevices.add(device);
-
-            LogicalDisplay display = new LogicalDisplay(device);
-            display.updateFromPrimaryDisplayDevice();
-
-            boolean isDefault = (display.mPrimaryDisplayDeviceInfo.flags
-                    & DisplayDeviceInfo.FLAG_DEFAULT_DISPLAY) != 0;
-            if (isDefault && mLogicalDisplays.get(Display.DEFAULT_DISPLAY) != null) {
-                Slog.w(TAG, "Attempted to add a second default device: " + device);
-                isDefault = false;
-            }
-
-            int displayId = isDefault ? Display.DEFAULT_DISPLAY : mNextNonDefaultDisplayId++;
-            mLogicalDisplays.put(displayId, display);
-
-            sendDisplayEventLocked(displayId, DisplayManagerGlobal.EVENT_DISPLAY_ADDED);
-
-            // Wake up waitForDefaultDisplay.
-            if (isDefault) {
-                mLock.notifyAll();
-            }
+            addLogicalDisplayLocked(device);
+            scheduleTraversalLocked();
         }
     }
 
-    // Runs on handler.
     private void handleDisplayDeviceChanged(DisplayDevice device) {
-        synchronized (mLock) {
+        synchronized (mSyncRoot) {
             if (!mDisplayDevices.contains(device)) {
-                Slog.w(TAG, "Attempted to change non-existent display device: " + device);
+                Slog.w(TAG, "Attempted to change non-existent display device: "
+                        + device.getDisplayDeviceInfoLocked());
                 return;
             }
 
-            for (int i = mLogicalDisplays.size(); i-- > 0; ) {
-                LogicalDisplay display = mLogicalDisplays.valueAt(i);
-                if (display.mPrimaryDisplayDevice == device) {
-                    final int displayId = mLogicalDisplays.keyAt(i);
-                    display.updateFromPrimaryDisplayDevice();
-                    sendDisplayEventLocked(displayId, DisplayManagerGlobal.EVENT_DISPLAY_CHANGED);
-                }
+            device.applyPendingDisplayDeviceInfoChangesLocked();
+            if (updateLogicalDisplaysLocked()) {
+                scheduleTraversalLocked();
             }
         }
     }
 
-    // Runs on handler.
     private void handleDisplayDeviceRemoved(DisplayDevice device) {
-        synchronized (mLock) {
+        synchronized (mSyncRoot) {
             if (!mDisplayDevices.remove(device)) {
-                Slog.w(TAG, "Attempted to remove non-existent display device: " + device);
+                Slog.w(TAG, "Attempted to remove non-existent display device: "
+                        + device.getDisplayDeviceInfoLocked());
                 return;
             }
 
-            for (int i = mLogicalDisplays.size(); i-- > 0; ) {
-                LogicalDisplay display = mLogicalDisplays.valueAt(i);
-                if (display.mPrimaryDisplayDevice == device) {
-                    final int displayId = mLogicalDisplays.keyAt(i);
-                    mLogicalDisplays.removeAt(i);
-                    sendDisplayEventLocked(displayId, DisplayManagerGlobal.EVENT_DISPLAY_REMOVED);
-                }
-            }
+            mRemovedDisplayDevices.add(device);
+            updateLogicalDisplaysLocked();
+            scheduleTraversalLocked();
         }
     }
 
-    // Posts a message to send a display event at the next opportunity.
+    // Adds a new logical display based on the given display device.
+    // Sends notifications if needed.
+    private void addLogicalDisplayLocked(DisplayDevice device) {
+        DisplayDeviceInfo deviceInfo = device.getDisplayDeviceInfoLocked();
+        boolean isDefault = (deviceInfo.flags
+                & DisplayDeviceInfo.FLAG_DEFAULT_DISPLAY) != 0;
+        if (isDefault && mLogicalDisplays.get(Display.DEFAULT_DISPLAY) != null) {
+            Slog.w(TAG, "Ignoring attempt to add a second default display: " + deviceInfo);
+            isDefault = false;
+        }
+
+        final int displayId = assignDisplayIdLocked(isDefault);
+        final int layerStack = assignLayerStackLocked(displayId);
+
+        LogicalDisplay display = new LogicalDisplay(layerStack, device);
+        display.updateLocked(mDisplayDevices);
+        if (!display.isValidLocked()) {
+            // This should never happen currently.
+            Slog.w(TAG, "Ignoring display device because the logical display "
+                    + "created from it was not considered valid: " + deviceInfo);
+            return;
+        }
+
+        mLogicalDisplays.put(displayId, display);
+
+        // Wake up waitForDefaultDisplay.
+        if (isDefault) {
+            mSyncRoot.notifyAll();
+        }
+
+        sendDisplayEventLocked(displayId, DisplayManagerGlobal.EVENT_DISPLAY_ADDED);
+    }
+
+    private int assignDisplayIdLocked(boolean isDefault) {
+        return isDefault ? Display.DEFAULT_DISPLAY : mNextNonDefaultDisplayId++;
+    }
+
+    private int assignLayerStackLocked(int displayId) {
+        // Currently layer stacks and display ids are the same.
+        // This need not be the case.
+        return displayId;
+    }
+
+    // Updates all existing logical displays given the current set of display devices.
+    // Removes invalid logical displays.
+    // Sends notifications if needed.
+    private boolean updateLogicalDisplaysLocked() {
+        boolean changed = false;
+        for (int i = mLogicalDisplays.size(); i-- > 0; ) {
+            final int displayId = mLogicalDisplays.keyAt(i);
+            LogicalDisplay display = mLogicalDisplays.valueAt(i);
+
+            mTempDisplayInfo.copyFrom(display.getDisplayInfoLocked());
+            display.updateLocked(mDisplayDevices);
+            if (!display.isValidLocked()) {
+                mLogicalDisplays.removeAt(i);
+                sendDisplayEventLocked(displayId, DisplayManagerGlobal.EVENT_DISPLAY_REMOVED);
+                changed = true;
+            } else if (!mTempDisplayInfo.equals(display.getDisplayInfoLocked())) {
+                sendDisplayEventLocked(displayId, DisplayManagerGlobal.EVENT_DISPLAY_CHANGED);
+                changed = true;
+            }
+        }
+        return changed;
+    }
+
+    private void performTraversalInTransactionLocked() {
+        // Perform one last traversal for each removed display device.
+        final int removedCount = mRemovedDisplayDevices.size();
+        for (int i = 0; i < removedCount; i++) {
+            DisplayDevice device = mRemovedDisplayDevices.get(i);
+            device.performTraversalInTransactionLocked();
+        }
+        mRemovedDisplayDevices.clear();
+
+        // Configure each display device.
+        final int count = mDisplayDevices.size();
+        for (int i = 0; i < count; i++) {
+            DisplayDevice device = mDisplayDevices.get(i);
+            configureDisplayInTransactionLocked(device);
+            device.performTraversalInTransactionLocked();
+        }
+    }
+
+    private void configureDisplayInTransactionLocked(DisplayDevice device) {
+        // TODO: add a proper per-display mirroring control
+        boolean isMirroring = SystemProperties.getBoolean("debug.display.mirror", true);
+
+        // Find the logical display that the display device is showing.
+        LogicalDisplay display = null;
+        if (!isMirroring) {
+            display = findLogicalDisplayForDeviceLocked(device);
+        }
+        if (display == null) {
+            display = mLogicalDisplays.get(Display.DEFAULT_DISPLAY);
+        }
+
+        // Apply the logical display configuration to the display device.
+        if (display == null) {
+            // TODO: no logical display for the device, blank it
+            Slog.d(TAG, "Missing logical display to use for physical display device: "
+                    + device.getDisplayDeviceInfoLocked());
+        } else {
+            display.configureDisplayInTransactionLocked(device);
+        }
+    }
+
+    private LogicalDisplay findLogicalDisplayForDeviceLocked(DisplayDevice device) {
+        final int count = mLogicalDisplays.size();
+        for (int i = 0; i < count; i++) {
+            LogicalDisplay display = mLogicalDisplays.valueAt(i);
+            if (display.getPrimaryDisplayDeviceLocked() == device) {
+                return display;
+            }
+        }
+        return null;
+    }
+
     private void sendDisplayEventLocked(int displayId, int event) {
         Message msg = mHandler.obtainMessage(MSG_DELIVER_DISPLAY_EVENT, displayId, event);
         mHandler.sendMessage(msg);
     }
 
-    // Runs on handler.
-    // This method actually sends display event notifications.
-    // Note that it must be very careful not to be holding the lock while sending
-    // is in progress.
+    // Requests that performTraversalsInTransactionFromWindowManager be called at a
+    // later time to apply changes to surfaces and displays.
+    private void scheduleTraversalLocked() {
+        if (!mPendingTraversal && mWindowManagerFuncs != null) {
+            mPendingTraversal = true;
+            mHandler.sendEmptyMessage(MSG_REQUEST_TRAVERSAL);
+        }
+    }
+
+    // Runs on Handler thread.
+    // Delivers display event notifications to callbacks.
     private void deliverDisplayEvent(int displayId, int event) {
         if (DEBUG) {
-            Slog.d(TAG, "Delivering display event: displayId=" + displayId + ", event=" + event);
+            Slog.d(TAG, "Delivering display event: displayId="
+                    + displayId + ", event=" + event);
         }
 
+        // Grab the lock and copy the callbacks.
         final int count;
-        synchronized (mLock) {
+        synchronized (mSyncRoot) {
             count = mCallbacks.size();
             mTempCallbacks.clear();
             for (int i = 0; i < count; i++) {
@@ -424,6 +545,7 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
             }
         }
 
+        // After releasing the lock, send the notifications out.
         for (int i = 0; i < count; i++) {
             mTempCallbacks.get(i).notifyDisplayEventAsync(displayId, event);
         }
@@ -443,30 +565,22 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
         pw.println("DISPLAY MANAGER (dumpsys display)");
         pw.println("  mHeadless=" + mHeadless);
 
-        mHandler.runWithScissors(new Runnable() {
-            @Override
-            public void run() {
-                dumpLocal(pw);
-            }
-        });
-    }
-
-    // Runs on handler.
-    private void dumpLocal(PrintWriter pw) {
-        synchronized (mLock) {
+        synchronized (mSyncRoot) {
             IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "    ");
+            ipw.increaseIndent();
 
             pw.println();
             pw.println("Display Adapters: size=" + mDisplayAdapters.size());
             for (DisplayAdapter adapter : mDisplayAdapters) {
                 pw.println("  " + adapter.getName());
-                adapter.dump(ipw);
+                adapter.dumpLocked(ipw);
             }
 
             pw.println();
             pw.println("Display Devices: size=" + mDisplayDevices.size());
             for (DisplayDevice device : mDisplayDevices) {
-                pw.println("  " + device);
+                pw.println("  " + device.getDisplayDeviceInfoLocked());
+                device.dumpLocked(ipw);
             }
 
             final int logicalDisplayCount = mLogicalDisplays.size();
@@ -476,12 +590,29 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
                 int displayId = mLogicalDisplays.keyAt(i);
                 LogicalDisplay display = mLogicalDisplays.valueAt(i);
                 pw.println("  Display " + displayId + ":");
-                pw.println("    mPrimaryDisplayDevice=" + display.mPrimaryDisplayDevice);
-                pw.println("    mBaseDisplayInfo=" + display.mBaseDisplayInfo);
-                pw.println("    mOverrideDisplayInfo="
-                        + display.mOverrideDisplayInfo);
+                display.dumpLocked(ipw);
             }
         }
+    }
+
+    /**
+     * This is the object that everything in the display manager locks on.
+     * We make it an inner class within the {@link DisplayManagerService} to so that it is
+     * clear that the object belongs to the display manager service and that it is
+     * a unique object with a special purpose.
+     */
+    public static final class SyncRoot {
+    }
+
+    /**
+     * Private interface to the window manager.
+     */
+    public interface WindowManagerFuncs {
+        /**
+         * Request that the window manager call {@link #performTraversalInTransaction}
+         * within a surface transaction at a later time.
+         */
+        void requestTraversal();
     }
 
     private final class DisplayManagerHandler extends Handler {
@@ -503,6 +634,10 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
                 case MSG_DELIVER_DISPLAY_EVENT:
                     deliverDisplayEvent(msg.arg1, msg.arg2);
                     break;
+
+                case MSG_REQUEST_TRAVERSAL:
+                    mWindowManagerFuncs.requestTraversal();
+                    break;
             }
         }
     }
@@ -522,6 +657,13 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
                 case DisplayAdapter.DISPLAY_DEVICE_EVENT_REMOVED:
                     handleDisplayDeviceRemoved(device);
                     break;
+            }
+        }
+
+        @Override
+        public void onTraversalRequested() {
+            synchronized (mSyncRoot) {
+                scheduleTraversalLocked();
             }
         }
     }
@@ -551,48 +693,6 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
                         + mPid + " that displays changed, assuming it died.", ex);
                 binderDied();
             }
-        }
-    }
-
-    /**
-     * Each logical display is primarily associated with one display device.
-     * The primary display device is nominally responsible for the basic properties
-     * of the logical display such as its size, refresh rate, and dpi.
-     *
-     * A logical display may be mirrored onto other display devices besides its
-     * primary display device, but it always remains bound to its primary.
-     * Note that the contents of a logical display may not always be visible, even
-     * on its primary display device, such as in the case where the logical display's
-     * primary display device is currently mirroring content from a different logical display.
-     */
-    private final static class LogicalDisplay {
-        public final DisplayInfo mBaseDisplayInfo = new DisplayInfo();
-        public DisplayInfo mOverrideDisplayInfo; // set by the window manager
-
-        public final DisplayDevice mPrimaryDisplayDevice;
-        public final DisplayDeviceInfo mPrimaryDisplayDeviceInfo = new DisplayDeviceInfo();
-
-        public LogicalDisplay(DisplayDevice primaryDisplayDevice) {
-            mPrimaryDisplayDevice = primaryDisplayDevice;
-        }
-
-        public void updateFromPrimaryDisplayDevice() {
-            // Bootstrap the logical display using its associated primary physical display.
-            mPrimaryDisplayDevice.getInfo(mPrimaryDisplayDeviceInfo);
-
-            mBaseDisplayInfo.appWidth = mPrimaryDisplayDeviceInfo.width;
-            mBaseDisplayInfo.appHeight = mPrimaryDisplayDeviceInfo.height;
-            mBaseDisplayInfo.logicalWidth = mPrimaryDisplayDeviceInfo.width;
-            mBaseDisplayInfo.logicalHeight = mPrimaryDisplayDeviceInfo.height;
-            mBaseDisplayInfo.rotation = Surface.ROTATION_0;
-            mBaseDisplayInfo.refreshRate = mPrimaryDisplayDeviceInfo.refreshRate;
-            mBaseDisplayInfo.logicalDensityDpi = mPrimaryDisplayDeviceInfo.densityDpi;
-            mBaseDisplayInfo.physicalXDpi = mPrimaryDisplayDeviceInfo.xDpi;
-            mBaseDisplayInfo.physicalYDpi = mPrimaryDisplayDeviceInfo.yDpi;
-            mBaseDisplayInfo.smallestNominalAppWidth = mPrimaryDisplayDeviceInfo.width;
-            mBaseDisplayInfo.smallestNominalAppHeight = mPrimaryDisplayDeviceInfo.height;
-            mBaseDisplayInfo.largestNominalAppWidth = mPrimaryDisplayDeviceInfo.width;
-            mBaseDisplayInfo.largestNominalAppHeight = mPrimaryDisplayDeviceInfo.height;
         }
     }
 }

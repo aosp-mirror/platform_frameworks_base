@@ -431,7 +431,12 @@ public class Handler {
      * set up a Handler thread and need to perform some initialization steps on
      * it before continuing execution.
      *
+     * If timeout occurs then this method returns <code>false</code> but the runnable
+     * will remain posted on the handler and may already be in progress or
+     * complete at a later time.
+     *
      * @param r The Runnable that will be executed synchronously.
+     * @param timeout The timeout in milliseconds, or 0 to wait indefinitely.
      *
      * @return Returns true if the Runnable was successfully executed.
      *         Returns false on failure, usually because the
@@ -441,9 +446,12 @@ public class Handler {
      * If we ever do make it part of the API, we might want to rename it to something
      * less funny like runUnsafe().
      */
-    public final boolean runWithScissors(final Runnable r) {
+    public final boolean runWithScissors(final Runnable r, long timeout) {
         if (r == null) {
             throw new IllegalArgumentException("runnable must not be null");
+        }
+        if (timeout < 0) {
+            throw new IllegalArgumentException("timeout must be non-negative");
         }
 
         if (Looper.myLooper() == mLooper) {
@@ -452,7 +460,7 @@ public class Handler {
         }
 
         BlockingRunnable br = new BlockingRunnable(r);
-        return br.postAndWait(this);
+        return br.postAndWait(this, timeout);
     }
 
     /**
@@ -743,16 +751,30 @@ public class Handler {
             }
         }
 
-        public boolean postAndWait(Handler handler) {
+        public boolean postAndWait(Handler handler, long timeout) {
             if (!handler.post(this)) {
                 return false;
             }
 
             synchronized (this) {
-                while (!mDone) {
-                    try {
-                        wait();
-                    } catch (InterruptedException ex) {
+                if (timeout > 0) {
+                    final long expirationTime = SystemClock.uptimeMillis() + timeout;
+                    while (!mDone) {
+                        long delay = expirationTime - SystemClock.uptimeMillis();
+                        if (delay <= 0) {
+                            return false; // timeout
+                        }
+                        try {
+                            wait(delay);
+                        } catch (InterruptedException ex) {
+                        }
+                    }
+                } else {
+                    while (!mDone) {
+                        try {
+                            wait();
+                        } catch (InterruptedException ex) {
+                        }
                     }
                 }
             }

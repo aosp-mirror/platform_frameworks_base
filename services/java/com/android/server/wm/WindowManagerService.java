@@ -45,7 +45,6 @@ import com.android.server.AttributeCache;
 import com.android.server.EventLogTags;
 import com.android.server.Watchdog;
 import com.android.server.am.BatteryStatsService;
-import com.android.server.display.DisplayDeviceInfo;
 import com.android.server.display.DisplayManagerService;
 import com.android.server.input.InputManagerService;
 import com.android.server.power.PowerManagerService;
@@ -163,7 +162,8 @@ import java.util.NoSuchElementException;
 
 /** {@hide} */
 public class WindowManagerService extends IWindowManager.Stub
-        implements Watchdog.Monitor, WindowManagerPolicy.WindowManagerFuncs {
+        implements Watchdog.Monitor, WindowManagerPolicy.WindowManagerFuncs,
+                DisplayManagerService.WindowManagerFuncs {
     static final String TAG = "WindowManager";
     static final boolean DEBUG = false;
     static final boolean DEBUG_ADD_REMOVE = false;
@@ -751,7 +751,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 holder[0] = new WindowManagerService(context, pm, dm,
                         uiHandler, haveInputMethods, showBootMsgs, onlyCore);
             }
-        });
+        }, 0);
         return holder[0];
     }
 
@@ -766,7 +766,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         * TYPE_LAYER_MULTIPLIER
                         + TYPE_LAYER_OFFSET;
             }
-        });
+        }, 0);
     }
 
     private WindowManagerService(Context context, PowerManagerService pm,
@@ -825,8 +825,11 @@ public class WindowManagerService extends IWindowManager.Stub
         Watchdog.getInstance().addMonitor(this);
 
         Surface.openTransaction();
-        createWatermark();
-        Surface.closeTransaction();
+        try {
+            createWatermarkInTransaction();
+        } finally {
+            Surface.closeTransaction();
+        }
     }
 
     public InputManagerService getInputManagerService() {
@@ -5731,41 +5734,44 @@ public class WindowManagerService extends IWindowManager.Stub
         mWaitingForConfig = true;
         mLayoutNeeded = true;
         startFreezingDisplayLocked(inTransaction);
-        mInputManager.setDisplayOrientation(0, rotation, Surface.ROTATION_0);
+        mInputManager.setDisplayOrientation(0, rotation);
 
         // We need to update our screen size information to match the new
         // rotation.  Note that this is redundant with the later call to
         // sendNewConfiguration() that must be called after this function
         // returns...  however we need to do the screen size part of that
-        // before then so we have the correct size to use when initializiation
+        // before then so we have the correct size to use when initializing
         // the rotation animation for the new rotation.
         computeScreenConfigurationLocked(null);
 
-        if (!inTransaction) {
-            if (SHOW_TRANSACTIONS)  Slog.i(TAG,
-                    ">>> OPEN TRANSACTION setRotationUnchecked");
-            Surface.openTransaction();
-        }
         final DisplayContent displayContent = getDefaultDisplayContent();
         final DisplayInfo displayInfo = displayContent.getDisplayInfo();
+        if (!inTransaction) {
+            if (SHOW_TRANSACTIONS) {
+                Slog.i(TAG, ">>> OPEN TRANSACTION setRotationUnchecked");
+            }
+            Surface.openTransaction();
+        }
         try {
             // NOTE: We disable the rotation in the emulator because
             //       it doesn't support hardware OpenGL emulation yet.
             if (CUSTOM_SCREEN_ROTATION && mAnimator.mScreenRotationAnimation != null
                     && mAnimator.mScreenRotationAnimation.hasScreenshot()) {
-                if (mAnimator.mScreenRotationAnimation.setRotation(rotation, mFxSession,
+                if (mAnimator.mScreenRotationAnimation.setRotationInTransaction(
+                        rotation, mFxSession,
                         MAX_ANIMATION_DURATION, mTransitionAnimationScale,
                         displayInfo.logicalWidth, displayInfo.logicalHeight)) {
                     updateLayoutToAnimationLocked();
                 }
             }
-            mDisplayManagerService.setDisplayOrientation(
-                    displayContent.getDisplayId(), rotation);
+
+            mDisplayManagerService.performTraversalInTransactionFromWindowManager();
         } finally {
             if (!inTransaction) {
                 Surface.closeTransaction();
-                if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
-                        "<<< CLOSE TRANSACTION setRotationUnchecked");
+                if (SHOW_LIGHT_TRANSACTIONS) {
+                    Slog.i(TAG, "<<< CLOSE TRANSACTION setRotationUnchecked");
+                }
             }
         }
 
@@ -6801,15 +6807,11 @@ public class WindowManagerService extends IWindowManager.Stub
             mAnimator.setDisplayDimensions(displayInfo.logicalWidth, displayInfo.logicalHeight,
                 displayInfo.appWidth, displayInfo.appHeight);
 
-            DisplayDeviceInfo info = new DisplayDeviceInfo();
-            mDisplayManagerService.getDefaultExternalDisplayDeviceInfo(info);
-
             final DisplayContent displayContent = getDefaultDisplayContent();
             mInputManager.setDisplaySize(displayContent.getDisplayId(),
-                    displayContent.mInitialDisplayWidth, displayContent.mInitialDisplayHeight,
-                    info.width, info.height);
+                    displayContent.mInitialDisplayWidth, displayContent.mInitialDisplayHeight);
             mInputManager.setDisplayOrientation(displayContent.getDisplayId(),
-                    mDefaultDisplay.getRotation(), Surface.ROTATION_0);
+                    mDefaultDisplay.getRotation());
             mPolicy.setInitialDisplaySize(mDefaultDisplay, displayContent.mInitialDisplayWidth,
                     displayContent.mInitialDisplayHeight, displayContent.mInitialDisplayDensity);
         }
@@ -8569,15 +8571,18 @@ public class WindowManagerService extends IWindowManager.Stub
                 ">>> OPEN TRANSACTION performLayoutAndPlaceSurfaces");
 
         Surface.openTransaction();
-
-        if (mWatermark != null) {
-            mWatermark.positionSurface(dw, dh);
-        }
-        if (mStrictModeFlash != null) {
-            mStrictModeFlash.positionSurface(dw, dh);
-        }
-
         try {
+            if (mWatermark != null) {
+                mWatermark.positionSurface(dw, dh);
+            }
+            if (mStrictModeFlash != null) {
+                mStrictModeFlash.positionSurface(dw, dh);
+            }
+
+            // Give the display manager a chance to adjust properties
+            // like display rotation if it needs to.
+            mDisplayManagerService.performTraversalInTransactionFromWindowManager();
+
             int repeats = 0;
 
             do {
@@ -9077,6 +9082,12 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    public void requestTraversal() {
+        synchronized (mWindowMap) {
+            requestTraversalLocked();
+        }
+    }
+
     void requestTraversalLocked() {
         if (!mTraversalScheduled) {
             mTraversalScheduled = true;
@@ -9572,7 +9583,7 @@ public class WindowManagerService extends IWindowManager.Stub
         return val;
     }
 
-    void createWatermark() {
+    void createWatermarkInTransaction() {
         if (mWatermark != null) {
             return;
         }
