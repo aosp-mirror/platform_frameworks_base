@@ -28,6 +28,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Vibrator;
 import android.os.Handler;
+import android.os.UserHandle;
 import android.util.Log;
 import android.net.Uri;
 import android.os.SystemClock;
@@ -798,7 +799,8 @@ public class NotificationTestList extends TestActivity
                             null, 
                             100, 
                             n,
-                            idOut);
+                            idOut,
+                            UserHandle.myUserId());
                 } catch (android.os.RemoteException ex) {
                     // oh well
                 }
@@ -822,7 +824,8 @@ public class NotificationTestList extends TestActivity
                             null, 
                             200, 
                             n,
-                            idOut);
+                            idOut,
+                            UserHandle.myUserId());
                 } catch (android.os.RemoteException ex) {
                     // oh well
                 }
@@ -846,7 +849,8 @@ public class NotificationTestList extends TestActivity
                             null, 
                             1, 
                             n,
-                            idOut);
+                            idOut,
+                            UserHandle.myUserId());
                 } catch (android.os.RemoteException ex) {
                     // oh well
                 }

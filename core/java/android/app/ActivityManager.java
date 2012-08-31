@@ -27,6 +27,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.PackageManager;
+import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Point;
@@ -1225,7 +1226,7 @@ public class ActivityManager {
     public boolean clearApplicationUserData(String packageName, IPackageDataObserver observer) {
         try {
             return ActivityManagerNative.getDefault().clearApplicationUserData(packageName, 
-                    observer, Binder.getOrigCallingUser());
+                    observer, UserHandle.myUserId());
         } catch (RemoteException e) {
             return false;
         }
@@ -1900,6 +1901,31 @@ public class ActivityManager {
             Slog.e(TAG, "PackageManager is dead?!?", e);
         }
         return PackageManager.PERMISSION_DENIED;
+    }
+
+    /** @hide */
+    public static int handleIncomingUser(int callingPid, int callingUid, int userId,
+            boolean allowAll, boolean requireFull, String name, String callerPackage) {
+        if (UserHandle.getUserId(callingUid) == userId) {
+            return userId;
+        }
+        try {
+            return ActivityManagerNative.getDefault().handleIncomingUser(callingPid,
+                    callingUid, userId, allowAll, requireFull, name, callerPackage);
+        } catch (RemoteException e) {
+            throw new SecurityException("Failed calling activity manager", e);
+        }
+    }
+
+    /** @hide */
+    public static int getCurrentUser() {
+        UserInfo ui;
+        try {
+            ui = ActivityManagerNative.getDefault().getCurrentUser();
+            return ui != null ? ui.id : 0;
+        } catch (RemoteException e) {
+            return 0;
+        }
     }
 
     /**
