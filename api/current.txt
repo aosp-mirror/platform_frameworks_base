@@ -5758,6 +5758,7 @@ package android.content {
     field public static final java.lang.String ACTION_PACKAGE_REMOVED = "android.intent.action.PACKAGE_REMOVED";
     field public static final java.lang.String ACTION_PACKAGE_REPLACED = "android.intent.action.PACKAGE_REPLACED";
     field public static final java.lang.String ACTION_PACKAGE_RESTARTED = "android.intent.action.PACKAGE_RESTARTED";
+    field public static final java.lang.String ACTION_PACKAGE_VERIFIED = "android.intent.action.PACKAGE_VERIFIED";
     field public static final java.lang.String ACTION_PASTE = "android.intent.action.PASTE";
     field public static final java.lang.String ACTION_PICK = "android.intent.action.PICK";
     field public static final java.lang.String ACTION_PICK_ACTIVITY = "android.intent.action.PICK_ACTIVITY";
@@ -6550,6 +6551,7 @@ package android.content.pm {
     field public static final int COMPONENT_ENABLED_STATE_ENABLED = 1; // 0x1
     field public static final int DONT_KILL_APP = 1; // 0x1
     field public static final java.lang.String EXTRA_VERIFICATION_ID = "android.content.pm.extra.VERIFICATION_ID";
+    field public static final java.lang.String EXTRA_VERIFICATION_RESULT = "android.content.pm.extra.VERIFICATION_RESULT";
     field public static final java.lang.String FEATURE_AUDIO_LOW_LATENCY = "android.hardware.audio.low_latency";
     field public static final java.lang.String FEATURE_BLUETOOTH = "android.hardware.bluetooth";
     field public static final java.lang.String FEATURE_CAMERA = "android.hardware.camera";
