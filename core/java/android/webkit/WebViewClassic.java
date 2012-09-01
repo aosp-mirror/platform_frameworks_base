@@ -1336,20 +1336,40 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
     private void onHandleUiTouchEvent(MotionEvent ev) {
         final ScaleGestureDetector detector =
-                mZoomManager.getMultiTouchGestureDetector();
+                mZoomManager.getScaleGestureDetector();
 
-        float x = ev.getX();
-        float y = ev.getY();
+        int action = ev.getActionMasked();
+        final boolean pointerUp = action == MotionEvent.ACTION_POINTER_UP;
+        final boolean configChanged =
+            action == MotionEvent.ACTION_POINTER_UP ||
+            action == MotionEvent.ACTION_POINTER_DOWN;
+        final int skipIndex = pointerUp ? ev.getActionIndex() : -1;
+
+        // Determine focal point
+        float sumX = 0, sumY = 0;
+        final int count = ev.getPointerCount();
+        for (int i = 0; i < count; i++) {
+            if (skipIndex == i) continue;
+            sumX += ev.getX(i);
+            sumY += ev.getY(i);
+        }
+        final int div = pointerUp ? count - 1 : count;
+        float x = sumX / div;
+        float y = sumY / div;
+
+        if (configChanged) {
+            mLastTouchX = Math.round(x);
+            mLastTouchY = Math.round(y);
+            mLastTouchTime = ev.getEventTime();
+            mWebView.cancelLongPress();
+            mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
+        }
 
         if (detector != null) {
             detector.onTouchEvent(ev);
             if (detector.isInProgress()) {
                 mLastTouchTime = ev.getEventTime();
-                x = detector.getFocusX();
-                y = detector.getFocusY();
 
-                mWebView.cancelLongPress();
-                mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
                 if (!mZoomManager.supportsPanDuringZoom()) {
                     return;
                 }
@@ -1360,14 +1380,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             }
         }
 
-        int action = ev.getActionMasked();
         if (action == MotionEvent.ACTION_POINTER_DOWN) {
             cancelTouch();
             action = MotionEvent.ACTION_DOWN;
-        } else if (action == MotionEvent.ACTION_POINTER_UP) {
-            // set mLastTouchX/Y to the remaining points for multi-touch.
-            mLastTouchX = Math.round(x);
-            mLastTouchY = Math.round(y);
         } else if (action == MotionEvent.ACTION_MOVE) {
             // negative x or y indicate it is on the edge, skip it.
             if (x < 0 || y < 0) {
@@ -4345,7 +4360,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
         // A multi-finger gesture can look like a long press; make sure we don't take
         // long press actions if we're scaling.
-        final ScaleGestureDetector detector = mZoomManager.getMultiTouchGestureDetector();
+        final ScaleGestureDetector detector = mZoomManager.getScaleGestureDetector();
         if (detector != null && detector.isInProgress()) {
             return false;
         }
@@ -5752,7 +5767,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     * and the middle point for multi-touch.
     */
     private void handleTouchEventCommon(MotionEvent event, int action, int x, int y) {
-        ScaleGestureDetector detector = mZoomManager.getMultiTouchGestureDetector();
+        ScaleGestureDetector detector = mZoomManager.getScaleGestureDetector();
 
         long eventTime = event.getEventTime();
 
