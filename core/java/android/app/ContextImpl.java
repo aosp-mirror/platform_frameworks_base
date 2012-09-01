@@ -138,6 +138,17 @@ class ReceiverRestrictedContext extends ContextWrapper {
     }
 
     @Override
+    public Intent registerReceiverAsUser(BroadcastReceiver receiver, UserHandle user,
+            IntentFilter filter, String broadcastPermission, Handler scheduler) {
+        throw new ReceiverCallNotAllowedException(
+                "IntentReceiver components are not allowed to register to receive intents");
+        //ex.fillInStackTrace();
+        //Log.e("IntentReceiver", ex.getMessage(), ex);
+        //return mContext.registerReceiver(receiver, filter, broadcastPermission,
+        //        scheduler);
+    }
+
+    @Override
     public boolean bindService(Intent service, ServiceConnection conn, int flags) {
         throw new ReceiverCallNotAllowedException(
                 "IntentReceiver components are not allowed to bind to services");
@@ -1252,11 +1263,18 @@ class ContextImpl extends Context {
     @Override
     public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter,
             String broadcastPermission, Handler scheduler) {
-        return registerReceiverInternal(receiver, filter, broadcastPermission,
-                scheduler, getOuterContext());
+        return registerReceiverInternal(receiver, UserHandle.myUserId(),
+                filter, broadcastPermission, scheduler, getOuterContext());
     }
 
-    private Intent registerReceiverInternal(BroadcastReceiver receiver,
+    @Override
+    public Intent registerReceiverAsUser(BroadcastReceiver receiver, UserHandle user,
+            IntentFilter filter, String broadcastPermission, Handler scheduler) {
+        return registerReceiverInternal(receiver, user.getIdentifier(),
+                filter, broadcastPermission, scheduler, getOuterContext());
+    }
+
+    private Intent registerReceiverInternal(BroadcastReceiver receiver, int userId,
             IntentFilter filter, String broadcastPermission,
             Handler scheduler, Context context) {
         IIntentReceiver rd = null;
@@ -1279,7 +1297,7 @@ class ContextImpl extends Context {
         try {
             return ActivityManagerNative.getDefault().registerReceiver(
                     mMainThread.getApplicationThread(), mBasePackageName,
-                    rd, filter, broadcastPermission);
+                    rd, filter, broadcastPermission, userId);
         } catch (RemoteException e) {
             return null;
         }

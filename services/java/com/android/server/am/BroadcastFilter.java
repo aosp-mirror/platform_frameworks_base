@@ -17,7 +17,6 @@
 package com.android.server.am;
 
 import android.content.IntentFilter;
-import android.os.UserHandle;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
 
@@ -32,13 +31,13 @@ class BroadcastFilter extends IntentFilter {
     final int owningUserId;
 
     BroadcastFilter(IntentFilter _filter, ReceiverList _receiverList,
-            String _packageName, String _requiredPermission, int _owningUid) {
+            String _packageName, String _requiredPermission, int _owningUid, int _userId) {
         super(_filter);
         receiverList = _receiverList;
         packageName = _packageName;
         requiredPermission = _requiredPermission;
         owningUid = _owningUid;
-        owningUserId = UserHandle.getUserId(owningUid);
+        owningUserId = _userId;
     }
     
     public void dump(PrintWriter pw, String prefix) {

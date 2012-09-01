@@ -237,16 +237,17 @@ public abstract class BroadcastReceiver {
         final boolean mOrderedHint;
         final boolean mInitialStickyHint;
         final IBinder mToken;
+        final int mSendingUser;
         
         int mResultCode;
         String mResultData;
         Bundle mResultExtras;
         boolean mAbortBroadcast;
         boolean mFinished;
-        
+
         /** @hide */
         public PendingResult(int resultCode, String resultData, Bundle resultExtras,
-                int type, boolean ordered, boolean sticky, IBinder token) {
+                int type, boolean ordered, boolean sticky, IBinder token, int userId) {
             mResultCode = resultCode;
             mResultData = resultData;
             mResultExtras = resultExtras;
@@ -254,6 +255,7 @@ public abstract class BroadcastReceiver {
             mOrderedHint = ordered;
             mInitialStickyHint = sticky;
             mToken = token;
+            mSendingUser = userId;
         }
         
         /**
@@ -425,7 +427,12 @@ public abstract class BroadcastReceiver {
                 }
             }
         }
-        
+
+        /** @hide */
+        public int getSendingUserId() {
+            return mSendingUser;
+        }
+
         void checkSynchronousHint() {
             // Note that we don't assert when receiving the initial sticky value,
             // since that may have come from an ordered broadcast.  We'll catch
@@ -733,6 +740,11 @@ public abstract class BroadcastReceiver {
         return mPendingResult;
     }
     
+    /** @hide */
+    public int getSendingUserId() {
+        return mPendingResult.mSendingUser;
+    }
+
     /**
      * Control inclusion of debugging help for mismatched
      * calls to {@link Context#registerReceiver(BroadcastReceiver, IntentFilter)
