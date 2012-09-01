@@ -86,8 +86,8 @@ public class ScaleGestureDetector {
          * pointers going up.
          *
          * Once a scale has ended, {@link ScaleGestureDetector#getFocusX()}
-         * and {@link ScaleGestureDetector#getFocusY()} will return the location
-         * of the pointer remaining on the screen.
+         * and {@link ScaleGestureDetector#getFocusY()} will return focal point
+         * of the pointers remaining on the screen.
          *
          * @param detector The detector reporting the event - use this to
          *          retrieve extended info about event state.
@@ -128,6 +128,7 @@ public class ScaleGestureDetector {
 
     private float mCurrSpan;
     private float mPrevSpan;
+    private float mInitialSpan;
     private float mCurrSpanX;
     private float mCurrSpanY;
     private float mPrevSpanX;
@@ -135,6 +136,7 @@ public class ScaleGestureDetector {
     private long mCurrTime;
     private long mPrevTime;
     private boolean mInProgress;
+    private int mSpanSlop;
 
     /**
      * Consistency verifier for debugging purposes.
@@ -146,6 +148,7 @@ public class ScaleGestureDetector {
     public ScaleGestureDetector(Context context, OnScaleGestureListener listener) {
         mContext = context;
         mListener = listener;
+        mSpanSlop = ViewConfiguration.get(context).getScaledTouchSlop() * 2;
     }
 
     /**
@@ -176,6 +179,7 @@ public class ScaleGestureDetector {
             if (mInProgress) {
                 mListener.onScaleEnd(this);
                 mInProgress = false;
+                mInitialSpan = 0;
             }
 
             if (streamComplete) {
@@ -221,18 +225,24 @@ public class ScaleGestureDetector {
         // Dispatch begin/end events as needed.
         // If the configuration changes, notify the app to reset its current state by beginning
         // a fresh scale event stream.
+        final boolean wasInProgress = mInProgress;
+        mFocusX = focusX;
+        mFocusY = focusY;
         if (mInProgress && (span == 0 || configChanged)) {
             mListener.onScaleEnd(this);
             mInProgress = false;
+            mInitialSpan = span;
         }
         if (configChanged) {
             mPrevSpanX = mCurrSpanX = spanX;
             mPrevSpanY = mCurrSpanY = spanY;
-            mPrevSpan = mCurrSpan = span;
+            mInitialSpan = mPrevSpan = mCurrSpan = span;
         }
-        if (!mInProgress && span != 0) {
-            mFocusX = focusX;
-            mFocusY = focusY;
+        if (!mInProgress && span != 0 &&
+                (wasInProgress || Math.abs(span - mInitialSpan) > mSpanSlop)) {
+            mPrevSpanX = mCurrSpanX = spanX;
+            mPrevSpanY = mCurrSpanY = spanY;
+            mPrevSpan = mCurrSpan = span;
             mInProgress = mListener.onScaleBegin(this);
         }
 
@@ -241,8 +251,6 @@ public class ScaleGestureDetector {
             mCurrSpanX = spanX;
             mCurrSpanY = spanY;
             mCurrSpan = span;
-            mFocusX = focusX;
-            mFocusY = focusY;
 
             boolean updatePrev = true;
             if (mInProgress) {
