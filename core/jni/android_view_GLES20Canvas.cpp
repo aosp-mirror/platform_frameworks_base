@@ -46,6 +46,7 @@
 #include <OpenGLRenderer.h>
 #include <SkiaShader.h>
 #include <SkiaColorFilter.h>
+#include <Stencil.h>
 #include <Rect.h>
 
 #include <TextLayout.h>
@@ -150,7 +151,7 @@ static void android_view_GLES20Canvas_finish(JNIEnv* env, jobject clazz,
 }
 
 static jint android_view_GLES20Canvas_getStencilSize(JNIEnv* env, jobject clazz) {
-    return OpenGLRenderer::getStencilSize();
+    return Stencil::getStencilSize();
 }
 
 // ----------------------------------------------------------------------------
