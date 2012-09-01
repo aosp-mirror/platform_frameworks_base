@@ -38,6 +38,7 @@
 #include "TextDropShadowCache.h"
 #include "FboCache.h"
 #include "ResourceCache.h"
+#include "Stencil.h"
 #include "Dither.h"
 
 namespace android {
@@ -252,9 +253,13 @@ public:
     TextDropShadowCache dropShadowCache;
     FboCache fboCache;
     ResourceCache resourceCache;
-    Dither dither;
 
     GammaFontRenderer* fontRenderer;
+
+    Dither dither;
+#if STENCIL_BUFFER_SIZE
+    Stencil stencil;
+#endif
 
     // Debug methods
     PFNGLINSERTEVENTMARKEREXTPROC eventMark;
