@@ -208,6 +208,12 @@ public:
     SkPaint* filterPaint(SkPaint* paint);
 
     /**
+     * Returns the desired size for the stencil buffer. If the returned value
+     * is 0, then no stencil buffer is required.
+     */
+    ANDROID_API static uint32_t getStencilSize();
+
+    /**
      * Sets the alpha on the current snapshot. This alpha value will be modulated
      * with other alpha values when drawing primitives.
      */

@@ -57,7 +57,7 @@ GradientCache::GradientCache():
         INIT_LOGD("  Using default gradient cache size of %.2fMB", DEFAULT_GRADIENT_CACHE_SIZE);
     }
 
-    mMaxTextureSize = Caches::getInstance().maxTextureSize;
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mMaxTextureSize);
 
     mCache.setOnEntryRemovedListener(this);
 }
