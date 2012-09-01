@@ -1145,6 +1145,10 @@ void OpenGLRenderer::setupDrawAALine() {
     mDescription.isAA = true;
 }
 
+void OpenGLRenderer::setupDrawAARect() {
+    mDescription.isAARect = true;
+}
+
 void OpenGLRenderer::setupDrawPoint(float pointSize) {
     mDescription.isPoint = true;
     mDescription.pointSize = pointSize;
@@ -1745,9 +1749,9 @@ status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const
 
 /**
  * This function uses a similar approach to that of AA lines in the drawLines() function.
- * We expand the rectangle by a half pixel in screen space on all sides, and use a fragment
- * shader to compute the translucency of the color, determined by whether a given pixel is
- * within that boundary region and how far into the region it is.
+ * We expand the rectangle by a half pixel in screen space on all sides. However, instead of using
+ * a fragment shader to compute the translucency of the color from its position, we simply use a
+ * varying parameter to define how far a given pixel is into the region.
  */
 void OpenGLRenderer::drawAARect(float left, float top, float right, float bottom,
         int color, SkXfermode::Mode mode) {
@@ -1759,10 +1763,8 @@ void OpenGLRenderer::drawAARect(float left, float top, float right, float bottom
         Matrix4 *mat = mSnapshot->transform;
         float m00 = mat->data[Matrix4::kScaleX];
         float m01 = mat->data[Matrix4::kSkewY];
-        float m02 = mat->data[2];
         float m10 = mat->data[Matrix4::kSkewX];
         float m11 = mat->data[Matrix4::kScaleX];
-        float m12 = mat->data[6];
         float scaleX = sqrt(m00 * m00 + m01 * m01);
         float scaleY = sqrt(m10 * m10 + m11 * m11);
         inverseScaleX = (scaleX != 0) ? (inverseScaleX / scaleX) : 0;
@@ -1771,6 +1773,11 @@ void OpenGLRenderer::drawAARect(float left, float top, float right, float bottom
 
     float boundarySizeX = .5 * inverseScaleX;
     float boundarySizeY = .5 * inverseScaleY;
+
+    float innerLeft = left + boundarySizeX;
+    float innerRight = right - boundarySizeX;
+    float innerTop = top + boundarySizeY;
+    float innerBottom = bottom - boundarySizeY;
 
     // Adjust the rect by the AA boundary padding
     left -= boundarySizeX;
@@ -1781,7 +1788,7 @@ void OpenGLRenderer::drawAARect(float left, float top, float right, float bottom
     if (!quickReject(left, top, right, bottom)) {
         setupDraw();
         setupDrawNoTexture();
-        setupDrawAALine();
+        setupDrawAARect();
         setupDrawColor(color, ((color >> 24) & 0xFF) * mSnapshot->alpha);
         setupDrawColorFilter();
         setupDrawShader();
@@ -1792,34 +1799,52 @@ void OpenGLRenderer::drawAARect(float left, float top, float right, float bottom
         setupDrawColorFilterUniforms();
         setupDrawShaderIdentityUniforms();
 
-        AAVertex rects[4];
-        AAVertex* aaVertices = &rects[0];
-        void* widthCoords = ((GLbyte*) aaVertices) + gVertexAAWidthOffset;
-        void* lengthCoords = ((GLbyte*) aaVertices) + gVertexAALengthOffset;
+        AlphaVertex rects[14];
+        AlphaVertex* aVertices = &rects[0];
+        void* alphaCoords = ((GLbyte*) aVertices) + gVertexAlphaOffset;
 
-        int widthSlot;
-        int lengthSlot;
+        bool force = mCaches.unbindMeshBuffer();
+        mCaches.bindPositionVertexPointer(force, mCaches.currentProgram->position,
+                aVertices, gAlphaVertexStride);
+        mCaches.resetTexCoordsVertexPointer();
+        mCaches.unbindIndicesBuffer();
 
-        float width = right - left;
-        float height = bottom - top;
+        int alphaSlot = mCaches.currentProgram->getAttrib("vtxAlpha");
+        glEnableVertexAttribArray(alphaSlot);
+        glVertexAttribPointer(alphaSlot, 1, GL_FLOAT, GL_FALSE, gAlphaVertexStride, alphaCoords);
 
-        float boundaryWidthProportion = .5 - ((width != 0) ? (2 * boundarySizeX) / width : 0);
-        float boundaryHeightProportion = .5 - ((height != 0) ? (2 * boundarySizeY) / height : 0);
-        setupDrawAALine((void*) aaVertices, widthCoords, lengthCoords,
-                boundaryWidthProportion, widthSlot, lengthSlot);
+        // draw left
+        AlphaVertex::set(aVertices++, left, bottom, 0);
+        AlphaVertex::set(aVertices++, innerLeft, innerBottom, 1);
+        AlphaVertex::set(aVertices++, left, top, 0);
+        AlphaVertex::set(aVertices++, innerLeft, innerTop, 1);
 
-        int boundaryLengthSlot = mCaches.currentProgram->getUniform("boundaryLength");
-        glUniform1f(boundaryLengthSlot, boundaryHeightProportion);
+        // draw top
+        AlphaVertex::set(aVertices++, right, top, 0);
+        AlphaVertex::set(aVertices++, innerRight, innerTop, 1);
 
-        AAVertex::set(aaVertices++, left, bottom, 1, 1);
-        AAVertex::set(aaVertices++, left, top, 1, 0);
-        AAVertex::set(aaVertices++, right, bottom, 0, 1);
-        AAVertex::set(aaVertices++, right, top, 0, 0);
+        // draw right
+        AlphaVertex::set(aVertices++, right, bottom, 0);
+        AlphaVertex::set(aVertices++, innerRight, innerBottom, 1);
+
+        // draw bottom
+        AlphaVertex::set(aVertices++, left, bottom, 0);
+        AlphaVertex::set(aVertices++, innerLeft, innerBottom, 1);
+
+        // draw inner rect (repeating last vertex to create degenerate bridge triangles)
+        // TODO: also consider drawing the inner rect without the blending-forced shader, if
+        // blending is expensive. Note: can't use drawColorRect() since it doesn't use vertex
+        // buffers like below, resulting in slightly different transformed coordinates.
+        AlphaVertex::set(aVertices++, innerLeft, innerBottom, 1);
+        AlphaVertex::set(aVertices++, innerLeft, innerTop, 1);
+        AlphaVertex::set(aVertices++, innerRight, innerBottom, 1);
+        AlphaVertex::set(aVertices++, innerRight, innerTop, 1);
+
         dirtyLayer(left, top, right, bottom, *mSnapshot->transform);
 
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
 
-        finishDrawAALine(widthSlot, lengthSlot);
+        glDisableVertexAttribArray(alphaSlot);
     }
 }
 
@@ -1874,10 +1899,8 @@ status_t OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
             Matrix4 *mat = mSnapshot->transform;
             float m00 = mat->data[Matrix4::kScaleX];
             float m01 = mat->data[Matrix4::kSkewY];
-            float m02 = mat->data[2];
             float m10 = mat->data[Matrix4::kSkewX];
             float m11 = mat->data[Matrix4::kScaleX];
-            float m12 = mat->data[6];
 
             float scaleX = sqrtf(m00 * m00 + m01 * m01);
             float scaleY = sqrtf(m10 * m10 + m11 * m11);

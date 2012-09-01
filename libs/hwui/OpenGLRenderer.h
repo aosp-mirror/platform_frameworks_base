@@ -440,7 +440,6 @@ private:
      * @param color The rectangle's ARGB color, defined as a packed 32 bits word
      * @param mode The Skia xfermode to use
      * @param ignoreTransform True if the current transform should be ignored
-     * @param ignoreBlending True if the blending is set by the caller
      */
     void drawColorRect(float left, float top, float right, float bottom,
             int color, SkXfermode::Mode mode, bool ignoreTransform = false);
@@ -655,6 +654,7 @@ private:
     void setupDrawWithExternalTexture();
     void setupDrawNoTexture();
     void setupDrawAALine();
+    void setupDrawAARect();
     void setupDrawPoint(float pointSize);
     void setupDrawColor(int color);
     void setupDrawColor(int color, int alpha);
