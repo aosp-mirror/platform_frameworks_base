@@ -1292,7 +1292,7 @@
   <java-symbol type="id" name="passwordEntry" />
   <java-symbol type="id" name="pinDel" />
   <java-symbol type="id" name="pinDisplay" />
-  <java-symbol type="id" name="propertyOf" />
+  <java-symbol type="id" name="owner_info" />
   <java-symbol type="id" name="pukDel" />
   <java-symbol type="id" name="pukDisplay" />
   <java-symbol type="id" name="right_icon" />

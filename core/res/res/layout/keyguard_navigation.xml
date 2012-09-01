@@ -31,11 +31,11 @@
         android:padding="10dip"
         android:clickable="true">
 
-        <TextView
-            android:layout_width="20dip"
-            android:layout_height="wrap_content"
-            android:textSize="28dp"
-            android:text="@string/kg_temp_back_string" />
+        <ImageView
+               android:src="?android:attr/homeAsUpIndicator"
+               android:layout_gravity="center_vertical|start"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"/>
 
         <!-- message area for security screen -->
         <TextView
@@ -43,6 +43,7 @@
             android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:layout_gravity="end"
             android:singleLine="true"
             android:ellipsize="marquee"
             android:layout_marginEnd="6dip"
