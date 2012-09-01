@@ -198,7 +198,7 @@ public:
      *
      * This field is used only if STENCIL_BUFFER_SIZE is > 0.
      */
-    Region* clipRegion;
+    SkRegion* clipRegion;
 
     /**
      * The ancestor layer's dirty region.
@@ -223,17 +223,14 @@ private:
     void ensureClipRegion();
     void copyClipRectFromRegion();
 
-    bool clipRegionOr(float left, float top, float right, float bottom);
-    bool clipRegionXor(float left, float top, float right, float bottom);
-    bool clipRegionAnd(float left, float top, float right, float bottom);
-    bool clipRegionNand(float left, float top, float right, float bottom);
+    bool clipRegionOp(float left, float top, float right, float bottom, SkRegion::Op op);
 
     mat4 mTransformRoot;
     Rect mClipRectRoot;
     Rect mLocalClip;
 
 #if STENCIL_BUFFER_SIZE
-    Region mClipRegionRoot;
+    SkRegion mClipRegionRoot;
 #endif
 
 }; // class Snapshot
