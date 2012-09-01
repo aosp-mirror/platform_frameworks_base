@@ -139,6 +139,10 @@ void OpenGLRenderer::endMark() const {
 // Setup
 ///////////////////////////////////////////////////////////////////////////////
 
+uint32_t OpenGLRenderer::getStencilSize() {
+    return STENCIL_BUFFER_SIZE;
+}
+
 bool OpenGLRenderer::isDeferred() {
     return false;
 }
