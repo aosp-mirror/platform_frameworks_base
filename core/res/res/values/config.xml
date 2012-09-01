@@ -479,7 +479,7 @@
     <integer name="config_lowBatteryCloseWarningLevel">20</integer>
 
     <!-- Default color for notification LED. -->
-    <color name="config_defaultNotificationColor">#ff00ff00</color>
+    <color name="config_defaultNotificationColor">#ffffffff</color>
 
     <!-- Default LED on time for notification LED in milliseconds. -->
     <integer name="config_defaultNotificationLedOn">500</integer>
