@@ -28,7 +28,6 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		SkiaColorFilter.cpp \
 		SkiaShader.cpp \
 		Snapshot.cpp \
-		Stencil.cpp \
 		TextureCache.cpp \
 		TextDropShadowCache.cpp
 	
