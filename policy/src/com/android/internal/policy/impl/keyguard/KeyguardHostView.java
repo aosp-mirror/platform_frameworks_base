@@ -172,7 +172,7 @@ public class KeyguardHostView extends KeyguardViewBase {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         mAppWidgetHost.startListening();
-        populateWidgets();
+        maybePopulateWidgets();
     }
 
     @Override
@@ -581,7 +581,12 @@ public class KeyguardHostView extends KeyguardViewBase {
         addWidget(view);
     }
 
-    private void populateWidgets() {
+    private void maybePopulateWidgets() {
+        if (mLockPatternUtils.getDevicePolicyManager().getKeyguardWidgetsDisabled(null)
+                != DevicePolicyManager.KEYGUARD_DISABLE_WIDGETS_NONE) {
+            Log.v(TAG, "Keyguard widgets disabled because of device policy admin");
+            return;
+        }
         SharedPreferences prefs = mContext.getSharedPreferences(
                 KEYGUARD_WIDGET_PREFS, Context.MODE_PRIVATE);
         for (String key : prefs.getAll().keySet()) {
