@@ -2809,7 +2809,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     /** {@inheritDoc} */
-    public void beginAnimationLw(int displayWidth, int displayHeight) {
+    public void beginPostLayoutPolicyLw(int displayWidth, int displayHeight) {
         mTopFullscreenOpaqueWindowState = null;
         mForceStatusBar = false;
         
@@ -2819,7 +2819,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     /** {@inheritDoc} */
-    public void animatingWindowLw(WindowState win,
+    public void applyPostLayoutPolicyLw(WindowState win,
                                 WindowManager.LayoutParams attrs) {
         if (DEBUG_LAYOUT) Slog.i(TAG, "Win " + win + ": isVisibleOrBehindKeyguardLw="
                 + win.isVisibleOrBehindKeyguardLw());
@@ -2851,7 +2851,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     /** {@inheritDoc} */
-    public int finishAnimationLw() {
+    public int finishPostLayoutPolicyLw() {
         int changes = 0;
         boolean topIsFullscreen = false;
 
@@ -2906,10 +2906,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         mTopIsFullscreen = topIsFullscreen;
 
-        // Hide the key guard if a visible window explicitly specifies that it wants to be displayed
-        // when the screen is locked
+        // Hide the key guard if a visible window explicitly specifies that it wants to be
+        // displayed when the screen is locked.
         if (mKeyguard != null) {
-            if (localLOGV) Log.v(TAG, "finishAnimationLw::mHideKeyguard="+mHideLockScreen);
+            if (localLOGV) Log.v(TAG, "finishPostLayoutPolicyLw: mHideKeyguard="
+                    + mHideLockScreen);
             if (mDismissKeyguard && !mKeyguardMediator.isSecure()) {
                 if (mKeyguard.hideLw(true)) {
                     changes |= FINISH_LAYOUT_REDO_LAYOUT
