@@ -62,6 +62,9 @@ class DisplayContent {
     final DisplayInfo mDisplayInfo = new DisplayInfo();
     final Display mDisplay;
 
+    // Accessed directly by all users.
+    boolean layoutNeeded;
+
     DisplayContent(Display display) {
         mDisplay = display;
         mDisplayId = display.getDisplayId();
@@ -106,6 +109,7 @@ class DisplayContent {
         pw.print("x"); pw.print(mDisplayInfo.smallestNominalAppHeight);
         pw.print("-"); pw.print(mDisplayInfo.largestNominalAppWidth);
         pw.print("x"); pw.println(mDisplayInfo.largestNominalAppHeight);
+        pw.print("layoutNeeded="); pw.println(layoutNeeded);
         pw.println();
     }
 }

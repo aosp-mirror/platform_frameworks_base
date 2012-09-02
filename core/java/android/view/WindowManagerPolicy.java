@@ -827,32 +827,33 @@ public interface WindowManagerPolicy {
     static final int FINISH_LAYOUT_REDO_ANIM = 0x0008;
     
     /**
-     * Called when animation of the windows is about to start.
+     * Called following layout of all windows before each window has policy applied.
      * 
      * @param displayWidth The current full width of the screen.
      * @param displayHeight The current full height of the screen.
      */
-    public void beginAnimationLw(int displayWidth, int displayHeight);
+    public void beginPostLayoutPolicyLw(int displayWidth, int displayHeight);
 
     /**
-     * Called each time a window is animating.
+     * Called following layout of all window to apply policy to each window.
      * 
      * @param win The window being positioned.
      * @param attrs The LayoutParams of the window. 
      */
-    public void animatingWindowLw(WindowState win,
+    public void applyPostLayoutPolicyLw(WindowState win,
             WindowManager.LayoutParams attrs);
 
     /**
-     * Called when animation of the windows is finished.  If in this function you do 
-     * something that may have modified the animation state of another window, 
-     * be sure to return true in order to perform another animation frame. 
+     * Called following layout of all windows and after policy has been applied
+     * to each window. If in this function you do
+     * something that may have modified the animation state of another window,
+     * be sure to return non-zero in order to perform another pass through layout.
      *  
      * @return Return any bit set of {@link #FINISH_LAYOUT_REDO_LAYOUT},
      * {@link #FINISH_LAYOUT_REDO_CONFIG}, {@link #FINISH_LAYOUT_REDO_WALLPAPER},
      * or {@link #FINISH_LAYOUT_REDO_ANIM}.
      */
-    public int finishAnimationLw();
+    public int finishPostLayoutPolicyLw();
 
     /**
      * Return true if it is okay to perform animations for an app transition

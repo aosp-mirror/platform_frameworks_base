@@ -23,13 +23,14 @@ import com.android.server.wm.WindowManagerService.H;
 
 import android.content.ClipData;
 import android.content.ClipDescription;
+import android.graphics.Point;
 import android.graphics.Region;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.util.Slog;
-import android.view.DisplayInfo;
+import android.view.Display;
 import android.view.DragEvent;
 import android.view.InputChannel;
 import android.view.Surface;
@@ -59,7 +60,7 @@ class DragState {
     WindowState mTargetWindow;
     ArrayList<WindowState> mNotifiedWindows;
     boolean mDragInProgress;
-    DisplayContent mDisplayContent;
+    Display mDisplay;
 
     private final Region mTmpRegion = new Region();
 
@@ -87,10 +88,10 @@ class DragState {
     }
 
     /**
-     * @param displayContent The display parameters associated with the window being dragged.
+     * @param display The Display that the window being dragged is on.
      */
-    void register(DisplayContent displayContent) {
-        mDisplayContent = displayContent;
+    void register(Display display) {
+        mDisplay = display;
         if (WindowManagerService.DEBUG_DRAG) Slog.d(WindowManagerService.TAG, "registering drag input channel");
         if (mClientChannel != null) {
             Slog.e(WindowManagerService.TAG, "Duplicate register of drag input channel");
@@ -108,7 +109,7 @@ class DragState {
                     WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
 
             mDragWindowHandle = new InputWindowHandle(mDragApplicationHandle, null,
-                    mDisplayContent.getDisplayId());
+                    mDisplay.getDisplayId());
             mDragWindowHandle.name = "drag";
             mDragWindowHandle.inputChannel = mServerChannel;
             mDragWindowHandle.layer = getDragLayerLw();
@@ -132,9 +133,10 @@ class DragState {
             // The drag window covers the entire display
             mDragWindowHandle.frameLeft = 0;
             mDragWindowHandle.frameTop = 0;
-            DisplayInfo displayInfo = mDisplayContent.getDisplayInfo();
-            mDragWindowHandle.frameRight = displayInfo.logicalWidth;
-            mDragWindowHandle.frameBottom = displayInfo.logicalHeight;
+            Point p = new Point();
+            mDisplay.getRealSize(p);
+            mDragWindowHandle.frameRight = p.x;
+            mDragWindowHandle.frameBottom = p.y;
 
             // Pause rotations before a drag.
             if (WindowManagerService.DEBUG_ORIENTATION) {
@@ -187,7 +189,7 @@ class DragState {
             Slog.d(WindowManagerService.TAG, "broadcasting DRAG_STARTED at (" + touchX + ", " + touchY + ")");
         }
 
-        final WindowList windows = mDisplayContent.getWindowList();
+        final WindowList windows = mService.getWindowList(mDisplay);
         final int N = windows.size();
         for (int i = 0; i < N; i++) {
             sendDragStartedLw(windows.get(i), touchX, touchY, mDataDescription);
@@ -390,7 +392,7 @@ class DragState {
         final int x = (int) xf;
         final int y = (int) yf;
 
-        final WindowList windows = mDisplayContent.getWindowList();
+        final WindowList windows = mService.getWindowList(mDisplay);
         final int N = windows.size();
         for (int i = N - 1; i >= 0; i--) {
             WindowState child = windows.get(i);

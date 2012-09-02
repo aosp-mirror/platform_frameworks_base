@@ -8301,7 +8301,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             // This has changed the visibility of windows, so perform
             // a new layout to get them all up-to-date.
-            changes |= PhoneWindowManager.FINISH_LAYOUT_REDO_LAYOUT
+            changes |= WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT
                     | WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG;
             mLayoutNeeded = true;
 
@@ -8627,15 +8627,15 @@ public class WindowManagerService extends IWindowManager.Stub
                 mPendingLayoutChanges = 0;
                 if (DEBUG_LAYOUT_REPEATS)  debugLayoutRepeats("loop number " + mLayoutRepeatCount,
                     mPendingLayoutChanges);
-                mPolicy.beginAnimationLw(dw, dh);
+                mPolicy.beginPostLayoutPolicyLw(dw, dh);
                 for (i = windows.size() - 1; i >= 0; i--) {
                     WindowState w = windows.get(i);
                     if (w.mHasSurface) {
-                        mPolicy.animatingWindowLw(w, w.mAttrs);
+                        mPolicy.applyPostLayoutPolicyLw(w, w.mAttrs);
                     }
                 }
-                mPendingLayoutChanges |= mPolicy.finishAnimationLw();
-                if (DEBUG_LAYOUT_REPEATS) debugLayoutRepeats("after finishAnimationLw",
+                mPendingLayoutChanges |= mPolicy.finishPostLayoutPolicyLw();
+                if (DEBUG_LAYOUT_REPEATS) debugLayoutRepeats("after finishPostLayoutPolicyLw",
                     mPendingLayoutChanges);
             } while (mPendingLayoutChanges != 0);
 
@@ -9348,7 +9348,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
-            if ((focusChanged&WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT) != 0) {
+            if ((focusChanged & WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT) != 0) {
                 // The change in focus caused us to need to do a layout.  Okay.
                 mLayoutNeeded = true;
                 if (mode == UPDATE_FOCUS_PLACING_SURFACES) {
@@ -10393,4 +10393,7 @@ public class WindowManagerService extends IWindowManager.Stub
         return getDefaultDisplayContent().getDisplayInfo();
     }
 
+    public WindowList getWindowList(final Display display) {
+        return getDisplayContent(display.getDisplayId()).getWindowList();
+    }
 }
