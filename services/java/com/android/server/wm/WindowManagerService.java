@@ -99,7 +99,6 @@ import android.util.EventLog;
 import android.util.FloatMath;
 import android.util.Log;
 import android.util.SparseArray;
-//import android.util.LogPrinter;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseIntArray;
@@ -454,7 +453,6 @@ public class WindowManagerService extends IWindowManager.Stub
     int mSystemDecorLayer = 0;
     final Rect mScreenRect = new Rect();
 
-    boolean mLayoutNeeded = true;
     boolean mTraversalScheduled = false;
     boolean mDisplayFrozen = false;
     boolean mWaitingForConfig = false;
@@ -1768,7 +1766,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 token.hidden = !visible;
                 // Need to do a layout to ensure the wallpaper now has the
                 // correct size.
-                mLayoutNeeded = true;
+                getDefaultDisplayContent().layoutNeeded = true;
             }
 
             int curWallpaperIndex = token.windows.size();
@@ -2011,7 +2009,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 token.hidden = !visible;
                 // Need to do a layout to ensure the wallpaper now has the
                 // correct size.
-                mLayoutNeeded = true;
+                getDefaultDisplayContent().layoutNeeded = true;
             }
 
             int curWallpaperIndex = token.windows.size();
@@ -2310,7 +2308,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 //Slog.i(TAG, "*** Running exit animation...");
                 win.mExiting = true;
                 win.mRemoveOnExit = true;
-                mLayoutNeeded = true;
+                win.mDisplayContent.layoutNeeded = true;
                 updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
                         false /*updateInputWindows*/);
                 performLayoutAndPlaceSurfacesLocked();
@@ -2427,7 +2425,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         if (!mInLayout) {
             assignLayersLocked(windows);
-            mLayoutNeeded = true;
+            win.mDisplayContent.layoutNeeded = true;
             performLayoutAndPlaceSurfacesLocked();
             if (win.mAppToken != null) {
                 win.mAppToken.updateReportedVisibilityLocked();
@@ -2493,7 +2491,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         w.mGivenVisibleInsets.scale(w.mGlobalScale);
                         w.mGivenTouchableRegion.scale(w.mGlobalScale);
                     }
-                    mLayoutNeeded = true;
+                    w.mDisplayContent.layoutNeeded = true;
                     performLayoutAndPlaceSurfacesLocked();
                 }
             }
@@ -2588,7 +2586,7 @@ public class WindowManagerService extends IWindowManager.Stub
         window.mGivenTouchableRegion.op((int)dispRect.left, (int)dispRect.top,
                 (int)dispRect.right, (int)dispRect.bottom, Region.Op.DIFFERENCE);
         window.mTouchableInsets = ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
-        mLayoutNeeded = true;
+        window.mDisplayContent.layoutNeeded = true;
         performLayoutAndPlaceSurfacesLocked();
     }
 
@@ -2856,7 +2854,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
-            mLayoutNeeded = true;
+            win.mDisplayContent.layoutNeeded = true;
             win.mGivenInsetsPending = (flags&WindowManagerGlobal.RELAYOUT_INSETS_PENDING) != 0;
             if (assignLayers) {
                 assignLayersLocked(win.getWindowList());
@@ -2946,7 +2944,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if ((win.mAttrs.flags&FLAG_SHOW_WALLPAPER) != 0) {
                     adjustWallpaperWindowsLocked();
                 }
-                mLayoutNeeded = true;
+                win.mDisplayContent.layoutNeeded = true;
                 performLayoutAndPlaceSurfacesLocked();
             }
         }
@@ -3460,11 +3458,11 @@ public class WindowManagerService extends IWindowManager.Stub
                             win.mWinAnimator.applyAnimationLocked(WindowManagerPolicy.TRANSIT_EXIT,
                                     false);
                             changed = true;
+                            win.mDisplayContent.layoutNeeded = true;
                         }
                     }
 
                     if (changed) {
-                        mLayoutNeeded = true;
                         performLayoutAndPlaceSurfacesLocked();
                         updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL,
                                 false /*updateInputWindows*/);
@@ -3720,7 +3718,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (computeScreenConfigurationLocked(mTempConfiguration)) {
                 if (currentConfig.diff(mTempConfiguration) != 0) {
                     mWaitingForConfig = true;
-                    mLayoutNeeded = true;
+                    getDefaultDisplayContent().layoutNeeded = true;
                     startFreezingDisplayLocked(false);
                     config = new Configuration(mTempConfiguration);
                 }
@@ -4086,7 +4084,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
                         updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
                                 true /*updateInputWindows*/);
-                        mLayoutNeeded = true;
+                        getDefaultDisplayContent().layoutNeeded = true;
                         performLayoutAndPlaceSurfacesLocked();
                         Binder.restoreCallingIdentity(origId);
                         return;
@@ -4251,6 +4249,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                     WindowManagerPolicy.TRANSIT_ENTER, true);
                         }
                         changed = true;
+                        win.mDisplayContent.layoutNeeded = true;
                     }
                 } else if (win.isVisibleNow()) {
                     if (!runningAppAnimation) {
@@ -4258,6 +4257,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                 WindowManagerPolicy.TRANSIT_EXIT, false);
                     }
                     changed = true;
+                    win.mDisplayContent.layoutNeeded = true;
                 }
             }
 
@@ -4279,7 +4279,6 @@ public class WindowManagerService extends IWindowManager.Stub
                       + wtoken.hiddenRequested);
 
             if (changed) {
-                mLayoutNeeded = true;
                 mInputMonitor.setUpdateInputWindowsNeededLw();
                 if (performLayout) {
                     updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
@@ -4407,6 +4406,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         mInnerFields.mOrientationChangeComplete = false;
                     }
                     unfrozeWindows = true;
+                    w.mDisplayContent.layoutNeeded = true;
                 }
             }
             if (force || unfrozeWindows) {
@@ -4416,7 +4416,6 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             if (unfreezeSurfaceNow) {
                 if (unfrozeWindows) {
-                    mLayoutNeeded = true;
                     performLayoutAndPlaceSurfacesLocked();
                 }
                 stopFreezingDisplayLocked();
@@ -4761,13 +4760,15 @@ public class WindowManagerService extends IWindowManager.Stub
                         final DisplayContent displayContent = iterator.next();
                         final WindowList windows = displayContent.getWindowList();
                         final int pos = findWindowOffsetLocked(windows, index);
-                        reAddAppWindowsLocked(displayContent, pos, wtoken);
+                        final int newPos = reAddAppWindowsLocked(displayContent, pos, wtoken);
+                        if (pos != newPos) {
+                            displayContent.layoutNeeded = true;
+                        }
                     }
                     if (DEBUG_REORDER) Slog.v(TAG, "Final window list:");
                     if (DEBUG_REORDER) dumpWindowsLocked();
                     updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
                             false /*updateInputWindows*/);
-                    mLayoutNeeded = true;
                     mInputMonitor.setUpdateInputWindowsNeededLw();
                     performLayoutAndPlaceSurfacesLocked();
                     mInputMonitor.updateInputWindowsLw(false /*force*/);
@@ -4807,7 +4808,10 @@ public class WindowManagerService extends IWindowManager.Stub
             final DisplayContent displayContent = iterator.next();
             final WindowList windows = displayContent.getWindowList();
             final int pos = findWindowOffsetLocked(windows, tokenPos);
-            reAddAppWindowsLocked(displayContent, pos, wtoken);
+            final int newPos = reAddAppWindowsLocked(displayContent, pos, wtoken);
+            if (pos != newPos) {
+                displayContent.layoutNeeded = true;
+            }
 
             if (updateFocusAndLayout && !updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
                     false /*updateInputWindows*/)) {
@@ -4820,7 +4824,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
             // Note that the above updateFocusedWindowLocked conditional used to sit here.
 
-            mLayoutNeeded = true;
             if (!mInLayout) {
                 performLayoutAndPlaceSurfacesLocked();
             }
@@ -4849,7 +4852,11 @@ public class WindowManagerService extends IWindowManager.Stub
             for (i=0; i<N; i++) {
                 WindowToken token = mTokenMap.get(tokens.get(i));
                 if (token != null) {
-                    pos = reAddAppWindowsLocked(displayContent, pos, token);
+                    final int newPos = reAddAppWindowsLocked(displayContent, pos, token);
+                    if (newPos != pos) {
+                        displayContent.layoutNeeded = true;
+                    }
+                    pos = newPos;
                 }
             }
             if (!updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
@@ -4862,7 +4869,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
         // Note that the above updateFocusedWindowLocked used to sit here.
 
-        mLayoutNeeded = true;
         performLayoutAndPlaceSurfacesLocked();
         mInputMonitor.updateInputWindowsLw(false /*force*/);
 
@@ -5656,7 +5662,7 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized(mWindowMap) {
             changed = updateRotationUncheckedLocked(false);
             if (!changed || forceRelayout) {
-                mLayoutNeeded = true;
+                getDefaultDisplayContent().layoutNeeded = true;
                 performLayoutAndPlaceSurfacesLocked();
             }
         }
@@ -5734,7 +5740,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mH.removeMessages(H.WINDOW_FREEZE_TIMEOUT);
         mH.sendMessageDelayed(mH.obtainMessage(H.WINDOW_FREEZE_TIMEOUT), 2000);
         mWaitingForConfig = true;
-        mLayoutNeeded = true;
+        getDefaultDisplayContent().layoutNeeded = true;
         startFreezingDisplayLocked(inTransaction);
         mInputManager.setDisplayOrientation(0, rotation);
 
@@ -7578,7 +7584,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mPolicy.setInitialDisplaySize(mDefaultDisplay, displayContent.mBaseDisplayWidth,
                 displayContent.mBaseDisplayHeight, displayContent.mBaseDisplayDensity);
 
-        mLayoutNeeded = true;
+        displayContent.layoutNeeded = true;
 
         boolean configChanged = updateOrientationFromAppTokensLocked(false);
         mTempConfiguration.setToDefaults();
@@ -7837,7 +7843,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             mInLayout = false;
 
-            if (mLayoutNeeded) {
+            if (needsLayout()) {
                 if (++mLayoutRepeatCount < 6) {
                     requestTraversalLocked();
                 } else {
@@ -7862,11 +7868,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private final void performLayoutLockedInner(final DisplayContent displayContent,
                                     boolean initial, boolean updateInputWindows) {
-        if (!mLayoutNeeded) {
+        if (!displayContent.layoutNeeded) {
             return;
         }
+        displayContent.layoutNeeded = false;
         WindowList windows = displayContent.getWindowList();
-        mLayoutNeeded = false;
 
         DisplayInfo displayInfo = displayContent.getDisplayInfo();
         final int dw = displayInfo.logicalWidth;
@@ -7883,7 +7889,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (DEBUG_LAYOUT) {
             Slog.v(TAG, "-------------------------------------");
             Slog.v(TAG, "performLayout: needed="
-                    + mLayoutNeeded + " dw=" + dw + " dh=" + dh);
+                    + displayContent.layoutNeeded + " dw=" + dw + " dh=" + dh);
         }
 
         WindowStateAnimator universeBackground = null;
@@ -8028,8 +8034,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /**
      * Extracted from {@link #performLayoutAndPlaceSurfacesLockedInner} to reduce size of method.
-     * @param windows TODO(cmautner):
-     *
+     * @param windows List of windows on default display.
      * @return bitmap indicating if another pass through layout must be made.
      */
     public int handleAppTransitionReadyLocked(WindowList windows) {
@@ -8285,7 +8290,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // a new layout to get them all up-to-date.
             changes |= WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT
                     | WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG;
-            mLayoutNeeded = true;
+            getDefaultDisplayContent().layoutNeeded = true;
 
             // TODO(multidisplay): IMEs are only supported on the default display.
             if (windows == getDefaultWindowList() && !moveInputMethodWindowsIfNeededLocked(true)) {
@@ -8573,19 +8578,18 @@ public class WindowManagerService extends IWindowManager.Stub
                 final DisplayContent displayContent = iterator.next();
                 WindowList windows = displayContent.getWindowList();
                 DisplayInfo displayInfo = displayContent.getDisplayInfo();
+                final int displayId = displayContent.getDisplayId();
                 final int dw = displayInfo.logicalWidth;
                 final int dh = displayInfo.logicalHeight;
                 final int innerDw = displayInfo.appWidth;
                 final int innerDh = displayInfo.appHeight;
-                final boolean isDefaultDisplay =
-                        displayContent.getDisplayId() == Display.DEFAULT_DISPLAY;
+                final boolean isDefaultDisplay = (displayId == Display.DEFAULT_DISPLAY);
 
                 int repeats = 0;
                 do {
                     repeats++;
                     if (repeats > 6) {
                         Slog.w(TAG, "Animation repeat aborted after too many iterations");
-                        mLayoutNeeded = false;
                         displayContent.layoutNeeded = false;
                         break;
                     }
@@ -8598,7 +8602,6 @@ public class WindowManagerService extends IWindowManager.Stub
                             && ((adjustWallpaperWindowsLocked()
                                     & ADJUST_WALLPAPER_LAYERS_CHANGED) != 0)) {
                         assignLayersLocked(windows);
-                        mLayoutNeeded = true;
                         displayContent.layoutNeeded = true;
                     }
 
@@ -8606,7 +8609,6 @@ public class WindowManagerService extends IWindowManager.Stub
                             & WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG) != 0) {
                         if (DEBUG_LAYOUT) Slog.v(TAG, "Computing new config from layout");
                         if (updateOrientationFromAppTokensLocked(true)) {
-                            mLayoutNeeded = true;
                             displayContent.layoutNeeded = true;
                             mH.sendEmptyMessage(H.SEND_NEW_CONFIGURATION);
                         }
@@ -8614,7 +8616,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
                     if ((displayContent.pendingLayoutChanges
                             & WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT) != 0) {
-                        mLayoutNeeded = true;
                         displayContent.layoutNeeded = true;
                     }
 
@@ -8857,7 +8858,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        if (mLayoutNeeded) {
+        if (needsLayout()) {
             defaultDisplay.pendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
             if (DEBUG_LAYOUT_REPEATS) debugLayoutRepeats("mLayoutNeeded",
                     defaultDisplay.pendingLayoutChanges);
@@ -8968,15 +8969,15 @@ public class WindowManagerService extends IWindowManager.Stub
             mRelayoutWhileAnimating.clear();
         }
 
-        if (wallpaperDestroyed) {
-            mLayoutNeeded |= adjustWallpaperWindowsLocked() != 0;
+        if (wallpaperDestroyed && (adjustWallpaperWindowsLocked() != 0)) {
+            getDefaultDisplayContent().layoutNeeded = true;
         }
 
         DisplayContentsIterator iterator = new DisplayContentsIterator();
         while (iterator.hasNext()) {
             DisplayContent displayContent = iterator.next();
             if (displayContent.pendingLayoutChanges != 0) {
-                mLayoutNeeded = true;
+                displayContent.layoutNeeded = true;
             }
         }
 
@@ -9014,8 +9015,8 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        if (mInnerFields.mOrientationChangeComplete && !mLayoutNeeded &&
-                !mInnerFields.mUpdateRotation) {
+        if (mInnerFields.mOrientationChangeComplete && !defaultDisplay.layoutNeeded
+                && !mInnerFields.mUpdateRotation) {
             checkDrawnWindowsLocked();
         }
 
@@ -9037,8 +9038,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
             for (DisplayContent displayContent : displayList) {
                 assignLayersLocked(displayContent.getWindowList());
+                displayContent.layoutNeeded = true;
             }
-            mLayoutNeeded = true;
         }
 
         // Check to see if we are now in a state where the screen should
@@ -9048,8 +9049,8 @@ public class WindowManagerService extends IWindowManager.Stub
         updateLayoutToAnimationLocked();
 
         if (DEBUG_WINDOW_TRACE) {
-            Slog.e(TAG, "performLayoutAndPlaceSurfacesLockedInner exit: mLayoutNeeded="
-                    + mLayoutNeeded + " animating=" + mAnimator.mAnimating);
+            Slog.e(TAG, "performLayoutAndPlaceSurfacesLockedInner exit: animating="
+                    + mAnimator.mAnimating);
         }
     }
 
@@ -9203,6 +9204,16 @@ public class WindowManagerService extends IWindowManager.Stub
 
     void stopDimming() {
         setAnimDimParams(null);
+    }
+
+    private boolean needsLayout() {
+        DisplayContentsIterator iterator = new DisplayContentsIterator();
+        while (iterator.hasNext()) {
+            if (iterator.next().layoutNeeded) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean copyAnimToLayoutParamsLocked() {
@@ -9381,7 +9392,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (moveInputMethodWindowsIfNeededLocked(
                         mode != UPDATE_FOCUS_WILL_ASSIGN_LAYERS &&
                         mode != UPDATE_FOCUS_WILL_PLACE_SURFACES)) {
-                    mLayoutNeeded = true;
+                    getDefaultDisplayContent().layoutNeeded = true;
                 }
                 if (mode == UPDATE_FOCUS_PLACING_SURFACES) {
                     performLayoutLockedInner(displayContent, true /*initial*/, updateInputWindows);
@@ -9395,7 +9406,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if ((focusChanged & WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT) != 0) {
                 // The change in focus caused us to need to do a layout.  Okay.
-                mLayoutNeeded = true;
+                getDefaultDisplayContent().layoutNeeded = true;
                 if (mode == UPDATE_FOCUS_PLACING_SURFACES) {
                     performLayoutLockedInner(displayContent, true /*initial*/, updateInputWindows);
                 }
@@ -10057,8 +10068,18 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             pw.print("  mSystemBooted="); pw.print(mSystemBooted);
                     pw.print(" mDisplayEnabled="); pw.println(mDisplayEnabled);
-            pw.print("  mLayoutNeeded="); pw.print(mLayoutNeeded);
-                    pw.print("mTransactionSequence="); pw.println(mTransactionSequence);
+            if (needsLayout()) {
+                pw.print("  layoutNeeded on displays=");
+                DisplayContentsIterator dcIterator = new DisplayContentsIterator();
+                while (dcIterator.hasNext()) {
+                    final DisplayContent displayContent = dcIterator.next();
+                    if (displayContent.layoutNeeded) {
+                        pw.print(displayContent.getDisplayId());
+                    }
+                }
+                pw.println();
+            }
+            pw.print("mTransactionSequence="); pw.println(mTransactionSequence);
             pw.print("  mDisplayFrozen="); pw.print(mDisplayFrozen);
                     pw.print(" mWindowsFreezingScreen="); pw.print(mWindowsFreezingScreen);
                     pw.print(" mAppsFreezingScreen="); pw.print(mAppsFreezingScreen);
