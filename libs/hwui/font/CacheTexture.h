@@ -50,8 +50,7 @@ struct CacheBlock {
     CacheBlock* mPrev;
 
     CacheBlock(uint16_t x, uint16_t y, uint16_t width, uint16_t height, bool empty = false):
-        mX(x), mY(y), mWidth(width), mHeight(height), mNext(NULL), mPrev(NULL)
-    {
+            mX(x), mY(y), mWidth(width), mHeight(height), mNext(NULL), mPrev(NULL) {
     }
 
     static CacheBlock* insertBlock(CacheBlock* head, CacheBlock *newBlock);
