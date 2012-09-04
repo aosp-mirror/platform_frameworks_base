@@ -1410,9 +1410,35 @@ public abstract class Context {
      * @see #unregisterReceiver
      */
     public abstract Intent registerReceiver(BroadcastReceiver receiver,
-                                            IntentFilter filter,
-                                            String broadcastPermission,
-                                            Handler scheduler);
+            IntentFilter filter, String broadcastPermission, Handler scheduler);
+
+    /**
+     * @hide
+     * Same as {@link #registerReceiver(BroadcastReceiver, IntentFilter, String, Handler)
+     * but for a specific user.  This receiver will receiver broadcasts that
+     * are sent to the requested user.  It
+     * requires holding the {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL}
+     * permission.
+     *
+     * @param receiver The BroadcastReceiver to handle the broadcast.
+     * @param user UserHandle to send the intent to.
+     * @param filter Selects the Intent broadcasts to be received.
+     * @param broadcastPermission String naming a permissions that a
+     *      broadcaster must hold in order to send an Intent to you.  If null,
+     *      no permission is required.
+     * @param scheduler Handler identifying the thread that will receive
+     *      the Intent.  If null, the main thread of the process will be used.
+     *
+     * @return The first sticky intent found that matches <var>filter</var>,
+     *         or null if there are none.
+     *
+     * @see #registerReceiver(BroadcastReceiver, IntentFilter, String, Handler
+     * @see #sendBroadcast
+     * @see #unregisterReceiver
+     */
+    public abstract Intent registerReceiverAsUser(BroadcastReceiver receiver,
+            UserHandle user, IntentFilter filter, String broadcastPermission,
+            Handler scheduler);
 
     /**
      * Unregister a previously registered BroadcastReceiver.  <em>All</em>
