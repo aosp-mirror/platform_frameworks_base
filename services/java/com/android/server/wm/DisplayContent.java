@@ -64,6 +64,7 @@ class DisplayContent {
 
     // Accessed directly by all users.
     boolean layoutNeeded;
+    int pendingLayoutChanges;
 
     DisplayContent(Display display) {
         mDisplay = display;
@@ -84,6 +85,7 @@ class DisplayContent {
     }
 
     DisplayInfo getDisplayInfo() {
+        mDisplay.getDisplayInfo(mDisplayInfo);
         return mDisplayInfo;
     }
 
