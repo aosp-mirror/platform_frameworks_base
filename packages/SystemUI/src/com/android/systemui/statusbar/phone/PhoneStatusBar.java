@@ -510,19 +510,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         return lp;
     }
 
-    /*
-    protected void updateRecentsPanel() {
-        super.updateRecentsPanel(R.layout.status_bar_recent_panel);
-        // Make .03 alpha the minimum so you always see the item a bit-- slightly below
-        // .03, the item disappears entirely (as if alpha = 0) and that discontinuity looks
-        // a bit jarring
-        mRecentsPanel.setMinSwipeAlpha(0.03f);
-        if (mNavigationBarView != null) {
-            mNavigationBarView.getRecentsButton().setOnTouchListener(mRecentsPanel);
-        }
-    }
-    */
-
     @Override
     protected void updateSearchPanel() {
         super.updateSearchPanel();
