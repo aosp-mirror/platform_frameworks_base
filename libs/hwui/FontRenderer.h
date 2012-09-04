@@ -85,25 +85,18 @@ public:
     GLuint getTexture(bool linearFiltering = false) {
         checkInit();
 
-        if (linearFiltering != mCurrentCacheTexture->mLinearFiltering) {
-            mCurrentCacheTexture->mLinearFiltering = linearFiltering;
-            mLinearFiltering = linearFiltering;
-            const GLenum filtering = linearFiltering ? GL_LINEAR : GL_NEAREST;
+        mCurrentCacheTexture->setLinearFiltering(linearFiltering);
+        mLinearFiltering = linearFiltering;
 
-            glBindTexture(GL_TEXTURE_2D, mCurrentCacheTexture->mTextureId);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filtering);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filtering);
-        }
-
-        return mCurrentCacheTexture->mTextureId;
+        return mCurrentCacheTexture->getTextureId();
     }
 
     uint32_t getCacheSize() const {
         uint32_t size = 0;
         for (uint32_t i = 0; i < mCacheTextures.size(); i++) {
             CacheTexture* cacheTexture = mCacheTextures[i];
-            if (cacheTexture != NULL && cacheTexture->mTexture != NULL) {
-                size += cacheTexture->mWidth * cacheTexture->mHeight;
+            if (cacheTexture && cacheTexture->getTexture()) {
+                size += cacheTexture->getWidth() * cacheTexture->getHeight();
             }
         }
         return size;

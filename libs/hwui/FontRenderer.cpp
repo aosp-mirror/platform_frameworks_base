@@ -127,66 +127,32 @@ void FontRenderer::flushAllAndInvalidate() {
         mCacheTextures[i]->init();
     }
 
-    #if DEBUG_FONT_RENDERER
+#if DEBUG_FONT_RENDERER
     uint16_t totalGlyphs = 0;
     for (uint32_t i = 0; i < mCacheTextures.size(); i++) {
-        totalGlyphs += mCacheTextures[i]->mNumGlyphs;
+        totalGlyphs += mCacheTextures[i]->getGlyphCount();
         // Erase caches, just as a debugging facility
-        if (mCacheTextures[i]->mTexture) {
-            memset(mCacheTextures[i]->mTexture, 0,
-                    mCacheTextures[i]->mWidth * mCacheTextures[i]->mHeight);
+        if (mCacheTextures[i]->getTexture()) {
+            memset(mCacheTextures[i]->getTexture(), 0,
+                    mCacheTextures[i]->getWidth() * mCacheTextures[i]->getHeight());
         }
     }
     ALOGD("Flushing caches: glyphs cached = %d", totalGlyphs);
 #endif
 }
 
-void FontRenderer::deallocateTextureMemory(CacheTexture *cacheTexture) {
-    if (cacheTexture && cacheTexture->mTexture) {
-        glDeleteTextures(1, &cacheTexture->mTextureId);
-        delete[] cacheTexture->mTexture;
-        cacheTexture->mTexture = NULL;
-        cacheTexture->mTextureId = 0;
-    }
-}
-
 void FontRenderer::flushLargeCaches() {
     // Start from 1; don't deallocate smallest/default texture
     for (uint32_t i = 1; i < mCacheTextures.size(); i++) {
         CacheTexture* cacheTexture = mCacheTextures[i];
-        if (cacheTexture->mTexture != NULL) {
+        if (cacheTexture->getTexture()) {
             cacheTexture->init();
             for (uint32_t j = 0; j < mActiveFonts.size(); j++) {
                 mActiveFonts[j]->invalidateTextureCache(cacheTexture);
             }
-            deallocateTextureMemory(cacheTexture);
+            cacheTexture->releaseTexture();
         }
     }
-}
-
-void FontRenderer::allocateTextureMemory(CacheTexture* cacheTexture) {
-    int width = cacheTexture->mWidth;
-    int height = cacheTexture->mHeight;
-
-    cacheTexture->mTexture = new uint8_t[width * height];
-
-    if (!cacheTexture->mTextureId) {
-        glGenTextures(1, &cacheTexture->mTextureId);
-    }
-
-    Caches::getInstance().activeTexture(0);
-    glBindTexture(GL_TEXTURE_2D, cacheTexture->mTextureId);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    // Initialize texture dimensions
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, width, height, 0,
-            GL_ALPHA, GL_UNSIGNED_BYTE, 0);
-
-    const GLenum filtering = cacheTexture->mLinearFiltering ? GL_LINEAR : GL_NEAREST;
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filtering);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filtering);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 
 CacheTexture* FontRenderer::cacheBitmapInTexture(const SkGlyph& glyph,
@@ -206,7 +172,7 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
     cachedGlyph->mIsValid = false;
     // If the glyph is too tall, don't cache it
     if (glyph.fHeight + TEXTURE_BORDER_SIZE * 2 >
-                mCacheTextures[mCacheTextures.size() - 1]->mHeight) {
+                mCacheTextures[mCacheTextures.size() - 1]->getHeight()) {
         ALOGE("Font size too large to fit in cache. width, height = %i, %i",
                 (int) glyph.fWidth, (int) glyph.fHeight);
         return;
@@ -240,14 +206,15 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
     uint32_t endX = startX + glyph.fWidth;
     uint32_t endY = startY + glyph.fHeight;
 
-    uint32_t cacheWidth = cacheTexture->mWidth;
+    uint32_t cacheWidth = cacheTexture->getWidth();
 
-    if (!cacheTexture->mTexture) {
+    if (!cacheTexture->getTexture()) {
+        Caches::getInstance().activeTexture(0);
         // Large-glyph texture memory is allocated only as needed
-        allocateTextureMemory(cacheTexture);
+        cacheTexture->allocateTexture();
     }
 
-    uint8_t* cacheBuffer = cacheTexture->mTexture;
+    uint8_t* cacheBuffer = cacheTexture->getTexture();
     uint8_t* bitmapBuffer = (uint8_t*) glyph.fImage;
     unsigned int stride = glyph.rowBytes();
 
@@ -287,7 +254,8 @@ CacheTexture* FontRenderer::createCacheTexture(int width, int height, bool alloc
     CacheTexture* cacheTexture = new CacheTexture(width, height);
 
     if (allocate) {
-        allocateTextureMemory(cacheTexture);
+        Caches::getInstance().activeTexture(0);
+        cacheTexture->allocateTexture();
     }
 
     return cacheTexture;
@@ -362,16 +330,16 @@ void FontRenderer::checkTextureUpdate() {
     // Iterate over all the cache textures and see which ones need to be updated
     for (uint32_t i = 0; i < mCacheTextures.size(); i++) {
         CacheTexture* cacheTexture = mCacheTextures[i];
-        if (cacheTexture->mDirty && cacheTexture->mTexture != NULL) {
+        if (cacheTexture->isDirty() && cacheTexture->getTexture()) {
             uint32_t xOffset = 0;
-            uint32_t width   = cacheTexture->mWidth;
-            uint32_t height  = cacheTexture->mHeight;
-            void* textureData = cacheTexture->mTexture;
+            uint32_t width = cacheTexture->getWidth();
+            uint32_t height = cacheTexture->getHeight();
+            void* textureData = cacheTexture->getTexture();
 
-            if (cacheTexture->mTextureId != lastTextureId) {
+            if (cacheTexture->getTextureId() != lastTextureId) {
+                lastTextureId = cacheTexture->getTextureId();
                 caches.activeTexture(0);
-                glBindTexture(GL_TEXTURE_2D, cacheTexture->mTextureId);
-                lastTextureId = cacheTexture->mTextureId;
+                glBindTexture(GL_TEXTURE_2D, lastTextureId);
             }
 #if DEBUG_FONT_RENDERER
             ALOGD("glTextSubimage for cacheTexture %d: xOff, width height = %d, %d, %d",
@@ -380,18 +348,14 @@ void FontRenderer::checkTextureUpdate() {
             glTexSubImage2D(GL_TEXTURE_2D, 0, xOffset, 0, width, height,
                     GL_ALPHA, GL_UNSIGNED_BYTE, textureData);
 
-            cacheTexture->mDirty = false;
+            cacheTexture->setDirty(false);
         }
     }
 
     caches.activeTexture(0);
-    glBindTexture(GL_TEXTURE_2D, mCurrentCacheTexture->mTextureId);
-    if (mLinearFiltering != mCurrentCacheTexture->mLinearFiltering) {
-        const GLenum filtering = mLinearFiltering ? GL_LINEAR : GL_NEAREST;
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filtering);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filtering);
-        mCurrentCacheTexture->mLinearFiltering = mLinearFiltering;
-    }
+    glBindTexture(GL_TEXTURE_2D, mCurrentCacheTexture->getTextureId());
+
+    mCurrentCacheTexture->setLinearFiltering(mLinearFiltering, false);
     mLastCacheTexture = mCurrentCacheTexture;
 
     mUploadTexture = false;
