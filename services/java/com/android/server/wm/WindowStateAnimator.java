@@ -359,9 +359,10 @@ class WindowStateAnimator {
         }
 
         finishExit();
-        mAnimator.mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
+        final int displayId = mWin.mDisplayContent.getDisplayId();
+        mAnimator.setPendingLayoutChanges(displayId, WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM);
         if (WindowManagerService.DEBUG_LAYOUT_REPEATS) mService.debugLayoutRepeats(
-                "WindowStateAnimator", mAnimator.mPendingLayoutChanges);
+                "WindowStateAnimator", mAnimator.mPendingLayoutChanges.get(displayId));
 
         if (mWin.mAppToken != null) {
             mWin.mAppToken.updateReportedVisibilityLocked();
@@ -1106,8 +1107,9 @@ class WindowStateAnimator {
                         "SIZE " + width + "x" + height, null);
                 mSurfaceResized = true;
                 mSurface.setSize(width, height);
-                mAnimator.mPendingLayoutChanges |=
-                        WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+                final int displayId = w.mDisplayContent.getDisplayId();
+                mAnimator.setPendingLayoutChanges(displayId,
+                        WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER);
                 if ((w.mAttrs.flags & LayoutParams.FLAG_DIM_BEHIND) != 0) {
                     final DisplayInfo displayInfo = mWin.mDisplayContent.getDisplayInfo();
                     mService.startDimming(this, w.mExiting ? 0 : w.mAttrs.dimAmount,
