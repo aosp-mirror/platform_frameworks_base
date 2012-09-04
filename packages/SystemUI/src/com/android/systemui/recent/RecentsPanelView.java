@@ -164,13 +164,6 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         public View getView(int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
                 convertView = createView(parent);
-                if (convertView.getParent() != null) {
-                    throw new RuntimeException("Recycled child has parent");
-                }
-            } else {
-                if (convertView.getParent() != null) {
-                    throw new RuntimeException("Recycled child has parent");
-                }
             }
             ViewHolder holder = (ViewHolder) convertView.getTag();
 
@@ -600,6 +593,9 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             usingDrawingCache = true;
         }
 
+        if (bm == null) {
+            throw new RuntimeException("Recents thumbnail is null");
+        }
         ActivityOptions opts = ActivityOptions.makeThumbnailScaleUpAnimation(
                 holder.thumbnailViewImage, bm, 0, 0, null);
 
