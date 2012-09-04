@@ -222,7 +222,7 @@ public class BroadcastQueue {
             mService.ensurePackageDexOpt(r.intent.getComponent().getPackageName());
             app.thread.scheduleReceiver(new Intent(r.intent), r.curReceiver,
                     mService.compatibilityInfoForPackageLocked(r.curReceiver.applicationInfo),
-                    r.resultCode, r.resultData, r.resultExtras, r.ordered);
+                    r.resultCode, r.resultData, r.resultExtras, r.ordered, r.userId);
             if (DEBUG_BROADCAST)  Slog.v(TAG,
                     "Process cur broadcast " + r + " DELIVERED for app " + app);
             started = true;
@@ -357,15 +357,16 @@ public class BroadcastQueue {
 
     private static void performReceiveLocked(ProcessRecord app, IIntentReceiver receiver,
             Intent intent, int resultCode, String data, Bundle extras,
-            boolean ordered, boolean sticky) throws RemoteException {
+            boolean ordered, boolean sticky, int sendingUser) throws RemoteException {
         // Send the intent to the receiver asynchronously using one-way binder calls.
         if (app != null && app.thread != null) {
             // If we have an app thread, do the call through that so it is
             // correctly ordered with other one-way calls.
             app.thread.scheduleRegisteredReceiver(receiver, intent, resultCode,
-                    data, extras, ordered, sticky);
+                    data, extras, ordered, sticky, sendingUser);
         } else {
-            receiver.performReceive(intent, resultCode, data, extras, ordered, sticky);
+            receiver.performReceive(intent, resultCode, data, extras, ordered,
+                    sticky, sendingUser);
         }
     }
 
@@ -428,8 +429,8 @@ public class BroadcastQueue {
                             + " (seq=" + seq + "): " + r);
                 }
                 performReceiveLocked(filter.receiverList.app, filter.receiverList.receiver,
-                    new Intent(r.intent), r.resultCode,
-                    r.resultData, r.resultExtras, r.ordered, r.initialSticky);
+                    new Intent(r.intent), r.resultCode, r.resultData,
+                    r.resultExtras, r.ordered, r.initialSticky, r.userId);
                 if (ordered) {
                     r.state = BroadcastRecord.CALL_DONE_RECEIVE;
                 }
@@ -579,7 +580,7 @@ public class BroadcastQueue {
                             }
                             performReceiveLocked(r.callerApp, r.resultTo,
                                 new Intent(r.intent), r.resultCode,
-                                r.resultData, r.resultExtras, false, false);
+                                r.resultData, r.resultExtras, false, false, r.userId);
                             // Set this to null so that the reference
                             // (local and remote) isnt kept in the mBroadcastHistory.
                             r.resultTo = null;

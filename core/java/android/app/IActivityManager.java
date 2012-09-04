@@ -80,7 +80,7 @@ public interface IActivityManager extends IInterface {
     public boolean willActivityBeVisible(IBinder token) throws RemoteException;
     public Intent registerReceiver(IApplicationThread caller, String callerPackage,
             IIntentReceiver receiver, IntentFilter filter,
-            String requiredPermission) throws RemoteException;
+            String requiredPermission, int userId) throws RemoteException;
     public void unregisterReceiver(IIntentReceiver receiver) throws RemoteException;
     public int broadcastIntent(IApplicationThread caller, Intent intent,
             String resolvedType, IIntentReceiver resultTo, int resultCode,

@@ -39,18 +39,20 @@ class ReceiverList extends ArrayList<BroadcastFilter>
     public final ProcessRecord app;
     public final int pid;
     public final int uid;
+    public final int userId;
     BroadcastRecord curBroadcast = null;
     boolean linkedToDeath = false;
 
     String stringName;
     
     ReceiverList(ActivityManagerService _owner, ProcessRecord _app,
-            int _pid, int _uid, IIntentReceiver _receiver) {
+            int _pid, int _uid, int _userId, IIntentReceiver _receiver) {
         owner = _owner;
         receiver = _receiver;
         app = _app;
         pid = _pid;
         uid = _uid;
+        userId = _userId;
     }
 
     // Want object identity, not the array identity we are inheriting.
@@ -67,8 +69,9 @@ class ReceiverList extends ArrayList<BroadcastFilter>
     }
     
     void dumpLocal(PrintWriter pw, String prefix) {
-        pw.print(prefix); pw.print("app="); pw.print(app);
-            pw.print(" pid="); pw.print(pid); pw.print(" uid="); pw.println(uid);
+        pw.print(prefix); pw.print("app="); pw.print(app.toShortString());
+            pw.print(" pid="); pw.print(pid); pw.print(" uid="); pw.print(uid);
+            pw.print(" user="); pw.println(userId);
         if (curBroadcast != null || linkedToDeath) {
             pw.print(prefix); pw.print("curBroadcast="); pw.print(curBroadcast);
                 pw.print(" linkedToDeath="); pw.println(linkedToDeath);
@@ -103,6 +106,8 @@ class ReceiverList extends ArrayList<BroadcastFilter>
         sb.append((app != null ? app.processName : "(unknown name)"));
         sb.append('/');
         sb.append(uid);
+        sb.append("/u");
+        sb.append(userId);
         sb.append((receiver.asBinder() instanceof Binder) ? " local:" : " remote:");
         sb.append(Integer.toHexString(System.identityHashCode(receiver.asBinder())));
         sb.append('}');

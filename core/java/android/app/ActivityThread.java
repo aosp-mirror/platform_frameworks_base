@@ -320,8 +320,9 @@ public final class ActivityThread {
 
     static final class ReceiverData extends BroadcastReceiver.PendingResult {
         public ReceiverData(Intent intent, int resultCode, String resultData, Bundle resultExtras,
-                boolean ordered, boolean sticky, IBinder token) {
-            super(resultCode, resultData, resultExtras, TYPE_COMPONENT, ordered, sticky, token);
+                boolean ordered, boolean sticky, IBinder token, int sendingUser) {
+            super(resultCode, resultData, resultExtras, TYPE_COMPONENT, ordered, sticky,
+                    token, sendingUser);
             this.intent = intent;
         }
 
@@ -613,9 +614,9 @@ public final class ActivityThread {
 
         public final void scheduleReceiver(Intent intent, ActivityInfo info,
                 CompatibilityInfo compatInfo, int resultCode, String data, Bundle extras,
-                boolean sync) {
+                boolean sync, int sendingUser) {
             ReceiverData r = new ReceiverData(intent, resultCode, data, extras,
-                    sync, false, mAppThread.asBinder());
+                    sync, false, mAppThread.asBinder(), sendingUser);
             r.info = info;
             r.compatInfo = compatInfo;
             queueOrSendMessage(H.RECEIVER, r);
@@ -774,8 +775,9 @@ public final class ActivityThread {
         // applies transaction ordering per object for such calls.
         public void scheduleRegisteredReceiver(IIntentReceiver receiver, Intent intent,
                 int resultCode, String dataStr, Bundle extras, boolean ordered,
-                boolean sticky) throws RemoteException {
-            receiver.performReceive(intent, resultCode, dataStr, extras, ordered, sticky);
+                boolean sticky, int sendingUser) throws RemoteException {
+            receiver.performReceive(intent, resultCode, dataStr, extras, ordered,
+                    sticky, sendingUser);
         }
 
         public void scheduleLowMemory() {

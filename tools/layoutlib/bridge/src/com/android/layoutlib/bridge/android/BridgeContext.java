@@ -1164,6 +1164,13 @@ public final class BridgeContext extends Context {
     }
 
     @Override
+    public Intent registerReceiverAsUser(BroadcastReceiver arg0, UserHandle arg0p5,
+            IntentFilter arg1, String arg2, Handler arg3) {
+        // pass
+        return null;
+    }
+
+    @Override
     public void removeStickyBroadcast(Intent arg0) {
         // pass
 

@@ -65,7 +65,8 @@ public interface IApplicationThread extends IInterface {
     void scheduleDestroyActivity(IBinder token, boolean finished,
             int configChanges) throws RemoteException;
     void scheduleReceiver(Intent intent, ActivityInfo info, CompatibilityInfo compatInfo,
-            int resultCode, String data, Bundle extras, boolean sync) throws RemoteException;
+            int resultCode, String data, Bundle extras, boolean sync,
+            int sendingUser) throws RemoteException;
     static final int BACKUP_MODE_INCREMENTAL = 0;
     static final int BACKUP_MODE_FULL = 1;
     static final int BACKUP_MODE_RESTORE = 2;
@@ -105,8 +106,8 @@ public interface IApplicationThread extends IInterface {
     void dumpProvider(FileDescriptor fd, IBinder servicetoken, String[] args)
             throws RemoteException;
     void scheduleRegisteredReceiver(IIntentReceiver receiver, Intent intent,
-            int resultCode, String data, Bundle extras, boolean ordered, boolean sticky)
-            throws RemoteException;
+            int resultCode, String data, Bundle extras, boolean ordered,
+            boolean sticky, int sendingUser) throws RemoteException;
     void scheduleLowMemory() throws RemoteException;
     void scheduleActivityConfigurationChanged(IBinder token) throws RemoteException;
     void profilerControl(boolean start, String path, ParcelFileDescriptor fd, int profileType)
