@@ -37,13 +37,16 @@ CacheBlock* CacheBlock::insertBlock(CacheBlock* head, CacheBlock *newBlock) {
             newBlock, newBlock->mX, newBlock->mY,
             newBlock->mWidth, newBlock->mHeight);
 #endif
+
     CacheBlock *currBlock = head;
     CacheBlock *prevBlock = NULL;
+
     while (currBlock && currBlock->mY != TEXTURE_BORDER_SIZE) {
         if (newBlock->mWidth < currBlock->mWidth) {
             newBlock->mNext = currBlock;
             newBlock->mPrev = prevBlock;
             currBlock->mPrev = newBlock;
+
             if (prevBlock) {
                 prevBlock->mNext = newBlock;
                 return head;
@@ -51,15 +54,19 @@ CacheBlock* CacheBlock::insertBlock(CacheBlock* head, CacheBlock *newBlock) {
                 return newBlock;
             }
         }
+
         prevBlock = currBlock;
         currBlock = currBlock->mNext;
     }
+
     // new block larger than all others - insert at end (but before the remainder space, if there)
     newBlock->mNext = currBlock;
     newBlock->mPrev = prevBlock;
+
     if (currBlock) {
         currBlock->mPrev = newBlock;
     }
+
     if (prevBlock) {
         prevBlock->mNext = newBlock;
         return head;
@@ -74,18 +81,23 @@ CacheBlock* CacheBlock::removeBlock(CacheBlock* head, CacheBlock *blockToRemove)
             blockToRemove, blockToRemove->mX, blockToRemove->mY,
             blockToRemove->mWidth, blockToRemove->mHeight);
 #endif
+
     CacheBlock* newHead = head;
     CacheBlock* nextBlock = blockToRemove->mNext;
     CacheBlock* prevBlock = blockToRemove->mPrev;
+
     if (prevBlock) {
         prevBlock->mNext = nextBlock;
     } else {
         newHead = nextBlock;
     }
+
     if (nextBlock) {
         nextBlock->mPrev = prevBlock;
     }
+
     delete blockToRemove;
+
     return newHead;
 }
 
@@ -100,12 +112,14 @@ bool CacheTexture::fitBitmap(const SkGlyph& glyph, uint32_t *retOriginX, uint32_
 
     uint16_t glyphW = glyph.fWidth + TEXTURE_BORDER_SIZE;
     uint16_t glyphH = glyph.fHeight + TEXTURE_BORDER_SIZE;
+
     // roundedUpW equals glyphW to the next multiple of CACHE_BLOCK_ROUNDING_SIZE.
     // This columns for glyphs that are close but not necessarily exactly the same size. It trades
     // off the loss of a few pixels for some glyphs against the ability to store more glyphs
     // of varying sizes in one block.
     uint16_t roundedUpW =
             (glyphW + CACHE_BLOCK_ROUNDING_SIZE - 1) & -CACHE_BLOCK_ROUNDING_SIZE;
+
     CacheBlock *cacheBlock = mCacheBlocks;
     while (cacheBlock) {
         // Store glyph in this block iff: it fits the block's remaining space and:
@@ -118,8 +132,10 @@ bool CacheTexture::fitBitmap(const SkGlyph& glyph, uint32_t *retOriginX, uint32_
                 // Only enough space for this glyph - don't bother rounding up the width
                 roundedUpW = glyphW;
             }
+
             *retOriginX = cacheBlock->mX;
             *retOriginY = cacheBlock->mY;
+
             // If this is the remainder space, create a new cache block for this column. Otherwise,
             // adjust the info about this column.
             if (cacheBlock->mY == TEXTURE_BORDER_SIZE) {
@@ -127,6 +143,7 @@ bool CacheTexture::fitBitmap(const SkGlyph& glyph, uint32_t *retOriginX, uint32_
                 // Adjust remainder space dimensions
                 cacheBlock->mWidth -= roundedUpW;
                 cacheBlock->mX += roundedUpW;
+
                 if (mHeight - glyphH >= glyphH) {
                     // There's enough height left over to create a new CacheBlock
                     CacheBlock *newBlock = new CacheBlock(oldX, glyphH + TEXTURE_BORDER_SIZE,
@@ -148,16 +165,20 @@ bool CacheTexture::fitBitmap(const SkGlyph& glyph, uint32_t *retOriginX, uint32_
                         cacheBlock->mWidth, cacheBlock->mHeight);
 #endif
             }
+
             if (cacheBlock->mHeight < fmin(glyphH, glyphW)) {
                 // If remaining space in this block is too small to be useful, remove it
                 mCacheBlocks = CacheBlock::removeBlock(mCacheBlocks, cacheBlock);
             }
+
             mDirty = true;
+            mNumGlyphs++;
+
 #if DEBUG_FONT_RENDERER
             ALOGD("fitBitmap: current block list:");
             mCacheBlocks->output();
 #endif
-            ++mNumGlyphs;
+
             return true;
         }
         cacheBlock = cacheBlock->mNext;

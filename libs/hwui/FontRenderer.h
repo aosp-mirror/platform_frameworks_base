@@ -109,7 +109,7 @@ public:
         return size;
     }
 
-protected:
+private:
     friend class Font;
 
     const uint8_t* mGammaTable;
@@ -143,6 +143,14 @@ protected:
             float x3, float y3, float u3, float v3,
             float x4, float y4, float u4, float v4, CacheTexture* texture);
 
+    void removeFont(const Font* font);
+
+    void checkTextureUpdate();
+
+    void setTextureDirty() {
+        mUploadTexture = true;
+    }
+
     uint32_t mSmallCacheWidth;
     uint32_t mSmallCacheHeight;
     uint32_t mLargeCacheWidth;
@@ -156,11 +164,10 @@ protected:
     CacheTexture* mCurrentCacheTexture;
     CacheTexture* mLastCacheTexture;
 
-    void checkTextureUpdate();
     bool mUploadTexture;
 
     // Pointer to vertex data to speed up frame to frame work
-    float *mTextMeshPtr;
+    float* mTextMesh;
     uint32_t mCurrentQuadIndex;
     uint32_t mMaxNumberOfQuads;
 
@@ -174,12 +181,13 @@ protected:
 
     bool mLinearFiltering;
 
-    void computeGaussianWeights(float* weights, int32_t radius);
-    void horizontalBlur(float* weights, int32_t radius, const uint8_t *source, uint8_t *dest,
+    /** We should consider multi-threading this code or using Renderscript **/
+    static void computeGaussianWeights(float* weights, int32_t radius);
+    static void horizontalBlur(float* weights, int32_t radius, const uint8_t *source, uint8_t *dest,
             int32_t width, int32_t height);
-    void verticalBlur(float* weights, int32_t radius, const uint8_t *source, uint8_t *dest,
+    static void verticalBlur(float* weights, int32_t radius, const uint8_t *source, uint8_t *dest,
             int32_t width, int32_t height);
-    void blurImage(uint8_t* image, int32_t width, int32_t height, int32_t radius);
+    static void blurImage(uint8_t* image, int32_t width, int32_t height, int32_t radius);
 };
 
 }; // namespace uirenderer
