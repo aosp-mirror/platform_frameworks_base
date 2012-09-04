@@ -6,6 +6,8 @@ include $(CLEAR_VARS)
 ifeq ($(USE_OPENGL_RENDERER),true)
 	LOCAL_SRC_FILES:= \
 		utils/SortedListImpl.cpp \
+		font/CacheTexture.cpp \
+		font/Font.cpp \
 		FontRenderer.cpp \
 		GammaFontRenderer.cpp \
 		Caches.cpp \
