@@ -48,10 +48,10 @@ Font::~Font() {
     }
 }
 
-void Font::invalidateTextureCache(CacheTexture *cacheTexture) {
+void Font::invalidateTextureCache(CacheTexture* cacheTexture) {
     for (uint32_t i = 0; i < mCachedGlyphs.size(); i++) {
         CachedGlyphInfo* cachedGlyph = mCachedGlyphs.valueAt(i);
-        if (cacheTexture == NULL || cachedGlyph->mCacheTexture == cacheTexture) {
+        if (cacheTexture || cachedGlyph->mCacheTexture == cacheTexture) {
             cachedGlyph->mIsValid = false;
         }
     }
@@ -106,9 +106,9 @@ void Font::drawCachedGlyphBitmap(CachedGlyphInfo* glyph, int x, int y,
     uint32_t endX = glyph->mStartX + glyph->mBitmapWidth;
     uint32_t endY = glyph->mStartY + glyph->mBitmapHeight;
 
-    CacheTexture *cacheTexture = glyph->mCacheTexture;
-    uint32_t cacheWidth = cacheTexture->mWidth;
-    const uint8_t* cacheBuffer = cacheTexture->mTexture;
+    CacheTexture* cacheTexture = glyph->mCacheTexture;
+    uint32_t cacheWidth = cacheTexture->getWidth();
+    const uint8_t* cacheBuffer = cacheTexture->getTexture();
 
     uint32_t cacheX = 0, cacheY = 0;
     int32_t bX = 0, bY = 0;
@@ -392,8 +392,8 @@ void Font::updateGlyphCache(SkPaint* paint, const SkGlyph& skiaGlyph, CachedGlyp
     glyph->mBitmapWidth = skiaGlyph.fWidth;
     glyph->mBitmapHeight = skiaGlyph.fHeight;
 
-    uint32_t cacheWidth = glyph->mCacheTexture->mWidth;
-    uint32_t cacheHeight = glyph->mCacheTexture->mHeight;
+    uint32_t cacheWidth = glyph->mCacheTexture->getWidth();
+    uint32_t cacheHeight = glyph->mCacheTexture->getHeight();
 
     glyph->mBitmapMinU = startX / (float) cacheWidth;
     glyph->mBitmapMinV = startY / (float) cacheHeight;
