@@ -1155,6 +1155,16 @@ public class DevicePolicyManager {
             = "android.app.action.START_ENCRYPTION";
 
     /**
+     * Widgets are enabled in keyguard
+     */
+    public static final int KEYGUARD_DISABLE_WIDGETS_NONE = 0;
+
+    /**
+     * Disable all keyguard widgets
+     */
+    public static final int KEYGUARD_DISABLE_WIDGETS_ALL = 0x7fffffff;
+
+    /**
      * Called by an application that is administering the device to
      * request that the storage system be encrypted.
      *
@@ -1281,6 +1291,46 @@ public class DevicePolicyManager {
             }
         }
         return false;
+    }
+
+    /**
+     * Called by an application that is administering the device to disable adding widgets to
+     * keyguard.  After setting this, keyguard widgets will be disabled according to the state
+     * provided.
+     *
+     * <p>The calling device admin must have requested
+     * {@link DeviceAdminInfo#USES_POLICY_DISABLE_KEYGUARD_WIDGETS} to be able to call
+     * this method; if it has not, a security exception will be thrown.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param which {@link DevicePolicyManager#KEYGUARD_DISABLE_WIDGETS_ALL} or
+     * {@link DevicePolicyManager#KEYGUARD_DISABLE_WIDGETS_NONE} (the default).
+     */
+    public void setKeyguardWidgetsDisabled(ComponentName admin, int which) {
+        if (mService != null) {
+            try {
+                mService.setKeyguardWidgetsDisabled(admin, which);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+    }
+
+    /**
+     * Determine whether or not widgets have been disabled in keyguard either by the current
+     * admin, if specified, or all admins.
+     * @param admin The name of the admin component to check, or null to check if any admins
+     * have disabled widgets in keyguard.
+     */
+    public int getKeyguardWidgetsDisabled(ComponentName admin) {
+        if (mService != null) {
+            try {
+                return mService.getKeyguardWidgetsDisabled(admin);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return KEYGUARD_DISABLE_WIDGETS_NONE;
     }
 
     /**
