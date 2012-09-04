@@ -234,10 +234,8 @@ public class AppWindowAnimator {
             return false;
         }
 
-        mAnimator.mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
-        if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
-            mService.debugLayoutRepeats("AppWindowToken", mAnimator.mPendingLayoutChanges);
-        }
+        mAnimator.setAppLayoutChanges(this, WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM,
+                "AppWindowToken");
 
         clearAnimation();
         animating = false;
