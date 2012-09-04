@@ -119,7 +119,7 @@ class KeyguardStatusViewManager {
         mDateView = (TextView) findViewById(R.id.date);
         mStatus1View = (TextView) findViewById(R.id.status1);
         mAlarmStatusView = (TextView) findViewById(R.id.alarm_status);
-        mOwnerInfoView = (TextView) findViewById(R.id.propertyOf);
+        mOwnerInfoView = (TextView) findViewById(R.id.owner_info);
         mDigitalClock = (DigitalClock) findViewById(R.id.time);
 
         // Registering this callback immediately updates the battery state, among other things.

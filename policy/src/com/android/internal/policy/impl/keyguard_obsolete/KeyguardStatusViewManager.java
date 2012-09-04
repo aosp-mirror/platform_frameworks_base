@@ -179,7 +179,7 @@ class KeyguardStatusViewManager implements OnClickListener {
         mDateView = (TextView) findViewById(R.id.date);
         mStatus1View = (TextView) findViewById(R.id.status1);
         mAlarmStatusView = (TextView) findViewById(R.id.alarm_status);
-        mOwnerInfoView = (TextView) findViewById(R.id.propertyOf);
+        mOwnerInfoView = (TextView) findViewById(R.id.owner_info);
         mTransportView = (TransportControlView) findViewById(R.id.transport);
         mEmergencyCallButton = (Button) findViewById(R.id.emergencyCallButton);
         mEmergencyCallButtonEnabledInScreen = emergencyButtonEnabledInScreen;
