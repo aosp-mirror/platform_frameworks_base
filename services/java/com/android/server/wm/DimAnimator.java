@@ -212,5 +212,12 @@ class DimAnimator {
             mDimHeight = dimHeight;
             mDimTarget = dimTarget;
         }
+
+        Parameters(Parameters o) {
+            mDimWinAnimator = o.mDimWinAnimator;
+            mDimWidth = o.mDimWidth;
+            mDimHeight = o.mDimHeight;
+            mDimTarget = o.mDimTarget;
+        }
     }
 }
