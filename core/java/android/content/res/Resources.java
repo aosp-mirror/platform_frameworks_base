@@ -1444,12 +1444,14 @@ public class Resources {
                 }
                 if (mTmpConfig.locale == null) {
                     mTmpConfig.locale = Locale.getDefault();
+                    mTmpConfig.setLayoutDirection(mTmpConfig.locale);
                 }
                 configChanges = mConfiguration.updateFrom(mTmpConfig);
                 configChanges = ActivityInfo.activityInfoConfigToNative(configChanges);
             }
             if (mConfiguration.locale == null) {
                 mConfiguration.locale = Locale.getDefault();
+                mConfiguration.setLayoutDirection(mConfiguration.locale);
             }
             if (mConfiguration.densityDpi != Configuration.DENSITY_DPI_UNDEFINED) {
                 mMetrics.densityDpi = mConfiguration.densityDpi;
