@@ -6250,6 +6250,7 @@ package android.content.pm {
     field public static final int CONFIG_FONT_SCALE = 1073741824; // 0x40000000
     field public static final int CONFIG_KEYBOARD = 16; // 0x10
     field public static final int CONFIG_KEYBOARD_HIDDEN = 32; // 0x20
+    field public static final int CONFIG_LAYOUT_DIRECTION = 8192; // 0x2000
     field public static final int CONFIG_LOCALE = 4; // 0x4
     field public static final int CONFIG_MCC = 1; // 0x1
     field public static final int CONFIG_MNC = 2; // 0x2
@@ -6852,9 +6853,12 @@ package android.content.res {
     method public int describeContents();
     method public int diff(android.content.res.Configuration);
     method public boolean equals(android.content.res.Configuration);
+    method public int getLayoutDirection();
     method public boolean isLayoutSizeAtLeast(int);
     method public static boolean needNewResources(int, int);
     method public void readFromParcel(android.os.Parcel);
+    method public void setLayoutDirection(java.util.Locale);
+    method public void setLocale(java.util.Locale);
     method public void setTo(android.content.res.Configuration);
     method public void setToDefaults();
     method public int updateFrom(android.content.res.Configuration);
@@ -6883,6 +6887,11 @@ package android.content.res {
     field public static final int ORIENTATION_PORTRAIT = 1; // 0x1
     field public static final deprecated int ORIENTATION_SQUARE = 3; // 0x3
     field public static final int ORIENTATION_UNDEFINED = 0; // 0x0
+    field public static final int SCREENLAYOUT_LAYOUTDIR_LTR = 64; // 0x40
+    field public static final int SCREENLAYOUT_LAYOUTDIR_MASK = 192; // 0xc0
+    field public static final int SCREENLAYOUT_LAYOUTDIR_RTL = 128; // 0x80
+    field public static final int SCREENLAYOUT_LAYOUTDIR_SHIFT = 6; // 0x6
+    field public static final int SCREENLAYOUT_LAYOUTDIR_UNDEFINED = 0; // 0x0
     field public static final int SCREENLAYOUT_LONG_MASK = 48; // 0x30
     field public static final int SCREENLAYOUT_LONG_NO = 16; // 0x10
     field public static final int SCREENLAYOUT_LONG_UNDEFINED = 0; // 0x0
@@ -6893,6 +6902,7 @@ package android.content.res {
     field public static final int SCREENLAYOUT_SIZE_SMALL = 1; // 0x1
     field public static final int SCREENLAYOUT_SIZE_UNDEFINED = 0; // 0x0
     field public static final int SCREENLAYOUT_SIZE_XLARGE = 4; // 0x4
+    field public static final int SCREENLAYOUT_UNDEFINED = 0; // 0x0
     field public static final int SCREEN_HEIGHT_DP_UNDEFINED = 0; // 0x0
     field public static final int SCREEN_WIDTH_DP_UNDEFINED = 0; // 0x0
     field public static final int SMALLEST_SCREEN_WIDTH_DP_UNDEFINED = 0; // 0x0

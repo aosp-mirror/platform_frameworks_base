@@ -123,6 +123,11 @@ int32_t AConfiguration_getSmallestScreenWidthDp(AConfiguration* config) {
     return config->smallestScreenWidthDp;
 }
 
+int32_t AConfiguration_getLayoutDirection(AConfiguration* config) {
+    return (config->screenLayout&ResTable_config::MASK_LAYOUTDIR)
+            >> ResTable_config::SHIFT_LAYOUTDIR;
+}
+
 // ----------------------------------------------------------------------
 
 void AConfiguration_setMcc(AConfiguration* config, int32_t mcc) {
@@ -208,6 +213,11 @@ void AConfiguration_setScreenHeightDp(AConfiguration* config, int32_t value) {
 
 void AConfiguration_setSmallestScreenWidthDp(AConfiguration* config, int32_t value) {
     config->smallestScreenWidthDp = value;
+}
+
+void AConfiguration_setLayoutDirection(AConfiguration* config, int32_t value) {
+    config->screenLayout = (config->screenLayout&~ResTable_config::MASK_LAYOUTDIR)
+            | ((value<<ResTable_config::SHIFT_LAYOUTDIR)&ResTable_config::MASK_LAYOUTDIR);
 }
 
 // ----------------------------------------------------------------------
