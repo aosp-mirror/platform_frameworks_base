@@ -547,6 +547,10 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Inaruhusu programu kuandikia kadi ya SD."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"badilisha/futa maudhui ya hifadhi ya media ya ndani."</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Inaruhusu programu kurekebisha maudhui ya hifadhi ya ndani vyombo vya habari."</string>
+    <!-- no translation found for permlab_sdcardAccessAll (8150613823900460576) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardAccessAll (3215208357415891320) -->
+    <skip />
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"fikia faili za mfumo za kache"</string>
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Inaruhusu programu kusoma na kuandika mfumo wa faili wa kache."</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"piga/pokea simu za mtandao"</string>
