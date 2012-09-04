@@ -81,11 +81,14 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
      * Stores some of the structures that Face Unlock will need to access and creates the handler
      * will be used to execute messages on the UI thread.
      */
-    public FaceUnlock(Context context, KeyguardSecurityCallback keyguardScreenCallback) {
+    public FaceUnlock(Context context) {
         mContext = context;
         mLockPatternUtils = new LockPatternUtils(context);
-        mKeyguardScreenCallback = keyguardScreenCallback;
         mHandler = new Handler(this);
+    }
+
+    public void setKeyguardCallback(KeyguardSecurityCallback keyguardScreenCallback) {
+        mKeyguardScreenCallback = keyguardScreenCallback;
     }
 
     /**
@@ -114,11 +117,7 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
         if (mHandler.getLooper() != Looper.myLooper()) {
             Log.e(TAG, "show() called off of the UI thread");
         }
-
         removeDisplayMessages();
-        if (mFaceUnlockView != null) {
-            mFaceUnlockView.setVisibility(View.VISIBLE);
-        }
         if (timeoutMillis > 0) {
             mHandler.sendEmptyMessageDelayed(MSG_HIDE_FACE_UNLOCK_VIEW, timeoutMillis);
         }
@@ -270,23 +269,15 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
      */
     void handleShowFaceUnlockView() {
         if (DEBUG) Log.d(TAG, "handleShowFaceUnlockView()");
-        if (mFaceUnlockView != null) {
-            mFaceUnlockView.setVisibility(View.VISIBLE);
-        } else {
-            Log.e(TAG, "mFaceUnlockView is null in handleShowFaceUnlockView()");
-        }
+        // Not required
     }
 
     /**
-     * Sets the Face Unlock view to invisible, thus exposing the backup lock.
+     * Hide face unlock and show backup
      */
     void handleHideFaceUnlockView() {
         if (DEBUG) Log.d(TAG, "handleHideFaceUnlockView()");
-        if (mFaceUnlockView != null) {
-            mFaceUnlockView.setVisibility(View.INVISIBLE);
-        } else {
-            Log.e(TAG, "mFaceUnlockView is null in handleHideFaceUnlockView()");
-        }
+        mKeyguardScreenCallback.showBackupSecurity();
     }
 
     /**
@@ -358,11 +349,6 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
     void handleUnlock() {
         if (DEBUG) Log.d(TAG, "handleUnlock()");
         removeDisplayMessages();
-        if (mFaceUnlockView != null) {
-            mFaceUnlockView.setVisibility(View.VISIBLE);
-        } else {
-            Log.e(TAG, "mFaceUnlockView is null in handleUnlock()");
-        }
         stop();
         mKeyguardScreenCallback.reportSuccessfulUnlockAttempt();
         mKeyguardScreenCallback.dismiss(true);
@@ -373,11 +359,7 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
      */
     void handleCancel() {
         if (DEBUG) Log.d(TAG, "handleCancel()");
-        if (mFaceUnlockView != null) {
-            mFaceUnlockView.setVisibility(View.INVISIBLE);
-        } else {
-            Log.e(TAG, "mFaceUnlockView is null in handleCancel()");
-        }
+        mKeyguardScreenCallback.dismiss(false);
         stop();
         mKeyguardScreenCallback.userActivity(BACKUP_LOCK_TIMEOUT);
     }
@@ -397,11 +379,7 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
      */
     void handleExposeFallback() {
         if (DEBUG) Log.d(TAG, "handleExposeFallback()");
-        if (mFaceUnlockView != null) {
-            mFaceUnlockView.setVisibility(View.INVISIBLE);
-        } else {
-            Log.e(TAG, "mFaceUnlockView is null in handleExposeFallback()");
-        }
+        // No longer required because face unlock doesn't cover backup unlock.
     }
 
     /**
