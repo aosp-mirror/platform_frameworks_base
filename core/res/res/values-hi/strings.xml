@@ -547,6 +547,10 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"एप्लिकेशन को SD कार्ड पर लिखने देता है."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"आंतरिक मीडिया संग्रहण सामग्रियों को बदलें/हटाएं"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"एप्लिकेशन को आंतरिक मीडिया संग्रहण की सामग्री को संशोधित करने देता है."</string>
+    <!-- no translation found for permlab_sdcardAccessAll (8150613823900460576) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardAccessAll (3215208357415891320) -->
+    <skip />
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"कैश फ़ाइल सिस्‍टम में पहंचे"</string>
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"एप्‍लिकेशन को संचय फ़ाइल सिस्‍टम पढ़ने और लिखने देता है."</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"इंटरनेट कॉल करें/प्राप्त करें"</string>
@@ -1167,14 +1171,10 @@
     <string name="vpn_title_long" msgid="6400714798049252294">"VPN को <xliff:g id="APP">%s</xliff:g> द्वारा सक्रिय किया गया है"</string>
     <string name="vpn_text" msgid="3011306607126450322">"नेटवर्क प्रबंधित करने के लिए स्‍पर्श करें."</string>
     <string name="vpn_text_long" msgid="6407351006249174473">"<xliff:g id="SESSION">%s</xliff:g> से कनेक्‍ट किया गया. नेटवर्क प्रबंधित करने के लिए स्‍पर्श करें."</string>
-    <!-- no translation found for vpn_lockdown_connecting (6443438964440960745) -->
-    <skip />
-    <!-- no translation found for vpn_lockdown_connected (8202679674819213931) -->
-    <skip />
-    <!-- no translation found for vpn_lockdown_error (6009249814034708175) -->
-    <skip />
-    <!-- no translation found for vpn_lockdown_reset (5365010427963548932) -->
-    <skip />
+    <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"हमेशा-चालू VPN कनेक्ट हो रहा है…"</string>
+    <string name="vpn_lockdown_connected" msgid="8202679674819213931">"हमेशा-चालू VPN कनेक्ट है"</string>
+    <string name="vpn_lockdown_error" msgid="6009249814034708175">"हमेशा-चालू VPN त्रुटि"</string>
+    <string name="vpn_lockdown_reset" msgid="5365010427963548932">"कनेक्शन रीसेट करने के लिए स्पर्श करें"</string>
     <string name="upload_file" msgid="2897957172366730416">"फ़ाइल चुनें"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"कोई फ़ाइल चुनी नहीं गई"</string>
     <string name="reset" msgid="2448168080964209908">"रीसेट करें"</string>

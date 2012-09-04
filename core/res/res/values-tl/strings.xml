@@ -547,6 +547,10 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Pinapayagan ang app na magsulat sa SD card."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"baguhin/tanggalin ang mga nilalaman ng panloob na imbakan ng media"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Pinapayagan ang app na baguhin ang mga nilalaman ng panloob na media storage."</string>
+    <!-- no translation found for permlab_sdcardAccessAll (8150613823900460576) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardAccessAll (3215208357415891320) -->
+    <skip />
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"i-access ang cache filesystem"</string>
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Pinapayagan ang app na basahin at isulat ang cache filesystem."</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"gumawa/tumanggap ng mga tawag sa Internet"</string>
@@ -1167,14 +1171,10 @@
     <string name="vpn_title_long" msgid="6400714798049252294">"Isinaaktibo ang VPN ng <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="3011306607126450322">"Pindutin upang pamahalaan ang network."</string>
     <string name="vpn_text_long" msgid="6407351006249174473">"Nakakonekta sa <xliff:g id="SESSION">%s</xliff:g>. Pindutin upang pamahalaan ang network."</string>
-    <!-- no translation found for vpn_lockdown_connecting (6443438964440960745) -->
-    <skip />
-    <!-- no translation found for vpn_lockdown_connected (8202679674819213931) -->
-    <skip />
-    <!-- no translation found for vpn_lockdown_error (6009249814034708175) -->
-    <skip />
-    <!-- no translation found for vpn_lockdown_reset (5365010427963548932) -->
-    <skip />
+    <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Kumukonekta ang Always-on VPN…"</string>
+    <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Nakakonekta ang Always-on VPN"</string>
+    <string name="vpn_lockdown_error" msgid="6009249814034708175">"Error sa Always-on VPN"</string>
+    <string name="vpn_lockdown_reset" msgid="5365010427963548932">"Pindutin upang i-reset ang koneksyon"</string>
     <string name="upload_file" msgid="2897957172366730416">"Pumili ng file"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Walang napiling file"</string>
     <string name="reset" msgid="2448168080964209908">"I-reset"</string>
