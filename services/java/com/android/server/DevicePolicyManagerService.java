@@ -177,6 +177,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         static final long DEF_PASSWORD_EXPIRATION_DATE = 0;
         long passwordExpirationDate = DEF_PASSWORD_EXPIRATION_DATE;
 
+        static final int DEF_KEYGUARD_WIDGET_DISABLED = 0; // none
+        int disableKeyguardWidgets = DEF_KEYGUARD_WIDGET_DISABLED;
+
         boolean encryptionRequested = false;
         boolean disableCamera = false;
 
@@ -285,6 +288,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.startTag(null, "disable-camera");
                 out.attribute(null, "value", Boolean.toString(disableCamera));
                 out.endTag(null, "disable-camera");
+            }
+            if (disableKeyguardWidgets != DEF_KEYGUARD_WIDGET_DISABLED) {
+                out.startTag(null, "disable-keyguard-widgets");
+                out.attribute(null, "value", Integer.toString(disableKeyguardWidgets));
+                out.endTag(null, "disable-keyguard-widgets");
             }
         }
 
@@ -2090,6 +2098,46 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
             }
             return false;
+        }
+    }
+
+    /**
+     * Selectively disable keyguard widgets.
+     */
+    public void setKeyguardWidgetsDisabled(ComponentName who, int which) {
+        synchronized (this) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            ActiveAdmin ap = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_DISABLE_KEYGUARD_WIDGETS);
+            if ((ap.disableKeyguardWidgets & which) != which) {
+                ap.disableKeyguardWidgets |= which;
+                saveSettingsLocked();
+            }
+            syncDeviceCapabilitiesLocked();
+        }
+    }
+
+    /**
+     * Gets the disabled state for widgets in keyguard for the given admin,
+     * or the aggregate of all active admins if who is null.
+     */
+    public int getKeyguardWidgetsDisabled(ComponentName who) {
+        synchronized (this) {
+            if (who != null) {
+                ActiveAdmin admin = getActiveAdminUncheckedLocked(who);
+                return (admin != null) ? admin.disableKeyguardWidgets : 0;
+            }
+
+            // Determine whether or not keyguard widgets are disabled for any active admins.
+            final int N = mAdminList.size();
+            int which = 0;
+            for (int i = 0; i < N; i++) {
+                ActiveAdmin admin = mAdminList.get(i);
+                which |= admin.disableKeyguardWidgets;
+            }
+            return which;
         }
     }
 

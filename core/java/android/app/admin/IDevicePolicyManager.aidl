@@ -48,7 +48,7 @@ interface IDevicePolicyManager {
 
     void setPasswordMinimumNonLetter(in ComponentName who, int length);
     int getPasswordMinimumNonLetter(in ComponentName who);
-    
+
     void setPasswordHistoryLength(in ComponentName who, int length);
     int getPasswordHistoryLength(in ComponentName who);
 
@@ -59,17 +59,17 @@ interface IDevicePolicyManager {
 
     boolean isActivePasswordSufficient();
     int getCurrentFailedPasswordAttempts();
-    
+
     void setMaximumFailedPasswordsForWipe(in ComponentName admin, int num);
     int getMaximumFailedPasswordsForWipe(in ComponentName admin);
-    
+
     boolean resetPassword(String password, int flags);
-    
+
     void setMaximumTimeToLock(in ComponentName who, long timeMs);
     long getMaximumTimeToLock(in ComponentName who);
-    
+
     void lockNow();
-    
+
     void wipeData(int flags);
 
     ComponentName setGlobalProxy(in ComponentName admin, String proxySpec, String exclusionList);
@@ -82,6 +82,9 @@ interface IDevicePolicyManager {
     void setCameraDisabled(in ComponentName who, boolean disabled);
     boolean getCameraDisabled(in ComponentName who);
 
+    void setKeyguardWidgetsDisabled(in ComponentName who, int which);
+    int getKeyguardWidgetsDisabled(in ComponentName who);
+
     void setActiveAdmin(in ComponentName policyReceiver, boolean refreshing);
     boolean isAdminActive(in ComponentName policyReceiver);
     List<ComponentName> getActiveAdmins();
@@ -89,7 +92,7 @@ interface IDevicePolicyManager {
     void getRemoveWarning(in ComponentName policyReceiver, in RemoteCallback result);
     void removeActiveAdmin(in ComponentName policyReceiver);
     boolean hasGrantedPolicy(in ComponentName policyReceiver, int usesPolicy);
-    
+
     void setActivePasswordState(int quality, int length, int letters, int uppercase, int lowercase,
         int numbers, int symbols, int nonletter);
     void reportFailedPasswordAttempt();
