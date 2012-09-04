@@ -587,10 +587,12 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
     }
 
+    @Override
     public int getSystemUiVisibility() {
         return mSystemUiVisibility;
     }
 
+    @Override
     public int getSurfaceLayer() {
         return mLayer;
     }
@@ -598,7 +600,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     public IApplicationToken getAppToken() {
         return mAppToken != null ? mAppToken.appToken : null;
     }
-    
+
+    public int getDisplayId() {
+        return mDisplayContent.getDisplayId();
+    }
+
     public long getInputDispatchingTimeoutNanos() {
         return mAppToken != null
                 ? mAppToken.inputDispatchingTimeoutNanos

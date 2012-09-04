@@ -335,7 +335,7 @@ class WindowStateAnimator {
                         + mWin.mPolicyVisibilityAfterAnim);
             }
             mWin.mPolicyVisibility = mWin.mPolicyVisibilityAfterAnim;
-            mService.mLayoutNeeded = true;
+            mWin.mDisplayContent.layoutNeeded = true;
             if (!mWin.mPolicyVisibility) {
                 if (mService.mCurrentFocus == mWin) {
                     mService.mFocusMayChange = true;
@@ -1362,7 +1362,7 @@ class WindowStateAnimator {
                         // do a layout.  If called from within the transaction
                         // loop, this will cause it to restart with a new
                         // layout.
-                        mService.mLayoutNeeded = true;
+                        c.mDisplayContent.layoutNeeded = true;
                     }
                 }
             }
