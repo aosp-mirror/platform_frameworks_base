@@ -94,7 +94,7 @@ private:
     // Cache of glyphs
     DefaultKeyedVector<glyph_t, CachedGlyphInfo*> mCachedGlyphs;
 
-    void invalidateTextureCache(CacheTexture *cacheTexture = NULL);
+    void invalidateTextureCache(CacheTexture* cacheTexture = NULL);
 
     CachedGlyphInfo* cacheGlyph(SkPaint* paint, glyph_t glyph, bool precaching);
     void updateGlyphCache(SkPaint* paint, const SkGlyph& skiaGlyph, CachedGlyphInfo* glyph,
