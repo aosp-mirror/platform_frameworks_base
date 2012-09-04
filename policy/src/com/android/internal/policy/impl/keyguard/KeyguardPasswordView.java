@@ -256,12 +256,10 @@ public class KeyguardPasswordView extends LinearLayout
 
     private void verifyPasswordAndUnlock() {
         String entry = mPasswordEntry.getText().toString();
-        boolean wrongPassword = true;
         if (mLockPatternUtils.checkPassword(entry)) {
             mCallback.reportSuccessfulUnlockAttempt();
             KeyStore.getInstance().password(entry);
             mCallback.dismiss(true);
-            wrongPassword = false;
         } else if (entry.length() > MINIMUM_PASSWORD_LENGTH_BEFORE_REPORT ) {
             // to avoid accidental lockout, only count attempts that are long enough to be a
             // real password. This may require some tweaking.
@@ -271,9 +269,9 @@ public class KeyguardPasswordView extends LinearLayout
                 long deadline = mLockPatternUtils.setLockoutAttemptDeadline();
                 handleAttemptLockout(deadline);
             }
+            mNavigationManager.setMessage(
+                    mIsAlpha ? R.string.kg_wrong_password : R.string.kg_wrong_pin);
         }
-        mNavigationManager.setMessage(wrongPassword ?
-                (mIsAlpha ? R.string.kg_wrong_password : R.string.kg_wrong_pin) : 0);
         mPasswordEntry.setText("");
     }
 

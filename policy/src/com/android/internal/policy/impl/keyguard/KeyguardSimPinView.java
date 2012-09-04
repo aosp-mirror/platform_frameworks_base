@@ -91,8 +91,6 @@ public class KeyguardSimPinView extends LinearLayout
                 }
             });
         }
-
-        setFocusableInTouchMode(true);
         reset();
     }
 
