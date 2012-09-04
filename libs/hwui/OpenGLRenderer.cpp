@@ -1937,7 +1937,7 @@ status_t OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
         // This value is used in the fragment shader to determine how to fill fragments.
         // We will need to calculate the actual width proportion on each segment for
         // scaled non-hairlines, since the boundary proportion may differ per-axis when scaled.
-        float boundaryWidthProportion = 1 / (2 * halfStrokeWidth);
+        float boundaryWidthProportion = .5 - 1 / (2 * halfStrokeWidth);
         setupDrawAALine((void*) aaVertices, widthCoords, lengthCoords,
                 boundaryWidthProportion, widthSlot, lengthSlot);
     }
@@ -2001,9 +2001,9 @@ status_t OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
                 abVector.x *= inverseScaleX;
                 abVector.y *= inverseScaleY;
                 float abLength = abVector.length();
-                boundaryLengthProportion = abLength / (length + abLength);
+                boundaryLengthProportion = .5 - abLength / (length + abLength);
             } else {
-                boundaryLengthProportion = .5 / (length + 1);
+                boundaryLengthProportion = .5 - .5 / (length + 1);
             }
 
             abVector /= 2;
