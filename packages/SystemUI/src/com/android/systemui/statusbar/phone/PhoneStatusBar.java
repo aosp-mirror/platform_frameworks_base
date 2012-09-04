@@ -746,6 +746,10 @@ public class PhoneStatusBar extends BaseStatusBar {
          */
 
         if (notification.notification.fullScreenIntent != null) {
+            // Stop screensaver if the notification has a full-screen intent.
+            // (like an incoming phone call)
+            awakenDreams();
+
             // not immersive & a full-screen alert should be shown
             Slog.d(TAG, "Notification has fullScreenIntent; sending fullScreenIntent");
             try {
