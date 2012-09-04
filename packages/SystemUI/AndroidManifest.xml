@@ -167,7 +167,7 @@
             android:name=".BeanBag"
             android:exported="true"
             android:label="BeanBag"
-            android:icon="@drawable/redbeandroid"
+            android:icon="@drawable/redbean2"
             android:theme="@android:style/Theme.Wallpaper.NoTitleBar.Fullscreen"
             android:hardwareAccelerated="true"
             android:launchMode="singleInstance"
@@ -184,7 +184,9 @@
         <service
             android:name=".BeanBagDream"
             android:exported="true"
-            android:label="Beans in space">
+            android:label="@string/jelly_bean_dream_name"
+            android:enabled="false"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
