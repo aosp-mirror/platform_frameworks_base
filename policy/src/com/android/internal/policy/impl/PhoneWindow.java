@@ -2841,7 +2841,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             mDecor.setDescendantFocusability(ViewGroup.FOCUS_AFTER_DESCENDANTS);
             mDecor.setIsRootNamespace(true);
             mDecor.setLayoutDirection(
-                    getContext().getResources().getConfiguration().layoutDirection);
+                    getContext().getResources().getConfiguration().getLayoutDirection());
         }
         if (mContentParent == null) {
             mContentParent = generateLayout(mDecor);

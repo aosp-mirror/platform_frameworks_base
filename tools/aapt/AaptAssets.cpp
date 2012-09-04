@@ -183,6 +183,13 @@ AaptGroupEntry::parseNamePart(const String8& part, int* axis, uint32_t* value)
         return 0;
     }
 
+    // layout direction
+    if (getLayoutDirectionName(part.string(), &config)) {
+        *axis = AXIS_LAYOUTDIR;
+        *value = (config.screenLayout&ResTable_config::MASK_LAYOUTDIR);
+        return 0;
+    }
+
     // smallest screen dp width
     if (getSmallestScreenWidthDpName(part.string(), &config)) {
         *axis = AXIS_SMALLESTSCREENWIDTHDP;
@@ -309,6 +316,8 @@ AaptGroupEntry::getConfigValueForAxis(const ResTable_config& config, int axis)
         case AXIS_LANGUAGE:
             return (((uint32_t)config.country[1]) << 24) | (((uint32_t)config.country[0]) << 16)
                 | (((uint32_t)config.language[1]) << 8) | (config.language[0]);
+        case AXIS_LAYOUTDIR:
+            return config.screenLayout&ResTable_config::MASK_LAYOUTDIR;
         case AXIS_SCREENLAYOUTSIZE:
             return config.screenLayout&ResTable_config::MASK_SCREENSIZE;
         case AXIS_ORIENTATION:
@@ -364,7 +373,7 @@ AaptGroupEntry::initFromDirName(const char* dir, String8* resType)
     Vector<String8> parts;
 
     String8 mcc, mnc, loc, layoutsize, layoutlong, orient, den;
-    String8 touch, key, keysHidden, nav, navHidden, size, vers;
+    String8 touch, key, keysHidden, nav, navHidden, size, layoutDir, vers;
     String8 uiModeType, uiModeNight, smallestwidthdp, widthdp, heightdp;
 
     const char *p = dir;
@@ -450,6 +459,18 @@ AaptGroupEntry::initFromDirName(const char* dir, String8* resType)
         part = parts[index];
     } else {
         //printf("not region: %s\n", part.string());
+    }
+
+    if (getLayoutDirectionName(part.string())) {
+        layoutDir = part;
+
+        index++;
+        if (index == N) {
+            goto success;
+        }
+        part = parts[index];
+    } else {
+        //printf("not layout direction: %s\n", part.string());
     }
 
     if (getSmallestScreenWidthDpName(part.string())) {
@@ -674,6 +695,7 @@ success:
     this->navHidden = navHidden;
     this->navigation = nav;
     this->screenSize = size;
+    this->layoutDirection = layoutDir;
     this->version = vers;
 
     // what is this anyway?
@@ -690,6 +712,8 @@ AaptGroupEntry::toString() const
     s += this->mnc;
     s += ",";
     s += this->locale;
+    s += ",";
+    s += layoutDirection;
     s += ",";
     s += smallestScreenWidthDp;
     s += ",";
@@ -746,6 +770,12 @@ AaptGroupEntry::toDirName(const String8& resType) const
             s += "-";
         }
         s += locale;
+    }
+    if (this->layoutDirection != "") {
+        if (s.length() > 0) {
+            s += "-";
+        }
+        s += layoutDirection;
     }
     if (this->smallestScreenWidthDp != "") {
         if (s.length() > 0) {
@@ -952,6 +982,28 @@ bool AaptGroupEntry::getLocaleName(const char* fileName,
             out->country[0] = fileName[3];
             out->country[1] = fileName[4];
         }
+        return true;
+    }
+
+    return false;
+}
+
+bool AaptGroupEntry::getLayoutDirectionName(const char* name, ResTable_config* out)
+{
+    if (strcmp(name, kWildcardName) == 0) {
+        if (out) out->screenLayout =
+                (out->screenLayout&~ResTable_config::MASK_LAYOUTDIR)
+                | ResTable_config::LAYOUTDIR_ANY;
+        return true;
+    } else if (strcmp(name, "ltr") == 0) {
+        if (out) out->screenLayout =
+                (out->screenLayout&~ResTable_config::MASK_LAYOUTDIR)
+                | ResTable_config::LAYOUTDIR_LTR;
+        return true;
+    } else if (strcmp(name, "rtl") == 0) {
+        if (out) out->screenLayout =
+                (out->screenLayout&~ResTable_config::MASK_LAYOUTDIR)
+                | ResTable_config::LAYOUTDIR_RTL;
         return true;
     }
 
@@ -1415,6 +1467,7 @@ int AaptGroupEntry::compare(const AaptGroupEntry& o) const
     int v = mcc.compare(o.mcc);
     if (v == 0) v = mnc.compare(o.mnc);
     if (v == 0) v = locale.compare(o.locale);
+    if (v == 0) v = layoutDirection.compare(o.layoutDirection);
     if (v == 0) v = vendor.compare(o.vendor);
     if (v == 0) v = smallestScreenWidthDp.compare(o.smallestScreenWidthDp);
     if (v == 0) v = screenWidthDp.compare(o.screenWidthDp);
@@ -1447,6 +1500,7 @@ const ResTable_config& AaptGroupEntry::toParams() const
     getMccName(mcc.string(), &params);
     getMncName(mnc.string(), &params);
     getLocaleName(locale.string(), &params);
+    getLayoutDirectionName(layoutDirection.string(), &params);
     getSmallestScreenWidthDpName(smallestScreenWidthDp.string(), &params);
     getScreenWidthDpName(screenWidthDp.string(), &params);
     getScreenHeightDpName(screenHeightDp.string(), &params);
