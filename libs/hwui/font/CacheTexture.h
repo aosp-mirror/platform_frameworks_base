@@ -103,8 +103,91 @@ public:
                 mWidth - TEXTURE_BORDER_SIZE, mHeight - TEXTURE_BORDER_SIZE, true);
     }
 
+    void releaseTexture() {
+        if (mTexture) {
+            glDeleteTextures(1, &mTextureId);
+            delete[] mTexture;
+            mTexture = NULL;
+            mTextureId = 0;
+        }
+    }
+
+    /**
+     * This method assumes that the proper texture unit is active.
+     */
+    void allocateTexture() {
+        int width = mWidth;
+        int height = mHeight;
+
+        mTexture = new uint8_t[width * height];
+
+        if (!mTextureId) {
+            glGenTextures(1, &mTextureId);
+        }
+
+        glBindTexture(GL_TEXTURE_2D, mTextureId);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        // Initialize texture dimensions
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, width, height, 0,
+                GL_ALPHA, GL_UNSIGNED_BYTE, 0);
+
+        const GLenum filtering = getLinearFiltering() ? GL_LINEAR : GL_NEAREST;
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filtering);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filtering);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    }
+
     bool fitBitmap(const SkGlyph& glyph, uint32_t *retOriginX, uint32_t *retOriginY);
 
+    inline uint16_t getWidth() const {
+        return mWidth;
+    }
+
+    inline uint16_t getHeight() const {
+        return mHeight;
+    }
+
+    inline uint8_t* getTexture() const {
+        return mTexture;
+    }
+
+    inline GLuint getTextureId() const {
+        return mTextureId;
+    }
+
+    inline bool isDirty() const {
+        return mDirty;
+    }
+
+    inline void setDirty(bool dirty) {
+        mDirty = dirty;
+    }
+
+    inline bool getLinearFiltering() const {
+        return mLinearFiltering;
+    }
+
+    /**
+     * This method assumes that the proper texture unit is active.
+     */
+    void setLinearFiltering(bool linearFiltering, bool bind = true) {
+        if (linearFiltering != mLinearFiltering) {
+            mLinearFiltering = linearFiltering;
+
+            const GLenum filtering = linearFiltering ? GL_LINEAR : GL_NEAREST;
+            if (bind) glBindTexture(GL_TEXTURE_2D, getTextureId());
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filtering);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filtering);
+        }
+    }
+
+    inline uint16_t getGlyphCount() const {
+        return mNumGlyphs;
+    }
+
+private:
     uint8_t* mTexture;
     GLuint mTextureId;
     uint16_t mWidth;
