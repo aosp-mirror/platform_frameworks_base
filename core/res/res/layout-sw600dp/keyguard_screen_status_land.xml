@@ -109,7 +109,7 @@
         />
 
     <TextView
-        android:id="@+id/propertyOf"
+        android:id="@+id/owner_info"
         android:lineSpacingExtra="8dip"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

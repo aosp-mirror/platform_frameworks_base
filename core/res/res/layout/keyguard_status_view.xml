@@ -94,7 +94,7 @@
         </LinearLayout>
 
         <TextView
-            android:id="@*android:id/status1"
+            android:id="@+id/status1"
             android:layout_gravity="end"
             android:layout_marginEnd="@*android:dimen/keyguard_lockscreen_status_line_font_right_margin"
             android:singleLine="true"
@@ -105,7 +105,18 @@
             />
 
         <TextView
-            android:id="@*android:id/carrier"
+            android:id="@+id/owner_info"
+            android:layout_gravity="end"
+            android:layout_marginEnd="@*android:dimen/keyguard_lockscreen_status_line_font_right_margin"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="@*android:dimen/keyguard_lockscreen_status_line_font_size"
+            android:drawablePadding="4dip"
+            />
+
+        <TextView
+            android:id="@+id/carrier"
             android:layout_gravity="end"
             android:layout_marginEnd="@*android:dimen/keyguard_lockscreen_status_line_font_right_margin"
             android:singleLine="true"
