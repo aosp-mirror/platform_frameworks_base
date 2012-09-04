@@ -27,7 +27,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -151,7 +150,7 @@ class AppWidgetService extends IAppWidgetService.Stub
         // Register for the boot completed broadcast, so we can send the
         // ENABLE broacasts. If we try to send them now, they time out,
         // because the system isn't ready to handle them yet.
-        mContext.registerReceiver(mBroadcastReceiver,
+        mContext.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL,
                 new IntentFilter(Intent.ACTION_BOOT_COMPLETED), null, null);
 
         // Register for configuration changes so we can update the names
@@ -166,12 +165,14 @@ class AppWidgetService extends IAppWidgetService.Stub
         filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         filter.addDataScheme("package");
-        mContext.registerReceiver(mBroadcastReceiver, filter);
+        mContext.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL,
+                filter, null, null);
         // Register for events related to sdcard installation.
         IntentFilter sdFilter = new IntentFilter();
         sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE);
         sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
-        mContext.registerReceiver(mBroadcastReceiver, sdFilter);
+        mContext.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL,
+                sdFilter, null, null);
 
         IntentFilter userFilter = new IntentFilter();
         userFilter.addAction(Intent.ACTION_USER_REMOVED);
@@ -181,6 +182,15 @@ class AppWidgetService extends IAppWidgetService.Stub
                 onUserRemoved(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1));
             }
         }, userFilter);
+
+        IntentFilter userStopFilter = new IntentFilter();
+        userStopFilter.addAction(Intent.ACTION_USER_STOPPED);
+        mContext.registerReceiverAsUser(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                onUserStopped(getSendingUserId());
+            }
+        }, UserHandle.ALL, userFilter, null, null);
     }
 
     @Override
@@ -252,6 +262,9 @@ class AppWidgetService extends IAppWidgetService.Stub
         } else {
             impl.onUserRemoved();
         }
+    }
+
+    public void onUserStopped(int userId) {
     }
 
     private AppWidgetServiceImpl getImplForUser(int userId) {
@@ -370,9 +383,17 @@ class AppWidgetService extends IAppWidgetService.Stub
                     service.onConfigurationChanged();
                 }
             } else {
-                for (int i = 0; i < mAppWidgetServices.size(); i++) {
-                    AppWidgetServiceImpl service = mAppWidgetServices.valueAt(i);
-                    service.onBroadcastReceived(intent);
+                int sendingUser = getSendingUserId();
+                if (sendingUser == UserHandle.USER_ALL) {
+                    for (int i = 0; i < mAppWidgetServices.size(); i++) {
+                        AppWidgetServiceImpl service = mAppWidgetServices.valueAt(i);
+                        service.onBroadcastReceived(intent);
+                    }
+                } else {
+                    AppWidgetServiceImpl service = mAppWidgetServices.get(sendingUser);
+                    if (service != null) {
+                        service.onBroadcastReceived(intent);
+                    }
                 }
             }
         }

@@ -370,6 +370,13 @@ public class MockContext extends Context {
         throw new UnsupportedOperationException();
     }
 
+    /** @hide */
+    @Override
+    public Intent registerReceiverAsUser(BroadcastReceiver receiver, UserHandle user,
+            IntentFilter filter, String broadcastPermission, Handler scheduler) {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public void unregisterReceiver(BroadcastReceiver receiver) {
         throw new UnsupportedOperationException();

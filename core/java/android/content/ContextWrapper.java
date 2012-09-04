@@ -425,6 +425,15 @@ public class ContextWrapper extends Context {
                 scheduler);
     }
 
+    /** @hide */
+    @Override
+    public Intent registerReceiverAsUser(
+        BroadcastReceiver receiver, UserHandle user, IntentFilter filter,
+        String broadcastPermission, Handler scheduler) {
+        return mBase.registerReceiverAsUser(receiver, user, filter, broadcastPermission,
+                scheduler);
+    }
+
     @Override
     public void unregisterReceiver(BroadcastReceiver receiver) {
         mBase.unregisterReceiver(receiver);

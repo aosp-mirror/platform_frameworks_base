@@ -495,7 +495,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         @Override
         protected BroadcastFilter newResult(BroadcastFilter filter, int match, int userId) {
-            if (userId == UserHandle.USER_ALL || userId == filter.owningUserId) {
+            if (userId == UserHandle.USER_ALL || filter.owningUserId == UserHandle.USER_ALL
+                    || userId == filter.owningUserId) {
                 return super.newResult(filter, match, userId);
             }
             return null;
@@ -7551,7 +7552,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             finisher = new IIntentReceiver.Stub() {
                                 public void performReceive(Intent intent, int resultCode,
                                         String data, Bundle extras, boolean ordered,
-                                        boolean sticky) {
+                                        boolean sticky, int sendingUser) {
                                     // The raw IIntentReceiver interface is called
                                     // with the AM lock held, so redispatch to
                                     // execute our code without the lock.
@@ -11040,9 +11041,10 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     public Intent registerReceiver(IApplicationThread caller, String callerPackage,
-            IIntentReceiver receiver, IntentFilter filter, String permission) {
+            IIntentReceiver receiver, IntentFilter filter, String permission, int userId) {
         enforceNotIsolatedCaller("registerReceiver");
         int callingUid;
+        int callingPid;
         synchronized(this) {
             ProcessRecord callerApp = null;
             if (caller != null) {
@@ -11059,10 +11061,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                             + " is not running in process " + callerApp);
                 }
                 callingUid = callerApp.info.uid;
+                callingPid = callerApp.pid;
             } else {
                 callerPackage = null;
                 callingUid = Binder.getCallingUid();
+                callingPid = Binder.getCallingPid();
             }
+
+            userId = this.handleIncomingUserLocked(callingPid, callingUid, userId,
+                    true, true, "registerReceiver", callerPackage);
 
             List allSticky = null;
 
@@ -11097,9 +11104,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             ReceiverList rl
                 = (ReceiverList)mRegisteredReceivers.get(receiver.asBinder());
             if (rl == null) {
-                rl = new ReceiverList(this, callerApp,
-                        Binder.getCallingPid(),
-                        Binder.getCallingUid(), receiver);
+                rl = new ReceiverList(this, callerApp, callingPid, callingUid,
+                        userId, receiver);
                 if (rl.app != null) {
                     rl.app.receivers.add(rl);
                 } else {
@@ -11111,9 +11117,21 @@ public final class ActivityManagerService extends ActivityManagerNative
                     rl.linkedToDeath = true;
                 }
                 mRegisteredReceivers.put(receiver.asBinder(), rl);
+            } else if (rl.uid != callingUid) {
+                throw new IllegalArgumentException(
+                        "Receiver requested to register for uid " + callingUid
+                        + " was previously registered for uid " + rl.uid);
+            } else if (rl.pid != callingPid) {
+                throw new IllegalArgumentException(
+                        "Receiver requested to register for pid " + callingPid
+                        + " was previously registered for pid " + rl.pid);
+            } else if (rl.userId != userId) {
+                throw new IllegalArgumentException(
+                        "Receiver requested to register for user " + userId
+                        + " was previously registered for user " + rl.userId);
             }
             BroadcastFilter bf = new BroadcastFilter(filter, rl, callerPackage,
-                    permission, callingUid);
+                    permission, callingUid, userId);
             rl.add(bf);
             if (!bf.debugCheck()) {
                 Slog.w(TAG, "==> For Dynamic broadast");
@@ -13836,7 +13854,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     final IIntentReceiver resultReceiver = new IIntentReceiver.Stub() {
                         @Override
                         public void performReceive(Intent intent, int resultCode, String data,
-                                Bundle extras, boolean ordered, boolean sticky) {
+                                Bundle extras, boolean ordered, boolean sticky, int sendingUser) {
                             finishUserStop(uss);
                         }
                     };

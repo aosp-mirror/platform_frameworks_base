@@ -300,7 +300,8 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
                 = b != null ? IIntentReceiver.Stub.asInterface(b) : null;
             IntentFilter filter = IntentFilter.CREATOR.createFromParcel(data);
             String perm = data.readString();
-            Intent intent = registerReceiver(app, packageName, rec, filter, perm);
+            int userId = data.readInt();
+            Intent intent = registerReceiver(app, packageName, rec, filter, perm, userId);
             reply.writeNoException();
             if (intent != null) {
                 reply.writeInt(1);
@@ -1999,7 +2000,7 @@ class ActivityManagerProxy implements IActivityManager
     }
     public Intent registerReceiver(IApplicationThread caller, String packageName,
             IIntentReceiver receiver,
-            IntentFilter filter, String perm) throws RemoteException
+            IntentFilter filter, String perm, int userId) throws RemoteException
     {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
@@ -2009,6 +2010,7 @@ class ActivityManagerProxy implements IActivityManager
         data.writeStrongBinder(receiver != null ? receiver.asBinder() : null);
         filter.writeToParcel(data, 0);
         data.writeString(perm);
+        data.writeInt(userId);
         mRemote.transact(REGISTER_RECEIVER_TRANSACTION, data, reply, 0);
         reply.readException();
         Intent intent = null;
