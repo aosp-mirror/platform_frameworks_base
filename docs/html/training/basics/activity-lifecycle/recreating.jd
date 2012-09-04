@@ -51,7 +51,7 @@ the user rotates the screen. When the screen changes orientation, the system des
 the foreground activity because the screen configuration has changed and your activity might need to
 load alternative resources (such as the layout).</p>
 
-<p>By default, the system uses the {@link android.os.Bundle} instance state to saves information
+<p>By default, the system uses the {@link android.os.Bundle} instance state to save information
 about each {@link android.view.View} object in your activity layout (such as the text value entered
 into an {@link android.widget.EditText} object). So, if your activity instance is destroyed and
 recreated, the state of the layout is automatically restored to its previous state. However, your
