@@ -14,6 +14,7 @@
 ** limitations under the License.
 */
 
+#include <linux/capability.h>
 #include "installd.h"
 #include <diskusage/dirsize.h>
 
@@ -665,14 +666,14 @@ int dexopt(const char *apk_path, uid_t uid, int is_public)
         ALOGE("dexopt cannot open '%s' for output\n", dex_path);
         goto fail;
     }
-    if (fchown(odex_fd, AID_SYSTEM, uid) < 0) {
-        ALOGE("dexopt cannot chown '%s'\n", dex_path);
-        goto fail;
-    }
     if (fchmod(odex_fd,
                S_IRUSR|S_IWUSR|S_IRGRP |
                (is_public ? S_IROTH : 0)) < 0) {
         ALOGE("dexopt cannot chmod '%s'\n", dex_path);
+        goto fail;
+    }
+    if (fchown(odex_fd, AID_SYSTEM, uid) < 0) {
+        ALOGE("dexopt cannot chown '%s'\n", dex_path);
         goto fail;
     }
 
@@ -690,13 +691,23 @@ int dexopt(const char *apk_path, uid_t uid, int is_public)
             ALOGE("setuid(%d) during dexopt\n", uid);
             exit(65);
         }
+        // drop capabilities
+        struct __user_cap_header_struct capheader;
+        struct __user_cap_data_struct capdata[2];
+        memset(&capheader, 0, sizeof(capheader));
+        memset(&capdata, 0, sizeof(capdata));
+        capheader.version = _LINUX_CAPABILITY_VERSION_3;
+        if (capset(&capheader, &capdata[0]) < 0) {
+            ALOGE("capset failed: %s\n", strerror(errno));
+            exit(66);
+        }
         if (flock(odex_fd, LOCK_EX | LOCK_NB) != 0) {
             ALOGE("flock(%s) failed: %s\n", dex_path, strerror(errno));
-            exit(66);
+            exit(67);
         }
 
         run_dexopt(zip_fd, odex_fd, apk_path, dexopt_flags);
-        exit(67);   /* only get here on exec failure */
+        exit(68);   /* only get here on exec failure */
     } else {
         res = wait_dexopt(pid, apk_path);
         if (res != 0) {
