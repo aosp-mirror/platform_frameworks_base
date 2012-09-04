@@ -46,7 +46,7 @@ FontRenderer::FontRenderer() {
     mMaxNumberOfQuads = 1024;
     mCurrentQuadIndex = 0;
 
-    mTextMeshPtr = NULL;
+    mTextMesh = NULL;
     mCurrentCacheTexture = NULL;
     mLastCacheTexture = NULL;
 
@@ -104,7 +104,7 @@ FontRenderer::~FontRenderer() {
         Caches::getInstance().unbindIndicesBuffer();
         glDeleteBuffers(1, &mIndexBufferID);
 
-        delete[] mTextMeshPtr;
+        delete[] mTextMesh;
     }
 
     Vector<Font*> fontsToDereference = mActiveFonts;
@@ -337,7 +337,7 @@ void FontRenderer::initVertexArrayBuffers() {
     uint32_t uvSize = 2;
     uint32_t vertsPerQuad = 4;
     uint32_t vertexBufferSize = mMaxNumberOfQuads * vertsPerQuad * coordSize * uvSize;
-    mTextMeshPtr = new float[vertexBufferSize];
+    mTextMesh = new float[vertexBufferSize];
 }
 
 // We don't want to allocate anything unless we actually draw text
@@ -403,7 +403,7 @@ void FontRenderer::issueDrawCommand() {
     Caches& caches = Caches::getInstance();
     caches.bindIndicesBuffer(mIndexBufferID);
     if (!mDrawn) {
-        float* buffer = mTextMeshPtr;
+        float* buffer = mTextMesh;
         int offset = 2;
 
         bool force = caches.unbindMeshBuffer();
@@ -432,7 +432,7 @@ void FontRenderer::appendMeshQuadNoClip(float x1, float y1, float u1, float v1,
 
     const uint32_t vertsPerQuad = 4;
     const uint32_t floatsPerVert = 4;
-    float* currentPos = mTextMeshPtr + mCurrentQuadIndex * vertsPerQuad * floatsPerVert;
+    float* currentPos = mTextMesh + mCurrentQuadIndex * vertsPerQuad * floatsPerVert;
 
     (*currentPos++) = x1;
     (*currentPos++) = y1;
@@ -645,6 +645,19 @@ bool FontRenderer::renderTextOnPath(SkPaint* paint, const Rect* clip, const char
     return mDrawn;
 }
 
+void FontRenderer::removeFont(const Font* font) {
+    for (uint32_t ct = 0; ct < mActiveFonts.size(); ct++) {
+        if (mActiveFonts[ct] == font) {
+            mActiveFonts.removeAt(ct);
+            break;
+        }
+    }
+
+    if (mCurrentFont == font) {
+        mCurrentFont = NULL;
+    }
+}
+
 void FontRenderer::computeGaussianWeights(float* weights, int32_t radius) {
     // Compute gaussian weights for the blur
     // e is the euler's number
@@ -732,7 +745,6 @@ void FontRenderer::verticalBlur(float* weights, int32_t radius,
     float currentPixel = 0.0f;
 
     for (int32_t y = 0; y < height; y ++) {
-
         uint8_t* output = dest + y * width;
 
         for (int32_t x = 0; x < width; x ++) {
@@ -766,7 +778,7 @@ void FontRenderer::verticalBlur(float* weights, int32_t radius,
                 }
             }
             *output = (uint8_t) blurredPixel;
-            output ++;
+            output++;
         }
     }
 }

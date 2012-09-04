@@ -41,12 +41,7 @@ Font::Font(FontRenderer* state, uint32_t fontId, float fontSize,
 
 
 Font::~Font() {
-    for (uint32_t ct = 0; ct < mState->mActiveFonts.size(); ct++) {
-        if (mState->mActiveFonts[ct] == this) {
-            mState->mActiveFonts.removeAt(ct);
-            break;
-        }
-    }
+    mState->removeFont(this);
 
     for (uint32_t i = 0; i < mCachedGlyphs.size(); i++) {
         delete mCachedGlyphs.valueAt(i);
@@ -405,7 +400,7 @@ void Font::updateGlyphCache(SkPaint* paint, const SkGlyph& skiaGlyph, CachedGlyp
     glyph->mBitmapMaxU = endX / (float) cacheWidth;
     glyph->mBitmapMaxV = endY / (float) cacheHeight;
 
-    mState->mUploadTexture = true;
+    mState->setTextureDirty();
 }
 
 CachedGlyphInfo* Font::cacheGlyph(SkPaint* paint, glyph_t glyph, bool precaching) {
