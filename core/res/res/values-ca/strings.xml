@@ -547,6 +547,10 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Permet a l\'aplicació escriure a la targeta SD."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"Canvia/esborra emmagatz. intern"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Permet que l\'aplicació modifiqui el contingut de l\'emmagatzematge multimèdia intern."</string>
+    <!-- no translation found for permlab_sdcardAccessAll (8150613823900460576) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardAccessAll (3215208357415891320) -->
+    <skip />
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"accedir al sistema de fitxers de la memòria cau"</string>
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Permet que l\'aplicació llegeixi el sistema de fitxers de la memòria cau i que hi escrigui."</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"fer/rebre trucades per Internet"</string>

@@ -547,6 +547,10 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"允许应用写入 SD 卡。"</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"修改/删除内部媒体存储设备的内容"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"允许应用修改内部媒体存储设备的内容。"</string>
+    <!-- no translation found for permlab_sdcardAccessAll (8150613823900460576) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardAccessAll (3215208357415891320) -->
+    <skip />
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"访问缓存文件系统"</string>
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"允许应用读取和写入缓存文件系统。"</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"拨打/接听互联网通话"</string>

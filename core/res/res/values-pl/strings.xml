@@ -547,6 +547,10 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Pozwala aplikacji na zapis na karcie SD."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"modyfikowanie/usuwanie zawartości pamięci wew."</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Pozwala aplikacji na modyfikowanie zawartości pamięci wewnętrznej."</string>
+    <!-- no translation found for permlab_sdcardAccessAll (8150613823900460576) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardAccessAll (3215208357415891320) -->
+    <skip />
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"dostęp do systemu plików pamięci podręcznej"</string>
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Pozwala aplikacji na odczyt i zapis w systemie plików pamięci podręcznej."</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"nawiązywanie/odbieranie połączeń przez internet"</string>

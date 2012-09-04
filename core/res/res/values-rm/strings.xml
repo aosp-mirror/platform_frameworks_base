@@ -891,6 +891,10 @@
     <skip />
     <!-- no translation found for permdesc_mediaStorageWrite (8189160597698529185) -->
     <skip />
+    <!-- no translation found for permlab_sdcardAccessAll (8150613823900460576) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardAccessAll (3215208357415891320) -->
+    <skip />
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"access al sistem da datotecas da cache"</string>
     <!-- no translation found for permdesc_cache_filesystem (5578967642265550955) -->
     <skip />
