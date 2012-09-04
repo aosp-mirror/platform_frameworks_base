@@ -1181,9 +1181,9 @@ public class Am {
     private class IntentReceiver extends IIntentReceiver.Stub {
         private boolean mFinished = false;
 
-        public synchronized void performReceive(
-                Intent intent, int rc, String data, Bundle ext, boolean ord,
-                boolean sticky) {
+        @Override
+        public void performReceive(Intent intent, int resultCode, String data, Bundle extras,
+                boolean ordered, boolean sticky, int sendingUser) throws RemoteException {
             String line = "Broadcast completed: result=" + rc;
             if (data != null) line = line + ", data=\"" + data + "\"";
             if (ext != null) line = line + ", extras: " + ext;
