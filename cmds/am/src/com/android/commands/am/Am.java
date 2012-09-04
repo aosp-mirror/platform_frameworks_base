@@ -1184,9 +1184,9 @@ public class Am {
         @Override
         public void performReceive(Intent intent, int resultCode, String data, Bundle extras,
                 boolean ordered, boolean sticky, int sendingUser) throws RemoteException {
-            String line = "Broadcast completed: result=" + rc;
+            String line = "Broadcast completed: result=" + resultCode;
             if (data != null) line = line + ", data=\"" + data + "\"";
-            if (ext != null) line = line + ", extras: " + ext;
+            if (extras != null) line = line + ", extras: " + extras;
             System.out.println(line);
             mFinished = true;
             notifyAll();
