@@ -153,7 +153,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -3571,15 +3570,32 @@ public final class ActivityManagerService extends ActivityManagerNative
     public void closeSystemDialogs(String reason) {
         enforceNotIsolatedCaller("closeSystemDialogs");
 
+        final int pid = Binder.getCallingPid();
         final int uid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
-        synchronized (this) {
-            closeSystemDialogsLocked(uid, reason);
+        try {
+            synchronized (this) {
+                // Only allow this from foreground processes, so that background
+                // applications can't abuse it to prevent system UI from being shown.
+                if (uid >= Process.FIRST_APPLICATION_UID) {
+                    ProcessRecord proc;
+                    synchronized (mPidsSelfLocked) {
+                        proc = mPidsSelfLocked.get(pid);
+                    }
+                    if (proc.curRawAdj > ProcessList.PERCEPTIBLE_APP_ADJ) {
+                        Slog.w(TAG, "Ignoring closeSystemDialogs " + reason
+                                + " from background process " + proc);
+                        return;
+                    }
+                }
+                closeSystemDialogsLocked(reason);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
         }
-        Binder.restoreCallingIdentity(origId);
     }
 
-    void closeSystemDialogsLocked(int callingUid, String reason) {
+    void closeSystemDialogsLocked(String reason) {
         Intent intent = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
         if (reason != null) {
@@ -3595,14 +3611,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
 
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            broadcastIntentLocked(null, null, intent, null,
-                    null, 0, null, null, null, false, false, -1,
-                    callingUid, UserHandle.USER_ALL);
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
+        broadcastIntentLocked(null, null, intent, null,
+                null, 0, null, null, null, false, false, -1,
+                Process.SYSTEM_UID, UserHandle.USER_ALL);
     }
 
     public Debug.MemoryInfo[] getProcessMemoryInfo(int[] pids)
