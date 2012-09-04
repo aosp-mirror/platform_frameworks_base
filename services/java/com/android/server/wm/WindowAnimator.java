@@ -176,7 +176,7 @@ public class WindowAnimator {
             // Set the new DimAnimator params.
             DimAnimator.Parameters dimParams = layoutToAnim.mDimParams;
             if (dimParams == null) {
-                mDimParams = dimParams;
+                mDimParams = null;
             } else {
                 final WindowStateAnimator newWinAnimator = dimParams.mDimWinAnimator;
 
@@ -187,7 +187,7 @@ public class WindowAnimator {
                 if (newWinAnimator.mSurfaceShown &&
                         (existingDimWinAnimator == null || !existingDimWinAnimator.mSurfaceShown
                         || existingDimWinAnimator.mAnimLayer < newWinAnimator.mAnimLayer)) {
-                    mDimParams = dimParams;
+                    mDimParams = new DimAnimator.Parameters(dimParams);
                 }
             }
 
@@ -559,15 +559,6 @@ public class WindowAnimator {
     private void performAnimationsLocked(final WinAnimatorList winAnimatorList) {
         updateWindowsLocked(winAnimatorList);
         updateWallpaperLocked(winAnimatorList);
-
-        for (int i = mPendingLayoutChanges.size() - 1; i >= 0; i--) {
-            if ((mPendingLayoutChanges.valueAt(i)
-                    & WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER) != 0) {
-                mPendingActions |= WALLPAPER_ACTION_PENDING;
-            }
-        }
-
-        testTokenMayBeDrawnLocked();
     }
 
     // TODO(cmautner): Change the following comment when no longer locked on mWindowMap */
@@ -576,12 +567,7 @@ public class WindowAnimator {
         if (!mInitialized) {
             return;
         }
-        for (int i = mWinAnimatorLists.size() - 1; i >= 0; i--) {
-            animateLocked(mWinAnimatorLists.get(i));
-        }
-    }
 
-    private void animateLocked(final WinAnimatorList winAnimatorList) {
         mPendingLayoutChanges.clear();
         mCurrentTime = SystemClock.uptimeMillis();
         mBulkUpdateParams = SET_ORIENTATION_CHANGE_COMPLETE;
@@ -591,23 +577,29 @@ public class WindowAnimator {
             Slog.i(TAG, "!!! animate: entry time=" + mCurrentTime);
         }
 
-        // Update animations of all applications, including those
-        // associated with exiting/removed apps
+        if (WindowManagerService.SHOW_TRANSACTIONS) Slog.i(
+                TAG, ">>> OPEN TRANSACTION animateLocked");
         Surface.openTransaction();
-
         try {
             updateWindowsAppsAndRotationAnimationsLocked();
-            performAnimationsLocked(winAnimatorList);
 
-            // THIRD LOOP: Update the surfaces of all windows.
+            for (int i = mWinAnimatorLists.size() - 1; i >= 0; i--) {
+                final WinAnimatorList winAnimatorList = mWinAnimatorLists.get(i);
+
+                // Update animations of all applications, including those
+                // associated with exiting/removed apps
+                performAnimationsLocked(winAnimatorList);
+
+                final int N = winAnimatorList.size();
+                for (int j = 0; j < N; j++) {
+                    winAnimatorList.get(j).prepareSurfaceLocked(true);
+                }
+            }
+
+            testTokenMayBeDrawnLocked();
 
             if (mScreenRotationAnimation != null) {
                 mScreenRotationAnimation.updateSurfacesInTransaction();
-            }
-
-            final int N = winAnimatorList.size();
-            for (int i = 0; i < N; i++) {
-                winAnimatorList.get(i).prepareSurfaceLocked(true);
             }
 
             if (mDimParams != null) {
@@ -634,6 +626,15 @@ public class WindowAnimator {
             Log.wtf(TAG, "Unhandled exception in Window Manager", e);
         } finally {
             Surface.closeTransaction();
+            if (WindowManagerService.SHOW_TRANSACTIONS) Slog.i(
+                    TAG, "<<< CLOSE TRANSACTION animateLocked");
+        }
+
+        for (int i = mPendingLayoutChanges.size() - 1; i >= 0; i--) {
+            if ((mPendingLayoutChanges.valueAt(i)
+                    & WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER) != 0) {
+                mPendingActions |= WALLPAPER_ACTION_PENDING;
+            }
         }
 
         if (mBulkUpdateParams != 0 || mPendingLayoutChanges.size() > 0) {
