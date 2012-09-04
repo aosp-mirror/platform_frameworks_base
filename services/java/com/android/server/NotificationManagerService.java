@@ -1047,6 +1047,7 @@ public class NotificationManagerService extends INotificationManager.Stub
             if (((mDisabledNotifications & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) == 0)
                     && (!(old != null
                         && (notification.flags & Notification.FLAG_ONLY_ALERT_ONCE) != 0 ))
+                    && (r.userId == UserHandle.USER_ALL || r.userId == userId)
                     && mSystemReady) {
 
                 final AudioManager audioManager = (AudioManager) mContext
