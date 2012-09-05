@@ -19,6 +19,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:id="@+id/settings_panel"
+    android:background="#80000080"
     >
     <ImageView
         android:layout_width="match_parent"
@@ -26,7 +27,6 @@
         android:scaleType="centerInside"
         android:src="@drawable/qs_coming_soon"
         android:padding="4dp"
-        android:background="#80000080"
         />
     <LinearLayout android:id="@+id/handle"
         android:layout_width="match_parent"

@@ -40,11 +40,11 @@
         >
         <include layout="@layout/status_bar_expanded"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             />
         <include layout="@layout/quick_settings"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             />
     </com.android.systemui.statusbar.phone.PanelHolder>
 
