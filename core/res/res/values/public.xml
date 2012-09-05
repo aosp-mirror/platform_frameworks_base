@@ -1275,7 +1275,7 @@
   <java-symbol type="id" name="date" />
   <java-symbol type="id" name="eight" />
   <java-symbol type="id" name="emergencyCallButton" />
-  <java-symbol type="id" name="faceLockAreaView" />
+  <java-symbol type="id" name="face_unlock_area_view" />
   <java-symbol type="id" name="five" />
   <java-symbol type="id" name="forgotPatternButton" />
   <java-symbol type="id" name="four" />

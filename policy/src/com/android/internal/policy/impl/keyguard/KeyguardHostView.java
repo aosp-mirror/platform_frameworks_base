@@ -108,6 +108,7 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     public KeyguardHostView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mLockPatternUtils = new LockPatternUtils(context);
         mAppWidgetHost = new AppWidgetHost(mContext, APPWIDGET_HOST_ID, mOnClickHandler);
         mSecurityModel = new KeyguardSecurityModel(mContext);
 
@@ -358,7 +359,7 @@ public class KeyguardHostView extends KeyguardViewBase {
      * account unlock screen and biometric unlock to show the user's normal unlock.
      */
     private void showBackupSecurity() {
-        SecurityMode currentMode = mSecurityModel.getSecurityMode();
+        SecurityMode currentMode = mSecurityModel.getAlternateFor(mSecurityModel.getSecurityMode());
         SecurityMode backup = mSecurityModel.getBackupFor(currentMode);
         showSecurityScreen(getSecurityViewIdForMode(backup));
     }
@@ -368,8 +369,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         if (SECURITY_SELECTOR_ID == mCurrentSecurityId) {
             SecurityMode securityMode = mSecurityModel.getSecurityMode();
             // Allow an alternate, such as biometric unlock
-            // TODO: un-comment when face unlock is working again:
-            // securityMode = mSecurityModel.getAlternateFor(securityMode);
+            securityMode = mSecurityModel.getAlternateFor(securityMode);
             int realSecurityId = getSecurityViewIdForMode(securityMode);
             if (SECURITY_SELECTOR_ID == realSecurityId) {
                 finish = true; // no security required
