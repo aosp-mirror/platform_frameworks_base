@@ -53,12 +53,12 @@ struct CacheBlock {
             mX(x), mY(y), mWidth(width), mHeight(height), mNext(NULL), mPrev(NULL) {
     }
 
-    static CacheBlock* insertBlock(CacheBlock* head, CacheBlock *newBlock);
+    static CacheBlock* insertBlock(CacheBlock* head, CacheBlock* newBlock);
 
-    static CacheBlock* removeBlock(CacheBlock* head, CacheBlock *blockToRemove);
+    static CacheBlock* removeBlock(CacheBlock* head, CacheBlock* blockToRemove);
 
     void output() {
-        CacheBlock *currBlock = this;
+        CacheBlock* currBlock = this;
         while (currBlock) {
             ALOGD("Block: this, x, y, w, h = %p, %d, %d, %d, %d",
                     currBlock, currBlock->mX, currBlock->mY, currBlock->mWidth, currBlock->mHeight);
@@ -139,7 +139,7 @@ public:
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     }
 
-    bool fitBitmap(const SkGlyph& glyph, uint32_t *retOriginX, uint32_t *retOriginY);
+    bool fitBitmap(const SkGlyph& glyph, uint32_t* retOriginX, uint32_t* retOriginY);
 
     inline uint16_t getWidth() const {
         return mWidth;

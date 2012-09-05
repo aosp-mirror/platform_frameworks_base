@@ -31,15 +31,15 @@ namespace uirenderer {
  * order, except for the final block (the remainder space at the right, since we fill from the
  * left).
  */
-CacheBlock* CacheBlock::insertBlock(CacheBlock* head, CacheBlock *newBlock) {
+CacheBlock* CacheBlock::insertBlock(CacheBlock* head, CacheBlock* newBlock) {
 #if DEBUG_FONT_RENDERER
     ALOGD("insertBlock: this, x, y, w, h = %p, %d, %d, %d, %d",
             newBlock, newBlock->mX, newBlock->mY,
             newBlock->mWidth, newBlock->mHeight);
 #endif
 
-    CacheBlock *currBlock = head;
-    CacheBlock *prevBlock = NULL;
+    CacheBlock* currBlock = head;
+    CacheBlock* prevBlock = NULL;
 
     while (currBlock && currBlock->mY != TEXTURE_BORDER_SIZE) {
         if (newBlock->mWidth < currBlock->mWidth) {
@@ -75,7 +75,7 @@ CacheBlock* CacheBlock::insertBlock(CacheBlock* head, CacheBlock *newBlock) {
     }
 }
 
-CacheBlock* CacheBlock::removeBlock(CacheBlock* head, CacheBlock *blockToRemove) {
+CacheBlock* CacheBlock::removeBlock(CacheBlock* head, CacheBlock* blockToRemove) {
 #if DEBUG_FONT_RENDERER
     ALOGD("removeBlock: this, x, y, w, h = %p, %d, %d, %d, %d",
             blockToRemove, blockToRemove->mX, blockToRemove->mY,
@@ -105,8 +105,8 @@ CacheBlock* CacheBlock::removeBlock(CacheBlock* head, CacheBlock *blockToRemove)
 // CacheTexture
 ///////////////////////////////////////////////////////////////////////////////
 
-bool CacheTexture::fitBitmap(const SkGlyph& glyph, uint32_t *retOriginX, uint32_t *retOriginY) {
-    if (glyph.fHeight + TEXTURE_BORDER_SIZE > mHeight) {
+bool CacheTexture::fitBitmap(const SkGlyph& glyph, uint32_t* retOriginX, uint32_t* retOriginY) {
+    if (glyph.fHeight + TEXTURE_BORDER_SIZE * 2 > mHeight) {
         return false;
     }
 
@@ -117,10 +117,9 @@ bool CacheTexture::fitBitmap(const SkGlyph& glyph, uint32_t *retOriginX, uint32_
     // This columns for glyphs that are close but not necessarily exactly the same size. It trades
     // off the loss of a few pixels for some glyphs against the ability to store more glyphs
     // of varying sizes in one block.
-    uint16_t roundedUpW =
-            (glyphW + CACHE_BLOCK_ROUNDING_SIZE - 1) & -CACHE_BLOCK_ROUNDING_SIZE;
+    uint16_t roundedUpW = (glyphW + CACHE_BLOCK_ROUNDING_SIZE - 1) & -CACHE_BLOCK_ROUNDING_SIZE;
 
-    CacheBlock *cacheBlock = mCacheBlocks;
+    CacheBlock* cacheBlock = mCacheBlocks;
     while (cacheBlock) {
         // Store glyph in this block iff: it fits the block's remaining space and:
         // it's the remainder space (mY == 0) or there's only enough height for this one glyph
@@ -146,7 +145,7 @@ bool CacheTexture::fitBitmap(const SkGlyph& glyph, uint32_t *retOriginX, uint32_
 
                 if (mHeight - glyphH >= glyphH) {
                     // There's enough height left over to create a new CacheBlock
-                    CacheBlock *newBlock = new CacheBlock(oldX, glyphH + TEXTURE_BORDER_SIZE,
+                    CacheBlock* newBlock = new CacheBlock(oldX, glyphH + TEXTURE_BORDER_SIZE,
                             roundedUpW, mHeight - glyphH - TEXTURE_BORDER_SIZE);
 #if DEBUG_FONT_RENDERER
                     ALOGD("fitBitmap: Created new block: this, x, y, w, h = %p, %d, %d, %d, %d",
