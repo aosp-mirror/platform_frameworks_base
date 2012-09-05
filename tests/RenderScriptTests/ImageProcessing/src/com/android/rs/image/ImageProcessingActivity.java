@@ -296,14 +296,14 @@ public class ImageProcessingActivity extends Activity
 
     // button hook
     public void benchmark(View v) {
-        long t = getBenchmark();
+        float t = getBenchmark();
         //long javaTime = javaFilter();
         //mBenchmarkResult.setText("RS: " + t + " ms  Java: " + javaTime + " ms");
         mBenchmarkResult.setText("Result: " + t + " ms");
     }
 
     // For benchmark test
-    public long getBenchmark() {
+    public float getBenchmark() {
         mDoingBenchmark = true;
 
         mTest.setupBenchmark();
@@ -319,14 +319,18 @@ public class ImageProcessingActivity extends Activity
 
         Log.v(TAG, "Benchmarking");
         t = java.lang.System.currentTimeMillis();
-        mTest.runTest();
+        for (int i=0; i<10; i++) {
+            mTest.runTest();
+        }
         mTest.finish();
         t = java.lang.System.currentTimeMillis() - t;
+        float ft = (float)t;
+        ft /= 10;
 
-        Log.v(TAG, "getBenchmark: Renderscript frame time core ms " + t);
+        Log.v(TAG, "getBenchmark: Renderscript frame time core ms " + ft);
         mTest.exitBenchmark();
         mDoingBenchmark = false;
 
-        return t;
+        return ft;
     }
 }
