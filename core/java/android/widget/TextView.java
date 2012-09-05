@@ -302,6 +302,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     // The alignment to pass to Layout, or null if not resolved.
     private Layout.Alignment mLayoutAlignment;
+    private int mResolvedTextAlignment;
 
     private boolean mResolvedDrawables;
 
@@ -5639,9 +5640,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Override
     public void onResolvedLayoutDirectionReset() {
         if (mLayoutAlignment != null) {
-            int resolvedTextAlignment = getResolvedTextAlignment();
-            if (resolvedTextAlignment == TEXT_ALIGNMENT_VIEW_START ||
-                 resolvedTextAlignment == TEXT_ALIGNMENT_VIEW_END) {
+            if (mResolvedTextAlignment == TEXT_ALIGNMENT_VIEW_START ||
+                    mResolvedTextAlignment == TEXT_ALIGNMENT_VIEW_END) {
                 mLayoutAlignment = null;
             }
         }
@@ -5649,8 +5649,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private Layout.Alignment getLayoutAlignment() {
         if (mLayoutAlignment == null) {
-            int textAlign = getResolvedTextAlignment();
-            switch (textAlign) {
+            mResolvedTextAlignment = getResolvedTextAlignment();
+            switch (mResolvedTextAlignment) {
                 case TEXT_ALIGNMENT_GRAVITY:
                     switch (mGravity & Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK) {
                         case Gravity.START:
