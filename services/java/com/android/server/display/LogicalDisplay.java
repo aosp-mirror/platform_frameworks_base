@@ -64,7 +64,8 @@ final class LogicalDisplay {
     private DisplayDeviceInfo mPrimaryDisplayDeviceInfo;
 
     // Temporary rectangle used when needed.
-    private final Rect mTempRect = new Rect();
+    private final Rect mTempLayerStackRect = new Rect();
+    private final Rect mTempDisplayRect = new Rect();
 
     public LogicalDisplay(int layerStack, DisplayDevice primaryDisplayDevice) {
         mLayerStack = layerStack;
@@ -208,8 +209,7 @@ final class LogicalDisplay {
         // Set the viewport.
         // This is the area of the logical display that we intend to show on the
         // display device.  For now, it is always the full size of the logical display.
-        mTempRect.set(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
-        device.setViewportInTransactionLocked(mTempRect);
+        mTempLayerStackRect.set(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
 
         // Set the orientation.
         // The orientation specifies how the physical coordinate system of the display
@@ -219,7 +219,6 @@ final class LogicalDisplay {
                 && (displayDeviceInfo.flags & DisplayDeviceInfo.FLAG_SUPPORTS_ROTATION) != 0) {
             orientation = displayInfo.rotation;
         }
-        device.setOrientationInTransactionLocked(orientation);
 
         // Set the frame.
         // The frame specifies the rotated physical coordinates into which the viewport
@@ -238,21 +237,23 @@ final class LogicalDisplay {
         // We avoid a division (and possible floating point imprecision) here by
         // multiplying the fractions by the product of their denominators before
         // comparing them.
-        int frameWidth, frameHeight;
+        int displayRectWidth, displayRectHeight;
         if (physWidth * displayInfo.logicalHeight
                 < physHeight * displayInfo.logicalWidth) {
             // Letter box.
-            frameWidth = physWidth;
-            frameHeight = displayInfo.logicalHeight * physWidth / displayInfo.logicalWidth;
+            displayRectWidth = physWidth;
+            displayRectHeight = displayInfo.logicalHeight * physWidth / displayInfo.logicalWidth;
         } else {
             // Pillar box.
-            frameWidth = displayInfo.logicalWidth * physHeight / displayInfo.logicalHeight;
-            frameHeight = physHeight;
+            displayRectWidth = displayInfo.logicalWidth * physHeight / displayInfo.logicalHeight;
+            displayRectHeight = physHeight;
         }
-        int frameTop = (physHeight - frameHeight) / 2;
-        int frameLeft = (physWidth - frameWidth) / 2;
-        mTempRect.set(frameLeft, frameTop, frameLeft + frameWidth, frameTop + frameHeight);
-        device.setFrameInTransactionLocked(mTempRect);
+        int displayRectTop = (physHeight - displayRectHeight) / 2;
+        int displayRectLeft = (physWidth - displayRectWidth) / 2;
+        mTempDisplayRect.set(displayRectLeft, displayRectTop,
+                displayRectLeft + displayRectWidth, displayRectTop + displayRectHeight);
+
+        device.setProjectionInTransactionLocked(orientation, mTempLayerStackRect, mTempDisplayRect);
     }
 
     public void dumpLocked(PrintWriter pw) {

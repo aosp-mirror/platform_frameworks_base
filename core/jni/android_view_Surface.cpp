@@ -647,38 +647,24 @@ static void nativeSetDisplayLayerStack(JNIEnv* env, jclass clazz,
     SurfaceComposerClient::setDisplayLayerStack(token, layerStack);
 }
 
-static void nativeSetDisplayOrientation(JNIEnv* env, jclass clazz,
-        jobject tokenObj, jint orientation) {
+static void nativeSetDisplayProjection(JNIEnv* env, jclass clazz,
+        jobject tokenObj, jint orientation, jobject rect1Obj, jobject rect2Obj) {
     sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
     if (token == NULL) return;
 
-    SurfaceComposerClient::setDisplayOrientation(token, orientation);
-}
+    Rect rect1;
+    rect1.left = env->GetIntField(rect1Obj, gRectClassInfo.left);
+    rect1.top = env->GetIntField(rect1Obj, gRectClassInfo.top);
+    rect1.right = env->GetIntField(rect1Obj, gRectClassInfo.right);
+    rect1.bottom = env->GetIntField(rect1Obj, gRectClassInfo.bottom);
 
-static void nativeSetDisplayViewport(JNIEnv* env, jclass clazz,
-        jobject tokenObj, jobject rectObj) {
-    sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
-    if (token == NULL) return;
+    Rect rect2;
+    rect2.left = env->GetIntField(rect2Obj, gRectClassInfo.left);
+    rect2.top = env->GetIntField(rect2Obj, gRectClassInfo.top);
+    rect2.right = env->GetIntField(rect2Obj, gRectClassInfo.right);
+    rect2.bottom = env->GetIntField(rect2Obj, gRectClassInfo.bottom);
 
-    Rect rect;
-    rect.left = env->GetIntField(rectObj, gRectClassInfo.left);
-    rect.top = env->GetIntField(rectObj, gRectClassInfo.top);
-    rect.right = env->GetIntField(rectObj, gRectClassInfo.right);
-    rect.bottom = env->GetIntField(rectObj, gRectClassInfo.bottom);
-    SurfaceComposerClient::setDisplayViewport(token, rect);
-}
-
-static void nativeSetDisplayFrame(JNIEnv* env, jclass clazz,
-        jobject tokenObj, jobject rectObj) {
-    sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
-    if (token == NULL) return;
-
-    Rect rect;
-    rect.left = env->GetIntField(rectObj, gRectClassInfo.left);
-    rect.top = env->GetIntField(rectObj, gRectClassInfo.top);
-    rect.right = env->GetIntField(rectObj, gRectClassInfo.right);
-    rect.bottom = env->GetIntField(rectObj, gRectClassInfo.bottom);
-    SurfaceComposerClient::setDisplayFrame(token, rect);
+    SurfaceComposerClient::setDisplayProjection(token, orientation, rect1, rect2);
 }
 
 static jboolean nativeGetDisplayInfo(JNIEnv* env, jclass clazz,
@@ -818,12 +804,8 @@ static JNINativeMethod gSurfaceMethods[] = {
             (void*)nativeSetDisplaySurface },
     {"nativeSetDisplayLayerStack", "(Landroid/os/IBinder;I)V",
             (void*)nativeSetDisplayLayerStack },
-    {"nativeSetDisplayOrientation", "(Landroid/os/IBinder;I)V",
-            (void*)nativeSetDisplayOrientation },
-    {"nativeSetDisplayViewport", "(Landroid/os/IBinder;Landroid/graphics/Rect;)V",
-            (void*)nativeSetDisplayViewport },
-    {"nativeSetDisplayFrame", "(Landroid/os/IBinder;Landroid/graphics/Rect;)V",
-            (void*)nativeSetDisplayFrame },
+    {"nativeSetDisplayProjection", "(Landroid/os/IBinder;ILandroid/graphics/Rect;Landroid/graphics/Rect;)V",
+            (void*)nativeSetDisplayProjection },
     {"nativeGetDisplayInfo", "(Landroid/os/IBinder;Landroid/view/Surface$PhysicalDisplayInfo;)Z",
             (void*)nativeGetDisplayInfo },
     {"nativeCopyFrom", "(Landroid/view/Surface;)V",
