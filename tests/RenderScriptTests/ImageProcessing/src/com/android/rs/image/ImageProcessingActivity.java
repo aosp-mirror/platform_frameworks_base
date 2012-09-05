@@ -168,10 +168,10 @@ public class ImageProcessingActivity extends Activity
             mTest = new Vignette(true, true);
             break;
         case 15:
-            mTest = new GroupTest(true);
+            mTest = new GroupTest(false);
             break;
         case 16:
-            mTest = new GroupTest(false);
+            mTest = new GroupTest(true);
             break;
         case 17:
             mTest = new Intrinsics(0);
