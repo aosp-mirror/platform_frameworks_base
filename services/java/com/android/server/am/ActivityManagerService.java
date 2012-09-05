@@ -10961,7 +10961,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                     restart = true;
                 } else {
                     removeDyingProviderLocked(app, cpr, true);
+                    // cpr should have been removed from mLaunchingProviders
                     NL = mLaunchingProviders.size();
+                    i--;
                 }
             }
         }
