@@ -51,7 +51,7 @@ Font::~Font() {
 void Font::invalidateTextureCache(CacheTexture* cacheTexture) {
     for (uint32_t i = 0; i < mCachedGlyphs.size(); i++) {
         CachedGlyphInfo* cachedGlyph = mCachedGlyphs.valueAt(i);
-        if (cacheTexture || cachedGlyph->mCacheTexture == cacheTexture) {
+        if (!cacheTexture || cachedGlyph->mCacheTexture == cacheTexture) {
             cachedGlyph->mIsValid = false;
         }
     }
