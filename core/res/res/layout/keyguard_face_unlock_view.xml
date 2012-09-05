@@ -23,9 +23,41 @@
 <com.android.internal.policy.impl.keyguard.KeyguardFaceUnlockView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/keyguard_face_unlock_view"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- TODO -->
+    <include layout="@layout/keyguard_navigation"/>
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="0dip"
+        android:layout_weight="1" />
+
+    <RelativeLayout
+        android:id="@+id/face_unlock_area_view"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/face_unlock_height"
+        android:background="@drawable/intro_bg"
+        android:gravity="center">
+
+        <View
+            android:id="@+id/spotlightMask"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/facelock_spotlight_mask"
+        />
+
+        <ImageView
+            android:id="@+id/cancel_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="5dip"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:src="@drawable/ic_facial_backup"
+        />
+
+    </RelativeLayout>
 
 </com.android.internal.policy.impl.keyguard.KeyguardFaceUnlockView>
