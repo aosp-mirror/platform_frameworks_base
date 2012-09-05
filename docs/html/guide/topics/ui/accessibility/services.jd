@@ -14,8 +14,16 @@ parent.link=index.html
         <li><a href="#service-config">Accessibility service configuration</a></li>
       </ol>
     </li>
+    <li><a href="#register">Registering for Accessibility Events</a></li>
     <li><a href="#methods">AccessibilityService Methods</a></li>
     <li><a href="#event-details">Getting Event Details</a></li>
+    <li><a href="#act-for-users">Taking Action for Users</a>
+      <ol>
+        <li><a href="#detect-gestures">Listening for gestures</a></li>
+        <li><a href="#using-actions">Using accessibility actions</a></li>
+        <li><a href="#focus-types">Using focus types</a></li>
+      </ol>
+    </li>
     <li><a href="#examples">Example Code</a></li>
   </ol>
 
@@ -30,7 +38,7 @@ parent.link=index.html
 
   <h2>See also</h2>
   <ol>
-    <li><a href="{@docRoot}training/accessibility/index.html">Implementing Accessibility</a></li>
+    <li><a href="{@docRoot}training/accessibility/index.html">Training: Implementing Accessibility</a></li>
   </ol>
 
 </div>
@@ -45,20 +53,20 @@ might need additional or alternative interface feedback.</p>
 create and distribute their own services. This document explains the basics of building an
 accessibility service.</p>
 
-<p>The ability for you to build and deploy accessibility services was introduced with Android
-1.6 (API Level 4) and received significant improvements with Android 4.0 (API Level 14). The Android
-Support Library was also updated with the release of Android 4.0 to provide support for these
-enhanced accessibility features back to Android 1.6. Developers aiming for widely compatible
-accessibility services are encouraged to use the
-<a href="{@docRoot}tools/extras/support-library.html">Support Library</a> and develop for the more
-advanced accessibility features introduced in Android 4.0.</p>
+<p>The ability for you to build and deploy accessibility services was introduced with Android 1.6
+  (API Level 4) and received significant improvements with Android 4.0 (API Level 14). The Android
+  <a href="{@docRoot}tools/extras/support-library.html">Support Library</a> was also updated with
+  the release of Android 4.0 to provide support for these enhanced accessibility features back to
+  Android 1.6. Developers aiming for widely compatible accessibility services are encouraged to use
+  the Support Library and develop for the more advanced accessibility features introduced in
+  Android 4.0.</p>
 
 
 <h2 id="manifest">Manifest Declarations and Permissions</h2>
 
 <p>Applications that provide accessibility services must include specific declarations in their
- application manifests in order to be treated as an accessibility service by an Android system.
- This section explains the required and optional settings for accessibility services.</p>
+ application manifests to be treated as an accessibility service by the Android system. This
+ section explains the required and optional settings for accessibility services.</p>
 
 
 <h3 id="service-declaration">Accessibility service declaration</h3>
@@ -66,7 +74,9 @@ advanced accessibility features introduced in Android 4.0.</p>
 <p>In order to be treated as an accessibility service, your application must include the
 {@code service} element (rather than the {@code activity} element) within the {@code application}
 element in its manifest. In addition, within the {@code service} element, you must also include an
-accessibility service intent filter, as shown in the following sample:</p>
+accessibility service intent filter. For compatiblity with Android 4.1 and higher, the manifest
+must also request the {@link android.Manifest.permission#BIND_ACCESSIBILITY_SERVICE} permission
+as shown in the following sample:</p>
 
 <pre>
 &lt;application&gt;
@@ -76,6 +86,7 @@ accessibility service intent filter, as shown in the following sample:</p>
       &lt;action android:name=&quot;android.accessibilityservice.AccessibilityService&quot; /&gt;
     &lt;/intent-filter&gt;
   &lt;/service&gt;
+  &lt;uses-permission android:name="android.permission.BIND_ACCESSIBILITY_SERVICE" /&gt;
 &lt;/application&gt;
 </pre>
 
@@ -123,27 +134,6 @@ shows example contents for the service configuration file:</p>
 /&gt;
 </pre>
 
-<p>One of the most important functions of the accessibility service configuration parameters is to
-allow you to specify what types of accessibility events your service can handle. Being able to
-specify this information enables accessibility services to cooperate with each other, and allows you
-as a developer the flexibility to handle only specific events types from specific applications. The
-event filtering can include the following criteria:</p>
-
-<ul>
-  <li><strong>Package Names</strong> - Specify the package names of applications whose accessibility
-events you want your service to handle. If this parameter is omitted, your accessibility service is
-considered available to service accessibility events for any application. This parameter can be set
-in the accessibility service configuration files with the {@code android:packageNames} attribute as
-a comma-separated list, or set using the {@link
-android.accessibilityservice.AccessibilityServiceInfo#packageNames
-AccessibilityServiceInfo.packageNames} member.</li>
-  <li><strong>Event Types</strong> - Specify the types of accessibility events you want your service
-to handle. This parameter can be set in the accessibility service configuration files with the
-{@code android:accessibilityEventTypes} attribute as a comma-separated list, or set using the
-{@link android.accessibilityservice.AccessibilityServiceInfo#eventTypes
-AccessibilityServiceInfo.eventTypes} member. </li>
-</ul>
-
 <p>For more information about the XML attributes which can be used in the accessibility service
  configuration file, follow these links to the reference documentation:</p>
 
@@ -162,9 +152,45 @@ AccessibilityServiceInfo.eventTypes} member. </li>
 the {@link android.accessibilityservice.AccessibilityServiceInfo} reference documentation.</p>
 
 
+<h2 id="register">Registering for Accessibility Events</h2>
+
+<p>One of the most important functions of the accessibility service configuration parameters is to
+allow you to specify what types of accessibility events your service can handle. Being able to
+specify this information enables accessibility services to cooperate with each other, and allows you
+as a developer the flexibility to handle only specific events types from specific applications. The
+event filtering can include the following criteria:</p>
+
+<ul>
+  <li><strong>Package Names</strong> - Specify the package names of applications whose accessibility
+events you want your service to handle. If this parameter is omitted, your accessibility service is
+considered available to service accessibility events for any application. This parameter can be set
+in the accessibility service configuration files with the {@code android:packageNames} attribute as
+a comma-separated list, or set using the {@link
+android.accessibilityservice.AccessibilityServiceInfo#packageNames
+AccessibilityServiceInfo.packageNames} member.</li>
+  <li><strong>Event Types</strong> - Specify the types of accessibility events you want your service
+to handle. This parameter can be set in the accessibility service configuration files with the
+{@code android:accessibilityEventTypes} attribute as a list separated by the {@code |} character
+(for example {@code accessibilityEventTypes="typeViewClicked|typeViewFocused"}), or set using the
+{@link android.accessibilityservice.AccessibilityServiceInfo#eventTypes
+AccessibilityServiceInfo.eventTypes} member. </li>
+</ul>
+
+<p>When setting up your accessibility service, carefully consider what events your service is able
+to handle and only register for those events. Since users can activate more than one accessibility
+services at a time, your service must not consume events that it is not able to handle. Remember
+that other services may handle those events in order to improve a user's experience.</p>
+
+<p class="note"><strong>Note:</strong> The Android framework dispatches accessibility events to
+more than one accessibility service if the services provide different
+<a href="{@docRoot}reference/android/R.styleable.html#AccessibilityService_accessibilityFeedbackType">
+feedback types</a>. However, if two or more services provide the same feedback type, then only the
+first registered service receives the event.</p>
+
+
 <h2 id="methods">AccessibilityService Methods</h2>
 
-<p>An application that provides accessibility service must extend the {@link
+<p>An accessibility service must extend the {@link
 android.accessibilityservice.AccessibilityService} class and override the following methods from
 that class. These methods are presented in the order in which they are called by the Android system,
 from when the service is started
@@ -188,15 +214,15 @@ onAccessibilityEvent()} - (required) This method is called back by the system wh
 {@link android.view.accessibility.AccessibilityEvent} that matches the event filtering parameters
 specified by your accessibility service. For example, when the user clicks a button or focuses on a
 user interface control in an application for which your accessibility service is providing feedback.
-When this happens, the system calls this method of your service with the associated {@link
-android.view.accessibility.AccessibilityEvent}, which you can then interpret and provide feedback to
-the user. This method may be called many times over the lifecycle of your service.</li>
+When this happens, the system calls this method, passing the associated {@link
+android.view.accessibility.AccessibilityEvent}, which the service can then interpret and use to
+provide feedback to the user. This method may be called many times over the lifecycle of your
+service.</li>
 
   <li>{@link android.accessibilityservice.AccessibilityService#onInterrupt onInterrupt()} -
 (required) This method is called when the system wants to interrupt the feedback your service is
-providing, usually in response to a user taking action, such as moving focus to a different user
-interface control than the one for which you are currently providing feedback. This method may be
-called many times over the lifecycle of your service.</li>
+providing, usually in response to a user action such as moving focus to a different control. This
+method may be called many times over the lifecycle of your service.</li>
 
   <li>{@link android.accessibilityservice.AccessibilityService#onUnbind onUnbind()} - (optional)
 This method is called when the system is about to shutdown the accessibility service. Use this
@@ -206,7 +232,9 @@ services, such as the audio manager or device vibrator.</li>
 
 <p>These callback methods provide the basic structure for your accessibility service. It is up to
 you to decide on how to process data provided by the Android system in the form of {@link
-android.view.accessibility.AccessibilityEvent} objects and provide feedback to the user.</p>
+android.view.accessibility.AccessibilityEvent} objects and provide feedback to the user. For more
+information about getting information from an accessibility event, see the
+<a href="{@docRoot}training/accessibility/service.html">Implementing Accessibility</a> training.</p>
 
 
 <h2 id="event-details">Getting Event Details</h2>
@@ -214,15 +242,15 @@ android.view.accessibility.AccessibilityEvent} objects and provide feedback to t
 <p>The Android system provides information to accessibility services about the user interface
 interaction through {@link android.view.accessibility.AccessibilityEvent} objects. Prior to Android
 4.0, the information available in an accessibility event, while providing a significant amount of
-detail about a user interface control selected by the user, typically provided limited contextual
+detail about a user interface control selected by the user, offered limited contextual
 information. In many cases, this missing context information might be critical to understanding the
 meaning of the selected control.</p>
 
-<p>A typical example of an interface where context is of critical importance is a calendar or day
-planner. If a user selects a 4:00 PM time slot in a Monday to Friday day list and the accessibility
-service announces “4 PM”, but fails to indicate this is a Friday a Monday, the month or day, this is
-hardly ideal feedback for the user. In this case, the context of a user interface control is of
-critical importance to a user who wants to schedule a meeting.</p>
+<p>An example of an interface where context is critical is a calendar or day planner. If the
+user selects a 4:00 PM time slot in a Monday to Friday day list and the accessibility service
+announces “4 PM”, but does not announce the weekday name, the day of the month, or the month name,
+the resulting feedback is confusing. In this case, the context of a user interface control is
+critical to a user who wants to schedule a meeting.</p>
 
 <p>Android 4.0 significantly extends the amount of information that an accessibility service can
 obtain about an user interface interaction by composing accessibility events based on the view
@@ -245,24 +273,165 @@ can obtain additional information about the event using these calls:</p>
 AccessibilityEvent.getRecordCount()} and {@link
 android.view.accessibility.AccessibilityEvent#getRecord getRecord(int)} - These methods allow you to
 retrieve the set of {@link android.view.accessibility.AccessibilityRecord} objects which contributed
-to the {@link android.view.accessibility.AccessibilityEvent} passed to you by the system, which can
-provide more context for your accessibility service.</li>
+to the {@link android.view.accessibility.AccessibilityEvent} passed to you by the system. This level
+of detail provides more context for the event that triggered your accessibility service.</li>
 
   <li>{@link android.view.accessibility.AccessibilityEvent#getSource
 AccessibilityEvent.getSource()} - This method returns an {@link
-android.view.accessibility.AccessibilityNodeInfo} object. This object allows you to request the
-parents and children of the component that originated the accessibility event and investigate their
-contents and state in order to provide
+android.view.accessibility.AccessibilityNodeInfo} object. This object allows you to request view
+layout hierarchy (parents and children) of the component that originated the accessibility event.
+This feature allows an accessibility service to investigate the full context of an event, including
+the content and state of any enclosing views or child views.
 
-    <p class="caution"><strong>Important:</strong> The ability to investigate the full view
+<p class="caution"><strong>Important:</strong> The ability to investigate the view
 hierarchy from an {@link android.view.accessibility.AccessibilityEvent} potentially exposes private
 user information to your accessibility service. For this reason, your service must request this
 level of access through the accessibility <a href="#service-config">service configuration XML</a>
 file, by including the {@code canRetrieveWindowContent} attribute and setting it to {@code true}. If
 you do not include this setting in your service configuration xml file, calls to {@link
 android.view.accessibility.AccessibilityEvent#getSource getSource()} fail.</p>
+
+<p class="note"><strong>Note:</strong> In Android 4.1 (API Level 16) and higher, the
+{@link android.view.accessibility.AccessibilityEvent#getSource getSource()} method,
+as well as {@link android.view.accessibility.AccessibilityNodeInfo#getChild
+AccessibilityNodeInfo.getChild()} and
+{@link android.view.accessibility.AccessibilityNodeInfo#getParent getParent()}, return only
+view objects that are considered important for accessibility (views that draw content or respond to
+user actions). If your service requires all views, it can request them by setting the
+{@link android.accessibilityservice.AccessibilityServiceInfo#flags flags} member of the service's
+{@link android.accessibilityservice.AccessibilityServiceInfo} instance to
+{@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_INCLUDE_NOT_IMPORTANT_VIEWS}.</p>
   </li>
 </ul>
+
+
+<h2 id="act-for-users">Taking Action for Users</h2>
+
+<p>Starting with Android 4.0 (API Level 14), accessibility services can act on behalf
+  of users, including changing the input focus and selecting (activating) user interface elements.
+  In Android 4.1 (API Level 16) the range of actions has been expanded to include scrolling lists
+  and interacting with text fields. Accessibility services can
+  also take global actions, such as navigating to the Home screen, pressing the Back button, opening
+  the notifications screen and recent applications list. Android 4.1 also includes a new type of
+  focus, <em>Accessibilty Focus</em>, which makes all visible elements selectable by an
+  accessibility service.</p>
+
+<p>These new capabilities make it possible for developers of accessibility services to create
+  alternative navigation modes such as
+  <a href="{@docRoot}tools/testing/testing_accessibility.html#test-gestures">gesture navigation</a>,
+  and give users with disabilities improved control of their Android devices.</p>
+
+
+<h3 id="detect-gestures">Listening for gestures</h3>
+
+<p>Accessibility services can listen for specific gestures and respond by taking action on behalf
+  of a user. This feature, added in Android 4.1 (API Level 16), and requires that your
+  accessibility service request activation of the Explore by Touch feature. Your service can
+  request this activation by setting the
+  {@link android.accessibilityservice.AccessibilityServiceInfo#flags flags} member of the service’s
+  {@link android.accessibilityservice.AccessibilityServiceInfo} instance to
+  {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_REQUEST_TOUCH_EXPLORATION_MODE},
+  as shown in the following example.
+  </p>
+
+<pre>
+public class MyAccessibilityService extends AccessibilityService {
+    &#64;Override
+    public void onCreate() {
+        getServiceInfo().flags = AccessibilityServiceInfo.FLAG_REQUEST_TOUCH_EXPLORATION_MODE;
+    }
+    ...
+}
+</pre>
+
+<p>Once your service has requested activation of Explore by Touch, the user must allow the
+  feature to be turned on, if it is not already active. When this feature is active, your service
+  receives notification of accessibility gestures through your service's
+  {@link android.accessibilityservice.AccessibilityService#onGesture onGesture()} callback method
+  and can respond by taking actions for the user.</p>
+
+
+<h3 id="using-actions">Using accessibility actions</h3>
+
+<p>Accessibility services can take action on behalf of users to make interacting with applications
+  simpler and more productive. The ability of accessibility services to perform actions was added
+  in Android 4.0 (API Level 14) and significantly expanded with Android 4.1 (API Level 16).</p>
+
+<p>In order to take actions on behalf of users, your accessibility service must
+  <a href="#register">register</a> to receive events from a few or many applications and request
+  permission to view the content of applications by setting the
+  <a href="{@docRoot}reference/android/R.styleable.html#AccessibilityService_canRetrieveWindowContent">
+  {@code android:canRetrieveWindowContent}</a> to {@code true} in the
+  <a href="#service-config">service configuration file</a>. When events are received by your
+  service, it can then retrieve the
+  {@link android.view.accessibility.AccessibilityNodeInfo} object from the event using
+  {@link android.view.accessibility.AccessibilityEvent#getSource getSource()}.
+  With the {@link android.view.accessibility.AccessibilityNodeInfo} object, your service can then
+  explore the view hierarchy to determine what action to take and then act for the user using
+  {@link android.view.accessibility.AccessibilityNodeInfo#performAction performAction()}.</p>
+
+<pre>
+public class MyAccessibilityService extends AccessibilityService {
+
+    &#64;Override
+    public void onAccessibilityEvent(AccessibilityEvent event) {
+        // get the source node of the event
+        AccessibilityNodeInfo nodeInfo = event.getSource();
+
+        // Use the event and node information to determine
+        // what action to take
+
+        // take action on behalf of the user
+        nodeInfo.performAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+
+        // recycle the nodeInfo object
+        nodeInfo.recycle();
+    }
+    ...
+}
+</pre>
+
+<p>The {@link android.view.accessibility.AccessibilityNodeInfo#performAction performAction()} method
+  allows your service to take action within an application. If your service needs to perform a
+  global action such as navigating to the Home screen, pressing the Back button, opening the
+  notifications screen or recent applications list, then use the
+  {@link android.accessibilityservice.AccessibilityService#performGlobalAction performGlobalAction()}
+  method.</p>
+
+
+<h3 id="focus-types">Using focus types</h3>
+
+<p>Android 4.1 (API Level 16) introduces a new type of user interface focus called <em>Accessibility
+  Focus</em>. This type of focus can be used by accessibility services to select any visible user
+  interface element and act on it. This focus type is different from the more well known <em>Input
+  Focus</em>, which determines what on-screen user interface element receives input when a user
+  types characters, presses <strong>Enter</strong> on a keyboard or pushes the center button of a
+  D-pad control.</p>
+
+<p>Accessibility Focus is completely separate and independent from Input Focus. In fact, it is
+  possible for one element in a user interface to have Input Focus while another element has
+  Accessibility Focus. The purpose of Accessibility Focus is to provide accessibility services with
+  a method of interacting with any visible element on a screen, regardless of whether or not the
+  element is input-focusable from a system perspective. You can see accessibility focus in action by
+  testing accessibility gestures. For more information about testing this feature, see
+  <a href="{@docRoot}tools/testing/testing_accessibility.html#test-gestures">Testing gesture
+  navigation</a>.</p>
+
+<p class="note">
+  <strong>Note:</strong> Accessibility services that use Accessibility Focus are responsible for
+  synchronizing the current Input Focus when an element is capable of this type of focus. Services
+  that do not synchronize Input Focus with Accessibility Focus run the risk of causing problems in
+  applications that expect input focus to be in a specific location when certain actions are taken.
+  </p>
+
+<p>An accessibility service can determine what user interface element has Input Focus or
+  Accessibility Focus using the {@link android.view.accessibility.AccessibilityNodeInfo#findFocus
+  AccessibilityNodeInfo.findFocus()} method. You can also search for elements that can be selected
+  with Input Focus using the
+  {@link android.view.accessibility.AccessibilityNodeInfo#focusSearch focusSearch()} method.
+  Finally, your accessibility service can set Accessibility Focus using the
+  {@link android.view.accessibility.AccessibilityNodeInfo#performAction
+  performAction(AccessibilityNodeInfo.ACTION_SET_ACCESSIBILITY_FOCUS)} method.</p>
 
 
 <h2 id="examples">Example Code</h2>
