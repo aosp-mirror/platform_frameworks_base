@@ -919,6 +919,9 @@
     <!-- Set to true to add links to Cell Broadcast app from Settings and MMS app. -->
     <bool name="config_cellBroadcastAppLinks">false</bool>
 
+    <!-- The default value if the SyncStorageEngine should sync automatically or not -->
+    <bool name="config_syncstorageengine_masterSyncAutomatically">true</bool>
+
     <!--  Maximum number of supported users -->
     <integer name="config_multiuserMaximumUsers">10</integer>
 </resources>
