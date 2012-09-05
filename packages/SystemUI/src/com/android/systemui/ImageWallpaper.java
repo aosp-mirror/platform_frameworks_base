@@ -30,10 +30,8 @@ import android.os.SystemProperties;
 import android.renderscript.Matrix4f;
 import android.service.wallpaper.WallpaperService;
 import android.util.Log;
-import android.view.Display;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
-import android.view.WindowManager;
 
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;

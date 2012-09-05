@@ -38,15 +38,11 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.Display;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
@@ -60,7 +56,6 @@ import android.widget.TextView;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.BaseStatusBar;
-import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.tablet.StatusBarPanel;
 import com.android.systemui.statusbar.tablet.TabletStatusBar;
@@ -72,7 +67,6 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     static final String TAG = "RecentsPanelView";
     static final boolean DEBUG = TabletStatusBar.DEBUG || PhoneStatusBar.DEBUG || false;
     private Context mContext;
-    private BaseStatusBar mBar;
     private PopupMenu mPopup;
     private View mRecentsScrim;
     private View mRecentsNoApps;
@@ -357,11 +351,6 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
      */
     public boolean isShowing() {
         return mShowing;
-    }
-
-    public void setBar(BaseStatusBar bar) {
-        mBar = bar;
-
     }
 
     public void setStatusBarView(View statusBarView) {
