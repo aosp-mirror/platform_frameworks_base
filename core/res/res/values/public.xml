@@ -1214,6 +1214,8 @@
   <java-symbol type="anim" name="dock_right_exit" />
   <java-symbol type="anim" name="keyguard_security_animate_in" />
   <java-symbol type="anim" name="keyguard_security_animate_out" />
+  <java-symbol type="anim" name="keyguard_security_fade_in" />
+  <java-symbol type="anim" name="keyguard_security_fade_out" />
   <java-symbol type="array" name="config_keyboardTapVibePattern" />
   <java-symbol type="array" name="config_longPressVibePattern" />
   <java-symbol type="array" name="config_safeModeDisabledVibePattern" />

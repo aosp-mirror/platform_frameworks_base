@@ -32,6 +32,7 @@ import com.android.internal.R;
 
 import android.util.AttributeSet;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
@@ -55,6 +56,8 @@ public class KeyguardSimPinView extends LinearLayout
     private PasswordEntryKeyboardHelper mKeyboardHelper;
     private LockPatternUtils mLockPatternUtils;
     private KeyguardNavigationManager mNavigationManager;
+
+    private volatile boolean mSimCheckInProgress;
 
     public KeyguardSimPinView(Context context) {
         this(context, null);
@@ -129,7 +132,7 @@ public class KeyguardSimPinView extends LinearLayout
             mPin = pin;
         }
 
-        abstract void onSimLockChangedResponse(boolean success);
+        abstract void onSimCheckResponse(boolean success);
 
         @Override
         public void run() {
@@ -138,13 +141,13 @@ public class KeyguardSimPinView extends LinearLayout
                         .checkService("phone")).supplyPin(mPin);
                 post(new Runnable() {
                     public void run() {
-                        onSimLockChangedResponse(result);
+                        onSimCheckResponse(result);
                     }
                 });
             } catch (RemoteException e) {
                 post(new Runnable() {
                     public void run() {
-                        onSimLockChangedResponse(false);
+                        onSimCheckResponse(false);
                     }
                 });
             }
@@ -154,8 +157,10 @@ public class KeyguardSimPinView extends LinearLayout
     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
         // Check if this was the result of hitting the enter key
         mCallback.userActivity(DIGIT_PRESS_WAKE_MILLIS);
-        if (actionId == EditorInfo.IME_NULL || actionId == EditorInfo.IME_ACTION_DONE
-                || actionId == EditorInfo.IME_ACTION_NEXT) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN && (
+                actionId == EditorInfo.IME_NULL
+                || actionId == EditorInfo.IME_ACTION_DONE
+                || actionId == EditorInfo.IME_ACTION_NEXT)) {
             checkPin();
             return true;
         }
@@ -188,27 +193,31 @@ public class KeyguardSimPinView extends LinearLayout
 
         getSimUnlockProgressDialog().show();
 
-        new CheckSimPin(mPinEntry.getText().toString()) {
-            void onSimLockChangedResponse(final boolean success) {
-                post(new Runnable() {
-                    public void run() {
-                        if (mSimUnlockProgressDialog != null) {
-                            mSimUnlockProgressDialog.hide();
+        if (!mSimCheckInProgress) {
+            mSimCheckInProgress = true; // there should be only one
+            new CheckSimPin(mPinEntry.getText().toString()) {
+                void onSimCheckResponse(final boolean success) {
+                    post(new Runnable() {
+                        public void run() {
+                            if (mSimUnlockProgressDialog != null) {
+                                mSimUnlockProgressDialog.hide();
+                            }
+                            if (success) {
+                                // before closing the keyguard, report back that the sim is unlocked
+                                // so it knows right away.
+                                KeyguardUpdateMonitor.getInstance(getContext()).reportSimUnlocked();
+                                mCallback.dismiss(true);
+                            } else {
+                                mNavigationManager.setMessage(R.string.kg_password_wrong_pin_code);
+                                mPinEntry.setText("");
+                            }
+                            mCallback.userActivity(0);
+                            mSimCheckInProgress = false;
                         }
-                        if (success) {
-                            // before closing the keyguard, report back that the sim is unlocked
-                            // so it knows right away.
-                            KeyguardUpdateMonitor.getInstance(getContext()).reportSimUnlocked();
-                            mCallback.dismiss(false); //
-                        } else {
-                            mNavigationManager.setMessage(R.string.kg_password_wrong_pin_code);
-                            mPinEntry.setText("");
-                        }
-                        mCallback.userActivity(0);
-                    }
-                });
-            }
-        }.start();
+                    });
+                }
+            }.start();
+        }
     }
 
     public void setLockPatternUtils(LockPatternUtils utils) {

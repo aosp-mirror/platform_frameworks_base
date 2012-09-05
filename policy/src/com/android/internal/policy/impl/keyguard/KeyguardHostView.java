@@ -130,10 +130,6 @@ public class KeyguardHostView extends KeyguardViewBase {
 
         // View Flipper
         mViewFlipper = (ViewFlipper) findViewById(R.id.view_flipper);
-        mViewFlipper.setInAnimation(AnimationUtils.loadAnimation(mContext,
-                R.anim.keyguard_security_animate_in));
-        mViewFlipper.setOutAnimation(AnimationUtils.loadAnimation(mContext,
-                R.anim.keyguard_security_animate_out));
 
         // Initialize all security views
         for (int i = 0; i < mViewIds.length; i++) {
@@ -381,11 +377,28 @@ public class KeyguardHostView extends KeyguardViewBase {
                 showSecurityScreen(realSecurityId); // switch to the "real" security view
             }
         } else if (authenticated) {
-            if (mCurrentSecurityId == SECURITY_PATTERN_ID
-                || mCurrentSecurityId == SECURITY_PASSWORD_ID
-                || mCurrentSecurityId == SECURITY_ACCOUNT_ID
-                || mCurrentSecurityId == SECURITY_BIOMETRIC_ID) {
-                finish = true;
+            switch (mCurrentSecurityId) {
+                case SECURITY_PATTERN_ID:
+                case SECURITY_PASSWORD_ID:
+                case SECURITY_ACCOUNT_ID:
+                case SECURITY_BIOMETRIC_ID:
+                    finish = true;
+                    break;
+
+                case SECURITY_SIM_PIN_ID:
+                case SECURITY_SIM_PUK_ID:
+                    // Shortcut for SIM PIN/PUK to go to directly to user's security screen or home
+                    SecurityMode securityMode = mSecurityModel.getSecurityMode();
+                    if (securityMode != SecurityMode.None) {
+                        showSecurityScreen(getSecurityViewIdForMode(securityMode));
+                    } else {
+                        finish = true;
+                    }
+                    break;
+
+                default:
+                    showSecurityScreen(SECURITY_SELECTOR_ID);
+                    break;
             }
         } else {
             // Not authenticated but we were asked to dismiss so go back to selector screen.
@@ -480,10 +493,20 @@ public class KeyguardHostView extends KeyguardViewBase {
         newView.onResume();
 
         mViewMediatorCallback.setNeedsInput(newView.needsInput());
-        mCurrentSecurityId = securityViewId;
 
         // Find and show this child.
         final int childCount = mViewFlipper.getChildCount();
+
+        // If we're go to/from the selector view, do flip animation, otherwise use fade animation.
+        final boolean doFlip = mCurrentSecurityId == SECURITY_SELECTOR_ID
+                || securityViewId == SECURITY_SELECTOR_ID;
+        final int inAnimation = doFlip ? R.anim.keyguard_security_animate_in
+                : R.anim.keyguard_security_fade_in;
+        final int outAnimation = doFlip ? R.anim.keyguard_security_animate_out
+                : R.anim.keyguard_security_fade_out;
+
+        mViewFlipper.setInAnimation(AnimationUtils.loadAnimation(mContext, inAnimation));
+        mViewFlipper.setOutAnimation(AnimationUtils.loadAnimation(mContext, outAnimation));
         for (int i = 0; i < childCount; i++) {
             if (securityViewId == mViewFlipper.getChildAt(i).getId()) {
                 mViewFlipper.setDisplayedChild(i);
@@ -495,6 +518,8 @@ public class KeyguardHostView extends KeyguardViewBase {
         if (securityViewId == SECURITY_SELECTOR_ID) {
             setOnDismissRunnable(null);
         }
+
+        mCurrentSecurityId = securityViewId;
     }
 
     @Override
