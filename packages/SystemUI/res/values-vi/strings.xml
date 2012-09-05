@@ -149,4 +149,6 @@
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Màn hình sẽ xoay tự động."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Màn hình hiện bị khóa theo hướng ngang."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Màn hình hiện bị khóa theo hướng dọc."</string>
+    <!-- no translation found for jelly_bean_dream_name (5992026543636816792) -->
+    <skip />
 </resources>
