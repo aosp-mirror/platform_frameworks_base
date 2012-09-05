@@ -1824,7 +1824,7 @@ public class AccountManager {
      * Returns an intent to an {@link Activity} that prompts the user to choose from a list of
      * accounts.
      * The caller will then typically start the activity by calling
-     * <code>startActivityWithResult(intent, ...);</code>.
+     * <code>startActivityForResult(intent, ...);</code>.
      * <p>
      * On success the activity returns a Bundle with the account name and type specified using
      * keys {@link #KEY_ACCOUNT_NAME} and {@link #KEY_ACCOUNT_TYPE}.
