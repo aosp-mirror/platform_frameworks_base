@@ -227,6 +227,32 @@ public:
      */
     void endMark() const;
 
+    /**
+     * Gets the alpha and xfermode out of a paint object. If the paint is null
+     * alpha will be 255 and the xfermode will be SRC_OVER. This method does
+     * not multiply the paint's alpha by the current snapshot's alpha.
+     *
+     * @param paint The paint to extract values from
+     * @param alpha Where to store the resulting alpha
+     * @param mode Where to store the resulting xfermode
+     */
+    static inline void getAlphaAndModeDirect(SkPaint* paint, int* alpha, SkXfermode::Mode* mode) {
+        if (paint) {
+            *mode = getXfermode(paint->getXfermode());
+
+            // Skia draws using the color's alpha channel if < 255
+            // Otherwise, it uses the paint's alpha
+            int color = paint->getColor();
+            *alpha = (color >> 24) & 0xFF;
+            if (*alpha == 255) {
+                *alpha = paint->getAlpha();
+            }
+        } else {
+            *mode = SkXfermode::kSrcOver_Mode;
+            *alpha = 255;
+        }
+    }
+
 protected:
     /**
      * Compose the layer defined in the current snapshot with the layer
@@ -289,32 +315,6 @@ protected:
      * @param mode Where to store the resulting xfermode
      */
     inline void getAlphaAndMode(SkPaint* paint, int* alpha, SkXfermode::Mode* mode);
-
-    /**
-     * Gets the alpha and xfermode out of a paint object. If the paint is null
-     * alpha will be 255 and the xfermode will be SRC_OVER. This method does
-     * not multiply the paint's alpha by the current snapshot's alpha.
-     *
-     * @param paint The paint to extract values from
-     * @param alpha Where to store the resulting alpha
-     * @param mode Where to store the resulting xfermode
-     */
-    static inline void getAlphaAndModeDirect(SkPaint* paint, int* alpha, SkXfermode::Mode* mode) {
-        if (paint) {
-            *mode = getXfermode(paint->getXfermode());
-
-            // Skia draws using the color's alpha channel if < 255
-            // Otherwise, it uses the paint's alpha
-            int color = paint->getColor();
-            *alpha = (color >> 24) & 0xFF;
-            if (*alpha == 255) {
-                *alpha = paint->getAlpha();
-            }
-        } else {
-            *mode = SkXfermode::kSrcOver_Mode;
-            *alpha = 255;
-        }
-    }
 
     /**
      * Safely retrieves the mode from the specified xfermode. If the specified

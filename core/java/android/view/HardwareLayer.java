@@ -19,6 +19,7 @@ package android.view;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.graphics.Rect;
 
 /**
@@ -60,6 +61,14 @@ abstract class HardwareLayer {
         mHeight = height;
         mOpaque = isOpaque;
     }
+
+    /**
+     * Update the paint used when drawing this layer.
+     *
+     * @param paint The paint used when the layer is drawn into the destination canvas.
+     * @see View#setLayerPaint(android.graphics.Paint)
+     */
+    void setLayerPaint(Paint paint) {}
 
     /**
      * Returns the minimum width of the layer.

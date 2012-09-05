@@ -11932,13 +11932,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link #setAlpha(float)}, the alpha value of the layer's paint is replaced by
      * this view's alpha value. Calling {@link #setAlpha(float)} is therefore
      * equivalent to setting a hardware layer on this view and providing a paint with
-     * the desired alpha value.<p>
+     * the desired alpha value.</p>
      *
      * <p>Refer to the documentation of {@link #LAYER_TYPE_NONE disabled},
      * {@link #LAYER_TYPE_SOFTWARE software} and {@link #LAYER_TYPE_HARDWARE hardware}
      * for more information on when and how to use layers.</p>
      *
-     * @param layerType The ype of layer to use with this view, must be one of
+     * @param layerType The type of layer to use with this view, must be one of
      *        {@link #LAYER_TYPE_NONE}, {@link #LAYER_TYPE_SOFTWARE} or
      *        {@link #LAYER_TYPE_HARDWARE}
      * @param paint The paint used to compose the layer. This argument is optional
@@ -11987,6 +11987,50 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         invalidateParentCaches();
         invalidate(true);
+    }
+
+    /**
+     * Updates the {@link Paint} object used with the current layer (used only if the current
+     * layer type is not set to {@link #LAYER_TYPE_NONE}). Changed properties of the Paint
+     * provided to {@link #setLayerType(int, android.graphics.Paint)} will be used the next time
+     * the View is redrawn, but {@link #setLayerPaint(android.graphics.Paint)} must be called to
+     * ensure that the view gets redrawn immediately.
+     *
+     * <p>A layer is associated with an optional {@link android.graphics.Paint}
+     * instance that controls how the layer is composed on screen. The following
+     * properties of the paint are taken into account when composing the layer:</p>
+     * <ul>
+     * <li>{@link android.graphics.Paint#getAlpha() Translucency (alpha)}</li>
+     * <li>{@link android.graphics.Paint#getXfermode() Blending mode}</li>
+     * <li>{@link android.graphics.Paint#getColorFilter() Color filter}</li>
+     * </ul>
+     *
+     * <p>If this view has an alpha value set to < 1.0 by calling
+     * {@link #setAlpha(float)}, the alpha value of the layer's paint is replaced by
+     * this view's alpha value. Calling {@link #setAlpha(float)} is therefore
+     * equivalent to setting a hardware layer on this view and providing a paint with
+     * the desired alpha value.</p>
+     *
+     * @param paint The paint used to compose the layer. This argument is optional
+     *        and can be null. It is ignored when the layer type is
+     *        {@link #LAYER_TYPE_NONE}
+     *
+     * @see #setLayerType(int, android.graphics.Paint)
+     */
+    public void setLayerPaint(Paint paint) {
+        int layerType = getLayerType();
+        if (layerType != LAYER_TYPE_NONE) {
+            mLayerPaint = paint == null ? new Paint() : paint;
+            if (layerType == LAYER_TYPE_HARDWARE) {
+                HardwareLayer layer = getHardwareLayer();
+                if (layer != null) {
+                    layer.setLayerPaint(paint);
+                }
+                invalidateViewProperty(false, false);
+            } else {
+                invalidate();
+            }
+        }
     }
 
     /**
@@ -12101,6 +12145,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (!mHardwareLayer.isValid()) {
                 return null;
             }
+            mHardwareLayer.setLayerPaint(mLayerPaint);
 
             mHardwareLayer.redraw(getHardwareLayerDisplayList(mHardwareLayer), mLocalDirtyRect);
             mLocalDirtyRect.setEmpty();

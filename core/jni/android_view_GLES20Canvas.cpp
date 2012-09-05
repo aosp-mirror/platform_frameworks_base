@@ -776,6 +776,20 @@ static void android_view_GLES20Canvas_resizeLayer(JNIEnv* env, jobject clazz,
     env->ReleaseIntArrayElements(layerInfo, storage, 0);
 }
 
+static void android_view_GLES20Canvas_setLayerPaint(JNIEnv* env, jobject clazz,
+        Layer* layer, SkPaint* paint) {
+    if (layer) {
+        layer->setPaint(paint);
+    }
+}
+
+static void android_view_GLES20Canvas_setLayerColorFilter(JNIEnv* env, jobject clazz,
+        Layer* layer, SkiaColorFilter* colorFilter) {
+    if (layer) {
+        layer->setColorFilter(colorFilter);
+    }
+}
+
 static void android_view_GLES20Canvas_setOpaqueLayer(JNIEnv* env, jobject clazz,
         Layer* layer, jboolean isOpaque) {
     if (layer) {
@@ -979,6 +993,8 @@ static JNINativeMethod gMethods[] = {
     { "nCreateLayerRenderer",    "(I)I",       (void*) android_view_GLES20Canvas_createLayerRenderer },
     { "nCreateLayer",            "(IIZ[I)I",   (void*) android_view_GLES20Canvas_createLayer },
     { "nResizeLayer",            "(III[I)V" ,  (void*) android_view_GLES20Canvas_resizeLayer },
+    { "nSetLayerPaint",          "(II)V",      (void*) android_view_GLES20Canvas_setLayerPaint },
+    { "nSetLayerColorFilter",    "(II)V",      (void*) android_view_GLES20Canvas_setLayerColorFilter },
     { "nSetOpaqueLayer",         "(IZ)V",      (void*) android_view_GLES20Canvas_setOpaqueLayer },
     { "nCreateTextureLayer",     "(Z[I)I",     (void*) android_view_GLES20Canvas_createTextureLayer },
     { "nUpdateTextureLayer",     "(IIIZLandroid/graphics/SurfaceTexture;)V",
