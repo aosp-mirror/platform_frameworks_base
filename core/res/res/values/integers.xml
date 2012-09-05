@@ -18,4 +18,5 @@
 -->
 <resources>
     <integer name="kg_security_flip_duration">150</integer>
+    <integer name="kg_security_fade_duration">150</integer>
 </resources>
