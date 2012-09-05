@@ -29,26 +29,30 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
+import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Canvas;
+import android.os.UserManager;
 import android.telephony.TelephonyManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Slog;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
-import android.widget.ViewFlipper;
 import android.widget.RemoteViews.OnClickHandler;
+import android.widget.ViewFlipper;
 
+import com.android.internal.R;
 import com.android.internal.policy.impl.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.internal.widget.LockPatternUtils;
-import com.android.internal.R;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 public class KeyguardHostView extends KeyguardViewBase {
     // Use this to debug all of keyguard
@@ -614,6 +618,7 @@ public class KeyguardHostView extends KeyguardViewBase {
             Log.v(TAG, "Keyguard widgets disabled because of device policy admin");
             return;
         }
+        inflateAndAddUserSelectorWidgetIfNecessary();
         SharedPreferences prefs = mContext.getSharedPreferences(
                 KEYGUARD_WIDGET_PREFS, Context.MODE_PRIVATE);
         for (String key : prefs.getAll().keySet()) {
@@ -624,6 +629,21 @@ public class KeyguardHostView extends KeyguardViewBase {
             } else {
                 Log.w(TAG, "populate: can't find " + key);
             }
+        }
+    }
+
+    private void inflateAndAddUserSelectorWidgetIfNecessary() {
+        // if there are multiple users, we need to add the multi-user switcher widget to the
+        // keyguard.
+        UserManager mUm = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        List<UserInfo> users = mUm.getUsers();
+
+        if (users.size() > 1) {
+            KeyguardWidgetFrame userswitcher = (KeyguardWidgetFrame)
+                LayoutInflater.from(mContext).inflate(R.layout.keyguard_multi_user_selector_widget,
+                        mAppWidgetContainer, false);
+            // add the switcher in the first position
+            mAppWidgetContainer.addView(userswitcher, 0);
         }
     }
 

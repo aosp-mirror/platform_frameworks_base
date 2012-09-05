@@ -38,6 +38,7 @@ public class KeyguardWidgetFrame extends FrameLayout {
     private static Drawable sRightOverscrollDrawable;
 
     private Drawable mForegroundDrawable;
+    private float mOverScrollAmount = 0f;
     private final Rect mForegroundRect = new Rect();
     private int mForegroundAlpha = 0;
 
@@ -80,14 +81,17 @@ public class KeyguardWidgetFrame extends FrameLayout {
     }
 
     void setOverScrollAmount(float r, boolean left) {
-        if (left && mForegroundDrawable != sLeftOverscrollDrawable) {
-            mForegroundDrawable = sLeftOverscrollDrawable;
-        } else if (!left && mForegroundDrawable != sRightOverscrollDrawable) {
-            mForegroundDrawable = sRightOverscrollDrawable;
-        }
+        if (Float.compare(mOverScrollAmount, r) != 0) {
+            mOverScrollAmount = r;
+            if (left && mForegroundDrawable != sLeftOverscrollDrawable) {
+                mForegroundDrawable = sLeftOverscrollDrawable;
+            } else if (!left && mForegroundDrawable != sRightOverscrollDrawable) {
+                mForegroundDrawable = sRightOverscrollDrawable;
+            }
 
-        mForegroundAlpha = (int) Math.round((r * 255));
-        mForegroundDrawable.setAlpha(mForegroundAlpha);
-        invalidate();
+            mForegroundAlpha = (int) Math.round((r * 255));
+            mForegroundDrawable.setAlpha(mForegroundAlpha);
+            invalidate();
+        }
     }
 }
