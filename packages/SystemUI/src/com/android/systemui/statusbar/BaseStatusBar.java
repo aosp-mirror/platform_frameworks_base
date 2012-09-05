@@ -594,25 +594,11 @@ public abstract class BaseStatusBar extends SystemUI implements
                  break;
              case MSG_PRELOAD_RECENT_APPS:
                   if (DEBUG) Slog.d(TAG, "preloading recents");
-                  {
-                      // TODO:
-                      // need to implement this
-                      //final RecentsPanelView recentsPanel = getRecentsPanel();
-                      //if (recentsPanel != null) {
-                      //recentsPanel.preloadRecentTasksList();
-                      //}
-                  }
+                  getRecentTasksLoader().preloadRecentTasksList();
                   break;
              case MSG_CANCEL_PRELOAD_RECENT_APPS:
                   if (DEBUG) Slog.d(TAG, "cancel preloading recents");
-                  {
-                      // TODO:
-                      // need to implement this
-                      //final RecentsPanelView recentsPanel = getRecentsPanel();
-                      //if (recentsPanel != null) {
-                      //recentsPanel.clearRecentTasksList();
-                      //}
-                  }
+                  getRecentTasksLoader().cancelPreloadingRecentTasksList();
                   break;
              case MSG_OPEN_SEARCH_PANEL:
                  if (DEBUG) Slog.d(TAG, "opening search panel");
