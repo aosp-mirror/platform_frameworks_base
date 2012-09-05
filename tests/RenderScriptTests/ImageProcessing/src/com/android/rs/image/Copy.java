@@ -22,42 +22,19 @@ import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.RenderScript;
 import android.renderscript.Script;
-import android.renderscript.ScriptIntrinsicConvolve3x3;
+import android.renderscript.ScriptC;
 import android.renderscript.Type;
 import android.util.Log;
-import android.widget.SeekBar;
-import android.widget.TextView;
 
-public class Intrinsics extends TestBase {
-    private ScriptIntrinsicConvolve3x3 mScript;
-
-    Intrinsics(int id) {
-    }
-
-    public boolean onBar1Setup(SeekBar b, TextView t) {
-        t.setText("Strength");
-        b.setProgress(50);
-        return true;
-    }
-
-    public void onBar1Changed(int progress) {
-        float s = progress / 100.0f;
-        float v[] = new float[9];
-        v[0] = 0.f;     v[1] = -s;      v[2] = 0.f;
-        v[3] = -s;      v[4] = s*4+1;   v[5] = -s;
-        v[6] = 0.f;     v[7] = -s;      v[8] = 0.f;
-        mScript.setColorMatrix(v);
-    }
-
+public class Copy extends TestBase {
+    private ScriptC_copy mScript;
 
     public void createTest(android.content.res.Resources res) {
-        mScript = ScriptIntrinsicConvolve3x3.create(mRS, Element.RGBA_8888(mRS));
+        mScript = new ScriptC_copy(mRS, res, R.raw.copy);
     }
 
     public void runTest() {
-        mScript.setInput(mInPixelsAllocation);
-        mScript.forEach(mOutPixelsAllocation);
+        mScript.forEach_root(mInPixelsAllocation, mOutPixelsAllocation);
     }
 
 }
-
