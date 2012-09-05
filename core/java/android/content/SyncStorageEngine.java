@@ -25,6 +25,7 @@ import org.xmlpull.v1.XmlSerializer;
 
 import android.accounts.Account;
 import android.accounts.AccountAndUser;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
@@ -336,6 +337,7 @@ public class SyncStorageEngine extends Handler {
 
     private int mNextHistoryId = 0;
     private SparseArray<Boolean> mMasterSyncAutomatically = new SparseArray<Boolean>();
+    private boolean mDefaultMasterSyncAutomatically;
 
     private OnSyncRequestListener mSyncRequestListener;
 
@@ -344,6 +346,9 @@ public class SyncStorageEngine extends Handler {
         sSyncStorageEngine = this;
 
         mCal = Calendar.getInstance(TimeZone.getTimeZone("GMT+0"));
+
+        mDefaultMasterSyncAutomatically = mContext.getResources().getBoolean(
+               com.android.internal.R.bool.config_syncstorageengine_masterSyncAutomatically);
 
         File systemDir = new File(dataDir, "system");
         File syncDir = new File(systemDir, "sync");
@@ -780,7 +785,7 @@ public class SyncStorageEngine extends Handler {
     public boolean getMasterSyncAutomatically(int userId) {
         synchronized (mAuthorities) {
             Boolean auto = mMasterSyncAutomatically.get(userId);
-            return auto == null ? true : auto;
+            return auto == null ? mDefaultMasterSyncAutomatically : auto;
         }
     }
 
