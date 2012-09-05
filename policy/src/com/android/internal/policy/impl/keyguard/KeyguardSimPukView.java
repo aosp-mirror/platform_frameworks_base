@@ -27,6 +27,7 @@ import android.text.Editable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
@@ -62,6 +63,8 @@ public class KeyguardSimPukView extends LinearLayout implements View.OnClickList
     private PasswordEntryKeyboardHelper mKeyboardHelper;
 
     private LockPatternUtils mLockPatternUtils;
+
+    private volatile boolean mCheckInProgress;
 
     public KeyguardSimPukView(Context context) {
         this(context, null);
@@ -233,48 +236,54 @@ public class KeyguardSimPukView extends LinearLayout implements View.OnClickList
 
         getSimUnlockProgressDialog().show();
 
-        new CheckSimPuk(mPukText.getText().toString(),
-                mPinText.getText().toString()) {
-            void onSimLockChangedResponse(final boolean success) {
-                mPinText.post(new Runnable() {
-                    public void run() {
-                        if (mSimUnlockProgressDialog != null) {
-                            mSimUnlockProgressDialog.hide();
+        if (!mCheckInProgress) {
+            mCheckInProgress = true;
+            new CheckSimPuk(mPukText.getText().toString(),
+                    mPinText.getText().toString()) {
+                void onSimLockChangedResponse(final boolean success) {
+                    mPinText.post(new Runnable() {
+                        public void run() {
+                            if (mSimUnlockProgressDialog != null) {
+                                mSimUnlockProgressDialog.hide();
+                            }
+                            if (success) {
+                                mCallback.dismiss(true);
+                            } else {
+                                mNavigationManager.setMessage(R.string.kg_invalid_puk);
+                                mPukText.setText("");
+                                mPinText.setText("");
+                            }
+                            mCheckInProgress = false;
                         }
-                        if (success) {
-                            mCallback.dismiss(true);
-                        } else {
-                            mNavigationManager.setMessage(R.string.kg_invalid_puk);
-                            mPukText.setText("");
-                            mPinText.setText("");
-                        }
-                    }
-                });
-            }
-        }.start();
+                    });
+                }
+            }.start();
+        }
     }
 
     @Override
     public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
         // Check if this was the result of hitting the enter key
         mCallback.userActivity(DIGIT_PRESS_WAKE_MILLIS);
-        if (actionId == EditorInfo.IME_NULL
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            if (actionId == EditorInfo.IME_NULL
                 || actionId == EditorInfo.IME_ACTION_DONE
                 || actionId == EditorInfo.IME_ACTION_NEXT) {
-            if (view == mPukText && mPukText.getText().length() < 8) {
-                mNavigationManager.setMessage(R.string.kg_invalid_sim_puk_hint);
-                mPukText.setText("");
-                mPukText.requestFocus();
-                return true;
-            } else if (view == mPinText) {
-                if (mPinText.getText().length() < 4 || mPinText.getText().length() > 8) {
-                    mNavigationManager.setMessage(R.string.kg_invalid_sim_pin_hint);
-                    mPinText.setText("");
-                    mPinText.requestFocus();
-                } else {
-                    checkPuk();
+                if (view == mPukText && mPukText.getText().length() < 8) {
+                    mNavigationManager.setMessage(R.string.kg_invalid_sim_puk_hint);
+                    mPukText.setText("");
+                    mPukText.requestFocus();
+                    return true;
+                } else if (view == mPinText) {
+                    if (mPinText.getText().length() < 4 || mPinText.getText().length() > 8) {
+                        mNavigationManager.setMessage(R.string.kg_invalid_sim_pin_hint);
+                        mPinText.setText("");
+                        mPinText.requestFocus();
+                    } else {
+                        checkPuk();
+                    }
+                    return true;
                 }
-                return true;
             }
         }
         return false;
