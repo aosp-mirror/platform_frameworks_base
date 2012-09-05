@@ -116,6 +116,7 @@ public class BatteryService extends Binder {
 
     private int mLowBatteryWarningLevel;
     private int mLowBatteryCloseWarningLevel;
+    private int mShutdownBatteryTemperature;
 
     private int mPlugType;
     private int mLastPlugType = -1; // Extra state so we can detect first run
@@ -138,6 +139,8 @@ public class BatteryService extends Binder {
                 com.android.internal.R.integer.config_lowBatteryWarningLevel);
         mLowBatteryCloseWarningLevel = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_lowBatteryCloseWarningLevel);
+        mShutdownBatteryTemperature = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_shutdownBatteryTemperature);
 
         mPowerSupplyObserver.startObserving("SUBSYSTEM=power_supply");
 
@@ -228,9 +231,11 @@ public class BatteryService extends Binder {
     }
 
     private final void shutdownIfOverTemp() {
-        // shut down gracefully if temperature is too high (> 68.0C)
-        // wait until the system has booted before attempting to display the shutdown dialog.
-        if (mBatteryTemperature > 680 && ActivityManagerNative.isSystemReady()) {
+        // shut down gracefully if temperature is too high (> 68.0C by default)
+        // wait until the system has booted before attempting to display the
+        // shutdown dialog.
+        if (mBatteryTemperature > mShutdownBatteryTemperature
+                && ActivityManagerNative.isSystemReady()) {
             Intent intent = new Intent(Intent.ACTION_REQUEST_SHUTDOWN);
             intent.putExtra(Intent.EXTRA_KEY_CONFIRM, false);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -259,7 +264,7 @@ public class BatteryService extends Binder {
         } else {
             mPlugType = BATTERY_PLUGGED_NONE;
         }
-        
+
         // Let the battery stats keep track of the current level.
         try {
             mBatteryStats.setBatteryState(mBatteryStatus, mBatteryHealth,
@@ -268,7 +273,7 @@ public class BatteryService extends Binder {
         } catch (RemoteException e) {
             // Should never happen.
         }
-        
+
         shutdownIfNoPower();
         shutdownIfOverTemp();
 
