@@ -38,8 +38,8 @@ abstract class DisplayDevice {
     // the display manager service.  The display device shouldn't really be looking at these.
     private int mCurrentLayerStack = -1;
     private int mCurrentOrientation = -1;
-    private Rect mCurrentViewport;
-    private Rect mCurrentFrame;
+    private Rect mCurrentLayerStackRect;
+    private Rect mCurrentDisplayRect;
 
     // The display device does own its surface texture, but it should only set it
     // within a transaction from performTraversalInTransactionLocked.
@@ -117,44 +117,26 @@ abstract class DisplayDevice {
     }
 
     /**
-     * Sets the display orientation while in a transaction.
+     * Sets the display projection while in a transaction.
+     *
+     * @param orientation defines the display's orientation
+     * @param layerStackRect defines which area of the window manager coordinate
+     *            space will be used
+     * @param displayRect defines where on the display will layerStackRect be
+     *            mapped to. displayRect is specified post-orientation, that is
+     *            it uses the orientation seen by the end-user
      */
-    public final void setOrientationInTransactionLocked(int orientation) {
-        if (mCurrentOrientation == orientation) {
-            return;
-        }
+    public final void setProjectionInTransactionLocked(int orientation, Rect layerStackRect, Rect displayRect) {
         mCurrentOrientation = orientation;
-        Surface.setDisplayOrientation(mDisplayToken, orientation);
-    }
-
-    /**
-     * Sets the display viewport while in a transaction.
-     */
-    public final void setViewportInTransactionLocked(Rect viewport) {
-        if (mCurrentViewport != null) {
-            if (mCurrentViewport.equals(viewport)) {
-                return;
-            }
-        } else {
-            mCurrentViewport = new Rect();
+        if (mCurrentLayerStackRect == null) {
+            mCurrentLayerStackRect = new Rect();
         }
-        mCurrentViewport.set(viewport);
-        Surface.setDisplayViewport(mDisplayToken, viewport);
-    }
-
-    /**
-     * Sets the display frame while in a transaction.
-     */
-    public final void setFrameInTransactionLocked(Rect frame) {
-        if (mCurrentFrame != null) {
-            if (mCurrentFrame.equals(frame)) {
-                return;
-            }
-        } else {
-            mCurrentFrame = new Rect();
+        mCurrentLayerStackRect.set(layerStackRect);
+        if (mCurrentDisplayRect == null) {
+            mCurrentDisplayRect = new Rect();
         }
-        mCurrentFrame.set(frame);
-        Surface.setDisplayFrame(mDisplayToken, frame);
+        mCurrentDisplayRect.set(displayRect);
+        Surface.setDisplayProjection(mDisplayToken, orientation, layerStackRect, displayRect);
     }
 
     /**
@@ -176,8 +158,8 @@ abstract class DisplayDevice {
         pw.println("mAdapter=" + mDisplayAdapter.getName());
         pw.println("mCurrentLayerStack=" + mCurrentLayerStack);
         pw.println("mCurrentOrientation=" + mCurrentOrientation);
-        pw.println("mCurrentViewport=" + mCurrentViewport);
-        pw.println("mCurrentFrame=" + mCurrentFrame);
+        pw.println("mCurrentViewport=" + mCurrentLayerStackRect);
+        pw.println("mCurrentFrame=" + mCurrentDisplayRect);
         pw.println("mCurrentSurfaceTexture=" + mCurrentSurfaceTexture);
     }
 }
