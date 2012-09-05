@@ -136,6 +136,8 @@ public class RecentsActivity extends Activity {
         mRecentsPanel.setOnTouchListener(new TouchOutsideListener(mRecentsPanel));
         mRecentsPanel.setRecentTasksLoader(recentTasksLoader);
         recentTasksLoader.setRecentsPanel(mRecentsPanel, mRecentsPanel);
+        mRecentsPanel.setMinSwipeAlpha(
+                getResources().getInteger(R.integer.config_recent_item_min_alpha) / 100f);
 
         handleIntent(getIntent());
         mIntentFilter = new IntentFilter();

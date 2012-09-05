@@ -29,5 +29,8 @@
     <!-- Whether recents thumbnails should stretch in both x and y to fill their
      ImageView -->
     <bool name="config_recents_thumbnail_image_fits_to_xy">true</bool>
+
+    <!-- Min alpha % that recent items will fade to while being dismissed -->
+    <integer name="config_recent_item_min_alpha">0</integer>
 </resources>
 
