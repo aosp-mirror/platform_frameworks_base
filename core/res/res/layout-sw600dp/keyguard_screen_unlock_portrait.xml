@@ -119,7 +119,7 @@
 
         <!-- Area to overlay FaceLock -->
         <RelativeLayout
-            android:id="@+id/faceLockAreaView"
+            android:id="@+id/face_unlock_area_view"
             android:visibility="invisible"
             android:layout_width="440dip"
             android:layout_height="440dip"

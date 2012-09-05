@@ -1013,7 +1013,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
             // TODO: make faceLockAreaView a more general biometricUnlockView
             // We will need to add our Face Unlock specific child views programmatically in
             // initializeView rather than having them in the XML files.
-            View biometricUnlockView = view.findViewById(R.id.faceLockAreaView);
+            View biometricUnlockView = view.findViewById(R.id.face_unlock_area_view);
             if (biometricUnlockView != null) {
                 mBiometricUnlock = new FaceUnlock(mContext, mUpdateMonitor, mLockPatternUtils,
                         mKeyguardScreenCallback);
