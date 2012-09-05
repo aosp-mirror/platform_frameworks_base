@@ -2374,6 +2374,12 @@
         <!-- The extra value of the subtype. This string can be any string and will be passed to
              the IME when the framework calls the IME with the subtype.  -->
         <attr name="imeSubtypeExtraValue" format="string" />
+        <!-- The unique id for the subtype. The input method framework keeps track of enabled
+             subtypes by ID. When the IME package gets upgraded, enabled IDs will stay enabled even
+             if other attributes are different. If the ID is unspecified (by calling the other
+             constructor or 0. Arrays.hashCode(new Object[] {locale, mode, extraValue,
+             isAuxiliary, overridesImplicitlyEnabledSubtype}) will be used instead. -->
+        <attr name="subtypeId" format="integer"/>
     </declare-styleable>
 
     <!-- Use <code>spell-checker</code> as the root tag of the XML resource that
