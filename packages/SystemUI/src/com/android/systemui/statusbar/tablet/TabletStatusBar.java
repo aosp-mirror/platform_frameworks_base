@@ -355,7 +355,7 @@ public class TabletStatusBar extends BaseStatusBar implements
 
         mWindowManager.addView(mCompatModePanel, lp);
 
-        //mRecentButton.setOnTouchListener(mRecentsPanel); //TODO: plumb this
+        mRecentButton.setOnTouchListener(getRecentTasksLoader());
 
         mPile = (NotificationRowLayout)mNotificationPanel.findViewById(R.id.content);
         mPile.removeAllViews();
