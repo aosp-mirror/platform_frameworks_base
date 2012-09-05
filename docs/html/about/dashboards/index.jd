@@ -52,7 +52,7 @@ Google Play within a 14-day period ending on the data collection date noted belo
 
 <div class="col-8" style="margin-right:0">
 <img alt=""
-src="http://chart.apis.google.com/chart?&cht=p&chs=460x245&chd=t:4.3,14,57.5,2.1,20.9,1.2&chl=Eclair%20%26%20lower|Froyo|Gingerbread|Honeycomb|Ice%20Cream%20Sandwich|Jelly%20Bean&chco=c4df9b,6fad0c&chf=bg,s,00000000" />
+src="http://chart.apis.google.com/chart?&cht=p&chs=460x245&chd=t:4.3,14,57.5,2.1,20.9,1.2&chl=Eclair%20%26%20older|Froyo|Gingerbread|Honeycomb|Ice%20Cream%20Sandwich|Jelly%20Bean&chco=c4df9b,6fad0c&chf=bg,s,00000000" />
 
 </div><!-- end dashboard-panel -->
 
