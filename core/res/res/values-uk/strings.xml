@@ -547,10 +547,8 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Дозволяє програмі записувати на карту SD."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"змінювати/видаляти вміст внутр. сховища даних"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Дозволяє програмі змінювати вміст внутрішнього сховища даних."</string>
-    <!-- no translation found for permlab_sdcardAccessAll (8150613823900460576) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardAccessAll (3215208357415891320) -->
-    <skip />
+    <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"доступ до зовн. пам’яті всіх корист."</string>
+    <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"Дозволяє програмі отримувати доступ до зовнішньої пам’яті всіх користувачів."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"отр. дост. до файл. сист. кешу"</string>
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Дозволяє програмі читати з файлової системи кеш-пам’яті та писати в неї."</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"здійсн./отрим. Інтернет-дзвін."</string>
@@ -581,6 +579,10 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Вимагати шифрування даних збереженої програми."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Вимкнути камери"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Запобігати використанню всіх камер пристрою."</string>
+    <!-- no translation found for policylab_disableKeyguardWidgets (1794894613389073926) -->
+    <skip />
+    <!-- no translation found for policydesc_disableKeyguardWidgets (7254624892984033592) -->
+    <skip />
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Дом."</item>
     <item msgid="869923650527136615">"Мобільний"</item>
@@ -1319,64 +1321,46 @@
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Аудіо Bluetooth"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Готово"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Вивід медіа-даних"</string>
-    <!-- no translation found for display_manager_built_in_display_name (2583134294292563941) -->
+    <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Вбудований екран"</string>
+    <!-- no translation found for display_manager_hdmi_display_name (1555264559227470109) -->
     <skip />
-    <!-- no translation found for display_manager_overlay_display_name (5142365982271620716) -->
+    <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Накладання №<xliff:g id="ID">%1$d</xliff:g>"</string>
+    <!-- no translation found for display_manager_overlay_display_title (652124517672257172) -->
     <skip />
-    <!-- no translation found for display_manager_overlay_display_title (8186674340178573982) -->
-    <skip />
-    <!-- no translation found for kg_emergency_call_label (684946192523830531) -->
-    <skip />
-    <!-- no translation found for kg_forgot_pattern_button_text (8852021467868220608) -->
-    <skip />
-    <!-- no translation found for kg_wrong_pattern (1850806070801358830) -->
-    <skip />
-    <!-- no translation found for kg_wrong_password (2333281762128113157) -->
-    <skip />
-    <!-- no translation found for kg_wrong_pin (1131306510833563801) -->
-    <skip />
-    <!-- no translation found for kg_too_many_failed_attempts_countdown (353963338189371686) -->
-    <skip />
-    <!-- no translation found for kg_pattern_instructions (398978611683075868) -->
-    <skip />
-    <!-- no translation found for kg_sim_pin_instructions (2319508550934557331) -->
-    <skip />
-    <!-- no translation found for kg_pin_instructions (2377242233495111557) -->
-    <skip />
-    <!-- no translation found for kg_password_instructions (5753646556186936819) -->
-    <skip />
-    <!-- no translation found for kg_puk_enter_puk_hint (5183097160254244459) -->
-    <skip />
-    <!-- no translation found for kg_puk_enter_pin_hint (597821135578014901) -->
-    <skip />
-    <!-- no translation found for kg_sim_unlock_progress_dialog_message (8950398016976865762) -->
-    <skip />
-    <!-- no translation found for kg_password_wrong_pin_code (1139324887413846912) -->
-    <skip />
-    <!-- no translation found for kg_invalid_sim_pin_hint (8795159358110620001) -->
-    <skip />
-    <!-- no translation found for kg_invalid_sim_puk_hint (5216603185442368307) -->
-    <skip />
-    <!-- no translation found for kg_sim_puk_recovery_hint (5577753137718442566) -->
-    <skip />
-    <!-- no translation found for kg_invalid_puk (5809955359950817326) -->
-    <skip />
-    <!-- no translation found for kg_login_too_many_attempts (6486842094005698475) -->
-    <skip />
-    <!-- no translation found for kg_login_instructions (1100551261265506448) -->
-    <skip />
-    <!-- no translation found for kg_login_username_hint (5718534272070920364) -->
-    <skip />
-    <!-- no translation found for kg_login_password_hint (9057289103827298549) -->
-    <skip />
-    <!-- no translation found for kg_login_submit_button (5355904582674054702) -->
-    <skip />
-    <!-- no translation found for kg_login_invalid_input (5754664119319872197) -->
-    <skip />
-    <!-- no translation found for kg_login_account_recovery_hint (5690709132841752974) -->
-    <skip />
-    <!-- no translation found for kg_login_checking_password (8849589033659332457) -->
-    <skip />
-    <!-- no translation found for kg_temp_back_string (5812983904056640466) -->
-    <skip />
+    <string name="kg_emergency_call_label" msgid="684946192523830531">"Екстрений виклик"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Не пам’ятаю ключ"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Неправильний ключ"</string>
+    <string name="kg_wrong_password" msgid="2333281762128113157">"Неправильний пароль"</string>
+    <string name="kg_wrong_pin" msgid="1131306510833563801">"Неправильний PIN-код"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Повторіть спробу через <xliff:g id="NUMBER">%d</xliff:g> сек."</string>
+    <string name="kg_pattern_instructions" msgid="398978611683075868">"Намалюйте ключ"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Введіть PIN-код SIM-карти"</string>
+    <string name="kg_pin_instructions" msgid="2377242233495111557">"Введіть PIN-код"</string>
+    <string name="kg_password_instructions" msgid="5753646556186936819">"Введіть пароль"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="5183097160254244459">"PUK-код"</string>
+    <string name="kg_puk_enter_pin_hint" msgid="597821135578014901">"Новий PIN-код"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Розблокування SIM-карти…"</string>
+    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Неправильний PIN-код."</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Введіть PIN-код із 4–8 цифр."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="5216603185442368307">"Введіть PUK-код із 8 або більше цифр."</string>
+    <string name="kg_sim_puk_recovery_hint" msgid="5577753137718442566">"Введіть PUK-код і новий PIN-код"</string>
+    <string name="kg_invalid_puk" msgid="5809955359950817326">"Введений PUK-код не правильний."</string>
+    <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Забагато спроб намалювати ключ"</string>
+    <string name="kg_login_instructions" msgid="1100551261265506448">"Щоб розблокувати, увійдіть, використовуючи дані облікового запису Google."</string>
+    <string name="kg_login_username_hint" msgid="5718534272070920364">"Ім’я користувача (електронна адреса)"</string>
+    <string name="kg_login_password_hint" msgid="9057289103827298549">"Пароль"</string>
+    <string name="kg_login_submit_button" msgid="5355904582674054702">"Увійти"</string>
+    <string name="kg_login_invalid_input" msgid="5754664119319872197">"Недійсне ім’я користувача чи пароль."</string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Не пам’ятаєте ім’я користувача чи пароль?"\n"Відвідайте сторінку "<b>"google.com/accounts/recovery"</b>"."</string>
+    <string name="kg_login_checking_password" msgid="8849589033659332457">"Перевірка…"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"PIN-код неправильно введено стільки разів: <xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n"Повторіть спробу через <xliff:g id="NUMBER_1">%d</xliff:g> сек."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Пароль неправильно введено стільки разів: <xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n"Повторіть спробу через <xliff:g id="NUMBER_1">%d</xliff:g> сек."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Ключ розблокування неправильно намальовано стільки разів: <xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n"Повторіть спробу через <xliff:g id="NUMBER_1">%d</xliff:g> сек."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Кількість невдалих спроб розблокувати планшетний ПК: <xliff:g id="NUMBER_0">%d</xliff:g>. У вас є ще стільки спроб: <xliff:g id="NUMBER_1">%d</xliff:g>. У разі невдачі налаштування планшетного ПК буде змінено на заводські за умовчанням, а всі дані користувача – втрачено."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Кількість невдалих спроб розблокувати телефон: <xliff:g id="NUMBER_0">%d</xliff:g>. У вас є ще стільки спроб: <xliff:g id="NUMBER_1">%d</xliff:g>. У разі невдачі налаштування телефону буде змінено на заводські за умовчанням, а всі дані користувача – втрачено."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Кількість невдалих спроб розблокувати планшетний ПК: <xliff:g id="NUMBER">%d</xliff:g>. Налаштування планшетного ПК буде змінено на заводські за умовчанням."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Кількість невдалих спроб розблокувати телефон: <xliff:g id="NUMBER">%d</xliff:g>. Налаштування телефону буде змінено на заводські за умовчанням."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Ключ розблокування неправильно намальовано стільки разів: <xliff:g id="NUMBER_0">%d</xliff:g>. У вас є ще стільки спроб: <xliff:g id="NUMBER_1">%d</xliff:g>. У разі невдачі з’явиться запит розблокувати планшетний ПК за допомогою облікового запису електронної пошти."\n\n" Повторіть спробу через <xliff:g id="NUMBER_2">%d</xliff:g> сек."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Ключ розблокування неправильно намальовано стільки разів: <xliff:g id="NUMBER_0">%d</xliff:g>. У вас є ще стільки спроб: <xliff:g id="NUMBER_1">%d</xliff:g>. У разі невдачі з’явиться запит розблокувати телефон за допомогою облікового запису електронної пошти."\n\n" Повторіть спробу через <xliff:g id="NUMBER_2">%d</xliff:g> сек."</string>
+    <string name="kg_temp_back_string" msgid="5812983904056640466">"&lt;"</string>
 </resources>
