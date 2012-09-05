@@ -5,7 +5,7 @@ import android.animation.TimeAnimator.TimeListener;
 import android.content.Context;
 import android.content.res.Resources;
 import android.util.AttributeSet;
-import android.util.Log;
+import android.util.Slog;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -18,7 +18,7 @@ public class PanelView extends FrameLayout {
     public static final String TAG = PanelView.class.getSimpleName();
     public final void LOG(String fmt, Object... args) {
         if (!DEBUG) return;
-        Log.v(TAG, (mViewName != null ? (mViewName + ": ") : "") + String.format(fmt, args));
+        Slog.v(TAG, (mViewName != null ? (mViewName + ": ") : "") + String.format(fmt, args));
     }
 
     public static final boolean BRAKES = false;
@@ -173,6 +173,12 @@ public class PanelView extends FrameLayout {
         event.offsetLocation(deltaX, deltaY);
         mVelocityTracker.addMovement(event);
         event.offsetLocation(-deltaX, -deltaY);
+    }
+
+    // Pass all touches along to the handle, allowing the user to drag the panel closed from its interior
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        return mHandleView.dispatchTouchEvent(event);
     }
 
     @Override

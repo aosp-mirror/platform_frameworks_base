@@ -109,8 +109,6 @@ public class PhoneStatusBar extends BaseStatusBar {
     public static final String ACTION_STATUSBAR_START
             = "com.android.internal.policy.statusbar.START";
 
-    private static final boolean SHOW_CARRIER_LABEL = false; // XXX: doesn't work with rubberband panels right now
-
     private static final int MSG_OPEN_NOTIFICATION_PANEL = 1000;
     private static final int MSG_CLOSE_NOTIFICATION_PANEL = 1001;
     // 1020-1030 reserved for BaseStatusBar
@@ -189,6 +187,9 @@ public class PhoneStatusBar extends BaseStatusBar {
     private boolean mCarrierLabelVisible = false;
     private int mCarrierLabelHeight;
     private TextView mEmergencyCallLabel;
+    private int mNotificationHeaderHeight;
+
+    private boolean mShowCarrierInPanel = false;
 
     // position
     int[] mPositionTmp = new int[2];
@@ -310,14 +311,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         mStatusBarView.setPanelHolder(holder);
 
         mNotificationPanel = (PanelView) mStatusBarWindow.findViewById(R.id.notification_panel);
-        // don't allow clicks on the panel to pass through to the background where they will cause the panel to close
-        View.OnTouchListener clickStopper = new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                return true;
-            }
-        };
-        mNotificationPanel.setOnTouchListener(clickStopper);
         mNotificationPanelIsFullScreenWidth =
             (mNotificationPanel.getLayoutParams().width == ViewGroup.LayoutParams.MATCH_PARENT);
         mNotificationPanel.setSystemUiVisibility(
@@ -326,7 +319,6 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         // quick settings (WIP)
         mSettingsPanel = (PanelView) mStatusBarWindow.findViewById(R.id.settings_panel);
-        mSettingsPanel.setOnTouchListener(clickStopper);
 
         if (!ActivityManager.isHighEndGfx()) {
             mStatusBarWindow.setBackground(null);
@@ -419,8 +411,10 @@ public class PhoneStatusBar extends BaseStatusBar {
                 }});
         }
 
-        if (SHOW_CARRIER_LABEL) {
-            mCarrierLabel = (TextView)mStatusBarWindow.findViewById(R.id.carrier_label);
+        mCarrierLabel = (TextView)mStatusBarWindow.findViewById(R.id.carrier_label);
+        mShowCarrierInPanel = (mCarrierLabel != null);
+        Slog.v(TAG, "carrierlabel=" + mCarrierLabel + " show=" + mShowCarrierInPanel);
+        if (mShowCarrierInPanel) {
             mCarrierLabel.setVisibility(mCarrierLabelVisible ? View.VISIBLE : View.INVISIBLE);
 
             // for mobile devices, we always show mobile connection info here (SPN/PLMN)
@@ -867,7 +861,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     protected void updateCarrierLabelVisibility(boolean force) {
-        if (!SHOW_CARRIER_LABEL) return;
+        if (!mShowCarrierInPanel) return;
         // The idea here is to only show the carrier label when there is enough room to see it, 
         // i.e. when there aren't enough notifications to fill the panel.
         if (DEBUG) {
@@ -878,7 +872,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         final boolean emergencyCallsShownElsewhere = mEmergencyCallLabel != null;
         final boolean makeVisible =
             !(emergencyCallsShownElsewhere && mNetworkController.isEmergencyOnly())
-            && mPile.getHeight() < (mScrollView.getHeight() - mCarrierLabelHeight);
+            && mPile.getHeight() < (mNotificationPanel.getHeight() - mCarrierLabelHeight - mNotificationHeaderHeight);
         
         if (force || mCarrierLabelVisible != makeVisible) {
             mCarrierLabelVisible = makeVisible;
@@ -1631,6 +1625,8 @@ public class PhoneStatusBar extends BaseStatusBar {
         lp.gravity = mSettingsPanelGravity;
         lp.rightMargin = mNotificationPanelMarginPx;
         mSettingsPanel.setLayoutParams(lp);
+
+        updateCarrierLabelVisibility(false);
     }
 
     // called by makeStatusbar and also by PhoneStatusBarView
@@ -1905,6 +1901,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             + res.getDimensionPixelSize(R.dimen.close_handle_underlap);
 
         mCarrierLabelHeight = res.getDimensionPixelSize(R.dimen.carrier_label_height);
+        mNotificationHeaderHeight = res.getDimensionPixelSize(R.dimen.notification_panel_header_height);
 
         if (false) Slog.v(TAG, "updateResources");
     }
