@@ -262,12 +262,8 @@ public class Surface implements Parcelable {
             IBinder displayToken, SurfaceTexture surfaceTexture);
     private static native void nativeSetDisplayLayerStack(
             IBinder displayToken, int layerStack);
-    private static native void nativeSetDisplayOrientation(
-            IBinder displayToken, int orientation);
-    private static native void nativeSetDisplayViewport(
-            IBinder displayToken, Rect viewport);
-    private static native void nativeSetDisplayFrame(
-            IBinder displayToken, Rect frame);
+    private static native void nativeSetDisplayProjection(
+            IBinder displayToken, int orientation, Rect layerStackRect, Rect displayRect);
     private static native boolean nativeGetDisplayInfo(
             IBinder displayToken, PhysicalDisplayInfo outInfo);
 
@@ -617,33 +613,18 @@ public class Surface implements Parcelable {
     }
 
     /** @hide */
-    public static void setDisplayOrientation(IBinder displayToken, int orientation) {
+    public static void setDisplayProjection(IBinder displayToken,
+            int orientation, Rect layerStackRect, Rect displayRect) {
         if (displayToken == null) {
             throw new IllegalArgumentException("displayToken must not be null");
         }
-        nativeSetDisplayOrientation(displayToken, orientation);
-    }
-
-    /** @hide */
-    public static void setDisplayViewport(IBinder displayToken, Rect viewport) {
-        if (displayToken == null) {
-            throw new IllegalArgumentException("displayToken must not be null");
+        if (layerStackRect == null) {
+            throw new IllegalArgumentException("layerStackRect must not be null");
         }
-        if (viewport == null) {
-            throw new IllegalArgumentException("viewport must not be null");
+        if (displayRect == null) {
+            throw new IllegalArgumentException("displayRect must not be null");
         }
-        nativeSetDisplayViewport(displayToken, viewport);
-    }
-
-    /** @hide */
-    public static void setDisplayFrame(IBinder displayToken, Rect frame) {
-        if (displayToken == null) {
-            throw new IllegalArgumentException("displayToken must not be null");
-        }
-        if (frame == null) {
-            throw new IllegalArgumentException("frame must not be null");
-        }
-        nativeSetDisplayFrame(displayToken, frame);
+        nativeSetDisplayProjection(displayToken, orientation, layerStackRect, displayRect);
     }
 
     /** @hide */
