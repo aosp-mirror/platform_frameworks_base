@@ -1,0 +1,173 @@
+page.title=Accessibility Developer Checklist
+parent.title=Accessibility
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#requirements">Accessibility Requirements</a></li>
+    <li><a href="#recommendations">Accessibility Recommendations</a></li>
+    <li><a href="#special-cases">Special Cases and Considerations</a></li>
+  </ol>
+
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}design/patterns/accessibility.html">Android Design: Accessibility</a></li>
+    <li><a href="{@docRoot}tools/testing/testing_accessibility.html">Accessibility Testing Checklist</a></li>
+    <li><a href="{@docRoot}training/accessibility/index.html">Training: Implementing Accessibility</a></li>
+    <li><a href="{@docRoot}training/design-navigation/index.html">Designing Effective Navigation</a></li>
+  </ol>
+
+</div>
+</div>
+
+<p>Making an application accessible is about a deep commitment to usability, getting the
+details right and delighting your users. This document provides a checklist of accessibility
+requirements, recommendations and considerations to help you make sure your application is
+accessible. Following this checklist does not guarantee your application is accessible, but it's a
+good place to start.</p>
+
+<p>Creating an accessible application is not just the responsibility of developers. Involve your
+design and testing folks as well, and make them are aware of the guidelines for these other stages
+of development:</p>
+
+<ul>
+  <li><a href="{@docRoot}design/patterns/accessibility.html">Android Design: Accessibility</a></li>
+  <li><a href="{@docRoot}tools/testing/testing_accessibility.html">Accessibility Testing
+    Checklist</a></li>
+</ul>
+
+<p>In most cases, creating an accessible Android application does not require extensive code
+restructuring. Rather, it means working through the subtle details of how users interact with your
+application, so you can provide them with feedback they can sense and understand. This checklist
+helps you focus on the key development issues to get the details of accessibility right.</p>
+
+
+<h2 id="requirements">Accessibility Requirements</h2>
+
+<p>The following steps must be completed in order to ensure a minimum level of application
+  accessibility.</p>
+
+<ol>
+  <li><strong>Describe user interface controls:</strong> Provide content
+    <a href="{@docRoot}guide/topics/ui/accessibility/apps.html#label-ui">descriptions</a> for user
+    interface components that do not have visible text, particularly
+    {@link android.widget.ImageButton}, {@link android.widget.ImageView}
+    and {@link android.widget.CheckBox} components. Use the
+    <a href="{@docRoot}reference/android/view/View.html#attr_android:contentDescription">
+    {@code android:contentDescription}</a> XML layout attribute or the {@link
+    android.view.View#setContentDescription} method to provide this information for accessibility
+    services. (Exception: <a href="#decorative">decorative graphics</a>)</li>
+  <li><strong>Enable focus-based navigation:</strong> Make sure
+    <a href="{@docRoot}guide/topics/ui/accessibility/apps.html#focus-nav">users can navigate</a>
+    your screen layouts using hardware-based or software directional controls (D-pads, trackballs,
+    keyboards and navigation gestures). In a few cases, you may need to make user interface components
+    <a href="{@docRoot}reference/android/view/View.html#attr_android:focusable">focusable</a>
+    or change the <a href="{@docRoot}guide/topics/ui/accessibility/apps.html#focus-order">focus
+    order</a> to be more logical for user actions.</li>
+  <li><strong>Custom view controls:</strong> If you build
+    <a href="{@docRoot}guide/topics/ui/custom-components.html">custom interface controls</a> for
+    your application, <a href="{@docRoot}guide/topics/ui/accessibility/apps.html#custom-views">
+    implement accessibility interfaces</a> for your custom views and provide content descriptions.
+    For custom controls that are intended to be compatible with versions of Android back to 1.6,
+    use the <a href="{@docRoot}tools/extras/support-library.html">Support Library</a> to implement
+    the latest accessibility features.</li>
+  <li><strong>No audio-only feedback:</strong> Audio feedback must always have a secondary
+    feedback mechanism to support users who are deaf or hard of hearing. For example, a sound alert
+    for the arrival of a message must be accompanied by a system
+    {@link android.app.Notification}, haptic feedback (if available) or other visual alert.</li>
+  <li><strong>Test:</strong> Test accessibility by navigating your application
+    using directional controls, and using eyes-free navigation with TalkBack enabled.
+    For more accessibility testing information, see the
+    <a href="{@docRoot}tools/testing/testing_accessibility.html">Accessibility Testing
+    Checklist</a>.</li>
+</ol>
+
+
+<h2 id="recommendations">Accessibility Recommendations</h2>
+
+<p>The following steps are recommended for ensuring the accessibility of your application. If you
+  do not take these actions, it may impact the overall accessibility and quality of your
+  application.</p>
+
+<ol>
+  <li><strong>Android Design Accessibility Guidelines:</strong> Before building your layouts,
+    review and follow the accessibility guidelines provided in the
+    <a href="{@docRoot}design/patterns/accessibility.html">Design guidelines</a>.</li>
+  <li><strong>Framework-provided controls:</strong> Use Android's built-in user interface
+    controls whenever possible, as these components provide accessibility support by default.</li>
+  <li><strong>Temporary or self-hiding controls and notifications:</strong> Avoid having user
+    interface controls that fade out or disappear after a certain amount of time. If this behavior
+    is important to your application, provide an alternative interface for these functions.</li>
+</ol>
+
+
+<h2 id="special-cases">Special Cases and Considerations</h2>
+
+<p>The following list describes specific situations where action should be taken to ensure an
+  accessible app. Review this list to see if any of these special cases and considerations apply to
+  your application, and take the appropriate action.</p>
+
+<ol>
+  <li><strong>Text field hints:</strong> For {@link android.widget.EditText} fields, provide an
+    <a href="{@docRoot}reference/android/widget/TextView.html#attr_android:hint">android:hint</a>
+    attribute <em>instead</em> of a content description, to help users understand what content is
+    expected when the text field is empty and allow the contents of the field to be spoken when
+    it is filled.</li>
+  <li><strong>Custom controls with high visual context:</strong> If your application contains a
+    <a href="{@docRoot}guide/topics/ui/custom-components.html">custom control</a> with a high degree
+    of visual context (such as a calendar control), default accessibility services processing may
+    not provide adequate descriptions for users, and you should consider providing a
+    <a href="{@docRoot}guide/topics/ui/accessibility/apps.html#virtual-hierarchy">virtual
+    view hierarchy</a> for your control using
+    {@link android.view.accessibility.AccessibilityNodeProvider}.</li>
+  <li><strong>Custom controls and click handling:</strong> If a custom control in your
+    application performs specific handling of user touch interaction, such as listening with
+    {@link android.view.View#onTouchEvent} for {@link android.view.MotionEvent#ACTION_DOWN
+    MotionEvent.ACTION_DOWN} and {@link android.view.MotionEvent#ACTION_UP MotionEvent.ACTION_UP}
+    and treating it as a click event, you must trigger an {@link
+    android.view.accessibility.AccessibilityEvent} equivalent to a click and provide a way for
+    accessibility services to perform this action for users. For more information, see
+    <a href="{@docRoot}guide/topics/ui/accessibility/apps.html#custom-touch-events">Handling custom
+    touch events</a>.</li>
+  <li><strong>Controls that change function:</strong> If you have buttons or other controls
+    that change function during the normal activity of a user in your application (for example, a
+    button that changes from <strong>Play</strong> to <strong>Pause</strong>), make sure you also
+    change the <a href="{@docRoot}reference/android/view/View.html#attr_android:contentDescription">
+    {@code android:contentDescription}</a> of the button appropriately.</li>
+  <li><strong>Prompts for related controls:</strong> Make sure sets of controls which provide a
+    single function, such as the {@link android.widget.DatePicker}, provide useful audio feedback
+    when an user interacts with the individual controls.</li>
+  <li><strong>Video playback and captioning:</strong> If your application provides video
+    playback, it must support captioning and subtitles to assist users who are deaf or hard of
+    hearing. Your video playback controls must also clearly indicate if captioning is available for
+    a video and provide a clear way of enabling captions.</li>
+  <li><strong>Supplemental accessibility audio feedback:</strong> Use only the Android accessibility
+    framework to provide accessibility audio feedback for your app. Accessibility services such as
+    <a href="https://play.google.com/store/apps/details?id=com.google.android.marvin.talkback"
+    >TalkBack</a> should be the only way your application provides accessibility audio prompts to
+    users. Provide the prompting information with a
+    <a href="{@docRoot}reference/android/view/View.html#attr_android:contentDescription">{@code
+    android:contentDescription}</a> XML layout attribute or dynamically add it using accessibility
+    framework APIs. For example, if your application takes action that you want to announce to a
+    user, such as automatically turning the page of a book, use the {@link
+    android.view.View#announceForAccessibility} method to have accessibility services speak this
+    information to the user.</li>
+  <li><strong>Custom controls with complex visual interactions:</strong> For custom controls that
+    provide complex or non-standard visual interactions, provide a
+    <a href="{@docRoot}guide/topics/ui/accessibility/apps.html#virtual-hierarchy">virtual view
+    hierarchy</a> for your control using {@link android.view.accessibility.AccessibilityNodeProvider}
+    that allows accessibility services to provide a simplified interaction model for the user. If
+    this approach is not feasible, consider providing an alternate view that is accessible.</li>
+  <li><strong>Sets of small controls:</strong> If you have controls that are smaller than
+    the minimum recommended touch size in your application screens, consider grouping these controls
+    together using a {@link android.view.ViewGroup} and providing a
+    <a href="{@docRoot}reference/android/view/View.html#attr_android:contentDescription">{@code
+    android:contentDescription}</a> for the group.</li>
+  <li id="decorative"><strong>Decorative images and graphics:</strong> Elements in application
+    screens that are purely decorative and do not provide any content or enable a user action should
+    not have accessibility content descriptions.</li>
+</ol>
