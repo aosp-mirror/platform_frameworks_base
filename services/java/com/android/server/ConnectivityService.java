@@ -1852,8 +1852,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         Intent intent = new Intent(ConnectivityManager.ACTION_DATA_ACTIVITY_CHANGE);
         intent.putExtra(ConnectivityManager.EXTRA_DEVICE_TYPE, deviceType);
         intent.putExtra(ConnectivityManager.EXTRA_IS_ACTIVE, active);
-        mContext.sendOrderedBroadcastAsUser(intent, UserHandle.ALL,
-                RECEIVE_DATA_ACTIVITY_CHANGE, null, null, 0, null, null);
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            mContext.sendOrderedBroadcastAsUser(intent, UserHandle.ALL,
+                    RECEIVE_DATA_ACTIVITY_CHANGE, null, null, 0, null, null);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 
     /**
@@ -1927,7 +1932,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 log("sendStickyBroadcast: action=" + intent.getAction());
             }
 
-            mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
         }
     }
 
@@ -2467,7 +2477,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
          * Connectivity events can happen before boot has completed ...
          */
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-        mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 
     // Caller must grab mDnsLock.
@@ -3112,7 +3127,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING |
             Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         intent.putExtra(Proxy.EXTRA_PROXY_INFO, proxy);
-        mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 
     private static class SettingsObserver extends ContentObserver {
