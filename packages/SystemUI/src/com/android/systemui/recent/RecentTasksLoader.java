@@ -253,10 +253,9 @@ public class RecentTasksLoader implements View.OnTouchListener {
     public boolean onTouch(View v, MotionEvent ev) {
         int action = ev.getAction() & MotionEvent.ACTION_MASK;
         if (action == MotionEvent.ACTION_DOWN) {
-            mHandler.post(mPreloadTasksRunnable);
+            preloadRecentTasksList();
         } else if (action == MotionEvent.ACTION_CANCEL) {
-            cancelLoadingThumbnailsAndIcons();
-            mHandler.removeCallbacks(mPreloadTasksRunnable);
+            cancelPreloadingRecentTasksList();
         } else if (action == MotionEvent.ACTION_UP) {
             // Remove the preloader if we haven't called it yet
             mHandler.removeCallbacks(mPreloadTasksRunnable);
@@ -266,6 +265,15 @@ public class RecentTasksLoader implements View.OnTouchListener {
 
         }
         return false;
+    }
+
+    public void preloadRecentTasksList() {
+        mHandler.post(mPreloadTasksRunnable);
+    }
+
+    public void cancelPreloadingRecentTasksList() {
+        cancelLoadingThumbnailsAndIcons();
+        mHandler.removeCallbacks(mPreloadTasksRunnable);
     }
 
     public void cancelLoadingThumbnailsAndIcons(RecentsPanelView caller) {
