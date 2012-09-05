@@ -488,10 +488,17 @@ public abstract class BaseStatusBar extends SystemUI implements
                         .getDimensionPixelSize(R.dimen.status_bar_recents_thumbnail_width);
                 float thumbHeight = res
                         .getDimensionPixelSize(R.dimen.status_bar_recents_thumbnail_height);
+                if (first == null) {
+                    throw new RuntimeException("Recents thumbnail is null");
+                }
                 if (first.getWidth() != thumbWidth || first.getHeight() != thumbHeight) {
                     first = Bitmap.createScaledBitmap(first, (int) thumbWidth, (int) thumbHeight,
                             true);
+                    if (first == null) {
+                        throw new RuntimeException("Recents thumbnail is null");
+                    }
                 }
+
 
                 DisplayMetrics dm = new DisplayMetrics();
                 mDisplay.getMetrics(dm);
@@ -521,8 +528,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                             + thumbBgPadding + thumbLeftMargin);
                     y = (int) (dm.heightPixels
                             - res.getDimensionPixelSize(R.dimen.status_bar_recents_thumbnail_height) - thumbBgPadding);
-                } else { // if (config.orientation ==
-                         // Configuration.ORIENTATION_LANDSCAPE) {
+                } else { // if (config.orientation == Configuration.ORIENTATION_LANDSCAPE) {
                     float thumbTopMargin = res
                             .getDimensionPixelSize(R.dimen.status_bar_recents_thumbnail_top_margin);
                     float thumbBgPadding = res
