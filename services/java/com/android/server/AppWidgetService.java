@@ -155,8 +155,8 @@ class AppWidgetService extends IAppWidgetService.Stub
 
         // Register for configuration changes so we can update the names
         // of the widgets when the locale changes.
-        mContext.registerReceiver(mBroadcastReceiver, new IntentFilter(
-                Intent.ACTION_CONFIGURATION_CHANGED), null, null);
+        mContext.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL,
+                new IntentFilter(Intent.ACTION_CONFIGURATION_CHANGED), null, null);
 
         // Register for broadcasts about package install, etc., so we can
         // update the provider list.
