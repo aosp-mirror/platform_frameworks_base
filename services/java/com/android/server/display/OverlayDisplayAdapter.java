@@ -16,9 +16,11 @@
 
 package com.android.server.display;
 
+import com.android.internal.util.DumpUtils;
+import com.android.internal.util.IndentingPrintWriter;
+
 import android.content.Context;
 import android.database.ContentObserver;
-import android.graphics.SurfaceTexture;
 import android.os.Handler;
 import android.os.IBinder;
 import android.provider.Settings;
@@ -28,7 +30,6 @@ import android.view.Gravity;
 import android.view.Surface;
 
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -71,6 +72,7 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
     @Override
     public void dumpLocked(PrintWriter pw) {
         super.dumpLocked(pw);
+
         pw.println("mCurrentOverlaySetting=" + mCurrentOverlaySetting);
         pw.println("mOverlays: size=" + mOverlays.size());
         for (OverlayDisplayHandle overlay : mOverlays) {
@@ -81,17 +83,19 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
     @Override
     public void registerLocked() {
         super.registerLocked();
-        getContext().getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(Settings.Secure.OVERLAY_DISPLAY_DEVICES), true,
-                new ContentObserver(getHandler()) {
-                    @Override
-                    public void onChange(boolean selfChange) {
-                        synchronized (getSyncRoot()) {
-                            updateOverlayDisplayDevicesLocked();
-                        }
-                    }
-                });
-        updateOverlayDisplayDevicesLocked();
+
+        getHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                getContext().getContentResolver().registerContentObserver(
+                        Settings.System.getUriFor(Settings.Secure.OVERLAY_DISPLAY_DEVICES),
+                        true, new SettingsObserver(getHandler()));
+
+                synchronized (getSyncRoot()) {
+                    updateOverlayDisplayDevicesLocked();
+                }
+            }
+        });
     }
 
     private void updateOverlayDisplayDevicesLocked() {
@@ -167,6 +171,19 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
         }
     }
 
+    private final class SettingsObserver extends ContentObserver {
+        public SettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            synchronized (getSyncRoot()) {
+                updateOverlayDisplayDevicesLocked();
+            }
+        }
+    }
+
     private final class OverlayDisplayDevice extends DisplayDevice {
         private final String mName;
         private final int mWidth;
@@ -174,35 +191,29 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
         private final float mRefreshRate;
         private final int mDensityDpi;
 
-        private SurfaceTexture mSurfaceTexture;
-        private boolean mSurfaceTextureChanged;
-
+        private Surface mSurface;
         private DisplayDeviceInfo mInfo;
 
         public OverlayDisplayDevice(IBinder displayToken, String name,
-                int width, int height, float refreshRate, int densityDpi) {
+                int width, int height, float refreshRate, int densityDpi,
+                Surface surface) {
             super(OverlayDisplayAdapter.this, displayToken);
             mName = name;
             mWidth = width;
             mHeight = height;
             mRefreshRate = refreshRate;
             mDensityDpi = densityDpi;
+            mSurface = surface;
         }
 
-        public void setSurfaceTextureLocked(SurfaceTexture surfaceTexture) {
-            if (surfaceTexture != mSurfaceTexture) {
-                mSurfaceTexture = surfaceTexture;
-                mSurfaceTextureChanged = true;
-                sendTraversalRequestLocked();
-            }
+        public void clearSurfaceLocked() {
+            mSurface = null;
+            sendTraversalRequestLocked();
         }
 
         @Override
         public void performTraversalInTransactionLocked() {
-            if (mSurfaceTextureChanged) {
-                setSurfaceTextureInTransactionLocked(mSurfaceTexture);
-                mSurfaceTextureChanged = false;
-            }
+            setSurfaceInTransactionLocked(mSurface);
         }
 
         @Override
@@ -256,12 +267,11 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
 
         // Called on the UI thread.
         @Override
-        public void onWindowCreated(SurfaceTexture surfaceTexture, float refreshRate) {
+        public void onWindowCreated(Surface surface, float refreshRate) {
             synchronized (getSyncRoot()) {
                 IBinder displayToken = Surface.createDisplay(mName);
                 mDevice = new OverlayDisplayDevice(displayToken, mName,
-                        mWidth, mHeight, refreshRate, mDensityDpi);
-                mDevice.setSurfaceTextureLocked(surfaceTexture);
+                        mWidth, mHeight, refreshRate, mDensityDpi, surface);
 
                 sendDisplayDeviceEventLocked(mDevice, DISPLAY_DEVICE_EVENT_ADDED);
             }
@@ -272,40 +282,24 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
         public void onWindowDestroyed() {
             synchronized (getSyncRoot()) {
                 if (mDevice != null) {
-                    mDevice.setSurfaceTextureLocked(null);
-
+                    mDevice.clearSurfaceLocked();
                     sendDisplayDeviceEventLocked(mDevice, DISPLAY_DEVICE_EVENT_REMOVED);
                 }
             }
         }
 
         public void dumpLocked(PrintWriter pw) {
-            pw.println("  " + mName + ": ");
+            pw.println("  " + mName + ":");
             pw.println("    mWidth=" + mWidth);
             pw.println("    mHeight=" + mHeight);
             pw.println("    mDensityDpi=" + mDensityDpi);
             pw.println("    mGravity=" + mGravity);
 
             // Try to dump the window state.
-            // This call may hang if the UI thread is waiting to acquire our lock so
-            // we use a short timeout to recover just in case.
             if (mWindow != null) {
-                final StringWriter sw = new StringWriter();
-                final OverlayDisplayWindow window = mWindow;
-                if (mUiHandler.runWithScissors(new Runnable() {
-                    @Override
-                    public void run() {
-                        PrintWriter lpw = new PrintWriter(sw);
-                        window.dump(lpw);
-                        lpw.close();
-                    }
-                }, 200)) {
-                    for (String line : sw.toString().split("\n")) {
-                        pw.println(line);
-                    }
-                } else {
-                    pw.println("    ... timed out while attempting to dump window state");
-                }
+                final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "    ");
+                ipw.increaseIndent();
+                DumpUtils.dumpAsync(mUiHandler, mWindow, ipw, 200);
             }
         }
 

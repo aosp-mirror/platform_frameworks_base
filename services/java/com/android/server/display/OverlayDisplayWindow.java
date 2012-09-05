@@ -16,6 +16,8 @@
 
 package com.android.server.display;
 
+import com.android.internal.util.DumpUtils;
+
 import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.hardware.display.DisplayManager;
@@ -27,6 +29,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
+import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.view.WindowManager;
@@ -42,7 +45,7 @@ import java.io.PrintWriter;
  * No locks are held by this object and locks must not be held while making called into it.
  * </p>
  */
-final class OverlayDisplayWindow {
+final class OverlayDisplayWindow implements DumpUtils.Dump {
     private static final String TAG = "OverlayDisplayWindow";
     private static final boolean DEBUG = false;
 
@@ -144,18 +147,18 @@ final class OverlayDisplayWindow {
     }
 
     public void dump(PrintWriter pw) {
-        pw.println("    mWindowVisible=" + mWindowVisible);
-        pw.println("    mWindowX=" + mWindowX);
-        pw.println("    mWindowY=" + mWindowY);
-        pw.println("    mWindowScale=" + mWindowScale);
-        pw.println("    mWindowParams=" + mWindowParams);
+        pw.println("mWindowVisible=" + mWindowVisible);
+        pw.println("mWindowX=" + mWindowX);
+        pw.println("mWindowY=" + mWindowY);
+        pw.println("mWindowScale=" + mWindowScale);
+        pw.println("mWindowParams=" + mWindowParams);
         if (mTextureView != null) {
-            pw.println("    mTextureView.getScaleX()=" + mTextureView.getScaleX());
-            pw.println("    mTextureView.getScaleY()=" + mTextureView.getScaleY());
+            pw.println("mTextureView.getScaleX()=" + mTextureView.getScaleX());
+            pw.println("mTextureView.getScaleY()=" + mTextureView.getScaleY());
         }
-        pw.println("    mLiveTranslationX=" + mLiveTranslationX);
-        pw.println("    mLiveTranslationY=" + mLiveTranslationY);
-        pw.println("    mLiveScale=" + mLiveScale);
+        pw.println("mLiveTranslationX=" + mLiveTranslationX);
+        pw.println("mLiveTranslationY=" + mLiveTranslationY);
+        pw.println("mLiveScale=" + mLiveScale);
     }
 
     private boolean updateDefaultDisplayInfo() {
@@ -286,22 +289,25 @@ final class OverlayDisplayWindow {
     private final SurfaceTextureListener mSurfaceTextureListener =
             new SurfaceTextureListener() {
         @Override
-        public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-            mListener.onWindowCreated(surface, mDefaultDisplayInfo.refreshRate);
+        public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture,
+                int width, int height) {
+            mListener.onWindowCreated(new Surface(surfaceTexture),
+                    mDefaultDisplayInfo.refreshRate);
         }
 
         @Override
-        public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
+        public boolean onSurfaceTextureDestroyed(SurfaceTexture surfaceTexture) {
             mListener.onWindowDestroyed();
             return true;
         }
 
         @Override
-        public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
+        public void onSurfaceTextureSizeChanged(SurfaceTexture surfaceTexture,
+                int width, int height) {
         }
 
         @Override
-        public void onSurfaceTextureUpdated(SurfaceTexture surface) {
+        public void onSurfaceTextureUpdated(SurfaceTexture surfaceTexture) {
         }
     };
 
@@ -355,7 +361,7 @@ final class OverlayDisplayWindow {
      * Watches for significant changes in the overlay display window lifecycle.
      */
     public interface Listener {
-        public void onWindowCreated(SurfaceTexture surfaceTexture, float refreshRate);
+        public void onWindowCreated(Surface surface, float refreshRate);
         public void onWindowDestroyed();
     }
 }

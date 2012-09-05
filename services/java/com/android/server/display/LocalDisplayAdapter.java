@@ -120,19 +120,20 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 mInfo.width = mPhys.width;
                 mInfo.height = mPhys.height;
                 mInfo.refreshRate = mPhys.refreshRate;
-                mInfo.densityDpi = (int)(mPhys.density * 160 + 0.5f);
-                mInfo.xDpi = mPhys.xDpi;
-                mInfo.yDpi = mPhys.yDpi;
                 if (mBuiltInDisplayId == Surface.BUILT_IN_DISPLAY_ID_MAIN) {
                     mInfo.name = getContext().getResources().getString(
                             com.android.internal.R.string.display_manager_built_in_display_name);
                     mInfo.flags = DisplayDeviceInfo.FLAG_DEFAULT_DISPLAY
                             | DisplayDeviceInfo.FLAG_SECURE
                             | DisplayDeviceInfo.FLAG_SUPPORTS_ROTATION;
+                    mInfo.densityDpi = (int)(mPhys.density * 160 + 0.5f);
+                    mInfo.xDpi = mPhys.xDpi;
+                    mInfo.yDpi = mPhys.yDpi;
                 } else {
                     mInfo.name = getContext().getResources().getString(
                             com.android.internal.R.string.display_manager_hdmi_display_name);
                     mInfo.flags = DisplayDeviceInfo.FLAG_SECURE;
+                    mInfo.setAssumedDensityForExternalDisplay(mPhys.width, mPhys.height);
                 }
             }
             return mInfo;

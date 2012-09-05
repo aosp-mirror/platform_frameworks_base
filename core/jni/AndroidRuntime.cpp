@@ -160,6 +160,7 @@ extern int register_android_backup_BackupHelperDispatcher(JNIEnv *env);
 extern int register_android_app_backup_FullBackup(JNIEnv *env);
 extern int register_android_app_ActivityThread(JNIEnv *env);
 extern int register_android_app_NativeActivity(JNIEnv *env);
+extern int register_android_media_RemoteDisplay(JNIEnv *env);
 extern int register_android_view_InputChannel(JNIEnv* env);
 extern int register_android_view_InputDevice(JNIEnv* env);
 extern int register_android_view_InputEventReceiver(JNIEnv* env);
@@ -1161,6 +1162,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_media_AudioSystem),
     REG_JNI(register_android_media_AudioTrack),
     REG_JNI(register_android_media_JetPlayer),
+    REG_JNI(register_android_media_RemoteDisplay),
     REG_JNI(register_android_media_ToneGenerator),
 
     REG_JNI(register_android_opengl_classes),
