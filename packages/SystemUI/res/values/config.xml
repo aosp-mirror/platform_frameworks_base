@@ -78,5 +78,8 @@
     <integer name="navigation_bar_deadzone_decay">333</integer>
     
     <bool name="config_dead_zone_flash">false</bool>
+
+    <!-- Min alpha % that recent items will fade to while being dismissed -->
+    <integer name="config_recent_item_min_alpha">3</integer>
 </resources>
 
