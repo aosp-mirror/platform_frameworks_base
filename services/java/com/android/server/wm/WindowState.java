@@ -990,6 +990,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return mClient.asBinder().isBinderAlive();
     }
 
+    @Override
+    public boolean isDefaultDisplay() {
+        return mDisplayContent.isDefaultDisplay;
+    }
+
     boolean isOtherUsersAppWindow() {
         final int type = mAttrs.type;
         if ((UserHandle.getUserId(mOwnerUid) != mService.mCurrentUserId)
