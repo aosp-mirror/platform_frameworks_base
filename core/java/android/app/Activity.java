@@ -653,8 +653,9 @@ public class Activity extends ContextThemeWrapper
     /** Start of user-defined activity results. */
     public static final int RESULT_FIRST_USER   = 1;
 
+    static final String FRAGMENTS_TAG = "android:fragments";
+
     private static final String WINDOW_HIERARCHY_TAG = "android:viewHierarchyState";
-    private static final String FRAGMENTS_TAG = "android:fragments";
     private static final String SAVED_DIALOG_IDS_KEY = "android:savedDialogIds";
     private static final String SAVED_DIALOGS_TAG = "android:savedDialogs";
     private static final String SAVED_DIALOG_KEY_PREFIX = "android:dialog_";
@@ -697,7 +698,7 @@ public class Activity extends ContextThemeWrapper
         Object activity;
         HashMap<String, Object> children;
         ArrayList<Fragment> fragments;
-        SparseArray<LoaderManagerImpl> loaders;
+        HashMap<String, LoaderManagerImpl> loaders;
     }
     /* package */ NonConfigurationInstances mLastNonConfigurationInstances;
     
@@ -715,8 +716,14 @@ public class Activity extends ContextThemeWrapper
     private int mTitleColor = 0;
 
     final FragmentManagerImpl mFragments = new FragmentManagerImpl();
+    final FragmentContainer mContainer = new FragmentContainer() {
+        @Override
+        public View findViewById(int id) {
+            return Activity.this.findViewById(id);
+        }
+    };
     
-    SparseArray<LoaderManagerImpl> mAllLoaderManagers;
+    HashMap<String, LoaderManagerImpl> mAllLoaderManagers;
     LoaderManagerImpl mLoaderManager;
     
     private static final class ManagedCursor {
@@ -744,6 +751,7 @@ public class Activity extends ContextThemeWrapper
     
     protected static final int[] FOCUSED_STATE_SET = {com.android.internal.R.attr.state_focused};
 
+    @SuppressWarnings("unused")
     private final Object mInstanceTracker = StrictMode.trackActivity(this);
 
     private Thread mUiThread;
@@ -808,19 +816,19 @@ public class Activity extends ContextThemeWrapper
             return mLoaderManager;
         }
         mCheckedForLoaderManager = true;
-        mLoaderManager = getLoaderManager(-1, mLoadersStarted, true);
+        mLoaderManager = getLoaderManager(null, mLoadersStarted, true);
         return mLoaderManager;
     }
     
-    LoaderManagerImpl getLoaderManager(int index, boolean started, boolean create) {
+    LoaderManagerImpl getLoaderManager(String who, boolean started, boolean create) {
         if (mAllLoaderManagers == null) {
-            mAllLoaderManagers = new SparseArray<LoaderManagerImpl>();
+            mAllLoaderManagers = new HashMap<String, LoaderManagerImpl>();
         }
-        LoaderManagerImpl lm = mAllLoaderManagers.get(index);
+        LoaderManagerImpl lm = mAllLoaderManagers.get(who);
         if (lm == null) {
             if (create) {
-                lm = new LoaderManagerImpl(this, started);
-                mAllLoaderManagers.put(index, lm);
+                lm = new LoaderManagerImpl(who, this, started);
+                mAllLoaderManagers.put(who, lm);
             }
         } else {
             lm.updateActivity(this);
@@ -1025,7 +1033,7 @@ public class Activity extends ContextThemeWrapper
             if (mLoaderManager != null) {
                 mLoaderManager.doStart();
             } else if (!mCheckedForLoaderManager) {
-                mLoaderManager = getLoaderManager(-1, mLoadersStarted, false);
+                mLoaderManager = getLoaderManager(null, mLoadersStarted, false);
             }
             mCheckedForLoaderManager = true;
         }
@@ -1601,13 +1609,17 @@ public class Activity extends ContextThemeWrapper
         if (mAllLoaderManagers != null) {
             // prune out any loader managers that were already stopped and so
             // have nothing useful to retain.
-            for (int i=mAllLoaderManagers.size()-1; i>=0; i--) {
-                LoaderManagerImpl lm = mAllLoaderManagers.valueAt(i);
-                if (lm.mRetaining) {
-                    retainLoaders = true;
-                } else {
-                    lm.doDestroy();
-                    mAllLoaderManagers.removeAt(i);
+            LoaderManagerImpl loaders[] = new LoaderManagerImpl[mAllLoaderManagers.size()];
+            mAllLoaderManagers.values().toArray(loaders);
+            if (loaders != null) {
+                for (int i=0; i<loaders.length; i++) {
+                    LoaderManagerImpl lm = loaders[i];
+                    if (lm.mRetaining) {
+                        retainLoaders = true;
+                    } else {
+                        lm.doDestroy();
+                        mAllLoaderManagers.remove(lm.mWho);
+                    }
                 }
             }
         }
@@ -1643,13 +1655,13 @@ public class Activity extends ContextThemeWrapper
         return mFragments;
     }
 
-    void invalidateFragmentIndex(int index) {
+    void invalidateFragment(String who) {
         //Log.v(TAG, "invalidateFragmentIndex: index=" + index);
         if (mAllLoaderManagers != null) {
-            LoaderManagerImpl lm = mAllLoaderManagers.get(index);
+            LoaderManagerImpl lm = mAllLoaderManagers.get(who);
             if (lm != null && !lm.mRetaining) {
                 lm.doDestroy();
-                mAllLoaderManagers.remove(index);
+                mAllLoaderManagers.remove(who);
             }
         }
     }
@@ -4739,6 +4751,10 @@ public class Activity extends ContextThemeWrapper
      * @param args additional arguments to the dump request.
      */
     public void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
+        dumpInner(prefix, fd, writer, args);
+    }
+
+    void dumpInner(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
         writer.print(prefix); writer.print("Local Activity ");
                 writer.print(Integer.toHexString(System.identityHashCode(this)));
                 writer.println(" State:");
@@ -5019,7 +5035,7 @@ public class Activity extends ContextThemeWrapper
             Configuration config) {
         attachBaseContext(context);
 
-        mFragments.attachActivity(this);
+        mFragments.attachActivity(this, mContainer, null);
         
         mWindow = PolicyManager.makeNewWindow(this);
         mWindow.setCallback(this);
@@ -5080,10 +5096,14 @@ public class Activity extends ContextThemeWrapper
         }
         mFragments.dispatchStart();
         if (mAllLoaderManagers != null) {
-            for (int i=mAllLoaderManagers.size()-1; i>=0; i--) {
-                LoaderManagerImpl lm = mAllLoaderManagers.valueAt(i);
-                lm.finishRetain();
-                lm.doReportStart();
+            LoaderManagerImpl loaders[] = new LoaderManagerImpl[mAllLoaderManagers.size()];
+            mAllLoaderManagers.values().toArray(loaders);
+            if (loaders != null) {
+                for (int i=0; i<loaders.length; i++) {
+                    LoaderManagerImpl lm = loaders[i];
+                    lm.finishRetain();
+                    lm.doReportStart();
+                }
             }
         }
     }
