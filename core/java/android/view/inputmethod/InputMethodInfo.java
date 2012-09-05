@@ -34,6 +34,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Printer;
+import android.util.Slog;
 import android.util.Xml;
 
 import java.io.IOException;
@@ -169,7 +170,10 @@ public final class InputMethodInfo implements Parcelable {
                             a.getBoolean(com.android.internal.R.styleable
                                     .InputMethod_Subtype_isAuxiliary, false),
                             a.getBoolean(com.android.internal.R.styleable
-                                    .InputMethod_Subtype_overridesImplicitlyEnabledSubtype, false));
+                                    .InputMethod_Subtype_overridesImplicitlyEnabledSubtype, false),
+                            a.getInt(com.android.internal.R.styleable
+                                    .InputMethod_Subtype_subtypeId, 0 /* use Arrays.hashCode */)
+                            );
                     if (!subtype.isAuxiliary()) {
                         mIsAuxIme = false;
                     }
@@ -194,6 +198,9 @@ public final class InputMethodInfo implements Parcelable {
                 final InputMethodSubtype subtype = additionalSubtypes.get(i);
                 if (!mSubtypes.contains(subtype)) {
                     mSubtypes.add(subtype);
+                } else {
+                    Slog.w(TAG, "Duplicated subtype definition found: "
+                            + subtype.getLocale() + ", " + subtype.getMode());
                 }
             }
         }

@@ -3579,7 +3579,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         private static final String ATTR_IS_AUXILIARY = "isAuxiliary";
         private final AtomicFile mAdditionalInputMethodSubtypeFile;
         private final HashMap<String, InputMethodInfo> mMethodMap;
-        private final HashMap<String, List<InputMethodSubtype>> mSubtypesMap =
+        private final HashMap<String, List<InputMethodSubtype>> mAdditionalSubtypesMap =
                 new HashMap<String, List<InputMethodSubtype>>();
         public InputMethodFileManager(HashMap<String, InputMethodInfo> methodMap) {
             if (methodMap == null) {
@@ -3595,18 +3595,19 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mAdditionalInputMethodSubtypeFile = new AtomicFile(subtypeFile);
             if (!subtypeFile.exists()) {
                 // If "subtypes.xml" doesn't exist, create a blank file.
-                writeAdditionalInputMethodSubtypes(mSubtypesMap, mAdditionalInputMethodSubtypeFile,
-                        methodMap);
+                writeAdditionalInputMethodSubtypes(
+                        mAdditionalSubtypesMap, mAdditionalInputMethodSubtypeFile, methodMap);
             } else {
-                readAdditionalInputMethodSubtypes(mSubtypesMap, mAdditionalInputMethodSubtypeFile);
+                readAdditionalInputMethodSubtypes(
+                        mAdditionalSubtypesMap, mAdditionalInputMethodSubtypeFile);
             }
         }
 
         private void deleteAllInputMethodSubtypes(String imiId) {
             synchronized (mMethodMap) {
-                mSubtypesMap.remove(imiId);
-                writeAdditionalInputMethodSubtypes(mSubtypesMap, mAdditionalInputMethodSubtypeFile,
-                        mMethodMap);
+                mAdditionalSubtypesMap.remove(imiId);
+                writeAdditionalInputMethodSubtypes(
+                        mAdditionalSubtypesMap, mAdditionalInputMethodSubtypeFile, mMethodMap);
             }
         }
 
@@ -3619,17 +3620,20 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     final InputMethodSubtype subtype = additionalSubtypes[i];
                     if (!subtypes.contains(subtype)) {
                         subtypes.add(subtype);
+                    } else {
+                        Slog.w(TAG, "Duplicated subtype definition found: "
+                                + subtype.getLocale() + ", " + subtype.getMode());
                     }
                 }
-                mSubtypesMap.put(imi.getId(), subtypes);
-                writeAdditionalInputMethodSubtypes(mSubtypesMap, mAdditionalInputMethodSubtypeFile,
-                        mMethodMap);
+                mAdditionalSubtypesMap.put(imi.getId(), subtypes);
+                writeAdditionalInputMethodSubtypes(
+                        mAdditionalSubtypesMap, mAdditionalInputMethodSubtypeFile, mMethodMap);
             }
         }
 
         public HashMap<String, List<InputMethodSubtype>> getAllAdditionalInputMethodSubtypes() {
             synchronized (mMethodMap) {
-                return mSubtypesMap;
+                return mAdditionalSubtypesMap;
             }
         }
 
