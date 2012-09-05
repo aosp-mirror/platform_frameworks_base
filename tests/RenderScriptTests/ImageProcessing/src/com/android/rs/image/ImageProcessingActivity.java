@@ -174,7 +174,19 @@ public class ImageProcessingActivity extends Activity
             mTest = new GroupTest(true);
             break;
         case 17:
-            mTest = new Intrinsics(0);
+            mTest = new Convolve3x3(false);
+            break;
+        case 18:
+            mTest = new Convolve3x3(true);
+            break;
+        case 19:
+            mTest = new ColorMatrix(false);
+            break;
+        case 20:
+            mTest = new ColorMatrix(true);
+            break;
+        case 21:
+            mTest = new Copy();
             break;
         }
 
@@ -188,7 +200,7 @@ public class ImageProcessingActivity extends Activity
     }
 
     void setupTests() {
-        mTestNames = new String[18];
+        mTestNames = new String[22];
         mTestNames[0] = "Levels Vec3 Relaxed";
         mTestNames[1] = "Levels Vec4 Relaxed";
         mTestNames[2] = "Levels Vec3 Full";
@@ -206,7 +218,11 @@ public class ImageProcessingActivity extends Activity
         mTestNames[14] = "Vignette Approximate Relaxed";
         mTestNames[15] = "Group Test (emulated)";
         mTestNames[16] = "Group Test (native)";
-        mTestNames[17] = "Intrinsics Convolve 3x3";
+        mTestNames[17] = "Convolve 3x3";
+        mTestNames[18] = "Intrinsics Convolve 3x3";
+        mTestNames[19] = "ColorMatrix";
+        mTestNames[20] = "Intrinsics ColorMatrix";
+        mTestNames[21] = "Copy";
         mTestSpinner.setAdapter(new ArrayAdapter<String>(
             this, R.layout.spinner_layout, mTestNames));
     }
