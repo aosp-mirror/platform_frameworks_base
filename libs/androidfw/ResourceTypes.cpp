@@ -2061,10 +2061,10 @@ String8 ResTable_config::toString() const {
         if (res.size() > 0) res.append("-");
         switch (screenLayout&ResTable_config::MASK_LAYOUTDIR) {
             case ResTable_config::LAYOUTDIR_LTR:
-                res.append("ltr");
+                res.append("ldltr");
                 break;
             case ResTable_config::LAYOUTDIR_RTL:
-                res.append("rtl");
+                res.append("ldrtl");
                 break;
             default:
                 res.appendFormat("layoutDir=%d",

@@ -995,12 +995,12 @@ bool AaptGroupEntry::getLayoutDirectionName(const char* name, ResTable_config* o
                 (out->screenLayout&~ResTable_config::MASK_LAYOUTDIR)
                 | ResTable_config::LAYOUTDIR_ANY;
         return true;
-    } else if (strcmp(name, "ltr") == 0) {
+    } else if (strcmp(name, "ldltr") == 0) {
         if (out) out->screenLayout =
                 (out->screenLayout&~ResTable_config::MASK_LAYOUTDIR)
                 | ResTable_config::LAYOUTDIR_LTR;
         return true;
-    } else if (strcmp(name, "rtl") == 0) {
+    } else if (strcmp(name, "ldrtl") == 0) {
         if (out) out->screenLayout =
                 (out->screenLayout&~ResTable_config::MASK_LAYOUTDIR)
                 | ResTable_config::LAYOUTDIR_RTL;
