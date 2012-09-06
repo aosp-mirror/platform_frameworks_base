@@ -329,6 +329,31 @@ your application for other languages.</p>
 indicates the current locale.</p>
       </td>
     </tr>
+    <tr id="LayoutDirectionQualifier">
+      <td>Layout Direction</td>
+      <td>Examples:<br/>
+        <code>ldrtl</code><br/>
+        <code>ldltr</code><br/>
+      </td>
+      <td><p>The layout direction of your application. {@code ldrtl} means "layout-direction-right-to-left".
+      {@code ldltr} means "layout-direction-left-to-right" and is the default implicit value.
+      </p>
+      <p>This can apply to any resource like layouts or values or drawables.
+      </p>
+      <p>For example, if you want to provide some specific layout for the Arabic language and some
+      generic layout for any other "right-to-left" language (like Persian or Hebrew) then you would have:
+      </p>
+<pre class="classic no-pretty-print">
+res/
+    layout/   <span style="color:black">
+        main.xml  </span>(This is the default layout)
+    layout-ar/  <span style="color:black">
+        main.xml  </span>(This is the specific layout for Arabic)
+    layout-ldrtl/  <span style="color:black">
+        main.xml  </span>(This applies to any "right-to-left" language, except for Arabic, because the ar language qualifier has a higher precedence.)
+</pre>
+      </td>
+    </tr>
     <tr id="SmallestScreenWidthQualifier">
       <td>smallestWidth</td>
       <td><code>sw&lt;N&gt;dp</code><br/><br/>
