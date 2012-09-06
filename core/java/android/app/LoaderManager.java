@@ -17,7 +17,6 @@
 package android.app;
 
 import android.content.Loader;
-import android.content.Loader.OnLoadCanceledListener;
 import android.os.Bundle;
 import android.util.DebugUtils;
 import android.util.Log;
@@ -212,6 +211,8 @@ class LoaderManagerImpl extends LoaderManager {
     // It allows an application to restart a loader, but continue using its
     // previously run loader until the new loader's data is available.
     final SparseArray<LoaderInfo> mInactiveLoaders = new SparseArray<LoaderInfo>();
+
+    final String mWho;
 
     Activity mActivity;
     boolean mStarted;
@@ -529,7 +530,8 @@ class LoaderManagerImpl extends LoaderManager {
         }
     }
     
-    LoaderManagerImpl(Activity activity, boolean started) {
+    LoaderManagerImpl(String who, Activity activity, boolean started) {
+        mWho = who;
         mActivity = activity;
         mStarted = started;
     }

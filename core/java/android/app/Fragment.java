@@ -85,7 +85,7 @@ final class FragmentState implements Parcelable {
         mSavedFragmentState = in.readBundle();
     }
     
-    public Fragment instantiate(Activity activity) {
+    public Fragment instantiate(Activity activity, Fragment parent) {
         if (mInstance != null) {
             return mInstance;
         }
@@ -100,7 +100,7 @@ final class FragmentState implements Parcelable {
             mSavedFragmentState.setClassLoader(activity.getClassLoader());
             mInstance.mSavedFragmentState = mSavedFragmentState;
         }
-        mInstance.setIndex(mIndex);
+        mInstance.setIndex(mIndex, parent);
         mInstance.mFromLayout = mFromLayout;
         mInstance.mRestored = true;
         mInstance.mFragmentId = mFragmentId;
@@ -207,6 +207,8 @@ final class FragmentState implements Parcelable {
  * with the fragment.
  * <li> {@link #onActivityCreated} tells the fragment that its activity has
  * completed its own {@link Activity#onCreate Activity.onCreate()}.
+ * <li> {@link #onViewStateRestored} tells the fragment that all of the saved
+ * state of its view hierarchy has been restored.
  * <li> {@link #onStart} makes the fragment visible to the user (based on its
  * containing activity being started).
  * <li> {@link #onResume} makes the fragment interacting with the user (based on its
@@ -412,7 +414,13 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
 
     // Activity this fragment is attached to.
     Activity mActivity;
-    
+
+    // Private fragment manager for child fragments inside of this one.
+    FragmentManagerImpl mChildFragmentManager;
+
+    // If this Fragment is contained in another Fragment, this is that container.
+    Fragment mParentFragment;
+
     // The optional identifier for this fragment -- either the container ID if it
     // was dynamically added to the view hierarchy, or the ID supplied in
     // layout.
@@ -595,16 +603,26 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
         }
     }
     
-    final void restoreViewState() {
+    final void restoreViewState(Bundle savedInstanceState) {
         if (mSavedViewState != null) {
             mView.restoreHierarchyState(mSavedViewState);
             mSavedViewState = null;
         }
+        mCalled = false;
+        onViewStateRestored(savedInstanceState);
+        if (!mCalled) {
+            throw new SuperNotCalledException("Fragment " + this
+                    + " did not call through to super.onViewStateRestored()");
+        }
     }
     
-    final void setIndex(int index) {
+    final void setIndex(int index, Fragment parent) {
         mIndex = index;
-        mWho = "android:fragment:" + mIndex;
+        if (parent != null) {
+            mWho = parent.mWho + ":" + mIndex;
+        } else {
+            mWho = "android:fragment:" + mIndex;
+        }
    }
     
     final boolean isInBackStack() {
@@ -785,9 +803,32 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * before {@link #getActivity()}, during the time from when the fragment is
      * placed in a {@link FragmentTransaction} until it is committed and
      * attached to its activity.
+     *
+     * <p>If this Fragment is a child of another Fragment, the FragmentManager
+     * returned here will be the parent's {@link #getChildFragmentManager()}.
      */
     final public FragmentManager getFragmentManager() {
         return mFragmentManager;
+    }
+
+    /**
+     * Return a private FragmentManager for placing and managing Fragments
+     * inside of this Fragment.
+     */
+    final public FragmentManager getChildFragmentManager() {
+        if (mChildFragmentManager == null) {
+            instantiateChildFragmentManager();
+            if (mState >= RESUMED) {
+                mChildFragmentManager.dispatchResume();
+            } else if (mState >= STARTED) {
+                mChildFragmentManager.dispatchStart();
+            } else if (mState >= ACTIVITY_CREATED) {
+                mChildFragmentManager.dispatchActivityCreated();
+            } else if (mState >= CREATED) {
+                mChildFragmentManager.dispatchCreate();
+            }
+        }
+        return mChildFragmentManager;
     }
 
     /**
@@ -880,6 +921,10 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * </ul>
      */
     public void setRetainInstance(boolean retain) {
+        if (retain && mParentFragment != null) {
+            throw new IllegalStateException(
+                    "Can't retain fragements that are nested in other fragments");
+        }
         mRetainInstance = retain;
     }
     
@@ -961,7 +1006,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
             throw new IllegalStateException("Fragment " + this + " not attached to Activity");
         }
         mCheckedForLoaderManager = true;
-        mLoaderManager = mActivity.getLoaderManager(mIndex, mLoadersStarted, true);
+        mLoaderManager = mActivity.getLoaderManager(mWho, mLoadersStarted, true);
         return mLoaderManager;
     }
 
@@ -1191,7 +1236,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * {@link #setRetainInstance(boolean)} to retain their instance,
      * as this callback tells the fragment when it is fully associated with
      * the new activity instance.  This is called after {@link #onCreateView}
-     * and before {@link #onStart()}.
+     * and before {@link #onViewStateRestored(Bundle)}.
      * 
      * @param savedInstanceState If the fragment is being re-created from
      * a previous saved state, this is the state.
@@ -1199,7 +1244,22 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     public void onActivityCreated(Bundle savedInstanceState) {
         mCalled = true;
     }
-    
+
+    /**
+     * Called when all saved state has been restored into the view hierarchy
+     * of the fragment.  This can be used to do initialization based on saved
+     * state that you are letting the view hierarchy track itself, such as
+     * whether check box widgets are currently checked.  This is called
+     * after {@link #onActivityCreated(Bundle)} and before
+     * {@link #onStart()}.
+     * 
+     * @param savedInstanceState If the fragment is being re-created from
+     * a previous saved state, this is the state.
+     */
+    public void onViewStateRestored(Bundle savedInstanceState) {
+        mCalled = true;
+    }
+
     /**
      * Called when the Fragment is visible to the user.  This is generally
      * tied to {@link Activity#onStart() Activity.onStart} of the containing
@@ -1212,7 +1272,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
             mLoadersStarted = true;
             if (!mCheckedForLoaderManager) {
                 mCheckedForLoaderManager = true;
-                mLoaderManager = mActivity.getLoaderManager(mIndex, mLoadersStarted, false);
+                mLoaderManager = mActivity.getLoaderManager(mWho, mLoadersStarted, false);
             }
             if (mLoaderManager != null) {
                 mLoaderManager.doStart();
@@ -1305,7 +1365,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
         //        + " mLoaderManager=" + mLoaderManager);
         if (!mCheckedForLoaderManager) {
             mCheckedForLoaderManager = true;
-            mLoaderManager = mActivity.getLoaderManager(mIndex, mLoadersStarted, false);
+            mLoaderManager = mActivity.getLoaderManager(mWho, mLoadersStarted, false);
         }
         if (mLoaderManager != null) {
             mLoaderManager.doDestroy();
@@ -1530,6 +1590,14 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
             writer.print(prefix); writer.print("mActivity=");
                     writer.println(mActivity);
         }
+        if (mChildFragmentManager != null) {
+            writer.print(prefix); writer.print("mChildFragmentManager=");
+                    writer.println(mChildFragmentManager);
+        }
+        if (mParentFragment != null) {
+            writer.print(prefix); writer.print("mParentFragment=");
+                    writer.println(mParentFragment);
+        }
         if (mArguments != null) {
             writer.print(prefix); writer.print("mArguments="); writer.println(mArguments);
         }
@@ -1564,23 +1632,229 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
             writer.print(prefix); writer.println("Loader Manager:");
             mLoaderManager.dump(prefix + "  ", fd, writer, args);
         }
+        if (mChildFragmentManager != null) {
+            writer.print(prefix); writer.println("Child Fragment Manager:");
+            mChildFragmentManager.dump(prefix + "  ", fd, writer, args);
+        }
+    }
+
+    Fragment findFragmentByWho(String who) {
+        if (who.equals(mWho)) {
+            return this;
+        }
+        if (mChildFragmentManager != null) {
+            return mChildFragmentManager.findFragmentByWho(who);
+        }
+        return null;
+    }
+
+    void instantiateChildFragmentManager() {
+        mChildFragmentManager = new FragmentManagerImpl();
+        mChildFragmentManager.attachActivity(mActivity, new FragmentContainer() {
+            @Override
+            public View findViewById(int id) {
+                if (mView == null) {
+                    throw new IllegalStateException("Fragment does not have a view");
+                }
+                return mView.findViewById(id);
+            }
+        }, this);
+    }
+
+    void performCreate(Bundle savedInstanceState) {
+        mCalled = false;
+        onCreate(savedInstanceState);
+        if (!mCalled) {
+            throw new SuperNotCalledException("Fragment " + this
+                    + " did not call through to super.onCreate()");
+        }
+        if (savedInstanceState != null) {
+            Parcelable p = savedInstanceState.getParcelable(Activity.FRAGMENTS_TAG);
+            if (p != null) {
+                if (mChildFragmentManager == null) {
+                    instantiateChildFragmentManager();
+                }
+                mChildFragmentManager.restoreAllState(p, null);
+                mChildFragmentManager.dispatchCreate();
+            }
+        }
+    }
+
+    void performActivityCreated(Bundle savedInstanceState) {
+        mCalled = false;
+        onActivityCreated(savedInstanceState);
+        if (!mCalled) {
+            throw new SuperNotCalledException("Fragment " + this
+                    + " did not call through to super.onActivityCreated()");
+        }
+        if (mChildFragmentManager != null) {
+            mChildFragmentManager.dispatchActivityCreated();
+        }
     }
 
     void performStart() {
+        if (mChildFragmentManager != null) {
+            mChildFragmentManager.noteStateNotSaved();
+            mChildFragmentManager.execPendingActions();
+        }
+        mCalled = false;
         onStart();
+        if (!mCalled) {
+            throw new SuperNotCalledException("Fragment " + this
+                    + " did not call through to super.onStart()");
+        }
+        if (mChildFragmentManager != null) {
+            mChildFragmentManager.dispatchStart();
+        }
         if (mLoaderManager != null) {
             mLoaderManager.doReportStart();
         }
     }
 
+    void performResume() {
+        if (mChildFragmentManager != null) {
+            mChildFragmentManager.execPendingActions();
+        }
+        mCalled = false;
+        onResume();
+        if (!mCalled) {
+            throw new SuperNotCalledException("Fragment " + this
+                    + " did not call through to super.onResume()");
+        }
+        if (mChildFragmentManager != null) {
+            mChildFragmentManager.dispatchResume();
+            mChildFragmentManager.execPendingActions();
+        }
+    }
+
+    void performConfigurationChanged(Configuration newConfig) {
+        onConfigurationChanged(newConfig);
+        if (mChildFragmentManager != null) {
+            mChildFragmentManager.dispatchConfigurationChanged(newConfig);
+        }
+    }
+
+    void performLowMemory() {
+        onLowMemory();
+        if (mChildFragmentManager != null) {
+            mChildFragmentManager.dispatchLowMemory();
+        }
+    }
+
+    void performTrimMemory(int level) {
+        onTrimMemory(level);
+        if (mChildFragmentManager != null) {
+            mChildFragmentManager.dispatchTrimMemory(level);
+        }
+    }
+
+    boolean performCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        boolean show = false;
+        if (!mHidden) {
+            if (mHasMenu && mMenuVisible) {
+                show = true;
+                onCreateOptionsMenu(menu, inflater);
+            }
+            if (mChildFragmentManager != null) {
+                show |= mChildFragmentManager.dispatchCreateOptionsMenu(menu, inflater);
+            }
+        }
+        return show;
+    }
+
+    boolean performPrepareOptionsMenu(Menu menu) {
+        boolean show = false;
+        if (!mHidden) {
+            if (mHasMenu && mMenuVisible) {
+                show = true;
+                onPrepareOptionsMenu(menu);
+            }
+            if (mChildFragmentManager != null) {
+                show |= mChildFragmentManager.dispatchPrepareOptionsMenu(menu);
+            }
+        }
+        return show;
+    }
+
+    boolean performOptionsItemSelected(MenuItem item) {
+        if (!mHidden) {
+            if (mHasMenu && mMenuVisible) {
+                if (onOptionsItemSelected(item)) {
+                    return true;
+                }
+            }
+            if (mChildFragmentManager != null) {
+                if (mChildFragmentManager.dispatchOptionsItemSelected(item)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    boolean performContextItemSelected(MenuItem item) {
+        if (!mHidden) {
+            if (onContextItemSelected(item)) {
+                return true;
+            }
+            if (mChildFragmentManager != null) {
+                if (mChildFragmentManager.dispatchContextItemSelected(item)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    void performOptionsMenuClosed(Menu menu) {
+        if (!mHidden) {
+            if (mHasMenu && mMenuVisible) {
+                onOptionsMenuClosed(menu);
+            }
+            if (mChildFragmentManager != null) {
+                mChildFragmentManager.dispatchOptionsMenuClosed(menu);
+            }
+        }
+    }
+
+    void performSaveInstanceState(Bundle outState) {
+        onSaveInstanceState(outState);
+        if (mChildFragmentManager != null) {
+            Parcelable p = mChildFragmentManager.saveAllState();
+            if (p != null) {
+                outState.putParcelable(Activity.FRAGMENTS_TAG, p);
+            }
+        }
+    }
+
+    void performPause() {
+        if (mChildFragmentManager != null) {
+            mChildFragmentManager.dispatchPause();
+        }
+        mCalled = false;
+        onPause();
+        if (!mCalled) {
+            throw new SuperNotCalledException("Fragment " + this
+                    + " did not call through to super.onPause()");
+        }
+    }
+
     void performStop() {
+        if (mChildFragmentManager != null) {
+            mChildFragmentManager.dispatchStop();
+        }
+        mCalled = false;
         onStop();
+        if (!mCalled) {
+            throw new SuperNotCalledException("Fragment " + this
+                    + " did not call through to super.onStop()");
+        }
         
         if (mLoadersStarted) {
             mLoadersStarted = false;
             if (!mCheckedForLoaderManager) {
                 mCheckedForLoaderManager = true;
-                mLoaderManager = mActivity.getLoaderManager(mIndex, mLoadersStarted, false);
+                mLoaderManager = mActivity.getLoaderManager(mWho, mLoadersStarted, false);
             }
             if (mLoaderManager != null) {
                 if (mActivity == null || !mActivity.mChangingConfigurations) {
@@ -1593,9 +1867,29 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     }
 
     void performDestroyView() {
+        if (mChildFragmentManager != null) {
+            mChildFragmentManager.dispatchDestroyView();
+        }
+        mCalled = false;
         onDestroyView();
+        if (!mCalled) {
+            throw new SuperNotCalledException("Fragment " + this
+                    + " did not call through to super.onDestroyView()");
+        }
         if (mLoaderManager != null) {
             mLoaderManager.doReportNextStart();
+        }
+    }
+
+    void performDestroy() {
+        if (mChildFragmentManager != null) {
+            mChildFragmentManager.dispatchDestroy();
+        }
+        mCalled = false;
+        onDestroy();
+        if (!mCalled) {
+            throw new SuperNotCalledException("Fragment " + this
+                    + " did not call through to super.onDestroy()");
         }
     }
 }
