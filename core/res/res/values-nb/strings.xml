@@ -547,10 +547,8 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Lar appen skrive til SD-kortet."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"endre eller slette innhold på interne medier"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Lar appen endre innholdet i det interne lagringsmediet."</string>
-    <!-- no translation found for permlab_sdcardAccessAll (8150613823900460576) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardAccessAll (3215208357415891320) -->
-    <skip />
+    <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"åpne eksternlagring for alle brukere"</string>
+    <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"Tillater appen å åpne eksternlagring for alle brukere."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"tilgang til bufrede filer"</string>
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Lar appen lese og skrive til det bufrede filsystemet."</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"foreta/motta Internett-anrop"</string>
@@ -581,6 +579,10 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Krev at lagrede appdata krypteres."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Deaktiver kameraer"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Hindre bruk av alle kameraer på enheten."</string>
+    <!-- no translation found for policylab_disableKeyguardWidgets (1794894613389073926) -->
+    <skip />
+    <!-- no translation found for policydesc_disableKeyguardWidgets (7254624892984033592) -->
+    <skip />
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Hjemmenummer"</item>
     <item msgid="869923650527136615">"Mobil"</item>
@@ -1319,64 +1321,46 @@
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth-lyd"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Fullført"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Medieutgang"</string>
-    <!-- no translation found for display_manager_built_in_display_name (2583134294292563941) -->
+    <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Innebygd skjerm"</string>
+    <!-- no translation found for display_manager_hdmi_display_name (1555264559227470109) -->
     <skip />
-    <!-- no translation found for display_manager_overlay_display_name (5142365982271620716) -->
+    <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Overlegg #<xliff:g id="ID">%1$d</xliff:g>"</string>
+    <!-- no translation found for display_manager_overlay_display_title (652124517672257172) -->
     <skip />
-    <!-- no translation found for display_manager_overlay_display_title (8186674340178573982) -->
-    <skip />
-    <!-- no translation found for kg_emergency_call_label (684946192523830531) -->
-    <skip />
-    <!-- no translation found for kg_forgot_pattern_button_text (8852021467868220608) -->
-    <skip />
-    <!-- no translation found for kg_wrong_pattern (1850806070801358830) -->
-    <skip />
-    <!-- no translation found for kg_wrong_password (2333281762128113157) -->
-    <skip />
-    <!-- no translation found for kg_wrong_pin (1131306510833563801) -->
-    <skip />
-    <!-- no translation found for kg_too_many_failed_attempts_countdown (353963338189371686) -->
-    <skip />
-    <!-- no translation found for kg_pattern_instructions (398978611683075868) -->
-    <skip />
-    <!-- no translation found for kg_sim_pin_instructions (2319508550934557331) -->
-    <skip />
-    <!-- no translation found for kg_pin_instructions (2377242233495111557) -->
-    <skip />
-    <!-- no translation found for kg_password_instructions (5753646556186936819) -->
-    <skip />
-    <!-- no translation found for kg_puk_enter_puk_hint (5183097160254244459) -->
-    <skip />
-    <!-- no translation found for kg_puk_enter_pin_hint (597821135578014901) -->
-    <skip />
-    <!-- no translation found for kg_sim_unlock_progress_dialog_message (8950398016976865762) -->
-    <skip />
-    <!-- no translation found for kg_password_wrong_pin_code (1139324887413846912) -->
-    <skip />
-    <!-- no translation found for kg_invalid_sim_pin_hint (8795159358110620001) -->
-    <skip />
-    <!-- no translation found for kg_invalid_sim_puk_hint (5216603185442368307) -->
-    <skip />
-    <!-- no translation found for kg_sim_puk_recovery_hint (5577753137718442566) -->
-    <skip />
-    <!-- no translation found for kg_invalid_puk (5809955359950817326) -->
-    <skip />
-    <!-- no translation found for kg_login_too_many_attempts (6486842094005698475) -->
-    <skip />
-    <!-- no translation found for kg_login_instructions (1100551261265506448) -->
-    <skip />
-    <!-- no translation found for kg_login_username_hint (5718534272070920364) -->
-    <skip />
-    <!-- no translation found for kg_login_password_hint (9057289103827298549) -->
-    <skip />
-    <!-- no translation found for kg_login_submit_button (5355904582674054702) -->
-    <skip />
-    <!-- no translation found for kg_login_invalid_input (5754664119319872197) -->
-    <skip />
-    <!-- no translation found for kg_login_account_recovery_hint (5690709132841752974) -->
-    <skip />
-    <!-- no translation found for kg_login_checking_password (8849589033659332457) -->
-    <skip />
-    <!-- no translation found for kg_temp_back_string (5812983904056640466) -->
-    <skip />
+    <string name="kg_emergency_call_label" msgid="684946192523830531">"Nødnummer"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Har du glemt mønsteret?"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Feil mønster"</string>
+    <string name="kg_wrong_password" msgid="2333281762128113157">"Feil passord"</string>
+    <string name="kg_wrong_pin" msgid="1131306510833563801">"Feil PIN-kode"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Prøv på nytt om <xliff:g id="NUMBER">%d</xliff:g> sekunder."</string>
+    <string name="kg_pattern_instructions" msgid="398978611683075868">"Tegn mønsteret ditt"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Skriv inn PIN-koden for SIM-kortet"</string>
+    <string name="kg_pin_instructions" msgid="2377242233495111557">"Skriv inn PIN-koden"</string>
+    <string name="kg_password_instructions" msgid="5753646556186936819">"Skriv inn passordet"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="5183097160254244459">"PUK-kode"</string>
+    <string name="kg_puk_enter_pin_hint" msgid="597821135578014901">"Ny PIN-kode"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Låser opp SIM-kortet ..."</string>
+    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Feil PIN-kode."</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Skriv inn en PIN-kode på fire til åtte sifre."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="5216603185442368307">"Skriv inn en PUK-kode på åtte sifre eller mer."</string>
+    <string name="kg_sim_puk_recovery_hint" msgid="5577753137718442566">"Skriv inn PUK-koden og en ny PIN-kode"</string>
+    <string name="kg_invalid_puk" msgid="5809955359950817326">"PUK-koden du har skrevet inn er ikke riktig."</string>
+    <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"For mange forsøk på tegning av mønster"</string>
+    <string name="kg_login_instructions" msgid="1100551261265506448">"Logg deg på med Google-kontoen din for å låse opp."</string>
+    <string name="kg_login_username_hint" msgid="5718534272070920364">"Brukernavn (e-postadresse)"</string>
+    <string name="kg_login_password_hint" msgid="9057289103827298549">"Passord"</string>
+    <string name="kg_login_submit_button" msgid="5355904582674054702">"Logg på"</string>
+    <string name="kg_login_invalid_input" msgid="5754664119319872197">"Ugyldig brukernavn eller passord."</string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Har du glemt brukernavnet eller passordet?"\n"Gå til "<b>"google.com/accounts/recovery"</b>"."</string>
+    <string name="kg_login_checking_password" msgid="8849589033659332457">"Kontrollerer …"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Du har oppgitt feil PIN-kode <xliff:g id="NUMBER_0">%d</xliff:g> ganger. "\n\n"Prøv på nytt om <xliff:g id="NUMBER_1">%d</xliff:g> sekunder."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Du har tastet inn passordet ditt feil <xliff:g id="NUMBER_0">%d</xliff:g> ganger. "\n\n"Prøv på nytt om <xliff:g id="NUMBER_1">%d</xliff:g> sekunder."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Du har tegnet opplåsningsmønsteret ditt feil <xliff:g id="NUMBER_0">%d</xliff:g> ganger. "\n\n"Prøv på nytt om <xliff:g id="NUMBER_1">%d</xliff:g> sekunder."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Du har oppgitt feil opplåsningspassord for nettbrettet <xliff:g id="NUMBER_0">%d</xliff:g> ganger. Etter ytterligere <xliff:g id="NUMBER_1">%d</xliff:g> gale forsøk, tilbakestilles nettbrettet til fabrikkstandard og all data går tapt."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Du har oppgitt feil opplåsningspassord for telefonen <xliff:g id="NUMBER_0">%d</xliff:g> ganger. Etter ytterligere <xliff:g id="NUMBER_1">%d</xliff:g> gale forsøk, tilbakestilles telefonen til fabrikkstandard og all data går tapt."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Du har oppgitt feil opplåsningspassord for nettbrettet <xliff:g id="NUMBER">%d</xliff:g> ganger. Telefonen tilbakestilles nå til fabrikkstandard."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Du har oppgitt feil opplåsningspassord for telefonen <xliff:g id="NUMBER">%d</xliff:g> ganger. Telefonen tilbakestilles nå til fabrikkstandard."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Du har tegnet opplåsningsmønsteret feil <xliff:g id="NUMBER_0">%d</xliff:g> ganger. Etter ytterligere <xliff:g id="NUMBER_1">%d</xliff:g> gale forsøk, blir du bedt om å låse opp nettbrettet via en e-postkonto."\n\n" Prøv på nytt om <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Du har tegnet opplåsningsmønsteret feil <xliff:g id="NUMBER_0">%d</xliff:g> ganger. Etter ytterligere <xliff:g id="NUMBER_1">%d</xliff:g> gale forsøk, blir du bedt om å låse opp telefonen via en e-postkonto."\n\n" Prøv på nytt om <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
+    <string name="kg_temp_back_string" msgid="5812983904056640466">"&lt;"</string>
 </resources>
