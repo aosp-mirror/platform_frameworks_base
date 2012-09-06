@@ -37,4 +37,7 @@
     <!-- Where to place the app icon over the thumbnail -->
     <dimen name="status_bar_recents_app_icon_left_margin">8dp</dimen>
     <dimen name="status_bar_recents_app_icon_top_margin">8dp</dimen>
+
+    <!-- The fixed height of each tile -->
+    <dimen name="quick_settings_cell_height">100dp</dimen>
 </resources>

@@ -81,5 +81,11 @@
 
     <!-- Min alpha % that recent items will fade to while being dismissed -->
     <integer name="config_recent_item_min_alpha">3</integer>
+
+    <!-- The number of columns in the QuickSettings -->
+    <integer name="quick_settings_num_columns">3</integer>
+
+    <!-- The number of columns that the top level tiles span in the QuickSettings -->
+    <integer name="quick_settings_user_time_settings_tile_span">1</integer>
 </resources>
 
