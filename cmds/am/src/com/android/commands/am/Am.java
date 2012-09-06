@@ -36,6 +36,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.util.AndroidException;
 import android.view.Display;
 import android.view.IWindowManager;
@@ -145,6 +146,18 @@ public class Am {
         } else {
             throw new IllegalArgumentException("Unknown command: " + op);
         }
+    }
+
+    int parseUserArg(String arg) {
+        int userId;
+        if ("all".equals(arg)) {
+            userId = UserHandle.USER_ALL;
+        } else if ("current".equals(arg) || "cur".equals(arg)) {
+            userId = UserHandle.USER_CURRENT;
+        } else {
+            userId = Integer.parseInt(arg);
+        }
+        return userId;
     }
 
     private Intent makeIntent() throws URISyntaxException {
@@ -321,7 +334,7 @@ public class Am {
             } else if (opt.equals("--opengl-trace")) {
                 mStartFlags |= ActivityManager.START_FLAG_OPENGL_TRACES;
             } else if (opt.equals("--user")) {
-                mUserId = Integer.parseInt(nextArgRequired());
+                mUserId = parseUserArg(nextArgRequired());
             } else {
                 System.err.println("Error: Unknown option: " + opt);
                 return null;
@@ -392,8 +405,12 @@ public class Am {
 
     private void runStartService() throws Exception {
         Intent intent = makeIntent();
+        if (mUserId == UserHandle.USER_ALL) {
+            System.err.println("Error: Can't start activity with user 'all'");
+            return;
+        }
         System.out.println("Starting service: " + intent);
-        ComponentName cn = mAm.startService(null, intent, intent.getType(), 0);
+        ComponentName cn = mAm.startService(null, intent, intent.getType(), mUserId);
         if (cn == null) {
             System.err.println("Error: Not found; no service started.");
         }
@@ -402,10 +419,15 @@ public class Am {
     private void runStart() throws Exception {
         Intent intent = makeIntent();
 
+        if (mUserId == UserHandle.USER_ALL) {
+            System.err.println("Error: Can't start service with user 'all'");
+            return;
+        }
+
         String mimeType = intent.getType();
         if (mimeType == null && intent.getData() != null
                 && "content".equals(intent.getData().getScheme())) {
-            mimeType = mAm.getProviderMimeType(intent.getData());
+            mimeType = mAm.getProviderMimeType(intent.getData(), mUserId);
         }
 
         do {
@@ -460,11 +482,11 @@ public class Am {
             int res;
             if (mWaitOption) {
                 result = mAm.startActivityAndWait(null, intent, mimeType,
-                            null, null, 0, mStartFlags, mProfileFile, fd, null);
+                            null, null, 0, mStartFlags, mProfileFile, fd, null, mUserId);
                 res = result.result;
             } else {
-                res = mAm.startActivity(null, intent, mimeType,
-                        null, null, 0, mStartFlags, mProfileFile, fd, null);
+                res = mAm.startActivityAsUser(null, intent, mimeType,
+                        null, null, 0, mStartFlags, mProfileFile, fd, null, mUserId);
             }
             PrintStream out = mWaitOption ? System.out : System.err;
             boolean launched = false;
@@ -573,6 +595,7 @@ public class Am {
         boolean wait = false;
         boolean rawMode = false;
         boolean no_window_animation = false;
+        int userId = 0;
         Bundle args = new Bundle();
         String argKey = null, argValue = null;
         IWindowManager wm = IWindowManager.Stub.asInterface(ServiceManager.getService("window"));
@@ -592,10 +615,17 @@ public class Am {
             } else if (opt.equals("--no_window_animation")
                     || opt.equals("--no-window-animation")) {
                 no_window_animation = true;
+            } else if (opt.equals("--user")) {
+                userId = parseUserArg(nextArgRequired());
             } else {
                 System.err.println("Error: Unknown option: " + opt);
                 return;
             }
+        }
+
+        if (userId == UserHandle.USER_ALL) {
+            System.err.println("Error: Can't start instrumentation with user 'all'");
+            return;
         }
 
         String cnArg = nextArgRequired();
@@ -614,7 +644,7 @@ public class Am {
             wm.setAnimationScale(1, 0.0f);
         }
 
-        if (!mAm.startInstrumentation(cn, profileFile, 0, args, watcher)) {
+        if (!mAm.startInstrumentation(cn, profileFile, 0, args, watcher, userId)) {
             throw new AndroidException("INSTRUMENTATION_FAILED: " + cn.flattenToString());
         }
 
@@ -1338,6 +1368,7 @@ public class Am {
                 "       am kill-all\n" +
                 "       am broadcast <INTENT>\n" +
                 "       am instrument [-r] [-e <NAME> <VALUE>] [-p <FILE>] [-w]\n" +
+                "               [--user <USER_ID> | all | current]\n" +
                 "               [--no-window-animation] <COMPONENT>\n" +
                 "       am profile start <PROCESS> <FILE>\n" +
                 "       am profile stop [<PROCESS>]\n" +
@@ -1384,6 +1415,7 @@ public class Am {
                 "    -p <FILE>: write profiling data to <FILE>\n" +
                 "    -w: wait for instrumentation to finish before returning.  Required for\n" +
                 "        test runners.\n" +
+                "    --user [<USER_ID> | all | current]: Specify user instrumentation runs in.\n" +
                 "    --no-window-animation: turn off window animations will running.\n" +
                 "\n" +
                 "am profile: start and stop profiler on a process.\n" +
@@ -1431,6 +1463,7 @@ public class Am {
                 "    [--ela <EXTRA_KEY> <EXTRA_LONG_VALUE>[,<EXTRA_LONG_VALUE...]]\n" +
                 "    [--efa <EXTRA_KEY> <EXTRA_FLOAT_VALUE>[,<EXTRA_FLOAT_VALUE...]]\n" +
                 "    [-n <COMPONENT>] [-f <FLAGS>]\n" +
+                "    [--user [<USER_ID> | all | current]\n" +
                 "    [--grant-read-uri-permission] [--grant-write-uri-permission]\n" +
                 "    [--debug-log-resolution] [--exclude-stopped-packages]\n" +
                 "    [--include-stopped-packages]\n" +

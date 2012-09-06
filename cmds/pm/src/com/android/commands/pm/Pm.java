@@ -20,7 +20,6 @@ import com.android.internal.content.PackageHelper;
 
 import android.app.ActivityManagerNative;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ContainerEncryptionParams;
 import android.content.pm.FeatureInfo;
@@ -40,12 +39,9 @@ import android.content.pm.VerificationParams;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.net.Uri;
-import android.os.Binder;
 import android.os.IUserManager;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.UserManager;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -74,7 +70,6 @@ public final class Pm {
 
     private static final String PM_NOT_RUNNING_ERR =
         "Error: Could not access the Package Manager.  Is the system running?";
-    private static final int ROOT_UID = 0;
 
     public static void main(String[] args) {
         new Pm().run(args);
@@ -1054,11 +1049,16 @@ public final class Pm {
     }
 
     private void runUninstall() {
-        int unInstallFlags = 0;
+        int unInstallFlags = PackageManager.DELETE_ALL_USERS;
 
-        String opt = nextOption();
-        if (opt != null && opt.equals("-k")) {
-            unInstallFlags = PackageManager.DELETE_KEEP_DATA;
+        String opt;
+        while ((opt=nextOption()) != null) {
+            if (opt.equals("-k")) {
+                unInstallFlags |= PackageManager.DELETE_KEEP_DATA;
+            } else {
+                System.err.println("Error: Unknown option: " + opt);
+                return;
+            }
         }
 
         String pkg = nextArg();

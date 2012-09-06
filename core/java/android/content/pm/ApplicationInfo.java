@@ -308,6 +308,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_INSTALLED = 1<<23;
 
     /**
+     * Value for {@link #flags}: true if the application only has its
+     * data installed; the application package itself does not currently
+     * exist on the device.
+     */
+    public static final int FLAG_IS_DATA_ONLY = 1<<24;
+
+    /**
      * Value for {@link #flags}: Set to true if the application has been
      * installed using the forward lock option.
      *
