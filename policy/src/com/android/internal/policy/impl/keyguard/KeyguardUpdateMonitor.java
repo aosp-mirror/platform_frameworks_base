@@ -100,7 +100,7 @@ public class KeyguardUpdateMonitor {
 
     private boolean mClockVisible;
 
-    private ArrayList<WeakReference<KeyguardUpdateMonitorCallback>>
+    private final ArrayList<WeakReference<KeyguardUpdateMonitorCallback>>
             mCallbacks = Lists.newArrayList();
     private ContentObserver mContentObserver;
 
@@ -586,39 +586,46 @@ public class KeyguardUpdateMonitor {
     /**
      * Remove the given observer's callback.
      *
-     * @param observer The observer to remove
+     * @param callback The callback to remove
      */
-    public void removeCallback(Object observer) {
-        mCallbacks.remove(observer);
+    public void removeCallback(KeyguardUpdateMonitorCallback callback) {
+        if (DEBUG) Log.v(TAG, "*** unregister callback for " + callback);
+        for (int i = mCallbacks.size() - 1; i >= 0; i--) {
+            if (mCallbacks.get(i).get() == callback) {
+                mCallbacks.remove(i);
+            }
+        }
     }
 
     /**
      * Register to receive notifications about general keyguard information
      * (see {@link InfoCallback}.
-     * @param callback The callback.
+     * @param callback The callback to register
      */
     public void registerCallback(KeyguardUpdateMonitorCallback callback) {
-        if (!mCallbacks.contains(callback)) {
-            mCallbacks.add(new WeakReference<KeyguardUpdateMonitorCallback>(callback));
-            // Notify listener of the current state
-            callback.onRefreshBatteryInfo(mBatteryStatus);
-            callback.onTimeChanged();
-            callback.onRingerModeChanged(mRingMode);
-            callback.onPhoneStateChanged(mPhoneState);
-            callback.onRefreshCarrierInfo(mTelephonyPlmn, mTelephonySpn);
-            callback.onClockVisibilityChanged();
-            callback.onSimStateChanged(mSimState);
-        } else {
-            if (DEBUG) Log.e(TAG, "Object tried to add another callback",
-                    new Exception("Called by"));
-        }
-
-        // Clean up any unused references
-        for (int i = mCallbacks.size() - 1; i >= 0; i--) {
-            if (mCallbacks.get(i).get() == null) {
-                mCallbacks.remove(i);
+        if (DEBUG) Log.v(TAG, "*** register callback for " + callback);
+        // Prevent adding duplicate callbacks
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            if (mCallbacks.get(i).get() == callback) {
+                if (DEBUG) Log.e(TAG, "Object tried to add another callback",
+                        new Exception("Called by"));
+                return;
             }
         }
+        mCallbacks.add(new WeakReference<KeyguardUpdateMonitorCallback>(callback));
+        removeCallback(null); // remove unused references
+        sendUpdates(callback);
+    }
+
+    private void sendUpdates(KeyguardUpdateMonitorCallback callback) {
+        // Notify listener of the current state
+        callback.onRefreshBatteryInfo(mBatteryStatus);
+        callback.onTimeChanged();
+        callback.onRingerModeChanged(mRingMode);
+        callback.onPhoneStateChanged(mPhoneState);
+        callback.onRefreshCarrierInfo(mTelephonyPlmn, mTelephonySpn);
+        callback.onClockVisibilityChanged();
+        callback.onSimStateChanged(mSimState);
     }
 
     public void reportClockVisible(boolean visible) {
