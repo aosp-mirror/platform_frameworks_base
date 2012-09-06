@@ -261,12 +261,13 @@ public class KeyguardUpdateMonitor {
         }
 
         /**
-         * Determine whether the device is plugged in (USB or power).
+         * Determine whether the device is plugged in (USB, power, or wireless).
          * @return true if the device is plugged in.
          */
         boolean isPluggedIn() {
             return plugged == BatteryManager.BATTERY_PLUGGED_AC
-                    || plugged == BatteryManager.BATTERY_PLUGGED_USB;
+                    || plugged == BatteryManager.BATTERY_PLUGGED_USB
+                    || plugged == BatteryManager.BATTERY_PLUGGED_WIRELESS;
         }
 
         /**
