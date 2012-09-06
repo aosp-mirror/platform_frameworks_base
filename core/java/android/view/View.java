@@ -14107,7 +14107,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @RemotableViewMethod
     public void setBackgroundColor(int color) {
         if (mBackground instanceof ColorDrawable) {
-            ((ColorDrawable) mBackground).setColor(color);
+            ((ColorDrawable) mBackground.mutate()).setColor(color);
             computeOpaqueFlags();
         } else {
             setBackground(new ColorDrawable(color));

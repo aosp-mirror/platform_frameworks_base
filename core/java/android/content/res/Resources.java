@@ -1897,12 +1897,14 @@ public class Resources {
             }
         }
 
-        final long key = (((long) value.assetCookie) << 32) | value.data;
         boolean isColorDrawable = false;
         if (value.type >= TypedValue.TYPE_FIRST_COLOR_INT &&
                 value.type <= TypedValue.TYPE_LAST_COLOR_INT) {
             isColorDrawable = true;
         }
+        final long key = isColorDrawable ? value.data :
+                (((long) value.assetCookie) << 32) | value.data;
+
         Drawable dr = getCachedDrawable(isColorDrawable ? mColorDrawableCache : mDrawableCache, key);
 
         if (dr != null) {
