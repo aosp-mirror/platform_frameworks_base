@@ -17,9 +17,7 @@
 */
 -->
 
-<!-- This is the screen that shows the 9 circle unlock widget and instructs
-     the user how to unlock their device, or make an emergency call.  This
-     is the portrait layout.  -->
+<!-- This is the screen that allows the user to unlock by showing their face.  -->
 <com.android.internal.policy.impl.keyguard.KeyguardFaceUnlockView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/keyguard_face_unlock_view"
