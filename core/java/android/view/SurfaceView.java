@@ -615,21 +615,22 @@ public class SurfaceView extends View {
             mSurfaceView = new WeakReference<SurfaceView>(surfaceView);
         }
 
-        public void resized(int w, int h, Rect contentInsets,
+        @Override
+        public void resized(Rect frame, Rect contentInsets,
                 Rect visibleInsets, boolean reportDraw, Configuration newConfig) {
             SurfaceView surfaceView = mSurfaceView.get();
             if (surfaceView != null) {
                 if (DEBUG) Log.v(
-                        "SurfaceView", surfaceView + " got resized: w=" +
-                                w + " h=" + h + ", cur w=" + mCurWidth + " h=" + mCurHeight);
+                        "SurfaceView", surfaceView + " got resized: w=" + frame.width()
+                        + " h=" + frame.height() + ", cur w=" + mCurWidth + " h=" + mCurHeight);
                 surfaceView.mSurfaceLock.lock();
                 try {
                     if (reportDraw) {
                         surfaceView.mUpdateWindowNeeded = true;
                         surfaceView.mReportDrawNeeded = true;
                         surfaceView.mHandler.sendEmptyMessage(UPDATE_WINDOW_MSG);
-                    } else if (surfaceView.mWinFrame.width() != w
-                            || surfaceView.mWinFrame.height() != h) {
+                    } else if (surfaceView.mWinFrame.width() != frame.width()
+                            || surfaceView.mWinFrame.height() != frame.height()) {
                         surfaceView.mUpdateWindowNeeded = true;
                         surfaceView.mHandler.sendEmptyMessage(UPDATE_WINDOW_MSG);
                     }
