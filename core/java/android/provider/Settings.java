@@ -4322,8 +4322,15 @@ public final class Settings {
         public static final String WEB_AUTOFILL_QUERY_URL =
             "web_autofill_query_url";
 
-        /** Whether package verification is enabled. {@hide} */
-        public static final String PACKAGE_VERIFIER_ENABLE = "verifier_enable";
+        /**
+         * Whether the package manager should send package verification broadcasts for verifiers to
+         * review apps prior to installation.
+         *
+         * 1 = request apps to be verified prior to installation, if a verifier exists.
+         * 0 = do not verify apps before installation
+         * {@hide}
+         */
+        public static final String PACKAGE_VERIFIER_ENABLE = "package_verifier_enable";
 
         /** Timeout for package verification. {@hide} */
         public static final String PACKAGE_VERIFIER_TIMEOUT = "verifier_timeout";
