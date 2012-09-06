@@ -496,6 +496,10 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     replyToMessage(message, WifiP2pManager.DELETE_PERSISTENT_GROUP,
                             WifiP2pManager.BUSY);
                     break;
+                case WifiP2pManager.SET_WFD_INFO:
+                    replyToMessage(message, WifiP2pManager.SET_WFD_INFO_FAILED,
+                            WifiP2pManager.BUSY);
+                    break;
                 case WifiP2pManager.REQUEST_PEERS:
                     replyToMessage(message, WifiP2pManager.RESPONSE_PEERS, mPeers);
                     break;
@@ -629,6 +633,10 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     replyToMessage(message, WifiP2pManager.DELETE_PERSISTENT_GROUP,
                             WifiP2pManager.P2P_UNSUPPORTED);
                     break;
+                case WifiP2pManager.SET_WFD_INFO:
+                    replyToMessage(message, WifiP2pManager.SET_WFD_INFO_FAILED,
+                            WifiP2pManager.P2P_UNSUPPORTED);
+                    break;
                default:
                     return NOT_HANDLED;
             }
@@ -741,6 +749,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     transitionTo(mP2pDisablingState);
                     break;
                 case WifiP2pManager.SET_DEVICE_NAME:
+                {
                     WifiP2pDevice d = (WifiP2pDevice) message.obj;
                     if (d != null && setAndPersistDeviceName(d.deviceName)) {
                         if (DBG) logd("set device name " + d.deviceName);
@@ -750,6 +759,18 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                                 WifiP2pManager.ERROR);
                     }
                     break;
+                }
+                case WifiP2pManager.SET_WFD_INFO:
+                {
+                    WifiP2pWfdInfo d = (WifiP2pWfdInfo) message.obj;
+                    if (d != null && setWfdInfo(d)) {
+                        replyToMessage(message, WifiP2pManager.SET_WFD_INFO_SUCCEEDED);
+                    } else {
+                        replyToMessage(message, WifiP2pManager.SET_WFD_INFO_FAILED,
+                                WifiP2pManager.ERROR);
+                    }
+                    break;
+                }
                 case WifiP2pManager.DISCOVER_PEERS:
                     // do not send service discovery request while normal find operation.
                     clearSupplicantServiceRequest();
@@ -2014,6 +2035,27 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
 
         Settings.Secure.putString(mContext.getContentResolver(),
                 Settings.Secure.WIFI_P2P_DEVICE_NAME, devName);
+        sendThisDeviceChangedBroadcast();
+        return true;
+    }
+
+    private boolean setWfdInfo(WifiP2pWfdInfo wfdInfo) {
+        boolean success;
+
+        if (!wfdInfo.isWfdEnabled()) {
+            success = mWifiNative.setWfdEnable(false);
+        } else {
+            success =
+                mWifiNative.setWfdEnable(true)
+                && mWifiNative.setWfdDeviceInfo(wfdInfo.getDeviceInfoHex());
+        }
+
+        if (!success) {
+            loge("Failed to set wfd properties");
+            return false;
+        }
+
+        mThisDevice.wfdInfo = wfdInfo;
         sendThisDeviceChangedBroadcast();
         return true;
     }

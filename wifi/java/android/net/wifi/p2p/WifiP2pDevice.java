@@ -107,12 +107,14 @@ public class WifiP2pDevice implements Parcelable {
     /** Device connection status */
     public int status = UNAVAILABLE;
 
-    /** Detailed device string pattern
+    /** @hide */
+    public WifiP2pWfdInfo wfdInfo;
+
+    /** Detailed device string pattern with WFD info
      * Example:
-     *  P2P-DEVICE-FOUND fa:7b:7a:42:02:13 p2p_dev_addr=fa:7b:7a:42:02:13
-     *  pri_dev_type=1-0050F204-1 name='p2p-TEST1' config_methods=0x188 dev_capab=0x27
-     *  group_capab=0x0
-     *
+     *  P2P-DEVICE-FOUND 00:18:6b:de:a3:6e p2p_dev_addr=00:18:6b:de:a3:6e
+     *  pri_dev_type=1-0050F204-1 name='DWD-300-DEA36E' config_methods=0x188
+     *  dev_capab=0x21 group_capab=0x9
      */
     private static final Pattern detailedDevicePattern = Pattern.compile(
         "((?:[0-9a-f]{2}:){5}[0-9a-f]{2}) " +
@@ -273,6 +275,7 @@ public class WifiP2pDevice implements Parcelable {
         sbuf.append("\n grpcapab: ").append(groupCapability);
         sbuf.append("\n devcapab: ").append(deviceCapability);
         sbuf.append("\n status: ").append(status);
+        sbuf.append("\n wfdInfo: ").append(wfdInfo);
         return sbuf.toString();
     }
 
@@ -292,6 +295,7 @@ public class WifiP2pDevice implements Parcelable {
             deviceCapability = source.deviceCapability;
             groupCapability = source.groupCapability;
             status = source.status;
+            wfdInfo = source.wfdInfo;
         }
     }
 
@@ -305,6 +309,12 @@ public class WifiP2pDevice implements Parcelable {
         dest.writeInt(deviceCapability);
         dest.writeInt(groupCapability);
         dest.writeInt(status);
+        if (wfdInfo != null) {
+            dest.writeInt(1);
+            wfdInfo.writeToParcel(dest, flags);
+        } else {
+            dest.writeInt(0);
+        }
     }
 
     /** Implement the Parcelable interface */
@@ -320,6 +330,9 @@ public class WifiP2pDevice implements Parcelable {
                 device.deviceCapability = in.readInt();
                 device.groupCapability = in.readInt();
                 device.status = in.readInt();
+                if (in.readInt() == 1) {
+                    device.wfdInfo = WifiP2pWfdInfo.CREATOR.createFromParcel(in);
+                }
                 return device;
             }
 
