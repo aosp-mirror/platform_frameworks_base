@@ -123,7 +123,7 @@ public interface WindowManagerPolicy {
     /**
      * This key event should put the device to sleep (and engage keyguard if necessary)
      * To be returned from {@link #interceptKeyBeforeQueueing}.
-     * Do not return this and {@link #ACTION_POKE_USER_ACTIVITY} or {@link #ACTION_PASS_TO_USER}.
+     * Do not return this and {@link #ACTION_WAKE_UP} or {@link #ACTION_PASS_TO_USER}.
      */
     public final static int ACTION_GO_TO_SLEEP = 0x00000004;
 
@@ -338,6 +338,12 @@ public interface WindowManagerPolicy {
          * Check whether the process hosting this window is currently alive.
          */
         public boolean isAlive();
+
+        /**
+         * Check if window is on {@link Display#DEFAULT_DISPLAY}.
+         * @return true if window is on default display.
+         */
+        public boolean isDefaultDisplay();
     }
 
     /**
@@ -707,7 +713,7 @@ public interface WindowManagerPolicy {
      * @param isScreenOn True if the screen is already on
      *
      * @return The bitwise or of the {@link #ACTION_PASS_TO_USER},
-     *          {@link #ACTION_POKE_USER_ACTIVITY} and {@link #ACTION_GO_TO_SLEEP} flags.
+     *      {@link #ACTION_WAKE_UP} and {@link #ACTION_GO_TO_SLEEP} flags.
      */
     public int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags, boolean isScreenOn);
 
@@ -721,7 +727,7 @@ public interface WindowManagerPolicy {
      * @param policyFlags The policy flags associated with the motion.
      *
      * @return The bitwise or of the {@link #ACTION_PASS_TO_USER},
-     *          {@link #ACTION_POKE_USER_ACTIVITY} and {@link #ACTION_GO_TO_SLEEP} flags.
+     *      {@link #ACTION_WAKE_UP} and {@link #ACTION_GO_TO_SLEEP} flags.
      */
     public int interceptMotionBeforeQueueingWhenScreenOff(int policyFlags);
 
@@ -762,12 +768,14 @@ public interface WindowManagerPolicy {
     /**
      * Called when layout of the windows is about to start.
      * 
+     * @param isDefaultDisplay true if window is on {@link Display#DEFAULT_DISPLAY}.
      * @param displayWidth The current full width of the screen.
      * @param displayHeight The current full height of the screen.
      * @param displayRotation The current rotation being applied to the base
      * window.
      */
-    public void beginLayoutLw(int displayWidth, int displayHeight, int displayRotation);
+    public void beginLayoutLw(boolean isDefaultDisplay, int displayWidth, int displayHeight,
+                              int displayRotation);
 
     /**
      * Return the rectangle of the screen currently covered by system decorations.
@@ -1066,9 +1074,9 @@ public interface WindowManagerPolicy {
      * Inform the policy that the user has chosen a preferred orientation ("rotation lock"). 
      *
      * @param mode One of {@link WindowManagerPolicy#USER_ROTATION_LOCKED} or
-     *             {@link * WindowManagerPolicy#USER_ROTATION_FREE}. 
+     *             {@link WindowManagerPolicy#USER_ROTATION_FREE}. 
      * @param rotation One of {@link Surface#ROTATION_0}, {@link Surface#ROTATION_90},
-     *                 {@link Surface#ROTATION_180}, {@link Surface#ROTATION_270}. 
+     *                 {@link Surface#ROTATION_180}, {@link Surface#ROTATION_270}.
      */
     public void setUserRotationMode(int mode, int rotation);
 

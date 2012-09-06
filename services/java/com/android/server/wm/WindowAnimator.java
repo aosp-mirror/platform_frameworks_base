@@ -50,6 +50,7 @@ public class WindowAnimator {
     // Layout changes for individual Displays. Indexed by displayId.
     SparseIntArray mPendingLayoutChanges = new SparseIntArray();
 
+    // TODO: Assign these from each iteration through DisplayContent. Only valid between loops.
     /** Overall window dimensions */
     int mDw, mDh;
 
@@ -695,20 +696,6 @@ public class WindowAnimator {
             } else {
                 pw.print(prefix); pw.print("no DimAnimator ");
             }
-        }
-    }
-
-    static class SetAnimationParams {
-        final WindowStateAnimator mWinAnimator;
-        final Animation mAnimation;
-        final int mAnimDw;
-        final int mAnimDh;
-        public SetAnimationParams(final WindowStateAnimator winAnimator,
-                                  final Animation animation, final int animDw, final int animDh) {
-            mWinAnimator = winAnimator;
-            mAnimation = animation;
-            mAnimDw = animDw;
-            mAnimDh = animDh;
         }
     }
 
