@@ -193,5 +193,18 @@
                 <category android:name="android.intent.category.DREAM" />
             </intent-filter>
         </service>
+
+        <activity android:name=".Somnambulator"
+            android:label="@string/start_dreams"
+            android:icon="@mipmap/ic_dreams"
+            android:theme="@android:style/Theme.Wallpaper.NoTitleBar"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            >
+            <intent-filter>
+                <action android:name="android.intent.action.CREATE_SHORTCUT" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
     </application>
 </manifest>
