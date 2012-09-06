@@ -688,7 +688,8 @@ public final class NdefRecord implements Parcelable {
                         }
                     } catch (FormatException e) {  }
                 } else if (Arrays.equals(mType, RTD_URI)) {
-                    return parseWktUri().normalizeScheme();
+                    Uri wktUri = parseWktUri();
+                    return (wktUri != null ? wktUri.normalizeScheme() : null);
                 }
                 break;
 
