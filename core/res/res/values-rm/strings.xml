@@ -951,6 +951,10 @@
     <skip />
     <!-- no translation found for policydesc_disableCamera (2306349042834754597) -->
     <skip />
+    <!-- no translation found for policylab_disableKeyguardWidgets (1794894613389073926) -->
+    <skip />
+    <!-- no translation found for policydesc_disableKeyguardWidgets (7254624892984033592) -->
+    <skip />
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Privat"</item>
     <item msgid="869923650527136615">"Telefonin"</item>
@@ -2084,9 +2088,11 @@
     <skip />
     <!-- no translation found for display_manager_built_in_display_name (2583134294292563941) -->
     <skip />
+    <!-- no translation found for display_manager_hdmi_display_name (1555264559227470109) -->
+    <skip />
     <!-- no translation found for display_manager_overlay_display_name (5142365982271620716) -->
     <skip />
-    <!-- no translation found for display_manager_overlay_display_title (8186674340178573982) -->
+    <!-- no translation found for display_manager_overlay_display_title (652124517672257172) -->
     <skip />
     <!-- no translation found for kg_emergency_call_label (684946192523830531) -->
     <skip />
@@ -2098,7 +2104,7 @@
     <skip />
     <!-- no translation found for kg_wrong_pin (1131306510833563801) -->
     <skip />
-    <!-- no translation found for kg_too_many_failed_attempts_countdown (353963338189371686) -->
+    <!-- no translation found for kg_too_many_failed_attempts_countdown (6358110221603297548) -->
     <skip />
     <!-- no translation found for kg_pattern_instructions (398978611683075868) -->
     <skip />
@@ -2139,6 +2145,24 @@
     <!-- no translation found for kg_login_account_recovery_hint (5690709132841752974) -->
     <skip />
     <!-- no translation found for kg_login_checking_password (8849589033659332457) -->
+    <skip />
+    <!-- no translation found for kg_too_many_failed_pin_attempts_dialog_message (8276745642049502550) -->
+    <skip />
+    <!-- no translation found for kg_too_many_failed_password_attempts_dialog_message (7813713389422226531) -->
+    <skip />
+    <!-- no translation found for kg_too_many_failed_pattern_attempts_dialog_message (74089475965050805) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_almost_at_wipe (1575557200627128949) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_almost_at_wipe (4051015943038199910) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_now_wiping (2072996269148483637) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_now_wiping (4817627474419471518) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_almost_at_login (3253575572118914370) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_almost_at_login (1437638152015574839) -->
     <skip />
     <!-- no translation found for kg_temp_back_string (5812983904056640466) -->
     <skip />
