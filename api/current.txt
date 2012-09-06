@@ -18718,6 +18718,53 @@ package android.provider {
     field public static final java.lang.String EXTRA_INPUT_METHOD_ID = "input_method_id";
   }
 
+  public static final class Settings.Global extends android.provider.Settings.NameValueTable {
+    ctor public Settings.Global();
+    method public static float getFloat(android.content.ContentResolver, java.lang.String, float);
+    method public static float getFloat(android.content.ContentResolver, java.lang.String) throws android.provider.Settings.SettingNotFoundException;
+    method public static int getInt(android.content.ContentResolver, java.lang.String, int);
+    method public static int getInt(android.content.ContentResolver, java.lang.String) throws android.provider.Settings.SettingNotFoundException;
+    method public static long getLong(android.content.ContentResolver, java.lang.String, long);
+    method public static long getLong(android.content.ContentResolver, java.lang.String) throws android.provider.Settings.SettingNotFoundException;
+    method public static synchronized java.lang.String getString(android.content.ContentResolver, java.lang.String);
+    method public static android.net.Uri getUriFor(java.lang.String);
+    method public static boolean putFloat(android.content.ContentResolver, java.lang.String, float);
+    method public static boolean putInt(android.content.ContentResolver, java.lang.String, int);
+    method public static boolean putLong(android.content.ContentResolver, java.lang.String, long);
+    method public static boolean putString(android.content.ContentResolver, java.lang.String, java.lang.String);
+    field public static final java.lang.String ADB_ENABLED = "adb_enabled";
+    field public static final java.lang.String AIRPLANE_MODE_ON = "airplane_mode_on";
+    field public static final java.lang.String AIRPLANE_MODE_RADIOS = "airplane_mode_radios";
+    field public static final java.lang.String AUTO_TIME = "auto_time";
+    field public static final java.lang.String AUTO_TIME_ZONE = "auto_time_zone";
+    field public static final java.lang.String BLUETOOTH_ON = "bluetooth_on";
+    field public static final android.net.Uri CONTENT_URI;
+    field public static final java.lang.String DATA_ROAMING = "data_roaming";
+    field public static final java.lang.String DEVELOPMENT_SETTINGS_ENABLED = "development_settings_enabled";
+    field public static final java.lang.String DEVICE_PROVISIONED = "device_provisioned";
+    field public static final java.lang.String INSTALL_NON_MARKET_APPS = "install_non_market_apps";
+    field public static final java.lang.String NETWORK_PREFERENCE = "network_preference";
+    field public static final java.lang.String RADIO_BLUETOOTH = "bluetooth";
+    field public static final java.lang.String RADIO_CELL = "cell";
+    field public static final java.lang.String RADIO_NFC = "nfc";
+    field public static final java.lang.String RADIO_WIFI = "wifi";
+    field public static final java.lang.String STAY_ON_WHILE_PLUGGED_IN = "stay_on_while_plugged_in";
+    field public static final java.lang.String SYS_PROP_SETTING_VERSION = "sys.settings_global_version";
+    field public static final java.lang.String USB_MASS_STORAGE_ENABLED = "usb_mass_storage_enabled";
+    field public static final java.lang.String USE_GOOGLE_MAIL = "use_google_mail";
+    field public static final java.lang.String WIFI_MAX_DHCP_RETRY_COUNT = "wifi_max_dhcp_retry_count";
+    field public static final java.lang.String WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS = "wifi_mobile_data_transition_wakelock_timeout_ms";
+    field public static final java.lang.String WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON = "wifi_networks_available_notification_on";
+    field public static final java.lang.String WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY = "wifi_networks_available_repeat_delay";
+    field public static final java.lang.String WIFI_NUM_OPEN_NETWORKS_KEPT = "wifi_num_open_networks_kept";
+    field public static final java.lang.String WIFI_ON = "wifi_on";
+    field public static final java.lang.String WIFI_SLEEP_POLICY = "wifi_sleep_policy";
+    field public static final int WIFI_SLEEP_POLICY_DEFAULT = 0; // 0x0
+    field public static final int WIFI_SLEEP_POLICY_NEVER = 2; // 0x2
+    field public static final int WIFI_SLEEP_POLICY_NEVER_WHILE_PLUGGED = 1; // 0x1
+    field public static final java.lang.String WIFI_WATCHDOG_ON = "wifi_watchdog_on";
+  }
+
   public static class Settings.NameValueTable implements android.provider.BaseColumns {
     ctor public Settings.NameValueTable();
     method public static android.net.Uri getUriFor(android.net.Uri, java.lang.String);
@@ -18744,28 +18791,28 @@ package android.provider {
     method public static final void setLocationProviderEnabled(android.content.ContentResolver, java.lang.String, boolean);
     field public static final java.lang.String ACCESSIBILITY_ENABLED = "accessibility_enabled";
     field public static final java.lang.String ACCESSIBILITY_SPEAK_PASSWORD = "speak_password";
-    field public static final java.lang.String ADB_ENABLED = "adb_enabled";
+    field public static final deprecated java.lang.String ADB_ENABLED = "adb_enabled";
     field public static final java.lang.String ALLOWED_GEOLOCATION_ORIGINS = "allowed_geolocation_origins";
     field public static final java.lang.String ALLOW_MOCK_LOCATION = "mock_location";
     field public static final java.lang.String ANDROID_ID = "android_id";
     field public static final deprecated java.lang.String BACKGROUND_DATA = "background_data";
-    field public static final java.lang.String BLUETOOTH_ON = "bluetooth_on";
+    field public static final deprecated java.lang.String BLUETOOTH_ON = "bluetooth_on";
     field public static final android.net.Uri CONTENT_URI;
-    field public static final java.lang.String DATA_ROAMING = "data_roaming";
+    field public static final deprecated java.lang.String DATA_ROAMING = "data_roaming";
     field public static final java.lang.String DEFAULT_INPUT_METHOD = "default_input_method";
-    field public static final java.lang.String DEVELOPMENT_SETTINGS_ENABLED = "development_settings_enabled";
-    field public static final java.lang.String DEVICE_PROVISIONED = "device_provisioned";
+    field public static final deprecated java.lang.String DEVELOPMENT_SETTINGS_ENABLED = "development_settings_enabled";
+    field public static final deprecated java.lang.String DEVICE_PROVISIONED = "device_provisioned";
     field public static final java.lang.String ENABLED_ACCESSIBILITY_SERVICES = "enabled_accessibility_services";
     field public static final java.lang.String ENABLED_INPUT_METHODS = "enabled_input_methods";
     field public static final java.lang.String HTTP_PROXY = "http_proxy";
     field public static final java.lang.String INPUT_METHOD_SELECTOR_VISIBILITY = "input_method_selector_visibility";
-    field public static final java.lang.String INSTALL_NON_MARKET_APPS = "install_non_market_apps";
+    field public static final deprecated java.lang.String INSTALL_NON_MARKET_APPS = "install_non_market_apps";
     field public static final java.lang.String LOCATION_PROVIDERS_ALLOWED = "location_providers_allowed";
     field public static final java.lang.String LOCK_PATTERN_ENABLED = "lock_pattern_autolock";
     field public static final java.lang.String LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED = "lock_pattern_tactile_feedback_enabled";
     field public static final java.lang.String LOCK_PATTERN_VISIBLE = "lock_pattern_visible_pattern";
     field public static final deprecated java.lang.String LOGGING_ID = "logging_id";
-    field public static final java.lang.String NETWORK_PREFERENCE = "network_preference";
+    field public static final deprecated java.lang.String NETWORK_PREFERENCE = "network_preference";
     field public static final java.lang.String PARENTAL_CONTROL_ENABLED = "parental_control_enabled";
     field public static final java.lang.String PARENTAL_CONTROL_LAST_UPDATE = "parental_control_last_update";
     field public static final java.lang.String PARENTAL_CONTROL_REDIRECT_URL = "parental_control_redirect_url";
@@ -18781,9 +18828,9 @@ package android.provider {
     field public static final deprecated java.lang.String TTS_DEFAULT_VARIANT = "tts_default_variant";
     field public static final java.lang.String TTS_ENABLED_PLUGINS = "tts_enabled_plugins";
     field public static final deprecated java.lang.String TTS_USE_DEFAULTS = "tts_use_defaults";
-    field public static final java.lang.String USB_MASS_STORAGE_ENABLED = "usb_mass_storage_enabled";
-    field public static final java.lang.String USE_GOOGLE_MAIL = "use_google_mail";
-    field public static final java.lang.String WIFI_MAX_DHCP_RETRY_COUNT = "wifi_max_dhcp_retry_count";
+    field public static final deprecated java.lang.String USB_MASS_STORAGE_ENABLED = "usb_mass_storage_enabled";
+    field public static final deprecated java.lang.String USE_GOOGLE_MAIL = "use_google_mail";
+    field public static final deprecated java.lang.String WIFI_MAX_DHCP_RETRY_COUNT = "wifi_max_dhcp_retry_count";
     field public static final java.lang.String WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS = "wifi_mobile_data_transition_wakelock_timeout_ms";
     field public static final java.lang.String WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON = "wifi_networks_available_notification_on";
     field public static final java.lang.String WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY = "wifi_networks_available_repeat_delay";
@@ -18816,7 +18863,7 @@ package android.provider {
     method public static int getInt(android.content.ContentResolver, java.lang.String) throws android.provider.Settings.SettingNotFoundException;
     method public static long getLong(android.content.ContentResolver, java.lang.String, long);
     method public static long getLong(android.content.ContentResolver, java.lang.String) throws android.provider.Settings.SettingNotFoundException;
-    method public static boolean getShowGTalkServiceStatus(android.content.ContentResolver);
+    method public static deprecated boolean getShowGTalkServiceStatus(android.content.ContentResolver);
     method public static synchronized java.lang.String getString(android.content.ContentResolver, java.lang.String);
     method public static android.net.Uri getUriFor(java.lang.String);
     method public static boolean putConfiguration(android.content.ContentResolver, android.content.res.Configuration);
@@ -18824,18 +18871,18 @@ package android.provider {
     method public static boolean putInt(android.content.ContentResolver, java.lang.String, int);
     method public static boolean putLong(android.content.ContentResolver, java.lang.String, long);
     method public static boolean putString(android.content.ContentResolver, java.lang.String, java.lang.String);
-    method public static void setShowGTalkServiceStatus(android.content.ContentResolver, boolean);
+    method public static deprecated void setShowGTalkServiceStatus(android.content.ContentResolver, boolean);
     field public static final java.lang.String ACCELEROMETER_ROTATION = "accelerometer_rotation";
     field public static final deprecated java.lang.String ADB_ENABLED = "adb_enabled";
-    field public static final java.lang.String AIRPLANE_MODE_ON = "airplane_mode_on";
-    field public static final java.lang.String AIRPLANE_MODE_RADIOS = "airplane_mode_radios";
+    field public static final deprecated java.lang.String AIRPLANE_MODE_ON = "airplane_mode_on";
+    field public static final deprecated java.lang.String AIRPLANE_MODE_RADIOS = "airplane_mode_radios";
     field public static final java.lang.String ALARM_ALERT = "alarm_alert";
     field public static final java.lang.String ALWAYS_FINISH_ACTIVITIES = "always_finish_activities";
     field public static final deprecated java.lang.String ANDROID_ID = "android_id";
     field public static final java.lang.String ANIMATOR_DURATION_SCALE = "animator_duration_scale";
     field public static final java.lang.String APPEND_FOR_LAST_AUDIBLE = "_last_audible";
-    field public static final java.lang.String AUTO_TIME = "auto_time";
-    field public static final java.lang.String AUTO_TIME_ZONE = "auto_time_zone";
+    field public static final deprecated java.lang.String AUTO_TIME = "auto_time";
+    field public static final deprecated java.lang.String AUTO_TIME_ZONE = "auto_time_zone";
     field public static final java.lang.String BLUETOOTH_DISCOVERABILITY = "bluetooth_discoverability";
     field public static final java.lang.String BLUETOOTH_DISCOVERABILITY_TIMEOUT = "bluetooth_discoverability_timeout";
     field public static final deprecated java.lang.String BLUETOOTH_ON = "bluetooth_on";
@@ -18868,10 +18915,10 @@ package android.provider {
     field public static final deprecated java.lang.String PARENTAL_CONTROL_ENABLED = "parental_control_enabled";
     field public static final deprecated java.lang.String PARENTAL_CONTROL_LAST_UPDATE = "parental_control_last_update";
     field public static final deprecated java.lang.String PARENTAL_CONTROL_REDIRECT_URL = "parental_control_redirect_url";
-    field public static final java.lang.String RADIO_BLUETOOTH = "bluetooth";
-    field public static final java.lang.String RADIO_CELL = "cell";
-    field public static final java.lang.String RADIO_NFC = "nfc";
-    field public static final java.lang.String RADIO_WIFI = "wifi";
+    field public static final deprecated java.lang.String RADIO_BLUETOOTH = "bluetooth";
+    field public static final deprecated java.lang.String RADIO_CELL = "cell";
+    field public static final deprecated java.lang.String RADIO_NFC = "nfc";
+    field public static final deprecated java.lang.String RADIO_WIFI = "wifi";
     field public static final java.lang.String RINGTONE = "ringtone";
     field public static final java.lang.String SCREEN_BRIGHTNESS = "screen_brightness";
     field public static final java.lang.String SCREEN_BRIGHTNESS_MODE = "screen_brightness_mode";
@@ -18884,7 +18931,7 @@ package android.provider {
     field public static final java.lang.String SHOW_PROCESSES = "show_processes";
     field public static final deprecated java.lang.String SHOW_WEB_SUGGESTIONS = "show_web_suggestions";
     field public static final java.lang.String SOUND_EFFECTS_ENABLED = "sound_effects_enabled";
-    field public static final java.lang.String STAY_ON_WHILE_PLUGGED_IN = "stay_on_while_plugged_in";
+    field public static final deprecated java.lang.String STAY_ON_WHILE_PLUGGED_IN = "stay_on_while_plugged_in";
     field public static final java.lang.String SYS_PROP_SETTING_VERSION = "sys.settings_system_version";
     field public static final java.lang.String TEXT_AUTO_CAPS = "auto_caps";
     field public static final java.lang.String TEXT_AUTO_PUNCTUATE = "auto_punctuate";
@@ -18912,10 +18959,10 @@ package android.provider {
     field public static final deprecated java.lang.String WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY = "wifi_networks_available_repeat_delay";
     field public static final deprecated java.lang.String WIFI_NUM_OPEN_NETWORKS_KEPT = "wifi_num_open_networks_kept";
     field public static final deprecated java.lang.String WIFI_ON = "wifi_on";
-    field public static final java.lang.String WIFI_SLEEP_POLICY = "wifi_sleep_policy";
-    field public static final int WIFI_SLEEP_POLICY_DEFAULT = 0; // 0x0
-    field public static final int WIFI_SLEEP_POLICY_NEVER = 2; // 0x2
-    field public static final int WIFI_SLEEP_POLICY_NEVER_WHILE_PLUGGED = 1; // 0x1
+    field public static final deprecated java.lang.String WIFI_SLEEP_POLICY = "wifi_sleep_policy";
+    field public static final deprecated int WIFI_SLEEP_POLICY_DEFAULT = 0; // 0x0
+    field public static final deprecated int WIFI_SLEEP_POLICY_NEVER = 2; // 0x2
+    field public static final deprecated int WIFI_SLEEP_POLICY_NEVER_WHILE_PLUGGED = 1; // 0x1
     field public static final java.lang.String WIFI_STATIC_DNS1 = "wifi_static_dns1";
     field public static final java.lang.String WIFI_STATIC_DNS2 = "wifi_static_dns2";
     field public static final java.lang.String WIFI_STATIC_GATEWAY = "wifi_static_gateway";
