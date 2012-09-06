@@ -12537,10 +12537,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             final boolean opaque = drawingCacheBackgroundColor != 0 || isOpaque();
             final boolean use32BitCache = attachInfo != null && attachInfo.mUse32BitDrawingCache;
 
-            if (width <= 0 || height <= 0 ||
-                     // Projected bitmap size in bytes
-                    (width * height * (opaque && !use32BitCache ? 2 : 4) >
-                            ViewConfiguration.get(mContext).getScaledMaximumDrawingCacheSize())) {
+            final int projectedBitmapSize = width * height * (opaque && !use32BitCache ? 2 : 4);
+            final int drawingCacheSize =
+                    ViewConfiguration.get(mContext).getScaledMaximumDrawingCacheSize();
+            if (width <= 0 || height <= 0 || projectedBitmapSize > drawingCacheSize) {
+                Log.w(VIEW_LOG_TAG, "View too large to fit into drawing cache, needs "
+                      + projectedBitmapSize + " bytes, only "
+                      + drawingCacheSize + " available");
                 destroyDrawingCache();
                 mCachingFailed = true;
                 return;
