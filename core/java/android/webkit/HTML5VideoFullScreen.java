@@ -93,6 +93,7 @@ public class HTML5VideoFullScreen extends HTML5VideoView
     private boolean mPlayingWhenDestroyed = false;
     SurfaceHolder.Callback mSHCallback = new SurfaceHolder.Callback()
     {
+        @Override
         public void surfaceChanged(SurfaceHolder holder, int format,
                                     int w, int h)
         {
@@ -106,6 +107,7 @@ public class HTML5VideoFullScreen extends HTML5VideoView
             }
         }
 
+        @Override
         public void surfaceCreated(SurfaceHolder holder)
         {
             mSurfaceHolder = holder;
@@ -114,6 +116,7 @@ public class HTML5VideoFullScreen extends HTML5VideoView
             prepareForFullScreen();
         }
 
+        @Override
         public void surfaceDestroyed(SurfaceHolder holder)
         {
             mPlayingWhenDestroyed = mPlayer.isPlaying();
@@ -233,12 +236,14 @@ public class HTML5VideoFullScreen extends HTML5VideoView
 
     }
 
+    @Override
     public boolean fullScreenExited() {
         return (mLayout == null);
     }
 
     private final WebChromeClient.CustomViewCallback mCallback =
         new WebChromeClient.CustomViewCallback() {
+            @Override
             public void onCustomViewHidden() {
                 // It listens to SurfaceHolder.Callback.SurfaceDestroyed event
                 // which happens when the video view is detached from its parent
@@ -274,7 +279,7 @@ public class HTML5VideoFullScreen extends HTML5VideoView
         mVideoSurfaceView.setFocusable(true);
         mVideoSurfaceView.setFocusableInTouchMode(true);
         mVideoSurfaceView.requestFocus();
-
+        mVideoSurfaceView.setOnKeyListener(mProxy);
         // Create a FrameLayout that will contain the VideoView and the
         // progress view (if any).
         mLayout = new FrameLayout(mProxy.getContext());
@@ -306,6 +311,7 @@ public class HTML5VideoFullScreen extends HTML5VideoView
      * @return true when we are in full screen mode, even the surface not fully
      * created.
      */
+    @Override
     public boolean isFullScreenMode() {
         return true;
     }
@@ -344,6 +350,7 @@ public class HTML5VideoFullScreen extends HTML5VideoView
     // Other listeners functions:
     private MediaPlayer.OnBufferingUpdateListener mBufferingUpdateListener =
         new MediaPlayer.OnBufferingUpdateListener() {
+        @Override
         public void onBufferingUpdate(MediaPlayer mp, int percent) {
             mCurrentBufferPercentage = percent;
         }
