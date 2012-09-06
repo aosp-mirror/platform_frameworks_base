@@ -30,8 +30,6 @@ import com.android.internal.widget.LockPatternUtils;
 public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecurityView {
 
     private static final String TAG = "KeyguardFaceUnlockView";
-    // Long enough to stay visible while dialer comes up
-    // Short enough to not be visible if the user goes back immediately
     private KeyguardSecurityCallback mKeyguardSecurityCallback;
     private LockPatternUtils mLockPatternUtils;
     private BiometricSensorUnlock mBiometricUnlock;
