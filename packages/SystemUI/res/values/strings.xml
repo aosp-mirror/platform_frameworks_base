@@ -372,9 +372,6 @@
     <!-- Content description of the clear button in the notification panel for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_clear_all">Clear all notifications.</string>
 
-    <!-- Description of the desk dock action that invokes the Android Dreams screen saver feature -->
-    <string name="dreams_dock_launcher">Activate screen saver</string>
-
     <!-- Title shown in notification popup for inspecting the responsible
          application -->
     <string name="status_bar_notification_inspect_item_title">App info</string>
@@ -400,4 +397,8 @@
 
     <!-- Name of the Jelly Bean platlogo screensaver -->
     <string name="jelly_bean_dream_name">BeanFlinger</string>
+
+    <!-- Name of the launcher shortcut icon that allows dreams to be started immediately [CHAR LIMIT=20] -->
+    <string name="start_dreams">Start dreams</string>
+
 </resources>
