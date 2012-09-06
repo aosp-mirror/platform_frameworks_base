@@ -1016,12 +1016,16 @@ class WindowStateAnimator {
 
     void updateSurfaceWindowCrop(final boolean recoveringMemory) {
         final WindowState w = mWin;
+        DisplayInfo displayInfo = w.mDisplayContent.getDisplayInfo();
 
         // Need to recompute a new system decor rect each time.
         if ((w.mAttrs.flags & LayoutParams.FLAG_SCALED) != 0) {
             // Currently can't do this cropping for scaled windows.  We'll
             // just keep the crop rect the same as the source surface.
             w.mSystemDecorRect.set(0, 0, w.mRequestedWidth, w.mRequestedHeight);
+        } else if (!w.isDefaultDisplay()) {
+            // On a different display is easy, just use the entire display.
+            w.mSystemDecorRect.set(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
         } else if (w.mLayer >= mService.mSystemDecorLayer) {
             // Above the decor layer is easy, just use the entire window.
             // Unless we have a universe background...  in which case all the
