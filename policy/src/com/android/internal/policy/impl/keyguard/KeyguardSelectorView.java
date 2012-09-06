@@ -149,7 +149,6 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
         mGlowPadView = (GlowPadView) findViewById(R.id.glow_pad_view);
         mGlowPadView.setOnTriggerListener(mOnTriggerListener);
         mEmergencyCallButton = (Button) findViewById(R.id.emergency_call_button);
-        KeyguardUpdateMonitor.getInstance(getContext()).registerCallback(mInfoCallback);
         updateTargets();
     }
 
