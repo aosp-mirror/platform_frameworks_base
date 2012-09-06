@@ -21,6 +21,8 @@ import android.util.AttributeSet;
 import android.widget.GridLayout;
 
 public class KeyguardStatusView extends GridLayout {
+    private KeyguardStatusViewManager mStatusViewManager;
+
     public KeyguardStatusView(Context context) {
         this(context, null, 0);
     }
@@ -38,7 +40,7 @@ public class KeyguardStatusView extends GridLayout {
         super.onFinishInflate();
 
         // StatusView manages all of the widgets in this view.
-        new KeyguardStatusViewManager(this);
+        mStatusViewManager = new KeyguardStatusViewManager(this);
     }
 
 }
