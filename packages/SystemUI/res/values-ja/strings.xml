@@ -68,7 +68,7 @@
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"スクリーンショットを保存中..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"スクリーンショットを保存しています..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"スクリーンショットを保存しています。"</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"スクリーンショットをキャプチャしました。"</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"スクリーンショットを取得しました。"</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"タップしてスクリーンショットを表示します。"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"スクリーンショットをキャプチャできませんでした。"</string>
     <string name="screenshot_failed_text" msgid="8134011269572415402">"スクリーンショットを保存できませんでした。ストレージが使用中の可能性があります。"</string>
@@ -151,4 +151,6 @@
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"画面は自動的に回転します。"</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"画面は横向きにロックされています。"</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"画面は縦向きにロックされています。"</string>
+    <!-- no translation found for jelly_bean_dream_name (5992026543636816792) -->
+    <skip />
 </resources>

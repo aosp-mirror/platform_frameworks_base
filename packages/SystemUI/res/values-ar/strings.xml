@@ -149,4 +149,6 @@
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"سيتم تدوير الشاشة تلقائيًا."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"تم تأمين الشاشة في الاتجاه الأفقي."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"تم تأمين الشاشة في الاتجاه العمودي."</string>
+    <!-- no translation found for jelly_bean_dream_name (5992026543636816792) -->
+    <skip />
 </resources>

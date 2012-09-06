@@ -151,4 +151,6 @@
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"L\'écran pivote automatiquement."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"L\'écran est verrouillé en mode paysage."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"L\'écran est verrouillé en mode portrait."</string>
+    <!-- no translation found for jelly_bean_dream_name (5992026543636816792) -->
+    <skip />
 </resources>
