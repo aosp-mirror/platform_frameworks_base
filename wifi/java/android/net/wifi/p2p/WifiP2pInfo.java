@@ -44,8 +44,8 @@ public class WifiP2pInfo implements Parcelable {
     public String toString() {
         StringBuffer sbuf = new StringBuffer();
         sbuf.append("groupFormed: ").append(groupFormed)
-            .append("isGroupOwner: ").append(isGroupOwner)
-            .append("groupOwnerAddress: ").append(groupOwnerAddress);
+            .append(" isGroupOwner: ").append(isGroupOwner)
+            .append(" groupOwnerAddress: ").append(groupOwnerAddress);
         return sbuf.toString();
     }
 

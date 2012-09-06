@@ -500,6 +500,14 @@ public class WifiNative {
         }
     }
 
+    public boolean setWfdEnable(boolean enable) {
+        return doBooleanCommand("SET wifi_display " + (enable ? "1" : "0"));
+    }
+
+    public boolean setWfdDeviceInfo(String hex) {
+        return doBooleanCommand("WFD_SUBELEM_SET 0 " + hex);
+    }
+
     /**
      * "sta" prioritizes STA connection over P2P and "p2p" prioritizes
      * P2P connection over STA
