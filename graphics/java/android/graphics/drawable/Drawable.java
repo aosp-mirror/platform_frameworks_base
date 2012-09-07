@@ -376,8 +376,8 @@ public abstract class Drawable {
     /**
      * Returns the resolved layout direction for this Drawable.
      *
-     * @return One of {@link View#LAYOUT_DIRECTION_LTR},
-     *   {@link View#LAYOUT_DIRECTION_RTL}
+     * @return One of {@link android.view.View#LAYOUT_DIRECTION_LTR},
+     *   {@link android.view.View#LAYOUT_DIRECTION_RTL}
      */
     public int getLayoutDirection() {
         return mLayoutDirection;
@@ -387,8 +387,8 @@ public abstract class Drawable {
      * Set the layout direction for this drawable. Should be a resolved direction as the
      * Drawable as no capacity to do the resolution on his own.
      *
-     * @param layoutDirection One of {@link View#LAYOUT_DIRECTION_LTR},
-     *   {@link View#LAYOUT_DIRECTION_RTL},
+     * @param layoutDirection One of {@link android.view.View#LAYOUT_DIRECTION_LTR},
+     *   {@link android.view.View#LAYOUT_DIRECTION_RTL},
      *
      */
     public void setLayoutDirection(int layoutDirection) {
