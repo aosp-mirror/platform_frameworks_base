@@ -4110,8 +4110,13 @@ public class PackageManagerService extends IPackageManager.Stub {
                     NativeLibraryHelper.copyNativeBinariesIfNeededLI(scanFile, nativeLibraryDir);
                 } else {
                     Slog.i(TAG, "Linking native library dir for " + path);
-                    mInstaller.linkNativeLibraryDirectory(dataPathString,
+                    int ret = mInstaller.linkNativeLibraryDirectory(dataPathString,
                             pkg.applicationInfo.nativeLibraryDir);
+                    if (ret < 0) {
+                        Slog.w(TAG, "Failed linking native library dir for " + path);
+                        mLastScanError = PackageManager.MOVE_FAILED_INSUFFICIENT_STORAGE;
+                        return null;
+                    }
                 }
             } catch (IOException ioe) {
                 Log.e(TAG, "Unable to get canonical file " + ioe.toString());
