@@ -395,6 +395,14 @@ public class PackageManagerTests extends AndroidTestCase {
                     assertTrue("The native library path (" + info.nativeLibraryDir
                             + ") should start with " + SECURE_CONTAINERS_PREFIX,
                             info.nativeLibraryDir.startsWith(SECURE_CONTAINERS_PREFIX));
+                    try {
+                        String compatLib = new File(info.dataDir + "/lib").getCanonicalPath();
+                        assertEquals("The compatibility lib directory should be a symbolic link to "
+                                + info.nativeLibraryDir,
+                                info.nativeLibraryDir, compatLib);
+                    } catch (IOException e) {
+                        fail("compat check: Can't read " + info.dataDir + "/lib");
+                    }
                 } else {
                     assertFalse((info.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0);
                     assertEquals(srcPath, appInstallPath);
