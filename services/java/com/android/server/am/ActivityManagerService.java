@@ -2150,8 +2150,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             intent.addCategory(Intent.CATEGORY_HOME);
         }
         ActivityInfo aInfo =
-            intent.resolveActivityInfo(mContext.getPackageManager(),
-                    STOCK_PM_FLAGS);
+            resolveActivityInfo(intent, STOCK_PM_FLAGS, userId);
         if (aInfo != null) {
             intent.setComponent(new ComponentName(
                     aInfo.applicationInfo.packageName, aInfo.name));
@@ -2172,6 +2171,29 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         return true;
+    }
+
+    private ActivityInfo resolveActivityInfo(Intent intent, int flags, int userId) {
+        ActivityInfo ai = null;
+        ComponentName comp = intent.getComponent();
+        try {
+            if (comp != null) {
+                ai = AppGlobals.getPackageManager().getActivityInfo(comp, flags, userId);
+            } else {
+                ResolveInfo info = AppGlobals.getPackageManager().resolveIntent(
+                        intent,
+                        intent.resolveTypeIfNeeded(mContext.getContentResolver()),
+                            flags, userId);
+    
+                if (info != null) {
+                    ai = info.activityInfo;
+                }
+            }
+        } catch (RemoteException e) {
+            // ignore
+        }
+
+        return ai;
     }
 
     /**
