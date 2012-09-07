@@ -2305,22 +2305,26 @@ public class NumberPicker extends LinearLayout {
         }
 
         private void sendAccessibilityEventForVirtualText(int eventType) {
-            AccessibilityEvent event = AccessibilityEvent.obtain(eventType);
-            mInputText.onInitializeAccessibilityEvent(event);
-            mInputText.onPopulateAccessibilityEvent(event);
-            event.setSource(NumberPicker.this, VIRTUAL_VIEW_ID_INPUT);
-            requestSendAccessibilityEvent(NumberPicker.this, event);
+            if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+                AccessibilityEvent event = AccessibilityEvent.obtain(eventType);
+                mInputText.onInitializeAccessibilityEvent(event);
+                mInputText.onPopulateAccessibilityEvent(event);
+                event.setSource(NumberPicker.this, VIRTUAL_VIEW_ID_INPUT);
+                requestSendAccessibilityEvent(NumberPicker.this, event);
+            }
         }
 
         private void sendAccessibilityEventForVirtualButton(int virtualViewId, int eventType,
                 String text) {
-            AccessibilityEvent event = AccessibilityEvent.obtain(eventType);
-            event.setClassName(Button.class.getName());
-            event.setPackageName(mContext.getPackageName());
-            event.getText().add(text);
-            event.setEnabled(NumberPicker.this.isEnabled());
-            event.setSource(NumberPicker.this, virtualViewId);
-            requestSendAccessibilityEvent(NumberPicker.this, event);
+            if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+                AccessibilityEvent event = AccessibilityEvent.obtain(eventType);
+                event.setClassName(Button.class.getName());
+                event.setPackageName(mContext.getPackageName());
+                event.getText().add(text);
+                event.setEnabled(NumberPicker.this.isEnabled());
+                event.setSource(NumberPicker.this, virtualViewId);
+                requestSendAccessibilityEvent(NumberPicker.this, event);
+            }
         }
 
         private void findAccessibilityNodeInfosByTextInChild(String searchedLowerCase,
