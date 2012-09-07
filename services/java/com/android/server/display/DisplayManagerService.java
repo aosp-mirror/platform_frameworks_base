@@ -333,6 +333,8 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
             if (shouldRegisterNonEssentialDisplayAdaptersLocked()) {
                 registerDisplayAdapterLocked(new OverlayDisplayAdapter(
                         mSyncRoot, mContext, mHandler, mDisplayAdapterListener, mUiHandler));
+                registerDisplayAdapterLocked(new WifiDisplayAdapter(
+                        mSyncRoot, mContext, mHandler, mDisplayAdapterListener));
             }
         }
     }

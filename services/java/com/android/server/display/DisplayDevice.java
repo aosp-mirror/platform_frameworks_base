@@ -17,7 +17,6 @@
 package com.android.server.display;
 
 import android.graphics.Rect;
-import android.graphics.SurfaceTexture;
 import android.os.IBinder;
 import android.view.Surface;
 
@@ -41,9 +40,9 @@ abstract class DisplayDevice {
     private Rect mCurrentLayerStackRect;
     private Rect mCurrentDisplayRect;
 
-    // The display device does own its surface texture, but it should only set it
+    // The display device owns its surface, but it should only set it
     // within a transaction from performTraversalInTransactionLocked.
-    private SurfaceTexture mCurrentSurfaceTexture;
+    private Surface mCurrentSurface;
 
     public DisplayDevice(DisplayAdapter displayAdapter, IBinder displayToken) {
         mDisplayAdapter = displayAdapter;
@@ -109,11 +108,10 @@ abstract class DisplayDevice {
      * Sets the display layer stack while in a transaction.
      */
     public final void setLayerStackInTransactionLocked(int layerStack) {
-        if (mCurrentLayerStack == layerStack) {
-            return;
+        if (mCurrentLayerStack != layerStack) {
+            mCurrentLayerStack = layerStack;
+            Surface.setDisplayLayerStack(mDisplayToken, layerStack);
         }
-        mCurrentLayerStack = layerStack;
-        Surface.setDisplayLayerStack(mDisplayToken, layerStack);
     }
 
     /**
@@ -126,28 +124,35 @@ abstract class DisplayDevice {
      *            mapped to. displayRect is specified post-orientation, that is
      *            it uses the orientation seen by the end-user
      */
-    public final void setProjectionInTransactionLocked(int orientation, Rect layerStackRect, Rect displayRect) {
-        mCurrentOrientation = orientation;
-        if (mCurrentLayerStackRect == null) {
-            mCurrentLayerStackRect = new Rect();
+    public final void setProjectionInTransactionLocked(int orientation,
+            Rect layerStackRect, Rect displayRect) {
+        if (mCurrentOrientation != orientation
+                || mCurrentLayerStackRect == null
+                || !mCurrentLayerStackRect.equals(layerStackRect)
+                || mCurrentDisplayRect == null
+                || !mCurrentDisplayRect.equals(displayRect)) {
+            mCurrentOrientation = orientation;
+            if (mCurrentLayerStackRect == null) {
+                mCurrentLayerStackRect = new Rect();
+            }
+            mCurrentLayerStackRect.set(layerStackRect);
+            if (mCurrentDisplayRect == null) {
+                mCurrentDisplayRect = new Rect();
+            }
+            mCurrentDisplayRect.set(displayRect);
+            Surface.setDisplayProjection(mDisplayToken,
+                    orientation, layerStackRect, displayRect);
         }
-        mCurrentLayerStackRect.set(layerStackRect);
-        if (mCurrentDisplayRect == null) {
-            mCurrentDisplayRect = new Rect();
-        }
-        mCurrentDisplayRect.set(displayRect);
-        Surface.setDisplayProjection(mDisplayToken, orientation, layerStackRect, displayRect);
     }
 
     /**
-     * Sets the surface texture while in a transaction.
+     * Sets the display surface while in a transaction.
      */
-    public final void setSurfaceTextureInTransactionLocked(SurfaceTexture surfaceTexture) {
-        if (mCurrentSurfaceTexture == surfaceTexture) {
-            return;
+    public final void setSurfaceInTransactionLocked(Surface surface) {
+        if (mCurrentSurface != surface) {
+            mCurrentSurface = surface;
+            Surface.setDisplaySurface(mDisplayToken, surface);
         }
-        mCurrentSurfaceTexture = surfaceTexture;
-        Surface.setDisplaySurface(mDisplayToken, surfaceTexture);
     }
 
     /**
@@ -156,10 +161,11 @@ abstract class DisplayDevice {
      */
     public void dumpLocked(PrintWriter pw) {
         pw.println("mAdapter=" + mDisplayAdapter.getName());
+        pw.println("mDisplayToken=" + mDisplayToken);
         pw.println("mCurrentLayerStack=" + mCurrentLayerStack);
         pw.println("mCurrentOrientation=" + mCurrentOrientation);
-        pw.println("mCurrentViewport=" + mCurrentLayerStackRect);
-        pw.println("mCurrentFrame=" + mCurrentDisplayRect);
-        pw.println("mCurrentSurfaceTexture=" + mCurrentSurfaceTexture);
+        pw.println("mCurrentLayerStackRect=" + mCurrentLayerStackRect);
+        pw.println("mCurrentDisplayRect=" + mCurrentDisplayRect);
+        pw.println("mCurrentSurface=" + mCurrentSurface);
     }
 }
