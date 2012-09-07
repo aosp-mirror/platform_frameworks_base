@@ -239,7 +239,11 @@ public class ClipDrawable extends Drawable implements Drawable.Callback {
         return null;
     }
 
-    
+    @Override
+    public void setLayoutDirection(int layoutDirection) {
+        mClipState.mDrawable.setLayoutDirection(layoutDirection);
+        super.setLayoutDirection(layoutDirection);
+    }
 
     final static class ClipState extends ConstantState {
         Drawable mDrawable;
