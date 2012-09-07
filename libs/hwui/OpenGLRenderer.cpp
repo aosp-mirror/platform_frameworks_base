@@ -2593,17 +2593,13 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* pain
 
     mCaches.activeTexture(0);
 
-    int alpha;
-    SkXfermode::Mode mode;
-    getAlphaAndMode(paint, &alpha, &mode);
-
-    layer->setAlpha(alpha, mode);
-
     if (CC_LIKELY(!layer->region.isEmpty())) {
         if (layer->region.isRect()) {
             composeLayerRect(layer, layer->regionRect);
         } else if (layer->mesh) {
-            const float a = alpha / 255.0f;
+            const float a = layer->getAlpha() / 255.0f;
+            SkiaColorFilter *oldFilter = mColorFilter;
+            mColorFilter = layer->getColorFilter();
 
             setupDraw();
             setupDrawWithTexture();
@@ -2632,6 +2628,8 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* pain
                     GL_UNSIGNED_SHORT, layer->meshIndices);
 
             finishDrawTexture();
+
+            mColorFilter = oldFilter;
 
 #if DEBUG_LAYERS_AS_REGIONS
             drawRegionRects(layer->region);
