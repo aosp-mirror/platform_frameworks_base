@@ -180,4 +180,9 @@ interface IWindowSession {
 
     void setUniverseTransform(IBinder window, float alpha, float offx, float offy,
             float dsdx, float dtdx, float dsdy, float dtdy);
+
+    /**
+     * Notifies that a rectangle on the screen has been requested.
+     */
+    void onRectangleOnScreenRequested(IBinder token, in Rect rectangle, boolean immediate);
 }

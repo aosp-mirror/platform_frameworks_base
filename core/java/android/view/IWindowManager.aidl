@@ -26,6 +26,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IRemoteCallback;
 import android.view.IApplicationToken;
+import android.view.IDisplayContentChangeListener;
 import android.view.IOnKeyguardExitResult;
 import android.view.IRotationWatcher;
 import android.view.IWindowSession;
@@ -34,7 +35,8 @@ import android.view.InputEvent;
 import android.view.MotionEvent;
 import android.view.InputChannel;
 import android.view.InputDevice;
-import  android.view.IInputFilter;
+import android.view.IInputFilter;
+import android.view.WindowInfo;
 
 /**
  * System private interface to the window manager.
@@ -214,11 +216,6 @@ interface IWindowManager
     IBinder getFocusedWindowToken();
 
     /**
-     * Gets the frame on the screen of the window given its token.
-     */
-    boolean getWindowFrame(IBinder token, out Rect outBounds);
-
-    /**
      * Gets the compatibility scale of e window given its token.
      */
     float getWindowCompatibilityScale(IBinder windowToken);
@@ -227,4 +224,29 @@ interface IWindowManager
      * Sets an input filter for manipulating the input event stream.
      */
     void setInputFilter(in IInputFilter filter);
+
+    /**
+     * Sets the scale and offset for implementing accessibility magnification.
+     */
+    void magnifyDisplay(int dipslayId, float scale, float offsetX, float offsetY);
+
+    /**
+     * Adds a listener for display content changes.
+     */
+    void addDisplayContentChangeListener(int displayId, IDisplayContentChangeListener listener);
+
+    /**
+     * Removes a listener for display content changes.
+     */
+    void removeDisplayContentChangeListener(int displayId, IDisplayContentChangeListener listener);
+
+    /**
+     * Gets the info for a window given its token.
+     */
+    WindowInfo getWindowInfo(IBinder token);
+
+    /**
+     * Gets the infos for all visible windows.
+     */
+    void getVisibleWindowsForDisplay(int displayId, out List<WindowInfo> outInfos);
 }

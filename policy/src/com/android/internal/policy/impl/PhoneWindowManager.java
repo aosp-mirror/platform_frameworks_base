@@ -71,6 +71,7 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
@@ -114,6 +115,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
 import static android.view.WindowManager.LayoutParams.TYPE_HIDDEN_NAV_CONSUMER;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_PHONE;
 import static android.view.WindowManager.LayoutParams.TYPE_PRIORITY_PHONE;
 import static android.view.WindowManager.LayoutParams.TYPE_SEARCH_BAR;
@@ -219,16 +221,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int NAVIGATION_BAR_PANEL_LAYER = 20;
     // system-level error dialogs
     static final int SYSTEM_ERROR_LAYER = 21;
+    // used to highlight the magnified portion of a display
+    static final int MAGNIFICATION_OVERLAY_LAYER = 22;
     // used to simulate secondary display devices
-    static final int DISPLAY_OVERLAY_LAYER = 22;
+    static final int DISPLAY_OVERLAY_LAYER = 23;
     // the drag layer: input for drag-and-drop is associated with this window,
     // which sits above all other focusable windows
-    static final int DRAG_LAYER = 23;
-    static final int SECURE_SYSTEM_OVERLAY_LAYER = 24;
-    static final int BOOT_PROGRESS_LAYER = 25;
+    static final int DRAG_LAYER = 24;
+    static final int SECURE_SYSTEM_OVERLAY_LAYER = 25;
+    static final int BOOT_PROGRESS_LAYER = 26;
     // the (mouse) pointer layer
-    static final int POINTER_LAYER = 26;
-    static final int HIDDEN_NAV_CONSUMER_LAYER = 27;
+    static final int POINTER_LAYER = 27;
+    static final int HIDDEN_NAV_CONSUMER_LAYER = 28;
 
     static final int APPLICATION_MEDIA_SUBLAYER = -2;
     static final int APPLICATION_MEDIA_OVERLAY_SUBLAYER = -1;
@@ -1332,6 +1336,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return UNIVERSE_BACKGROUND_LAYER;
         case TYPE_DISPLAY_OVERLAY:
             return DISPLAY_OVERLAY_LAYER;
+        case TYPE_MAGNIFICATION_OVERLAY:
+            return MAGNIFICATION_OVERLAY_LAYER;
         }
         Log.e(TAG, "Unknown window type: " + type);
         return APPLICATION_LAYER;
@@ -4308,6 +4314,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void setLastInputMethodWindowLw(WindowState ime, WindowState target) {
         mLastInputMethodWindow = ime;
         mLastInputMethodTargetWindow = target;
+    }
+
+    public boolean canMagnifyWindow(WindowManager.LayoutParams attrs) {
+        switch (attrs.type) {
+            case WindowManager.LayoutParams.TYPE_INPUT_METHOD:
+            case WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG:
+            case WindowManager.LayoutParams.TYPE_NAVIGATION_BAR:
+            case WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY: {
+                return false;
+            }
+        }
+        return true;
     }
 
     public void dump(String prefix, PrintWriter pw, String[] args) {

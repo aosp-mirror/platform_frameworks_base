@@ -86,6 +86,7 @@ import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.Process;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StrictMode;
@@ -108,6 +109,7 @@ import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.IApplicationToken;
+import android.view.IDisplayContentChangeListener;
 import android.view.IInputFilter;
 import android.view.IOnKeyguardExitResult;
 import android.view.IRotationWatcher;
@@ -124,6 +126,7 @@ import android.view.Surface;
 import android.view.SurfaceSession;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.WindowInfo;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicy;
@@ -715,6 +718,9 @@ public class WindowManagerService extends IWindowManager.Stub
      * navigational focus because the user is directly pressing the screen).
      */
     boolean mInTouchMode = true;
+
+    // Temp regions for intermediary calculations.
+    private final Region mTempRegion = new Region();
 
     private ViewServer mViewServer;
     private ArrayList<WindowChangeListener> mWindowChangeListeners =
@@ -2325,6 +2331,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (win.mWinAnimator.applyAnimationLocked(transit, false)) {
                     win.mExiting = true;
                 }
+                scheduleNotifyWindowTranstionIfNeededLocked(win, transit);
             }
             if (win.mExiting || win.mWinAnimator.isAnimating()) {
                 // The exit animation is running... wait for it!
@@ -2613,6 +2620,54 @@ public class WindowManagerService extends IWindowManager.Stub
         performLayoutAndPlaceSurfacesLocked();
     }
 
+    public void onRectangleOnScreenRequested(IBinder token, Rect rectangle, boolean immediate) {
+        synchronized (mWindowMap) {
+            WindowState window = mWindowMap.get(token);
+            if (window != null) {
+                scheduleNotifyRectangleOnScreenRequestedIfNeededLocked(window, rectangle,
+                        immediate);
+            }
+        }
+    }
+
+    private void scheduleNotifyRectangleOnScreenRequestedIfNeededLocked(WindowState window,
+            Rect rectangle, boolean immediate) {
+        DisplayContent displayContent = window.mDisplayContent;
+        if (displayContent.mDisplayContentChangeListeners != null
+                && displayContent.mDisplayContentChangeListeners.getRegisteredCallbackCount() > 0) {
+            mH.obtainMessage(H.NOTIFY_RECTANGLE_ON_SCREEN_REQUESTED, displayContent.getDisplayId(),
+                    immediate? 1 : 0, new Rect(rectangle)).sendToTarget();
+        }
+    }
+
+    private void handleNotifyRectangleOnScreenRequested(int displayId, Rect rectangle,
+            boolean immediate) {
+        RemoteCallbackList<IDisplayContentChangeListener> callbacks = null;
+        synchronized (mWindowMap) {
+            DisplayContent displayContent = getDisplayContent(displayId);
+            if (displayContent == null) {
+                return;
+            }
+            callbacks = displayContent.mDisplayContentChangeListeners;
+            if (callbacks == null) {
+                return;
+            }
+        }
+        final int callbackCount = callbacks.beginBroadcast();
+        try {
+            for (int i = 0; i < callbackCount; i++) {
+                try {
+                    callbacks.getBroadcastItem(i).onRectangleOnScreenRequested(displayId,
+                            rectangle, immediate);
+                } catch (RemoteException re) {
+                    /* ignore */
+                }
+            }
+        } finally {
+            callbacks.finishBroadcast();
+        }
+    }
+
     public int relayoutWindow(Session session, IWindow client, int seq,
             WindowManager.LayoutParams attrs, int requestedWidth,
             int requestedHeight, int viewVisibility, int flags,
@@ -2842,6 +2897,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             }
                             winAnimator.destroySurfaceLocked();
                         }
+                        scheduleNotifyWindowTranstionIfNeededLocked(win, transit);
                     }
                 }
 
@@ -2985,6 +3041,97 @@ public class WindowManagerService extends IWindowManager.Stub
             WindowState windowState = mWindowMap.get(windowToken);
             return (windowState != null) ? windowState.mGlobalScale : 1.0f;
         }
+    }
+
+    @Override
+    public WindowInfo getWindowInfo(IBinder token) {
+        if (!checkCallingPermission(android.Manifest.permission.RETRIEVE_WINDOW_INFO,
+                "getWindowInfo()")) {
+            throw new SecurityException("Requires RETRIEVE_WINDOW_INFO permission.");
+        }
+        synchronized (mWindowMap) {
+            WindowState window = mWindowMap.get(token);
+            if (window != null) {
+                return getWindowInfoForWindowStateLocked(window);
+            }
+            return null;
+        }
+    }
+
+    @Override
+    public void getVisibleWindowsForDisplay(int displayId, List<WindowInfo> outInfos) {
+        if (!checkCallingPermission(android.Manifest.permission.RETRIEVE_WINDOW_INFO,
+                "getWindowInfos()")) {
+            throw new SecurityException("Requires RETRIEVE_WINDOW_INFO permission.");
+        }
+        synchronized (mWindowMap) {
+            DisplayContent displayContent = getDisplayContent(displayId);
+            if (displayContent == null) {
+                return;
+            }
+            WindowList windows = displayContent.getWindowList();
+            final int windowCount = windows.size();
+            for (int i = 0; i < windowCount; i++) {
+                WindowState window = windows.get(i);
+                if (window.isVisibleLw() ||
+                        window.mAttrs.type == WindowManager.LayoutParams.TYPE_UNIVERSE_BACKGROUND) {
+                    WindowInfo info = getWindowInfoForWindowStateLocked(window);
+                    outInfos.add(info);
+                }
+            }
+        }
+    }
+
+    public void magnifyDisplay(int displayId, float scale, float offsetX, float offsetY) {
+        if (!checkCallingPermission(
+                android.Manifest.permission.MAGNIFY_DISPLAY, "magnifyDisplay()")) {
+            throw new SecurityException("Requires MAGNIFY_DISPLAY permission");
+        }
+        synchronized (mWindowMap) {
+            MagnificationSpec spec = getDisplayMagnificationSpecLocked(displayId);
+            if (spec != null) {
+                final boolean scaleChanged = spec.mScale != scale;
+                final boolean offsetChanged = spec.mOffsetX != offsetX || spec.mOffsetY != offsetY;
+                if (!scaleChanged && !offsetChanged) {
+                    return;
+                }
+                spec.initialize(scale, offsetX, offsetY);
+                // If the offset has changed we need to re-add the input windows
+                // since the offsets have to be propagated to the input system.
+                if (offsetChanged) {
+                    // TODO(multidisplay): Input only occurs on the default display.
+                    if (displayId == Display.DEFAULT_DISPLAY) {
+                        mInputMonitor.updateInputWindowsLw(true);
+                    }
+                }
+                scheduleAnimationLocked();
+            }
+        }
+    }
+
+    MagnificationSpec getDisplayMagnificationSpecLocked(int displayId) {
+        DisplayContent displayContent = getDisplayContent(displayId);
+        if (displayContent != null) {
+            if (displayContent.mMagnificationSpec == null) {
+                displayContent.mMagnificationSpec = new MagnificationSpec();
+            }
+            return displayContent.mMagnificationSpec;
+        }
+        return null;
+    }
+
+    private WindowInfo getWindowInfoForWindowStateLocked(WindowState window) {
+        WindowInfo info = WindowInfo.obtain();
+        info.token = window.mToken.token;
+        info.frame.set(window.mFrame);
+        info.type = window.mAttrs.type;
+        info.displayId = window.getDisplayId();
+        info.compatibilityScale = window.mGlobalScale;
+        info.visible = window.isVisibleLw()
+                || info.type == WindowManager.LayoutParams.TYPE_UNIVERSE_BACKGROUND;
+        window.getTouchableRegion(mTempRegion);
+        mTempRegion.getBounds(info.touchableRegion);
+        return info;
     }
 
     private AttributeCache.Entry getCachedAnimations(WindowManager.LayoutParams lp) {
@@ -3481,6 +3628,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         if (win.isVisibleNow()) {
                             win.mWinAnimator.applyAnimationLocked(WindowManagerPolicy.TRANSIT_EXIT,
                                     false);
+                            scheduleNotifyWindowTranstionIfNeededLocked(win,
+                                    WindowManagerPolicy.TRANSIT_EXIT);
                             changed = true;
                             win.mDisplayContent.layoutNeeded = true;
                         }
@@ -4254,6 +4403,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (applyAnimationLocked(wtoken, lp, transit, visible)) {
                     delayed = runningAppAnimation = true;
                 }
+                WindowState window = wtoken.findMainWindow();
+                if (window != null) {
+                    scheduleNotifyWindowTranstionIfNeededLocked(window, transit);
+                }
                 changed = true;
             }
 
@@ -4271,6 +4424,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         if (!runningAppAnimation) {
                             win.mWinAnimator.applyAnimationLocked(
                                     WindowManagerPolicy.TRANSIT_ENTER, true);
+                            scheduleNotifyWindowTranstionIfNeededLocked(win,
+                                    WindowManagerPolicy.TRANSIT_ENTER);
                         }
                         changed = true;
                         win.mDisplayContent.layoutNeeded = true;
@@ -4279,6 +4434,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (!runningAppAnimation) {
                         win.mWinAnimator.applyAnimationLocked(
                                 WindowManagerPolicy.TRANSIT_EXIT, false);
+                        scheduleNotifyWindowTranstionIfNeededLocked(win,
+                                WindowManagerPolicy.TRANSIT_EXIT);
                     }
                     changed = true;
                     win.mDisplayContent.layoutNeeded = true;
@@ -5818,12 +5975,16 @@ public class WindowManagerService extends IWindowManager.Stub
                 mInnerFields.mOrientationChangeComplete = false;
             }
         }
+
         for (int i=mRotationWatchers.size()-1; i>=0; i--) {
             try {
                 mRotationWatchers.get(i).onRotationChanged(rotation);
             } catch (RemoteException e) {
             }
         }
+
+        scheduleNotifyRotationChangedIfNeededLocked(displayContent, rotation);
+
         return true;
     }
 
@@ -6202,6 +6363,110 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         return success;
+    }
+
+    public void addDisplayContentChangeListener(int displayId,
+            IDisplayContentChangeListener listener) {
+        if (!checkCallingPermission(android.Manifest.permission.RETRIEVE_WINDOW_INFO,
+                "addDisplayContentChangeListener()")) {
+            throw new SecurityException("Requires RETRIEVE_WINDOW_INFO permission");
+        }
+        synchronized(mWindowMap) {
+            DisplayContent displayContent = getDisplayContent(displayId);
+            if (displayContent.mDisplayContentChangeListeners == null) {
+                displayContent.mDisplayContentChangeListeners =
+                        new RemoteCallbackList<IDisplayContentChangeListener>();
+            displayContent.mDisplayContentChangeListeners.register(listener);
+            }
+        }
+    }
+
+    public void removeDisplayContentChangeListener(int displayId,
+            IDisplayContentChangeListener listener) {
+        if (!checkCallingPermission(android.Manifest.permission.RETRIEVE_WINDOW_INFO,
+                "removeDisplayContentChangeListener()")) {
+            throw new SecurityException("Requires RETRIEVE_WINDOW_INFO permission");
+        }
+        synchronized(mWindowMap) {
+            DisplayContent displayContent = getDisplayContent(displayId);
+            if (displayContent.mDisplayContentChangeListeners != null) {
+                displayContent.mDisplayContentChangeListeners.unregister(listener);
+                if (displayContent.mDisplayContentChangeListeners
+                        .getRegisteredCallbackCount() == 0) {
+                    displayContent.mDisplayContentChangeListeners = null;
+                }
+            }
+        }
+    }
+
+    void scheduleNotifyWindowTranstionIfNeededLocked(WindowState window, int transition) {
+        DisplayContent displayContent = window.mDisplayContent;
+        if (displayContent.mDisplayContentChangeListeners != null) {
+            WindowInfo info = getWindowInfoForWindowStateLocked(window);
+            mH.obtainMessage(H.NOTIFY_WINDOW_TRANSITION, transition, 0, info).sendToTarget();
+        }
+    }
+
+    private void handleNotifyWindowTranstion(int transition, WindowInfo info) {
+        RemoteCallbackList<IDisplayContentChangeListener> callbacks = null;
+        synchronized (mWindowMap) {
+            DisplayContent displayContent = getDisplayContent(info.displayId);
+            if (displayContent == null) {
+                return;
+            }
+            callbacks = displayContent.mDisplayContentChangeListeners;
+            if (callbacks == null) {
+                return;
+            }
+        }
+        final int callbackCount = callbacks.beginBroadcast();
+        try {
+            for (int i = 0; i < callbackCount; i++) {
+                try {
+                    callbacks.getBroadcastItem(i).onWindowTransition(info.displayId,
+                            transition, info);
+                } catch (RemoteException re) {
+                    /* ignore */
+                }
+            }
+        } finally {
+            callbacks.finishBroadcast();
+        }
+    }
+
+    private void scheduleNotifyRotationChangedIfNeededLocked(DisplayContent displayContent,
+            int rotation) {
+        if (displayContent.mDisplayContentChangeListeners != null
+                && displayContent.mDisplayContentChangeListeners.getRegisteredCallbackCount() > 0) {
+            mH.obtainMessage(H.NOTIFY_ROTATION_CHANGED, displayContent.getDisplayId(),
+                    rotation).sendToTarget();
+        }
+    }
+
+    private void handleNotifyRotationChanged(int displayId, int rotation) {
+        RemoteCallbackList<IDisplayContentChangeListener> callbacks = null;
+        synchronized (mWindowMap) {
+            DisplayContent displayContent = getDisplayContent(displayId);
+            if (displayContent == null) {
+                return;
+            }
+            callbacks = displayContent.mDisplayContentChangeListeners;
+            if (callbacks == null) {
+                return;
+            }
+        }
+        try {
+            final int watcherCount = callbacks.beginBroadcast();
+            for (int i = 0; i < watcherCount; i++) {
+                try {
+                    callbacks.getBroadcastItem(i).onRotationChanged(rotation);
+                } catch (RemoteException re) {
+                    /* ignore */
+                }
+            }
+        } finally {
+            callbacks.finishBroadcast();
+        }
     }
 
     public void addWindowChangeListener(WindowChangeListener listener) {
@@ -6767,21 +7032,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public boolean getWindowFrame(IBinder token, Rect outBounds) {
-        if (!checkCallingPermission(android.Manifest.permission.RETRIEVE_WINDOW_INFO,
-                "getWindowFrame()")) {
-            throw new SecurityException("Requires RETRIEVE_WINDOW_INFO permission.");
-        }
-        synchronized (mWindowMap) {
-            WindowState windowState = mWindowMap.get(token);
-            if (windowState != null) {
-                outBounds.set(windowState.getFrameLw());
-                return true;
-            }
-        }
-        return false;
-    }
-
     private WindowState getFocusedWindow() {
         synchronized (mWindowMap) {
             return getFocusedWindowLocked();
@@ -6929,6 +7179,9 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int UPDATE_ANIM_PARAMETERS = 25;
         public static final int SHOW_STRICT_MODE_VIOLATION = 26;
         public static final int DO_ANIMATION_CALLBACK = 27;
+        public static final int NOTIFY_ROTATION_CHANGED = 28;
+        public static final int NOTIFY_WINDOW_TRANSITION = 29;
+        public static final int NOTIFY_RECTANGLE_ON_SCREEN_REQUESTED = 30;
 
         public static final int ANIMATOR_WHAT_OFFSET = 100000;
         public static final int SET_TRANSPARENT_REGION = ANIMATOR_WHAT_OFFSET + 1;
@@ -7365,6 +7618,25 @@ public class WindowManagerService extends IWindowManager.Stub
                         ((IRemoteCallback)msg.obj).sendResult(null);
                     } catch (RemoteException e) {
                     }
+                    break;
+                }
+                case NOTIFY_ROTATION_CHANGED: {
+                    final int displayId = msg.arg1;
+                    final int rotation = msg.arg2;
+                    handleNotifyRotationChanged(displayId, rotation);
+                    break;
+                }
+                case NOTIFY_WINDOW_TRANSITION: {
+                    final int transition = msg.arg1;
+                    WindowInfo info = (WindowInfo) msg.obj;
+                    handleNotifyWindowTranstion(transition, info);
+                    break;
+                }
+                case NOTIFY_RECTANGLE_ON_SCREEN_REQUESTED: {
+                    final int displayId = msg.arg1;
+                    final boolean immediate = (msg.arg2 == 1);
+                    Rect rectangle = (Rect) msg.obj;
+                    handleNotifyRectangleOnScreenRequested(displayId, rectangle, immediate);
                     break;
                 }
             }
