@@ -1188,8 +1188,10 @@ public class Am {
             if (data != null) line = line + ", data=\"" + data + "\"";
             if (extras != null) line = line + ", extras: " + extras;
             System.out.println(line);
-            mFinished = true;
-            notifyAll();
+            synchronized (this) {
+              mFinished = true;
+              notifyAll();
+            }
         }
 
         public synchronized void waitForFinish() {
