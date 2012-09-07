@@ -422,6 +422,17 @@ final class Session extends IWindowSession.Stub
         }
     }
 
+    public void onRectangleOnScreenRequested(IBinder token, Rect rectangle, boolean immediate) {
+        synchronized(mService.mWindowMap) {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mService.onRectangleOnScreenRequested(token, rectangle, immediate);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+    }
+
     void windowAddedLocked() {
         if (mSurfaceSession == null) {
             if (WindowManagerService.localLOGV) Slog.v(

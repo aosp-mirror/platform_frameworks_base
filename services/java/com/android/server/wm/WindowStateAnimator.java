@@ -3,7 +3,6 @@
 package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
-
 import static com.android.server.wm.WindowManagerService.LayoutFields.SET_ORIENTATION_CHANGE_COMPLETE;
 import static com.android.server.wm.WindowManagerService.LayoutFields.SET_TURN_ON_SCREEN;
 
@@ -887,6 +886,11 @@ class WindowStateAnimator {
                 tmpMatrix.postConcat(
                         mService.mAnimator.mScreenRotationAnimation.getEnterTransformation().getMatrix());
             }
+            MagnificationSpec spec = mWin.getWindowMagnificationSpecLocked();
+            if (spec != null && !spec.isNop()) {
+                tmpMatrix.postScale(spec.mScale, spec.mScale);
+                tmpMatrix.postTranslate(spec.mOffsetX, spec.mOffsetY);
+            }
 
             // "convert" it into SurfaceFlinger's format
             // (a 2x2 matrix + an offset)
@@ -954,16 +958,30 @@ class WindowStateAnimator {
         if (WindowManagerService.localLOGV) Slog.v(
                 TAG, "computeShownFrameLocked: " + this +
                 " not attached, mAlpha=" + mAlpha);
-        if (mAnimator.mUniverseBackground != null &&
-                mWin.mAttrs.type != WindowManager.LayoutParams.TYPE_UNIVERSE_BACKGROUND
-                && mWin.mBaseLayer < mAnimator.mAboveUniverseLayer) {
+
+        final boolean applyUniverseTransformation = (mAnimator.mUniverseBackground != null
+                && mWin.mAttrs.type != WindowManager.LayoutParams.TYPE_UNIVERSE_BACKGROUND
+                && mWin.mBaseLayer < mAnimator.mAboveUniverseLayer);
+        MagnificationSpec spec = mWin.getWindowMagnificationSpecLocked();
+        if (applyUniverseTransformation || spec != null) {
             final Rect frame = mWin.mFrame;
             final float tmpFloats[] = mService.mTmpFloats;
             final Matrix tmpMatrix = mWin.mTmpMatrix;
+
             tmpMatrix.setScale(mWin.mGlobalScale, mWin.mGlobalScale);
             tmpMatrix.postTranslate(frame.left + mWin.mXOffset, frame.top + mWin.mYOffset);
-            tmpMatrix.postConcat(mAnimator.mUniverseBackground.mUniverseTransform.getMatrix());
+
+            if (applyUniverseTransformation) {
+                tmpMatrix.postConcat(mAnimator.mUniverseBackground.mUniverseTransform.getMatrix());
+            }
+
+            if (spec != null && !spec.isNop()) {
+                tmpMatrix.postScale(spec.mScale, spec.mScale);
+                tmpMatrix.postTranslate(spec.mOffsetX, spec.mOffsetY);
+            }
+
             tmpMatrix.getValues(tmpFloats);
+
             mHaveMatrix = true;
             mDsDx = tmpFloats[Matrix.MSCALE_X];
             mDtDx = tmpFloats[Matrix.MSKEW_Y];
@@ -973,8 +991,12 @@ class WindowStateAnimator {
             float y = tmpFloats[Matrix.MTRANS_Y];
             int w = frame.width();
             int h = frame.height();
-            mWin.mShownFrame.set(x, y, x+w, y+h);
-            mShownAlpha = mAlpha * mAnimator.mUniverseBackground.mUniverseTransform.getAlpha();
+            mWin.mShownFrame.set(x, y, x + w, y + h);
+
+            mShownAlpha = mAlpha;
+            if (applyUniverseTransformation) {
+                mShownAlpha *= mAnimator.mUniverseBackground.mUniverseTransform.getAlpha();
+            }
         } else {
             mWin.mShownFrame.set(mWin.mFrame);
             if (mWin.mXOffset != 0 || mWin.mYOffset != 0) {
@@ -1435,8 +1457,8 @@ class WindowStateAnimator {
         } else {
             transit = WindowManagerPolicy.TRANSIT_SHOW;
         }
-
         applyAnimationLocked(transit, true);
+        mService.scheduleNotifyWindowTranstionIfNeededLocked(mWin, transit);
     }
 
     // TODO(cmautner): Move back to WindowState?

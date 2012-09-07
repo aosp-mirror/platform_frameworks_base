@@ -48,6 +48,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -62,6 +63,7 @@ import android.view.IWindowManager;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
+import android.view.WindowInfo;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityInteractionClient;
@@ -115,6 +117,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private static final int MSG_SEND_ACCESSIBILITY_EVENT_TO_INPUT_FILTER = 3;
 
+    private static final int MSG_SEND_UPDATE_INPUT_FILTER = 4;
+
     private static int sIdCounter = 0;
 
     private static int sNextWindowId;
@@ -157,11 +161,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private boolean mIsTouchExplorationEnabled;
 
+    private boolean mIsScreenMagnificationEnabled;
+
     private final IWindowManager mWindowManager;
 
     private final SecurityPolicy mSecurityPolicy;
 
-    private final MainHanler mMainHandler;
+    private final MainHandler mMainHandler;
 
     private Service mUiAutomationService;
 
@@ -183,7 +189,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         mPackageManager = mContext.getPackageManager();
         mWindowManager = (IWindowManager) ServiceManager.getService(Context.WINDOW_SERVICE);
         mSecurityPolicy = new SecurityPolicy();
-        mMainHandler = new MainHanler();
+        mMainHandler = new MainHandler(mContext.getMainLooper());
         registerPackageChangeAndBootCompletedBroadcastReceiver();
         registerSettingsContentObservers();
     }
@@ -201,7 +207,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 synchronized (mLock) {
                     // We will update when the automation service dies.
                     if (mUiAutomationService == null) {
-                        populateAccessibilityServiceListLocked();
+                        populateInstalledAccessibilityServiceLocked();
                         manageServicesLocked();
                     }
                 }
@@ -262,18 +268,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     synchronized (mLock) {
                         // We will update when the automation service dies.
                         if (mUiAutomationService == null) {
-                            populateAccessibilityServiceListLocked();
-                            populateEnabledAccessibilityServicesLocked();
-                            populateTouchExplorationGrantedAccessibilityServicesLocked();
-                            handleAccessibilityEnabledSettingChangedLocked();
-                            handleTouchExplorationEnabledSettingChangedLocked();
-                            updateInputFilterLocked();
-                            sendStateToClientsLocked();
+                            updateInternalStateLocked();
                         }
                     }
                     return;
                 }
-
                 super.onReceive(context, intent);
             }
         };
@@ -328,6 +327,24 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                         }
                     }
                 });
+
+        Uri accessibilityScreenMagnificationEnabledUri = Settings.Secure.getUriFor(
+                Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED);
+        contentResolver.registerContentObserver(accessibilityScreenMagnificationEnabledUri, false,
+            new ContentObserver(new Handler()) {
+                @Override
+                public void onChange(boolean selfChange) {
+                    super.onChange(selfChange);
+                    synchronized (mLock) {
+                        // We will update when the automation service dies.
+                        if (mUiAutomationService == null) {
+                            handleScreenMagnificationEnabledSettingChangedLocked();
+                            updateInputFilterLocked();
+                            sendStateToClientsLocked();
+                        }
+                    }
+                }
+            });
 
         Uri accessibilityServicesUri =
             Settings.Secure.getUriFor(Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
@@ -587,8 +604,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             final int windowId = mSecurityPolicy.mActiveWindowId;
             IBinder token = mWindowIdToWindowTokenMap.get(windowId);
             try {
-                mWindowManager.getWindowFrame(token, outBounds);
-                return true;
+                WindowInfo info = mWindowManager.getWindowInfo(token);
+                if (info != null) {
+                    outBounds.set(info.frame);
+                    return true;
+                }
             } catch (RemoteException re) {
                 /* ignore */
             }
@@ -652,7 +672,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     /**
      * Populates the cached list of installed {@link AccessibilityService}s.
      */
-    private void populateAccessibilityServiceListLocked() {
+    private void populateInstalledAccessibilityServiceLocked() {
         mInstalledServices.clear();
 
         List<ResolveInfo> installedServices = mPackageManager.queryIntentServices(
@@ -962,31 +982,26 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     }
 
     /**
-     * Updates the touch exploration state.
+     * Updates the state of the input filter.
      */
     private void updateInputFilterLocked() {
-        if (mIsAccessibilityEnabled && mIsTouchExplorationEnabled) {
-            if (!mHasInputFilter) {
-                mHasInputFilter = true;
-                if (mInputFilter == null) {
-                    mInputFilter = new AccessibilityInputFilter(mContext, this);
-                }
-                try {
-                    mWindowManager.setInputFilter(mInputFilter);
-                } catch (RemoteException re) {
-                    /* ignore */
-                }
-            }
-            return;
-        }
-        if (mHasInputFilter) {
-            mHasInputFilter = false;
-            try {
-                mWindowManager.setInputFilter(null);
-            } catch (RemoteException re) {
-                /* ignore */
-            }
-        }
+         mMainHandler.obtainMessage(MSG_SEND_UPDATE_INPUT_FILTER).sendToTarget();
+    }
+
+    /**
+     * Updated the internal state of this service to match the current settings.
+     */
+    private void updateInternalStateLocked() {
+        populateInstalledAccessibilityServiceLocked();
+        populateEnabledAccessibilityServicesLocked();
+        populateTouchExplorationGrantedAccessibilityServicesLocked();
+
+        handleTouchExplorationEnabledSettingChangedLocked();
+        handleScreenMagnificationEnabledSettingChangedLocked();
+        handleAccessibilityEnabledSettingChangedLocked();
+
+        updateInputFilterLocked();
+        sendStateToClientsLocked();
     }
 
     /**
@@ -1010,6 +1025,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         mIsTouchExplorationEnabled = Settings.Secure.getInt(
                 mContext.getContentResolver(),
                 Settings.Secure.TOUCH_EXPLORATION_ENABLED, 0) == 1;
+    }
+
+    /**
+     * Updates the state based on the screen magnification enabled setting.
+     */
+    private void handleScreenMagnificationEnabledSettingChangedLocked() {
+        mIsScreenMagnificationEnabled = Settings.Secure.getInt(
+                mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED, 0) == 1;
     }
 
     private void handleTouchExplorationGrantedAccessibilityServicesChangedLocked() {
@@ -1083,7 +1107,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
     }
 
-    private class MainHanler extends Handler {
+    private class MainHandler extends Handler {
+
+        public MainHandler(Looper looper) {
+            super(looper);
+        }
+
         @Override
         public void handleMessage(Message msg) {
             final int type = msg.what;
@@ -1140,9 +1169,49 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 case MSG_SEND_ACCESSIBILITY_EVENT_TO_INPUT_FILTER: {
                     AccessibilityEvent event = (AccessibilityEvent) msg.obj;
                     if (mHasInputFilter && mInputFilter != null) {
-                        mInputFilter.onAccessibilityEvent(event);
+                        mInputFilter.notifyAccessibilityEvent(event);
                     }
                     event.recycle();
+                } break;
+                case MSG_SEND_UPDATE_INPUT_FILTER: {
+                    boolean setInputFilter = false;
+                    AccessibilityInputFilter inputFilter = null;
+                    synchronized (mLock) {
+                        if ((mIsAccessibilityEnabled && mIsTouchExplorationEnabled)
+                                || mIsScreenMagnificationEnabled) {
+                            if (!mHasInputFilter) {
+                                mHasInputFilter = true;
+                                if (mInputFilter == null) {
+                                    mInputFilter = new AccessibilityInputFilter(mContext,
+                                            AccessibilityManagerService.this);
+                                }
+                                inputFilter = mInputFilter;
+                                setInputFilter = true;
+                            }
+                            int flags = 0;
+                            if (mIsScreenMagnificationEnabled) {
+                                flags |= AccessibilityInputFilter.FLAG_FEATURE_SCREEN_MAGNIFIER;
+                            }
+                            if (mIsTouchExplorationEnabled) {
+                                flags |= AccessibilityInputFilter.FLAG_FEATURE_TOUCH_EXPLORATION;
+                            }
+                            mInputFilter.setEnabledFeatures(flags);
+                        } else {
+                            if (mHasInputFilter) {
+                                mHasInputFilter = false;
+                                mInputFilter.setEnabledFeatures(0);
+                                inputFilter = null;
+                                setInputFilter = true;
+                            }
+                        }
+                    }
+                    if (setInputFilter) {
+                        try {
+                            mWindowManager.setInputFilter(inputFilter);
+                        } catch (RemoteException re) {
+                            /* ignore */
+                        }
+                    }
                 } break;
             }
         }
@@ -1629,18 +1698,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 // the state based on values in the settings database.
                 if (mIsAutomation) {
                     mUiAutomationService = null;
-
-                    populateEnabledAccessibilityServicesLocked();
-                    populateTouchExplorationGrantedAccessibilityServicesLocked();
-
-                    handleAccessibilityEnabledSettingChangedLocked();
-                    sendStateToClientsLocked();
-
-                    handleTouchExplorationEnabledSettingChangedLocked();
-                    updateInputFilterLocked();
-
-                    populateAccessibilityServiceListLocked();
-                    manageServicesLocked();
+                    updateInternalStateLocked();
                 }
             }
         }
