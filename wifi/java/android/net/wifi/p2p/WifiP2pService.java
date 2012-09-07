@@ -1497,7 +1497,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         public void exit() {
             mSavedProvDiscDevice = null;
             updateThisDevice(WifiP2pDevice.AVAILABLE);
-            setWifiP2pInfoOnGroupTermination();
+            resetWifiP2pInfo();
             mNetworkInfo.setDetailedState(NetworkInfo.DetailedState.DISCONNECTED, null, null);
             sendP2pConnectionChangedBroadcast();
         }
@@ -1976,7 +1976,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         mWifiP2pInfo.groupOwnerAddress = NetworkUtils.numericToInetAddress(serverAddress);
     }
 
-    private void setWifiP2pInfoOnGroupTermination() {
+    private void resetWifiP2pInfo() {
         mWifiP2pInfo.groupFormed = false;
         mWifiP2pInfo.isGroupOwner = false;
         mWifiP2pInfo.groupOwnerAddress = null;
@@ -2092,6 +2092,9 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
     }
 
     private void handleGroupCreationFailure() {
+        resetWifiP2pInfo();
+        mNetworkInfo.setDetailedState(NetworkInfo.DetailedState.FAILED, null, null);
+        sendP2pConnectionChangedBroadcast();
         mSavedPeerConfig = null;
         /* After cancelling group formation, new connections on existing peers can fail
          * at supplicant. Flush and restart discovery */
