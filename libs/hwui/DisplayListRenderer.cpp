@@ -149,6 +149,7 @@ void DisplayList::clearResources() {
     delete mTransformMatrix3D;
     delete mStaticMatrix;
     delete mAnimationMatrix;
+
     mTransformMatrix = NULL;
     mTransformCamera = NULL;
     mTransformMatrix3D = NULL;
@@ -156,50 +157,54 @@ void DisplayList::clearResources() {
     mAnimationMatrix = NULL;
 
     Caches& caches = Caches::getInstance();
+    caches.resourceCache.lock();
 
     for (size_t i = 0; i < mBitmapResources.size(); i++) {
-        caches.resourceCache.decrementRefcount(mBitmapResources.itemAt(i));
+        caches.resourceCache.decrementRefcountLocked(mBitmapResources.itemAt(i));
     }
-    mBitmapResources.clear();
 
     for (size_t i = 0; i < mOwnedBitmapResources.size(); i++) {
         SkBitmap* bitmap = mOwnedBitmapResources.itemAt(i);
-        caches.resourceCache.decrementRefcount(bitmap);
-        caches.resourceCache.destructor(bitmap);
+        caches.resourceCache.decrementRefcountLocked(bitmap);
+        caches.resourceCache.destructorLocked(bitmap);
     }
-    mOwnedBitmapResources.clear();
 
     for (size_t i = 0; i < mFilterResources.size(); i++) {
-        caches.resourceCache.decrementRefcount(mFilterResources.itemAt(i));
+        caches.resourceCache.decrementRefcountLocked(mFilterResources.itemAt(i));
     }
-    mFilterResources.clear();
 
     for (size_t i = 0; i < mShaders.size(); i++) {
-        caches.resourceCache.decrementRefcount(mShaders.itemAt(i));
-        caches.resourceCache.destructor(mShaders.itemAt(i));
+        caches.resourceCache.decrementRefcountLocked(mShaders.itemAt(i));
+        caches.resourceCache.destructorLocked(mShaders.itemAt(i));
     }
-    mShaders.clear();
+
+    for (size_t i = 0; i < mSourcePaths.size(); i++) {
+        caches.resourceCache.decrementRefcountLocked(mSourcePaths.itemAt(i));
+    }
+
+    caches.resourceCache.unlock();
 
     for (size_t i = 0; i < mPaints.size(); i++) {
         delete mPaints.itemAt(i);
     }
-    mPaints.clear();
 
     for (size_t i = 0; i < mPaths.size(); i++) {
         SkPath* path = mPaths.itemAt(i);
         caches.pathCache.remove(path);
         delete path;
     }
-    mPaths.clear();
-
-    for (size_t i = 0; i < mSourcePaths.size(); i++) {
-        caches.resourceCache.decrementRefcount(mSourcePaths.itemAt(i));
-    }
-    mSourcePaths.clear();
 
     for (size_t i = 0; i < mMatrices.size(); i++) {
         delete mMatrices.itemAt(i);
     }
+
+    mBitmapResources.clear();
+    mOwnedBitmapResources.clear();
+    mFilterResources.clear();
+    mShaders.clear();
+    mSourcePaths.clear();
+    mPaints.clear();
+    mPaths.clear();
     mMatrices.clear();
 }
 
@@ -223,34 +228,43 @@ void DisplayList::initFromDisplayListRenderer(const DisplayListRenderer& recorde
     mReader.setMemory(buffer, mSize);
 
     Caches& caches = Caches::getInstance();
+    caches.resourceCache.lock();
 
     const Vector<SkBitmap*>& bitmapResources = recorder.getBitmapResources();
     for (size_t i = 0; i < bitmapResources.size(); i++) {
         SkBitmap* resource = bitmapResources.itemAt(i);
         mBitmapResources.add(resource);
-        caches.resourceCache.incrementRefcount(resource);
+        caches.resourceCache.incrementRefcountLocked(resource);
     }
 
     const Vector<SkBitmap*> &ownedBitmapResources = recorder.getOwnedBitmapResources();
     for (size_t i = 0; i < ownedBitmapResources.size(); i++) {
         SkBitmap* resource = ownedBitmapResources.itemAt(i);
         mOwnedBitmapResources.add(resource);
-        caches.resourceCache.incrementRefcount(resource);
+        caches.resourceCache.incrementRefcountLocked(resource);
     }
 
     const Vector<SkiaColorFilter*>& filterResources = recorder.getFilterResources();
     for (size_t i = 0; i < filterResources.size(); i++) {
         SkiaColorFilter* resource = filterResources.itemAt(i);
         mFilterResources.add(resource);
-        caches.resourceCache.incrementRefcount(resource);
+        caches.resourceCache.incrementRefcountLocked(resource);
     }
 
     const Vector<SkiaShader*>& shaders = recorder.getShaders();
     for (size_t i = 0; i < shaders.size(); i++) {
         SkiaShader* resource = shaders.itemAt(i);
         mShaders.add(resource);
-        caches.resourceCache.incrementRefcount(resource);
+        caches.resourceCache.incrementRefcountLocked(resource);
     }
+
+    const SortedVector<SkPath*>& sourcePaths = recorder.getSourcePaths();
+    for (size_t i = 0; i < sourcePaths.size(); i++) {
+        mSourcePaths.add(sourcePaths.itemAt(i));
+        caches.resourceCache.incrementRefcountLocked(sourcePaths.itemAt(i));
+    }
+
+    caches.resourceCache.unlock();
 
     const Vector<SkPaint*>& paints = recorder.getPaints();
     for (size_t i = 0; i < paints.size(); i++) {
@@ -260,12 +274,6 @@ void DisplayList::initFromDisplayListRenderer(const DisplayListRenderer& recorde
     const Vector<SkPath*>& paths = recorder.getPaths();
     for (size_t i = 0; i < paths.size(); i++) {
         mPaths.add(paths.itemAt(i));
-    }
-
-    const SortedVector<SkPath*>& sourcePaths = recorder.getSourcePaths();
-    for (size_t i = 0; i < sourcePaths.size(); i++) {
-        mSourcePaths.add(sourcePaths.itemAt(i));
-        caches.resourceCache.incrementRefcount(sourcePaths.itemAt(i));
     }
 
     const Vector<SkMatrix*>& matrices = recorder.getMatrices();
@@ -1309,7 +1317,8 @@ status_t DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flag
 // Base structure
 ///////////////////////////////////////////////////////////////////////////////
 
-DisplayListRenderer::DisplayListRenderer() : mWriter(MIN_WRITER_SIZE),
+DisplayListRenderer::DisplayListRenderer():
+        mCaches(Caches::getInstance()), mWriter(MIN_WRITER_SIZE),
         mTranslateX(0.0f), mTranslateY(0.0f), mHasTranslate(false), mHasDrawOps(false) {
 }
 
@@ -1320,33 +1329,37 @@ DisplayListRenderer::~DisplayListRenderer() {
 void DisplayListRenderer::reset() {
     mWriter.reset();
 
-    Caches& caches = Caches::getInstance();
+    mCaches.resourceCache.lock();
+
     for (size_t i = 0; i < mBitmapResources.size(); i++) {
-        caches.resourceCache.decrementRefcount(mBitmapResources.itemAt(i));
+        mCaches.resourceCache.decrementRefcountLocked(mBitmapResources.itemAt(i));
     }
-    mBitmapResources.clear();
 
     for (size_t i = 0; i < mOwnedBitmapResources.size(); i++) {
-        SkBitmap* bitmap = mOwnedBitmapResources.itemAt(i);
-        caches.resourceCache.decrementRefcount(bitmap);
+        mCaches.resourceCache.decrementRefcountLocked(mOwnedBitmapResources.itemAt(i));
     }
-    mOwnedBitmapResources.clear();
 
     for (size_t i = 0; i < mFilterResources.size(); i++) {
-        caches.resourceCache.decrementRefcount(mFilterResources.itemAt(i));
+        mCaches.resourceCache.decrementRefcountLocked(mFilterResources.itemAt(i));
     }
-    mFilterResources.clear();
 
     for (size_t i = 0; i < mShaders.size(); i++) {
-        caches.resourceCache.decrementRefcount(mShaders.itemAt(i));
+        mCaches.resourceCache.decrementRefcountLocked(mShaders.itemAt(i));
     }
-    mShaders.clear();
-    mShaderMap.clear();
 
     for (size_t i = 0; i < mSourcePaths.size(); i++) {
-        caches.resourceCache.decrementRefcount(mSourcePaths.itemAt(i));
+        mCaches.resourceCache.decrementRefcountLocked(mSourcePaths.itemAt(i));
     }
+
+    mCaches.resourceCache.unlock();
+
+    mBitmapResources.clear();
+    mOwnedBitmapResources.clear();
+    mFilterResources.clear();
     mSourcePaths.clear();
+
+    mShaders.clear();
+    mShaderMap.clear();
 
     mPaints.clear();
     mPaintMap.clear();
