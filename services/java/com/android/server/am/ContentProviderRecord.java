@@ -85,7 +85,7 @@ class ContentProviderRecord {
 
     public boolean canRunHere(ProcessRecord app) {
         return (info.multiprocess || info.processName.equals(app.processName))
-                && (uid == Process.SYSTEM_UID || uid == app.info.uid);
+                && uid == app.info.uid;
     }
 
     public void addExternalProcessHandleLocked(IBinder token) {
