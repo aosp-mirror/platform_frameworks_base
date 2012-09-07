@@ -116,13 +116,11 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.text.format.Time;
 import android.util.EventLog;
-import android.util.LocaleUtil;
 import android.util.Log;
 import android.util.Pair;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.SparseIntArray;
 import android.util.TimeUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -432,6 +430,11 @@ public final class ActivityManagerService extends ActivityManagerNative
      * Which uses have been started, so are allowed to run code.
      */
     final SparseArray<UserStartedState> mStartedUsers = new SparseArray<UserStartedState>();
+
+    /**
+     * LRU list of history of current users.  Most recently current is at the end.
+     */
+    final ArrayList<Integer> mUserLru = new ArrayList<Integer>();
 
     /**
      * Packages that the user has asked to have run in screen size
@@ -1094,11 +1097,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             } break;
             case KILL_APPLICATION_MSG: {
                 synchronized (ActivityManagerService.this) {
-                    int uid = msg.arg1;
+                    int appid = msg.arg1;
                     boolean restart = (msg.arg2 == 1);
                     String pkg = (String) msg.obj;
-                    forceStopPackageLocked(pkg, uid, restart, false, true, false,
-                            UserHandle.getUserId(uid));
+                    forceStopPackageLocked(pkg, appid, restart, false, true, false,
+                            UserHandle.USER_ALL);
                 }
             } break;
             case FINALIZE_PENDING_INTENT_MSG: {
@@ -1526,6 +1529,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         // User 0 is the first and only user that runs at boot.
         mStartedUsers.put(0, new UserStartedState(new UserHandle(0), true));
+        mUserLru.add(Integer.valueOf(0));
 
         GL_ES_VERSION = SystemProperties.getInt("ro.opengles.version",
             ConfigurationInfo.GL_ES_VERSION_UNDEFINED);
@@ -2385,8 +2389,10 @@ public final class ActivityManagerService extends ActivityManagerNative
     public final WaitResult startActivityAndWait(IApplicationThread caller,
             Intent intent, String resolvedType, IBinder resultTo,
             String resultWho, int requestCode, int startFlags, String profileFile,
-            ParcelFileDescriptor profileFd, Bundle options) {
+            ParcelFileDescriptor profileFd, Bundle options, int userId) {
         enforceNotIsolatedCaller("startActivityAndWait");
+        userId = handleIncomingUserLocked(Binder.getCallingPid(), Binder.getCallingUid(), userId,
+                false, true, "startActivityAndWait", null);
         WaitResult res = new WaitResult();
         mMainStack.startActivityMayWait(caller, -1, intent, resolvedType,
                 resultTo, resultWho, requestCode, startFlags, profileFile, profileFd,
@@ -3542,16 +3548,15 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     /*
-     * The pkg name and uid have to be specified.
-     * @see android.app.IActivityManager#killApplicationWithUid(java.lang.String, int)
+     * The pkg name and app id have to be specified.
      */
-    public void killApplicationWithUid(String pkg, int uid) {
+    public void killApplicationWithAppId(String pkg, int appid) {
         if (pkg == null) {
             return;
         }
         // Make sure the uid is valid.
-        if (uid < 0) {
-            Slog.w(TAG, "Invalid uid specified for pkg : " + pkg);
+        if (appid < 0) {
+            Slog.w(TAG, "Invalid appid specified for pkg : " + pkg);
             return;
         }
         int callerUid = Binder.getCallingUid();
@@ -3559,7 +3564,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (callerUid == Process.SYSTEM_UID) {
             // Post an aysnc message to kill the application
             Message msg = mHandler.obtainMessage(KILL_APPLICATION_MSG);
-            msg.arg1 = uid;
+            msg.arg1 = appid;
             msg.arg2 = 0;
             msg.obj = pkg;
             mHandler.sendMessage(msg);
@@ -3691,7 +3696,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 MY_PID, Process.SYSTEM_UID, userId);
     }
 
-    private final boolean killPackageProcessesLocked(String packageName, int uid,
+    private final boolean killPackageProcessesLocked(String packageName, int appId,
             int userId, int minOomAdj, boolean callerWillRestart, boolean allowRestart,
             boolean doit, boolean evenPersistent, String reason) {
         ArrayList<ProcessRecord> procs = new ArrayList<ProcessRecord>();
@@ -3712,32 +3717,41 @@ public final class ActivityManagerService extends ActivityManagerNative
                     if (doit) {
                         procs.add(app);
                     }
+                    continue;
+                }
+
+                // Skip process if it doesn't meet our oom adj requirement.
+                if (app.setAdj < minOomAdj) {
+                    continue;
+                }
+
                 // If no package is specified, we call all processes under the
                 // give user id.
-                } else if (packageName == null) {
-                    if (app.userId == userId) {
-                        if (app.setAdj >= minOomAdj) {
-                            if (!doit) {
-                                return true;
-                            }
-                            app.removed = true;
-                            procs.add(app);
-                        }
+                if (packageName == null) {
+                    if (app.userId != userId) {
+                        continue;
                     }
-                // If uid is specified and the uid and process name match
-                // Or, the uid is not specified and the process name matches
-                } else if (((uid > 0 && uid != Process.SYSTEM_UID && app.info.uid == uid)
-                            || ((app.processName.equals(packageName)
-                                 || app.processName.startsWith(procNamePrefix))
-                                && uid < 0))) {
-                    if (app.setAdj >= minOomAdj) {
-                        if (!doit) {
-                            return true;
-                        }
-                        app.removed = true;
-                        procs.add(app);
+                // Package has been specified, we want to hit all processes
+                // that match it.  We need to qualify this by the processes
+                // that are running under the specified app and user ID.
+                } else {
+                    if (UserHandle.getAppId(app.uid) != appId) {
+                        continue;
+                    }
+                    if (userId != UserHandle.USER_ALL && app.userId != userId) {
+                        continue;
+                    }
+                    if (!app.pkgList.contains(packageName)) {
+                        continue;
                     }
                 }
+
+                // Process has passed all conditions, kill it!
+                if (!doit) {
+                    return true;
+                }
+                app.removed = true;
+                procs.add(app);
             }
         }
         
@@ -3748,22 +3762,28 @@ public final class ActivityManagerService extends ActivityManagerNative
         return N > 0;
     }
 
-    private final boolean forceStopPackageLocked(String name, int uid,
+    private final boolean forceStopPackageLocked(String name, int appId,
             boolean callerWillRestart, boolean purgeCache, boolean doit,
             boolean evenPersistent, int userId) {
         int i;
         int N;
 
-        if (uid < 0 && name != null) {
+        if (userId == UserHandle.USER_ALL && name == null) {
+            Slog.w(TAG, "Can't force stop all processes of all users, that is insane!");
+        }
+
+        if (appId < 0 && name != null) {
             try {
-                uid = AppGlobals.getPackageManager().getPackageUid(name, userId);
+                appId = UserHandle.getAppId(
+                        AppGlobals.getPackageManager().getPackageUid(name, 0));
             } catch (RemoteException e) {
             }
         }
 
         if (doit) {
             if (name != null) {
-                Slog.i(TAG, "Force stopping package " + name + " uid=" + uid);
+                Slog.i(TAG, "Force stopping package " + name + " appid=" + appId
+                        + " user=" + userId);
             } else {
                 Slog.i(TAG, "Force stopping user " + userId);
             }
@@ -3775,8 +3795,14 @@ public final class ActivityManagerService extends ActivityManagerNative
                     boolean remove = false;
                     final int entUid = ba.keyAt(i);
                     if (name != null) {
-                        if (entUid == uid) {
-                            remove = true;
+                        if (userId == UserHandle.USER_ALL) {
+                            if (UserHandle.getAppId(entUid) == appId) {
+                                remove = true;
+                            }
+                        } else {
+                            if (entUid == UserHandle.getUid(userId, appId)) {
+                                remove = true;
+                            }
                         }
                     } else if (UserHandle.getUserId(entUid) == userId) {
                         remove = true;
@@ -3791,9 +3817,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
 
-        boolean didSomething = killPackageProcessesLocked(name, uid,
-                name == null ? userId : -1 , -100, callerWillRestart, false,
-                doit, evenPersistent,
+        boolean didSomething = killPackageProcessesLocked(name, appId, userId,
+                -100, callerWillRestart, false, doit, evenPersistent,
                 name == null ? ("force stop user " + userId) : ("force stop " + name));
         
         TaskRecord lastTask = null;
@@ -3801,7 +3826,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             ActivityRecord r = (ActivityRecord)mMainStack.mHistory.get(i);
             final boolean samePackage = r.packageName.equals(name)
                     || (name == null && r.userId == userId);
-            if (r.userId == userId
+            if ((userId == UserHandle.USER_ALL || r.userId == userId)
                     && (samePackage || r.task == lastTask)
                     && (r.app == null || evenPersistent || !r.app.persistent)) {
                 if (!doit) {
@@ -3841,20 +3866,62 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         ArrayList<ContentProviderRecord> providers = new ArrayList<ContentProviderRecord>();
-        for (ContentProviderRecord provider : mProviderMap.getProvidersByClass(userId).values()) {
-            if ((name == null || provider.info.packageName.equals(name))
-                    && (provider.proc == null || evenPersistent || !provider.proc.persistent)) {
+        if (mProviderMap.collectForceStopProviders(name, appId, doit, evenPersistent,
+                userId, providers)) {
+            if (!doit) {
+                return true;
+            }
+            didSomething = true;
+        }
+        N = providers.size();
+        for (i=0; i<N; i++) {
+            removeDyingProviderLocked(null, providers.get(i), true);
+        }
+
+        if (mIntentSenderRecords.size() > 0) {
+            Iterator<WeakReference<PendingIntentRecord>> it
+                    = mIntentSenderRecords.values().iterator();
+            while (it.hasNext()) {
+                WeakReference<PendingIntentRecord> wpir = it.next();
+                if (wpir == null) {
+                    it.remove();
+                    continue;
+                }
+                PendingIntentRecord pir = wpir.get();
+                if (pir == null) {
+                    it.remove();
+                    continue;
+                }
+                if (name == null) {
+                    // Stopping user, remove all objects for the user.
+                    if (pir.key.userId != userId) {
+                        // Not the same user, skip it.
+                        continue;
+                    }
+                } else {
+                    if (UserHandle.getAppId(pir.uid) != appId) {
+                        // Different app id, skip it.
+                        continue;
+                    }
+                    if (userId != UserHandle.USER_ALL && pir.key.userId != userId) {
+                        // Different user, skip it.
+                        continue;
+                    }
+                    if (!pir.key.packageName.equals(name)) {
+                        // Different package, skip it.
+                        continue;
+                    }
+                }
                 if (!doit) {
                     return true;
                 }
                 didSomething = true;
-                providers.add(provider);
+                it.remove();
+                pir.canceled = true;
+                if (pir.key.activity != null) {
+                    pir.key.activity.pendingResults.remove(pir.ref);
+                }
             }
-        }
-
-        N = providers.size();
-        for (i=0; i<N; i++) {
-            removeDyingProviderLocked(null, providers.get(i), true);
         }
 
         if (doit) {
@@ -6778,10 +6845,11 @@ public final class ActivityManagerService extends ActivityManagerNative
      * Test cases are at cts/tests/appsecurity-tests/test-apps/UsePermissionDiffCert/
      *     src/com/android/cts/usespermissiondiffcertapp/AccessPermissionWithDiffSigTest.java
      */
-    public String getProviderMimeType(Uri uri) {
+    public String getProviderMimeType(Uri uri, int userId) {
         enforceNotIsolatedCaller("getProviderMimeType");
+        userId = handleIncomingUserLocked(Binder.getCallingPid(), Binder.getCallingUid(),
+                userId, false, true, "getProviderMimeType", null);
         final String name = uri.getAuthority();
-        final int userId = UserHandle.getCallingUserId();
         final long ident = Binder.clearCallingIdentity();
         ContentProviderHolder holder = null;
 
@@ -7134,7 +7202,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             mDebugTransient = !persistent;
             if (packageName != null) {
                 final long origId = Binder.clearCallingIdentity();
-                forceStopPackageLocked(packageName, -1, false, false, true, true, 0);
+                forceStopPackageLocked(packageName, -1, false, false, true, true,
+                        UserHandle.USER_ALL);
                 Binder.restoreCallingIdentity(origId);
             }
         }
@@ -9129,9 +9198,14 @@ public final class ActivityManagerService extends ActivityManagerNative
         for (int i=0; i<mStartedUsers.size(); i++) {
             UserStartedState uss = mStartedUsers.valueAt(i);
             pw.print("    User #"); pw.print(uss.mHandle.getIdentifier());
-                    pw.println(":");
-            uss.dump("      ", pw);
+                    pw.print(": "); uss.dump("", pw);
         }
+        pw.print("  mUserLru: [");
+        for (int i=0; i<mUserLru.size(); i++) {
+            if (i > 0) pw.print(", ");
+            pw.print(mUserLru.get(i));
+        }
+        pw.println("]");
         pw.println("  mHomeProcess: " + mHomeProcess);
         pw.println("  mPreviousProcess: " + mPreviousProcess);
         if (dumpAll) {
@@ -11815,8 +11889,10 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     public boolean startInstrumentation(ComponentName className,
             String profileFile, int flags, Bundle arguments,
-            IInstrumentationWatcher watcher) {
+            IInstrumentationWatcher watcher, int userId) {
         enforceNotIsolatedCaller("startInstrumentation");
+        userId = handleIncomingUserLocked(Binder.getCallingPid(), Binder.getCallingUid(),
+                userId, false, true, "startInstrumentation", null);
         // Refuse possible leaked file descriptors
         if (arguments != null && arguments.hasFileDescriptors()) {
             throw new IllegalArgumentException("File descriptors passed in Bundle");
@@ -11828,9 +11904,10 @@ public final class ActivityManagerService extends ActivityManagerNative
             try {
                 ii = mContext.getPackageManager().getInstrumentationInfo(
                     className, STOCK_PM_FLAGS);
-                ai = mContext.getPackageManager().getApplicationInfo(
-                        ii.targetPackage, STOCK_PM_FLAGS);
+                ai = AppGlobals.getPackageManager().getApplicationInfo(
+                        ii.targetPackage, STOCK_PM_FLAGS, userId);
             } catch (PackageManager.NameNotFoundException e) {
+            } catch (RemoteException e) {
             }
             if (ii == null) {
                 reportStartInstrumentationFailure(watcher, className,
@@ -11857,7 +11934,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                 throw new SecurityException(msg);
             }
 
-            int userId = UserHandle.getCallingUserId();
             final long origId = Binder.clearCallingIdentity();
             // Instrumentation can kill and relaunch even persistent processes
             forceStopPackageLocked(ii.targetPackage, -1, true, false, true, true, userId);
@@ -13780,6 +13856,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
 
             mCurrentUserId = userId;
+            Integer userIdInt = Integer.valueOf(userId);
+            mUserLru.remove(userIdInt);
+            mUserLru.add(userIdInt);
             boolean haveActivities = mMainStack.switchUser(userId);
             if (!haveActivities) {
                 startHomeActivityLocked(userId, mStartedUsers.get(userId));
@@ -13925,6 +14004,23 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         synchronized (this) {
             return getUserManager().getUserInfo(mCurrentUserId);
+        }
+    }
+
+    @Override
+    public boolean isUserRunning(int userId) {
+        if (checkCallingPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
+                != PackageManager.PERMISSION_GRANTED) {
+            String msg = "Permission Denial: isUserRunning() from pid="
+                    + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid()
+                    + " requires " + android.Manifest.permission.INTERACT_ACROSS_USERS;
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
+        synchronized (this) {
+            UserStartedState state = mStartedUsers.get(userId);
+            return state != null && state.mState != UserStartedState.STATE_STOPPING;
         }
     }
 
