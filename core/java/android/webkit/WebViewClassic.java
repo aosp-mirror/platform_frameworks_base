@@ -8554,6 +8554,11 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         updateHwAccelerated();
     }
 
+    @Override
+    public void preDispatchDraw(Canvas canvas) {
+        // no-op for WebViewClassic.
+    }
+
     private void updateHwAccelerated() {
         if (mNativeClass == 0) {
             return;
