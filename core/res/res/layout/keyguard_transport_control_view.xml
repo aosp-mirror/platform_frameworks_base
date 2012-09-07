@@ -14,19 +14,20 @@
      limitations under the License.
 -->
 
-<!-- Note: This file is meant to be included in various password unlock screens. As such,
-     LayoutParams (layout_*) for TransportControlView should *NOT* be specified here,
-     but rather as include tags for this file or the layout will break. -->
-<com.android.internal.widget.TransportControlView
+<!-- This is a view to control music playback in keyguard. -->
+<com.android.internal.policy.impl.keyguard.KeyguardTransportControlView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/transport_controls">
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center_horizontal"
+    android:id="@+id/keyguard_transport_control">
 
     <!-- FrameLayout used as scrim to show between album art and buttons -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:foreground="@drawable/ic_lockscreen_player_background">
-        <!-- We use ImageView for its cropping features, otherwise could be android:background -->
+        <!-- Use ImageView for its cropping features; otherwise could be android:background -->
         <ImageView
             android:id="@+id/albumart"
             android:layout_width="match_parent"
@@ -107,4 +108,4 @@
         </LinearLayout>
     </LinearLayout>
 
-</com.android.internal.widget.TransportControlView>
+</com.android.internal.policy.impl.keyguard.KeyguardTransportControlView>
