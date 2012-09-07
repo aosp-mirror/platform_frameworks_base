@@ -28,7 +28,6 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.util.Slog;
-import android.view.InputFilter;
 import android.view.MotionEvent;
 import android.view.MotionEvent.PointerCoords;
 import android.view.MotionEvent.PointerProperties;
@@ -64,7 +63,7 @@ import java.util.Arrays;
  *
  * @hide
  */
-public class TouchExplorer {
+class TouchExplorer implements EventStreamTransformation {
 
     private static final boolean DEBUG = false;
 
@@ -120,10 +119,6 @@ public class TouchExplorer {
     // Slop between the first and second tap to be a double tap.
     private final int mDoubleTapSlop;
 
-    // The InputFilter this tracker is associated with i.e. the filter
-    // which delegates event processing to this touch explorer.
-    private final InputFilter mInputFilter;
-
     // The current state of the touch explorer.
     private int mCurrentState = STATE_TOUCH_EXPLORING;
 
@@ -154,6 +149,9 @@ public class TouchExplorer {
 
     // The scaled velocity above which we detect gestures.
     private final int mScaledGestureDetectionVelocity;
+
+    // The handler to which to delegate events.
+    private EventStreamTransformation mNext;
 
     // Helper to track gesture velocity.
     private VelocityTracker mVelocityTracker;
@@ -206,12 +204,10 @@ public class TouchExplorer {
      * @param inputFilter The input filter associated with this explorer.
      * @param context A context handle for accessing resources.
      */
-    public TouchExplorer(InputFilter inputFilter, Context context,
-            AccessibilityManagerService service) {
+    public TouchExplorer(Context context, AccessibilityManagerService service) {
         mAms = service;
         mReceivedPointerTracker = new ReceivedPointerTracker(context);
         mInjectedPointerTracker = new InjectedPointerTracker();
-        mInputFilter = inputFilter;
         mTapTimeout = ViewConfiguration.getTapTimeout();
         mDetermineUserIntentTimeout = (int) (mTapTimeout * 1.5f);
         mDoubleTapTimeout = ViewConfiguration.getDoubleTapTimeout();
@@ -242,7 +238,11 @@ public class TouchExplorer {
         }
     }
 
-    public void clear(MotionEvent event, int policyFlags) {
+    public void onDestroy() {
+        // TODO: Implement
+    }
+
+    private void clear(MotionEvent event, int policyFlags) {
         switch (mCurrentState) {
             case STATE_TOUCH_EXPLORING: {
                 // If a touch exploration gesture is in progress send events for its end.
@@ -278,8 +278,17 @@ public class TouchExplorer {
         mLongPressingPointerDeltaX = 0;
         mLongPressingPointerDeltaY = 0;
         mCurrentState = STATE_TOUCH_EXPLORING;
+        if (mNext != null) {
+            mNext.clear();
+        }
     }
 
+    @Override
+    public void setNext(EventStreamTransformation next) {
+        mNext = next;
+    }
+
+    @Override
     public void onMotionEvent(MotionEvent event, int policyFlags) {
         if (DEBUG) {
             Slog.d(LOG_TAG, "Received event: " + event + ", policyFlags=0x"
@@ -324,6 +333,9 @@ public class TouchExplorer {
             case AccessibilityEvent.TYPE_VIEW_HOVER_EXIT: {
                 mLastTouchedWindowId = event.getWindowId();
             } break;
+        }
+        if (mNext != null) {
+            mNext.onAccessibilityEvent(event);
         }
     }
 
@@ -958,7 +970,9 @@ public class TouchExplorer {
 
         // Make sure that the user will see the event.
         policyFlags |= WindowManagerPolicy.FLAG_PASS_TO_USER;
-        mInputFilter.sendInputEvent(event, policyFlags);
+        if (mNext != null) {
+            mNext.onMotionEvent(event, policyFlags);
+        }
 
         mInjectedPointerTracker.onMotionEvent(event);
 
@@ -1008,11 +1022,13 @@ public class TouchExplorer {
         private MotionEvent mFirstTapEvent;
 
         public void onMotionEvent(MotionEvent event, int policyFlags) {
+            final int actionIndex = event.getActionIndex();
             final int action = event.getActionMasked();
             switch (action) {
                 case MotionEvent.ACTION_DOWN:
                 case MotionEvent.ACTION_POINTER_DOWN: {
-                    if (mFirstTapEvent != null && !isSamePointerContext(mFirstTapEvent, event)) {
+                    if (mFirstTapEvent != null
+                            && !GestureUtils.isSamePointerContext(mFirstTapEvent, event)) {
                         clear();
                     }
                     mDownEvent = MotionEvent.obtain(event);
@@ -1022,19 +1038,21 @@ public class TouchExplorer {
                     if (mDownEvent == null) {
                         return;
                     }
-                    if (!isSamePointerContext(mDownEvent, event)) {
+                    if (!GestureUtils.isSamePointerContext(mDownEvent, event)) {
                         clear();
                         return;
                     }
-                    if (isTap(mDownEvent, event)) {
-                        if (mFirstTapEvent == null || isTimedOut(mFirstTapEvent, event,
-                                mDoubleTapTimeout)) {
+                    if (GestureUtils.isTap(mDownEvent, event, mTapTimeout, mTouchSlop,
+                            actionIndex)) {
+                        if (mFirstTapEvent == null || GestureUtils.isTimedOut(mFirstTapEvent,
+                                event, mDoubleTapTimeout)) {
                             mFirstTapEvent = MotionEvent.obtain(event);
                             mDownEvent.recycle();
                             mDownEvent = null;
                             return;
                         }
-                        if (isDoubleTap(mFirstTapEvent, event)) {
+                        if (GestureUtils.isMultiTap(mFirstTapEvent, event, mDoubleTapTimeout,
+                                mDoubleTapSlop, actionIndex)) {
                             onDoubleTap(event, policyFlags);
                             mFirstTapEvent.recycle();
                             mFirstTapEvent = null;
@@ -1140,42 +1158,6 @@ public class TouchExplorer {
             }
         }
 
-        public boolean isTap(MotionEvent down, MotionEvent up) {
-            return eventsWithinTimeoutAndDistance(down, up, mTapTimeout, mTouchSlop);
-        }
-
-        private boolean isDoubleTap(MotionEvent firstUp, MotionEvent secondUp) {
-            return eventsWithinTimeoutAndDistance(firstUp, secondUp, mDoubleTapTimeout,
-                    mDoubleTapSlop);
-        }
-
-        private boolean eventsWithinTimeoutAndDistance(MotionEvent first, MotionEvent second,
-                int timeout, int distance) {
-            if (isTimedOut(first, second, timeout)) {
-                return false;
-            }
-            final int downPtrIndex = first.getActionIndex();
-            final int upPtrIndex = second.getActionIndex();
-            final float deltaX = second.getX(upPtrIndex) - first.getX(downPtrIndex);
-            final float deltaY = second.getY(upPtrIndex) - first.getY(downPtrIndex);
-            final double deltaMove = Math.hypot(deltaX, deltaY);
-            if (deltaMove >= distance) {
-                return false;
-            }
-            return true;
-        }
-
-        private boolean isTimedOut(MotionEvent firstUp, MotionEvent secondUp, int timeout) {
-            final long deltaTime = secondUp.getEventTime() - firstUp.getEventTime();
-            return (deltaTime >= timeout);
-        }
-
-        private boolean isSamePointerContext(MotionEvent first, MotionEvent second) {
-            return (first.getPointerIdBits() == second.getPointerIdBits()
-                    && first.getPointerId(first.getActionIndex())
-                            == second.getPointerId(second.getActionIndex()));
-        }
-
         public boolean firstTapDetected() {
             return mFirstTapEvent != null
                 && SystemClock.uptimeMillis() - mFirstTapEvent.getEventTime() < mDoubleTapTimeout;
@@ -1201,47 +1183,14 @@ public class TouchExplorer {
         final float secondPtrX = event.getX(secondPtrIndex);
         final float secondPtrY = event.getY(secondPtrIndex);
 
-        // Check if the pointers are moving in the same direction.
-        final float firstDeltaX =
-            firstPtrX - receivedTracker.getReceivedPointerDownX(firstPtrIndex);
-        final float firstDeltaY =
-            firstPtrY - receivedTracker.getReceivedPointerDownY(firstPtrIndex);
+        final float firstPtrDownX = receivedTracker.getReceivedPointerDownX(firstPtrIndex);
+        final float firstPtrDownY = receivedTracker.getReceivedPointerDownY(firstPtrIndex);
+        final float secondPtrDownX = receivedTracker.getReceivedPointerDownX(secondPtrIndex);
+        final float secondPtrDownY = receivedTracker.getReceivedPointerDownY(secondPtrIndex);
 
-        if (firstDeltaX == 0 && firstDeltaY == 0) {
-            return true;
-        }
-
-        final float firstMagnitude =
-            (float) Math.sqrt(firstDeltaX * firstDeltaX + firstDeltaY * firstDeltaY);
-        final float firstXNormalized =
-            (firstMagnitude > 0) ? firstDeltaX / firstMagnitude : firstDeltaX;
-        final float firstYNormalized =
-            (firstMagnitude > 0) ? firstDeltaY / firstMagnitude : firstDeltaY;
-
-        final float secondDeltaX =
-            secondPtrX - receivedTracker.getReceivedPointerDownX(secondPtrIndex);
-        final float secondDeltaY =
-            secondPtrY - receivedTracker.getReceivedPointerDownY(secondPtrIndex);
-
-        if (secondDeltaX == 0 && secondDeltaY == 0) {
-            return true;
-        }
-
-        final float secondMagnitude =
-            (float) Math.sqrt(secondDeltaX * secondDeltaX + secondDeltaY * secondDeltaY);
-        final float secondXNormalized =
-            (secondMagnitude > 0) ? secondDeltaX / secondMagnitude : secondDeltaX;
-        final float secondYNormalized =
-            (secondMagnitude > 0) ? secondDeltaY / secondMagnitude : secondDeltaY;
-
-        final float angleCos =
-            firstXNormalized * secondXNormalized + firstYNormalized * secondYNormalized;
-
-        if (angleCos < MAX_DRAGGING_ANGLE_COS) {
-            return false;
-        }
-
-        return true;
+        return GestureUtils.isDraggingGesture(firstPtrDownX, firstPtrDownY, secondPtrDownX,
+                secondPtrDownY, firstPtrX, firstPtrY, secondPtrX, secondPtrY,
+                MAX_DRAGGING_ANGLE_COS);
     }
 
     /**

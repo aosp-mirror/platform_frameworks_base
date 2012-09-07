@@ -514,6 +514,21 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
     }
 
+    MagnificationSpec getWindowMagnificationSpecLocked() {
+        MagnificationSpec spec = mDisplayContent.mMagnificationSpec;
+        if (spec != null && !spec.isNop()) {
+            if (mAttachedWindow != null) {
+                if (!mPolicy.canMagnifyWindow(mAttachedWindow.mAttrs)) {
+                    return null;
+                }
+            }
+            if (!mPolicy.canMagnifyWindow(mAttrs)) {
+                return null;
+            }
+        }
+        return spec;
+    }
+
     @Override
     public Rect getFrameLw() {
         return mFrame;

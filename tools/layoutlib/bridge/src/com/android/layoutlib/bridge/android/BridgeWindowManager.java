@@ -22,22 +22,21 @@ import com.android.internal.view.IInputMethodClient;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.graphics.Point;
-import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.RemoteException;
 import android.util.DisplayMetrics;
 import android.view.Display;
-import android.view.DisplayInfo;
 import android.view.Display_Delegate;
 import android.view.Gravity;
 import android.view.IApplicationToken;
+import android.view.IDisplayContentChangeListener;
 import android.view.IInputFilter;
 import android.view.IOnKeyguardExitResult;
 import android.view.IRotationWatcher;
 import android.view.IWindowManager;
 import android.view.IWindowSession;
+import android.view.WindowInfo;
 
 import java.util.List;
 
@@ -293,7 +292,6 @@ public class BridgeWindowManager implements IWindowManager {
     @Override
     public void setAppOrientation(IApplicationToken arg0, int arg1) throws RemoteException {
         // TODO Auto-generated method stub
-
     }
 
     @Override
@@ -301,7 +299,6 @@ public class BridgeWindowManager implements IWindowManager {
             CharSequence arg4, int arg5, int arg6, int arg7, IBinder arg8, boolean arg9)
             throws RemoteException {
         // TODO Auto-generated method stub
-
     }
 
     @Override
@@ -313,19 +310,16 @@ public class BridgeWindowManager implements IWindowManager {
     @Override
     public void setAppWillBeHidden(IBinder arg0) throws RemoteException {
         // TODO Auto-generated method stub
-
     }
 
     @Override
     public void setEventDispatching(boolean arg0) throws RemoteException {
         // TODO Auto-generated method stub
-
     }
 
     @Override
     public void setFocusedApp(IBinder arg0, boolean arg1) throws RemoteException {
         // TODO Auto-generated method stub
-
     }
 
     @Override
@@ -341,13 +335,11 @@ public class BridgeWindowManager implements IWindowManager {
     @Override
     public void setInTouchMode(boolean arg0) throws RemoteException {
         // TODO Auto-generated method stub
-
     }
 
     @Override
     public void setNewConfiguration(Configuration arg0) throws RemoteException {
         // TODO Auto-generated method stub
-
     }
 
     @Override
@@ -358,19 +350,16 @@ public class BridgeWindowManager implements IWindowManager {
     @Override
     public void setStrictModeVisualIndicatorPreference(String arg0) throws RemoteException {
         // TODO Auto-generated method stub
-
     }
 
     @Override
     public void showStrictModeViolation(boolean arg0) throws RemoteException {
         // TODO Auto-generated method stub
-
     }
 
     @Override
     public void startAppFreezingScreen(IBinder arg0, int arg1) throws RemoteException {
         // TODO Auto-generated method stub
-
     }
 
     @Override
@@ -382,13 +371,11 @@ public class BridgeWindowManager implements IWindowManager {
     @Override
     public void statusBarVisibilityChanged(int arg0) throws RemoteException {
         // TODO Auto-generated method stub
-
     }
 
     @Override
     public void stopAppFreezingScreen(IBinder arg0, boolean arg1) throws RemoteException {
         // TODO Auto-generated method stub
-
     }
 
     @Override
@@ -400,7 +387,6 @@ public class BridgeWindowManager implements IWindowManager {
     @Override
     public void thawRotation() throws RemoteException {
         // TODO Auto-generated method stub
-
     }
 
     @Override
@@ -453,12 +439,6 @@ public class BridgeWindowManager implements IWindowManager {
     }
 
     @Override
-    public boolean getWindowFrame(IBinder token, Rect outBounds) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
     public float getWindowCompatibilityScale(IBinder windowToken) throws RemoteException {
         // TODO Auto-generated method stub
         return 0;
@@ -466,6 +446,41 @@ public class BridgeWindowManager implements IWindowManager {
 
     @Override
     public void setInputFilter(IInputFilter filter) throws RemoteException {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void stopWatchRotation(IRotationWatcher watcher) throws RemoteException {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void addDisplayContentChangeListener(int displayId,
+            IDisplayContentChangeListener listener) throws RemoteException {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void removeDisplayContentChangeListener(int displayId,
+            IDisplayContentChangeListener listener) throws RemoteException {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public WindowInfo getWindowInfo(IBinder token) throws RemoteException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void getVisibleWindowsForDisplay(int displayId,
+            List<WindowInfo> outInfos) throws RemoteException {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void magnifyDisplay(int dipslayId, float scale, float offsetX, float offsetY)
+            throws RemoteException {
         // TODO Auto-generated method stub
     }
 }

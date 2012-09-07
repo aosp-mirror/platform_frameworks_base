@@ -1180,6 +1180,7 @@
   <java-symbol type="drawable" name="jog_tab_right_sound_on" />
   <java-symbol type="drawable" name="jog_tab_target_green" />
   <java-symbol type="drawable" name="jog_tab_target_yellow" />
+  <java-symbol type="drawable" name="magnified_region_frame" />
   <java-symbol type="drawable" name="menu_background" />
   <java-symbol type="drawable" name="stat_sys_secure" />
   <java-symbol type="drawable" name="kg_widget_overscroll_layer_left" />

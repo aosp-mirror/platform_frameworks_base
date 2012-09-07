@@ -3400,6 +3400,46 @@ public final class Settings {
             "accessibility_web_content_key_bindings";
 
         /**
+         * Setting that specifies whether the display magnification is enabled.
+         * Display magnifications allows the user to zoom in the display content
+         * and is targeted to low vision users. The current magnification scale
+         * is controlled by {@link #ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE}.
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED =
+                "accessibility_display_magnification_enabled";
+
+        /**
+         * Setting that specifies what the display magnification scale is.
+         * Display magnifications allows the user to zoom in the display
+         * content and is targeted to low vision users. Whether a display
+         * magnification is performed is controlled by
+         * {@link #ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED}
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE =
+                "accessibility_display_magnification_scale";
+
+        /**
+         * Setting that specifies whether the display magnification should be
+         * automatically updated. If this fearture is enabled the system will
+         * exit magnification mode or pan the viewport when a context change
+         * occurs. For example, on staring a new activity or rotating the screen,
+         * the system may zoom out so the user can see the new context he is in.
+         * Another example is on showing a window that is not visible in the
+         * magnified viewport the system may pan the viewport to make the window
+         * the has popped up so the user knows that the context has changed.
+         * Whether a screen magnification is performed is controlled by
+         * {@link #ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED}
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_DISPLAY_MAGNIFICATION_AUTO_UPDATE =
+                "accessibility_display_magnification_auto_update";
+
+        /**
          * The timout for considering a press to be a long press in milliseconds.
          * @hide
          */
@@ -4806,6 +4846,9 @@ public final class Settings {
             PARENTAL_CONTROL_ENABLED,
             PARENTAL_CONTROL_REDIRECT_URL,
             USB_MASS_STORAGE_ENABLED,
+            ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED,
+            ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE,
+            ACCESSIBILITY_DISPLAY_MAGNIFICATION_AUTO_UPDATE,
             ACCESSIBILITY_SCRIPT_INJECTION,
             BACKUP_AUTO_RESTORE,
             ENABLED_ACCESSIBILITY_SERVICES,
