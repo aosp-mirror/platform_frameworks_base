@@ -420,7 +420,7 @@ int protect(char *pkgname, gid_t gid)
         return -1;
     }
     if (chmod(pkgpath, S_IRUSR|S_IWUSR|S_IRGRP) < 0) {
-        ALOGE("failed to chmod '%s': %s\n", pkgpath, strerror(errno));
+        ALOGE("protect(): failed to chmod '%s': %s\n", pkgpath, strerror(errno));
         return -1;
     }
 
@@ -1014,13 +1014,13 @@ int linklib(const char* dataDir, const char* asecLibDir)
 
     if (stat(dataDir, &s) < 0) return -1;
 
-    if (chown(dataDir, 0, 0) < 0) {
+    if (chown(dataDir, AID_INSTALL, AID_INSTALL) < 0) {
         ALOGE("failed to chown '%s': %s\n", dataDir, strerror(errno));
         return -1;
     }
 
     if (chmod(dataDir, 0700) < 0) {
-        ALOGE("failed to chmod '%s': %s\n", dataDir, strerror(errno));
+        ALOGE("linklib() 1: failed to chmod '%s': %s\n", dataDir, strerror(errno));
         rc = -1;
         goto out;
     }
@@ -1058,7 +1058,7 @@ int linklib(const char* dataDir, const char* asecLibDir)
 
 out:
     if (chmod(dataDir, s.st_mode) < 0) {
-        ALOGE("failed to chmod '%s': %s\n", dataDir, strerror(errno));
+        ALOGE("linklib() 2: failed to chmod '%s': %s\n", dataDir, strerror(errno));
         rc = -errno;
     }
 
@@ -1091,13 +1091,13 @@ int unlinklib(const char* dataDir)
         return -1;
     }
 
-    if (chown(dataDir, 0, 0) < 0) {
+    if (chown(dataDir, AID_INSTALL, AID_INSTALL) < 0) {
         ALOGE("failed to chown '%s': %s\n", dataDir, strerror(errno));
         return -1;
     }
 
     if (chmod(dataDir, 0700) < 0) {
-        ALOGE("failed to chmod '%s': %s\n", dataDir, strerror(errno));
+        ALOGE("unlinklib() 1: failed to chmod '%s': %s\n", dataDir, strerror(errno));
         rc = -1;
         goto out;
     }
@@ -1140,7 +1140,7 @@ int unlinklib(const char* dataDir)
 
 out:
     if (chmod(dataDir, s.st_mode) < 0) {
-        ALOGE("failed to chmod '%s': %s\n", dataDir, strerror(errno));
+        ALOGE("unlinklib() 2: failed to chmod '%s': %s\n", dataDir, strerror(errno));
         rc = -1;
     }
 
