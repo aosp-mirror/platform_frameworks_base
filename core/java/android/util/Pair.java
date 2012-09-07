@@ -16,6 +16,8 @@
 
 package android.util;
 
+import libcore.util.Objects;
+
 /**
  * Container to ease passing around a tuple of two objects. This object provides a sensible
  * implementation of equals(), returning true if equals() is true on each of the contained
@@ -26,8 +28,8 @@ public class Pair<F, S> {
     public final S second;
 
     /**
-     * Constructor for a Pair. If either are null then equals() and hashCode() will throw
-     * a NullPointerException.
+     * Constructor for a Pair.
+     *
      * @param first the first object in the Pair
      * @param second the second object in the pair
      */
@@ -37,31 +39,30 @@ public class Pair<F, S> {
     }
 
     /**
-     * Checks the two objects for equality by delegating to their respective equals() methods.
-     * @param o the Pair to which this one is to be checked for equality
-     * @return true if the underlying objects of the Pair are both considered equals()
+     * Checks the two objects for equality by delegating to their respective
+     * {@link Object#equals(Object)} methods.
+     *
+     * @param o the {@link Pair} to which this one is to be checked for equality
+     * @return true if the underlying objects of the Pair are both considered
+     *         equal
      */
+    @Override
     public boolean equals(Object o) {
-        if (o == this) return true;
-        if (!(o instanceof Pair)) return false;
-        final Pair<F, S> other;
-        try {
-            other = (Pair<F, S>) o;
-        } catch (ClassCastException e) {
+        if (!(o instanceof Pair)) {
             return false;
         }
-        return first.equals(other.first) && second.equals(other.second);
+        Pair<?, ?> p = (Pair<?, ?>) o;
+        return Objects.equal(p.first, first) && Objects.equal(p.second, second);
     }
 
     /**
      * Compute a hash code using the hash codes of the underlying objects
+     *
      * @return a hashcode of the Pair
      */
+    @Override
     public int hashCode() {
-        int result = 17;
-        result = 31 * result + first.hashCode();
-        result = 31 * result + second.hashCode();
-        return result;
+        return (first == null ? 0 : first.hashCode()) ^ (second == null ? 0 : second.hashCode());
     }
 
     /**
