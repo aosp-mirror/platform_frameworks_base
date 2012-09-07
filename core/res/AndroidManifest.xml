@@ -1285,6 +1285,12 @@
         android:description="@string/permdesc_retrieve_window_info"
         android:protectionLevel="signature" />
 
+    <!-- @hide Allows an application to magnify the content of a display. -->
+    <permission android:name="android.permission.MAGNIFY_DISPLAY"
+        android:label="@string/permlab_magnify_display"
+        android:description="@string/permdesc_magnify_display"
+        android:protectionLevel="signature" />
+
     <!-- Allows an application to watch and control how activities are
          started globally in the system.  Only for is in debugging
          (usually the monkey command). -->

@@ -129,6 +129,15 @@
     <!-- Default for Settings.Secure.TOUCH_EXPLORATION_ENABLED -->
     <bool name="def_touch_exploration_enabled">false</bool>
 
+    <!-- Default value for Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE -->
+    <fraction name="def_accessibility_display_magnification_scale">200%</fraction>
+
+    <!-- Default value for Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED -->
+    <bool name="def_accessibility_display_magnification_enabled">false</bool>
+
+    <!-- Default value for Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_AUTO_UPDATE -->
+    <bool name="def_accessibility_display_magnification_auto_update">true</bool>
+
     <!-- Default for Settings.System.USER_ROTATION -->
     <integer name="def_user_rotation">0</integer>
 
