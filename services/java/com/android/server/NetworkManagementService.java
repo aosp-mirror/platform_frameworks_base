@@ -45,8 +45,10 @@ import android.net.NetworkUtils;
 import android.net.RouteInfo;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.INetworkManagementService;
+import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -1436,7 +1438,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public void setFirewallEnabled(boolean enabled) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+        enforceSystemUid();
         try {
             mConnector.execute("firewall", enabled ? "enable" : "disable");
             mFirewallEnabled = enabled;
@@ -1447,13 +1449,13 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public boolean isFirewallEnabled() {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+        enforceSystemUid();
         return mFirewallEnabled;
     }
 
     @Override
     public void setFirewallInterfaceRule(String iface, boolean allow) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+        enforceSystemUid();
         Preconditions.checkState(mFirewallEnabled);
         final String rule = allow ? ALLOW : DENY;
         try {
@@ -1465,7 +1467,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public void setFirewallEgressSourceRule(String addr, boolean allow) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+        enforceSystemUid();
         Preconditions.checkState(mFirewallEnabled);
         final String rule = allow ? ALLOW : DENY;
         try {
@@ -1477,7 +1479,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public void setFirewallEgressDestRule(String addr, int port, boolean allow) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+        enforceSystemUid();
         Preconditions.checkState(mFirewallEnabled);
         final String rule = allow ? ALLOW : DENY;
         try {
@@ -1489,13 +1491,20 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public void setFirewallUidRule(int uid, boolean allow) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+        enforceSystemUid();
         Preconditions.checkState(mFirewallEnabled);
         final String rule = allow ? ALLOW : DENY;
         try {
             mConnector.execute("firewall", "set_uid_rule", uid, rule);
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
+        }
+    }
+
+    private static void enforceSystemUid() {
+        final int uid = Binder.getCallingUid();
+        if (uid != Process.SYSTEM_UID) {
+            throw new SecurityException("Only available to AID_SYSTEM");
         }
     }
 

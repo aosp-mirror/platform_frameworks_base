@@ -77,6 +77,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -3370,7 +3371,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     @Override
     public boolean updateLockdownVpn() {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+        enforceSystemUid();
 
         // Tear down existing lockdown if profile was removed
         mLockdownEnabled = LockdownVpnTracker.isEnabled();
@@ -3419,6 +3420,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private void throwIfLockdownEnabled() {
         if (mLockdownEnabled) {
             throw new IllegalStateException("Unavailable in lockdown mode");
+        }
+    }
+
+    private static void enforceSystemUid() {
+        final int uid = Binder.getCallingUid();
+        if (uid != Process.SYSTEM_UID) {
+            throw new SecurityException("Only available to AID_SYSTEM");
         }
     }
 }
