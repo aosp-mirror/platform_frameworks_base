@@ -1628,8 +1628,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             } else {
                 // Make sure KEEP_SCREEN_ON is disabled, since that
                 // would allow bypassing of the maximum time to lock.
-                Settings.System.putInt(mContext.getContentResolver(),
-                        Settings.System.STAY_ON_WHILE_PLUGGED_IN, 0);
+                Settings.Global.putInt(mContext.getContentResolver(),
+                        Settings.Global.STAY_ON_WHILE_PLUGGED_IN, 0);
             }
 
             mLastMaximumTimeToLock = timeMs;
