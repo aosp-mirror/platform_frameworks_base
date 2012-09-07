@@ -67,7 +67,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 84;
+    private static final int DATABASE_VERSION = 85;
 
     private Context mContext;
     private int mUserHandle;
@@ -1241,11 +1241,35 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 loadBooleanSetting(stmt,
                         Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_AUTO_UPDATE,
                         R.bool.def_accessibility_display_magnification_auto_update);
+
+                db.setTransactionSuccessful();
             } finally {
                 db.endTransaction();
                 if (stmt != null) stmt.close();
             }
             upgradeVersion = 84;
+        }
+
+        if (upgradeVersion == 84) {
+            db.beginTransaction();
+            SQLiteStatement stmt = null;
+            try {
+                // Patch up the slightly-wrong key migration from 82 -> 83
+                String[] settingsToMove = {
+                        Settings.Secure.ADB_ENABLED,
+                        Settings.Secure.BLUETOOTH_ON,
+                        Settings.Secure.DATA_ROAMING,
+                        Settings.Secure.DEVICE_PROVISIONED,
+                        Settings.Secure.INSTALL_NON_MARKET_APPS,
+                        Settings.Secure.USB_MASS_STORAGE_ENABLED
+                };
+                moveSettingsToNewTable(db, TABLE_SECURE, TABLE_GLOBAL, settingsToMove);
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+                if (stmt != null) stmt.close();
+            }
+            upgradeVersion = 85;
         }
 
         // *** Remember to update DATABASE_VERSION above!
