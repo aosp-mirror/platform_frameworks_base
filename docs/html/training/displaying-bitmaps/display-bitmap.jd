@@ -103,7 +103,8 @@ public class ImageDetailActivity extends FragmentActivity {
 }
 </pre>
 
-<p>The details {@link android.app.Fragment} holds the {@link android.widget.ImageView} children:</p>
+<p>Here is an implementation of the details {@link android.app.Fragment} which holds the {@link android.widget.ImageView} children. This might seem like a perfectly reasonable approach, but can
+you see the drawbacks of this implementation? How could it be improved?</p>
 
 <pre>
 public class ImageDetailFragment extends Fragment {
@@ -146,11 +147,11 @@ public class ImageDetailFragment extends Fragment {
 }
 </pre>
 
-<p>Hopefully you noticed the issue with this implementation; The images are being read from
-resources on the UI thread which can lead to an application hanging and being force closed. Using an
-{@link android.os.AsyncTask} as described in the <a href="process-bitmap.html">Processing Bitmaps Off
-the UI Thread</a> lesson, it’s straightforward to move image loading and processing to a background
-thread:</p>
+<p>Hopefully you noticed the issue: the images are being read from resources on the UI thread,
+which can lead to an application hanging and being force closed. Using an
+{@link android.os.AsyncTask} as described in the <a href="process-bitmap.html">Processing Bitmaps
+Off the UI Thread</a> lesson, it’s straightforward to move image loading and processing to a
+background thread:</p>
 
 <pre>
 public class ImageDetailActivity extends FragmentActivity {
@@ -190,7 +191,7 @@ modifications for a memory cache:</p>
 <pre>
 public class ImageDetailActivity extends FragmentActivity {
     ...
-    private LruCache<String, Bitmap> mMemoryCache;
+    private LruCache&lt;String, Bitmap&gt; mMemoryCache;
 
     &#64;Override
     public void onCreate(Bundle savedInstanceState) {
@@ -229,7 +230,8 @@ UI remains fluid, memory usage remains under control and concurrency is handled 
 the way {@link android.widget.GridView} recycles its children views).</p>
 
 <p>To start with, here is a standard {@link android.widget.GridView} implementation with {@link
-android.widget.ImageView} children placed inside a {@link android.app.Fragment}:</p>
+android.widget.ImageView} children placed inside a {@link android.app.Fragment}. Again, this might
+seem like a perfectly reasonable approach, but what would make it better?</p>
 
 <pre>
 public class ImageGridFragment extends Fragment implements AdapterView.OnItemClickListener {
@@ -261,7 +263,7 @@ public class ImageGridFragment extends Fragment implements AdapterView.OnItemCli
     }
 
     &#64;Override
-    public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+    public void onItemClick(AdapterView&lt;?&gt; parent, View v, int position, long id) {
         final Intent i = new Intent(getActivity(), ImageDetailActivity.class);
         i.putExtra(ImageDetailActivity.EXTRA_IMAGE, position);
         startActivity(i);
@@ -345,13 +347,13 @@ public class ImageGridFragment extends Fragment implements AdapterView.OnItemCli
     }
 
     static class AsyncDrawable extends BitmapDrawable {
-        private final WeakReference<BitmapWorkerTask> bitmapWorkerTaskReference;
+        private final WeakReference&lt;BitmapWorkerTask&gt; bitmapWorkerTaskReference;
 
         public AsyncDrawable(Resources res, Bitmap bitmap,
                 BitmapWorkerTask bitmapWorkerTask) {
             super(res, bitmap);
             bitmapWorkerTaskReference =
-                new WeakReference<BitmapWorkerTask>(bitmapWorkerTask);
+                new WeakReference&lt;BitmapWorkerTask&gt;(bitmapWorkerTask);
         }
 
         public BitmapWorkerTask getBitmapWorkerTask() {
