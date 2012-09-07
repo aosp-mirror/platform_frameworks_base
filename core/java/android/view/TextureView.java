@@ -367,6 +367,7 @@ public class TextureView extends View {
             if (mListener != null && !mUpdateSurface) {
                 mListener.onSurfaceTextureAvailable(mSurface, getWidth(), getHeight());
             }
+            mLayer.setLayerPaint(mLayerPaint);
         }
 
         if (mUpdateSurface) {

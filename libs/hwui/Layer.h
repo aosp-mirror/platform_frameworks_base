@@ -45,6 +45,7 @@ class DisplayList;
  * A layer has dimensions and is backed by an OpenGL texture or FBO.
  */
 struct Layer {
+
     Layer(const uint32_t layerWidth, const uint32_t layerHeight) {
         mesh = NULL;
         meshIndices = NULL;
@@ -60,10 +61,7 @@ struct Layer {
         displayList = NULL;
     }
 
-    ~Layer() {
-        if (mesh) delete mesh;
-        if (meshIndices) delete meshIndices;
-    }
+    ~Layer();
 
     /**
      * Sets this layer's region to a rectangle. Computes the appropriate
@@ -105,6 +103,8 @@ struct Layer {
         texture.width = width;
         texture.height = height;
     }
+
+    ANDROID_API void setPaint(SkPaint* paint);
 
     inline void setBlend(bool blend) {
         texture.blend = blend;
@@ -191,9 +191,7 @@ struct Layer {
         return colorFilter;
     }
 
-    inline void setColorFilter(SkiaColorFilter* filter) {
-        colorFilter = filter;
-    }
+    ANDROID_API void setColorFilter(SkiaColorFilter* filter);
 
     inline void bindTexture() {
         glBindTexture(renderTarget, texture.id);
