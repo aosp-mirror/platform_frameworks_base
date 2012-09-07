@@ -3222,7 +3222,7 @@ public final class Settings {
         public static final String DISPLAY_DENSITY_FORCED = Global.DISPLAY_DENSITY_FORCED;
 
         /**
-         * @deprecated Use {@link android.provider.Settings.Global#ASSISTED_GPS_ENABLE} instead
+         * @deprecated Use {@link android.provider.Settings.Global#ASSISTED_GPS_ENABLED} instead
          * @hide
          */
         @Deprecated
@@ -4318,21 +4318,18 @@ public final class Settings {
                 "sync_max_retry_delay_in_seconds";
 
         /**
-         * The interval in milliseconds at which to check the number of SMS sent
-         * out without asking for use permit, to limit the un-authorized SMS
-         * usage.
+         * @deprecated Use {@link Settings.Global#SMS_OUTGOING_CHECK_INTERVAL_MS} instead.
          * @hide
          */
         public static final String SMS_OUTGOING_CHECK_INTERVAL_MS =
-                "sms_outgoing_check_interval_ms";
+                Global.SMS_OUTGOING_CHECK_INTERVAL_MS;
 
         /**
-         * The number of outgoing SMS sent without asking for user permit
-         * (of {@link #SMS_OUTGOING_CHECK_INTERVAL_MS}
+         * @deprecated Use {@link Settings.Global#SMS_OUTGOING_CHECK_MAX_COUNT} instead.
          * @hide
          */
         public static final String SMS_OUTGOING_CHECK_MAX_COUNT =
-                "sms_outgoing_check_max_count";
+                Global.SMS_OUTGOING_CHECK_MAX_COUNT;
 
         /**
          * The global search provider chosen by the user (if multiple global
@@ -4832,13 +4829,6 @@ public final class Settings {
          */
         public static final String CONTACTS_PREAUTH_URI_EXPIRATION =
                 "contacts_preauth_uri_expiration";
-
-        /**
-         * Prefix for SMS short code regex patterns (country code is appended).
-         * @see com.android.internal.telephony.SmsUsageMonitor
-         * @hide
-         */
-        public static final String SMS_SHORT_CODES_PREFIX = "sms_short_codes_";
 
         /**
          * Overlay display devices setting.
@@ -5398,6 +5388,38 @@ public final class Settings {
         */
        public static final String SETUP_PREPAID_DETECTION_REDIR_HOST =
                "setup_prepaid_detection_redir_host";
+
+       /**
+        * The interval in milliseconds at which to check the number of SMS sent out without asking
+        * for use permit, to limit the un-authorized SMS usage.
+        *
+        * @hide
+        */
+       public static final String SMS_OUTGOING_CHECK_INTERVAL_MS =
+               "sms_outgoing_check_interval_ms";
+
+       /**
+        * The number of outgoing SMS sent without asking for user permit (of {@link
+        * #SMS_OUTGOING_CHECK_INTERVAL_MS}
+        *
+        * @hide
+        */
+       public static final String SMS_OUTGOING_CHECK_MAX_COUNT =
+               "sms_outgoing_check_max_count";
+
+       /**
+        * Used to disable SMS short code confirmation - defaults to true.
+        * @see com.android.internal.telephony.SmsUsageMonitor
+        * @hide
+        */
+       public static final String SMS_SHORT_CODE_CONFIRMATION = "sms_short_code_confirmation";
+
+       /**
+        * Prefix for SMS short code regex patterns (country code is appended).
+        * @see com.android.internal.telephony.SmsUsageMonitor
+        * @hide
+        */
+       public static final String SMS_SHORT_CODES_PREFIX = "sms_short_codes_";
 
        /**
         * Used to disable Tethering on a device - defaults to true
