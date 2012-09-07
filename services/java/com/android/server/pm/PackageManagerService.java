@@ -1193,7 +1193,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         if (mSettings.isDisabledSystemPackageLPr(ps.name)) {
                             Slog.i(TAG, "Expecting better updatd system app for " + ps.name
                                     + "; removing system app");
-                            removePackageLI(scannedPkg, true);
+                            removePackageLI(ps, true);
                         }
 
                         continue;
@@ -1822,7 +1822,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
                 pkg = new PackageParser.Package(packageName);
                 pkg.applicationInfo.packageName = packageName;
-                pkg.applicationInfo.flags = ps.pkgFlags;
+                pkg.applicationInfo.flags = ps.pkgFlags | ApplicationInfo.FLAG_IS_DATA_ONLY;
                 pkg.applicationInfo.publicSourceDir = ps.resourcePathString;
                 pkg.applicationInfo.sourceDir = ps.codePathString;
                 pkg.applicationInfo.dataDir =
@@ -4429,20 +4429,40 @@ public class PackageManagerService extends IPackageManager.Stub {
         return pkg;
     }
 
-    private void killApplication(String pkgName, int uid) {
+    private void killApplication(String pkgName, int appId) {
         // Request the ActivityManager to kill the process(only for existing packages)
         // so that we do not end up in a confused state while the user is still using the older
         // version of the application while the new one gets installed.
         IActivityManager am = ActivityManagerNative.getDefault();
         if (am != null) {
             try {
-                am.killApplicationWithUid(pkgName, uid);
+                am.killApplicationWithAppId(pkgName, appId);
             } catch (RemoteException e) {
             }
         }
     }
 
-    void removePackageLI(PackageParser.Package pkg, boolean chatty) {
+    void removePackageLI(PackageSetting ps, boolean chatty) {
+        if (DEBUG_INSTALL) {
+            if (chatty)
+                Log.d(TAG, "Removing package " + ps.name);
+        }
+
+        // writer
+        synchronized (mPackages) {
+            mPackages.remove(ps.name);
+            if (ps.codePathString != null) {
+                mAppDirs.remove(ps.codePathString);
+            }
+
+            final PackageParser.Package pkg = ps.pkg;
+            if (pkg != null) {
+                cleanPackageDataStructuresLILPw(pkg, chatty);
+            }
+        }
+    }
+
+    void removeInstalledPackageLI(PackageParser.Package pkg, boolean chatty) {
         if (DEBUG_INSTALL) {
             if (chatty)
                 Log.d(TAG, "Removing package " + pkg.applicationInfo.packageName);
@@ -4454,34 +4474,115 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (pkg.mPath != null) {
                 mAppDirs.remove(pkg.mPath);
             }
+            cleanPackageDataStructuresLILPw(pkg, chatty);
+        }
+    }
 
-            int N = pkg.providers.size();
-            StringBuilder r = null;
-            int i;
-            for (i=0; i<N; i++) {
-                PackageParser.Provider p = pkg.providers.get(i);
-                mProvidersByComponent.remove(new ComponentName(p.info.packageName,
-                        p.info.name));
-                if (p.info.authority == null) {
+    void cleanPackageDataStructuresLILPw(PackageParser.Package pkg, boolean chatty) {
+        int N = pkg.providers.size();
+        StringBuilder r = null;
+        int i;
+        for (i=0; i<N; i++) {
+            PackageParser.Provider p = pkg.providers.get(i);
+            mProvidersByComponent.remove(new ComponentName(p.info.packageName,
+                    p.info.name));
+            if (p.info.authority == null) {
 
-                    /* The is another ContentProvider with this authority when
-                     * this app was installed so this authority is null,
-                     * Ignore it as we don't have to unregister the provider.
-                     */
-                    continue;
-                }
-                String names[] = p.info.authority.split(";");
-                for (int j = 0; j < names.length; j++) {
-                    if (mProviders.get(names[j]) == p) {
-                        mProviders.remove(names[j]);
-                        if (DEBUG_REMOVE) {
-                            if (chatty)
-                                Log.d(TAG, "Unregistered content provider: " + names[j]
-                                        + ", className = " + p.info.name + ", isSyncable = "
-                                        + p.info.isSyncable);
-                        }
+                /* There was another ContentProvider with this authority when
+                 * this app was installed so this authority is null,
+                 * Ignore it as we don't have to unregister the provider.
+                 */
+                continue;
+            }
+            String names[] = p.info.authority.split(";");
+            for (int j = 0; j < names.length; j++) {
+                if (mProviders.get(names[j]) == p) {
+                    mProviders.remove(names[j]);
+                    if (DEBUG_REMOVE) {
+                        if (chatty)
+                            Log.d(TAG, "Unregistered content provider: " + names[j]
+                                    + ", className = " + p.info.name + ", isSyncable = "
+                                    + p.info.isSyncable);
                     }
                 }
+            }
+            if (chatty) {
+                if (r == null) {
+                    r = new StringBuilder(256);
+                } else {
+                    r.append(' ');
+                }
+                r.append(p.info.name);
+            }
+        }
+        if (r != null) {
+            if (DEBUG_REMOVE) Log.d(TAG, "  Providers: " + r);
+        }
+
+        N = pkg.services.size();
+        r = null;
+        for (i=0; i<N; i++) {
+            PackageParser.Service s = pkg.services.get(i);
+            mServices.removeService(s);
+            if (chatty) {
+                if (r == null) {
+                    r = new StringBuilder(256);
+                } else {
+                    r.append(' ');
+                }
+                r.append(s.info.name);
+            }
+        }
+        if (r != null) {
+            if (DEBUG_REMOVE) Log.d(TAG, "  Services: " + r);
+        }
+
+        N = pkg.receivers.size();
+        r = null;
+        for (i=0; i<N; i++) {
+            PackageParser.Activity a = pkg.receivers.get(i);
+            mReceivers.removeActivity(a, "receiver");
+            if (chatty) {
+                if (r == null) {
+                    r = new StringBuilder(256);
+                } else {
+                    r.append(' ');
+                }
+                r.append(a.info.name);
+            }
+        }
+        if (r != null) {
+            if (DEBUG_REMOVE) Log.d(TAG, "  Receivers: " + r);
+        }
+
+        N = pkg.activities.size();
+        r = null;
+        for (i=0; i<N; i++) {
+            PackageParser.Activity a = pkg.activities.get(i);
+            mActivities.removeActivity(a, "activity");
+            if (chatty) {
+                if (r == null) {
+                    r = new StringBuilder(256);
+                } else {
+                    r.append(' ');
+                }
+                r.append(a.info.name);
+            }
+        }
+        if (r != null) {
+            if (DEBUG_REMOVE) Log.d(TAG, "  Activities: " + r);
+        }
+
+        N = pkg.permissions.size();
+        r = null;
+        for (i=0; i<N; i++) {
+            PackageParser.Permission p = pkg.permissions.get(i);
+            BasePermission bp = mSettings.mPermissions.get(p.info.name);
+            if (bp == null) {
+                bp = mSettings.mPermissionTrees.get(p.info.name);
+            }
+            if (bp != null && bp.perm == p) {
+                bp.perm = null;
                 if (chatty) {
                     if (r == null) {
                         r = new StringBuilder(256);
@@ -4491,105 +4592,27 @@ public class PackageManagerService extends IPackageManager.Stub {
                     r.append(p.info.name);
                 }
             }
-            if (r != null) {
-                if (DEBUG_REMOVE) Log.d(TAG, "  Providers: " + r);
-            }
+        }
+        if (r != null) {
+            if (DEBUG_REMOVE) Log.d(TAG, "  Permissions: " + r);
+        }
 
-            N = pkg.services.size();
-            r = null;
-            for (i=0; i<N; i++) {
-                PackageParser.Service s = pkg.services.get(i);
-                mServices.removeService(s);
-                if (chatty) {
-                    if (r == null) {
-                        r = new StringBuilder(256);
-                    } else {
-                        r.append(' ');
-                    }
-                    r.append(s.info.name);
+        N = pkg.instrumentation.size();
+        r = null;
+        for (i=0; i<N; i++) {
+            PackageParser.Instrumentation a = pkg.instrumentation.get(i);
+            mInstrumentation.remove(a.getComponentName());
+            if (chatty) {
+                if (r == null) {
+                    r = new StringBuilder(256);
+                } else {
+                    r.append(' ');
                 }
+                r.append(a.info.name);
             }
-            if (r != null) {
-                if (DEBUG_REMOVE) Log.d(TAG, "  Services: " + r);
-            }
-
-            N = pkg.receivers.size();
-            r = null;
-            for (i=0; i<N; i++) {
-                PackageParser.Activity a = pkg.receivers.get(i);
-                mReceivers.removeActivity(a, "receiver");
-                if (chatty) {
-                    if (r == null) {
-                        r = new StringBuilder(256);
-                    } else {
-                        r.append(' ');
-                    }
-                    r.append(a.info.name);
-                }
-            }
-            if (r != null) {
-                if (DEBUG_REMOVE) Log.d(TAG, "  Receivers: " + r);
-            }
-
-            N = pkg.activities.size();
-            r = null;
-            for (i=0; i<N; i++) {
-                PackageParser.Activity a = pkg.activities.get(i);
-                mActivities.removeActivity(a, "activity");
-                if (chatty) {
-                    if (r == null) {
-                        r = new StringBuilder(256);
-                    } else {
-                        r.append(' ');
-                    }
-                    r.append(a.info.name);
-                }
-            }
-            if (r != null) {
-                if (DEBUG_REMOVE) Log.d(TAG, "  Activities: " + r);
-            }
-
-            N = pkg.permissions.size();
-            r = null;
-            for (i=0; i<N; i++) {
-                PackageParser.Permission p = pkg.permissions.get(i);
-                BasePermission bp = mSettings.mPermissions.get(p.info.name);
-                if (bp == null) {
-                    bp = mSettings.mPermissionTrees.get(p.info.name);
-                }
-                if (bp != null && bp.perm == p) {
-                    bp.perm = null;
-                    if (chatty) {
-                        if (r == null) {
-                            r = new StringBuilder(256);
-                        } else {
-                            r.append(' ');
-                        }
-                        r.append(p.info.name);
-                    }
-                }
-            }
-            if (r != null) {
-                if (DEBUG_REMOVE) Log.d(TAG, "  Permissions: " + r);
-            }
-
-            N = pkg.instrumentation.size();
-            r = null;
-            for (i=0; i<N; i++) {
-                PackageParser.Instrumentation a = pkg.instrumentation.get(i);
-                mInstrumentation.remove(a.getComponentName());
-                if (chatty) {
-                    if (r == null) {
-                        r = new StringBuilder(256);
-                    } else {
-                        r.append(' ');
-                    }
-                    r.append(a.info.name);
-                }
-            }
-            if (r != null) {
-                if (DEBUG_REMOVE) Log.d(TAG, "  Instrumentation: " + r);
-            }
+        }
+        if (r != null) {
+            if (DEBUG_REMOVE) Log.d(TAG, "  Instrumentation: " + r);
         }
     }
 
@@ -5424,10 +5447,10 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         public void onEvent(int event, String path) {
             String removedPackage = null;
-            int removedUid = -1;
+            int removedAppId = -1;
             int[] removedUsers = null;
             String addedPackage = null;
-            int addedUid = -1;
+            int addedAppId = -1;
             int[] addedUsers = null;
 
             // TODO post a message to the handler to obtain serial ordering
@@ -5454,11 +5477,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                     return;
                 }
                 PackageParser.Package p = null;
+                PackageSetting ps = null;
                 // reader
                 synchronized (mPackages) {
                     p = mAppDirs.get(fullPathStr);
                     if (p != null) {
-                        PackageSetting ps = mSettings.mPackages.get(p.applicationInfo.packageName);
+                        ps = mSettings.mPackages.get(p.applicationInfo.packageName);
                         if (ps != null) {
                             removedUsers = ps.queryInstalledUsers(sUserManager.getUserIds(), true);
                         } else {
@@ -5468,10 +5492,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                     addedUsers = sUserManager.getUserIds();
                 }
                 if ((event&REMOVE_EVENTS) != 0) {
-                    if (p != null) {
-                        removePackageLI(p, true);
-                        removedPackage = p.applicationInfo.packageName;
-                        removedUid = p.applicationInfo.uid;
+                    if (ps != null) {
+                        removePackageLI(ps, true);
+                        removedPackage = ps.name;
+                        removedAppId = ps.appId;
                     }
                 }
 
@@ -5496,7 +5520,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                                         p.permissions.size() > 0 ? UPDATE_PERMISSIONS_ALL : 0);
                             }
                             addedPackage = p.applicationInfo.packageName;
-                            addedUid = p.applicationInfo.uid;
+                            addedAppId = UserHandle.getAppId(p.applicationInfo.uid);
                         }
                     }
                 }
@@ -5509,14 +5533,14 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             if (removedPackage != null) {
                 Bundle extras = new Bundle(1);
-                extras.putInt(Intent.EXTRA_UID, removedUid);
+                extras.putInt(Intent.EXTRA_UID, removedAppId);
                 extras.putBoolean(Intent.EXTRA_DATA_REMOVED, false);
                 sendPackageBroadcast(Intent.ACTION_PACKAGE_REMOVED, removedPackage,
                         extras, null, null, removedUsers);
             }
             if (addedPackage != null) {
                 Bundle extras = new Bundle(1);
-                extras.putInt(Intent.EXTRA_UID, addedUid);
+                extras.putInt(Intent.EXTRA_UID, addedAppId);
                 sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, addedPackage,
                         extras, null, null, addedUsers);
             }
@@ -7527,7 +7551,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         res.removedInfo.uid = oldPkg.applicationInfo.uid;
         res.removedInfo.removedPackage = packageName;
         // Remove existing system package
-        removePackageLI(oldPkg, true);
+        removePackageLI(oldPkgSetting, true);
         // writer
         synchronized (mPackages) {
             if (!mSettings.disableSystemPackageLPw(packageName) && deletedPackage != null) {
@@ -7566,7 +7590,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             // Re installation failed. Restore old information
             // Remove new pkg information
             if (newPackage != null) {
-                removePackageLI(newPackage, true);
+                removeInstalledPackageLI(newPackage, true);
             }
             // Add back the old system package
             scanPackageLI(oldPkg, parseFlags, SCAN_MONITOR | SCAN_UPDATE_SIGNATURE, 0, user);
@@ -7967,10 +7991,10 @@ public class PackageManagerService extends IPackageManager.Stub {
      * make sure this flag is set for partially installed apps. If not its meaningless to
      * delete a partially installed application.
      */
-    private void removePackageDataLI(PackageParser.Package p, PackageRemovedInfo outInfo,
+    private void removePackageDataLI(PackageSetting ps, PackageRemovedInfo outInfo,
             int flags, boolean writeSettings) {
-        String packageName = p.packageName;
-        removePackageLI(p, (flags&REMOVE_CHATTY) != 0);
+        String packageName = ps.name;
+        removePackageLI(ps, (flags&REMOVE_CHATTY) != 0);
         // Retrieve object to delete permissions for shared user later on
         final PackageSetting deletedPs;
         // reader
@@ -8015,38 +8039,32 @@ public class PackageManagerService extends IPackageManager.Stub {
     /*
      * Tries to delete system package.
      */
-    private boolean deleteSystemPackageLI(PackageParser.Package p,
+    private boolean deleteSystemPackageLI(PackageSetting newPs,
             int flags, PackageRemovedInfo outInfo, boolean writeSettings) {
-        ApplicationInfo applicationInfo = p.applicationInfo;
-        //applicable for non-partially installed applications only
-        if (applicationInfo == null) {
-            Slog.w(TAG, "Package " + p.packageName + " has no applicationInfo.");
-            return false;
-        }
-        PackageSetting ps = null;
+        PackageSetting disabledPs = null;
         // Confirm if the system package has been updated
         // An updated system app can be deleted. This will also have to restore
         // the system pkg from system partition
         // reader
         synchronized (mPackages) {
-            ps = mSettings.getDisabledSystemPkgLPr(p.packageName);
+            disabledPs = mSettings.getDisabledSystemPkgLPr(newPs.name);
         }
-        if (ps == null) {
-            Slog.w(TAG, "Attempt to delete unknown system package "+ p.packageName);
+        if (disabledPs == null) {
+            Slog.w(TAG, "Attempt to delete unknown system package "+ newPs.name);
             return false;
         } else {
             Log.i(TAG, "Deleting system pkg from data partition");
         }
         // Delete the updated package
         outInfo.isRemovedPackageSystemUpdate = true;
-        if (ps.versionCode < p.mVersionCode) {
+        if (disabledPs.versionCode < newPs.versionCode) {
             // Delete data for downgrades
             flags &= ~PackageManager.DELETE_KEEP_DATA;
         } else {
             // Preserve data by setting flag
             flags |= PackageManager.DELETE_KEEP_DATA;
         }
-        boolean ret = deleteInstalledPackageLI(p, true, flags, outInfo,
+        boolean ret = deleteInstalledPackageLI(newPs, true, flags, outInfo,
                 writeSettings);
         if (!ret) {
             return false;
@@ -8054,17 +8072,18 @@ public class PackageManagerService extends IPackageManager.Stub {
         // writer
         synchronized (mPackages) {
             // Reinstate the old system package
-            mSettings.enableSystemPackageLPw(p.packageName);
+            mSettings.enableSystemPackageLPw(newPs.name);
             // Remove any native libraries from the upgraded package.
-            NativeLibraryHelper.removeNativeBinariesLI(p.applicationInfo.nativeLibraryDir);
+            NativeLibraryHelper.removeNativeBinariesLI(newPs.nativeLibraryPathString);
         }
         // Install the system package
-        PackageParser.Package newPkg = scanPackageLI(ps.codePath,
+        PackageParser.Package newPkg = scanPackageLI(disabledPs.codePath,
                 PackageParser.PARSE_MUST_BE_APK | PackageParser.PARSE_IS_SYSTEM,
                 SCAN_MONITOR | SCAN_NO_PATHS, 0, null);
 
         if (newPkg == null) {
-            Slog.w(TAG, "Failed to restore system package:"+p.packageName+" with error:" + mLastScanError);
+            Slog.w(TAG, "Failed to restore system package:" + newPs.name
+                    + " with error:" + mLastScanError);
             return false;
         }
         // writer
@@ -8079,28 +8098,23 @@ public class PackageManagerService extends IPackageManager.Stub {
         return true;
     }
 
-    private boolean deleteInstalledPackageLI(PackageParser.Package p,
+    private boolean deleteInstalledPackageLI(PackageSetting ps,
             boolean deleteCodeAndResources, int flags, PackageRemovedInfo outInfo,
             boolean writeSettings) {
-        ApplicationInfo applicationInfo = p.applicationInfo;
-        if (applicationInfo == null) {
-            Slog.w(TAG, "Package " + p.packageName + " has no applicationInfo.");
-            return false;
-        }
         if (outInfo != null) {
-            outInfo.uid = applicationInfo.uid;
+            outInfo.uid = ps.appId;
         }
 
         // Delete package data from internal structures and also remove data if flag is set
-        removePackageDataLI(p, outInfo, flags, writeSettings);
+        removePackageDataLI(ps, outInfo, flags, writeSettings);
 
         // Delete application code and resources
         if (deleteCodeAndResources) {
             // TODO can pick up from PackageSettings as well
-            int installFlags = isExternal(p) ? PackageManager.INSTALL_EXTERNAL : 0;
-            installFlags |= isForwardLocked(p) ? PackageManager.INSTALL_FORWARD_LOCK : 0;
-            outInfo.args = createInstallArgs(installFlags, applicationInfo.sourceDir,
-                    applicationInfo.publicSourceDir, applicationInfo.nativeLibraryDir);
+            int installFlags = isExternal(ps) ? PackageManager.INSTALL_EXTERNAL : 0;
+            installFlags |= isForwardLocked(ps) ? PackageManager.INSTALL_FORWARD_LOCK : 0;
+            outInfo.args = createInstallArgs(installFlags, ps.codePathString,
+                    ps.resourcePathString, ps.nativeLibraryPathString);
         }
         return true;
     }
@@ -8115,28 +8129,17 @@ public class PackageManagerService extends IPackageManager.Stub {
             Slog.w(TAG, "Attempt to delete null packageName.");
             return false;
         }
-        PackageParser.Package p;
+        PackageSetting ps;
         boolean dataOnly = false;
         int removeUser = -1;
         int appId = -1;
         synchronized (mPackages) {
-            p = mPackages.get(packageName);
-            if (p == null) {
-                //this retrieves partially installed apps
-                dataOnly = true;
-                PackageSetting ps = mSettings.mPackages.get(packageName);
-                if (ps == null) {
-                    Slog.w(TAG, "Package named '" + packageName + "' doesn't exist.");
-                    return false;
-                }
-                p = ps.pkg;
-            }
-            if (p == null) {
+            ps = mSettings.mPackages.get(packageName);
+            if (ps == null) {
                 Slog.w(TAG, "Package named '" + packageName + "' doesn't exist.");
                 return false;
             }
-            final PackageSetting ps = (PackageSetting)p.mExtras;
-            if (!isSystemApp(p) && ps != null && user != null
+            if (!isSystemApp(ps) && user != null
                     && user.getIdentifier() != UserHandle.USER_ALL) {
                 // The caller is asking that the package only be deleted for a single
                 // user.  To do this, we just mark its uninstalled state and delete
@@ -8177,25 +8180,20 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         if (dataOnly) {
             // Delete application data first
-            removePackageDataLI(p, outInfo, flags, writeSettings);
+            removePackageDataLI(ps, outInfo, flags, writeSettings);
             return true;
         }
-        // At this point the package should have ApplicationInfo associated with it
-        if (p.applicationInfo == null) {
-            Slog.w(TAG, "Package " + p.packageName + " has no applicationInfo.");
-            return false;
-        }
         boolean ret = false;
-        if (isSystemApp(p)) {
-            Log.i(TAG, "Removing system package:"+p.packageName);
+        if (isSystemApp(ps)) {
+            Log.i(TAG, "Removing system package:" + ps.name);
             // When an updated system application is deleted we delete the existing resources as well and
             // fall back to existing code in system partition
-            ret = deleteSystemPackageLI(p, flags, outInfo, writeSettings);
+            ret = deleteSystemPackageLI(ps, flags, outInfo, writeSettings);
         } else {
-            Log.i(TAG, "Removing non-system package:"+p.packageName);
+            Log.i(TAG, "Removing non-system package:" + ps.name);
             // Kill application pre-emptively especially for apps on sd.
-            killApplication(packageName, p.applicationInfo.uid);
-            ret = deleteInstalledPackageLI(p, deleteCodeAndResources, flags, outInfo,
+            killApplication(packageName, ps.appId);
+            ret = deleteInstalledPackageLI(ps, deleteCodeAndResources, flags, outInfo,
                     writeSettings);
         }
         return ret;

@@ -39,6 +39,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
@@ -230,7 +231,8 @@ public abstract class ContentResolver {
         }
 
         try {
-            String type = ActivityManagerNative.getDefault().getProviderMimeType(url);
+            String type = ActivityManagerNative.getDefault().getProviderMimeType(
+                    url, UserHandle.myUserId());
             return type;
         } catch (RemoteException e) {
             // Arbitrary and not worth documenting, as Activity
