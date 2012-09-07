@@ -1978,6 +1978,10 @@ status_t OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
 
         // Find the normal to the line
         vec2 n = (b - a).copyNormalized() * halfStrokeWidth;
+        float x = n.x;
+        n.x = -n.y;
+        n.y = x;
+
         if (isHairLine) {
             if (isAA) {
                 float wideningFactor;
@@ -2002,13 +2006,9 @@ status_t OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
 
             float extendedNLength = extendedN.length();
             // We need to set this value on the shader prior to drawing
-            boundaryWidthProportion = extendedNLength / (halfStrokeWidth + extendedNLength);
+            boundaryWidthProportion = .5 - extendedNLength / (halfStrokeWidth + extendedNLength);
             n += extendedN;
         }
-
-        float x = n.x;
-        n.x = -n.y;
-        n.y = x;
 
         // aa lines expand the endpoint vertices to encompass the AA boundary
         if (isAA) {
