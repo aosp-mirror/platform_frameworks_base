@@ -77,6 +77,7 @@ public class NinePatchDrawable extends Drawable {
     @Deprecated
     public NinePatchDrawable(Bitmap bitmap, byte[] chunk, Rect padding, String srcName) {
         this(new NinePatchState(new NinePatch(bitmap, chunk, srcName), padding), null);
+        mMutated = true;
     }
 
     /**
@@ -87,6 +88,7 @@ public class NinePatchDrawable extends Drawable {
             Rect padding, String srcName) {
         this(new NinePatchState(new NinePatch(bitmap, chunk, srcName), padding), res);
         mNinePatchState.mTargetDensity = mTargetDensity;
+        mMutated = true;
     }
 
     /**
@@ -99,6 +101,7 @@ public class NinePatchDrawable extends Drawable {
             Rect padding, Rect layoutInsets, String srcName) {
         this(new NinePatchState(new NinePatch(bitmap, chunk, srcName), padding, layoutInsets), res);
         mNinePatchState.mTargetDensity = mTargetDensity;
+        mMutated = true;
     }
 
     /**
@@ -109,6 +112,7 @@ public class NinePatchDrawable extends Drawable {
     @Deprecated
     public NinePatchDrawable(NinePatch patch) {
         this(new NinePatchState(patch, new Rect()), null);
+        mMutated = true;
     }
 
     /**
@@ -118,6 +122,7 @@ public class NinePatchDrawable extends Drawable {
     public NinePatchDrawable(Resources res, NinePatch patch) {
         this(new NinePatchState(patch, new Rect()), res);
         mNinePatchState.mTargetDensity = mTargetDensity;
+        mMutated = true;
     }
 
     private void setNinePatchState(NinePatchState state, Resources res) {
@@ -181,7 +186,7 @@ public class NinePatchDrawable extends Drawable {
         }
     }
 
-    private Insets scaleFromDensity(Insets insets, int sdensity, int tdensity) {
+    private static Insets scaleFromDensity(Insets insets, int sdensity, int tdensity) {
         int left = Bitmap.scaleFromDensity(insets.left, sdensity, tdensity);
         int top = Bitmap.scaleFromDensity(insets.top, sdensity, tdensity);
         int right = Bitmap.scaleFromDensity(insets.right, sdensity, tdensity);

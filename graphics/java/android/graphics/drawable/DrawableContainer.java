@@ -105,7 +105,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
             mAlpha = alpha;
             if (mCurrDrawable != null) {
                 if (mEnterAnimationEnd == 0) {
-                    mCurrDrawable.setAlpha(alpha);
+                    mCurrDrawable.mutate().setAlpha(alpha);
                 } else {
                     animate(false);
                 }
@@ -118,7 +118,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         if (mDrawableContainerState.mDither != dither) {
             mDrawableContainerState.mDither = dither;
             if (mCurrDrawable != null) {
-                mCurrDrawable.setDither(mDrawableContainerState.mDither);
+                mCurrDrawable.mutate().setDither(mDrawableContainerState.mDither);
             }
         }
     }
@@ -128,7 +128,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         if (mColorFilter != cf) {
             mColorFilter = cf;
             if (mCurrDrawable != null) {
-                mCurrDrawable.setColorFilter(cf);
+                mCurrDrawable.mutate().setColorFilter(cf);
             }
         }
     }
@@ -176,7 +176,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         }
         if (mCurrDrawable != null) {
             mCurrDrawable.jumpToCurrentState();
-            mCurrDrawable.setAlpha(mAlpha);
+            mCurrDrawable.mutate().setAlpha(mAlpha);
         }
         if (mExitAnimationEnd != 0) {
             mExitAnimationEnd = 0;
@@ -312,6 +312,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
             mCurrDrawable = d;
             mCurIndex = idx;
             if (d != null) {
+                d.mutate();
                 if (mDrawableContainerState.mEnterFadeDuration > 0) {
                     mEnterAnimationEnd = now + mDrawableContainerState.mEnterFadeDuration;
                 } else {
@@ -355,13 +356,13 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         if (mCurrDrawable != null) {
             if (mEnterAnimationEnd != 0) {
                 if (mEnterAnimationEnd <= now) {
-                    mCurrDrawable.setAlpha(mAlpha);
+                    mCurrDrawable.mutate().setAlpha(mAlpha);
                     mEnterAnimationEnd = 0;
                 } else {
                     int animAlpha = (int)((mEnterAnimationEnd-now)*255)
                             / mDrawableContainerState.mEnterFadeDuration;
                     if (DEBUG) android.util.Log.i(TAG, toString() + " cur alpha " + animAlpha);
-                    mCurrDrawable.setAlpha(((255-animAlpha)*mAlpha)/255);
+                    mCurrDrawable.mutate().setAlpha(((255-animAlpha)*mAlpha)/255);
                     animating = true;
                 }
             }
@@ -378,7 +379,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                     int animAlpha = (int)((mExitAnimationEnd-now)*255)
                             / mDrawableContainerState.mExitFadeDuration;
                     if (DEBUG) android.util.Log.i(TAG, toString() + " last alpha " + animAlpha);
-                    mLastDrawable.setAlpha((animAlpha*mAlpha)/255);
+                    mLastDrawable.mutate().setAlpha((animAlpha*mAlpha)/255);
                     animating = true;
                 }
             }
