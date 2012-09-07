@@ -57,12 +57,6 @@ public class KeyguardHostView extends KeyguardViewBase {
     static final int APPWIDGET_HOST_ID = 0x4B455947;
     private static final String KEYGUARD_WIDGET_PREFS = "keyguard_widget_prefs";
 
-    // time after launching EmergencyDialer before the screen goes blank.
-    private static final int EMERGENCY_CALL_TIMEOUT = 10000;
-
-    // intent action for launching emergency dialer activity.
-    static final String ACTION_EMERGENCY_DIAL = "com.android.phone.EmergencyDialer.DIAL";
-
     private static final String TAG = "KeyguardViewHost";
 
     private static final int SECURITY_SELECTOR_ID = R.id.keyguard_selector_view;
@@ -76,7 +70,6 @@ public class KeyguardHostView extends KeyguardViewBase {
     private AppWidgetHost mAppWidgetHost;
     private KeyguardWidgetPager mAppWidgetContainer;
     private ViewFlipper mViewFlipper;
-    private Button mEmergencyDialerButton;
     private boolean mEnableMenuKey;
     private boolean mIsVerifyUnlockOnly;
     private boolean mEnableFallback; // TODO: This should get the value from KeyguardPatternView
@@ -142,14 +135,6 @@ public class KeyguardHostView extends KeyguardViewBase {
                 Log.v("*********", "Can't find view id " + mViewIds[i]);
             }
         }
-
-        // Enable emergency dialer button
-        mEmergencyDialerButton = (Button) findViewById(R.id.emergency_call_button);
-        mEmergencyDialerButton.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                takeEmergencyCallAction();
-            }
-        });
     }
 
     void setLockPatternUtils(LockPatternUtils utils) {
@@ -224,22 +209,6 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
 
     };
-
-    /**
-     * Shows the emergency dialer or returns the user to the existing call.
-     */
-    public void takeEmergencyCallAction() {
-        mCallback.userActivity(EMERGENCY_CALL_TIMEOUT);
-        if (TelephonyManager.getDefault().getCallState()
-                == TelephonyManager.CALL_STATE_OFFHOOK) {
-            mLockPatternUtils.resumeCall();
-        } else {
-            Intent intent = new Intent(ACTION_EMERGENCY_DIAL);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                    | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-            getContext().startActivity(intent);
-        }
-    }
 
     private void showDialog(String title, String message) {
         final AlertDialog dialog = new AlertDialog.Builder(mContext)
@@ -526,12 +495,14 @@ public class KeyguardHostView extends KeyguardViewBase {
     public void onScreenTurnedOn() {
         if (DEBUG) Log.d(TAG, "screen on");
         showSecurityScreen(mCurrentSecurityId);
+        getSecurityView(mCurrentSecurityId).onResume();
     }
 
     @Override
     public void onScreenTurnedOff() {
         if (DEBUG) Log.d(TAG, "screen off");
         showSecurityScreen(SECURITY_SELECTOR_ID);
+        getSecurityView(mCurrentSecurityId).onPause();
     }
 
     @Override
