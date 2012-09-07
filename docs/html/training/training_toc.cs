@@ -104,6 +104,26 @@
       </li>
 
       <li class="nav-section">
+        <div class="nav-section-header"><a href="<?cs var:toroot?>training/basics/data-storage/index.html">
+            <span class="en">Saving Data</span>
+          </a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/basics/data-storage/shared-preferences.html">
+            <span class="en">Saving Key-Value Sets</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/basics/data-storage/files.html">
+            <span class="en">Saving Files</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/basics/data-storage/databases.html">
+            <span class="en">Saving Data in SQL Databases</span>
+          </a>
+          </li>
+        </ul>
+      </li>
+
+      <li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot ?>training/basics/intents/index.html">
             <span class="en">Interacting with Other Apps</span>
           </a></div>
