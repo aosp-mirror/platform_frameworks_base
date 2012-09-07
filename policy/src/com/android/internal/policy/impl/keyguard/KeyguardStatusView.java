@@ -21,6 +21,7 @@ import android.util.AttributeSet;
 import android.widget.GridLayout;
 
 public class KeyguardStatusView extends GridLayout {
+    @SuppressWarnings("unused")
     private KeyguardStatusViewManager mStatusViewManager;
 
     public KeyguardStatusView(Context context) {

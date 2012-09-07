@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.MediaStore;
+import android.telephony.TelephonyManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Slog;
@@ -33,6 +34,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 
 import com.android.internal.telephony.IccCardConstants;
+import com.android.internal.telephony.IccCardConstants.State;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.multiwaveview.GlowPadView;
 import com.android.internal.widget.multiwaveview.GlowPadView.OnTriggerListener;
@@ -43,6 +45,9 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
     private static final String TAG = "SecuritySelectorView";
     private static final String ASSIST_ICON_METADATA_NAME =
         "com.android.systemui.action_assist_icon";
+    private static final int EMERGENCY_CALL_TIMEOUT = 10000; // screen timeout after starting e.d.
+    static final String ACTION_EMERGENCY_DIAL = "com.android.phone.EmergencyDialer.DIAL";
+
     private KeyguardSecurityCallback mCallback;
     private GlowPadView mGlowPadView;
     private Button mEmergencyCallButton;
@@ -98,9 +103,19 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
 
     };
 
-    KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
+    private void updateEmergencyCallButton(State simState, int phoneState) {
+        if (mEmergencyCallButton != null) {
+            boolean en = mLockPatternUtils.isEmergencyCallCapable()
+                || (phoneState == TelephonyManager.CALL_STATE_OFFHOOK); // voice call in progress
+            if (en && KeyguardUpdateMonitor.isSimLocked(simState)) {
+                // Some countries can't handle emergency calls while SIM is locked.
+                en = mLockPatternUtils.isEmergencyCallEnabledWhileSimLocked();
+            }
+            mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton, phoneState, en);
+        }
+    }
 
-        private boolean mEmergencyDialerDisableBecauseSimLocked;
+    KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
 
         @Override
         public void onDevicePolicyManagerStateChanged() {
@@ -108,19 +123,15 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
         }
 
         @Override
-        public void onSimStateChanged(IccCardConstants.State simState) {
-            // Some carriers aren't capable of handling emergency calls while the SIM is locked
-            mEmergencyDialerDisableBecauseSimLocked = KeyguardUpdateMonitor.isSimLocked(simState)
-                    && !mLockPatternUtils.isEmergencyCallEnabledWhileSimLocked();
+        public void onSimStateChanged(State simState) {
+            int phoneState = KeyguardUpdateMonitor.getInstance(mContext).getPhoneState();
+            updateEmergencyCallButton(simState, phoneState);
             updateTargets();
         }
 
         void onPhoneStateChanged(int phoneState) {
-            if (mEmergencyCallButton != null) {
-                mLockPatternUtils.isEmergencyCallEnabledWhileSimLocked();
-                mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton,
-                        phoneState, !mEmergencyDialerDisableBecauseSimLocked);
-            }
+            State simState = KeyguardUpdateMonitor.getInstance(mContext).getSimState();
+            updateEmergencyCallButton(simState, phoneState);
         };
     };
 
@@ -149,7 +160,28 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
         mGlowPadView = (GlowPadView) findViewById(R.id.glow_pad_view);
         mGlowPadView.setOnTriggerListener(mOnTriggerListener);
         mEmergencyCallButton = (Button) findViewById(R.id.emergency_call_button);
+        mEmergencyCallButton.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                takeEmergencyCallAction();
+            }
+        });
         updateTargets();
+    }
+
+    /**
+     * Shows the emergency dialer or returns the user to the existing call.
+     */
+    public void takeEmergencyCallAction() {
+        mCallback.userActivity(EMERGENCY_CALL_TIMEOUT);
+        if (TelephonyManager.getDefault().getCallState()
+                == TelephonyManager.CALL_STATE_OFFHOOK) {
+            mLockPatternUtils.resumeCall();
+        } else {
+            Intent intent = new Intent(ACTION_EMERGENCY_DIAL);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                    | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+            getContext().startActivity(intent);
+        }
     }
 
     public boolean isTargetPresent(int resId) {

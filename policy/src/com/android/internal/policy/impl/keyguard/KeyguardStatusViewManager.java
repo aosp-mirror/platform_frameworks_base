@@ -32,11 +32,10 @@ import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 
 /***
- * Manages a number of views inside of LockScreen layouts. See below for a list of widgets
+ * Manages a number of views inside of the given layout. See below for a list of widgets.
  */
 class KeyguardStatusViewManager {
     private static final boolean DEBUG = false;
@@ -92,21 +91,12 @@ class KeyguardStatusViewManager {
     private boolean mShowingStatus;
     private CharSequence mPlmn;
     private CharSequence mSpn;
-    protected int mPhoneState;
     private DigitalClock mDigitalClock;
     protected boolean mBatteryCharged;
     protected boolean mBatteryIsLow;
-    private boolean mEmergencyButtonEnabledBecauseSimLocked;
-    private Button mEmergencyCallButton;
-    private boolean mEmergencyCallButtonEnabledInScreen;
 
     /**
-     *
      * @param view the containing view of all widgets
-     * @param updateMonitor the update monitor to use
-     * @param lockPatternUtils lock pattern util object
-     * @param callback used to invoke emergency dialer
-     * @param emergencyButtonEnabledInScreen whether emergency button is enabled by default
      */
     public KeyguardStatusViewManager(View view) {
         if (DEBUG) Log.v(TAG, "KeyguardStatusViewManager()");
@@ -364,7 +354,6 @@ class KeyguardStatusViewManager {
 
         CharSequence carrierText = null;
         int carrierHelpTextId = 0;
-        mEmergencyButtonEnabledBecauseSimLocked = false;
         mStatus = getStatusForIccState(simState);
         mSimState = simState;
         switch (mStatus) {
@@ -394,7 +383,6 @@ class KeyguardStatusViewManager {
                 carrierText = getContext().getText(
                         R.string.lockscreen_permanent_disabled_sim_message_short);
                 carrierHelpTextId = R.string.lockscreen_permanent_disabled_sim_instructions;
-                mEmergencyButtonEnabledBecauseSimLocked = true;
                 break;
 
             case SimMissingLocked:
@@ -402,32 +390,24 @@ class KeyguardStatusViewManager {
                         getContext().getText(R.string.lockscreen_missing_sim_message_short),
                         mPlmn);
                 carrierHelpTextId = R.string.lockscreen_missing_sim_instructions;
-                mEmergencyButtonEnabledBecauseSimLocked = true;
                 break;
 
             case SimLocked:
                 carrierText = makeCarrierStringOnEmergencyCapable(
                         getContext().getText(R.string.lockscreen_sim_locked_message),
                         mPlmn);
-                mEmergencyButtonEnabledBecauseSimLocked = true;
                 break;
 
             case SimPukLocked:
                 carrierText = makeCarrierStringOnEmergencyCapable(
                         getContext().getText(R.string.lockscreen_sim_puk_locked_message),
                         mPlmn);
-                if (!mLockPatternUtils.isPukUnlockScreenEnable()) {
-                    // This means we're showing the PUK unlock screen
-                    mEmergencyButtonEnabledBecauseSimLocked = true;
-                }
                 break;
         }
 
         setCarrierText(carrierText);
         setCarrierHelpText(carrierHelpTextId);
-        updateEmergencyCallButtonState(mPhoneState);
     }
-
 
     /*
      * Add emergencyCallMessage to carrier string only if phone supports emergency calls.
@@ -500,17 +480,6 @@ class KeyguardStatusViewManager {
         }
     }
 
-    private void updateEmergencyCallButtonState(int phoneState) {
-        if (mEmergencyCallButton != null) {
-            boolean enabledBecauseSimLocked =
-                    mLockPatternUtils.isEmergencyCallEnabledWhileSimLocked()
-                    && mEmergencyButtonEnabledBecauseSimLocked;
-            boolean shown = mEmergencyCallButtonEnabledInScreen || enabledBecauseSimLocked;
-            mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton,
-                    phoneState, shown);
-        }
-    }
-
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
 
         @Override
@@ -534,12 +503,6 @@ class KeyguardStatusViewManager {
             mPlmn = plmn;
             mSpn = spn;
             updateCarrierStateWithSimStatus(mSimState);
-        }
-
-        @Override
-        public void onPhoneStateChanged(int phoneState) {
-            mPhoneState = phoneState;
-            updateEmergencyCallButtonState(phoneState);
         }
 
         @Override
