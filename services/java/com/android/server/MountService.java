@@ -1114,9 +1114,8 @@ class MountService extends IMountService.Stub
                         Slog.e(TAG, "path or description is null in readStorageList");
                     } else {
                         String pathString = path.toString();
-                        StorageVolume volume = new StorageVolume(pathString,
-                                descriptionId, removable, emulated,
-                                mtpReserve, allowMassStorage, maxFileSize);
+                        StorageVolume volume = new StorageVolume(pathString, descriptionId, primary,
+                                removable, emulated, mtpReserve, allowMassStorage, maxFileSize);
                         if (primary) {
                             if (mPrimaryVolume == null) {
                                 mPrimaryVolume = volume;
