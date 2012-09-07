@@ -19,7 +19,6 @@ package android.webkit;
 import android.Manifest.permission;
 import android.content.pm.PackageManager;
 import android.graphics.SurfaceTexture;
-import android.media.MediaPlayer;
 import android.webkit.HTML5VideoView;
 import android.webkit.HTML5VideoViewProxy;
 import android.view.Surface;
