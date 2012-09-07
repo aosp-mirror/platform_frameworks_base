@@ -180,12 +180,15 @@ public class ImageProcessingActivity extends Activity
             mTest = new Convolve3x3(true);
             break;
         case 19:
-            mTest = new ColorMatrix(false);
+            mTest = new ColorMatrix(false, false);
             break;
         case 20:
-            mTest = new ColorMatrix(true);
+            mTest = new ColorMatrix(true, false);
             break;
         case 21:
+            mTest = new ColorMatrix(true, true);
+            break;
+        case 22:
             mTest = new Copy();
             break;
         }
@@ -200,7 +203,7 @@ public class ImageProcessingActivity extends Activity
     }
 
     void setupTests() {
-        mTestNames = new String[22];
+        mTestNames = new String[23];
         mTestNames[0] = "Levels Vec3 Relaxed";
         mTestNames[1] = "Levels Vec4 Relaxed";
         mTestNames[2] = "Levels Vec3 Full";
@@ -222,7 +225,8 @@ public class ImageProcessingActivity extends Activity
         mTestNames[18] = "Intrinsics Convolve 3x3";
         mTestNames[19] = "ColorMatrix";
         mTestNames[20] = "Intrinsics ColorMatrix";
-        mTestNames[21] = "Copy";
+        mTestNames[21] = "Intrinsics ColorMatrix Grey";
+        mTestNames[22] = "Copy";
         mTestSpinner.setAdapter(new ArrayAdapter<String>(
             this, R.layout.spinner_layout, mTestNames));
     }
