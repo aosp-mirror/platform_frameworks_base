@@ -66,6 +66,7 @@ static struct {
     jfieldID mGenerationId;
     jfieldID mCanvas;
     jfieldID mCanvasSaveCount;
+    jmethodID ctor;
 } gSurfaceClassInfo;
 
 static struct {
@@ -230,6 +231,42 @@ static void setSurface(JNIEnv* env, jobject surfaceObj, const sp<Surface>& surfa
                 gSurfaceClassInfo.mGenerationId, generationId);
     }
 }
+
+static sp<ISurfaceTexture> getISurfaceTexture(JNIEnv* env, jobject surfaceObj) {
+    if (surfaceObj) {
+        sp<Surface> surface(getSurface(env, surfaceObj));
+        if (surface != NULL) {
+            return surface->getSurfaceTexture();
+        }
+    }
+    return NULL;
+}
+
+jobject android_view_Surface_createFromISurfaceTexture(JNIEnv* env,
+        const sp<ISurfaceTexture>& surfaceTexture) {
+    if (surfaceTexture == NULL) {
+        return NULL;
+    }
+
+    sp<Surface> surface(new Surface(surfaceTexture));
+    if (surface == NULL) {
+        return NULL;
+    }
+
+    jobject surfaceObj = env->NewObject(gSurfaceClassInfo.clazz, gSurfaceClassInfo.ctor);
+    if (surfaceObj == NULL) {
+        if (env->ExceptionCheck()) {
+            ALOGE("Could not create instance of Surface from ISurfaceTexture.");
+            LOGE_EX(env);
+            env->ExceptionClear();
+        }
+        return NULL;
+    }
+
+    setSurface(env, surfaceObj, surface);
+    return surfaceObj;
+}
+
 
 // ----------------------------------------------------------------------------
 
@@ -619,24 +656,12 @@ static jobject nativeCreateDisplay(JNIEnv* env, jclass clazz, jstring nameObj) {
 }
 
 static void nativeSetDisplaySurface(JNIEnv* env, jclass clazz,
-        jobject tokenObj, jobject surfaceTextureObj) {
+        jobject tokenObj, jobject surfaceObj) {
     sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
     if (token == NULL) return;
 
-    if (!surfaceTextureObj) {
-        SurfaceComposerClient::setDisplaySurface(token, NULL);
-        return;
-    }
-
-    sp<SurfaceTexture> st(SurfaceTexture_getSurfaceTexture(env, surfaceTextureObj));
-    if (st == NULL) {
-        jniThrowException(env, "java/lang/IllegalArgumentException",
-                "SurfaceTexture has already been released");
-        return;
-    }
-
-    sp<ISurfaceTexture> bq = st->getBufferQueue();
-    SurfaceComposerClient::setDisplaySurface(token, bq);
+    sp<ISurfaceTexture> surfaceTexture(getISurfaceTexture(env, surfaceObj));
+    SurfaceComposerClient::setDisplaySurface(token, surfaceTexture);
 }
 
 static void nativeSetDisplayLayerStack(JNIEnv* env, jclass clazz,
@@ -648,23 +673,23 @@ static void nativeSetDisplayLayerStack(JNIEnv* env, jclass clazz,
 }
 
 static void nativeSetDisplayProjection(JNIEnv* env, jclass clazz,
-        jobject tokenObj, jint orientation, jobject rect1Obj, jobject rect2Obj) {
+        jobject tokenObj, jint orientation, jobject layerStackRectObj, jobject displayRectObj) {
     sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
     if (token == NULL) return;
 
-    Rect rect1;
-    rect1.left = env->GetIntField(rect1Obj, gRectClassInfo.left);
-    rect1.top = env->GetIntField(rect1Obj, gRectClassInfo.top);
-    rect1.right = env->GetIntField(rect1Obj, gRectClassInfo.right);
-    rect1.bottom = env->GetIntField(rect1Obj, gRectClassInfo.bottom);
+    Rect layerStackRect;
+    layerStackRect.left = env->GetIntField(layerStackRectObj, gRectClassInfo.left);
+    layerStackRect.top = env->GetIntField(layerStackRectObj, gRectClassInfo.top);
+    layerStackRect.right = env->GetIntField(layerStackRectObj, gRectClassInfo.right);
+    layerStackRect.bottom = env->GetIntField(layerStackRectObj, gRectClassInfo.bottom);
 
-    Rect rect2;
-    rect2.left = env->GetIntField(rect2Obj, gRectClassInfo.left);
-    rect2.top = env->GetIntField(rect2Obj, gRectClassInfo.top);
-    rect2.right = env->GetIntField(rect2Obj, gRectClassInfo.right);
-    rect2.bottom = env->GetIntField(rect2Obj, gRectClassInfo.bottom);
+    Rect displayRect;
+    displayRect.left = env->GetIntField(displayRectObj, gRectClassInfo.left);
+    displayRect.top = env->GetIntField(displayRectObj, gRectClassInfo.top);
+    displayRect.right = env->GetIntField(displayRectObj, gRectClassInfo.right);
+    displayRect.bottom = env->GetIntField(displayRectObj, gRectClassInfo.bottom);
 
-    SurfaceComposerClient::setDisplayProjection(token, orientation, rect1, rect2);
+    SurfaceComposerClient::setDisplayProjection(token, orientation, layerStackRect, displayRect);
 }
 
 static jboolean nativeGetDisplayInfo(JNIEnv* env, jclass clazz,
@@ -800,7 +825,7 @@ static JNINativeMethod gSurfaceMethods[] = {
             (void*)nativeGetBuiltInDisplay },
     {"nativeCreateDisplay", "(Ljava/lang/String;)Landroid/os/IBinder;",
             (void*)nativeCreateDisplay },
-    {"nativeSetDisplaySurface", "(Landroid/os/IBinder;Landroid/graphics/SurfaceTexture;)V",
+    {"nativeSetDisplaySurface", "(Landroid/os/IBinder;Landroid/view/Surface;)V",
             (void*)nativeSetDisplaySurface },
     {"nativeSetDisplayLayerStack", "(Landroid/os/IBinder;I)V",
             (void*)nativeSetDisplayLayerStack },
@@ -835,6 +860,7 @@ int register_android_view_Surface(JNIEnv* env)
             env->GetFieldID(gSurfaceClassInfo.clazz, "mCanvas", "Landroid/graphics/Canvas;");
     gSurfaceClassInfo.mCanvasSaveCount =
             env->GetFieldID(gSurfaceClassInfo.clazz, "mCanvasSaveCount", "I");
+    gSurfaceClassInfo.ctor = env->GetMethodID(gSurfaceClassInfo.clazz, "<init>", "()V");
 
     clazz = env->FindClass("android/graphics/Canvas");
     gCanvasClassInfo.mNativeCanvas = env->GetFieldID(clazz, "mNativeCanvas", "I");

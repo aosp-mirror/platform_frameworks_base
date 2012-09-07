@@ -16,6 +16,8 @@
 
 package com.android.server.display;
 
+import android.util.DisplayMetrics;
+
 import libcore.util.Objects;
 
 /**
@@ -58,12 +60,43 @@ final class DisplayDeviceInfo {
      */
     public int height;
 
+    /**
+     * The refresh rate of the display.
+     */
     public float refreshRate;
+
+    /**
+     * The nominal apparent density of the display in DPI used for layout calculations.
+     * This density is sensitive to the viewing distance.  A big TV and a tablet may have
+     * the same apparent density even though the pixels on the TV are much bigger than
+     * those on the tablet.
+     */
     public int densityDpi;
+
+    /**
+     * The physical density of the display in DPI in the X direction.
+     * This density should specify the physical size of each pixel.
+     */
     public float xDpi;
+
+    /**
+     * The physical density of the display in DPI in the X direction.
+     * This density should specify the physical size of each pixel.
+     */
     public float yDpi;
 
+    /**
+     * Display flags.
+     */
     public int flags;
+
+    public void setAssumedDensityForExternalDisplay(int width, int height) {
+        densityDpi = Math.min(width, height) * DisplayMetrics.DENSITY_XHIGH / 1080;
+        // Technically, these values should be smaller than the apparent density
+        // but we don't know the physical size of the display.
+        xDpi = densityDpi;
+        yDpi = densityDpi;
+    }
 
     @Override
     public boolean equals(Object o) {
