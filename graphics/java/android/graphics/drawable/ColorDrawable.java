@@ -36,12 +36,14 @@ import java.io.IOException;
 public class ColorDrawable extends Drawable {
     private ColorState mState;
     private final Paint mPaint = new Paint();
+    private boolean mMutated;
 
     /**
      * Creates a new black ColorDrawable.
      */
     public ColorDrawable() {
         this(null);
+        mMutated = true;
     }
 
     /**
@@ -52,6 +54,7 @@ public class ColorDrawable extends Drawable {
     public ColorDrawable(int color) {
         this(null);
         setColor(color);
+        mMutated = true;
     }
 
     private ColorDrawable(ColorState state) {
@@ -61,6 +64,21 @@ public class ColorDrawable extends Drawable {
     @Override
     public int getChangingConfigurations() {
         return super.getChangingConfigurations() | mState.mChangingConfigurations;
+    }
+
+    /**
+     * A mutable BitmapDrawable still shares its Bitmap with any other Drawable
+     * that comes from the same resource.
+     *
+     * @return This drawable.
+     */
+    @Override
+    public Drawable mutate() {
+        if (!mMutated && super.mutate() == this) {
+            mState = new ColorState(mState);
+            mMutated = true;
+        }
+        return this;
     }
 
     @Override
@@ -165,6 +183,7 @@ public class ColorDrawable extends Drawable {
             if (state != null) {
                 mBaseColor = state.mBaseColor;
                 mUseColor = state.mUseColor;
+                mChangingConfigurations = state.mChangingConfigurations;
             }
         }
 
