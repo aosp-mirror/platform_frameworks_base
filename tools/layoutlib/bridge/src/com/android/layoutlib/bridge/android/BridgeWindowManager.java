@@ -450,7 +450,8 @@ public class BridgeWindowManager implements IWindowManager {
     }
 
     @Override
-    public void stopWatchRotation(IRotationWatcher watcher) throws RemoteException {
+    public void magnifyDisplay(int dipslayId, float scale, float offsetX, float offsetY)
+            throws RemoteException {
         // TODO Auto-generated method stub
     }
 
@@ -473,13 +474,7 @@ public class BridgeWindowManager implements IWindowManager {
     }
 
     @Override
-    public void getVisibleWindowsForDisplay(int displayId,
-            List<WindowInfo> outInfos) throws RemoteException {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public void magnifyDisplay(int dipslayId, float scale, float offsetX, float offsetY)
+    public void getVisibleWindowsForDisplay(int displayId, List<WindowInfo> outInfos)
             throws RemoteException {
         // TODO Auto-generated method stub
     }
