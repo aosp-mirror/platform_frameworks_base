@@ -29,6 +29,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.MathUtils;
 import android.util.SparseBooleanArray;
 import android.view.FocusFinder;
 import android.view.KeyEvent;
@@ -1490,6 +1491,10 @@ public class ListView extends AbsListView {
 
             View focusLayoutRestoreView = null;
 
+            AccessibilityNodeInfo accessibilityFocusLayoutRestoreNode = null;
+            View accessibilityFocusLayoutRestoreView = null;
+            int accessibilityFocusPosition = INVALID_POSITION;
+
             // Remember stuff we will need down below
             switch (mLayoutMode) {
             case LAYOUT_SET_SELECTION:
@@ -1582,6 +1587,25 @@ public class ListView extends AbsListView {
                     }
                 }
                 requestFocus();
+            }
+
+            // Remember which child, if any, had accessibility focus.
+            final View accessFocusedView = getViewRootImpl().getAccessibilityFocusedHost();
+            if (accessFocusedView != null) {
+                final View accessFocusedChild = findAccessibilityFocusedChild(accessFocusedView);
+                if (accessFocusedChild != null) {
+                    if (!dataChanged || isDirectChildHeaderOrFooter(accessFocusedChild)) {
+                        // If the views won't be changing, try to maintain focus
+                        // on the current view host and (if applicable) its
+                        // virtual view.
+                        accessibilityFocusLayoutRestoreView = accessFocusedView;
+                        accessibilityFocusLayoutRestoreNode = getViewRootImpl()
+                                .getAccessibilityFocusedVirtualView();
+                    } else {
+                        // Otherwise, try to maintain focus at the same position.
+                        accessibilityFocusPosition = getPositionForView(accessFocusedChild);
+                    }
+                }
             }
 
             // Clear out old views
@@ -1682,6 +1706,22 @@ public class ListView extends AbsListView {
                 }
             }
 
+            // Attempt to restore accessibility focus.
+            if (accessibilityFocusLayoutRestoreNode != null) {
+                accessibilityFocusLayoutRestoreNode.performAction(
+                        AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
+            } else if (accessibilityFocusLayoutRestoreView != null) {
+                accessibilityFocusLayoutRestoreView.requestAccessibilityFocus();
+            } else if (accessibilityFocusPosition != INVALID_POSITION) {
+                // Bound the position within the visible children.
+                final int position = MathUtils.constrain(
+                        (accessibilityFocusPosition - mFirstPosition), 0, (getChildCount() - 1));
+                final View restoreView = getChildAt(position);
+                if (restoreView != null) {
+                    restoreView.requestAccessibilityFocus();
+                }
+            }
+
             // tell focus view we are done mucking with it, if it is still in
             // our view hierarchy.
             if (focusLayoutRestoreView != null
@@ -1710,6 +1750,22 @@ public class ListView extends AbsListView {
                 mBlockLayoutRequests = false;
             }
         }
+    }
+
+    /**
+     * @param focusedView the view that has accessibility focus.
+     * @return the direct child that contains accessibility focus.
+     */
+    private View findAccessibilityFocusedChild(View focusedView) {
+        ViewParent viewParent = focusedView.getParent();
+        while ((viewParent instanceof View) && (viewParent != this)) {
+            focusedView = (View) viewParent;
+            viewParent = viewParent.getParent();
+        }
+        if (!(viewParent instanceof View)) {
+            return null;
+        }
+        return focusedView;
     }
 
     /**
