@@ -41,6 +41,7 @@ import com.android.internal.net.VpnConfig;
 import com.android.internal.net.VpnProfile;
 import com.android.internal.util.Preconditions;
 import com.android.server.ConnectivityService;
+import com.android.server.EventLogTags;
 import com.android.server.connectivity.Vpn;
 
 /**
@@ -122,12 +123,18 @@ public class LockdownVpnTracker {
         }
         if (egressDisconnected) return;
 
+        final int egressType = egressInfo.getType();
+        if (vpnInfo.getDetailedState() == DetailedState.FAILED) {
+            EventLogTags.writeLockdownVpnError(egressType);
+        }
+
         if (mErrorCount > MAX_ERROR_COUNT) {
             showNotification(R.string.vpn_lockdown_error, R.drawable.vpn_disconnected);
 
         } else if (egressInfo.isConnected() && !vpnInfo.isConnectedOrConnecting()) {
             if (mProfile.isValidLockdownProfile()) {
                 Slog.d(TAG, "Active network connected; starting VPN");
+                EventLogTags.writeLockdownVpnConnecting(egressType);
                 showNotification(R.string.vpn_lockdown_connecting, R.drawable.vpn_disconnected);
 
                 mAcceptedEgressIface = egressProp.getInterfaceName();
@@ -148,6 +155,7 @@ public class LockdownVpnTracker {
             }
 
             Slog.d(TAG, "VPN connected using iface=" + iface + ", sourceAddr=" + sourceAddr);
+            EventLogTags.writeLockdownVpnConnected(egressType);
             showNotification(R.string.vpn_lockdown_connected, R.drawable.vpn_connected);
 
             try {
