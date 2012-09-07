@@ -1175,14 +1175,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 loadStringSetting(stmt, Settings.Secure.SCREENSAVER_COMPONENTS,
                         R.string.def_screensaver_component);
 
-                // Migrate now-global settings. Note that this happens before
-                // new users can be created.
-                createGlobalTable(db);
-                String[] settingsToMove = (String[]) SettingsProvider.sSystemGlobalKeys.toArray();
-                moveSettingsToNewTable(db, TABLE_SYSTEM, TABLE_GLOBAL, settingsToMove);
-                settingsToMove = (String[]) SettingsProvider.sSecureGlobalKeys.toArray();
-                moveSettingsToNewTable(db, TABLE_SECURE, TABLE_GLOBAL, settingsToMove);
-
                 db.setTransactionSuccessful();
             } finally {
                 db.endTransaction();
@@ -1216,9 +1208,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 // Migrate now-global settings. Note that this happens before
                 // new users can be created.
                 createGlobalTable(db);
-                String[] settingsToMove = (String[]) SettingsProvider.sSystemGlobalKeys.toArray();
+                String[] settingsToMove = hashsetToStringArray(SettingsProvider.sSystemGlobalKeys);
                 moveSettingsToNewTable(db, TABLE_SYSTEM, TABLE_GLOBAL, settingsToMove);
-                settingsToMove = (String[]) SettingsProvider.sSecureGlobalKeys.toArray();
+                settingsToMove = hashsetToStringArray(SettingsProvider.sSecureGlobalKeys);
                 moveSettingsToNewTable(db, TABLE_SECURE, TABLE_GLOBAL, settingsToMove);
 
                 db.setTransactionSuccessful();
@@ -1281,6 +1273,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("INSERT INTO secure(name,value) values('" +
                     "wiped_db_reason" + "','" + wipeReason + "');");
         }
+    }
+
+    private String[] hashsetToStringArray(HashSet<String> set) {
+        String[] array = new String[set.size()];
+        return set.toArray(array);
     }
 
     private void moveSettingsToNewTable(SQLiteDatabase db,
