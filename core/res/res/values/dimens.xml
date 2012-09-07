@@ -193,7 +193,7 @@
     <!-- Padding on left margin of PIN text entry field to center it when del button is showing -->
     <dimen name="keyguard_lockscreen_pin_margin_left">40dip</dimen>
 
-    <!-- Height of FaceUnlock widget in keyguard -->
+    <!-- Height of FaceUnlock view in keyguard -->
     <dimen name="face_unlock_height">330dip</dimen>
 
     <!-- Minimum popup width for selecting an activity in ActivityChooserDialog/ActivityChooserView. -->
