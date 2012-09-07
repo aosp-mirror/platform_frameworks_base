@@ -18,6 +18,7 @@ package android.net.sip;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Locale;
 
 /**
  * An object used to manipulate messages of Session Description Protocol (SDP).
@@ -66,7 +67,7 @@ public class SimpleSessionDescription {
     public SimpleSessionDescription(long sessionId, String address) {
         address = (address.indexOf(':') < 0 ? "IN IP4 " : "IN IP6 ") + address;
         mFields.parse("v=0");
-        mFields.parse(String.format("o=- %d %d %s", sessionId,
+        mFields.parse(String.format(Locale.US, "o=- %d %d %s", sessionId,
                 System.currentTimeMillis(), address));
         mFields.parse("s=-");
         mFields.parse("t=0 0");
