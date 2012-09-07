@@ -152,6 +152,8 @@ class GLES20Canvas extends HardwareCanvas {
     static native int nCreateLayer(int width, int height, boolean isOpaque, int[] layerInfo);
     static native void nResizeLayer(int layerId, int width, int height, int[] layerInfo);
     static native void nSetOpaqueLayer(int layerId, boolean isOpaque);
+    static native void nSetLayerPaint(int layerId, int nativePaint);
+    static native void nSetLayerColorFilter(int layerId, int nativeColorFilter);
     static native void nUpdateTextureLayer(int layerId, int width, int height, boolean opaque,
             SurfaceTexture surface);
     static native void nSetTextureLayerTransform(int layerId, int matrix);
@@ -394,13 +396,8 @@ class GLES20Canvas extends HardwareCanvas {
     
     void drawHardwareLayer(HardwareLayer layer, float x, float y, Paint paint) {
         final GLES20Layer glLayer = (GLES20Layer) layer;
-        int modifier = paint != null ? setupColorFilter(paint) : MODIFIER_NONE;
-        try {
-            final int nativePaint = paint == null ? 0 : paint.mNativePaint;
-            nDrawLayer(mRenderer, glLayer.getLayer(), x, y, nativePaint);
-        } finally {
-            if (modifier != MODIFIER_NONE) nResetModifiers(mRenderer, modifier);
-        }
+        final int nativePaint = paint == null ? 0 : paint.mNativePaint;
+        nDrawLayer(mRenderer, glLayer.getLayer(), x, y, nativePaint);
     }
 
     private static native void nDrawLayer(int renderer, int layer, float x, float y, int paint);
