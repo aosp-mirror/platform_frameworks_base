@@ -6805,7 +6805,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public CharSequence getIterableTextForAccessibility() {
-        return mContentDescription;
+        return getContentDescription();
     }
 
     /**
