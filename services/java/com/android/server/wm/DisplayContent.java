@@ -65,11 +65,13 @@ class DisplayContent {
     // Accessed directly by all users.
     boolean layoutNeeded;
     int pendingLayoutChanges;
+    final boolean isDefaultDisplay;
 
     DisplayContent(Display display) {
         mDisplay = display;
         mDisplayId = display.getDisplayId();
         display.getDisplayInfo(mDisplayInfo);
+        isDefaultDisplay = mDisplayId == Display.DEFAULT_DISPLAY;
     }
 
     int getDisplayId() {
@@ -85,7 +87,7 @@ class DisplayContent {
     }
 
     DisplayInfo getDisplayInfo() {
-        mDisplay.getDisplayInfo(mDisplayInfo);
+        // TODO: Add a listener for changes to Display and update mDisplayInfo when appropriate.
         return mDisplayInfo;
     }
 
@@ -111,7 +113,7 @@ class DisplayContent {
         pw.print("x"); pw.print(mDisplayInfo.smallestNominalAppHeight);
         pw.print("-"); pw.print(mDisplayInfo.largestNominalAppWidth);
         pw.print("x"); pw.println(mDisplayInfo.largestNominalAppHeight);
-        pw.print("layoutNeeded="); pw.println(layoutNeeded);
+        pw.print("  layoutNeeded="); pw.println(layoutNeeded);
         pw.println();
     }
 }
