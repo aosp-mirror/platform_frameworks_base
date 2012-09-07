@@ -40,6 +40,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     private static final String SECURE_SETTINGS_BLUETOOTH_NAME="bluetooth_name";
     private static final int TIMEOUT_BIND_MS = 3000; //Maximum msec to wait for a bind
     private static final int TIMEOUT_SAVE_MS = 500; //Maximum msec to wait for a save
+    //Maximum msec to wait for service restart
+    private static final int SERVICE_RESTART_TIME_MS = 200;
 
     private static final int MESSAGE_ENABLE = 1;
     private static final int MESSAGE_DISABLE = 2;
@@ -49,6 +51,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     private static final int MESSAGE_UNREGISTER_STATE_CHANGE_CALLBACK = 31;
     private static final int MESSAGE_BLUETOOTH_SERVICE_CONNECTED = 40;
     private static final int MESSAGE_BLUETOOTH_SERVICE_DISCONNECTED = 41;
+    private static final int MESSAGE_RESTART_BLUETOOTH_SERVICE = 42;
     private static final int MESSAGE_BLUETOOTH_STATE_CHANGE=60;
     private static final int MESSAGE_TIMEOUT_BIND =100;
     private static final int MESSAGE_TIMEOUT_UNBIND =101;
@@ -660,8 +663,36 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 {
                     if (DBG) Log.d(TAG, "MESSAGE_BLUETOOTH_SERVICE_DISCONNECTED");
                     sendBluetoothServiceDownCallback();
+
+                    // Send BT state broadcast to update
+                    // the BT icon correctly
+                    Message stateChangeMsg = mHandler.obtainMessage(
+                        MESSAGE_BLUETOOTH_STATE_CHANGE);
+                    stateChangeMsg.arg1 = BluetoothAdapter.STATE_ON;
+                    stateChangeMsg.arg2 =
+                        BluetoothAdapter.STATE_TURNING_OFF;
+                    mHandler.sendMessage(stateChangeMsg);
+                    synchronized(mConnection) {
+                        mBluetooth = null;
+                    }
+                    // Send a Bluetooth Restart message
+                    Message restartMsg = mHandler.obtainMessage(
+                        MESSAGE_RESTART_BLUETOOTH_SERVICE);
+                    mHandler.sendMessageDelayed(restartMsg,
+                        SERVICE_RESTART_TIME_MS);
                     break;
                 }
+                case MESSAGE_RESTART_BLUETOOTH_SERVICE:
+                {
+                    Log.d(TAG, "MESSAGE_RESTART_BLUETOOTH_SERVICE:"
+                        +" Restart IBluetooth service");
+                    /* Enable without persisting the setting as
+                     it doesnt change when IBluetooth
+                     service restarts */
+                    handleEnable(false, mQuietEnable);
+                    break;
+                }
+
                 case MESSAGE_TIMEOUT_UNBIND:
                 {
                     Log.e(TAG, "MESSAGE_TIMEOUT_UNBIND");
