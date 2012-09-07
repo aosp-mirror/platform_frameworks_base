@@ -62,13 +62,13 @@ decodeSampledBitmapFromResource()}</a>: </p>
 
 <a name="BitmapWorkerTask"></a>
 <pre>
-class BitmapWorkerTask extends AsyncTask<Integer, Void, Bitmap> {
-    private final WeakReference<ImageView> imageViewReference;
+class BitmapWorkerTask extends AsyncTask&lt;Integer, Void, Bitmap&gt; {
+    private final WeakReference&lt;ImageView&gt; imageViewReference;
     private int data = 0;
 
     public BitmapWorkerTask(ImageView imageView) {
         // Use a WeakReference to ensure the ImageView can be garbage collected
-        imageViewReference = new WeakReference<ImageView>(imageView);
+        imageViewReference = new WeakReference&lt;ImageView&gt;(imageView);
     }
 
     // Decode image in background.
@@ -133,13 +133,13 @@ completes:</p>
 <a name="AsyncDrawable"></a>
 <pre>
 static class AsyncDrawable extends BitmapDrawable {
-    private final WeakReference<BitmapWorkerTask> bitmapWorkerTaskReference;
+    private final WeakReference&lt;BitmapWorkerTask&gt; bitmapWorkerTaskReference;
 
     public AsyncDrawable(Resources res, Bitmap bitmap,
             BitmapWorkerTask bitmapWorkerTask) {
         super(res, bitmap);
         bitmapWorkerTaskReference =
-            new WeakReference<BitmapWorkerTask>(bitmapWorkerTask);
+            new WeakReference&lt;BitmapWorkerTask&gt;(bitmapWorkerTask);
     }
 
     public BitmapWorkerTask getBitmapWorkerTask() {
@@ -211,7 +211,7 @@ one associated with the {@link android.widget.ImageView}:</p>
 
 <a name="BitmapWorkerTaskUpdated"></a>
 <pre>
-class BitmapWorkerTask extends AsyncTask<Integer, Void, Bitmap> {
+class BitmapWorkerTask extends AsyncTask&lt;Integer, Void, Bitmap&gt; {
     ...
 
     &#64;Override
