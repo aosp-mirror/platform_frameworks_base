@@ -1760,7 +1760,7 @@ void OpenGLRenderer::drawAARect(float left, float top, float right, float bottom
         float m00 = mat->data[Matrix4::kScaleX];
         float m01 = mat->data[Matrix4::kSkewY];
         float m10 = mat->data[Matrix4::kSkewX];
-        float m11 = mat->data[Matrix4::kScaleX];
+        float m11 = mat->data[Matrix4::kScaleY];
         float scaleX = sqrt(m00 * m00 + m01 * m01);
         float scaleY = sqrt(m10 * m10 + m11 * m11);
         inverseScaleX = (scaleX != 0) ? (inverseScaleX / scaleX) : 0;
@@ -1896,7 +1896,7 @@ status_t OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
             float m00 = mat->data[Matrix4::kScaleX];
             float m01 = mat->data[Matrix4::kSkewY];
             float m10 = mat->data[Matrix4::kSkewX];
-            float m11 = mat->data[Matrix4::kScaleX];
+            float m11 = mat->data[Matrix4::kScaleY];
 
             float scaleX = sqrtf(m00 * m00 + m01 * m01);
             float scaleY = sqrtf(m10 * m10 + m11 * m11);
