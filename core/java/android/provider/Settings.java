@@ -878,6 +878,8 @@ public final class Settings {
         private static final HashSet<String> MOVED_TO_GLOBAL;
         static {
             MOVED_TO_GLOBAL = new HashSet<String>();
+            // these were originally in system but migrated to secure in the past,
+            // so are duplicated in the Secure.* namespace
             MOVED_TO_GLOBAL.add(Global.ADB_ENABLED);
             MOVED_TO_GLOBAL.add(Global.BLUETOOTH_ON);
             MOVED_TO_GLOBAL.add(Global.DATA_ROAMING);
@@ -885,6 +887,7 @@ public final class Settings {
             MOVED_TO_GLOBAL.add(Global.INSTALL_NON_MARKET_APPS);
             MOVED_TO_GLOBAL.add(Global.USB_MASS_STORAGE_ENABLED);
 
+            // these are moving directly from system to global
             MOVED_TO_GLOBAL.add(Settings.Global.AIRPLANE_MODE_ON);
             MOVED_TO_GLOBAL.add(Settings.Global.AIRPLANE_MODE_RADIOS);
             MOVED_TO_GLOBAL.add(Settings.Global.AIRPLANE_MODE_TOGGLEABLE_RADIOS);
