@@ -536,8 +536,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         int layoutDir = (screenLayout&SCREENLAYOUT_LAYOUTDIR_MASK);
         switch (layoutDir) {
             case SCREENLAYOUT_LAYOUTDIR_UNDEFINED: sb.append(" ?layoutDir"); break;
-            case SCREENLAYOUT_LAYOUTDIR_LTR: sb.append(" ltr"); break;
-            case SCREENLAYOUT_LAYOUTDIR_RTL: sb.append(" rtl"); break;
+            case SCREENLAYOUT_LAYOUTDIR_LTR: sb.append(" ldltr"); break;
+            case SCREENLAYOUT_LAYOUTDIR_RTL: sb.append(" ldrtl"); break;
             default: sb.append(" layoutDir=");
                 sb.append(layoutDir >> SCREENLAYOUT_LAYOUTDIR_SHIFT); break;
         }
