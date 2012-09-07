@@ -31,6 +31,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
+import android.view.KeyEvent;
+import android.view.View;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -47,7 +49,8 @@ class HTML5VideoViewProxy extends Handler
                           MediaPlayer.OnCompletionListener,
                           MediaPlayer.OnErrorListener,
                           MediaPlayer.OnInfoListener,
-                          SurfaceTexture.OnFrameAvailableListener {
+                          SurfaceTexture.OnFrameAvailableListener,
+                          View.OnKeyListener {
     // Logging tag.
     private static final String LOGTAG = "HTML5VideoViewProxy";
 
@@ -94,9 +97,6 @@ class HTML5VideoViewProxy extends Handler
         private static HTML5VideoView mHTML5VideoView;
 
         private static boolean isVideoSelfEnded = false;
-        // By using the baseLayer and the current video Layer ID, we can
-        // identify the exact layer on the UI thread to use the SurfaceTexture.
-        private static int mBaseLayer = 0;
 
         private static void setPlayerBuffering(boolean playerBuffering) {
             mHTML5VideoView.setPlayerBuffering(playerBuffering);
@@ -106,7 +106,6 @@ class HTML5VideoViewProxy extends Handler
         // When we found the Video layer, then we set the Surface Texture to it.
         // Otherwise, we may want to delete the Surface Texture to save memory.
         public static void setBaseLayer(int layer) {
-            mBaseLayer = layer;
             // Don't do this for full screen mode.
             if (mHTML5VideoView != null
                 && !mHTML5VideoView.isFullScreenMode()
@@ -303,6 +302,7 @@ class HTML5VideoViewProxy extends Handler
 
     // A bunch event listeners for our VideoView
     // MediaPlayer.OnPreparedListener
+    @Override
     public void onPrepared(MediaPlayer mp) {
         VideoPlayer.onPrepared();
         Message msg = Message.obtain(mWebCoreHandler, PREPARED);
@@ -315,6 +315,7 @@ class HTML5VideoViewProxy extends Handler
     }
 
     // MediaPlayer.OnCompletionListener;
+    @Override
     public void onCompletion(MediaPlayer mp) {
         // The video ended by itself, so we need to
         // send a message to the UI thread to dismiss
@@ -324,6 +325,7 @@ class HTML5VideoViewProxy extends Handler
     }
 
     // MediaPlayer.OnErrorListener
+    @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
         sendMessage(obtainMessage(ERROR));
         return false;
@@ -489,6 +491,7 @@ class HTML5VideoViewProxy extends Handler
             releaseQueue();
         }
         // EventHandler methods. Executed on the network thread.
+        @Override
         public void status(int major_version,
                 int minor_version,
                 int code,
@@ -496,10 +499,12 @@ class HTML5VideoViewProxy extends Handler
             mStatusCode = code;
         }
 
+        @Override
         public void headers(Headers headers) {
             mHeaders = headers;
         }
 
+        @Override
         public void data(byte[] data, int len) {
             if (mPosterBytes == null) {
                 mPosterBytes = new ByteArrayOutputStream();
@@ -507,6 +512,7 @@ class HTML5VideoViewProxy extends Handler
             mPosterBytes.write(data, 0, len);
         }
 
+        @Override
         public void endData() {
             if (mStatusCode == 200) {
                 if (mPosterBytes.size() > 0) {
@@ -524,6 +530,7 @@ class HTML5VideoViewProxy extends Handler
                 }
                 if (mUrl != null) {
                     mHandler.post(new Runnable() {
+                       @Override
                        public void run() {
                            if (mRequestHandle != null) {
                                mRequestHandle.setupRedirect(mUrl.toString(), mStatusCode,
@@ -535,14 +542,17 @@ class HTML5VideoViewProxy extends Handler
             }
         }
 
+        @Override
         public void certificate(SslCertificate certificate) {
             // Don't care.
         }
 
+        @Override
         public void error(int id, String description) {
             cleanup();
         }
 
+        @Override
         public boolean handleSslErrorRequest(SslError error) {
             // Don't care. If this happens, data() will never be called so
             // mPosterBytes will never be created, so no need to call cleanup.
@@ -791,6 +801,19 @@ class HTML5VideoViewProxy extends Handler
             sendMessage(obtainMessage(BUFFERING_START, what, extra));
         } else if (what == MediaPlayer.MEDIA_INFO_BUFFERING_END) {
             sendMessage(obtainMessage(BUFFERING_END, what, extra));
+        }
+        return false;
+    }
+
+    @Override
+    public boolean onKey(View v, int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                return true;
+            } else if (event.getAction() == KeyEvent.ACTION_UP && !event.isCanceled()) {
+                VideoPlayer.exitFullScreenVideo(this, mWebView);
+                return true;
+            }
         }
         return false;
     }
