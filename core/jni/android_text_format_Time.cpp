@@ -23,6 +23,7 @@
 #include "jni.h"
 #include "utils/misc.h"
 #include "android_runtime/AndroidRuntime.h"
+#include "ScopedStringChars.h"
 #include "TimeUtils.h"
 #include <nativehelper/JNIHelp.h>
 #include <cutils/tztime.h>
@@ -71,11 +72,10 @@ static inline bool java2time(JNIEnv* env, Time* t, jobject o)
     t->t.tm_gmtoff = env->GetLongField(o, g_gmtoffField);
     bool allDay = env->GetBooleanField(o, g_allDayField);
     if (allDay &&
-	((t->t.tm_sec !=0) || (t->t.tm_min != 0) || (t->t.tm_hour != 0))) {
-        char msg[100];
-	sprintf(msg, "allDay is true but sec, min, hour are not 0.");
-	jniThrowException(env, "java/lang/IllegalArgumentException", msg);
-	return false;
+       ((t->t.tm_sec !=0) || (t->t.tm_min != 0) || (t->t.tm_hour != 0))) {
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                          "allDay is true but sec, min, hour are not 0.");
+        return false;
     }
     return true;
 }
@@ -308,7 +308,7 @@ static jstring android_text_format_Time_format(JNIEnv* env, jobject This,
 static jstring android_text_format_Time_toString(JNIEnv* env, jobject This)
 {
     Time t;
-    if (!java2time(env, &t, This)) return env->NewStringUTF("");;
+    if (!java2time(env, &t, This)) return env->NewStringUTF("");
     ACQUIRE_TIMEZONE(This, t)
 
     String8 r = t.toString();
@@ -360,32 +360,30 @@ static void android_text_format_Time_set(JNIEnv* env, jobject This, jlong millis
 // ============================================================================
 // Just do this here because it's not worth recreating the strings
 
-static int get_char(JNIEnv* env, const jchar *s, int spos, int mul,
-                    bool *thrown)
+static int get_char(JNIEnv* env, const ScopedStringChars& s, int spos, int mul,
+                    bool* thrown)
 {
     jchar c = s[spos];
     if (c >= '0' && c <= '9') {
         return (c - '0') * mul;
     } else {
         if (!*thrown) {
-            char msg[100];
-            sprintf(msg, "Parse error at pos=%d", spos);
-            jniThrowException(env, "android/util/TimeFormatException", msg);
+            jniThrowExceptionFmt(env, "android/util/TimeFormatException",
+                                 "Parse error at pos=%d", spos);
             *thrown = true;
         }
         return 0;
     }
 }
 
-static bool check_char(JNIEnv* env, const jchar *s, int spos, jchar expected)
+static bool check_char(JNIEnv* env, const ScopedStringChars& s, int spos, jchar expected)
 {
     jchar c = s[spos];
     if (c != expected) {
-        char msg[100];
-	sprintf(msg, "Unexpected character 0x%02x at pos=%d.  Expected %c.", c, spos,
-		expected);
-	jniThrowException(env, "android/util/TimeFormatException", msg);
-	return false;
+        jniThrowExceptionFmt(env, "android/util/TimeFormatException",
+                             "Unexpected character 0x%02x at pos=%d.  Expected %c.",
+                             c, spos, expected);
+        return false;
     }
     return true;
 }
@@ -394,20 +392,19 @@ static bool check_char(JNIEnv* env, const jchar *s, int spos, jchar expected)
 static jboolean android_text_format_Time_parse(JNIEnv* env, jobject This, jstring strObj)
 {
     jsize len = env->GetStringLength(strObj);
-    const jchar *s = env->GetStringChars(strObj, NULL);
-
-    bool thrown = false;
-    int n;
-    jboolean inUtc = false;
-
     if (len < 8) {
-        char msg[100];
-        sprintf(msg, "String too short -- expected at least 8 characters.");
-	jniThrowException(env, "android/util/TimeFormatException", msg);
-	return false;
+        jniThrowException(env, "android/util/TimeFormatException",
+                          "String too short -- expected at least 8 characters.");
+        return false;
     }
 
+    jboolean inUtc = false;
+
+    ScopedStringChars s(env, strObj);
+
     // year
+    int n;
+    bool thrown = false;
     n = get_char(env, s, 0, 1000, &thrown);
     n += get_char(env, s, 1, 100, &thrown);
     n += get_char(env, s, 2, 10, &thrown);
@@ -454,7 +451,7 @@ static jboolean android_text_format_Time_parse(JNIEnv* env, jobject This, jstrin
         if (len > 15) {
             // Z
             if (!check_char(env, s, 15, 'Z')) return false;
-	    inUtc = true;
+            inUtc = true;
         }
     } else {
         env->SetBooleanField(This, g_allDayField, JNI_TRUE);
@@ -467,8 +464,7 @@ static jboolean android_text_format_Time_parse(JNIEnv* env, jobject This, jstrin
     env->SetIntField(This, g_ydayField, 0);
     env->SetIntField(This, g_isdstField, -1);
     env->SetLongField(This, g_gmtoffField, 0);
-    
-    env->ReleaseStringChars(strObj, s);
+
     return inUtc;
 }
 
@@ -477,19 +473,19 @@ static jboolean android_text_format_Time_parse3339(JNIEnv* env,
                                            jstring strObj)
 {
     jsize len = env->GetStringLength(strObj);
-    const jchar *s = env->GetStringChars(strObj, NULL);
-
-    bool thrown = false;
-    int n;
-    jboolean inUtc = false;
-
     if (len < 10) {
         jniThrowException(env, "android/util/TimeFormatException",
-                "Time input is too short; must be at least 10 characters");
+                          "String too short --- expected at least 10 characters.");
         return false;
     }
 
+    jboolean inUtc = false;
+
+    ScopedStringChars s(env, strObj);
+
     // year
+    int n;
+    bool thrown = false;
     n = get_char(env, s, 0, 1000, &thrown);    
     n += get_char(env, s, 1, 100, &thrown);
     n += get_char(env, s, 2, 10, &thrown);
@@ -520,28 +516,28 @@ static jboolean android_text_format_Time_parse3339(JNIEnv* env,
         // T
         if (!check_char(env, s, 10, 'T')) return false;
 
-	env->SetBooleanField(This, g_allDayField, JNI_FALSE);
+        env->SetBooleanField(This, g_allDayField, JNI_FALSE);
         // hour
         n = get_char(env, s, 11, 10, &thrown);
         n += get_char(env, s, 12, 1, &thrown);
         if (thrown) return false;
-	int hour = n;
+        int hour = n;
         // env->SetIntField(This, g_hourField, n);
-	
-	// :
-	if (!check_char(env, s, 13, ':')) return false;
 
-	// minute
+        // :
+        if (!check_char(env, s, 13, ':')) return false;
+
+        // minute
         n = get_char(env, s, 14, 10, &thrown);
         n += get_char(env, s, 15, 1, &thrown);
         if (thrown) return false;
-	int minute = n;
+        int minute = n;
         // env->SetIntField(This, g_minField, n);
 
-	// :
-	if (!check_char(env, s, 16, ':')) return false;
+        // :
+        if (!check_char(env, s, 16, ':')) return false;
 
-	// second
+        // second
         n = get_char(env, s, 17, 10, &thrown);
         n += get_char(env, s, 18, 1, &thrown);
         if (thrown) return false;
@@ -561,64 +557,63 @@ static jboolean android_text_format_Time_parse3339(JNIEnv* env,
         if (len > tz_index) {
             char c = s[tz_index];
 
-	    // NOTE: the offset is meant to be subtracted to get from local time
-	    // to UTC.  we therefore use 1 for '-' and -1 for '+'.
-	    switch (c) {
-	    case 'Z':
-	        // Zulu time -- UTC
-	        offset = 0;
-		break;
-	    case '-': 
+            // NOTE: the offset is meant to be subtracted to get from local time
+            // to UTC.  we therefore use 1 for '-' and -1 for '+'.
+            switch (c) {
+            case 'Z':
+                // Zulu time -- UTC
+                offset = 0;
+                break;
+            case '-': 
                 offset = 1;
-	        break;
-	    case '+': 
+                break;
+            case '+': 
                 offset = -1;
-	        break;
-	    default:
-	        char msg[100];
-	        sprintf(msg, "Unexpected character 0x%02x at position %d.  Expected + or -",
-			c, tz_index);
-	        jniThrowException(env, "android/util/TimeFormatException", msg);
-	        return false;
-	    }
+                break;
+            default:
+                jniThrowExceptionFmt(env, "android/util/TimeFormatException",
+                                     "Unexpected character 0x%02x at position %d.  Expected + or -",
+                                     c, tz_index);
+                return false;
+            }
             inUtc = true;
 
-	    if (offset != 0) {
-	        if (len < tz_index + 6) {
-	            char msg[100];
-	            sprintf(msg, "Unexpected length; should be %d characters", tz_index + 6);
-	            jniThrowException(env, "android/util/TimeFormatException", msg);
-	            return false;
-	        }
+            if (offset != 0) {
+                if (len < tz_index + 6) {
+                    jniThrowExceptionFmt(env, "android/util/TimeFormatException",
+                                         "Unexpected length; should be %d characters",
+                                         tz_index + 6);
+                    return false;
+                }
 
-	        // hour
-	        n = get_char(env, s, tz_index + 1, 10, &thrown);
-		n += get_char(env, s, tz_index + 2, 1, &thrown);
-		if (thrown) return false;
-		n *= offset;
-		hour += n;
+                // hour
+                n = get_char(env, s, tz_index + 1, 10, &thrown);
+                n += get_char(env, s, tz_index + 2, 1, &thrown);
+                if (thrown) return false;
+                n *= offset;
+                hour += n;
 
-		// :
-		if (!check_char(env, s, tz_index + 3, ':')) return false;
-	    
-		// minute
-		n = get_char(env, s, tz_index + 4, 10, &thrown);
-		n += get_char(env, s, tz_index + 5, 1, &thrown);
-		if (thrown) return false;
-		n *= offset;
-		minute += n;
-	    }
-	}
-	env->SetIntField(This, g_hourField, hour);
+                // :
+                if (!check_char(env, s, tz_index + 3, ':')) return false;
+            
+                // minute
+                n = get_char(env, s, tz_index + 4, 10, &thrown);
+                n += get_char(env, s, tz_index + 5, 1, &thrown);
+                if (thrown) return false;
+                n *= offset;
+                minute += n;
+            }
+        }
+        env->SetIntField(This, g_hourField, hour);
         env->SetIntField(This, g_minField, minute);
 
-	if (offset != 0) {
-	    // we need to normalize after applying the hour and minute offsets
-	    android_text_format_Time_normalize(env, This, false /* use isdst */);
-	    // The timezone is set to UTC in the calling Java code.
-	}
+        if (offset != 0) {
+            // we need to normalize after applying the hour and minute offsets
+            android_text_format_Time_normalize(env, This, false /* use isdst */);
+            // The timezone is set to UTC in the calling Java code.
+        }
     } else {
-	env->SetBooleanField(This, g_allDayField, JNI_TRUE);
+        env->SetBooleanField(This, g_allDayField, JNI_TRUE);
         env->SetIntField(This, g_hourField, 0);
         env->SetIntField(This, g_minField, 0);
         env->SetIntField(This, g_secField, 0);
@@ -628,8 +623,7 @@ static jboolean android_text_format_Time_parse3339(JNIEnv* env,
     env->SetIntField(This, g_ydayField, 0);
     env->SetIntField(This, g_isdstField, -1);
     env->SetLongField(This, g_gmtoffField, 0);
-    
-    env->ReleaseStringChars(strObj, s);
+
     return inUtc;
 }
 
