@@ -8355,7 +8355,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     @Override
     public CharSequence getIterableTextForAccessibility() {
-        if (getContentDescription() == null) {
+        if (!TextUtils.isEmpty(mText)) {
             if (!(mText instanceof Spannable)) {
                 setText(mText, BufferType.SPANNABLE);
             }
