@@ -887,6 +887,12 @@ public class WindowManagerService extends IWindowManager.Stub
         return -1;
     }
 
+    /**
+     * Return the list of Windows from the passed token on the given Display.
+     * @param token The token with all the windows.
+     * @param displayContent The display we are interested in.
+     * @return List of windows from token that are on displayContent.
+     */
     WindowList getTokenWindowsOnDisplay(WindowToken token, DisplayContent displayContent) {
         final WindowList windowList = new WindowList();
         final int count = token.windows.size();
@@ -928,7 +934,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         WindowState lastWindow = tokenWindowList.get(index);
                         if (atoken != null && lastWindow == atoken.startingWindow) {
                             placeWindowBefore(lastWindow, win);
-                            tokenWindowsPos = token.windows.indexOf(lastWindow) - 1;
+                            tokenWindowsPos = token.windows.indexOf(lastWindow);
                         } else {
                             int newIdx = findIdxBasedOnAppTokens(win);
                             //there is a window above this one associated with the same
@@ -937,10 +943,15 @@ public class WindowManagerService extends IWindowManager.Stub
                             //windows associated with this token.
                             if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) {
                                 Slog.v(TAG, "Adding window " + win + " at "
-                                        + (newIdx+1) + " of " + N);
+                                        + (newIdx + 1) + " of " + N);
                             }
-                            windows.add(newIdx+1, win);
-                            tokenWindowsPos = token.windows.indexOf(windows.get(newIdx)) + 1;
+                            windows.add(newIdx + 1, win);
+                            if (newIdx < 0) {
+                                // No window from token found on win's display.
+                                tokenWindowsPos = 0;
+                            } else {
+                                tokenWindowsPos = token.windows.indexOf(windows.get(newIdx)) + 1;
+                            }
                             mWindowsChanged = true;
                         }
                     }
