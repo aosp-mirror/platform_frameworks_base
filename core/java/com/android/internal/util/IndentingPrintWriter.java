@@ -28,7 +28,7 @@ public class IndentingPrintWriter extends PrintWriter {
     private final String mIndent;
 
     private StringBuilder mBuilder = new StringBuilder();
-    private String mCurrent = new String();
+    private char[] mCurrent;
     private boolean mEmptyLine = true;
 
     public IndentingPrintWriter(Writer writer, String indent) {
@@ -38,12 +38,12 @@ public class IndentingPrintWriter extends PrintWriter {
 
     public void increaseIndent() {
         mBuilder.append(mIndent);
-        mCurrent = mBuilder.toString();
+        mCurrent = null;
     }
 
     public void decreaseIndent() {
         mBuilder.delete(0, mIndent.length());
-        mCurrent = mBuilder.toString();
+        mCurrent = null;
     }
 
     public void printPair(String key, Object value) {
@@ -51,17 +51,35 @@ public class IndentingPrintWriter extends PrintWriter {
     }
 
     @Override
-    public void println() {
-        super.println();
-        mEmptyLine = true;
+    public void write(char[] buf, int offset, int count) {
+        final int bufferEnd = offset + count;
+        int lineStart = offset;
+        int lineEnd = offset;
+        while (lineEnd < bufferEnd) {
+            char ch = buf[lineEnd++];
+            if (ch == '\n') {
+                writeIndent();
+                super.write(buf, lineStart, lineEnd - lineStart);
+                lineStart = lineEnd;
+                mEmptyLine = true;
+            }
+        }
+
+        if (lineStart != lineEnd) {
+            writeIndent();
+            super.write(buf, lineStart, lineEnd - lineStart);
+        }
     }
 
-    @Override
-    public void write(char[] buf, int offset, int count) {
+    private void writeIndent() {
         if (mEmptyLine) {
             mEmptyLine = false;
-            super.print(mCurrent);
+            if (mBuilder.length() != 0) {
+                if (mCurrent == null) {
+                    mCurrent = mBuilder.toString().toCharArray();
+                }
+                super.write(mCurrent, 0, mCurrent.length);
+            }
         }
-        super.write(buf, offset, count);
     }
 }
