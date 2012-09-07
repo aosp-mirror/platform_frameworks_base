@@ -4152,7 +4152,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             } catch (ActivityNotFoundException e) {
             }
         }
-        mContext.startActivity(mHomeIntent);
+        mContext.startActivityAsUser(mHomeIntent, UserHandle.CURRENT);
     }
     
     /**
