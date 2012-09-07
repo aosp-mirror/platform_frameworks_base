@@ -64,7 +64,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 81;
+    private static final int DATABASE_VERSION = 82;
 
     private Context mContext;
 
@@ -1145,6 +1145,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 81;
         }
 
+        if (upgradeVersion == 81) {
+            // Add package verification setting
+            db.beginTransaction();
+            SQLiteStatement stmt = null;
+            try {
+                stmt = db.compileStatement("INSERT OR REPLACE INTO secure(name,value)"
+                        + " VALUES(?,?);");
+                loadBooleanSetting(stmt, Settings.Secure.PACKAGE_VERIFIER_ENABLE,
+                        R.bool.def_package_verifier_enable);
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+                if (stmt != null) stmt.close();
+            }
+            upgradeVersion = 82;
+        }
+
         // *** Remember to update DATABASE_VERSION above!
 
         if (upgradeVersion != currentVersion) {
@@ -1641,6 +1658,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             loadBooleanSetting(stmt, Settings.Secure.INSTALL_NON_MARKET_APPS,
                     R.bool.def_install_non_market_apps);
+
+            loadBooleanSetting(stmt, Settings.Secure.PACKAGE_VERIFIER_ENABLE,
+                R.bool.def_package_verifier_enable);
 
             loadStringSetting(stmt, Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
                     R.string.def_location_providers_allowed);
