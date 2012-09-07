@@ -80,7 +80,7 @@ public class ScriptIntrinsicColorMatrix extends ScriptIntrinsic {
     }
 
     /**
-     * Set a color matrix to convert from RGB to luminace. The alpha channel
+     * Set a color matrix to convert from RGB to luminance. The alpha channel
      * will be a copy.
      *
      */
