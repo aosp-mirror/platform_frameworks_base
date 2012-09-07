@@ -763,7 +763,7 @@ private:
             mPaths.add(pathCopy);
         }
         if (mSourcePaths.indexOf(path) < 0) {
-            Caches::getInstance().resourceCache.incrementRefcount(path);
+            mCaches.resourceCache.incrementRefcount(path);
             mSourcePaths.add(path);
         }
 
@@ -811,13 +811,13 @@ private:
         // which doesn't seem worth the extra cycles for this unlikely case.
         addInt((int) bitmap);
         mBitmapResources.add(bitmap);
-        Caches::getInstance().resourceCache.incrementRefcount(bitmap);
+        mCaches.resourceCache.incrementRefcount(bitmap);
     }
 
     void addBitmapData(SkBitmap* bitmap) {
         addInt((int) bitmap);
         mOwnedBitmapResources.add(bitmap);
-        Caches::getInstance().resourceCache.incrementRefcount(bitmap);
+        mCaches.resourceCache.incrementRefcount(bitmap);
     }
 
     inline void addShader(SkiaShader* shader) {
@@ -833,7 +833,7 @@ private:
             // replaceValueFor() performs an add if the entry doesn't exist
             mShaderMap.replaceValueFor(shader, shaderCopy);
             mShaders.add(shaderCopy);
-            Caches::getInstance().resourceCache.incrementRefcount(shaderCopy);
+            mCaches.resourceCache.incrementRefcount(shaderCopy);
         }
 
         addInt((int) shaderCopy);
@@ -842,7 +842,7 @@ private:
     inline void addColorFilter(SkiaColorFilter* colorFilter) {
         addInt((int) colorFilter);
         mFilterResources.add(colorFilter);
-        Caches::getInstance().resourceCache.incrementRefcount(colorFilter);
+        mCaches.resourceCache.incrementRefcount(colorFilter);
     }
 
     Vector<SkBitmap*> mBitmapResources;
@@ -862,15 +862,16 @@ private:
 
     Vector<SkMatrix*> mMatrices;
 
-    SkWriter32 mWriter;
     uint32_t mBufferSize;
 
     int mRestoreSaveCount;
 
+    Caches& mCaches;
+    SkWriter32 mWriter;
+
     float mTranslateX;
     float mTranslateY;
     bool mHasTranslate;
-
     bool mHasDrawOps;
 
     friend class DisplayList;

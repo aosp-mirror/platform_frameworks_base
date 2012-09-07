@@ -52,28 +52,59 @@ public:
 };
 
 class ANDROID_API ResourceCache {
-    KeyedVector<void *, ResourceReference *>* mCache;
 public:
     ResourceCache();
     ~ResourceCache();
+
+    /**
+     * When using these two methods, make sure to only invoke the *Locked()
+     * variants of increment/decrementRefcount(), recyle() and destructor()
+     */
+    void lock();
+    void unlock();
+
     void incrementRefcount(SkPath* resource);
     void incrementRefcount(SkBitmap* resource);
     void incrementRefcount(SkiaShader* resource);
     void incrementRefcount(SkiaColorFilter* resource);
-    void incrementRefcount(const void* resource, ResourceType resourceType);
-    void decrementRefcount(void* resource);
+
+    void incrementRefcountLocked(SkPath* resource);
+    void incrementRefcountLocked(SkBitmap* resource);
+    void incrementRefcountLocked(SkiaShader* resource);
+    void incrementRefcountLocked(SkiaColorFilter* resource);
+
     void decrementRefcount(SkBitmap* resource);
     void decrementRefcount(SkPath* resource);
     void decrementRefcount(SkiaShader* resource);
     void decrementRefcount(SkiaColorFilter* resource);
-    void recycle(SkBitmap* resource);
+
+    void decrementRefcountLocked(SkBitmap* resource);
+    void decrementRefcountLocked(SkPath* resource);
+    void decrementRefcountLocked(SkiaShader* resource);
+    void decrementRefcountLocked(SkiaColorFilter* resource);
+
     void destructor(SkPath* resource);
     void destructor(SkBitmap* resource);
     void destructor(SkiaShader* resource);
     void destructor(SkiaColorFilter* resource);
+
+    void destructorLocked(SkPath* resource);
+    void destructorLocked(SkBitmap* resource);
+    void destructorLocked(SkiaShader* resource);
+    void destructorLocked(SkiaColorFilter* resource);
+
+    void recycle(SkBitmap* resource);
+    void recycleLocked(SkBitmap* resource);
+
 private:
     void deleteResourceReference(void* resource, ResourceReference* ref);
+
     void incrementRefcount(void* resource, ResourceType resourceType);
+    void incrementRefcountLocked(void* resource, ResourceType resourceType);
+
+    void decrementRefcount(void* resource);
+    void decrementRefcountLocked(void* resource);
+
     void logCache();
 
     /**
@@ -82,6 +113,8 @@ private:
      * or a reference queue finalization thread.
      */
     mutable Mutex mLock;
+
+    KeyedVector<void*, ResourceReference*>* mCache;
 };
 
 }; // namespace uirenderer
