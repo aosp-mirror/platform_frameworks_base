@@ -94,8 +94,11 @@ class DisplayContent {
     }
 
     DisplayInfo getDisplayInfo() {
-        // TODO: Add a listener for changes to Display and update mDisplayInfo when appropriate.
         return mDisplayInfo;
+    }
+
+    public void updateDisplayInfo() {
+        mDisplay.getDisplayInfo(mDisplayInfo);
     }
 
     public void dump(PrintWriter pw) {
@@ -121,7 +124,7 @@ class DisplayContent {
         pw.print("-"); pw.print(mDisplayInfo.largestNominalAppWidth);
         pw.print("x"); pw.println(mDisplayInfo.largestNominalAppHeight);
         pw.print("  layoutNeeded="); pw.println(layoutNeeded);
-        pw.print("magnificationSpec="); pw.println(mMagnificationSpec.toString());
+        pw.print("magnificationSpec="); pw.println(mMagnificationSpec);
         pw.println();
     }
 }
