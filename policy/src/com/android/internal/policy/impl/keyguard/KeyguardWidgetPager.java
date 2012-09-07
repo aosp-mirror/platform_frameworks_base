@@ -146,6 +146,9 @@ public class KeyguardWidgetPager extends PagedView {
                         v.setPivotY(pageHeight / 2.0f);
                         v.setPivotX(pageWidth / 2.0f);
                         v.setRotationY(0f);
+                        if (v instanceof KeyguardWidgetFrame) {
+                            ((KeyguardWidgetFrame) v).setOverScrollAmount(0, false);
+                        }
                     }
                 }
 
