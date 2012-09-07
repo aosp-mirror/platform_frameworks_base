@@ -69,7 +69,8 @@ public class KeyguardSecurityModel {
         SecurityMode mode = SecurityMode.None;
         if (simState == IccCardConstants.State.PIN_REQUIRED) {
             mode = SecurityMode.SimPin;
-        } else if (simState == IccCardConstants.State.PUK_REQUIRED) {
+        } else if (simState == IccCardConstants.State.PUK_REQUIRED
+                && mLockPatternUtils.isPukUnlockScreenEnable()) {
             mode = SecurityMode.SimPuk;
         } else {
             final int security = mLockPatternUtils.getKeyguardStoredPasswordQuality();
