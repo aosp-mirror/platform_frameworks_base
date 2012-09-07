@@ -113,17 +113,22 @@ public class SettingsProvider extends ContentProvider {
         // table, shared across all users
         // These must match Settings.Secure.MOVED_TO_GLOBAL
         sSecureGlobalKeys = new HashSet<String>();
+        sSecureGlobalKeys.add(Settings.Secure.ADB_ENABLED);
         sSecureGlobalKeys.add(Settings.Secure.ASSISTED_GPS_ENABLED);
+        sSecureGlobalKeys.add(Settings.Secure.BLUETOOTH_ON);
         sSecureGlobalKeys.add(Settings.Secure.CDMA_CELL_BROADCAST_SMS);
         sSecureGlobalKeys.add(Settings.Secure.CDMA_ROAMING_MODE);
         sSecureGlobalKeys.add(Settings.Secure.CDMA_SUBSCRIPTION_MODE);
         sSecureGlobalKeys.add(Settings.Secure.DATA_ACTIVITY_TIMEOUT_MOBILE);
         sSecureGlobalKeys.add(Settings.Secure.DATA_ACTIVITY_TIMEOUT_WIFI);
+        sSecureGlobalKeys.add(Settings.Secure.DATA_ROAMING);
         sSecureGlobalKeys.add(Settings.Secure.DEVELOPMENT_SETTINGS_ENABLED);
+        sSecureGlobalKeys.add(Settings.Secure.DEVICE_PROVISIONED);
         sSecureGlobalKeys.add(Settings.Secure.DISPLAY_DENSITY_FORCED);
         sSecureGlobalKeys.add(Settings.Secure.DISPLAY_SIZE_FORCED);
         sSecureGlobalKeys.add(Settings.Secure.DOWNLOAD_MAX_BYTES_OVER_MOBILE);
         sSecureGlobalKeys.add(Settings.Secure.DOWNLOAD_RECOMMENDED_MAX_BYTES_OVER_MOBILE);
+        sSecureGlobalKeys.add(Settings.Secure.INSTALL_NON_MARKET_APPS);
         sSecureGlobalKeys.add(Settings.Secure.MOBILE_DATA);
         sSecureGlobalKeys.add(Settings.Secure.NETSTATS_DEV_BUCKET_DURATION);
         sSecureGlobalKeys.add(Settings.Secure.NETSTATS_DEV_DELETE_AGE);
@@ -167,6 +172,7 @@ public class SettingsProvider extends ContentProvider {
         sSecureGlobalKeys.add(Settings.Secure.THROTTLE_RESET_DAY);
         sSecureGlobalKeys.add(Settings.Secure.THROTTLE_THRESHOLD_BYTES);
         sSecureGlobalKeys.add(Settings.Secure.THROTTLE_VALUE_KBITSPS);
+        sSecureGlobalKeys.add(Settings.Secure.USB_MASS_STORAGE_ENABLED);
         sSecureGlobalKeys.add(Settings.Secure.USE_GOOGLE_MAIL);
         sSecureGlobalKeys.add(Settings.Secure.WEB_AUTOFILL_QUERY_URL);
         sSecureGlobalKeys.add(Settings.Secure.WIFI_COUNTRY_CODE);
@@ -193,12 +199,6 @@ public class SettingsProvider extends ContentProvider {
         // Keys from the 'system' table now moved to 'global'
         // These must match Settings.System.MOVED_TO_GLOBAL
         sSystemGlobalKeys = new HashSet<String>();
-        sSystemGlobalKeys.add(Settings.Secure.ADB_ENABLED);
-        sSystemGlobalKeys.add(Settings.Secure.BLUETOOTH_ON);
-        sSystemGlobalKeys.add(Settings.Secure.DATA_ROAMING);
-        sSystemGlobalKeys.add(Settings.Secure.DEVICE_PROVISIONED);
-        sSystemGlobalKeys.add(Settings.Secure.INSTALL_NON_MARKET_APPS);
-        sSystemGlobalKeys.add(Settings.Secure.USB_MASS_STORAGE_ENABLED);
 
         sSystemGlobalKeys.add(Settings.System.AIRPLANE_MODE_ON);
         sSystemGlobalKeys.add(Settings.System.AIRPLANE_MODE_RADIOS);
@@ -214,6 +214,7 @@ public class SettingsProvider extends ContentProvider {
         sSystemGlobalKeys.add(Settings.System.UNLOCK_SOUND);
         sSystemGlobalKeys.add(Settings.System.LOW_BATTERY_SOUND);
         sSystemGlobalKeys.add(Settings.System.POWER_SOUNDS_ENABLED);
+        sSystemGlobalKeys.add(Settings.System.STAY_ON_WHILE_PLUGGED_IN);
         sSystemGlobalKeys.add(Settings.System.WIFI_SLEEP_POLICY);
     }
 

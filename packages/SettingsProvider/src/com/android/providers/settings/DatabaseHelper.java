@@ -67,7 +67,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 85;
+    private static final int DATABASE_VERSION = 86;
 
     private Context mContext;
     private int mUserHandle;
@@ -308,7 +308,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     Settings.Secure.WIFI_WATCHDOG_PING_DELAY_MS,
                     Settings.Secure.WIFI_WATCHDOG_PING_TIMEOUT_MS,
                 };
-            moveSettingsToNewTable(db, TABLE_SYSTEM, TABLE_SECURE, settingsToMove);
+            moveSettingsToNewTable(db, TABLE_SYSTEM, TABLE_SECURE, settingsToMove, false);
             upgradeVersion = 28;
         }
 
@@ -674,7 +674,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                    "lockscreen.lockedoutpermanently",
                    "lockscreen.password_salt"
            };
-           moveSettingsToNewTable(db, TABLE_SYSTEM, TABLE_SECURE, settingsToMove);
+           moveSettingsToNewTable(db, TABLE_SYSTEM, TABLE_SECURE, settingsToMove, false);
            upgradeVersion = 52;
        }
 
@@ -724,7 +724,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     Secure.SET_INSTALL_LOCATION,
                     Secure.DEFAULT_INSTALL_LOCATION
             };
-            moveSettingsToNewTable(db, TABLE_SYSTEM, TABLE_SECURE, settingsToMove);
+            moveSettingsToNewTable(db, TABLE_SYSTEM, TABLE_SECURE, settingsToMove, false);
             db.beginTransaction();
             SQLiteStatement stmt = null;
             try {
@@ -1209,9 +1209,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 // new users can be created.
                 createGlobalTable(db);
                 String[] settingsToMove = hashsetToStringArray(SettingsProvider.sSystemGlobalKeys);
-                moveSettingsToNewTable(db, TABLE_SYSTEM, TABLE_GLOBAL, settingsToMove);
+                moveSettingsToNewTable(db, TABLE_SYSTEM, TABLE_GLOBAL, settingsToMove, false);
                 settingsToMove = hashsetToStringArray(SettingsProvider.sSecureGlobalKeys);
-                moveSettingsToNewTable(db, TABLE_SECURE, TABLE_GLOBAL, settingsToMove);
+                moveSettingsToNewTable(db, TABLE_SECURE, TABLE_GLOBAL, settingsToMove, false);
 
                 db.setTransactionSuccessful();
             } finally {
@@ -1254,7 +1254,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.beginTransaction();
             SQLiteStatement stmt = null;
             try {
-                // Patch up the slightly-wrong key migration from 82 -> 83
+                // Patch up the slightly-wrong key migration from 82 -> 83 for those
+                // devices that missed it, ignoring if the move is redundant
                 String[] settingsToMove = {
                         Settings.Secure.ADB_ENABLED,
                         Settings.Secure.BLUETOOTH_ON,
@@ -1263,13 +1264,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         Settings.Secure.INSTALL_NON_MARKET_APPS,
                         Settings.Secure.USB_MASS_STORAGE_ENABLED
                 };
-                moveSettingsToNewTable(db, TABLE_SECURE, TABLE_GLOBAL, settingsToMove);
+                moveSettingsToNewTable(db, TABLE_SECURE, TABLE_GLOBAL, settingsToMove, true);
                 db.setTransactionSuccessful();
             } finally {
                 db.endTransaction();
                 if (stmt != null) stmt.close();
             }
             upgradeVersion = 85;
+        }
+
+        if (upgradeVersion == 85) {
+            db.beginTransaction();
+            try {
+                // Fix up the migration, ignoring already-migrated elements, to snap up to
+                // date with new changes to the set of global versus system/secure settings
+                String[] settingsToMove = { Settings.System.STAY_ON_WHILE_PLUGGED_IN };
+                moveSettingsToNewTable(db, TABLE_SYSTEM, TABLE_GLOBAL, settingsToMove, true);
+
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+            upgradeVersion = 86;
         }
 
         // *** Remember to update DATABASE_VERSION above!
@@ -1306,15 +1322,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     private void moveSettingsToNewTable(SQLiteDatabase db,
             String sourceTable, String destTable,
-            String[] settingsToMove) {
+            String[] settingsToMove, boolean doIgnore) {
         // Copy settings values from the source table to the dest, and remove from the source
         SQLiteStatement insertStmt = null;
         SQLiteStatement deleteStmt = null;
 
         db.beginTransaction();
         try {
-            insertStmt = db.compileStatement("INSERT INTO "
-                    + destTable + " (name,value) SELECT name,value FROM "
+            insertStmt = db.compileStatement("INSERT "
+                    + (doIgnore ? " OR IGNORE " : "")
+                    + " INTO " + destTable + " (name,value) SELECT name,value FROM "
                     + sourceTable + " WHERE name=?");
             deleteStmt = db.compileStatement("DELETE FROM " + sourceTable + " WHERE name=?");
 
