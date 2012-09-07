@@ -63,6 +63,9 @@ final class LogicalDisplay {
     private DisplayDevice mPrimaryDisplayDevice;
     private DisplayDeviceInfo mPrimaryDisplayDeviceInfo;
 
+    // True if the logical display has unique content.
+    private boolean mHasContent;
+
     // Temporary rectangle used when needed.
     private final Rect mTempLayerStackRect = new Rect();
     private final Rect mTempDisplayRect = new Rect();
@@ -126,7 +129,7 @@ final class LogicalDisplay {
 
     /**
      * Returns true if the logical display is in a valid state.
-     * This method should be checked after calling {@link #update} to handle the
+     * This method should be checked after calling {@link #updateLocked} to handle the
      * case where a logical display should be removed because all of its associated
      * display devices are gone or if it is otherwise no longer needed.
      *
@@ -254,6 +257,29 @@ final class LogicalDisplay {
                 displayRectLeft + displayRectWidth, displayRectTop + displayRectHeight);
 
         device.setProjectionInTransactionLocked(orientation, mTempLayerStackRect, mTempDisplayRect);
+    }
+
+    /**
+     * Returns true if the logical display has unique content.
+     * <p>
+     * If the display has unique content then we will try to ensure that it is
+     * visible on at least its primary display device.  Otherwise we will ignore the
+     * logical display and perhaps show mirrored content on the primary display device.
+     * </p>
+     *
+     * @return True if the display has unique content.
+     */
+    public boolean hasContentLocked() {
+        return mHasContent;
+    }
+
+    /**
+     * Sets whether the logical display has unique content.
+     *
+     * @param hasContent True if the display has unique content.
+     */
+    public void setHasContentLocked(boolean hasContent) {
+        mHasContent = hasContent;
     }
 
     public void dumpLocked(PrintWriter pw) {

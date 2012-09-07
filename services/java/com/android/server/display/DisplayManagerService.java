@@ -58,7 +58,7 @@ import java.util.ArrayList;
  * </p><p>
  * Display adapters are only weakly coupled to the display manager service.
  * Display adapters communicate changes in display device state to the display manager
- * service asynchronously via a {@link DisplayAdapter.DisplayAdapterListener} registered
+ * service asynchronously via a {@link DisplayAdapter.Listener} registered
  * by the display manager service.  This separation of concerns is important for
  * two main reasons.  First, it neatly encapsulates the responsibilities of these
  * two classes: display adapters handle individual display devices whereas
@@ -254,8 +254,8 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
      * Returns information about the specified logical display.
      *
      * @param displayId The logical display id.
-     * @param The logical display info, or null if the display does not exist.
-     * This object must be treated as immutable.
+     * @return The logical display info, or null if the display does not exist.  The
+     * returned object must be treated as immutable.
      */
     @Override // Binder call
     public DisplayInfo getDisplayInfo(int displayId) {
@@ -481,14 +481,34 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
         }
     }
 
-    private void configureDisplayInTransactionLocked(DisplayDevice device) {
-        // TODO: add a proper per-display mirroring control
-        boolean isMirroring = SystemProperties.getBoolean("debug.display.mirror", true);
+    /**
+     * Tells the display manager whether there is interesting unique content on the
+     * specified logical display.  This is used to control automatic mirroring.
+     * <p>
+     * If the display has unique content, then the display manager arranges for it
+     * to be presented on a physical display if appropriate.  Otherwise, the display manager
+     * may choose to make the physical display mirror some other logical display.
+     * </p>
+     *
+     * @param displayId The logical display id to update.
+     * @param hasContent True if the logical display has content.
+     */
+    public void setDisplayHasContent(int displayId, boolean hasContent) {
+        synchronized (mSyncRoot) {
+            LogicalDisplay display = mLogicalDisplays.get(displayId);
+            if (display != null && display.hasContentLocked() != hasContent) {
+                display.setHasContentLocked(hasContent);
+                scheduleTraversalLocked();
+            }
+        }
 
+    }
+
+    private void configureDisplayInTransactionLocked(DisplayDevice device) {
         // Find the logical display that the display device is showing.
-        LogicalDisplay display = null;
-        if (!isMirroring) {
-            display = findLogicalDisplayForDeviceLocked(device);
+        LogicalDisplay display = findLogicalDisplayForDeviceLocked(device);
+        if (display != null && !display.hasContentLocked()) {
+            display = null;
         }
         if (display == null) {
             display = mLogicalDisplays.get(Display.DEFAULT_DISPLAY);
@@ -611,8 +631,9 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
      */
     public interface WindowManagerFuncs {
         /**
-         * Request that the window manager call {@link #performTraversalInTransaction}
-         * within a surface transaction at a later time.
+         * Request that the window manager call
+         * {@link #performTraversalInTransactionFromWindowManager} within a surface
+         * transaction at a later time.
          */
         void requestTraversal();
     }
