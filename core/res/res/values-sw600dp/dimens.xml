@@ -45,6 +45,9 @@
     <!-- Size of lockscreen outerring on unsecure unlock LockScreen -->
     <dimen name="keyguard_lockscreen_outerring_diameter">364dp</dimen>
 
+    <!-- Height of FaceUnlock view in keyguard -->
+    <dimen name="face_unlock_height">430dip</dimen>
+
     <!-- target placement radius for GlowPadView. Should be 1/2 of outerring diameter. -->
     <dimen name="glowpadview_target_placement_radius">182dip</dimen>
 
