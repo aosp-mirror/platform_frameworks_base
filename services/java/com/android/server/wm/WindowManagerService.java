@@ -165,7 +165,7 @@ import java.util.NoSuchElementException;
 /** {@hide} */
 public class WindowManagerService extends IWindowManager.Stub
         implements Watchdog.Monitor, WindowManagerPolicy.WindowManagerFuncs,
-                DisplayManagerService.WindowManagerFuncs {
+                DisplayManagerService.WindowManagerFuncs, DisplayManager.DisplayListener {
     static final String TAG = "WindowManager";
     static final boolean DEBUG = false;
     static final boolean DEBUG_ADD_REMOVE = false;
@@ -782,8 +782,14 @@ public class WindowManagerService extends IWindowManager.Stub
         mLimitedAlphaCompositing = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_sf_limitedAlpha);
         mDisplayManagerService = displayManager;
-        mDisplayManager = (DisplayManager)context.getSystemService(Context.DISPLAY_SERVICE);
         mHeadless = displayManager.isHeadless();
+
+        mDisplayManager = (DisplayManager)context.getSystemService(Context.DISPLAY_SERVICE);
+        mDisplayManager.registerDisplayListener(this, null);
+        Display[] displays = mDisplayManager.getDisplays();
+        for (Display display : displays) {
+            createDisplayContent(display);
+        }
 
         mKeyguardDisableHandler = new KeyguardDisableHandler(mContext, mPolicy);
 
@@ -1108,6 +1114,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
         if (win.mAppToken != null && addToToken) {
             win.mAppToken.allAppWindows.add(win);
+        }
+
+        if (windows.size() == 1) {
+            mDisplayManagerService.setDisplayHasContent(win.getDisplayId(), true);
         }
     }
 
@@ -2397,6 +2407,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
         final WindowList windows = win.getWindowList();
         windows.remove(win);
+        if (windows.isEmpty()) {
+            mDisplayManagerService.setDisplayHasContent(win.getDisplayId(), false);
+        }
         mPendingRemove.remove(win);
         mWindowsChanged = true;
         if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG, "Final remove of window: " + win);
@@ -7183,6 +7196,10 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int NOTIFY_WINDOW_TRANSITION = 29;
         public static final int NOTIFY_RECTANGLE_ON_SCREEN_REQUESTED = 30;
 
+        public static final int DO_DISPLAY_ADDED = 31;
+        public static final int DO_DISPLAY_REMOVED = 32;
+        public static final int DO_DISPLAY_CHANGED = 33;
+
         public static final int ANIMATOR_WHAT_OFFSET = 100000;
         public static final int SET_TRANSPARENT_REGION = ANIMATOR_WHAT_OFFSET + 1;
         public static final int CLEAR_PENDING_ACTIONS = ANIMATOR_WHAT_OFFSET + 2;
@@ -7620,18 +7637,21 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                     break;
                 }
+
                 case NOTIFY_ROTATION_CHANGED: {
                     final int displayId = msg.arg1;
                     final int rotation = msg.arg2;
                     handleNotifyRotationChanged(displayId, rotation);
                     break;
                 }
+
                 case NOTIFY_WINDOW_TRANSITION: {
                     final int transition = msg.arg1;
                     WindowInfo info = (WindowInfo) msg.obj;
                     handleNotifyWindowTranstion(transition, info);
                     break;
                 }
+
                 case NOTIFY_RECTANGLE_ON_SCREEN_REQUESTED: {
                     final int displayId = msg.arg1;
                     final boolean immediate = (msg.arg2 == 1);
@@ -7639,6 +7659,24 @@ public class WindowManagerService extends IWindowManager.Stub
                     handleNotifyRectangleOnScreenRequested(displayId, rectangle, immediate);
                     break;
                 }
+
+                case DO_DISPLAY_ADDED:
+                    synchronized (mWindowMap) {
+                        handleDisplayAddedLocked(msg.arg1);
+                    }
+                    break;
+
+                case DO_DISPLAY_REMOVED:
+                    synchronized (mWindowMap) {
+                        handleDisplayRemovedLocked(msg.arg1);
+                    }
+                    break;
+
+                case DO_DISPLAY_CHANGED:
+                    synchronized (mWindowMap) {
+                        handleDisplayChangedLocked(msg.arg1);
+                    }
+                    break;
             }
             if (DEBUG_WINDOW_TRACE) {
                 Slog.v(TAG, "handleMessage: exit");
@@ -8855,8 +8893,6 @@ public class WindowManagerService extends IWindowManager.Stub
         final DisplayInfo defaultInfo = defaultDisplay.getDisplayInfo();
         final int defaultDw = defaultInfo.logicalWidth;
         final int defaultDh = defaultInfo.logicalHeight;
-        final int defaultInnerDw = defaultInfo.appWidth;
-        final int defaultInnerDh = defaultInfo.appHeight;
 
         if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                 ">>> OPEN TRANSACTION performLayoutAndPlaceSurfaces");
@@ -9430,6 +9466,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @Override
     public void requestTraversal() {
         synchronized (mWindowMap) {
             requestTraversalLocked();
@@ -10454,7 +10491,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     boolean dumpWindows(PrintWriter pw, String name, String[] args,
             int opti, boolean dumpAll) {
-        ArrayList<WindowState> windows = new ArrayList<WindowState>();
+        WindowList windows = new WindowList();
         if ("visible".equals(name)) {
             synchronized(mWindowMap) {
                 final AllWindowsIterator iterator = new AllWindowsIterator(REVERSE_ITERATOR);
@@ -10662,6 +10699,14 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    public void createDisplayContent(final Display display) {
+        if (display == null) {
+            throw new IllegalArgumentException("getDisplayContent: display must not be null");
+        }
+        final DisplayContent displayContent = new DisplayContent(display);
+        mDisplayContents.put(display.getDisplayId(), displayContent);
+    }
+
     public DisplayContent getDisplayContent(final int displayId) {
         DisplayContent displayContent = mDisplayContents.get(displayId);
         if (displayContent == null) {
@@ -10768,5 +10813,41 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public WindowList getWindowList(final Display display) {
         return getDisplayContent(display.getDisplayId()).getWindowList();
+    }
+
+    @Override
+    public void onDisplayAdded(int displayId) {
+        mH.sendMessage(mH.obtainMessage(H.DO_DISPLAY_ADDED, displayId, 0));
+    }
+
+    private void handleDisplayAddedLocked(int displayId) {
+        createDisplayContent(mDisplayManager.getDisplay(displayId));
+    }
+
+    @Override
+    public void onDisplayRemoved(int displayId) {
+        mH.sendMessage(mH.obtainMessage(H.DO_DISPLAY_REMOVED, displayId, 0));
+    }
+
+    private void handleDisplayRemovedLocked(int displayId) {
+        final DisplayContent displayContent = getDisplayContent(displayId);
+        mDisplayContents.delete(displayId);
+        WindowList windows = displayContent.getWindowList();
+        for (int i = windows.size() - 1; i >= 0; --i) {
+            final WindowState win = windows.get(i);
+            removeWindowLocked(win.mSession, win);
+        }
+    }
+
+    @Override
+    public void onDisplayChanged(int displayId) {
+        mH.sendMessage(mH.obtainMessage(H.DO_DISPLAY_CHANGED, displayId, 0));
+    }
+
+    private void handleDisplayChangedLocked(int displayId) {
+        final DisplayContent displayContent = getDisplayContent(displayId);
+        if (displayContent != null) {
+            displayContent.updateDisplayInfo();
+        }
     }
 }
