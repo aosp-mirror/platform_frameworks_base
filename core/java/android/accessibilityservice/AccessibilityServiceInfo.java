@@ -85,6 +85,11 @@ public class AccessibilityServiceInfo implements Parcelable {
     public static final int FEEDBACK_GENERIC = 0x0000010;
 
     /**
+     * Denotes braille feedback.
+     */
+    public static final int FEEDBACK_BRAILLE = 0x0000020;
+
+    /**
      * Mask for all feedback types.
      *
      * @see #FEEDBACK_SPOKEN
@@ -92,6 +97,7 @@ public class AccessibilityServiceInfo implements Parcelable {
      * @see #FEEDBACK_AUDIBLE
      * @see #FEEDBACK_VISUAL
      * @see #FEEDBACK_GENERIC
+     * @see #FEEDBACK_BRAILLE
      */
     public static final int FEEDBACK_ALL_MASK = 0xFFFFFFFF;
 
@@ -186,6 +192,7 @@ public class AccessibilityServiceInfo implements Parcelable {
      * @see #FEEDBACK_HAPTIC
      * @see #FEEDBACK_SPOKEN
      * @see #FEEDBACK_VISUAL
+     * @see #FEEDBACK_BRAILLE
      */
     public int feedbackType;
 
@@ -590,6 +597,12 @@ public class AccessibilityServiceInfo implements Parcelable {
                         builder.append(", ");
                     }
                     builder.append("FEEDBACK_VISUAL");
+                    break;
+                case FEEDBACK_BRAILLE:
+                    if (builder.length() > 1) {
+                        builder.append(", ");
+                    }
+                    builder.append("FEEDBACK_BRAILLE");
                     break;
             }
         }

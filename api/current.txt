@@ -2066,6 +2066,7 @@ package android.accessibilityservice {
     field public static final int DEFAULT = 1; // 0x1
     field public static final int FEEDBACK_ALL_MASK = -1; // 0xffffffff
     field public static final int FEEDBACK_AUDIBLE = 4; // 0x4
+    field public static final int FEEDBACK_BRAILLE = 32; // 0x20
     field public static final int FEEDBACK_GENERIC = 16; // 0x10
     field public static final int FEEDBACK_HAPTIC = 2; // 0x2
     field public static final int FEEDBACK_SPOKEN = 1; // 0x1
