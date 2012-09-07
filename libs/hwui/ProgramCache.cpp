@@ -43,6 +43,8 @@ const char* gVS_Header_Attributes_TexCoords =
 const char* gVS_Header_Attributes_AAParameters =
         "attribute float vtxWidth;\n"
         "attribute float vtxLength;\n";
+const char* gVS_Header_Attributes_AARectParameters =
+        "attribute float vtxAlpha;\n";
 const char* gVS_Header_Uniforms_TextureTransform =
         "uniform mat4 mainTextureTransform;\n";
 const char* gVS_Header_Uniforms =
@@ -65,6 +67,8 @@ const char* gVS_Header_Varyings_HasTexture =
 const char* gVS_Header_Varyings_IsAA =
         "varying float widthProportion;\n"
         "varying float lengthProportion;\n";
+const char* gVS_Header_Varyings_IsAARect =
+        "varying float alpha;\n";
 const char* gVS_Header_Varyings_HasBitmap =
         "varying highp vec2 outBitmapTexCoords;\n";
 const char* gVS_Header_Varyings_PointHasBitmap =
@@ -112,6 +116,8 @@ const char* gVS_Main_PointSize =
 const char* gVS_Main_AA =
         "    widthProportion = vtxWidth;\n"
         "    lengthProportion = vtxLength;\n";
+const char* gVS_Main_AARect =
+        "    alpha = vtxAlpha;\n";
 const char* gVS_Footer =
         "}\n\n";
 
@@ -242,6 +248,8 @@ const char* gFS_Main_ModulateColor_ApplyGamma =
 const char* gFS_Main_AccountForAA =
         "    fragColor *= (1.0 - smoothstep(boundaryWidth, 0.5, abs(0.5 - widthProportion)))\n"
         "               * (1.0 - smoothstep(boundaryLength, 0.5, abs(0.5 - lengthProportion)));\n";
+const char* gFS_Main_AccountForAARect =
+        "    fragColor *= alpha;\n";
 
 const char* gFS_Main_FetchTexture[2] = {
         // Don't modulate
@@ -439,7 +447,9 @@ String8 ProgramCache::generateVertexShader(const ProgramDescription& description
     if (description.hasTexture || description.hasExternalTexture) {
         shader.append(gVS_Header_Attributes_TexCoords);
     }
-    if (description.isAA) {
+    if (description.isAARect) {
+        shader.append(gVS_Header_Attributes_AARectParameters);
+    } else if (description.isAA) {
         shader.append(gVS_Header_Attributes_AAParameters);
     }
     // Uniforms
@@ -460,7 +470,9 @@ String8 ProgramCache::generateVertexShader(const ProgramDescription& description
     if (description.hasTexture || description.hasExternalTexture) {
         shader.append(gVS_Header_Varyings_HasTexture);
     }
-    if (description.isAA) {
+    if (description.isAARect) {
+        shader.append(gVS_Header_Varyings_IsAARect);
+    } else if (description.isAA) {
         shader.append(gVS_Header_Varyings_IsAA);
     }
     if (description.hasGradient) {
@@ -479,7 +491,9 @@ String8 ProgramCache::generateVertexShader(const ProgramDescription& description
         } else if (description.hasTexture || description.hasExternalTexture) {
             shader.append(gVS_Main_OutTexCoords);
         }
-        if (description.isAA) {
+        if (description.isAARect) {
+            shader.append(gVS_Main_AARect);
+        } else if (description.isAA) {
             shader.append(gVS_Main_AA);
         }
         if (description.hasGradient) {
@@ -521,7 +535,9 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
     if (description.hasTexture || description.hasExternalTexture) {
         shader.append(gVS_Header_Varyings_HasTexture);
     }
-    if (description.isAA) {
+    if (description.isAARect) {
+        shader.append(gVS_Header_Varyings_IsAARect);
+    } else if (description.isAA) {
         shader.append(gVS_Header_Varyings_IsAA);
     }
     if (description.hasGradient) {
@@ -562,7 +578,8 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
 
     // Optimization for common cases
     if (!description.isAA && !blendFramebuffer &&
-            description.colorOp == ProgramDescription::kColorNone && !description.isPoint) {
+            description.colorOp == ProgramDescription::kColorNone &&
+            !description.isPoint && !description.isAARect) {
         bool fast = false;
 
         const bool noShader = !description.hasGradient && !description.hasBitmap;
@@ -654,7 +671,9 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
                 shader.append(gFS_Main_FetchColor);
             }
         }
-        if (description.isAA) {
+        if (description.isAARect) {
+            shader.append(gFS_Main_AccountForAARect);
+        } else if (description.isAA) {
             shader.append(gFS_Main_AccountForAA);
         }
         if (description.hasGradient) {
