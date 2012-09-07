@@ -1957,4 +1957,21 @@ public class ActivityManager {
             return false;
         }
     }
+
+    /**
+     * Return whether the given user is actively running.  This means that
+     * the user is in the "started" state, not "stopped" -- it is currently
+     * allowed to run code through scheduled alarms, receiving broadcasts,
+     * etc.  A started user may be either the current foreground user or a
+     * background user; the result here does not distinguish between the two.
+     * @param userid the user's id. Zero indicates the default user.
+     * @hide
+     */
+    public boolean isUserRunning(int userid) {
+        try {
+            return ActivityManagerNative.getDefault().isUserRunning(userid);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
 }
