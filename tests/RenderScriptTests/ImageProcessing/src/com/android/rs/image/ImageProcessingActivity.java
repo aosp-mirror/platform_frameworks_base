@@ -243,8 +243,8 @@ public class ImageProcessingActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        mBitmapIn = loadBitmap(R.drawable.city);
-        mBitmapOut = loadBitmap(R.drawable.city);
+        mBitmapIn = loadBitmap(R.drawable.img1600x1067);
+        mBitmapOut = loadBitmap(R.drawable.img1600x1067);
 
         mSurfaceView = (SurfaceView) findViewById(R.id.surface);
 
