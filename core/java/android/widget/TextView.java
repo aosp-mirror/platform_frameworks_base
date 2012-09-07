@@ -4463,9 +4463,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         mTemporaryDetach = false;
 
-        // Resolve drawables as the layout direction has been resolved
-        resolveDrawables();
-
         if (mEditor != null) mEditor.onAttachedToWindow();
     }
 

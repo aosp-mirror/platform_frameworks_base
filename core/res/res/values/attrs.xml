@@ -4079,6 +4079,10 @@
                  The clip will be based on the horizontal gravity: a left gravity will clip the right
                  edge, a right gravity will clip the left edge, and neither will clip both edges. -->
             <flag name="clip_horizontal" value="0x08" />
+            <!-- Push object to the beginning of its container, not changing its size. -->
+            <flag name="start" value="0x00800003" />
+            <!-- Push object to the end of its container, not changing its size. -->
+            <flag name="end" value="0x00800005" />
         </attr>
         <!-- Reference to a drawable resource to draw with the specified scale. -->
         <attr name="drawable" />
