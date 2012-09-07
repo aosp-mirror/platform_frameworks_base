@@ -372,8 +372,8 @@ public final class PowerManagerService extends IPowerManager.Stub
                     Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP), false, mSettingsObserver);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.SCREEN_OFF_TIMEOUT), false, mSettingsObserver);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.STAY_ON_WHILE_PLUGGED_IN), false, mSettingsObserver);
+            resolver.registerContentObserver(Settings.Global.getUriFor(
+                    Settings.Global.STAY_ON_WHILE_PLUGGED_IN), false, mSettingsObserver);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.SCREEN_BRIGHTNESS), false, mSettingsObserver);
             resolver.registerContentObserver(Settings.System.getUriFor(
@@ -405,8 +405,8 @@ public final class PowerManagerService extends IPowerManager.Stub
                 Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP, 0) != 0);
         mScreenOffTimeoutSetting = Settings.System.getInt(resolver,
                 Settings.System.SCREEN_OFF_TIMEOUT, DEFAULT_SCREEN_OFF_TIMEOUT);
-        mStayOnWhilePluggedInSetting = Settings.System.getInt(resolver,
-                Settings.System.STAY_ON_WHILE_PLUGGED_IN,
+        mStayOnWhilePluggedInSetting = Settings.Global.getInt(resolver,
+                Settings.Global.STAY_ON_WHILE_PLUGGED_IN,
                 BatteryManager.BATTERY_PLUGGED_AC);
 
         final int oldScreenBrightnessSetting = mScreenBrightnessSetting;
@@ -1585,8 +1585,8 @@ public final class PowerManagerService extends IPowerManager.Stub
     }
 
     private void setStayOnSettingInternal(int val) {
-        Settings.System.putInt(mContext.getContentResolver(),
-                Settings.System.STAY_ON_WHILE_PLUGGED_IN, val);
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.STAY_ON_WHILE_PLUGGED_IN, val);
     }
 
     /**
