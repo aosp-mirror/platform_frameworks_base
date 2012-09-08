@@ -373,8 +373,16 @@ public class ShapeDrawable extends Drawable {
     @Override
     public Drawable mutate() {
         if (!mMutated && super.mutate() == this) {
-            mShapeState.mPaint = new Paint(mShapeState.mPaint);
-            mShapeState.mPadding = new Rect(mShapeState.mPadding);
+            if (mShapeState.mPaint != null) {
+                mShapeState.mPaint = new Paint(mShapeState.mPaint);
+            } else {
+                mShapeState.mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            }
+            if (mShapeState.mPadding != null) {
+                mShapeState.mPadding = new Rect(mShapeState.mPadding);
+            } else {
+                mShapeState.mPadding = new Rect();
+            }
             try {
                 mShapeState.mShape = mShapeState.mShape.clone();
             } catch (CloneNotSupportedException e) {
