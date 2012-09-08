@@ -286,7 +286,11 @@ public final class ScreenMagnifier implements EventStreamTransformation {
     private PointerCoords[] getTempPointerCoordsWithMinSize(int size) {
         final int oldSize = (mTempPointerCoords != null) ? mTempPointerCoords.length : 0;
         if (oldSize < size) {
+            PointerCoords[] oldTempPointerCoords = mTempPointerCoords;
             mTempPointerCoords = new PointerCoords[size];
+            if (oldTempPointerCoords != null) {
+                System.arraycopy(oldTempPointerCoords, 0, mTempPointerCoords, 0, oldSize);
+            }
         }
         for (int i = oldSize; i < size; i++) {
             mTempPointerCoords[i] = new PointerCoords();
@@ -297,7 +301,11 @@ public final class ScreenMagnifier implements EventStreamTransformation {
     private PointerProperties[] getTempPointerPropertiesWithMinSize(int size) {
         final int oldSize = (mTempPointerProperties != null) ? mTempPointerProperties.length : 0;
         if (oldSize < size) {
+            PointerProperties[] oldTempPointerProperties = mTempPointerProperties;
             mTempPointerProperties = new PointerProperties[size];
+            if (oldTempPointerProperties != null) {
+                System.arraycopy(oldTempPointerProperties, 0, mTempPointerProperties, 0, oldSize);
+            }
         }
         for (int i = oldSize; i < size; i++) {
             mTempPointerProperties[i] = new PointerProperties();
@@ -324,7 +332,7 @@ public final class ScreenMagnifier implements EventStreamTransformation {
                     Slog.i(LOG_TAG, "mCurrentState: STATE_PANNING");
                 } break;
                 case STATE_DECIDE_PAN_OR_SCALE: {
-                    Slog.i(LOG_TAG, "mCurrentState: STATE_DETECTING_PAN_OR_SCALE");
+                    Slog.i(LOG_TAG, "mCurrentState: STATE_DECIDE_PAN_OR_SCALE");
                 } break;
                 default: {
                     throw new IllegalArgumentException("Unknown state: " + state);
@@ -397,6 +405,7 @@ public final class ScreenMagnifier implements EventStreamTransformation {
                     }
                     if (scaleDelta > DETECT_SCALING_THRESHOLD) {
                         performScale(detector, true);
+                        clear();
                         transitionToState(STATE_SCALING);
                         return false;
                     }
@@ -409,8 +418,9 @@ public final class ScreenMagnifier implements EventStreamTransformation {
                         Slog.i(LOG_TAG, "panDelta: " + panDelta);
                     }
                     if (panDelta > mScaledDetectPanningThreshold) {
-                        transitionToState(STATE_PANNING);
                         performPan(detector, true);
+                        clear();
+                        transitionToState(STATE_PANNING);
                         return false;
                     }
                 } break;
