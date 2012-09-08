@@ -4401,6 +4401,18 @@ class BackupManagerService extends IBackupManager.Stub {
                     return;
                 }
 
+                if (packageInfo.applicationInfo.backupAgentName == null
+                        || "".equals(packageInfo.applicationInfo.backupAgentName)) {
+                    if (DEBUG) {
+                        Slog.i(TAG, "Data exists for package " + packageName
+                                + " but app has no agent; skipping");
+                    }
+                    EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE, packageName,
+                            "Package has no agent");
+                    executeNextState(RestoreState.RUNNING_QUEUE);
+                    return;
+                }
+
                 if (metaInfo.versionCode > packageInfo.versionCode) {
                     // Data is from a "newer" version of the app than we have currently
                     // installed.  If the app has not declared that it is prepared to
