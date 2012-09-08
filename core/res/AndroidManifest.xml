@@ -1446,6 +1446,22 @@
         android:description="@string/permdesc_readFrameBuffer"
         android:protectionLevel="signature|system" />
 
+    <!-- Allows an application to configure and connect to Wifi displays
+         @hide -->
+    <permission android:name="android.permission.CONFIGURE_WIFI_DISPLAY"
+        android:label="@string/permlab_configureWifiDisplay"
+        android:description="@string/permdesc_configureWifiDisplay"
+        android:protectionLevel="signature" />
+
+    <!-- Allows an application to control low-level features of Wifi displays
+         such as opening an RTSP socket.  This permission should only be used
+         by the display manager.
+         @hide -->
+    <permission android:name="android.permission.CONTROL_WIFI_DISPLAY"
+        android:label="@string/permlab_controlWifiDisplay"
+        android:description="@string/permdesc_controlWifiDisplay"
+        android:protectionLevel="signature" />
+
     <!-- Required to be able to disable the device (very dangerous!). -->
     <permission android:name="android.permission.BRICK"
         android:label="@string/permlab_brick"
