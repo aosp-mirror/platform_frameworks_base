@@ -1191,6 +1191,16 @@
     <string name="permdesc_readFrameBuffer">Allows the app to read the content of the frame buffer.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_configureWifiDisplay">configure Wifi displays</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_configureWifiDisplay">Allows the app to configure and connect to Wifi displays.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_controlWifiDisplay">control Wifi displays</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_controlWifiDisplay">Allows the app to control low-level features of Wifi displays.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_modifyAudioSettings">change your audio settings</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_modifyAudioSettings">Allows the app to modify global audio settings such as volume and which speaker is used for output.</string>
