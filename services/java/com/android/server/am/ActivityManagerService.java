@@ -10851,7 +10851,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         builder.append("; this requires ");
                         builder.append(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL);
                         if (!requireFull) {
-                            builder.append("or");
+                            builder.append(" or ");
                             builder.append(android.Manifest.permission.INTERACT_ACROSS_USERS);
                         }
                         String msg = builder.toString();

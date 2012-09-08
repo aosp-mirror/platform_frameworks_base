@@ -64,13 +64,25 @@ public class Binder implements IBinder {
     public static final native int getCallingPid();
     
     /**
-     * Return the ID of the user assigned to the process that sent you the
+     * Return the Linux uid assigned to the process that sent you the
      * current transaction that is being processed.  This uid can be used with
      * higher-level system services to determine its identity and check
      * permissions.  If the current thread is not currently executing an
      * incoming transaction, then its own uid is returned.
      */
     public static final native int getCallingUid();
+
+    /**
+     * Return the UserHandle assigned to the process that sent you the
+     * current transaction that is being processed.  This is the user
+     * of the caller.  It is distinct from {@link #getCallingUid()} in that a
+     * particular user will have multiple distinct apps running under it each
+     * with their own uid.  If the current thread is not currently executing an
+     * incoming transaction, then its own UserHandle is returned.
+     */
+    public static final UserHandle getCallingUserHandle() {
+        return new UserHandle(UserHandle.getUserId(getCallingUid()));
+    }
 
     /**
      * Reset the identity of the incoming IPC on the current thread.  This can
