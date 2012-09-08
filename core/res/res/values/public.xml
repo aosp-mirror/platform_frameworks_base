@@ -3782,5 +3782,8 @@
   <public type="attr" name="singleUser" />
   <public type="attr" name="presentationTheme" />
   <public type="attr" name="subtypeId"/>
+  <public type="attr" name="initialKeyguardLayout" />
+  <public type="attr" name="widgetFeatures" />
+  <public type="attr" name="widgetCategory" />
 
 </resources>
