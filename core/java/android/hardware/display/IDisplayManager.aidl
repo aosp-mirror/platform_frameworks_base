@@ -17,6 +17,8 @@
 package android.hardware.display;
 
 import android.hardware.display.IDisplayManagerCallback;
+import android.hardware.display.WifiDisplay;
+import android.hardware.display.WifiDisplayStatus;
 import android.view.DisplayInfo;
 
 /** @hide */
@@ -25,4 +27,16 @@ interface IDisplayManager {
     int[] getDisplayIds();
 
     void registerCallback(in IDisplayManagerCallback callback);
+
+    // Requires CONFIGURE_WIFI_DISPLAY permission.
+    void scanWifiDisplays();
+
+    // Requires CONFIGURE_WIFI_DISPLAY permission.
+    void connectWifiDisplay(String address);
+
+    // Requires CONFIGURE_WIFI_DISPLAY permission.
+    void disconnectWifiDisplay();
+
+    // Requires CONFIGURE_WIFI_DISPLAY permission.
+    WifiDisplayStatus getWifiDisplayStatus();
 }
