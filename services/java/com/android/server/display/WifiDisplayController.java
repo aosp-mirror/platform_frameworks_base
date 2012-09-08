@@ -64,6 +64,12 @@ final class WifiDisplayController implements DumpUtils.Dump {
     private static final int MAX_THROUGHPUT = 50;
     private static final int CONNECTION_TIMEOUT_SECONDS = 30;
 
+    private static final int DISCOVER_PEERS_MAX_RETRIES = 10;
+    private static final int DISCOVER_PEERS_RETRY_DELAY_MILLIS = 500;
+
+    private static final int CONNECT_MAX_RETRIES = 3;
+    private static final int CONNECT_RETRY_DELAY_MILLIS = 500;
+
     private final Context mContext;
     private final Handler mHandler;
     private final Listener mListener;
@@ -77,6 +83,12 @@ final class WifiDisplayController implements DumpUtils.Dump {
 
     private final ArrayList<WifiP2pDevice> mKnownWifiDisplayPeers =
             new ArrayList<WifiP2pDevice>();
+
+    // True if there is a call to discoverPeers in progress.
+    private boolean mDiscoverPeersInProgress;
+
+    // Number of discover peers retries remaining.
+    private int mDiscoverPeersRetriesLeft;
 
     // The device to which we want to connect, or null if we want to be disconnected.
     private WifiP2pDevice mDesiredDevice;
@@ -93,6 +105,9 @@ final class WifiDisplayController implements DumpUtils.Dump {
 
     // The device that we announced to the rest of the system.
     private WifiP2pDevice mPublishedDevice;
+
+    // Number of connection retries remaining.
+    private int mConnectionRetriesLeft;
 
     public WifiDisplayController(Context context, Handler handler, Listener listener) {
         mContext = context;
@@ -114,10 +129,13 @@ final class WifiDisplayController implements DumpUtils.Dump {
         pw.println("mWfdEnabled=" + mWfdEnabled);
         pw.println("mWfdEnabling=" + mWfdEnabling);
         pw.println("mNetworkInfo=" + mNetworkInfo);
+        pw.println("mDiscoverPeersInProgress=" + mDiscoverPeersInProgress);
+        pw.println("mDiscoverPeersRetriesLeft=" + mDiscoverPeersRetriesLeft);
         pw.println("mDesiredDevice=" + describeWifiP2pDevice(mDesiredDevice));
         pw.println("mConnectingDisplay=" + describeWifiP2pDevice(mConnectingDevice));
         pw.println("mConnectedDevice=" + describeWifiP2pDevice(mConnectedDevice));
         pw.println("mPublishedDevice=" + describeWifiP2pDevice(mPublishedDevice));
+        pw.println("mConnectionRetriesLeft=" + mConnectionRetriesLeft);
 
         pw.println("mKnownWifiDisplayPeers: size=" + mKnownWifiDisplayPeers.size());
         for (WifiP2pDevice device : mKnownWifiDisplayPeers) {
@@ -160,6 +178,14 @@ final class WifiDisplayController implements DumpUtils.Dump {
     }
 
     private void discoverPeers() {
+        if (!mDiscoverPeersInProgress) {
+            mDiscoverPeersInProgress = true;
+            mDiscoverPeersRetriesLeft = DISCOVER_PEERS_MAX_RETRIES;
+            tryDiscoverPeers();
+        }
+    }
+
+    private void tryDiscoverPeers() {
         mWifiP2pManager.discoverPeers(mWifiP2pChannel, new ActionListener() {
             @Override
             public void onSuccess() {
@@ -167,6 +193,7 @@ final class WifiDisplayController implements DumpUtils.Dump {
                     Slog.d(TAG, "Discover peers succeeded.  Requesting peers now.");
                 }
 
+                mDiscoverPeersInProgress = false;
                 requestPeers();
             }
 
@@ -174,6 +201,30 @@ final class WifiDisplayController implements DumpUtils.Dump {
             public void onFailure(int reason) {
                 if (DEBUG) {
                     Slog.d(TAG, "Discover peers failed with reason " + reason + ".");
+                }
+
+                if (mDiscoverPeersInProgress) {
+                    if (reason == 0 && mDiscoverPeersRetriesLeft > 0 && mWfdEnabled) {
+                        mHandler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (mDiscoverPeersInProgress) {
+                                    if (mDiscoverPeersRetriesLeft > 0 && mWfdEnabled) {
+                                        mDiscoverPeersRetriesLeft -= 1;
+                                        if (DEBUG) {
+                                            Slog.d(TAG, "Retrying discovery.  Retries left: "
+                                                    + mDiscoverPeersRetriesLeft);
+                                        }
+                                        tryDiscoverPeers();
+                                    } else {
+                                        mDiscoverPeersInProgress = false;
+                                    }
+                                }
+                            }
+                        }, DISCOVER_PEERS_RETRY_DELAY_MILLIS);
+                    } else {
+                        mDiscoverPeersInProgress = false;
+                    }
                 }
             }
         });
@@ -230,15 +281,32 @@ final class WifiDisplayController implements DumpUtils.Dump {
                         + describeWifiP2pDevice(device) + " and not part way through "
                         + "connecting to a different device.");
             }
+            return;
         }
 
         mDesiredDevice = device;
+        mConnectionRetriesLeft = CONNECT_MAX_RETRIES;
         updateConnection();
     }
 
     private void disconnect() {
         mDesiredDevice = null;
         updateConnection();
+    }
+
+    private void retryConnection() {
+        if (mDesiredDevice != null && mPublishedDevice != mDesiredDevice
+                && mConnectionRetriesLeft > 0) {
+            mConnectionRetriesLeft -= 1;
+            Slog.i(TAG, "Retrying Wifi display connection.  Retries left: "
+                    + mConnectionRetriesLeft);
+
+            // Cheap hack.  Make a new instance of the device object so that we
+            // can distinguish it from the previous connection attempt.
+            // This will cause us to tear everything down before we try again.
+            mDesiredDevice = new WifiP2pDevice(mDesiredDevice);
+            updateConnection();
+        }
     }
 
     /**
@@ -353,7 +421,7 @@ final class WifiDisplayController implements DumpUtils.Dump {
                             + newDevice.deviceName + ", reason=" + reason);
                     if (mConnectingDevice == newDevice) {
                         mConnectingDevice = null;
-                        handleConnectionFailure();
+                        handleConnectionFailure(false);
                     }
                 }
             });
@@ -366,7 +434,7 @@ final class WifiDisplayController implements DumpUtils.Dump {
             if (addr == null) {
                 Slog.i(TAG, "Failed to get local interface address for communicating "
                         + "with Wifi display: " + mConnectedDevice.deviceName);
-                handleConnectionFailure();
+                handleConnectionFailure(false);
                 return; // done
             }
 
@@ -426,7 +494,7 @@ final class WifiDisplayController implements DumpUtils.Dump {
                             Slog.i(TAG, "Aborting connection to Wifi display because "
                                     + "the current P2P group does not contain the device "
                                     + "we expected to find: " + mConnectingDevice.deviceName);
-                            handleConnectionFailure();
+                            handleConnectionFailure(false);
                             return;
                         }
 
@@ -436,7 +504,8 @@ final class WifiDisplayController implements DumpUtils.Dump {
                         }
 
                         if (mConnectingDevice != null && mConnectingDevice == mDesiredDevice) {
-                            Slog.i(TAG, "Connected to Wifi display: " + mConnectingDevice.deviceName);
+                            Slog.i(TAG, "Connected to Wifi display: "
+                                    + mConnectingDevice.deviceName);
 
                             mHandler.removeCallbacks(mConnectionTimeout);
                             mConnectedDeviceGroupInfo = info;
@@ -459,15 +528,25 @@ final class WifiDisplayController implements DumpUtils.Dump {
                 Slog.i(TAG, "Timed out waiting for Wifi display connection after "
                         + CONNECTION_TIMEOUT_SECONDS + " seconds: "
                         + mConnectingDevice.deviceName);
-                handleConnectionFailure();
+                handleConnectionFailure(true);
             }
         }
     };
 
-    private void handleConnectionFailure() {
+    private void handleConnectionFailure(boolean timeoutOccurred) {
         if (mDesiredDevice != null) {
             Slog.i(TAG, "Wifi display connection failed!");
-            disconnect();
+
+            if (mConnectionRetriesLeft > 0) {
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        retryConnection();
+                    }
+                }, timeoutOccurred ? 0 : CONNECT_RETRY_DELAY_MILLIS);
+            } else {
+                disconnect();
+            }
         }
     }
 
