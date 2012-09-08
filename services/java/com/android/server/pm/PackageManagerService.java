@@ -2891,11 +2891,14 @@ public class PackageManagerService extends IPackageManager.Stub {
         return index;
     }
 
-    public ParceledListSlice<PackageInfo> getInstalledPackages(int flags, String lastRead) {
+    @Override
+    public ParceledListSlice<PackageInfo> getInstalledPackages(int flags, String lastRead,
+            int userId) {
         final ParceledListSlice<PackageInfo> list = new ParceledListSlice<PackageInfo>();
         final boolean listUninstalled = (flags & PackageManager.GET_UNINSTALLED_PACKAGES) != 0;
         final String[] keys;
-        int userId = UserHandle.getCallingUserId();
+
+        enforceCrossUserPermission(Binder.getCallingUid(), userId, true, "get installed packages");
 
         // writer
         synchronized (mPackages) {

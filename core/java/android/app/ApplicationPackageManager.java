@@ -407,6 +407,12 @@ final class ApplicationPackageManager extends PackageManager {
     @SuppressWarnings("unchecked")
     @Override
     public List<PackageInfo> getInstalledPackages(int flags) {
+        return getInstalledPackages(flags, UserHandle.myUserId());
+    }
+
+    /** @hide */
+    @Override
+    public List<PackageInfo> getInstalledPackages(int flags, int userId) {
         try {
             final List<PackageInfo> packageInfos = new ArrayList<PackageInfo>();
             PackageInfo lastItem = null;
@@ -414,7 +420,7 @@ final class ApplicationPackageManager extends PackageManager {
 
             do {
                 final String lastKey = lastItem != null ? lastItem.packageName : null;
-                slice = mPM.getInstalledPackages(flags, lastKey);
+                slice = mPM.getInstalledPackages(flags, lastKey, userId);
                 lastItem = slice.populateList(packageInfos, PackageInfo.CREATOR);
             } while (!slice.isLastSlice());
 
@@ -460,12 +466,19 @@ final class ApplicationPackageManager extends PackageManager {
     @Override
     public List<ResolveInfo> queryIntentActivities(Intent intent,
                                                    int flags) {
+        return queryIntentActivitiesForUser(intent, flags, UserHandle.myUserId());
+    }
+
+    /** @hide Same as above but for a specific user */
+    @Override
+    public List<ResolveInfo> queryIntentActivitiesForUser(Intent intent,
+                                                   int flags, int userId) {
         try {
             return mPM.queryIntentActivities(
                 intent,
                 intent.resolveTypeIfNeeded(mContext.getContentResolver()),
                 flags,
-                UserHandle.myUserId());
+                userId);
         } catch (RemoteException e) {
             throw new RuntimeException("Package manager has died", e);
         }

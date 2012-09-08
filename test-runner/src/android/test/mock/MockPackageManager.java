@@ -140,6 +140,12 @@ public class MockPackageManager extends PackageManager {
         throw new UnsupportedOperationException();
     }
 
+    /** @hide */
+    @Override
+    public List<PackageInfo> getInstalledPackages(int flags, int userId) {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public int checkPermission(String permName, String pkgName) {
         throw new UnsupportedOperationException();
@@ -212,6 +218,13 @@ public class MockPackageManager extends PackageManager {
 
     @Override
     public List<ResolveInfo> queryIntentActivities(Intent intent, int flags) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @Override
+    public List<ResolveInfo> queryIntentActivitiesForUser(Intent intent,
+                                                   int flags, int userId) {
         throw new UnsupportedOperationException();
     }
 
