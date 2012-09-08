@@ -563,7 +563,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 getContentResolver().insert(contentUri, contentValues);
             }
 
-            if (DEBUG) {
+            if (DEBUG || true) {
                 Log.d(TAG, "Restored setting: " + key + "=" + value);
             }
         }
