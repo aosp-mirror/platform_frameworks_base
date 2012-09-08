@@ -23,5 +23,11 @@
     <!-- Whether we're using the tablet-optimized recents interface (we use this
      value at runtime for some things) -->
     <integer name="status_bar_recents_bg_gradient_degrees">90</integer>
+
+    <!-- The number of columns in the QuickSettings -->
+    <integer name="quick_settings_num_columns">6</integer>
+
+    <!-- The number of columns that the top level tiles span in the QuickSettings -->
+    <integer name="quick_settings_user_time_settings_tile_span">2</integer>
 </resources>
 

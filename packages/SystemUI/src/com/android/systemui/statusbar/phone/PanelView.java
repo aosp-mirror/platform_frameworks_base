@@ -12,6 +12,10 @@ import android.view.View;
 import android.widget.FrameLayout;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.BluetoothController;
+import com.android.systemui.statusbar.policy.LocationController;
+import com.android.systemui.statusbar.policy.NetworkController;
 
 public class PanelView extends FrameLayout {
     public static final boolean DEBUG = false;
@@ -354,6 +358,11 @@ public class PanelView extends FrameLayout {
 
     public void setBar(PanelBar panelBar) {
         mBar = panelBar;
+    }
+
+    public void setup(NetworkController network, BluetoothController bt, BatteryController batt,
+            LocationController location) {
+        // To be implemented by classes extending PanelView
     }
 
     public void collapse() {
