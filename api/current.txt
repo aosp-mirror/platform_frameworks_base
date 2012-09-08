@@ -15617,6 +15617,7 @@ package android.os {
     method public static final void flushPendingCommands();
     method public static final int getCallingPid();
     method public static final int getCallingUid();
+    method public static final android.os.UserHandle getCallingUserHandle();
     method public java.lang.String getInterfaceDescriptor();
     method public boolean isBinderAlive();
     method public static final void joinThreadPool();
