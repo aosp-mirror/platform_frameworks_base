@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.policy;
 
 import java.util.ArrayList;
 
+import android.bluetooth.BluetoothAdapter.BluetoothStateChangeCallback;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -36,6 +37,13 @@ public class BatteryController extends BroadcastReceiver {
     private ArrayList<ImageView> mIconViews = new ArrayList<ImageView>();
     private ArrayList<TextView> mLabelViews = new ArrayList<TextView>();
 
+    private ArrayList<BatteryStateChangeCallback> mChangeCallbacks =
+            new ArrayList<BatteryStateChangeCallback>();
+
+    public interface BatteryStateChangeCallback {
+        public void onBatteryLevelChanged(int level, boolean pluggedIn);
+    }
+
     public BatteryController(Context context) {
         mContext = context;
 
@@ -50,6 +58,10 @@ public class BatteryController extends BroadcastReceiver {
 
     public void addLabelView(TextView v) {
         mLabelViews.add(v);
+    }
+
+    public void addStateChangedCallback(BatteryStateChangeCallback cb) {
+        mChangeCallbacks.add(cb);
     }
 
     public void onReceive(Context context, Intent intent) {
@@ -72,6 +84,10 @@ public class BatteryController extends BroadcastReceiver {
                 TextView v = mLabelViews.get(i);
                 v.setText(mContext.getString(R.string.status_bar_settings_battery_meter_format,
                         level));
+            }
+
+            for (BatteryStateChangeCallback cb : mChangeCallbacks) {
+                cb.onBatteryLevelChanged(level, plugged);
             }
         }
     }
