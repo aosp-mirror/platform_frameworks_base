@@ -2392,17 +2392,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             String resultWho, int requestCode, int startFlags,
             String profileFile, ParcelFileDescriptor profileFd, Bundle options, int userId) {
         enforceNotIsolatedCaller("startActivity");
-        if (userId != UserHandle.getCallingUserId()) {
-            userId = handleIncomingUserLocked(Binder.getCallingPid(), Binder.getCallingUid(), userId,
-                    false, true, "startActivity", null);
-        } else {
-            if (intent.getCategories() != null
-                    && intent.getCategories().contains(Intent.CATEGORY_HOME)) {
-                // Requesting home, set the identity to the current user
-                // HACK!
-                userId = mCurrentUserId;
-            }
-        }
+        userId = handleIncomingUserLocked(Binder.getCallingPid(), Binder.getCallingUid(), userId,
+                false, true, "startActivity", null);
         return mMainStack.startActivityMayWait(caller, -1, intent, resolvedType,
                 resultTo, resultWho, requestCode, startFlags, profileFile, profileFd,
                 null, null, options, userId);
