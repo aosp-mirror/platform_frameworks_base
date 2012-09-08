@@ -24,6 +24,7 @@ import android.content.pm.PackageManager;
 import android.hardware.display.DisplayManagerGlobal;
 import android.hardware.display.IDisplayManager;
 import android.hardware.display.IDisplayManagerCallback;
+import android.hardware.display.WifiDisplayStatus;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -136,6 +137,9 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
     // Set to true when there are pending display changes that have yet to be applied
     // to the surface flinger state.
     private boolean mPendingTraversal;
+
+    // The Wifi display adapter, or null if not registered.
+    private WifiDisplayAdapter mWifiDisplayAdapter;
 
     // Temporary callback list, used when sending display events to applications.
     // May be used outside of the lock but only on the handler thread.
@@ -315,6 +319,77 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
         }
     }
 
+    @Override // Binder call
+    public void scanWifiDisplays() {
+        if (mContext.checkCallingPermission(android.Manifest.permission.CONFIGURE_WIFI_DISPLAY)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires CONFIGURE_WIFI_DISPLAY permission");
+        }
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mSyncRoot) {
+                mWifiDisplayAdapter.requestScanLocked();
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    @Override // Binder call
+    public void connectWifiDisplay(String address) {
+        if (mContext.checkCallingPermission(android.Manifest.permission.CONFIGURE_WIFI_DISPLAY)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires CONFIGURE_WIFI_DISPLAY permission");
+        }
+        if (address == null) {
+            throw new IllegalArgumentException("address must not be null");
+        }
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mSyncRoot) {
+                mWifiDisplayAdapter.requestConnectLocked(address);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    @Override // Binder call
+    public void disconnectWifiDisplay() {
+        if (mContext.checkCallingPermission(android.Manifest.permission.CONFIGURE_WIFI_DISPLAY)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires CONFIGURE_WIFI_DISPLAY permission");
+        }
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mSyncRoot) {
+                mWifiDisplayAdapter.requestDisconnectLocked();
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    @Override // Binder call
+    public WifiDisplayStatus getWifiDisplayStatus() {
+        if (mContext.checkCallingPermission(android.Manifest.permission.CONFIGURE_WIFI_DISPLAY)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires CONFIGURE_WIFI_DISPLAY permission");
+        }
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mSyncRoot) {
+                return mWifiDisplayAdapter.getWifiDisplayStatusLocked();
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
     private void registerDefaultDisplayAdapter() {
         // Register default display adapter.
         synchronized (mSyncRoot) {
@@ -333,8 +408,9 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
             if (shouldRegisterNonEssentialDisplayAdaptersLocked()) {
                 registerDisplayAdapterLocked(new OverlayDisplayAdapter(
                         mSyncRoot, mContext, mHandler, mDisplayAdapterListener, mUiHandler));
-                registerDisplayAdapterLocked(new WifiDisplayAdapter(
-                        mSyncRoot, mContext, mHandler, mDisplayAdapterListener));
+                mWifiDisplayAdapter = new WifiDisplayAdapter(
+                        mSyncRoot, mContext, mHandler, mDisplayAdapterListener);
+                registerDisplayAdapterLocked(mWifiDisplayAdapter);
             }
         }
     }
