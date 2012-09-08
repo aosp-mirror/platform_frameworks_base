@@ -40,6 +40,28 @@ public final class DisplayManager {
     private final Object mLock = new Object();
     private final SparseArray<Display> mDisplays = new SparseArray<Display>();
 
+    /**
+     * Broadcast receiver that indicates when the Wifi display status changes.
+     * <p>
+     * The status is provided as a {@link WifiDisplayStatus} object in the
+     * {@link #EXTRA_WIFI_DISPLAY_STATUS} extra.
+     * </p><p>
+     * This broadcast is only sent to registered receivers with the
+     * {@link android.Manifest.permission#CONFIGURE_WIFI_DISPLAY} permission and can
+     * only be sent by the system.
+     * </p>
+     * @hide
+     */
+    public static final String ACTION_WIFI_DISPLAY_STATUS_CHANGED =
+            "android.hardware.display.action.WIFI_DISPLAY_STATUS_CHANGED";
+
+    /**
+     * Contains a {@link WifiDisplayStatus} object.
+     * @hide
+     */
+    public static final String EXTRA_WIFI_DISPLAY_STATUS =
+            "android.hardware.display.extra.WIFI_DISPLAY_STATUS";
+
     /** @hide */
     public DisplayManager(Context context) {
         mContext = context;
@@ -124,6 +146,47 @@ public final class DisplayManager {
      */
     public void unregisterDisplayListener(DisplayListener listener) {
         mGlobal.unregisterDisplayListener(listener);
+    }
+
+    /**
+     * Initiates a fresh scan of availble Wifi displays.
+     * The results are sent as a {@link #ACTION_WIFI_DISPLAY_STATUS_CHANGED} broadcast.
+     * @hide
+     */
+    public void scanWifiDisplays() {
+        mGlobal.scanWifiDisplays();
+    }
+
+    /**
+     * Connects to a Wifi display.
+     * The results are sent as a {@link #ACTION_WIFI_DISPLAY_STATUS_CHANGED} broadcast.
+     *
+     * @param deviceAddress The MAC address of the device to which we should connect.
+     * @hide
+     */
+    public void connectWifiDisplay(String deviceAddress) {
+        mGlobal.connectWifiDisplay(deviceAddress);
+    }
+
+    /**
+     * Disconnects from the current Wifi display.
+     * The results are sent as a {@link #ACTION_WIFI_DISPLAY_STATUS_CHANGED} broadcast.
+     * @hide
+     */
+    public void disconnectWifiDisplay() {
+        mGlobal.disconnectWifiDisplay();
+    }
+
+    /**
+     * Gets the current Wifi display status.
+     * Watch for changes in the status by registering a broadcast receiver for
+     * {@link #ACTION_WIFI_DISPLAY_STATUS_CHANGED}.
+     *
+     * @return The current Wifi display status.
+     * @hide
+     */
+    public WifiDisplayStatus getWifiDisplayStatus() {
+        return mGlobal.getWifiDisplayStatus();
     }
 
     /**

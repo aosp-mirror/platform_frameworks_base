@@ -253,6 +253,43 @@ public final class DisplayManagerGlobal {
         }
     }
 
+    public void scanWifiDisplays() {
+        try {
+            mDm.scanWifiDisplays();
+        } catch (RemoteException ex) {
+            Log.e(TAG, "Failed to scan for Wifi displays.", ex);
+        }
+    }
+
+    public void connectWifiDisplay(String deviceAddress) {
+        if (deviceAddress == null) {
+            throw new IllegalArgumentException("deviceAddress must not be null");
+        }
+
+        try {
+            mDm.connectWifiDisplay(deviceAddress);
+        } catch (RemoteException ex) {
+            Log.e(TAG, "Failed to connect to Wifi display " + deviceAddress + ".", ex);
+        }
+    }
+
+    public void disconnectWifiDisplay() {
+        try {
+            mDm.disconnectWifiDisplay();
+        } catch (RemoteException ex) {
+            Log.e(TAG, "Failed to disconnect from Wifi display.", ex);
+        }
+    }
+
+    public WifiDisplayStatus getWifiDisplayStatus() {
+        try {
+            return mDm.getWifiDisplayStatus();
+        } catch (RemoteException ex) {
+            Log.e(TAG, "Failed to get Wifi display status.", ex);
+            return new WifiDisplayStatus();
+        }
+    }
+
     private final class DisplayManagerCallback extends IDisplayManagerCallback.Stub {
         @Override
         public void onDisplayEvent(int displayId, int event) {
