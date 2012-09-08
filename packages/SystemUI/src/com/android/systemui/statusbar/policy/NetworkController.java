@@ -148,6 +148,8 @@ public class NetworkController extends BroadcastReceiver {
     ArrayList<TextView> mWifiLabelViews = new ArrayList<TextView>();
     ArrayList<TextView> mEmergencyLabelViews = new ArrayList<TextView>();
     ArrayList<SignalCluster> mSignalClusters = new ArrayList<SignalCluster>();
+    ArrayList<NetworkSignalChangedCallback> mSignalsChangedCallbacks =
+            new ArrayList<NetworkSignalChangedCallback>();
     int mLastPhoneSignalIconId = -1;
     int mLastDataDirectionIconId = -1;
     int mLastDataDirectionOverlayIconId = -1;
@@ -170,6 +172,12 @@ public class NetworkController extends BroadcastReceiver {
         void setMobileDataIndicators(boolean visible, int strengthIcon, int activityIcon,
                 int typeIcon, String contentDescription, String typeContentDescription);
         void setIsAirplaneMode(boolean is, int airplaneIcon);
+    }
+
+    public interface NetworkSignalChangedCallback {
+        void onWifiSignalChanged(boolean enabled, String description);
+        void onMobileDataSignalChanged(boolean enabled, String description);
+        void onAirplaneModeChanged(boolean enabled);
     }
 
     /**
@@ -299,6 +307,11 @@ public class NetworkController extends BroadcastReceiver {
         refreshSignalCluster(cluster);
     }
 
+    public void addNetworkSignalChangedCallback(NetworkSignalChangedCallback cb) {
+        mSignalsChangedCallbacks.add(cb);
+        notifySignalsChangedCallbacks(cb);
+    }
+
     public void refreshSignalCluster(SignalCluster cluster) {
         cluster.setWifiIndicators(
                 // only show wifi in the cluster if connected or if wifi-only
@@ -327,6 +340,27 @@ public class NetworkController extends BroadcastReceiver {
                     mContentDescriptionDataType);
         }
         cluster.setIsAirplaneMode(mAirplaneMode, mAirplaneIconId);
+    }
+
+    void notifySignalsChangedCallbacks(NetworkSignalChangedCallback cb) {
+        // only show wifi in the cluster if connected or if wifi-only
+        boolean wifiEnabled = mWifiEnabled && (mWifiConnected || !mHasMobileDataFeature);
+        String wifiDesc = wifiEnabled ?
+                mWifiSsid : null;
+        cb.onWifiSignalChanged(wifiEnabled, wifiDesc);
+
+        if (isEmergencyOnly()) {
+            cb.onMobileDataSignalChanged(false, null);
+        } else {
+            if (mIsWimaxEnabled && mWimaxConnected) {
+                // wimax is special
+                cb.onMobileDataSignalChanged(true, mNetworkName);
+            } else {
+                // normal mobile data
+                cb.onMobileDataSignalChanged(mHasMobileDataFeature, mNetworkName);
+            }
+        }
+        cb.onAirplaneModeChanged(mAirplaneMode);
     }
 
     public void setStackedMode(boolean stacked) {
@@ -1123,6 +1157,9 @@ public class NetworkController extends BroadcastReceiver {
             // NB: the mLast*s will be updated later
             for (SignalCluster cluster : mSignalClusters) {
                 refreshSignalCluster(cluster);
+            }
+            for (NetworkSignalChangedCallback cb : mSignalsChangedCallbacks) {
+                notifySignalsChangedCallbacks(cb);
             }
         }
 

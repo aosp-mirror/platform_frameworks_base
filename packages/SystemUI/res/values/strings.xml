@@ -401,4 +401,34 @@
     <!-- Name of the launcher shortcut icon that allows dreams to be started immediately [CHAR LIMIT=20] -->
     <string name="start_dreams">Start dreams</string>
 
+    <!-- QuickSettings: Airplane mode [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_airplane_mode_label">Airplane mode</string>
+    <!-- QuickSettings: Battery [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_battery_label">Battery</string>
+    <!-- QuickSettings: Bluetooth [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_bluetooth_label">Bluetooth</string>
+    <!-- QuickSettings: Brightness [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_brightness_label">Brightness</string>
+    <!-- QuickSettings: IME [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_ime_label">IME</string>
+    <!-- QuickSettings: Location [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_label">Location in use</string>
+    <!-- QuickSettings: Media device [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_media_device_label">Media device</string>
+    <!-- QuickSettings: RSSI [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_rssi_label">RSSI</string>
+    <!-- QuickSettings: RSSI (No network) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_rssi_emergency_only">Emergency Calls Only</string>
+    <!-- QuickSettings: Settings [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_settings_label">Settings</string>
+    <!-- QuickSettings: Time [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_time_label">Time</string>
+    <!-- QuickSettings: User [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_user_label">Me</string>
+    <!-- QuickSettings: Wifi [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_wifi_label">Wifi</string>
+    <!-- QuickSettings: Wifi (No network) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_wifi_no_network">No Network</string>
+    <!-- QuickSettings: Wifi display [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_wifi_display_label">Wifi display</string>
 </resources>
