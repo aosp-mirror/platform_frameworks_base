@@ -496,7 +496,8 @@ final class WifiDisplayController implements DumpUtils.Dump {
 
     private static boolean isWifiDisplay(WifiP2pDevice device) {
         // FIXME: the wfdInfo API doesn't work yet
-        return device.deviceName.equals("DWD-300-22ACC2");
+        return false;
+        //return device.deviceName.equals("DWD-300-22ACC2");
         //return device.deviceName.startsWith("DWD-")
         //        || device.deviceName.startsWith("DIRECT-")
         //        || device.deviceName.startsWith("CAVM-");
