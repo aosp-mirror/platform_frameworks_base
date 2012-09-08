@@ -109,6 +109,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.Environment.UserEnvironment;
 import android.provider.Settings.Secure;
 import android.security.SystemKeyStore;
 import android.util.DisplayMetrics;
@@ -6135,19 +6136,20 @@ public class PackageManagerService extends IPackageManager.Stub {
                 mounted = true;
             } else {
                 final String status = Environment.getExternalStorageState();
-
-                mounted = status.equals(Environment.MEDIA_MOUNTED)
-                        || status.equals(Environment.MEDIA_MOUNTED_READ_ONLY);
+                mounted = (Environment.MEDIA_MOUNTED.equals(status)
+                        || Environment.MEDIA_MOUNTED_READ_ONLY.equals(status));
             }
 
             if (mounted) {
-                final File externalCacheDir = Environment
+                final UserEnvironment userEnv = new UserEnvironment(mStats.userHandle);
+
+                final File externalCacheDir = userEnv
                         .getExternalStorageAppCacheDirectory(mStats.packageName);
                 final long externalCacheSize = mContainerService
                         .calculateDirectorySize(externalCacheDir.getPath());
                 mStats.externalCacheSize = externalCacheSize;
 
-                final File externalDataDir = Environment
+                final File externalDataDir = userEnv
                         .getExternalStorageAppDataDirectory(mStats.packageName);
                 long externalDataSize = mContainerService.calculateDirectorySize(externalDataDir
                         .getPath());
@@ -6157,12 +6159,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
                 mStats.externalDataSize = externalDataSize;
 
-                final File externalMediaDir = Environment
+                final File externalMediaDir = userEnv
                         .getExternalStorageAppMediaDirectory(mStats.packageName);
                 mStats.externalMediaSize = mContainerService
                         .calculateDirectorySize(externalMediaDir.getPath());
 
-                final File externalObbDir = Environment
+                final File externalObbDir = userEnv
                         .getExternalStorageAppObbDirectory(mStats.packageName);
                 mStats.externalObbSize = mContainerService.calculateDirectorySize(externalObbDir
                         .getPath());
@@ -8361,20 +8363,22 @@ public class PackageManagerService extends IPackageManager.Stub {
                     if (conn.mContainerService == null) {
                         return;
                     }
-                    final File externalCacheDir = Environment
+
+                    final UserEnvironment userEnv = new UserEnvironment(curUser);
+                    final File externalCacheDir = userEnv
                             .getExternalStorageAppCacheDirectory(packageName);
                     try {
                         conn.mContainerService.clearDirectory(externalCacheDir.toString());
                     } catch (RemoteException e) {
                     }
                     if (allData) {
-                        final File externalDataDir = Environment
+                        final File externalDataDir = userEnv
                                 .getExternalStorageAppDataDirectory(packageName);
                         try {
                             conn.mContainerService.clearDirectory(externalDataDir.toString());
                         } catch (RemoteException e) {
                         }
-                        final File externalMediaDir = Environment
+                        final File externalMediaDir = userEnv
                                 .getExternalStorageAppMediaDirectory(packageName);
                         try {
                             conn.mContainerService.clearDirectory(externalMediaDir.toString());
