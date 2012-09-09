@@ -245,6 +245,7 @@ public final class ScreenMagnifier implements EventStreamTransformation {
     public void onDestroy() {
         mMagnificationController.setScaleAndMagnifiedRegionCenter(1.0f,
                 0, 0, true);
+        mViewport.setFrameShown(false, true);
         mDisplayProvider.destroy();
         mDisplayContentObserver.destroy();
     }
