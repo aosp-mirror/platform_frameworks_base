@@ -33,7 +33,6 @@ import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.os.UserManager;
-import android.telephony.TelephonyManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Slog;
@@ -42,7 +41,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
-import android.widget.Button;
 import android.widget.RemoteViews.OnClickHandler;
 import android.widget.ViewFlipper;
 
@@ -51,7 +49,6 @@ import com.android.internal.policy.impl.keyguard.KeyguardSecurityModel.SecurityM
 import com.android.internal.widget.LockPatternUtils;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 public class KeyguardHostView extends KeyguardViewBase {
@@ -200,6 +197,17 @@ public class KeyguardHostView extends KeyguardViewBase {
             dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
         }
         dialog.show();
+    }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if (event.getAction() == KeyEvent.ACTION_UP
+                && event.getKeyCode() == KeyEvent.KEYCODE_BACK
+                && mCurrentSecuritySelection != SecurityMode.None) {
+            mCallback.dismiss(false);
+            return true;
+        }
+        return super.dispatchKeyEvent(event);
     }
 
     private void showTimeoutDialog() {
