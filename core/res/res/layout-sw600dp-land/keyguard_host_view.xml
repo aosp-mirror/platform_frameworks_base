@@ -44,7 +44,7 @@
         android:layout_weight="1"
         android:gravity="center">
 
-        <ViewFlipper
+        <com.android.internal.policy.impl.keyguard.KeyguardSecurityViewFlipper
             android:id="@+id/view_flipper"
             android:layout_width="@dimen/kg_security_view_width"
             android:layout_height="match_parent"
@@ -55,7 +55,7 @@
             <!-- SelectorView is always used, so add it here. The rest are loaded dynamically -->
             <include layout="@layout/keyguard_selector_view"/>
 
-        </ViewFlipper>
+        </com.android.internal.policy.impl.keyguard.KeyguardSecurityViewFlipper>
 
     </FrameLayout>
 

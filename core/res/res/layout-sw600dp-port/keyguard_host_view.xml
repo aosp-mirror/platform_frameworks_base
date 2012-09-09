@@ -40,7 +40,7 @@
 
     </com.android.internal.policy.impl.keyguard.KeyguardWidgetPager>
 
-    <ViewFlipper
+    <com.android.internal.policy.impl.keyguard.KeyguardSecurityViewFlipper
         android:id="@+id/view_flipper"
         android:layout_width="@dimen/kg_security_view_width"
         android:layout_height="0dip"
@@ -50,7 +50,7 @@
         <!-- SelectorView is always used, so add it here. The rest are loaded dynamically -->
         <include layout="@layout/keyguard_selector_view"/>
 
-    </ViewFlipper>
+    </com.android.internal.policy.impl.keyguard.KeyguardSecurityViewFlipper>
 
 </com.android.internal.policy.impl.keyguard.KeyguardHostView>
 
