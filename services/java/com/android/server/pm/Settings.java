@@ -566,6 +566,10 @@ final class Settings {
         if (p.signatures.mSignatures == null) {
             p.signatures.assignSignatures(pkg.mSignatures);
         }
+        // Update flags if needed.
+        if (pkg.applicationInfo.flags != p.pkgFlags) {
+            p.pkgFlags = pkg.applicationInfo.flags;
+        }
         // If this app defines a shared user id initialize
         // the shared user signatures as well.
         if (p.sharedUser != null && p.sharedUser.signatures.mSignatures == null) {
@@ -2616,10 +2620,10 @@ final class Settings {
                 pw.print("    installerPackageName="); pw.println(ps.installerPackageName);
             }
             pw.print("    signatures="); pw.println(ps.signatures);
-            pw.print("    permissionsFixed="); pw.print(ps.permissionsFixed);
-            pw.print(" haveGids="); pw.println(ps.haveGids);
-            pw.print("    pkgFlags=0x"); pw.print(Integer.toHexString(ps.pkgFlags));
-            pw.print(" installStatus="); pw.println(ps.installStatus);
+            pw.print("    permissionsFixed="); pw.println(ps.permissionsFixed);
+            pw.print("    haveGids="); pw.println(ps.haveGids);
+            pw.print("    pkgFlags="); printFlags(pw, ps.pkgFlags, FLAG_DUMP_SPEC);
+            pw.print("    installStatus="); pw.println(ps.installStatus);
             for (UserInfo user : users) {
                 pw.print("    User "); pw.print(user.id); pw.print(": ");
                 pw.print(" installed=");
