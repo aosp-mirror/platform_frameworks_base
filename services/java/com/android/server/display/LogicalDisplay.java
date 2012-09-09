@@ -54,6 +54,7 @@ import libcore.util.Objects;
 final class LogicalDisplay {
     private final DisplayInfo mBaseDisplayInfo = new DisplayInfo();
 
+    private final int mDisplayId;
     private final int mLayerStack;
     private DisplayInfo mOverrideDisplayInfo; // set by the window manager
     private DisplayInfo mInfo;
@@ -70,9 +71,19 @@ final class LogicalDisplay {
     private final Rect mTempLayerStackRect = new Rect();
     private final Rect mTempDisplayRect = new Rect();
 
-    public LogicalDisplay(int layerStack, DisplayDevice primaryDisplayDevice) {
+    public LogicalDisplay(int displayId, int layerStack, DisplayDevice primaryDisplayDevice) {
+        mDisplayId = displayId;
         mLayerStack = layerStack;
         mPrimaryDisplayDevice = primaryDisplayDevice;
+    }
+
+    /**
+     * Gets the logical display id of this logical display.
+     *
+     * @return The logical display id.
+     */
+    public int getDisplayIdLocked() {
+        return mDisplayId;
     }
 
     /**

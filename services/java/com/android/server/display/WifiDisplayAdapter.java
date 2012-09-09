@@ -324,6 +324,7 @@ final class WifiDisplayAdapter extends DisplayAdapter {
                 mInfo.height = mHeight;
                 mInfo.refreshRate = mRefreshRate;
                 mInfo.flags = mFlags;
+                mInfo.touch = DisplayDeviceInfo.TOUCH_EXTERNAL;
                 mInfo.setAssumedDensityForExternalDisplay(mWidth, mHeight);
             }
             return mInfo;

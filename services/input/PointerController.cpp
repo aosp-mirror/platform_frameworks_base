@@ -307,8 +307,16 @@ void PointerController::setInactivityTimeout(InactivityTimeout inactivityTimeout
     }
 }
 
-void PointerController::setDisplaySize(int32_t width, int32_t height) {
+void PointerController::setDisplayViewport(int32_t width, int32_t height, int32_t orientation) {
     AutoMutex _l(mLock);
+
+    // Adjust to use the display's unrotated coordinate frame.
+    if (orientation == DISPLAY_ORIENTATION_90
+            || orientation == DISPLAY_ORIENTATION_270) {
+        int32_t temp = height;
+        height = width;
+        width = temp;
+    }
 
     if (mLocked.displayWidth != width || mLocked.displayHeight != height) {
         mLocked.displayWidth = width;
@@ -324,12 +332,7 @@ void PointerController::setDisplaySize(int32_t width, int32_t height) {
         }
 
         fadeOutAndReleaseAllSpotsLocked();
-        updatePointerLocked();
     }
-}
-
-void PointerController::setDisplayOrientation(int32_t orientation) {
-    AutoMutex _l(mLock);
 
     if (mLocked.displayOrientation != orientation) {
         // Apply offsets to convert from the pixel top-left corner position to the pixel center.
@@ -380,9 +383,9 @@ void PointerController::setDisplayOrientation(int32_t orientation) {
         mLocked.pointerX = x - 0.5f;
         mLocked.pointerY = y - 0.5f;
         mLocked.displayOrientation = orientation;
-
-        updatePointerLocked();
     }
+
+    updatePointerLocked();
 }
 
 void PointerController::setPointerIcon(const SpriteIcon& icon) {

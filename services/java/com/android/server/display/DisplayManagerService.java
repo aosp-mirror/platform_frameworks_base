@@ -96,6 +96,7 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
     private static final int MSG_REGISTER_ADDITIONAL_DISPLAY_ADAPTERS = 2;
     private static final int MSG_DELIVER_DISPLAY_EVENT = 3;
     private static final int MSG_REQUEST_TRAVERSAL = 4;
+    private static final int MSG_UPDATE_VIEWPORT = 5;
 
     private final Context mContext;
     private final boolean mHeadless;
@@ -103,6 +104,7 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
     private final Handler mUiHandler;
     private final DisplayAdapterListener mDisplayAdapterListener;
     private WindowManagerFuncs mWindowManagerFuncs;
+    private InputManagerFuncs mInputManagerFuncs;
 
     // The synchronization root for the display manager.
     // This lock guards most of the display manager's state.
@@ -141,12 +143,22 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
     // The Wifi display adapter, or null if not registered.
     private WifiDisplayAdapter mWifiDisplayAdapter;
 
+    // Viewports of the default display and the display that should receive touch
+    // input from an external source.  Used by the input system.
+    private final DisplayViewport mDefaultViewport = new DisplayViewport();
+    private final DisplayViewport mExternalTouchViewport = new DisplayViewport();
+
     // Temporary callback list, used when sending display events to applications.
     // May be used outside of the lock but only on the handler thread.
     private final ArrayList<CallbackRecord> mTempCallbacks = new ArrayList<CallbackRecord>();
 
     // Temporary display info, used for comparing display configurations.
     private final DisplayInfo mTempDisplayInfo = new DisplayInfo();
+
+    // Temporary viewports, used when sending new viewport information to the
+    // input system.  May be used outside of the lock but only on the handler thread.
+    private final DisplayViewport mTempDefaultViewport = new DisplayViewport();
+    private final DisplayViewport mTempExternalTouchViewport = new DisplayViewport();
 
     public DisplayManagerService(Context context, Handler mainHandler, Handler uiHandler) {
         mContext = context;
@@ -183,12 +195,23 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
     }
 
     /**
-     * Called during initialization to associated the display manager with the
+     * Called during initialization to associate the display manager with the
      * window manager.
      */
     public void setWindowManager(WindowManagerFuncs windowManagerFuncs) {
         synchronized (mSyncRoot) {
             mWindowManagerFuncs = windowManagerFuncs;
+            scheduleTraversalLocked();
+        }
+    }
+
+    /**
+     * Called during initialization to associate the display manager with the
+     * input manager.
+     */
+    public void setInputManager(InputManagerFuncs inputManagerFuncs) {
+        synchronized (mSyncRoot) {
+            mInputManagerFuncs = inputManagerFuncs;
             scheduleTraversalLocked();
         }
     }
@@ -487,7 +510,7 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
         final int displayId = assignDisplayIdLocked(isDefault);
         final int layerStack = assignLayerStackLocked(displayId);
 
-        LogicalDisplay display = new LogicalDisplay(layerStack, device);
+        LogicalDisplay display = new LogicalDisplay(displayId, layerStack, device);
         display.updateLocked(mDisplayDevices);
         if (!display.isValidLocked()) {
             // This should never happen currently.
@@ -548,12 +571,21 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
         }
         mRemovedDisplayDevices.clear();
 
+        // Clear all viewports before configuring displays so that we can keep
+        // track of which ones we have configured.
+        clearViewportsLocked();
+
         // Configure each display device.
         final int count = mDisplayDevices.size();
         for (int i = 0; i < count; i++) {
             DisplayDevice device = mDisplayDevices.get(i);
             configureDisplayInTransactionLocked(device);
             device.performTraversalInTransactionLocked();
+        }
+
+        // Tell the input system about these new viewports.
+        if (mInputManagerFuncs != null) {
+            mHandler.sendEmptyMessage(MSG_UPDATE_VIEWPORT);
         }
     }
 
@@ -577,7 +609,11 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
                 scheduleTraversalLocked();
             }
         }
+    }
 
+    private void clearViewportsLocked() {
+        mDefaultViewport.valid = false;
+        mExternalTouchViewport.valid = false;
     }
 
     private void configureDisplayInTransactionLocked(DisplayDevice device) {
@@ -593,11 +629,30 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
         // Apply the logical display configuration to the display device.
         if (display == null) {
             // TODO: no logical display for the device, blank it
-            Slog.d(TAG, "Missing logical display to use for physical display device: "
+            Slog.w(TAG, "Missing logical display to use for physical display device: "
                     + device.getDisplayDeviceInfoLocked());
+            return;
         } else {
             display.configureDisplayInTransactionLocked(device);
         }
+
+        // Update the viewports if needed.
+        DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
+        if (!mDefaultViewport.valid
+                && (info.flags & DisplayDeviceInfo.FLAG_DEFAULT_DISPLAY) != 0) {
+            setViewportLocked(mDefaultViewport, display, device);
+        }
+        if (!mExternalTouchViewport.valid
+                && info.touch == DisplayDeviceInfo.TOUCH_EXTERNAL) {
+            setViewportLocked(mExternalTouchViewport, display, device);
+        }
+    }
+
+    private static void setViewportLocked(DisplayViewport viewport,
+            LogicalDisplay display, DisplayDevice device) {
+        viewport.valid = true;
+        viewport.displayId = display.getDisplayIdLocked();
+        device.populateViewportLocked(viewport);
     }
 
     private LogicalDisplay findLogicalDisplayForDeviceLocked(DisplayDevice device) {
@@ -690,6 +745,10 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
                 pw.println("  Display " + displayId + ":");
                 display.dumpLocked(ipw);
             }
+
+            pw.println();
+            pw.println("Default viewport: " + mDefaultViewport);
+            pw.println("External touch viewport: " + mExternalTouchViewport);
         }
     }
 
@@ -712,6 +771,18 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
          * transaction at a later time.
          */
         void requestTraversal();
+    }
+
+    /**
+     * Private interface to the input manager.
+     */
+    public interface InputManagerFuncs {
+        /**
+         * Sets information about the displays as needed by the input system.
+         * The input system should copy this information if required.
+         */
+        void setDisplayViewports(DisplayViewport defaultViewport,
+                DisplayViewport externalTouchViewport);
     }
 
     private final class DisplayManagerHandler extends Handler {
@@ -737,6 +808,16 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
                 case MSG_REQUEST_TRAVERSAL:
                     mWindowManagerFuncs.requestTraversal();
                     break;
+
+                case MSG_UPDATE_VIEWPORT: {
+                    synchronized (mSyncRoot) {
+                        mTempDefaultViewport.copyFrom(mDefaultViewport);
+                        mTempExternalTouchViewport.copyFrom(mExternalTouchViewport);
+                    }
+                    mInputManagerFuncs.setDisplayViewports(
+                            mTempDefaultViewport, mTempExternalTouchViewport);
+                    break;
+                }
             }
         }
     }
