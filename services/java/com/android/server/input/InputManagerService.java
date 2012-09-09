@@ -19,6 +19,8 @@ package com.android.server.input;
 import com.android.internal.R;
 import com.android.internal.util.XmlUtils;
 import com.android.server.Watchdog;
+import com.android.server.display.DisplayManagerService;
+import com.android.server.display.DisplayViewport;
 
 import org.xmlpull.v1.XmlPullParser;
 
@@ -90,7 +92,8 @@ import libcore.util.Objects;
 /*
  * Wraps the C++ InputManager and provides its callbacks.
  */
-public class InputManagerService extends IInputManager.Stub implements Watchdog.Monitor {
+public class InputManagerService extends IInputManager.Stub
+        implements Watchdog.Monitor, DisplayManagerService.InputManagerFuncs {
     static final String TAG = "InputManager";
     static final boolean DEBUG = false;
 
@@ -143,11 +146,11 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
     private static native int nativeInit(InputManagerService service,
             Context context, MessageQueue messageQueue);
     private static native void nativeStart(int ptr);
-    private static native void nativeSetDisplaySize(int ptr, int displayId,
-            int width, int height, int externalWidth, int externalHeight);
-    private static native void nativeSetDisplayOrientation(int ptr, int displayId,
-            int rotation, int externalRotation);
-    
+    private static native void nativeSetDisplayViewport(int ptr, boolean external,
+            int displayId, int rotation,
+            int logicalLeft, int logicalTop, int logicalRight, int logicalBottom,
+            int physicalLeft, int physicalTop, int physicalRight, int physicalBottom);
+
     private static native int nativeGetScanCodeState(int ptr,
             int deviceId, int sourceMask, int scanCode);
     private static native int nativeGetKeyCodeState(int ptr,
@@ -282,28 +285,27 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
         nativeReloadDeviceAliases(mPtr);
     }
 
-    public void setDisplaySize(int displayId, int width, int height) {
-        if (width <= 0 || height <= 0) {
-            throw new IllegalArgumentException("Invalid display id or dimensions.");
+    @Override
+    public void setDisplayViewports(DisplayViewport defaultViewport,
+            DisplayViewport externalTouchViewport) {
+        if (defaultViewport.valid) {
+            setDisplayViewport(false, defaultViewport);
         }
-        
-        if (DEBUG) {
-            Slog.d(TAG, "Setting display #" + displayId + " size to " + width + "x" + height);
+
+        if (externalTouchViewport.valid) {
+            setDisplayViewport(true, externalTouchViewport);
+        } else if (defaultViewport.valid) {
+            setDisplayViewport(true, defaultViewport);
         }
-        // FIXME: external size is deprecated
-        nativeSetDisplaySize(mPtr, displayId, width, height, 1280, 720);
     }
 
-    public void setDisplayOrientation(int displayId, int rotation) {
-        if (rotation < Surface.ROTATION_0 || rotation > Surface.ROTATION_270) {
-            throw new IllegalArgumentException("Invalid rotation.");
-        }
-        
-        if (DEBUG) {
-            Slog.d(TAG, "Setting display #" + displayId + " orientation to rotation " + rotation);
-        }
-        // FIXME: external rotation is deprecated
-        nativeSetDisplayOrientation(mPtr, displayId, rotation, Surface.ROTATION_0);
+    private void setDisplayViewport(boolean external, DisplayViewport viewport) {
+        nativeSetDisplayViewport(mPtr, external,
+                viewport.displayId, viewport.orientation,
+                viewport.logicalFrame.left, viewport.logicalFrame.top,
+                viewport.logicalFrame.right, viewport.logicalFrame.bottom,
+                viewport.physicalFrame.left, viewport.physicalFrame.top,
+                viewport.physicalFrame.right, viewport.physicalFrame.bottom);
     }
 
     /**
