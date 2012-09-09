@@ -21,7 +21,7 @@
 #include <ctype.h>
 #include <errno.h>
 
-#include <expat.h>
+#include <libexpat/expat.h>
 
 using namespace android;
 
