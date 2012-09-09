@@ -16,6 +16,8 @@
 
 package android.content.pm;
 
+import static libcore.io.OsConstants.*;
+
 import com.android.frameworks.coretests.R;
 import com.android.internal.content.PackageHelper;
 
@@ -32,9 +34,11 @@ import android.net.Uri;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.IBinder;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StatFs;
+import android.os.SystemClock;
 import android.os.storage.IMountService;
 import android.os.storage.StorageListener;
 import android.os.storage.StorageManager;
@@ -52,6 +56,12 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
+import libcore.io.ErrnoException;
+import libcore.io.Libcore;
+import libcore.io.StructStat;
 
 public class PackageManagerTests extends AndroidTestCase {
     private static final boolean localLOGV = true;
@@ -404,15 +414,12 @@ public class PackageManagerTests extends AndroidTestCase {
                 if ((flags & PackageManager.INSTALL_FORWARD_LOCK) != 0) {
                     assertTrue("The application should be installed forward locked",
                             (info.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0);
-                    assertTrue("The APK path (" + srcPath + ") should start with "
-                            + SECURE_CONTAINERS_PREFIX,
-                            srcPath.startsWith(SECURE_CONTAINERS_PREFIX));
-                    assertTrue("The public APK path (" + publicSrcPath + ") should start with "
-                            + SECURE_CONTAINERS_PREFIX,
-                            publicSrcPath.startsWith(SECURE_CONTAINERS_PREFIX));
-                    assertTrue("The native library path (" + info.nativeLibraryDir
-                            + ") should start with " + SECURE_CONTAINERS_PREFIX,
-                            info.nativeLibraryDir.startsWith(SECURE_CONTAINERS_PREFIX));
+                    assertStartsWith("The APK path should point to the ASEC",
+                            SECURE_CONTAINERS_PREFIX, srcPath);
+                    assertStartsWith("The public APK path should point to the ASEC",
+                            SECURE_CONTAINERS_PREFIX, publicSrcPath);
+                    assertStartsWith("The native library path should point to the ASEC",
+                            SECURE_CONTAINERS_PREFIX, info.nativeLibraryDir);
                     try {
                         String compatLib = new File(info.dataDir + "/lib").getCanonicalPath();
                         assertEquals("The compatibility lib directory should be a symbolic link to "
@@ -425,7 +432,14 @@ public class PackageManagerTests extends AndroidTestCase {
                     assertFalse((info.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0);
                     assertEquals(srcPath, appInstallPath);
                     assertEquals(publicSrcPath, appInstallPath);
-                    assertTrue(info.nativeLibraryDir.startsWith(dataDir.getPath()));
+                    assertStartsWith("Native library should point to shared lib directory",
+                            dataDir.getPath(),
+                            info.nativeLibraryDir);
+                    assertDirOwnerGroupPerms(
+                            "Native library directory should be owned by system:system and 0755",
+                            Process.SYSTEM_UID, Process.SYSTEM_UID,
+                            S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH,
+                            info.nativeLibraryDir);
                 }
                 assertFalse((info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0);
 
@@ -435,8 +449,7 @@ public class PackageManagerTests extends AndroidTestCase {
                         nativeLibDir.exists());
                 try {
                     assertEquals("Native library dir should not be a symlink",
-                            info.nativeLibraryDir,
-                            nativeLibDir.getCanonicalPath());
+                            info.nativeLibraryDir, nativeLibDir.getCanonicalPath());
                 } catch (IOException e) {
                     fail("Can't read " + nativeLibDir.getPath());
                 }
@@ -453,14 +466,12 @@ public class PackageManagerTests extends AndroidTestCase {
                         (info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0);
                 // Might need to check:
                 // ((info.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0)
-                assertTrue("The APK path (" + srcPath + ") should start with "
-                        + SECURE_CONTAINERS_PREFIX, srcPath.startsWith(SECURE_CONTAINERS_PREFIX));
-                assertTrue("The public APK path (" + publicSrcPath + ") should start with "
-                        + SECURE_CONTAINERS_PREFIX,
-                        publicSrcPath.startsWith(SECURE_CONTAINERS_PREFIX));
-                assertTrue("The native library path (" + info.nativeLibraryDir
-                        + ") should start with " + SECURE_CONTAINERS_PREFIX,
-                        info.nativeLibraryDir.startsWith(SECURE_CONTAINERS_PREFIX));
+                assertStartsWith("The APK path should point to the ASEC",
+                        SECURE_CONTAINERS_PREFIX, srcPath);
+                assertStartsWith("The public APK path should point to the ASEC",
+                        SECURE_CONTAINERS_PREFIX, publicSrcPath);
+                assertStartsWith("The native library path should point to the ASEC",
+                        SECURE_CONTAINERS_PREFIX, info.nativeLibraryDir);
 
                 // Make sure the native library in /data/data/<app>/lib is a
                 // symlink to the ASEC
@@ -480,6 +491,66 @@ public class PackageManagerTests extends AndroidTestCase {
             }
         } catch (NameNotFoundException e) {
             failStr("failed with exception : " + e);
+        }
+    }
+
+    private void assertDirOwnerGroupPerms(String reason, int uid, int gid, int perms, String path) {
+        final StructStat stat;
+
+        try {
+            stat = Libcore.os.lstat(path);
+        } catch (ErrnoException e) {
+            throw new AssertionError(reason + "\n" + "Got: " + path + " does not exist");
+        }
+
+        StringBuilder sb = new StringBuilder();
+
+        if (!S_ISDIR(stat.st_mode)) {
+            sb.append("\nExpected type: ");
+            sb.append(S_IFDIR);
+            sb.append("\ngot type: ");
+            sb.append((stat.st_mode & S_IFMT));
+        }
+
+        if (stat.st_uid != uid) {
+            sb.append("\nExpected owner: ");
+            sb.append(uid);
+            sb.append("\nGot owner: ");
+            sb.append(stat.st_uid);
+        }
+
+        if (stat.st_gid != gid) {
+            sb.append("\nExpected group: ");
+            sb.append(gid);
+            sb.append("\nGot group: ");
+            sb.append(stat.st_gid);
+        }
+
+        if ((stat.st_mode & ~S_IFMT) != perms) {
+            sb.append("\nExpected permissions: ");
+            sb.append(Integer.toOctalString(perms));
+            sb.append("\nGot permissions: ");
+            sb.append(Integer.toOctalString(stat.st_mode & ~S_IFMT));
+        }
+
+        if (sb.length() > 0) {
+            throw new AssertionError(reason + sb.toString());
+        }
+    }
+
+    private static void assertStartsWith(String prefix, String actual) {
+        assertStartsWith("", prefix, actual);
+    }
+
+    private static void assertStartsWith(String description, String prefix, String actual) {
+        if (!actual.startsWith(prefix)) {
+            StringBuilder sb = new StringBuilder(description);
+            sb.append("\nExpected prefix: ");
+            sb.append(prefix);
+            sb.append("\n     got: ");
+            sb.append(actual);
+            sb.append('\n');
+            throw new AssertionError(sb.toString());
         }
     }
 
@@ -820,22 +891,51 @@ public class PackageManagerTests extends AndroidTestCase {
                 | PackageManager.INSTALL_EXTERNAL);
     }
 
-    /* -------------- Delete tests ---*/
+    /* -------------- Delete tests --- */
     private static class DeleteObserver extends IPackageDeleteObserver.Stub {
+        private CountDownLatch mLatch = new CountDownLatch(1);
 
-        public boolean succeeded;
-        private boolean doneFlag = false;
+        private int mReturnCode;
 
-        public boolean isDone() {
-            return doneFlag;
+        private final String mPackageName;
+
+        private String mObservedPackage;
+
+        public DeleteObserver(String packageName) {
+            mPackageName = packageName;
+        }
+
+        public boolean isSuccessful() {
+            return mReturnCode == PackageManager.DELETE_SUCCEEDED;
         }
 
         public void packageDeleted(String packageName, int returnCode) throws RemoteException {
-            synchronized(this) {
-                this.succeeded = returnCode == PackageManager.DELETE_SUCCEEDED;
-                doneFlag = true;
-                notifyAll();
+            mObservedPackage = packageName;
+
+            mReturnCode = returnCode;
+
+            mLatch.countDown();
+        }
+
+        public void waitForCompletion(long timeoutMillis) {
+            final long deadline = SystemClock.uptimeMillis() + timeoutMillis;
+
+            long waitTime = timeoutMillis;
+            while (waitTime > 0) {
+                try {
+                    boolean done = mLatch.await(waitTime, TimeUnit.MILLISECONDS);
+                    if (done) {
+                        assertEquals(mPackageName, mObservedPackage);
+                        return;
+                    }
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                waitTime = deadline - SystemClock.uptimeMillis();
             }
+
+            throw new AssertionError("Timeout waiting for package deletion");
         }
     }
 
@@ -863,39 +963,38 @@ public class PackageManagerTests extends AndroidTestCase {
         }
     }
 
-    public boolean invokeDeletePackage(final String pkgName, int flags,
-            GenericReceiver receiver) throws Exception {
-        DeleteObserver observer = new DeleteObserver();
-        final boolean received = false;
+    public boolean invokeDeletePackage(final String pkgName, int flags, GenericReceiver receiver)
+            throws Exception {
+        ApplicationInfo info = getPm().getApplicationInfo(pkgName,
+                PackageManager.GET_UNINSTALLED_PACKAGES);
+
         mContext.registerReceiver(receiver, receiver.filter);
         try {
-            // Wait on observer
-            synchronized(observer) {
-                synchronized (receiver) {
-                    getPm().deletePackage(pkgName, observer, flags);
-                    long waitTime = 0;
-                    while((!observer.isDone()) && (waitTime < MAX_WAIT_TIME) ) {
-                        observer.wait(WAIT_TIME_INCR);
-                        waitTime += WAIT_TIME_INCR;
-                    }
-                    if(!observer.isDone()) {
-                        throw new Exception("Timed out waiting for packageInstalled callback");
-                    }
-                    // Verify we received the broadcast
-                    waitTime = 0;
-                    while((!receiver.isDone()) && (waitTime < MAX_WAIT_TIME) ) {
-                        receiver.wait(WAIT_TIME_INCR);
-                        waitTime += WAIT_TIME_INCR;
-                    }
-                    if(!receiver.isDone()) {
-                        throw new Exception("Timed out waiting for PACKAGE_REMOVED notification");
-                    }
-                    return receiver.received;
-                }
+            DeleteObserver observer = new DeleteObserver(pkgName);
+
+            getPm().deletePackage(pkgName, observer, flags);
+            observer.waitForCompletion(MAX_WAIT_TIME);
+
+            assertUninstalled(info);
+
+            // Verify we received the broadcast
+            long waitTime = 0;
+            while ((!receiver.isDone()) && (waitTime < MAX_WAIT_TIME)) {
+                receiver.wait(WAIT_TIME_INCR);
+                waitTime += WAIT_TIME_INCR;
             }
+            if (!receiver.isDone()) {
+                throw new Exception("Timed out waiting for PACKAGE_REMOVED notification");
+            }
+            return receiver.received;
         } finally {
             mContext.unregisterReceiver(receiver);
         }
+    }
+
+    private static void assertUninstalled(ApplicationInfo info) throws Exception {
+        File nativeLibraryFile = new File(info.nativeLibraryDir);
+        assertFalse("Native library directory should be erased", nativeLibraryFile.exists());
     }
 
     public void deleteFromRawResource(int iFlags, int dFlags) throws Exception {
@@ -1212,11 +1311,29 @@ public class PackageManagerTests extends AndroidTestCase {
             return;
         }
         Runtime.getRuntime().gc();
-        Log.i(TAG, "Deleting package : " + ip.pkg.packageName);
-        getPm().deletePackage(ip.pkg.packageName, null, 0);
-        File outFile = new File(ip.pkg.mScanPath);
-        if (outFile != null && outFile.exists()) {
-            outFile.delete();
+
+        final String packageName = ip.pkg.packageName;
+        Log.i(TAG, "Deleting package : " + packageName);
+
+        ApplicationInfo info = null;
+        try {
+            info = getPm().getApplicationInfo(packageName, PackageManager.GET_UNINSTALLED_PACKAGES);
+        } catch (NameNotFoundException ignored) {
+        }
+
+        DeleteObserver observer = new DeleteObserver(packageName);
+        getPm().deletePackage(packageName, observer, 0);
+        observer.waitForCompletion(MAX_WAIT_TIME);
+
+        try {
+            if (info != null) {
+                assertUninstalled(info);
+            }
+        } finally {
+            File outFile = new File(ip.pkg.mScanPath);
+            if (outFile != null && outFile.exists()) {
+                outFile.delete();
+            }
         }
     }
 
@@ -1230,7 +1347,10 @@ public class PackageManagerTests extends AndroidTestCase {
                     PackageManager.GET_UNINSTALLED_PACKAGES);
 
             if (info != null) {
-                getPm().deletePackage(pkgName, null, 0);
+                DeleteObserver observer = new DeleteObserver(pkgName);
+                getPm().deletePackage(pkgName, observer, 0);
+                observer.waitForCompletion(MAX_WAIT_TIME);
+                assertUninstalled(info);
             }
         } catch (NameNotFoundException e) {
         }
@@ -1587,16 +1707,16 @@ public class PackageManagerTests extends AndroidTestCase {
                 if ((moveFlags & PackageManager.MOVE_INTERNAL) != 0) {
                     assertTrue("ApplicationInfo.FLAG_EXTERNAL_STORAGE flag should NOT be set",
                             (info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) == 0);
-                    assertTrue("ApplicationInfo.nativeLibraryDir should start with " + info.dataDir,
-                            info.nativeLibraryDir.startsWith(info.dataDir));
-                } else if ((moveFlags & PackageManager.MOVE_EXTERNAL_MEDIA) != 0){
+                    assertStartsWith("Native library dir should be in dataDir",
+                            info.dataDir, info.nativeLibraryDir);
+                } else if ((moveFlags & PackageManager.MOVE_EXTERNAL_MEDIA) != 0) {
                     assertTrue("ApplicationInfo.FLAG_EXTERNAL_STORAGE flag should be set",
                             (info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0);
-                    assertTrue("ApplicationInfo.nativeLibraryDir should start with " + SECURE_CONTAINERS_PREFIX,
-                            info.nativeLibraryDir.startsWith(SECURE_CONTAINERS_PREFIX));
+                    assertStartsWith("Native library dir should point to ASEC",
+                            SECURE_CONTAINERS_PREFIX, info.nativeLibraryDir);
                     final File nativeLibSymLink = new File(info.dataDir, "lib");
-                    assertTrue("The data directory should have a 'lib' symlink that points to the ASEC container",
-                            nativeLibSymLink.getCanonicalPath().startsWith(SECURE_CONTAINERS_PREFIX));
+                    assertStartsWith("The data directory should have a 'lib' symlink that points to the ASEC container",
+                            SECURE_CONTAINERS_PREFIX, nativeLibSymLink.getCanonicalPath());
                 }
             }
         } catch (NameNotFoundException e) {
