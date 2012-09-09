@@ -32,18 +32,27 @@ import java.util.Arrays;
  */
 public final class WifiDisplayStatus implements Parcelable {
     private final boolean mEnabled;
-    private final WifiDisplay mConnectedDisplay;
+    private final int mScanState;
+    private final int mActiveDisplayState;
+    private final WifiDisplay mActiveDisplay;
     private final WifiDisplay[] mKnownDisplays;
-    private final boolean mScanInProgress;
-    private final boolean mConnectionInProgress;
+
+    public static final int SCAN_STATE_NOT_SCANNING = 0;
+    public static final int SCAN_STATE_SCANNING = 1;
+
+    public static final int DISPLAY_STATE_NOT_CONNECTED = 0;
+    public static final int DISPLAY_STATE_CONNECTING = 1;
+    public static final int DISPLAY_STATE_CONNECTED = 2;
 
     public static final Creator<WifiDisplayStatus> CREATOR = new Creator<WifiDisplayStatus>() {
         public WifiDisplayStatus createFromParcel(Parcel in) {
             boolean enabled = (in.readInt() != 0);
+            int scanState = in.readInt();
+            int activeDisplayState= in.readInt();
 
-            WifiDisplay connectedDisplay = null;
+            WifiDisplay activeDisplay = null;
             if (in.readInt() != 0) {
-                connectedDisplay = WifiDisplay.CREATOR.createFromParcel(in);
+                activeDisplay = WifiDisplay.CREATOR.createFromParcel(in);
             }
 
             WifiDisplay[] knownDisplays = WifiDisplay.CREATOR.newArray(in.readInt());
@@ -51,11 +60,8 @@ public final class WifiDisplayStatus implements Parcelable {
                 knownDisplays[i] = WifiDisplay.CREATOR.createFromParcel(in);
             }
 
-            boolean scanInProgress = (in.readInt() != 0);
-            boolean connectionInProgress = (in.readInt() != 0);
-
-            return new WifiDisplayStatus(enabled, connectedDisplay, knownDisplays,
-                    scanInProgress, connectionInProgress);
+            return new WifiDisplayStatus(enabled, scanState, activeDisplayState,
+                    activeDisplay, knownDisplays);
         }
 
         public WifiDisplayStatus[] newArray(int size) {
@@ -64,21 +70,21 @@ public final class WifiDisplayStatus implements Parcelable {
     };
 
     public WifiDisplayStatus() {
-        this(false, null, WifiDisplay.EMPTY_ARRAY, false, false);
+        this(false, SCAN_STATE_NOT_SCANNING, DISPLAY_STATE_NOT_CONNECTED,
+                null, WifiDisplay.EMPTY_ARRAY);
     }
 
-    public WifiDisplayStatus(boolean enabled,
-            WifiDisplay connectedDisplay, WifiDisplay[] knownDisplays,
-            boolean scanInProgress, boolean connectionInProgress) {
+    public WifiDisplayStatus(boolean enabled, int scanState, int activeDisplayState,
+            WifiDisplay activeDisplay, WifiDisplay[] knownDisplays) {
         if (knownDisplays == null) {
             throw new IllegalArgumentException("knownDisplays must not be null");
         }
 
         mEnabled = enabled;
-        mConnectedDisplay = connectedDisplay;
+        mScanState = scanState;
+        mActiveDisplayState = activeDisplayState;
+        mActiveDisplay = activeDisplay;
         mKnownDisplays = knownDisplays;
-        mScanInProgress = scanInProgress;
-        mConnectionInProgress = connectionInProgress;
     }
 
     /**
@@ -94,10 +100,30 @@ public final class WifiDisplayStatus implements Parcelable {
     }
 
     /**
-     * Gets the currently connected Wifi display or null if none.
+     * Returns the current state of the Wifi display scan.
+     *
+     * @return One of: {@link #SCAN_STATE_NOT_SCANNING} or {@link #SCAN_STATE_SCANNING}.
      */
-    public WifiDisplay getConnectedDisplay() {
-        return mConnectedDisplay;
+    public int getScanState() {
+        return mScanState;
+    }
+
+    /**
+     * Get the state of the currently active display.
+     *
+     * @return One of: {@link #DISPLAY_STATE_NOT_CONNECTED}, {@link #DISPLAY_STATE_CONNECTING},
+     * or {@link #DISPLAY_STATE_CONNECTED}.
+     */
+    public int getActiveDisplayState() {
+        return mActiveDisplayState;
+    }
+
+    /**
+     * Gets the Wifi display that is currently active.  It may be connecting or
+     * connected.
+     */
+    public WifiDisplay getActiveDisplay() {
+        return mActiveDisplay;
     }
 
     /**
@@ -107,27 +133,15 @@ public final class WifiDisplayStatus implements Parcelable {
         return mKnownDisplays;
     }
 
-    /**
-     * Returns true if there is currently a Wifi display scan in progress.
-     */
-    public boolean isScanInProgress() {
-        return mScanInProgress;
-    }
-
-    /**
-     * Returns true if there is currently a Wifi display connection in progress.
-     */
-    public boolean isConnectionInProgress() {
-        return mConnectionInProgress;
-    }
-
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mEnabled ? 1 : 0);
+        dest.writeInt(mScanState);
+        dest.writeInt(mActiveDisplayState);
 
-        if (mConnectedDisplay != null) {
+        if (mActiveDisplay != null) {
             dest.writeInt(1);
-            mConnectedDisplay.writeToParcel(dest, flags);
+            mActiveDisplay.writeToParcel(dest, flags);
         } else {
             dest.writeInt(0);
         }
@@ -136,9 +150,6 @@ public final class WifiDisplayStatus implements Parcelable {
         for (WifiDisplay display : mKnownDisplays) {
             display.writeToParcel(dest, flags);
         }
-
-        dest.writeInt(mScanInProgress ? 1 : 0);
-        dest.writeInt(mConnectionInProgress ? 1 : 0);
     }
 
     @Override
@@ -150,10 +161,10 @@ public final class WifiDisplayStatus implements Parcelable {
     @Override
     public String toString() {
         return "WifiDisplayStatus{enabled=" + mEnabled
-                + ", connectedDisplay=" + mConnectedDisplay
+                + ", scanState=" + mScanState
+                + ", activeDisplayState=" + mActiveDisplayState
+                + ", activeDisplay=" + mActiveDisplay
                 + ", knownDisplays=" + Arrays.toString(mKnownDisplays)
-                + ", scanInProgress=" + mScanInProgress
-                + ", connectionInProgress=" + mConnectionInProgress
                 + "}";
     }
 }

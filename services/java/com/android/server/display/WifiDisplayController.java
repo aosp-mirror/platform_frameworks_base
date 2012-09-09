@@ -536,7 +536,7 @@ final class WifiDisplayController implements DumpUtils.Dump {
 
     private void handleConnectionChanged(NetworkInfo networkInfo) {
         mNetworkInfo = networkInfo;
-        if (mWifiP2pEnabled && mWfdEnabled && networkInfo.isConnected()) {
+        if (mWfdEnabled && networkInfo.isConnected()) {
             if (mDesiredDevice != null) {
                 mWifiP2pManager.requestGroupInfo(mWifiP2pChannel, new GroupInfoListener() {
                     @Override
@@ -573,6 +573,13 @@ final class WifiDisplayController implements DumpUtils.Dump {
             }
         } else {
             disconnect();
+
+            // After disconnection for a group, for some reason we have a tendency
+            // to get a peer change notification with an empty list of peers.
+            // Perform a fresh scan.
+            if (mWfdEnabled) {
+                requestPeers();
+            }
         }
     }
 

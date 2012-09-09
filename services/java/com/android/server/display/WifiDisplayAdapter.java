@@ -55,10 +55,10 @@ final class WifiDisplayAdapter extends DisplayAdapter {
 
     private WifiDisplayStatus mCurrentStatus;
     private boolean mEnabled;
-    private WifiDisplay mConnectedDisplay;
+    private int mScanState;
+    private int mActiveDisplayState;
+    private WifiDisplay mActiveDisplay;
     private WifiDisplay[] mKnownDisplays = WifiDisplay.EMPTY_ARRAY;
-    private boolean mScanInProgress;
-    private boolean mConnectionInProgress;
 
     private boolean mPendingStatusChangeBroadcast;
 
@@ -80,10 +80,10 @@ final class WifiDisplayAdapter extends DisplayAdapter {
 
         pw.println("mCurrentStatus=" + getWifiDisplayStatusLocked());
         pw.println("mEnabled=" + mEnabled);
-        pw.println("mConnectedDisplay=" + mConnectedDisplay);
+        pw.println("mScanState=" + mScanState);
+        pw.println("mActiveDisplayState=" + mActiveDisplayState);
+        pw.println("mActiveDisplay=" + mActiveDisplay);
         pw.println("mKnownDisplays=" + Arrays.toString(mKnownDisplays));
-        pw.println("mScanInProgress=" + mScanInProgress);
-        pw.println("mConnectionInProgress=" + mConnectionInProgress);
         pw.println("mPendingStatusChangeBroadcast=" + mPendingStatusChangeBroadcast);
 
         // Try to dump the controller state.
@@ -145,9 +145,8 @@ final class WifiDisplayAdapter extends DisplayAdapter {
 
     public WifiDisplayStatus getWifiDisplayStatusLocked() {
         if (mCurrentStatus == null) {
-            mCurrentStatus = new WifiDisplayStatus(mEnabled,
-                    mConnectedDisplay, mKnownDisplays,
-                    mScanInProgress, mConnectionInProgress);
+            mCurrentStatus = new WifiDisplayStatus(mEnabled, mScanState, mActiveDisplayState,
+                    mActiveDisplay, mKnownDisplays);
         }
         return mCurrentStatus;
     }
@@ -211,9 +210,9 @@ final class WifiDisplayAdapter extends DisplayAdapter {
         @Override
         public void onScanStarted() {
             synchronized (getSyncRoot()) {
-                if (!mScanInProgress) {
+                if (mScanState != WifiDisplayStatus.SCAN_STATE_SCANNING) {
                     mCurrentStatus = null;
-                    mScanInProgress = true;
+                    mScanState = WifiDisplayStatus.SCAN_STATE_SCANNING;
                     scheduleStatusChangedBroadcastLocked();
                 }
             }
@@ -221,10 +220,11 @@ final class WifiDisplayAdapter extends DisplayAdapter {
 
         public void onScanFinished(WifiDisplay[] knownDisplays) {
             synchronized (getSyncRoot()) {
-                if (!Arrays.equals(mKnownDisplays, knownDisplays) || mScanInProgress) {
+                if (mScanState != WifiDisplayStatus.SCAN_STATE_NOT_SCANNING
+                        || !Arrays.equals(mKnownDisplays, knownDisplays)) {
                     mCurrentStatus = null;
+                    mScanState = WifiDisplayStatus.SCAN_STATE_NOT_SCANNING;
                     mKnownDisplays = knownDisplays;
-                    mScanInProgress = false;
                     scheduleStatusChangedBroadcastLocked();
                 }
             }
@@ -233,9 +233,12 @@ final class WifiDisplayAdapter extends DisplayAdapter {
         @Override
         public void onDisplayConnecting(WifiDisplay display) {
             synchronized (getSyncRoot()) {
-                if (!mConnectionInProgress) {
+                if (mActiveDisplayState != WifiDisplayStatus.DISPLAY_STATE_CONNECTING
+                        || mActiveDisplay == null
+                        || !mActiveDisplay.equals(display)) {
                     mCurrentStatus = null;
-                    mConnectionInProgress = true;
+                    mActiveDisplayState = WifiDisplayStatus.DISPLAY_STATE_CONNECTING;
+                    mActiveDisplay = display;
                     scheduleStatusChangedBroadcastLocked();
                 }
             }
@@ -244,9 +247,11 @@ final class WifiDisplayAdapter extends DisplayAdapter {
         @Override
         public void onDisplayConnectionFailed() {
             synchronized (getSyncRoot()) {
-                if (mConnectionInProgress) {
+                if (mActiveDisplayState != WifiDisplayStatus.DISPLAY_STATE_NOT_CONNECTED
+                        || mActiveDisplay != null) {
                     mCurrentStatus = null;
-                    mConnectionInProgress = false;
+                    mActiveDisplayState = WifiDisplayStatus.DISPLAY_STATE_NOT_CONNECTED;
+                    mActiveDisplay = null;
                     scheduleStatusChangedBroadcastLocked();
                 }
             }
@@ -257,11 +262,12 @@ final class WifiDisplayAdapter extends DisplayAdapter {
             synchronized (getSyncRoot()) {
                 handleConnectLocked(display, iface);
 
-                if (mConnectedDisplay == null || !mConnectedDisplay.equals(display)
-                        || mConnectionInProgress) {
+                if (mActiveDisplayState != WifiDisplayStatus.DISPLAY_STATE_CONNECTED
+                        || mActiveDisplay == null
+                        || !mActiveDisplay.equals(display)) {
                     mCurrentStatus = null;
-                    mConnectedDisplay = display;
-                    mConnectionInProgress = false;
+                    mActiveDisplayState = WifiDisplayStatus.DISPLAY_STATE_CONNECTED;
+                    mActiveDisplay = display;
                     scheduleStatusChangedBroadcastLocked();
                 }
             }
@@ -273,10 +279,11 @@ final class WifiDisplayAdapter extends DisplayAdapter {
             synchronized (getSyncRoot()) {
                 handleDisconnectLocked();
 
-                if (mConnectedDisplay != null || mConnectionInProgress) {
+                if (mActiveDisplayState != WifiDisplayStatus.DISPLAY_STATE_NOT_CONNECTED
+                        || mActiveDisplay != null) {
                     mCurrentStatus = null;
-                    mConnectedDisplay = null;
-                    mConnectionInProgress = false;
+                    mActiveDisplayState = WifiDisplayStatus.DISPLAY_STATE_NOT_CONNECTED;
+                    mActiveDisplay = null;
                     scheduleStatusChangedBroadcastLocked();
                 }
             }
