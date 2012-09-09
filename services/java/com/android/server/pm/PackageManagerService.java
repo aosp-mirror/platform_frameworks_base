@@ -8118,10 +8118,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         // Delete application code and resources
         if (deleteCodeAndResources) {
-            // TODO can pick up from PackageSettings as well
-            int installFlags = isExternal(ps) ? PackageManager.INSTALL_EXTERNAL : 0;
-            installFlags |= isForwardLocked(ps) ? PackageManager.INSTALL_FORWARD_LOCK : 0;
-            outInfo.args = createInstallArgs(installFlags, ps.codePathString,
+            outInfo.args = createInstallArgs(packageFlagsToInstallFlags(ps), ps.codePathString,
                     ps.resourcePathString, ps.nativeLibraryPathString);
         }
         return true;
