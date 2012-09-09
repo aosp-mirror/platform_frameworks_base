@@ -16,6 +16,7 @@
 package android.net.wifi.p2p;
 
 import java.util.Collection;
+import java.util.Map;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -32,8 +33,9 @@ public class WifiP2pGroupList implements Parcelable {
 
     private static final int CREDENTIAL_MAX_NUM             =   32;
 
-    private LruCache<Integer, WifiP2pGroup> mGroups;
-    private GroupDeleteListener mListener;
+    private final LruCache<Integer, WifiP2pGroup> mGroups;
+    private final GroupDeleteListener mListener;
+
     private boolean isClearCalled = false;
 
     public interface GroupDeleteListener {
@@ -41,10 +43,10 @@ public class WifiP2pGroupList implements Parcelable {
     }
 
     WifiP2pGroupList() {
-        this(null);
+        this(null, null);
     }
 
-    WifiP2pGroupList(GroupDeleteListener listener) {
+    WifiP2pGroupList(WifiP2pGroupList source, GroupDeleteListener listener) {
         mListener = listener;
         mGroups = new LruCache<Integer, WifiP2pGroup>(CREDENTIAL_MAX_NUM) {
             @Override
@@ -55,6 +57,12 @@ public class WifiP2pGroupList implements Parcelable {
                 }
             }
         };
+
+        if (source != null) {
+            for (Map.Entry<Integer, WifiP2pGroup> item : source.mGroups.snapshot().entrySet()) {
+                mGroups.put(item.getKey(), item.getValue());
+            }
+        }
     }
 
     /**

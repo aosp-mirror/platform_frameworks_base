@@ -359,8 +359,8 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         private WifiNative mWifiNative = new WifiNative(mInterface);
         private WifiMonitor mWifiMonitor = new WifiMonitor(this, mWifiNative);
 
-        private WifiP2pDeviceList mPeers = new WifiP2pDeviceList();
-        private WifiP2pGroupList mGroups = new WifiP2pGroupList(
+        private final WifiP2pDeviceList mPeers = new WifiP2pDeviceList();
+        private final WifiP2pGroupList mGroups = new WifiP2pGroupList(null,
                 new GroupDeleteListener() {
             @Override
             public void onDeleteGroup(int netId) {
@@ -370,7 +370,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                 sendP2pPersistentGroupsChangedBroadcast();
             }
         });
-        private WifiP2pInfo mWifiP2pInfo = new WifiP2pInfo();
+        private final WifiP2pInfo mWifiP2pInfo = new WifiP2pInfo();
         private WifiP2pGroup mGroup;
 
         // Saved WifiP2pConfig for a peer connection
@@ -501,17 +501,20 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                             WifiP2pManager.BUSY);
                     break;
                 case WifiP2pManager.REQUEST_PEERS:
-                    replyToMessage(message, WifiP2pManager.RESPONSE_PEERS, mPeers);
+                    replyToMessage(message, WifiP2pManager.RESPONSE_PEERS,
+                            new WifiP2pDeviceList(mPeers));
                     break;
                 case WifiP2pManager.REQUEST_CONNECTION_INFO:
-                    replyToMessage(message, WifiP2pManager.RESPONSE_CONNECTION_INFO, mWifiP2pInfo);
+                    replyToMessage(message, WifiP2pManager.RESPONSE_CONNECTION_INFO,
+                            new WifiP2pInfo(mWifiP2pInfo));
                     break;
                 case WifiP2pManager.REQUEST_GROUP_INFO:
-                    replyToMessage(message, WifiP2pManager.RESPONSE_GROUP_INFO, mGroup);
+                    replyToMessage(message, WifiP2pManager.RESPONSE_GROUP_INFO,
+                            mGroup != null ? new WifiP2pGroup(mGroup) : null);
                     break;
                 case WifiP2pManager.REQUEST_PERSISTENT_GROUP_INFO:
                     replyToMessage(message, WifiP2pManager.RESPONSE_PERSISTENT_GROUP_INFO,
-                            mGroups);
+                            new WifiP2pGroupList(mGroups, null));
                     break;
                 case WifiP2pManager.SET_DIALOG_LISTENER:
                     String appPkgName = (String)message.getData().getString(
