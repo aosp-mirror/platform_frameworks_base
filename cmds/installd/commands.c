@@ -403,37 +403,6 @@ int rm_dex(const char *path)
     }
 }
 
-int protect(char *pkgname, gid_t gid)
-{
-    struct stat s;
-    char pkgpath[PKG_PATH_MAX];
-
-    if (gid < AID_SYSTEM) return -1;
-
-    if (create_pkg_path_in_dir(pkgpath, &android_app_private_dir, pkgname, ".apk"))
-        return -1;
-
-    if (stat(pkgpath, &s) < 0) return -1;
-
-    if (chown(pkgpath, s.st_uid, gid) < 0) {
-        ALOGE("failed to chgrp '%s': %s\n", pkgpath, strerror(errno));
-        return -1;
-    }
-    if (chmod(pkgpath, S_IRUSR|S_IWUSR|S_IRGRP) < 0) {
-        ALOGE("protect(): failed to chmod '%s': %s\n", pkgpath, strerror(errno));
-        return -1;
-    }
-
-#ifdef HAVE_SELINUX
-    if (selinux_android_setfilecon(pkgpath, pkgname, s.st_uid) < 0) {
-        ALOGE("cannot setfilecon dir '%s': %s\n", pkgpath, strerror(errno));
-        return -1;
-    }
-#endif
-
-    return 0;
-}
-
 int get_size(const char *pkgname, int persona, const char *apkpath,
              const char *fwdlock_apkpath, const char *asecpath,
              int64_t *_codesize, int64_t *_datasize, int64_t *_cachesize,
