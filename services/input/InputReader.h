@@ -24,7 +24,6 @@
 #include <androidfw/Input.h>
 #include <androidfw/VelocityControl.h>
 #include <androidfw/VelocityTracker.h>
-#include <ui/DisplayInfo.h>
 #include <utils/KeyedVector.h>
 #include <utils/threads.h>
 #include <utils/Timers.h>
@@ -48,6 +47,45 @@ namespace android {
 class InputDevice;
 class InputMapper;
 
+/*
+ * Describes how coordinates are mapped on a physical display.
+ * See com.android.server.display.DisplayViewport.
+ */
+struct DisplayViewport {
+    int32_t displayId; // -1 if invalid
+    int32_t orientation;
+    int32_t logicalLeft;
+    int32_t logicalTop;
+    int32_t logicalRight;
+    int32_t logicalBottom;
+    int32_t physicalLeft;
+    int32_t physicalTop;
+    int32_t physicalRight;
+    int32_t physicalBottom;
+
+    DisplayViewport() :
+            displayId(-1), orientation(DISPLAY_ORIENTATION_0),
+            logicalLeft(0), logicalTop(0), logicalRight(0), logicalBottom(0),
+            physicalLeft(0), physicalTop(0), physicalRight(0), physicalBottom(0) {
+    }
+
+    bool operator==(const DisplayViewport& other) const {
+        return displayId == other.displayId
+                && orientation == other.orientation
+                && logicalLeft == other.logicalLeft
+                && logicalTop == other.logicalTop
+                && logicalRight == other.logicalRight
+                && logicalBottom == other.logicalBottom
+                && physicalLeft == other.physicalLeft
+                && physicalTop == other.physicalTop
+                && physicalRight == other.physicalRight
+                && physicalBottom == other.physicalBottom;
+    }
+
+    bool operator!=(const DisplayViewport& other) const {
+        return !(*this == other);
+    }
+};
 
 /*
  * Input reader configuration.
@@ -180,25 +218,12 @@ struct InputReaderConfiguration {
             pointerGestureZoomSpeedRatio(0.3f),
             showTouches(false) { }
 
-    bool getDisplayInfo(int32_t displayId, bool external,
-            int32_t* width, int32_t* height, int32_t* orientation) const;
-
-    void setDisplayInfo(int32_t displayId, bool external,
-            int32_t width, int32_t height, int32_t orientation);
+    bool getDisplayInfo(bool external, DisplayViewport* outViewport) const;
+    void setDisplayInfo(bool external, const DisplayViewport& viewport);
 
 private:
-    struct DisplayInfo {
-        int32_t width;
-        int32_t height;
-        int32_t orientation;
-
-        DisplayInfo() :
-            width(-1), height(-1), orientation(DISPLAY_ORIENTATION_0) {
-        }
-    };
-
-    DisplayInfo mInternalDisplay;
-    DisplayInfo mExternalDisplay;
+    DisplayViewport mInternalDisplay;
+    DisplayViewport mExternalDisplay;
 };
 
 
@@ -992,7 +1017,7 @@ private:
 
     // Immutable configuration parameters.
     struct Parameters {
-        int32_t associatedDisplayId;
+        bool hasAssociatedDisplay;
         bool orientationAware;
     } mParameters;
 
@@ -1042,7 +1067,7 @@ private:
         };
 
         Mode mode;
-        int32_t associatedDisplayId;
+        bool hasAssociatedDisplay;
         bool orientationAware;
     } mParameters;
 
@@ -1143,7 +1168,7 @@ protected:
         };
 
         DeviceType deviceType;
-        int32_t associatedDisplayId;
+        bool hasAssociatedDisplay;
         bool associatedDisplayIsExternal;
         bool orientationAware;
 
@@ -1277,10 +1302,8 @@ private:
     int32_t mSurfaceWidth;
     int32_t mSurfaceHeight;
 
-    // The associated display orientation and width and height set by configureSurface().
-    int32_t mAssociatedDisplayOrientation;
-    int32_t mAssociatedDisplayWidth;
-    int32_t mAssociatedDisplayHeight;
+    // The associated display viewport set by configureSurface().
+    DisplayViewport mAssociatedDisplayViewport;
 
     // Translation and scaling factors, orientation-independent.
     float mXScale;
