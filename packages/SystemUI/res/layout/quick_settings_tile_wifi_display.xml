@@ -15,11 +15,12 @@
 -->
 <TextView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/wifi_display_textview"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_gravity="center"
     android:gravity="center"
+    android:drawableTop="@drawable/ic_qs_wifi_normal"
     android:text="@string/quick_settings_wifi_display_label"
-    android:singleLine="true"
-    android:ellipsize="marquee"
-    android:fadingEdge="horizontal"
+    android:textAppearance="@style/TextAppearance.QuickSettings.TileView"
     />
