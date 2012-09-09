@@ -1586,7 +1586,15 @@ public final class ActivityThread {
         CompatibilityInfoHolder cih = new CompatibilityInfoHolder();
         cih.set(ci);
         Display d = displayManager.getCompatibleDisplay(displayId, cih);
-        d.getMetrics(dm);
+        if (d != null) {
+            d.getMetrics(dm);
+        } else {
+            // Display no longer exists
+            // FIXME: This would not be a problem if we kept the Display object around
+            // instead of using the raw display id everywhere.  The Display object caches
+            // its information even after the display has been removed.
+            dm.setToDefaults();
+        }
         //Slog.i("foo", "New metrics: w=" + metrics.widthPixels + " h="
         //        + metrics.heightPixels + " den=" + metrics.density
         //        + " xdpi=" + metrics.xdpi + " ydpi=" + metrics.ydpi);
