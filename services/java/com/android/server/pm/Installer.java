@@ -324,20 +324,6 @@ class Installer {
         return execute(builder.toString());
     }
 
-    /*
-     * @param packagePathSuffix The name of the path relative to install
-     * directory. Say if the path name is /data/app/com.test-1.apk, the package
-     * suffix path will be com.test-1
-     */
-    public int setForwardLockPerm(String packagePathSuffix, int gid) {
-        StringBuilder builder = new StringBuilder("protect");
-        builder.append(' ');
-        builder.append(packagePathSuffix);
-        builder.append(' ');
-        builder.append(gid);
-        return execute(builder.toString());
-    }
-
     public int getSizeInfo(String pkgName, int persona, String apkPath, String fwdLockApkPath,
             String asecPath, PackageStats pStats) {
         StringBuilder builder = new StringBuilder("getsize");

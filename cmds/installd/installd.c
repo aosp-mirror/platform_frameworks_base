@@ -75,11 +75,6 @@ static int do_rm_cache(char **arg, char reply[REPLY_MAX])
     return delete_cache(arg[0]); /* pkgname */
 }
 
-static int do_protect(char **arg, char reply[REPLY_MAX])
-{
-    return protect(arg[0], atoi(arg[1])); /* pkgname, gid */
-}
-
 static int do_get_size(char **arg, char reply[REPLY_MAX])
 {
     int64_t codesize = 0;
@@ -153,7 +148,6 @@ struct cmdinfo cmds[] = {
     { "fixuid",               3, do_fixuid },
     { "freecache",            1, do_free_cache },
     { "rmcache",              1, do_rm_cache },
-    { "protect",              2, do_protect },
     { "getsize",              5, do_get_size },
     { "rmuserdata",           2, do_rm_user_data },
     { "movefiles",            0, do_movefiles },
