@@ -352,7 +352,9 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mSyncRoot) {
-                mWifiDisplayAdapter.requestScanLocked();
+                if (mWifiDisplayAdapter != null) {
+                    mWifiDisplayAdapter.requestScanLocked();
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -372,7 +374,9 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mSyncRoot) {
-                mWifiDisplayAdapter.requestConnectLocked(address);
+                if (mWifiDisplayAdapter != null) {
+                    mWifiDisplayAdapter.requestConnectLocked(address);
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -389,7 +393,9 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mSyncRoot) {
-                mWifiDisplayAdapter.requestDisconnectLocked();
+                if (mWifiDisplayAdapter != null) {
+                    mWifiDisplayAdapter.requestDisconnectLocked();
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -406,7 +412,11 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mSyncRoot) {
-                return mWifiDisplayAdapter.getWifiDisplayStatusLocked();
+                if (mWifiDisplayAdapter != null) {
+                    return mWifiDisplayAdapter.getWifiDisplayStatusLocked();
+                } else {
+                    return new WifiDisplayStatus();
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(token);
