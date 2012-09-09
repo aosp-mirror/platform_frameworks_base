@@ -132,14 +132,17 @@ abstract class DisplayDevice {
                 || mCurrentDisplayRect == null
                 || !mCurrentDisplayRect.equals(displayRect)) {
             mCurrentOrientation = orientation;
+
             if (mCurrentLayerStackRect == null) {
                 mCurrentLayerStackRect = new Rect();
             }
             mCurrentLayerStackRect.set(layerStackRect);
+
             if (mCurrentDisplayRect == null) {
                 mCurrentDisplayRect = new Rect();
             }
             mCurrentDisplayRect.set(displayRect);
+
             Surface.setDisplayProjection(mDisplayToken,
                     orientation, layerStackRect, displayRect);
         }
@@ -152,6 +155,26 @@ abstract class DisplayDevice {
         if (mCurrentSurface != surface) {
             mCurrentSurface = surface;
             Surface.setDisplaySurface(mDisplayToken, surface);
+        }
+    }
+
+    /**
+     * Populates the specified viewport object with orientation,
+     * physical and logical rects based on the display's current projection.
+     */
+    public final void populateViewportLocked(DisplayViewport viewport) {
+        viewport.orientation = mCurrentOrientation;
+
+        if (mCurrentLayerStackRect != null) {
+            viewport.logicalFrame.set(mCurrentLayerStackRect);
+        } else {
+            viewport.logicalFrame.setEmpty();
+        }
+
+        if (mCurrentDisplayRect != null) {
+            viewport.physicalFrame.set(mCurrentDisplayRect);
+        } else {
+            viewport.physicalFrame.setEmpty();
         }
     }
 

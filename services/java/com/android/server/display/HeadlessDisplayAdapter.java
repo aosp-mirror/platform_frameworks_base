@@ -61,6 +61,7 @@ final class HeadlessDisplayAdapter extends DisplayAdapter {
                 mInfo.yDpi = 160;
                 mInfo.flags = DisplayDeviceInfo.FLAG_DEFAULT_DISPLAY
                         | DisplayDeviceInfo.FLAG_SECURE;
+                mInfo.touch = DisplayDeviceInfo.TOUCH_NONE;
             }
             return mInfo;
         }

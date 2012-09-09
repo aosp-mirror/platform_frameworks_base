@@ -43,6 +43,21 @@ final class DisplayDeviceInfo {
     public static final int FLAG_SUPPORTS_ROTATION = 1 << 2;
 
     /**
+     * Touch attachment: Display does not receive touch.
+     */
+    public static final int TOUCH_NONE = 0;
+
+    /**
+     * Touch attachment: Touch input is via the internal interface.
+     */
+    public static final int TOUCH_INTERNAL = 1;
+
+    /**
+     * Touch attachment: Touch input is via an external interface, such as USB.
+     */
+    public static final int TOUCH_EXTERNAL = 2;
+
+    /**
      * Gets the name of the display device, which may be derived from
      * EDID or other sources.  The name may be displayed to the user.
      */
@@ -90,6 +105,11 @@ final class DisplayDeviceInfo {
      */
     public int flags;
 
+    /**
+     * The touch attachment, per {@link DisplayViewport#touch}.
+     */
+    public int touch;
+
     public void setAssumedDensityForExternalDisplay(int width, int height) {
         densityDpi = Math.min(width, height) * DisplayMetrics.DENSITY_XHIGH / 1080;
         // Technically, these values should be smaller than the apparent density
@@ -112,7 +132,8 @@ final class DisplayDeviceInfo {
                 && densityDpi == other.densityDpi
                 && xDpi == other.xDpi
                 && yDpi == other.yDpi
-                && flags == other.flags;
+                && flags == other.flags
+                && touch == other.touch;
     }
 
     @Override
@@ -129,6 +150,7 @@ final class DisplayDeviceInfo {
         xDpi = other.xDpi;
         yDpi = other.yDpi;
         flags = other.flags;
+        touch = other.touch;
     }
 
     // For debugging purposes
@@ -136,7 +158,20 @@ final class DisplayDeviceInfo {
     public String toString() {
         return "DisplayDeviceInfo{\"" + name + "\": " + width + " x " + height + ", " + refreshRate + " fps, "
                 + "density " + densityDpi + ", " + xDpi + " x " + yDpi + " dpi"
-                + flagsToString(flags) + "}";
+                + ", touch " + touchToString(touch) + flagsToString(flags) + "}";
+    }
+
+    private static String touchToString(int touch) {
+        switch (touch) {
+            case TOUCH_NONE:
+                return "NONE";
+            case TOUCH_INTERNAL:
+                return "INTERNAL";
+            case TOUCH_EXTERNAL:
+                return "EXTERNAL";
+            default:
+                return Integer.toString(touch);
+        }
     }
 
     private static String flagsToString(int flags) {

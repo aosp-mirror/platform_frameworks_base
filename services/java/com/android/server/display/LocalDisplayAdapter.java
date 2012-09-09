@@ -129,10 +129,12 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                     mInfo.densityDpi = (int)(mPhys.density * 160 + 0.5f);
                     mInfo.xDpi = mPhys.xDpi;
                     mInfo.yDpi = mPhys.yDpi;
+                    mInfo.touch = DisplayDeviceInfo.TOUCH_INTERNAL;
                 } else {
                     mInfo.name = getContext().getResources().getString(
                             com.android.internal.R.string.display_manager_hdmi_display_name);
                     mInfo.flags = DisplayDeviceInfo.FLAG_SECURE;
+                    mInfo.touch = DisplayDeviceInfo.TOUCH_EXTERNAL;
                     mInfo.setAssumedDensityForExternalDisplay(mPhys.width, mPhys.height);
                 }
             }

@@ -5947,7 +5947,6 @@ public class WindowManagerService extends IWindowManager.Stub
         mWaitingForConfig = true;
         getDefaultDisplayContent().layoutNeeded = true;
         startFreezingDisplayLocked(inTransaction);
-        mInputManager.setDisplayOrientation(0, rotation);
 
         // We need to update our screen size information to match the new
         // rotation.  Note that this is redundant with the later call to
@@ -7121,10 +7120,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 displayInfo.appWidth, displayInfo.appHeight);
 
             final DisplayContent displayContent = getDefaultDisplayContent();
-            mInputManager.setDisplaySize(displayContent.getDisplayId(),
-                    displayContent.mInitialDisplayWidth, displayContent.mInitialDisplayHeight);
-            mInputManager.setDisplayOrientation(displayContent.getDisplayId(),
-                    mDefaultDisplay.getRotation());
             mPolicy.setInitialDisplaySize(mDefaultDisplay, displayContent.mInitialDisplayWidth,
                     displayContent.mInitialDisplayHeight, displayContent.mInitialDisplayDensity);
         }

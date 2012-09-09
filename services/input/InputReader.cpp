@@ -203,34 +203,18 @@ static void synthesizeButtonKeys(InputReaderContext* context, int32_t action,
 
 // --- InputReaderConfiguration ---
 
-bool InputReaderConfiguration::getDisplayInfo(int32_t displayId, bool external,
-        int32_t* width, int32_t* height, int32_t* orientation) const {
-    if (displayId == 0) {
-        const DisplayInfo& info = external ? mExternalDisplay : mInternalDisplay;
-        if (info.width > 0 && info.height > 0) {
-            if (width) {
-                *width = info.width;
-            }
-            if (height) {
-                *height = info.height;
-            }
-            if (orientation) {
-                *orientation = info.orientation;
-            }
-            return true;
-        }
+bool InputReaderConfiguration::getDisplayInfo(bool external, DisplayViewport* outViewport) const {
+    const DisplayViewport& viewport = external ? mExternalDisplay : mInternalDisplay;
+    if (viewport.displayId >= 0) {
+        *outViewport = viewport;
+        return true;
     }
     return false;
 }
 
-void InputReaderConfiguration::setDisplayInfo(int32_t displayId, bool external,
-        int32_t width, int32_t height, int32_t orientation) {
-    if (displayId == 0) {
-        DisplayInfo& info = external ? mExternalDisplay : mInternalDisplay;
-        info.width = width;
-        info.height = height;
-        info.orientation = orientation;
-    }
+void InputReaderConfiguration::setDisplayInfo(bool external, const DisplayViewport& viewport) {
+    DisplayViewport& v = external ? mExternalDisplay : mInternalDisplay;
+    v = viewport;
 }
 
 
@@ -2001,9 +1985,11 @@ void KeyboardInputMapper::configure(nsecs_t when,
     }
 
     if (!changes || (changes & InputReaderConfiguration::CHANGE_DISPLAY_INFO)) {
-        if (mParameters.orientationAware && mParameters.associatedDisplayId >= 0) {
-            if (!config->getDisplayInfo(mParameters.associatedDisplayId,
-                        false /*external*/, NULL, NULL, &mOrientation)) {
+        if (mParameters.orientationAware && mParameters.hasAssociatedDisplay) {
+            DisplayViewport v;
+            if (config->getDisplayInfo(false /*external*/, &v)) {
+                mOrientation = v.orientation;
+            } else {
                 mOrientation = DISPLAY_ORIENTATION_0;
             }
         } else {
@@ -2017,16 +2003,16 @@ void KeyboardInputMapper::configureParameters() {
     getDevice()->getConfiguration().tryGetProperty(String8("keyboard.orientationAware"),
             mParameters.orientationAware);
 
-    mParameters.associatedDisplayId = -1;
+    mParameters.hasAssociatedDisplay = false;
     if (mParameters.orientationAware) {
-        mParameters.associatedDisplayId = 0;
+        mParameters.hasAssociatedDisplay = true;
     }
 }
 
 void KeyboardInputMapper::dumpParameters(String8& dump) {
     dump.append(INDENT3 "Parameters:\n");
-    dump.appendFormat(INDENT4 "AssociatedDisplayId: %d\n",
-            mParameters.associatedDisplayId);
+    dump.appendFormat(INDENT4 "HasAssociatedDisplay: %s\n",
+            toString(mParameters.hasAssociatedDisplay));
     dump.appendFormat(INDENT4 "OrientationAware: %s\n",
             toString(mParameters.orientationAware));
 }
@@ -2086,7 +2072,7 @@ void KeyboardInputMapper::processKey(nsecs_t when, bool down, int32_t keyCode,
 
     if (down) {
         // Rotate key codes according to orientation if needed.
-        if (mParameters.orientationAware && mParameters.associatedDisplayId >= 0) {
+        if (mParameters.orientationAware && mParameters.hasAssociatedDisplay) {
             keyCode = rotateKeyCode(keyCode, mOrientation);
         }
 
@@ -2317,9 +2303,11 @@ void CursorInputMapper::configure(nsecs_t when,
     }
 
     if (!changes || (changes & InputReaderConfiguration::CHANGE_DISPLAY_INFO)) {
-        if (mParameters.orientationAware && mParameters.associatedDisplayId >= 0) {
-            if (!config->getDisplayInfo(mParameters.associatedDisplayId,
-                        false /*external*/, NULL, NULL, &mOrientation)) {
+        if (mParameters.orientationAware && mParameters.hasAssociatedDisplay) {
+            DisplayViewport v;
+            if (config->getDisplayInfo(false /*external*/, &v)) {
+                mOrientation = v.orientation;
+            } else {
                 mOrientation = DISPLAY_ORIENTATION_0;
             }
         } else {
@@ -2344,16 +2332,16 @@ void CursorInputMapper::configureParameters() {
     getDevice()->getConfiguration().tryGetProperty(String8("cursor.orientationAware"),
             mParameters.orientationAware);
 
-    mParameters.associatedDisplayId = -1;
+    mParameters.hasAssociatedDisplay = false;
     if (mParameters.mode == Parameters::MODE_POINTER || mParameters.orientationAware) {
-        mParameters.associatedDisplayId = 0;
+        mParameters.hasAssociatedDisplay = true;
     }
 }
 
 void CursorInputMapper::dumpParameters(String8& dump) {
     dump.append(INDENT3 "Parameters:\n");
-    dump.appendFormat(INDENT4 "AssociatedDisplayId: %d\n",
-            mParameters.associatedDisplayId);
+    dump.appendFormat(INDENT4 "HasAssociatedDisplay: %s\n",
+            toString(mParameters.hasAssociatedDisplay));
 
     switch (mParameters.mode) {
     case Parameters::MODE_POINTER:
@@ -2420,7 +2408,7 @@ void CursorInputMapper::sync(nsecs_t when) {
     bool moved = deltaX != 0 || deltaY != 0;
 
     // Rotate delta according to orientation if needed.
-    if (mParameters.orientationAware && mParameters.associatedDisplayId >= 0
+    if (mParameters.orientationAware && mParameters.hasAssociatedDisplay
             && (deltaX != 0.0f || deltaY != 0.0f)) {
         rotateDelta(mOrientation, &deltaX, &deltaY);
     }
@@ -2782,15 +2770,15 @@ void TouchInputMapper::configureParameters() {
     getDevice()->getConfiguration().tryGetProperty(String8("touch.orientationAware"),
             mParameters.orientationAware);
 
-    mParameters.associatedDisplayId = -1;
+    mParameters.hasAssociatedDisplay = false;
     mParameters.associatedDisplayIsExternal = false;
     if (mParameters.orientationAware
             || mParameters.deviceType == Parameters::DEVICE_TYPE_TOUCH_SCREEN
             || mParameters.deviceType == Parameters::DEVICE_TYPE_POINTER) {
+        mParameters.hasAssociatedDisplay = true;
         mParameters.associatedDisplayIsExternal =
                 mParameters.deviceType == Parameters::DEVICE_TYPE_TOUCH_SCREEN
                         && getDevice()->isExternal();
-        mParameters.associatedDisplayId = 0;
     }
 }
 
@@ -2822,8 +2810,9 @@ void TouchInputMapper::dumpParameters(String8& dump) {
         ALOG_ASSERT(false);
     }
 
-    dump.appendFormat(INDENT4 "AssociatedDisplay: id=%d, isExternal=%s\n",
-            mParameters.associatedDisplayId, toString(mParameters.associatedDisplayIsExternal));
+    dump.appendFormat(INDENT4 "AssociatedDisplay: present=%s, isExternal=%s\n",
+            toString(mParameters.hasAssociatedDisplay),
+            toString(mParameters.associatedDisplayIsExternal));
     dump.appendFormat(INDENT4 "OrientationAware: %s\n",
             toString(mParameters.orientationAware));
 }
@@ -2861,7 +2850,7 @@ void TouchInputMapper::configureSurface(nsecs_t when, bool* outResetNeeded) {
             mSource |= AINPUT_SOURCE_STYLUS;
         }
     } else if (mParameters.deviceType == Parameters::DEVICE_TYPE_TOUCH_SCREEN
-            && mParameters.associatedDisplayId >= 0) {
+            && mParameters.hasAssociatedDisplay) {
         mSource = AINPUT_SOURCE_TOUCHSCREEN;
         mDeviceMode = DEVICE_MODE_DIRECT;
         if (hasStylus()) {
@@ -2881,15 +2870,13 @@ void TouchInputMapper::configureSurface(nsecs_t when, bool* outResetNeeded) {
     }
 
     // Get associated display dimensions.
-    if (mParameters.associatedDisplayId >= 0) {
-        if (!mConfig.getDisplayInfo(mParameters.associatedDisplayId,
-                mParameters.associatedDisplayIsExternal,
-                &mAssociatedDisplayWidth, &mAssociatedDisplayHeight,
-                &mAssociatedDisplayOrientation)) {
+    if (mParameters.hasAssociatedDisplay) {
+        if (!mConfig.getDisplayInfo(mParameters.associatedDisplayIsExternal,
+                &mAssociatedDisplayViewport)) {
             ALOGI(INDENT "Touch device '%s' could not query the properties of its associated "
-                    "display %d.  The device will be inoperable until the display size "
+                    "display.  The device will be inoperable until the display size "
                     "becomes available.",
-                    getDeviceName().string(), mParameters.associatedDisplayId);
+                    getDeviceName().string());
             mDeviceMode = DEVICE_MODE_DISABLED;
             return;
         }
@@ -2898,10 +2885,16 @@ void TouchInputMapper::configureSurface(nsecs_t when, bool* outResetNeeded) {
     // Configure dimensions.
     int32_t width, height, orientation;
     if (mDeviceMode == DEVICE_MODE_DIRECT || mDeviceMode == DEVICE_MODE_POINTER) {
-        width = mAssociatedDisplayWidth;
-        height = mAssociatedDisplayHeight;
+        width = mAssociatedDisplayViewport.logicalRight - mAssociatedDisplayViewport.logicalLeft;
+        height = mAssociatedDisplayViewport.logicalBottom - mAssociatedDisplayViewport.logicalTop;
+        if (mAssociatedDisplayViewport.orientation == DISPLAY_ORIENTATION_90
+                || mAssociatedDisplayViewport.orientation == DISPLAY_ORIENTATION_270) {
+            int32_t temp = height;
+            height = width;
+            width = temp;
+        }
         orientation = mParameters.orientationAware ?
-                mAssociatedDisplayOrientation : DISPLAY_ORIENTATION_0;
+                mAssociatedDisplayViewport.orientation : DISPLAY_ORIENTATION_0;
     } else {
         width = mRawPointerAxes.x.maxValue - mRawPointerAxes.x.minValue + 1;
         height = mRawPointerAxes.y.maxValue - mRawPointerAxes.y.minValue + 1;
@@ -3163,8 +3156,7 @@ void TouchInputMapper::configureSurface(nsecs_t when, bool* outResetNeeded) {
             int32_t rawWidth = mRawPointerAxes.x.maxValue - mRawPointerAxes.x.minValue + 1;
             int32_t rawHeight = mRawPointerAxes.y.maxValue - mRawPointerAxes.y.minValue + 1;
             float rawDiagonal = hypotf(rawWidth, rawHeight);
-            float displayDiagonal = hypotf(mAssociatedDisplayWidth,
-                    mAssociatedDisplayHeight);
+            float displayDiagonal = hypotf(width, height);
 
             // Scale movements such that one whole swipe of the touch pad covers a
             // given area relative to the diagonal size of the display when no acceleration
