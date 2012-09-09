@@ -615,7 +615,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
                     + " did not call through to super.onViewStateRestored()");
         }
     }
-    
+
     final void setIndex(int index, Fragment parent) {
         mIndex = index;
         if (parent != null) {
@@ -623,8 +623,8 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
         } else {
             mWho = "android:fragment:" + mIndex;
         }
-   }
-    
+    }
+
     final boolean isInBackStack() {
         return mBackStackNesting > 0;
     }
@@ -829,6 +829,14 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
             }
         }
         return mChildFragmentManager;
+    }
+
+    /**
+     * Returns the parent Fragment containing this Fragment.  If this Fragment
+     * is attached directly to an Activity, returns null.
+     */
+    final public Fragment getParentFragment() {
+        return mParentFragment;
     }
 
     /**
@@ -1180,20 +1188,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     public void onCreate(Bundle savedInstanceState) {
         mCalled = true;
     }
-    
-    /**
-     * Called immediately after {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)}
-     * has returned, but before any saved state has been restored in to the view.
-     * This gives subclasses a chance to initialize themselves once
-     * they know their view hierarchy has been completely created.  The fragment's
-     * view hierarchy is not however attached to its parent at this point.
-     * @param view The View returned by {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)}.
-     * @param savedInstanceState If non-null, this fragment is being re-constructed
-     * from a previous saved state as given here.
-     */
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-    }
-    
+
     /**
      * Called to have the fragment instantiate its user interface view.
      * This is optional, and non-graphical fragments can return null (which
@@ -1217,6 +1212,19 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
             Bundle savedInstanceState) {
         return null;
     }
+
+    /**
+     * Called immediately after {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)}
+     * has returned, but before any saved state has been restored in to the view.
+     * This gives subclasses a chance to initialize themselves once
+     * they know their view hierarchy has been completely created.  The fragment's
+     * view hierarchy is not however attached to its parent at this point.
+     * @param view The View returned by {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)}.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here.
+     */
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+    }
     
     /**
      * Get the root view for the fragment's layout (the one returned by {@link #onCreateView}),
@@ -1237,7 +1245,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * as this callback tells the fragment when it is fully associated with
      * the new activity instance.  This is called after {@link #onCreateView}
      * and before {@link #onViewStateRestored(Bundle)}.
-     * 
+     *
      * @param savedInstanceState If the fragment is being re-created from
      * a previous saved state, this is the state.
      */
@@ -1252,7 +1260,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * whether check box widgets are currently checked.  This is called
      * after {@link #onActivityCreated(Bundle)} and before
      * {@link #onStart()}.
-     * 
+     *
      * @param savedInstanceState If the fragment is being re-created from
      * a previous saved state, this is the state.
      */
@@ -1590,10 +1598,6 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
             writer.print(prefix); writer.print("mActivity=");
                     writer.println(mActivity);
         }
-        if (mChildFragmentManager != null) {
-            writer.print(prefix); writer.print("mChildFragmentManager=");
-                    writer.println(mChildFragmentManager);
-        }
         if (mParentFragment != null) {
             writer.print(prefix); writer.print("mParentFragment=");
                     writer.println(mParentFragment);
@@ -1633,7 +1637,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
             mLoaderManager.dump(prefix + "  ", fd, writer, args);
         }
         if (mChildFragmentManager != null) {
-            writer.print(prefix); writer.println("Child Fragment Manager:");
+            writer.print(prefix); writer.println("Child " + mChildFragmentManager + ":");
             mChildFragmentManager.dump(prefix + "  ", fd, writer, args);
         }
     }
@@ -1662,6 +1666,9 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     }
 
     void performCreate(Bundle savedInstanceState) {
+        if (mChildFragmentManager != null) {
+            mChildFragmentManager.noteStateNotSaved();
+        }
         mCalled = false;
         onCreate(savedInstanceState);
         if (!mCalled) {
@@ -1680,7 +1687,18 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
         }
     }
 
+    View performCreateView(LayoutInflater inflater, ViewGroup container,
+            Bundle savedInstanceState) {
+        if (mChildFragmentManager != null) {
+            mChildFragmentManager.noteStateNotSaved();
+        }
+        return onCreateView(inflater, container, savedInstanceState);
+    }
+
     void performActivityCreated(Bundle savedInstanceState) {
+        if (mChildFragmentManager != null) {
+            mChildFragmentManager.noteStateNotSaved();
+        }
         mCalled = false;
         onActivityCreated(savedInstanceState);
         if (!mCalled) {
@@ -1713,6 +1731,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
 
     void performResume() {
         if (mChildFragmentManager != null) {
+            mChildFragmentManager.noteStateNotSaved();
             mChildFragmentManager.execPendingActions();
         }
         mCalled = false;

@@ -3353,6 +3353,7 @@ package android.app {
     method public final android.app.FragmentManager getFragmentManager();
     method public final int getId();
     method public android.app.LoaderManager getLoaderManager();
+    method public final android.app.Fragment getParentFragment();
     method public final android.content.res.Resources getResources();
     method public final boolean getRetainInstance();
     method public final java.lang.String getString(int);
