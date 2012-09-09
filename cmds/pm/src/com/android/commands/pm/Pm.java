@@ -42,6 +42,7 @@ import android.net.Uri;
 import android.os.IUserManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -241,6 +242,7 @@ public final class Pm {
         boolean listDisabled = false, listEnabled = false;
         boolean listSystem = false, listThirdParty = false;
         boolean listInstaller = false;
+        int userId = UserHandle.USER_OWNER;
         try {
             String opt;
             while ((opt=nextOption()) != null) {
@@ -260,6 +262,8 @@ public final class Pm {
                     listThirdParty = true;
                 } else if (opt.equals("-i")) {
                     listInstaller = true;
+                } else if (opt.equals("--user")) {
+                    userId = Integer.parseInt(nextArg());
                 } else if (opt.equals("-u")) {
                     getFlags |= PackageManager.GET_UNINSTALLED_PACKAGES;
                 } else {
@@ -275,7 +279,7 @@ public final class Pm {
         String filter = nextArg();
 
         try {
-            final List<PackageInfo> packages = getInstalledPackages(mPm, getFlags);
+            final List<PackageInfo> packages = getInstalledPackages(mPm, getFlags, userId);
 
             int count = packages.size();
             for (int p = 0 ; p < count ; p++) {
@@ -309,7 +313,7 @@ public final class Pm {
     }
 
     @SuppressWarnings("unchecked")
-    private List<PackageInfo> getInstalledPackages(IPackageManager pm, int flags)
+    private List<PackageInfo> getInstalledPackages(IPackageManager pm, int flags, int userId)
             throws RemoteException {
         final List<PackageInfo> packageInfos = new ArrayList<PackageInfo>();
         PackageInfo lastItem = null;
@@ -317,7 +321,7 @@ public final class Pm {
 
         do {
             final String lastKey = lastItem != null ? lastItem.packageName : null;
-            slice = pm.getInstalledPackages(flags, lastKey);
+            slice = pm.getInstalledPackages(flags, lastKey, userId);
             lastItem = slice.populateList(packageInfos, PackageInfo.CREATOR);
         } while (!slice.isLastSlice());
 
@@ -1420,7 +1424,7 @@ public final class Pm {
     }
 
     private static void showUsage() {
-        System.err.println("usage: pm list packages [-f] [-d] [-e] [-s] [-3] [-i] [-u] [FILTER]");
+        System.err.println("usage: pm list packages [-f] [-d] [-e] [-s] [-3] [-i] [-u] [--user USER_ID] [FILTER]");
         System.err.println("       pm list permission-groups");
         System.err.println("       pm list permissions [-g] [-f] [-d] [-u] [GROUP]");
         System.err.println("       pm list instrumentation [-f] [TARGET-PACKAGE]");
