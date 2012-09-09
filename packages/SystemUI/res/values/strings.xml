@@ -430,5 +430,25 @@
     <!-- QuickSettings: Wifi (No network) [CHAR LIMIT=NONE] -->
     <string name="quick_settings_wifi_no_network">No Network</string>
     <!-- QuickSettings: Wifi display [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_wifi_display_label">Wifi display</string>
+    <string name="quick_settings_wifi_display_label">Wifi Display</string>
+    <!-- QuickSettings: Wifi display [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_wifi_display_no_connection_label">No Wifi Display Connection</string>
+
+    <!-- Wifi display: Scan button text [CHAR LIMIT=15] -->
+    <string name="wifi_display_scan">Scan</string>
+
+    <!-- Wifi display: Disconnect button text [CHAR LIMIT=15] -->
+    <string name="wifi_display_disconnect">Disconnect</string>
+
+    <!-- Wifi display: Quick setting dialog title [CHAR LIMIT=30] -->
+    <string name="wifi_display_dialog_title">Wifi Display</string>
+
+    <!-- Wifi display: Subtitle text shown to indicate that a display is available [CHAR LIMIT=30] -->
+    <string name="wifi_display_state_available">Available</string>
+
+    <!-- Wifi display: Subtitle text shown to indicate that a display is connecting [CHAR LIMIT=30] -->
+    <string name="wifi_display_state_connecting">Connecting</string>
+
+    <!-- Wifi display: Subtitle text shown to indicate that a display is connected [CHAR LIMIT=30] -->
+    <string name="wifi_display_state_connected">Connected</string>
 </resources>
