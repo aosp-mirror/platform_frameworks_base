@@ -1469,6 +1469,45 @@ public abstract class PackageManager {
     public abstract List<PackageInfo> getInstalledPackages(int flags);
 
     /**
+     * Return a List of all packages that are installed on the device, for a specific user.
+     * Requesting a list of installed packages for another user
+     * will require the permission INTERACT_ACROSS_USERS_FULL.
+     * @param flags Additional option flags. Use any combination of
+     * {@link #GET_ACTIVITIES},
+     * {@link #GET_GIDS},
+     * {@link #GET_CONFIGURATIONS},
+     * {@link #GET_INSTRUMENTATION},
+     * {@link #GET_PERMISSIONS},
+     * {@link #GET_PROVIDERS},
+     * {@link #GET_RECEIVERS},
+     * {@link #GET_SERVICES},
+     * {@link #GET_SIGNATURES},
+     * {@link #GET_UNINSTALLED_PACKAGES} to modify the data returned.
+     * @param userId The user for whom the installed packages are to be listed
+     *
+     * @return A List of PackageInfo objects, one for each package that is
+     *         installed on the device.  In the unlikely case of there being no
+     *         installed packages, an empty list is returned.
+     *         If flag GET_UNINSTALLED_PACKAGES is set, a list of all
+     *         applications including those deleted with DONT_DELETE_DATA
+     *         (partially installed apps with data directory) will be returned.
+     *
+     * @see #GET_ACTIVITIES
+     * @see #GET_GIDS
+     * @see #GET_CONFIGURATIONS
+     * @see #GET_INSTRUMENTATION
+     * @see #GET_PERMISSIONS
+     * @see #GET_PROVIDERS
+     * @see #GET_RECEIVERS
+     * @see #GET_SERVICES
+     * @see #GET_SIGNATURES
+     * @see #GET_UNINSTALLED_PACKAGES
+     *
+     * @hide
+     */
+    public abstract List<PackageInfo> getInstalledPackages(int flags, int userId);
+
+    /**
      * Check whether a particular package has been granted a particular
      * permission.
      *
@@ -1753,6 +1792,29 @@ public abstract class PackageManager {
      */
     public abstract List<ResolveInfo> queryIntentActivities(Intent intent,
             int flags);
+
+    /**
+     * Retrieve all activities that can be performed for the given intent, for a specific user.
+     *
+     * @param intent The desired intent as per resolveActivity().
+     * @param flags Additional option flags.  The most important is
+     * {@link #MATCH_DEFAULT_ONLY}, to limit the resolution to only
+     * those activities that support the {@link android.content.Intent#CATEGORY_DEFAULT}.
+     *
+     * @return A List&lt;ResolveInfo&gt; containing one entry for each matching
+     *         Activity. These are ordered from best to worst match -- that
+     *         is, the first item in the list is what is returned by
+     *         {@link #resolveActivity}.  If there are no matching activities, an empty
+     *         list is returned.
+     *
+     * @see #MATCH_DEFAULT_ONLY
+     * @see #GET_INTENT_FILTERS
+     * @see #GET_RESOLVED_FILTER
+     * @hide
+     */
+    public abstract List<ResolveInfo> queryIntentActivitiesForUser(Intent intent,
+            int flags, int userId);
+
 
     /**
      * Retrieve a set of activities that should be presented to the user as
