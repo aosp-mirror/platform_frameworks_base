@@ -35,10 +35,9 @@ import java.util.HashMap;
  */
 public class WifiP2pDeviceList implements Parcelable {
 
-    private HashMap<String, WifiP2pDevice> mDevices;
+    private final HashMap<String, WifiP2pDevice> mDevices = new HashMap<String, WifiP2pDevice>();
 
     public WifiP2pDeviceList() {
-        mDevices = new HashMap<String, WifiP2pDevice>();
     }
 
     /** copy constructor */
@@ -52,7 +51,6 @@ public class WifiP2pDeviceList implements Parcelable {
 
     /** @hide */
     public WifiP2pDeviceList(ArrayList<WifiP2pDevice> devices) {
-        mDevices = new HashMap<String, WifiP2pDevice>();
         for (WifiP2pDevice device : devices) {
             if (device.deviceAddress != null) {
                 mDevices.put(device.deviceAddress, device);
