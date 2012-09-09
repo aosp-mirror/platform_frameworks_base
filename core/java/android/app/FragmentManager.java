@@ -834,7 +834,9 @@ final class FragmentManagerImpl extends FragmentManager {
                         throw new SuperNotCalledException("Fragment " + f
                                 + " did not call through to super.onAttach()");
                     }
-                    mActivity.onAttachFragment(f);
+                    if (f.mParentFragment == null) {
+                        mActivity.onAttachFragment(f);
+                    }
 
                     if (!f.mRetaining) {
                         f.performCreate(f.mSavedFragmentState);
@@ -844,8 +846,8 @@ final class FragmentManagerImpl extends FragmentManager {
                         // For fragments that are part of the content view
                         // layout, we need to instantiate the view immediately
                         // and the inflater will take care of adding it.
-                        f.mView = f.onCreateView(f.getLayoutInflater(f.mSavedFragmentState),
-                                null, f.mSavedFragmentState);
+                        f.mView = f.performCreateView(f.getLayoutInflater(
+                                f.mSavedFragmentState), null, f.mSavedFragmentState);
                         if (f.mView != null) {
                             f.mView.setSaveFromParentEnabled(false);
                             if (f.mHidden) f.mView.setVisibility(View.GONE);
@@ -868,8 +870,8 @@ final class FragmentManagerImpl extends FragmentManager {
                                 }
                             }
                             f.mContainer = container;
-                            f.mView = f.onCreateView(f.getLayoutInflater(f.mSavedFragmentState),
-                                    container, f.mSavedFragmentState);
+                            f.mView = f.performCreateView(f.getLayoutInflater(
+                                    f.mSavedFragmentState), container, f.mSavedFragmentState);
                             if (f.mView != null) {
                                 f.mView.setSaveFromParentEnabled(false);
                                 if (container != null) {
@@ -885,7 +887,7 @@ final class FragmentManagerImpl extends FragmentManager {
                                 f.onViewCreated(f.mView, f.mSavedFragmentState);
                             }
                         }
-                        
+
                         f.performActivityCreated(f.mSavedFragmentState);
                         if (f.mView != null) {
                             f.restoreViewState(f.mSavedFragmentState);
@@ -1824,7 +1826,7 @@ final class FragmentManagerImpl extends FragmentManager {
     public void dispatchDestroyView() {
         moveToState(Fragment.CREATED, false);
     }
-    
+
     public void dispatchDestroy() {
         mDestroyed = true;
         execPendingActions();
