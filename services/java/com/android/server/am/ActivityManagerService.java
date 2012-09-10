@@ -546,7 +546,7 @@ public final class ActivityManagerService extends ActivityManagerNative
      */
     final ArrayList mCancelledThumbnails = new ArrayList();
 
-    final ProviderMap mProviderMap = new ProviderMap();
+    final ProviderMap mProviderMap;
 
     /**
      * List of content providers who have clients waiting for them.  The
@@ -1511,6 +1511,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         mBroadcastQueues[1] = mBgBroadcastQueue;
 
         mServices = new ActiveServices(this);
+        mProviderMap = new ProviderMap(this);
 
         File dataDir = Environment.getDataDirectory();
         File systemDir = new File(dataDir, "system");
@@ -1792,7 +1793,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             // Also don't let it kick out the first few "real" hidden processes.
             skipTop = ProcessList.MIN_HIDDEN_APPS;
         }
-        
+
         while (i >= 0) {
             ProcessRecord p = mLruProcesses.get(i);
             // If this app shouldn't be in front of the first N background
@@ -2680,7 +2681,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             final long origId = Binder.clearCallingIdentity();
             boolean res = mMainStack.requestFinishActivityLocked(token, resultCode,
-                    resultData, "app-request");
+                    resultData, "app-request", true);
             Binder.restoreCallingIdentity(origId);
             return res;
         }
@@ -2710,7 +2711,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     int index = mMainStack.indexOfTokenLocked(r.appToken);
                     if (index >= 0) {
                         mMainStack.finishActivityLocked(r, index, Activity.RESULT_CANCELED,
-                                null, "finish-heavy");
+                                null, "finish-heavy", true);
                     }
                 }
             }
@@ -3627,7 +3628,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             ActivityRecord r = (ActivityRecord)mMainStack.mHistory.get(i);
             if ((r.info.flags&ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS) != 0) {
                 r.stack.finishActivityLocked(r, i,
-                        Activity.RESULT_CANCELED, null, "close-sys");
+                        Activity.RESULT_CANCELED, null, "close-sys", true);
             }
         }
 
@@ -6972,7 +6973,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (count > 1) {
                 final long origId = Binder.clearCallingIdentity();
                 mMainStack.finishActivityLocked((ActivityRecord)mMainStack.mHistory.get(count-1),
-                        count-1, Activity.RESULT_CANCELED, null, "unhandled-back");
+                        count-1, Activity.RESULT_CANCELED, null, "unhandled-back", true);
                 Binder.restoreCallingIdentity(origId);
             }
         }
@@ -7891,7 +7892,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (r.app == app) {
                     Slog.w(TAG, "  Force finishing activity "
                         + r.intent.getComponent().flattenToShortString());
-                    r.stack.finishActivityLocked(r, i, Activity.RESULT_CANCELED, null, "crashed");
+                    r.stack.finishActivityLocked(r, i, Activity.RESULT_CANCELED,
+                            null, "crashed", false);
                 }
             }
             if (!app.persistent) {
@@ -7926,7 +7928,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         + r.intent.getComponent().flattenToShortString());
                 int index = mMainStack.indexOfActivityLocked(r);
                 r.stack.finishActivityLocked(r, index,
-                        Activity.RESULT_CANCELED, null, "crashed");
+                        Activity.RESULT_CANCELED, null, "crashed", false);
                 // Also terminate any activities below it that aren't yet
                 // stopped, to avoid a situation where one will get
                 // re-start our crashing activity once it gets resumed again.
@@ -7940,7 +7942,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             Slog.w(TAG, "  Force finishing activity "
                                     + r.intent.getComponent().flattenToShortString());
                             r.stack.finishActivityLocked(r, index,
-                                    Activity.RESULT_CANCELED, null, "crashed");
+                                    Activity.RESULT_CANCELED, null, "crashed", false);
                         }
                     }
                 }
@@ -12305,7 +12307,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             for (int i = start; i > finishTo; i--) {
                 ActivityRecord r = history.get(i);
                 mMainStack.requestFinishActivityLocked(r.appToken, resultCode, resultData,
-                        "navigate-up");
+                        "navigate-up", true);
                 // Only return the supplied result for the first activity finished
                 resultCode = Activity.RESULT_CANCELED;
                 resultData = null;
@@ -12331,7 +12333,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         foundParentInTask = false;
                     }
                     mMainStack.requestFinishActivityLocked(parent.appToken, resultCode,
-                            resultData, "navigate-up");
+                            resultData, "navigate-up", true);
                 }
             }
             Binder.restoreCallingIdentity(origId);
