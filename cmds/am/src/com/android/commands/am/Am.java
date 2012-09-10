@@ -63,7 +63,7 @@ public class Am {
     private boolean mStopOption = false;
 
     private int mRepeat = 0;
-    private int mUserId = 0;
+    private int mUserId;
 
     private String mProfileFile;
 
@@ -160,7 +160,7 @@ public class Am {
         return userId;
     }
 
-    private Intent makeIntent() throws URISyntaxException {
+    private Intent makeIntent(int defUser) throws URISyntaxException {
         Intent intent = new Intent();
         Intent baseIntent = intent;
         boolean hasIntentInfo = false;
@@ -170,7 +170,7 @@ public class Am {
         mStopOption = false;
         mRepeat = 0;
         mProfileFile = null;
-        mUserId = 0;
+        mUserId = defUser;
         Uri data = null;
         String type = null;
 
@@ -404,7 +404,7 @@ public class Am {
     }
 
     private void runStartService() throws Exception {
-        Intent intent = makeIntent();
+        Intent intent = makeIntent(UserHandle.USER_CURRENT);
         if (mUserId == UserHandle.USER_ALL) {
             System.err.println("Error: Can't start activity with user 'all'");
             return;
@@ -417,7 +417,7 @@ public class Am {
     }
 
     private void runStart() throws Exception {
-        Intent intent = makeIntent();
+        Intent intent = makeIntent(UserHandle.USER_CURRENT);
 
         if (mUserId == UserHandle.USER_ALL) {
             System.err.println("Error: Can't start service with user 'all'");
@@ -456,7 +456,7 @@ public class Am {
                     packageName = activities.get(0).activityInfo.packageName;
                 }
                 System.out.println("Stopping: " + packageName);
-                mAm.forceStopPackage(packageName);
+                mAm.forceStopPackage(packageName, mUserId);
                 Thread.sleep(250);
             }
     
@@ -570,11 +570,33 @@ public class Am {
     }
 
     private void runForceStop() throws Exception {
-        mAm.forceStopPackage(nextArgRequired());
+        int userId = UserHandle.USER_ALL;
+
+        String opt;
+        while ((opt=nextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = parseUserArg(nextArgRequired());
+            } else {
+                System.err.println("Error: Unknown option: " + opt);
+                return;
+            }
+        }
+        mAm.forceStopPackage(nextArgRequired(), userId);
     }
 
     private void runKill() throws Exception {
-        mAm.killBackgroundProcesses(nextArgRequired());
+        int userId = UserHandle.USER_ALL;
+
+        String opt;
+        while ((opt=nextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = parseUserArg(nextArgRequired());
+            } else {
+                System.err.println("Error: Unknown option: " + opt);
+                return;
+            }
+        }
+        mAm.killBackgroundProcesses(nextArgRequired(), userId);
     }
 
     private void runKillAll() throws Exception {
@@ -582,7 +604,7 @@ public class Am {
     }
 
     private void sendBroadcast() throws Exception {
-        Intent intent = makeIntent();
+        Intent intent = makeIntent(UserHandle.USER_ALL);
         IntentReceiver receiver = new IntentReceiver();
         System.out.println("Broadcasting: " + intent);
         mAm.broadcastIntent(null, intent, null, receiver, 0, null, null, null, true, false,
@@ -595,7 +617,7 @@ public class Am {
         boolean wait = false;
         boolean rawMode = false;
         boolean no_window_animation = false;
-        int userId = 0;
+        int userId = UserHandle.USER_CURRENT;
         Bundle args = new Bundle();
         String argKey = null, argValue = null;
         IWindowManager wm = IWindowManager.Stub.asInterface(ServiceManager.getService("window"));
@@ -672,17 +694,37 @@ public class Am {
         String profileFile = null;
         boolean start = false;
         boolean wall = false;
+        int userId = UserHandle.USER_CURRENT;
         int profileType = 0;
-        
+
         String process = null;
-        
+
         String cmd = nextArgRequired();
 
         if ("start".equals(cmd)) {
             start = true;
-            wall = "--wall".equals(nextOption());
+            String opt;
+            while ((opt=nextOption()) != null) {
+                if (opt.equals("--user")) {
+                    userId = parseUserArg(nextArgRequired());
+                } else if (opt.equals("--wall")) {
+                    wall = true;
+                } else {
+                    System.err.println("Error: Unknown option: " + opt);
+                    return;
+                }
+            }
             process = nextArgRequired();
         } else if ("stop".equals(cmd)) {
+            String opt;
+            while ((opt=nextOption()) != null) {
+                if (opt.equals("--user")) {
+                    userId = parseUserArg(nextArgRequired());
+                } else {
+                    System.err.println("Error: Unknown option: " + opt);
+                    return;
+                }
+            }
             process = nextArg();
         } else {
             // Compatibility with old syntax: process is specified first.
@@ -694,7 +736,12 @@ public class Am {
                 throw new IllegalArgumentException("Profile command " + process + " not valid");
             }
         }
-        
+
+        if (userId == UserHandle.USER_ALL) {
+            System.err.println("Error: Can't profile with user 'all'");
+            return;
+        }
+
         ParcelFileDescriptor fd = null;
 
         if (start) {
@@ -722,7 +769,7 @@ public class Am {
             } else if (start) {
                 //removeWallOption();
             }
-            if (!mAm.profileControl(process, start, profileFile, fd, profileType)) {
+            if (!mAm.profileControl(process, userId, start, profileFile, fd, profileType)) {
                 wall = false;
                 throw new AndroidException("PROFILE FAILED on process " + process);
             }
@@ -734,7 +781,24 @@ public class Am {
     }
 
     private void runDumpHeap() throws Exception {
-        boolean managed = !"-n".equals(nextOption());
+        boolean managed = true;
+        int userId = UserHandle.USER_CURRENT;
+
+        String opt;
+        while ((opt=nextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = parseUserArg(nextArgRequired());
+                if (userId == UserHandle.USER_ALL) {
+                    System.err.println("Error: Can't dump heap with user 'all'");
+                    return;
+                }
+            } else if (opt.equals("-n")) {
+                managed = false;
+            } else {
+                System.err.println("Error: Unknown option: " + opt);
+                return;
+            }
+        }
         String process = nextArgRequired();
         String heapFile = nextArgRequired();
         ParcelFileDescriptor fd = null;
@@ -750,7 +814,7 @@ public class Am {
             return;
         }
 
-        if (!mAm.dumpHeap(process, managed, heapFile, fd)) {
+        if (!mAm.dumpHeap(process, userId, managed, heapFile, fd)) {
             throw new AndroidException("HEAP DUMP FAILED on process " + process);
         }
     }
@@ -1204,7 +1268,7 @@ public class Am {
     }
 
     private void runToUri(boolean intentScheme) throws Exception {
-        Intent intent = makeIntent();
+        Intent intent = makeIntent(UserHandle.USER_CURRENT);
         System.out.println(intent.toUri(intentScheme ? Intent.URI_INTENT_SCHEME : 0));
     }
 
@@ -1363,18 +1427,19 @@ public class Am {
         System.err.println(
                 "usage: am [subcommand] [options]\n" +
                 "usage: am start [-D] [-W] [-P <FILE>] [--start-profiler <FILE>]\n" +
-                "               [--R COUNT] [-S] [--opengl-trace] <INTENT>\n" +
-                "       am startservice <INTENT>\n" +
-                "       am force-stop <PACKAGE>\n" +
-                "       am kill <PACKAGE>\n" +
+                "               [--R COUNT] [-S] [--opengl-trace]\n" +
+                "               [--user <USER_ID> | current] <INTENT>\n" +
+                "       am startservice [--user <USER_ID> | current] <INTENT>\n" +
+                "       am force-stop [--user <USER_ID> | all | current] <PACKAGE>\n" +
+                "       am kill [--user <USER_ID> | all | current] <PACKAGE>\n" +
                 "       am kill-all\n" +
-                "       am broadcast <INTENT>\n" +
+                "       am broadcast [--user <USER_ID> | all | current] <INTENT>\n" +
                 "       am instrument [-r] [-e <NAME> <VALUE>] [-p <FILE>] [-w]\n" +
-                "               [--user <USER_ID> | all | current]\n" +
+                "               [--user <USER_ID> | current]\n" +
                 "               [--no-window-animation] <COMPONENT>\n" +
-                "       am profile start <PROCESS> <FILE>\n" +
-                "       am profile stop [<PROCESS>]\n" +
-                "       am dumpheap [flags] <PROCESS> <FILE>\n" +
+                "       am profile start [--user <USER_ID> current] <PROCESS> <FILE>\n" +
+                "       am profile stop [--user <USER_ID> current] [<PROCESS>]\n" +
+                "       am dumpheap [--user <USER_ID> current] [-n] <PROCESS> <FILE>\n" +
                 "       am set-debug-app [-w] [--persistent] <PACKAGE>\n" +
                 "       am clear-debug-app\n" +
                 "       am monitor [--gdb <port>]\n" +
@@ -1395,18 +1460,28 @@ public class Am {
                 "        the top activity will be finished.\n" +
                 "    -S: force stop the target app before starting the activity\n" +
                 "    --opengl-trace: enable tracing of OpenGL functions\n" +
+                "    --user <USER_ID> | current: Specify which user to run as; if not\n" +
+                "        specified then run as the current user.\n" +
                 "\n" +
-                "am startservice: start a Service.\n" +
+                "am startservice: start a Service.  Options are:\n" +
+                "    --user <USER_ID> | current: Specify which user to run as; if not\n" +
+                "        specified then run as the current user.\n" +
                 "\n" +
                 "am force-stop: force stop everything associated with <PACKAGE>.\n" +
+                "    --user <USER_ID> | all | current: Specify user to force stop;\n" +
+                "        all users if not specified.\n" +
                 "\n" +
                 "am kill: Kill all processes associated with <PACKAGE>.  Only kills.\n" +
                 "  processes that are safe to kill -- that is, will not impact the user\n" +
                 "  experience.\n" +
+                "    --user <USER_ID> | all | current: Specify user whose processes to kill;\n" +
+                "        all users if not specified.\n" +
                 "\n" +
                 "am kill-all: Kill all background processes.\n" +
                 "\n" +
-                "am broadcast: send a broadcast Intent.\n" +
+                "am broadcast: send a broadcast Intent.  Options are:\n" +
+                "    --user <USER_ID> | all | current: Specify which user to send to; if not\n" +
+                "        specified then send to all users.\n" +
                 "\n" +
                 "am instrument: start an Instrumentation.  Typically this target <COMPONENT>\n" +
                 "  is the form <TEST_PACKAGE>/<RUNNER_CLASS>.  Options are:\n" +
@@ -1417,13 +1492,20 @@ public class Am {
                 "    -p <FILE>: write profiling data to <FILE>\n" +
                 "    -w: wait for instrumentation to finish before returning.  Required for\n" +
                 "        test runners.\n" +
-                "    --user [<USER_ID> | all | current]: Specify user instrumentation runs in.\n" +
+                "    --user <USER_ID> | current: Specify user instrumentation runs in;\n" +
+                "        current user if not specified.\n" +
                 "    --no-window-animation: turn off window animations will running.\n" +
                 "\n" +
-                "am profile: start and stop profiler on a process.\n" +
+                "am profile: start and stop profiler on a process.  The given <PROCESS> argument\n" +
+                "  may be either a process name or pid.  Options are:\n" +
+                "    --user <USER_ID> | current: When supplying a process name,\n" +
+                "        specify user of process to profile; uses current user if not specified.\n" +
                 "\n" +
-                "am dumpheap: dump the heap of a process.  Options are:\n" +
+                "am dumpheap: dump the heap of a process.  The given <PROCESS> argument may\n" +
+                "  be either a process name or pid.  Options are:\n" +
                 "    -n: dump native heap instead of managed heap\n" +
+                "    --user <USER_ID> | current: When supplying a process name,\n" +
+                "        specify user of process to dump; uses current user if not specified.\n" +
                 "\n" +
                 "am set-debug-app: set application <PACKAGE> to debug.  Options are:\n" +
                 "    -w: wait for debugger when application starts\n" +
@@ -1444,10 +1526,10 @@ public class Am {
                 "\n" +
                 "am to-intent-uri: print the given Intent specification as an intent: URI.\n" +
                 "\n" +
-                "am switch-user: switch to put USER_ID in the foreground, starting" +
+                "am switch-user: switch to put USER_ID in the foreground, starting\n" +
                 "  execution of that user if it is currently stopped.\n" +
                 "\n" +
-                "am stop-user: stop execution of USER_ID, not allowing it to run any" +
+                "am stop-user: stop execution of USER_ID, not allowing it to run any\n" +
                 "  code until a later explicit switch to it.\n" +
                 "\n" +
                 "<INTENT> specifications include these flags and arguments:\n" +
@@ -1465,7 +1547,6 @@ public class Am {
                 "    [--ela <EXTRA_KEY> <EXTRA_LONG_VALUE>[,<EXTRA_LONG_VALUE...]]\n" +
                 "    [--efa <EXTRA_KEY> <EXTRA_FLOAT_VALUE>[,<EXTRA_FLOAT_VALUE...]]\n" +
                 "    [-n <COMPONENT>] [-f <FLAGS>]\n" +
-                "    [--user [<USER_ID> | all | current]\n" +
                 "    [--grant-read-uri-permission] [--grant-write-uri-permission]\n" +
                 "    [--debug-log-resolution] [--exclude-stopped-packages]\n" +
                 "    [--include-stopped-packages]\n" +

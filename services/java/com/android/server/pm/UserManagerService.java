@@ -281,7 +281,7 @@ public class UserManagerService extends IUserManager.Stub {
      * cache it elsewhere.
      * @return the array of user ids.
      */
-    int[] getUserIds() {
+    public int[] getUserIds() {
         synchronized (mPackagesLock) {
             return mUserIds;
         }
