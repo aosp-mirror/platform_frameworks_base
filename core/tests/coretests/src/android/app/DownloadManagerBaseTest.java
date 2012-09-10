@@ -29,6 +29,7 @@ import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
+import android.os.UserHandle;
 import android.os.ParcelFileDescriptor.AutoCloseInputStream;
 import android.os.SystemClock;
 import android.provider.Settings;
@@ -553,7 +554,7 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
         int state = enable ? 1 : 0;
 
         // Change the system setting
-        Settings.System.putInt(mContext.getContentResolver(), Settings.System.AIRPLANE_MODE_ON,
+        Settings.Global.putInt(mContext.getContentResolver(), Settings.Global.AIRPLANE_MODE_ON,
                 state);
 
         String timeoutMessage = "Timed out waiting for airplane mode to be " +
@@ -561,8 +562,8 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
 
         // wait for airplane mode to change state
         int currentWaitTime = 0;
-        while (Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.AIRPLANE_MODE_ON, -1) != state) {
+        while (Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.AIRPLANE_MODE_ON, -1) != state) {
             timeoutWait(currentWaitTime, DEFAULT_WAIT_POLL_TIME, DEFAULT_MAX_WAIT_TIME,
                     timeoutMessage);
         }
@@ -570,7 +571,7 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
         // Post the intent
         Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         intent.putExtra("state", true);
-        mContext.sendBroadcast(intent);
+        mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
     }
 
     /**
