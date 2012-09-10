@@ -66,14 +66,53 @@ public class Input {
                 }
             } else if (command.equals("tap")) {
                 if (args.length == 3) {
-                    sendTap(Float.parseFloat(args[1]), Float.parseFloat(args[2]));
+                    sendTap(InputDevice.SOURCE_TOUCHSCREEN, Float.parseFloat(args[1]), Float.parseFloat(args[2]));
                     return;
                 }
             } else if (command.equals("swipe")) {
                 if (args.length == 5) {
-                    sendSwipe(Float.parseFloat(args[1]), Float.parseFloat(args[2]),
+                    sendSwipe(InputDevice.SOURCE_TOUCHSCREEN, Float.parseFloat(args[1]), Float.parseFloat(args[2]),
                             Float.parseFloat(args[3]), Float.parseFloat(args[4]));
                     return;
+                }
+            } else if (command.equals("touchscreen") || command.equals("touchpad")) {
+                // determine input source
+                int inputSource = InputDevice.SOURCE_TOUCHSCREEN;
+                if (command.equals("touchpad")) {
+                    inputSource = InputDevice.SOURCE_TOUCHPAD;
+                }
+                // determine subcommand
+                if (args.length > 1) {
+                    String subcommand = args[1];
+                    if (subcommand.equals("tap")) {
+                        if (args.length == 4) {
+                            sendTap(inputSource, Float.parseFloat(args[2]),
+                                    Float.parseFloat(args[3]));
+                            return;
+                        }
+                    } else if (subcommand.equals("swipe")) {
+                        if (args.length == 6) {
+                            sendSwipe(inputSource, Float.parseFloat(args[2]),
+                                    Float.parseFloat(args[3]), Float.parseFloat(args[4]),
+                                    Float.parseFloat(args[5]));
+                            return;
+                        }
+                    }
+                }
+            } else if (command.equals("trackball")) {
+                // determine subcommand
+                if (args.length > 1) {
+                    String subcommand = args[1];
+                    if (subcommand.equals("press")) {
+                        sendTap(InputDevice.SOURCE_TRACKBALL, 0.0f, 0.0f);
+                        return;
+                    } else if (subcommand.equals("roll")) {
+                        if (args.length == 4) {
+                            sendMove(InputDevice.SOURCE_TRACKBALL, Float.parseFloat(args[2]),
+                                    Float.parseFloat(args[3]));
+                            return;
+                        }
+                    }
                 }
             } else {
                 System.err.println("Error: Unknown command: " + command);
@@ -127,33 +166,64 @@ public class Input {
                 KeyCharacterMap.VIRTUAL_KEYBOARD, 0, 0, InputDevice.SOURCE_KEYBOARD));
     }
 
-    private void sendTap(float x, float y) {
+    private void sendTap(int inputSource, float x, float y) {
         long now = SystemClock.uptimeMillis();
-        injectPointerEvent(MotionEvent.obtain(now, now, MotionEvent.ACTION_DOWN, x, y, 0));
-        injectPointerEvent(MotionEvent.obtain(now, now, MotionEvent.ACTION_UP, x, y, 0));
+        injectMotionEvent(inputSource, MotionEvent.ACTION_DOWN, now, x, y, 1.0f);
+        injectMotionEvent(inputSource, MotionEvent.ACTION_UP, now, x, y, 0.0f);
     }
 
-    private void sendSwipe(float x1, float y1, float x2, float y2) {
+    private void sendSwipe(int inputSource, float x1, float y1, float x2, float y2) {
         final int NUM_STEPS = 11;
         long now = SystemClock.uptimeMillis();
-        injectPointerEvent(MotionEvent.obtain(now, now, MotionEvent.ACTION_DOWN, x1, y1, 0));
+        injectMotionEvent(inputSource, MotionEvent.ACTION_DOWN, now, x1, y1, 1.0f);
         for (int i = 1; i < NUM_STEPS; i++) {
-            float alpha = (float)i / NUM_STEPS;
-            injectPointerEvent(MotionEvent.obtain(now, now, MotionEvent.ACTION_MOVE,
-                    lerp(x1, x2, alpha), lerp(y1, y2, alpha), 0));
+            float alpha = (float) i / NUM_STEPS;
+            injectMotionEvent(inputSource, MotionEvent.ACTION_MOVE, now, lerp(x1, x2, alpha),
+                    lerp(y1, y2, alpha), 1.0f);
         }
-        injectPointerEvent(MotionEvent.obtain(now, now, MotionEvent.ACTION_UP, x2, y2, 0));
+        injectMotionEvent(inputSource, MotionEvent.ACTION_UP, now, x1, y1, 0.0f);
+    }
+
+    /**
+     * Sends a simple zero-pressure move event.
+     *
+     * @param inputSource the InputDevice.SOURCE_* sending the input event
+     * @param dx change in x coordinate due to move
+     * @param dy change in y coordinate due to move
+     */
+    private void sendMove(int inputSource, float dx, float dy) {
+        long now = SystemClock.uptimeMillis();
+        injectMotionEvent(inputSource, MotionEvent.ACTION_MOVE, now, dx, dy, 0.0f);
     }
 
     private void injectKeyEvent(KeyEvent event) {
-        Log.i(TAG, "InjectKeyEvent: " + event);
+        Log.i(TAG, "injectKeyEvent: " + event);
         InputManager.getInstance().injectInputEvent(event,
                 InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
     }
 
-    private void injectPointerEvent(MotionEvent event) {
-        event.setSource(InputDevice.SOURCE_TOUCHSCREEN);
-        Log.i("Input", "InjectPointerEvent: " + event);
+    /**
+     * Builds a MotionEvent and injects it into the event stream.
+     *
+     * @param inputSource the InputDevice.SOURCE_* sending the input event
+     * @param action the MotionEvent.ACTION_* for the event
+     * @param when the value of SystemClock.uptimeMillis() at which the event happened
+     * @param x x coordinate of event
+     * @param y y coordinate of event
+     * @param pressure pressure of event
+     */
+    private void injectMotionEvent(int inputSource, int action, long when, float x, float y, float pressure) {
+        final float DEFAULT_SIZE = 1.0f;
+        final int DEFAULT_META_STATE = 0;
+        final float DEFAULT_PRECISION_X = 1.0f;
+        final float DEFAULT_PRECISION_Y = 1.0f;
+        final int DEFAULT_DEVICE_ID = 0;
+        final int DEFAULT_EDGE_FLAGS = 0;
+        MotionEvent event = MotionEvent.obtain(when, when, action, x, y, pressure, DEFAULT_SIZE,
+                DEFAULT_META_STATE, DEFAULT_PRECISION_X, DEFAULT_PRECISION_Y, DEFAULT_DEVICE_ID,
+                DEFAULT_EDGE_FLAGS);
+        event.setSource(inputSource);
+        Log.i("Input", "injectMotionEvent: " + event);
         InputManager.getInstance().injectInputEvent(event,
                 InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
     }
@@ -166,7 +236,9 @@ public class Input {
         System.err.println("usage: input ...");
         System.err.println("       input text <string>");
         System.err.println("       input keyevent <key code number or name>");
-        System.err.println("       input tap <x> <y>");
-        System.err.println("       input swipe <x1> <y1> <x2> <y2>");
+        System.err.println("       input [touchscreen|touchpad] tap <x> <y>");
+        System.err.println("       input [touchscreen|touchpad] swipe <x1> <y1> <x2> <y2>");
+        System.err.println("       input trackball press");
+        System.err.println("       input trackball roll <dx> <dy>");
     }
 }

@@ -47,6 +47,8 @@ oneway interface IInputMethodSession {
 
     void dispatchTrackballEvent(int seq, in MotionEvent event, IInputMethodCallback callback);
 
+    void dispatchGenericMotionEvent(int seq, in MotionEvent event, IInputMethodCallback callback);
+
     void appPrivateCommand(String action, in Bundle data);
 
     void toggleSoftInput(int showFlags, int hideFlags);
