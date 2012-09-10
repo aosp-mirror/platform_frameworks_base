@@ -237,8 +237,9 @@ public class AppWidgetManager {
     /**
      * Sent when the custom extras for an AppWidget change.
      *
-     * @see AppWidgetProvider#onAppWidgetExtrasChanged AppWidgetProvider#onAppWidgetExtrasChanged(
-     *      Context context, AppWidgetManager appWidgetManager, int appWidgetId, Bundle newExtras)
+     * @see AppWidgetProvider#onAppWidgetOptionsChanged 
+     *      AppWidgetProvider.onAppWidgetOptionsChanged(Context context, 
+     *      AppWidgetManager appWidgetManager, int appWidgetId, Bundle newExtras)
      */
     public static final String ACTION_APPWIDGET_OPTIONS_CHANGED = "android.appwidget.action.APPWIDGET_UPDATE_OPTIONS";
 
