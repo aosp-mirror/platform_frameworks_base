@@ -1782,6 +1782,15 @@ public class Camera {
         public static final String SCENE_MODE_BARCODE = "barcode";
 
         /**
+         * Capture a scene using high dynamic range imaging techniques. The
+         * camera will return an image that has an extended dynamic range
+         * compared to a regular capture. Capturing such an image may take
+         * longer than a regular capture.
+         * @hide
+         */
+        public static final String SCENE_MODE_HDR = "hdr";
+
+        /**
          * Auto-focus mode. Applications should call {@link
          * #autoFocus(AutoFocusCallback)} to start the focus in this mode.
          */
@@ -2784,6 +2793,7 @@ public class Camera {
          * @see #SCENE_MODE_SPORTS
          * @see #SCENE_MODE_PARTY
          * @see #SCENE_MODE_CANDLELIGHT
+         * @see #SCENE_MODE_BARCODE
          */
         public String getSceneMode() {
             return get(KEY_SCENE_MODE);
