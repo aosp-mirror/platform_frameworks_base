@@ -151,6 +151,8 @@ public:
         v.physicalTop = 0;
         v.physicalRight = isRotated ? height : width;
         v.physicalBottom = isRotated ? width : height;
+        v.deviceWidth = isRotated ? height : width;
+        v.deviceHeight = isRotated ? width : height;
         mConfig.setDisplayInfo(false /*external*/, v);
         mConfig.setDisplayInfo(true /*external*/, v);
     }
@@ -487,6 +489,7 @@ private:
                 return OK;
             }
         }
+        outAxisInfo->clear();
         return -1;
     }
 

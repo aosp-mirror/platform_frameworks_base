@@ -69,12 +69,12 @@ void NotifyKeyArgs::notify(const sp<InputListenerInterface>& listener) const {
 NotifyMotionArgs::NotifyMotionArgs(nsecs_t eventTime, int32_t deviceId, uint32_t source,
         uint32_t policyFlags,
         int32_t action, int32_t flags, int32_t metaState, int32_t buttonState,
-        int32_t edgeFlags, uint32_t pointerCount,
+        int32_t edgeFlags, int32_t displayId, uint32_t pointerCount,
         const PointerProperties* pointerProperties, const PointerCoords* pointerCoords,
         float xPrecision, float yPrecision, nsecs_t downTime) :
         eventTime(eventTime), deviceId(deviceId), source(source), policyFlags(policyFlags),
         action(action), flags(flags), metaState(metaState), buttonState(buttonState),
-        edgeFlags(edgeFlags), pointerCount(pointerCount),
+        edgeFlags(edgeFlags), displayId(displayId), pointerCount(pointerCount),
         xPrecision(xPrecision), yPrecision(yPrecision), downTime(downTime) {
     for (uint32_t i = 0; i < pointerCount; i++) {
         this->pointerProperties[i].copyFrom(pointerProperties[i]);
@@ -87,7 +87,8 @@ NotifyMotionArgs::NotifyMotionArgs(const NotifyMotionArgs& other) :
         policyFlags(other.policyFlags),
         action(other.action), flags(other.flags),
         metaState(other.metaState), buttonState(other.buttonState),
-        edgeFlags(other.edgeFlags), pointerCount(other.pointerCount),
+        edgeFlags(other.edgeFlags), displayId(other.displayId),
+        pointerCount(other.pointerCount),
         xPrecision(other.xPrecision), yPrecision(other.yPrecision), downTime(other.downTime) {
     for (uint32_t i = 0; i < pointerCount; i++) {
         pointerProperties[i].copyFrom(other.pointerProperties[i]);
