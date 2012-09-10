@@ -1593,7 +1593,7 @@ public final class InputMethodManager {
     /**
      * @hide
      */
-    void dispatchTrackballEvent(Context context, int seq, MotionEvent motion,
+    public void dispatchTrackballEvent(Context context, int seq, MotionEvent motion,
             FinishedEventCallback callback) {
         synchronized (mH) {
             if (DEBUG) Log.d(TAG, "dispatchTrackballEvent");
@@ -1607,6 +1607,30 @@ public final class InputMethodManager {
                     return;
                 } catch (RemoteException e) {
                     Log.w(TAG, "IME died: " + mCurId + " dropping trackball: " + motion, e);
+                }
+            }
+        }
+
+        callback.finishedEvent(seq, false);
+    }
+
+    /**
+     * @hide
+     */
+    public void dispatchGenericMotionEvent(Context context, int seq, MotionEvent motion,
+            FinishedEventCallback callback) {
+        synchronized (mH) {
+            if (DEBUG) Log.d(TAG, "dispatchGenericMotionEvent");
+
+            if (mCurMethod != null && mCurrentTextBoxAttribute != null) {
+                try {
+                    if (DEBUG) Log.v(TAG, "DISPATCH GENERIC MOTION: " + mCurMethod);
+                    final long startTime = SystemClock.uptimeMillis();
+                    enqueuePendingEventLocked(startTime, seq, mCurId, callback);
+                    mCurMethod.dispatchGenericMotionEvent(seq, motion, mInputMethodCallback);
+                    return;
+                } catch (RemoteException e) {
+                    Log.w(TAG, "IME died: " + mCurId + " dropping generic motion: " + motion, e);
                 }
             }
         }
