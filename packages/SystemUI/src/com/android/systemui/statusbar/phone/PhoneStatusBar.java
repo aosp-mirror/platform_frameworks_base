@@ -1426,6 +1426,9 @@ public class PhoneStatusBar extends BaseStatusBar {
         // no ticking in Setup
         if (!isDeviceProvisioned()) return;
 
+        // not for you
+        if (!notificationIsForCurrentUser(n)) return;
+
         // Show the ticker if one is requested. Also don't do this
         // until status bar window is attached to the window manager,
         // because...  well, what's the point otherwise?  And trying to
