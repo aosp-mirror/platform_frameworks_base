@@ -1214,7 +1214,8 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         case KILL_BACKGROUND_PROCESSES_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             String packageName = data.readString();
-            killBackgroundProcesses(packageName);
+            int userId = data.readInt();
+            killBackgroundProcesses(packageName, userId);
             reply.writeNoException();
             return true;
         }
@@ -1229,7 +1230,8 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         case FORCE_STOP_PACKAGE_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             String packageName = data.readString();
-            forceStopPackage(packageName);
+            int userId = data.readInt();
+            forceStopPackage(packageName, userId);
             reply.writeNoException();
             return true;
         }
@@ -1255,12 +1257,13 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         case PROFILE_CONTROL_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             String process = data.readString();
+            int userId = data.readInt();
             boolean start = data.readInt() != 0;
             int profileType = data.readInt();
             String path = data.readString();
             ParcelFileDescriptor fd = data.readInt() != 0
                     ? data.readFileDescriptor() : null;
-            boolean res = profileControl(process, start, path, fd, profileType);
+            boolean res = profileControl(process, userId, start, path, fd, profileType);
             reply.writeNoException();
             reply.writeInt(res ? 1 : 0);
             return true;
@@ -1484,9 +1487,10 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             String process = data.readString();
             boolean managed = data.readInt() != 0;
             String path = data.readString();
+            int userId = data.readInt();
             ParcelFileDescriptor fd = data.readInt() != 0
                     ? data.readFileDescriptor() : null;
-            boolean res = dumpHeap(process, managed, path, fd);
+            boolean res = dumpHeap(process, userId, managed, path, fd);
             reply.writeNoException();
             reply.writeInt(res ? 1 : 0);
             return true;
@@ -3264,11 +3268,12 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
     }
 
-    public void killBackgroundProcesses(String packageName) throws RemoteException {
+    public void killBackgroundProcesses(String packageName, int userId) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeString(packageName);
+        data.writeInt(userId);
         mRemote.transact(KILL_BACKGROUND_PROCESSES_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
@@ -3285,11 +3290,12 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
     }
 
-    public void forceStopPackage(String packageName) throws RemoteException {
+    public void forceStopPackage(String packageName, int userId) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeString(packageName);
+        data.writeInt(userId);
         mRemote.transact(FORCE_STOP_PACKAGE_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
@@ -3322,13 +3328,14 @@ class ActivityManagerProxy implements IActivityManager
         return res;
     }
     
-    public boolean profileControl(String process, boolean start,
+    public boolean profileControl(String process, int userId, boolean start,
             String path, ParcelFileDescriptor fd, int profileType) throws RemoteException
     {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeString(process);
+        data.writeInt(userId);
         data.writeInt(start ? 1 : 0);
         data.writeInt(profileType);
         data.writeString(path);
@@ -3601,12 +3608,13 @@ class ActivityManagerProxy implements IActivityManager
         return res;
     }
 
-    public boolean dumpHeap(String process, boolean managed,
+    public boolean dumpHeap(String process, int userId, boolean managed,
             String path, ParcelFileDescriptor fd) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeString(process);
+        data.writeInt(userId);
         data.writeInt(managed ? 1 : 0);
         data.writeString(path);
         if (fd != null) {

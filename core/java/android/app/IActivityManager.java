@@ -208,9 +208,10 @@ public interface IActivityManager extends IInterface {
     
     public void getMemoryInfo(ActivityManager.MemoryInfo outInfo) throws RemoteException;
     
-    public void killBackgroundProcesses(final String packageName) throws RemoteException;
+    public void killBackgroundProcesses(final String packageName, int userId)
+            throws RemoteException;
     public void killAllBackgroundProcesses() throws RemoteException;
-    public void forceStopPackage(final String packageName) throws RemoteException;
+    public void forceStopPackage(final String packageName, int userId) throws RemoteException;
     
     // Note: probably don't want to allow applications access to these.
     public void goingToSleep() throws RemoteException;
@@ -267,7 +268,7 @@ public interface IActivityManager extends IInterface {
     public ConfigurationInfo getDeviceConfigurationInfo() throws RemoteException;
     
     // Turn on/off profiling in a particular process.
-    public boolean profileControl(String process, boolean start,
+    public boolean profileControl(String process, int userId, boolean start,
             String path, ParcelFileDescriptor fd, int profileType) throws RemoteException;
     
     public boolean shutdown(int timeout) throws RemoteException;
@@ -308,7 +309,7 @@ public interface IActivityManager extends IInterface {
             Uri uri, int modeFlags) throws RemoteException;
 
     // Cause the specified process to dump the specified heap.
-    public boolean dumpHeap(String process, boolean managed, String path,
+    public boolean dumpHeap(String process, int userId, boolean managed, String path,
         ParcelFileDescriptor fd) throws RemoteException;
 
     public int startActivities(IApplicationThread caller,
