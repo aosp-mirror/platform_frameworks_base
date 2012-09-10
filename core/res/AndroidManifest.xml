@@ -1265,6 +1265,13 @@
         android:description="@string/permdesc_manageAppTokens"
         android:protectionLevel="signature" />
 
+    <!-- @hide Allows the application to temporarily freeze the screen for a
+         full-screen transition. -->
+    <permission android:name="android.permission.FREEZE_SCREEN"
+        android:label="@string/permlab_freezeScreen"
+        android:description="@string/permdesc_freezeScreen"
+        android:protectionLevel="signature" />
+    
     <!-- Allows an application to inject user events (keys, touch, trackball)
          into the event stream and deliver them to ANY window.  Without this
          permission, you can only deliver events to windows in your own process.
