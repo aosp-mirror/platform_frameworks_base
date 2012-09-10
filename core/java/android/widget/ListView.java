@@ -38,6 +38,7 @@ import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+import android.view.ViewRootImpl;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.RemoteViews.RemoteView;
@@ -1590,20 +1591,25 @@ public class ListView extends AbsListView {
             }
 
             // Remember which child, if any, had accessibility focus.
-            final View accessFocusedView = getViewRootImpl().getAccessibilityFocusedHost();
-            if (accessFocusedView != null) {
-                final View accessFocusedChild = findAccessibilityFocusedChild(accessFocusedView);
-                if (accessFocusedChild != null) {
-                    if (!dataChanged || isDirectChildHeaderOrFooter(accessFocusedChild)) {
-                        // If the views won't be changing, try to maintain focus
-                        // on the current view host and (if applicable) its
-                        // virtual view.
-                        accessibilityFocusLayoutRestoreView = accessFocusedView;
-                        accessibilityFocusLayoutRestoreNode = getViewRootImpl()
-                                .getAccessibilityFocusedVirtualView();
-                    } else {
-                        // Otherwise, try to maintain focus at the same position.
-                        accessibilityFocusPosition = getPositionForView(accessFocusedChild);
+            final ViewRootImpl viewRootImpl = getViewRootImpl();
+            if (viewRootImpl != null) {
+                final View accessFocusedView = viewRootImpl.getAccessibilityFocusedHost();
+                if (accessFocusedView != null) {
+                    final View accessFocusedChild = findAccessibilityFocusedChild(
+                            accessFocusedView);
+                    if (accessFocusedChild != null) {
+                        if (!dataChanged || isDirectChildHeaderOrFooter(accessFocusedChild)) {
+                            // If the views won't be changing, try to maintain
+                            // focus on the current view host and (if
+                            // applicable) its virtual view.
+                            accessibilityFocusLayoutRestoreView = accessFocusedView;
+                            accessibilityFocusLayoutRestoreNode = viewRootImpl
+                                    .getAccessibilityFocusedVirtualView();
+                        } else {
+                            // Otherwise, try to maintain focus at the same
+                            // position.
+                            accessibilityFocusPosition = getPositionForView(accessFocusedChild);
+                        }
                     }
                 }
             }
