@@ -299,9 +299,11 @@ status_t OpenGLRenderer::invokeFunctors(Rect& dirty) {
                 mFunctors.add(f);
             }
         }
+        // protect against functors binding to other buffers
+        mCaches.unbindMeshBuffer();
+        mCaches.unbindIndicesBuffer();
+        mCaches.activeTexture(0);
     }
-
-    mCaches.activeTexture(0);
 
     return result;
 }
