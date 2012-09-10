@@ -141,7 +141,6 @@
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Đang tìm kiếm GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Vị trí đặt bởi GPS"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Xóa tất cả thông báo."</string>
-    <string name="dreams_dock_launcher" msgid="3541196417659166245">"Kích hoạt trình bảo vệ màn hình"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Thông tin về ứng dụng"</string>
     <string name="close_universe" msgid="3736513750241754348">"Đóng"</string>
     <string name="notifications_off_title" msgid="8936620513608443224">"Tắt thông báo"</string>
@@ -150,5 +149,7 @@
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Màn hình hiện bị khóa theo hướng ngang."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Màn hình hiện bị khóa theo hướng dọc."</string>
     <!-- no translation found for jelly_bean_dream_name (5992026543636816792) -->
+    <skip />
+    <!-- no translation found for start_dreams (870400522982252717) -->
     <skip />
 </resources>

@@ -252,8 +252,6 @@
     <skip />
     <!-- no translation found for accessibility_clear_all (5235938559247164925) -->
     <skip />
-    <!-- no translation found for dreams_dock_launcher (3541196417659166245) -->
-    <skip />
     <!-- no translation found for status_bar_notification_inspect_item_title (1163547729015390250) -->
     <skip />
     <!-- no translation found for close_universe (3736513750241754348) -->
@@ -269,5 +267,7 @@
     <!-- no translation found for accessibility_rotation_lock_on_portrait (5809367521644012115) -->
     <skip />
     <!-- no translation found for jelly_bean_dream_name (5992026543636816792) -->
+    <skip />
+    <!-- no translation found for start_dreams (870400522982252717) -->
     <skip />
 </resources>
