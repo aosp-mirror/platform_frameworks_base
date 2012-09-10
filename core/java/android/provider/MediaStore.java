@@ -183,8 +183,6 @@ public final class MediaStore {
      * on top of the lock screen while secured. There is no activity stack when
      * this flag is used, so launching more than one activity is strongly
      * discouraged.
-     *
-     * @hide
      */
     public static final String INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE =
             "android.media.action.STILL_IMAGE_CAMERA_SECURE";
