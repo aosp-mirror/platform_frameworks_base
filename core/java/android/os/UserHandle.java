@@ -40,7 +40,7 @@ public final class UserHandle implements Parcelable {
     /** @hide A user id to indicate that we would like to send to the current
      *  user, but if this is calling from a user process then we will send it
      *  to the caller's user instead of failing wiht a security exception */
-    public static final int USER_CURRENT_OR_SELF = -2;
+    public static final int USER_CURRENT_OR_SELF = -3;
 
     /** @hide A user handle to indicate that we would like to send to the current
      *  user, but if this is calling from a user process then we will send it
