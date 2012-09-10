@@ -3211,6 +3211,33 @@ public final class ViewRootImpl implements ViewParent,
             mInputEventConsistencyVerifier.onTrackballEvent(event, 0);
         }
 
+        if (mView != null && mAdded && (q.mFlags & QueuedInputEvent.FLAG_DELIVER_POST_IME) == 0) {
+            if (LOCAL_LOGV)
+                Log.v(TAG, "Dispatching trackball " + event + " to " + mView);
+
+            // Dispatch to the IME before propagating down the view hierarchy.
+            // The IME will eventually call back into handleImeFinishedEvent.
+            if (mLastWasImTarget) {
+                InputMethodManager imm = InputMethodManager.peekInstance();
+                if (imm != null) {
+                    final int seq = event.getSequenceNumber();
+                    if (DEBUG_IMF)
+                        Log.v(TAG, "Sending trackball event to IME: seq="
+                                + seq + " event=" + event);
+                    imm.dispatchTrackballEvent(mView.getContext(), seq, event,
+                            mInputMethodCallback);
+                    return;
+                }
+            }
+        }
+
+        // Not dispatching to IME, continue with post IME actions.
+        deliverTrackballEventPostIme(q);
+    }
+
+    private void deliverTrackballEventPostIme(QueuedInputEvent q) {
+        final MotionEvent event = (MotionEvent) q.mEvent;
+
         // If there is no view, then the event will not be handled.
         if (mView == null || !mAdded) {
             finishInputEvent(q, false);
@@ -3344,8 +3371,33 @@ public final class ViewRootImpl implements ViewParent,
             mInputEventConsistencyVerifier.onGenericMotionEvent(event, 0);
         }
 
-        final int source = event.getSource();
-        final boolean isJoystick = (source & InputDevice.SOURCE_CLASS_JOYSTICK) != 0;
+        if (mView != null && mAdded && (q.mFlags & QueuedInputEvent.FLAG_DELIVER_POST_IME) == 0) {
+            if (LOCAL_LOGV)
+                Log.v(TAG, "Dispatching generic motion " + event + " to " + mView);
+
+            // Dispatch to the IME before propagating down the view hierarchy.
+            // The IME will eventually call back into handleImeFinishedEvent.
+            if (mLastWasImTarget) {
+                InputMethodManager imm = InputMethodManager.peekInstance();
+                if (imm != null) {
+                    final int seq = event.getSequenceNumber();
+                    if (DEBUG_IMF)
+                        Log.v(TAG, "Sending generic motion event to IME: seq="
+                                + seq + " event=" + event);
+                    imm.dispatchGenericMotionEvent(mView.getContext(), seq, event,
+                            mInputMethodCallback);
+                    return;
+                }
+            }
+        }
+
+        // Not dispatching to IME, continue with post IME actions.
+        deliverGenericMotionEventPostIme(q);
+    }
+
+    private void deliverGenericMotionEventPostIme(QueuedInputEvent q) {
+        final MotionEvent event = (MotionEvent) q.mEvent;
+        final boolean isJoystick = (event.getSource() & InputDevice.SOURCE_CLASS_JOYSTICK) != 0;
 
         // If there is no view, then the event will not be handled.
         if (mView == null || !mAdded) {
@@ -3366,7 +3418,8 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         if (isJoystick) {
-            // Translate the joystick event into DPAD keys and try to deliver those.
+            // Translate the joystick event into DPAD keys and try to deliver
+            // those.
             updateJoystickDirection(event, true);
             finishInputEvent(q, true);
         } else {
@@ -3521,13 +3574,7 @@ public final class ViewRootImpl implements ViewParent,
             mInputEventConsistencyVerifier.onKeyEvent(event, 0);
         }
 
-        if ((q.mFlags & QueuedInputEvent.FLAG_DELIVER_POST_IME) == 0) {
-            // If there is no view, then the event will not be handled.
-            if (mView == null || !mAdded) {
-                finishInputEvent(q, false);
-                return;
-            }
-
+        if (mView != null && mAdded && (q.mFlags & QueuedInputEvent.FLAG_DELIVER_POST_IME) == 0) {
             if (LOCAL_LOGV) Log.v(TAG, "Dispatching key " + event + " to " + mView);
 
             // Perform predispatching before the IME.
@@ -3557,15 +3604,23 @@ public final class ViewRootImpl implements ViewParent,
     void handleImeFinishedEvent(int seq, boolean handled) {
         final QueuedInputEvent q = mCurrentInputEvent;
         if (q != null && q.mEvent.getSequenceNumber() == seq) {
-            final KeyEvent event = (KeyEvent)q.mEvent;
             if (DEBUG_IMF) {
                 Log.v(TAG, "IME finished event: seq=" + seq
-                        + " handled=" + handled + " event=" + event);
+                        + " handled=" + handled + " event=" + q);
             }
             if (handled) {
                 finishInputEvent(q, true);
             } else {
-                deliverKeyEventPostIme(q);
+                if (q.mEvent instanceof KeyEvent) {
+                    deliverKeyEventPostIme(q);
+                } else {
+                    final int source = q.mEvent.getSource();
+                    if ((source & InputDevice.SOURCE_CLASS_TRACKBALL) != 0) {
+                        deliverTrackballEventPostIme(q);
+                    } else {
+                        deliverGenericMotionEventPostIme(q);
+                    }
+                }
             }
         } else {
             if (DEBUG_IMF) {

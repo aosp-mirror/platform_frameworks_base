@@ -1773,7 +1773,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * Override this to intercept special key multiple events before they are
      * processed by the
      * application.  If you return true, the application will not itself
-     * process the event.  If you return true, the normal application processing
+     * process the event.  If you return false, the normal application processing
      * will occur as if the IME had not seen the event at all.
      * 
      * <p>The default implementation always returns false, except when
@@ -1788,7 +1788,7 @@ public class InputMethodService extends AbstractInputMethodService {
     /**
      * Override this to intercept key up events before they are processed by the
      * application.  If you return true, the application will not itself
-     * process the event.  If you return true, the normal application processing
+     * process the event.  If you return false, the normal application processing
      * will occur as if the IME had not seen the event at all.
      * 
      * <p>The default implementation intercepts {@link KeyEvent#KEYCODE_BACK
@@ -1806,8 +1806,29 @@ public class InputMethodService extends AbstractInputMethodService {
         return doMovementKey(keyCode, event, MOVEMENT_UP);
     }
 
+    /**
+     * Override this to intercept trackball motion events before they are
+     * processed by the application.
+     * If you return true, the application will not itself process the event.
+     * If you return false, the normal application processing will occur as if
+     * the IME had not seen the event at all.
+     */
     @Override
     public boolean onTrackballEvent(MotionEvent event) {
+        if (DEBUG) Log.v(TAG, "onTrackballEvent: " + event);
+        return false;
+    }
+
+    /**
+     * Override this to intercept generic motion events before they are
+     * processed by the application.
+     * If you return true, the application will not itself process the event.
+     * If you return false, the normal application processing will occur as if
+     * the IME had not seen the event at all.
+     */
+    @Override
+    public boolean onGenericMotionEvent(MotionEvent event) {
+        if (DEBUG) Log.v(TAG, "onGenericMotionEvent(): event " + event);
         return false;
     }
 

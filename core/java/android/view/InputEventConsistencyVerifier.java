@@ -322,7 +322,7 @@ public final class InputEventConsistencyVerifier {
 
         final int action = event.getAction();
         final boolean newStream = action == MotionEvent.ACTION_DOWN
-                || action == MotionEvent.ACTION_CANCEL;
+                || action == MotionEvent.ACTION_CANCEL || action == MotionEvent.ACTION_OUTSIDE;
         if (newStream && (mTouchEventStreamIsTainted || mTouchEventStreamUnhandled)) {
             mTouchEventStreamIsTainted = false;
             mTouchEventStreamUnhandled = false;
