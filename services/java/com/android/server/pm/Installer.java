@@ -369,10 +369,10 @@ class Installer {
      */
     public int linkNativeLibraryDirectory(String dataPath, String nativeLibPath) {
         if (dataPath == null) {
-            Slog.e(TAG, "unlinkNativeLibraryDirectory dataPath is null");
+            Slog.e(TAG, "linkNativeLibraryDirectory dataPath is null");
             return -1;
         } else if (nativeLibPath == null) {
-            Slog.e(TAG, "unlinkNativeLibraryDirectory nativeLibPath is null");
+            Slog.e(TAG, "linkNativeLibraryDirectory nativeLibPath is null");
             return -1;
         }
 
@@ -380,18 +380,6 @@ class Installer {
         builder.append(dataPath);
         builder.append(' ');
         builder.append(nativeLibPath);
-
-        return execute(builder.toString());
-    }
-
-    public int unlinkNativeLibraryDirectory(String dataPath) {
-        if (dataPath == null) {
-            Slog.e(TAG, "unlinkNativeLibraryDirectory dataPath is null");
-            return -1;
-        }
-
-        StringBuilder builder = new StringBuilder("unlinklib ");
-        builder.append(dataPath);
 
         return execute(builder.toString());
     }

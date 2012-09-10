@@ -4468,9 +4468,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             throws IOException {
         if (!nativeLibraryDir.isDirectory()) {
             nativeLibraryDir.delete();
+
             if (!nativeLibraryDir.mkdir()) {
                 throw new IOException("Cannot create " + nativeLibraryDir.getPath());
             }
+
             try {
                 Libcore.os.chmod(nativeLibraryDir.getPath(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH
                         | S_IXOTH);
@@ -4478,6 +4480,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 throw new IOException("Cannot chmod native library directory "
                         + nativeLibraryDir.getPath(), e);
             }
+        } else if (!SELinux.restorecon(nativeLibraryDir)) {
+            throw new IOException("Cannot set SELinux context for " + nativeLibraryDir.getPath());
         }
 
         /*
