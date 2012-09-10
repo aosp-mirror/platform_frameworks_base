@@ -493,8 +493,13 @@ final class WifiDisplayController implements DumpUtils.Dump {
                 return; // done
             }
 
-            WifiP2pWfdInfo wfdInfo = mConnectedDevice.wfdInfo;
-            int port = (wfdInfo != null ? wfdInfo.getControlPort() : DEFAULT_CONTROL_PORT);
+            int port = DEFAULT_CONTROL_PORT;
+            if (mConnectedDevice.deviceName.startsWith("DIRECT-")
+                    && mConnectedDevice.deviceName.endsWith("Broadcom")) {
+                // These dongles ignore the port we broadcast in our WFD IE.
+                port = 8554;
+            }
+
             final WifiDisplay display = createWifiDisplay(mConnectedDevice);
             final String iface = addr.getHostAddress() + ":" + port;
 
