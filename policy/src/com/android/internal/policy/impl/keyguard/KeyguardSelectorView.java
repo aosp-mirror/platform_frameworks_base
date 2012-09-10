@@ -142,7 +142,9 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
     protected void launchCamera() {
         if (mLockPatternUtils.isSecure()) {
             // Launch the secure version of the camera
-            launchActivity(new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE), true);
+            Intent intent = new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE);
+            intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+            launchActivity(intent, true);
         } else {
             // Launch the normal camera
             launchActivity(new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA), false);
@@ -262,7 +264,7 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
      * See {@link WindowManager#FLAG_SHOW_WHEN_LOCKED}
      */
     private void launchActivity(final Intent intent, boolean showsWhileLocked) {
-        intent.setFlags(
+        intent.addFlags(
                 Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_SINGLE_TOP
                 | Intent.FLAG_ACTIVITY_CLEAR_TOP);
