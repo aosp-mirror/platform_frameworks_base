@@ -115,7 +115,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 context.getSystemService(Context.CONNECTIVITY_SERVICE);
         mHasTelephony = cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
         mContext.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(Settings.System.AIRPLANE_MODE_ON), true,
+                Settings.Global.getUriFor(Settings.Global.AIRPLANE_MODE_ON), true,
                 mAirplaneModeObserver);
         Vibrator vibrator = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
         mHasVibrator = vibrator != null && vibrator.hasVibrator();
@@ -849,9 +849,9 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         // Let the service state callbacks handle the state.
         if (mHasTelephony) return;
 
-        boolean airplaneModeOn = Settings.System.getInt(
+        boolean airplaneModeOn = Settings.Global.getInt(
                 mContext.getContentResolver(),
-                Settings.System.AIRPLANE_MODE_ON,
+                Settings.Global.AIRPLANE_MODE_ON,
                 0) == 1;
         mAirplaneState = airplaneModeOn ? ToggleAction.State.On : ToggleAction.State.Off;
         mAirplaneModeOn.updateState(mAirplaneState);
@@ -861,9 +861,9 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
      * Change the airplane mode system setting
      */
     private void changeAirplaneModeSystemSetting(boolean on) {
-        Settings.System.putInt(
+        Settings.Global.putInt(
                 mContext.getContentResolver(),
-                Settings.System.AIRPLANE_MODE_ON,
+                Settings.Global.AIRPLANE_MODE_ON,
                 on ? 1 : 0);
         Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
