@@ -333,7 +333,6 @@ final class ActivityRecord {
         state = ActivityState.INITIALIZING;
         frontOfTask = false;
         launchFailed = false;
-        haveState = false;
         stopped = false;
         delayedResume = false;
         finishing = false;
@@ -346,6 +345,11 @@ final class ActivityRecord {
         thumbnailNeeded = false;
         idle = false;
         hasBeenLaunched = false;
+
+        // This starts out true, since the initial state of an activity
+        // is that we have everything, and we shouldn't never consider it
+        // lacking in state to be removed if it dies.
+        haveState = true;
 
         if (aInfo != null) {
             if (aInfo.targetActivity == null

@@ -1551,8 +1551,12 @@ public class ActiveServices {
                 }
             }
         } else {
-            didSomething = collectForceStopServicesLocked(name, userId, evenPersistent,
-                    doit, mServiceMap.mServicesByNamePerUser.get(userId), services);
+            HashMap<ComponentName, ServiceRecord> items
+                    = mServiceMap.mServicesByNamePerUser.get(userId);
+            if (items != null) {
+                didSomething = collectForceStopServicesLocked(name, userId, evenPersistent,
+                        doit, items, services);
+            }
         }
 
         int N = services.size();
