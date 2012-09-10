@@ -223,6 +223,10 @@ static void SurfaceTexture_updateTexImage(JNIEnv* env, jobject thiz)
     } else if (err < 0) {
         jniThrowRuntimeException(env, "Error during updateTexImage (see logcat for details)");
     }
+    err = surfaceTexture->doGLFenceWait();
+    if (err != NO_ERROR) {
+        jniThrowRuntimeException(env, "Error waiting for fence (see logcat for details)");
+    }
 }
 
 static jint SurfaceTexture_detachFromGLContext(JNIEnv* env, jobject thiz)
