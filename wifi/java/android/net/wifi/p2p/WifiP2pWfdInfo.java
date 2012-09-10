@@ -54,6 +54,13 @@ public class WifiP2pWfdInfo implements Parcelable {
     public WifiP2pWfdInfo() {
     }
 
+    public WifiP2pWfdInfo(int devInfo, int ctrlPort, int maxTput) {
+        mWfdEnabled = true;
+        mDeviceInfo = devInfo;
+        mCtrlPort = ctrlPort;
+        mMaxThroughput = maxTput;
+    }
+
     public boolean isWfdEnabled() {
         return mWfdEnabled;
     }

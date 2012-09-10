@@ -124,7 +124,8 @@ public class WifiP2pDevice implements Parcelable {
         "name='(.*)' " +
         "config_methods=(0x[0-9a-fA-F]+) " +
         "dev_capab=(0x[0-9a-fA-F]+) " +
-        "group_capab=(0x[0-9a-fA-F]+)"
+        "group_capab=(0x[0-9a-fA-F]+)" +
+        "( wfd_dev_info=000006([0-9a-fA-F]+))?"
     );
 
     /** 2 token device address pattern
@@ -153,7 +154,7 @@ public class WifiP2pDevice implements Parcelable {
      * @param string formats supported include
      *  P2P-DEVICE-FOUND fa:7b:7a:42:02:13 p2p_dev_addr=fa:7b:7a:42:02:13
      *  pri_dev_type=1-0050F204-1 name='p2p-TEST1' config_methods=0x188 dev_capab=0x27
-     *  group_capab=0x0
+     *  group_capab=0x0 wfd_dev_info=000006015d022a0032
      *
      *  P2P-DEVICE-LOST p2p_dev_addr=fa:7b:7a:42:02:13
      *
@@ -205,6 +206,12 @@ public class WifiP2pDevice implements Parcelable {
                 wpsConfigMethodsSupported = parseHex(match.group(6));
                 deviceCapability = parseHex(match.group(7));
                 groupCapability = parseHex(match.group(8));
+                if (match.group(9) != null) {
+                    String str = match.group(10);
+                    wfdInfo = new WifiP2pWfdInfo(parseHex(str.substring(0,4)),
+                            parseHex(str.substring(4,8)),
+                            parseHex(str.substring(8,12)));
+                }
                 break;
         }
 
