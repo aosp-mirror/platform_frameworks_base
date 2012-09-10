@@ -5,15 +5,18 @@ import static android.provider.Settings.Secure.SCREENSAVER_DEFAULT_COMPONENT;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
+import android.app.ActivityManagerNative;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
 import android.view.IWindowManager;
@@ -41,6 +44,7 @@ public class DreamManagerService
     private ComponentName mCurrentDreamComponent;
     private IDreamService mCurrentDream;
     private Binder mCurrentDreamToken;
+    private int mCurrentUserId;
 
     public DreamManagerService(Context context) {
         if (DEBUG) Slog.v(TAG, "DreamManagerService startup");
@@ -58,7 +62,7 @@ public class DreamManagerService
     // IDreamManager method
     @Override
     public void dream() {
-        ComponentName[] dreams = getDreamComponents();
+        ComponentName[] dreams = getDreamComponentsForUser(mCurrentUserId);
         ComponentName name = dreams != null && dreams.length > 0 ? dreams[0] : null;
         if (name != null) {
             synchronized (mLock) {
@@ -75,9 +79,10 @@ public class DreamManagerService
     // IDreamManager method
     @Override
     public void setDreamComponents(ComponentName[] componentNames) {
-        Settings.Secure.putString(mContext.getContentResolver(),
+        Settings.Secure.putStringForUser(mContext.getContentResolver(),
                 SCREENSAVER_COMPONENTS,
-                componentsToString(componentNames));
+                componentsToString(componentNames),
+                UserHandle.getCallingUserId());
     }
 
     private static String componentsToString(ComponentName[] componentNames) {
@@ -103,15 +108,22 @@ public class DreamManagerService
     // IDreamManager method
     @Override
     public ComponentName[] getDreamComponents() {
-        // TODO(dsandler) don't load this every time, watch the value
-        String names = Settings.Secure.getString(mContext.getContentResolver(), SCREENSAVER_COMPONENTS);
+        return getDreamComponentsForUser(UserHandle.getCallingUserId());
+    }
+
+    private ComponentName[] getDreamComponentsForUser(int userId) {
+        String names = Settings.Secure.getStringForUser(mContext.getContentResolver(),
+                SCREENSAVER_COMPONENTS,
+                userId);
         return names == null ? null : componentsFromString(names);
     }
 
     // IDreamManager method
     @Override
     public ComponentName getDefaultDreamComponent() {
-        String name = Settings.Secure.getString(mContext.getContentResolver(), SCREENSAVER_DEFAULT_COMPONENT);
+        String name = Settings.Secure.getStringForUser(mContext.getContentResolver(),
+                SCREENSAVER_DEFAULT_COMPONENT,
+                UserHandle.getCallingUserId());
         return name == null ? null : ComponentName.unflattenFromString(name);
     }
 
@@ -210,6 +222,25 @@ public class DreamManagerService
     }
 
     public void systemReady() {
+
+        // dream settings are kept per user, so keep track of current user
+        try {
+            mCurrentUserId = ActivityManagerNative.getDefault().getCurrentUser().id;
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Couldn't get current user ID; guessing it's 0", e);
+        }
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_USER_SWITCHED);
+        mContext.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                if (Intent.ACTION_USER_SWITCHED.equals(action)) {
+                    mCurrentUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
+                    if (DEBUG) Slog.v(TAG, "userId " + mCurrentUserId + " is in the house");
+                }
+            }}, filter);
+
         if (DEBUG) Slog.v(TAG, "ready to dream!");
     }
 
