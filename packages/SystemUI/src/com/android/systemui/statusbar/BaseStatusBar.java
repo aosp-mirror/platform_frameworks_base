@@ -1041,8 +1041,12 @@ public abstract class BaseStatusBar extends SystemUI implements
         // swipe-dismissable)
         updateNotificationVetoButton(oldEntry.row, notification);
 
+        // Is this for you?
+        boolean isForCurrentUser = notificationIsForCurrentUser(notification);
+        if (DEBUG) Slog.d(TAG, "notification is " + (isForCurrentUser ? "" : "not ") + "for you");
+
         // Restart the ticker if it's still running
-        if (updateTicker) {
+        if (updateTicker && isForCurrentUser) {
             haltTicker();
             tick(key, notification, false);
         }
