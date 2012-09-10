@@ -27,6 +27,7 @@ import com.android.server.ProcessMap;
 import com.android.server.SystemServer;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityStack.ActivityState;
+import com.android.server.pm.UserManagerService;
 import com.android.server.wm.WindowManagerService;
 
 import dalvik.system.Zygote;
@@ -99,6 +100,7 @@ import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IPermissionController;
+import android.os.IUserManager;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
@@ -112,7 +114,6 @@ import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.provider.Settings;
 import android.text.format.Time;
 import android.util.EventLog;
@@ -811,7 +812,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static ActivityThread mSystemThread;
 
     private int mCurrentUserId;
-    private UserManager mUserManager;
+    private UserManagerService mUserManager;
 
     private final class AppDeathRecipient implements IBinder.DeathRecipient {
         final ProcessRecord mApp;
@@ -3401,10 +3402,12 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
     
     public boolean clearApplicationUserData(final String packageName,
-            final IPackageDataObserver observer, final int userId) {
+            final IPackageDataObserver observer, int userId) {
         enforceNotIsolatedCaller("clearApplicationUserData");
         int uid = Binder.getCallingUid();
         int pid = Binder.getCallingPid();
+        userId = handleIncomingUserLocked(pid, uid,
+                userId, false, true, "clearApplicationUserData", null);
         long callingId = Binder.clearCallingIdentity();
         try {
             IPackageManager pm = AppGlobals.getPackageManager();
@@ -3446,7 +3449,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         return true;
     }
 
-    public void killBackgroundProcesses(final String packageName) {
+    public void killBackgroundProcesses(final String packageName, int userId) {
         if (checkCallingPermission(android.Manifest.permission.KILL_BACKGROUND_PROCESSES)
                 != PackageManager.PERMISSION_GRANTED &&
                 checkCallingPermission(android.Manifest.permission.RESTART_PACKAGES)
@@ -3458,22 +3461,23 @@ public final class ActivityManagerService extends ActivityManagerNative
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }
-        
-        int userId = UserHandle.getCallingUserId();
+
+        userId = handleIncomingUserLocked(Binder.getCallingPid(), Binder.getCallingUid(),
+                userId, true, true, "killBackgroundProcesses", null);
         long callingId = Binder.clearCallingIdentity();
         try {
             IPackageManager pm = AppGlobals.getPackageManager();
-            int pkgUid = -1;
             synchronized(this) {
+                int appId = -1;
                 try {
-                    pkgUid = pm.getPackageUid(packageName, userId);
+                    appId = UserHandle.getAppId(pm.getPackageUid(packageName, 0));
                 } catch (RemoteException e) {
                 }
-                if (pkgUid == -1) {
+                if (appId == -1) {
                     Slog.w(TAG, "Invalid packageName: " + packageName);
                     return;
                 }
-                killPackageProcessesLocked(packageName, pkgUid, -1,
+                killPackageProcessesLocked(packageName, appId, userId,
                         ProcessList.SERVICE_ADJ, false, true, true, false, "kill background");
             }
         } finally {
@@ -3523,7 +3527,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    public void forceStopPackage(final String packageName) {
+    public void forceStopPackage(final String packageName, int userId) {
         if (checkCallingPermission(android.Manifest.permission.FORCE_STOP_PACKAGES)
                 != PackageManager.PERMISSION_GRANTED) {
             String msg = "Permission Denial: forceStopPackage() from pid="
@@ -3533,27 +3537,34 @@ public final class ActivityManagerService extends ActivityManagerNative
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }
-        final int userId = UserHandle.getCallingUserId();
+        userId = handleIncomingUserLocked(Binder.getCallingPid(), Binder.getCallingUid(),
+                userId, true, true, "forceStopPackage", null);
         long callingId = Binder.clearCallingIdentity();
         try {
             IPackageManager pm = AppGlobals.getPackageManager();
-            int pkgUid = -1;
             synchronized(this) {
-                try {
-                    pkgUid = pm.getPackageUid(packageName, userId);
-                } catch (RemoteException e) {
-                }
-                if (pkgUid == -1) {
-                    Slog.w(TAG, "Invalid packageName: " + packageName);
-                    return;
-                }
-                forceStopPackageLocked(packageName, pkgUid);
-                try {
-                    pm.setPackageStoppedState(packageName, true, userId);
-                } catch (RemoteException e) {
-                } catch (IllegalArgumentException e) {
-                    Slog.w(TAG, "Failed trying to unstop package "
-                            + packageName + ": " + e);
+                int[] users = userId == UserHandle.USER_ALL
+                        ? getUsersLocked() : new int[] { userId };
+                for (int user : users) {
+                    int pkgUid = -1;
+                    try {
+                        pkgUid = pm.getPackageUid(packageName, user);
+                    } catch (RemoteException e) {
+                    }
+                    if (pkgUid == -1) {
+                        Slog.w(TAG, "Invalid packageName: " + packageName);
+                        continue;
+                    }
+                    try {
+                        pm.setPackageStoppedState(packageName, true, user);
+                    } catch (RemoteException e) {
+                    } catch (IllegalArgumentException e) {
+                        Slog.w(TAG, "Failed trying to unstop package "
+                                + packageName + ": " + e);
+                    }
+                    if (isUserRunningLocked(user)) {
+                        forceStopPackageLocked(packageName, pkgUid);
+                    }
                 }
             }
         } finally {
@@ -3685,8 +3696,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private void forceStopPackageLocked(final String packageName, int uid) {
-        forceStopPackageLocked(packageName, uid, false, false, true, false,
-                UserHandle.getUserId(uid));
+        forceStopPackageLocked(packageName, UserHandle.getAppId(uid), false,
+                false, true, false, UserHandle.getUserId(uid));
         Intent intent = new Intent(Intent.ACTION_PACKAGE_RESTARTED,
                 Uri.fromParts("package", packageName, null));
         if (!mProcessesReady) {
@@ -13688,7 +13699,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         mAutoStopProfiler = false;
     }
 
-    public boolean profileControl(String process, boolean start,
+    public boolean profileControl(String process, int userId, boolean start,
             String path, ParcelFileDescriptor fd, int profileType) throws RemoteException {
 
         try {
@@ -13707,22 +13718,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
                 ProcessRecord proc = null;
                 if (process != null) {
-                    try {
-                        int pid = Integer.parseInt(process);
-                        synchronized (mPidsSelfLocked) {
-                            proc = mPidsSelfLocked.get(pid);
-                        }
-                    } catch (NumberFormatException e) {
-                    }
-
-                    if (proc == null) {
-                        HashMap<String, SparseArray<ProcessRecord>> all
-                                = mProcessNames.getMap();
-                        SparseArray<ProcessRecord> procs = all.get(process);
-                        if (procs != null && procs.size() > 0) {
-                            proc = procs.valueAt(0);
-                        }
-                    }
+                    proc = findProcessLocked(process, userId, "profileControl");
                 }
 
                 if (start && (proc == null || proc.thread == null)) {
@@ -13766,7 +13762,40 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    public boolean dumpHeap(String process, boolean managed,
+    private ProcessRecord findProcessLocked(String process, int userId, String callName) {
+        userId = handleIncomingUserLocked(Binder.getCallingPid(), Binder.getCallingUid(),
+                userId, true, true, callName, null);
+        ProcessRecord proc = null;
+        try {
+            int pid = Integer.parseInt(process);
+            synchronized (mPidsSelfLocked) {
+                proc = mPidsSelfLocked.get(pid);
+            }
+        } catch (NumberFormatException e) {
+        }
+
+        if (proc == null) {
+            HashMap<String, SparseArray<ProcessRecord>> all
+                    = mProcessNames.getMap();
+            SparseArray<ProcessRecord> procs = all.get(process);
+            if (procs != null && procs.size() > 0) {
+                proc = procs.valueAt(0);
+                if (userId != UserHandle.USER_ALL && proc.userId != userId) {
+                    for (int i=1; i<procs.size(); i++) {
+                        ProcessRecord thisProc = procs.valueAt(i);
+                        if (thisProc.userId == userId) {
+                            proc = thisProc;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        return proc;
+    }
+
+    public boolean dumpHeap(String process, int userId, boolean managed,
             String path, ParcelFileDescriptor fd) throws RemoteException {
 
         try {
@@ -13783,24 +13812,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     throw new IllegalArgumentException("null fd");
                 }
 
-                ProcessRecord proc = null;
-                try {
-                    int pid = Integer.parseInt(process);
-                    synchronized (mPidsSelfLocked) {
-                        proc = mPidsSelfLocked.get(pid);
-                    }
-                } catch (NumberFormatException e) {
-                }
-
-                if (proc == null) {
-                    HashMap<String, SparseArray<ProcessRecord>> all
-                            = mProcessNames.getMap();
-                    SparseArray<ProcessRecord> procs = all.get(process);
-                    if (procs != null && procs.size() > 0) {
-                        proc = procs.valueAt(0);
-                    }
-                }
-
+                ProcessRecord proc = findProcessLocked(process, userId, "dumpHeap");
                 if (proc == null || proc.thread == null) {
                     throw new IllegalArgumentException("Unknown process: " + process);
                 }
@@ -14018,7 +14030,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             throw new SecurityException(msg);
         }
         synchronized (this) {
-            return getUserManager().getUserInfo(mCurrentUserId);
+            return getUserManagerLocked().getUserInfo(mCurrentUserId);
         }
     }
 
@@ -14034,19 +14046,32 @@ public final class ActivityManagerService extends ActivityManagerNative
             throw new SecurityException(msg);
         }
         synchronized (this) {
-            UserStartedState state = mStartedUsers.get(userId);
-            return state != null && state.mState != UserStartedState.STATE_STOPPING;
+            return isUserRunningLocked(userId);
         }
     }
 
-    private boolean userExists(int userId) {
-        UserInfo user = getUserManager().getUserInfo(userId);
-        return user != null;
+    boolean isUserRunningLocked(int userId) {
+        UserStartedState state = mStartedUsers.get(userId);
+        return state != null && state.mState != UserStartedState.STATE_STOPPING;
     }
 
-    UserManager getUserManager() {
+    private boolean userExists(int userId) {
+        if (userId == 0) {
+            return true;
+        }
+        UserManagerService ums = getUserManagerLocked();
+        return ums != null ? (ums.getUserInfo(userId) != null) : false;
+    }
+
+    int[] getUsersLocked() {
+        UserManagerService ums = getUserManagerLocked();
+        return ums != null ? ums.getUserIds() : new int[] { 0 };
+    }
+
+    UserManagerService getUserManagerLocked() {
         if (mUserManager == null) {
-            mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+            IBinder b = ServiceManager.getService(Context.USER_SERVICE);
+            mUserManager = (UserManagerService)IUserManager.Stub.asInterface(b);
         }
         return mUserManager;
     }

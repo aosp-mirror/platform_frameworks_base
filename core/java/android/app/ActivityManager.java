@@ -1693,7 +1693,8 @@ public class ActivityManager {
      */
     public void killBackgroundProcesses(String packageName) {
         try {
-            ActivityManagerNative.getDefault().killBackgroundProcesses(packageName);
+            ActivityManagerNative.getDefault().killBackgroundProcesses(packageName,
+                    UserHandle.myUserId());
         } catch (RemoteException e) {
         }
     }
@@ -1718,7 +1719,8 @@ public class ActivityManager {
      */
     public void forceStopPackage(String packageName) {
         try {
-            ActivityManagerNative.getDefault().forceStopPackage(packageName);
+            ActivityManagerNative.getDefault().forceStopPackage(packageName,
+                    UserHandle.myUserId());
         } catch (RemoteException e) {
         }
     }
