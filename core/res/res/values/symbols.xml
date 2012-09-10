@@ -279,6 +279,7 @@
   <java-symbol type="integer" name="config_soundEffectVolumeDb" />
   <java-symbol type="integer" name="config_lockSoundVolumeDb" />
   <java-symbol type="integer" name="config_multiuserMaximumUsers" />
+  <java-symbol type="integer" name="config_safe_media_volume_index" />
 
   <java-symbol type="color" name="tab_indicator_text_v4" />
 
@@ -810,6 +811,7 @@
   <java-symbol type="string" name="default_audio_route_name_dock_speakers" />
   <java-symbol type="string" name="default_audio_route_name_hdmi" />
   <java-symbol type="string" name="default_audio_route_category_name" />
+  <java-symbol type="string" name="safe_media_volume_warning" />
 
   <java-symbol type="plurals" name="abbrev_in_num_days" />
   <java-symbol type="plurals" name="abbrev_in_num_hours" />

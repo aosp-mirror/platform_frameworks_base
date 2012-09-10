@@ -3880,6 +3880,12 @@
        Try again in <xliff:g id="number">%d</xliff:g> seconds.
     </string>
 
+    <!-- Message shown in dialog when user is attempting to set the music volume above the
+    recommended maximum level for headphones -->
+    <string name="safe_media_volume_warning" product="default">
+       "Raise volume above the recommended level?"
+    </string>
+
     <string name="kg_temp_back_string"> &lt; </string> <!-- TODO: remove this -->
 
 </resources>
