@@ -114,17 +114,15 @@ public final class ScreenMagnifier implements EventStreamTransformation {
     private static final boolean DEBUG_VIEWPORT_WINDOW = false;
     private static final boolean DEBUG_WINDOW_TRANSITIONS = false;
     private static final boolean DEBUG_ROTATION = false;
-    private static final boolean DEBUG_GESTURE_DETECTOR = false;
+    private static final boolean DEBUG_SCALE_GESTURE_DETECTOR = false;
     private static final boolean DEBUG_MAGNIFICATION_CONTROLLER = false;
 
     private static final String LOG_TAG = ScreenMagnifier.class.getSimpleName();
 
     private static final int STATE_DELEGATING = 1;
     private static final int STATE_DETECTING = 2;
-    private static final int STATE_SCALING = 3;
     private static final int STATE_VIEWPORT_DRAGGING = 4;
-    private static final int STATE_PANNING = 5;
-    private static final int STATE_DECIDE_PAN_OR_SCALE = 6;
+    private static final int STATE_MAGNIFIED_INTERACTION = 6;
 
     private static final float DEFAULT_MAGNIFICATION_SCALE = 2.0f;
     private static final int DEFAULT_SCREEN_MAGNIFICATION_AUTO_UPDATE = 1;
@@ -203,12 +201,10 @@ public final class ScreenMagnifier implements EventStreamTransformation {
             case STATE_VIEWPORT_DRAGGING: {
                 mStateViewportDraggingHandler.onMotionEvent(event, policyFlags);
             } break;
-            case STATE_SCALING:
-            case STATE_PANNING:
-            case STATE_DECIDE_PAN_OR_SCALE: {
+            case STATE_MAGNIFIED_INTERACTION: {
                 // Handled by the gesture detector. Since the detector
                 // needs all touch events to work properly we cannot
-                // call it only for these states.
+                // call it only for this state.
             } break;
             default: {
                 throw new IllegalStateException("Unknown state: " + mCurrentState);
@@ -326,14 +322,8 @@ public final class ScreenMagnifier implements EventStreamTransformation {
                 case STATE_VIEWPORT_DRAGGING: {
                     Slog.i(LOG_TAG, "mCurrentState: STATE_VIEWPORT_DRAGGING");
                 } break;
-                case STATE_SCALING: {
-                    Slog.i(LOG_TAG, "mCurrentState: STATE_SCALING");
-                } break;
-                case STATE_PANNING: {
-                    Slog.i(LOG_TAG, "mCurrentState: STATE_PANNING");
-                } break;
-                case STATE_DECIDE_PAN_OR_SCALE: {
-                    Slog.i(LOG_TAG, "mCurrentState: STATE_DECIDE_PAN_OR_SCALE");
+                case STATE_MAGNIFIED_INTERACTION: {
+                    Slog.i(LOG_TAG, "mCurrentState: STATE_MAGNIFIED_INTERACTION");
                 } break;
                 default: {
                     throw new IllegalArgumentException("Unknown state: " + state);
@@ -347,7 +337,7 @@ public final class ScreenMagnifier implements EventStreamTransformation {
         private static final float MIN_SCALE = 1.3f;
         private static final float MAX_SCALE = 5.0f;
 
-        private static final float DETECT_SCALING_THRESHOLD = 0.25f;
+        private static final float DETECT_SCALING_THRESHOLD = 0.30f;
         private static final int DETECT_PANNING_THRESHOLD_DIP = 30;
 
         private final float mScaledDetectPanningThreshold;
@@ -366,6 +356,9 @@ public final class ScreenMagnifier implements EventStreamTransformation {
         private float mScaleFocusX = Float.NaN;
         private float mScaleFocusY = Float.NaN;
 
+        private boolean mScaling;
+        private boolean mPanning;
+
         public GestureDetector(Context context) {
             final float density = context.getResources().getDisplayMetrics().density;
             mScaledDetectPanningThreshold = DETECT_PANNING_THRESHOLD_DIP * density;
@@ -383,8 +376,9 @@ public final class ScreenMagnifier implements EventStreamTransformation {
             }
             if (event.getActionMasked() == MotionEvent.ACTION_UP) {
                 clear();
-                if (mCurrentState == STATE_SCALING) {
-                    persistScale(mMagnificationController.getScale());
+                final float scale = mMagnificationController.getScale();
+                if (scale != getPersistedScale()) {
+                    persistScale(scale);
                 }
                 transitionToState(STATE_DETECTING);
             }
@@ -398,38 +392,36 @@ public final class ScreenMagnifier implements EventStreamTransformation {
                 case STATE_VIEWPORT_DRAGGING: {
                     return true;
                 }
-                case STATE_DECIDE_PAN_OR_SCALE: {
+                case STATE_MAGNIFIED_INTERACTION: {
                     mCurrScaleFactor = mScaleGestureDetector.getScaleFactor();
                     final float scaleDelta = Math.abs(1.0f - mCurrScaleFactor * mPrevScaleFactor);
-                    if (DEBUG_GESTURE_DETECTOR) {
+                    if (DEBUG_SCALE_GESTURE_DETECTOR) {
                         Slog.i(LOG_TAG, "scaleDelta: " + scaleDelta);
                     }
-                    if (scaleDelta > DETECT_SCALING_THRESHOLD) {
-                        performScale(detector, true);
-                        clear();
-                        transitionToState(STATE_SCALING);
+                    if (!mScaling && scaleDelta > DETECT_SCALING_THRESHOLD) {
+                        mScaling = true;
+                        clearContextualState();
                         return true;
+                    }
+                    if (mScaling) {
+                        performScale(detector);
                     }
                     mCurrPan = (float) MathUtils.dist(
                             mScaleGestureDetector.getFocusX(),
                             mScaleGestureDetector.getFocusY(),
                             mInitialFocus.x, mInitialFocus.y);
                     final float panDelta = mCurrPan + mPrevPan;
-                    if (DEBUG_GESTURE_DETECTOR) {
+                    if (DEBUG_SCALE_GESTURE_DETECTOR) {
                         Slog.i(LOG_TAG, "panDelta: " + panDelta);
                     }
-                    if (panDelta > mScaledDetectPanningThreshold) {
-                        performPan(detector, true);
-                        clear();
-                        transitionToState(STATE_PANNING);
+                    if (!mPanning && panDelta > mScaledDetectPanningThreshold) {
+                        mPanning = true;
+                        clearContextualState();
                         return true;
                     }
-                } break;
-                case STATE_SCALING: {
-                    performScale(detector, false);
-                } break;
-                case STATE_PANNING: {
-                    performPan(detector, false);
+                    if (mPanning) {
+                        performPan(detector);
+                    }
                 } break;
             }
             return false;
@@ -437,32 +429,26 @@ public final class ScreenMagnifier implements EventStreamTransformation {
 
         @Override
         public boolean onScaleBegin(ScaleGestureDetector detector) {
-            switch (mCurrentState) {
-                case STATE_DECIDE_PAN_OR_SCALE: {
-                    mPrevScaleFactor *= mCurrScaleFactor;
-                    mPrevPan += mCurrPan;
-                    mPrevFocus.x = mInitialFocus.x = detector.getFocusX();
-                    mPrevFocus.y = mInitialFocus.y = detector.getFocusY();
-                } break;
-                case STATE_SCALING: {
-                    mPrevScaleFactor = 1.0f;
-                    mCurrScale = Float.NaN;
-                } break;
-                case STATE_PANNING: {
-                    mPrevPan += mCurrPan;
-                    mPrevFocus.x = mInitialFocus.x = detector.getFocusX();
-                    mPrevFocus.y = mInitialFocus.y = detector.getFocusY();
-                } break;
-            }
+            mPrevScaleFactor *= mCurrScaleFactor;
+            mCurrScale = Float.NaN;
+            mPrevPan += mCurrPan;
+            mPrevFocus.x = mInitialFocus.x = detector.getFocusX();
+            mPrevFocus.y = mInitialFocus.y = detector.getFocusY();
             return true;
         }
 
         @Override
         public void onScaleEnd(ScaleGestureDetector detector) {
-            clear();
+            clearContextualState();
         }
 
         public void clear() {
+            clearContextualState();
+            mScaling = false;
+            mPanning = false;
+        }
+
+        private void clearContextualState() {
             mCurrScaleFactor = 1.0f;
             mPrevScaleFactor = 1.0f;
             mPrevPan = 0;
@@ -474,7 +460,7 @@ public final class ScreenMagnifier implements EventStreamTransformation {
             mScaleFocusY = Float.NaN;
         }
 
-        private void performPan(ScaleGestureDetector detector, boolean animate) {
+        private void performPan(ScaleGestureDetector detector) {
             if (Float.compare(mPrevFocus.x, Float.NaN) == 0
                     && Float.compare(mPrevFocus.y, Float.NaN) == 0) {
                 mPrevFocus.set(detector.getFocusX(), detector.getFocusY());
@@ -491,11 +477,11 @@ public final class ScreenMagnifier implements EventStreamTransformation {
                 Slog.i(LOG_TAG, "Panned content by scrollX: " + scrollX
                         + " scrollY: " + scrollY);
             }
-            mMagnificationController.setMagnifiedRegionCenter(centerX, centerY, animate);
+            mMagnificationController.setMagnifiedRegionCenter(centerX, centerY, false);
             mPrevFocus.set(detector.getFocusX(), detector.getFocusY());
         }
 
-        private void performScale(ScaleGestureDetector detector, boolean animate) {
+        private void performScale(ScaleGestureDetector detector) {
             if (Float.compare(mCurrScale, Float.NaN) == 0) {
                 mCurrScale = mMagnificationController.getScale();
                 return;
@@ -513,7 +499,7 @@ public final class ScreenMagnifier implements EventStreamTransformation {
                 mScaleFocusY = detector.getFocusY();
             }
             mMagnificationController.setScale(normalizedNewScale, mScaleFocusX,
-                    mScaleFocusY, animate);
+                    mScaleFocusY, false);
         }
     }
 
@@ -528,7 +514,7 @@ public final class ScreenMagnifier implements EventStreamTransformation {
                 }
                 case MotionEvent.ACTION_POINTER_DOWN: {
                     clear();
-                    transitionToState(STATE_SCALING);
+                    transitionToState(STATE_MAGNIFIED_INTERACTION);
                 } break;
                 case MotionEvent.ACTION_MOVE: {
                     if (event.getPointerCount() != 1) {
@@ -632,7 +618,7 @@ public final class ScreenMagnifier implements EventStreamTransformation {
                 } break;
                 case MotionEvent.ACTION_POINTER_DOWN: {
                     if (mMagnificationController.isMagnifying()) {
-                        transitionToState(STATE_DECIDE_PAN_OR_SCALE);
+                        transitionToState(STATE_MAGNIFIED_INTERACTION);
                         clear();
                     } else {
                         transitionToDelegatingStateAndClear();
