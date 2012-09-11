@@ -1811,7 +1811,6 @@ public class Camera {
          * camera will return an image that has an extended dynamic range
          * compared to a regular capture. Capturing such an image may take
          * longer than a regular capture.
-         * @hide
          */
         public static final String SCENE_MODE_HDR = "hdr";
 
