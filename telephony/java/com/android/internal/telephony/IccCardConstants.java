@@ -47,10 +47,13 @@ public class IccCardConstants {
     /* PERM_DISABLED means ICC is permanently disabled due to puk fails */
     public static final String INTENT_VALUE_ABSENT_ON_PERM_DISABLED = "PERM_DISABLED";
 
-    /*
-      UNKNOWN is a transient state, for example, after uesr inputs ICC pin under
-      PIN_REQUIRED state, the query for ICC status returns UNKNOWN before it
-      turns to READY
+    /**
+     * This is combination of IccCardStatus.CardState and IccCardApplicationStatus.AppState
+     * for external apps (like PhoneApp) to use
+     *
+     * UNKNOWN is a transient state, for example, after user inputs ICC pin under
+     * PIN_REQUIRED state, the query for ICC status returns UNKNOWN before it
+     * turns to READY
      */
     public enum State {
         UNKNOWN,
