@@ -23,7 +23,10 @@ import android.content.Intent;
 import android.provider.Settings;
 import android.os.FileUtils;
 import android.util.Base64;
+import android.util.EventLog;
 import android.util.Slog;
+
+import com.android.server.EventLogTags;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -100,6 +103,8 @@ public class ConfigUpdateInstallReceiver extends BroadcastReceiver {
                     }
                 } catch (Exception e) {
                     Slog.e(TAG, "Could not update content!", e);
+                    EventLog.writeEvent(EventLogTags.CONFIG_INSTALL_FAILED,
+                                        updateDir.toString());
                 }
             }
         }.start();
