@@ -223,7 +223,7 @@ public class EthernetDataTracker implements NetworkStateTracker {
                     mIface = iface;
                     mNMService.setInterfaceUp(iface);
                     InterfaceConfiguration config = mNMService.getInterfaceConfig(iface);
-                    mLinkUp = config.isActive();
+                    mLinkUp = config.hasFlag("up");
                     if (config != null && mHwAddr == null) {
                         mHwAddr = config.getHardwareAddress();
                         if (mHwAddr != null) {
