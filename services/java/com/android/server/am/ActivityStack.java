@@ -733,7 +733,7 @@ final class ActivityStack {
                       + ", giving up", e);
                 mService.appDiedLocked(app, app.pid, app.thread);
                 requestFinishActivityLocked(r.appToken, Activity.RESULT_CANCELED, null,
-                        "2nd-crash");
+                        "2nd-crash", false);
                 return false;
             }
 
@@ -1100,7 +1100,7 @@ final class ActivityStack {
         if (prev != null) {
             if (prev.finishing) {
                 if (DEBUG_PAUSE) Slog.v(TAG, "Executing finish of activity: " + prev);
-                prev = finishCurrentActivityLocked(prev, FINISH_AFTER_VISIBLE);
+                prev = finishCurrentActivityLocked(prev, FINISH_AFTER_VISIBLE, false);
             } else if (prev.app != null) {
                 if (DEBUG_PAUSE) Slog.v(TAG, "Enqueueing pending stop: " + prev);
                 if (prev.waitingVisible) {
@@ -1512,7 +1512,7 @@ final class ActivityStack {
                     Slog.d(TAG, "no-history finish of " + last + " on new resume");
                 }
                 requestFinishActivityLocked(last.appToken, Activity.RESULT_CANCELED, null,
-                        "no-history");
+                        "no-history", false);
             }
         }
 
@@ -1734,7 +1734,7 @@ final class ActivityStack {
                 // activity and try the next one.
                 Slog.w(TAG, "Exception thrown during resume of " + next, e);
                 requestFinishActivityLocked(next.appToken, Activity.RESULT_CANCELED, null,
-                        "resume-exception");
+                        "resume-exception", true);
                 return true;
             }
 
@@ -2088,7 +2088,7 @@ final class ActivityStack {
                                 continue;
                             }
                             if (finishActivityLocked(p, srcPos,
-                                    Activity.RESULT_CANCELED, null, "reset")) {
+                                    Activity.RESULT_CANCELED, null, "reset", false)) {
                                 replyChainEnd--;
                                 srcPos--;
                             }
@@ -2151,7 +2151,7 @@ final class ActivityStack {
                             continue;
                         }
                         if (finishActivityLocked(p, srcPos,
-                                Activity.RESULT_CANCELED, null, "reset")) {
+                                Activity.RESULT_CANCELED, null, "reset", false)) {
                             taskTopI--;
                             lastReparentPos--;
                             replyChainEnd--;
@@ -2208,7 +2208,7 @@ final class ActivityStack {
                             }
                             if (p.intent.getComponent().equals(target.intent.getComponent())) {
                                 if (finishActivityLocked(p, j,
-                                        Activity.RESULT_CANCELED, null, "replace")) {
+                                        Activity.RESULT_CANCELED, null, "replace", false)) {
                                     taskTopI--;
                                     lastReparentPos--;
                                 }
@@ -2278,7 +2278,7 @@ final class ActivityStack {
                         continue;
                     }
                     if (finishActivityLocked(r, i, Activity.RESULT_CANCELED,
-                            null, "clear")) {
+                            null, "clear", false)) {
                         i--;
                     }
                 }
@@ -2292,7 +2292,7 @@ final class ActivityStack {
                         int index = indexOfTokenLocked(ret.appToken);
                         if (index >= 0) {
                             finishActivityLocked(ret, index, Activity.RESULT_CANCELED,
-                                    null, "clear");
+                                    null, "clear", false);
                         }
                         return null;
                     }
@@ -2321,7 +2321,7 @@ final class ActivityStack {
                 continue;
             }
             if (!finishActivityLocked(r, i, Activity.RESULT_CANCELED,
-                    null, "clear")) {
+                    null, "clear", false)) {
                 i++;
             }
         }
@@ -2587,6 +2587,7 @@ final class ActivityStack {
             mDismissKeyguardOnNextActivity = false;
             mService.mWindowManager.dismissKeyguard();
         }
+        Slog.i(TAG, "DONE STARTING!");
         return err;
     }
   
@@ -3327,7 +3328,7 @@ final class ActivityStack {
                         Slog.d(TAG, "no-history finish of " + r);
                     }
                     requestFinishActivityLocked(r.appToken, Activity.RESULT_CANCELED, null,
-                            "no-history");
+                            "no-history", false);
                 } else {
                     if (DEBUG_STATES) Slog.d(TAG, "Not finishing noHistory " + r
                             + " on stop because we're just sleeping");
@@ -3539,7 +3540,7 @@ final class ActivityStack {
             ActivityRecord r = (ActivityRecord)stops.get(i);
             synchronized (mService) {
                 if (r.finishing) {
-                    finishCurrentActivityLocked(r, FINISH_IMMEDIATELY);
+                    finishCurrentActivityLocked(r, FINISH_IMMEDIATELY, false);
                 } else {
                     stopActivityLocked(r);
                 }
@@ -3593,7 +3594,7 @@ final class ActivityStack {
      * some reason it is being left as-is.
      */
     final boolean requestFinishActivityLocked(IBinder token, int resultCode,
-            Intent resultData, String reason) {
+            Intent resultData, String reason, boolean oomAdj) {
         int index = indexOfTokenLocked(token);
         if (DEBUG_RESULTS || DEBUG_STATES) Slog.v(
                 TAG, "Finishing activity @" + index + ": token=" + token
@@ -3604,7 +3605,7 @@ final class ActivityStack {
         }
         ActivityRecord r = mHistory.get(index);
 
-        finishActivityLocked(r, index, resultCode, resultData, reason);
+        finishActivityLocked(r, index, resultCode, resultData, reason, oomAdj);
         return true;
     }
 
@@ -3621,10 +3622,11 @@ final class ActivityStack {
                 if ((r.resultWho == null && resultWho == null) ||
                     (r.resultWho != null && r.resultWho.equals(resultWho))) {
                     finishActivityLocked(r, i,
-                            Activity.RESULT_CANCELED, null, "request-sub");
+                            Activity.RESULT_CANCELED, null, "request-sub", false);
                 }
             }
         }
+        mService.updateOomAdjLocked();
     }
 
     final boolean finishActivityAffinityLocked(IBinder token) {
@@ -3647,7 +3649,8 @@ final class ActivityStack {
             if (cur.taskAffinity != null && !cur.taskAffinity.equals(r.taskAffinity)) {
                 break;
             }
-            finishActivityLocked(cur, index, Activity.RESULT_CANCELED, null, "request-affinity");
+            finishActivityLocked(cur, index, Activity.RESULT_CANCELED, null,
+                    "request-affinity", true);
             index--;
         }
         return true;
@@ -3685,16 +3688,16 @@ final class ActivityStack {
      * list, or false if it is still in the list and will be removed later.
      */
     final boolean finishActivityLocked(ActivityRecord r, int index,
-            int resultCode, Intent resultData, String reason) {
-        return finishActivityLocked(r, index, resultCode, resultData, reason, false);
+            int resultCode, Intent resultData, String reason, boolean oomAdj) {
+        return finishActivityLocked(r, index, resultCode, resultData, reason, false, oomAdj);
     }
 
     /**
      * @return Returns true if this activity has been removed from the history
      * list, or false if it is still in the list and will be removed later.
      */
-    final boolean finishActivityLocked(ActivityRecord r, int index,
-            int resultCode, Intent resultData, String reason, boolean immediate) {
+    final boolean finishActivityLocked(ActivityRecord r, int index, int resultCode,
+            Intent resultData, String reason, boolean immediate, boolean oomAdj) {
         if (r.finishing) {
             Slog.w(TAG, "Duplicate finish request for " + r);
             return false;
@@ -3738,7 +3741,7 @@ final class ActivityStack {
 
         if (immediate) {
             return finishCurrentActivityLocked(r, index,
-                    FINISH_IMMEDIATELY) == null;
+                    FINISH_IMMEDIATELY, oomAdj) == null;
         } else if (mResumedActivity == r) {
             boolean endTask = index <= 0
                     || (mHistory.get(index-1)).task != r.task;
@@ -3762,7 +3765,7 @@ final class ActivityStack {
             // it is done pausing; else we can just directly finish it here.
             if (DEBUG_PAUSE) Slog.v(TAG, "Finish not pausing: " + r);
             return finishCurrentActivityLocked(r, index,
-                    FINISH_AFTER_PAUSE) == null;
+                    FINISH_AFTER_PAUSE, oomAdj) == null;
         } else {
             if (DEBUG_PAUSE) Slog.v(TAG, "Finish waiting for pause of: " + r);
         }
@@ -3775,17 +3778,17 @@ final class ActivityStack {
     private static final int FINISH_AFTER_VISIBLE = 2;
 
     private final ActivityRecord finishCurrentActivityLocked(ActivityRecord r,
-            int mode) {
+            int mode, boolean oomAdj) {
         final int index = indexOfActivityLocked(r);
         if (index < 0) {
             return null;
         }
 
-        return finishCurrentActivityLocked(r, index, mode);
+        return finishCurrentActivityLocked(r, index, mode, oomAdj);
     }
 
     private final ActivityRecord finishCurrentActivityLocked(ActivityRecord r,
-            int index, int mode) {
+            int index, int mode, boolean oomAdj) {
         // First things first: if this activity is currently visible,
         // and the resumed activity is not yet visible, then hold off on
         // finishing until the resumed one becomes visible.
@@ -3804,7 +3807,9 @@ final class ActivityStack {
             if (DEBUG_STATES) Slog.v(TAG, "Moving to STOPPING: " + r
                     + " (finish requested)");
             r.state = ActivityState.STOPPING;
-            mService.updateOomAdjLocked();
+            if (oomAdj) {
+                mService.updateOomAdjLocked();
+            }
             return r;
         }
 
@@ -3824,7 +3829,8 @@ final class ActivityStack {
                 || prevState == ActivityState.INITIALIZING) {
             // If this activity is already stopped, we can just finish
             // it right now.
-            boolean activityRemoved = destroyActivityLocked(r, true, true, "finish-imm");
+            boolean activityRemoved = destroyActivityLocked(r, true,
+                    oomAdj, "finish-imm");
             if (activityRemoved) {
                 resumeTopActivityLocked(null);
             }
@@ -4016,9 +4022,8 @@ final class ActivityStack {
                             ActivityManagerService.CANCEL_HEAVY_NOTIFICATION_MSG);
                 }
                 if (r.app.activities.size() == 0) {
-                    // No longer have activities, so update location in
-                    // LRU list.
-                    mService.updateLruProcessLocked(r.app, oomAdj, false);
+                    // No longer have activities, so update oom adj.
+                    mService.updateOomAdjLocked();
                 }
             }
 
