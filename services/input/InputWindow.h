@@ -132,6 +132,7 @@ struct InputWindowInfo {
     int32_t ownerPid;
     int32_t ownerUid;
     int32_t inputFeatures;
+    int32_t displayId;
 
     bool touchableRegionContainsPoint(int32_t x, int32_t y) const;
     bool frameContainsPoint(int32_t x, int32_t y) const;

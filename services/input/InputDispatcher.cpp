@@ -166,6 +166,10 @@ static bool validateMotionEvent(int32_t action, size_t pointerCount,
     return true;
 }
 
+static bool isMainDisplay(int32_t displayId) {
+    return displayId == ADISPLAY_ID_DEFAULT || displayId == ADISPLAY_ID_NONE;
+}
+
 static void dumpRegion(String8& dump, const SkRegion& region) {
     if (region.isEmpty()) {
         dump.append("<empty>");
@@ -423,11 +427,12 @@ bool InputDispatcher::enqueueInboundEventLocked(EventEntry* entry) {
                 && (motionEntry->source & AINPUT_SOURCE_CLASS_POINTER)
                 && mInputTargetWaitCause == INPUT_TARGET_WAIT_CAUSE_APPLICATION_NOT_READY
                 && mInputTargetWaitApplicationHandle != NULL) {
+            int32_t displayId = motionEntry->displayId;
             int32_t x = int32_t(motionEntry->pointerCoords[0].
                     getAxisValue(AMOTION_EVENT_AXIS_X));
             int32_t y = int32_t(motionEntry->pointerCoords[0].
                     getAxisValue(AMOTION_EVENT_AXIS_Y));
-            sp<InputWindowHandle> touchedWindowHandle = findTouchedWindowAtLocked(x, y);
+            sp<InputWindowHandle> touchedWindowHandle = findTouchedWindowAtLocked(displayId, x, y);
             if (touchedWindowHandle != NULL
                     && touchedWindowHandle->inputApplicationHandle
                             != mInputTargetWaitApplicationHandle) {
@@ -444,28 +449,31 @@ bool InputDispatcher::enqueueInboundEventLocked(EventEntry* entry) {
     return needWake;
 }
 
-sp<InputWindowHandle> InputDispatcher::findTouchedWindowAtLocked(int32_t x, int32_t y) {
+sp<InputWindowHandle> InputDispatcher::findTouchedWindowAtLocked(int32_t displayId,
+        int32_t x, int32_t y) {
     // Traverse windows from front to back to find touched window.
     size_t numWindows = mWindowHandles.size();
     for (size_t i = 0; i < numWindows; i++) {
         sp<InputWindowHandle> windowHandle = mWindowHandles.itemAt(i);
         const InputWindowInfo* windowInfo = windowHandle->getInfo();
-        int32_t flags = windowInfo->layoutParamsFlags;
+        if (windowInfo->displayId == displayId) {
+            int32_t flags = windowInfo->layoutParamsFlags;
 
-        if (windowInfo->visible) {
-            if (!(flags & InputWindowInfo::FLAG_NOT_TOUCHABLE)) {
-                bool isTouchModal = (flags & (InputWindowInfo::FLAG_NOT_FOCUSABLE
-                        | InputWindowInfo::FLAG_NOT_TOUCH_MODAL)) == 0;
-                if (isTouchModal || windowInfo->touchableRegionContainsPoint(x, y)) {
-                    // Found window.
-                    return windowHandle;
+            if (windowInfo->visible) {
+                if (!(flags & InputWindowInfo::FLAG_NOT_TOUCHABLE)) {
+                    bool isTouchModal = (flags & (InputWindowInfo::FLAG_NOT_FOCUSABLE
+                            | InputWindowInfo::FLAG_NOT_TOUCH_MODAL)) == 0;
+                    if (isTouchModal || windowInfo->touchableRegionContainsPoint(x, y)) {
+                        // Found window.
+                        return windowHandle;
+                    }
                 }
             }
-        }
 
-        if (flags & InputWindowInfo::FLAG_SYSTEM_ERROR) {
-            // Error window is on top but not visible, so touch is dropped.
-            return NULL;
+            if (flags & InputWindowInfo::FLAG_SYSTEM_ERROR) {
+                // Error window is on top but not visible, so touch is dropped.
+                return NULL;
+            }
         }
     }
     return NULL;
@@ -826,7 +834,10 @@ bool InputDispatcher::dispatchMotionLocked(
         return true;
     }
 
-    addMonitoringTargetsLocked(inputTargets);
+    // TODO: support sending secondary display events to input monitors
+    if (isMainDisplay(entry->displayId)) {
+        addMonitoringTargetsLocked(inputTargets);
+    }
 
     // Dispatch the motion.
     if (conflictingPointerActions) {
@@ -1117,6 +1128,7 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
     //
     bool screenWasOff = false; // original policy: policyFlags & POLICY_FLAG_BRIGHT_HERE;
 
+    int32_t displayId = entry->displayId;
     int32_t action = entry->action;
     int32_t maskedAction = action & AMOTION_EVENT_ACTION_MASK;
 
@@ -1126,9 +1138,10 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
     sp<InputWindowHandle> newHoverWindowHandle;
 
     bool isSplit = mTouchState.split;
-    bool switchedDevice = mTouchState.deviceId >= 0
+    bool switchedDevice = mTouchState.deviceId >= 0 && mTouchState.displayId >= 0
             && (mTouchState.deviceId != entry->deviceId
-                    || mTouchState.source != entry->source);
+                    || mTouchState.source != entry->source
+                    || mTouchState.displayId != displayId);
     bool isHoverAction = (maskedAction == AMOTION_EVENT_ACTION_HOVER_MOVE
             || maskedAction == AMOTION_EVENT_ACTION_HOVER_ENTER
             || maskedAction == AMOTION_EVENT_ACTION_HOVER_EXIT);
@@ -1152,6 +1165,7 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
         mTempTouchState.down = down;
         mTempTouchState.deviceId = entry->deviceId;
         mTempTouchState.source = entry->source;
+        mTempTouchState.displayId = displayId;
         isSplit = false;
     } else {
         mTempTouchState.copyFrom(mTouchState);
@@ -1174,8 +1188,11 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
         for (size_t i = 0; i < numWindows; i++) {
             sp<InputWindowHandle> windowHandle = mWindowHandles.itemAt(i);
             const InputWindowInfo* windowInfo = windowHandle->getInfo();
-            int32_t flags = windowInfo->layoutParamsFlags;
+            if (windowInfo->displayId != displayId) {
+                continue; // wrong display
+            }
 
+            int32_t flags = windowInfo->layoutParamsFlags;
             if (flags & InputWindowInfo::FLAG_SYSTEM_ERROR) {
                 if (topErrorWindowHandle == NULL) {
                     topErrorWindowHandle = windowHandle;
@@ -1300,7 +1317,8 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
 
             sp<InputWindowHandle> oldTouchedWindowHandle =
                     mTempTouchState.getFirstForegroundWindowHandle();
-            sp<InputWindowHandle> newTouchedWindowHandle = findTouchedWindowAtLocked(x, y);
+            sp<InputWindowHandle> newTouchedWindowHandle =
+                    findTouchedWindowAtLocked(displayId, x, y);
             if (oldTouchedWindowHandle != newTouchedWindowHandle
                     && newTouchedWindowHandle != NULL) {
 #if DEBUG_FOCUS
@@ -1438,8 +1456,10 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
         if (foregroundWindowHandle->getInfo()->hasWallpaper) {
             for (size_t i = 0; i < mWindowHandles.size(); i++) {
                 sp<InputWindowHandle> windowHandle = mWindowHandles.itemAt(i);
-                if (windowHandle->getInfo()->layoutParamsType
-                        == InputWindowInfo::TYPE_WALLPAPER) {
+                const InputWindowInfo* info = windowHandle->getInfo();
+                if (info->displayId == displayId
+                        && windowHandle->getInfo()->layoutParamsType
+                                == InputWindowInfo::TYPE_WALLPAPER) {
                     mTempTouchState.addOrUpdateWindow(windowHandle,
                             InputTarget::FLAG_WINDOW_IS_OBSCURED
                                     | InputTarget::FLAG_DISPATCH_AS_IS,
@@ -1495,6 +1515,7 @@ Failed:
                         || maskedAction == AMOTION_EVENT_ACTION_HOVER_MOVE) {
                     mTouchState.deviceId = entry->deviceId;
                     mTouchState.source = entry->source;
+                    mTouchState.displayId = displayId;
                 }
             } else if (maskedAction == AMOTION_EVENT_ACTION_UP
                     || maskedAction == AMOTION_EVENT_ACTION_CANCEL) {
@@ -1610,6 +1631,7 @@ bool InputDispatcher::checkInjectionPermission(const sp<InputWindowHandle>& wind
 
 bool InputDispatcher::isWindowObscuredAtPointLocked(
         const sp<InputWindowHandle>& windowHandle, int32_t x, int32_t y) const {
+    int32_t displayId = windowHandle->getInfo()->displayId;
     size_t numWindows = mWindowHandles.size();
     for (size_t i = 0; i < numWindows; i++) {
         sp<InputWindowHandle> otherHandle = mWindowHandles.itemAt(i);
@@ -1618,7 +1640,8 @@ bool InputDispatcher::isWindowObscuredAtPointLocked(
         }
 
         const InputWindowInfo* otherInfo = otherHandle->getInfo();
-        if (otherInfo->visible && ! otherInfo->isTrustedOverlay()
+        if (otherInfo->displayId == displayId
+                && otherInfo->visible && !otherInfo->isTrustedOverlay()
                 && otherInfo->frameContainsPoint(x, y)) {
             return true;
         }
@@ -1845,7 +1868,7 @@ void InputDispatcher::enqueueDispatchEntryLocked(
         }
         if (dispatchEntry->resolvedAction == AMOTION_EVENT_ACTION_HOVER_MOVE
                 && !connection->inputState.isHovering(
-                        motionEntry->deviceId, motionEntry->source)) {
+                        motionEntry->deviceId, motionEntry->source, motionEntry->displayId)) {
 #if DEBUG_DISPATCH_CYCLE
         ALOGD("channel '%s' ~ enqueueDispatchEntryLocked: filling in missing hover enter event",
                 connection->getInputChannelName());
@@ -2271,6 +2294,7 @@ InputDispatcher::splitMotionEvent(const MotionEntry* originalMotionEntry, BitSet
             originalMotionEntry->xPrecision,
             originalMotionEntry->yPrecision,
             originalMotionEntry->downTime,
+            originalMotionEntry->displayId,
             splitPointerCount, splitPointerProperties, splitPointerCoords);
 
     if (originalMotionEntry->injectionState) {
@@ -2351,7 +2375,7 @@ void InputDispatcher::notifyKey(const NotifyKeyArgs* args) {
     { // acquire lock
         mLock.lock();
 
-        if (mInputFilterEnabled) {
+        if (shouldSendKeyToInputFilterLocked(args)) {
             mLock.unlock();
 
             policyFlags |= POLICY_FLAG_FILTERED;
@@ -2375,6 +2399,10 @@ void InputDispatcher::notifyKey(const NotifyKeyArgs* args) {
     if (needWake) {
         mLooper->wake();
     }
+}
+
+bool InputDispatcher::shouldSendKeyToInputFilterLocked(const NotifyKeyArgs* args) {
+    return mInputFilterEnabled;
 }
 
 void InputDispatcher::notifyMotion(const NotifyMotionArgs* args) {
@@ -2415,7 +2443,7 @@ void InputDispatcher::notifyMotion(const NotifyMotionArgs* args) {
     { // acquire lock
         mLock.lock();
 
-        if (mInputFilterEnabled) {
+        if (shouldSendMotionToInputFilterLocked(args)) {
             mLock.unlock();
 
             MotionEvent event;
@@ -2438,6 +2466,7 @@ void InputDispatcher::notifyMotion(const NotifyMotionArgs* args) {
                 args->deviceId, args->source, policyFlags,
                 args->action, args->flags, args->metaState, args->buttonState,
                 args->edgeFlags, args->xPrecision, args->yPrecision, args->downTime,
+                args->displayId,
                 args->pointerCount, args->pointerProperties, args->pointerCoords);
 
         needWake = enqueueInboundEventLocked(newEntry);
@@ -2447,6 +2476,11 @@ void InputDispatcher::notifyMotion(const NotifyMotionArgs* args) {
     if (needWake) {
         mLooper->wake();
     }
+}
+
+bool InputDispatcher::shouldSendMotionToInputFilterLocked(const NotifyMotionArgs* args) {
+    // TODO: support sending secondary display events to input filter
+    return mInputFilterEnabled && isMainDisplay(args->displayId);
 }
 
 void InputDispatcher::notifySwitch(const NotifySwitchArgs* args) {
@@ -2532,6 +2566,7 @@ int32_t InputDispatcher::injectInputEvent(const InputEvent* event,
 
     case AINPUT_EVENT_TYPE_MOTION: {
         const MotionEvent* motionEvent = static_cast<const MotionEvent*>(event);
+        int32_t displayId = ADISPLAY_ID_DEFAULT;
         int32_t action = motionEvent->getAction();
         size_t pointerCount = motionEvent->getPointerCount();
         const PointerProperties* pointerProperties = motionEvent->getPointerProperties();
@@ -2553,8 +2588,8 @@ int32_t InputDispatcher::injectInputEvent(const InputEvent* event,
                 motionEvent->getMetaState(), motionEvent->getButtonState(),
                 motionEvent->getEdgeFlags(),
                 motionEvent->getXPrecision(), motionEvent->getYPrecision(),
-                motionEvent->getDownTime(), uint32_t(pointerCount),
-                pointerProperties, samplePointerCoords);
+                motionEvent->getDownTime(), displayId,
+                uint32_t(pointerCount), pointerProperties, samplePointerCoords);
         lastInjectedEntry = firstInjectedEntry;
         for (size_t i = motionEvent->getHistorySize(); i > 0; i--) {
             sampleEventTimes += 1;
@@ -2565,8 +2600,8 @@ int32_t InputDispatcher::injectInputEvent(const InputEvent* event,
                     motionEvent->getMetaState(), motionEvent->getButtonState(),
                     motionEvent->getEdgeFlags(),
                     motionEvent->getXPrecision(), motionEvent->getYPrecision(),
-                    motionEvent->getDownTime(), uint32_t(pointerCount),
-                    pointerProperties, samplePointerCoords);
+                    motionEvent->getDownTime(), displayId,
+                    uint32_t(pointerCount), pointerProperties, samplePointerCoords);
             lastInjectedEntry->next = nextInjectedEntry;
             lastInjectedEntry = nextInjectedEntry;
         }
@@ -2939,6 +2974,12 @@ bool InputDispatcher::transferTouchFocus(const sp<InputChannel>& fromChannel,
 #endif
             return true;
         }
+        if (fromWindowHandle->getInfo()->displayId != toWindowHandle->getInfo()->displayId) {
+#if DEBUG_FOCUS
+            ALOGD("Cannot transfer focus because windows are on different displays.");
+#endif
+            return false;
+        }
 
         bool found = false;
         for (size_t i = 0; i < mTouchState.windows.size(); i++) {
@@ -3040,6 +3081,7 @@ void InputDispatcher::dumpDispatchStateLocked(String8& dump) {
     dump.appendFormat(INDENT "TouchSplit: %s\n", toString(mTouchState.split));
     dump.appendFormat(INDENT "TouchDeviceId: %d\n", mTouchState.deviceId);
     dump.appendFormat(INDENT "TouchSource: 0x%08x\n", mTouchState.source);
+    dump.appendFormat(INDENT "TouchDisplayId: %d\n", mTouchState.displayId);
     if (!mTouchState.windows.isEmpty()) {
         dump.append(INDENT "TouchedWindows:\n");
         for (size_t i = 0; i < mTouchState.windows.size(); i++) {
@@ -3059,11 +3101,12 @@ void InputDispatcher::dumpDispatchStateLocked(String8& dump) {
             const sp<InputWindowHandle>& windowHandle = mWindowHandles.itemAt(i);
             const InputWindowInfo* windowInfo = windowHandle->getInfo();
 
-            dump.appendFormat(INDENT2 "%d: name='%s', paused=%s, hasFocus=%s, hasWallpaper=%s, "
+            dump.appendFormat(INDENT2 "%d: name='%s', displayId=%d, "
+                    "paused=%s, hasFocus=%s, hasWallpaper=%s, "
                     "visible=%s, canReceiveKeys=%s, flags=0x%08x, type=0x%08x, layer=%d, "
                     "frame=[%d,%d][%d,%d], scale=%f, "
                     "touchableRegion=",
-                    i, windowInfo->name.string(),
+                    i, windowInfo->name.string(), windowInfo->displayId,
                     toString(windowInfo->paused),
                     toString(windowInfo->hasFocus),
                     toString(windowInfo->hasWallpaper),
@@ -3802,14 +3845,14 @@ InputDispatcher::MotionEntry::MotionEntry(nsecs_t eventTime,
         int32_t deviceId, uint32_t source, uint32_t policyFlags, int32_t action, int32_t flags,
         int32_t metaState, int32_t buttonState,
         int32_t edgeFlags, float xPrecision, float yPrecision,
-        nsecs_t downTime, uint32_t pointerCount,
+        nsecs_t downTime, int32_t displayId, uint32_t pointerCount,
         const PointerProperties* pointerProperties, const PointerCoords* pointerCoords) :
         EventEntry(TYPE_MOTION, eventTime, policyFlags),
         eventTime(eventTime),
         deviceId(deviceId), source(source), action(action), flags(flags),
         metaState(metaState), buttonState(buttonState), edgeFlags(edgeFlags),
         xPrecision(xPrecision), yPrecision(yPrecision),
-        downTime(downTime), pointerCount(pointerCount) {
+        downTime(downTime), displayId(displayId), pointerCount(pointerCount) {
     for (uint32_t i = 0; i < pointerCount; i++) {
         this->pointerProperties[i].copyFrom(pointerProperties[i]);
         this->pointerCoords[i].copyFrom(pointerCoords[i]);
@@ -3820,8 +3863,8 @@ InputDispatcher::MotionEntry::~MotionEntry() {
 }
 
 void InputDispatcher::MotionEntry::appendDescription(String8& msg) const {
-    msg.appendFormat("MotionEvent(action=%d, deviceId=%d, source=0x%08x)",
-            action, deviceId, source);
+    msg.appendFormat("MotionEvent(action=%d, deviceId=%d, source=0x%08x, displayId=%d)",
+            action, deviceId, source, displayId);
 }
 
 
@@ -3864,11 +3907,13 @@ bool InputDispatcher::InputState::isNeutral() const {
     return mKeyMementos.isEmpty() && mMotionMementos.isEmpty();
 }
 
-bool InputDispatcher::InputState::isHovering(int32_t deviceId, uint32_t source) const {
+bool InputDispatcher::InputState::isHovering(int32_t deviceId, uint32_t source,
+        int32_t displayId) const {
     for (size_t i = 0; i < mMotionMementos.size(); i++) {
         const MotionMemento& memento = mMotionMementos.itemAt(i);
         if (memento.deviceId == deviceId
                 && memento.source == source
+                && memento.displayId == displayId
                 && memento.hovering) {
             return true;
         }
@@ -4025,6 +4070,7 @@ ssize_t InputDispatcher::InputState::findMotionMemento(const MotionEntry* entry,
         const MotionMemento& memento = mMotionMementos.itemAt(i);
         if (memento.deviceId == entry->deviceId
                 && memento.source == entry->source
+                && memento.displayId == entry->displayId
                 && memento.hovering == hovering) {
             return i;
         }
@@ -4055,6 +4101,7 @@ void InputDispatcher::InputState::addMotionMemento(const MotionEntry* entry,
     memento.xPrecision = entry->xPrecision;
     memento.yPrecision = entry->yPrecision;
     memento.downTime = entry->downTime;
+    memento.displayId = entry->displayId;
     memento.setPointers(entry);
     memento.hovering = hovering;
     memento.policyFlags = entry->policyFlags;
@@ -4090,6 +4137,7 @@ void InputDispatcher::InputState::synthesizeCancelationEvents(nsecs_t currentTim
                             : AMOTION_EVENT_ACTION_CANCEL,
                     memento.flags, 0, 0, 0,
                     memento.xPrecision, memento.yPrecision, memento.downTime,
+                    memento.displayId,
                     memento.pointerCount, memento.pointerProperties, memento.pointerCoords));
         }
     }
@@ -4108,7 +4156,8 @@ void InputDispatcher::InputState::copyPointerStateTo(InputState& other) const {
             for (size_t j = 0; j < other.mMotionMementos.size(); ) {
                 const MotionMemento& otherMemento = other.mMotionMementos.itemAt(j);
                 if (memento.deviceId == otherMemento.deviceId
-                        && memento.source == otherMemento.source) {
+                        && memento.source == otherMemento.source
+                        && memento.displayId == otherMemento.displayId) {
                     other.mMotionMementos.removeAt(j);
                 } else {
                     j += 1;
@@ -4240,7 +4289,7 @@ InputDispatcher::CommandEntry::~CommandEntry() {
 // --- InputDispatcher::TouchState ---
 
 InputDispatcher::TouchState::TouchState() :
-    down(false), split(false), deviceId(-1), source(0) {
+    down(false), split(false), deviceId(-1), source(0), displayId(-1) {
 }
 
 InputDispatcher::TouchState::~TouchState() {
@@ -4251,6 +4300,7 @@ void InputDispatcher::TouchState::reset() {
     split = false;
     deviceId = -1;
     source = 0;
+    displayId = -1;
     windows.clear();
 }
 
@@ -4259,6 +4309,7 @@ void InputDispatcher::TouchState::copyFrom(const TouchState& other) {
     split = other.split;
     deviceId = other.deviceId;
     source = other.source;
+    displayId = other.displayId;
     windows = other.windows;
 }
 
