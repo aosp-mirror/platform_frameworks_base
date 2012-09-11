@@ -1852,6 +1852,110 @@ static status_t writeLayoutClasses(
     return hasErrors ? UNKNOWN_ERROR : NO_ERROR;
 }
 
+static status_t writeTextLayoutClasses(
+    FILE* fp, const sp<AaptAssets>& assets,
+    const sp<AaptSymbols>& symbols, bool includePrivate)
+{
+    String16 attr16("attr");
+    String16 package16(assets->getPackage());
+
+    bool hasErrors = false;
+
+    size_t i;
+    size_t N = symbols->getNestedSymbols().size();
+    for (i=0; i<N; i++) {
+        sp<AaptSymbols> nsymbols = symbols->getNestedSymbols().valueAt(i);
+        String16 nclassName16(symbols->getNestedSymbols().keyAt(i));
+        String8 realClassName(nclassName16);
+        if (fixupSymbol(&nclassName16) != NO_ERROR) {
+            hasErrors = true;
+        }
+        String8 nclassName(nclassName16);
+
+        SortedVector<uint32_t> idents;
+        Vector<uint32_t> origOrder;
+        Vector<bool> publicFlags;
+
+        size_t a;
+        size_t NA = nsymbols->getSymbols().size();
+        for (a=0; a<NA; a++) {
+            const AaptSymbolEntry& sym(nsymbols->getSymbols().valueAt(a));
+            int32_t code = sym.typeCode == AaptSymbolEntry::TYPE_INT32
+                    ? sym.int32Val : 0;
+            bool isPublic = true;
+            if (code == 0) {
+                String16 name16(sym.name);
+                uint32_t typeSpecFlags;
+                code = assets->getIncludedResources().identifierForName(
+                    name16.string(), name16.size(),
+                    attr16.string(), attr16.size(),
+                    package16.string(), package16.size(), &typeSpecFlags);
+                if (code == 0) {
+                    fprintf(stderr, "ERROR: In <declare-styleable> %s, unable to find attribute %s\n",
+                            nclassName.string(), sym.name.string());
+                    hasErrors = true;
+                }
+                isPublic = (typeSpecFlags&ResTable_typeSpec::SPEC_PUBLIC) != 0;
+            }
+            idents.add(code);
+            origOrder.add(code);
+            publicFlags.add(isPublic);
+        }
+
+        NA = idents.size();
+
+        fprintf(fp, "int[] styleable %s {", nclassName.string());
+
+        for (a=0; a<NA; a++) {
+            if (a != 0) {
+                fprintf(fp, ",");
+            }
+            fprintf(fp, " 0x%08x", idents[a]);
+        }
+
+        fprintf(fp, " }\n");
+
+        for (a=0; a<NA; a++) {
+            ssize_t pos = idents.indexOf(origOrder.itemAt(a));
+            if (pos >= 0) {
+                const AaptSymbolEntry& sym = nsymbols->getSymbols().valueAt(a);
+                if (!publicFlags.itemAt(a) && !includePrivate) {
+                    continue;
+                }
+                String8 name8(sym.name);
+                String16 comment(sym.comment);
+                String16 typeComment;
+                if (comment.size() <= 0) {
+                    comment = getAttributeComment(assets, name8, &typeComment);
+                } else {
+                    getAttributeComment(assets, name8, &typeComment);
+                }
+                String16 name(name8);
+                if (fixupSymbol(&name) != NO_ERROR) {
+                    hasErrors = true;
+                }
+
+                uint32_t typeSpecFlags = 0;
+                String16 name16(sym.name);
+                assets->getIncludedResources().identifierForName(
+                    name16.string(), name16.size(),
+                    attr16.string(), attr16.size(),
+                    package16.string(), package16.size(), &typeSpecFlags);
+                //printf("%s:%s/%s: 0x%08x\n", String8(package16).string(),
+                //    String8(attr16).string(), String8(name16).string(), typeSpecFlags);
+                const bool pub = (typeSpecFlags&ResTable_typeSpec::SPEC_PUBLIC) != 0;
+
+                fprintf(fp,
+                        "int styleable.%s_%s %d\n",
+                        nclassName.string(),
+                        String8(name).string(), (int)pos);
+            }
+        }
+    }
+
+    return hasErrors ? UNKNOWN_ERROR : NO_ERROR;
+}
+
 static status_t writeSymbolClass(
     FILE* fp, const sp<AaptAssets>& assets, bool includePrivate,
     const sp<AaptSymbols>& symbols, const String8& className, int indent,
@@ -1879,7 +1983,6 @@ static status_t writeSymbolClass(
             continue;
         }
         String16 name(sym.name);
-        String8 realName(name);
         if (fixupSymbol(&name) != NO_ERROR) {
             return UNKNOWN_ERROR;
         }
@@ -1991,6 +2094,51 @@ static status_t writeSymbolClass(
     return NO_ERROR;
 }
 
+static status_t writeTextSymbolClass(
+    FILE* fp, const sp<AaptAssets>& assets, bool includePrivate,
+    const sp<AaptSymbols>& symbols, const String8& className)
+{
+    size_t i;
+    status_t err = NO_ERROR;
+
+    size_t N = symbols->getSymbols().size();
+    for (i=0; i<N; i++) {
+        const AaptSymbolEntry& sym = symbols->getSymbols().valueAt(i);
+        if (sym.typeCode != AaptSymbolEntry::TYPE_INT32) {
+            continue;
+        }
+
+        if (!assets->isJavaSymbol(sym, includePrivate)) {
+            continue;
+        }
+
+        String16 name(sym.name);
+        if (fixupSymbol(&name) != NO_ERROR) {
+            return UNKNOWN_ERROR;
+        }
+
+        fprintf(fp, "int %s %s 0x%08x\n",
+                className.string(),
+                String8(name).string(), (int)sym.int32Val);
+    }
+
+    N = symbols->getNestedSymbols().size();
+    for (i=0; i<N; i++) {
+        sp<AaptSymbols> nsymbols = symbols->getNestedSymbols().valueAt(i);
+        String8 nclassName(symbols->getNestedSymbols().keyAt(i));
+        if (nclassName == "styleable") {
+            err = writeTextLayoutClasses(fp, assets, nsymbols, includePrivate);
+        } else {
+            err = writeTextSymbolClass(fp, assets, includePrivate, nsymbols, nclassName);
+        }
+        if (err != NO_ERROR) {
+            return err;
+        }
+    }
+
+    return NO_ERROR;
+}
+
 status_t writeResourceSymbols(Bundle* bundle, const sp<AaptAssets>& assets,
     const String8& package, bool includePrivate)
 {
@@ -1998,11 +2146,15 @@ status_t writeResourceSymbols(Bundle* bundle, const sp<AaptAssets>& assets,
         return NO_ERROR;
     }
 
+    const char* textSymbolsDest = bundle->getOutputTextSymbols();
+
+    String8 R("R");
     const size_t N = assets->getSymbols().size();
     for (size_t i=0; i<N; i++) {
         sp<AaptSymbols> symbols = assets->getSymbols().valueAt(i);
         String8 className(assets->getSymbols().keyAt(i));
         String8 dest(bundle->getRClassDir());
+
         if (bundle->getMakePackageDirs()) {
             String8 pkg(package);
             const char* last = pkg.string();
@@ -2034,14 +2186,14 @@ status_t writeResourceSymbols(Bundle* bundle, const sp<AaptAssets>& assets,
         }
 
         fprintf(fp,
-        "/* AUTO-GENERATED FILE.  DO NOT MODIFY.\n"
-        " *\n"
-        " * This class was automatically generated by the\n"
-        " * aapt tool from the resource data it found.  It\n"
-        " * should not be modified by hand.\n"
-        " */\n"
-        "\n"
-        "package %s;\n\n", package.string());
+            "/* AUTO-GENERATED FILE.  DO NOT MODIFY.\n"
+            " *\n"
+            " * This class was automatically generated by the\n"
+            " * aapt tool from the resource data it found.  It\n"
+            " * should not be modified by hand.\n"
+            " */\n"
+            "\n"
+            "package %s;\n\n", package.string());
 
         status_t err = writeSymbolClass(fp, assets, includePrivate, symbols,
                 className, 0, bundle->getNonConstantId());
@@ -2050,14 +2202,37 @@ status_t writeResourceSymbols(Bundle* bundle, const sp<AaptAssets>& assets,
         }
         fclose(fp);
 
+        if (textSymbolsDest != NULL && R == className) {
+            String8 textDest(textSymbolsDest);
+            textDest.appendPath(className);
+            textDest.append(".txt");
+
+            FILE* fp = fopen(textDest.string(), "w+");
+            if (fp == NULL) {
+                fprintf(stderr, "ERROR: Unable to open text symbol file %s: %s\n",
+                        textDest.string(), strerror(errno));
+                return UNKNOWN_ERROR;
+            }
+            if (bundle->getVerbose()) {
+                printf("  Writing text symbols for class %s.\n", className.string());
+            }
+
+            status_t err = writeTextSymbolClass(fp, assets, includePrivate, symbols,
+                    className);
+            if (err != NO_ERROR) {
+                return err;
+            }
+            fclose(fp);
+        }
+
         // If we were asked to generate a dependency file, we'll go ahead and add this R.java
         // as a target in the dependency file right next to it.
-        if (bundle->getGenDependencies()) {
+        if (bundle->getGenDependencies() && R == className) {
             // Add this R.java to the dependency file
             String8 dependencyFile(bundle->getRClassDir());
             dependencyFile.appendPath("R.java.d");
 
-            fp = fopen(dependencyFile.string(), "a");
+            FILE *fp = fopen(dependencyFile.string(), "a");
             fprintf(fp,"%s \\\n", dest.string());
             fclose(fp);
         }
@@ -2065,7 +2240,6 @@ status_t writeResourceSymbols(Bundle* bundle, const sp<AaptAssets>& assets,
 
     return NO_ERROR;
 }
-
 
 
 class ProguardKeepSet
