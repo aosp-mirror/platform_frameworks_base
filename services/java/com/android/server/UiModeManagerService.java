@@ -463,7 +463,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
 
                 if (homeIntent != null) {
                     try {
-                        mContext.startActivity(homeIntent);
+                        mContext.startActivityAsUser(homeIntent, UserHandle.CURRENT);
                     } catch (ActivityNotFoundException e) {
                     }
                 }
