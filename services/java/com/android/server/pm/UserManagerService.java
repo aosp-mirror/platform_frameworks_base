@@ -238,6 +238,18 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     /**
+     * Check if we've hit the limit of how many users can be created.
+     */
+    private boolean isUserLimitReached() {
+        synchronized (mInstallLock) {
+            int nUsers = mUsers.size();
+            int userLimit = mContext.getResources().getInteger(
+                    com.android.internal.R.integer.config_multiuserMaximumUsers);
+            return nUsers >= userLimit;
+        }
+    }
+
+    /**
      * Enforces that only the system UID or root's UID or apps that have the
      * {@link android.Manifest.permission.MANAGE_USERS MANAGE_USERS}
      * permission can make certain calls to the UserManager.
@@ -522,6 +534,9 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public UserInfo createUser(String name, int flags) {
         checkManageUsersPermission("Only the system can create users");
+
+        if (isUserLimitReached()) return null;
+
         int userId = getNextAvailableId();
         UserInfo userInfo = new UserInfo(userId, name, null, flags);
         File userPath = new File(mBaseUserPath, Integer.toString(userId));
