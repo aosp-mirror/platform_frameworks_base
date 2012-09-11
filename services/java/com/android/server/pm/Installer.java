@@ -359,6 +359,14 @@ class Installer {
         return execute("movefiles");
     }
 
+    /**
+     * Links the native library directory in an application's directory to its
+     * real location.
+     *
+     * @param dataPath data directory where the application is
+     * @param nativeLibPath target native library path
+     * @return -1 on error
+     */
     public int linkNativeLibraryDirectory(String dataPath, String nativeLibPath) {
         if (dataPath == null) {
             Slog.e(TAG, "unlinkNativeLibraryDirectory dataPath is null");

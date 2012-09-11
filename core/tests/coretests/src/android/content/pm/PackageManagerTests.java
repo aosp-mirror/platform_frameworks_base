@@ -72,6 +72,8 @@ public class PackageManagerTests extends AndroidTestCase {
 
     public final long WAIT_TIME_INCR = 5 * 1000;
 
+    private static final String APP_LIB_DIR_PREFIX = "/data/app-lib/";
+
     private static final String SECURE_CONTAINERS_PREFIX = "/mnt/asec/";
 
     private static final int APP_INSTALL_AUTO = PackageHelper.APP_INSTALL_AUTO;
@@ -433,7 +435,7 @@ public class PackageManagerTests extends AndroidTestCase {
                     assertEquals(srcPath, appInstallPath);
                     assertEquals(publicSrcPath, appInstallPath);
                     assertStartsWith("Native library should point to shared lib directory",
-                            dataDir.getPath(),
+                            new File(APP_LIB_DIR_PREFIX, info.packageName).getPath(),
                             info.nativeLibraryDir);
                     assertDirOwnerGroupPerms(
                             "Native library directory should be owned by system:system and 0755",
