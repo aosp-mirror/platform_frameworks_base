@@ -27,7 +27,6 @@ import android.content.ClipboardManager;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -69,7 +68,6 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
-import android.view.Display;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.HardwareCanvas;
@@ -87,7 +85,6 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.ViewRootImpl;
-import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -136,9 +133,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
-import java.util.concurrent.CountDownLatch;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Implements a backend provider for the {@link WebView} public API.
@@ -1891,9 +1885,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                             mSavePasswordDialog = null;
                         }
                     })
-                    .setOnCancelListener(new OnCancelListener() {
+                    .setOnDismissListener(new DialogInterface.OnDismissListener() {
                         @Override
-                        public void onCancel(DialogInterface dialog) {
+                        public void onDismiss(DialogInterface dialog) {
                             if (mResumeMsg != null) {
                                 resumeMsg.sendToTarget();
                                 mResumeMsg = null;
@@ -2098,13 +2092,17 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         hideSoftKeyboard();
         clearActionModes();
         dismissFullScreenMode();
-        cancelSelectDialog();
+        cancelDialogs();
     }
 
-    private void cancelSelectDialog() {
+    private void cancelDialogs() {
         if (mListBoxDialog != null) {
             mListBoxDialog.cancel();
             mListBoxDialog = null;
+        }
+        if (mSavePasswordDialog != null) {
+            mSavePasswordDialog.dismiss();
+            mSavePasswordDialog = null;
         }
     }
 
@@ -2133,15 +2131,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
     private void destroyJava() {
         mCallbackProxy.blockMessages();
-        clearHelpers();
-        if (mListBoxDialog != null) {
-            mListBoxDialog.dismiss();
-            mListBoxDialog = null;
-        }
-        if (mSavePasswordDialog != null) {
-            mSavePasswordDialog.dismiss();
-            mSavePasswordDialog = null;
-        }
         if (mWebViewCore != null) {
             // Tell WebViewCore to destroy itself
             synchronized (this) {
@@ -3492,7 +3481,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 nativeSetPauseDrawing(mNativeClass, true);
             }
 
-            cancelSelectDialog();
+            cancelDialogs();
             WebCoreThreadWatchdog.pause();
         }
     }
