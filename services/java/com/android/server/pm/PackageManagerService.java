@@ -25,6 +25,11 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 import static com.android.internal.util.ArrayUtils.appendInt;
 import static com.android.internal.util.ArrayUtils.removeInt;
 import static libcore.io.OsConstants.S_ISLNK;
+import static libcore.io.OsConstants.S_IRWXU;
+import static libcore.io.OsConstants.S_IRGRP;
+import static libcore.io.OsConstants.S_IXGRP;
+import static libcore.io.OsConstants.S_IROTH;
+import static libcore.io.OsConstants.S_IXOTH;
 
 import com.android.internal.app.IMediaContainerService;
 import com.android.internal.app.ResolverActivity;
@@ -147,6 +152,7 @@ import java.util.Set;
 import libcore.io.ErrnoException;
 import libcore.io.IoUtils;
 import libcore.io.Libcore;
+import libcore.io.OsConstants;
 import libcore.io.StructStat;
 
 /**
@@ -276,7 +282,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     // This is the object monitoring mDrmAppPrivateInstallDir.
     final FileObserver mDrmAppInstallObserver;
 
-    // Used for priviledge escalation.  MUST NOT BE CALLED WITH mPackages
+    // Used for privilege escalation. MUST NOT BE CALLED WITH mPackages
     // LOCK HELD.  Can be called with mInstallLock held.
     final Installer mInstaller;
 
@@ -285,6 +291,12 @@ public class PackageManagerService extends IPackageManager.Stub {
     final File mVendorAppDir;
     final File mAppInstallDir;
     final File mDalvikCacheDir;
+
+    /**
+     * Directory to which applications installed internally have native
+     * libraries copied.
+     */
+    private File mAppLibInstallDir;
 
     // Directory containing the private parts (e.g. code and non-resource assets) of forward-locked
     // apps.
@@ -1215,6 +1227,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             mAppInstallDir = new File(dataDir, "app");
+            mAppLibInstallDir = new File(dataDir, "app-lib");
             //look for any incomplete package installations
             ArrayList<PackageSetting> deletePkgsList = mSettings.getListOfIncompleteInstallPackagesLPr();
             //clean up list
@@ -3607,6 +3620,13 @@ public class PackageManagerService extends IPackageManager.Stub {
                 res = resInner;
             }
         }
+
+        final File nativeLibraryFile = new File(mAppLibInstallDir, packageName);
+        NativeLibraryHelper.removeNativeBinariesFromDirLI(nativeLibraryFile);
+        if (!nativeLibraryFile.delete()) {
+            Slog.w(TAG, "Couldn't delete native library directory " + nativeLibraryFile.getPath());
+        }
+
         return res;
     }
 
@@ -4048,9 +4068,7 @@ public class PackageManagerService extends IPackageManager.Stub {
              */
             if (pkg.applicationInfo.nativeLibraryDir == null && pkg.applicationInfo.dataDir != null) {
                 if (pkgSetting.nativeLibraryPathString == null) {
-                    final String nativeLibraryPath = new File(dataPath, LIB_DIR_NAME).getPath();
-                    pkg.applicationInfo.nativeLibraryDir = nativeLibraryPath;
-                    pkgSetting.nativeLibraryPathString = nativeLibraryPath;
+                    setInternalAppNativeLibraryPath(pkg, pkgSetting);
                 } else {
                     pkg.applicationInfo.nativeLibraryDir = pkgSetting.nativeLibraryPathString;
                 }
@@ -4072,7 +4090,7 @@ public class PackageManagerService extends IPackageManager.Stub {
          */
         if (pkg.applicationInfo.nativeLibraryDir != null) {
             try {
-                final File nativeLibraryDir = new File(pkg.applicationInfo.nativeLibraryDir);
+                File nativeLibraryDir = new File(pkg.applicationInfo.nativeLibraryDir);
                 final String dataPathString = dataPath.getCanonicalPath();
 
                 if (isSystemApp(pkg) && !isUpdatedSystemApp(pkg)) {
@@ -4087,30 +4105,31 @@ public class PackageManagerService extends IPackageManager.Stub {
                         Log.i(TAG, "removed obsolete native libraries for system package "
                                 + path);
                     }
-                } else if (nativeLibraryDir.getParentFile().getCanonicalPath()
-                        .equals(dataPathString)) {
-                    /*
-                     * Make sure the native library dir isn't a symlink to
-                     * something. If it is, ask installd to remove it and create
-                     * a directory so we can copy to it afterwards.
-                     */
-                    boolean isSymLink;
-                    try {
-                        isSymLink = S_ISLNK(Libcore.os.lstat(nativeLibraryDir.getPath()).st_mode);
-                    } catch (ErrnoException e) {
-                        // This shouldn't happen, but we'll fail-safe.
-                        isSymLink = true;
-                    }
-                    if (isSymLink) {
-                        mInstaller.unlinkNativeLibraryDirectory(dataPathString);
+                } else if (!isForwardLocked(pkg) && !isExternal(pkg)) {
+                    // Update native library dir if it starts with /data/data
+                    if (nativeLibraryDir.getParent().startsWith(dataPathString)) {
+                        setInternalAppNativeLibraryPath(pkg, pkgSetting);
+                        nativeLibraryDir = new File(pkg.applicationInfo.nativeLibraryDir);
                     }
 
-                    /*
-                     * If this is an internal application or our
-                     * nativeLibraryPath points to our data directory, unpack
-                     * the libraries if necessary.
-                     */
-                    NativeLibraryHelper.copyNativeBinariesIfNeededLI(scanFile, nativeLibraryDir);
+                    try {
+                        if (copyNativeLibrariesForInternalApp(scanFile, nativeLibraryDir) != PackageManager.INSTALL_SUCCEEDED) {
+                            Slog.e(TAG, "Unable to copy native libraries");
+                            mLastScanError = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
+                            return null;
+                        }
+                    } catch (IOException e) {
+                        Slog.e(TAG, "Unable to copy native libraries", e);
+                        mLastScanError = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
+                        return null;
+                    }
+
+                    if (mInstaller.linkNativeLibraryDirectory(dataPathString,
+                            pkg.applicationInfo.nativeLibraryDir) == -1) {
+                        Slog.e(TAG, "Unable to link native library directory");
+                        mLastScanError = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
+                        return null;
+                    }
                 } else {
                     Slog.i(TAG, "Linking native library dir for " + path);
                     int ret = mInstaller.linkNativeLibraryDirectory(dataPathString,
@@ -4122,7 +4141,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                 }
             } catch (IOException ioe) {
-                Log.e(TAG, "Unable to get canonical file " + ioe.toString());
+                Slog.e(TAG, "Unable to get canonical file " + ioe.toString());
             }
         }
         pkg.mScanPath = path;
@@ -4435,6 +4454,37 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         return pkg;
+    }
+
+    private void setInternalAppNativeLibraryPath(PackageParser.Package pkg,
+            PackageSetting pkgSetting) {
+        final String apkLibPath = getApkName(pkgSetting.codePathString);
+        final String nativeLibraryPath = new File(mAppLibInstallDir, apkLibPath).getPath();
+        pkg.applicationInfo.nativeLibraryDir = nativeLibraryPath;
+        pkgSetting.nativeLibraryPathString = nativeLibraryPath;
+    }
+
+    private static int copyNativeLibrariesForInternalApp(File scanFile, final File nativeLibraryDir)
+            throws IOException {
+        if (!nativeLibraryDir.isDirectory()) {
+            nativeLibraryDir.delete();
+            if (!nativeLibraryDir.mkdir()) {
+                throw new IOException("Cannot create " + nativeLibraryDir.getPath());
+            }
+            try {
+                Libcore.os.chmod(nativeLibraryDir.getPath(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH
+                        | S_IXOTH);
+            } catch (ErrnoException e) {
+                throw new IOException("Cannot chmod native library directory "
+                        + nativeLibraryDir.getPath(), e);
+            }
+        }
+
+        /*
+         * If this is an internal application or our nativeLibraryPath points to
+         * the app-lib directory, unpack the libraries if necessary.
+         */
+        return NativeLibraryHelper.copyNativeBinariesIfNeededLI(scanFile, nativeLibraryDir);
     }
 
     private void killApplication(String pkgName, int appId) {
@@ -6737,7 +6787,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             String apkName = getNextCodePath(null, pkgName, ".apk");
             codeFileName = new File(installDir, apkName + ".apk").getPath();
             resourceFileName = getResourcePathFromCodePath();
-            libraryPath = new File(dataDir, LIB_DIR_NAME).getPath();
+            libraryPath = new File(mAppLibInstallDir, pkgName).getPath();
         }
 
         boolean checkFreeStorage(IMediaContainerService imcs) throws RemoteException {
@@ -6774,6 +6824,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             installDir = isFwdLocked() ? mDrmAppPrivateInstallDir : mAppInstallDir;
             codeFileName = createTempPackageFile(installDir).getPath();
             resourceFileName = getResourcePathFromCodePath();
+            libraryPath = getLibraryPathFromCodePath();
             created = true;
         }
 
@@ -6828,6 +6879,23 @@ public class PackageManagerService extends IPackageManager.Stub {
                     return PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
                 }
             }
+
+            final File nativeLibraryFile = new File(getNativeLibraryPath());
+            Slog.i(TAG, "Copying native libraries to " + nativeLibraryFile.getPath());
+            if (nativeLibraryFile.exists()) {
+                NativeLibraryHelper.removeNativeBinariesFromDirLI(nativeLibraryFile);
+                nativeLibraryFile.delete();
+            }
+            try {
+                int copyRet = copyNativeLibrariesForInternalApp(codeFile, nativeLibraryFile);
+                if (copyRet != PackageManager.INSTALL_SUCCEEDED) {
+                    return copyRet;
+                }
+            } catch (IOException e) {
+                Slog.e(TAG, "Copying native libraries failed", e);
+                ret = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
+            }
+
             return ret;
         }
 
@@ -6845,6 +6913,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             } else {
                 final File oldCodeFile = new File(getCodePath());
                 final File oldResourceFile = new File(getResourcePath());
+                final File oldLibraryFile = new File(getNativeLibraryPath());
 
                 // Rename APK file based on packageName
                 final String apkName = getNextCodePath(oldCodePath, pkgName, ".apk");
@@ -6859,7 +6928,20 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (isFwdLocked() && !oldResourceFile.renameTo(newResFile)) {
                     return false;
                 }
-                resourceFileName = getResourcePathFromCodePath();
+                resourceFileName = newResFile.getPath();
+
+                // Rename library path
+                final File newLibraryFile = new File(getLibraryPathFromCodePath());
+                if (newLibraryFile.exists()) {
+                    NativeLibraryHelper.removeNativeBinariesFromDirLI(newLibraryFile);
+                    newLibraryFile.delete();
+                }
+                if (!oldLibraryFile.renameTo(newLibraryFile)) {
+                    Slog.e(TAG, "Cannot rename native library directory "
+                            + oldLibraryFile.getPath() + " to " + newLibraryFile.getPath());
+                    return false;
+                }
+                libraryPath = newLibraryFile.getPath();
 
                 // Attempt to set permissions
                 if (!setPermissions()) {
@@ -6910,8 +6992,15 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
+        private String getLibraryPathFromCodePath() {
+            return new File(mAppLibInstallDir, getApkName(getCodePath())).getPath();
+        }
+
         @Override
         String getNativeLibraryPath() {
+            if (libraryPath == null) {
+                libraryPath = getLibraryPathFromCodePath();
+            }
             return libraryPath;
         }
 
@@ -6937,6 +7026,15 @@ public class PackageManagerService extends IPackageManager.Stub {
                     publicSourceFile.delete();
                 }
             }
+
+            if (libraryPath != null) {
+                File nativeLibraryFile = new File(libraryPath);
+                NativeLibraryHelper.removeNativeBinariesFromDirLI(nativeLibraryFile);
+                if (!nativeLibraryFile.delete()) {
+                    Slog.w(TAG, "Couldn't delete native library directory " + libraryPath);
+                }
+            }
+
             return ret;
         }
 
@@ -9779,30 +9877,25 @@ public class PackageManagerService extends IPackageManager.Stub {
                                     final String newNativePath = mp.targetArgs
                                             .getNativeLibraryPath();
 
-                                    try {
-                                        final File newNativeDir = new File(newNativePath);
+                                    final File newNativeDir = new File(newNativePath);
 
-                                        final String libParentDir = newNativeDir.getParentFile()
-                                                .getCanonicalPath();
-                                        if (newNativeDir.getParentFile().getCanonicalPath()
-                                                .equals(pkg.applicationInfo.dataDir)) {
-                                            if (mInstaller
-                                                    .unlinkNativeLibraryDirectory(pkg.applicationInfo.dataDir) < 0) {
-                                                returnCode = PackageManager.MOVE_FAILED_INSUFFICIENT_STORAGE;
-                                            } else {
-                                                NativeLibraryHelper.copyNativeBinariesIfNeededLI(
-                                                        new File(newCodePath), newNativeDir);
-                                            }
-                                        } else {
+                                    if (!isForwardLocked(pkg) && !isExternal(pkg)) {
+                                        synchronized (mInstallLock) {
                                             if (mInstaller.linkNativeLibraryDirectory(
                                                     pkg.applicationInfo.dataDir, newNativePath) < 0) {
                                                 returnCode = PackageManager.MOVE_FAILED_INSUFFICIENT_STORAGE;
                                             }
                                         }
-                                    } catch (IOException e) {
-                                        returnCode = PackageManager.MOVE_FAILED_INVALID_LOCATION;
+                                        NativeLibraryHelper.copyNativeBinariesIfNeededLI(new File(
+                                                newCodePath), newNativeDir);
+                                    } else {
+                                        synchronized (mInstallLock) {
+                                            if (mInstaller.linkNativeLibraryDirectory(
+                                                    pkg.applicationInfo.dataDir, newNativePath) < 0) {
+                                                returnCode = PackageManager.MOVE_FAILED_INSUFFICIENT_STORAGE;
+                                            }
+                                        }
                                     }
-
 
                                     if (returnCode == PackageManager.MOVE_SUCCEEDED) {
                                         pkg.mPath = newCodePath;
