@@ -5815,8 +5815,8 @@ public class PackageManagerService extends IPackageManager.Stub {
      * @return verification timeout in milliseconds
      */
     private long getVerificationTimeout() {
-        return android.provider.Settings.Secure.getLong(mContext.getContentResolver(),
-                android.provider.Settings.Secure.PACKAGE_VERIFIER_TIMEOUT,
+        return android.provider.Settings.Global.getLong(mContext.getContentResolver(),
+                android.provider.Settings.Global.PACKAGE_VERIFIER_TIMEOUT,
                 DEFAULT_VERIFICATION_TIMEOUT);
     }
 
@@ -5826,8 +5826,8 @@ public class PackageManagerService extends IPackageManager.Stub {
      * @return default verification response code
      */
     private int getDefaultVerificationResponse() {
-        return android.provider.Settings.Secure.getInt(mContext.getContentResolver(),
-                android.provider.Settings.Secure.PACKAGE_VERIFIER_DEFAULT_RESPONSE,
+        return android.provider.Settings.Global.getInt(mContext.getContentResolver(),
+                android.provider.Settings.Global.PACKAGE_VERIFIER_DEFAULT_RESPONSE,
                 DEFAULT_VERIFICATION_RESPONSE);
     }
 
@@ -5837,8 +5837,8 @@ public class PackageManagerService extends IPackageManager.Stub {
      * @return true if verification should be performed
      */
     private boolean isVerificationEnabled() {
-        return android.provider.Settings.Secure.getInt(mContext.getContentResolver(),
-                android.provider.Settings.Secure.PACKAGE_VERIFIER_ENABLE,
+        return android.provider.Settings.Global.getInt(mContext.getContentResolver(),
+                android.provider.Settings.Global.PACKAGE_VERIFIER_ENABLE,
                 DEFAULT_VERIFY_ENABLE ? 1 : 0) == 1 ? true : false;
     }
 

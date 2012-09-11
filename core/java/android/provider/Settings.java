@@ -4782,17 +4782,24 @@ public final class Settings {
         /**
          * Whether the package manager should send package verification broadcasts for verifiers to
          * review apps prior to installation.
-         *
+         * @deprecated moved to Settings.Global
          * 1 = request apps to be verified prior to installation, if a verifier exists.
          * 0 = do not verify apps before installation
          * {@hide}
          */
+        @Deprecated
         public static final String PACKAGE_VERIFIER_ENABLE = "package_verifier_enable";
 
-        /** Timeout for package verification. {@hide} */
+        /** Timeout for package verification.
+         * @deprecated moved to Settings.Global
+         * {@hide} */
+        @Deprecated
         public static final String PACKAGE_VERIFIER_TIMEOUT = "verifier_timeout";
 
-        /** Default response code for package verification. {@hide} */
+        /** Default response code for package verification.
+         * @deprecated moved to Settings.Global
+         * {@hide} */
+        @Deprecated
         public static final String PACKAGE_VERIFIER_DEFAULT_RESPONSE = "verifier_default_response";
 
         /** {@hide} */
@@ -5270,6 +5277,23 @@ public final class Settings {
        public static final String NTP_SERVER = "ntp_server";
        /** Timeout in milliseconds to wait for NTP server. {@hide} */
        public static final String NTP_TIMEOUT = "ntp_timeout";
+
+       /**
+        * Whether the package manager should send package verification broadcasts for verifiers to
+        * review apps prior to installation.
+        * 1 = request apps to be verified prior to installation, if a verifier exists.
+        * 0 = do not verify apps before installation
+        * {@hide}
+        */
+       public static final String PACKAGE_VERIFIER_ENABLE = "package_verifier_enable";
+
+       /** Timeout for package verification.
+        * {@hide} */
+       public static final String PACKAGE_VERIFIER_TIMEOUT = "verifier_timeout";
+
+       /** Default response code for package verification.
+        * {@hide} */
+       public static final String PACKAGE_VERIFIER_DEFAULT_RESPONSE = "verifier_default_response";
 
        /**
         * The interval in milliseconds at which to check packet counts on the
