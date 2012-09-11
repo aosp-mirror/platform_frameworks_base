@@ -20,6 +20,10 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 
 import android.content.Context;
+import android.content.Intent;
+import android.hardware.display.DisplayManager;
+import android.hardware.display.WifiDisplay;
+import android.hardware.display.WifiDisplayStatus;
 import android.media.RemoteDisplay;
 import android.os.Handler;
 import android.os.IBinder;
@@ -27,6 +31,7 @@ import android.util.Slog;
 import android.view.Surface;
 
 import java.io.PrintWriter;
+import java.util.Arrays;
 
 /**
  * Connects to Wifi displays that implement the Miracast protocol.
@@ -48,6 +53,15 @@ final class WifiDisplayAdapter extends DisplayAdapter {
     private WifiDisplayHandle mDisplayHandle;
     private WifiDisplayController mDisplayController;
 
+    private WifiDisplayStatus mCurrentStatus;
+    private boolean mEnabled;
+    private WifiDisplay mConnectedDisplay;
+    private WifiDisplay[] mKnownDisplays = WifiDisplay.EMPTY_ARRAY;
+    private boolean mScanInProgress;
+    private boolean mConnectionInProgress;
+
+    private boolean mPendingStatusChangeBroadcast;
+
     public WifiDisplayAdapter(DisplayManagerService.SyncRoot syncRoot,
             Context context, Handler handler, Listener listener) {
         super(syncRoot, context, handler, listener, TAG);
@@ -63,6 +77,14 @@ final class WifiDisplayAdapter extends DisplayAdapter {
             pw.println("mDisplayHandle:");
             mDisplayHandle.dumpLocked(pw);
         }
+
+        pw.println("mCurrentStatus=" + getWifiDisplayStatusLocked());
+        pw.println("mEnabled=" + mEnabled);
+        pw.println("mConnectedDisplay=" + mConnectedDisplay);
+        pw.println("mKnownDisplays=" + Arrays.toString(mKnownDisplays));
+        pw.println("mScanInProgress=" + mScanInProgress);
+        pw.println("mConnectionInProgress=" + mConnectionInProgress);
+        pw.println("mPendingStatusChangeBroadcast=" + mPendingStatusChangeBroadcast);
 
         // Try to dump the controller state.
         if (mDisplayController == null) {
@@ -88,28 +110,160 @@ final class WifiDisplayAdapter extends DisplayAdapter {
         });
     }
 
-    private void connectLocked(String deviceName, String iface) {
-        disconnectLocked();
-
-        String name = getContext().getResources().getString(
-                com.android.internal.R.string.display_manager_wifi_display_name,
-                deviceName);
-        mDisplayHandle = new WifiDisplayHandle(name, iface);
+    public void requestScanLocked() {
+        getHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                if (mDisplayController != null) {
+                    mDisplayController.requestScan();
+                }
+            }
+        });
     }
 
-    private void disconnectLocked() {
+    public void requestConnectLocked(final String address) {
+        getHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                if (mDisplayController != null) {
+                    mDisplayController.requestConnect(address);
+                }
+            }
+        });
+    }
+
+    public void requestDisconnectLocked() {
+        getHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                if (mDisplayController != null) {
+                    mDisplayController.requestDisconnect();
+                }
+            }
+        });
+    }
+
+    public WifiDisplayStatus getWifiDisplayStatusLocked() {
+        if (mCurrentStatus == null) {
+            mCurrentStatus = new WifiDisplayStatus(mEnabled,
+                    mConnectedDisplay, mKnownDisplays,
+                    mScanInProgress, mConnectionInProgress);
+        }
+        return mCurrentStatus;
+    }
+
+    private void handleConnectLocked(WifiDisplay display, String iface) {
+        handleDisconnectLocked();
+
+        mDisplayHandle = new WifiDisplayHandle(display.getDeviceName(), iface);
+    }
+
+    private void handleDisconnectLocked() {
         if (mDisplayHandle != null) {
             mDisplayHandle.disposeLocked();
             mDisplayHandle = null;
         }
     }
 
+    private void scheduleStatusChangedBroadcastLocked() {
+        if (!mPendingStatusChangeBroadcast) {
+            mPendingStatusChangeBroadcast = true;
+            getHandler().post(mStatusChangeBroadcast);
+        }
+    }
+
+    private final Runnable mStatusChangeBroadcast = new Runnable() {
+        @Override
+        public void run() {
+            final Intent intent;
+            synchronized (getSyncRoot()) {
+                if (!mPendingStatusChangeBroadcast) {
+                    return;
+                }
+
+                mPendingStatusChangeBroadcast = false;
+                intent = new Intent(DisplayManager.ACTION_WIFI_DISPLAY_STATUS_CHANGED);
+                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                intent.putExtra(DisplayManager.EXTRA_WIFI_DISPLAY_STATUS,
+                        getWifiDisplayStatusLocked());
+            }
+
+            // Send protected broadcast about wifi display status to receivers that
+            // have the required permission.
+            getContext().sendBroadcast(intent,
+                    android.Manifest.permission.CONFIGURE_WIFI_DISPLAY);
+        }
+    };
+
     private final WifiDisplayController.Listener mWifiDisplayListener =
             new WifiDisplayController.Listener() {
         @Override
-        public void onDisplayConnected(String deviceName, String iface) {
+        public void onEnablementChanged(boolean enabled) {
             synchronized (getSyncRoot()) {
-                connectLocked(deviceName, iface);
+                if (mEnabled != enabled) {
+                    mCurrentStatus = null;
+                    mEnabled = enabled;
+                    scheduleStatusChangedBroadcastLocked();
+                }
+            }
+        }
+
+        @Override
+        public void onScanStarted() {
+            synchronized (getSyncRoot()) {
+                if (!mScanInProgress) {
+                    mCurrentStatus = null;
+                    mScanInProgress = true;
+                    scheduleStatusChangedBroadcastLocked();
+                }
+            }
+        }
+
+        public void onScanFinished(WifiDisplay[] knownDisplays) {
+            synchronized (getSyncRoot()) {
+                if (!Arrays.equals(mKnownDisplays, knownDisplays) || mScanInProgress) {
+                    mCurrentStatus = null;
+                    mKnownDisplays = knownDisplays;
+                    mScanInProgress = false;
+                    scheduleStatusChangedBroadcastLocked();
+                }
+            }
+        }
+
+        @Override
+        public void onDisplayConnecting(WifiDisplay display) {
+            synchronized (getSyncRoot()) {
+                if (!mConnectionInProgress) {
+                    mCurrentStatus = null;
+                    mConnectionInProgress = true;
+                    scheduleStatusChangedBroadcastLocked();
+                }
+            }
+        }
+
+        @Override
+        public void onDisplayConnectionFailed() {
+            synchronized (getSyncRoot()) {
+                if (mConnectionInProgress) {
+                    mCurrentStatus = null;
+                    mConnectionInProgress = false;
+                    scheduleStatusChangedBroadcastLocked();
+                }
+            }
+        }
+
+        @Override
+        public void onDisplayConnected(WifiDisplay display, String iface) {
+            synchronized (getSyncRoot()) {
+                handleConnectLocked(display, iface);
+
+                if (mConnectedDisplay == null || !mConnectedDisplay.equals(display)
+                        || mConnectionInProgress) {
+                    mCurrentStatus = null;
+                    mConnectedDisplay = display;
+                    mConnectionInProgress = false;
+                    scheduleStatusChangedBroadcastLocked();
+                }
             }
         }
 
@@ -117,7 +271,14 @@ final class WifiDisplayAdapter extends DisplayAdapter {
         public void onDisplayDisconnected() {
             // Stop listening.
             synchronized (getSyncRoot()) {
-                disconnectLocked();
+                handleDisconnectLocked();
+
+                if (mConnectedDisplay != null || mConnectionInProgress) {
+                    mCurrentStatus = null;
+                    mConnectedDisplay = null;
+                    mConnectionInProgress = false;
+                    scheduleStatusChangedBroadcastLocked();
+                }
             }
         }
     };

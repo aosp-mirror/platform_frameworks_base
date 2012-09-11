@@ -3688,9 +3688,6 @@
     <!-- Title text to show within the overlay.  [CHAR LIMIT=50] -->
     <string name="display_manager_overlay_display_title"><xliff:g id="name">%1$s</xliff:g>: <xliff:g id="width">%2$d</xliff:g>x<xliff:g id="height">%3$d</xliff:g>, <xliff:g id="dpi">%4$d</xliff:g> dpi</string>
 
-    <!-- Name of a wifi display.  [CHAR LIMIT=50] -->
-    <string name="display_manager_wifi_display_name">Wifi display: <xliff:g id="device">%1$s</xliff:g></string>
-
     <!-- Keyguard strings -->
     <!-- Label shown on emergency call button in keyguard -->
     <string name="kg_emergency_call_label">Emergency call</string>
