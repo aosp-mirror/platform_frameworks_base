@@ -783,16 +783,20 @@ public abstract class BaseStatusBar extends SystemUI implements
         int N = mNotificationData.size();
         for (int i = 0; i < N; i++) {
             NotificationData.Entry entry = mNotificationData.get(i);
-            if (i == (N-1)) {
-                if (DEBUG) Slog.d(TAG, "expanding top notification at " + i);
-                expandView(entry, true);
-            } else {
-                if (!entry.userExpanded()) {
-                    if (DEBUG) Slog.d(TAG, "collapsing notification at " + i);
-                    expandView(entry, false);
+            if (!entry.userLocked()) {
+                if (i == (N-1)) {
+                    if (DEBUG) Slog.d(TAG, "expanding top notification at " + i);
+                    expandView(entry, true);
                 } else {
-                    if (DEBUG) Slog.d(TAG, "ignoring user-modified notification at " + i);
+                    if (!entry.userExpanded()) {
+                        if (DEBUG) Slog.d(TAG, "collapsing notification at " + i);
+                        expandView(entry, false);
+                    } else {
+                        if (DEBUG) Slog.d(TAG, "ignoring user-modified notification at " + i);
+                    }
                 }
+            } else {
+                if (DEBUG) Slog.d(TAG, "ignoring notification being held by user at " + i);
             }
         }
     }

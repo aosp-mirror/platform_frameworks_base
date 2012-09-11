@@ -78,6 +78,7 @@ public class NotificationRowLayout
         super(context, attrs, defStyle);
 
         mRealLayoutTransition = new LayoutTransition();
+        mRealLayoutTransition.setAnimateParentHierarchy(true);
         setLayoutTransitionsEnabled(true);
         
         setOrientation(LinearLayout.VERTICAL);
@@ -161,7 +162,12 @@ public class NotificationRowLayout
         return NotificationData.setUserExpanded(v, userExpanded);
     }
 
+    public boolean setUserLockedChild(View v, boolean userLocked) {
+        return NotificationData.setUserLocked(v, userLocked);
+    }
+
     public void onChildDismissed(View v) {
+        if (DEBUG) Slog.v(TAG, "onChildDismissed: " + v + " mRemoveViews=" + mRemoveViews);
         final View veto = v.findViewById(R.id.veto);
         if (veto != null && veto.getVisibility() != View.GONE && mRemoveViews) {
             veto.performClick();
@@ -225,6 +231,7 @@ public class NotificationRowLayout
      * get removed properly.
      */
     public void setViewRemoval(boolean removeViews) {
+        if (DEBUG) Slog.v(TAG, "setViewRemoval: " + removeViews);
         mRemoveViews = removeViews;
     }
 
