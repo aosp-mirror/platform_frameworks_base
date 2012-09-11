@@ -59,7 +59,7 @@ interface IWindowManager
             in IInputContext inputContext);
     boolean inputMethodClientHasFocus(IInputMethodClient client);
 
-    void setForcedDisplaySize(int displayId, int longDimen, int shortDimen);
+    void setForcedDisplaySize(int displayId, int width, int height);
     void clearForcedDisplaySize(int displayId);
     void setForcedDisplayDensity(int displayId, int density);
     void clearForcedDisplayDensity(int displayId);

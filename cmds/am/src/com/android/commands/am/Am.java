@@ -1187,30 +1187,24 @@ public class Am {
 
     private void runDisplaySize() throws Exception {
         String size = nextArgRequired();
-        int m, n;
+        int w, h;
         if ("reset".equals(size)) {
-            m = n = -1;
+            w = h = -1;
         } else {
             int div = size.indexOf('x');
             if (div <= 0 || div >= (size.length()-1)) {
                 System.err.println("Error: bad size " + size);
                 return;
             }
-            String mstr = size.substring(0, div);
-            String nstr = size.substring(div+1);
+            String wstr = size.substring(0, div);
+            String hstr = size.substring(div+1);
             try {
-                m = Integer.parseInt(mstr);
-                n = Integer.parseInt(nstr);
+                w = Integer.parseInt(wstr);
+                h = Integer.parseInt(hstr);
             } catch (NumberFormatException e) {
                 System.err.println("Error: bad number " + e);
                 return;
             }
-        }
-
-        if (m < n) {
-            int tmp = m;
-            m = n;
-            n = tmp;
         }
 
         IWindowManager wm = IWindowManager.Stub.asInterface(ServiceManager.checkService(
@@ -1221,9 +1215,9 @@ public class Am {
         }
 
         try {
-            if (m >= 0 && n >= 0) {
+            if (w >= 0 && h >= 0) {
                 // TODO(multidisplay): For now Configuration only applies to main screen.
-                wm.setForcedDisplaySize(Display.DEFAULT_DISPLAY, m, n);
+                wm.setForcedDisplaySize(Display.DEFAULT_DISPLAY, w, h);
             } else {
                 wm.clearForcedDisplaySize(Display.DEFAULT_DISPLAY);
             }
@@ -1444,7 +1438,7 @@ public class Am {
                 "       am clear-debug-app\n" +
                 "       am monitor [--gdb <port>]\n" +
                 "       am screen-compat [on|off] <PACKAGE>\n" +
-                "       am display-size [reset|MxN]\n" +
+                "       am display-size [reset|WxH]\n" +
                 "       am display-density [reset|DENSITY]\n" +
                 "       am to-uri [INTENT]\n" +
                 "       am to-intent-uri [INTENT]\n" +
