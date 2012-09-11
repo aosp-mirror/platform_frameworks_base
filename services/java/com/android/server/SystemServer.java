@@ -37,14 +37,12 @@ import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.provider.Settings;
 import android.server.search.SearchManagerService;
 import android.service.dreams.DreamManagerService;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
-import android.view.Display;
 import android.view.WindowManager;
 
 import com.android.internal.os.BinderInternal;

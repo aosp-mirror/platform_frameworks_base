@@ -1763,12 +1763,11 @@ public class ActiveServices {
             if (ActivityManager.checkUidPermission(
                     android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
                     uid) == PackageManager.PERMISSION_GRANTED) {
-                List<UserInfo> users = mAm.getUserManager().getUsers();
-                for (int ui=0; ui<users.size() && res.size() < maxNum; ui++) {
-                    final UserInfo user = users.get(ui);
-                    if (mServiceMap.getAllServices(user.id).size() > 0) {
+                int[] users = mAm.getUsersLocked();
+                for (int ui=0; ui<users.length && res.size() < maxNum; ui++) {
+                    if (mServiceMap.getAllServices(users[ui]).size() > 0) {
                         Iterator<ServiceRecord> it = mServiceMap.getAllServices(
-                                user.id).iterator();
+                                users[ui]).iterator();
                         while (it.hasNext() && res.size() < maxNum) {
                             res.add(makeRunningServiceInfoLocked(it.next()));
                         }
@@ -1873,14 +1872,13 @@ public class ActiveServices {
 
         pw.println("ACTIVITY MANAGER SERVICES (dumpsys activity services)");
         try {
-            List<UserInfo> users = mAm.getUserManager().getUsers();
-            for (int ui=0; ui<users.size(); ui++) {
-                final UserInfo user = users.get(ui);
-                if (mServiceMap.getAllServices(user.id).size() > 0) {
+            int[] users = mAm.getUsersLocked();
+            for (int user : users) {
+                if (mServiceMap.getAllServices(user).size() > 0) {
                     boolean printed = false;
                     long nowReal = SystemClock.elapsedRealtime();
                     Iterator<ServiceRecord> it = mServiceMap.getAllServices(
-                            user.id).iterator();
+                            user).iterator();
                     needSep = false;
                     while (it.hasNext()) {
                         ServiceRecord r = it.next();
@@ -1891,10 +1889,10 @@ public class ActiveServices {
                             continue;
                         }
                         if (!printed) {
-                            if (ui > 0) {
+                            if (user != 0) {
                                 pw.println();
                             }
-                            pw.println("  User " + user.id + " active services:");
+                            pw.println("  User " + user + " active services:");
                             printed = true;
                         }
                         if (needSep) {
@@ -2070,32 +2068,30 @@ public class ActiveServices {
             int opti, boolean dumpAll) {
         ArrayList<ServiceRecord> services = new ArrayList<ServiceRecord>();
 
-        List<UserInfo> users = mAm.getUserManager().getUsers();
-        if ("all".equals(name)) {
-            synchronized (this) {
-                for (UserInfo user : users) {
-                    for (ServiceRecord r1 : mServiceMap.getAllServices(user.id)) {
+        synchronized (this) {
+            int[] users = mAm.getUsersLocked();
+            if ("all".equals(name)) {
+                for (int user : users) {
+                    for (ServiceRecord r1 : mServiceMap.getAllServices(user)) {
                         services.add(r1);
                     }
                 }
-            }
-        } else {
-            ComponentName componentName = name != null
-                    ? ComponentName.unflattenFromString(name) : null;
-            int objectId = 0;
-            if (componentName == null) {
-                // Not a '/' separated full component name; maybe an object ID?
-                try {
-                    objectId = Integer.parseInt(name, 16);
-                    name = null;
-                    componentName = null;
-                } catch (RuntimeException e) {
+            } else {
+                ComponentName componentName = name != null
+                        ? ComponentName.unflattenFromString(name) : null;
+                int objectId = 0;
+                if (componentName == null) {
+                    // Not a '/' separated full component name; maybe an object ID?
+                    try {
+                        objectId = Integer.parseInt(name, 16);
+                        name = null;
+                        componentName = null;
+                    } catch (RuntimeException e) {
+                    }
                 }
-            }
 
-            synchronized (this) {
-                for (UserInfo user : users) {
-                    for (ServiceRecord r1 : mServiceMap.getAllServices(user.id)) {
+                for (int user : users) {
+                    for (ServiceRecord r1 : mServiceMap.getAllServices(user)) {
                         if (componentName != null) {
                             if (r1.name.equals(componentName)) {
                                 services.add(r1);
