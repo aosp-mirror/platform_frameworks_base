@@ -127,7 +127,7 @@ interface IPackageManager {
      * limit that kicks in when flags are included that bloat up the data
      * returned.
      */
-    ParceledListSlice getInstalledPackages(int flags, in String lastRead);
+    ParceledListSlice getInstalledPackages(int flags, in String lastRead, in int userId);
 
     /**
      * This implements getInstalledApplications via a "last returned row"
