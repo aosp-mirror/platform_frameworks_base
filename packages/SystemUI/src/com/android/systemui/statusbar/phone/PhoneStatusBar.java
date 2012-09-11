@@ -19,11 +19,10 @@ package com.android.systemui.statusbar.phone;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
+import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
-import android.app.Dialog;
-import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
@@ -31,7 +30,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
@@ -54,13 +52,11 @@ import android.util.Log;
 import android.util.Slog;
 import android.view.Display;
 import android.view.Gravity;
-import android.view.IWindowManager;
-import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManagerGlobal;
 import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
@@ -76,7 +72,6 @@ import android.widget.TextView;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarNotification;
 import com.android.systemui.R;
-import com.android.systemui.recent.RecentTasksLoader;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.GestureRecorder;
@@ -86,6 +81,7 @@ import com.android.systemui.statusbar.RotationToggle;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.DateView;
 import com.android.systemui.statusbar.policy.IntruderAlertView;
 import com.android.systemui.statusbar.policy.LocationController;
@@ -139,6 +135,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     PhoneStatusBarPolicy mIconPolicy;
 
     // These are no longer handled by the policy, because we need custom strategies for them
+    BluetoothController mBluetoothController;
     BatteryController mBatteryController;
     LocationController mLocationController;
     NetworkController mNetworkController;
@@ -317,9 +314,6 @@ public class PhoneStatusBar extends BaseStatusBar {
                   View.STATUS_BAR_DISABLE_NOTIFICATION_TICKER
                 | (mNotificationPanelIsFullScreenWidth ? 0 : View.STATUS_BAR_DISABLE_SYSTEM_INFO));
 
-        // quick settings (WIP)
-        mSettingsPanel = (PanelView) mStatusBarWindow.findViewById(R.id.settings_panel);
-
         if (!ActivityManager.isHighEndGfx()) {
             mStatusBarWindow.setBackground(null);
             mNotificationPanel.setBackground(new FastColorDrawable(context.getResources().getColor(
@@ -394,8 +388,10 @@ public class PhoneStatusBar extends BaseStatusBar {
         mBatteryController = new BatteryController(mContext);
         mBatteryController.addIconView((ImageView)mStatusBarView.findViewById(R.id.battery));
         mNetworkController = new NetworkController(mContext);
+        mBluetoothController = new BluetoothController(mContext);
         final SignalClusterView signalCluster =
                 (SignalClusterView)mStatusBarView.findViewById(R.id.signal_cluster);
+
 
         mNetworkController.addSignalCluster(signalCluster);
         signalCluster.setNetworkController(mNetworkController);
@@ -433,6 +429,12 @@ public class PhoneStatusBar extends BaseStatusBar {
                 }
             });
         }
+
+        // Quick Settings (WIP)
+        mSettingsPanel = (PanelView) mStatusBarWindow.findViewById(R.id.settings_panel);
+        mSettingsPanel.setBar(mStatusBarView);
+        mSettingsPanel.setup(mNetworkController, mBluetoothController, mBatteryController,
+                mLocationController);
 
 //        final ImageView wimaxRSSI =
 //                (ImageView)sb.findViewById(R.id.wimax_signal);
@@ -1844,6 +1846,10 @@ public class PhoneStatusBar extends BaseStatusBar {
         if (mClearButton instanceof TextView) {
             ((TextView)mClearButton).setText(context.getText(R.string.status_bar_clear_all_button));
         }
+
+        // Update the QuickSettings container
+        ((SettingsPanelView) mSettingsPanel).updateResources();
+
         loadDimens();
     }
 

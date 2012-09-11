@@ -16,12 +16,67 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.animation.LayoutTransition;
 import android.content.Context;
+import android.content.Intent;
+import android.content.res.Resources;
 import android.util.AttributeSet;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
+import com.android.systemui.R;
+import com.android.systemui.statusbar.BaseStatusBar;
+import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.BluetoothController;
+import com.android.systemui.statusbar.policy.LocationController;
+import com.android.systemui.statusbar.policy.NetworkController;
 
 public class SettingsPanelView extends PanelView {
+
+    private QuickSettings mQS;
+    private QuickSettingsContainerView mQSContainer;
+
     public SettingsPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
+    }
+
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+
+        mQSContainer = (QuickSettingsContainerView) findViewById(R.id.quick_settings_container);
+        mQS = new QuickSettings(getContext(), mQSContainer);
+    }
+
+    @Override
+    public void setBar(PanelBar panelBar) {
+        super.setBar(panelBar);
+
+        if (mQS != null) {
+            mQS.setBar(panelBar);
+        }
+    }
+
+    @Override
+    public void setup(NetworkController networkController, BluetoothController bluetoothController,
+            BatteryController batteryController, LocationController locationController) {
+        super.setup(networkController, bluetoothController, batteryController, locationController);
+
+        if (mQS != null) {
+            mQS.setup(networkController, bluetoothController, batteryController,
+                    locationController);
+        }
+    }
+
+    void updateResources() {
+        if (mQS != null) {
+            mQS.updateResources();
+        }
+        if (mQSContainer != null) {
+            mQSContainer.updateResources();
+        }
+        requestLayout();
     }
 
     @Override

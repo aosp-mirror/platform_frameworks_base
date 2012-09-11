@@ -30,7 +30,7 @@ import com.android.systemui.R;
 
 import java.util.Date;
 
-public final class DateView extends TextView {
+public class DateView extends TextView {
     private static final String TAG = "DateView";
 
     private boolean mAttachedToWindow;
@@ -86,7 +86,7 @@ public final class DateView extends TextView {
         return 0;
     }
 
-    private final void updateClock() {
+    protected void updateClock() {
         final Context context = getContext();
         Date now = new Date();
         CharSequence dow = DateFormat.format("EEEE", now);
