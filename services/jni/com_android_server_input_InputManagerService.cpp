@@ -993,7 +993,8 @@ static void nativeStart(JNIEnv* env, jclass clazz, jint ptr) {
 static void nativeSetDisplayViewport(JNIEnv* env, jclass clazz, jint ptr, jboolean external,
         jint displayId, jint orientation,
         jint logicalLeft, jint logicalTop, jint logicalRight, jint logicalBottom,
-        jint physicalLeft, jint physicalTop, jint physicalRight, jint physicalBottom) {
+        jint physicalLeft, jint physicalTop, jint physicalRight, jint physicalBottom,
+        jint deviceWidth, jint deviceHeight) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
     DisplayViewport v;
@@ -1007,6 +1008,8 @@ static void nativeSetDisplayViewport(JNIEnv* env, jclass clazz, jint ptr, jboole
     v.physicalTop = physicalTop;
     v.physicalRight = physicalRight;
     v.physicalBottom = physicalBottom;
+    v.deviceWidth = deviceWidth;
+    v.deviceHeight = deviceHeight;
     im->setDisplayViewport(external, v);
 }
 
@@ -1288,7 +1291,7 @@ static JNINativeMethod gInputManagerMethods[] = {
             (void*) nativeInit },
     { "nativeStart", "(I)V",
             (void*) nativeStart },
-    { "nativeSetDisplayViewport", "(IZIIIIIIIIII)V",
+    { "nativeSetDisplayViewport", "(IZIIIIIIIIIIII)V",
             (void*) nativeSetDisplayViewport },
     { "nativeGetScanCodeState", "(IIII)I",
             (void*) nativeGetScanCodeState },

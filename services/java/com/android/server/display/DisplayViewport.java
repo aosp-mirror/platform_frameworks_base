@@ -44,12 +44,20 @@ public final class DisplayViewport {
     // should be scaled or translated after rotation.
     public final Rect physicalFrame = new Rect();
 
+    // The full width and height of the display device, rotated in the same
+    // manner as physicalFrame.  This expresses the full native size of the display device.
+    // The physical frame should usually fit within this area.
+    public int deviceWidth;
+    public int deviceHeight;
+
     public void copyFrom(DisplayViewport viewport) {
         valid = viewport.valid;
         displayId = viewport.displayId;
         orientation = viewport.orientation;
         logicalFrame.set(viewport.logicalFrame);
         physicalFrame.set(viewport.physicalFrame);
+        deviceWidth = viewport.deviceWidth;
+        deviceHeight = viewport.deviceHeight;
     }
 
     // For debugging purposes.
@@ -60,6 +68,8 @@ public final class DisplayViewport {
                 + ", orientation=" + orientation
                 + ", logicalFrame=" + logicalFrame
                 + ", physicalFrame=" + physicalFrame
+                + ", deviceWidth=" + deviceWidth
+                + ", deviceHeight=" + deviceHeight
                 + "}";
     }
 }
