@@ -461,6 +461,7 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean mDisplayFrozen = false;
     boolean mWaitingForConfig = false;
     boolean mWindowsFreezingScreen = false;
+    boolean mClientFreezingScreen = false;
     int mAppsFreezingScreen = 0;
     int mLastWindowForcedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 
@@ -3915,7 +3916,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (currentConfig.diff(mTempConfiguration) != 0) {
                     mWaitingForConfig = true;
                     getDefaultDisplayContent().layoutNeeded = true;
-                    startFreezingDisplayLocked(false);
+                    startFreezingDisplayLocked(false, 0, 0);
                     config = new Configuration(mTempConfiguration);
                 }
             }
@@ -4644,7 +4645,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 wtoken.mAppAnimator.freezingScreen = true;
                 mAppsFreezingScreen++;
                 if (mAppsFreezingScreen == 1) {
-                    startFreezingDisplayLocked(false);
+                    startFreezingDisplayLocked(false, 0, 0);
                     mH.removeMessages(H.APP_FREEZE_TIMEOUT);
                     mH.sendMessageDelayed(mH.obtainMessage(H.APP_FREEZE_TIMEOUT),
                             5000);
@@ -5152,6 +5153,49 @@ public class WindowManagerService extends IWindowManager.Stub
     // -------------------------------------------------------------
     // Misc IWindowSession methods
     // -------------------------------------------------------------
+
+    @Override
+    public void startFreezingScreen(int exitAnim, int enterAnim) {
+        if (!checkCallingPermission(android.Manifest.permission.FREEZE_SCREEN,
+                "startFreezingScreen()")) {
+            throw new SecurityException("Requires FREEZE_SCREEN permission");
+        }
+
+        synchronized(mWindowMap) {
+            if (!mClientFreezingScreen) {
+                mClientFreezingScreen = true;
+                final long origId = Binder.clearCallingIdentity();
+                try {
+                    startFreezingDisplayLocked(false, exitAnim, enterAnim);
+                    mH.removeMessages(H.CLIENT_FREEZE_TIMEOUT);
+                    mH.sendMessageDelayed(mH.obtainMessage(H.CLIENT_FREEZE_TIMEOUT),
+                            5000);
+                } finally {
+                    Binder.restoreCallingIdentity(origId);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void stopFreezingScreen() {
+        if (!checkCallingPermission(android.Manifest.permission.FREEZE_SCREEN,
+                "stopFreezingScreen()")) {
+            throw new SecurityException("Requires FREEZE_SCREEN permission");
+        }
+
+        synchronized(mWindowMap) {
+            if (mClientFreezingScreen) {
+                mClientFreezingScreen = false;
+                final long origId = Binder.clearCallingIdentity();
+                try {
+                    stopFreezingDisplayLocked();
+                } finally {
+                    Binder.restoreCallingIdentity(origId);
+                }
+            }
+        }
+    }
 
     @Override
     public void disableKeyguard(IBinder token, String tag) {
@@ -5947,7 +5991,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mH.sendMessageDelayed(mH.obtainMessage(H.WINDOW_FREEZE_TIMEOUT), 2000);
         mWaitingForConfig = true;
         getDefaultDisplayContent().layoutNeeded = true;
-        startFreezingDisplayLocked(inTransaction);
+        startFreezingDisplayLocked(inTransaction, 0, 0);
 
         // We need to update our screen size information to match the new
         // rotation.  Note that this is redundant with the later call to
@@ -7207,6 +7251,8 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int DO_DISPLAY_REMOVED = 32;
         public static final int DO_DISPLAY_CHANGED = 33;
 
+        public static final int CLIENT_FREEZE_TIMEOUT = 34;
+
         public static final int ANIMATOR_WHAT_OFFSET = 100000;
         public static final int SET_TRANSPARENT_REGION = ANIMATOR_WHAT_OFFSET + 1;
         public static final int CLEAR_PENDING_ACTIONS = ANIMATOR_WHAT_OFFSET + 2;
@@ -7528,6 +7574,16 @@ public class WindowManagerService extends IWindowManager.Stub
                                     unsetAppFreezingScreenLocked(tok, true, true);
                                 }
                             }
+                        }
+                    }
+                    break;
+                }
+
+                case CLIENT_FREEZE_TIMEOUT: {
+                    synchronized (mWindowMap) {
+                        if (mClientFreezingScreen) {
+                            mClientFreezingScreen = false;
+                            stopFreezingDisplayLocked();
                         }
                     }
                     break;
@@ -7949,7 +8005,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         if (configChanged) {
             mWaitingForConfig = true;
-            startFreezingDisplayLocked(false);
+            startFreezingDisplayLocked(false, 0, 0);
             mH.sendEmptyMessage(H.SEND_NEW_CONFIGURATION);
         }
 
@@ -9859,7 +9915,8 @@ public class WindowManagerService extends IWindowManager.Stub
         return result;
     }
 
-    private void startFreezingDisplayLocked(boolean inTransaction) {
+    private void startFreezingDisplayLocked(boolean inTransaction,
+            int exitAnim, int enterAnim) {
         if (mDisplayFrozen) {
             return;
         }
@@ -9901,7 +9958,8 @@ public class WindowManagerService extends IWindowManager.Stub
             final DisplayInfo displayInfo = displayContent.getDisplayInfo();
             mAnimator.mScreenRotationAnimation = new ScreenRotationAnimation(mContext,
                     display, mFxSession, inTransaction, displayInfo.logicalWidth,
-                    displayInfo.logicalHeight, display.getRotation());
+                    displayInfo.logicalHeight, display.getRotation(),
+                    exitAnim, enterAnim);
         }
     }
 
@@ -9910,16 +9968,19 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
 
-        if (mWaitingForConfig || mAppsFreezingScreen > 0 || mWindowsFreezingScreen) {
+        if (mWaitingForConfig || mAppsFreezingScreen > 0 || mWindowsFreezingScreen
+                || mClientFreezingScreen) {
             if (DEBUG_ORIENTATION) Slog.d(TAG,
                 "stopFreezingDisplayLocked: Returning mWaitingForConfig=" + mWaitingForConfig
                 + ", mAppsFreezingScreen=" + mAppsFreezingScreen
-                + ", mWindowsFreezingScreen=" + mWindowsFreezingScreen);
+                + ", mWindowsFreezingScreen=" + mWindowsFreezingScreen
+                + ", mClientFreezingScreen=" + mClientFreezingScreen);
             return;
         }
         
         mDisplayFrozen = false;
         mH.removeMessages(H.APP_FREEZE_TIMEOUT);
+        mH.removeMessages(H.CLIENT_FREEZE_TIMEOUT);
         if (PROFILE_ORIENTATION) {
             Debug.stopMethodTracing();
         }
@@ -10440,9 +10501,10 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             pw.print("  mTransactionSequence="); pw.println(mTransactionSequence);
             pw.print("  mDisplayFrozen="); pw.print(mDisplayFrozen);
-                    pw.print(" mWindowsFreezingScreen="); pw.print(mWindowsFreezingScreen);
-                    pw.print(" mAppsFreezingScreen="); pw.print(mAppsFreezingScreen);
-                    pw.print(" mWaitingForConfig="); pw.println(mWaitingForConfig);
+                    pw.print(" windows="); pw.print(mWindowsFreezingScreen);
+                    pw.print(" client="); pw.print(mClientFreezingScreen);
+                    pw.print(" apps="); pw.print(mAppsFreezingScreen);
+                    pw.print(" waitingForConfig="); pw.println(mWaitingForConfig);
             pw.print("  mRotation="); pw.print(mRotation);
                     pw.print(" mAltOrientation="); pw.println(mAltOrientation);
             pw.print("  mLastWindowForcedOrientation="); pw.print(mLastWindowForcedOrientation);
