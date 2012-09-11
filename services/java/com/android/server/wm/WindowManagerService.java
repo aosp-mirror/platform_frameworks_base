@@ -7775,24 +7775,22 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void setForcedDisplaySize(int displayId, int longDimen, int shortDimen) {
+    public void setForcedDisplaySize(int displayId, int width, int height) {
         synchronized(mWindowMap) {
+            // Set some sort of reasonable bounds on the size of the display that we
+            // will try to emulate.
+            final int MIN_WIDTH = 200;
+            final int MIN_HEIGHT = 200;
+            final int MAX_SCALE = 2;
             final DisplayContent displayContent = getDisplayContent(displayId);
-            int width, height;
-            if (displayContent.mInitialDisplayWidth < displayContent.mInitialDisplayHeight) {
-                width = shortDimen < displayContent.mInitialDisplayWidth
-                        ? shortDimen : displayContent.mInitialDisplayWidth;
-                height = longDimen < displayContent.mInitialDisplayHeight
-                        ? longDimen : displayContent.mInitialDisplayHeight;
-            } else {
-                width = longDimen < displayContent.mInitialDisplayWidth
-                        ? longDimen : displayContent.mInitialDisplayWidth;
-                height = shortDimen < displayContent.mInitialDisplayHeight
-                        ? shortDimen : displayContent.mInitialDisplayHeight;
-            }
+
+            width = Math.min(Math.max(width, MIN_WIDTH),
+                    displayContent.mInitialDisplayWidth * MAX_SCALE);
+            height = Math.min(Math.max(height, MIN_HEIGHT),
+                    displayContent.mInitialDisplayHeight * MAX_SCALE);
             setForcedDisplaySizeLocked(displayContent, width, height);
-            Settings.Secure.putString(mContext.getContentResolver(),
-                    Settings.Secure.DISPLAY_SIZE_FORCED, width + "," + height);
+            Settings.Global.putString(mContext.getContentResolver(),
+                    Settings.Global.DISPLAY_SIZE_FORCED, width + "," + height);
         }
     }
 
@@ -7839,8 +7837,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private void readForcedDisplaySizeAndDensityLocked(final DisplayContent displayContent) {
         boolean changed = false;
-        final String sizeStr = Settings.Secure.getString(mContext.getContentResolver(),
-                Settings.Secure.DISPLAY_SIZE_FORCED);
+        final String sizeStr = Settings.Global.getString(mContext.getContentResolver(),
+                Settings.Global.DISPLAY_SIZE_FORCED);
         if (sizeStr != null && sizeStr.length() > 0) {
             final int pos = sizeStr.indexOf(',');
             if (pos > 0 && sizeStr.lastIndexOf(',') == pos) {
@@ -7861,8 +7859,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
         }
-        final String densityStr = Settings.Secure.getString(mContext.getContentResolver(),
-                Settings.Secure.DISPLAY_DENSITY_FORCED);
+        final String densityStr = Settings.Global.getString(mContext.getContentResolver(),
+                Settings.Global.DISPLAY_DENSITY_FORCED);
         if (densityStr != null && densityStr.length() > 0) {
             int density;
             try {
@@ -7897,8 +7895,8 @@ public class WindowManagerService extends IWindowManager.Stub
             final DisplayContent displayContent = getDisplayContent(displayId);
             setForcedDisplaySizeLocked(displayContent, displayContent.mInitialDisplayWidth,
                     displayContent.mInitialDisplayHeight);
-            Settings.Secure.putString(mContext.getContentResolver(),
-                    Settings.Secure.DISPLAY_SIZE_FORCED, "");
+            Settings.Global.putString(mContext.getContentResolver(),
+                    Settings.Global.DISPLAY_SIZE_FORCED, "");
         }
     }
 
@@ -7906,8 +7904,8 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized(mWindowMap) {
             final DisplayContent displayContent = getDisplayContent(displayId);
             setForcedDisplayDensityLocked(displayContent, density);
-            Settings.Secure.putString(mContext.getContentResolver(),
-                    Settings.Secure.DISPLAY_DENSITY_FORCED, Integer.toString(density));
+            Settings.Global.putString(mContext.getContentResolver(),
+                    Settings.Global.DISPLAY_DENSITY_FORCED, Integer.toString(density));
         }
     }
 
