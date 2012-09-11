@@ -1,0 +1,110 @@
+/*
+ * Copyright (C) 2012 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package android.renderscript;
+
+import android.content.Context;
+import android.content.res.Resources;
+import android.util.Log;
+
+
+/**
+ * @hide
+ **/
+public class ScriptIntrinsicLUT extends ScriptIntrinsic {
+    private Matrix4f mMatrix = new Matrix4f();
+    private Allocation mTables;
+    private byte mCache[] = new byte[1024];
+    private boolean mDirty = true;
+
+    ScriptIntrinsicLUT(int id, RenderScript rs) {
+        super(id, rs);
+        mTables = Allocation.createSized(rs, Element.U8(rs), 1024);
+        for (int ct=0; ct < 256; ct++) {
+            mCache[ct] = (byte)ct;
+            mCache[ct + 256] = (byte)ct;
+            mCache[ct + 512] = (byte)ct;
+            mCache[ct + 768] = (byte)ct;
+        }
+        bindAllocation(mTables, 0);
+    }
+
+    /**
+     * Supported elements types are uchar4
+     *
+     * @param rs
+     * @param e
+     *
+     * @return ScriptIntrinsicColorMatrix
+     */
+    public static ScriptIntrinsicLUT create(RenderScript rs, Element e) {
+        int id = rs.nScriptIntrinsicCreate(3, e.getID(rs));
+        return new ScriptIntrinsicLUT(id, rs);
+
+    }
+
+
+    private void validate(int index, int value) {
+        if (index < 0 || index > 255) {
+            throw new RSIllegalArgumentException("Index out of range (0-255).");
+        }
+        if (value < 0 || value > 255) {
+            throw new RSIllegalArgumentException("Value out of range (0-255).");
+        }
+    }
+
+    public void setRed(int index, int value) {
+        validate(index, value);
+        mCache[index] = (byte)value;
+        mDirty = true;
+    }
+
+    public void setGreen(int index, int value) {
+        validate(index, value);
+        mCache[index+256] = (byte)value;
+        mDirty = true;
+    }
+
+    public void setBlue(int index, int value) {
+        validate(index, value);
+        mCache[index+512] = (byte)value;
+        mDirty = true;
+    }
+
+    public void setAlpha(int index, int value) {
+        validate(index, value);
+        mCache[index+768] = (byte)value;
+        mDirty = true;
+    }
+
+
+    /**
+     * Invoke the kernel and apply the matrix to each cell of ain and copy to
+     * aout.
+     *
+     * @param ain Input allocation
+     * @param aout Output allocation
+     */
+    public void forEach(Allocation ain, Allocation aout) {
+        if (mDirty) {
+            mDirty = false;
+            mTables.copyFromUnchecked(mCache);
+        }
+        forEach(0, ain, aout, null);
+    }
+
+}
+
