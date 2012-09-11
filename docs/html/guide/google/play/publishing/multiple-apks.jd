@@ -9,9 +9,7 @@ page.title=Multiple APK Support
   <ul>
     <li>Simultaneously publish different APKs for different
 device configurations</li>
-    <li>Different APKs are distributed to different devices based on filters declared in the
-manifest file</li>
-    <li>You should publish multiple APKs only when it's not possible or reasonable to
+    <li>You should publish multiple APKs only when it's not possible to
 support all desired devices with a single APK</li>
   </ul>
 
@@ -39,16 +37,17 @@ support all desired devices with a single APK</li>
       <li><a href="#TextureOptions">Supporting multiple GL textures</a></li>
       <li><a href="#ScreenOptions">Supporting multiple screens</a></li>
       <li><a href="#ApiLevelOptions">Supporting multiple API levels</a></li>
+      <li><a href="#CpuArchOptions">Supporting multiple CPU architectures</a></li>
     </ol>
   </li>
 </ol>
 
   <h2>See also</h2>
 <ol>
+  <li><a href="{@docRoot}guide/google/play/expansion-files.html">APK Expansion Files</a></li>
   <li><a href="{@docRoot}guide/google/play/filters.html">Filters on Google Play</a></li>
   <li><a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a></li>
-  <li><a href="{@docRoot}tools/extras/support-library.html">Compatibility
-Package</a></li>
+  <li><a href="{@docRoot}tools/extras/support-library.html">Support Library</a></li>
   <li><a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">Android API Levels</a></li>
 </ol>
 
@@ -76,14 +75,16 @@ many device configurations as possible, doing so is sometimes not possible. To h
 you publish your application for as many devices as possible, Google Play allows you to
 publish multiple APKs under the same application listing. Google Play then supplies each APK to
 the appropriate devices based on configuration support you've declared in the manifest file of each
-APK.</p>
+APK. </p>
 
 <p>By publishing your application with multiple APKs, you can:</p>
 
 <ul>
   <li>Support different OpenGL texture compression formats with each APK.</li>
-  <li>Support different screen configurations with each APK.</li>
+  <li>Support different screen sizes and densities with each APK.</li>
   <li>Support different platform versions with each APK.</li>
+  <li>Support different CPU architectures with each APK (such as for ARM, x86, and MIPS, when your
+  app uses the <a href="{@docRoot}tools/sdk/ndk/index.html">Android NDK</a>).</li>
 </ul>
 
 <p>Currently, these are the only device characteristics that Google Play supports for publishing
@@ -91,7 +92,8 @@ multiple APKs as the same application.</p>
 
 <p class="note"><strong>Note:</strong> You should generally use multiple APKs to support
 different device configurations <strong>only when your APK is too large</strong> (greater than
-50MB). Using a single APK to support different configurations is always the best practice,
+50MB) due to the alternative resources needed for different device configurations.
+Using a single APK to support different configurations is always the best practice,
 because it makes the path for application updates simple and clear for users (and also makes
 your life simpler by avoiding development and publishing complexity). Read the section below about
 <a href="#SingleAPK">Using a Single APK Instead</a> to
@@ -283,14 +285,19 @@ higher, as per the previous note).</li>
     </ul>
   </div>
   </li>
+
+  <li><strong>CPU architecture (ABI)</strong>
+    <p>This is based on the native libraries included in each APK (which are
+    determined by the architectures you declare in the {@code Application.mk}
+    file) when using the Android NDK.</p></li>
 </ul>
 
 <p>Other manifest elements that enable <a
 href="{@docRoot}guide/google/play/filters.html">Google Play filters</a>&mdash;but are not
 listed above&mdash;are still applied for each APK as usual. However, Google Play does not allow
-you to publish multiple APKs based on variations of them. Thus, you cannot publish
-multiple APKs if the above listed filters are the same for each APK (but the APKs differ based on
-other characteristics in the manifest file). For
+you to publish separate APKs based on variations of those device characteristics. Thus, you cannot
+publish multiple APKs if the above listed filters are the same for each APK (but the APKs differ
+based on other characteristics in the manifest or APK). For
 example, you cannot provide different APKs that differ purely on the <a
 href="{@docRoot}guide/topics/manifest/uses-configuration-element.html">{@code
 &lt;uses-configuration&gt;}</a> characteristics.</p>
@@ -349,7 +356,8 @@ greater. In this case, the API level is the only supported filter used, so the v
 get an update when they receive a system update.</li>
       <li>If you have one APK that's for API level 4 (and above) <em>and</em> small -
 large screens, and another APK for API level 8 (and above) <em>and</em> large - xlarge screens, then
-the version codes <strong>must increase</strong>. In this case, the API level filter is used to
+the version codes <strong>must increase</strong> in correlation with the API levels.
+In this case, the API level filter is used to
 distinguish each APK, but so is the screen size. Because the screen sizes overlap (both APKs
 support large screens), the version codes must still be in order. This ensures that a large screen
 device that receives a system update to API level 8 will receive an update for the second
@@ -360,6 +368,21 @@ screens, then the version codes <strong>do not need to increase</strong> in corr
 levels. Because there is no overlap within the screen size filter, there are no devices that
 could potentially move between these two APKs, so there's no need for the version codes to
 increase from the lower API level to the higher API level.</li>
+      <li>If you have one APK that's for API level 4 (and above) <em>and</em> ARMv7 CPUs,
+and another APK for API level 8 (and above) <em>and</em> ARMv5TE CPUs,
+then the version codes <strong>must increase</strong> in correlation with the API levels.
+In this case, the API level filter is used to
+distinguish each APK, but so is the CPU architecture. Because an APK with ARMv5TE libraries is
+compatible with devices that have an ARMv7 CPU, the APKs overlap on this characteristic.
+As such, the version code for the APK that supports API level 8 and above must be higher.
+This ensures that a device with an ARMv7 CPU that receives a system update to API level 8
+will receive an update for the second APK that's designed for API level 8.
+However, because this kind of update results in the ARMv7 device using an APK that's not
+fully optimized for that device's CPU, you should provide an
+APK for both the ARMv5TE and the ARMv7 architecture at each API level in order to optimize
+the app performance on each CPU.
+<strong>Note:</strong> This applies <em>only</em> when comparing APKs with the ARMv5TE and
+ARMv7 libraries, and not when comparing other native libraries.</li>
     </ul>
   </li>
 
@@ -384,7 +407,12 @@ screens so that all previously-supported devices are still supported.</li>
 sizes small, normal, and large, while another APK supports sizes large and xlarge, there is an
 overlap, because both APKs support large screens. If you do not resolve this, then devices that
 qualify for both APKs (large screen devices in the example) will receive whichever APK has the
-highest version code.</li>
+highest version code.
+  <p class="note"><strong>Note:</strong> If you're creating separate APKs for different CPU
+  architectures, be aware that an APK for ARMv5TE will overlap with an APK for ARMv7. That is,
+  an APK designed for ARMv5TE is compatible with an ARMv7 device,
+but the reverse is not true (an APK with only the ARMv7 libraries is
+<em>not</em> compatible with an ARMv5TE device).</li>
 </ul>
 
 <p>When such conflicts occur, you will see a warning message, but you can still publish your
@@ -641,3 +669,17 @@ if (android.os.Build.VERSION.SDK_INT >= 11) {
 }
 </pre>
 
+
+<h3 id="CpuArchOptions">Supporting multiple CPU architectures</h3>
+
+<p>When using the Android NDK, you can create a single APK that supports multiple CPU architectures
+by declaring each of the desired architectures with the {@code APP_ABI} variable in the
+<code>Application.mk</code> file.</p>
+
+<p>For example, here's an <code>Application.mk</code> file that declares support for three
+different CPU architectures:</p>
+
+<pre>
+APP_ABI := armeabi armeabi-v7a mips
+APP_PLATFORM := android-9
+</pre>
