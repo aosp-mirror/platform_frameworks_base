@@ -108,6 +108,8 @@ interface IAudioService {
 
     boolean isBluetoothA2dpOn();
 
+    oneway void setRemoteSubmixOn(boolean on, int address);
+
     int requestAudioFocus(int mainStreamType, int durationHint, IBinder cb, IAudioFocusDispatcher l,
             String clientId, String callingPackageName);
 
