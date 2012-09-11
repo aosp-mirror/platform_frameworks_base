@@ -68,6 +68,9 @@ public class KeyguardPasswordView extends LinearLayout
     // any passwords with length less than or equal to this length.
     private static final int MINIMUM_PASSWORD_LENGTH_BEFORE_REPORT = 3;
 
+    // Enable this if we want to hide the on-screen PIN keyboard when a physical one is showing
+    private static final boolean ENABLE_HIDE_KEYBOARD = false;
+
     public KeyguardPasswordView(Context context) {
         super(context);
     }
@@ -123,10 +126,13 @@ public class KeyguardPasswordView extends LinearLayout
             mKeyboardHelper.setKeyboardMode(PasswordEntryKeyboardHelper.KEYBOARD_MODE_ALPHA);
             mKeyboardView.setVisibility(View.GONE);
         } else {
-            // Use lockscreen's numeric keyboard if the physical keyboard isn't showing
             mKeyboardHelper.setKeyboardMode(PasswordEntryKeyboardHelper.KEYBOARD_MODE_NUMERIC);
-            mKeyboardView.setVisibility(getResources().getConfiguration().hardKeyboardHidden
-                    == Configuration.HARDKEYBOARDHIDDEN_NO ? View.INVISIBLE : View.VISIBLE);
+
+            // Use lockscreen's numeric keyboard if the physical keyboard isn't showing
+            boolean hardKeyboardVisible = getResources().getConfiguration().hardKeyboardHidden
+                    == Configuration.HARDKEYBOARDHIDDEN_NO;
+            mKeyboardView.setVisibility(
+                    (ENABLE_HIDE_KEYBOARD && hardKeyboardVisible) ? View.INVISIBLE : View.VISIBLE);
 
             // The delete button is of the PIN keyboard itself in some (e.g. tablet) layouts,
             // not a separate view
