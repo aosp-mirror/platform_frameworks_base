@@ -48,6 +48,7 @@ class ScreenRotationAnimation {
     BlackFrame mExitingBlackFrame;
     BlackFrame mEnteringBlackFrame;
     int mWidth, mHeight;
+    int mExitAnimId, mEnterAnimId;
 
     int mOriginalRotation;
     int mOriginalWidth, mOriginalHeight;
@@ -188,9 +189,12 @@ class ScreenRotationAnimation {
     }
 
     public ScreenRotationAnimation(Context context, Display display, SurfaceSession session,
-            boolean inTransaction, int originalWidth, int originalHeight, int originalRotation) {
+            boolean inTransaction, int originalWidth, int originalHeight, int originalRotation,
+            int exitAnim, int enterAnim) {
         mContext = context;
         mDisplay = display;
+        mExitAnimId = exitAnim;
+        mEnterAnimId = enterAnim;
 
         // Screenshot does NOT include rotation!
         if (originalRotation == Surface.ROTATION_90
@@ -375,58 +379,68 @@ class ScreenRotationAnimation {
                 + finalWidth + " finalHeight=" + finalHeight
                 + " origWidth=" + mOriginalWidth + " origHeight=" + mOriginalHeight);
 
-        switch (delta) {
-            case Surface.ROTATION_0:
-                mRotateExitAnimation = AnimationUtils.loadAnimation(mContext,
-                        com.android.internal.R.anim.screen_rotate_0_exit);
-                mRotateEnterAnimation = AnimationUtils.loadAnimation(mContext,
-                        com.android.internal.R.anim.screen_rotate_0_enter);
-                if (USE_CUSTOM_BLACK_FRAME) {
-                    mRotateFrameAnimation = AnimationUtils.loadAnimation(mContext,
-                            com.android.internal.R.anim.screen_rotate_0_frame);
-                }
-                break;
-            case Surface.ROTATION_90:
-                mRotateExitAnimation = AnimationUtils.loadAnimation(mContext,
-                        com.android.internal.R.anim.screen_rotate_plus_90_exit);
-                mRotateEnterAnimation = AnimationUtils.loadAnimation(mContext,
-                        com.android.internal.R.anim.screen_rotate_plus_90_enter);
-                if (USE_CUSTOM_BLACK_FRAME) {
-                    mRotateFrameAnimation = AnimationUtils.loadAnimation(mContext,
-                            com.android.internal.R.anim.screen_rotate_plus_90_frame);
-                }
-                break;
-            case Surface.ROTATION_180:
-                mRotateExitAnimation = AnimationUtils.loadAnimation(mContext,
-                        com.android.internal.R.anim.screen_rotate_180_exit);
-                mRotateEnterAnimation = AnimationUtils.loadAnimation(mContext,
-                        com.android.internal.R.anim.screen_rotate_180_enter);
-                mRotateFrameAnimation = AnimationUtils.loadAnimation(mContext,
-                        com.android.internal.R.anim.screen_rotate_180_frame);
-                break;
-            case Surface.ROTATION_270:
-                mRotateExitAnimation = AnimationUtils.loadAnimation(mContext,
-                        com.android.internal.R.anim.screen_rotate_minus_90_exit);
-                mRotateEnterAnimation = AnimationUtils.loadAnimation(mContext,
-                        com.android.internal.R.anim.screen_rotate_minus_90_enter);
-                if (USE_CUSTOM_BLACK_FRAME) {
-                    mRotateFrameAnimation = AnimationUtils.loadAnimation(mContext,
-                            com.android.internal.R.anim.screen_rotate_minus_90_frame);
-                }
-                break;
+        final boolean customAnim;
+        if (mExitAnimId != 0 && mEnterAnimId != 0) {
+            customAnim = true;
+            mRotateExitAnimation = AnimationUtils.loadAnimation(mContext, mExitAnimId);
+            mRotateEnterAnimation = AnimationUtils.loadAnimation(mContext, mEnterAnimId);
+        } else {
+            customAnim = false;
+            switch (delta) {
+                case Surface.ROTATION_0:
+                    mRotateExitAnimation = AnimationUtils.loadAnimation(mContext,
+                            com.android.internal.R.anim.screen_rotate_0_exit);
+                    mRotateEnterAnimation = AnimationUtils.loadAnimation(mContext,
+                            com.android.internal.R.anim.screen_rotate_0_enter);
+                    if (USE_CUSTOM_BLACK_FRAME) {
+                        mRotateFrameAnimation = AnimationUtils.loadAnimation(mContext,
+                                com.android.internal.R.anim.screen_rotate_0_frame);
+                    }
+                    break;
+                case Surface.ROTATION_90:
+                    mRotateExitAnimation = AnimationUtils.loadAnimation(mContext,
+                            com.android.internal.R.anim.screen_rotate_plus_90_exit);
+                    mRotateEnterAnimation = AnimationUtils.loadAnimation(mContext,
+                            com.android.internal.R.anim.screen_rotate_plus_90_enter);
+                    if (USE_CUSTOM_BLACK_FRAME) {
+                        mRotateFrameAnimation = AnimationUtils.loadAnimation(mContext,
+                                com.android.internal.R.anim.screen_rotate_plus_90_frame);
+                    }
+                    break;
+                case Surface.ROTATION_180:
+                    mRotateExitAnimation = AnimationUtils.loadAnimation(mContext,
+                            com.android.internal.R.anim.screen_rotate_180_exit);
+                    mRotateEnterAnimation = AnimationUtils.loadAnimation(mContext,
+                            com.android.internal.R.anim.screen_rotate_180_enter);
+                    if (USE_CUSTOM_BLACK_FRAME) {
+                        mRotateFrameAnimation = AnimationUtils.loadAnimation(mContext,
+                                com.android.internal.R.anim.screen_rotate_180_frame);
+                    }
+                    break;
+                case Surface.ROTATION_270:
+                    mRotateExitAnimation = AnimationUtils.loadAnimation(mContext,
+                            com.android.internal.R.anim.screen_rotate_minus_90_exit);
+                    mRotateEnterAnimation = AnimationUtils.loadAnimation(mContext,
+                            com.android.internal.R.anim.screen_rotate_minus_90_enter);
+                    if (USE_CUSTOM_BLACK_FRAME) {
+                        mRotateFrameAnimation = AnimationUtils.loadAnimation(mContext,
+                                com.android.internal.R.anim.screen_rotate_minus_90_frame);
+                    }
+                    break;
+            }
         }
-
-        // Compute partial steps between original and final sizes.  These
-        // are used for the dimensions of the exiting and entering elements,
-        // so they are never stretched too significantly.
-        final int halfWidth = (finalWidth + mOriginalWidth) / 2;
-        final int halfHeight = (finalHeight + mOriginalHeight) / 2;
 
         // Initialize the animations.  This is a hack, redefining what "parent"
         // means to allow supplying the last and next size.  In this definition
         // "%p" is the original (let's call it "previous") size, and "%" is the
         // screen's current/new size.
         if (TWO_PHASE_ANIMATION && firstStart) {
+            // Compute partial steps between original and final sizes.  These
+            // are used for the dimensions of the exiting and entering elements,
+            // so they are never stretched too significantly.
+            final int halfWidth = (finalWidth + mOriginalWidth) / 2;
+            final int halfHeight = (finalHeight + mOriginalHeight) / 2;
+
             if (DEBUG_STATE) Slog.v(TAG, "Initializing start and finish animations");
             mStartEnterAnimation.initialize(finalWidth, finalHeight,
                     halfWidth, halfHeight);
@@ -510,7 +524,7 @@ class ScreenRotationAnimation {
             }
         }
 
-        if (mExitingBlackFrame == null) {
+        if (!customAnim && mExitingBlackFrame == null) {
             if (WindowManagerService.SHOW_LIGHT_TRANSACTIONS || DEBUG_STATE) Slog.i(
                     WindowManagerService.TAG,
                     ">>> OPEN TRANSACTION ScreenRotationAnimation.startAnimation");
@@ -540,7 +554,7 @@ class ScreenRotationAnimation {
             }
         }
 
-        if (false && mEnteringBlackFrame == null) {
+        if (customAnim && mEnteringBlackFrame == null) {
             if (WindowManagerService.SHOW_LIGHT_TRANSACTIONS || DEBUG_STATE) Slog.i(
                     WindowManagerService.TAG,
                     ">>> OPEN TRANSACTION ScreenRotationAnimation.startAnimation");
