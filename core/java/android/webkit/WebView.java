@@ -26,7 +26,6 @@ import android.graphics.Picture;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.http.SslCertificate;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
 import android.os.Message;
@@ -1479,10 +1478,20 @@ public class WebView extends AbsoluteLayout
     /**
      * Injects the supplied Java object into this WebView. The object is
      * injected into the JavaScript context of the main frame, using the
-     * supplied name. This allows the Java object's public methods to be
-     * accessed from JavaScript. Note that that injected objects will not
+     * supplied name. This allows the Java object's methods to be
+     * accessed from JavaScript. For API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
+     * and above, only public methods that are annotated with
+     * {@link android.webkit.JavascriptInterface} can be accessed from JavaScript.
+     * For API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN} or below,
+     * all public methods (including the inherited ones) can be accessed, see the
+     * important security note below for implications. Note that injected objects will not
      * appear in JavaScript until the page is next (re)loaded. For example:
-     * <pre> webView.addJavascriptInterface(new Object(), "injectedObject");
+     * <pre>
+     * class JsObject {
+     *    {@literal @}JavascriptInterface
+     *    public String toString() { return "injectedObject"; }
+     * }
+     * webView.addJavascriptInterface(new JsObject(), "injectedObject");
      * webView.loadData("<!DOCTYPE html><title></title>", "text/html", null);
      * webView.loadUrl("javascript:alert(injectedObject.toString())");</pre>
      * <p>
@@ -1490,7 +1499,9 @@ public class WebView extends AbsoluteLayout
      * <ul>
      * <li> This method can be used to allow JavaScript to control the host
      * application. This is a powerful feature, but also presents a security
-     * risk, particularly as JavaScript could use reflection to access an
+     * risk for applications targeting API level
+     * {@link android.os.Build.VERSION_CODES#JELLY_BEAN} or below, because
+     * JavaScript could use reflection to access an
      * injected object's public fields. Use of this method in a WebView
      * containing untrusted content could allow an attacker to manipulate the
      * host application in unintended ways, executing Java code with the
@@ -1499,6 +1510,7 @@ public class WebView extends AbsoluteLayout
      * <li> JavaScript interacts with Java object on a private, background
      * thread of this WebView. Care is therefore required to maintain thread
      * safety.</li>
+     * <li> The Java object's fields are not accessible.</li>
      * </ul>
      *
      * @param object the Java object to inject into this WebView's JavaScript
@@ -1508,9 +1520,6 @@ public class WebView extends AbsoluteLayout
     public void addJavascriptInterface(Object object, String name) {
         checkThread();
         mProvider.addJavascriptInterface(object, name);
-        // TODO in a separate CL provide logic to enable annotations for API level JB_MR1 and above. Don't forget to
-        // update the doc, set a link to annotation and unhide the annotation.
-        // also describe that fields of java objects are not accessible from JS.
     }
 
     /**
