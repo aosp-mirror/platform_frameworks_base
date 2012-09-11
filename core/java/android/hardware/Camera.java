@@ -1146,6 +1146,31 @@ public class Camera {
     public native final void setDisplayOrientation(int degrees);
 
     /**
+     * Enable or disable the default shutter sound when taking a picture.
+     *
+     * By default, the camera plays the system-defined camera shutter sound when
+     * {@link #takePicture} is called. Using this method, the shutter sound can
+     * be disabled. It is strongly recommended that an alternative shutter sound
+     * is played in the {@link ShutterCallback} when the system shutter sound is
+     * disabled.
+     *
+     * Note that devices may not always allow control of the camera shutter
+     * sound. If the shutter sound cannot be controlled, this method will return
+     * false.
+     *
+     * @param enabled whether the camera should play the system shutter sound
+     *                when {@link #takePicture takePicture} is called.
+     * @return true if the shutter sound state was successfully changed. False
+     *         if the shutter sound cannot be controlled; in this case, the
+     *         application should not play its own shutter sound since the
+     *         system shutter sound will play when a picture is taken.
+     * @see #takePicture
+     * @see ShutterCallback
+     * @hide
+     */
+    public native final boolean enableShutterSound(boolean enabled);
+
+    /**
      * Callback interface for zoom changes during a smooth zoom operation.
      *
      * @see #setZoomChangeListener(OnZoomChangeListener)
