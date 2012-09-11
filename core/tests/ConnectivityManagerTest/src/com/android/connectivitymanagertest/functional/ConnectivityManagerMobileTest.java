@@ -59,8 +59,8 @@ public class ConnectivityManagerMobileTest extends
         wl = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "CMWakeLock");
         wl.acquire();
         // Each test case will start with cellular connection
-        if (Settings.System.getInt(getInstrumentation().getContext().getContentResolver(),
-                Settings.System.AIRPLANE_MODE_ON) == 1) {
+        if (Settings.Global.getInt(getInstrumentation().getContext().getContentResolver(),
+                Settings.Global.AIRPLANE_MODE_ON) == 1) {
             log("airplane is not disabled, disable it.");
             cmActivity.setAirplaneMode(getInstrumentation().getContext(), false);
         }
@@ -84,8 +84,8 @@ public class ConnectivityManagerMobileTest extends
         wl.release();
         cmActivity.removeConfiguredNetworksAndDisableWifi();
         // if airplane mode is set, disable it.
-        if (Settings.System.getInt(getInstrumentation().getContext().getContentResolver(),
-                Settings.System.AIRPLANE_MODE_ON) == 1) {
+        if (Settings.Global.getInt(getInstrumentation().getContext().getContentResolver(),
+                Settings.Global.AIRPLANE_MODE_ON) == 1) {
             log("disable airplane mode if it is enabled");
             cmActivity.setAirplaneMode(getInstrumentation().getContext(), false);
         }

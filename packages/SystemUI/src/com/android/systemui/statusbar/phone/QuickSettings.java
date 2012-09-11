@@ -32,6 +32,7 @@ import android.hardware.display.DisplayManager;
 import android.hardware.display.WifiDisplay;
 import android.hardware.display.WifiDisplayStatus;
 import android.net.Uri;
+import android.os.UserHandle;
 import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.view.LayoutInflater;
@@ -147,7 +148,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         // TODO: Sets the view to be "awaiting" if not already awaiting
 
         // Change the system setting
-        Settings.System.putInt(mContext.getContentResolver(), Settings.System.AIRPLANE_MODE_ON,
+        Settings.Global.putInt(mContext.getContentResolver(), Settings.Global.AIRPLANE_MODE_ON,
                                 enabled ? 1 : 0);
 
         // TODO: Update the UI to reflect system setting
@@ -156,7 +157,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         // Post the intent
         Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         intent.putExtra("state", enabled);
-        mContext.sendBroadcast(intent);
+        mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
     }
     // NetworkSignalChanged callback
     @Override

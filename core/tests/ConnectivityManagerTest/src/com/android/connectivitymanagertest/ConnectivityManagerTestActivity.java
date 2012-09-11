@@ -36,6 +36,7 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -696,12 +697,12 @@ public class ConnectivityManagerTestActivity extends Activity {
      */
     public void setAirplaneMode(Context context, boolean enableAM) {
         //set the airplane mode
-        Settings.System.putInt(context.getContentResolver(), Settings.System.AIRPLANE_MODE_ON,
+        Settings.Global.putInt(context.getContentResolver(), Settings.Global.AIRPLANE_MODE_ON,
                 enableAM ? 1 : 0);
         // Post the intent
         Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         intent.putExtra("state", enableAM);
-        context.sendBroadcast(intent);
+        context.sendBroadcastAsUser(intent, UserHandle.ALL);
     }
 
     protected static String convertToQuotedString(String string) {
