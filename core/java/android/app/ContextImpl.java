@@ -1503,7 +1503,7 @@ class ContextImpl extends Context {
                     (message != null ? (message + ": ") : "") +
                     (selfToo
                      ? "Neither user " + uid + " nor current process has "
-                     : "User " + uid + " does not have ") +
+                     : "uid " + uid + " does not have ") +
                     permission +
                     ".");
         }
