@@ -6327,6 +6327,7 @@ package android.content.pm {
     field public static final int FLAG_FACTORY_TEST = 16; // 0x10
     field public static final int FLAG_HAS_CODE = 4; // 0x4
     field public static final int FLAG_INSTALLED = 8388608; // 0x800000
+    field public static final int FLAG_IS_DATA_ONLY = 16777216; // 0x1000000
     field public static final int FLAG_KILL_AFTER_RESTORE = 65536; // 0x10000
     field public static final int FLAG_LARGE_HEAP = 1048576; // 0x100000
     field public static final int FLAG_PERSISTENT = 8; // 0x8

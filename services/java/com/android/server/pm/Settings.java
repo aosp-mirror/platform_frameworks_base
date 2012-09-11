@@ -32,7 +32,6 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
-import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -50,7 +49,6 @@ import android.os.Binder;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Process;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
@@ -2603,8 +2601,8 @@ final class Settings {
                     first = false;
                     pw.print("anyDensity");
                 }
+                pw.println("]");
             }
-            pw.println("]");
             pw.print("    timeStamp=");
                 date.setTime(ps.timeStamp);
                 pw.println(sdf.format(date));

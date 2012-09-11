@@ -62,7 +62,7 @@ public interface IActivityManager extends IInterface {
     public WaitResult startActivityAndWait(IApplicationThread caller,
             Intent intent, String resolvedType, IBinder resultTo, String resultWho,
             int requestCode, int flags, String profileFile,
-            ParcelFileDescriptor profileFd, Bundle options) throws RemoteException;
+            ParcelFileDescriptor profileFd, Bundle options, int userId) throws RemoteException;
     public int startActivityWithConfig(IApplicationThread caller,
             Intent intent, String resolvedType, IBinder resultTo, String resultWho,
             int requestCode, int startFlags, Configuration newConfig,
@@ -160,7 +160,7 @@ public interface IActivityManager extends IInterface {
     public void killApplicationProcess(String processName, int uid) throws RemoteException;
     
     public boolean startInstrumentation(ComponentName className, String profileFile,
-            int flags, Bundle arguments, IInstrumentationWatcher watcher)
+            int flags, Bundle arguments, IInstrumentationWatcher watcher, int userId)
             throws RemoteException;
     public void finishInstrumentation(IApplicationThread target,
             int resultCode, Bundle results) throws RemoteException;
@@ -275,7 +275,7 @@ public interface IActivityManager extends IInterface {
     public void stopAppSwitches() throws RemoteException;
     public void resumeAppSwitches() throws RemoteException;
     
-    public void killApplicationWithUid(String pkg, int uid) throws RemoteException;
+    public void killApplicationWithAppId(String pkg, int appid) throws RemoteException;
     
     public void closeSystemDialogs(String reason) throws RemoteException;
     
@@ -296,7 +296,7 @@ public interface IActivityManager extends IInterface {
     public void crashApplication(int uid, int initialPid, String packageName,
             String message) throws RemoteException;
 
-    public String getProviderMimeType(Uri uri) throws RemoteException;
+    public String getProviderMimeType(Uri uri, int userId) throws RemoteException;
     
     public IBinder newUriPermissionOwner(String name) throws RemoteException;
     public void grantUriPermissionFromOwner(IBinder owner, int fromUid, String targetPkg,
@@ -328,6 +328,7 @@ public interface IActivityManager extends IInterface {
     public boolean switchUser(int userid) throws RemoteException;
     public int stopUser(int userid, IStopUserCallback callback) throws RemoteException;
     public UserInfo getCurrentUser() throws RemoteException;
+    public boolean isUserRunning(int userid) throws RemoteException;
 
     public boolean removeSubTask(int taskId, int subTaskIndex) throws RemoteException;
 
@@ -548,7 +549,7 @@ public interface IActivityManager extends IInterface {
     int GET_UID_FOR_INTENT_SENDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+92;
     int HANDLE_INCOMING_USER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+93;
 
-    int KILL_APPLICATION_WITH_UID_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+95;
+    int KILL_APPLICATION_WITH_APPID_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+95;
     int CLOSE_SYSTEM_DIALOGS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+96;
     int GET_PROCESS_MEMORY_INFO_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+97;
     int KILL_APPLICATION_PROCESS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+98;
@@ -574,7 +575,7 @@ public interface IActivityManager extends IInterface {
     int CHECK_GRANT_URI_PERMISSION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+118;
     int DUMP_HEAP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+119;
     int START_ACTIVITIES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+120;
-
+    int IS_USER_RUNNING_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+121;
     int ACTIVITY_SLEPT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+122;
     int GET_FRONT_ACTIVITY_SCREEN_COMPAT_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+123;
     int SET_FRONT_ACTIVITY_SCREEN_COMPAT_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+124;

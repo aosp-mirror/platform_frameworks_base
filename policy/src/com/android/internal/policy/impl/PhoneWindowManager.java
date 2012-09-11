@@ -4181,22 +4181,22 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     Intent dock = createHomeDockIntent();
                     if (dock != null) {
                         int result = ActivityManagerNative.getDefault()
-                                .startActivity(null, dock,
+                                .startActivityAsUser(null, dock,
                                         dock.resolveTypeIfNeeded(mContext.getContentResolver()),
                                         null, null, 0,
                                         ActivityManager.START_FLAG_ONLY_IF_NEEDED,
-                                        null, null, null);
+                                        null, null, null, UserHandle.USER_CURRENT);
                         if (result == ActivityManager.START_RETURN_INTENT_TO_CALLER) {
                             return false;
                         }
                     }
                 }
                 int result = ActivityManagerNative.getDefault()
-                        .startActivity(null, mHomeIntent,
+                        .startActivityAsUser(null, mHomeIntent,
                                 mHomeIntent.resolveTypeIfNeeded(mContext.getContentResolver()),
                                 null, null, 0,
                                 ActivityManager.START_FLAG_ONLY_IF_NEEDED,
-                                null, null, null);
+                                null, null, null, UserHandle.USER_CURRENT);
                 if (result == ActivityManager.START_RETURN_INTENT_TO_CALLER) {
                     return false;
                 }

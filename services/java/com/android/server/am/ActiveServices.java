@@ -185,7 +185,7 @@ public class ActiveServices {
         }
 
         private HashMap<ComponentName, ServiceRecord> getServices(int callingUser) {
-            HashMap map = mServicesByNamePerUser.get(callingUser);
+            HashMap<ComponentName, ServiceRecord> map = mServicesByNamePerUser.get(callingUser);
             if (map == null) {
                 map = new HashMap<ComponentName, ServiceRecord>();
                 mServicesByNamePerUser.put(callingUser, map);
@@ -195,7 +195,8 @@ public class ActiveServices {
 
         private HashMap<Intent.FilterComparison, ServiceRecord> getServicesByIntent(
                 int callingUser) {
-            HashMap map = mServicesByIntentPerUser.get(callingUser);
+            HashMap<Intent.FilterComparison, ServiceRecord> map
+                    = mServicesByIntentPerUser.get(callingUser);
             if (map == null) {
                 map = new HashMap<Intent.FilterComparison, ServiceRecord>();
                 mServicesByIntentPerUser.put(callingUser, map);
@@ -1514,10 +1515,12 @@ public class ActiveServices {
         }
     }
 
-    boolean forceStopLocked(String name, int userId, boolean evenPersistent, boolean doit) {
+    private boolean collectForceStopServicesLocked(String name, int userId,
+            boolean evenPersistent, boolean doit,
+            HashMap<ComponentName, ServiceRecord> services,
+            ArrayList<ServiceRecord> result) {
         boolean didSomething = false;
-        ArrayList<ServiceRecord> services = new ArrayList<ServiceRecord>();
-        for (ServiceRecord service : mServiceMap.getAllServices(userId)) {
+        for (ServiceRecord service : services.values()) {
             if ((name == null || service.packageName.equals(name))
                     && (service.app == null || evenPersistent || !service.app.persistent)) {
                 if (!doit) {
@@ -1530,8 +1533,26 @@ public class ActiveServices {
                 }
                 service.app = null;
                 service.isolatedProc = null;
-                services.add(service);
+                result.add(service);
             }
+        }
+        return didSomething;
+    }
+
+    boolean forceStopLocked(String name, int userId, boolean evenPersistent, boolean doit) {
+        boolean didSomething = false;
+        ArrayList<ServiceRecord> services = new ArrayList<ServiceRecord>();
+        if (userId == UserHandle.USER_ALL) {
+            for (int i=0; i<mServiceMap.mServicesByNamePerUser.size(); i++) {
+                didSomething |= collectForceStopServicesLocked(name, userId, evenPersistent,
+                        doit, mServiceMap.mServicesByNamePerUser.valueAt(i), services);
+                if (!doit && didSomething) {
+                    return true;
+                }
+            }
+        } else {
+            didSomething = collectForceStopServicesLocked(name, userId, evenPersistent,
+                    doit, mServiceMap.mServicesByNamePerUser.get(userId), services);
         }
 
         int N = services.size();
