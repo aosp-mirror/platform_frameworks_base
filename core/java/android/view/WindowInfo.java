@@ -45,13 +45,15 @@ public class WindowInfo implements Parcelable {
 
     public final Rect touchableRegion = new Rect();
 
-    public int type;
+    public int type = UNDEFINED;
 
-    public float compatibilityScale;
+    public float compatibilityScale = UNDEFINED;
 
     public boolean visible;
 
-    public int displayId;
+    public int displayId = UNDEFINED;
+
+    public int layer = UNDEFINED;
 
     private WindowInfo() {
         /* do nothing - reduce visibility */
@@ -71,6 +73,7 @@ public class WindowInfo implements Parcelable {
         parcel.writeFloat(compatibilityScale);
         parcel.writeInt(visible ? 1 : 0);
         parcel.writeInt(displayId);
+        parcel.writeInt(layer);
         recycle();
     }
 
@@ -82,6 +85,7 @@ public class WindowInfo implements Parcelable {
         compatibilityScale = parcel.readFloat();
         visible = (parcel.readInt() == 1);
         displayId = parcel.readInt();
+        layer = parcel.readInt();
     }
 
     public static WindowInfo obtain(WindowInfo other) {
@@ -90,9 +94,10 @@ public class WindowInfo implements Parcelable {
         info.frame.set(other.frame);
         info.touchableRegion.set(other.touchableRegion);
         info.type = other.type;
-        info.displayId = other.displayId;
         info.compatibilityScale = other.compatibilityScale;
         info.visible = other.visible;
+        info.displayId = other.displayId;
+        info.layer = other.layer;
         return info;
     }
 
@@ -131,8 +136,25 @@ public class WindowInfo implements Parcelable {
         frame.setEmpty();
         touchableRegion.setEmpty();
         type = UNDEFINED;
-        displayId = UNDEFINED;
+        compatibilityScale = UNDEFINED;
         visible = false;
+        displayId = UNDEFINED;
+        layer = UNDEFINED;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("Window [token:").append((token != null) ? token.hashCode() : null);
+        builder.append(", displayId:").append(displayId);
+        builder.append(", type:").append(type);
+        builder.append(", visible:").append(visible);
+        builder.append(", layer:").append(layer);
+        builder.append(", compatibilityScale:").append(compatibilityScale);
+        builder.append(", frame:").append(frame);
+        builder.append(", touchableRegion:").append(touchableRegion);
+        builder.append("]");
+        return builder.toString();
     }
 
     /**
