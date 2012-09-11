@@ -75,12 +75,12 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
 
     private void registerForAirplaneMode(IntentFilter filter) {
         final ContentResolver resolver = mContext.getContentResolver();
-        final String airplaneModeRadios = Settings.System.getString(resolver,
-                Settings.System.AIRPLANE_MODE_RADIOS);
-        final String toggleableRadios = Settings.System.getString(resolver,
-                Settings.System.AIRPLANE_MODE_TOGGLEABLE_RADIOS);
+        final String airplaneModeRadios = Settings.Global.getString(resolver,
+                Settings.Global.AIRPLANE_MODE_RADIOS);
+        final String toggleableRadios = Settings.Global.getString(resolver,
+                Settings.Global.AIRPLANE_MODE_TOGGLEABLE_RADIOS);
         boolean mIsAirplaneSensitive = airplaneModeRadios == null ? true :
-                airplaneModeRadios.contains(Settings.System.RADIO_BLUETOOTH);
+                airplaneModeRadios.contains(Settings.Global.RADIO_BLUETOOTH);
         if (mIsAirplaneSensitive) {
             filter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         }
@@ -151,8 +151,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
      *  Returns true if airplane mode is currently on
      */
     private final boolean isAirplaneModeOn() {
-        return Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.AIRPLANE_MODE_ON, 0) == 1;
+        return Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.AIRPLANE_MODE_ON, 0) == 1;
     }
 
     /**

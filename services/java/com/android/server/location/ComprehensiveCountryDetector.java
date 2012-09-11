@@ -384,8 +384,8 @@ public class ComprehensiveCountryDetector extends CountryDetectorBase {
     }
 
     protected boolean isAirplaneModeOff() {
-        return Settings.System.getInt(
-                mContext.getContentResolver(), Settings.System.AIRPLANE_MODE_ON, 0) == 0;
+        return Settings.Global.getInt(
+                mContext.getContentResolver(), Settings.Global.AIRPLANE_MODE_ON, 0) == 0;
     }
 
     /**
