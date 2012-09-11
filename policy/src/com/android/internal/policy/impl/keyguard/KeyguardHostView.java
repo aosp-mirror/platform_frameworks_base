@@ -32,17 +32,17 @@ import android.content.SharedPreferences;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.os.UserManager;
-import android.telephony.TelephonyManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Slog;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
-import android.widget.Button;
 import android.widget.RemoteViews.OnClickHandler;
 import android.widget.ViewFlipper;
 
@@ -51,7 +51,6 @@ import com.android.internal.policy.impl.keyguard.KeyguardSecurityModel.SecurityM
 import com.android.internal.widget.LockPatternUtils;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 public class KeyguardHostView extends KeyguardViewBase {
@@ -77,6 +76,8 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     private KeyguardSecurityModel mSecurityModel;
 
+    private Rect mTempRect = new Rect();
+
     public KeyguardHostView(Context context) {
         this(context, null);
     }
@@ -91,6 +92,17 @@ public class KeyguardHostView extends KeyguardViewBase {
         mEnableMenuKey = shouldEnableMenuKey();
         setFocusable(true);
         setFocusableInTouchMode(true);
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        boolean result = super.dispatchTouchEvent(ev);
+        mTempRect.set(0, 0, 0, 0);
+        offsetRectIntoDescendantCoords(mSecurityViewContainer, mTempRect);
+        ev.offsetLocation(mTempRect.left, mTempRect.top);
+        result = mSecurityViewContainer.dispatchTouchEvent(ev) || result;
+        ev.offsetLocation(-mTempRect.left, -mTempRect.top);
+        return result;
     }
 
     @Override

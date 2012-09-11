@@ -22,6 +22,7 @@ import android.accounts.AccountManagerFuture;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.content.Context;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.SystemClock;
@@ -31,7 +32,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.LinearLayout;
+import android.widget.GridLayout;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternView;
@@ -40,7 +41,7 @@ import com.android.internal.R;
 import java.io.IOException;
 import java.util.List;
 
-public class KeyguardPatternView extends LinearLayout implements KeyguardSecurityView {
+public class KeyguardPatternView extends GridLayout implements KeyguardSecurityView {
 
     private static final String TAG = "SecurityPatternView";
     private static final boolean DEBUG = false;
@@ -83,6 +84,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
             mLockPatternView.clearPattern();
         }
     };
+    private Rect mTempRect = new Rect();
 
     enum FooterMode {
         Normal,
@@ -156,13 +158,18 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
-        final boolean result = super.dispatchTouchEvent(ev);
+        boolean result = super.dispatchTouchEvent(ev);
         // as long as the user is entering a pattern (i.e sending a touch event that was handled
         // by this screen), keep poking the wake lock so that the screen will stay on.
         final long elapsed = SystemClock.elapsedRealtime() - mLastPokeTime;
         if (result && (elapsed > (UNLOCK_PATTERN_WAKE_INTERVAL_MS - 100))) {
             mLastPokeTime = SystemClock.elapsedRealtime();
         }
+        mTempRect.set(0, 0, 0, 0);
+        offsetRectIntoDescendantCoords(mLockPatternView, mTempRect);
+        ev.offsetLocation(mTempRect.left, mTempRect.top);
+        result = mLockPatternView.dispatchTouchEvent(ev) || result;
+        ev.offsetLocation(-mTempRect.left, -mTempRect.top);
         return result;
     }
 
