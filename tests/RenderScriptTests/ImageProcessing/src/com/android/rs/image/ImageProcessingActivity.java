@@ -135,61 +135,73 @@ public class ImageProcessingActivity extends Activity
             mTest = new LevelsV4(true, true);
             break;
         case 4:
-            mTest = new Blur25();
+            mTest = new Blur25(false);
             break;
         case 5:
-            mTest = new Greyscale();
+            mTest = new Blur25(true);
             break;
         case 6:
-            mTest = new Grain();
+            mTest = new Greyscale();
             break;
         case 7:
-            mTest = new Fisheye(false, false);
+            mTest = new Grain();
             break;
         case 8:
-            mTest = new Fisheye(false, true);
+            mTest = new Fisheye(false, false);
             break;
         case 9:
-            mTest = new Fisheye(true, false);
+            mTest = new Fisheye(false, true);
             break;
         case 10:
-            mTest = new Fisheye(true, true);
+            mTest = new Fisheye(true, false);
             break;
         case 11:
-            mTest = new Vignette(false, false);
+            mTest = new Fisheye(true, true);
             break;
         case 12:
-            mTest = new Vignette(false, true);
+            mTest = new Vignette(false, false);
             break;
         case 13:
-            mTest = new Vignette(true, false);
+            mTest = new Vignette(false, true);
             break;
         case 14:
-            mTest = new Vignette(true, true);
+            mTest = new Vignette(true, false);
             break;
         case 15:
-            mTest = new GroupTest(false);
+            mTest = new Vignette(true, true);
             break;
         case 16:
-            mTest = new GroupTest(true);
+            mTest = new GroupTest(false);
             break;
         case 17:
-            mTest = new Convolve3x3(false);
+            mTest = new GroupTest(true);
             break;
         case 18:
-            mTest = new Convolve3x3(true);
+            mTest = new Convolve3x3(false);
             break;
         case 19:
-            mTest = new ColorMatrix(false, false);
+            mTest = new Convolve3x3(true);
             break;
         case 20:
-            mTest = new ColorMatrix(true, false);
+            mTest = new ColorMatrix(false, false);
             break;
         case 21:
-            mTest = new ColorMatrix(true, true);
+            mTest = new ColorMatrix(true, false);
             break;
         case 22:
+            mTest = new ColorMatrix(true, true);
+            break;
+        case 23:
             mTest = new Copy();
+            break;
+        case 24:
+            mTest = new CrossProcess();
+            break;
+        case 25:
+            mTest = new Convolve5x5(false);
+            break;
+        case 26:
+            mTest = new Convolve5x5(true);
             break;
         }
 
@@ -203,30 +215,34 @@ public class ImageProcessingActivity extends Activity
     }
 
     void setupTests() {
-        mTestNames = new String[23];
+        mTestNames = new String[27];
         mTestNames[0] = "Levels Vec3 Relaxed";
         mTestNames[1] = "Levels Vec4 Relaxed";
         mTestNames[2] = "Levels Vec3 Full";
         mTestNames[3] = "Levels Vec4 Full";
         mTestNames[4] = "Blur radius 25";
-        mTestNames[5] = "Greyscale";
-        mTestNames[6] = "Grain";
-        mTestNames[7] = "Fisheye Full";
-        mTestNames[8] = "Fisheye Relaxed";
-        mTestNames[9] = "Fisheye Approximate Full";
-        mTestNames[10] = "Fisheye Approximate Relaxed";
-        mTestNames[11] = "Vignette Full";
-        mTestNames[12] = "Vignette Relaxed";
-        mTestNames[13] = "Vignette Approximate Full";
-        mTestNames[14] = "Vignette Approximate Relaxed";
-        mTestNames[15] = "Group Test (emulated)";
-        mTestNames[16] = "Group Test (native)";
-        mTestNames[17] = "Convolve 3x3";
-        mTestNames[18] = "Intrinsics Convolve 3x3";
-        mTestNames[19] = "ColorMatrix";
-        mTestNames[20] = "Intrinsics ColorMatrix";
-        mTestNames[21] = "Intrinsics ColorMatrix Grey";
-        mTestNames[22] = "Copy";
+        mTestNames[5] = "Intrinsic Blur radius 25";
+        mTestNames[6] = "Greyscale";
+        mTestNames[7] = "Grain";
+        mTestNames[8] = "Fisheye Full";
+        mTestNames[9] = "Fisheye Relaxed";
+        mTestNames[10] = "Fisheye Approximate Full";
+        mTestNames[11] = "Fisheye Approximate Relaxed";
+        mTestNames[12] = "Vignette Full";
+        mTestNames[13] = "Vignette Relaxed";
+        mTestNames[14] = "Vignette Approximate Full";
+        mTestNames[15] = "Vignette Approximate Relaxed";
+        mTestNames[16] = "Group Test (emulated)";
+        mTestNames[17] = "Group Test (native)";
+        mTestNames[18] = "Convolve 3x3";
+        mTestNames[19] = "Intrinsics Convolve 3x3";
+        mTestNames[20] = "ColorMatrix";
+        mTestNames[21] = "Intrinsics ColorMatrix";
+        mTestNames[22] = "Intrinsics ColorMatrix Grey";
+        mTestNames[23] = "Copy";
+        mTestNames[24] = "CrossProcess (using LUT)";
+        mTestNames[25] = "Convolve 5x5";
+        mTestNames[26] = "Intrinsics Convolve 5x5";
         mTestSpinner.setAdapter(new ArrayAdapter<String>(
             this, R.layout.spinner_layout, mTestNames));
     }
