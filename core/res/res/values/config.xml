@@ -923,5 +923,5 @@
     <bool name="config_syncstorageengine_masterSyncAutomatically">true</bool>
 
     <!--  Maximum number of supported users -->
-    <integer name="config_multiuserMaximumUsers">10</integer>
+    <integer name="config_multiuserMaximumUsers">1</integer>
 </resources>
