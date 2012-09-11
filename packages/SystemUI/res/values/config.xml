@@ -67,6 +67,6 @@
     <integer translatable="false" name="config_search_panel_view_vibration_duration">20</integer>
 
     <!-- The length of the vibration when the notificaiotn pops open. -->
-    <integer name="one_finger_pop_duration_ms">10</integer>
+    <integer name="blinds_pop_duration_ms">10</integer>
 </resources>
 
