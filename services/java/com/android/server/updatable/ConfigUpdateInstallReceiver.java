@@ -218,15 +218,24 @@ public class ConfigUpdateInstallReceiver extends BroadcastReceiver {
         try {
             // create the temporary file
             tmp = File.createTempFile("journal", "", dir);
+            // create the parents for the destination file
+            File parent = file.getParentFile();
+            parent.mkdirs();
+            // check that they were created correctly
+            if (!parent.exists()) {
+                throw new IOException("Failed to create directory " + parent.getCanonicalPath());
+            }
             // mark tmp -rw-r--r--
             tmp.setReadable(true, false);
             // write to it
             out = new FileOutputStream(tmp);
             out.write(content.getBytes());
             // sync to disk
-            FileUtils.sync(out);
+            out.getFD().sync();
             // atomic rename
-            tmp.renameTo(file);
+            if (!tmp.renameTo(file)) {
+                throw new IOException("Failed to atomically rename " + file.getCanonicalPath());
+            }
         } catch (IOException e) {
             Slog.e(TAG, "Failed to write update", e);
         } finally {
