@@ -41,6 +41,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.EventLog;
@@ -160,6 +161,9 @@ public class KeyguardViewMediator {
 
     /** High level access to the power manager for WakeLocks */
     private PowerManager mPM;
+
+    /** UserManager for querying number of users */
+    private UserManager mUserManager;
 
     /**
      * Used to keep the device awake while the keyguard is showing, i.e for
@@ -436,6 +440,7 @@ public class KeyguardViewMediator {
     public KeyguardViewMediator(Context context, LockPatternUtils lockPatternUtils) {
         mContext = context;
         mPM = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+        mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         mWakeLock = mPM.newWakeLock(
                 PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "keyguard");
         mWakeLock.setReferenceCounted(false);
@@ -779,7 +784,8 @@ public class KeyguardViewMediator {
             return;
         }
 
-        if (mLockPatternUtils.isLockScreenDisabled() && !lockedOrMissing) {
+        if (mUserManager.getUsers().size() < 2
+                && mLockPatternUtils.isLockScreenDisabled() && !lockedOrMissing) {
             if (DEBUG) Log.d(TAG, "doKeyguard: not showing because lockscreen is off");
             return;
         }
