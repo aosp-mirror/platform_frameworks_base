@@ -511,15 +511,17 @@ private:
         float xPrecision;
         float yPrecision;
         nsecs_t downTime;
+        int32_t displayId;
         uint32_t pointerCount;
         PointerProperties pointerProperties[MAX_POINTERS];
         PointerCoords pointerCoords[MAX_POINTERS];
 
         MotionEntry(nsecs_t eventTime,
-                int32_t deviceId, uint32_t source, uint32_t policyFlags, int32_t action,
-                int32_t flags, int32_t metaState, int32_t buttonState, int32_t edgeFlags,
+                int32_t deviceId, uint32_t source, uint32_t policyFlags,
+                int32_t action, int32_t flags,
+                int32_t metaState, int32_t buttonState, int32_t edgeFlags,
                 float xPrecision, float yPrecision,
-                nsecs_t downTime, uint32_t pointerCount,
+                nsecs_t downTime, int32_t displayId, uint32_t pointerCount,
                 const PointerProperties* pointerProperties, const PointerCoords* pointerCoords);
         virtual void appendDescription(String8& msg) const;
 
@@ -696,7 +698,7 @@ private:
 
         // Returns true if the specified source is known to have received a hover enter
         // motion event.
-        bool isHovering(int32_t deviceId, uint32_t source) const;
+        bool isHovering(int32_t deviceId, uint32_t source, int32_t displayId) const;
 
         // Records tracking information for a key event that has just been published.
         // Returns true if the event should be delivered, false if it is inconsistent
@@ -752,6 +754,7 @@ private:
             float xPrecision;
             float yPrecision;
             nsecs_t downTime;
+            int32_t displayId;
             uint32_t pointerCount;
             PointerProperties pointerProperties[MAX_POINTERS];
             PointerCoords pointerCoords[MAX_POINTERS];
@@ -867,7 +870,7 @@ private:
     // to transfer focus to a new application.
     EventEntry* mNextUnblockedEvent;
 
-    sp<InputWindowHandle> findTouchedWindowAtLocked(int32_t x, int32_t y);
+    sp<InputWindowHandle> findTouchedWindowAtLocked(int32_t displayId, int32_t x, int32_t y);
 
     // All registered connections mapped by channel file descriptor.
     KeyedVector<int, sp<Connection> > mConnectionsByFd;
@@ -899,6 +902,10 @@ private:
     bool runCommandsLockedInterruptible();
     CommandEntry* postCommandLocked(Command command);
 
+    // Input filter processing.
+    bool shouldSendKeyToInputFilterLocked(const NotifyKeyArgs* args);
+    bool shouldSendMotionToInputFilterLocked(const NotifyMotionArgs* args);
+
     // Inbound event processing.
     void drainInboundQueueLocked();
     void releasePendingEventLocked();
@@ -928,6 +935,7 @@ private:
         bool split;
         int32_t deviceId; // id of the device that is currently down, others are rejected
         uint32_t source;  // source of the device that is current down, others are rejected
+        int32_t displayId; // id to the display that currently has a touch, others are rejected
         Vector<TouchedWindow> windows;
 
         TouchState();

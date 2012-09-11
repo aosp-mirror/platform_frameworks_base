@@ -176,6 +176,12 @@ abstract class DisplayDevice {
         } else {
             viewport.physicalFrame.setEmpty();
         }
+
+        boolean isRotated = (mCurrentOrientation == Surface.ROTATION_90
+                || mCurrentOrientation == Surface.ROTATION_270);
+        DisplayDeviceInfo info = getDisplayDeviceInfoLocked();
+        viewport.deviceWidth = isRotated ? info.height : info.width;
+        viewport.deviceHeight = isRotated ? info.width : info.height;
     }
 
     /**

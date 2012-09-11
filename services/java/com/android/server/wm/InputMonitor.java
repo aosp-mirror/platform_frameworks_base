@@ -19,11 +19,13 @@ package com.android.server.wm;
 import com.android.server.input.InputManagerService;
 import com.android.server.input.InputApplicationHandle;
 import com.android.server.input.InputWindowHandle;
+import com.android.server.wm.WindowManagerService.AllWindowsIterator;
 
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.Slog;
+import android.view.Display;
 import android.view.InputChannel;
 import android.view.KeyEvent;
 import android.view.WindowManager;
@@ -225,10 +227,11 @@ final class InputMonitor implements InputManagerService.Callbacks {
             addInputWindowHandleLw(mService.mFakeWindows.get(i).mWindowHandle);
         }
 
-        // TODO(multidisplay): Input only occurs on the default display.
-        final WindowList windows = mService.getDefaultWindowList();
-        for (int i = windows.size() - 1; i >= 0; i--) {
-            final WindowState child = windows.get(i);
+        // Add all windows on the default display.
+        final AllWindowsIterator iterator = mService.new AllWindowsIterator(
+                WindowManagerService.REVERSE_ITERATOR);
+        while (iterator.hasNext()) {
+            final WindowState child = iterator.next();
             final InputChannel inputChannel = child.mInputChannel;
             final InputWindowHandle inputWindowHandle = child.mInputWindowHandle;
             if (inputChannel == null || inputWindowHandle == null || child.mRemoved) {
@@ -243,15 +246,16 @@ final class InputMonitor implements InputManagerService.Callbacks {
             final boolean isVisible = child.isVisibleLw();
             final boolean hasWallpaper = (child == mService.mWallpaperTarget)
                     && (type != WindowManager.LayoutParams.TYPE_KEYGUARD);
+            final boolean onDefaultDisplay = (child.getDisplayId() == Display.DEFAULT_DISPLAY);
 
             // If there's a drag in progress and 'child' is a potential drop target,
             // make sure it's been told about the drag
-            if (inDrag && isVisible) {
+            if (inDrag && isVisible && onDefaultDisplay) {
                 mService.mDragState.sendDragStartedIfNeededLw(child);
             }
 
             if (universeBackground != null && !addedUniverse
-                    && child.mBaseLayer < aboveUniverseLayer) {
+                    && child.mBaseLayer < aboveUniverseLayer && onDefaultDisplay) {
                 final WindowState u = universeBackground.mWin;
                 if (u.mInputChannel != null && u.mInputWindowHandle != null) {
                     addInputWindowHandleLw(u.mInputWindowHandle, u, u.mAttrs.flags,

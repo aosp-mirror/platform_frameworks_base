@@ -149,7 +149,8 @@ public class InputManagerService extends IInputManager.Stub
     private static native void nativeSetDisplayViewport(int ptr, boolean external,
             int displayId, int rotation,
             int logicalLeft, int logicalTop, int logicalRight, int logicalBottom,
-            int physicalLeft, int physicalTop, int physicalRight, int physicalBottom);
+            int physicalLeft, int physicalTop, int physicalRight, int physicalBottom,
+            int deviceWidth, int deviceHeight);
 
     private static native int nativeGetScanCodeState(int ptr,
             int deviceId, int sourceMask, int scanCode);
@@ -305,7 +306,8 @@ public class InputManagerService extends IInputManager.Stub
                 viewport.logicalFrame.left, viewport.logicalFrame.top,
                 viewport.logicalFrame.right, viewport.logicalFrame.bottom,
                 viewport.physicalFrame.left, viewport.physicalFrame.top,
-                viewport.physicalFrame.right, viewport.physicalFrame.bottom);
+                viewport.physicalFrame.right, viewport.physicalFrame.bottom,
+                viewport.deviceWidth, viewport.deviceHeight);
     }
 
     /**

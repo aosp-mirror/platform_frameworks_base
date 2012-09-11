@@ -10744,7 +10744,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    boolean REVERSE_ITERATOR = true;
+    final static boolean REVERSE_ITERATOR = true;
     class AllWindowsIterator implements Iterator<WindowState> {
         private DisplayContent mDisplayContent;
         private DisplayContentsIterator mDisplayContentsIterator;
