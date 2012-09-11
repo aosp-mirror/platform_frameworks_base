@@ -61,7 +61,7 @@ import android.util.SparseArray;
 
 public class SettingsProvider extends ContentProvider {
     private static final String TAG = "SettingsProvider";
-    private static final boolean LOCAL_LOGV = true;
+    private static final boolean LOCAL_LOGV = false;
 
     private static final String TABLE_SYSTEM = "system";
     private static final String TABLE_SECURE = "secure";
@@ -422,10 +422,6 @@ public class SettingsProvider extends ContentProvider {
                     }
                 }
             }, userFilter);
-
-            if (!ensureAndroidIdIsSet()) {
-                return false;
-            }
         }
         return true;
     }
@@ -472,6 +468,8 @@ public class SettingsProvider extends ContentProvider {
         SettingsFileObserver observer = new SettingsFileObserver(userHandle, db.getPath());
         sObserverInstances.append(userHandle, observer);
         observer.startWatching();
+
+        ensureAndroidIdIsSet(userHandle);
 
         startAsyncCachePopulation(userHandle);
     }
@@ -537,24 +535,27 @@ public class SettingsProvider extends ContentProvider {
         }
     }
 
-    private boolean ensureAndroidIdIsSet() {
-        final Cursor c = query(Settings.Secure.CONTENT_URI,
+    private boolean ensureAndroidIdIsSet(int userHandle) {
+        final Cursor c = queryForUser(Settings.Secure.CONTENT_URI,
                 new String[] { Settings.NameValueTable.VALUE },
                 Settings.NameValueTable.NAME + "=?",
-                new String[] { Settings.Secure.ANDROID_ID }, null);
+                new String[] { Settings.Secure.ANDROID_ID }, null,
+                userHandle);
         try {
             final String value = c.moveToNext() ? c.getString(0) : null;
             if (value == null) {
                 final SecureRandom random = new SecureRandom();
                 final String newAndroidIdValue = Long.toHexString(random.nextLong());
-                Log.d(TAG, "Generated and saved new ANDROID_ID [" + newAndroidIdValue + "]");
                 final ContentValues values = new ContentValues();
                 values.put(Settings.NameValueTable.NAME, Settings.Secure.ANDROID_ID);
                 values.put(Settings.NameValueTable.VALUE, newAndroidIdValue);
-                final Uri uri = insert(Settings.Secure.CONTENT_URI, values);
+                final Uri uri = insertForUser(Settings.Secure.CONTENT_URI, values, userHandle);
                 if (uri == null) {
+                    Slog.e(TAG, "Unable to generate new ANDROID_ID for user " + userHandle);
                     return false;
                 }
+                Slog.d(TAG, "Generated and saved new ANDROID_ID [" + newAndroidIdValue
+                        + "] for user " + userHandle);
             }
             return true;
         } finally {
@@ -732,12 +733,17 @@ public class SettingsProvider extends ContentProvider {
 
     @Override
     public Cursor query(Uri url, String[] select, String where, String[] whereArgs, String sort) {
-        final int callingUser = UserHandle.getCallingUserId();
-        if (LOCAL_LOGV) Slog.v(TAG, "query() for user " + callingUser);
+        return queryForUser(url, select, where, whereArgs, sort, UserHandle.getCallingUserId());
+    }
+
+    public Cursor queryForUser(Uri url, String[] select, String where, String[] whereArgs,
+            String sort, int forUser) {
+        if (LOCAL_LOGV) Slog.v(TAG, "query(" + url + ") for user " + forUser);
         SqlArguments args = new SqlArguments(url, where, whereArgs);
         DatabaseHelper dbH;
         synchronized (this) {
-            dbH = getOrEstablishDatabaseLocked(callingUser);
+            dbH = getOrEstablishDatabaseLocked(
+                    TABLE_GLOBAL.equals(args.table) ? UserHandle.USER_OWNER : forUser);
         }
         SQLiteDatabase db = dbH.getReadableDatabase();
 
@@ -795,7 +801,8 @@ public class SettingsProvider extends ContentProvider {
         mutationCount.incrementAndGet();
         DatabaseHelper dbH;
         synchronized (this) {
-            dbH = getOrEstablishDatabaseLocked(callingUser);
+            dbH = getOrEstablishDatabaseLocked(
+                    TABLE_GLOBAL.equals(args.table) ? UserHandle.USER_OWNER : callingUser);
         }
         SQLiteDatabase db = dbH.getWritableDatabase();
         db.beginTransaction();
@@ -898,7 +905,7 @@ public class SettingsProvider extends ContentProvider {
     private Uri insertForUser(Uri url, ContentValues initialValues, int desiredUserHandle) {
         final int callingUser = UserHandle.getCallingUserId();
         if (callingUser != desiredUserHandle) {
-            getContext().enforceCallingPermission(
+            getContext().enforceCallingOrSelfPermission(
                     android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
                     "Not permitted to access settings for other users");
         }
@@ -934,7 +941,7 @@ public class SettingsProvider extends ContentProvider {
         mutationCount.incrementAndGet();
         DatabaseHelper dbH;
         synchronized (this) {
-            dbH = getOrEstablishDatabaseLocked(callingUser);
+            dbH = getOrEstablishDatabaseLocked(desiredUserHandle);
         }
         SQLiteDatabase db = dbH.getWritableDatabase();
         final long rowId = db.insert(args.table, null, initialValues);
@@ -952,13 +959,15 @@ public class SettingsProvider extends ContentProvider {
 
     @Override
     public int delete(Uri url, String where, String[] whereArgs) {
-        final int callingUser = UserHandle.getCallingUserId();
+        int callingUser = UserHandle.getCallingUserId();
         if (LOCAL_LOGV) Slog.v(TAG, "delete() for user " + callingUser);
         SqlArguments args = new SqlArguments(url, where, whereArgs);
         if (TABLE_FAVORITES.equals(args.table)) {
             return 0;
         } else if (TABLE_OLD_FAVORITES.equals(args.table)) {
             args.table = TABLE_FAVORITES;
+        } else if (TABLE_GLOBAL.equals(args.table)) {
+            callingUser = UserHandle.USER_OWNER;
         }
         checkWritePermissions(args);
 
@@ -987,11 +996,13 @@ public class SettingsProvider extends ContentProvider {
         // intended effect (the update will be invisible to the rest of the system).
         // This should have no practical effect, since writes to the Secure db can only
         // be done by system code, and that code should be using the correct API up front.
-        final int callingUser = UserHandle.getCallingUserId();
+        int callingUser = UserHandle.getCallingUserId();
         if (LOCAL_LOGV) Slog.v(TAG, "update() for user " + callingUser);
         SqlArguments args = new SqlArguments(url, where, whereArgs);
         if (TABLE_FAVORITES.equals(args.table)) {
             return 0;
+        } else if (TABLE_GLOBAL.equals(args.table)) {
+            callingUser = UserHandle.USER_OWNER;
         }
         checkWritePermissions(args);
 
