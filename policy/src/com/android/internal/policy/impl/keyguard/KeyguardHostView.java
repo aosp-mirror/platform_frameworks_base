@@ -214,6 +214,17 @@ public class KeyguardHostView extends KeyguardViewBase {
         dialog.show();
     }
 
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if (event.getAction() == KeyEvent.ACTION_UP
+                && event.getKeyCode() == KeyEvent.KEYCODE_BACK
+                && mCurrentSecuritySelection != SecurityMode.None) {
+            mCallback.dismiss(false);
+            return true;
+        }
+        return super.dispatchKeyEvent(event);
+    }
+
     private void showTimeoutDialog() {
         int timeoutInSeconds = (int) LockPatternUtils.FAILED_ATTEMPT_TIMEOUT_MS / 1000;
         int messageId = 0;
