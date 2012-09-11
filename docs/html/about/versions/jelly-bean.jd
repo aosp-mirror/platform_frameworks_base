@@ -1,29 +1,6 @@
 page.title=Android 4.1 for Developers
 @jd:body
 
-
-<!--<style type="text/css">
-#jd-content {
-  max-width:1024px;
-}
-#jd-content div.screenshot {
-  float:left;
-  clear:left;
-  padding:15px 30px 15px 0;
-}
-
-</style>
-
-<p></p>
-
-
-<div style="float:right;width:230px;padding:0px 0px 60px 34px;margin-top:-40px">
-<div>
-<img src="{@docRoot}images/android-jellybean-sm.png" xheight="402" width="280">
-</div>
-<p class="image-caption">Find out more about the Jelly Bean features for users at <a href="http://www.android.com">android.com</a></p>
-</div>-->
-
 <div style="float:right;width:320px;padding:0px 0px 0px 34px;clear:both">
 <div>
 <img src="{@docRoot}images/jb-android-4.1.png" height="426" width="390">
@@ -35,23 +12,9 @@ page.title=Android 4.1 for Developers
 improvements throughout the platform and added great new features
 for users and developers. This document provides a glimpse of what's new for developers.
 
-<p>See the <a href="{@docRoot}about/versions/android-4.1.html">Android 4.1 APIs</a> document for a detailed look at the new developer APIs,</p>
+<p>See the <a href="{@docRoot}about/versions/android-4.1.html">Android 4.1 APIs</a> document for a detailed look at the new developer APIs.</p>
 
-<!--
-<ul>
-  <li><a href="#performance">Fast, Smooth, Responsive</a></li>
-  <li><a href="#accessibility">Enhanced Accessibility</a></li>
-  <li><a href="#intl">Support for International Users</a></li>
-  <li><a href="#ui">Capabilities for Creating Beautiful UI</a></li>
-  <li><a href="#input">New Input Types and Capabilities</a></li>
-  <li><a href="#graphics">Animation and Graphics</a></li>
-  <li><a href="#connectivity">New Types of Connectivity</a></li>
-  <li><a href="#media">Media Capabilities</a></li>
-  <li><a href="#google">Google APIs and services</a></li>
-  </ul>
--->
-
-<p>Find out more about the Jelly Bean features for users at <a href="http://www.android.com/whatsnew">www.android.com</a></p>
+<p>Find out more about the Jelly Bean features for users at <a href="http://www.android.com/whatsnew">www.android.com</a>.</p>
 
 
 <h2 id="performance">Faster, Smoother, More Responsive</h2>
