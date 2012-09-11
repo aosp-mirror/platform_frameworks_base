@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.backup.BackupManager;
 import android.content.BroadcastReceiver;
@@ -60,7 +61,7 @@ import android.util.SparseArray;
 
 public class SettingsProvider extends ContentProvider {
     private static final String TAG = "SettingsProvider";
-    private static final boolean LOCAL_LOGV = false;
+    private static final boolean LOCAL_LOGV = true;
 
     private static final String TABLE_SYSTEM = "system";
     private static final String TABLE_SECURE = "secure";
@@ -621,24 +622,10 @@ public class SettingsProvider extends ContentProvider {
         if (args != null) {
             int reqUser = args.getInt(Settings.CALL_METHOD_USER_KEY, callingUser);
             if (reqUser != callingUser) {
-                getContext().enforceCallingPermission(
-                        android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
-                        "Not permitted to access settings for other users");
-                if (reqUser == UserHandle.USER_CURRENT) {
-                    try {
-                        reqUser = ActivityManagerNative.getDefault().getCurrentUser().id;
-                    } catch (RemoteException e) {
-                        // can't happen
-                    }
-                    if (LOCAL_LOGV) {
-                        Slog.v(TAG, "   USER_CURRENT resolved to " + reqUser);
-                    }
-                }
-                if (reqUser < 0) {
-                    throw new IllegalArgumentException("Bad user handle " + reqUser);
-                }
-                callingUser = reqUser;
-                if (LOCAL_LOGV) Slog.v(TAG, "   fetching setting for user " + callingUser);
+                callingUser = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
+                        Binder.getCallingUid(), reqUser, false, true,
+                        "get/set setting for user", null);
+                if (LOCAL_LOGV) Slog.v(TAG, "   access setting for user " + callingUser);
             }
         }
 
@@ -678,9 +665,6 @@ public class SettingsProvider extends ContentProvider {
         // the Settings.NameValueTable.VALUE static.
         final String newValue = (args == null)
                 ? null : args.getString(Settings.NameValueTable.VALUE);
-        if (newValue == null) {
-            throw new IllegalArgumentException("Bad value for " + method);
-        }
 
         final ContentValues values = new ContentValues();
         values.put(Settings.NameValueTable.NAME, request);
