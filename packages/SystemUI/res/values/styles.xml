@@ -92,6 +92,11 @@
         <item name="android:textSize">14dp</item>
     </style>
 
+    <style name="TextAppearance.QuickSettings.Alarm" parent="@style/TextAppearance.QuickSettings.TileView">
+        <item name="android:textSize">13dp</item>
+        <item name="android:textColor">#ff3a3b39</item>
+    </style>
+
     <style name="Animation" />
 
     <style name="Animation.ShirtPocketPanel">

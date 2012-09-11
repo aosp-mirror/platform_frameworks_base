@@ -32,4 +32,12 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         />
+    <TextView
+        android:textAppearance="@style/TextAppearance.QuickSettings.Alarm"
+        android:id="@+id/alarm_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:drawableLeft="@drawable/stat_sys_alarm"
+        />
 </LinearLayout>
