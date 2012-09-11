@@ -83,7 +83,8 @@ final class DisplayPowerController {
     private static final boolean USE_ELECTRON_BEAM_ON_ANIMATION = false;
 
     // If true, enables the use of the screen auto-brightness adjustment setting.
-    private static final boolean USE_SCREEN_AUTO_BRIGHTNESS_ADJUSTMENT = false;
+    private static final boolean USE_SCREEN_AUTO_BRIGHTNESS_ADJUSTMENT =
+            PowerManager.useScreenAutoBrightnessAdjustmentFeature();
 
     // The maximum range of gamma adjustment possible using the screen
     // auto-brightness adjustment setting.
