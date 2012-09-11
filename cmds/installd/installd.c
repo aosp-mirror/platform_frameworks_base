@@ -126,11 +126,6 @@ static int do_linklib(char **arg, char reply[REPLY_MAX])
     return linklib(arg[0], arg[1]);
 }
 
-static int do_unlinklib(char **arg, char reply[REPLY_MAX])
-{
-    return unlinklib(arg[0]);
-}
-
 struct cmdinfo {
     const char *name;
     unsigned numargs;
@@ -152,7 +147,6 @@ struct cmdinfo cmds[] = {
     { "rmuserdata",           2, do_rm_user_data },
     { "movefiles",            0, do_movefiles },
     { "linklib",              2, do_linklib },
-    { "unlinklib",            1, do_unlinklib },
     { "mkuserdata",           3, do_mk_user_data },
     { "rmuser",               1, do_rm_user },
     { "cloneuserdata",        3, do_clone_user_data },
@@ -287,6 +281,11 @@ int initialize_globals() {
 
     // Get the android protected app directory.
     if (copy_and_append(&android_app_private_dir, &android_data_dir, PRIVATE_APP_SUBDIR) < 0) {
+        return -1;
+    }
+
+    // Get the android app native library directory.
+    if (copy_and_append(&android_app_lib_dir, &android_data_dir, APP_LIB_SUBDIR) < 0) {
         return -1;
     }
 
