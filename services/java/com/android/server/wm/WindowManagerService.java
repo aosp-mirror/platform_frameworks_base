@@ -434,6 +434,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final float[] mTmpFloats = new float[9];
 
+    boolean mDisplayReady;
     boolean mSafeMode;
     boolean mDisplayEnabled = false;
     boolean mSystemBooted = false;
@@ -502,8 +503,6 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean mSkipAppTransitionAnimation = false;
     final ArrayList<AppWindowToken> mOpeningApps = new ArrayList<AppWindowToken>();
     final ArrayList<AppWindowToken> mClosingApps = new ArrayList<AppWindowToken>();
-
-    Display mDefaultDisplay;
 
     boolean mIsTouchDevice;
 
@@ -2085,7 +2084,7 @@ public class WindowManagerService extends IWindowManager.Stub
         long origId;
 
         synchronized(mWindowMap) {
-            if (mDefaultDisplay == null) {
+            if (!mDisplayReady) {
                 throw new IllegalStateException("Display has not been initialialized");
             }
 
@@ -5604,8 +5603,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     ">>> OPEN TRANSACTION showStrictModeViolation");
             Surface.openTransaction();
             try {
+                // TODO(multi-display): support multiple displays
                 if (mStrictModeFlash == null) {
-                    mStrictModeFlash = new StrictModeFlash(mDefaultDisplay, mFxSession);
+                    mStrictModeFlash = new StrictModeFlash(
+                            getDefaultDisplayContent().getDisplay(), mFxSession);
                 }
                 mStrictModeFlash.setVisibility(on);
             } finally {
@@ -5718,7 +5719,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             // The screenshot API does not apply the current screen rotation.
-            rot = mDefaultDisplay.getRotation();
+            rot = getDefaultDisplayContent().getDisplay().getRotation();
             int fw = frame.width();
             int fh = frame.height();
 
@@ -6751,7 +6752,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     boolean computeScreenConfigurationLocked(Configuration config) {
-        if (mDefaultDisplay == null) {
+        if (!mDisplayReady) {
             return false;
         }
 
@@ -6785,13 +6786,8 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         if (config != null) {
-            int orientation = Configuration.ORIENTATION_SQUARE;
-            if (dw < dh) {
-                orientation = Configuration.ORIENTATION_PORTRAIT;
-            } else if (dw > dh) {
-                orientation = Configuration.ORIENTATION_LANDSCAPE;
-            }
-            config.orientation = orientation;
+            config.orientation = (dw <= dh) ? Configuration.ORIENTATION_PORTRAIT :
+                    Configuration.ORIENTATION_LANDSCAPE;
         }
 
         // Update application display metrics.
@@ -6958,9 +6954,12 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized (mWindowMap) {
                 try {
                     if (mDragState == null) {
+                        // TODO(multi-display): support other displays
+                        final DisplayContent displayContent = getDefaultDisplayContent();
+                        final Display display = displayContent.getDisplay();
                         Surface surface = new Surface(session, "drag surface",
                                 width, height, PixelFormat.TRANSLUCENT, Surface.HIDDEN);
-                        surface.setLayerStack(mDefaultDisplay.getLayerStack());
+                        surface.setLayerStack(display.getLayerStack());
                         if (SHOW_TRANSACTIONS) Slog.i(TAG, "  DRAG "
                                 + surface + ": CREATE");
                         outSurface.copyFrom(surface);
@@ -7102,26 +7101,28 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public void displayReady() {
-        WindowManager wm = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
-        final Display display = wm.getDefaultDisplay();
-        displayReady(display.getDisplayId());
+        displayReady(Display.DEFAULT_DISPLAY);
 
         synchronized(mWindowMap) {
-            readForcedDisplaySizeAndDensityLocked(getDefaultDisplayContent());
+            final DisplayContent displayContent = getDefaultDisplayContent();
+            final Display display = displayContent.getDisplay();
+            readForcedDisplaySizeAndDensityLocked(displayContent);
 
-            mDefaultDisplay = display;
+            mDisplayReady = true;
             mIsTouchDevice = mContext.getPackageManager().hasSystemFeature(
-                PackageManager.FEATURE_TOUCHSCREEN);
+                    PackageManager.FEATURE_TOUCHSCREEN);
 
             mAnimator.initializeLocked(display.getLayerStack());
 
             final DisplayInfo displayInfo = getDefaultDisplayInfo();
-            mAnimator.setDisplayDimensions(displayInfo.logicalWidth, displayInfo.logicalHeight,
-                displayInfo.appWidth, displayInfo.appHeight);
+            mAnimator.setDisplayDimensions(
+                    displayInfo.logicalWidth, displayInfo.logicalHeight,
+                    displayInfo.appWidth, displayInfo.appHeight);
 
-            final DisplayContent displayContent = getDefaultDisplayContent();
-            mPolicy.setInitialDisplaySize(mDefaultDisplay, displayContent.mInitialDisplayWidth,
-                    displayContent.mInitialDisplayHeight, displayContent.mInitialDisplayDensity);
+            mPolicy.setInitialDisplaySize(displayContent.getDisplay(),
+                    displayContent.mInitialDisplayWidth,
+                    displayContent.mInitialDisplayHeight,
+                    displayContent.mInitialDisplayDensity);
         }
 
         try {
@@ -7802,6 +7803,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         // TODO(multidisplay): For now rotations are only main screen.
         final DisplayContent displayContent = getDefaultDisplayContent();
+        final Display display = displayContent.getDisplay();
         if (displayContent.mBaseDisplayWidth < displayContent.mInitialDisplayWidth
                 || displayContent.mBaseDisplayHeight < displayContent.mInitialDisplayHeight) {
             int initW, initH, baseW, baseH;
@@ -7829,7 +7831,7 @@ public class WindowManagerService extends IWindowManager.Stub
             Rect inner = new Rect(0, 0, baseW, baseH);
             try {
                 mBlackFrame = new BlackFrame(mFxSession, outer, inner, MASK_LAYER,
-                        mDefaultDisplay.getLayerStack());
+                        display.getLayerStack());
             } catch (Surface.OutOfResourcesException e) {
             }
         }
@@ -7929,8 +7931,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private void reconfigureDisplayLocked(DisplayContent displayContent) {
         // TODO: Multidisplay: for now only use with default display.
-        mPolicy.setInitialDisplaySize(mDefaultDisplay, displayContent.mBaseDisplayWidth,
-                displayContent.mBaseDisplayHeight, displayContent.mBaseDisplayDensity);
+        mPolicy.setInitialDisplaySize(displayContent.getDisplay(),
+                displayContent.mBaseDisplayWidth,
+                displayContent.mBaseDisplayHeight,
+                displayContent.mBaseDisplayDensity);
 
         displayContent.layoutNeeded = true;
 
@@ -8154,7 +8158,7 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
         
-        if (mDefaultDisplay == null) {
+        if (!mDisplayReady) {
             // Not yet initialized, nothing to do.
             return;
         }
@@ -8600,11 +8604,14 @@ public class WindowManagerService extends IWindowManager.Stub
                 Rect dirty = new Rect(0, 0, mNextAppTransitionThumbnail.getWidth(),
                         mNextAppTransitionThumbnail.getHeight());
                 try {
+                    // TODO(multi-display): support other displays
+                    final DisplayContent displayContent = getDefaultDisplayContent();
+                    final Display display = displayContent.getDisplay();
                     Surface surface = new Surface(mFxSession,
                             "thumbnail anim",
                             dirty.width(), dirty.height(),
                             PixelFormat.TRANSLUCENT, Surface.HIDDEN);
-                    surface.setLayerStack(mDefaultDisplay.getLayerStack());
+                    surface.setLayerStack(display.getLayerStack());
                     topOpeningApp.mAppAnimator.thumbnail = surface;
                     if (SHOW_TRANSACTIONS) Slog.i(TAG, "  THUMBNAIL "
                             + surface + ": CREATE");
@@ -9857,7 +9864,7 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
 
-        if (mDefaultDisplay == null || !mPolicy.isScreenOnFully()) {
+        if (!mDisplayReady || !mPolicy.isScreenOnFully()) {
             // No need to freeze the screen before the system is ready or if
             // the screen is off.
             return;
@@ -9889,10 +9896,12 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             // TODO(multidisplay): rotation on main screen only.
-            DisplayInfo displayInfo = getDefaultDisplayContent().getDisplayInfo();
+            final DisplayContent displayContent = getDefaultDisplayContent();
+            final Display display = displayContent.getDisplay();
+            final DisplayInfo displayInfo = displayContent.getDisplayInfo();
             mAnimator.mScreenRotationAnimation = new ScreenRotationAnimation(mContext,
-                    mDefaultDisplay, mFxSession, inTransaction, displayInfo.logicalWidth,
-                    displayInfo.logicalHeight, mDefaultDisplay.getRotation());
+                    display, mFxSession, inTransaction, displayInfo.logicalWidth,
+                    displayInfo.logicalHeight, display.getRotation());
         }
     }
 
@@ -10003,8 +10012,8 @@ public class WindowManagerService extends IWindowManager.Stub
             if (line != null) {
                 String[] toks = line.split("%");
                 if (toks != null && toks.length > 0) {
-                    mWatermark =
-                            new Watermark(mDefaultDisplay, mRealDisplayMetrics, mFxSession, toks);
+                    mWatermark = new Watermark(getDefaultDisplayContent().getDisplay(),
+                            mRealDisplayMetrics, mFxSession, toks);
                 }
             }
         } catch (FileNotFoundException e) {
@@ -10372,7 +10381,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
         pw.println();
-        if (mDefaultDisplay != null) {
+        if (mDisplayReady) {
             DisplayContentsIterator dCIterator = new DisplayContentsIterator();
             while (dCIterator.hasNext()) {
                 dCIterator.next().dump(pw);
@@ -10804,9 +10813,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public DisplayContent getDefaultDisplayContent() {
-        final int displayId = mDefaultDisplay == null
-                ? Display.DEFAULT_DISPLAY : mDefaultDisplay.getDisplayId();
-        return getDisplayContent(displayId);
+        return getDisplayContent(Display.DEFAULT_DISPLAY);
     }
 
     public WindowList getDefaultWindowList() {
