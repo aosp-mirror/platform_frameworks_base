@@ -44,6 +44,34 @@ public class AppWidgetProviderInfo implements Parcelable {
     public static final int RESIZE_BOTH = RESIZE_HORIZONTAL | RESIZE_VERTICAL;
 
     /**
+     * Indicates that the widget can be displayed on the home screen. This is the default value.
+     */
+    public static final int WIDGET_CATEGORY_HOME_SCREEN = 1;
+
+    /**
+     * Indicates that the widget can be displayed on the keyguard.
+     */
+    public static final int WIDGET_CATEGORY_KEYGUARD = 2;
+
+    /**
+     * Indicates that the widget supports no special features.
+     */
+    public static final int WIDGET_FEATURES_NONE = 0;
+
+    /**
+     * Indicates that the widget displays the current time. The host may use this as a hint to not
+     * display the time in other places.
+     */
+    public static final int WIDGET_FEATURES_CLOCK = 1;
+
+    /**
+     * Indicates that the widget is output only, ie. has nothing clickable. This may be enforced by
+     * the host. Presently, this flag is used by the keyguard to indicate that it can be placed
+     * in the first position.
+     */
+    public static final int WIDGET_FEATURES_STATUS = 2;
+
+    /**
      * Identity of this AppWidget component.  This component should be a {@link
      * android.content.BroadcastReceiver}, and it will be sent the AppWidget intents
      * {@link android.appwidget as described in the AppWidget package documentation}.
@@ -111,6 +139,16 @@ public class AppWidgetProviderInfo implements Parcelable {
     public int initialLayout;
 
     /**
+     * The resource id of the initial layout for this AppWidget when it is displayed on keyguard.
+     * This parameter only needs to be provided if the widget can be displayed on the keyguard,
+     * see {@link #widgetCategory}.
+     *
+     * <p>This field corresponds to the <code>android:initialKeyguardLayout</code> attribute in
+     * the AppWidget meta-data file.
+     */
+    public int initialKeyguardLayout;
+
+    /**
      * The activity to launch that will configure the AppWidget.
      *
      * <p>This class name of field corresponds to the <code>android:configure</code> attribute in
@@ -164,6 +202,27 @@ public class AppWidgetProviderInfo implements Parcelable {
      */
     public int resizeMode;
 
+    /**
+     * Determines whether this widget can be displayed on the home screen, the keyguard, or both.
+     * A widget which is displayed on both needs to ensure that it follows the design guidelines
+     * for both widget classes. This can be achieved by querying the AppWidget options in its
+     * widget provider's update method.
+     *
+     * <p>This field corresponds to the <code>widgetCategory</code> attribute in
+     * the AppWidget meta-data file.
+     */
+    public int widgetCategory;
+
+    /**
+     * A field which specifies any special features that this widget supports. See
+     * {@link #WIDGET_FEATURES_NONE}, {@link #WIDGET_FEATURES_CLOCK},
+     * {@link #WIDGET_FEATURES_STATUS}.
+     *
+     * <p>This field corresponds to the <code>widgetFeatures</code> attribute in
+     * the AppWidget meta-data file.
+     */
+    public int widgetFeatures;
+
     public AppWidgetProviderInfo() {
     }
 
@@ -180,6 +239,7 @@ public class AppWidgetProviderInfo implements Parcelable {
         this.minResizeHeight = in.readInt();
         this.updatePeriodMillis = in.readInt();
         this.initialLayout = in.readInt();
+        this.initialKeyguardLayout = in.readInt();
         if (0 != in.readInt()) {
             this.configure = new ComponentName(in);
         }
@@ -188,6 +248,8 @@ public class AppWidgetProviderInfo implements Parcelable {
         this.previewImage = in.readInt();
         this.autoAdvanceViewId = in.readInt();
         this.resizeMode = in.readInt();
+        this.widgetCategory = in.readInt();
+        this.widgetFeatures = in.readInt();
     }
 
     public void writeToParcel(android.os.Parcel out, int flags) {
@@ -203,6 +265,7 @@ public class AppWidgetProviderInfo implements Parcelable {
         out.writeInt(this.minResizeHeight);
         out.writeInt(this.updatePeriodMillis);
         out.writeInt(this.initialLayout);
+        out.writeInt(this.initialKeyguardLayout);
         if (this.configure != null) {
             out.writeInt(1);
             this.configure.writeToParcel(out, flags);
@@ -214,6 +277,8 @@ public class AppWidgetProviderInfo implements Parcelable {
         out.writeInt(this.previewImage);
         out.writeInt(this.autoAdvanceViewId);
         out.writeInt(this.resizeMode);
+        out.writeInt(this.widgetCategory);
+        out.writeInt(this.widgetFeatures);
     }
 
     public int describeContents() {
