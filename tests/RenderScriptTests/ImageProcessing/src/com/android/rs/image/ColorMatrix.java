@@ -33,9 +33,11 @@ public class ColorMatrix extends TestBase {
     private ScriptC_colormatrix mScript;
     private ScriptIntrinsicColorMatrix mIntrinsic;
     private boolean mUseIntrinsic;
+    private boolean mUseGrey;
 
-    public ColorMatrix(boolean useIntrinsic) {
+    public ColorMatrix(boolean useIntrinsic, boolean useGrey) {
         mUseIntrinsic = useIntrinsic;
+        mUseGrey = useGrey;
     }
 
     public void createTest(android.content.res.Resources res) {
@@ -46,7 +48,11 @@ public class ColorMatrix extends TestBase {
 
         if (mUseIntrinsic) {
             mIntrinsic = ScriptIntrinsicColorMatrix.create(mRS, Element.U8_4(mRS));
-            mIntrinsic.setColorMatrix(m);
+            if (mUseGrey) {
+                mIntrinsic.setGreyscale();
+            } else {
+                mIntrinsic.setColorMatrix(m);
+            }
         } else {
             mScript = new ScriptC_colormatrix(mRS, res, R.raw.colormatrix);
             mScript.invoke_setMatrix(m);
