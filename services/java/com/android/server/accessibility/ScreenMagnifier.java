@@ -21,7 +21,10 @@ import android.animation.Animator.AnimatorListener;
 import android.animation.ObjectAnimator;
 import android.animation.TypeEvaluator;
 import android.animation.ValueAnimator;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
@@ -144,6 +147,7 @@ public final class ScreenMagnifier implements EventStreamTransformation {
 
     private final MagnificationController mMagnificationController;
     private final DisplayContentObserver mDisplayContentObserver;
+    private final ScreenStateObserver mScreenStateObserver;
     private final Viewport mViewport;
 
     private final int mTapTimeSlop = ViewConfiguration.getTapTimeout();
@@ -187,6 +191,8 @@ public final class ScreenMagnifier implements EventStreamTransformation {
         mDisplayContentObserver = new DisplayContentObserver(mContext, mViewport,
                 mMagnificationController, mWindowManagerService, mDisplayProvider,
                 mLongAnimationDuration, mWindowAnimationScale);
+        mScreenStateObserver = new ScreenStateObserver(mContext, mViewport,
+                mMagnificationController);
 
         mGestureDetector = new GestureDetector(context);
 
@@ -247,6 +253,7 @@ public final class ScreenMagnifier implements EventStreamTransformation {
         mViewport.setFrameShown(false, true);
         mDisplayProvider.destroy();
         mDisplayContentObserver.destroy();
+        mScreenStateObserver.destroy();
     }
 
     private void handleMotionEventStateDelegating(MotionEvent event, int policyFlags) {
@@ -786,6 +793,12 @@ public final class ScreenMagnifier implements EventStreamTransformation {
                 DEFAULT_MAGNIFICATION_SCALE);
     }
 
+    private static boolean isScreenMagnificationAutoUpdateEnabled(Context context) {
+        return (Settings.Secure.getInt(context.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_AUTO_UPDATE,
+                DEFAULT_SCREEN_MAGNIFICATION_AUTO_UPDATE) == 1);
+    }
+
     private static final class MotionEventInfo {
 
         private static final int MAX_POOL_SIZE = 10;
@@ -841,6 +854,54 @@ public final class ScreenMagnifier implements EventStreamTransformation {
             mEvent.recycle();
             mEvent = null;
             mPolicyFlags = 0;
+        }
+    }
+
+    private static final class ScreenStateObserver extends BroadcastReceiver {
+
+        private static final int MESSAGE_ON_SCREEN_STATE_CHANGE = 1;
+
+        private final Handler mHandler = new Handler() {
+            @Override
+            public void handleMessage(Message message) {
+                switch (message.what) {
+                    case MESSAGE_ON_SCREEN_STATE_CHANGE: {
+                        String action = (String) message.obj;
+                        handleOnScreenStateChange(action);
+                    } break;
+                }
+            }
+        };
+
+        private final Context mContext;
+        private final Viewport mViewport;
+        private final MagnificationController mMagnificationController;
+
+        public ScreenStateObserver(Context context, Viewport viewport,
+                MagnificationController magnificationController) {
+            mContext = context;
+            mViewport = viewport;
+            mMagnificationController = magnificationController;
+            mContext.registerReceiver(this, new IntentFilter(Intent.ACTION_SCREEN_OFF));
+        }
+
+        public void destroy() {
+            mContext.unregisterReceiver(this);
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            mHandler.obtainMessage(MESSAGE_ON_SCREEN_STATE_CHANGE,
+                    intent.getAction()).sendToTarget();
+        }
+
+        private void handleOnScreenStateChange(String action) {
+            if (action.equals(Intent.ACTION_SCREEN_OFF)
+                    && mMagnificationController.isMagnifying()
+                    && isScreenMagnificationAutoUpdateEnabled(mContext)) {
+                mMagnificationController.reset(false);
+                mViewport.setFrameShown(false, false);
+            }
         }
     }
 
@@ -972,7 +1033,7 @@ public final class ScreenMagnifier implements EventStreamTransformation {
                     switch (transition) {
                         case WindowManagerPolicy.TRANSIT_ENTER:
                         case WindowManagerPolicy.TRANSIT_SHOW: {
-                            if (!magnifying || !screenMagnificationAutoUpdateEnabled(mContext)) {
+                            if (!magnifying || !isScreenMagnificationAutoUpdateEnabled(mContext)) {
                                 break;
                             }
                             final int type = info.type;
@@ -1060,16 +1121,10 @@ public final class ScreenMagnifier implements EventStreamTransformation {
 
         private void resetMagnificationIfNeeded() {
             if (mMagnificationController.isMagnifying()
-                    && screenMagnificationAutoUpdateEnabled(mContext)) {
+                    && isScreenMagnificationAutoUpdateEnabled(mContext)) {
                 mMagnificationController.reset(true);
                 mViewport.setFrameShown(false, true);
             }
-        }
-
-        private boolean screenMagnificationAutoUpdateEnabled(Context context) {
-            return (Settings.Secure.getInt(context.getContentResolver(),
-                    Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_AUTO_UPDATE,
-                    DEFAULT_SCREEN_MAGNIFICATION_AUTO_UPDATE) == 1);
         }
 
         private String windowTransitionToString(int transition) {
