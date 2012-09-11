@@ -404,7 +404,7 @@ class QuickSettings {
                     @Override
                     public void onLoadComplete(Loader<Cursor> loader,
                             Cursor cursor) {
-                        if (cursor.moveToFirst()) {
+                        if (cursor != null && cursor.moveToFirst()) {
                             String name = cursor.getString(0); // DISPLAY_NAME
                             mModel.setUserTileInfo(name);
                             /*
