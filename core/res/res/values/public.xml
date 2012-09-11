@@ -1286,6 +1286,13 @@
   <java-symbol type="layout" name="keyguard_screen_tab_unlock_land" />
   <java-symbol type="layout" name="keyguard_screen_unlock_landscape" />
   <java-symbol type="layout" name="keyguard_screen_unlock_portrait" />
+  <java-symbol type="layout" name="keyguard_selector_view" />
+  <java-symbol type="layout" name="keyguard_pattern_view" />
+  <java-symbol type="layout" name="keyguard_password_view" />
+  <java-symbol type="layout" name="keyguard_face_unlock_view" />
+  <java-symbol type="layout" name="keyguard_sim_pin_view" />
+  <java-symbol type="layout" name="keyguard_sim_puk_view" />
+  <java-symbol type="layout" name="keyguard_account_view" />
   <java-symbol type="layout" name="recent_apps_dialog" />
   <java-symbol type="layout" name="screen_action_bar" />
   <java-symbol type="layout" name="screen_action_bar_overlay" />

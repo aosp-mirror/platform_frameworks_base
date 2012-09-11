@@ -33,13 +33,8 @@
         android:layout_height="match_parent"
         android:gravity="center">
 
+        <!-- SelectorView is always used, so add it here. The rest are loaded dynamically -->
         <include layout="@layout/keyguard_selector_view"/>
-        <include layout="@layout/keyguard_account_view"/>
-        <include layout="@layout/keyguard_pattern_view"/>
-        <include layout="@layout/keyguard_password_view"/>
-        <include layout="@layout/keyguard_sim_pin_view"/>
-        <include layout="@layout/keyguard_sim_puk_view"/>
-        <include layout="@layout/keyguard_face_unlock_view"/>
 
     </ViewFlipper>
 
