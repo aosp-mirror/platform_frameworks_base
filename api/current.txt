@@ -25028,6 +25028,7 @@ package android.view {
     method public void setId(int);
     method public void setImportantForAccessibility(int);
     method public void setKeepScreenOn(boolean);
+    method public void setLayerPaint(android.graphics.Paint);
     method public void setLayerType(int, android.graphics.Paint);
     method public void setLayoutDirection(int);
     method public void setLayoutParams(android.view.ViewGroup.LayoutParams);

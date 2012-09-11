@@ -18,6 +18,7 @@
 package android.view;
 
 import android.graphics.Bitmap;
+import android.graphics.Paint;
 
 /**
  * An OpenGL ES 2.0 implementation of {@link HardwareLayer}.
@@ -40,6 +41,15 @@ abstract class GLES20Layer extends HardwareLayer {
      */
     public int getLayer() {
         return mLayer;
+    }
+
+    @Override
+    void setLayerPaint(Paint paint) {
+        if (paint != null) {
+            GLES20Canvas.nSetLayerPaint(mLayer, paint.mNativePaint);
+            GLES20Canvas.nSetLayerColorFilter(mLayer, paint.getColorFilter() != null ?
+                    paint.getColorFilter().nativeColorFilter : 0);
+        }
     }
 
     @Override

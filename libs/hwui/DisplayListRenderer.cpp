@@ -1012,29 +1012,39 @@ status_t DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flag
             }
             break;
             case DrawLayer: {
+                int oldAlpha = -1;
                 Layer* layer = (Layer*) getInt();
                 float x = getFloat();
                 float y = getFloat();
                 SkPaint* paint = getPaint(renderer);
-                if (mCaching) {
-                    paint->setAlpha(mMultipliedAlpha);
+                if (mCaching && mMultipliedAlpha < 255) {
+                    oldAlpha = layer->getAlpha();
+                    layer->setAlpha(mMultipliedAlpha);
                 }
                 DISPLAY_LIST_LOGD("%s%s %p, %.2f, %.2f, %p", (char*) indent, OP_NAMES[op],
                         layer, x, y, paint);
                 drawGlStatus |= renderer.drawLayer(layer, x, y, paint);
+                if (oldAlpha >= 0) {
+                    layer->setAlpha(oldAlpha);
+                }
             }
             break;
             case DrawBitmap: {
+                int oldAlpha = -1;
                 SkBitmap* bitmap = getBitmap();
                 float x = getFloat();
                 float y = getFloat();
                 SkPaint* paint = getPaint(renderer);
-                if (mCaching) {
+                if (mCaching && mMultipliedAlpha < 255) {
+                    oldAlpha = paint->getAlpha();
                     paint->setAlpha(mMultipliedAlpha);
                 }
                 DISPLAY_LIST_LOGD("%s%s %p, %.2f, %.2f, %p", (char*) indent, OP_NAMES[op],
                         bitmap, x, y, paint);
                 drawGlStatus |= renderer.drawBitmap(bitmap, x, y, paint);
+                if (oldAlpha >= 0) {
+                    paint->setAlpha(oldAlpha);
+                }
             }
             break;
             case DrawBitmapMatrix: {

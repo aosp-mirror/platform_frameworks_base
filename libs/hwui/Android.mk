@@ -16,6 +16,7 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		Dither.cpp \
 		FboCache.cpp \
 		GradientCache.cpp \
+		Layer.cpp \
 		LayerCache.cpp \
 		LayerRenderer.cpp \
 		Matrix.cpp \
