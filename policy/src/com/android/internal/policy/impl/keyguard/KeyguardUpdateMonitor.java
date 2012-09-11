@@ -73,9 +73,9 @@ public class KeyguardUpdateMonitor {
     private static final int MSG_PHONE_STATE_CHANGED = 306;
     private static final int MSG_CLOCK_VISIBILITY_CHANGED = 307;
     private static final int MSG_DEVICE_PROVISIONED = 308;
-    protected static final int MSG_DPM_STATE_CHANGED = 309;
-    protected static final int MSG_USER_SWITCHED = 310;
-    protected static final int MSG_USER_REMOVED = 311;
+    private static final int MSG_DPM_STATE_CHANGED = 309;
+    private static final int MSG_USER_SWITCHED = 310;
+    private static final int MSG_USER_REMOVED = 311;
 
     private static KeyguardUpdateMonitor sInstance;
 

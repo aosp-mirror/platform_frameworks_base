@@ -23,42 +23,36 @@
 <com.android.internal.policy.impl.keyguard.KeyguardPatternView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/keyguard_pattern_view"
+    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal">
 
-    <GridLayout
-        android:orientation="vertical"
+    <include layout="@layout/keyguard_navigation"/>
+
+    <Space android:layout_gravity="fill" />
+
+    <Button android:id="@+id/forgot_password_button"
+        android:layout_gravity="right"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="@*android:dimen/keyguard_lockscreen_status_line_font_size"
+        android:drawableLeft="@*android:drawable/lockscreen_forgot_password_button"
+        android:drawablePadding="0dip"
+        android:visibility="gone"/>
+
+    <!-- We need MATCH_PARENT here only to force the size of the parent to be passed to
+    the pattern view for it to compute its size. This is an unusual case, caused by
+    LockPatternView's requirement to maintain a square aspect ratio based on the width
+    of the screen. -->
+    <com.android.internal.widget.LockPatternView
+        android:id="@+id/lockPatternView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center_horizontal">
-
-        <include layout="@layout/keyguard_navigation"/>
-
-        <Space android:layout_gravity="fill" />
-
-        <Button android:id="@+id/forgot_password_button"
-            android:layout_gravity="right"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="@*android:dimen/keyguard_lockscreen_status_line_font_size"
-            android:drawableLeft="@*android:drawable/lockscreen_forgot_password_button"
-            android:drawablePadding="0dip"
-            android:visibility="gone"/>
-
-        <!-- We need MATCH_PARENT here only to force the size of the parent to be passed to
-        the pattern view for it to compute its size. This is an unusual case, caused by
-        LockPatternView's requirement to maintain a square aspect ratio based on the width
-        of the screen. -->
-        <com.android.internal.widget.LockPatternView
-            android:id="@+id/lockPatternView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginEnd="8dip"
-            android:layout_marginBottom="4dip"
-            android:layout_marginStart="8dip"
-            android:layout_gravity="center_horizontal"
-         />
-
-    </GridLayout>
+        android:layout_marginEnd="8dip"
+        android:layout_marginBottom="4dip"
+        android:layout_marginStart="8dip"
+        android:layout_gravity="center_horizontal"
+     />
 
 </com.android.internal.policy.impl.keyguard.KeyguardPatternView>
