@@ -117,11 +117,8 @@ class CallbackProxy extends Handler {
     private static final int ADD_HISTORY_ITEM                     = 135;
     private static final int HISTORY_INDEX_CHANGED                = 136;
     private static final int AUTH_CREDENTIALS                     = 137;
-    private static final int NOTIFY_SEARCHBOX_LISTENERS           = 139;
     private static final int AUTO_LOGIN                           = 140;
     private static final int CLIENT_CERT_REQUEST                  = 141;
-    private static final int SEARCHBOX_IS_SUPPORTED_CALLBACK      = 142;
-    private static final int SEARCHBOX_DISPATCH_COMPLETE_CALLBACK = 143;
     private static final int PROCEEDED_AFTER_SSL_ERROR            = 144;
 
     // Message triggered by the client to resume execution
@@ -871,14 +868,6 @@ class CallbackProxy extends Handler {
                         host, realm, username, password);
                 break;
             }
-            case NOTIFY_SEARCHBOX_LISTENERS: {
-                SearchBoxImpl searchBox = (SearchBoxImpl) mWebView.getSearchBox();
-
-                @SuppressWarnings("unchecked")
-                List<String> suggestions = (List<String>) msg.obj;
-                searchBox.handleSuggestions(msg.getData().getString("query"), suggestions);
-                break;
-            }
             case AUTO_LOGIN: {
                 if (mWebViewClient != null) {
                     String realm = msg.getData().getString("realm");
@@ -887,19 +876,6 @@ class CallbackProxy extends Handler {
                     mWebViewClient.onReceivedLoginRequest(mWebView.getWebView(), realm,
                             account, args);
                 }
-                break;
-            }
-            case SEARCHBOX_IS_SUPPORTED_CALLBACK: {
-                SearchBoxImpl searchBox = (SearchBoxImpl) mWebView.getSearchBox();
-                Boolean supported = (Boolean) msg.obj;
-                searchBox.handleIsSupportedCallback(supported);
-                break;
-            }
-            case SEARCHBOX_DISPATCH_COMPLETE_CALLBACK: {
-                SearchBoxImpl searchBox = (SearchBoxImpl) mWebView.getSearchBox();
-                Boolean success = (Boolean) msg.obj;
-                searchBox.handleDispatchCompleteCallback(msg.getData().getString("function"),
-                        msg.getData().getInt("id"), success);
                 break;
             }
         }
@@ -1627,29 +1603,6 @@ class CallbackProxy extends Handler {
         // another Activity when the alert should be displayed?
         // See bug 3166409
         return mContext instanceof Activity;
-    }
-
-    void onSearchboxSuggestionsReceived(String query, List<String> suggestions) {
-        Message msg = obtainMessage(NOTIFY_SEARCHBOX_LISTENERS);
-        msg.obj = suggestions;
-        msg.getData().putString("query", query);
-
-        sendMessage(msg);
-    }
-
-    void onIsSupportedCallback(boolean isSupported) {
-        Message msg = obtainMessage(SEARCHBOX_IS_SUPPORTED_CALLBACK);
-        msg.obj = Boolean.valueOf(isSupported);
-        sendMessage(msg);
-    }
-
-    void onSearchboxDispatchCompleteCallback(String function, int id, boolean success) {
-        Message msg = obtainMessage(SEARCHBOX_DISPATCH_COMPLETE_CALLBACK);
-        msg.obj = Boolean.valueOf(success);
-        msg.getData().putString("function", function);
-        msg.getData().putInt("id", id);
-
-        sendMessage(msg);
     }
 
     private synchronized void sendMessageToUiThreadSync(Message msg) {
