@@ -5367,10 +5367,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      * This is an implementation detail.
      */
     public SearchBox getSearchBox() {
-        if ((mWebViewCore == null) || (mWebViewCore.getBrowserFrame() == null)) {
-            return null;
-        }
-        return mWebViewCore.getBrowserFrame().getSearchBox();
+        return null;
     }
 
     /**
