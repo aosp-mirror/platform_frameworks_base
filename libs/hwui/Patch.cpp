@@ -266,6 +266,11 @@ void Patch::generateQuad(TextureVertex*& vertex, float x1, float y1, float x2, f
     const uint32_t oldQuadCount = quadCount;
     quadCount++;
 
+    if (x1 < 0.0f) x1 = 0.0f;
+    if (x2 < 0.0f) x2 = 0.0f;
+    if (y1 < 0.0f) y1 = 0.0f;
+    if (y2 < 0.0f) y2 = 0.0f;
+
     // Skip degenerate and transparent (empty) quads
     if ((mColorKey >> oldQuadCount) & 0x1) {
 #if DEBUG_PATCHES_EMPTY_VERTICES
