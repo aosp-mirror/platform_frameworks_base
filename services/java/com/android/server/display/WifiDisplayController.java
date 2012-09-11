@@ -493,14 +493,8 @@ final class WifiDisplayController implements DumpUtils.Dump {
                 return; // done
             }
 
-            int port = DEFAULT_CONTROL_PORT;
-            if (mConnectedDevice.deviceName.startsWith("DIRECT-")
-                    && mConnectedDevice.deviceName.endsWith("Broadcom")) {
-                // These dongles ignore the port we broadcast in our WFD IE.
-                port = 8554;
-            }
-
             final WifiDisplay display = createWifiDisplay(mConnectedDevice);
+            final int port = getPortNumber(mConnectedDevice);
             final String iface = addr.getHostAddress() + ":" + port;
 
             mPublishedDevice = mConnectedDevice;
@@ -647,12 +641,24 @@ final class WifiDisplayController implements DumpUtils.Dump {
         return null;
     }
 
+    private static int getPortNumber(WifiP2pDevice device) {
+        if (device.deviceName.startsWith("DIRECT-")
+                && device.deviceName.endsWith("Broadcom")) {
+            // These dongles ignore the port we broadcast in our WFD IE.
+            return 8554;
+        }
+        return DEFAULT_CONTROL_PORT;
+    }
+
     private static boolean isWifiDisplay(WifiP2pDevice device) {
-        // FIXME: the wfdInfo API doesn't work yet
-        return device.deviceName.startsWith("DWD-")
-                || device.deviceName.startsWith("DIRECT-")
-                || device.deviceName.startsWith("CAVM-");
-        //device.wfdInfo != null && device.wfdInfo.isWfdEnabled();
+        return device.wfdInfo != null
+                && device.wfdInfo.isWfdEnabled()
+                && isPrimarySinkDeviceType(device.wfdInfo.getDeviceType());
+    }
+
+    private static boolean isPrimarySinkDeviceType(int deviceType) {
+        return deviceType == WifiP2pWfdInfo.PRIMARY_SINK
+                || deviceType == WifiP2pWfdInfo.SOURCE_OR_PRIMARY_SINK;
     }
 
     private static String describeWifiP2pDevice(WifiP2pDevice device) {
