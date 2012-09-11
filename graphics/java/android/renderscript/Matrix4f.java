@@ -113,6 +113,34 @@ public class Matrix4f {
     }
 
     /**
+    * Sets the values of the matrix to those of the parameter
+    *
+    * @param src matrix to load the values from
+    * @hide
+    */
+    public void load(Matrix3f src) {
+        mMat[0] = src.mMat[0];
+        mMat[1] = src.mMat[1];
+        mMat[2] = src.mMat[2];
+        mMat[3] = 0;
+
+        mMat[4] = src.mMat[3];
+        mMat[5] = src.mMat[4];
+        mMat[6] = src.mMat[5];
+        mMat[7] = 0;
+
+        mMat[8] = src.mMat[6];
+        mMat[9] = src.mMat[7];
+        mMat[10] = src.mMat[8];
+        mMat[11] = 0;
+
+        mMat[12] = 0;
+        mMat[13] = 0;
+        mMat[14] = 0;
+        mMat[15] = 1;
+    }
+
+    /**
     * Sets current values to be a rotation matrix of certain angle
     * about a given axis
     *
