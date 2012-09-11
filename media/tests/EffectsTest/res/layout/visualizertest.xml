@@ -105,6 +105,8 @@
             style="@android:style/TextAppearance.Medium" />
 
         <EditText android:id="@+id/sessionEdit"
+            android:singleLine="true"
+            android:numeric="integer"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_weight="0.5"
