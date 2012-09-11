@@ -107,6 +107,9 @@ public abstract class AbsSeekBar extends ProgressBar {
         }
         if (thumb != null) {
             thumb.setCallback(this);
+            if (canResolveLayoutDirection()) {
+                thumb.setLayoutDirection(getResolvedLayoutDirection());
+            }
 
             // Assuming the thumb drawable is symmetric, set the thumb offset
             // such that the thumb will hang halfway off either edge of the
@@ -303,7 +306,16 @@ public abstract class AbsSeekBar extends ProgressBar {
         // Canvas will be translated, so 0,0 is where we start drawing
         thumb.setBounds(thumbPos, topBound, thumbPos + thumbWidth, bottomBound);
     }
-    
+
+    @Override
+    public void onResolveDrawables(int layoutDirection) {
+        super.onResolveDrawables(layoutDirection);
+
+        if (mThumb != null) {
+            mThumb.setLayoutDirection(layoutDirection);
+        }
+    }
+
     @Override
     protected synchronized void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -409,15 +421,25 @@ public abstract class AbsSeekBar extends ProgressBar {
         int x = (int)event.getX();
         float scale;
         float progress = 0;
-        if (x < mPaddingLeft) {
-            scale = 0.0f;
-        } else if (x > width - mPaddingRight) {
-            scale = 1.0f;
+        if (isLayoutRtl()) {
+            if (x > width - mPaddingRight) {
+                scale = 0.0f;
+            } else if (x < mPaddingLeft) {
+                scale = 1.0f;
+            } else {
+                scale = (float)(available - x + mPaddingLeft) / (float)available;
+                progress = mTouchProgressOffset;
+            }
         } else {
-            scale = (float)(x - mPaddingLeft) / (float)available;
-            progress = mTouchProgressOffset;
+            if (x < mPaddingLeft) {
+                scale = 0.0f;
+            } else if (x > width - mPaddingRight) {
+                scale = 1.0f;
+            } else {
+                scale = (float)(x - mPaddingLeft) / (float)available;
+                progress = mTouchProgressOffset;
+            }
         }
-        
         final int max = getMax();
         progress += scale * max;
         
