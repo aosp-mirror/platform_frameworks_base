@@ -509,8 +509,8 @@ public class NetworkController extends BroadcastReceiver {
     }
 
     private void updateAirplaneMode() {
-        mAirplaneMode = (Settings.System.getInt(mContext.getContentResolver(),
-            Settings.System.AIRPLANE_MODE_ON, 0) == 1);
+        mAirplaneMode = (Settings.Global.getInt(mContext.getContentResolver(),
+            Settings.Global.AIRPLANE_MODE_ON, 0) == 1);
     }
 
     private final void updateTelephonySignalStrength() {

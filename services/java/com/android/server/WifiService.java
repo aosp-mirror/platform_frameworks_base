@@ -1179,17 +1179,17 @@ public class WifiService extends IWifiManager.Stub {
     }
 
     private boolean isAirplaneSensitive() {
-        String airplaneModeRadios = Settings.System.getString(mContext.getContentResolver(),
-                Settings.System.AIRPLANE_MODE_RADIOS);
+        String airplaneModeRadios = Settings.Global.getString(mContext.getContentResolver(),
+                Settings.Global.AIRPLANE_MODE_RADIOS);
         return airplaneModeRadios == null
-            || airplaneModeRadios.contains(Settings.System.RADIO_WIFI);
+            || airplaneModeRadios.contains(Settings.Global.RADIO_WIFI);
     }
 
     private boolean isAirplaneToggleable() {
-        String toggleableRadios = Settings.System.getString(mContext.getContentResolver(),
-                Settings.System.AIRPLANE_MODE_TOGGLEABLE_RADIOS);
+        String toggleableRadios = Settings.Global.getString(mContext.getContentResolver(),
+                Settings.Global.AIRPLANE_MODE_TOGGLEABLE_RADIOS);
         return toggleableRadios != null
-            && toggleableRadios.contains(Settings.System.RADIO_WIFI);
+            && toggleableRadios.contains(Settings.Global.RADIO_WIFI);
     }
 
     /**
@@ -1198,8 +1198,8 @@ public class WifiService extends IWifiManager.Stub {
      * @return {@code true} if airplane mode is on.
      */
     private boolean isAirplaneModeOn() {
-        return isAirplaneSensitive() && Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.AIRPLANE_MODE_ON, 0) == 1;
+        return isAirplaneSensitive() && Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.AIRPLANE_MODE_ON, 0) == 1;
     }
 
     @Override
@@ -1213,8 +1213,8 @@ public class WifiService extends IWifiManager.Stub {
         }
         pw.println("Wi-Fi is " + mWifiStateMachine.syncGetWifiStateByName());
         pw.println("Stay-awake conditions: " +
-                Settings.System.getInt(mContext.getContentResolver(),
-                                       Settings.System.STAY_ON_WHILE_PLUGGED_IN, 0));
+                Settings.Global.getInt(mContext.getContentResolver(),
+                                       Settings.Global.STAY_ON_WHILE_PLUGGED_IN, 0));
         pw.println();
 
         pw.println("Internal state:");
