@@ -138,10 +138,6 @@ public class WifiStateMachine extends StateMachine {
     private boolean mScanResultIsPending = false;
     /* Tracks if the current scan settings are active */
     private boolean mSetScanActive = false;
-    /* High perf mode is true if an app has held a high perf Wifi Lock */
-    private boolean mHighPerfMode = false;
-    /* Tracks if user has disabled suspend optimizations through settings */
-    private AtomicBoolean mSuspendOptEnabled = new AtomicBoolean(true);
 
     private boolean mBluetoothConnectionActive = false;
 
@@ -338,10 +334,8 @@ public class WifiStateMachine extends StateMachine {
     static final int CMD_START_PACKET_FILTERING           = BASE + 84;
     /* Clear packet filter */
     static final int CMD_STOP_PACKET_FILTERING            = BASE + 85;
-    /* Set suspend mode optimizations in the driver */
-    static final int CMD_SET_SUSPEND_OPTIMIZATIONS        = BASE + 86;
-    /* Clear suspend mode optimizations in the driver */
-    static final int CMD_CLEAR_SUSPEND_OPTIMIZATIONS      = BASE + 87;
+    /* Enable suspend mode optimizations in the driver */
+    static final int CMD_SET_SUSPEND_OPT_ENABLED          = BASE + 86;
     /* When there are no saved networks, we do a periodic scan to notify user of
      * an open network */
     static final int CMD_NO_NETWORKS_PERIODIC_SCAN        = BASE + 88;
@@ -386,8 +380,19 @@ public class WifiStateMachine extends StateMachine {
      */
     private static final int DEFAULT_MAX_DHCP_RETRIES = 9;
 
-    /* Tracks if power save is enabled in driver */
-    private boolean mPowerSaveEnabled = true;;
+    /* Tracks if suspend optimizations need to be disabled by DHCP,
+     * screen or due to high perf mode.
+     * When any of them needs to disable it, we keep the suspend optimizations
+     * disabled
+     */
+    private int mSuspendOptNeedsDisabled = 0;
+
+    private static final int SUSPEND_DUE_TO_DHCP       = 1;
+    private static final int SUSPEND_DUE_TO_HIGH_PERF  = 1<<1;
+    private static final int SUSPEND_DUE_TO_SCREEN     = 1<<2;
+
+    /* Tracks if user has enabled suspend optimizations through settings */
+    private AtomicBoolean mUserWantsSuspendOpt = new AtomicBoolean(true);
 
     /**
      * Default framework scan interval in milliseconds. This is used in the scenario in which
@@ -599,7 +604,7 @@ public class WifiStateMachine extends StateMachine {
         mPrimaryDeviceType = mContext.getResources().getString(
                 com.android.internal.R.string.config_wifi_p2p_device_type);
 
-        mSuspendOptEnabled.set(Settings.Secure.getInt(mContext.getContentResolver(),
+        mUserWantsSuspendOpt.set(Settings.Secure.getInt(mContext.getContentResolver(),
                     Settings.Secure.WIFI_SUSPEND_OPTIMIZATIONS_ENABLED, 1) == 1);
 
         mContext.registerReceiver(
@@ -637,20 +642,20 @@ public class WifiStateMachine extends StateMachine {
                         enableBackgroundScanCommand(false);
                     }
                     enableAllNetworks();
-                    if (mSuspendOptEnabled.get()) {
+                    if (mUserWantsSuspendOpt.get()) {
                         if (DBG) log("Clear suspend optimizations");
-                        sendMessage(CMD_CLEAR_SUSPEND_OPTIMIZATIONS);
+                        sendMessage(obtainMessage(CMD_SET_SUSPEND_OPT_ENABLED, 0, 0));
                     }
                 } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
                     enableRssiPolling(false);
                     if (mBackgroundScanSupported) {
                         enableBackgroundScanCommand(true);
                     }
-                    if (mSuspendOptEnabled.get()) {
+                    if (mUserWantsSuspendOpt.get()) {
                         if (DBG) log("Enable suspend optimizations");
                         //Allow 2s for suspend optimizations to be set
                         mSuspendWakeLock.acquire(2000);
-                        sendMessage(CMD_SET_SUSPEND_OPTIMIZATIONS);
+                        sendMessage(obtainMessage(CMD_SET_SUSPEND_OPT_ENABLED, 1, 0));
                     }
                 }
             }
@@ -671,7 +676,7 @@ public class WifiStateMachine extends StateMachine {
                 new ContentObserver(getHandler()) {
                     @Override
                     public void onChange(boolean selfChange) {
-                        mSuspendOptEnabled.set(Settings.Secure.getInt(mContext.getContentResolver(),
+                        mUserWantsSuspendOpt.set(Settings.Secure.getInt(mContext.getContentResolver(),
                                 Settings.Secure.WIFI_SUSPEND_OPTIMIZATIONS_ENABLED, 1) == 1);
                     }
                 });
@@ -1172,8 +1177,8 @@ public class WifiStateMachine extends StateMachine {
         sb.append("mLastNetworkId ").append(mLastNetworkId).append(LS);
         sb.append("mReconnectCount ").append(mReconnectCount).append(LS);
         sb.append("mIsScanMode ").append(mIsScanMode).append(LS);
-        sb.append("mHighPerfMode").append(mHighPerfMode).append(LS);
-        sb.append("mSuspendOptEnabled").append(mSuspendOptEnabled).append(LS);
+        sb.append("mUserWantsSuspendOpt ").append(mUserWantsSuspendOpt).append(LS);
+        sb.append("mSuspendOptNeedsDisabled ").append(mSuspendOptNeedsDisabled).append(LS);
         sb.append("Supplicant status").append(LS)
                 .append(mWifiNative.status()).append(LS).append(LS);
 
@@ -1191,8 +1196,7 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_START_DRIVER:
                 case CMD_SET_SCAN_MODE:
                 case CMD_SET_HIGH_PERF_MODE:
-                case CMD_SET_SUSPEND_OPTIMIZATIONS:
-                case CMD_CLEAR_SUSPEND_OPTIMIZATIONS:
+                case CMD_SET_SUSPEND_OPT_ENABLED:
                 case CMD_ENABLE_BACKGROUND_SCAN:
                 case CMD_ENABLE_ALL_NETWORKS:
                 return false;
@@ -1322,6 +1326,32 @@ public class WifiStateMachine extends StateMachine {
         int band = Settings.Secure.getInt(mContext.getContentResolver(),
                 Settings.Secure.WIFI_FREQUENCY_BAND, WifiManager.WIFI_FREQUENCY_BAND_AUTO);
         setFrequencyBand(band, false);
+    }
+
+    private void setSuspendOptimizationsNative(int reason, boolean enabled) {
+        if (DBG) log("setSuspendOptimizationsNative: " + reason + " " + enabled);
+        if (enabled) {
+            mSuspendOptNeedsDisabled &= ~reason;
+            /* None of dhcp, screen or highperf need it disabled and user wants it enabled */
+            if (mSuspendOptNeedsDisabled == 0 && mUserWantsSuspendOpt.get()) {
+                mWifiNative.setSuspendOptimizations(true);
+                if (DBG) log("Enabled, mSuspendOptNeedsDisabled " + mSuspendOptNeedsDisabled);
+            }
+        } else {
+            mSuspendOptNeedsDisabled |= reason;
+            mWifiNative.setSuspendOptimizations(false);
+            if (DBG) log("Disabled, mSuspendOptNeedsDisabled " + mSuspendOptNeedsDisabled);
+        }
+    }
+
+    private void setSuspendOptimizations(int reason, boolean enabled) {
+        if (DBG) log("setSuspendOptimizations: " + reason + " " + enabled);
+        if (enabled) {
+            mSuspendOptNeedsDisabled &= ~reason;
+        } else {
+            mSuspendOptNeedsDisabled |= reason;
+        }
+        if (DBG) log("mSuspendOptNeedsDisabled " + mSuspendOptNeedsDisabled);
     }
 
     private void setWifiState(int wifiState) {
@@ -1736,18 +1766,16 @@ public class WifiStateMachine extends StateMachine {
                     mWifiNative.BLUETOOTH_COEXISTENCE_MODE_DISABLED);
         }
 
-        /* Disable power save during DHCP */
-        if (mPowerSaveEnabled) {
-            mPowerSaveEnabled = false;
-            mWifiNative.setPowerSave(mPowerSaveEnabled);
-        }
+        /* Disable power save and suspend optimizations during DHCP */
+        mWifiNative.setPowerSave(false);
+        setSuspendOptimizationsNative(SUSPEND_DUE_TO_DHCP, false);
     }
 
 
     void handlePostDhcpSetup() {
-        /* Restore power save */
-        mPowerSaveEnabled = true;
-        mWifiNative.setPowerSave(mPowerSaveEnabled);
+        /* Restore power save and suspend optimizations */
+        mWifiNative.setPowerSave(true);
+        setSuspendOptimizationsNative(SUSPEND_DUE_TO_DHCP, true);
 
         // Set the coexistence mode back to its default value
         mWifiNative.setBluetoothCoexistenceMode(
@@ -1880,7 +1908,11 @@ public class WifiStateMachine extends StateMachine {
                     mEnableBackgroundScan = (message.arg1 == 1);
                     break;
                 case CMD_SET_HIGH_PERF_MODE:
-                    mHighPerfMode = (message.arg1 == 1);
+                    if (message.arg1 == 1) {
+                        setSuspendOptimizations(SUSPEND_DUE_TO_HIGH_PERF, false);
+                    } else {
+                        setSuspendOptimizations(SUSPEND_DUE_TO_HIGH_PERF, true);
+                    }
                     break;
                     /* Discard */
                 case CMD_LOAD_DRIVER:
@@ -1927,14 +1959,18 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_RESPONSE_AP_CONFIG:
                 case WifiWatchdogStateMachine.POOR_LINK_DETECTED:
                 case WifiWatchdogStateMachine.GOOD_LINK_DETECTED:
-                case CMD_CLEAR_SUSPEND_OPTIMIZATIONS:
                 case CMD_NO_NETWORKS_PERIODIC_SCAN:
                     break;
                 case DhcpStateMachine.CMD_ON_QUIT:
                     mDhcpStateMachine = null;
                     break;
-                case CMD_SET_SUSPEND_OPTIMIZATIONS:
-                    mSuspendWakeLock.release();
+                case CMD_SET_SUSPEND_OPT_ENABLED:
+                    if (message.arg1 == 1) {
+                        mSuspendWakeLock.release();
+                        setSuspendOptimizations(SUSPEND_DUE_TO_SCREEN, true);
+                    } else {
+                        setSuspendOptimizations(SUSPEND_DUE_TO_SCREEN, false);
+                    }
                     break;
                 case WifiMonitor.DRIVER_HUNG_EVENT:
                     setWifiEnabled(false);
@@ -2670,7 +2706,7 @@ public class WifiStateMachine extends StateMachine {
                 mWifiNative.stopFilteringMulticastV4Packets();
             }
 
-            mWifiNative.setPowerSave(mPowerSaveEnabled);
+            mWifiNative.setPowerSave(true);
 
             if (mIsScanMode) {
                 mWifiNative.setScanResultHandling(SCAN_ONLY_MODE);
@@ -2797,20 +2833,19 @@ public class WifiStateMachine extends StateMachine {
                         loge("Illegal arugments to CMD_STOP_PACKET_FILTERING");
                     }
                     break;
-                case CMD_SET_SUSPEND_OPTIMIZATIONS:
-                    if (!mHighPerfMode) {
-                        mWifiNative.setSuspendOptimizations(true);
+                case CMD_SET_SUSPEND_OPT_ENABLED:
+                    if (message.arg1 == 1) {
+                        setSuspendOptimizationsNative(SUSPEND_DUE_TO_SCREEN, true);
+                        mSuspendWakeLock.release();
+                    } else {
+                        setSuspendOptimizationsNative(SUSPEND_DUE_TO_SCREEN, false);
                     }
-                    mSuspendWakeLock.release();
-                    break;
-                case CMD_CLEAR_SUSPEND_OPTIMIZATIONS:
-                    mWifiNative.setSuspendOptimizations(false);
                     break;
                 case CMD_SET_HIGH_PERF_MODE:
-                    mHighPerfMode = (message.arg1 == 1);
-                    if (mHighPerfMode) {
-                        //Disable any suspend optimizations
-                        mWifiNative.setSuspendOptimizations(false);
+                    if (message.arg1 == 1) {
+                        setSuspendOptimizationsNative(SUSPEND_DUE_TO_HIGH_PERF, false);
+                    } else {
+                        setSuspendOptimizationsNative(SUSPEND_DUE_TO_HIGH_PERF, true);
                     }
                     break;
                 default:
