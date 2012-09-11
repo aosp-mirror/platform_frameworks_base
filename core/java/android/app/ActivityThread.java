@@ -4066,7 +4066,8 @@ public final class ActivityThread {
 
         // send up app name; do this *before* waiting for debugger
         Process.setArgV0(data.processName);
-        android.ddm.DdmHandleAppName.setAppName(data.processName);
+        android.ddm.DdmHandleAppName.setAppName(data.processName,
+                                                UserHandle.myUserId());
 
         if (data.persistent) {
             // Persistent processes on low-memory devices do not get to
@@ -4792,7 +4793,8 @@ public final class ActivityThread {
                     ensureJitEnabled();
                 }
             });
-            android.ddm.DdmHandleAppName.setAppName("<pre-initialized>");
+            android.ddm.DdmHandleAppName.setAppName("<pre-initialized>",
+                                                    UserHandle.myUserId());
             RuntimeInit.setApplicationObject(mAppThread.asBinder());
             IActivityManager mgr = ActivityManagerNative.getDefault();
             try {
@@ -4803,7 +4805,8 @@ public final class ActivityThread {
         } else {
             // Don't set application object here -- if the system crashes,
             // we can't display an alert, we just want to die die die.
-            android.ddm.DdmHandleAppName.setAppName("system_process");
+            android.ddm.DdmHandleAppName.setAppName("system_process",
+                                                    UserHandle.myUserId());
             try {
                 mInstrumentation = new Instrumentation();
                 ContextImpl context = new ContextImpl();
