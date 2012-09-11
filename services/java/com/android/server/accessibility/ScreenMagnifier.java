@@ -236,7 +236,6 @@ public final class ScreenMagnifier implements EventStreamTransformation {
         mDetectingStateHandler.clear();
         mStateViewportDraggingHandler.clear();
         mGestureDetector.clear();
-
         if (mNext != null) {
             mNext.clear();
         }
@@ -244,6 +243,8 @@ public final class ScreenMagnifier implements EventStreamTransformation {
 
     @Override
     public void onDestroy() {
+        mMagnificationController.setScaleAndMagnifiedRegionCenter(1.0f,
+                0, 0, true);
         mDisplayProvider.destroy();
         mDisplayContentObserver.destroy();
     }
