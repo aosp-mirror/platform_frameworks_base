@@ -739,6 +739,7 @@ public final class Settings {
             try {
                 Bundle arg = new Bundle();
                 arg.putString(Settings.NameValueTable.VALUE, value);
+                arg.putInt(CALL_METHOD_USER_KEY, userHandle);
                 IContentProvider cp = lazyGetProvider(cr);
                 cp.call(mCallSetCommand, name, arg);
             } catch (RemoteException e) {
