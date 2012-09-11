@@ -261,7 +261,7 @@ public abstract class Keyframe implements Cloneable {
 
         @Override
         public ObjectKeyframe clone() {
-            ObjectKeyframe kfClone = new ObjectKeyframe(getFraction(), mValue);
+            ObjectKeyframe kfClone = new ObjectKeyframe(getFraction(), mHasValue ? mValue : null);
             kfClone.setInterpolator(getInterpolator());
             return kfClone;
         }
@@ -306,7 +306,9 @@ public abstract class Keyframe implements Cloneable {
 
         @Override
         public IntKeyframe clone() {
-            IntKeyframe kfClone = new IntKeyframe(getFraction(), mValue);
+            IntKeyframe kfClone = mHasValue ?
+                    new IntKeyframe(getFraction(), mValue) :
+                    new IntKeyframe(getFraction());
             kfClone.setInterpolator(getInterpolator());
             return kfClone;
         }
@@ -350,7 +352,9 @@ public abstract class Keyframe implements Cloneable {
 
         @Override
         public FloatKeyframe clone() {
-            FloatKeyframe kfClone = new FloatKeyframe(getFraction(), mValue);
+            FloatKeyframe kfClone = mHasValue ?
+                    new FloatKeyframe(getFraction(), mValue) :
+                    new FloatKeyframe(getFraction());
             kfClone.setInterpolator(getInterpolator());
             return kfClone;
         }
