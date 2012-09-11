@@ -780,6 +780,12 @@
         create and manage their own tokens, bypassing their normal
         Z-ordering. Should never be needed for normal apps.</string>
 
+    <!-- [CHAR LIMIT=NONE] Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_freezeScreen">freeze screen</string>
+    <!-- [CHAR LIMIT=NONE] Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_freezeScreen">Allows the application to temporarily freeze
+        the screen for a full-screen transition.</string>
+    
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_injectEvents">press keys and control buttons</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

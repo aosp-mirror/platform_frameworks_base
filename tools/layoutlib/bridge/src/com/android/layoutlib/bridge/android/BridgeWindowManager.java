@@ -107,6 +107,16 @@ public class BridgeWindowManager implements IWindowManager {
     }
 
     @Override
+    public void startFreezingScreen(int exitAnim, int enterAnim) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void stopFreezingScreen() {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
     public void disableKeyguard(IBinder arg0, String arg1) throws RemoteException {
         // TODO Auto-generated method stub
 
