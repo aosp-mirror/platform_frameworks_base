@@ -721,7 +721,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private void sendChangedNotification() {
         Intent intent = new Intent(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
         intent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-        mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+        long ident = Binder.clearCallingIdentity();
+        try {
+            // TODO: This shouldn't be sent to all users, if DPM is per user.
+            mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 
     private void loadSettingsLocked() {
