@@ -127,6 +127,10 @@ public class LocationController extends BroadcastReceiver {
                         n,
                         idOut,
                         UserHandle.USER_CURRENT);
+
+                for (LocationGpsStateChangeCallback cb : mChangeCallbacks) {
+                    cb.onLocationGpsStateChanged(true, text);
+                }
             } else {
                 mNotificationService.cancelNotificationWithTag(
                         mContext.getPackageName(), null,
