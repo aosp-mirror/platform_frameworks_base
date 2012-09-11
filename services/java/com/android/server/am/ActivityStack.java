@@ -430,11 +430,10 @@ final class ActivityStack {
     }
     
     final ActivityRecord topRunningActivityLocked(ActivityRecord notTop) {
-        // TODO: Don't look for any tasks from other users
         int i = mHistory.size()-1;
         while (i >= 0) {
             ActivityRecord r = mHistory.get(i);
-            if (!r.finishing && r != notTop) {
+            if (!r.finishing && r != notTop && r.userId == mCurrentUser) {
                 return r;
             }
             i--;
@@ -443,11 +442,10 @@ final class ActivityStack {
     }
 
     final ActivityRecord topRunningNonDelayedActivityLocked(ActivityRecord notTop) {
-        // TODO: Don't look for any tasks from other users
         int i = mHistory.size()-1;
         while (i >= 0) {
             ActivityRecord r = mHistory.get(i);
-            if (!r.finishing && !r.delayedResume && r != notTop) {
+            if (!r.finishing && !r.delayedResume && r != notTop && r.userId == mCurrentUser) {
                 return r;
             }
             i--;
@@ -465,12 +463,12 @@ final class ActivityStack {
      * @return Returns the HistoryRecord of the next activity on the stack.
      */
     final ActivityRecord topRunningActivityLocked(IBinder token, int taskId) {
-        // TODO: Don't look for any tasks from other users
         int i = mHistory.size()-1;
         while (i >= 0) {
             ActivityRecord r = mHistory.get(i);
             // Note: the taskId check depends on real taskId fields being non-zero
-            if (!r.finishing && (token != r.appToken) && (taskId != r.task.taskId)) {
+            if (!r.finishing && (token != r.appToken) && (taskId != r.task.taskId)
+                    && r.userId == mCurrentUser) {
                 return r;
             }
             i--;
@@ -1408,7 +1406,7 @@ final class ActivityStack {
             // Launcher...
             if (mMainStack) {
                 ActivityOptions.abort(options);
-                return mService.startHomeActivityLocked(0, null);
+                return mService.startHomeActivityLocked(mCurrentUser, null);
             }
         }
 
