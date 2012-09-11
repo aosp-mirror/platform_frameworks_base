@@ -67,6 +67,8 @@ import com.android.internal.R;
 import com.android.internal.os.SomeArgs;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * This class handles the screen magnification when accessibility is enabled.
@@ -1020,7 +1022,9 @@ public final class ScreenMagnifier implements EventStreamTransformation {
                 }
                 if (info.type == WindowManager.LayoutParams.TYPE_NAVIGATION_BAR
                         || info.type == WindowManager.LayoutParams.TYPE_INPUT_METHOD
-                        || info.type == WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG) {
+                        || info.type == WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG
+                        || info.type == WindowManager.LayoutParams.TYPE_KEYGUARD
+                        || info.type == WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG) {
                     switch (transition) {
                         case WindowManagerPolicy.TRANSIT_ENTER:
                         case WindowManagerPolicy.TRANSIT_SHOW:
@@ -1473,7 +1477,9 @@ public final class ScreenMagnifier implements EventStreamTransformation {
 
         private final ArrayList<WindowInfo> mTempWindowInfoList = new ArrayList<WindowInfo>();
 
-        private final Rect mTempRect = new Rect();
+        private final Rect mTempRect1 = new Rect();
+        private final Rect mTempRect2 = new Rect();
+        private final Rect mTempRect3 = new Rect();
 
         private final IWindowManager mWindowManagerService;
         private final DisplayProvider mDisplayProvider;
@@ -1542,31 +1548,83 @@ public final class ScreenMagnifier implements EventStreamTransformation {
             recomputeBounds(false);
         }
 
+        private final Comparator<WindowInfo> mWindowInfoInverseComparator =
+                new Comparator<WindowInfo>() {
+            @Override
+            public int compare(WindowInfo lhs, WindowInfo rhs) {
+                if (lhs.layer != rhs.layer) {
+                    return rhs.layer - lhs.layer;
+                }
+                if (lhs.touchableRegion.top != rhs.touchableRegion.top) {
+                    return rhs.touchableRegion.top - lhs.touchableRegion.top;
+                }
+                if (lhs.touchableRegion.left != rhs.touchableRegion.left) {
+                    return rhs.touchableRegion.left - lhs.touchableRegion.left;
+                }
+                if (lhs.touchableRegion.right != rhs.touchableRegion.right) {
+                    return rhs.touchableRegion.right - lhs.touchableRegion.right;
+                }
+                if (lhs.touchableRegion.bottom != rhs.touchableRegion.bottom) {
+                    return rhs.touchableRegion.bottom - lhs.touchableRegion.bottom;
+                }
+                return 0;
+            }
+        };
+
         public void recomputeBounds(boolean animate) {
-            Rect frame = mTempRect;
-            frame.set(0, 0, mDisplayProvider.getDisplayInfo().logicalWidth,
-                    mDisplayProvider.getDisplayInfo().logicalHeight);
+            Rect magnifiedFrame = mTempRect1;
+            magnifiedFrame.set(0, 0, 0, 0);
+
+            Rect notMagnifiedFrame = mTempRect2;
+            notMagnifiedFrame.set(0, 0, 0, 0);
+
             ArrayList<WindowInfo> infos = mTempWindowInfoList;
             infos.clear();
+            int windowCount = 0;
             try {
                 mWindowManagerService.getVisibleWindowsForDisplay(
                         mDisplayProvider.getDisplay().getDisplayId(), infos);
-                final int windowCount = infos.size();
+                Collections.sort(infos, mWindowInfoInverseComparator);
+                windowCount = infos.size();
                 for (int i = 0; i < windowCount; i++) {
                     WindowInfo info = infos.get(i);
-                    if (info.type == WindowManager.LayoutParams.TYPE_NAVIGATION_BAR
-                            || info.type == WindowManager.LayoutParams.TYPE_INPUT_METHOD
-                            || info.type == WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG) {
-                        subtract(frame, info.touchableRegion);
+                    if (info.type == WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY) {
+                        continue;
                     }
-                    info.recycle();
+                    if (isWindowMagnified(info.type)) {
+                        Rect clippedFrame = mTempRect3;
+                        clippedFrame.set(info.touchableRegion);
+                        subtract(clippedFrame, notMagnifiedFrame);
+                        magnifiedFrame.union(clippedFrame);
+                    } else {
+                        Rect clippedFrame = mTempRect3;
+                        clippedFrame.set(info.touchableRegion);
+                        subtract(clippedFrame, magnifiedFrame);
+                        notMagnifiedFrame.union(clippedFrame);
+                    }
+                    if (magnifiedFrame.bottom >= notMagnifiedFrame.top) {
+                        break;
+                    }
                 }
             } catch (RemoteException re) {
                 /* ignore */
             } finally {
-                infos.clear();
+                for (int i = windowCount - 1; i >= 0; i--) {
+                    infos.remove(i).recycle();
+                }
             }
-            resize(frame, animate);
+
+            final int displayWidth = mDisplayProvider.getDisplayInfo().logicalWidth;
+            final int displayHeight = mDisplayProvider.getDisplayInfo().logicalHeight;
+            magnifiedFrame.intersect(0, 0, displayWidth, displayHeight);
+
+            resize(magnifiedFrame, animate);
+        }
+
+        private boolean isWindowMagnified(int type) {
+            return (type != WindowManager.LayoutParams.TYPE_NAVIGATION_BAR
+                    && type != WindowManager.LayoutParams.TYPE_INPUT_METHOD
+                    && type != WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG);
         }
 
         public void rotationChanged() {
