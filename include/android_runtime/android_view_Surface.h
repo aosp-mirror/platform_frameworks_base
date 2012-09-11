@@ -24,6 +24,7 @@
 namespace android {
 
 class Surface;
+class ISurfaceTexture;
 
 /* Gets the underlying ANativeWindow for a Surface. */
 extern sp<ANativeWindow> android_view_Surface_getNativeWindow(
@@ -34,6 +35,10 @@ extern bool android_view_Surface_isInstanceOf(JNIEnv* env, jobject obj);
 
 /* Gets the underlying Surface from a Surface Java object. */
 extern sp<Surface> android_view_Surface_getSurface(JNIEnv* env, jobject surfaceObj);
+
+/* Creates a Surface from an ISurfaceTexture. */
+extern jobject android_view_Surface_createFromISurfaceTexture(JNIEnv* env,
+        const sp<ISurfaceTexture>& surfaceTexture);
 
 } // namespace android
 

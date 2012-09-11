@@ -126,6 +126,7 @@ LOCAL_SRC_FILES:= \
 	android_media_AudioSystem.cpp \
 	android_media_AudioTrack.cpp \
 	android_media_JetPlayer.cpp \
+	android_media_RemoteDisplay.cpp \
 	android_media_ToneGenerator.cpp \
 	android_hardware_Camera.cpp \
 	android_hardware_SensorManager.cpp \
