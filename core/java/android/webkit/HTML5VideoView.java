@@ -16,11 +16,8 @@
 
 package android.webkit;
 
-import android.graphics.SurfaceTexture;
 import android.media.MediaPlayer;
 import android.net.Uri;
-import android.util.Log;
-import android.view.SurfaceView;
 import android.webkit.HTML5VideoViewProxy;
 import java.io.IOException;
 import java.util.HashMap;
