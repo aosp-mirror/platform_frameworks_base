@@ -62,7 +62,8 @@ public:
           mMinSdkVersion(NULL), mTargetSdkVersion(NULL), mMaxSdkVersion(NULL),
           mVersionCode(NULL), mVersionName(NULL), mCustomPackage(NULL), mExtraPackages(NULL),
           mMaxResVersion(NULL), mDebugMode(false), mNonConstantId(false), mProduct(NULL),
-          mUseCrunchCache(false), mArgc(0), mArgv(NULL)
+          mUseCrunchCache(false), mOutputTextSymbols(NULL),
+          mArgc(0), mArgv(NULL)
         {}
     ~Bundle(void) {}
 
@@ -174,6 +175,8 @@ public:
     void setProduct(const char * val) { mProduct = val; }
     void setUseCrunchCache(bool val) { mUseCrunchCache = val; }
     bool getUseCrunchCache() const { return mUseCrunchCache; }
+    const char* getOutputTextSymbols() const { return mOutputTextSymbols; }
+    void setOutputTextSymbols(const char* val) { mOutputTextSymbols = val; }
 
     /*
      * Set and get the file specification.
@@ -280,6 +283,7 @@ private:
     bool        mNonConstantId;
     const char* mProduct;
     bool        mUseCrunchCache;
+    const char* mOutputTextSymbols;
 
     /* file specification */
     int         mArgc;
