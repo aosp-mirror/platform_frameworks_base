@@ -1403,7 +1403,7 @@ public class WifiStateMachine extends StateMachine {
         int freq = 0;
         long tsf = 0;
         String flags = "";
-        String ssid = "";
+        WifiSsid wifiSsid = null;
 
         if (scanResults == null) {
             return;
@@ -1441,22 +1441,26 @@ public class WifiStateMachine extends StateMachine {
                 } else if (line.startsWith(FLAGS_STR)) {
                     flags = line.substring(FLAGS_STR.length());
                 } else if (line.startsWith(SSID_STR)) {
-                    ssid = line.substring(SSID_STR.length());
-                    if (ssid == null) ssid = "";
+                    wifiSsid = WifiSsid.createFromAsciiEncoded(
+                            line.substring(SSID_STR.length()));
                 } else if (line.startsWith(DELIMITER_STR)) {
                     if (bssid != null) {
+                        String ssid = (wifiSsid != null) ? wifiSsid.toString() : WifiSsid.NONE;
                         String key = bssid + ssid;
                         ScanResult scanResult = mScanResultCache.get(key);
                         if (scanResult != null) {
                             scanResult.level = level;
-                            scanResult.SSID = ssid;
+                            scanResult.wifiSsid = wifiSsid;
+                            // Keep existing API
+                            scanResult.SSID = (wifiSsid != null) ? wifiSsid.toString() :
+                                    WifiSsid.NONE;
                             scanResult.capabilities = flags;
                             scanResult.frequency = freq;
                             scanResult.timestamp = tsf;
                         } else {
                             scanResult =
                                 new ScanResult(
-                                        ssid, bssid, flags, level, freq, tsf);
+                                        wifiSsid, bssid, flags, level, freq, tsf);
                             mScanResultCache.put(key, scanResult);
                         }
                         mScanResults.add(scanResult);
@@ -1466,7 +1470,7 @@ public class WifiStateMachine extends StateMachine {
                     freq = 0;
                     tsf = 0;
                     flags = "";
-                    ssid = "";
+                    wifiSsid = null;
                 }
             }
         }
@@ -1652,7 +1656,7 @@ public class WifiStateMachine extends StateMachine {
         }
 
         mWifiInfo.setBSSID(stateChangeResult.BSSID);
-        mWifiInfo.setSSID(stateChangeResult.SSID);
+        mWifiInfo.setSSID(stateChangeResult.wifiSsid);
 
         mSupplicantStateTracker.sendMessage(Message.obtain(message));
 
