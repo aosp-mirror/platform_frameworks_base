@@ -214,9 +214,9 @@ public class KeyguardViewManager {
      */
     public synchronized void reset() {
         if (DEBUG) Log.d(TAG, "reset()");
-        if (mKeyguardView != null) {
-            mKeyguardView.reset();
-        }
+        // User might have switched, check if we need to go back to keyguard
+        // TODO: It's preferable to stay and show the correct lockscreen or unlock if none
+        maybeCreateKeyguardLocked(shouldEnableScreenRotation());
     }
 
     public synchronized void onScreenTurnedOff() {
