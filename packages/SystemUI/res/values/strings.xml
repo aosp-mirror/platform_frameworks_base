@@ -433,6 +433,10 @@
     <string name="quick_settings_wifi_display_label">Wifi Display</string>
     <!-- QuickSettings: Wifi display [CHAR LIMIT=NONE] -->
     <string name="quick_settings_wifi_display_no_connection_label">No Wifi Display Connection</string>
+    <!-- QuickSettings: Brightness dialog title [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_brightness_dialog_title">Brightness</string>
+    <!-- QuickSettings: Brightness dialog auto brightness button [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_brightness_dialog_auto_brightness_label">AUTO</string>
 
     <!-- Wifi display: Scan button text [CHAR LIMIT=15] -->
     <string name="wifi_display_scan">Scan</string>
