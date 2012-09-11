@@ -186,7 +186,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         // TODO: Sets the view to be "awaiting" if not already awaiting
 
         // Change the system setting
-        Settings.System.putInt(mContext.getContentResolver(), Settings.Global.AIRPLANE_MODE_ON,
+        Settings.Global.putInt(mContext.getContentResolver(), Settings.Global.AIRPLANE_MODE_ON,
                                 enabled ? 1 : 0);
 
         // Post the intent
