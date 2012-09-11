@@ -21,6 +21,7 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.CursorLoader;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.Loader;
@@ -36,6 +37,7 @@ import android.provider.ContactsContract;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -47,8 +49,10 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.QuickSettingsModel.State;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
+import com.android.systemui.statusbar.policy.BrightnessController;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
+import com.android.systemui.statusbar.policy.ToggleSlider;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -67,6 +71,9 @@ class QuickSettings {
     private DisplayManager mDisplayManager;
     private WifiDisplayStatus mWifiDisplayStatus;
     private WifiDisplayListAdapter mWifiDisplayListAdapter;
+    
+    private BrightnessController mBrightnessController;
+    private Dialog mBrightnessDialog;
 
     private CursorLoader mUserInfoLoader;
 
@@ -160,9 +167,9 @@ class QuickSettings {
         startSettingsActivity(intent);
     }
     private void startSettingsActivity(Intent intent) {
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        mContext.startActivity(intent);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         mBar.collapseAllPanels(true);
+        mContext.startActivity(intent);
 
     }
 
@@ -328,7 +335,9 @@ class QuickSettings {
         brightnessTile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startSettingsActivity(android.provider.Settings.ACTION_DISPLAY_SETTINGS);
+                // startSettingsActivity(android.provider.Settings.ACTION_DISPLAY_SETTINGS);
+                mBar.collapseAllPanels(true);
+                showBrightnessDialog();
             }
         });
         parent.addView(brightnessTile);
@@ -362,8 +371,8 @@ class QuickSettings {
         wifiDisplayTile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showWifiDisplayDialog();
                 mBar.collapseAllPanels(true);
+                showWifiDisplayDialog();
             }
         });
         mModel.addWifiDisplayTile(wifiDisplayTile, new QuickSettingsModel.RefreshCallback() {
@@ -403,6 +412,30 @@ class QuickSettings {
             v.setColumnSpan(span);
         }
         mContainerView.requestLayout();
+    }
+    
+    private void showBrightnessDialog() {
+        if (mBrightnessDialog == null) {
+            mBrightnessDialog = new Dialog(mContext);
+            mBrightnessDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            mBrightnessDialog.setContentView(R.layout.quick_settings_brightness_dialog);
+            mBrightnessDialog.setCanceledOnTouchOutside(true);
+        
+            mBrightnessController = new BrightnessController(mContext,
+                    (ToggleSlider) mBrightnessDialog.findViewById(R.id.brightness_slider));
+            mBrightnessDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                @Override
+                public void onDismiss(DialogInterface dialog) {
+                    mBrightnessController = null;
+                }
+            });
+            
+            mBrightnessDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+            mBrightnessDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        }
+        if (!mBrightnessDialog.isShowing()) {
+            mBrightnessDialog.show();
+        }
     }
 
     // Wifi Display
