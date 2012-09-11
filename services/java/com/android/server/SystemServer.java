@@ -304,6 +304,7 @@ class ServerThread extends Thread {
 
             ActivityManagerService.self().setWindowManager(wm);
             display.setWindowManager(wm);
+            display.setInputManager(inputManager);
 
             // Skip Bluetooth if we have an emulator kernel
             // TODO: Use a more reliable check to see if this product should
