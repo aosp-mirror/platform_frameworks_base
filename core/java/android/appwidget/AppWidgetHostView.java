@@ -513,7 +513,17 @@ public class AppWidgetHostView extends FrameLayout {
                         theirContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 inflater = inflater.cloneInContext(theirContext);
                 inflater.setFilter(sInflaterFilter);
-                defaultView = inflater.inflate(mInfo.initialLayout, this, false);
+                AppWidgetManager manager = AppWidgetManager.getInstance(mContext);
+                Bundle options = manager.getAppWidgetOptions(mAppWidgetId);
+
+                int layoutId = mInfo.initialLayout;
+                if (options.containsKey(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY)) {
+                    int category = options.getInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY);
+                    if (category == AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD) {
+                        layoutId = mInfo.initialKeyguardLayout;
+                    }
+                }
+                defaultView = inflater.inflate(layoutId, this, false);
             } else {
                 Log.w(TAG, "can't inflate defaultView because mInfo is missing");
             }

@@ -555,6 +555,7 @@ package android {
     field public static final int indicatorRight = 16843022; // 0x101010e
     field public static final int inflatedId = 16842995; // 0x10100f3
     field public static final int initOrder = 16842778; // 0x101001a
+    field public static final int initialKeyguardLayout = 16843714; // 0x10103c2
     field public static final int initialLayout = 16843345; // 0x1010251
     field public static final int innerRadius = 16843359; // 0x101025f
     field public static final int innerRadiusRatio = 16843163; // 0x101019b
@@ -1120,6 +1121,7 @@ package android {
     field public static final int weekNumberColor = 16843589; // 0x1010345
     field public static final int weekSeparatorLineColor = 16843590; // 0x1010346
     field public static final int weightSum = 16843048; // 0x1010128
+    field public static final int widgetFeatures = 16843715; // 0x10103c3
     field public static final int widgetLayout = 16843243; // 0x10101eb
     field public static final int width = 16843097; // 0x1010159
     field public static final int windowActionBar = 16843469; // 0x10102cd
@@ -4399,6 +4401,7 @@ package android.appwidget {
 
   public class AppWidgetManager {
     method public boolean bindAppWidgetIdIfAllowed(int, android.content.ComponentName);
+    method public boolean bindAppWidgetIdIfAllowed(int, android.content.ComponentName, android.os.Bundle);
     method public int[] getAppWidgetIds(android.content.ComponentName);
     method public android.appwidget.AppWidgetProviderInfo getAppWidgetInfo(int);
     method public android.os.Bundle getAppWidgetOptions(int);
@@ -4428,6 +4431,7 @@ package android.appwidget {
     field public static final java.lang.String EXTRA_CUSTOM_INFO = "customInfo";
     field public static final int INVALID_APPWIDGET_ID = 0; // 0x0
     field public static final java.lang.String META_DATA_APPWIDGET_PROVIDER = "android.appwidget.provider";
+    field public static final java.lang.String OPTION_APPWIDGET_HOST_CATEGORY = "appWidgetCategory";
     field public static final java.lang.String OPTION_APPWIDGET_MAX_HEIGHT = "appWidgetMaxHeight";
     field public static final java.lang.String OPTION_APPWIDGET_MAX_WIDTH = "appWidgetMaxWidth";
     field public static final java.lang.String OPTION_APPWIDGET_MIN_HEIGHT = "appWidgetMinHeight";
@@ -4454,9 +4458,15 @@ package android.appwidget {
     field public static final int RESIZE_HORIZONTAL = 1; // 0x1
     field public static final int RESIZE_NONE = 0; // 0x0
     field public static final int RESIZE_VERTICAL = 2; // 0x2
+    field public static final int WIDGET_CATEGORY_HOME_SCREEN = 1; // 0x1
+    field public static final int WIDGET_CATEGORY_KEYGUARD = 2; // 0x2
+    field public static final int WIDGET_FEATURES_CLOCK = 1; // 0x1
+    field public static final int WIDGET_FEATURES_NONE = 0; // 0x0
+    field public static final int WIDGET_FEATURES_STATUS = 2; // 0x2
     field public int autoAdvanceViewId;
     field public android.content.ComponentName configure;
     field public int icon;
+    field public int initialKeyguardLayout;
     field public int initialLayout;
     field public java.lang.String label;
     field public int minHeight;
@@ -4467,6 +4477,8 @@ package android.appwidget {
     field public android.content.ComponentName provider;
     field public int resizeMode;
     field public int updatePeriodMillis;
+    field public int widgetCategory;
+    field public int widgetFeatures;
   }
 
 }

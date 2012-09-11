@@ -316,6 +316,8 @@ class AppWidgetServiceImpl {
                 pw.print(info.updatePeriodMillis);
                 pw.print(" resizeMode=");
                 pw.print(info.resizeMode);
+                pw.print(info.widgetCategory);
+                pw.print(info.widgetFeatures);
                 pw.print(" autoAdvanceViewId=");
                 pw.print(info.autoAdvanceViewId);
                 pw.print(" initialLayout=#");
@@ -527,7 +529,7 @@ class AppWidgetServiceImpl {
         }
     }
 
-    private void bindAppWidgetIdImpl(int appWidgetId, ComponentName provider) {
+    private void bindAppWidgetIdImpl(int appWidgetId, ComponentName provider, Bundle options) {
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mAppWidgetIds) {
@@ -550,6 +552,17 @@ class AppWidgetServiceImpl {
                 }
 
                 id.provider = p;
+                if (options == null) {
+                    options = new Bundle();
+                }
+                id.options = options;
+
+                // We need to provide a default value for the widget category if it is not specified
+                if (!options.containsKey(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY)) {
+                    options.putInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY,
+                            AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN);
+                }
+
                 p.instances.add(id);
                 int instancesSize = p.instances.size();
                 if (instancesSize == 1) {
@@ -572,14 +585,14 @@ class AppWidgetServiceImpl {
         }
     }
 
-    public void bindAppWidgetId(int appWidgetId, ComponentName provider) {
+    public void bindAppWidgetId(int appWidgetId, ComponentName provider, Bundle options) {
         mContext.enforceCallingPermission(android.Manifest.permission.BIND_APPWIDGET,
             "bindAppWidgetId appWidgetId=" + appWidgetId + " provider=" + provider);
-        bindAppWidgetIdImpl(appWidgetId, provider);
+        bindAppWidgetIdImpl(appWidgetId, provider, options);
     }
 
     public boolean bindAppWidgetIdIfAllowed(
-            String packageName, int appWidgetId, ComponentName provider) {
+            String packageName, int appWidgetId, ComponentName provider, Bundle options) {
         try {
             mContext.enforceCallingPermission(android.Manifest.permission.BIND_APPWIDGET, null);
         } catch (SecurityException se) {
@@ -587,7 +600,7 @@ class AppWidgetServiceImpl {
                 return false;
             }
         }
-        bindAppWidgetIdImpl(appWidgetId, provider);
+        bindAppWidgetIdImpl(appWidgetId, provider, options);
         return true;
     }
 
@@ -873,15 +886,18 @@ class AppWidgetServiceImpl {
             if (id == null) {
                 return;
             }
+
             Provider p = id.provider;
-            id.options = options;
+            // Merge the options
+            id.options.putAll(options);
 
             // send the broacast saying that this appWidgetId has been deleted
             Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_OPTIONS_CHANGED);
             intent.setComponent(p.info.provider);
             intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id.appWidgetId);
-            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_OPTIONS, options);
+            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_OPTIONS, id.options);
             mContext.sendBroadcastAsUser(intent, new UserHandle(mUserId));
+            saveStateLocked();
         }
     }
 
@@ -1325,6 +1341,8 @@ class AppWidgetServiceImpl {
                     com.android.internal.R.styleable.AppWidgetProviderInfo_updatePeriodMillis, 0);
             info.initialLayout = sa.getResourceId(
                     com.android.internal.R.styleable.AppWidgetProviderInfo_initialLayout, 0);
+            info.initialKeyguardLayout = sa.getResourceId(com.android.internal.R.styleable.
+                    AppWidgetProviderInfo_initialKeyguardLayout, 0);
             String className = sa
                     .getString(com.android.internal.R.styleable.AppWidgetProviderInfo_configure);
             if (className != null) {
@@ -1339,6 +1357,12 @@ class AppWidgetServiceImpl {
             info.resizeMode = sa.getInt(
                     com.android.internal.R.styleable.AppWidgetProviderInfo_resizeMode,
                     AppWidgetProviderInfo.RESIZE_NONE);
+            info.widgetCategory = sa.getInt(
+                    com.android.internal.R.styleable.AppWidgetProviderInfo_resizeMode,
+                    AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN);
+            info.widgetFeatures = sa.getInt(
+                    com.android.internal.R.styleable.AppWidgetProviderInfo_resizeMode,
+                    AppWidgetProviderInfo.WIDGET_FEATURES_NONE);
 
             sa.recycle();
         } catch (Exception e) {
@@ -1476,6 +1500,18 @@ class AppWidgetServiceImpl {
                 if (id.provider != null) {
                     out.attribute(null, "p", Integer.toHexString(id.provider.tag));
                 }
+                if (id.options != null) {
+                    out.attribute(null, "min_width", Integer.toHexString(id.options.getInt(
+                            AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)));
+                    out.attribute(null, "min_height", Integer.toHexString(id.options.getInt(
+                            AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)));
+                    out.attribute(null, "max_width", Integer.toHexString(id.options.getInt(
+                            AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH)));
+                    out.attribute(null, "max_height", Integer.toHexString(id.options.getInt(
+                            AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT)));
+                    out.attribute(null, "host_category", Integer.toHexString(id.options.getInt(
+                            AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY)));
+                }
                 out.endTag(null, "g");
             }
 
@@ -1496,6 +1532,7 @@ class AppWidgetServiceImpl {
         }
     }
 
+    @SuppressWarnings("unused")
     void readStateFromFileLocked(FileInputStream stream) {
         boolean success = false;
         try {
@@ -1568,6 +1605,34 @@ class AppWidgetServiceImpl {
                         if (id.appWidgetId >= mNextAppWidgetId) {
                             mNextAppWidgetId = id.appWidgetId + 1;
                         }
+
+                        Bundle options = new Bundle();
+                        String minWidthString = parser.getAttributeValue(null, "min_width");
+                        if (minWidthString != null) {
+                            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH,
+                                    Integer.parseInt(minWidthString, 16));
+                        }
+                        String minHeightString = parser.getAttributeValue(null, "min_height");
+                        if (minWidthString != null) {
+                            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT,
+                                    Integer.parseInt(minHeightString, 16));
+                        }
+                        String maxWidthString = parser.getAttributeValue(null, "max_height");
+                        if (minWidthString != null) {
+                            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH,
+                                    Integer.parseInt(maxWidthString, 16));
+                        }
+                        String maxHeightString = parser.getAttributeValue(null, "max_height");
+                        if (minWidthString != null) {
+                            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT,
+                                    Integer.parseInt(maxHeightString, 16));
+                        }
+                        String categoryString = parser.getAttributeValue(null, "host_category");
+                        if (minWidthString != null) {
+                            options.putInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY,
+                                    Integer.parseInt(categoryString, 16));
+                        }
+                        id.options = options;
 
                         String providerString = parser.getAttributeValue(null, "p");
                         if (providerString != null) {
