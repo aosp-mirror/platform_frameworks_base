@@ -1121,6 +1121,7 @@ package android {
     field public static final int weekNumberColor = 16843589; // 0x1010345
     field public static final int weekSeparatorLineColor = 16843590; // 0x1010346
     field public static final int weightSum = 16843048; // 0x1010128
+    field public static final int widgetCategory = 16843716; // 0x10103c4
     field public static final int widgetFeatures = 16843715; // 0x10103c3
     field public static final int widgetLayout = 16843243; // 0x10101eb
     field public static final int width = 16843097; // 0x1010159
