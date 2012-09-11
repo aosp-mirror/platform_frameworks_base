@@ -108,6 +108,7 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 
+import libcore.io.EventLogger;
 import libcore.io.IoUtils;
 
 import dalvik.system.CloseGuard;
@@ -4869,6 +4870,13 @@ public final class ActivityThread {
         }
     }
 
+    private static class EventLoggingReporter implements EventLogger.Reporter {
+        @Override
+        public void report (int code, Object... list) {
+            EventLog.writeEvent(code, list);
+        }
+    }
+
     public static void main(String[] args) {
         SamplingProfilerIntegration.start();
 
@@ -4876,6 +4884,9 @@ public final class ActivityThread {
         // disable it here, but selectively enable it later (via
         // StrictMode) on debug builds, but using DropBox, not logs.
         CloseGuard.setEnabled(false);
+
+        // Set the reporter for event logging in libcore
+        EventLogger.setReporter(new EventLoggingReporter());
 
         Security.addProvider(new AndroidKeyStoreProvider());
 
