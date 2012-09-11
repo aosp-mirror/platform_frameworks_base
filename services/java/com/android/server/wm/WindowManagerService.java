@@ -3153,6 +3153,7 @@ public class WindowManagerService extends IWindowManager.Stub
         info.compatibilityScale = window.mGlobalScale;
         info.visible = window.isVisibleLw()
                 || info.type == WindowManager.LayoutParams.TYPE_UNIVERSE_BACKGROUND;
+        info.layer = window.mLayer;
         window.getTouchableRegion(mTempRegion);
         mTempRegion.getBounds(info.touchableRegion);
         return info;
