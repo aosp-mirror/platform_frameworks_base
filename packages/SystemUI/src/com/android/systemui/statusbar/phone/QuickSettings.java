@@ -16,36 +16,58 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothAdapter.BluetoothStateChangeCallback;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.CursorLoader;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.Loader;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.database.DataSetObserver;
 import android.graphics.drawable.ClipDrawable;
+import android.hardware.display.DisplayManager;
+import android.hardware.display.WifiDisplay;
+import android.hardware.display.WifiDisplayStatus;
+import android.hardware.input.KeyboardLayout;
 import android.net.Uri;
 import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.CheckedTextView;
+import android.widget.ListView;
+import android.widget.RadioButton;
 import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.ListAdapter;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.QuickSettingsModel.State;
 import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.LocationController;
+import com.android.systemui.statusbar.policy.LocationController.LocationGpsStateChangeCallback;
 import com.android.systemui.statusbar.policy.NetworkController;
+import com.android.systemui.statusbar.policy.NetworkController.NetworkSignalChangedCallback;
 
 class QuickSettingsModel implements BluetoothStateChangeCallback,
-        NetworkController.NetworkSignalChangedCallback,
-        BatteryController.BatteryStateChangeCallback,
-        LocationController.LocationGpsStateChangeCallback {
+        NetworkSignalChangedCallback,
+        BatteryStateChangeCallback,
+        LocationGpsStateChangeCallback {
 
     /** Represents the state of a given attribute. */
     static class State {
@@ -76,6 +98,10 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private QuickSettingsTileView mWifiTile;
     private RefreshCallback mWifiCallback;
     private State mWifiState = new State();
+
+    private QuickSettingsTileView mWifiDisplayTile;
+    private RefreshCallback mWifiDisplayCallback;
+    private State mWifiDisplayState = new State();
 
     private QuickSettingsTileView mRSSITile;
     private RefreshCallback mRSSICallback;
@@ -282,6 +308,32 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         }
     }
 
+    // Wifi Display
+    void addWifiDisplayTile(QuickSettingsTileView view, RefreshCallback cb) {
+        mWifiDisplayTile = view;
+        mWifiDisplayCallback = cb;
+    }
+    private void enableWifiDisplayTile() {
+        mWifiDisplayTile.setVisibility(View.VISIBLE);
+    }
+    private void disableWifiDisplayTile() {
+        mWifiDisplayTile.setVisibility(View.GONE);
+    }
+    public void onWifiDisplayStateChanged(WifiDisplayStatus status) {
+        if (status.isEnabled()) {
+            if (status.getActiveDisplay() != null) {
+                mWifiDisplayState.label = status.getActiveDisplay().getDeviceName();
+            } else {
+                mWifiDisplayState.label = mContext.getString(
+                        R.string.quick_settings_wifi_display_no_connection_label);
+            }
+            mWifiDisplayCallback.refreshView(mWifiDisplayTile, mWifiDisplayState);
+            enableWifiDisplayTile();
+        } else {
+            disableWifiDisplayTile();
+        }
+    }
+
 }
 
 /**
@@ -294,6 +346,10 @@ class QuickSettings {
     private QuickSettingsModel mModel;
     private QuickSettingsContainerView mContainerView;
 
+    private DisplayManager mDisplayManager;
+    private WifiDisplayStatus mWifiDisplayStatus;
+    private WifiDisplayListAdapter mWifiDisplayListAdapter;
+
     private CursorLoader mUserInfoLoader;
 
     // The set of QuickSettingsTiles that have dynamic spans (and need to be updated on
@@ -302,11 +358,19 @@ class QuickSettings {
             new ArrayList<QuickSettingsTileView>();
 
     public QuickSettings(Context context, QuickSettingsContainerView container) {
+        mDisplayManager = (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
         mContext = context;
-        mModel = new QuickSettingsModel(context);
         mContainerView = container;
+        mModel = new QuickSettingsModel(context);
+        mWifiDisplayStatus = new WifiDisplayStatus();
+        mWifiDisplayListAdapter = new WifiDisplayListAdapter(context);
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(DisplayManager.ACTION_WIFI_DISPLAY_STATUS_CHANGED);
+        mContext.registerReceiver(mReceiver, filter);
 
         setupQuickSettings();
+        updateWifiDisplayStatus();
         updateResources();
     }
 
@@ -551,6 +615,26 @@ class QuickSettings {
         });
         parent.addView(locationTile);
 
+        // Wifi Display
+        QuickSettingsTileView wifiDisplayTile = (QuickSettingsTileView)
+                inflater.inflate(R.layout.quick_settings_tile, parent, false);
+        wifiDisplayTile.setContent(R.layout.quick_settings_tile_wifi_display, inflater);
+        wifiDisplayTile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showWifiDisplayDialog();
+                mBar.collapseAllPanels(true);
+            }
+        });
+        mModel.addWifiDisplayTile(wifiDisplayTile, new QuickSettingsModel.RefreshCallback() {
+            @Override
+            public void refreshView(QuickSettingsTileView view, State state) {
+                TextView tv = (TextView) view.findViewById(R.id.wifi_display_textview);
+                tv.setText(state.label);
+            }
+        });
+        parent.addView(wifiDisplayTile);
+
         /*
         QuickSettingsTileView mediaTile = (QuickSettingsTileView)
                 inflater.inflate(R.layout.quick_settings_tile, parent, false);
@@ -579,4 +663,132 @@ class QuickSettings {
         }
         mContainerView.requestLayout();
     }
+
+    private void showWifiDisplayDialog() {
+        mDisplayManager.scanWifiDisplays();
+        updateWifiDisplayStatus();
+
+        Dialog dialog = new Dialog(mContext);
+        dialog.setContentView(R.layout.wifi_display_dialog);
+        dialog.setCanceledOnTouchOutside(true);
+        dialog.setTitle(R.string.wifi_display_dialog_title);
+
+        Button scanButton = (Button)dialog.findViewById(R.id.scan);
+        scanButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mDisplayManager.scanWifiDisplays();
+            }
+        });
+
+        Button disconnectButton = (Button)dialog.findViewById(R.id.disconnect);
+        disconnectButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mDisplayManager.disconnectWifiDisplay();
+            }
+        });
+
+        ListView list = (ListView)dialog.findViewById(R.id.list);
+        list.setAdapter(mWifiDisplayListAdapter);
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                WifiDisplay display = mWifiDisplayListAdapter.getItem(position);
+                mDisplayManager.connectWifiDisplay(display.getDeviceAddress());
+            }
+        });
+
+        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        dialog.show();
+    }
+
+    private void updateWifiDisplayStatus() {
+        applyWifiDisplayStatus(mDisplayManager.getWifiDisplayStatus());
+    }
+
+    private void applyWifiDisplayStatus(WifiDisplayStatus status) {
+        mWifiDisplayStatus = status;
+
+        mWifiDisplayListAdapter.clear();
+        mWifiDisplayListAdapter.addAll(status.getKnownDisplays());
+        if (status.getActiveDisplay() != null
+                && !contains(status.getKnownDisplays(), status.getActiveDisplay())) {
+            mWifiDisplayListAdapter.add(status.getActiveDisplay());
+        }
+        mWifiDisplayListAdapter.sort(mWifiDisplayComparator);
+
+        mModel.onWifiDisplayStateChanged(status);
+    }
+
+    private static boolean contains(WifiDisplay[] displays, WifiDisplay display) {
+        for (WifiDisplay d : displays) {
+            if (d.equals(display)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(DisplayManager.ACTION_WIFI_DISPLAY_STATUS_CHANGED)) {
+                WifiDisplayStatus status = (WifiDisplayStatus)intent.getParcelableExtra(
+                        DisplayManager.EXTRA_WIFI_DISPLAY_STATUS);
+                applyWifiDisplayStatus(status);
+            }
+        }
+    };
+
+    private final class WifiDisplayListAdapter extends ArrayAdapter<WifiDisplay> {
+        private final LayoutInflater mInflater;
+
+        public WifiDisplayListAdapter(Context context) {
+            super(context, android.R.layout.simple_list_item_2);
+            mInflater = LayoutInflater.from(context);
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            WifiDisplay item = getItem(position);
+            View view = convertView;
+            if (view == null) {
+                view = mInflater.inflate(android.R.layout.simple_list_item_2,
+                        parent, false);
+            }
+            TextView headline = (TextView) view.findViewById(android.R.id.text1);
+            TextView subText = (TextView) view.findViewById(android.R.id.text2);
+            headline.setText(item.getDeviceName());
+
+            int state = WifiDisplayStatus.DISPLAY_STATE_NOT_CONNECTED;
+            if (item.equals(mWifiDisplayStatus.getActiveDisplay())) {
+                state = mWifiDisplayStatus.getActiveDisplayState();
+            }
+            switch (state) {
+                case WifiDisplayStatus.DISPLAY_STATE_CONNECTING:
+                    subText.setText(R.string.wifi_display_state_connecting);
+                    break;
+                case WifiDisplayStatus.DISPLAY_STATE_CONNECTED:
+                    subText.setText(R.string.wifi_display_state_connected);
+                    break;
+                case WifiDisplayStatus.DISPLAY_STATE_NOT_CONNECTED:
+                default:
+                    subText.setText(R.string.wifi_display_state_available);
+                    break;
+            }
+            return view;
+        }
+    }
+
+    private final Comparator<WifiDisplay> mWifiDisplayComparator = new Comparator<WifiDisplay>() {
+        @Override
+        public int compare(WifiDisplay lhs, WifiDisplay rhs) {
+            int c = lhs.getDeviceName().compareToIgnoreCase(rhs.getDeviceName());
+            if (c == 0) {
+                c = lhs.getDeviceAddress().compareToIgnoreCase(rhs.getDeviceAddress());
+            }
+            return c;
+        }
+    };
 }
