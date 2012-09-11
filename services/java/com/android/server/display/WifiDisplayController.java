@@ -179,7 +179,6 @@ final class WifiDisplayController implements DumpUtils.Dump {
                     if (mWfdEnabling) {
                         mWfdEnabling = false;
                         setWfdEnabled(true);
-                        discoverPeers();
                     }
                 }
 
@@ -511,9 +510,7 @@ final class WifiDisplayController implements DumpUtils.Dump {
         if (mWifiP2pEnabled != enabled) {
             mWifiP2pEnabled = enabled;
             if (enabled) {
-                if (mWfdEnabled) {
-                    discoverPeers();
-                } else {
+                if (!mWfdEnabled) {
                     enableWfd();
                 }
             } else {
