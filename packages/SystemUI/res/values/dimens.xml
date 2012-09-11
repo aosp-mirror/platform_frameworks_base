@@ -184,7 +184,7 @@
     <!-- Height of the carrier/wifi name label -->
     <dimen name="carrier_label_height">24dp</dimen>
 
-    <!-- The distance you can pull a notificaiton before it pops open -->
+    <!-- The distance you can pull a notification before it pops open -->
     <dimen name="one_finger_pop_limit">32dp</dimen>
 
     <!-- The fixed height of each tile -->
@@ -196,4 +196,9 @@
     <!-- Minimum fraction of the screen that should be taken up by the notification panel.
          Not used at this screen size. -->
     <item type="dimen" name="notification_panel_min_height_frac">0%</item>
+
+    <dimen name="blinds_pop_threshold">32dp</dimen>
+
+    <!-- The size of the gesture span needed to activate the "pull" notification expansion -->
+    <dimen name="pull_span_min">25dp</dimen>
 </resources>
