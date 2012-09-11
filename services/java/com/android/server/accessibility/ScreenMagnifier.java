@@ -128,6 +128,8 @@ public final class ScreenMagnifier implements EventStreamTransformation {
     private static final int DEFAULT_SCREEN_MAGNIFICATION_AUTO_UPDATE = 1;
     private static final float DEFAULT_WINDOW_ANIMATION_SCALE = 1.0f;
 
+    private static final int MULTI_TAP_TIME_SLOP_ADJUSTMENT = 50;
+
     private final IWindowManager mWindowManagerService = IWindowManager.Stub.asInterface(
             ServiceManager.getService("window"));
     private final WindowManager mWindowManager;
@@ -145,7 +147,8 @@ public final class ScreenMagnifier implements EventStreamTransformation {
     private final Viewport mViewport;
 
     private final int mTapTimeSlop = ViewConfiguration.getTapTimeout();
-    private final int mMultiTapTimeSlop = ViewConfiguration.getDoubleTapTimeout();
+    private final int mMultiTapTimeSlop =
+            ViewConfiguration.getDoubleTapTimeout() - MULTI_TAP_TIME_SLOP_ADJUSTMENT;
     private final int mTapDistanceSlop;
     private final int mMultiTapDistanceSlop;
 
@@ -617,7 +620,7 @@ public final class ScreenMagnifier implements EventStreamTransformation {
                     } else if (mTapCount < ACTION_TAP_COUNT) {
                         Message message = mHandler.obtainMessage(
                                 MESSAGE_TRANSITION_TO_DELEGATING_STATE);
-                        mHandler.sendMessageDelayed(message, mTapTimeSlop + mMultiTapDistanceSlop);
+                        mHandler.sendMessageDelayed(message, mMultiTapTimeSlop);
                     }
                     clearLastDownEvent();
                     mLastDownEvent = MotionEvent.obtain(event);
