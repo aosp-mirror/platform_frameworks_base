@@ -27,13 +27,15 @@ dir_rec_t android_data_dir;
 dir_rec_t android_asec_dir;
 dir_rec_t android_app_dir;
 dir_rec_t android_app_private_dir;
+dir_rec_t android_app_lib_dir;
 dir_rec_t android_media_dir;
 dir_rec_array_t android_system_dirs;
 
 int install(const char *pkgname, uid_t uid, gid_t gid)
 {
     char pkgdir[PKG_PATH_MAX];
-    char libdir[PKG_PATH_MAX];
+    char libsymlink[PKG_PATH_MAX];
+    char applibdir[PKG_PATH_MAX];
 
     if ((uid < AID_SYSTEM) || (gid < AID_SYSTEM)) {
         ALOGE("invalid uid/gid: %d %d\n", uid, gid);
@@ -45,63 +47,48 @@ int install(const char *pkgname, uid_t uid, gid_t gid)
         return -1;
     }
 
-    if (create_pkg_path(libdir, pkgname, PKG_LIB_POSTFIX, 0)) {
-        ALOGE("cannot create package lib path\n");
+    if (create_pkg_path(libsymlink, pkgname, PKG_LIB_POSTFIX, 0)) {
+        ALOGE("cannot create package lib symlink origin path\n");
+        return -1;
+    }
+
+    if (create_pkg_path_in_dir(applibdir, &android_app_lib_dir, pkgname, PKG_DIR_POSTFIX)) {
+        ALOGE("cannot create package lib symlink dest path\n");
         return -1;
     }
 
     if (mkdir(pkgdir, 0751) < 0) {
         ALOGE("cannot create dir '%s': %s\n", pkgdir, strerror(errno));
-        return -errno;
+        return -1;
     }
     if (chmod(pkgdir, 0751) < 0) {
         ALOGE("cannot chmod dir '%s': %s\n", pkgdir, strerror(errno));
         unlink(pkgdir);
-        return -errno;
+        return -1;
     }
 
-    if (mkdir(libdir, 0755) < 0) {
-        ALOGE("cannot create dir '%s': %s\n", libdir, strerror(errno));
+    if (symlink(applibdir, libsymlink) < 0) {
+        ALOGE("couldn't symlink directory '%s' -> '%s': %s\n", libsymlink, applibdir,
+                strerror(errno));
         unlink(pkgdir);
-        return -errno;
-    }
-    if (chmod(libdir, 0755) < 0) {
-        ALOGE("cannot chmod dir '%s': %s\n", libdir, strerror(errno));
-        unlink(libdir);
-        unlink(pkgdir);
-        return -errno;
-    }
-    if (chown(libdir, AID_SYSTEM, AID_SYSTEM) < 0) {
-        ALOGE("cannot chown dir '%s': %s\n", libdir, strerror(errno));
-        unlink(libdir);
-        unlink(pkgdir);
-        return -errno;
-    }
-
-#ifdef HAVE_SELINUX
-    if (selinux_android_setfilecon(libdir, pkgname, AID_SYSTEM) < 0) {
-        ALOGE("cannot setfilecon dir '%s': %s\n", libdir, strerror(errno));
-        unlink(libdir);
-        unlink(pkgdir);
-        return -errno;
-    }
-#endif
-
-    if (chown(pkgdir, uid, gid) < 0) {
-        ALOGE("cannot chown dir '%s': %s\n", pkgdir, strerror(errno));
-        unlink(libdir);
-        unlink(pkgdir);
-        return -errno;
+        return -1;
     }
 
 #ifdef HAVE_SELINUX
     if (selinux_android_setfilecon(pkgdir, pkgname, uid) < 0) {
         ALOGE("cannot setfilecon dir '%s': %s\n", pkgdir, strerror(errno));
-        unlink(libdir);
+        unlink(libsymlink);
         unlink(pkgdir);
-        return -errno;
+        return -1;
     }
 #endif
+
+    if (chown(pkgdir, uid, gid) < 0) {
+        ALOGE("cannot chown dir '%s': %s\n", pkgdir, strerror(errno));
+        unlink(libsymlink);
+        unlink(pkgdir);
+        return -1;
+    }
 
     return 0;
 }
@@ -185,7 +172,6 @@ int delete_user_data(const char *pkgname, uid_t persona)
 int make_user_data(const char *pkgname, uid_t uid, uid_t persona)
 {
     char pkgdir[PKG_PATH_MAX];
-    char real_libdir[PKG_PATH_MAX];
 
     // Create the data dir for the package
     if (create_pkg_path(pkgdir, pkgname, PKG_DIR_POSTFIX, persona)) {
@@ -1034,88 +1020,6 @@ out:
     if (chown(dataDir, s.st_uid, s.st_gid) < 0) {
         ALOGE("failed to chown '%s' : %s\n", dataDir, strerror(errno));
         return -errno;
-    }
-
-    return rc;
-}
-
-int unlinklib(const char* dataDir)
-{
-    char libdir[PKG_PATH_MAX];
-    struct stat s, libStat;
-    int rc = 0;
-
-    const size_t libdirLen = strlen(dataDir) + strlen(PKG_LIB_POSTFIX);
-    if (libdirLen >= PKG_PATH_MAX) {
-        return -1;
-    }
-
-    if (snprintf(libdir, sizeof(libdir), "%s%s", dataDir, PKG_LIB_POSTFIX) != (ssize_t)libdirLen) {
-        ALOGE("library dir not written successfully: %s\n", strerror(errno));
-        return -1;
-    }
-
-    if (stat(dataDir, &s) < 0) {
-        ALOGE("couldn't state data dir");
-        return -1;
-    }
-
-    if (chown(dataDir, AID_INSTALL, AID_INSTALL) < 0) {
-        ALOGE("failed to chown '%s': %s\n", dataDir, strerror(errno));
-        return -1;
-    }
-
-    if (chmod(dataDir, 0700) < 0) {
-        ALOGE("unlinklib() 1: failed to chmod '%s': %s\n", dataDir, strerror(errno));
-        rc = -1;
-        goto out;
-    }
-
-    if (lstat(libdir, &libStat) < 0) {
-        ALOGE("couldn't stat lib dir: %s\n", strerror(errno));
-        rc = -1;
-        goto out;
-    }
-
-    if (S_ISDIR(libStat.st_mode)) {
-        if (delete_dir_contents(libdir, 1, 0) < 0) {
-            rc = -1;
-            goto out;
-        }
-    } else if (S_ISLNK(libStat.st_mode)) {
-        if (unlink(libdir) < 0) {
-            rc = -1;
-            goto out;
-        }
-    }
-
-    if (mkdir(libdir, 0755) < 0) {
-        ALOGE("cannot create dir '%s': %s\n", libdir, strerror(errno));
-        rc = -errno;
-        goto out;
-    }
-    if (chmod(libdir, 0755) < 0) {
-        ALOGE("cannot chmod dir '%s': %s\n", libdir, strerror(errno));
-        unlink(libdir);
-        rc = -errno;
-        goto out;
-    }
-    if (chown(libdir, AID_SYSTEM, AID_SYSTEM) < 0) {
-        ALOGE("cannot chown dir '%s': %s\n", libdir, strerror(errno));
-        unlink(libdir);
-        rc = -errno;
-        goto out;
-    }
-
-out:
-    if (chmod(dataDir, s.st_mode) < 0) {
-        ALOGE("unlinklib() 2: failed to chmod '%s': %s\n", dataDir, strerror(errno));
-        rc = -1;
-    }
-
-    if (chown(dataDir, s.st_uid, s.st_gid) < 0) {
-        ALOGE("failed to chown '%s' : %s\n", dataDir, strerror(errno));
-        return -1;
     }
 
     return rc;
