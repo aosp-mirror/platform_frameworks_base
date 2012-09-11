@@ -25535,12 +25535,12 @@ package android.view {
     method protected boolean isLayoutRtl();
     method public boolean isMarginRelative();
     method public void setLayoutDirection(int);
+    method public void setMarginEnd(int);
+    method public void setMarginStart(int);
     method public void setMargins(int, int, int, int);
     field public int bottomMargin;
-    field public int endMargin;
     field public int leftMargin;
     field public int rightMargin;
-    field public int startMargin;
     field public int topMargin;
   }
 
