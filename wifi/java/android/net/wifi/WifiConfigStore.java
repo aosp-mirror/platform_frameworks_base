@@ -1318,7 +1318,13 @@ class WifiConfigStore {
 
         value = mWifiNative.getNetworkVariable(netId, WifiConfiguration.ssidVarName);
         if (!TextUtils.isEmpty(value)) {
-            config.SSID = value;
+            if (value.charAt(0) != '"') {
+                config.SSID = "\"" + WifiSsid.createFromHex(value).toString() + "\"";
+                //TODO: convert a hex string that is not UTF-8 decodable to a P-formatted
+                //supplicant string
+            } else {
+                config.SSID = value;
+            }
         } else {
             config.SSID = null;
         }

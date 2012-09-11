@@ -524,6 +524,27 @@ public class WifiConfiguration implements Parcelable {
     }
     */
 
+    /** {@hide} */
+    public String getPrintableSsid() {
+        if (SSID == null) return "";
+        final int length = SSID.length();
+        if (length > 2 && (SSID.charAt(0) == '"') && SSID.charAt(length - 1) == '"') {
+            return SSID.substring(1, length - 1);
+        }
+
+        /** The ascii-encoded string format is P"<ascii-encoded-string>"
+         * The decoding is implemented in the supplicant for a newly configured
+         * network.
+         */
+        if (length > 3 && (SSID.charAt(0) == 'P') && (SSID.charAt(1) == '"') &&
+                (SSID.charAt(length-1) == '"')) {
+            WifiSsid wifiSsid = WifiSsid.createFromAsciiEncoded(
+                    SSID.substring(2, length - 1));
+            return wifiSsid.toString();
+        }
+        return SSID;
+    }
+
     private static BitSet readBitSet(Parcel src) {
         int cardinality = src.readInt();
 
