@@ -34,6 +34,7 @@ import org.json.JSONObject;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -53,7 +54,7 @@ class AccessibilityInjector {
     private final WebView mWebView;
 
     // The Java objects that are exposed to JavaScript.
-    private TextToSpeech mTextToSpeech;
+    private TextToSpeechWrapper mTextToSpeech;
     private CallbackHandler mCallback;
 
     // Lazily loaded helper objects.
@@ -367,10 +368,7 @@ class AccessibilityInjector {
         if (mTextToSpeech != null) {
             return;
         }
-
-        final String pkgName = mContext.getPackageName();
-
-        mTextToSpeech = new TextToSpeech(mContext, null, null, pkgName + ".**webview**", true);
+        mTextToSpeech = new TextToSpeechWrapper(mContext);
         mWebView.addJavascriptInterface(mTextToSpeech, ALIAS_TTS_JS_INTERFACE);
     }
 
@@ -526,6 +524,41 @@ class AccessibilityInjector {
     }
 
     /**
+     * Used to protect the TextToSpeech class, only exposing the methods we want to expose.
+     */
+    private static class TextToSpeechWrapper {
+        private TextToSpeech mTextToSpeech;
+
+        public TextToSpeechWrapper(Context context) {
+            final String pkgName = context.getPackageName();
+            mTextToSpeech = new TextToSpeech(context, null, null, pkgName + ".**webview**", true);
+        }
+
+        @JavascriptInterface
+        @SuppressWarnings("unused")
+        public boolean isSpeaking() {
+            return mTextToSpeech.isSpeaking();
+        }
+
+        @JavascriptInterface
+        @SuppressWarnings("unused")
+        public int speak(String text, int queueMode, HashMap<String, String> params) {
+            return mTextToSpeech.speak(text, queueMode, params);
+        }
+
+        @JavascriptInterface
+        @SuppressWarnings("unused")
+        public int stop() {
+            return mTextToSpeech.stop();
+        }
+
+        @SuppressWarnings("unused")
+        protected void shutdown() {
+            mTextToSpeech.shutdown();
+        }
+    }
+
+    /**
      * Exposes result interface to JavaScript.
      */
     private static class CallbackHandler {
@@ -621,6 +654,7 @@ class AccessibilityInjector {
          * @param id The result id of the request as a {@link String}.
          * @param result The result of the request as a {@link String}.
          */
+        @JavascriptInterface
         @SuppressWarnings("unused")
         public void onResult(String id, String result) {
             final long resultId;
