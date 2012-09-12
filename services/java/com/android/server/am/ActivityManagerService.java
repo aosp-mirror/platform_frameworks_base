@@ -13878,6 +13878,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 return true;
             }
 
+            mWindowManager.startFreezingScreen(R.anim.screen_user_exit,
+                    R.anim.screen_user_enter);
+
             // If the user we are switching to is not currently started, then
             // we need to start it now.
             if (mStartedUsers.get(userId) == null) {
@@ -13891,6 +13894,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             boolean haveActivities = mMainStack.switchUser(userId);
             if (!haveActivities) {
                 startHomeActivityLocked(userId, mStartedUsers.get(userId));
+            } else {
+                mMainStack.addStartingUserLocked(mStartedUsers.get(userId));
             }
         }
 
@@ -13921,6 +13926,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         android.Manifest.permission.RECEIVE_BOOT_COMPLETED,
                         false, false, MY_PID, Process.SYSTEM_UID, userId);
             }
+            mWindowManager.stopFreezingScreen();
         }
     }
 

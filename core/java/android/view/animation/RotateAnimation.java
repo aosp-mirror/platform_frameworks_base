@@ -22,7 +22,7 @@ import android.util.AttributeSet;
 
 /**
  * An animation that controls the rotation of an object. This rotation takes
- * place int the X-Y plane. You can specify the point to use for the center of
+ * place in the X-Y plane. You can specify the point to use for the center of
  * the rotation, where (0,0) is the top left point. If not specified, (0,0) is
  * the default rotation point.
  * 
