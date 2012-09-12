@@ -304,7 +304,8 @@ public abstract class AbsSeekBar extends ProgressBar {
         }
         
         // Canvas will be translated, so 0,0 is where we start drawing
-        thumb.setBounds(thumbPos, topBound, thumbPos + thumbWidth, bottomBound);
+        final int left = isLayoutRtl() ? available - thumbPos : thumbPos;
+        thumb.setBounds(left, topBound, left + thumbWidth, bottomBound);
     }
 
     @Override
