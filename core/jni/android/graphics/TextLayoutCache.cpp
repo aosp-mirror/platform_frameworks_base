@@ -78,8 +78,10 @@ void TextLayoutCache::operator()(TextLayoutCacheKey& text, sp<TextLayoutValue>& 
 /*
  * Cache clearing
  */
-void TextLayoutCache::clear() {
+void TextLayoutCache::purgeCaches() {
+    AutoMutex _l(mLock);
     mCache.clear();
+    mShaper->purgeCaches();
 }
 
 /*
@@ -965,8 +967,7 @@ sp<TextLayoutValue> TextLayoutEngine::getValue(const SkPaint* paint, const jchar
 
 void TextLayoutEngine::purgeCaches() {
 #if USE_TEXT_LAYOUT_CACHE
-    mTextLayoutCache->clear();
-    mShaper->purgeCaches();
+    mTextLayoutCache->purgeCaches();
 #if DEBUG_GLYPHS
     ALOGD("Purged TextLayoutEngine caches");
 #endif
