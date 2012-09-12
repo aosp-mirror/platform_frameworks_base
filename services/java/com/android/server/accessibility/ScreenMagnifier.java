@@ -353,11 +353,13 @@ public final class ScreenMagnifier implements EventStreamTransformation {
         private static final float MIN_SCALE = 1.3f;
         private static final float MAX_SCALE = 5.0f;
 
+        private static final float SCALING_THRESHOLD = 0.3f;
+
         private final ScaleGestureDetector mScaleGestureDetector;
         private final GestureDetector mGestureDetector;
 
-        private float mScaleFocusX = -1;
-        private float mScaleFocusY = -1;
+        private float mInitialScaleFactor = -1;
+        private boolean mScaling;
 
         public MagnifiedContentInteractonStateHandler(Context context) {
             mScaleGestureDetector = new ScaleGestureDetector(context, this);
@@ -405,8 +407,17 @@ public final class ScreenMagnifier implements EventStreamTransformation {
 
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
-            if (mCurrentState != STATE_MAGNIFIED_INTERACTION) {
-                return true;
+            if (!mScaling) {
+                if (mInitialScaleFactor < 0) {
+                    mInitialScaleFactor = detector.getScaleFactor();
+                } else {
+                    final float deltaScale = detector.getScaleFactor() - mInitialScaleFactor;
+                    if (Math.abs(deltaScale) > SCALING_THRESHOLD) {
+                        mScaling = true;
+                        return true;
+                    }
+                }
+                return false;
             }
             final float newScale = mMagnificationController.getScale()
                     * detector.getScaleFactor();
@@ -414,12 +425,8 @@ public final class ScreenMagnifier implements EventStreamTransformation {
             if (DEBUG_SCALING) {
                 Slog.i(LOG_TAG, "normalizedNewScale: " + normalizedNewScale);
             }
-            if (mScaleFocusX < 0 && mScaleFocusY < 0) {
-                mScaleFocusX = detector.getFocusX();
-                mScaleFocusY = detector.getFocusY();
-            }
-            mMagnificationController.setScale(normalizedNewScale, mScaleFocusX,
-                    mScaleFocusY, false);
+            mMagnificationController.setScale(normalizedNewScale, detector.getFocusX(),
+                    detector.getFocusY(), false);
             return true;
         }
 
@@ -434,8 +441,8 @@ public final class ScreenMagnifier implements EventStreamTransformation {
         }
 
         private void clear() {
-            mScaleFocusX = -1;
-            mScaleFocusY = -1;
+            mInitialScaleFactor = -1;
+            mScaling = false;
         }
     }
 
