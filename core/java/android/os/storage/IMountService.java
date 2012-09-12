@@ -677,15 +677,15 @@ public interface IMountService extends IInterface {
                 return _result;
             }
 
-            public Parcelable[] getVolumeList() throws RemoteException {
+            public StorageVolume[] getVolumeList() throws RemoteException {
                 Parcel _data = Parcel.obtain();
                 Parcel _reply = Parcel.obtain();
-                Parcelable[] _result;
+                StorageVolume[] _result;
                 try {
                     _data.writeInterfaceToken(DESCRIPTOR);
                     mRemote.transact(Stub.TRANSACTION_getVolumeList, _data, _reply, 0);
                     _reply.readException();
-                    _result = _reply.readParcelableArray(StorageVolume.class.getClassLoader());
+                    _result = _reply.createTypedArray(StorageVolume.CREATOR);
                 } finally {
                     _reply.recycle();
                     _data.recycle();
@@ -1119,9 +1119,9 @@ public interface IMountService extends IInterface {
                 }
                 case TRANSACTION_getVolumeList: {
                     data.enforceInterface(DESCRIPTOR);
-                    Parcelable[] result = getVolumeList();
+                    StorageVolume[] result = getVolumeList();
                     reply.writeNoException();
-                    reply.writeParcelableArray(result, 0);
+                    reply.writeTypedArray(result, android.os.Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
                     return true;
                 }
                 case TRANSACTION_getSecureContainerFilesystemPath: {
@@ -1358,7 +1358,7 @@ public interface IMountService extends IInterface {
     /**
      * Returns list of all mountable volumes.
      */
-    public Parcelable[] getVolumeList() throws RemoteException;
+    public StorageVolume[] getVolumeList() throws RemoteException;
 
     /**
      * Gets the path on the filesystem for the ASEC container itself.
