@@ -1164,7 +1164,7 @@ public class AudioManager {
     /**
      * Indicates if current platform supports use of SCO for off call use cases.
      * Application wanted to use bluetooth SCO audio when the phone is not in call
-     * must first call thsi method to make sure that the platform supports this
+     * must first call this method to make sure that the platform supports this
      * feature.
      * @return true if bluetooth SCO can be used for audio when not in call
      *         false otherwise
@@ -1296,6 +1296,19 @@ public class AudioManager {
             return false;
         } else {
             return true;
+        }
+    }
+
+    /**
+     * @hide
+     * Signals whether remote submix audio rerouting is enabled.
+     */
+    public void setRemoteSubmixOn(boolean on, int address) {
+        IAudioService service = getService();
+        try {
+            service.setRemoteSubmixOn(on, address);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in setRemoteSubmixOn", e);
         }
     }
 

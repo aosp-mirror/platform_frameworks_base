@@ -151,6 +151,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     private static final int MSG_SET_WIRED_DEVICE_CONNECTION_STATE = 21;
     private static final int MSG_SET_A2DP_CONNECTION_STATE = 22;
     // end of messages handled under wakelock
+    private static final int MSG_SET_RSX_CONNECTION_STATE = 23; // change remote submix connection
+    private static final int MSG_SET_FORCE_RSX_USE = 24;        // force remote submix audio routing
 
     // flags for MSG_PERSIST_VOLUME indicating if current and/or last audible volume should be
     // persisted
@@ -2109,6 +2111,33 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         }
     };
 
+    /** see AudioManager.setRemoteSubmixOn(boolean on) */
+    public void setRemoteSubmixOn(boolean on, int address) {
+        sendMsg(mAudioHandler, MSG_SET_RSX_CONNECTION_STATE,
+                SENDMSG_REPLACE /* replace with QUEUE when multiple addresses are supported */,
+                on ? 1 : 0 /*arg1*/,
+                address /*arg2*/,
+                null/*obj*/, 0/*delay*/);
+
+        // Note that we are  currently forcing use of remote submix as soon as corresponding device
+        //   is made available
+        sendMsg(mAudioHandler, MSG_SET_FORCE_RSX_USE, SENDMSG_REPLACE,
+                AudioSystem.FOR_MEDIA,
+                on ? AudioSystem.FORCE_REMOTE_SUBMIX : AudioSystem.FORCE_NONE,
+                null/*obj*/, 0/*delay*/);
+    }
+
+    private void onSetRsxConnectionState(int available, int address) {
+        AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_IN_REMOTE_SUBMIX,
+                available == 1 ?
+                        AudioSystem.DEVICE_STATE_AVAILABLE : AudioSystem.DEVICE_STATE_UNAVAILABLE,
+                String.valueOf(address) /*device_address*/);
+        AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_REMOTE_SUBMIX,
+                available == 1 ?
+                        AudioSystem.DEVICE_STATE_AVAILABLE : AudioSystem.DEVICE_STATE_UNAVAILABLE,
+                String.valueOf(address) /*device_address*/);
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // Internal methods
     ///////////////////////////////////////////////////////////////////////////
@@ -3072,6 +3101,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
                 case MSG_SET_FORCE_USE:
                 case MSG_SET_FORCE_BT_A2DP_USE:
+                case MSG_SET_FORCE_RSX_USE:
                     setForceUse(msg.arg1, msg.arg2);
                     break;
 
@@ -3133,6 +3163,10 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 case MSG_RCC_NEW_VOLUME_OBS:
                     onRegisterVolumeObserverForRcc(msg.arg1 /* rccId */,
                             (IRemoteVolumeObserver)msg.obj /* rvo */);
+                    break;
+
+                case MSG_SET_RSX_CONNECTION_STATE:
+                    onSetRsxConnectionState(msg.arg1/*available*/, msg.arg2/*address*/);
                     break;
             }
         }

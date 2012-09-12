@@ -214,6 +214,7 @@ public class AudioSystem
     public static final int DEVICE_OUT_REMOTE_SUBMIX = 0x8000;
 
     public static final int DEVICE_OUT_DEFAULT = DEVICE_BIT_DEFAULT;
+
     public static final int DEVICE_OUT_ALL = (DEVICE_OUT_EARPIECE |
                                               DEVICE_OUT_SPEAKER |
                                               DEVICE_OUT_WIRED_HEADSET |
@@ -352,7 +353,8 @@ public class AudioSystem
     public static final int FORCE_ANALOG_DOCK = 8;
     public static final int FORCE_DIGITAL_DOCK = 9;
     public static final int FORCE_NO_BT_A2DP = 10;
-    private static final int NUM_FORCE_CONFIG = 11;
+    public static final int FORCE_REMOTE_SUBMIX = 11;
+    private static final int NUM_FORCE_CONFIG = 12;
     public static final int FORCE_DEFAULT = FORCE_NONE;
 
     // usage for setForceUse, must match AudioSystem::force_use
