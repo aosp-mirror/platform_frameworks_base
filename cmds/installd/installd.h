@@ -62,6 +62,8 @@
 
 #define APP_SUBDIR             "app/" // sub-directory under ANDROID_DATA
 
+#define APP_LIB_SUBDIR         "app-lib/" // sub-directory under ANDROID_DATA
+
 #define MEDIA_SUBDIR           "media/" // sub-directory under ANDROID_DATA
 
 /* other handy constants */
@@ -93,6 +95,7 @@ typedef struct {
 
 extern dir_rec_t android_app_dir;
 extern dir_rec_t android_app_private_dir;
+extern dir_rec_t android_app_lib_dir;
 extern dir_rec_t android_data_dir;
 extern dir_rec_t android_asec_dir;
 extern dir_rec_t android_media_dir;
@@ -207,4 +210,3 @@ int free_cache(int64_t free_size);
 int dexopt(const char *apk_path, uid_t uid, int is_public);
 int movefiles();
 int linklib(const char* target, const char* source);
-int unlinklib(const char* libPath);
