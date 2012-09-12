@@ -189,7 +189,7 @@ class DragState {
             Slog.d(WindowManagerService.TAG, "broadcasting DRAG_STARTED at (" + touchX + ", " + touchY + ")");
         }
 
-        final WindowList windows = mService.getWindowList(mDisplay);
+        final WindowList windows = mService.getWindowListLocked(mDisplay);
         final int N = windows.size();
         for (int i = 0; i < N; i++) {
             sendDragStartedLw(windows.get(i), touchX, touchY, mDataDescription);
@@ -392,7 +392,7 @@ class DragState {
         final int x = (int) xf;
         final int y = (int) yf;
 
-        final WindowList windows = mService.getWindowList(mDisplay);
+        final WindowList windows = mService.getWindowListLocked(mDisplay);
         final int N = windows.size();
         for (int i = N - 1; i >= 0; i--) {
             WindowState child = windows.get(i);
