@@ -28,7 +28,6 @@ import android.content.IntentFilter;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
-import android.graphics.PointF;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -40,18 +39,20 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
-import android.util.MathUtils;
 import android.util.Property;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayInfo;
+import android.view.GestureDetector;
+import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.Gravity;
 import android.view.IDisplayContentChangeListener;
 import android.view.IWindowManager;
 import android.view.MotionEvent;
 import android.view.MotionEvent.PointerCoords;
 import android.view.MotionEvent.PointerProperties;
-import android.view.ScaleGestureDetector.SimpleOnScaleGestureListener;
+import android.view.ScaleGestureDetector;
+import android.view.ScaleGestureDetector.OnScaleGestureListener;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -119,7 +120,6 @@ public final class ScreenMagnifier implements EventStreamTransformation {
     private static final boolean DEBUG_VIEWPORT_WINDOW = false;
     private static final boolean DEBUG_WINDOW_TRANSITIONS = false;
     private static final boolean DEBUG_ROTATION = false;
-    private static final boolean DEBUG_GESTURE_DETECTOR = false;
     private static final boolean DEBUG_MAGNIFICATION_CONTROLLER = false;
 
     private static final String LOG_TAG = ScreenMagnifier.class.getSimpleName();
@@ -141,7 +141,7 @@ public final class ScreenMagnifier implements EventStreamTransformation {
     private final DisplayProvider mDisplayProvider;
 
     private final DetectingStateHandler mDetectingStateHandler = new DetectingStateHandler();
-    private final GestureDetector mGestureDetector;
+    private final MagnifiedContentInteractonStateHandler mMagnifiedContentInteractonStateHandler;
     private final StateViewportDraggingHandler mStateViewportDraggingHandler =
             new StateViewportDraggingHandler();
 
@@ -196,14 +196,15 @@ public final class ScreenMagnifier implements EventStreamTransformation {
         mScreenStateObserver = new ScreenStateObserver(mContext, mViewport,
                 mMagnificationController);
 
-        mGestureDetector = new GestureDetector(context);
+        mMagnifiedContentInteractonStateHandler = new MagnifiedContentInteractonStateHandler(
+                context);
 
         transitionToState(STATE_DETECTING);
     }
 
     @Override
     public void onMotionEvent(MotionEvent event, int policyFlags) {
-        mGestureDetector.onMotionEvent(event);
+        mMagnifiedContentInteractonStateHandler.onMotionEvent(event);
         switch (mCurrentState) {
             case STATE_DELEGATING: {
                 handleMotionEventStateDelegating(event, policyFlags);
@@ -215,9 +216,9 @@ public final class ScreenMagnifier implements EventStreamTransformation {
                 mStateViewportDraggingHandler.onMotionEvent(event, policyFlags);
             } break;
             case STATE_MAGNIFIED_INTERACTION: {
-                // Handled by the gesture detector. Since the detector
-                // needs all touch events to work properly we cannot
-                // call it only for this state.
+                // mMagnifiedContentInteractonStateHandler handles events only
+                // if this is the current state since it uses ScaleGestureDetecotr
+                // and a GestureDetector which need well formed event stream.
             } break;
             default: {
                 throw new IllegalStateException("Unknown state: " + mCurrentState);
@@ -242,7 +243,7 @@ public final class ScreenMagnifier implements EventStreamTransformation {
         mCurrentState = STATE_DETECTING;
         mDetectingStateHandler.clear();
         mStateViewportDraggingHandler.clear();
-        mGestureDetector.clear();
+        mMagnifiedContentInteractonStateHandler.clear();
         if (mNext != null) {
             mNext.clear();
         }
@@ -347,46 +348,27 @@ public final class ScreenMagnifier implements EventStreamTransformation {
         mCurrentState = state;
     }
 
-    private final class GestureDetector implements OnScaleGestureListener {
+    private final class MagnifiedContentInteractonStateHandler
+            extends SimpleOnGestureListener implements OnScaleGestureListener {
         private static final float MIN_SCALE = 1.3f;
         private static final float MAX_SCALE = 5.0f;
 
-        private static final float DETECT_SCALING_THRESHOLD = 0.30f;
-        private static final int DETECT_PANNING_THRESHOLD_DIP = 30;
-
-        private final float mScaledDetectPanningThreshold;
-
         private final ScaleGestureDetector mScaleGestureDetector;
+        private final GestureDetector mGestureDetector;
 
-        private final PointF mPrevFocus = new PointF(Float.NaN, Float.NaN);
-        private final PointF mInitialFocus = new PointF(Float.NaN, Float.NaN);
+        private float mScaleFocusX = -1;
+        private float mScaleFocusY = -1;
 
-        private float mCurrScale = Float.NaN;
-        private float mCurrScaleFactor = 1.0f;
-        private float mPrevScaleFactor = 1.0f;
-        private float mCurrPan;
-        private float mPrevPan;
-
-        private float mScaleFocusX = Float.NaN;
-        private float mScaleFocusY = Float.NaN;
-
-        private boolean mScaling;
-        private boolean mPanning;
-
-        public GestureDetector(Context context) {
-            final float density = context.getResources().getDisplayMetrics().density;
-            mScaledDetectPanningThreshold = DETECT_PANNING_THRESHOLD_DIP * density;
-            mScaleGestureDetector = new ScaleGestureDetector(this);
+        public MagnifiedContentInteractonStateHandler(Context context) {
+            mScaleGestureDetector = new ScaleGestureDetector(context, this);
+            mGestureDetector = new GestureDetector(context, this);
         }
 
         public void onMotionEvent(MotionEvent event) {
             mScaleGestureDetector.onTouchEvent(event);
-            switch (mCurrentState) {
-                case STATE_DETECTING:
-                case STATE_DELEGATING:
-                case STATE_VIEWPORT_DRAGGING: {
-                    return;
-                }
+            mGestureDetector.onTouchEvent(event);
+            if (mCurrentState != STATE_MAGNIFIED_INTERACTION) {
+                return;
             }
             if (event.getActionMasked() == MotionEvent.ACTION_UP) {
                 clear();
@@ -403,121 +385,57 @@ public final class ScreenMagnifier implements EventStreamTransformation {
         }
 
         @Override
-        public boolean onScale(ScaleGestureDetector detector) {
-            switch (mCurrentState) {
-                case STATE_DETECTING:
-                case STATE_DELEGATING:
-                case STATE_VIEWPORT_DRAGGING: {
-                    return true;
-                }
-                case STATE_MAGNIFIED_INTERACTION: {
-                    mCurrScaleFactor = mScaleGestureDetector.getScaleFactor();
-                    final float scaleDelta = Math.abs(1.0f - mCurrScaleFactor * mPrevScaleFactor);
-                    if (DEBUG_GESTURE_DETECTOR) {
-                        Slog.i(LOG_TAG, "scaleDelta: " + scaleDelta);
-                    }
-                    if (!mScaling && scaleDelta > DETECT_SCALING_THRESHOLD) {
-                        mScaling = true;
-                        clearContextualState();
-                        return true;
-                    }
-                    if (mScaling) {
-                        performScale(detector);
-                    }
-                    mCurrPan = (float) MathUtils.dist(
-                            mScaleGestureDetector.getFocusX(),
-                            mScaleGestureDetector.getFocusY(),
-                            mInitialFocus.x, mInitialFocus.y);
-                    final float panDelta = mCurrPan + mPrevPan;
-                    if (DEBUG_GESTURE_DETECTOR) {
-                        Slog.i(LOG_TAG, "panDelta: " + panDelta);
-                    }
-                    if (!mPanning && panDelta > mScaledDetectPanningThreshold) {
-                        mPanning = true;
-                        clearContextualState();
-                        return true;
-                    }
-                    if (mPanning) {
-                        performPan(detector);
-                    }
-                } break;
-            }
-            return false;
-        }
-
-        @Override
-        public boolean onScaleBegin(ScaleGestureDetector detector) {
-            mPrevScaleFactor *= mCurrScaleFactor;
-            mCurrScale = Float.NaN;
-            mPrevPan += mCurrPan;
-            mPrevFocus.x = mInitialFocus.x = detector.getFocusX();
-            mPrevFocus.y = mInitialFocus.y = detector.getFocusY();
-            return true;
-        }
-
-        @Override
-        public void onScaleEnd(ScaleGestureDetector detector) {
-            clearContextualState();
-        }
-
-        public void clear() {
-            clearContextualState();
-            mScaling = false;
-            mPanning = false;
-        }
-
-        private void clearContextualState() {
-            mCurrScaleFactor = 1.0f;
-            mPrevScaleFactor = 1.0f;
-            mPrevPan = 0;
-            mCurrPan = 0;
-            mInitialFocus.set(Float.NaN, Float.NaN);
-            mPrevFocus.set(Float.NaN, Float.NaN);
-            mCurrScale = Float.NaN;
-            mScaleFocusX = Float.NaN;
-            mScaleFocusY = Float.NaN;
-        }
-
-        private void performPan(ScaleGestureDetector detector) {
-            if (Float.compare(mPrevFocus.x, Float.NaN) == 0
-                    && Float.compare(mPrevFocus.y, Float.NaN) == 0) {
-                mPrevFocus.set(detector.getFocusX(), detector.getFocusY());
-                return;
+        public boolean onScroll(MotionEvent first, MotionEvent second, float distanceX,
+                float distanceY) {
+            if (mCurrentState != STATE_MAGNIFIED_INTERACTION) {
+                return true;
             }
             final float scale = mMagnificationController.getScale();
-            final float scrollX = (detector.getFocusX() - mPrevFocus.x) / scale;
-            final float scrollY = (detector.getFocusY() - mPrevFocus.y) / scale;
-            final float centerX = mMagnificationController.getMagnifiedRegionCenterX()
-                    - scrollX;
-            final float centerY = mMagnificationController.getMagnifiedRegionCenterY()
-                    - scrollY;
+            final float scrollX = distanceX / scale;
+            final float scrollY = distanceY / scale;
+            final float centerX = mMagnificationController.getMagnifiedRegionCenterX() + scrollX;
+            final float centerY = mMagnificationController.getMagnifiedRegionCenterY() + scrollY;
             if (DEBUG_PANNING) {
                 Slog.i(LOG_TAG, "Panned content by scrollX: " + scrollX
                         + " scrollY: " + scrollY);
             }
             mMagnificationController.setMagnifiedRegionCenter(centerX, centerY, false);
-            mPrevFocus.set(detector.getFocusX(), detector.getFocusY());
+            return true;
         }
 
-        private void performScale(ScaleGestureDetector detector) {
-            if (Float.compare(mCurrScale, Float.NaN) == 0) {
-                mCurrScale = mMagnificationController.getScale();
-                return;
+        @Override
+        public boolean onScale(ScaleGestureDetector detector) {
+            if (mCurrentState != STATE_MAGNIFIED_INTERACTION) {
+                return true;
             }
-            final float totalScaleFactor = mPrevScaleFactor * detector.getScaleFactor();
-            final float newScale = mCurrScale * totalScaleFactor;
-            final float normalizedNewScale = Math.min(Math.max(newScale, MIN_SCALE),
-                    MAX_SCALE);
+            final float newScale = mMagnificationController.getScale()
+                    * detector.getScaleFactor();
+            final float normalizedNewScale = Math.min(Math.max(newScale, MIN_SCALE), MAX_SCALE);
             if (DEBUG_SCALING) {
                 Slog.i(LOG_TAG, "normalizedNewScale: " + normalizedNewScale);
             }
-            if (Float.compare(mScaleFocusX, Float.NaN) == 0
-                    && Float.compare(mScaleFocusY, Float.NaN) == 0) {
+            if (mScaleFocusX < 0 && mScaleFocusY < 0) {
                 mScaleFocusX = detector.getFocusX();
                 mScaleFocusY = detector.getFocusY();
             }
             mMagnificationController.setScale(normalizedNewScale, mScaleFocusX,
                     mScaleFocusY, false);
+            return true;
+        }
+
+        @Override
+        public boolean onScaleBegin(ScaleGestureDetector detector) {
+            return (mCurrentState == STATE_MAGNIFIED_INTERACTION);
+        }
+
+        @Override
+        public void onScaleEnd(ScaleGestureDetector detector) {
+            clear();
+        }
+
+        private void clear() {
+            mScaleFocusX = -1;
+            mScaleFocusY = -1;
         }
     }
 
@@ -1868,484 +1786,6 @@ public final class ScreenMagnifier implements EventStreamTransformation {
         @Override
         public void onDisplayChanged(int displayId) {
             updateDisplayInfo();
-        }
-    }
-
-    /**
-     * The listener for receiving notifications when gestures occur.
-     * If you want to listen for all the different gestures then implement
-     * this interface. If you only want to listen for a subset it might
-     * be easier to extend {@link SimpleOnScaleGestureListener}.
-     *
-     * An application will receive events in the following order:
-     * <ul>
-     *  <li>One {@link OnScaleGestureListener#onScaleBegin(ScaleGestureDetector)}
-     *  <li>Zero or more {@link OnScaleGestureListener#onScale(ScaleGestureDetector)}
-     *  <li>One {@link OnScaleGestureListener#onScaleEnd(ScaleGestureDetector)}
-     * </ul>
-     */
-    interface OnScaleGestureListener {
-        /**
-         * Responds to scaling events for a gesture in progress.
-         * Reported by pointer motion.
-         *
-         * @param detector The detector reporting the event - use this to
-         *          retrieve extended info about event state.
-         * @return Whether or not the detector should consider this event
-         *          as handled. If an event was not handled, the detector
-         *          will continue to accumulate movement until an event is
-         *          handled. This can be useful if an application, for example,
-         *          only wants to update scaling factors if the change is
-         *          greater than 0.01.
-         */
-        public boolean onScale(ScaleGestureDetector detector);
-
-        /**
-         * Responds to the beginning of a scaling gesture. Reported by
-         * new pointers going down.
-         *
-         * @param detector The detector reporting the event - use this to
-         *          retrieve extended info about event state.
-         * @return Whether or not the detector should continue recognizing
-         *          this gesture. For example, if a gesture is beginning
-         *          with a focal point outside of a region where it makes
-         *          sense, onScaleBegin() may return false to ignore the
-         *          rest of the gesture.
-         */
-        public boolean onScaleBegin(ScaleGestureDetector detector);
-
-        /**
-         * Responds to the end of a scale gesture. Reported by existing
-         * pointers going up.
-         *
-         * Once a scale has ended, {@link ScaleGestureDetector#getFocusX()}
-         * and {@link ScaleGestureDetector#getFocusY()} will return the location
-         * of the pointer remaining on the screen.
-         *
-         * @param detector The detector reporting the event - use this to
-         *          retrieve extended info about event state.
-         */
-        public void onScaleEnd(ScaleGestureDetector detector);
-    }
-
-    class ScaleGestureDetector {
-
-        private final MinCircleFinder mMinCircleFinder = new MinCircleFinder();
-
-        private final OnScaleGestureListener mListener;
-
-        private float mFocusX;
-        private float mFocusY;
-
-        private float mCurrSpan;
-        private float mPrevSpan;
-        private float mCurrSpanX;
-        private float mCurrSpanY;
-        private float mPrevSpanX;
-        private float mPrevSpanY;
-        private long mCurrTime;
-        private long mPrevTime;
-        private boolean mInProgress;
-
-        public ScaleGestureDetector(OnScaleGestureListener listener) {
-            mListener = listener;
-        }
-
-        /**
-         * Accepts MotionEvents and dispatches events to a {@link OnScaleGestureListener}
-         * when appropriate.
-         *
-         * <p>Applications should pass a complete and consistent event stream to this method.
-         * A complete and consistent event stream involves all MotionEvents from the initial
-         * ACTION_DOWN to the final ACTION_UP or ACTION_CANCEL.</p>
-         *
-         * @param event The event to process
-         * @return true if the event was processed and the detector wants to receive the
-         *         rest of the MotionEvents in this event stream.
-         */
-        public boolean onTouchEvent(MotionEvent event) {
-            boolean streamEnded = false;
-            boolean contextChanged = false;
-            int excludedPtrIdx = -1;
-            final int action = event.getActionMasked();
-            switch (action) {
-                case MotionEvent.ACTION_DOWN:
-                case MotionEvent.ACTION_POINTER_DOWN: {
-                    contextChanged = true;
-                } break;
-                case MotionEvent.ACTION_POINTER_UP: {
-                    contextChanged = true;
-                    excludedPtrIdx = event.getActionIndex();
-                } break;
-                case MotionEvent.ACTION_UP:
-                case MotionEvent.ACTION_CANCEL: {
-                    streamEnded = true;
-                } break;
-            }
-
-            if (mInProgress && (contextChanged || streamEnded)) {
-                mListener.onScaleEnd(this);
-                mInProgress = false;
-                mPrevSpan = 0;
-                mPrevSpanX = 0;
-                mPrevSpanY = 0;
-                return true;
-            }
-
-            final long currTime = mCurrTime;
-
-            mFocusX = 0;
-            mFocusY = 0;
-            mCurrSpan = 0;
-            mCurrSpanX = 0;
-            mCurrSpanY = 0;
-            mCurrTime = 0;
-            mPrevTime = 0;
-
-            if (!streamEnded) {
-                MinCircleFinder.Circle circle =
-                        mMinCircleFinder.computeMinCircleAroundPointers(event);
-                mFocusX = circle.centerX;
-                mFocusY = circle.centerY;
-
-                double sumSlope = 0;
-                final int pointerCount = event.getPointerCount();
-                for (int i = 0; i < pointerCount; i++) {
-                    if (i == excludedPtrIdx) {
-                        continue;
-                    }
-                    float x = event.getX(i) - mFocusX;
-                    float y = event.getY(i) - mFocusY;
-                    if (x == 0) {
-                        x += 0.1f;
-                    }
-                    sumSlope += y / x;
-                }
-                final double avgSlope = sumSlope
-                        / ((excludedPtrIdx < 0) ? pointerCount : pointerCount - 1);
-
-                double angle = Math.atan(avgSlope);
-                mCurrSpan = 2 * circle.radius;
-                mCurrSpanX = (float) Math.abs((Math.cos(angle) * mCurrSpan));
-                mCurrSpanY = (float) Math.abs((Math.sin(angle) * mCurrSpan));
-            }
-
-            if (contextChanged || mPrevSpan == 0 || mPrevSpanX == 0 || mPrevSpanY == 0) {
-                mPrevSpan = mCurrSpan;
-                mPrevSpanX = mCurrSpanX;
-                mPrevSpanY = mCurrSpanY;
-            }
-
-            if (!mInProgress && mCurrSpan != 0 && !streamEnded) {
-                mInProgress = mListener.onScaleBegin(this);
-            }
-
-            if (mInProgress) {
-                mPrevTime = (currTime != 0) ? currTime : event.getEventTime();
-                mCurrTime = event.getEventTime();
-                if (mCurrSpan == 0) {
-                    mListener.onScaleEnd(this);
-                    mInProgress = false;
-                } else {
-                    if (mListener.onScale(this)) {
-                        mPrevSpanX = mCurrSpanX;
-                        mPrevSpanY = mCurrSpanY;
-                        mPrevSpan = mCurrSpan;
-                    }
-                }
-            }
-
-            return true;
-        }
-
-        /**
-         * Returns {@code true} if a scale gesture is in progress.
-         */
-        public boolean isInProgress() {
-            return mInProgress;
-        }
-
-        /**
-         * Get the X coordinate of the current gesture's focal point.
-         * If a gesture is in progress, the focal point is between
-         * each of the pointers forming the gesture.
-         *
-         * If {@link #isInProgress()} would return false, the result of this
-         * function is undefined.
-         *
-         * @return X coordinate of the focal point in pixels.
-         */
-        public float getFocusX() {
-            return mFocusX;
-        }
-
-        /**
-         * Get the Y coordinate of the current gesture's focal point.
-         * If a gesture is in progress, the focal point is between
-         * each of the pointers forming the gesture.
-         *
-         * If {@link #isInProgress()} would return false, the result of this
-         * function is undefined.
-         *
-         * @return Y coordinate of the focal point in pixels.
-         */
-        public float getFocusY() {
-            return mFocusY;
-        }
-
-        /**
-         * Return the average distance between each of the pointers forming the
-         * gesture in progress through the focal point.
-         *
-         * @return Distance between pointers in pixels.
-         */
-        public float getCurrentSpan() {
-            return mCurrSpan;
-        }
-
-        /**
-         * Return the average X distance between each of the pointers forming the
-         * gesture in progress through the focal point.
-         *
-         * @return Distance between pointers in pixels.
-         */
-        public float getCurrentSpanX() {
-            return mCurrSpanX;
-        }
-
-        /**
-         * Return the average Y distance between each of the pointers forming the
-         * gesture in progress through the focal point.
-         *
-         * @return Distance between pointers in pixels.
-         */
-        public float getCurrentSpanY() {
-            return mCurrSpanY;
-        }
-
-        /**
-         * Return the previous average distance between each of the pointers forming the
-         * gesture in progress through the focal point.
-         *
-         * @return Previous distance between pointers in pixels.
-         */
-        public float getPreviousSpan() {
-            return mPrevSpan;
-        }
-
-        /**
-         * Return the previous average X distance between each of the pointers forming the
-         * gesture in progress through the focal point.
-         *
-         * @return Previous distance between pointers in pixels.
-         */
-        public float getPreviousSpanX() {
-            return mPrevSpanX;
-        }
-
-        /**
-         * Return the previous average Y distance between each of the pointers forming the
-         * gesture in progress through the focal point.
-         *
-         * @return Previous distance between pointers in pixels.
-         */
-        public float getPreviousSpanY() {
-            return mPrevSpanY;
-        }
-
-        /**
-         * Return the scaling factor from the previous scale event to the current
-         * event. This value is defined as
-         * ({@link #getCurrentSpan()} / {@link #getPreviousSpan()}).
-         *
-         * @return The current scaling factor.
-         */
-        public float getScaleFactor() {
-            return mPrevSpan > 0 ? mCurrSpan / mPrevSpan : 1;
-        }
-
-        /**
-         * Return the time difference in milliseconds between the previous
-         * accepted scaling event and the current scaling event.
-         *
-         * @return Time difference since the last scaling event in milliseconds.
-         */
-        public long getTimeDelta() {
-            return mCurrTime - mPrevTime;
-        }
-
-        /**
-         * Return the event time of the current event being processed.
-         *
-         * @return Current event time in milliseconds.
-         */
-        public long getEventTime() {
-            return mCurrTime;
-        }
-    }
-
-    private static final class MinCircleFinder {
-        private final ArrayList<PointHolder> mPoints = new ArrayList<PointHolder>();
-        private final ArrayList<PointHolder> sBoundary = new ArrayList<PointHolder>();
-        private final Circle mMinCircle = new Circle();
-
-        /**
-         * Finds the minimal circle that contains all pointers of a motion event.
-         *
-         * @param event A motion event.
-         * @return The minimal circle.
-         */
-        public Circle computeMinCircleAroundPointers(MotionEvent event) {
-            ArrayList<PointHolder> points = mPoints;
-            points.clear();
-            final int pointerCount = event.getPointerCount();
-            for (int i = 0; i < pointerCount; i++) {
-                PointHolder point = PointHolder.obtain(event.getX(i), event.getY(i));
-                points.add(point);
-            }
-            ArrayList<PointHolder> boundary = sBoundary;
-            boundary.clear();
-            computeMinCircleAroundPointsRecursive(points, boundary, mMinCircle);
-            for (int i = points.size() - 1; i >= 0; i--) {
-                points.remove(i).recycle();
-            }
-            boundary.clear();
-            return mMinCircle;
-        }
-
-        private static void computeMinCircleAroundPointsRecursive(ArrayList<PointHolder> points,
-                ArrayList<PointHolder> boundary, Circle outCircle) {
-            if (points.isEmpty()) {
-                if (boundary.size() == 0) {
-                    outCircle.initialize();
-                } else if (boundary.size() == 1) {
-                    outCircle.initialize(boundary.get(0).mData, boundary.get(0).mData);
-                } else if (boundary.size() == 2) {
-                    outCircle.initialize(boundary.get(0).mData, boundary.get(1).mData);
-                } else if (boundary.size() == 3) {
-                    outCircle.initialize(boundary.get(0).mData, boundary.get(1).mData,
-                            boundary.get(2).mData);
-                }
-                return;
-            }
-            PointHolder point = points.remove(points.size() - 1);
-            computeMinCircleAroundPointsRecursive(points, boundary, outCircle);
-            if (!outCircle.contains(point.mData)) {
-                boundary.add(point);
-                computeMinCircleAroundPointsRecursive(points, boundary, outCircle);
-                boundary.remove(point);
-            }
-            points.add(point);
-        }
-
-        private static final class PointHolder {
-            private static final int MAX_POOL_SIZE = 20;
-            private static PointHolder sPool;
-            private static int sPoolSize;
-
-            private PointHolder mNext;
-            private boolean mIsInPool;
-
-            private final PointF mData = new PointF();
-
-            public static PointHolder obtain(float x, float y) {
-                PointHolder holder;
-                if (sPoolSize > 0) {
-                    sPoolSize--;
-                    holder = sPool;
-                    sPool = sPool.mNext;
-                    holder.mNext = null;
-                    holder.mIsInPool = false;
-                } else {
-                    holder = new PointHolder();
-                }
-                holder.mData.set(x, y);
-                return holder;
-            }
-
-            public void recycle() {
-                if (mIsInPool) {
-                    throw new IllegalStateException("Already recycled.");
-                }
-                clear();
-                if (sPoolSize < MAX_POOL_SIZE) {
-                    sPoolSize++;
-                    mNext = sPool;
-                    sPool = this;
-                    mIsInPool = true;
-                }
-            }
-
-            private void clear() {
-                mData.set(0, 0);
-            }
-        }
-
-        public static final class Circle {
-            public float centerX;
-            public float centerY;
-            public float radius;
-
-            private void initialize() {
-                centerX = 0;
-                centerY = 0;
-                radius = 0;
-            }
-
-            private void initialize(PointF first, PointF second, PointF third) {
-                if (!hasLineWithInfiniteSlope(first, second, third)) {
-                    initializeInternal(first, second, third);
-                } else if (!hasLineWithInfiniteSlope(first, third, second)) {
-                    initializeInternal(first, third, second);
-                } else if (!hasLineWithInfiniteSlope(second, first, third)) {
-                    initializeInternal(second, first, third);
-                } else if (!hasLineWithInfiniteSlope(second, third, first)) {
-                    initializeInternal(second, third, first);
-                } else if (!hasLineWithInfiniteSlope(third, first, second)) {
-                    initializeInternal(third, first, second);
-                } else if (!hasLineWithInfiniteSlope(third, second, first)) {
-                    initializeInternal(third, second, first);
-                } else {
-                    initialize();
-                }
-            }
-
-            private void initialize(PointF first, PointF second) {
-                radius = (float) (Math.hypot(second.x - first.x, second.y - first.y) / 2);
-                centerX = (float) (second.x + first.x) / 2;
-                centerY = (float) (second.y + first.y) / 2;
-            }
-
-            public boolean contains(PointF point) {
-                return (int) (Math.hypot(point.x - centerX, point.y - centerY)) <= radius;
-            }
-
-            private void initializeInternal(PointF first, PointF second, PointF third) {
-                final float x1 = first.x;
-                final float y1 = first.y;
-                final float x2 = second.x;
-                final float y2 = second.y;
-                final float x3 = third.x;
-                final float y3 = third.y;
-
-                final float sl1 = (y2 - y1) / (x2 - x1);
-                final float sl2 = (y3 - y2) / (x3 - x2);
-
-                centerX = (int) ((sl1 * sl2 * (y1 - y3) + sl2 * (x1 + x2) - sl1 * (x2 + x3))
-                        / (2 * (sl2 - sl1)));
-                centerY = (int) (-1 / sl1 * (centerX - (x1 + x2) / 2) + (y1 + y2) / 2);
-                radius = (int) Math.hypot(x1 - centerX, y1 - centerY);
-            }
-
-            private boolean hasLineWithInfiniteSlope(PointF first, PointF second, PointF third) {
-                return (second.x - first.x == 0 || third.x - second.x == 0
-                        || second.y - first.y == 0 || third.y - second.y == 0);
-            }
-
-            @Override
-            public String toString() {
-                return "cetner: [" + centerX + ", " + centerY + "] radius: " + radius;
-            }
         }
     }
 }
