@@ -19,7 +19,7 @@
 
 #include <arpa/inet.h>
 #include <stdint.h>
-#include <linux/socket.h>
+#include <sys/socket.h>
 
 #include <common_time/ICommonClock.h>
 #include <common_time/local_clock.h>

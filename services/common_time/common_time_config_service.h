@@ -13,10 +13,11 @@
  * limitations under the License.
  */
 
-#include <common_time/ICommonTimeConfig.h>
-
 #ifndef ANDROID_COMMON_TIME_CONFIG_SERVICE_H
 #define ANDROID_COMMON_TIME_CONFIG_SERVICE_H
+
+#include <sys/socket.h>
+#include <common_time/ICommonTimeConfig.h>
 
 namespace android {
 
