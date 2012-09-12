@@ -18,7 +18,7 @@ package android.content.pm;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
+import android.os.UserHandle;
 
 /**
  * Per-user information.
@@ -90,6 +90,10 @@ public class UserInfo implements Parcelable {
         id = orig.id;
         flags = orig.flags;
         serialNumber = orig.serialNumber;
+    }
+
+    public UserHandle getUserHandle() {
+        return new UserHandle(id);
     }
 
     @Override

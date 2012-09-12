@@ -125,6 +125,7 @@ class ServerThread extends Thread {
         BatteryService battery = null;
         VibratorService vibrator = null;
         AlarmManagerService alarm = null;
+        MountService mountService = null;
         NetworkManagementService networkManagement = null;
         NetworkStatsService networkStats = null;
         NetworkPolicyManagerService networkPolicy = null;
@@ -374,7 +375,6 @@ class ServerThread extends Thread {
         }
 
         if (factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
-            MountService mountService = null;
             if (!"0".equals(SystemProperties.get("system_init.startmountservice"))) {
                 try {
                     /*
@@ -813,6 +813,7 @@ class ServerThread extends Thread {
 
         // These are needed to propagate to the runnable below.
         final Context contextF = context;
+        final MountService mountServiceF = mountService;
         final BatteryService batteryF = battery;
         final NetworkManagementService networkManagementF = networkManagement;
         final NetworkStatsService networkStatsF = networkStats;
@@ -846,6 +847,11 @@ class ServerThread extends Thread {
                 Slog.i(TAG, "Making services ready");
 
                 if (!headless) startSystemUi(contextF);
+                try {
+                    if (mountServiceF != null) mountServiceF.systemReady();
+                } catch (Throwable e) {
+                    reportWtf("making Mount Service ready", e);
+                }
                 try {
                     if (batteryF != null) batteryF.systemReady();
                 } catch (Throwable e) {
