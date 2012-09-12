@@ -103,8 +103,8 @@ public class MtpDatabase {
     private static final String PATH_WHERE = Files.FileColumns.DATA + "=?";
 
     private static final String STORAGE_WHERE = Files.FileColumns.STORAGE_ID + "=?";
-    private static final String FORMAT_WHERE = Files.FileColumns.PARENT + "=?";
-    private static final String PARENT_WHERE = Files.FileColumns.FORMAT + "=?";
+    private static final String FORMAT_WHERE = Files.FileColumns.FORMAT + "=?";
+    private static final String PARENT_WHERE = Files.FileColumns.PARENT + "=?";
     private static final String STORAGE_FORMAT_WHERE = STORAGE_WHERE + " AND "
                                             + Files.FileColumns.FORMAT + "=?";
     private static final String STORAGE_PARENT_WHERE = STORAGE_WHERE + " AND "
