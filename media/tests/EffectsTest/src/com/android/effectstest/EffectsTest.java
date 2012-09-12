@@ -32,6 +32,7 @@ import android.widget.ListView;
 import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.media.audiofx.AudioEffect;
+
 import java.util.UUID;
 
 public class EffectsTest extends Activity {
@@ -154,13 +155,35 @@ public class EffectsTest extends Activity {
             this.setOrientation(VERTICAL);
         }
 
+        public String effectUuidToString(UUID effectType) {
+            if (effectType.equals(AudioEffect.EFFECT_TYPE_VIRTUALIZER)) {
+                return "Virtualizer";
+            } else if (effectType.equals(AudioEffect.EFFECT_TYPE_ENV_REVERB)){
+                return "Reverb";
+            } else if (effectType.equals(AudioEffect.EFFECT_TYPE_PRESET_REVERB)){
+                return "Preset Reverb";
+            } else if (effectType.equals(AudioEffect.EFFECT_TYPE_EQUALIZER)){
+                return "Equalizer";
+            } else if (effectType.equals(AudioEffect.EFFECT_TYPE_BASS_BOOST)){
+                return "Bass Boost";
+            } else if (effectType.equals(AudioEffect.EFFECT_TYPE_AGC)){
+                return "Automatic Gain Control";
+            } else if (effectType.equals(AudioEffect.EFFECT_TYPE_AEC)){
+                return "Acoustic Echo Canceler";
+            } else if (effectType.equals(AudioEffect.EFFECT_TYPE_NS)){
+                return "Noise Suppressor";
+            }
+
+            return effectType.toString();
+        }
+
         public void set(int position) {
             TextView tv = new TextView(mContext);
             tv.setText("Effect "+ position);
             addView(tv, new LinearLayout.LayoutParams(
                     LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
             tv = new TextView(mContext);
-            tv.setText(" type: "+ mDescriptors[position].type.toString());
+            tv.setText(" type: "+ effectUuidToString(mDescriptors[position].type));
             addView(tv, new LinearLayout.LayoutParams(
                     LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
             tv = new TextView(mContext);
