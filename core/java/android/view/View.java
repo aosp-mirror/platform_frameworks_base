@@ -39,7 +39,6 @@ import android.graphics.Region;
 import android.graphics.Shader;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.Bundle;
 import android.os.Handler;
@@ -4275,25 +4274,42 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return Whether any parent scrolled.
      */
     public boolean requestRectangleOnScreen(Rect rectangle, boolean immediate) {
+        if (mAttachInfo == null) {
+            return false;
+        }
+
         View child = this;
+
+        RectF position = mAttachInfo.mTmpTransformRect;
+        position.set(rectangle);
+
         ViewParent parent = mParent;
         boolean scrolled = false;
         while (parent != null) {
+            rectangle.set((int) position.left, (int) position.top,
+                    (int) position.right, (int) position.bottom);
+
             scrolled |= parent.requestChildRectangleOnScreen(child,
                     rectangle, immediate);
 
-            // offset rect so next call has the rectangle in the
-            // coordinate system of its direct child.
-            rectangle.offset(child.getLeft(), child.getTop());
-            rectangle.offset(-child.getScrollX(), -child.getScrollY());
+            if (!child.hasIdentityMatrix()) {
+                child.getMatrix().mapRect(position);
+            }
+
+            position.offset(child.mLeft, child.mTop);
 
             if (!(parent instanceof View)) {
                 break;
             }
 
-            child = (View) parent;
+            View parentView = (View) parent;
+
+            position.offset(-parentView.getScrollX(), -parentView.getScrollY());
+
+            child = parentView;
             parent = child.getParent();
         }
+
         return scrolled;
     }
 
