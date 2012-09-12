@@ -1301,8 +1301,8 @@ public class PduPersister {
             }
             addressMap.put(addrType, array);
         }
-    	// Check to see if Group MMS is enabled in Share Preferences 
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+        // Check to see if Group MMS is enabled in Share Preferences 
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
         boolean groupMMSEnabled = prefs.getBoolean("pref_key_mms_group_mms", true);
 
         HashSet<String> recipients = new HashSet<String>();
@@ -1332,21 +1332,21 @@ public class PduPersister {
                     }
                 }
             }
-			// START GROUPMMS BLOCK: This block checks if Group MMS is enabled and the PDU is incoming
-			// then adds every address in the TO field to recipients minus the owner's own address
-			if (groupMMSEnabled && msgType == PduHeaders.MESSAGE_TYPE_RETRIEVE_CONF) {
-				TelephonyManager mTelephonyMgr = (TelephonyManager)mContext.getSystemService(Context.TELEPHONY_SERVICE);
-				String phoneNo = mTelephonyMgr.getLine1Number();
-				array = addressMap.get(PduHeaders.TO);
-				if (array != null) {
-	                for (EncodedStringValue v : array) {
-	                    if (v != null && !v.getString().replaceAll("\\D", "").equals(phoneNo.replaceAll("\\D", ""))) {
-	                        recipients.add(v.getString());
-	                    }
-	                }
-	            }
-			}
-			// END GROUPMMS BLOCK:
+        // START GROUPMMS BLOCK: This block checks if Group MMS is enabled and the PDU is incoming
+        // then adds every address in the TO field to recipients minus the owner's own address
+        if (groupMMSEnabled && msgType == PduHeaders.MESSAGE_TYPE_RETRIEVE_CONF) {
+            TelephonyManager mTelephonyMgr = (TelephonyManager)mContext.getSystemService(Context.TELEPHONY_SERVICE);
+            String phoneNo = mTelephonyMgr.getLine1Number();
+            array = addressMap.get(PduHeaders.TO);
+            if (array != null) {
+                for (EncodedStringValue v : array) {
+                    if (v != null && !v.getString().replaceAll("\\D", "").equals(phoneNo.replaceAll("\\D", ""))) {
+                        recipients.add(v.getString());
+                    }
+                }
+            }
+        }
+        // END GROUPMMS BLOCK:
             if (!recipients.isEmpty()) {
                 long threadId = Threads.getOrCreateThreadId(mContext, recipients);
                 values.put(Mms.THREAD_ID, threadId);
