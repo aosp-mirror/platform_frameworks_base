@@ -5364,13 +5364,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * This is an implementation detail.
-     */
-    public SearchBox getSearchBox() {
-        return null;
-    }
-
-    /**
      * Returns the currently highlighted text as a string.
      */
     String getSelection() {
