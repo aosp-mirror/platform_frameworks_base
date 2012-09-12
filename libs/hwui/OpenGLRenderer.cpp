@@ -173,6 +173,15 @@ int OpenGLRenderer::prepareDirty(float left, float top, float right, float botto
     mSnapshot->setClip(left, top, right, bottom);
     mDirtyClip = opaque;
 
+    // If we know that we are going to redraw the entire framebuffer,
+    // perform a discard to let the driver know we don't need to preserve
+    // the back buffer for this frame.
+    if (mCaches.extensions.hasDiscardFramebuffer() &&
+            left <= 0.0f && top <= 0.0f && right >= mWidth && bottom >= mHeight) {
+        const GLenum attachments[] = { getTargetFbo() == 0 ? GL_COLOR_EXT : GL_COLOR_ATTACHMENT0 };
+        glDiscardFramebufferEXT(GL_FRAMEBUFFER, 1, attachments);
+    }
+
     syncState();
 
     if (!opaque) {
