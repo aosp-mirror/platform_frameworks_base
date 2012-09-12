@@ -155,13 +155,13 @@
     <string name="always_use_accessory">Use by default for this USB accessory</string>
 
     <!-- Title of confirmation dialog for USB debugging -->
-    <string name="usb_debugging_title">Allow USB Debugging?</string>
+    <string name="usb_debugging_title">Allow USB debugging?</string>
 
     <!-- Message of confirmation dialog for USB debugging -->
-    <string name="usb_debugging_message">Allow USB Debugging from this computer?\nYour RSA key fingerprint is\n<xliff:g id="fingerprint">%1$s</xliff:g></string>
+    <string name="usb_debugging_message">The computer\'s RSA key fingerprint is:\n<xliff:g id="fingerprint">%1$s</xliff:g></string>
 
     <!-- Option to always allow USB debugging from the attached computer -->
-    <string name="usb_debugging_always">Always allow this computer</string>
+    <string name="usb_debugging_always">Always allow from this computer</string>
 
     <!-- Checkbox label for application compatibility mode ON (zooming app to look like it's running
          on a phone).  [CHAR LIMIT=25] -->
