@@ -332,10 +332,10 @@ void LayerRenderer::flushLayer(Layer* layer) {
         if (Caches::getInstance().extensions.hasDiscardFramebuffer()) {
             GLuint previousFbo;
             glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint*) &previousFbo);
-
-            GLenum attachments = GL_COLOR_ATTACHMENT0;
             if (fbo != previousFbo) glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-            glDiscardFramebufferEXT(GL_FRAMEBUFFER, 1, &attachments);
+
+            const GLenum attachments[] = { GL_COLOR_ATTACHMENT0 };
+            glDiscardFramebufferEXT(GL_FRAMEBUFFER, 1, attachments);
 
             if (fbo != previousFbo) glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
         }
