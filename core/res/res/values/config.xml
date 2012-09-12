@@ -537,17 +537,18 @@
 
     <!-- Array of light sensor LUX values to define our levels for auto backlight brightness support.
          The N entries of this array define N + 1 control points as follows:
+         (1-based arrays)
 
-         Point 1:        LUX <= 0 (implicit)
-         Point 2:        0 < level[1] == LUX < level[2]
+         Point 1:            (0, value[1]):             lux <= 0
+         Point 2:     (level[1], value[2]):  0        < lux <= level[1]
+         Point 3:     (level[2], value[3]):  level[2] < lux <= level[3]
          ...
-         Point N:        level[N - 1] == LUX < level[N]
-         Point N + 1:    level[N] <= LUX < infinity
+         Point N+1: (level[N], value[N+1]):  level[N] < lux
 
          The control points must be strictly increasing.  Each control point
          corresponds to an entry in the brightness backlight values arrays.
          For example, if LUX == level[1] (first element of the levels array)
-         then the brightness will be determined by value[1] (first element
+         then the brightness will be determined by value[2] (second element
          of the brightness values array).
 
          Spline interpolation is used to determine the auto-brightness
