@@ -215,15 +215,18 @@ class AppWidgetService extends IAppWidgetService.Stub
     }
 
     @Override
-    public void bindAppWidgetId(int appWidgetId, ComponentName provider) throws RemoteException {
-        getImplForUser(UserHandle.getCallingUserId()).bindAppWidgetId(appWidgetId, provider);
+    public void bindAppWidgetId(int appWidgetId, ComponentName provider, Bundle options)
+            throws RemoteException {
+        getImplForUser(UserHandle.getCallingUserId()).bindAppWidgetId(appWidgetId, provider,
+                options);
     }
 
     @Override
     public boolean bindAppWidgetIdIfAllowed(
-            String packageName, int appWidgetId, ComponentName provider) throws RemoteException {
+            String packageName, int appWidgetId, ComponentName provider, Bundle options)
+                    throws RemoteException {
         return getImplForUser(UserHandle.getCallingUserId()).bindAppWidgetIdIfAllowed(
-                packageName, appWidgetId, provider);
+                packageName, appWidgetId, provider, options);
     }
 
     @Override
