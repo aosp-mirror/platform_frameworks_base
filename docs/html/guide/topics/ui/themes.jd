@@ -413,8 +413,8 @@ thoroughly describe the styles, so viewing the actual source code for these styl
 themes will give you a better understanding of what style properties each one provides.
 For a better reference to the Android styles and themes, see the following source code:</p>
 <ul>
-	<li><a href="http://android.git.kernel.org/?p=platform/frameworks/base.git;a=blob;f=core/res/res/values/styles.xml;h=d7b654e49809cb97a35682754b1394af5c8bc88b;hb=HEAD">Android Styles (styles.xml)</a></li>
-	<li><a href="http://android.git.kernel.org/?p=platform/frameworks/base.git;a=blob;f=core/res/res/values/themes.xml;h=6b3d7407d1c895a3c297e60d5beac98e2d34c271;hb=HEAD">Android Themes (themes.xml)</a></li>
+	<li><a href="https://android.googlesource.com/platform/frameworks/base/+/refs/heads/master/core/res/res/values/styles.xml">Android Styles (styles.xml)</a></li>
+	<li><a href="https://android.googlesource.com/platform/frameworks/base/+/refs/heads/master/core/res/res/values/themes.xml">Android Themes (themes.xml)</a></li>
 </ul>
 
 <p>These files will help you learn through example. For instance, in the Android themes source code,
