@@ -470,7 +470,13 @@ public class WebView extends AbsoluteLayout
      * @param defStyle the default style resource ID
      * @param privateBrowsing whether this WebView will be initialized in
      *                        private mode
+     *
+     * @deprecated Private browsing is no longer supported directly via 
+     * WebView and will be removed in a future release. Prefer using
+     * {@link WebSettings}, {@link WebViewDatabase}, {@link CookieManager}
+     * and {@link WebStorage} for fine-grained control of privacy data.
      */
+    @Deprecated
     public WebView(Context context, AttributeSet attrs, int defStyle,
             boolean privateBrowsing) {
         this(context, attrs, defStyle, null, privateBrowsing);
@@ -569,7 +575,11 @@ public class WebView extends AbsoluteLayout
 
     /**
      * Sets the SSL certificate for the main top-level page.
+     *
+     * @deprecated Calling this function has no useful effect, and will be
+     * ignored in future releases.
      */
+    @Deprecated
     public void setCertificate(SslCertificate certificate) {
         checkThread();
         mProvider.setCertificate(certificate);
@@ -1018,7 +1028,12 @@ public class WebView extends AbsoluteLayout
      * Gets the current scale of this WebView.
      *
      * @return the current scale
+     *
+     * @deprecated This method is prone to inaccuracy due to race conditions
+     * between the web rendering and UI threads; prefer
+     * {@link WebViewClient#onScaleChanged}.
      */
+    @Deprecated
     @ViewDebug.ExportedProperty(category = "webview")
     public float getScale() {
         checkThread();
@@ -1598,6 +1613,10 @@ public class WebView extends AbsoluteLayout
     public void onGlobalFocusChanged(View oldFocus, View newFocus) {
     }
 
+    /**
+     * @deprecated Only the default case, true, will be supported in a future version.
+     */
+    @Deprecated
     public void setMapTrackballToArrowKeys(boolean setMap) {
         checkThread();
         mProvider.setMapTrackballToArrowKeys(setMap);
@@ -1631,7 +1650,12 @@ public class WebView extends AbsoluteLayout
      * Gets whether this WebView can be zoomed in.
      *
      * @return true if this WebView can be zoomed in
+     *
+     * @deprecated This method is prone to inaccuracy due to race conditions
+     * between the web rendering and UI threads; prefer
+     * {@link WebViewClient#onScaleChanged}.
      */
+    @Deprecated
     public boolean canZoomIn() {
         checkThread();
         return mProvider.canZoomIn();
@@ -1641,7 +1665,12 @@ public class WebView extends AbsoluteLayout
      * Gets whether this WebView can be zoomed out.
      *
      * @return true if this WebView can be zoomed out
+     *
+     * @deprecated This method is prone to inaccuracy due to race conditions
+     * between the web rendering and UI threads; prefer
+     * {@link WebViewClient#onScaleChanged}.
      */
+    @Deprecated
     public boolean canZoomOut() {
         checkThread();
         return mProvider.canZoomOut();

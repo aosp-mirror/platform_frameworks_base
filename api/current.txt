@@ -27067,7 +27067,7 @@ package android.webkit {
   }
 
   public abstract class WebSettings {
-    method public boolean enableSmoothTransition();
+    method public deprecated boolean enableSmoothTransition();
     method public boolean getAllowContentAccess();
     method public boolean getAllowFileAccess();
     method public abstract boolean getAllowFileAccessFromFileURLs();
@@ -27133,7 +27133,7 @@ package android.webkit {
     method public void setDefaultZoom(android.webkit.WebSettings.ZoomDensity);
     method public void setDisplayZoomControls(boolean);
     method public synchronized void setDomStorageEnabled(boolean);
-    method public void setEnableSmoothTransition(boolean);
+    method public deprecated void setEnableSmoothTransition(boolean);
     method public synchronized void setFantasyFontFamily(java.lang.String);
     method public synchronized void setFixedFontFamily(java.lang.String);
     method public synchronized void setGeolocationDatabasePath(java.lang.String);
@@ -27172,7 +27172,7 @@ package android.webkit {
     field public static final int LOAD_CACHE_ELSE_NETWORK = 1; // 0x1
     field public static final int LOAD_CACHE_ONLY = 3; // 0x3
     field public static final int LOAD_DEFAULT = -1; // 0xffffffff
-    field public static final int LOAD_NORMAL = 0; // 0x0
+    field public static final deprecated int LOAD_NORMAL = 0; // 0x0
     field public static final int LOAD_NO_CACHE = 2; // 0x2
   }
 
@@ -27255,13 +27255,13 @@ package android.webkit {
     ctor public WebView(android.content.Context);
     ctor public WebView(android.content.Context, android.util.AttributeSet);
     ctor public WebView(android.content.Context, android.util.AttributeSet, int);
-    ctor public WebView(android.content.Context, android.util.AttributeSet, int, boolean);
+    ctor public deprecated WebView(android.content.Context, android.util.AttributeSet, int, boolean);
     method public void addJavascriptInterface(java.lang.Object, java.lang.String);
     method public boolean canGoBack();
     method public boolean canGoBackOrForward(int);
     method public boolean canGoForward();
-    method public boolean canZoomIn();
-    method public boolean canZoomOut();
+    method public deprecated boolean canZoomIn();
+    method public deprecated boolean canZoomOut();
     method public android.graphics.Picture capturePicture();
     method public void clearCache(boolean);
     method public void clearFormData();
@@ -27289,7 +27289,7 @@ package android.webkit {
     method public java.lang.String[] getHttpAuthUsernamePassword(java.lang.String, java.lang.String);
     method public java.lang.String getOriginalUrl();
     method public int getProgress();
-    method public float getScale();
+    method public deprecated float getScale();
     method public android.webkit.WebSettings getSettings();
     method public java.lang.String getTitle();
     method public java.lang.String getUrl();
@@ -27326,13 +27326,13 @@ package android.webkit {
     method public android.webkit.WebBackForwardList saveState(android.os.Bundle);
     method public void saveWebArchive(java.lang.String);
     method public void saveWebArchive(java.lang.String, boolean, android.webkit.ValueCallback<java.lang.String>);
-    method public void setCertificate(android.net.http.SslCertificate);
+    method public deprecated void setCertificate(android.net.http.SslCertificate);
     method public void setDownloadListener(android.webkit.DownloadListener);
     method public void setFindListener(android.webkit.WebView.FindListener);
     method public void setHorizontalScrollbarOverlay(boolean);
     method public void setHttpAuthUsernamePassword(java.lang.String, java.lang.String, java.lang.String, java.lang.String);
     method public void setInitialScale(int);
-    method public void setMapTrackballToArrowKeys(boolean);
+    method public deprecated void setMapTrackballToArrowKeys(boolean);
     method public void setNetworkAvailable(boolean);
     method public deprecated void setPictureListener(android.webkit.WebView.PictureListener);
     method public void setVerticalScrollbarOverlay(boolean);
