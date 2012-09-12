@@ -258,6 +258,9 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         final BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         onBluetoothStateChange(adapter.isEnabled());
     }
+    boolean deviceSupportsBluetooth() {
+        return (BluetoothAdapter.getDefaultAdapter() != null);
+    }
     // BluetoothController callback
     @Override
     public void onBluetoothStateChange(boolean on) {
