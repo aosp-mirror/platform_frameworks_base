@@ -7900,6 +7900,16 @@ public final class ContactsContract {
                 "com.android.contacts.action.GET_MULTIPLE_PHONES";
 
         /**
+         * A broadcast action which is sent when any change has been made to the profile, such
+         * as the profile name or the picture.  A receiver must have
+         * the android.permission.READ_PROFILE permission.
+         *
+         * @hide
+         */
+        public static final String ACTION_PROFILE_CHANGED =
+                "android.provider.Contacts.PROFILE_CHANGED";
+
+        /**
          * Used with {@link #SHOW_OR_CREATE_CONTACT} to force creating a new
          * contact if no matching contact found. Otherwise, default behavior is
          * to prompt user with dialog before creating.
