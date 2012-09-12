@@ -55,6 +55,7 @@ import android.net.ProxyProperties;
 import android.net.Uri;
 import android.net.http.SslCertificate;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -4119,10 +4120,17 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             return;
         }
         WebViewCore.JSInterfaceData arg = new WebViewCore.JSInterfaceData();
-        // TODO in a separate CL provide logic to enable annotations for API level JB_MR1 and above.
+
         arg.mObject = object;
         arg.mInterfaceName = name;
-        arg.mRequireAnnotation = false;
+
+        // starting with JELLY_BEAN_MR1, annotations are mandatory for enabling access to
+        // methods that are accessible from JS.
+        if (mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            arg.mRequireAnnotation = true;
+        } else {
+            arg.mRequireAnnotation = false;
+        }
         mWebViewCore.sendMessage(EventHub.ADD_JS_INTERFACE, arg);
     }
 
