@@ -84,11 +84,10 @@ public class MtpDatabase {
             Files.FileColumns._ID, // 0
             Files.FileColumns.DATA, // 1
     };
-    private static final String[] PATH_SIZE_FORMAT_PROJECTION = new String[] {
+    private static final String[] PATH_FORMAT_PROJECTION = new String[] {
             Files.FileColumns._ID, // 0
             Files.FileColumns.DATA, // 1
-            Files.FileColumns.SIZE, // 2
-            Files.FileColumns.FORMAT, // 3
+            Files.FileColumns.FORMAT, // 2
     };
     private static final String[] OBJECT_INFO_PROJECTION = new String[] {
             Files.FileColumns._ID, // 0
@@ -96,8 +95,7 @@ public class MtpDatabase {
             Files.FileColumns.FORMAT, // 2
             Files.FileColumns.PARENT, // 3
             Files.FileColumns.DATA, // 4
-            Files.FileColumns.SIZE, // 5
-            Files.FileColumns.DATE_MODIFIED, // 6
+            Files.FileColumns.DATE_MODIFIED, // 5
     };
     private static final String ID_WHERE = Files.FileColumns._ID + "=?";
     private static final String PATH_WHERE = Files.FileColumns.DATA + "=?";
@@ -834,7 +832,7 @@ public class MtpDatabase {
     }
 
     private boolean getObjectInfo(int handle, int[] outStorageFormatParent,
-                        char[] outName, long[] outSizeModified) {
+                        char[] outName, long[] outModified) {
         Cursor c = null;
         try {
             c = mMediaProvider.query(mObjectsUri, OBJECT_INFO_PROJECTION,
@@ -855,8 +853,7 @@ public class MtpDatabase {
                 path.getChars(start, end, outName, 0);
                 outName[end - start] = 0;
 
-                outSizeModified[0] = c.getLong(5);
-                outSizeModified[1] = c.getLong(6);
+                outModified[0] = c.getLong(5);
                 return true;
             }
         } catch (RemoteException e) {
@@ -880,14 +877,16 @@ public class MtpDatabase {
         }
         Cursor c = null;
         try {
-            c = mMediaProvider.query(mObjectsUri, PATH_SIZE_FORMAT_PROJECTION,
+            c = mMediaProvider.query(mObjectsUri, PATH_FORMAT_PROJECTION,
                             ID_WHERE, new String[] {  Integer.toString(handle) }, null, null);
             if (c != null && c.moveToNext()) {
                 String path = c.getString(1);
                 path.getChars(0, path.length(), outFilePath, 0);
                 outFilePath[path.length()] = 0;
-                outFileLengthFormat[0] = c.getLong(2);
-                outFileLengthFormat[1] = c.getLong(3);
+                // File transfers from device to host will likely fail if the size is incorrect.
+                // So to be safe, use the actual file size here.
+                outFileLengthFormat[0] = new File(path).length();
+                outFileLengthFormat[1] = c.getLong(2);
                 return MtpConstants.RESPONSE_OK;
             } else {
                 return MtpConstants.RESPONSE_INVALID_OBJECT_HANDLE;
@@ -909,13 +908,13 @@ public class MtpDatabase {
 
         Cursor c = null;
         try {
-            c = mMediaProvider.query(mObjectsUri, PATH_SIZE_FORMAT_PROJECTION,
+            c = mMediaProvider.query(mObjectsUri, PATH_FORMAT_PROJECTION,
                             ID_WHERE, new String[] {  Integer.toString(handle) }, null, null);
             if (c != null && c.moveToNext()) {
                 // don't convert to media path here, since we will be matching
                 // against paths in the database matching /data/media
                 path = c.getString(1);
-                format = c.getInt(3);
+                format = c.getInt(2);
             } else {
                 return MtpConstants.RESPONSE_INVALID_OBJECT_HANDLE;
             }
