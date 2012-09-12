@@ -496,6 +496,11 @@ public class KeyguardHostView extends KeyguardViewBase {
         if (DEBUG) Log.d(TAG, "screen on");
         showSecurityScreen(mCurrentSecuritySelection);
         getSecurityView(mCurrentSecuritySelection).onResume();
+
+        // This is a an attempt to fix bug 7137389 where the device comes back on but the entire
+        // layout is blank but forcing a layout causes it to reappear (e.g. with with
+        // hierarchyviewer).
+        requestLayout();
     }
 
     @Override
