@@ -67,6 +67,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.WorkSource;
+import android.os.Environment.UserEnvironment;
 import android.os.storage.IMountService;
 import android.provider.Settings;
 import android.util.EventLog;
@@ -2720,9 +2721,13 @@ class BackupManagerService extends IBackupManager.Stub {
             FullBackup.backupToTar(pkg.packageName, FullBackup.APK_TREE_TOKEN, null,
                     apkDir, appSourceDir, output);
 
+            // TODO: migrate this to SharedStorageBackup, since AID_SYSTEM
+            // doesn't have access to external storage.
+
             // Save associated .obb content if it exists and we did save the apk
             // check for .obb and save those too
-            final File obbDir = Environment.getExternalStorageAppObbDirectory(pkg.packageName);
+            final UserEnvironment userEnv = new UserEnvironment(UserHandle.USER_OWNER);
+            final File obbDir = userEnv.getExternalStorageAppObbDirectory(pkg.packageName);
             if (obbDir != null) {
                 if (MORE_DEBUG) Log.i(TAG, "obb dir: " + obbDir.getAbsolutePath());
                 File[] obbFiles = obbDir.listFiles();

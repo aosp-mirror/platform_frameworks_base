@@ -52,6 +52,7 @@ import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Debug;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -4884,6 +4885,8 @@ public final class ActivityThread {
         // disable it here, but selectively enable it later (via
         // StrictMode) on debug builds, but using DropBox, not logs.
         CloseGuard.setEnabled(false);
+
+        Environment.initForCurrentUser();
 
         // Set the reporter for event logging in libcore
         EventLogger.setReporter(new EventLoggingReporter());
