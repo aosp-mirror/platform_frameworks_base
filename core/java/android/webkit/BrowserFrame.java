@@ -107,9 +107,6 @@ class BrowserFrame extends Handler {
     // Key store handler when Chromium HTTP stack is used.
     private KeyStoreHandler mKeyStoreHandler = null;
 
-    // Implementation of the searchbox API.
-    private final SearchBoxImpl mSearchBox;
-
     // message ids
     // a message posted when a frame loading is completed
     static final int FRAME_COMPLETED = 1001;
@@ -254,8 +251,6 @@ class BrowserFrame extends Handler {
         mCallbackProxy = proxy;
         mDatabase = WebViewDatabaseClassic.getInstance(appContext);
         mWebViewCore = w;
-
-        mSearchBox = new SearchBoxImpl(mWebViewCore, mCallbackProxy);
 
         AssetManager am = context.getAssets();
         nativeCreateFrame(w, am, proxy.getBackForwardList());
@@ -1215,10 +1210,6 @@ class BrowserFrame extends Handler {
             Log.e(LOGTAG, "Can't get the certificate from WebKit, canceling");
             return;
         }
-    }
-
-    /*package*/ SearchBox getSearchBox() {
-        return mSearchBox;
     }
 
     /**
