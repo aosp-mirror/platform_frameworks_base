@@ -9865,6 +9865,7 @@ package android.hardware {
     field public static final java.lang.String SCENE_MODE_BEACH = "beach";
     field public static final java.lang.String SCENE_MODE_CANDLELIGHT = "candlelight";
     field public static final java.lang.String SCENE_MODE_FIREWORKS = "fireworks";
+    field public static final java.lang.String SCENE_MODE_HDR = "hdr";
     field public static final java.lang.String SCENE_MODE_LANDSCAPE = "landscape";
     field public static final java.lang.String SCENE_MODE_NIGHT = "night";
     field public static final java.lang.String SCENE_MODE_NIGHT_PORTRAIT = "night-portrait";
