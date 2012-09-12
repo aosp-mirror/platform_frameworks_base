@@ -27,7 +27,6 @@ import android.hardware.display.WifiDisplayStatus;
 import android.media.RemoteDisplay;
 import android.os.Handler;
 import android.os.IBinder;
-import android.util.Slog;
 import android.view.Surface;
 
 import java.io.PrintWriter;
@@ -50,8 +49,8 @@ import java.util.Arrays;
 final class WifiDisplayAdapter extends DisplayAdapter {
     private static final String TAG = "WifiDisplayAdapter";
 
-    private WifiDisplayHandle mDisplayHandle;
     private WifiDisplayController mDisplayController;
+    private WifiDisplayDevice mDisplayDevice;
 
     private WifiDisplayStatus mCurrentStatus;
     private boolean mEnabled;
@@ -70,13 +69,6 @@ final class WifiDisplayAdapter extends DisplayAdapter {
     @Override
     public void dumpLocked(PrintWriter pw) {
         super.dumpLocked(pw);
-
-        if (mDisplayHandle == null) {
-            pw.println("mDisplayHandle=null");
-        } else {
-            pw.println("mDisplayHandle:");
-            mDisplayHandle.dumpLocked(pw);
-        }
 
         pw.println("mCurrentStatus=" + getWifiDisplayStatusLocked());
         pw.println("mEnabled=" + mEnabled);
@@ -151,16 +143,29 @@ final class WifiDisplayAdapter extends DisplayAdapter {
         return mCurrentStatus;
     }
 
-    private void handleConnectLocked(WifiDisplay display, String iface) {
+    private void handleConnectLocked(WifiDisplay display,
+            Surface surface, int width, int height, int flags) {
         handleDisconnectLocked();
 
-        mDisplayHandle = new WifiDisplayHandle(display.getDeviceName(), iface);
+        int deviceFlags = 0;
+        if ((flags & RemoteDisplay.DISPLAY_FLAG_SECURE) != 0) {
+            deviceFlags |= DisplayDeviceInfo.FLAG_SECURE;
+        }
+
+        float refreshRate = 60.0f; // TODO: get this for real
+
+        String name = display.getDeviceName();
+        IBinder displayToken = Surface.createDisplay(name);
+        mDisplayDevice = new WifiDisplayDevice(displayToken, name, width, height,
+                refreshRate, deviceFlags, surface);
+        sendDisplayDeviceEventLocked(mDisplayDevice, DISPLAY_DEVICE_EVENT_ADDED);
     }
 
     private void handleDisconnectLocked() {
-        if (mDisplayHandle != null) {
-            mDisplayHandle.disposeLocked();
-            mDisplayHandle = null;
+        if (mDisplayDevice != null) {
+            mDisplayDevice.clearSurfaceLocked();
+            sendDisplayDeviceEventLocked(mDisplayDevice, DISPLAY_DEVICE_EVENT_REMOVED);
+            mDisplayDevice = null;
         }
     }
 
@@ -258,9 +263,10 @@ final class WifiDisplayAdapter extends DisplayAdapter {
         }
 
         @Override
-        public void onDisplayConnected(WifiDisplay display, String iface) {
+        public void onDisplayConnected(WifiDisplay display, Surface surface,
+                int width, int height, int flags) {
             synchronized (getSyncRoot()) {
-                handleConnectLocked(display, iface);
+                handleConnectLocked(display, surface, width, height, flags);
 
                 if (mActiveDisplayState != WifiDisplayStatus.DISPLAY_STATE_CONNECTED
                         || mActiveDisplay == null
@@ -335,94 +341,6 @@ final class WifiDisplayAdapter extends DisplayAdapter {
                 mInfo.setAssumedDensityForExternalDisplay(mWidth, mHeight);
             }
             return mInfo;
-        }
-    }
-
-    private final class WifiDisplayHandle implements RemoteDisplay.Listener {
-        private final String mName;
-        private final String mIface;
-        private final RemoteDisplay mRemoteDisplay;
-
-        private WifiDisplayDevice mDevice;
-        private int mLastError;
-
-        public WifiDisplayHandle(String name, String iface) {
-            mName = name;
-            mIface = iface;
-            mRemoteDisplay = RemoteDisplay.listen(iface, this, getHandler());
-
-            Slog.i(TAG, "Listening for Wifi display connections on " + iface
-                    + " from " + mName);
-        }
-
-        public void disposeLocked() {
-            Slog.i(TAG, "Stopped listening for Wifi display connections on " + mIface
-                    + " from " + mName);
-
-            removeDisplayLocked();
-            mRemoteDisplay.dispose();
-        }
-
-        public void dumpLocked(PrintWriter pw) {
-            pw.println("  " + mName + ": " + (mDevice != null ? "connected" : "disconnected"));
-            pw.println("    mIface=" + mIface);
-            pw.println("    mLastError=" + mLastError);
-        }
-
-        // Called on the handler thread.
-        @Override
-        public void onDisplayConnected(Surface surface, int width, int height, int flags) {
-            synchronized (getSyncRoot()) {
-                mLastError = 0;
-                removeDisplayLocked();
-                addDisplayLocked(surface, width, height, flags);
-
-                Slog.i(TAG, "Wifi display connected: " + mName);
-            }
-        }
-
-        // Called on the handler thread.
-        @Override
-        public void onDisplayDisconnected() {
-            synchronized (getSyncRoot()) {
-                mLastError = 0;
-                removeDisplayLocked();
-
-                Slog.i(TAG, "Wifi display disconnected: " + mName);
-            }
-        }
-
-        // Called on the handler thread.
-        @Override
-        public void onDisplayError(int error) {
-            synchronized (getSyncRoot()) {
-                mLastError = error;
-                removeDisplayLocked();
-
-                Slog.i(TAG, "Wifi display disconnected due to error " + error + ": " + mName);
-            }
-        }
-
-        private void addDisplayLocked(Surface surface, int width, int height, int flags) {
-            int deviceFlags = 0;
-            if ((flags & RemoteDisplay.DISPLAY_FLAG_SECURE) != 0) {
-                deviceFlags |= DisplayDeviceInfo.FLAG_SECURE;
-            }
-
-            float refreshRate = 60.0f; // TODO: get this for real
-
-            IBinder displayToken = Surface.createDisplay(mName);
-            mDevice = new WifiDisplayDevice(displayToken, mName, width, height,
-                    refreshRate, deviceFlags, surface);
-            sendDisplayDeviceEventLocked(mDevice, DISPLAY_DEVICE_EVENT_ADDED);
-        }
-
-        private void removeDisplayLocked() {
-            if (mDevice != null) {
-                mDevice.clearSurfaceLocked();
-                sendDisplayDeviceEventLocked(mDevice, DISPLAY_DEVICE_EVENT_REMOVED);
-                mDevice = null;
-            }
         }
     }
 }

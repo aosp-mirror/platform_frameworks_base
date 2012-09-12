@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.display.WifiDisplay;
+import android.media.RemoteDisplay;
 import android.net.NetworkInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
@@ -36,6 +37,7 @@ import android.net.wifi.p2p.WifiP2pManager.GroupInfoListener;
 import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
 import android.os.Handler;
 import android.util.Slog;
+import android.view.Surface;
 
 import java.io.PrintWriter;
 import java.net.Inet4Address;
@@ -64,6 +66,7 @@ final class WifiDisplayController implements DumpUtils.Dump {
     private static final int DEFAULT_CONTROL_PORT = 7236;
     private static final int MAX_THROUGHPUT = 50;
     private static final int CONNECTION_TIMEOUT_SECONDS = 30;
+    private static final int RTSP_TIMEOUT_SECONDS = 15;
 
     private static final int DISCOVER_PEERS_MAX_RETRIES = 10;
     private static final int DISCOVER_PEERS_RETRY_DELAY_MILLIS = 500;
@@ -104,11 +107,18 @@ final class WifiDisplayController implements DumpUtils.Dump {
     // The group info obtained after connecting.
     private WifiP2pGroup mConnectedDeviceGroupInfo;
 
-    // The device that we announced to the rest of the system.
-    private WifiP2pDevice mPublishedDevice;
-
     // Number of connection retries remaining.
     private int mConnectionRetriesLeft;
+
+    // The remote display that is listening on the connection.
+    // Created after the Wifi P2P network is connected.
+    private RemoteDisplay mRemoteDisplay;
+
+    // The remote display interface.
+    private String mRemoteDisplayInterface;
+
+    // True if RTSP has connected.
+    private boolean mRemoteDisplayConnected;
 
     public WifiDisplayController(Context context, Handler handler, Listener listener) {
         mContext = context;
@@ -135,8 +145,10 @@ final class WifiDisplayController implements DumpUtils.Dump {
         pw.println("mDesiredDevice=" + describeWifiP2pDevice(mDesiredDevice));
         pw.println("mConnectingDisplay=" + describeWifiP2pDevice(mConnectingDevice));
         pw.println("mConnectedDevice=" + describeWifiP2pDevice(mConnectedDevice));
-        pw.println("mPublishedDevice=" + describeWifiP2pDevice(mPublishedDevice));
         pw.println("mConnectionRetriesLeft=" + mConnectionRetriesLeft);
+        pw.println("mRemoteDisplay=" + mRemoteDisplay);
+        pw.println("mRemoteDisplayInterface=" + mRemoteDisplayInterface);
+        pw.println("mRemoteDisplayConnected=" + mRemoteDisplayConnected);
 
         pw.println("mKnownWifiDisplayPeers: size=" + mKnownWifiDisplayPeers.size());
         for (WifiP2pDevice device : mKnownWifiDisplayPeers) {
@@ -341,7 +353,7 @@ final class WifiDisplayController implements DumpUtils.Dump {
     }
 
     private void retryConnection() {
-        if (mDesiredDevice != null && mPublishedDevice != mDesiredDevice
+        if (mDesiredDevice != null && mConnectedDevice != mDesiredDevice
                 && mConnectionRetriesLeft > 0) {
             mConnectionRetriesLeft -= 1;
             Slog.i(TAG, "Retrying Wifi display connection.  Retries left: "
@@ -363,14 +375,22 @@ final class WifiDisplayController implements DumpUtils.Dump {
     private void updateConnection() {
         // Step 1. Before we try to connect to a new device, tell the system we
         // have disconnected from the old one.
-        if (mPublishedDevice != null && mPublishedDevice != mDesiredDevice) {
+        if (mRemoteDisplay != null && mConnectedDevice != mDesiredDevice) {
+            Slog.i(TAG, "Stopped listening for RTSP connection on " + mRemoteDisplayInterface
+                    + " from Wifi display: " + mConnectedDevice.deviceName);
+
+            mRemoteDisplay.dispose();
+            mRemoteDisplay = null;
+            mRemoteDisplayInterface = null;
+            mRemoteDisplayConnected = false;
+            mHandler.removeCallbacks(mRtspTimeout);
+
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     mListener.onDisplayDisconnected();
                 }
             });
-            mPublishedDevice = null;
 
             // continue to next step
         }
@@ -471,9 +491,9 @@ final class WifiDisplayController implements DumpUtils.Dump {
 
                 @Override
                 public void onFailure(int reason) {
-                    Slog.i(TAG, "Failed to initiate connection to Wifi display: "
-                            + newDevice.deviceName + ", reason=" + reason);
                     if (mConnectingDevice == newDevice) {
+                        Slog.i(TAG, "Failed to initiate connection to Wifi display: "
+                                + newDevice.deviceName + ", reason=" + reason);
                         mConnectingDevice = null;
                         handleConnectionFailure(false);
                     }
@@ -482,8 +502,8 @@ final class WifiDisplayController implements DumpUtils.Dump {
             return; // wait for asynchronous callback
         }
 
-        // Step 6. Publish the new connection.
-        if (mConnectedDevice != null && mPublishedDevice == null) {
+        // Step 6. Listen for incoming connections.
+        if (mConnectedDevice != null && mRemoteDisplay == null) {
             Inet4Address addr = getInterfaceAddress(mConnectedDeviceGroupInfo);
             if (addr == null) {
                 Slog.i(TAG, "Failed to get local interface address for communicating "
@@ -492,17 +512,57 @@ final class WifiDisplayController implements DumpUtils.Dump {
                 return; // done
             }
 
-            final WifiDisplay display = createWifiDisplay(mConnectedDevice);
+            final WifiP2pDevice oldDevice = mConnectedDevice;
             final int port = getPortNumber(mConnectedDevice);
             final String iface = addr.getHostAddress() + ":" + port;
+            mRemoteDisplayInterface = iface;
 
-            mPublishedDevice = mConnectedDevice;
-            mHandler.post(new Runnable() {
+            Slog.i(TAG, "Listening for RTSP connection on " + iface
+                    + " from Wifi display: " + mConnectedDevice.deviceName);
+
+            mRemoteDisplay = RemoteDisplay.listen(iface, new RemoteDisplay.Listener() {
                 @Override
-                public void run() {
-                    mListener.onDisplayConnected(display, iface);
+                public void onDisplayConnected(final Surface surface,
+                        final int width, final int height, final int flags) {
+                    if (mConnectedDevice == oldDevice && !mRemoteDisplayConnected) {
+                        Slog.i(TAG, "Opened RTSP connection with Wifi display: "
+                                + mConnectedDevice.deviceName);
+                        mRemoteDisplayConnected = true;
+                        mHandler.removeCallbacks(mRtspTimeout);
+
+                        final WifiDisplay display = createWifiDisplay(mConnectedDevice);
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                mListener.onDisplayConnected(display,
+                                        surface, width, height, flags);
+                            }
+                        });
+                    }
                 }
-            });
+
+                @Override
+                public void onDisplayDisconnected() {
+                    if (mConnectedDevice == oldDevice) {
+                        Slog.i(TAG, "Closed RTSP connection with Wifi display: "
+                                + mConnectedDevice.deviceName);
+                        mHandler.removeCallbacks(mRtspTimeout);
+                        disconnect();
+                    }
+                }
+
+                @Override
+                public void onDisplayError(int error) {
+                    if (mConnectedDevice == oldDevice) {
+                        Slog.i(TAG, "Lost RTSP connection with Wifi display due to error "
+                                + error + ": " + mConnectedDevice.deviceName);
+                        mHandler.removeCallbacks(mRtspTimeout);
+                        handleConnectionFailure(false);
+                    }
+                }
+            }, mHandler);
+
+            mHandler.postDelayed(mRtspTimeout, RTSP_TIMEOUT_SECONDS * 1000);
         }
     }
 
@@ -591,17 +651,30 @@ final class WifiDisplayController implements DumpUtils.Dump {
         }
     };
 
+    private final Runnable mRtspTimeout = new Runnable() {
+        @Override
+        public void run() {
+            if (mConnectedDevice != null
+                    && mRemoteDisplay != null && !mRemoteDisplayConnected) {
+                Slog.i(TAG, "Timed out waiting for Wifi display RTSP connection after "
+                        + RTSP_TIMEOUT_SECONDS + " seconds: "
+                        + mConnectedDevice.deviceName);
+                handleConnectionFailure(true);
+            }
+        }
+    };
+
     private void handleConnectionFailure(boolean timeoutOccurred) {
+        Slog.i(TAG, "Wifi display connection failed!");
+
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mListener.onDisplayConnectionFailed();
+            }
+        });
+
         if (mDesiredDevice != null) {
-            Slog.i(TAG, "Wifi display connection failed!");
-
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    mListener.onDisplayConnectionFailed();
-                }
-            });
-
             if (mConnectionRetriesLeft > 0) {
                 mHandler.postDelayed(new Runnable() {
                     @Override
@@ -714,7 +787,8 @@ final class WifiDisplayController implements DumpUtils.Dump {
 
         void onDisplayConnecting(WifiDisplay display);
         void onDisplayConnectionFailed();
-        void onDisplayConnected(WifiDisplay display, String iface);
+        void onDisplayConnected(WifiDisplay display,
+                Surface surface, int width, int height, int flags);
         void onDisplayDisconnected();
     }
 }
