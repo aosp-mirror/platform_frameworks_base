@@ -26943,6 +26943,9 @@ package android.webkit {
     method public boolean useHttpAuthUsernamePassword();
   }
 
+  public abstract class JavascriptInterface implements java.lang.annotation.Annotation {
+  }
+
   public class JsPromptResult extends android.webkit.JsResult {
     method public void confirm(java.lang.String);
   }
