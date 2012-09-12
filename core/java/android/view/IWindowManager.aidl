@@ -107,6 +107,9 @@ interface IWindowManager
             IBinder freezeThisOneIfNeeded);
     void setNewConfiguration(in Configuration config);
     
+    void startFreezingScreen(int exitAnim, int enterAnim);
+    void stopFreezingScreen();
+
     // these require DISABLE_KEYGUARD permission
     void disableKeyguard(IBinder token, String tag);
     void reenableKeyguard(IBinder token);
