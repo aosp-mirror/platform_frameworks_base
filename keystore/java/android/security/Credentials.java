@@ -20,8 +20,9 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
-import com.android.org.bouncycastle.openssl.PEMReader;
-import com.android.org.bouncycastle.openssl.PEMWriter;
+import com.android.org.bouncycastle.util.io.pem.PemObject;
+import com.android.org.bouncycastle.util.io.pem.PemReader;
+import com.android.org.bouncycastle.util.io.pem.PemWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -32,6 +33,10 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.Charsets;
 import java.security.KeyPair;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
@@ -108,34 +113,41 @@ public class Credentials {
     public static final String EXTRA_CA_CERTIFICATES_DATA = "ca_certificates_data";
 
     /**
-     * Convert objects to a PEM format, which is used for
-     * CA_CERTIFICATE, USER_CERTIFICATE, and USER_PRIVATE_KEY
-     * entries.
+     * Convert objects to a PEM format which is used for
+     * CA_CERTIFICATE and USER_CERTIFICATE entries.
      */
-    public static byte[] convertToPem(Object... objects) throws IOException {
+    public static byte[] convertToPem(Certificate... objects)
+            throws IOException, CertificateEncodingException {
         ByteArrayOutputStream bao = new ByteArrayOutputStream();
         Writer writer = new OutputStreamWriter(bao, Charsets.US_ASCII);
-        PEMWriter pw = new PEMWriter(writer);
-        for (Object o : objects) {
-            pw.writeObject(o);
+        PemWriter pw = new PemWriter(writer);
+        for (Certificate o : objects) {
+            pw.writeObject(new PemObject("CERTIFICATE", o.getEncoded()));
         }
         pw.close();
         return bao.toByteArray();
     }
     /**
      * Convert objects from PEM format, which is used for
-     * CA_CERTIFICATE, USER_CERTIFICATE, and USER_PRIVATE_KEY
-     * entries.
+     * CA_CERTIFICATE and USER_CERTIFICATE entries.
      */
-    public static List<Object> convertFromPem(byte[] bytes) throws IOException {
+    public static List<X509Certificate> convertFromPem(byte[] bytes)
+            throws IOException, CertificateException {
         ByteArrayInputStream bai = new ByteArrayInputStream(bytes);
         Reader reader = new InputStreamReader(bai, Charsets.US_ASCII);
-        PEMReader pr = new PEMReader(reader);
+        PemReader pr = new PemReader(reader);
 
-        List<Object> result = new ArrayList<Object>();
-        Object o;
-        while ((o = pr.readObject()) != null) {
-            result.add(o);
+        CertificateFactory cf = CertificateFactory.getInstance("X509");
+
+        List<X509Certificate> result = new ArrayList<X509Certificate>();
+        PemObject o;
+        while ((o = pr.readPemObject()) != null) {
+            if (o.getType().equals("CERTIFICATE")) {
+                Certificate c = cf.generateCertificate(new ByteArrayInputStream(o.getContent()));
+                result.add((X509Certificate) c);
+            } else {
+                throw new IllegalArgumentException("Unknown type " + o.getType());
+            }
         }
         pr.close();
         return result;
