@@ -215,7 +215,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     /**
      * Whether verification is enabled by default.
      */
-    private static final boolean DEFAULT_VERIFY_ENABLE = true;
+    private static final boolean DEFAULT_VERIFY_ENABLE = false;
 
     /**
      * The default maximum time to wait for the verification agent to return in
