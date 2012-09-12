@@ -1412,8 +1412,12 @@ int DisplayListRenderer::prepareDirty(float left, float top,
     mSnapshot = new Snapshot(mFirstSnapshot,
             SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
     mSaveCount = 1;
+
     mSnapshot->setClip(0.0f, 0.0f, mWidth, mHeight);
+    mDirtyClip = opaque;
+
     mRestoreSaveCount = -1;
+
     return DrawGlInfo::kStatusDone; // No invalidate needed at record-time
 }
 
