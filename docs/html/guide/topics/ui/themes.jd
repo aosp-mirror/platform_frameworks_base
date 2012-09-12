@@ -422,9 +422,8 @@ you'll find a declaration for <code>&lt;style name="Theme.Dialog"&gt;</code>. In
 you'll see all of the properties that are used to style dialogs that are used by the Android
 framework.</p>
 
-<p>For more information about the syntax used to create styles in XML, see
-<a href="{@docRoot}guide/topics/resources/available-resources.html#stylesandthemes">Available Resource Types:
-Style and Themes</a>.</p>
+<p>For more information about the syntax for styles and themes in XML, see the
+<a href="{@docRoot}guide/topics/resources/style-resource.html">Style Resource</a> document.</p>
 
 <p>For a reference of available style attributes that you can use to define a style or theme
 (e.g., "windowBackground" or "textAppearance"), see {@link android.R.attr} or the respective
