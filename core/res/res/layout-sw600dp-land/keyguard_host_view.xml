@@ -35,6 +35,7 @@
 
         <!-- TODO: Remove this once supported as a widget -->
         <include layout="@layout/keyguard_status_view"/>
+        <include layout="@layout/keyguard_transport_control_view"/>
 
     </com.android.internal.policy.impl.keyguard.KeyguardWidgetPager>
 

@@ -41,6 +41,8 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.widget.RemoteViews.OnClickHandler;
@@ -54,13 +56,14 @@ import java.io.File;
 import java.util.List;
 
 public class KeyguardHostView extends KeyguardViewBase {
+    private static final String TAG = "KeyguardViewHost";
+
     // Use this to debug all of keyguard
     public static boolean DEBUG;
 
     static final int APPWIDGET_HOST_ID = 0x4B455947;
     private static final String KEYGUARD_WIDGET_PREFS = "keyguard_widget_prefs";
 
-    private static final String TAG = "KeyguardViewHost";
     private AppWidgetHost mAppWidgetHost;
     private KeyguardWidgetPager mAppWidgetContainer;
     private ViewFlipper mSecurityViewContainer;
@@ -77,6 +80,12 @@ public class KeyguardHostView extends KeyguardViewBase {
     private KeyguardSecurityModel mSecurityModel;
 
     private Rect mTempRect = new Rect();
+    private KeyguardTransportControlView mTransportControl;
+
+    /*package*/ interface TransportCallback {
+        void hide();
+        void show();
+    }
 
     public KeyguardHostView(Context context) {
         this(context, null);
@@ -111,11 +120,56 @@ public class KeyguardHostView extends KeyguardViewBase {
         mViewMediatorCallback.keyguardDoneDrawing();
     }
 
+    private int getWidgetPosition(int id) {
+        final int children = mAppWidgetContainer.getChildCount();
+        for (int i = 0; i < children; i++) {
+            if (mAppWidgetContainer.getChildAt(i).getId() == id) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     @Override
     protected void onFinishInflate() {
         mAppWidgetContainer = (KeyguardWidgetPager) findViewById(R.id.app_widget_container);
         mAppWidgetContainer.setVisibility(VISIBLE);
         mSecurityViewContainer = (ViewFlipper) findViewById(R.id.view_flipper);
+
+        // This code manages showing/hiding the transport control. We keep it around and only
+        // add it to the hierarchy if it needs to be present.
+        mTransportControl =
+                (KeyguardTransportControlView) findViewById(R.id.keyguard_transport_control);
+        if (mTransportControl != null) {
+            mTransportControl.setKeyguardCallback(new TransportCallback() {
+                @Override
+                public void hide() {
+                    int page = getWidgetPosition(R.id.keyguard_transport_control);
+                    if (page != -1) {
+                        if (page == mAppWidgetContainer.getCurrentPage()) {
+                            // Switch back to clock view if music was showing.
+                            mAppWidgetContainer
+                                .setCurrentPage(getWidgetPosition(R.id.keyguard_status_view));
+                        }
+                        mAppWidgetContainer.removeView(mTransportControl);
+                        // XXX keep view attached to hierarchy so we still get show/hide events
+                        // from AudioManager
+                        KeyguardHostView.this.addView(mTransportControl);
+                        mTransportControl.setVisibility(View.GONE);
+                    }
+                }
+
+                @Override
+                public void show() {
+                    if (getWidgetPosition(R.id.keyguard_transport_control) == -1) {
+                        KeyguardHostView.this.removeView(mTransportControl);
+                        mAppWidgetContainer.addView(mTransportControl,
+                                getWidgetPosition(R.id.keyguard_status_view) + 1);
+                        mTransportControl.setVisibility(View.VISIBLE);
+                    }
+                }
+            });
+        }
         updateSecurityViews();
     }
 
@@ -423,6 +477,7 @@ public class KeyguardHostView extends KeyguardViewBase {
     @Override
     public void reset() {
         mIsVerifyUnlockOnly = false;
+        mAppWidgetContainer.setCurrentPage(getWidgetPosition(R.id.keyguard_status_view));
         requestFocus();
     }
 
@@ -639,8 +694,8 @@ public class KeyguardHostView extends KeyguardViewBase {
             KeyguardWidgetFrame userswitcher = (KeyguardWidgetFrame)
                 LayoutInflater.from(mContext).inflate(R.layout.keyguard_multi_user_selector_widget,
                         mAppWidgetContainer, false);
-            // add the switcher in the first position
-            mAppWidgetContainer.addView(userswitcher, 0);
+            // add the switcher to the left of status view
+            mAppWidgetContainer.addView(userswitcher, getWidgetPosition(R.id.keyguard_status_view));
         }
     }
 
