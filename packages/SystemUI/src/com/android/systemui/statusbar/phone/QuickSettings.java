@@ -167,10 +167,9 @@ class QuickSettings {
         startSettingsActivity(intent);
     }
     private void startSettingsActivity(Intent intent) {
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         mBar.collapseAllPanels(true);
         mContext.startActivity(intent);
-
     }
 
     private void addUserTiles(ViewGroup parent, LayoutInflater inflater) {
@@ -310,23 +309,25 @@ class QuickSettings {
         parent.addView(airplaneTile);
 
         // Bluetooth
-        QuickSettingsTileView bluetoothTile = (QuickSettingsTileView)
-                inflater.inflate(R.layout.quick_settings_tile, parent, false);
-        bluetoothTile.setContent(R.layout.quick_settings_tile_bluetooth, inflater);
-        bluetoothTile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startSettingsActivity(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS);
-            }
-        });
-        mModel.addBluetoothTile(bluetoothTile, new QuickSettingsModel.RefreshCallback() {
-            @Override
-            public void refreshView(QuickSettingsTileView view, State state) {
-                TextView tv = (TextView) view.findViewById(R.id.bluetooth_textview);
-                tv.setCompoundDrawablesRelativeWithIntrinsicBounds(0, state.iconId, 0, 0);
-            }
-        });
-        parent.addView(bluetoothTile);
+        if (mModel.deviceSupportsBluetooth()) {
+            QuickSettingsTileView bluetoothTile = (QuickSettingsTileView)
+                    inflater.inflate(R.layout.quick_settings_tile, parent, false);
+            bluetoothTile.setContent(R.layout.quick_settings_tile_bluetooth, inflater);
+            bluetoothTile.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    startSettingsActivity(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS);
+                }
+            });
+            mModel.addBluetoothTile(bluetoothTile, new QuickSettingsModel.RefreshCallback() {
+                @Override
+                public void refreshView(QuickSettingsTileView view, State state) {
+                    TextView tv = (TextView) view.findViewById(R.id.bluetooth_textview);
+                    tv.setCompoundDrawablesRelativeWithIntrinsicBounds(0, state.iconId, 0, 0);
+                }
+            });
+            parent.addView(bluetoothTile);
+        }
 
         // Brightness
         QuickSettingsTileView brightnessTile = (QuickSettingsTileView)
