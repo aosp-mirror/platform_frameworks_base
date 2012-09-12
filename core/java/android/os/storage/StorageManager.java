@@ -16,6 +16,8 @@
 
 package android.os.storage;
 
+import android.app.NotificationManager;
+import android.content.Context;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
@@ -283,6 +285,11 @@ public class StorageManager
             StorageStateChangedStorageEvent e = new StorageStateChangedStorageEvent(path, oldState, newState);
             mHandler.sendMessage(e.getMessage());
         }
+    }
+
+    /** {@hide} */
+    public static StorageManager from(Context context) {
+        return (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
     }
 
     /**
@@ -593,5 +600,21 @@ public class StorageManager
             paths[i] = volumes[i].getPath();
         }
         return paths;
+    }
+
+    /** {@hide} */
+    public StorageVolume getPrimaryVolume() {
+        return getPrimaryVolume(getVolumeList());
+    }
+
+    /** {@hide} */
+    public static StorageVolume getPrimaryVolume(StorageVolume[] volumes) {
+        for (StorageVolume volume : volumes) {
+            if (volume.isPrimary()) {
+                return volume;
+            }
+        }
+        Log.w(TAG, "No primary storage defined");
+        return null;
     }
 }
