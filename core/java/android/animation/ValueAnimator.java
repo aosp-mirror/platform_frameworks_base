@@ -958,13 +958,7 @@ public class ValueAnimator extends Animator {
         } else if (!mInitialized) {
             initAnimation();
         }
-        // The final value set on the target varies, depending on whether the animation
-        // was supposed to repeat an odd number of times
-        if (mRepeatCount > 0 && (mRepeatCount & 0x01) == 1) {
-            animateValue(0f);
-        } else {
-            animateValue(1f);
-        }
+        animateValue(mPlayingBackwards ? 0f : 1f);
         endAnimation(handler);
     }
 
