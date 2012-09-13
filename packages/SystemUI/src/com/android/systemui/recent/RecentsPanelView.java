@@ -33,6 +33,7 @@ import android.graphics.Shader.TileMode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -581,25 +582,23 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             bm = holder.thumbnailViewImage.getDrawingCache();
             usingDrawingCache = true;
         }
-
-        if (bm == null) {
-            throw new RuntimeException("Recents thumbnail is null");
-        }
-        ActivityOptions opts = ActivityOptions.makeThumbnailScaleUpAnimation(
-                holder.thumbnailViewImage, bm, 0, 0, null);
+        Bundle opts = (bm == null) ?
+                null :
+                ActivityOptions.makeThumbnailScaleUpAnimation(
+                        holder.thumbnailViewImage, bm, 0, 0, null).toBundle();
 
         show(false);
         if (ad.taskId >= 0) {
             // This is an active task; it should just go to the foreground.
             am.moveTaskToFront(ad.taskId, ActivityManager.MOVE_TASK_WITH_HOME,
-                    opts.toBundle());
+                    opts);
         } else {
             Intent intent = ad.intent;
             intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
                     | Intent.FLAG_ACTIVITY_TASK_ON_HOME
                     | Intent.FLAG_ACTIVITY_NEW_TASK);
             if (DEBUG) Log.v(TAG, "Starting activity " + intent);
-            context.startActivityAsUser(intent, opts.toBundle(),
+            context.startActivityAsUser(intent, opts,
                     new UserHandle(UserHandle.USER_CURRENT));
         }
         if (usingDrawingCache) {
