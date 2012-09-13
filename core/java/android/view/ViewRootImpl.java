@@ -3612,8 +3612,31 @@ public final class ViewRootImpl implements ViewParent,
                 finishInputEvent(q, true);
             } else {
                 if (q.mEvent instanceof KeyEvent) {
+                    KeyEvent event = (KeyEvent)q.mEvent;
+                    if (event.getAction() != KeyEvent.ACTION_UP) {
+                        // If the window doesn't currently have input focus, then drop
+                        // this event.  This could be an event that came back from the
+                        // IME dispatch but the window has lost focus in the meantime.
+                        if (!mAttachInfo.mHasWindowFocus) {
+                            Slog.w(TAG, "Dropping event due to no window focus: " + event);
+                            finishInputEvent(q, true);
+                            return;
+                        }
+                    }
                     deliverKeyEventPostIme(q);
                 } else {
+                    MotionEvent event = (MotionEvent)q.mEvent;
+                    if (event.getAction() != MotionEvent.ACTION_CANCEL
+                            && event.getAction() != MotionEvent.ACTION_UP) {
+                        // If the window doesn't currently have input focus, then drop
+                        // this event.  This could be an event that came back from the
+                        // IME dispatch but the window has lost focus in the meantime.
+                        if (!mAttachInfo.mHasWindowFocus) {
+                            Slog.w(TAG, "Dropping event due to no window focus: " + event);
+                            finishInputEvent(q, true);
+                            return;
+                        }
+                    }
                     final int source = q.mEvent.getSource();
                     if ((source & InputDevice.SOURCE_CLASS_TRACKBALL) != 0) {
                         deliverTrackballEventPostIme(q);
