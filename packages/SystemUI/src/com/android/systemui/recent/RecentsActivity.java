@@ -164,13 +164,15 @@ public class RecentsActivity extends Activity {
         super.onNewIntent(intent);
 
         if (TOGGLE_RECENTS_INTENT.equals(intent.getAction())) {
-            if (mRecentsPanel != null && !mRecentsPanel.isShowing()) {
-                final SystemUIApplication app = (SystemUIApplication) getApplication();
-                final RecentTasksLoader recentTasksLoader = app.getRecentTasksLoader();
-                mRecentsPanel.show(true, recentTasksLoader.getLoadedTasks(),
-                        recentTasksLoader.isFirstScreenful());
-            } else if ((mRecentsPanel != null && mRecentsPanel.isShowing())) {
-                dismissAndGoBack();
+            if (mRecentsPanel != null) {
+                if (mRecentsPanel.isShowing() && mForeground) {
+                    dismissAndGoBack();
+                } else {
+                    final SystemUIApplication app = (SystemUIApplication) getApplication();
+                    final RecentTasksLoader recentTasksLoader = app.getRecentTasksLoader();
+                    mRecentsPanel.show(true, recentTasksLoader.getLoadedTasks(),
+                            recentTasksLoader.isFirstScreenful());
+                }
             }
         }
     }
