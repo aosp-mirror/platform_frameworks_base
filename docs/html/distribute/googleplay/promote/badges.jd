@@ -1,11 +1,20 @@
 page.title=Google Play Badges
 @jd:body
 
-<p>Google Play badges give you an officially branded way of promoting your app to Android users. Use the form below to quickly create badges to link users to your products from web pages, ads, reviews, and more. See <a href="linking.html">Linking to your products</a> for more ways to bring users to your apps.</p>
+<p>Google Play badges allow you to promote your app with official branding in your
+online ads, promotional materials, or anywhere else you want a link to your app.</p>
 
-<p>Input your app's package or your publisher name, choose the style, size, and language, and click "Build my badge". The form will generate code for an embbeded button that links to your app's product page or a list of your apps. </p>
+<p>In the form below,
+input your app's package name or publisher name, choose the badge style,
+click <em>Build my badge</em>, then paste the HTML into your web content.</p>
 
-<p>Note that you should not modify the Google Play badges after generating them, including colors, size, text, and logo. See <a href="http://www.android.com/branding.html">Android Brand Guidelines</a> for more information.</p>
+<p>If you're creating a promotional web page for your app, you should also use the
+<a href="{@docRoot}distribute/promote/device-art.html">Device Art Generator</a>, which quickly
+wraps your screenshots in real device artwork.</p>
+
+<p>For guidelines when using the Google Play badge and other brand assets,
+see the <a href="{@docRoot}distribute/googleplay/promote/brand.html">Brand Assets and
+Guidelines</a>.</p>
 
 <style type="text/css">
 
@@ -34,11 +43,13 @@ div.button-row {
 }
 
 div.button-row input {
-  vertical-align:120%;
+  vertical-align:middle;
+  margin:0 5px 0 0;
 }
 
 #jd-content div.button-row img {
   margin: 0;
+  vertical-align:middle;
 }
 
 </style>
@@ -46,7 +57,7 @@ div.button-row input {
 <script type="text/javascript">
 
 // variables for creating 'try it out' demo button
-var imagePath = "http://www.android.com/images/brand/"
+var imagePath = "http://developer.android.com/images/brand/"
 var linkStart = "<a href=\"http://play.google.com/store/";
 var imageStart = "\">\n"
         + "  <img alt=\"";
@@ -167,28 +178,29 @@ $(document).ready(function() {
             onclick="return clearLabel('publisher','Example, Inc.');">clear</a>
          <br/><br/>
 
-<div class="button-row">
-  <input type="radio" name="buttonStyle" value="get_it_on_play_logo_small" id="ns" checked="checked" />
-    <label for="ns"><img src="http://www.android.com/images/brand/get_it_on_play_logo_small.png"
-alt="Get it on Google Play (small)" /></label>
-    &nbsp;&nbsp;&nbsp;&nbsp;
-  <input type="radio" name="buttonStyle" value="get_it_on_play_logo_large" id="nm" />
-    <label for="nm"><img src="http://www.android.com/images/brand/get_it_on_play_logo_large.png"
-alt="Get it on Google Play (large)" /></label>
-</div>
 
 <div class="button-row">
-  <input type="radio" name="buttonStyle" value="android_app_on_play_logo_small" id="ws" />
-    <label for="ws"><img src="http://www.android.com/images/brand/android_app_on_play_logo_small.png"
+  <input type="radio" name="buttonStyle" value="en_app_rgb_wo_45" id="ws" checked="checked" />
+    <label for="ws"><img src="{@docRoot}images/brand/en_app_rgb_wo_45.png"
 alt="Android app on Google Play (small)" /></label>
     &nbsp;&nbsp;&nbsp;&nbsp;
-  <input type="radio" name="buttonStyle" value="android_app_on_play_logo_large" id="wm" />
-    <label for="wm"><img src="http://www.android.com/images/brand/android_app_on_play_logo_large.png"
+  <input type="radio" name="buttonStyle" value="en_app_rgb_wo_60" id="wm" />
+    <label for="wm"><img src="{@docRoot}images/brand/en_app_rgb_wo_60.png"
 alt="Android app on Google Play (large)" /></label>
 </div>
 
+<div class="button-row">
+  <input type="radio" name="buttonStyle" value="en_generic_rgb_wo_45" id="ns" />
+    <label for="ns"><img src="{@docRoot}images/brand/en_generic_rgb_wo_45.png"
+alt="Get it on Google Play (small)" /></label>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+  <input type="radio" name="buttonStyle" value="en_generic_rgb_wo_60" id="nm" />
+    <label for="nm"><img src="{@docRoot}images/brand/en_generic_rgb_wo_60.png"
+alt="Get it on Google Play (large)" /></label>
+</div>
+
   <input type="button" onclick="return buildButton(this.parentNode)" value="Build my badge"
-style="padding:5px" />
+style="padding:10px" />
   <br/>
 </form>
 
