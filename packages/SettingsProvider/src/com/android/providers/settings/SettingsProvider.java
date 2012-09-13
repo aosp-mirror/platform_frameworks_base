@@ -87,6 +87,9 @@ public class SettingsProvider extends ContentProvider {
     private static final SparseArray<AtomicInteger> sKnownMutationsInFlight
             = new SparseArray<AtomicInteger>();
 
+    // Each defined user has their own settings
+    protected final SparseArray<DatabaseHelper> mOpenHelpers = new SparseArray<DatabaseHelper>();
+
     // Over this size we don't reject loading or saving settings but
     // we do consider them broken/malicious and don't keep them in
     // memory at least:
@@ -98,9 +101,6 @@ public class SettingsProvider extends ContentProvider {
     // want to cache the existence of a key, but not store its value.
     private static final Bundle TOO_LARGE_TO_CACHE_MARKER = Bundle.forPair("_dummy", null);
 
-    // Each defined user has their own settings
-    protected final SparseArray<DatabaseHelper> mOpenHelpers = new SparseArray<DatabaseHelper>();
-    //protected DatabaseHelper mOpenHelper;
     private UserManager mUserManager;
     private BackupManager mBackupManager;
 
@@ -411,32 +411,29 @@ public class SettingsProvider extends ContentProvider {
         mBackupManager = new BackupManager(getContext());
         mUserManager = (UserManager) getContext().getSystemService(Context.USER_SERVICE);
 
-        synchronized (this) {
-            establishDbTrackingLocked(UserHandle.USER_OWNER);
+        establishDbTracking(UserHandle.USER_OWNER);
 
-            IntentFilter userFilter = new IntentFilter();
-            userFilter.addAction(Intent.ACTION_USER_REMOVED);
-            getContext().registerReceiver(new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    if (intent.getAction().equals(Intent.ACTION_USER_REMOVED)) {
-                        final int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
-                                UserHandle.USER_OWNER);
-                        if (userHandle != UserHandle.USER_OWNER) {
-                            onUserRemoved(userHandle);
-                        }
+        IntentFilter userFilter = new IntentFilter();
+        userFilter.addAction(Intent.ACTION_USER_REMOVED);
+        getContext().registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent.getAction().equals(Intent.ACTION_USER_REMOVED)) {
+                    final int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
+                            UserHandle.USER_OWNER);
+                    if (userHandle != UserHandle.USER_OWNER) {
+                        onUserRemoved(userHandle);
                     }
                 }
-            }, userFilter);
-        }
+            }
+        }, userFilter);
         return true;
     }
 
     void onUserRemoved(int userHandle) {
-        // the db file itself will be deleted automatically, but we need to tear down
-        // our caches and other internal bookkeeping.  Creation/deletion of a user's
-        // settings db infrastructure is synchronized on 'this'
         synchronized (this) {
+            // the db file itself will be deleted automatically, but we need to tear down
+            // our caches and other internal bookkeeping.
             FileObserver observer = sObserverInstances.get(userHandle);
             if (observer != null) {
                 observer.stopWatching();
@@ -455,25 +452,43 @@ public class SettingsProvider extends ContentProvider {
         }
     }
 
-    private void establishDbTrackingLocked(int userHandle) {
+    private void establishDbTracking(int userHandle) {
         if (LOCAL_LOGV) {
             Slog.i(TAG, "Installing settings db helper and caches for user " + userHandle);
         }
 
-        DatabaseHelper dbhelper = new DatabaseHelper(getContext(), userHandle);
-        mOpenHelpers.append(userHandle, dbhelper);
+        DatabaseHelper dbhelper;
 
-        // Watch for external modifications to the database files,
-        // keeping our caches in sync.
-        sSystemCaches.append(userHandle, new SettingsCache(TABLE_SYSTEM));
-        sSecureCaches.append(userHandle, new SettingsCache(TABLE_SECURE));
-        sKnownMutationsInFlight.append(userHandle, new AtomicInteger(0));
+        synchronized (this) {
+            dbhelper = mOpenHelpers.get(userHandle);
+            if (dbhelper == null) {
+                dbhelper = new DatabaseHelper(getContext(), userHandle);
+                mOpenHelpers.append(userHandle, dbhelper);
+
+                sSystemCaches.append(userHandle, new SettingsCache(TABLE_SYSTEM));
+                sSecureCaches.append(userHandle, new SettingsCache(TABLE_SECURE));
+                sKnownMutationsInFlight.append(userHandle, new AtomicInteger(0));
+            }
+        }
+
+        // Initialization of the db *outside* the locks.  It's possible that racing
+        // threads might wind up here, the second having read the cache entries
+        // written by the first, but that's benign: the SQLite helper implementation
+        // manages concurrency itself, and it's important that we not run the db
+        // initialization with any of our own locks held, so we're fine.
         SQLiteDatabase db = dbhelper.getWritableDatabase();
 
-        // Now we can start observing it for changes
-        SettingsFileObserver observer = new SettingsFileObserver(userHandle, db.getPath());
-        sObserverInstances.append(userHandle, observer);
-        observer.startWatching();
+        // Watch for external modifications to the database files,
+        // keeping our caches in sync.  We synchronize the observer set
+        // separately, and of course it has to run after the db file
+        // itself was set up by the DatabaseHelper.
+        synchronized (sObserverInstances) {
+            if (sObserverInstances.get(userHandle) == null) {
+                SettingsFileObserver observer = new SettingsFileObserver(userHandle, db.getPath());
+                sObserverInstances.append(userHandle, observer);
+                observer.startWatching();
+            }
+        }
 
         ensureAndroidIdIsSet(userHandle);
 
@@ -571,19 +586,17 @@ public class SettingsProvider extends ContentProvider {
 
     // Lazy-initialize the settings caches for non-primary users
     private SettingsCache getOrConstructCache(int callingUser, SparseArray<SettingsCache> which) {
-        synchronized (this) {
-            getOrEstablishDatabaseLocked(callingUser); // ignore return value; we don't need it
-            return which.get(callingUser);
-        }
+        getOrEstablishDatabase(callingUser); // ignore return value; we don't need it
+        return which.get(callingUser);
     }
 
     // Lazy initialize the database helper and caches for this user, if necessary
-    private DatabaseHelper getOrEstablishDatabaseLocked(int callingUser) {
+    private DatabaseHelper getOrEstablishDatabase(int callingUser) {
         long oldId = Binder.clearCallingIdentity();
         try {
             DatabaseHelper dbHelper = mOpenHelpers.get(callingUser);
             if (null == dbHelper) {
-                establishDbTrackingLocked(callingUser);
+                establishDbTracking(callingUser);
                 dbHelper = mOpenHelpers.get(callingUser);
             }
             return dbHelper;
@@ -646,25 +659,21 @@ public class SettingsProvider extends ContentProvider {
         // Get methods
         if (Settings.CALL_METHOD_GET_SYSTEM.equals(method)) {
             if (LOCAL_LOGV) Slog.v(TAG, "call(system:" + request + ") for " + callingUser);
-            synchronized (this) {
-                dbHelper = getOrEstablishDatabaseLocked(callingUser);
-                cache = sSystemCaches.get(callingUser);
-            }
+            dbHelper = getOrEstablishDatabase(callingUser);
+            cache = sSystemCaches.get(callingUser);
             return lookupValue(dbHelper, TABLE_SYSTEM, cache, request);
         }
         if (Settings.CALL_METHOD_GET_SECURE.equals(method)) {
             if (LOCAL_LOGV) Slog.v(TAG, "call(secure:" + request + ") for " + callingUser);
-            synchronized (this) {
-                dbHelper = getOrEstablishDatabaseLocked(callingUser);
-                cache = sSecureCaches.get(callingUser);
-            }
+            dbHelper = getOrEstablishDatabase(callingUser);
+            cache = sSecureCaches.get(callingUser);
             return lookupValue(dbHelper, TABLE_SECURE, cache, request);
         }
         if (Settings.CALL_METHOD_GET_GLOBAL.equals(method)) {
             if (LOCAL_LOGV) Slog.v(TAG, "call(global:" + request + ") for " + callingUser);
             // fast path: owner db & cache are immutable after onCreate() so we need not
             // guard on the attempt to look them up
-            return lookupValue(getOrEstablishDatabaseLocked(UserHandle.USER_OWNER), TABLE_GLOBAL,
+            return lookupValue(getOrEstablishDatabase(UserHandle.USER_OWNER), TABLE_GLOBAL,
                     sGlobalCache, request);
         }
 
@@ -678,13 +687,13 @@ public class SettingsProvider extends ContentProvider {
         values.put(Settings.NameValueTable.VALUE, newValue);
         if (Settings.CALL_METHOD_PUT_SYSTEM.equals(method)) {
             if (LOCAL_LOGV) Slog.v(TAG, "call_put(system:" + request + "=" + newValue + ") for " + callingUser);
-            insert(Settings.System.CONTENT_URI, values);
+            insertForUser(Settings.System.CONTENT_URI, values, callingUser);
         } else if (Settings.CALL_METHOD_PUT_SECURE.equals(method)) {
             if (LOCAL_LOGV) Slog.v(TAG, "call_put(secure:" + request + "=" + newValue + ") for " + callingUser);
-            insert(Settings.Secure.CONTENT_URI, values);
+            insertForUser(Settings.Secure.CONTENT_URI, values, callingUser);
         } else if (Settings.CALL_METHOD_PUT_GLOBAL.equals(method)) {
             if (LOCAL_LOGV) Slog.v(TAG, "call_put(global:" + request + "=" + newValue + ") for " + callingUser);
-            insert(Settings.Global.CONTENT_URI, values);
+            insertForUser(Settings.Global.CONTENT_URI, values, callingUser);
         } else {
             Slog.w(TAG, "call() with invalid method: " + method);
         }
@@ -747,10 +756,8 @@ public class SettingsProvider extends ContentProvider {
         if (LOCAL_LOGV) Slog.v(TAG, "query(" + url + ") for user " + forUser);
         SqlArguments args = new SqlArguments(url, where, whereArgs);
         DatabaseHelper dbH;
-        synchronized (this) {
-            dbH = getOrEstablishDatabaseLocked(
-                    TABLE_GLOBAL.equals(args.table) ? UserHandle.USER_OWNER : forUser);
-        }
+        dbH = getOrEstablishDatabase(
+                TABLE_GLOBAL.equals(args.table) ? UserHandle.USER_OWNER : forUser);
         SQLiteDatabase db = dbH.getReadableDatabase();
 
         // The favorites table was moved from this provider to a provider inside Home
@@ -805,11 +812,8 @@ public class SettingsProvider extends ContentProvider {
 
         final AtomicInteger mutationCount = sKnownMutationsInFlight.get(callingUser);
         mutationCount.incrementAndGet();
-        DatabaseHelper dbH;
-        synchronized (this) {
-            dbH = getOrEstablishDatabaseLocked(
-                    TABLE_GLOBAL.equals(args.table) ? UserHandle.USER_OWNER : callingUser);
-        }
+        DatabaseHelper dbH = getOrEstablishDatabase(
+                TABLE_GLOBAL.equals(args.table) ? UserHandle.USER_OWNER : callingUser);
         SQLiteDatabase db = dbH.getWritableDatabase();
         db.beginTransaction();
         try {
@@ -945,10 +949,7 @@ public class SettingsProvider extends ContentProvider {
 
         final AtomicInteger mutationCount = sKnownMutationsInFlight.get(desiredUserHandle);
         mutationCount.incrementAndGet();
-        DatabaseHelper dbH;
-        synchronized (this) {
-            dbH = getOrEstablishDatabaseLocked(desiredUserHandle);
-        }
+        DatabaseHelper dbH = getOrEstablishDatabase(desiredUserHandle);
         SQLiteDatabase db = dbH.getWritableDatabase();
         final long rowId = db.insert(args.table, null, initialValues);
         mutationCount.decrementAndGet();
@@ -956,7 +957,8 @@ public class SettingsProvider extends ContentProvider {
 
         SettingsCache.populate(cache, initialValues);  // before we notify
 
-        if (LOCAL_LOGV) Log.v(TAG, args.table + " <- " + initialValues);
+        if (LOCAL_LOGV) Log.v(TAG, args.table + " <- " + initialValues
+                + " for user " + desiredUserHandle);
         // Note that we use the original url here, not the potentially-rewritten table name
         url = getUriFor(url, initialValues, rowId);
         sendNotify(url, desiredUserHandle);
@@ -979,10 +981,7 @@ public class SettingsProvider extends ContentProvider {
 
         final AtomicInteger mutationCount = sKnownMutationsInFlight.get(callingUser);
         mutationCount.incrementAndGet();
-        DatabaseHelper dbH;
-        synchronized (this) {
-            dbH = getOrEstablishDatabaseLocked(callingUser);
-        }
+        DatabaseHelper dbH = getOrEstablishDatabase(callingUser);
         SQLiteDatabase db = dbH.getWritableDatabase();
         int count = db.delete(args.table, args.where, args.args);
         mutationCount.decrementAndGet();
@@ -1014,10 +1013,7 @@ public class SettingsProvider extends ContentProvider {
 
         final AtomicInteger mutationCount = sKnownMutationsInFlight.get(callingUser);
         mutationCount.incrementAndGet();
-        DatabaseHelper dbH;
-        synchronized (this) {
-            dbH = getOrEstablishDatabaseLocked(callingUser);
-        }
+        DatabaseHelper dbH = getOrEstablishDatabase(callingUser);
         SQLiteDatabase db = dbH.getWritableDatabase();
         int count = db.update(args.table, initialValues, args.where, args.args);
         mutationCount.decrementAndGet();

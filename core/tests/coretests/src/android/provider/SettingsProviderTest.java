@@ -19,11 +19,15 @@ package android.provider;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.pm.UserInfo;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.MediumTest;
@@ -196,6 +200,53 @@ public class SettingsProviderTest extends AndroidTestCase {
         assertEquals("test1,test2",
                 Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED));
      }
+
+    private boolean findUser(UserManager um, int userHandle) {
+        for (UserInfo user : um.getUsers()) {
+            if (user.id == userHandle) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @MediumTest
+    public void testPerUserSettings() {
+        UserManager um = (UserManager) getContext().getSystemService(Context.USER_SERVICE);
+        ContentResolver r = getContext().getContentResolver();
+
+        // Make sure there's an owner
+        assertTrue(findUser(um, UserHandle.USER_OWNER));
+
+        // create a new user to use for testing
+        UserInfo user = um.createUser("TestUser1", UserInfo.FLAG_GUEST);
+        assertTrue(user != null);
+
+        try {
+            // Write some settings for that user as well as the current user
+            final String TEST_KEY = "test_setting";
+            final int SELF_VALUE = 40;
+            final int OTHER_VALUE = 27;
+
+            Settings.System.putInt(r, TEST_KEY, SELF_VALUE);
+            Settings.System.putIntForUser(r, TEST_KEY, OTHER_VALUE, user.id);
+
+            // Verify that they read back as intended
+            int myValue = Settings.System.getInt(r, TEST_KEY, 0);
+            int otherValue = Settings.System.getIntForUser(r, TEST_KEY, 0, user.id);
+            assertTrue("Running as user " + UserHandle.myUserId()
+                    + " and reading/writing as user " + user.id
+                    + ", expected to read " + SELF_VALUE + " but got " + myValue,
+                    myValue == SELF_VALUE);
+            assertTrue("Running as user " + UserHandle.myUserId()
+                    + " and reading/writing as user " + user.id
+                    + ", expected to read " + OTHER_VALUE + " but got " + otherValue,
+                    otherValue == OTHER_VALUE);
+        } finally {
+            // Tidy up
+            um.removeUser(user.id);
+        }
+    }
 
      @SmallTest
      public void testSettings() {
