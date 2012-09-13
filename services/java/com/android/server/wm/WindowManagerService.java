@@ -3442,25 +3442,27 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
                         "applyAnimation: atoken=" + atoken
                         + " anim=" + a + " nextAppTransition=ANIM_CUSTOM"
-                        + " transit=" + transit + " Callers " + Debug.getCallers(3));
+                        + " transit=" + transit + " isEntrance=" + enter
+                        + " Callers " + Debug.getCallers(3));
             } else if (mNextAppTransitionType == ActivityOptions.ANIM_SCALE_UP) {
                 a = createScaleUpAnimationLocked(transit, enter);
                 initialized = true;
                 if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
                         "applyAnimation: atoken=" + atoken
                         + " anim=" + a + " nextAppTransition=ANIM_SCALE_UP"
-                        + " transit=" + transit + " Callers " + Debug.getCallers(3));
+                        + " transit=" + transit + " isEntrance=" + enter
+                        + " Callers " + Debug.getCallers(3));
             } else if (mNextAppTransitionType == ActivityOptions.ANIM_THUMBNAIL_SCALE_UP ||
                     mNextAppTransitionType == ActivityOptions.ANIM_THUMBNAIL_SCALE_DOWN) {
                 boolean scaleUp = (mNextAppTransitionType == ActivityOptions.ANIM_THUMBNAIL_SCALE_UP);
                 a = createThumbnailAnimationLocked(transit, enter, false, scaleUp);
                 initialized = true;
-
                 if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) {
                     String animName = scaleUp ? "ANIM_THUMBNAIL_SCALE_UP" : "ANIM_THUMBNAIL_SCALE_DOWN";
                     Slog.v(TAG, "applyAnimation: atoken=" + atoken
                             + " anim=" + a + " nextAppTransition=" + animName
-                            + " transit=" + transit + " Callers " + Debug.getCallers(3));
+                            + " transit=" + transit + " isEntrance=" + enter
+                            + " Callers " + Debug.getCallers(3));
                 }
             } else {
                 int animAttr = 0;
@@ -3521,7 +3523,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         "applyAnimation: atoken=" + atoken
                         + " anim=" + a
                         + " animAttr=0x" + Integer.toHexString(animAttr)
-                        + " transit=" + transit + " Callers " + Debug.getCallers(3));
+                        + " transit=" + transit + " isEntrance=" + enter
+                        + " Callers " + Debug.getCallers(3));
             }
             if (a != null) {
                 if (DEBUG_ANIM) {
