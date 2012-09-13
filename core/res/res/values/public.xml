@@ -1977,7 +1977,6 @@
      =============================================================== -->
   <eat-comment />
   <public type="attr" name="parentActivityName" id="0x010103a7" />
-  <public type="attr" name="permissionGroupFlags" id="0x010103a8" />
   <public type="attr" name="isolatedProcess" id="0x010103a9" />
   <public type="attr" name="importantForAccessibility" id="0x010103aa" />
   <public type="attr" name="keyboardLayout" id="0x010103ab" />
@@ -2016,5 +2015,6 @@
   <public type="attr" name="initialKeyguardLayout" />
   <public type="attr" name="widgetFeatures" />
   <public type="attr" name="widgetCategory" />
+  <public type="attr" name="permissionGroupFlags" />
 
 </resources>
