@@ -940,6 +940,18 @@ public class WifiManager {
     }
 
     /**
+     * Get the operational country code.
+     * @hide
+     */
+    public String getCountryCode() {
+        try {
+            return mService.getCountryCode();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
      * Set the operational frequency band.
      * @param band  One of
      *     {@link #WIFI_FREQUENCY_BAND_AUTO},
