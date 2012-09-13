@@ -33,6 +33,9 @@ public class Environment {
     private static final String ENV_EXTERNAL_STORAGE = "EXTERNAL_STORAGE";
     private static final String ENV_EMULATED_STORAGE_TARGET = "EMULATED_STORAGE_TARGET";
 
+    /** {@hide} */
+    public static String DIRECTORY_ANDROID = "Android";
+
     private static final File ROOT_DIRECTORY
             = getDirectory("ANDROID_ROOT", "/system");
 
@@ -111,11 +114,11 @@ public class Environment {
                 // /storage/sdcard0
                 mExternalStorage = new File(rawExternalStorage);
                 // /storage/sdcard0/Android/obb
-                mExternalStorageAndroidObb = buildPath(mExternalStorage, "Android", "obb");
+                mExternalStorageAndroidObb = buildPath(mExternalStorage, DIRECTORY_ANDROID, "obb");
             }
 
-            mExternalStorageAndroidData = buildPath(mExternalStorage, "Android", "data");
-            mExternalStorageAndroidMedia = buildPath(mExternalStorage, "Android", "media");
+            mExternalStorageAndroidData = buildPath(mExternalStorage, DIRECTORY_ANDROID, "data");
+            mExternalStorageAndroidMedia = buildPath(mExternalStorage, DIRECTORY_ANDROID, "media");
         }
 
         public File getExternalStorageDirectory() {
