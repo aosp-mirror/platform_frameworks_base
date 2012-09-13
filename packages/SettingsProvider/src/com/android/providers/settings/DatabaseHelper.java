@@ -1202,21 +1202,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         if (upgradeVersion == 82) {
             // Move to per-user settings dbs
-            db.beginTransaction();
-            SQLiteStatement stmt = null;
-            try {
-                // Migrate now-global settings. Note that this happens before
-                // new users can be created.
-                createGlobalTable(db);
-                String[] settingsToMove = hashsetToStringArray(SettingsProvider.sSystemGlobalKeys);
-                moveSettingsToNewTable(db, TABLE_SYSTEM, TABLE_GLOBAL, settingsToMove, false);
-                settingsToMove = hashsetToStringArray(SettingsProvider.sSecureGlobalKeys);
-                moveSettingsToNewTable(db, TABLE_SECURE, TABLE_GLOBAL, settingsToMove, false);
+            if (mUserHandle == UserHandle.USER_OWNER) {
 
-                db.setTransactionSuccessful();
-            } finally {
-                db.endTransaction();
-                if (stmt != null) stmt.close();
+                db.beginTransaction();
+                SQLiteStatement stmt = null;
+                try {
+                    // Migrate now-global settings. Note that this happens before
+                    // new users can be created.
+                    createGlobalTable(db);
+                    String[] settingsToMove = hashsetToStringArray(SettingsProvider.sSystemGlobalKeys);
+                    moveSettingsToNewTable(db, TABLE_SYSTEM, TABLE_GLOBAL, settingsToMove, false);
+                    settingsToMove = hashsetToStringArray(SettingsProvider.sSecureGlobalKeys);
+                    moveSettingsToNewTable(db, TABLE_SECURE, TABLE_GLOBAL, settingsToMove, false);
+
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                    if (stmt != null) stmt.close();
+                }
             }
             upgradeVersion = 83;
         }
@@ -1251,73 +1254,81 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         if (upgradeVersion == 84) {
-            db.beginTransaction();
-            SQLiteStatement stmt = null;
-            try {
-                // Patch up the slightly-wrong key migration from 82 -> 83 for those
-                // devices that missed it, ignoring if the move is redundant
-                String[] settingsToMove = {
-                        Settings.Secure.ADB_ENABLED,
-                        Settings.Secure.BLUETOOTH_ON,
-                        Settings.Secure.DATA_ROAMING,
-                        Settings.Secure.DEVICE_PROVISIONED,
-                        Settings.Secure.INSTALL_NON_MARKET_APPS,
-                        Settings.Secure.USB_MASS_STORAGE_ENABLED
-                };
-                moveSettingsToNewTable(db, TABLE_SECURE, TABLE_GLOBAL, settingsToMove, true);
-                db.setTransactionSuccessful();
-            } finally {
-                db.endTransaction();
-                if (stmt != null) stmt.close();
+            if (mUserHandle == UserHandle.USER_OWNER) {
+                db.beginTransaction();
+                SQLiteStatement stmt = null;
+                try {
+                    // Patch up the slightly-wrong key migration from 82 -> 83 for those
+                    // devices that missed it, ignoring if the move is redundant
+                    String[] settingsToMove = {
+                            Settings.Secure.ADB_ENABLED,
+                            Settings.Secure.BLUETOOTH_ON,
+                            Settings.Secure.DATA_ROAMING,
+                            Settings.Secure.DEVICE_PROVISIONED,
+                            Settings.Secure.INSTALL_NON_MARKET_APPS,
+                            Settings.Secure.USB_MASS_STORAGE_ENABLED
+                    };
+                    moveSettingsToNewTable(db, TABLE_SECURE, TABLE_GLOBAL, settingsToMove, true);
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                    if (stmt != null) stmt.close();
+                }
             }
             upgradeVersion = 85;
         }
 
         if (upgradeVersion == 85) {
-            db.beginTransaction();
-            try {
-                // Fix up the migration, ignoring already-migrated elements, to snap up to
-                // date with new changes to the set of global versus system/secure settings
-                String[] settingsToMove = { Settings.System.STAY_ON_WHILE_PLUGGED_IN };
-                moveSettingsToNewTable(db, TABLE_SYSTEM, TABLE_GLOBAL, settingsToMove, true);
+            if (mUserHandle == UserHandle.USER_OWNER) {
+                db.beginTransaction();
+                try {
+                    // Fix up the migration, ignoring already-migrated elements, to snap up to
+                    // date with new changes to the set of global versus system/secure settings
+                    String[] settingsToMove = { Settings.System.STAY_ON_WHILE_PLUGGED_IN };
+                    moveSettingsToNewTable(db, TABLE_SYSTEM, TABLE_GLOBAL, settingsToMove, true);
 
-                db.setTransactionSuccessful();
-            } finally {
-                db.endTransaction();
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                }
             }
             upgradeVersion = 86;
         }
 
         if (upgradeVersion == 86) {
-            db.beginTransaction();
-            try {
-                String[] settingsToMove = {
-                        Settings.Secure.PACKAGE_VERIFIER_ENABLE,
-                        Settings.Secure.PACKAGE_VERIFIER_TIMEOUT,
-                        Settings.Secure.PACKAGE_VERIFIER_DEFAULT_RESPONSE
-                };
-                moveSettingsToNewTable(db, TABLE_SECURE, TABLE_GLOBAL, settingsToMove, true);
+            if (mUserHandle == UserHandle.USER_OWNER) {
+                db.beginTransaction();
+                try {
+                    String[] settingsToMove = {
+                            Settings.Secure.PACKAGE_VERIFIER_ENABLE,
+                            Settings.Secure.PACKAGE_VERIFIER_TIMEOUT,
+                            Settings.Secure.PACKAGE_VERIFIER_DEFAULT_RESPONSE
+                    };
+                    moveSettingsToNewTable(db, TABLE_SECURE, TABLE_GLOBAL, settingsToMove, true);
 
-                db.setTransactionSuccessful();
-            } finally {
-                db.endTransaction();
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                }
             }
             upgradeVersion = 87;
         }
 
         if (upgradeVersion == 87) {
-            db.beginTransaction();
-            try {
-                String[] settingsToMove = {
-                        Settings.Secure.DATA_STALL_ALARM_NON_AGGRESSIVE_DELAY_IN_MS,
-                        Settings.Secure.DATA_STALL_ALARM_AGGRESSIVE_DELAY_IN_MS,
-                        Settings.Secure.GPRS_REGISTER_CHECK_PERIOD_MS
-                };
-                moveSettingsToNewTable(db, TABLE_SECURE, TABLE_GLOBAL, settingsToMove, true);
+            if (mUserHandle == UserHandle.USER_OWNER) {
+                db.beginTransaction();
+                try {
+                    String[] settingsToMove = {
+                            Settings.Secure.DATA_STALL_ALARM_NON_AGGRESSIVE_DELAY_IN_MS,
+                            Settings.Secure.DATA_STALL_ALARM_AGGRESSIVE_DELAY_IN_MS,
+                            Settings.Secure.GPRS_REGISTER_CHECK_PERIOD_MS
+                    };
+                    moveSettingsToNewTable(db, TABLE_SECURE, TABLE_GLOBAL, settingsToMove, true);
 
-                db.setTransactionSuccessful();
-            } finally {
-                db.endTransaction();
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                }
             }
             upgradeVersion = 88;
         }
