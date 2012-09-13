@@ -51,7 +51,7 @@ public class UT_program_raster extends UnitTest {
     }
 
     private void testScriptSide(RenderScript pRS) {
-        ScriptC_program_raster s = new ScriptC_program_raster(pRS, mRes, R.raw.program_raster);
+        ScriptC_program_raster s = new ScriptC_program_raster(pRS);
         pRS.setMessageHandler(mRsMessage);
         initializeGlobals(pRS, s);
         s.invoke_program_raster_test();
