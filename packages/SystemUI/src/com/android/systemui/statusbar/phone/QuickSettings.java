@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import android.app.Dialog;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -32,8 +33,8 @@ import android.hardware.display.DisplayManager;
 import android.hardware.display.WifiDisplay;
 import android.hardware.display.WifiDisplayStatus;
 import android.net.Uri;
-import android.os.UserHandle;
 import android.provider.ContactsContract;
+import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -101,6 +102,10 @@ class QuickSettings {
 
     void setBar(PanelBar bar) {
         mBar = bar;
+    }
+
+    public void setImeWindowStatus(boolean visible) {
+        mModel.onImeWindowStatusChanged(visible);
     }
 
     void setup(NetworkController networkController, BluetoothController bluetoothController,
@@ -247,29 +252,31 @@ class QuickSettings {
         });
         parent.addView(wifiTile);
 
-        // RSSI
-        QuickSettingsTileView rssiTile = (QuickSettingsTileView)
-                inflater.inflate(R.layout.quick_settings_tile, parent, false);
-        rssiTile.setContent(R.layout.quick_settings_tile_rssi, inflater);
-        rssiTile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent();
-                intent.setComponent(new ComponentName(
-                        "com.android.settings",
-                        "com.android.settings.Settings$DataUsageSummaryActivity"));
-                startSettingsActivity(intent);
-            }
-        });
-        mModel.addRSSITile(rssiTile, new QuickSettingsModel.RefreshCallback() {
-            @Override
-            public void refreshView(QuickSettingsTileView view, State state) {
-                TextView tv = (TextView) view.findViewById(R.id.rssi_textview);
-                tv.setCompoundDrawablesRelativeWithIntrinsicBounds(0, state.iconId, 0, 0);
-                tv.setText(state.label);
-            }
-        });
-        parent.addView(rssiTile);
+        if (mModel.deviceSupportsTelephony()) {
+            // RSSI
+            QuickSettingsTileView rssiTile = (QuickSettingsTileView)
+                    inflater.inflate(R.layout.quick_settings_tile, parent, false);
+            rssiTile.setContent(R.layout.quick_settings_tile_rssi, inflater);
+            rssiTile.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent();
+                    intent.setComponent(new ComponentName(
+                            "com.android.settings",
+                            "com.android.settings.Settings$DataUsageSummaryActivity"));
+                    startSettingsActivity(intent);
+                }
+            });
+            mModel.addRSSITile(rssiTile, new QuickSettingsModel.RefreshCallback() {
+                @Override
+                public void refreshView(QuickSettingsTileView view, State state) {
+                    TextView tv = (TextView) view.findViewById(R.id.rssi_textview);
+                    tv.setCompoundDrawablesRelativeWithIntrinsicBounds(0, state.iconId, 0, 0);
+                    tv.setText(state.label);
+                }
+            });
+            parent.addView(rssiTile);
+        }
 
         // Battery
         QuickSettingsTileView batteryTile = (QuickSettingsTileView)
@@ -385,6 +392,29 @@ class QuickSettings {
             }
         });
         parent.addView(wifiDisplayTile);
+
+        // IME
+        QuickSettingsTileView imeTile = (QuickSettingsTileView)
+                inflater.inflate(R.layout.quick_settings_tile, parent, false);
+        imeTile.setContent(R.layout.quick_settings_tile_ime, inflater);
+        imeTile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    mBar.collapseAllPanels(true);
+                    Intent intent = new Intent(Settings.ACTION_SHOW_INPUT_METHOD_PICKER);
+                    PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0, intent, 0);
+                    pendingIntent.send();
+                } catch (Exception e) {}
+            }
+        });
+        mModel.addImeTile(imeTile, new QuickSettingsModel.RefreshCallback() {
+            @Override
+            public void refreshView(QuickSettingsTileView view, State state) {
+                view.setVisibility(state.enabled ? View.VISIBLE : View.GONE);
+            }
+        });
+        parent.addView(imeTile);
 
         /*
         QuickSettingsTileView mediaTile = (QuickSettingsTileView)

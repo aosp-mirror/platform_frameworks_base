@@ -59,6 +59,13 @@ public class SettingsPanelView extends PanelView {
     }
 
     @Override
+    public void setImeWindowStatus(boolean visible) {
+        if (mQS != null) {
+            mQS.setImeWindowStatus(visible);
+        }
+    }
+
+    @Override
     public void setup(NetworkController networkController, BluetoothController bluetoothController,
             BatteryController batteryController, LocationController locationController) {
         super.setup(networkController, bluetoothController, batteryController, locationController);
