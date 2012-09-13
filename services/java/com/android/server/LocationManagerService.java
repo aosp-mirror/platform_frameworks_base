@@ -210,7 +210,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
         mBlacklist = new LocationBlacklist(mContext, mLocationHandler);
         mBlacklist.init();
-        mLocationFudger = new LocationFudger();
+        mLocationFudger = new LocationFudger(mContext, mLocationHandler);
 
         synchronized (mLock) {
             loadProvidersLocked();
