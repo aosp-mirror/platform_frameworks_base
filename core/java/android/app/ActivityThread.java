@@ -109,6 +109,7 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 
+import libcore.io.EventLogger;
 import libcore.io.IoUtils;
 
 import dalvik.system.CloseGuard;
@@ -4870,6 +4871,13 @@ public final class ActivityThread {
         }
     }
 
+    private static class EventLoggingReporter implements EventLogger.Reporter {
+        @Override
+        public void report (int code, Object... list) {
+            EventLog.writeEvent(code, list);
+        }
+    }
+
     public static void main(String[] args) {
         SamplingProfilerIntegration.start();
 
@@ -4879,6 +4887,9 @@ public final class ActivityThread {
         CloseGuard.setEnabled(false);
 
         Environment.initForCurrentUser();
+
+        // Set the reporter for event logging in libcore
+        EventLogger.setReporter(new EventLoggingReporter());
 
         Security.addProvider(new AndroidKeyStoreProvider());
 
