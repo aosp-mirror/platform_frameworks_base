@@ -256,6 +256,10 @@
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Дозволяє програмі отримувати інформацію про вікна від диспетчера вікон. Шкідливі програми можуть отримувати інформацію, яка призначена для внутрішнього користування системи."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"фільтрувати події"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Дозволяє програмі реєструвати вхідний фільтр, який фільтрує потік усіх подій користувача перед їх надсиланням. Шкідливі програми можуть контролювати інтерфейс системи без втручання користувача."</string>
+    <!-- no translation found for permlab_magnify_display (5973626738170618775) -->
+    <skip />
+    <!-- no translation found for permdesc_magnify_display (7121235684515003792) -->
+    <skip />
     <string name="permlab_shutdown" msgid="7185747824038909016">"частк. заверш. роб."</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Переводить диспетчер дій у стан завершення роботи. Не виконує повне завершення роботи."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"запобіг. зміні програм"</string>
@@ -286,6 +290,10 @@
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Дозволяє програмі будь-коли змінювати загальну швидкість анімації (пришвидшувати чи сповільнювати анімації)."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"керувати маркерами програми"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Дозволяє програмам створювати власні маркери та керувати ними, обходячи звичайне впорядкування по осі Z. Ніколи не застосовується для звичайних програм."</string>
+    <!-- no translation found for permlab_freezeScreen (4708181184441880175) -->
+    <skip />
+    <!-- no translation found for permdesc_freezeScreen (8558923789222670064) -->
+    <skip />
     <string name="permlab_injectEvents" msgid="1378746584023586600">"натиск. клавіші чи кнопки керув."</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Дозволяє програмі передавати власні події введення (натискання клавіш тощо) іншим програмам. Шкідливі програми можуть використовувати це для контролю над планшетним ПК."</string>
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Дозволяє програмі передавати власні події введення (натискання клавіш тощо) іншим програмам. Шкідливі програми можуть використовувати це для контролю над телефоном."</string>
@@ -398,6 +406,14 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Дозволяє програмі використовувати низькорівневі функції SurfaceFlinger."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"читати фрейм-буфер"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Дозволяє програмі читати вміст буфера кадрів."</string>
+    <!-- no translation found for permlab_configureWifiDisplay (5595661694746742168) -->
+    <skip />
+    <!-- no translation found for permdesc_configureWifiDisplay (7916815158690218065) -->
+    <skip />
+    <!-- no translation found for permlab_controlWifiDisplay (393641276723695496) -->
+    <skip />
+    <!-- no translation found for permdesc_controlWifiDisplay (4543912292681826986) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"змінювати налаштув-ня звуку"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Дозволяє програмі змінювати загальні налаштування звуку, як-от гучність і динамік, який використовується для виводу сигналу."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"запис-ти аудіо"</string>
@@ -1322,17 +1338,15 @@
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Готово"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Вивід медіа-даних"</string>
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Вбудований екран"</string>
-    <!-- no translation found for display_manager_hdmi_display_name (1555264559227470109) -->
-    <skip />
+    <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"Екран HDMI"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Накладання №<xliff:g id="ID">%1$d</xliff:g>"</string>
-    <!-- no translation found for display_manager_overlay_display_title (652124517672257172) -->
-    <skip />
+    <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>х<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Екстрений виклик"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Не пам’ятаю ключ"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Неправильний ключ"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Неправильний пароль"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"Неправильний PIN-код"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Повторіть спробу через <xliff:g id="NUMBER">%d</xliff:g> сек."</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Повторіть спробу через <xliff:g id="NUMBER">%d</xliff:g> с."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Намалюйте ключ"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Введіть PIN-код SIM-карти"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Введіть PIN-код"</string>
@@ -1353,9 +1367,9 @@
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Недійсне ім’я користувача чи пароль."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Не пам’ятаєте ім’я користувача чи пароль?"\n"Відвідайте сторінку "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="kg_login_checking_password" msgid="8849589033659332457">"Перевірка…"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"PIN-код неправильно введено стільки разів: <xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n"Повторіть спробу через <xliff:g id="NUMBER_1">%d</xliff:g> сек."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Пароль неправильно введено стільки разів: <xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n"Повторіть спробу через <xliff:g id="NUMBER_1">%d</xliff:g> сек."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Ключ розблокування неправильно намальовано стільки разів: <xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n"Повторіть спробу через <xliff:g id="NUMBER_1">%d</xliff:g> сек."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"PIN-код неправильно введено стільки разів: <xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n"Повторіть спробу через <xliff:g id="NUMBER_1">%d</xliff:g> с."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Пароль неправильно введено стільки разів: <xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n"Повторіть спробу через <xliff:g id="NUMBER_1">%d</xliff:g> с."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Ключ розблокування неправильно намальовано стільки разів: <xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n"Повторіть спробу через <xliff:g id="NUMBER_1">%d</xliff:g> с."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Кількість невдалих спроб розблокувати планшетний ПК: <xliff:g id="NUMBER_0">%d</xliff:g>. У вас є ще стільки спроб: <xliff:g id="NUMBER_1">%d</xliff:g>. У разі невдачі налаштування планшетного ПК буде змінено на заводські за умовчанням, а всі дані користувача – втрачено."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Кількість невдалих спроб розблокувати телефон: <xliff:g id="NUMBER_0">%d</xliff:g>. У вас є ще стільки спроб: <xliff:g id="NUMBER_1">%d</xliff:g>. У разі невдачі налаштування телефону буде змінено на заводські за умовчанням, а всі дані користувача – втрачено."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Кількість невдалих спроб розблокувати планшетний ПК: <xliff:g id="NUMBER">%d</xliff:g>. Налаштування планшетного ПК буде змінено на заводські за умовчанням."</string>
