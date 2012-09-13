@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-class Installer {
+public final class Installer {
     private static final String TAG = "Installer";
 
     private static final boolean LOCAL_DEBUG = false;
