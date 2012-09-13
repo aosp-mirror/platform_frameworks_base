@@ -142,10 +142,11 @@ public class KeyguardHostView extends KeyguardViewBase {
                 (KeyguardTransportControlView) findViewById(R.id.keyguard_transport_control);
         if (mTransportControl != null) {
             mTransportControl.setKeyguardCallback(new TransportCallback() {
+                boolean mSticky = false;
                 @Override
                 public void hide() {
                     int page = getWidgetPosition(R.id.keyguard_transport_control);
-                    if (page != -1) {
+                    if (page != -1 && !mSticky) {
                         if (page == mAppWidgetContainer.getCurrentPage()) {
                             // Switch back to clock view if music was showing.
                             mAppWidgetContainer
@@ -166,6 +167,8 @@ public class KeyguardHostView extends KeyguardViewBase {
                         mAppWidgetContainer.addView(mTransportControl,
                                 getWidgetPosition(R.id.keyguard_status_view) + 1);
                         mTransportControl.setVisibility(View.VISIBLE);
+                        // Once shown, leave it showing
+                        mSticky = true;
                     }
                 }
             });
