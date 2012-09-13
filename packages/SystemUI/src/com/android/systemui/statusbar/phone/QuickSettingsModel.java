@@ -23,6 +23,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.hardware.display.WifiDisplayStatus;
@@ -125,6 +126,10 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private QuickSettingsTileView mLocationTile;
     private RefreshCallback mLocationCallback;
     private State mLocationState = new State();
+
+    private QuickSettingsTileView mImeTile;
+    private RefreshCallback mImeCallback;
+    private State mImeState = new State();
 
     public QuickSettingsModel(Context context) {
         mContext = context;
@@ -234,20 +239,26 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mRSSICallback = cb;
         mRSSICallback.refreshView(mRSSITile, mRSSIState);
     }
+    boolean deviceSupportsTelephony() {
+        PackageManager pm = mContext.getPackageManager();
+        return pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
+    }
     // NetworkSignalChanged callback
     @Override
     public void onMobileDataSignalChanged(boolean enabled, String description) {
-        // TODO: If view is in awaiting state, disable
-        Resources r = mContext.getResources();
-        // TODO: Check if RSSI is enabled
-        mRSSIState.enabled = enabled;
-        mRSSIState.iconId = (enabled ?
-                R.drawable.ic_qs_rssi_enabled :
-                R.drawable.ic_qs_rssi_normal);
-        mRSSIState.label = (enabled ?
-                description :
-                r.getString(R.string.quick_settings_rssi_emergency_only));
-        mRSSICallback.refreshView(mRSSITile, mRSSIState);
+        if (deviceSupportsTelephony()) {
+            // TODO: If view is in awaiting state, disable
+            Resources r = mContext.getResources();
+            // TODO: Check if RSSI is enabled
+            mRSSIState.enabled = enabled;
+            mRSSIState.iconId = (enabled ?
+                    R.drawable.ic_qs_rssi_enabled :
+                    R.drawable.ic_qs_rssi_normal);
+            mRSSIState.label = (enabled ?
+                    description :
+                    r.getString(R.string.quick_settings_rssi_emergency_only));
+            mRSSICallback.refreshView(mRSSITile, mRSSIState);
+        }
     }
 
     // Bluetooth
@@ -318,6 +329,17 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         }
         mWifiDisplayCallback.refreshView(mWifiDisplayTile, mWifiDisplayState);
 
+    }
+
+    // IME
+    void addImeTile(QuickSettingsTileView view, RefreshCallback cb) {
+        mImeTile = view;
+        mImeCallback = cb;
+        mImeCallback.refreshView(mImeTile, mImeState);
+    }
+    void onImeWindowStatusChanged(boolean visible) {
+        mImeState.enabled = visible;
+        mImeCallback.refreshView(mImeTile, mImeState);
     }
 
 }
