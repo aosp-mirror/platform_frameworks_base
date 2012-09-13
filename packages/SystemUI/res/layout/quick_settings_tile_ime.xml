@@ -15,9 +15,12 @@
 -->
 <TextView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ime_textview"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_gravity="center"
     android:gravity="center"
+    android:drawableTop="@drawable/stat_sys_roaming_cdma_0"
     android:text="@string/quick_settings_ime_label"
-    android:singleLine="true"
+    android:textAppearance="@style/TextAppearance.QuickSettings.TileView"
     />

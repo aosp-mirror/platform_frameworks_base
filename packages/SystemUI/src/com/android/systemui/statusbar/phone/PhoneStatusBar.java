@@ -1413,10 +1413,11 @@ public class PhoneStatusBar extends BaseStatusBar {
         mCommandQueue.setNavigationIconHints(
                 altBack ? (mNavigationIconHints | StatusBarManager.NAVIGATION_HINT_BACK_ALT)
                         : (mNavigationIconHints & ~StatusBarManager.NAVIGATION_HINT_BACK_ALT));
+        mSettingsPanel.setImeWindowStatus(vis > 0);
     }
 
     @Override
-    public void setHardKeyboardStatus(boolean available, boolean enabled) { }
+    public void setHardKeyboardStatus(boolean available, boolean enabled) {}
 
     @Override
     protected void tick(IBinder key, StatusBarNotification n, boolean firstTime) {
