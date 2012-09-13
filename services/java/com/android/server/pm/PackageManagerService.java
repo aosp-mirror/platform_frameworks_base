@@ -4108,7 +4108,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                 } else if (!isForwardLocked(pkg) && !isExternal(pkg)) {
                     // Update native library dir if it starts with /data/data
-                    if (nativeLibraryDir.getParent().startsWith(dataPathString)) {
+                    if (nativeLibraryDir.getPath().startsWith(dataPathString)) {
                         setInternalAppNativeLibraryPath(pkg, pkgSetting);
                         nativeLibraryDir = new File(pkg.applicationInfo.nativeLibraryDir);
                     }
