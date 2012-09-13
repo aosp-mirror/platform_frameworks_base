@@ -115,6 +115,7 @@ public abstract class WebSettings {
      * {@link android.os.Build.VERSION_CODES#HONEYCOMB} and onwards it has the
      * same effect as {@link #LOAD_DEFAULT}.
      */
+    @Deprecated
     public static final int LOAD_NORMAL = 0;
 
     /**
@@ -345,7 +346,10 @@ public abstract class WebSettings {
      * If it is true, WebView will choose a solution to maximize the performance.
      * e.g. the WebView's content may not be updated during the transition.
      * If it is false, WebView will keep its fidelity. The default value is false.
+     *
+     * @deprecated This method is now obsolete, and will become a no-op in future.
      */
+    @Deprecated
     public void setEnableSmoothTransition(boolean enable) {
         throw new MustOverrideException();
     }
@@ -355,7 +359,10 @@ public abstract class WebSettings {
      * zooming.
      *
      * @see #setEnableSmoothTransition
+     *
+     * @deprecated This method is now obsolete, and will become a no-op in future.
      */
+    @Deprecated
     public boolean enableSmoothTransition() {
         throw new MustOverrideException();
     }
