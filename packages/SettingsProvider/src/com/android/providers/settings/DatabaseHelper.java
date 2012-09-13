@@ -67,7 +67,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 87;
+    private static final int DATABASE_VERSION = 88;
 
     private Context mContext;
     private int mUserHandle;
@@ -1303,6 +1303,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 db.endTransaction();
             }
             upgradeVersion = 87;
+        }
+
+        if (upgradeVersion == 87) {
+            db.beginTransaction();
+            try {
+                String[] settingsToMove = {
+                        Settings.Secure.DATA_STALL_ALARM_NON_AGGRESSIVE_DELAY_IN_MS,
+                        Settings.Secure.DATA_STALL_ALARM_AGGRESSIVE_DELAY_IN_MS,
+                        Settings.Secure.GPRS_REGISTER_CHECK_PERIOD_MS
+                };
+                moveSettingsToNewTable(db, TABLE_SECURE, TABLE_GLOBAL, settingsToMove, true);
+
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+            upgradeVersion = 88;
         }
 
         // *** Remember to update DATABASE_VERSION above!
