@@ -304,7 +304,7 @@ public class UT_vector extends UnitTest {
 
     public void run() {
         RenderScript pRS = RenderScript.create(mCtx);
-        ScriptC_vector s = new ScriptC_vector(pRS, mRes, R.raw.vector);
+        ScriptC_vector s = new ScriptC_vector(pRS);
         pRS.setMessageHandler(mRsMessage);
         if (!initializeGlobals(s)) {
             failTest();

@@ -46,7 +46,7 @@ public class UT_unsigned extends UnitTest {
 
     public void run() {
         RenderScript pRS = RenderScript.create(mCtx);
-        ScriptC_unsigned s = new ScriptC_unsigned(pRS, mRes, R.raw.unsigned);
+        ScriptC_unsigned s = new ScriptC_unsigned(pRS);
         pRS.setMessageHandler(mRsMessage);
         if (!initializeGlobals(s)) {
             failTest();

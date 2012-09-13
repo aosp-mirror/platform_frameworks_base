@@ -54,7 +54,7 @@ public class UT_mesh extends UnitTest {
     }
 
     private void testScriptSide(RenderScript pRS) {
-        ScriptC_mesh s = new ScriptC_mesh(pRS, mRes, R.raw.mesh);
+        ScriptC_mesh s = new ScriptC_mesh(pRS);
         pRS.setMessageHandler(mRsMessage);
         initializeGlobals(pRS, s);
         s.invoke_mesh_test();
