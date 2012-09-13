@@ -682,11 +682,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         for (int i = 0, count = installedServices.size(); i < count; i++) {
             ResolveInfo resolveInfo = installedServices.get(i);
             ServiceInfo serviceInfo = resolveInfo.serviceInfo;
-            // For now we are enforcing this if the target version is JellyBean or
-            // higher and in a later release we will enforce this for everyone.
-            if (serviceInfo.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.JELLY_BEAN
-                    && !android.Manifest.permission.BIND_ACCESSIBILITY_SERVICE.equals(
-                    serviceInfo.permission)) {
+            if (!android.Manifest.permission.BIND_ACCESSIBILITY_SERVICE.equals(serviceInfo.permission)) {
                 Slog.w(LOG_TAG, "Skipping accessibilty service " + new ComponentName(
                         serviceInfo.packageName, serviceInfo.name).flattenToShortString()
                         + ": it does not require the permission "
