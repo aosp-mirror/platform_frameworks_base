@@ -9675,6 +9675,7 @@ package android.hardware {
     method public final void addCallbackBuffer(byte[]);
     method public final void autoFocus(android.hardware.Camera.AutoFocusCallback);
     method public final void cancelAutoFocus();
+    method public final boolean enableShutterSound(boolean);
     method public static void getCameraInfo(int, android.hardware.Camera.CameraInfo);
     method public static int getNumberOfCameras();
     method public android.hardware.Camera.Parameters getParameters();
