@@ -195,6 +195,12 @@ public class SettingsProvider extends ContentProvider {
         sSecureGlobalKeys.add(Settings.Secure.WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED);
         sSecureGlobalKeys.add(Settings.Secure.WIFI_WATCHDOG_RSSI_FETCH_INTERVAL_MS);
         sSecureGlobalKeys.add(Settings.Secure.WIMAX_NETWORKS_AVAILABLE_NOTIFICATION_ON);
+        sSecureGlobalKeys.add(Settings.Secure.PACKAGE_VERIFIER_ENABLE);
+        sSecureGlobalKeys.add(Settings.Secure.PACKAGE_VERIFIER_TIMEOUT);
+        sSecureGlobalKeys.add(Settings.Secure.PACKAGE_VERIFIER_DEFAULT_RESPONSE);
+        sSecureGlobalKeys.add(Settings.Secure.DATA_STALL_ALARM_NON_AGGRESSIVE_DELAY_IN_MS);
+        sSecureGlobalKeys.add(Settings.Secure.DATA_STALL_ALARM_AGGRESSIVE_DELAY_IN_MS);
+        sSecureGlobalKeys.add(Settings.Secure.GPRS_REGISTER_CHECK_PERIOD_MS);
         sSecureGlobalKeys.add(Settings.Secure.WTF_IS_FATAL);
 
         // Keys from the 'system' table now moved to 'global'
