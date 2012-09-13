@@ -750,10 +750,11 @@ public class Switch extends CompoundButton {
         mTextPaint.drawableState = getDrawableState();
 
         Layout switchText = getTargetCheckedState() ? mOnLayout : mOffLayout;
-
-        canvas.translate((thumbLeft + thumbRight) / 2 - switchText.getWidth() / 2,
-                (switchInnerTop + switchInnerBottom) / 2 - switchText.getHeight() / 2);
-        switchText.draw(canvas);
+        if (switchText != null) {
+            canvas.translate((thumbLeft + thumbRight) / 2 - switchText.getWidth() / 2,
+                    (switchInnerTop + switchInnerBottom) / 2 - switchText.getHeight() / 2);
+            switchText.draw(canvas);
+        }
 
         canvas.restore();
     }
