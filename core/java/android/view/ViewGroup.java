@@ -5568,7 +5568,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          * to this field.
          */
         @ViewDebug.ExportedProperty(category = "layout")
-        public int startMargin = DEFAULT_RELATIVE;
+        private int startMargin = DEFAULT_RELATIVE;
 
         /**
          * The end margin in pixels of the child.
@@ -5576,7 +5576,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          * to this field.
          */
         @ViewDebug.ExportedProperty(category = "layout")
-        public int endMargin = DEFAULT_RELATIVE;
+        private int endMargin = DEFAULT_RELATIVE;
 
         /**
          * The default start and end margin.
@@ -5724,6 +5724,17 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         /**
+         * Sets the relative start margin.
+         *
+         * @param start the start marging size
+         *
+         * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginStart
+         */
+        public void setMarginStart(int start) {
+            startMargin = start;
+        }
+
+        /**
          * Returns the start margin in pixels.
          *
          * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginStart
@@ -5739,6 +5750,17 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 default:
                     return leftMargin;
             }
+        }
+
+        /**
+         * Sets the relative end margin.
+         *
+         * @param end the end marging size
+         *
+         * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginEnd
+         */
+        public void setMarginEnd(int end) {
+            endMargin = end;
         }
 
         /**
