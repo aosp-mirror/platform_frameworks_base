@@ -2616,6 +2616,12 @@ public final class Settings {
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_WATCHDOG_RSSI_FETCH_INTERVAL_MS);
             MOVED_TO_GLOBAL.add(Settings.Global.WIMAX_NETWORKS_AVAILABLE_NOTIFICATION_ON);
+            MOVED_TO_GLOBAL.add(Settings.Global.PACKAGE_VERIFIER_ENABLE);
+            MOVED_TO_GLOBAL.add(Settings.Global.PACKAGE_VERIFIER_TIMEOUT);
+            MOVED_TO_GLOBAL.add(Settings.Global.PACKAGE_VERIFIER_DEFAULT_RESPONSE);
+            MOVED_TO_GLOBAL.add(Settings.Global.DATA_STALL_ALARM_NON_AGGRESSIVE_DELAY_IN_MS);
+            MOVED_TO_GLOBAL.add(Settings.Global.DATA_STALL_ALARM_AGGRESSIVE_DELAY_IN_MS);
+            MOVED_TO_GLOBAL.add(Settings.Global.GPRS_REGISTER_CHECK_PERIOD_MS);
             MOVED_TO_GLOBAL.add(Settings.Global.WTF_IS_FATAL);
         }
 
@@ -4254,30 +4260,28 @@ public final class Settings {
                 Global.PDP_WATCHDOG_MAX_PDP_RESET_FAIL_COUNT;
 
         /**
-         * The number of milliseconds to delay when checking for data stalls during
-         * non-aggressive detection. (screen is turned off.)
+         * @deprecated Moved to Settings.Global
          * @hide
          */
+        @Deprecated
         public static final String DATA_STALL_ALARM_NON_AGGRESSIVE_DELAY_IN_MS =
-                "data_stall_alarm_non_aggressive_delay_in_ms";
+                Global.DATA_STALL_ALARM_NON_AGGRESSIVE_DELAY_IN_MS;
 
         /**
-         * The number of milliseconds to delay when checking for data stalls during
-         * aggressive detection. (screen on or suspected data stall)
+         * @deprecated Moved to Settings.Global
          * @hide
          */
+        @Deprecated
         public static final String DATA_STALL_ALARM_AGGRESSIVE_DELAY_IN_MS =
-                "data_stall_alarm_aggressive_delay_in_ms";
+                Global.DATA_STALL_ALARM_AGGRESSIVE_DELAY_IN_MS;
 
         /**
-         * The interval in milliseconds at which to check gprs registration
-         * after the first registration mismatch of gprs and voice service,
-         * to detect possible data network registration problems.
-         *
+         * @deprecated Moved to Settings.Global
          * @hide
          */
+        @Deprecated
         public static final String GPRS_REGISTER_CHECK_PERIOD_MS =
-                "gprs_register_check_period_ms";
+                Global.GPRS_REGISTER_CHECK_PERIOD_MS;
 
         /**
          * @deprecated Use {@link android.provider.Settings.Global#NITZ_UPDATE_SPACING} instead
@@ -5602,6 +5606,32 @@ public final class Settings {
         * @hide
         */
        public static final String WIFI_P2P_DEVICE_NAME = "wifi_p2p_device_name";
+
+       /**
+        * The number of milliseconds to delay when checking for data stalls during
+        * non-aggressive detection. (screen is turned off.)
+        * @hide
+        */
+       public static final String DATA_STALL_ALARM_NON_AGGRESSIVE_DELAY_IN_MS =
+               "data_stall_alarm_non_aggressive_delay_in_ms";
+
+       /**
+        * The number of milliseconds to delay when checking for data stalls during
+        * aggressive detection. (screen on or suspected data stall)
+        * @hide
+        */
+       public static final String DATA_STALL_ALARM_AGGRESSIVE_DELAY_IN_MS =
+               "data_stall_alarm_aggressive_delay_in_ms";
+
+       /**
+        * The interval in milliseconds at which to check gprs registration
+        * after the first registration mismatch of gprs and voice service,
+        * to detect possible data network registration problems.
+        *
+        * @hide
+        */
+       public static final String GPRS_REGISTER_CHECK_PERIOD_MS =
+               "gprs_register_check_period_ms";
 
        /**
         * Nonzero causes Log.wtf() to crash.
