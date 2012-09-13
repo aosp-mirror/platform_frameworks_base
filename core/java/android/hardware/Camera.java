@@ -1166,7 +1166,6 @@ public class Camera {
      *         system shutter sound will play when a picture is taken.
      * @see #takePicture
      * @see ShutterCallback
-     * @hide
      */
     public native final boolean enableShutterSound(boolean enabled);
 
