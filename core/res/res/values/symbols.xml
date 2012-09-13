@@ -1262,6 +1262,8 @@
   <java-symbol type="id" name="keyguard_user_name" />
   <java-symbol type="id" name="keyguard_active_user" />
   <java-symbol type="id" name="keyguard_inactive_users" />
+  <java-symbol type="id" name="keyguard_transport_control" />
+  <java-symbol type="id" name="keyguard_status_view" />
   <java-symbol type="integer" name="config_carDockRotation" />
   <java-symbol type="integer" name="config_defaultUiModeType" />
   <java-symbol type="integer" name="config_deskDockRotation" />

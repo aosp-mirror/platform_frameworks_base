@@ -25,8 +25,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center_horizontal"
-    android:clipChildren="false">
+    android:gravity="center_horizontal">
 
     <com.android.internal.policy.impl.keyguard.KeyguardWidgetPager
         android:id="@+id/app_widget_container"
@@ -37,6 +36,7 @@
 
         <!-- TODO: Remove this once supported as a widget -->
         <include layout="@layout/keyguard_status_view"/>
+        <include layout="@layout/keyguard_transport_control_view"/>
 
     </com.android.internal.policy.impl.keyguard.KeyguardWidgetPager>
 

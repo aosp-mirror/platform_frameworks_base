@@ -595,6 +595,10 @@ public class PagedView extends ViewGroup implements ViewGroup.OnHierarchyChangeL
 
     @Override
     public void onChildViewRemoved(View parent, View child) {
+        invalidate();
+        invalidateCachedOffsets();
+        // This prevents a crash when a child is removed that was the current page.
+        mCurrentPage = Math.min(mCurrentPage, getChildCount() - 1);
     }
 
     protected void invalidateCachedOffsets() {
