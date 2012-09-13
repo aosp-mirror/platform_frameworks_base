@@ -994,6 +994,12 @@ public class LocationManager {
      * <p> Internally, this method uses both {@link #NETWORK_PROVIDER}
      * and {@link #GPS_PROVIDER}.
      *
+     * <p>Before API version 17, this method could be used with
+     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} or
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}.
+     * From API version 17 and onwards, this method requires
+     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} permission.
+     *
      * @param latitude the latitude of the central point of the
      * alert region
      * @param longitude the longitude of the central point of the
@@ -1005,7 +1011,8 @@ public class LocationManager {
      * @param intent a PendingIntent that will be used to generate an Intent to
      * fire when entry to or exit from the alert region is detected
      *
-     * @throws SecurityException if no suitable permission is present
+     * @throws SecurityException if {@link android.Manifest.permission#ACCESS_FINE_LOCATION}
+     * permission is not present
      *
      * @deprecated Use {@link LocationRequest} and {@link Geofence} instead
      */
@@ -1055,7 +1062,8 @@ public class LocationManager {
      *
      * @throws IllegalArgumentException if fence is null
      * @throws IllegalArgumentException if intent is null
-     * @throws SecurityException if no suitable permission is present
+     * @throws SecurityException if {@link android.Manifest.permission#ACCESS_FINE_LOCATION}
+     * permission is not present
      */
     public void addGeofence(LocationRequest request, Geofence fence, PendingIntent intent) {
         checkPendingIntent(intent);
@@ -1071,11 +1079,18 @@ public class LocationManager {
     /**
      * Removes the proximity alert with the given PendingIntent.
      *
+     * <p>Before API version 17, this method could be used with
+     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} or
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}.
+     * From API version 17 and onwards, this method requires
+     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} permission.
+     *
      * @param intent the PendingIntent that no longer needs to be notified of
      * proximity alerts
      *
      * @throws IllegalArgumentException if intent is null
-     * @throws SecurityException if no suitable permission is present
+     * @throws SecurityException if {@link android.Manifest.permission#ACCESS_FINE_LOCATION}
+     * permission is not present
      *
      * @deprecated Use {@link LocationRequest} and {@link Geofence} instead
      */
@@ -1102,7 +1117,8 @@ public class LocationManager {
      *
      * @throws IllegalArgumentException if fence is null
      * @throws IllegalArgumentException if intent is null
-     * @throws SecurityException if no suitable permission is present
+     * @throws SecurityException if {@link android.Manifest.permission#ACCESS_FINE_LOCATION}
+     * permission is not present
      */
     public void removeGeofence(Geofence fence, PendingIntent intent) {
         checkPendingIntent(intent);
@@ -1122,7 +1138,8 @@ public class LocationManager {
      * @param intent a pending intent previously passed to {@link #addGeofence}
      *
      * @throws IllegalArgumentException if intent is null
-     * @throws SecurityException if no suitable permission is present
+     * @throws SecurityException if {@link android.Manifest.permission#ACCESS_FINE_LOCATION}
+     * permission is not present
      */
     public void removeAllGeofences(PendingIntent intent) {
         checkPendingIntent(intent);
