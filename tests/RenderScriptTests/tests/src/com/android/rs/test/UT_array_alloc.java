@@ -30,7 +30,7 @@ public class UT_array_alloc extends UnitTest {
 
     public void run() {
         RenderScript pRS = RenderScript.create(mCtx);
-        ScriptC_array_alloc s = new ScriptC_array_alloc(pRS, mRes, R.raw.array_alloc);
+        ScriptC_array_alloc s = new ScriptC_array_alloc(pRS);
         pRS.setMessageHandler(mRsMessage);
 
         int dimX = s.get_dimX();

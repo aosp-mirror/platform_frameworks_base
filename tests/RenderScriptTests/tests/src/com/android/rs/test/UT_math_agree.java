@@ -528,8 +528,7 @@ public class UT_math_agree extends UnitTest {
 
     public void run() {
         RenderScript pRS = RenderScript.create(mCtx);
-        ScriptC_math_agree s = new ScriptC_math_agree(pRS, mRes,
-                R.raw.math_agree);
+        ScriptC_math_agree s = new ScriptC_math_agree(pRS);
         pRS.setMessageHandler(mRsMessage);
         initializeValues(s);
         s.invoke_math_agree_test();
