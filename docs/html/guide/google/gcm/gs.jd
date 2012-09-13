@@ -138,8 +138,14 @@ page.title=GCM: Getting Started
 
 </ol>
 <p>This intent service will be called by the <code>GCMBroadcastReceiver</code> (which is is provided by GCM library), as shown in the next step. It must be a subclass of <code>com.google.android.gcm.GCMBaseIntentService</code>, must contain a public constructor, and should be named <code>my_app_package.GCMIntentService</code> (unless you use a subclass of <code>GCMBroadcastReceiver</code> that overrides the method used to name the service).</p>
-<h4><br>
-  Step 3: Write the my_app_package.GCMIntentService class</h4>
+
+<p>The intent service must also define its sender ID(s). It does this as follows:</p>
+<ul>
+  <li>If the value is static, the service's default constructor should call <code>super(senderIds)</code>.</li>
+  <li>If the value is dynamic, the service should override the <code>getSenderIds()</code> method.</li>
+</ul>
+
+<h4>Step 3: Write the my_app_package.GCMIntentService class</h4>
 <p>Next write the <code>my_app_package.GCMIntentService</code> class, overriding the following callback methods (which are called by <code>GCMBroadcastReceiver</code>):<br>
 </p>
 <ul>
