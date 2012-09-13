@@ -124,7 +124,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                     mInfo.name = getContext().getResources().getString(
                             com.android.internal.R.string.display_manager_built_in_display_name);
                     mInfo.flags = DisplayDeviceInfo.FLAG_DEFAULT_DISPLAY
-                            | DisplayDeviceInfo.FLAG_SECURE
+                            | DisplayDeviceInfo.FLAG_SUPPORTS_SECURE_VIDEO_OUTPUT
                             | DisplayDeviceInfo.FLAG_SUPPORTS_ROTATION;
                     mInfo.densityDpi = (int)(mPhys.density * 160 + 0.5f);
                     mInfo.xDpi = mPhys.xDpi;
@@ -133,7 +133,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 } else {
                     mInfo.name = getContext().getResources().getString(
                             com.android.internal.R.string.display_manager_hdmi_display_name);
-                    mInfo.flags = DisplayDeviceInfo.FLAG_SECURE;
+                    mInfo.flags = DisplayDeviceInfo.FLAG_SUPPORTS_SECURE_VIDEO_OUTPUT;
                     mInfo.touch = DisplayDeviceInfo.TOUCH_EXTERNAL;
                     mInfo.setAssumedDensityForExternalDisplay(mPhys.width, mPhys.height);
                 }

@@ -34,6 +34,11 @@ public final class DisplayInfo implements Parcelable {
     public int layerStack;
 
     /**
+     * Display flags.
+     */
+    public int flags;
+
+    /**
      * The human-readable name of the display.
      */
     public String name;
@@ -189,6 +194,7 @@ public final class DisplayInfo implements Parcelable {
 
     public void copyFrom(DisplayInfo other) {
         layerStack = other.layerStack;
+        flags = other.flags;
         name = other.name;
         appWidth = other.appWidth;
         appHeight = other.appHeight;
@@ -207,6 +213,7 @@ public final class DisplayInfo implements Parcelable {
 
     public void readFromParcel(Parcel source) {
         layerStack = source.readInt();
+        flags = source.readInt();
         name = source.readString();
         appWidth = source.readInt();
         appHeight = source.readInt();
@@ -226,6 +233,7 @@ public final class DisplayInfo implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(layerStack);
+        dest.writeInt(flags);
         dest.writeString(name);
         dest.writeInt(appWidth);
         dest.writeInt(appHeight);
@@ -286,6 +294,17 @@ public final class DisplayInfo implements Parcelable {
                 + ", rotation " + rotation
                 + ", density " + logicalDensityDpi
                 + ", " + physicalXDpi + " x " + physicalYDpi + " dpi"
-                + ", layerStack " + layerStack + "}";
+                + ", layerStack " + layerStack + flagsToString(flags) + "}";
+    }
+
+    private static String flagsToString(int flags) {
+        StringBuilder result = new StringBuilder();
+        if ((flags & Display.FLAG_SUPPORTS_SECURE_VIDEO_OUTPUT) != 0) {
+            result.append(", FLAG_SUPPORTS_SECURE_VIDEO_OUTPUT");
+        }
+        if ((flags & Display.FLAG_SUPPORTS_SECURE_VIDEO_BUFFERS) != 0) {
+            result.append(", FLAG_SUPPORTS_SECURE_VIDEO_BUFFERS");
+        }
+        return result.toString();
     }
 }
