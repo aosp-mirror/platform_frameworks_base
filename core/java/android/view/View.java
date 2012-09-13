@@ -15256,11 +15256,34 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Returns whether the view hierarchy is currently undergoing a layout pass. This
+     * information is useful to avoid situations such as calling {@link #requestLayout()} during
+     * a layout pass.
+     *
+     * @return whether the view hierarchy is currently undergoing a layout pass
+     */
+    public boolean isInLayout() {
+        ViewRootImpl viewRoot = getViewRootImpl();
+        return (viewRoot != null && viewRoot.isInLayout());
+    }
+
+    /**
      * Call this when something has changed which has invalidated the
      * layout of this view. This will schedule a layout pass of the view
-     * tree.
+     * tree. This should not be called while the view hierarchy is currently in a layout
+     * pass ({@link #isInLayout()}. If layout is happening, the request may be honored at the
+     * end of the current layout pass (and then layout will run again) or after the current
+     * frame is drawn and the next layout occurs.
+     *
+     * <p>Subclasses which override this method should call the superclass method to
+     * handle possible request-during-layout errors correctly.</p>
      */
     public void requestLayout() {
+        ViewRootImpl viewRoot = getViewRootImpl();
+        if (viewRoot != null && viewRoot.isInLayout()) {
+            viewRoot.requestLayoutDuringLayout(this);
+            return;
+        }
         mPrivateFlags |= PFLAG_FORCE_LAYOUT;
         mPrivateFlags |= PFLAG_INVALIDATED;
 

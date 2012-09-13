@@ -24995,6 +24995,7 @@ package android.view {
     method public boolean isHorizontalScrollBarEnabled();
     method public boolean isHovered();
     method public boolean isInEditMode();
+    method public boolean isInLayout();
     method public boolean isInTouchMode();
     method protected static boolean isLayoutDirectionRtl(java.util.Locale);
     method public boolean isLayoutRequested();
