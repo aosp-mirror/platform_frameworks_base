@@ -149,7 +149,7 @@ final class WifiDisplayAdapter extends DisplayAdapter {
 
         int deviceFlags = 0;
         if ((flags & RemoteDisplay.DISPLAY_FLAG_SECURE) != 0) {
-            deviceFlags |= DisplayDeviceInfo.FLAG_SECURE;
+            deviceFlags |= DisplayDeviceInfo.FLAG_SUPPORTS_SECURE_VIDEO_OUTPUT;
         }
 
         float refreshRate = 60.0f; // TODO: get this for real

@@ -17,6 +17,7 @@
 package com.android.server.display;
 
 import android.graphics.Rect;
+import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Surface;
 
@@ -177,6 +178,10 @@ final class LogicalDisplay {
         DisplayDeviceInfo deviceInfo = mPrimaryDisplayDevice.getDisplayDeviceInfoLocked();
         if (!Objects.equal(mPrimaryDisplayDeviceInfo, deviceInfo)) {
             mBaseDisplayInfo.layerStack = mLayerStack;
+            mBaseDisplayInfo.flags = 0;
+            if ((deviceInfo.flags & DisplayDeviceInfo.FLAG_SUPPORTS_SECURE_VIDEO_OUTPUT) != 0) {
+                mBaseDisplayInfo.flags |= Display.FLAG_SUPPORTS_SECURE_VIDEO_OUTPUT;
+            }
             mBaseDisplayInfo.name = deviceInfo.name;
             mBaseDisplayInfo.appWidth = deviceInfo.width;
             mBaseDisplayInfo.appHeight = deviceInfo.height;
