@@ -356,6 +356,14 @@ public class PanelView extends FrameLayout {
         return mExpandedFraction;
     }
 
+    public boolean isFullyExpanded() {
+        return mExpandedHeight == getFullHeight();
+    }
+
+    public boolean isFullyCollapsed() {
+        return mExpandedHeight == 0;
+    }
+
     public void setBar(PanelBar panelBar) {
         mBar = panelBar;
     }
@@ -367,13 +375,13 @@ public class PanelView extends FrameLayout {
 
     public void collapse() {
         // TODO: abort animation or ongoing touch
-        if (mExpandedHeight > 0) {
+        if (!isFullyCollapsed()) {
             fling(-mSelfCollapseVelocityPx, /*always=*/ true);
         }
     }
 
     public void expand() {
-        if (mExpandedHeight < getFullHeight()) {
+        if (!isFullyExpanded()) {
             fling (mSelfExpandVelocityPx, /*always=*/ true);
         }
     }

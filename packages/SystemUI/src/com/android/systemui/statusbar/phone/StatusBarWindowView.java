@@ -21,6 +21,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ScrollView;
 import android.widget.TextSwitcher;
@@ -36,6 +37,7 @@ public class StatusBarWindowView extends FrameLayout
 
     private ExpandHelper mExpandHelper;
     private NotificationRowLayout latestItems;
+    private NotificationPanelView mNotificationPanel;
 
     PhoneStatusBar mService;
 
@@ -49,6 +51,7 @@ public class StatusBarWindowView extends FrameLayout
         super.onAttachedToWindow();
         latestItems = (NotificationRowLayout) findViewById(R.id.latestItems);
         ScrollView scroller = (ScrollView) findViewById(R.id.scroll);
+        mNotificationPanel = (NotificationPanelView) findViewById(R.id.notification_panel);
         int minHeight = getResources().getDimensionPixelSize(R.dimen.notification_row_min_height);
         int maxHeight = getResources().getDimensionPixelSize(R.dimen.notification_row_max_height);
         mExpandHelper = new ExpandHelper(mContext, latestItems, minHeight, maxHeight);
@@ -71,8 +74,13 @@ public class StatusBarWindowView extends FrameLayout
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        boolean intercept = mExpandHelper.onInterceptTouchEvent(ev) ||
-                super.onInterceptTouchEvent(ev);
+        boolean intercept = false;
+        if (mNotificationPanel.isFullyExpanded()) {
+            intercept = mExpandHelper.onInterceptTouchEvent(ev);
+        }
+        if (!intercept) {
+            super.onInterceptTouchEvent(ev);
+        }
         if (intercept) {
             MotionEvent cancellation = MotionEvent.obtain(ev);
             cancellation.setAction(MotionEvent.ACTION_CANCEL);
@@ -84,8 +92,13 @@ public class StatusBarWindowView extends FrameLayout
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        boolean handled = mExpandHelper.onTouchEvent(ev) ||
-                super.onTouchEvent(ev);
+        boolean handled = false;
+        if (mNotificationPanel.isFullyExpanded()) {
+            handled = mExpandHelper.onTouchEvent(ev);
+        }
+        if (!handled) {
+            handled = super.onTouchEvent(ev);
+        }
         return handled;
     }
 }
