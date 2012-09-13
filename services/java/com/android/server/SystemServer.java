@@ -55,6 +55,7 @@ import com.android.server.display.DisplayManagerService;
 import com.android.server.input.InputManagerService;
 import com.android.server.net.NetworkPolicyManagerService;
 import com.android.server.net.NetworkStatsService;
+import com.android.server.pm.Installer;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.UserManagerService;
 import com.android.server.power.PowerManagerService;
@@ -117,6 +118,7 @@ class ServerThread extends Thread {
                 : Integer.parseInt(factoryTestStr);
         final boolean headless = "1".equals(SystemProperties.get("ro.config.headless", "0"));
 
+        Installer installer = null;
         AccountManagerService accountManager = null;
         ContentService contentService = null;
         LightsService lights = null;
@@ -195,6 +197,13 @@ class ServerThread extends Thread {
         // Critical services...
         boolean onlyCore = false;
         try {
+            // Wait for installd to finished starting up so that it has a chance to
+            // create critical directories such as /data/user with the appropriate
+            // permissions.  We need this to complete before we initialize other services.
+            Slog.i(TAG, "Waiting for installd to be ready.");
+            installer = new Installer();
+            installer.ping();
+
             Slog.i(TAG, "Entropy Mixer");
             ServiceManager.addService("entropy", new EntropyMixer());
 
@@ -234,7 +243,7 @@ class ServerThread extends Thread {
                 onlyCore = true;
             }
 
-            pm = PackageManagerService.main(context,
+            pm = PackageManagerService.main(context, installer,
                     factoryTest != SystemServer.FACTORY_TEST_OFF,
                     onlyCore);
             boolean firstBoot = false;
