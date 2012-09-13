@@ -28,11 +28,11 @@ import android.appwidget.AppWidgetProviderInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.content.SharedPreferences;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.os.Looper;
 import android.os.UserManager;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -41,8 +41,6 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.widget.RemoteViews.OnClickHandler;
@@ -61,6 +59,7 @@ public class KeyguardHostView extends KeyguardViewBase {
     // Use this to debug all of keyguard
     public static boolean DEBUG;
 
+    // also referenced in SecuritySettings.java
     static final int APPWIDGET_HOST_ID = 0x4B455947;
     private static final String KEYGUARD_WIDGET_PREFS = "keyguard_widget_prefs";
 
@@ -94,8 +93,9 @@ public class KeyguardHostView extends KeyguardViewBase {
     public KeyguardHostView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mLockPatternUtils = new LockPatternUtils(context);
-        mAppWidgetHost = new AppWidgetHost(mContext, APPWIDGET_HOST_ID, mOnClickHandler);
-        mSecurityModel = new KeyguardSecurityModel(mContext);
+        mAppWidgetHost = new AppWidgetHost(
+                context, APPWIDGET_HOST_ID, mOnClickHandler, Looper.myLooper());
+        mSecurityModel = new KeyguardSecurityModel(context);
 
         // The following enables the MENU key to work for testing automation
         mEnableMenuKey = shouldEnableMenuKey();
@@ -212,7 +212,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         mAppWidgetHost.stopListening();
     }
 
-    AppWidgetHost getAppWidgetHost() {
+    private AppWidgetHost getAppWidgetHost() {
         return mAppWidgetHost;
     }
 
@@ -674,15 +674,11 @@ public class KeyguardHostView extends KeyguardViewBase {
             return;
         }
         inflateAndAddUserSelectorWidgetIfNecessary();
-        SharedPreferences prefs = mContext.getSharedPreferences(
-                KEYGUARD_WIDGET_PREFS, Context.MODE_PRIVATE);
-        for (String key : prefs.getAll().keySet()) {
-            int appId = prefs.getInt(key, -1);
-            if (appId != -1) {
-                Log.w(TAG, "populate: adding " + key);
-                addWidget(appId);
-            } else {
-                Log.w(TAG, "populate: can't find " + key);
+
+        final int[] widgets = mLockPatternUtils.getUserDefinedWidgets();
+        for (int i = 0; i < widgets.length; i++) {
+            if (widgets[i] != -1) {
+                addWidget(widgets[i]);
             }
         }
     }
