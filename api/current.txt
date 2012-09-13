@@ -3830,6 +3830,7 @@ package android.app {
     method public android.app.Notification.Builder setOnlyAlertOnce(boolean);
     method public android.app.Notification.Builder setPriority(int);
     method public android.app.Notification.Builder setProgress(int, int, boolean);
+    method public android.app.Notification.Builder setShowWhen(boolean);
     method public android.app.Notification.Builder setSmallIcon(int);
     method public android.app.Notification.Builder setSmallIcon(int, int);
     method public android.app.Notification.Builder setSound(android.net.Uri);
