@@ -430,8 +430,6 @@ public class WindowManagerService extends IWindowManager.Stub
     Watermark mWatermark;
     StrictModeFlash mStrictModeFlash;
 
-    BlackFrame mBlackFrame;
-
     final float[] mTmpFloats = new float[9];
 
     boolean mDisplayReady;
@@ -6036,8 +6034,6 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        rebuildBlackFrameLocked();
-
         final WindowList windows = displayContent.getWindowList();
         for (int i = windows.size() - 1; i >= 0; i--) {
             WindowState w = windows.get(i);
@@ -7854,49 +7850,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private void rebuildBlackFrameLocked() {
-        if (mBlackFrame != null) {
-            mBlackFrame.kill();
-            mBlackFrame = null;
-        }
-        // TODO(multidisplay): For now rotations are only main screen.
-        final DisplayContent displayContent = getDefaultDisplayContentLocked();
-        final Display display = displayContent.getDisplay();
-        if (displayContent.mBaseDisplayWidth < displayContent.mInitialDisplayWidth
-                || displayContent.mBaseDisplayHeight < displayContent.mInitialDisplayHeight) {
-            int initW, initH, baseW, baseH;
-            final boolean rotated = (mRotation == Surface.ROTATION_90
-                    || mRotation == Surface.ROTATION_270);
-            if (DEBUG_BOOT) {
-                Slog.i(TAG, "BLACK FRAME: rotated=" + rotated + " init="
-                        + displayContent.mInitialDisplayWidth + "x"
-                        + displayContent.mInitialDisplayHeight + " base="
-                        + displayContent.mBaseDisplayWidth + "x"
-                        + displayContent.mBaseDisplayHeight);
-            }
-            if (rotated) {
-                initW = displayContent.mInitialDisplayHeight;
-                initH = displayContent.mInitialDisplayWidth;
-                baseW = displayContent.mBaseDisplayHeight;
-                baseH = displayContent.mBaseDisplayWidth;
-            } else {
-                initW = displayContent.mInitialDisplayWidth;
-                initH = displayContent.mInitialDisplayHeight;
-                baseW = displayContent.mBaseDisplayWidth;
-                baseH = displayContent.mBaseDisplayHeight;
-            }
-            Rect outer = new Rect(0, 0, initW, initH);
-            Rect inner = new Rect(0, 0, baseW, baseH);
-            try {
-                mBlackFrame = new BlackFrame(mFxSession, outer, inner, MASK_LAYER,
-                        display.getLayerStack());
-            } catch (Surface.OutOfResourcesException e) {
-            }
-        }
-    }
-
     private void readForcedDisplaySizeAndDensityLocked(final DisplayContent displayContent) {
-        boolean changed = false;
         final String sizeStr = Settings.Global.getString(mContext.getContentResolver(),
                 Settings.Global.DISPLAY_SIZE_FORCED);
         if (sizeStr != null && sizeStr.length() > 0) {
@@ -7909,7 +7863,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     synchronized(displayContent.mDisplaySizeLock) {
                         if (displayContent.mBaseDisplayWidth != width
                                 || displayContent.mBaseDisplayHeight != height) {
-                            changed = true;
                             Slog.i(TAG, "FORCED DISPLAY SIZE: " + width + "x" + height);
                             displayContent.mBaseDisplayWidth = width;
                             displayContent.mBaseDisplayHeight = height;
@@ -7927,16 +7880,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 density = Integer.parseInt(densityStr);
                 synchronized(displayContent.mDisplaySizeLock) {
                     if (displayContent.mBaseDisplayDensity != density) {
-                        changed = true;
                         Slog.i(TAG, "FORCED DISPLAY DENSITY: " + density);
                         displayContent.mBaseDisplayDensity = density;
                     }
                 }
             } catch (NumberFormatException ex) {
             }
-        }
-        if (changed) {
-            rebuildBlackFrameLocked();
         }
     }
 
@@ -8010,8 +7959,6 @@ public class WindowManagerService extends IWindowManager.Stub
             startFreezingDisplayLocked(false, 0, 0);
             mH.sendEmptyMessage(H.SEND_NEW_CONFIGURATION);
         }
-
-        rebuildBlackFrameLocked();
 
         performLayoutAndPlaceSurfacesLocked();
     }
