@@ -44,20 +44,17 @@ public class PermissionGroupInfo extends PackageItemInfo implements Parcelable {
     /**
      * Flag for {@link #flags}, corresponding to <code>personalInfo</code>
      * value of {@link android.R.attr#permissionGroupFlags}.
-     * @hide
      */
     public static final int FLAG_PERSONAL_INFO = 1<<0;
 
     /**
      * Additional flags about this group as given by
      * {@link android.R.attr#permissionGroupFlags}.
-     * @hide
      */
     public int flags;
 
     /**
      * Prioritization of this group, for visually sorting with other groups.
-     * @hide
      */
     public int priority;
 
