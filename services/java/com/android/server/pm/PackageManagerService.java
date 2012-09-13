@@ -7289,7 +7289,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 final int groupOwner;
                 final String protectedFile;
                 if (isFwdLocked()) {
-                    groupOwner = uid;
+                    groupOwner = UserHandle.getSharedAppGid(uid);
                     protectedFile = RES_FILE_NAME;
                 } else {
                     groupOwner = -1;
@@ -7371,7 +7371,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         int doPostCopy(int uid) {
             if (isFwdLocked()) {
                 if (uid < Process.FIRST_APPLICATION_UID
-                        || !PackageHelper.fixSdPermissions(cid, uid, RES_FILE_NAME)) {
+                        || !PackageHelper.fixSdPermissions(cid, UserHandle.getSharedAppGid(uid),
+                                RES_FILE_NAME)) {
                     Slog.e(TAG, "Failed to finalize " + cid);
                     PackageHelper.destroySdDir(cid);
                     return PackageManager.INSTALL_FAILED_CONTAINER_ERROR;
