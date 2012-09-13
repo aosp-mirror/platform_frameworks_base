@@ -31,7 +31,7 @@ public class UT_convert_relaxed extends UnitTest {
     public void run() {
         RenderScript pRS = RenderScript.create(mCtx);
         ScriptC_convert_relaxed s =
-                new ScriptC_convert_relaxed(pRS, mRes, R.raw.convert_relaxed);
+                new ScriptC_convert_relaxed(pRS);
         pRS.setMessageHandler(mRsMessage);
         s.invoke_convert_test();
         pRS.finish();

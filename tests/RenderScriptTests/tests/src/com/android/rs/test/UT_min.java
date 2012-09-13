@@ -30,7 +30,7 @@ public class UT_min extends UnitTest {
 
     public void run() {
         RenderScript pRS = RenderScript.create(mCtx);
-        ScriptC_min s = new ScriptC_min(pRS, mRes, R.raw.min);
+        ScriptC_min s = new ScriptC_min(pRS);
         pRS.setMessageHandler(mRsMessage);
         s.invoke_min_test();
         pRS.finish();
