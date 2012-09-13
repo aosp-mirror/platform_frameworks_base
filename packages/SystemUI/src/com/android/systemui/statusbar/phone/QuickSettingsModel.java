@@ -29,12 +29,18 @@ import android.database.ContentObserver;
 import android.hardware.display.WifiDisplayStatus;
 import android.os.Handler;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.view.View;
+import android.view.inputmethod.InputMethodInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 import com.android.systemui.statusbar.policy.LocationController.LocationGpsStateChangeCallback;
 import com.android.systemui.statusbar.policy.NetworkController.NetworkSignalChangedCallback;
+
+import java.util.List;
 
 
 class QuickSettingsModel implements BluetoothStateChangeCallback,
@@ -338,8 +344,32 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mImeCallback.refreshView(mImeTile, mImeState);
     }
     void onImeWindowStatusChanged(boolean visible) {
+        InputMethodManager imm =
+                (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
+        List<InputMethodInfo> imis = imm.getInputMethodList();
+
         mImeState.enabled = visible;
+        mImeState.label = getCurrentInputMethodName(mContext, mContext.getContentResolver(),
+                imm, imis, mContext.getPackageManager());
         mImeCallback.refreshView(mImeTile, mImeState);
+    }
+    private static String getCurrentInputMethodName(Context context, ContentResolver resolver,
+            InputMethodManager imm, List<InputMethodInfo> imis, PackageManager pm) {
+        if (resolver == null || imis == null) return null;
+        final String currentInputMethodId = Settings.Secure.getString(resolver,
+                Settings.Secure.DEFAULT_INPUT_METHOD);
+        if (TextUtils.isEmpty(currentInputMethodId)) return null;
+        for (InputMethodInfo imi : imis) {
+            if (currentInputMethodId.equals(imi.getId())) {
+                final InputMethodSubtype subtype = imm.getCurrentInputMethodSubtype();
+                final CharSequence summary = subtype != null
+                        ? subtype.getDisplayName(context, imi.getPackageName(),
+                                imi.getServiceInfo().applicationInfo)
+                        : context.getString(R.string.quick_settings_ime_label);
+                return summary.toString();
+            }
+        }
+        return null;
     }
 
 }
