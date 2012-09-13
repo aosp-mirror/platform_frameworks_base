@@ -751,13 +751,22 @@ MtpResponseCode MyMtpDatabase::getObjectPropertyList(MtpObjectHandle handle,
 
 MtpResponseCode MyMtpDatabase::getObjectInfo(MtpObjectHandle handle,
                                             MtpObjectInfo& info) {
-    char    date[20];
+    char            date[20];
+    MtpString       path;
+    int64_t         length;
+    MtpObjectFormat format;
+
+    MtpResponseCode result = getObjectFilePath(handle, path, length, format);
+    if (result != MTP_RESPONSE_OK) {
+        return result;
+    }
+    info.mCompressedSize = (length > 0xFFFFFFFFLL ? 0xFFFFFFFF : (uint32_t)length);
 
     JNIEnv* env = AndroidRuntime::getJNIEnv();
-    jboolean result = env->CallBooleanMethod(mDatabase, method_getObjectInfo,
-                (jint)handle, mIntBuffer, mStringBuffer, mLongBuffer);
-    if (!result)
+    if (!env->CallBooleanMethod(mDatabase, method_getObjectInfo,
+                (jint)handle, mIntBuffer, mStringBuffer, mLongBuffer)) {
         return MTP_RESPONSE_INVALID_OBJECT_HANDLE;
+    }
 
     jint* intValues = env->GetIntArrayElements(mIntBuffer, 0);
     info.mStorageID = intValues[0];
@@ -766,9 +775,7 @@ MtpResponseCode MyMtpDatabase::getObjectInfo(MtpObjectHandle handle,
     env->ReleaseIntArrayElements(mIntBuffer, intValues, 0);
 
     jlong* longValues = env->GetLongArrayElements(mLongBuffer, 0);
-    uint64_t size = longValues[0];
-    info.mCompressedSize = (size > 0xFFFFFFFFLL ? 0xFFFFFFFF : size);
-    info.mDateModified = longValues[1];
+    info.mDateModified = longValues[0];
     env->ReleaseLongArrayElements(mLongBuffer, longValues, 0);
 
 //    info.mAssociationType = (format == MTP_FORMAT_ASSOCIATION ?
@@ -783,28 +790,23 @@ MtpResponseCode MyMtpDatabase::getObjectInfo(MtpObjectHandle handle,
 
     // read EXIF data for thumbnail information
     if (info.mFormat == MTP_FORMAT_EXIF_JPEG || info.mFormat == MTP_FORMAT_JFIF) {
-        MtpString path;
-        int64_t length;
-        MtpObjectFormat format;
-        if (getObjectFilePath(handle, path, length, format) == MTP_RESPONSE_OK) {
-            ResetJpgfile();
-             // Start with an empty image information structure.
-            memset(&ImageInfo, 0, sizeof(ImageInfo));
-            ImageInfo.FlashUsed = -1;
-            ImageInfo.MeteringMode = -1;
-            ImageInfo.Whitebalance = -1;
-            strncpy(ImageInfo.FileName, (const char *)path, PATH_MAX);
-            if (ReadJpegFile((const char*)path, READ_METADATA)) {
-                Section_t* section = FindSection(M_EXIF);
-                if (section) {
-                    info.mThumbCompressedSize = ImageInfo.ThumbnailSize;
-                    info.mThumbFormat = MTP_FORMAT_EXIF_JPEG;
-                    info.mImagePixWidth = ImageInfo.Width;
-                    info.mImagePixHeight = ImageInfo.Height;
-                }
+        ResetJpgfile();
+         // Start with an empty image information structure.
+        memset(&ImageInfo, 0, sizeof(ImageInfo));
+        ImageInfo.FlashUsed = -1;
+        ImageInfo.MeteringMode = -1;
+        ImageInfo.Whitebalance = -1;
+        strncpy(ImageInfo.FileName, (const char *)path, PATH_MAX);
+        if (ReadJpegFile((const char*)path, READ_METADATA)) {
+            Section_t* section = FindSection(M_EXIF);
+            if (section) {
+                info.mThumbCompressedSize = ImageInfo.ThumbnailSize;
+                info.mThumbFormat = MTP_FORMAT_EXIF_JPEG;
+                info.mImagePixWidth = ImageInfo.Width;
+                info.mImagePixHeight = ImageInfo.Height;
             }
-            DiscardData();
         }
+        DiscardData();
     }
 
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
