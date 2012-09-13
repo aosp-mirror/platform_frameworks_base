@@ -31,16 +31,16 @@ final class DisplayDeviceInfo {
     public static final int FLAG_DEFAULT_DISPLAY = 1 << 0;
 
     /**
-     * Flag: Indicates that this display device can show secure surfaces.
-     */
-    public static final int FLAG_SECURE = 1 << 1;
-
-    /**
      * Flag: Indicates that this display device can rotate to show contents in a
      * different orientation.  Otherwise the rotation is assumed to be fixed in the
      * natural orientation and the display manager should transform the content to fit.
      */
-    public static final int FLAG_SUPPORTS_ROTATION = 1 << 2;
+    public static final int FLAG_SUPPORTS_ROTATION = 1 << 1;
+
+    /**
+     * Flag: Indicates that this display device can show secure surfaces.
+     */
+    public static final int FLAG_SUPPORTS_SECURE_VIDEO_OUTPUT = 1 << 2;
 
     /**
      * Touch attachment: Display does not receive touch.
@@ -179,8 +179,11 @@ final class DisplayDeviceInfo {
         if ((flags & FLAG_DEFAULT_DISPLAY) != 0) {
             msg.append(", FLAG_DEFAULT_DISPLAY");
         }
-        if ((flags & FLAG_SECURE) != 0) {
-            msg.append(", FLAG_SECURE");
+        if ((flags & FLAG_SUPPORTS_ROTATION) != 0) {
+            msg.append(", FLAG_DEFAULT_DISPLAY");
+        }
+        if ((flags & FLAG_SUPPORTS_SECURE_VIDEO_OUTPUT) != 0) {
+            msg.append(", FLAG_SUPPORTS_SECURE_VIDEO_OUTPUT");
         }
         return msg.toString();
     }
