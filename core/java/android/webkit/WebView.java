@@ -1494,12 +1494,14 @@ public class WebView extends AbsoluteLayout
      * Injects the supplied Java object into this WebView. The object is
      * injected into the JavaScript context of the main frame, using the
      * supplied name. This allows the Java object's methods to be
-     * accessed from JavaScript. For API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
+     * accessed from JavaScript. For applications targeted to API
+     * level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
      * and above, only public methods that are annotated with
      * {@link android.webkit.JavascriptInterface} can be accessed from JavaScript.
-     * For API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN} or below,
+     * For applications targeted to API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN} or below,
      * all public methods (including the inherited ones) can be accessed, see the
-     * important security note below for implications. Note that injected objects will not
+     * important security note below for implications.
+     * <p> Note that injected objects will not
      * appear in JavaScript until the page is next (re)loaded. For example:
      * <pre>
      * class JsObject {
@@ -1514,7 +1516,7 @@ public class WebView extends AbsoluteLayout
      * <ul>
      * <li> This method can be used to allow JavaScript to control the host
      * application. This is a powerful feature, but also presents a security
-     * risk for applications targeting API level
+     * risk for applications targeted to API level
      * {@link android.os.Build.VERSION_CODES#JELLY_BEAN} or below, because
      * JavaScript could use reflection to access an
      * injected object's public fields. Use of this method in a WebView
