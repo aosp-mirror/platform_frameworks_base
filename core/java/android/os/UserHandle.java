@@ -139,6 +139,15 @@ public final class UserHandle implements Parcelable {
     }
 
     /**
+     * Returns the shared app gid for a given uid or appId.
+     * @hide
+     */
+    public static final int getSharedAppGid(int id) {
+        return Process.FIRST_SHARED_APPLICATION_GID + (id % PER_USER_RANGE)
+                - Process.FIRST_APPLICATION_UID;
+    }
+
+    /**
      * Returns the user id of the current process
      * @return user id of the current process
      * @hide

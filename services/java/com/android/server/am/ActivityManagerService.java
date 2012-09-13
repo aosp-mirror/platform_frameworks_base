@@ -2010,9 +2010,10 @@ public final class ActivityManagerService extends ActivityManagerNative
             int[] gids = null;
             int mountExternal = Zygote.MOUNT_EXTERNAL_NONE;
             if (!app.isolated) {
+                int[] permGids = null;
                 try {
                     final PackageManager pm = mContext.getPackageManager();
-                    gids = pm.getPackageGids(app.info.packageName);
+                    permGids = pm.getPackageGids(app.info.packageName);
 
                     if (Environment.isExternalStorageEmulated()) {
                         if (pm.checkPermission(
@@ -2026,6 +2027,18 @@ public final class ActivityManagerService extends ActivityManagerNative
                 } catch (PackageManager.NameNotFoundException e) {
                     Slog.w(TAG, "Unable to retrieve gids", e);
                 }
+
+                /*
+                 * Add shared application GID so applications can share some
+                 * resources like shared libraries
+                 */
+                if (permGids == null) {
+                    gids = new int[1];
+                } else {
+                    gids = new int[permGids.length + 1];
+                    System.arraycopy(permGids, 0, gids, 1, permGids.length);
+                }
+                gids[0] = UserHandle.getSharedAppGid(UserHandle.getAppId(uid));
             }
             if (mFactoryTest != SystemServer.FACTORY_TEST_OFF) {
                 if (mFactoryTest == SystemServer.FACTORY_TEST_LOW_LEVEL
