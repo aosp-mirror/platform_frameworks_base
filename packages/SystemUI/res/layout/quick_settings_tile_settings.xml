@@ -15,11 +15,11 @@
 -->
 <TextView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    style="@style/TextAppearance.QuickSettings.TileView"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:gravity="center"
-    android:drawableTop="@drawable/ic_notify_quicksettings"
+    android:drawableTop="@drawable/ic_qs_settings"
     android:text="@string/quick_settings_settings_label"
-    android:textAppearance="@style/TextAppearance.QuickSettings.TileView"
     />
