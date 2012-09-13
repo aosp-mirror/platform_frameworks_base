@@ -152,10 +152,24 @@ public class Process {
     public static final int LAST_ISOLATED_UID = 99999;
 
     /**
+     * First gid for applications to share resources. Used when forward-locking
+     * is enabled but all UserHandles need to be able to read the resources.
+     * @hide
+     */
+    public static final int FIRST_SHARED_APPLICATION_GID = 50000;
+
+    /**
+     * Last gid for applications to share resources. Used when forward-locking
+     * is enabled but all UserHandles need to be able to read the resources.
+     * @hide
+     */
+    public static final int LAST_SHARED_APPLICATION_GID = 59999;
+
+    /**
      * Defines a secondary group id for access to the bluetooth hardware.
      */
     public static final int BLUETOOTH_GID = 2000;
-    
+
     /**
      * Standard priority of application threads.
      * Use with {@link #setThreadPriority(int)} and
