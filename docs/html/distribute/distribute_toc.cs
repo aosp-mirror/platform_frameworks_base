@@ -72,10 +72,10 @@
         <span class="en">Linking to Your Products</a></li>
        <li><a href="<?cs var:toroot ?>distribute/googleplay/promote/badges.html">
         <span class="en">Google Play Badges</a></li>
-       <li><a href="<?cs var:toroot ?>distribute/googleplay/promote/brand.html">
-        <span class="en">Brand Assets and Guidelines</a></li>
        <li><a href="<?cs var:toroot ?>distribute/promote/device-art.html">
         <span class="en">Device Art Generator</a></li>
+       <li><a href="<?cs var:toroot ?>distribute/googleplay/promote/brand.html">
+        <span class="en">Brand Assets and Guidelines</a></li>
      </ul>
    </li>
 
