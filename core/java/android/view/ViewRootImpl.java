@@ -1007,17 +1007,15 @@ public final class ViewRootImpl implements ViewParent,
             //Log.i(TAG, "Computing view hierarchy attributes!");
             attachInfo.mRecomputeGlobalAttributes = false;
             boolean oldScreenOn = attachInfo.mKeepScreenOn;
-            int oldVis = attachInfo.mSystemUiVisibility;
-            boolean oldHasSystemUiListeners = attachInfo.mHasSystemUiListeners;
             attachInfo.mKeepScreenOn = false;
             attachInfo.mSystemUiVisibility = 0;
             attachInfo.mHasSystemUiListeners = false;
             mView.dispatchCollectViewAttributes(attachInfo, 0);
             attachInfo.mSystemUiVisibility &= ~attachInfo.mDisabledSystemUiVisibility;
+            WindowManager.LayoutParams params = mWindowAttributes;
             if (attachInfo.mKeepScreenOn != oldScreenOn
-                    || attachInfo.mSystemUiVisibility != oldVis
-                    || attachInfo.mHasSystemUiListeners != oldHasSystemUiListeners) {
-                WindowManager.LayoutParams params = mWindowAttributes;
+                    || attachInfo.mSystemUiVisibility != params.subtreeSystemUiVisibility
+                    || attachInfo.mHasSystemUiListeners != params.hasSystemUiListeners) {
                 applyKeepScreenOnFlag(params);
                 params.subtreeSystemUiVisibility = attachInfo.mSystemUiVisibility;
                 params.hasSystemUiListeners = attachInfo.mHasSystemUiListeners;
