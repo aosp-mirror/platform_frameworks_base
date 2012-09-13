@@ -7436,7 +7436,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     void needGlobalAttributesUpdate(boolean force) {
         final AttachInfo ai = mAttachInfo;
-        if (ai != null) {
+        if (ai != null && !ai.mRecomputeGlobalAttributes) {
             if (force || ai.mKeepScreenOn || (ai.mSystemUiVisibility != 0)
                     || ai.mHasSystemUiListeners) {
                 ai.mRecomputeGlobalAttributes = true;
@@ -11719,6 +11719,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // If nobody has evaluated the drawable state yet, then do it now.
             refreshDrawableState();
         }
+        needGlobalAttributesUpdate(false);
     }
 
     void dispatchDetachedFromWindow() {
