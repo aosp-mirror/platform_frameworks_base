@@ -51,7 +51,6 @@ delivered right away unless the <code>delay_while_idle</code> flag is set to tru
 
 <p>If the device is not connected to GCM, the message will be stored until a connection is established (again respecting the collapse key rules). When a connection is established, GCM will deliver all pending messages to the device, regardless of the <code>delay_while_idle</code> flag. If the device never gets connected again (for instance, if it was factory reset), the message will eventually time out and be discarded from GCM storage. The default timeout is 4 weeks, unless the <code>time_to_live</code> flag is set.</p>
 
-<p class="note"><strong>Note:</strong> When you set the <code>time_to_live</code> flag, you must also set <code>collapse_key</code>. Otherwise the message will be rejected as a bad request.</p>
 <p>Finally, when GCM attempts to deliver a message to the device and the application was uninstalled, GCM will discard that message right away and invalidate the registration ID. Future attempts to send a message to that device will get a <code>NotRegistered</code> error. See <a href="#unreg">How Unregistration Works</a> for more information.</p>
 <p>Although is not possible to track the status of each individual message, the Google APIs Console stats are broken down by messages sent to device, messages collapsed, and messages waiting for delivery.</p>
 
