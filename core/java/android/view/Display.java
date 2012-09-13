@@ -79,6 +79,40 @@ public final class Display {
     public static final int DEFAULT_DISPLAY = 0;
 
     /**
+     * Display flag: Indicates that the display supports secure video output.
+     * <p>
+     * This flag is used to indicate that the display supports content protection
+     * mechanisms for secure video output at the display interface, such as HDCP.
+     * These mechanisms may be used to protect secure content as it leaves the device.
+     * </p><p>
+     * While mirroring content to multiple displays, it can happen that certain
+     * display devices support secure video output while other display devices do not.
+     * The secure content will be shown only on the display devices that support
+     * secure video output and will be blanked on other display devices that do
+     * not support secure video output.
+     * </p><p>
+     * This flag mainly applies to external display devices such as HDMI or
+     * Wifi display.  Built-in display devices are usually considered secure.
+     * </p>
+     *
+     * @hide pending review
+     */
+    public static final int FLAG_SUPPORTS_SECURE_VIDEO_OUTPUT = 1 << 0;
+
+    /**
+     * Display flag: Indicates that the display supports secure in-memory video buffers.
+     * <p>
+     * This flag is used to indicate that the display supports content protection
+     * mechanisms for decrypted in-memory video buffers, such as secure memory areas.
+     * These mechanisms may be used to protect secure video buffers in memory from
+     * the video decoder to the display compositor and the video interface.
+     * </p>
+     *
+     * @hide pending review
+     */
+    public static final int FLAG_SUPPORTS_SECURE_VIDEO_BUFFERS = 1 << 1;
+
+    /**
      * Internal method to create a display.
      * Applications should use {@link android.view.WindowManager#getDefaultDisplay()}
      * or {@link android.hardware.display.DisplayManager#getDisplay}
@@ -155,6 +189,20 @@ public final class Display {
      */
     public int getLayerStack() {
         return mLayerStack;
+    }
+
+    /**
+     * Returns a combination of flags that describe the capabilities of the display.
+     *
+     * @return The display flags.
+     *
+     * @hide pending review
+     */
+    public int getFlags() {
+        synchronized (this) {
+            updateDisplayInfoLocked();
+            return mDisplayInfo.flags;
+        }
     }
 
     /**
