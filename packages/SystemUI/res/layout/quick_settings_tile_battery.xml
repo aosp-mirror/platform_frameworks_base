@@ -13,14 +13,25 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<TextView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/battery_textview"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:layout_gravity="center"
-    android:gravity="center"
-    android:drawableTop="@drawable/ic_qs_battery"
-    android:text="@string/quick_settings_battery_label"
-    android:textAppearance="@style/TextAppearance.QuickSettings.TileView"
-    />
+    android:orientation="vertical">
+    <ImageView
+        android:id="@+id/battery_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:paddingBottom="10dp"
+        />
+    <TextView
+        style="@style/TextAppearance.QuickSettings.TileView"
+        android:id="@+id/battery_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        />
+</LinearLayout>

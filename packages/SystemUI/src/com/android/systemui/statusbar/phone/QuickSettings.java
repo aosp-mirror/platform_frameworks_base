@@ -28,7 +28,8 @@ import android.content.IntentFilter;
 import android.content.Loader;
 import android.content.res.Resources;
 import android.database.Cursor;
-import android.graphics.drawable.ClipDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LevelListDrawable;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.WifiDisplay;
 import android.hardware.display.WifiDisplayStatus;
@@ -43,11 +44,13 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.QuickSettingsModel.State;
+import com.android.systemui.statusbar.phone.QuickSettingsModel.UserState;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.BrightnessController;
@@ -78,6 +81,9 @@ class QuickSettings {
 
     private CursorLoader mUserInfoLoader;
 
+    private LevelListDrawable mBatteryLevels;
+    private LevelListDrawable mChargingBatteryLevels;
+
     // The set of QuickSettingsTiles that have dynamic spans (and need to be updated on
     // configuration change)
     private final ArrayList<QuickSettingsTileView> mDynamicSpannedTiles =
@@ -90,6 +96,11 @@ class QuickSettings {
         mModel = new QuickSettingsModel(context);
         mWifiDisplayStatus = new WifiDisplayStatus();
         mWifiDisplayListAdapter = new WifiDisplayListAdapter(context);
+
+        Resources r = mContext.getResources();
+        mBatteryLevels = (LevelListDrawable) r.getDrawable(R.drawable.qs_sys_battery);
+        mChargingBatteryLevels =
+                (LevelListDrawable) r.getDrawable(R.drawable.qs_sys_battery_charging);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(DisplayManager.ACTION_WIFI_DISPLAY_STATUS_CHANGED);
@@ -143,7 +154,7 @@ class QuickSettings {
                             Cursor cursor) {
                         if (cursor != null && cursor.moveToFirst()) {
                             String name = cursor.getString(0); // DISPLAY_NAME
-                            mModel.setUserTileInfo(name);
+                            mModel.setUserTileInfo(name, null);
                             /*
                             byte[] photoData = cursor.getBlob(0);
                             Bitmap b =
@@ -184,8 +195,12 @@ class QuickSettings {
         mModel.addUserTile(userTile, new QuickSettingsModel.RefreshCallback() {
             @Override
             public void refreshView(QuickSettingsTileView view, State state) {
+                UserState us = (UserState) state;
                 TextView tv = (TextView) view.findViewById(R.id.user_textview);
                 tv.setText(state.label);
+                if (us.avatar != null) {
+                    tv.setCompoundDrawables(null, us.avatar, null, null);
+                }
             }
         });
         parent.addView(userTile);
@@ -294,10 +309,23 @@ class QuickSettings {
                 QuickSettingsModel.BatteryState batteryState =
                         (QuickSettingsModel.BatteryState) state;
                 TextView tv = (TextView) view.findViewById(R.id.battery_textview);
-                ClipDrawable drawable = (ClipDrawable) tv.getCompoundDrawables()[1];
-                drawable.setLevel((int) (10000 * (batteryState.batteryLevel / 100.0f)));
-                // TODO: use format string
-                tv.setText(batteryState.batteryLevel + "%");
+                ImageView iv = (ImageView) view.findViewById(R.id.battery_image);
+                Drawable d = batteryState.pluggedIn
+                        ? mChargingBatteryLevels
+                        : mBatteryLevels;
+                String t;
+                if (batteryState.batteryLevel == 100) {
+                    t = mContext.getString(R.string.quick_settings_battery_charged_label);
+                } else {
+                    t = batteryState.pluggedIn
+                        ? mContext.getString(R.string.quick_settings_battery_charging_label,
+                                batteryState.batteryLevel)
+                        : mContext.getString(R.string.status_bar_settings_battery_meter_format,
+                                batteryState.batteryLevel);
+                }
+                iv.setImageDrawable(d);
+                iv.setImageLevel(batteryState.batteryLevel);
+                tv.setText(t);
             }
         });
         parent.addView(batteryTile);

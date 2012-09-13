@@ -26,6 +26,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.graphics.drawable.Drawable;
 import android.hardware.display.WifiDisplayStatus;
 import android.os.Handler;
 import android.provider.Settings;
@@ -57,6 +58,9 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     static class BatteryState extends State {
         int batteryLevel;
         boolean pluggedIn;
+    }
+    static class UserState extends State {
+        Drawable avatar;
     }
 
     /** The callback to update a given tile. */
@@ -99,7 +103,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
 
     private QuickSettingsTileView mUserTile;
     private RefreshCallback mUserCallback;
-    private State mUserState = new State();
+    private UserState mUserState = new UserState();
 
     private QuickSettingsTileView mTimeTile;
     private RefreshCallback mTimeAlarmCallback;
@@ -154,8 +158,9 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mUserCallback = cb;
         mUserCallback.refreshView(mUserTile, mUserState);
     }
-    void setUserTileInfo(String name) {
+    void setUserTileInfo(String name, Drawable avatar) {
         mUserState.label = name;
+        mUserState.avatar = avatar;
         mUserCallback.refreshView(mUserTile, mUserState);
     }
 
@@ -167,13 +172,11 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     }
     void onAlarmChanged(Intent intent) {
         mTimeAlarmState.enabled = intent.getBooleanExtra("alarmSet", false);
-        System.out.println("ALARM ENABLED: " + mTimeAlarmState.enabled);
         mTimeAlarmCallback.refreshView(mTimeTile, mTimeAlarmState);
     }
     void onNextAlarmChanged() {
         mTimeAlarmState.label = Settings.System.getString(mContext.getContentResolver(),
                 Settings.System.NEXT_ALARM_FORMATTED);
-        System.out.println("ALARM LABEL: " + mTimeAlarmState.label);
         mTimeAlarmCallback.refreshView(mTimeTile, mTimeAlarmState);
     }
 
@@ -212,8 +215,8 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         Resources r = mContext.getResources();
         mAirplaneModeState.enabled = enabled;
         mAirplaneModeState.iconId = (enabled ?
-                R.drawable.ic_qs_airplane_enabled :
-                R.drawable.ic_qs_airplane_normal);
+                R.drawable.ic_qs_airplane_on :
+                R.drawable.ic_qs_airplane_off);
         mAirplaneModeCallback.refreshView(mAirplaneModeTile, mAirplaneModeState);
     }
 
@@ -231,8 +234,8 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         // TODO: Check if wifi is enabled
         mWifiState.enabled = enabled;
         mWifiState.iconId = (enabled ?
-                R.drawable.ic_qs_wifi_enabled :
-                R.drawable.ic_qs_wifi_normal);
+                R.drawable.ic_qs_wifi_4 :
+                R.drawable.ic_qs_wifi_not_connected);
         mWifiState.label = (enabled ?
                 description :
                 r.getString(R.string.quick_settings_wifi_no_network));
@@ -258,8 +261,8 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
             // TODO: Check if RSSI is enabled
             mRSSIState.enabled = enabled;
             mRSSIState.iconId = (enabled ?
-                    R.drawable.ic_qs_rssi_enabled :
-                    R.drawable.ic_qs_rssi_normal);
+                    R.drawable.ic_qs_signal_4 :
+                    R.drawable.ic_qs_signal_0);
             mRSSIState.label = (enabled ?
                     description :
                     r.getString(R.string.quick_settings_rssi_emergency_only));
@@ -285,9 +288,9 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         Resources r = mContext.getResources();
         mBluetoothState.enabled = on;
         if (on) {
-            mBluetoothState.iconId = R.drawable.ic_qs_bluetooth_enabled;
+            mBluetoothState.iconId = R.drawable.ic_qs_bluetooth_on;
         } else {
-            mBluetoothState.iconId = R.drawable.ic_qs_bluetooth_normal;
+            mBluetoothState.iconId = R.drawable.ic_qs_bluetooth_off;
         }
         mBluetoothCallback.refreshView(mBluetoothTile, mBluetoothState);
     }

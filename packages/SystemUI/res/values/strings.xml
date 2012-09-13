@@ -403,8 +403,10 @@
 
     <!-- QuickSettings: Airplane mode [CHAR LIMIT=NONE] -->
     <string name="quick_settings_airplane_mode_label">Airplane mode</string>
-    <!-- QuickSettings: Battery [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_battery_label">Battery</string>
+    <!-- QuickSettings: Battery Charging [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_battery_charging_label">Charging, <xliff:g id="number">%d</xliff:g><xliff:g id="percent">%%</xliff:g></string>
+    <!-- QuickSettings: Battery Charged [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_battery_charged_label">Charged</string>
     <!-- QuickSettings: Bluetooth [CHAR LIMIT=NONE] -->
     <string name="quick_settings_bluetooth_label">Bluetooth</string>
     <!-- QuickSettings: Brightness [CHAR LIMIT=NONE] -->
