@@ -276,7 +276,7 @@ public:
     /**
      * Clear the cache
      */
-    void clear();
+    void purgeCaches();
 
 private:
     TextLayoutShaper* mShaper;
