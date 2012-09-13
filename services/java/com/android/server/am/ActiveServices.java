@@ -478,12 +478,6 @@ public class ActiveServices {
         if (res.record == null) {
             return -1;
         }
-        if (mAm.isSingleton(res.record.processName, res.record.appInfo,
-                res.record.serviceInfo.name, res.record.serviceInfo.flags)) {
-            userId = 0;
-            res = retrieveServiceLocked(service, resolvedType, Binder.getCallingPid(),
-                    Binder.getCallingUid(), 0, true);
-        }
         ServiceRecord s = res.record;
 
         final long origId = Binder.clearCallingIdentity();
