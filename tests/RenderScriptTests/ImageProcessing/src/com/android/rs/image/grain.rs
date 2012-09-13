@@ -43,9 +43,9 @@ int32_t gHeight;
 
 rs_allocation gBlendSource;
 void blend9(uchar *out, uint32_t x, uint32_t y) {
-    uint32_t x1 = min((int32_t)x+1, (int32_t)gWidth);
+    uint32_t x1 = min((int32_t)x+1, (int32_t)(gWidth -1));
     uint32_t x2 = max((int32_t)x-1, (int32_t)0);
-    uint32_t y1 = min((int32_t)y+1, (int32_t)gHeight);
+    uint32_t y1 = min((int32_t)y+1, (int32_t)(gHeight -1));
     uint32_t y2 = max((int32_t)y-1, (int32_t)0);
 
     uint p00 = 56 *  ((uchar *)rsGetElementAt(gBlendSource, x1, y1))[0];
@@ -69,7 +69,8 @@ void blend9(uchar *out, uint32_t x, uint32_t y) {
     p20 += p22;
     p20 += p02;
 
-    *out = (uchar)(p20 >> 10);
+    p20 = min(p20 >> 10, (uint)255);
+    *out = (uchar)p20;
 }
 
 float gNoiseStrength;
