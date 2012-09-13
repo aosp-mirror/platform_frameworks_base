@@ -411,6 +411,10 @@ class QuickSettings {
         mModel.addImeTile(imeTile, new QuickSettingsModel.RefreshCallback() {
             @Override
             public void refreshView(QuickSettingsTileView view, State state) {
+                TextView tv = (TextView) view.findViewById(R.id.ime_textview);
+                if (state.label != null) {
+                    tv.setText(state.label);
+                }
                 view.setVisibility(state.enabled ? View.VISIBLE : View.GONE);
             }
         });

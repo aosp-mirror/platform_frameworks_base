@@ -410,7 +410,7 @@
     <!-- QuickSettings: Brightness [CHAR LIMIT=NONE] -->
     <string name="quick_settings_brightness_label">Brightness</string>
     <!-- QuickSettings: IME [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_ime_label">IME</string>
+    <string name="quick_settings_ime_label">Input Method</string>
     <!-- QuickSettings: Location [CHAR LIMIT=NONE] -->
     <string name="quick_settings_location_label">Location in use</string>
     <!-- QuickSettings: Media device [CHAR LIMIT=NONE] -->
