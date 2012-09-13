@@ -937,9 +937,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    public static final IPackageManager main(Context context, boolean factoryTest,
-            boolean onlyCore) {
-        PackageManagerService m = new PackageManagerService(context, factoryTest, onlyCore);
+    public static final IPackageManager main(Context context, Installer installer,
+            boolean factoryTest, boolean onlyCore) {
+        PackageManagerService m = new PackageManagerService(context, installer,
+                factoryTest, onlyCore);
         ServiceManager.addService("package", m);
         return m;
     }
@@ -966,7 +967,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         return res;
     }
 
-    public PackageManagerService(Context context, boolean factoryTest, boolean onlyCore) {
+    public PackageManagerService(Context context, Installer installer,
+            boolean factoryTest, boolean onlyCore) {
         EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_START,
                 SystemClock.uptimeMillis());
 
@@ -1004,7 +1006,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             mSeparateProcesses = null;
         }
 
-        mInstaller = new Installer();
+        mInstaller = installer;
 
         WindowManager wm = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
         Display d = wm.getDefaultDisplay();
