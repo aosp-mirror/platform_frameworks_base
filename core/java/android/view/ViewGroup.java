@@ -5726,7 +5726,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         /**
          * Sets the relative start margin.
          *
-         * @param start the start marging size
+         * @param start the start margin size
          *
          * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginStart
          */
@@ -5755,7 +5755,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         /**
          * Sets the relative end margin.
          *
-         * @param end the end marging size
+         * @param end the end margin size
          *
          * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginEnd
          */
