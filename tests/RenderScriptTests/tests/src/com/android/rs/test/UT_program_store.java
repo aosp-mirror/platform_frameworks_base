@@ -94,7 +94,7 @@ public class UT_program_store extends UnitTest {
     }
 
     private void testScriptSide(RenderScript pRS) {
-        ScriptC_program_store s = new ScriptC_program_store(pRS, mRes, R.raw.program_store);
+        ScriptC_program_store s = new ScriptC_program_store(pRS);
         pRS.setMessageHandler(mRsMessage);
         initializeGlobals(pRS, s);
         s.invoke_program_store_test();

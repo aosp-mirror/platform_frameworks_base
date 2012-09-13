@@ -30,7 +30,7 @@ public class UT_fp_mad extends UnitTest {
 
     public void run() {
         RenderScript pRS = RenderScript.create(mCtx);
-        ScriptC_fp_mad s = new ScriptC_fp_mad(pRS, mRes, R.raw.fp_mad);
+        ScriptC_fp_mad s = new ScriptC_fp_mad(pRS);
         pRS.setMessageHandler(mRsMessage);
         s.invoke_fp_mad_test(0, 0);
         pRS.finish();

@@ -75,7 +75,7 @@ public class UT_sampler extends UnitTest {
     }
 
     private void testScriptSide(RenderScript pRS) {
-        ScriptC_sampler s = new ScriptC_sampler(pRS, mRes, R.raw.sampler);
+        ScriptC_sampler s = new ScriptC_sampler(pRS);
         pRS.setMessageHandler(mRsMessage);
         initializeGlobals(pRS, s);
         s.invoke_sampler_test();

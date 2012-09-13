@@ -30,7 +30,7 @@ public class UT_struct extends UnitTest {
 
     public void run() {
         RenderScript pRS = RenderScript.create(mCtx);
-        ScriptC_struct s = new ScriptC_struct(pRS, mRes, R.raw.struct);
+        ScriptC_struct s = new ScriptC_struct(pRS);
         pRS.setMessageHandler(mRsMessage);
 
         ScriptField_Point2 p = new ScriptField_Point2(pRS, 1);

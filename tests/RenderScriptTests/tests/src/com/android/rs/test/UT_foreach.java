@@ -44,7 +44,7 @@ public class UT_foreach extends UnitTest {
 
     public void run() {
         RenderScript pRS = RenderScript.create(mCtx);
-        ScriptC_foreach s = new ScriptC_foreach(pRS, mRes, R.raw.foreach);
+        ScriptC_foreach s = new ScriptC_foreach(pRS);
         pRS.setMessageHandler(mRsMessage);
         initializeGlobals(pRS, s);
         s.forEach_root(A);
