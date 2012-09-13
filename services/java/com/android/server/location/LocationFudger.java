@@ -19,10 +19,14 @@ package com.android.server.location;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.security.SecureRandom;
+import android.content.Context;
+import android.database.ContentObserver;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Parcelable;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.util.Log;
 
 
@@ -39,22 +43,19 @@ public class LocationFudger {
     private static final String EXTRA_COARSE_LOCATION = "coarseLocation";
 
     /**
-     * This is the main control: Best location accuracy allowed for coarse applications.
+     * Default coarse accuracy in meters.
      */
-    private static final float ACCURACY_METERS = 200.0f;
+    private static final float DEFAULT_ACCURACY_IN_METERS = 2000.0f;
 
     /**
-     * The distance between grids for snap-to-grid. See {@link #createCoarse}.
+     * Minimum coarse accuracy in meters.
      */
-    private static final double GRID_SIZE_METERS = ACCURACY_METERS;
+    private static final float MINIMUM_ACCURACY_IN_METERS = 200.0f;
 
     /**
-     * Standard deviation of the (normally distributed) random offset applied
-     * to coarse locations. It does not need to be as large as
-     * {@link #COARSE_ACCURACY_METERS} because snap-to-grid is the primary obfuscation
-     * method. See further details in the implementation.
+     * Secure settings key for coarse accuracy.
      */
-    private static final double STANDARD_DEVIATION_METERS = GRID_SIZE_METERS / 4.0;
+    private static final String COARSE_ACCURACY_CONFIG_NAME = "locationCoarseAccuracy";
 
     /**
      * This is the fastest interval that applications can receive coarse
@@ -106,43 +107,90 @@ public class LocationFudger {
     private final Object mLock = new Object();
     private final SecureRandom mRandom = new SecureRandom();
 
+    /**
+     * Used to monitor coarse accuracy secure setting for changes.
+     */
+    private final ContentObserver mSettingsObserver;
+
+    /**
+     * Used to resolve coarse accuracy setting.
+     */
+    private final Context mContext;
+
     // all fields below protected by mLock
     private double mOffsetLatitudeMeters;
     private double mOffsetLongitudeMeters;
     private long mNextInterval;
 
-    public LocationFudger() {
-        mOffsetLatitudeMeters = nextOffset();
-        mOffsetLongitudeMeters = nextOffset();
-        mNextInterval = SystemClock.elapsedRealtime() + CHANGE_INTERVAL_MS;
+    /**
+     * Best location accuracy allowed for coarse applications.
+     * This value should only be set by {@link #setAccuracyInMetersLocked(float)}.
+     */
+    private float mAccuracyInMeters;
+
+    /**
+     * The distance between grids for snap-to-grid. See {@link #createCoarse}.
+     * This value should only be set by {@link #setAccuracyInMetersLocked(float)}.
+     */
+    private double mGridSizeInMeters;
+
+    /**
+     * Standard deviation of the (normally distributed) random offset applied
+     * to coarse locations. It does not need to be as large as
+     * {@link #COARSE_ACCURACY_METERS} because snap-to-grid is the primary obfuscation
+     * method. See further details in the implementation.
+     * This value should only be set by {@link #setAccuracyInMetersLocked(float)}.
+     */
+    private double mStandardDeviationInMeters;
+
+    public LocationFudger(Context context, Handler handler) {
+        mContext = context;
+        mSettingsObserver = new ContentObserver(handler) {
+            @Override
+            public void onChange(boolean selfChange) {
+                setAccuracyInMeters(loadCoarseAccuracy());
+            }
+        };
+        mContext.getContentResolver().registerContentObserver(Settings.Secure.getUriFor(
+                COARSE_ACCURACY_CONFIG_NAME), false, mSettingsObserver);
+
+        float accuracy = loadCoarseAccuracy();
+        synchronized (mLock) {
+            setAccuracyInMetersLocked(accuracy);
+            mOffsetLatitudeMeters = nextOffsetLocked();
+            mOffsetLongitudeMeters = nextOffsetLocked();
+            mNextInterval = SystemClock.elapsedRealtime() + CHANGE_INTERVAL_MS;
+        }
     }
 
     /**
      * Get the cached coarse location, or generate a new one and cache it.
      */
     public Location getOrCreate(Location location) {
-        Bundle extras = location.getExtras();
-        if (extras == null) {
-            return addCoarseLocationExtra(location);
+        synchronized (mLock) {
+            Bundle extras = location.getExtras();
+            if (extras == null) {
+                return addCoarseLocationExtraLocked(location);
+            }
+            Parcelable parcel = extras.getParcelable(EXTRA_COARSE_LOCATION);
+            if (parcel == null) {
+                return addCoarseLocationExtraLocked(location);
+            }
+            if (!(parcel instanceof Location)) {
+                return addCoarseLocationExtraLocked(location);
+            }
+            Location coarse = (Location) parcel;
+            if (coarse.getAccuracy() < mAccuracyInMeters) {
+                return addCoarseLocationExtraLocked(location);
+            }
+            return coarse;
         }
-        Parcelable parcel = extras.getParcelable(EXTRA_COARSE_LOCATION);
-        if (parcel == null) {
-            return addCoarseLocationExtra(location);
-        }
-        if (!(parcel instanceof Location)) {
-            return addCoarseLocationExtra(location);
-        }
-        Location coarse = (Location) parcel;
-        if (coarse.getAccuracy() < ACCURACY_METERS) {
-            return addCoarseLocationExtra(location);
-        }
-        return coarse;
     }
 
-    private Location addCoarseLocationExtra(Location location) {
+    private Location addCoarseLocationExtraLocked(Location location) {
         Bundle extras = location.getExtras();
         if (extras == null) extras = new Bundle();
-        Location coarse = createCoarse(location);
+        Location coarse = createCoarseLocked(location);
         extras.putParcelable(EXTRA_COARSE_LOCATION, coarse);
         location.setExtras(extras);
         return coarse;
@@ -163,7 +211,7 @@ public class LocationFudger {
      * producing stable results, and mitigating against taking many samples
      * to average out a random offset.
      */
-    private Location createCoarse(Location fine) {
+    private Location createCoarseLocked(Location fine) {
         Location coarse = new Location(fine);
 
         // clean all the optional information off the location, because
@@ -188,14 +236,12 @@ public class LocationFudger {
         //
         // We apply the offset even if the location already claims to be
         // inaccurate, because it may be more accurate than claimed.
-        synchronized (mLock) {
-            updateRandomOffsetLocked();
-            // perform lon first whilst lat is still within bounds
-            lon += metersToDegreesLongitude(mOffsetLongitudeMeters, lat);
-            lat += metersToDegreesLatitude(mOffsetLatitudeMeters);
-            if (D) Log.d(TAG, String.format("applied offset of %.0f, %.0f (meters)",
-                    mOffsetLongitudeMeters, mOffsetLatitudeMeters));
-        }
+        updateRandomOffsetLocked();
+        // perform lon first whilst lat is still within bounds
+        lon += metersToDegreesLongitude(mOffsetLongitudeMeters, lat);
+        lat += metersToDegreesLatitude(mOffsetLatitudeMeters);
+        if (D) Log.d(TAG, String.format("applied offset of %.0f, %.0f (meters)",
+                mOffsetLongitudeMeters, mOffsetLatitudeMeters));
 
         // wrap
         lat = wrapLatitude(lat);
@@ -211,9 +257,9 @@ public class LocationFudger {
         // Note we quantize the latitude first, since the longitude
         // quantization depends on the latitude value and so leaks information
         // about the latitude
-        double latGranularity = metersToDegreesLatitude(GRID_SIZE_METERS);
+        double latGranularity = metersToDegreesLatitude(mGridSizeInMeters);
         lat = Math.round(lat / latGranularity) * latGranularity;
-        double lonGranularity = metersToDegreesLongitude(GRID_SIZE_METERS, lat);
+        double lonGranularity = metersToDegreesLongitude(mGridSizeInMeters, lat);
         lon = Math.round(lon / lonGranularity) * lonGranularity;
 
         // wrap again
@@ -223,7 +269,7 @@ public class LocationFudger {
         // apply
         coarse.setLatitude(lat);
         coarse.setLongitude(lon);
-        coarse.setAccuracy(Math.max(ACCURACY_METERS, coarse.getAccuracy()));
+        coarse.setAccuracy(Math.max(mAccuracyInMeters, coarse.getAccuracy()));
 
         if (D) Log.d(TAG, "fudged " + fine + " to " + coarse);
         return coarse;
@@ -259,16 +305,16 @@ public class LocationFudger {
         mNextInterval = now + CHANGE_INTERVAL_MS;
 
         mOffsetLatitudeMeters *= PREVIOUS_WEIGHT;
-        mOffsetLatitudeMeters += NEW_WEIGHT * nextOffset();
+        mOffsetLatitudeMeters += NEW_WEIGHT * nextOffsetLocked();
         mOffsetLongitudeMeters *= PREVIOUS_WEIGHT;
-        mOffsetLongitudeMeters += NEW_WEIGHT * nextOffset();
+        mOffsetLongitudeMeters += NEW_WEIGHT * nextOffsetLocked();
 
         if (D) Log.d(TAG, String.format("new offset: %.0f, %.0f (meters)",
                 mOffsetLongitudeMeters, mOffsetLatitudeMeters));
     }
 
-    private double nextOffset() {
-        return mRandom.nextGaussian() * STANDARD_DEVIATION_METERS;
+    private double nextOffsetLocked() {
+        return mRandom.nextGaussian() * mStandardDeviationInMeters;
     }
 
     private static double wrapLatitude(double lat) {
@@ -306,5 +352,46 @@ public class LocationFudger {
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println(String.format("offset: %.0f, %.0f (meters)", mOffsetLongitudeMeters,
                 mOffsetLatitudeMeters));
+    }
+
+    /**
+     * This is the main control: call this to set the best location accuracy
+     * allowed for coarse applications and all derived values.
+     */
+    private void setAccuracyInMetersLocked(float accuracyInMeters) {
+        mAccuracyInMeters = Math.max(accuracyInMeters, MINIMUM_ACCURACY_IN_METERS);
+        if (D) {
+            Log.d(TAG, "setAccuracyInMetersLocked: new accuracy = " + mAccuracyInMeters);
+        }
+        mGridSizeInMeters = mAccuracyInMeters;
+        mStandardDeviationInMeters = mGridSizeInMeters / 4.0;
+    }
+
+    /**
+     * Same as setAccuracyInMetersLocked without the pre-lock requirement.
+     */
+    private void setAccuracyInMeters(float accuracyInMeters) {
+        synchronized (mLock) {
+            setAccuracyInMetersLocked(accuracyInMeters);
+        }
+    }
+
+    /**
+     * Loads the coarse accuracy value from secure settings.
+     */
+    private float loadCoarseAccuracy() {
+        String newSetting = Settings.Secure.getString(mContext.getContentResolver(),
+                COARSE_ACCURACY_CONFIG_NAME);
+        if (D) {
+            Log.d(TAG, "loadCoarseAccuracy: newSetting = \"" + newSetting + "\"");
+        }
+        if (newSetting == null) {
+            return DEFAULT_ACCURACY_IN_METERS;
+        }
+        try {
+            return Float.parseFloat(newSetting);
+        } catch (NumberFormatException e) {
+            return DEFAULT_ACCURACY_IN_METERS;
+        }
     }
 }
