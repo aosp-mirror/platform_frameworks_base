@@ -228,17 +228,15 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     }
     // NetworkSignalChanged callback
     @Override
-    public void onWifiSignalChanged(boolean enabled, String description) {
+    public void onWifiSignalChanged(boolean enabled, int wifiSignalIconId, String enabledDesc) {
         // TODO: If view is in awaiting state, disable
         Resources r = mContext.getResources();
-        // TODO: Check if wifi is enabled
-        mWifiState.enabled = enabled;
-        mWifiState.iconId = (enabled ?
-                R.drawable.ic_qs_wifi_4 :
-                R.drawable.ic_qs_wifi_not_connected);
-        mWifiState.label = (enabled ?
-                description :
-                r.getString(R.string.quick_settings_wifi_no_network));
+        mWifiState.iconId = enabled && (wifiSignalIconId > 0)
+                ? wifiSignalIconId
+                : R.drawable.ic_qs_wifi_no_network;
+        mWifiState.label = enabled
+                ? enabledDesc
+                : r.getString(R.string.quick_settings_wifi_no_network);
         mWifiCallback.refreshView(mWifiTile, mWifiState);
     }
 
@@ -254,18 +252,17 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     }
     // NetworkSignalChanged callback
     @Override
-    public void onMobileDataSignalChanged(boolean enabled, String description) {
+    public void onMobileDataSignalChanged(boolean enabled, int mobileSignalIconId,
+            String enabledDesc) {
         if (deviceSupportsTelephony()) {
             // TODO: If view is in awaiting state, disable
             Resources r = mContext.getResources();
-            // TODO: Check if RSSI is enabled
-            mRSSIState.enabled = enabled;
-            mRSSIState.iconId = (enabled ?
-                    R.drawable.ic_qs_signal_4 :
-                    R.drawable.ic_qs_signal_0);
-            mRSSIState.label = (enabled ?
-                    description :
-                    r.getString(R.string.quick_settings_rssi_emergency_only));
+            mRSSIState.iconId = enabled && (mobileSignalIconId > 0)
+                    ? mobileSignalIconId
+                    : R.drawable.ic_qs_signal_no_signal;
+            mRSSIState.label = enabled
+                    ? enabledDesc
+                    : r.getString(R.string.quick_settings_rssi_emergency_only);
             mRSSICallback.refreshView(mRSSITile, mRSSIState);
         }
     }
