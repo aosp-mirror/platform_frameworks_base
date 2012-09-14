@@ -1218,39 +1218,39 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             // TODO: adjust these timings for production builds
         }
 
-        private long getSecureLong(String name, long def) {
-            return Settings.Secure.getLong(mResolver, name, def);
+        private long getGlobalLong(String name, long def) {
+            return Settings.Global.getLong(mResolver, name, def);
         }
-        private boolean getSecureBoolean(String name, boolean def) {
+        private boolean getGlobalBoolean(String name, boolean def) {
             final int defInt = def ? 1 : 0;
-            return Settings.Secure.getInt(mResolver, name, defInt) != 0;
+            return Settings.Global.getInt(mResolver, name, defInt) != 0;
         }
 
         @Override
         public long getPollInterval() {
-            return getSecureLong(NETSTATS_POLL_INTERVAL, 30 * MINUTE_IN_MILLIS);
+            return getGlobalLong(NETSTATS_POLL_INTERVAL, 30 * MINUTE_IN_MILLIS);
         }
         @Override
         public long getTimeCacheMaxAge() {
-            return getSecureLong(NETSTATS_TIME_CACHE_MAX_AGE, DAY_IN_MILLIS);
+            return getGlobalLong(NETSTATS_TIME_CACHE_MAX_AGE, DAY_IN_MILLIS);
         }
         @Override
         public long getGlobalAlertBytes(long def) {
-            return getSecureLong(NETSTATS_GLOBAL_ALERT_BYTES, def);
+            return getGlobalLong(NETSTATS_GLOBAL_ALERT_BYTES, def);
         }
         @Override
         public boolean getSampleEnabled() {
-            return getSecureBoolean(NETSTATS_SAMPLE_ENABLED, true);
+            return getGlobalBoolean(NETSTATS_SAMPLE_ENABLED, true);
         }
         @Override
         public boolean getReportXtOverDev() {
-            return getSecureBoolean(NETSTATS_REPORT_XT_OVER_DEV, true);
+            return getGlobalBoolean(NETSTATS_REPORT_XT_OVER_DEV, true);
         }
         @Override
         public Config getDevConfig() {
-            return new Config(getSecureLong(NETSTATS_DEV_BUCKET_DURATION, HOUR_IN_MILLIS),
-                    getSecureLong(NETSTATS_DEV_ROTATE_AGE, 15 * DAY_IN_MILLIS),
-                    getSecureLong(NETSTATS_DEV_DELETE_AGE, 90 * DAY_IN_MILLIS));
+            return new Config(getGlobalLong(NETSTATS_DEV_BUCKET_DURATION, HOUR_IN_MILLIS),
+                    getGlobalLong(NETSTATS_DEV_ROTATE_AGE, 15 * DAY_IN_MILLIS),
+                    getGlobalLong(NETSTATS_DEV_DELETE_AGE, 90 * DAY_IN_MILLIS));
         }
         @Override
         public Config getXtConfig() {
@@ -1258,19 +1258,19 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
         @Override
         public Config getUidConfig() {
-            return new Config(getSecureLong(NETSTATS_UID_BUCKET_DURATION, 2 * HOUR_IN_MILLIS),
-                    getSecureLong(NETSTATS_UID_ROTATE_AGE, 15 * DAY_IN_MILLIS),
-                    getSecureLong(NETSTATS_UID_DELETE_AGE, 90 * DAY_IN_MILLIS));
+            return new Config(getGlobalLong(NETSTATS_UID_BUCKET_DURATION, 2 * HOUR_IN_MILLIS),
+                    getGlobalLong(NETSTATS_UID_ROTATE_AGE, 15 * DAY_IN_MILLIS),
+                    getGlobalLong(NETSTATS_UID_DELETE_AGE, 90 * DAY_IN_MILLIS));
         }
         @Override
         public Config getUidTagConfig() {
-            return new Config(getSecureLong(NETSTATS_UID_TAG_BUCKET_DURATION, 2 * HOUR_IN_MILLIS),
-                    getSecureLong(NETSTATS_UID_TAG_ROTATE_AGE, 5 * DAY_IN_MILLIS),
-                    getSecureLong(NETSTATS_UID_TAG_DELETE_AGE, 15 * DAY_IN_MILLIS));
+            return new Config(getGlobalLong(NETSTATS_UID_TAG_BUCKET_DURATION, 2 * HOUR_IN_MILLIS),
+                    getGlobalLong(NETSTATS_UID_TAG_ROTATE_AGE, 5 * DAY_IN_MILLIS),
+                    getGlobalLong(NETSTATS_UID_TAG_DELETE_AGE, 15 * DAY_IN_MILLIS));
         }
         @Override
         public long getDevPersistBytes(long def) {
-            return getSecureLong(NETSTATS_DEV_PERSIST_BYTES, def);
+            return getGlobalLong(NETSTATS_DEV_PERSIST_BYTES, def);
         }
         @Override
         public long getXtPersistBytes(long def) {
@@ -1278,11 +1278,11 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
         @Override
         public long getUidPersistBytes(long def) {
-            return getSecureLong(NETSTATS_UID_PERSIST_BYTES, def);
+            return getGlobalLong(NETSTATS_UID_PERSIST_BYTES, def);
         }
         @Override
         public long getUidTagPersistBytes(long def) {
-            return getSecureLong(NETSTATS_UID_TAG_PERSIST_BYTES, def);
+            return getGlobalLong(NETSTATS_UID_TAG_PERSIST_BYTES, def);
         }
     }
 }

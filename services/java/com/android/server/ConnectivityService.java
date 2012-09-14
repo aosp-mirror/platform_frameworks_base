@@ -96,6 +96,7 @@ import com.android.internal.net.VpnConfig;
 import com.android.internal.net.VpnProfile;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneConstants;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.connectivity.Tethering;
 import com.android.server.connectivity.Vpn;
@@ -2593,7 +2594,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     @Override
-    protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
+        final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
         if (mContext.checkCallingOrSelfPermission(
                 android.Manifest.permission.DUMP)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -2602,20 +2604,28 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     Binder.getCallingUid());
             return;
         }
+
+        // TODO: add locking to get atomic snapshot
         pw.println();
-        for (NetworkStateTracker nst : mNetTrackers) {
+        for (int i = 0; i < mNetTrackers.length; i++) {
+            final NetworkStateTracker nst = mNetTrackers[i];
             if (nst != null) {
+                pw.println("NetworkStateTracker for " + getNetworkTypeName(i) + ":");
+                pw.increaseIndent();
                 if (nst.getNetworkInfo().isConnected()) {
                     pw.println("Active network: " + nst.getNetworkInfo().
                             getTypeName());
                 }
                 pw.println(nst.getNetworkInfo());
+                pw.println(nst.getLinkProperties());
                 pw.println(nst);
                 pw.println();
+                pw.decreaseIndent();
             }
         }
 
         pw.println("Network Requester Pids:");
+        pw.increaseIndent();
         for (int net : mPriorityList) {
             String pidString = net + ": ";
             for (Object pid : mNetRequestersPids[net]) {
@@ -2624,12 +2634,15 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             pw.println(pidString);
         }
         pw.println();
+        pw.decreaseIndent();
 
         pw.println("FeatureUsers:");
+        pw.increaseIndent();
         for (Object requester : mFeatureUsers) {
             pw.println(requester.toString());
         }
         pw.println();
+        pw.decreaseIndent();
 
         synchronized (this) {
             pw.println("NetworkTranstionWakeLock is currently " +
@@ -2643,9 +2656,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if (mInetLog != null) {
             pw.println();
             pw.println("Inet condition reports:");
+            pw.increaseIndent();
             for(int i = 0; i < mInetLog.size(); i++) {
                 pw.println(mInetLog.get(i));
             }
+            pw.decreaseIndent();
         }
     }
 
