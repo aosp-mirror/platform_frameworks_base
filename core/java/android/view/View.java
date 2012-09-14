@@ -2759,6 +2759,23 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private CharSequence mContentDescription;
 
     /**
+     * Specifies the id of a view for which this view serves as a label for
+     * accessibility purposes.
+     */
+    private int mLabelForId = View.NO_ID;
+
+    /**
+     * Predicate for matching labeled view id with its label for
+     * accessibility purposes.
+     */
+    private MatchLabelForPredicate mMatchLabelForPredicate;
+
+    /**
+     * Predicate for matching a view by its id.
+     */
+    private MatchIdPredicate mMatchIdPredicate;
+
+    /**
      * Cache the paddingRight set by the user to append to the scrollbar's size.
      *
      * @hide
@@ -3369,6 +3386,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     break;
                 case com.android.internal.R.styleable.View_contentDescription:
                     setContentDescription(a.getString(attr));
+                    break;
+                case com.android.internal.R.styleable.View_labelFor:
+                    setLabelFor(a.getResourceId(attr, NO_ID));
                     break;
                 case com.android.internal.R.styleable.View_soundEffectsEnabled:
                     if (!a.getBoolean(attr, true)) {
@@ -4837,6 +4857,28 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             info.setParent((View) parent);
         }
 
+        if (mID != View.NO_ID) {
+            View rootView = getRootView();
+            if (rootView == null) {
+                rootView = this;
+            }
+            View label = rootView.findLabelForView(this, mID);
+            if (label != null) {
+                info.setLabeledBy(label);
+            }
+        }
+
+        if (mLabelForId != View.NO_ID) {
+            View rootView = getRootView();
+            if (rootView == null) {
+                rootView = this;
+            }
+            View labeled = rootView.findViewInsideOutShouldExist(this, mLabelForId);
+            if (labeled != null) {
+                info.setLabelFor(labeled);
+            }
+        }
+
         info.setVisibleToUser(isVisibleToUser());
 
         info.setPackageName(mContext.getPackageName());
@@ -4886,6 +4928,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     | AccessibilityNodeInfo.MOVEMENT_GRANULARITY_WORD
                     | AccessibilityNodeInfo.MOVEMENT_GRANULARITY_PARAGRAPH);
         }
+    }
+
+    private View findLabelForView(View view, int labeledId) {
+        if (mMatchLabelForPredicate == null) {
+            mMatchLabelForPredicate = new MatchLabelForPredicate();
+        }
+        mMatchLabelForPredicate.mLabeledId = labeledId;
+        return findViewByPredicateInsideOut(view, mMatchLabelForPredicate);
     }
 
     /**
@@ -5055,6 +5105,32 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final boolean nonEmptyDesc = contentDescription != null && contentDescription.length() > 0;
         if (nonEmptyDesc && getImportantForAccessibility() == IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
              setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
+        }
+    }
+
+    /**
+     * Gets the id of a view for which this view serves as a label for
+     * accessibility purposes.
+     *
+     * @return The labeled view id.
+     */
+    @ViewDebug.ExportedProperty(category = "accessibility")
+    public int getLabelFor() {
+        return mLabelForId;
+    }
+
+    /**
+     * Sets the id of a view for which this view serves as a label for
+     * accessibility purposes.
+     *
+     * @param id The labeled view id.
+     */
+    @RemotableViewMethod
+    public void setLabelFor(int id) {
+        mLabelForId = id;
+        if (mLabelForId != View.NO_ID
+                && mID == View.NO_ID) {
+            mID = generateViewId();
         }
     }
 
@@ -6110,17 +6186,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return null;
     }
 
-    private View findViewInsideOutShouldExist(View root, final int childViewId) {
-        View result = root.findViewByPredicateInsideOut(this, new Predicate<View>() {
-            @Override
-            public boolean apply(View t) {
-                return t.mID == childViewId;
-            }
-        });
-
+    private View findViewInsideOutShouldExist(View root, int id) {
+        if (mMatchIdPredicate == null) {
+            mMatchIdPredicate = new MatchIdPredicate();
+        }
+        mMatchIdPredicate.mId = id;
+        View result = root.findViewByPredicateInsideOut(this, mMatchIdPredicate);
         if (result == null) {
-            Log.w(VIEW_LOG_TAG, "couldn't find next focus view specified "
-                    + "by user for id " + childViewId);
+            Log.w(VIEW_LOG_TAG, "couldn't find view with id " + id);
         }
         return result;
     }
@@ -14922,6 +14995,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void setId(int id) {
         mID = id;
+        if (mID == View.NO_ID && mLabelForId != View.NO_ID) {
+            mID = generateViewId();
+        }
     }
 
     /**
@@ -18006,6 +18082,24 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          */
         public AccessibilityNodeProvider getAccessibilityNodeProvider(View host) {
             return null;
+        }
+    }
+
+    private class MatchIdPredicate implements Predicate<View> {
+        public int mId;
+
+        @Override
+        public boolean apply(View view) {
+            return (view.mID == mId);
+        }
+    }
+
+    private class MatchLabelForPredicate implements Predicate<View> {
+        private int mLabeledId;
+
+        @Override
+        public boolean apply(View view) {
+            return (view.mLabelForId == mLabeledId);
         }
     }
 }

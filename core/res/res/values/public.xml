@@ -2016,5 +2016,6 @@
   <public type="attr" name="widgetFeatures" />
   <public type="attr" name="widgetCategory" />
   <public type="attr" name="permissionGroupFlags" />
+  <public type="attr" name="labelFor" />
 
 </resources>
