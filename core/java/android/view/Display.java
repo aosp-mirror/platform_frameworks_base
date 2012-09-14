@@ -103,7 +103,7 @@ public final class Display {
      * Display flag: Indicates that the display supports secure in-memory video buffers.
      * <p>
      * This flag is used to indicate that the display supports content protection
-     * mechanisms for decrypted in-memory video buffers, such as secure memory areas.
+     * mechanisms for in-memory video buffers, such as secure memory areas.
      * These mechanisms may be used to protect secure video buffers in memory from
      * the video decoder to the display compositor and the video interface.
      * </p>
