@@ -832,8 +832,8 @@ public final class ViewRootImpl implements ViewParent,
     void invalidateWorld(View view) {
         view.invalidate();
         if (view instanceof ViewGroup) {
-            ViewGroup parent = (ViewGroup)view;
-            for (int i=0; i<parent.getChildCount(); i++) {
+            ViewGroup parent = (ViewGroup) view;
+            for (int i = 0; i < parent.getChildCount(); i++) {
                 invalidateWorld(parent.getChildAt(i));
             }
         }
@@ -2998,7 +2998,9 @@ public final class ViewRootImpl implements ViewParent,
                 handleDispatchDoneAnimating();
             } break;
             case MSG_INVALIDATE_WORLD: {
-                invalidateWorld(mView);
+                if (mView != null) {
+                    invalidateWorld(mView);
+                }
             } break;
             }
         }
