@@ -256,6 +256,10 @@
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Permite que o aplicativo recupere informações sobre as janelas do gerenciador de janelas. Aplicativos mal-intencionados podem recuperar informações destinadas ao uso interno do sistema."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"filtrar eventos"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Permite que o aplicativo registre um filtro de entrada que filtra o fluxo de todos os eventos do usuário antes que sejam enviados. Aplicativos mal-intencionados podem controlar a interface do sistema sem a intervenção do usuário."</string>
+    <!-- no translation found for permlab_magnify_display (5973626738170618775) -->
+    <skip />
+    <!-- no translation found for permdesc_magnify_display (7121235684515003792) -->
+    <skip />
     <string name="permlab_shutdown" msgid="7185747824038909016">"desligamento parcial"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Coloca o gerenciador de atividades em um estado de desligamento. Não executa o desligamento completo."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"evitar trocas de aplicativo"</string>
@@ -286,6 +290,10 @@
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Permite que o aplicativo altere a velocidade de animação global (animação mais rápida ou mais lenta) a qualquer momento."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"gerenciar tokens do aplicativo"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Permite que o aplicativo crie e gerencie seus próprios tokens, ignorando seus pedidos Z normais. Nunca deve ser necessário para aplicativos normais."</string>
+    <!-- no translation found for permlab_freezeScreen (4708181184441880175) -->
+    <skip />
+    <!-- no translation found for permdesc_freezeScreen (8558923789222670064) -->
+    <skip />
     <string name="permlab_injectEvents" msgid="1378746584023586600">"pressionar as teclas e os botões de controle"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Permite que o aplicativo exiba seus próprios eventos de entrada (teclas pressionadas, etc.) para outros aplicativos. Aplicativos maliciosos podem usar isso para tomar conta do tablet."</string>
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Permite que o aplicativo entregue seus próprios eventos de entrada (teclas pressionadas, etc,) para outros aplicativos. Aplicativos maliciosos podem usar esse recurso para assumir o controle do telefone."</string>
@@ -398,6 +406,14 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Permite que o aplicativo use recursos com baixos níveis de SurfaceFlinger."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"ler o buffer do frame"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Permite que o aplicativo leia o conteúdo do buffer de frame."</string>
+    <!-- no translation found for permlab_configureWifiDisplay (5595661694746742168) -->
+    <skip />
+    <!-- no translation found for permdesc_configureWifiDisplay (7916815158690218065) -->
+    <skip />
+    <!-- no translation found for permlab_controlWifiDisplay (393641276723695496) -->
+    <skip />
+    <!-- no translation found for permdesc_controlWifiDisplay (4543912292681826986) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"alterar as suas configurações de áudio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Permite que o aplicativo modifique configurações de áudio globais como volume e alto-falantes de saída."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"gravar áudio"</string>
@@ -1322,11 +1338,9 @@
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Concluído"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Saída de mídia"</string>
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Tela integrada"</string>
-    <!-- no translation found for display_manager_hdmi_display_name (1555264559227470109) -->
-    <skip />
+    <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"Tela HDMI"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Sobreposição nº <xliff:g id="ID">%1$d</xliff:g>"</string>
-    <!-- no translation found for display_manager_overlay_display_title (652124517672257172) -->
-    <skip />
+    <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Chamada de emergência"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Esqueci o padrão"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Padrão incorreto"</string>

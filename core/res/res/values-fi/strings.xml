@@ -256,6 +256,10 @@
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Antaa sovelluksen noutaa ikkunoiden tietoja ikkunanhallinnasta. Haitalliset sovellukset voivat noutaa tietoja, jotka on tarkoitettu järjestelmän sisäiseen käyttöön."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"suodata tapahtumat"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Antaa sovelluksen rekisteröidä syöttösuodattimen, joka suodattaa kaikkien käyttäjätapahtumien streamin ennen tapahtumien näyttämistä. Haitalliset sovellukset voivat hallita järjestelmän käyttöliittymää ilman käyttäjän lupaa."</string>
+    <!-- no translation found for permlab_magnify_display (5973626738170618775) -->
+    <skip />
+    <!-- no translation found for permdesc_magnify_display (7121235684515003792) -->
+    <skip />
     <string name="permlab_shutdown" msgid="7185747824038909016">"sulje puhelin osittain"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Asettaa toimintojen hallinnan sulkeutumistilaan. Ei sulje puhelinta kokonaan."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"estä sovellusten vaihto"</string>
@@ -286,6 +290,10 @@
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Antaa sovelluksen muuttaa yleistä animaationopeutta (nopeuttaa tai hidastaa animaatioita) milloin tahansa."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"sovellustunnusten hallinta"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Antaa sovelluksen luoda ja hallinnoida omia tunnuksia ohittaen tavallisen Z-järjestyksen. Ei tavallisten sovellusten käyttöön."</string>
+    <!-- no translation found for permlab_freezeScreen (4708181184441880175) -->
+    <skip />
+    <!-- no translation found for permdesc_freezeScreen (8558923789222670064) -->
+    <skip />
     <string name="permlab_injectEvents" msgid="1378746584023586600">"painaa näppäimiä ja hallintapainikkeita"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Antaa sovelluksen käyttää omia syötteitään (kuten näppäinpainalluksia) muissa sovelluksissa. Haitalliset sovellukset voivat ottaa tällä tablet-laitteen haltuun."</string>
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Antaa sovelluksen käyttää omia syötteitään (kuten näppäinpainalluksia) muissa sovelluksissa. Haitalliset sovellukset voivat ottaa tällä puhelimen haltuun."</string>
@@ -398,6 +406,14 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Antaa sovelluksen käyttää SurfaceFlingerin matalan tason ominaisuuksia."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"lue kehyspuskuria"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Antaa sovelluksen lukea kehyspuskurin sisältöä."</string>
+    <!-- no translation found for permlab_configureWifiDisplay (5595661694746742168) -->
+    <skip />
+    <!-- no translation found for permdesc_configureWifiDisplay (7916815158690218065) -->
+    <skip />
+    <!-- no translation found for permlab_controlWifiDisplay (393641276723695496) -->
+    <skip />
+    <!-- no translation found for permdesc_controlWifiDisplay (4543912292681826986) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"muuta ääniasetuksia"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Antaa sovelluksen muokata yleisiä ääniasetuksia, kuten äänenvoimakkuutta ja käytettävää kaiutinta."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"tallentaa ääntä"</string>
@@ -1322,11 +1338,9 @@
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Valmis"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Median äänentoisto"</string>
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Yhdysrakenteinen näyttö"</string>
-    <!-- no translation found for display_manager_hdmi_display_name (1555264559227470109) -->
-    <skip />
+    <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI-ruutu"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Peittokuva # <xliff:g id="ID">%1$d</xliff:g>"</string>
-    <!-- no translation found for display_manager_overlay_display_title (652124517672257172) -->
-    <skip />
+    <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Hätäpuhelu"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Unohtunut kuvio"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Väärä kuvio"</string>

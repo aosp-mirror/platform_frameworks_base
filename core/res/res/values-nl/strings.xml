@@ -256,6 +256,10 @@
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Toestaan dat een app gegevens over vensters kan ophalen uit vensterbeheer. Schadelijke apps kunnen gegevens ophalen die zijn bedoeld voor interne systeemfunctionaliteit."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"evenementen filteren"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Toestaan dat een app een invoerfilter registreert waarmee de streams van alle gebruikersgebeurtenissen worden gefilterd voordat deze worden verzonden. Schadelijke apps kunnen de gebruikersinterface van het systeem beheren zonder tussenkomst van de gebruiker."</string>
+    <!-- no translation found for permlab_magnify_display (5973626738170618775) -->
+    <skip />
+    <!-- no translation found for permdesc_magnify_display (7121235684515003792) -->
+    <skip />
     <string name="permlab_shutdown" msgid="7185747824038909016">"gedeeltelijke uitschakeling"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Hiermee wordt activiteitenbeheer uitgeschakeld. Er wordt geen volledige uitschakeling uitgevoerd."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"schakelen tussen apps voorkomen"</string>
@@ -286,6 +290,10 @@
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Hiermee kan de app op elk gewenst moment de algemene animatiesnelheid wijzigen (snellere of tragere animaties)."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"app-tokens beheren"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Hiermee kan de app zelf tokens maken en beheren buiten de normale Z-rangschikking om. Dit is in principe nooit nodig voor normale apps."</string>
+    <!-- no translation found for permlab_freezeScreen (4708181184441880175) -->
+    <skip />
+    <!-- no translation found for permdesc_freezeScreen (8558923789222670064) -->
+    <skip />
     <string name="permlab_injectEvents" msgid="1378746584023586600">"drukken op toetsen en bedieningselementen"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Hiermee kan de app de eigen invoergebeurtenissen (zoals toetsaanslagen) aan andere apps doorgeven. Schadelijke apps kunnen dit gebruiken om de tablet over te nemen."</string>
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Hiermee kan de app de eigen invoergebeurtenissen (toetsaanslagen, enzovoort) aan andere apps doorgeven. Schadelijke apps kunnen dit gebruiken om de telefoon over te nemen."</string>
@@ -398,6 +406,14 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Hiermee kan de app SurfaceFlinger-functies op laag niveau gebruiken."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"framebuffer lezen"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Hiermee kan de app de inhoud van de framebuffer lezen."</string>
+    <!-- no translation found for permlab_configureWifiDisplay (5595661694746742168) -->
+    <skip />
+    <!-- no translation found for permdesc_configureWifiDisplay (7916815158690218065) -->
+    <skip />
+    <!-- no translation found for permlab_controlWifiDisplay (393641276723695496) -->
+    <skip />
+    <!-- no translation found for permdesc_controlWifiDisplay (4543912292681826986) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"uw audio-instellingen wijzigen"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Hiermee kan de app algemene audio-instellingen wijzigen zoals het volume en welke luidspreker wordt gebruikt voor de uitvoer."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"audio opnemen"</string>
@@ -1322,11 +1338,9 @@
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Gereed"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Media-uitvoer"</string>
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Ingebouwd scherm"</string>
-    <!-- no translation found for display_manager_hdmi_display_name (1555264559227470109) -->
-    <skip />
+    <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI-scherm"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Overlay <xliff:g id="ID">%1$d</xliff:g>"</string>
-    <!-- no translation found for display_manager_overlay_display_title (652124517672257172) -->
-    <skip />
+    <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Noodoproep"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Patroon vergeten"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Onjuist patroon"</string>

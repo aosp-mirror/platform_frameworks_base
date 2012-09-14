@@ -256,6 +256,8 @@
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"מאפשר ליישום לאחזר מידע לגבי החלונות ממנהל החלונות. יישומים זדוניים עשויים לאחזר מידע המיועד לשימוש מערכת פנימי."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"סנן אירועים"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"מאפשר ליישום לרשום מסנן קלט שמסנן את הזרם של כל אירועי המשתמש לפני שהם נשלחים. יישום זדוני עשוי לשלוט ב-UI של המערכת ללא התערבות משתמש."</string>
+    <string name="permlab_magnify_display" msgid="5973626738170618775">"הגדלת תצוגה"</string>
+    <string name="permdesc_magnify_display" msgid="7121235684515003792">"מאפשר ליישום להגדיל את התוכן של תצוגה. יישומים זדוניים עלולים לשנות את תוכן התצוגה כך שהמכשיר יהפוך לבלתי שמיש."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"כיבוי חלקי"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"מעביר את מנהל הפעילויות למצב כיבוי. לא מבצע כיבוי מלא."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"מנע החלפת יישומים"</string>
@@ -286,6 +288,8 @@
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"הרשאה זו מאפשרת ליישום לשנות את מהירות ההנפשה הכללית (הנפשות מהירות או איטיות יותר) בכל עת."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"ניהול אסימוני יישומים"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"מאפשר ליישום ליצור ולנהל אסימונים משלהם, תוך עקיפת סידור ה-Z הרגיל שלהם. הרשאה זו לעולם אינה נחוצה ליישומים רגילים."</string>
+    <string name="permlab_freezeScreen" msgid="4708181184441880175">"הקפאת מסך"</string>
+    <string name="permdesc_freezeScreen" msgid="8558923789222670064">"מאפשר ליישום להקפיא באופן זמני את המסך למעבר למסך מלא."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"לחץ על מקשים ושלוט בלחצנים"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"מאפשר ליישום להעביר אירועי קלט (לחיצות על מקשים וכיוצא בזה) משלו ליישומים אחרים. יישומים זדוניים עלולים להשתמש בכך כדי להשתלט על הטבלט."</string>
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"מאפשר ליישום להעביר אירועי קלט (לחיצות על מקשים וכיוצא בזה) משלו ליישומים אחרים. יישומים זדוניים עלולים להשתמש בכך כדי להשתלט על הטלפון."</string>
@@ -398,6 +402,10 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"מאפשר ליישום להשתמש בתכונות ברמה הנמוכה של SurfaceFlinger."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"אחסון זמני של מסגרת קריאה"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"מאפשר ליישום לקרוא את התוכן של מאגר הנתונים הזמני של המסגרות."</string>
+    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"הגדר תצוגות Wifi"</string>
+    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"מאפשר ליישום להגדיר ולהתחבר לתצוגות Wifi."</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"שלוט בתצוגות Wifi"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"מאפשר ליישום לשלוט בתכונות ברמה נמוכה של תצוגות Wifi."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"שנה את הגדרות האודיו שלך"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"מאפשר ליישום לשנות הגדרות אודיו גלובליות כמו עוצמת קול ובחירת הרמקול המשמש לפלט."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"הקלט אודיו"</string>
@@ -547,7 +555,7 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"מאפשר ליישום לכתוב לכרטיס ה-SD."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"שנה/מחק תוכן של אחסון מדיה פנימי"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"מאפשר ליישום לשנות את התוכן של אמצעי האחסון הפנימי למדיה."</string>
-    <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"גישה לאחסון חיצוני של כל המשתמשים"</string>
+    <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"גישה לאחסון חיצוני, כל המשתמשים"</string>
     <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"מאפשר ליישום לגשת לאחסון חיצוני עבור כל המשתמשים."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"גישה למערכת הקבצים בקובץ השמור"</string>
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"מאפשר ליישום לקרוא ולכתוב במערכת הקבצים של הקבצים השמורים."</string>
@@ -579,10 +587,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"דרוש שנתוני יישומים מאוחסנים יהיו מוצפנים."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"השבת מצלמות"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"מנע שימוש בכל המצלמות שבמכשיר."</string>
-    <!-- no translation found for policylab_disableKeyguardWidgets (1794894613389073926) -->
-    <skip />
-    <!-- no translation found for policydesc_disableKeyguardWidgets (7254624892984033592) -->
-    <skip />
+    <string name="policylab_disableKeyguardWidgets" msgid="1794894613389073926">"השבת Widgets ב-Keyguard"</string>
+    <string name="policydesc_disableKeyguardWidgets" msgid="7254624892984033592">"מנע שימוש של חלק מה-Widgets או כולם ב-Keyguard"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"בית"</item>
     <item msgid="869923650527136615">"נייד"</item>
@@ -1322,11 +1328,9 @@
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"סיום"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"פלט מדיה"</string>
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"מסך מובנה"</string>
-    <!-- no translation found for display_manager_hdmi_display_name (1555264559227470109) -->
-    <skip />
+    <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"מסך HDMI"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"שכבת על #<xliff:g id="ID">%1$d</xliff:g>"</string>
-    <!-- no translation found for display_manager_overlay_display_title (652124517672257172) -->
-    <skip />
+    <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: ‎<xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>‎, ‏<xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"שיחת חירום"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"שכחת את הקו"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"קו ביטול נעילה שגוי"</string>
@@ -1358,7 +1362,7 @@
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"שרטטת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%d</xliff:g> פעמים. "\n\n"נסה שוב בעוד <xliff:g id="NUMBER_1">%d</xliff:g> שניות."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"ביצעת <xliff:g id="NUMBER_0">%d</xliff:g> ניסיונות שגויים לביטול נעילת הטלפון. לאחר <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות כושלים נוספים, הטאבלט יעבור איפוס לברירת המחדל של היצרן וכל נתוני המשתמש יאבדו."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"ביצעת <xliff:g id="NUMBER_0">%d</xliff:g> ניסיונות שגויים לביטול נעילת הטלפון. לאחר <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות כושלים נוספים, הטלפון יעבור איפוס לברירת המחדל של היצרן וכל נתוני המשתמש יאבדו."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"ביצעת <xliff:g id="NUMBER">%d</xliff:g> ניסיונות שגויים לביטול נעילת הטאבלט. הטלפון יעבור כעת איפוס לברירת המחדל של היצרן."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"ביצעת <xliff:g id="NUMBER">%d</xliff:g> ניסיונות שגויים לביטול נעילת הטאבלט. הטאבלט יעבור כעת איפוס לברירת המחדל של היצרן."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"ביצעת <xliff:g id="NUMBER">%d</xliff:g> ניסיונות שגויים לביטול נעילת הטלפון. הטלפון יעבור כעת איפוס לברירת המחדל של היצרן."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"שרטטת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%d</xliff:g> פעמים. לאחר <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את נעילת הטאבלט באמצעות חשבון דוא\"ל‏."\n\n"נסה שוב בעוד <xliff:g id="NUMBER_2">%d</xliff:g> שניות."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"שרטטת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%d</xliff:g> פעמים. לאחר <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את נעילת הטלפון באמצעות חשבון דוא\"ל‏."\n\n"נסה שוב בעוד <xliff:g id="NUMBER_2">%d</xliff:g> שניות."</string>

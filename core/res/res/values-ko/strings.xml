@@ -256,6 +256,10 @@
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"애플리케이션이 Window Manager에서 창 관련 정보를 가져오도록 허용합니다. 이 경우 악성 앱이 내부 시스템에서만 사용하도록 되어 있는 정보를 가져올 수 있습니다."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"일정 필터링"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"애플리케이션에 입력 필터를 등록할 수 있도록 하여 모든 사용자 일정 스트림을 전달하기 전에 필터링합니다. 이 경우 사용자의 개입 없이 악성 앱이 시스템 UI를 제어할 수 있습니다."</string>
+    <!-- no translation found for permlab_magnify_display (5973626738170618775) -->
+    <skip />
+    <!-- no translation found for permdesc_magnify_display (7121235684515003792) -->
+    <skip />
     <string name="permlab_shutdown" msgid="7185747824038909016">"부분 종료"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"작업 관리자를 종료 상태로 설정합니다. 전체 종료를 수행하지는 않습니다."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"애플리케이션 전환 방지"</string>
@@ -286,6 +290,10 @@
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"애플리케이션이 언제든지 전체 애니메이션 속도를 빠르게 또는 느리게 변경할 수 있도록 허용합니다."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"앱 토큰 관리"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"앱이 일반적인 Z-순서를 무시하여 자체 토큰을 만들고 관리할 수 있도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
+    <!-- no translation found for permlab_freezeScreen (4708181184441880175) -->
+    <skip />
+    <!-- no translation found for permdesc_freezeScreen (8558923789222670064) -->
+    <skip />
     <string name="permlab_injectEvents" msgid="1378746584023586600">"키 및 컨트롤 버튼 누르기"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"앱이 입력 이벤트(예: 키 누름)를 다른 앱에 전달할 수 있도록 허용합니다. 이 경우 악성 앱이 태블릿을 완전히 제어할 수 있습니다."</string>
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"앱이 입력 이벤트(예: 키 누름)를 다른 앱에 전달할 수 있도록 허용합니다. 이 경우 악성 앱이 휴대전화를 완전히 제어할 수 있습니다."</string>
@@ -398,6 +406,14 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"앱이 SurfaceFlinger의 하위 수준 기능을 사용할 수 있도록 허용합니다."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"프레임 버퍼 읽기"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"앱이 프레임 버퍼의 내용을 읽을 수 있도록 허용합니다."</string>
+    <!-- no translation found for permlab_configureWifiDisplay (5595661694746742168) -->
+    <skip />
+    <!-- no translation found for permdesc_configureWifiDisplay (7916815158690218065) -->
+    <skip />
+    <!-- no translation found for permlab_controlWifiDisplay (393641276723695496) -->
+    <skip />
+    <!-- no translation found for permdesc_controlWifiDisplay (4543912292681826986) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"오디오 설정 변경"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"앱이 음량이나 출력을 위해 사용하는 스피커 등 전체 오디오 설정을 변경할 수 있도록 허용합니다."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"오디오 녹음"</string>
@@ -931,7 +947,7 @@
     <string name="years" msgid="6881577717993213522">"년"</string>
     <string name="VideoView_error_title" msgid="3534509135438353077">"영상 문제"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"이 기기로 스트리밍하기에 적합하지 않은 동영상입니다."</string>
-    <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"동영상이 재생되지 않습니까?"</string>
+    <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"동영상을 재생할 수 없습니다."</string>
     <string name="VideoView_error_button" msgid="2822238215100679592">"확인"</string>
     <string name="relative_time" msgid="1818557177829411417">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="noon" msgid="7245353528818587908">"정오"</string>
@@ -1322,11 +1338,9 @@
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"완료"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"미디어 출력"</string>
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"기본으로 제공되는 화면"</string>
-    <!-- no translation found for display_manager_hdmi_display_name (1555264559227470109) -->
-    <skip />
+    <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI 화면"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"<xliff:g id="ID">%1$d</xliff:g>번째 오버레이"</string>
-    <!-- no translation found for display_manager_overlay_display_title (652124517672257172) -->
-    <skip />
+    <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"긴급 통화"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"패턴을 잊음"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"잘못된 패턴"</string>

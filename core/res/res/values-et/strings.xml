@@ -256,6 +256,10 @@
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Võimaldab rakendusel hankida teavet aknahalduri akende kohta. Pahatahtlikud rakendused võivad hankida teavet, mis on mõeldud süsteemisiseseks kasutamiseks."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"filtreeri sündmused"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Võimaldab rakendusel registreerida sisestusfiltri, mis filtreerib kõigi kasutaja sündmuste voo, enne kui need ära saadetakse. Pahatahtlik rakendus võib süsteemi kasutajaliidest juhtida ilma kasutaja sekkumiseta."</string>
+    <!-- no translation found for permlab_magnify_display (5973626738170618775) -->
+    <skip />
+    <!-- no translation found for permdesc_magnify_display (7121235684515003792) -->
+    <skip />
     <string name="permlab_shutdown" msgid="7185747824038909016">"osaline väljalülitamine"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Lülitab tegevushalduri väljalülitusolekusse. Ei lülita lõplikult välja."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"väldi rakenduste ümberlülitamist"</string>
@@ -286,6 +290,10 @@
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Võimaldab rakendusel muuta animatsiooni üldist kiirust (animatsioone kiirendada või aeglustada) ükskõik millal."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"Rakenduse lubade haldamine"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Võimaldab rakendusel luua ja hallata tema enda lube, möödudes tavapärasest Z-järjekorrast. Tavarakenduste puhul ei peaks seda kunagi vaja minema."</string>
+    <!-- no translation found for permlab_freezeScreen (4708181184441880175) -->
+    <skip />
+    <!-- no translation found for permdesc_freezeScreen (8558923789222670064) -->
+    <skip />
     <string name="permlab_injectEvents" msgid="1378746584023586600">"vajuta klahve ja juhtnuppe"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Võimaldab rakendusel saata oma sisendtoiminguid (klahvivajutusi jms) teistele rakendustele. Pahatahtlikud rakendused võivad seda kasutada tahvelarvuti ülevõtmiseks."</string>
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Võimaldab rakendusel saata oma sisendtoiminguid (klahvivajutusi jms) teistele rakendustele. Pahatahtlikud rakendused võivad seda kasutada telefoni ülevõtmiseks."</string>
@@ -398,6 +406,14 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Võimaldab rakendusel kasutada SurfaceFlingeri madalatasemelisi funktsioone."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"loe kaadripuhvrit"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Võimaldab rakendusel kaadripuhvri sisu lugeda."</string>
+    <!-- no translation found for permlab_configureWifiDisplay (5595661694746742168) -->
+    <skip />
+    <!-- no translation found for permdesc_configureWifiDisplay (7916815158690218065) -->
+    <skip />
+    <!-- no translation found for permlab_controlWifiDisplay (393641276723695496) -->
+    <skip />
+    <!-- no translation found for permdesc_controlWifiDisplay (4543912292681826986) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"muuda heliseadeid"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Võimaldab rakendusel muuta üldiseid heliseadeid, näiteks helitugevust ja seda, millist kõlarit kasutatakse väljundiks."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"salvesta heli"</string>
@@ -547,8 +563,8 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Võimaldab rakendusel kirjutada SD-kaardile."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"sisemälu sisu muutm./kustut."</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Võimaldab rakendusel muuta sisemise andmekandja sisu."</string>
-    <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"juurdepääs kõikide kasutajate välismäluseadmele"</string>
-    <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"Võimaldab rakenduse kõikidel kasutajatel hankida juurdepääsu välismäluseadmele."</string>
+    <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"juurdepääs välismäluseadmele (kõikidele kasutajatele)"</string>
+    <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"Võimaldab rakenduse kõikidel kasutajatel pöörduda välismäluseadme poole."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"juurdepääs vahemälu failisüsteemile"</string>
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Võimaldab rakendusel vahemälu failisüsteemi lugeda ja kirjutada."</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"Interneti-kõnede tegemine/vastuvõtmine"</string>
@@ -1322,13 +1338,11 @@
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Valmis"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Meediaväljund"</string>
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Sisseehitatud ekraan"</string>
-    <!-- no translation found for display_manager_hdmi_display_name (1555264559227470109) -->
-    <skip />
-    <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Ülekate nr<xliff:g id="ID">%1$d</xliff:g>"</string>
-    <!-- no translation found for display_manager_overlay_display_title (652124517672257172) -->
-    <skip />
+    <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI-ekraan"</string>
+    <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Ülekate nr .<xliff:g id="ID">%1$d</xliff:g>"</string>
+    <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Hädaabikõne"</string>
-    <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Unustasite mustri"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Unustasin mustri"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Vale muster"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Vale parool"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"Vale PIN-kood"</string>
@@ -1360,7 +1374,7 @@
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Olete üritanud <xliff:g id="NUMBER_0">%d</xliff:g> korda telefoni valesti avada. Pärast veel <xliff:g id="NUMBER_1">%d</xliff:g> ebaõnnestunud katset lähtestatakse telefon tehase vaikeseadetele ja kõik kasutajaandmed lähevad kaotsi."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Olete püüdnud tahvelarvutit <xliff:g id="NUMBER">%d</xliff:g> korda valesti avada. Tahvelarvuti lähtestatakse nüüd tehase vaikeseadetele."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Olete püüdnud telefoni <xliff:g id="NUMBER">%d</xliff:g> korda valesti avada. Telefon lähtestatakse nüüd tehase vaikeseadetele."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Joonistasite oma avamismustri <xliff:g id="NUMBER_0">%d</xliff:g> korda valesti. Kui olete teinud veel <xliff:g id="NUMBER_1">%d</xliff:g> ebaõnnestunud katset, palutakse teil tahvelarvuti avada meilikontoga."\n\n" Proovige uuesti <xliff:g id="NUMBER_2">%d</xliff:g> sekundi pärast."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Joonistasite oma avamismustri <xliff:g id="NUMBER_0">%d</xliff:g> korda valesti. Kui olete teinud veel <xliff:g id="NUMBER_1">%d</xliff:g> ebaõnnestunud katset, palutakse teil telefon avada meilikontoga."\n\n" Proovige uuesti <xliff:g id="NUMBER_2">%d</xliff:g> sekundi pärast."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Joonistasite oma avamismustri <xliff:g id="NUMBER_0">%d</xliff:g> korda valesti. Pärast veel <xliff:g id="NUMBER_1">%d</xliff:g> ebaõnnestunud katset palutakse teil tahvelarvuti avada meilikontoga."\n\n" Proovige uuesti <xliff:g id="NUMBER_2">%d</xliff:g> sekundi pärast."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Joonistasite oma avamismustri <xliff:g id="NUMBER_0">%d</xliff:g> korda valesti. Pärast veel <xliff:g id="NUMBER_1">%d</xliff:g> ebaõnnestunud katset palutakse teil telefon avada meilikontoga."\n\n" Proovige uuesti <xliff:g id="NUMBER_2">%d</xliff:g> sekundi pärast."</string>
     <string name="kg_temp_back_string" msgid="5812983904056640466">"&lt;"</string>
 </resources>

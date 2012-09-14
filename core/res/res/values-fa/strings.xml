@@ -142,7 +142,7 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"زنگ خاموش"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"زنگ لرزشی"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"زنگ روشن"</string>
-    <string name="shutdown_progress" msgid="2281079257329981203">"خاموش کردن..."</string>
+    <string name="shutdown_progress" msgid="2281079257329981203">"در حال خاموش شدن…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"رایانهٔ لوحی شما خاموش می‌شود."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"گوشی شما خاموش می‌شود."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"آیا می‎خواهید تلفن خاموش شود؟"</string>
@@ -256,6 +256,10 @@
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"به یک برنامه کاربردی اجازه می‌دهد که اطلاعات مربوط به پنجره‌ها را از مدیریت پنجره بازیابی کند. برنامه‌های کاربردی مخرب ممکن است اطلاعاتی که برای استفاده سیستم داخلی درنظر گرفته شده‌اند را بازیابی کنند."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"فیلتر کردن رویدادها"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"به یک برنامه کاربردی اجازه می‌دهد یک فیلتر ورودی را که جریان تمام رویدادهای کاربران را قبل از ارسال شدن فیلتر می‌کند، ثبت نماید. برنامه‌ کاربردی مخرب ممکن است رابط کاربری سیستم را بدون مداخله کاربر، کنترل کند."</string>
+    <!-- no translation found for permlab_magnify_display (5973626738170618775) -->
+    <skip />
+    <!-- no translation found for permdesc_magnify_display (7121235684515003792) -->
+    <skip />
     <string name="permlab_shutdown" msgid="7185747824038909016">"خاموش شدن جزئی"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"مدیر فعالیت را در حالت خاموشی قرار می‌دهد. خاموشی را به صورت کامل انجام نمی‌دهد."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"ممانعت از جابجایی برنامه"</string>
@@ -276,7 +280,7 @@
     <string name="permdesc_batteryStats" msgid="6835186932305744068">"به برنامه اجازه می‎دهد تا آمار جمع‌آوری شده باتری را تغییر دهد. برای استفاده برنامه‎های عادی نیست."</string>
     <string name="permlab_backup" msgid="470013022865453920">"کنترل نسخهٔ پشتیبان سیستم و بازیابی"</string>
     <string name="permdesc_backup" msgid="6912230525140589891">"به برنامه اجازه می‎دهد پشتیبان سیستم را کنترل کند و مکانیستم را بازیابی کند. برای استفاده برنامه‎های عادی نیست."</string>
-    <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"تهیه نسخهٔ پشتیبان کامل را تأیید کرده یا عملیات را بازیابی کنید"</string>
+    <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"تهیهٔ نسخهٔ پشتیبان کامل را تأیید کرده یا عملیات را بازیابی کنید"</string>
     <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"به برنامه اجازه می‎دهد تا رابط کاربر تایید نسخه کامل پشتیبان را راه‌اندازی کند. هر برنامه‌ای نمی‎تواند از آن استفاده کند."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"نمایش پنجره‌های غیرمجاز"</string>
     <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"به برنامه اجازه می‎دهد پنجره‎هایی را ایجاد کند که می‎خواهد توسط رابط کاربر سیستم داخلی استفاده شود. برای استفاده برنامه‎های عادی نیست."</string>
@@ -286,6 +290,10 @@
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"به برنامه اجازه می‎دهد سرعت کلی انیمیشن را هر زمان که بخواهد تغییر دهد (انیمیشن‎های سریعتر یا آهسته‎تر)."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"مدیریت نشانه‎های برنامه"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"به برنامه اجازه می‎دهد با ایجاد کنارگذر از سفارش عادی Z، نشانه‎های خود را ایجاد و مدیریت کند. برای برنامه‎های عادی مورد نیاز است."</string>
+    <!-- no translation found for permlab_freezeScreen (4708181184441880175) -->
+    <skip />
+    <!-- no translation found for permdesc_freezeScreen (8558923789222670064) -->
+    <skip />
     <string name="permlab_injectEvents" msgid="1378746584023586600">"کلیدها و دکمه‌های کنترل را فشار دهید"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"به برنامه اجازه می‎دهد تا رویدادهای ورودی خود (فشردن کلیدها و غیره) را تحویل دهد. برنامه‎های مخرب می‎توانند از آن استفاده کنند تا کارکرد رایانهٔ لوحی را کنترل کنند."</string>
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"به برنامه اجازه می‎دهد تا رویدادهای ورودی خود را به برنامه‎های دیگر تحویل دهد (فشردن کلیدها و غیره). برنامه‎های مخرب می‎توانند از آن برای کنترل کارکرد تلفن استفاده کنند."</string>
@@ -398,6 +406,14 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"اجازه می‎دهد برنامه از ویژگی‌های سطح پایین SurfaceFlinger استفاده کند."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"خواندن بافر قاب"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"به برنامه اجازه می‎دهد تا محتوای بافر کادر را بخواند."</string>
+    <!-- no translation found for permlab_configureWifiDisplay (5595661694746742168) -->
+    <skip />
+    <!-- no translation found for permdesc_configureWifiDisplay (7916815158690218065) -->
+    <skip />
+    <!-- no translation found for permlab_controlWifiDisplay (393641276723695496) -->
+    <skip />
+    <!-- no translation found for permdesc_controlWifiDisplay (4543912292681826986) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"تغییر تنظیمات صوتی"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"به برنامه امکان می‌دهد تنظیمات صوتی کلی مانند میزان صدا و بلندگوی مورد استفاده برای پخش صدا را اصلاح کند."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ضبط صدا"</string>
@@ -1322,18 +1338,16 @@
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"انجام شد"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"خروجی رسانه"</string>
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"صفحه نمایش از خود"</string>
-    <!-- no translation found for display_manager_hdmi_display_name (1555264559227470109) -->
-    <skip />
+    <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"صفحه HDMI"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"همپوشانی #<xliff:g id="ID">%1$d</xliff:g>"</string>
-    <!-- no translation found for display_manager_overlay_display_title (652124517672257172) -->
-    <skip />
+    <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"تماس اضطراری"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"الگو را فراموش کرده‌اید"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"الگوی اشتباه"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"گذرواژه اشتباه"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"پین اشتباه"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"پس از <xliff:g id="NUMBER">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
-    <string name="kg_pattern_instructions" msgid="398978611683075868">"رسم الگوی خود"</string>
+    <string name="kg_pattern_instructions" msgid="398978611683075868">"الگوی خود را رسم کنید"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"پین سیم کارت را وارد کنید"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"پین را وارد کنید"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"گذرواژه را وارد کنید"</string>
@@ -1350,7 +1364,7 @@
     <string name="kg_login_username_hint" msgid="5718534272070920364">"نام کاربری (ایمیل)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"گذرواژه"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"ورود به سیستم"</string>
-    <string name="kg_login_invalid_input" msgid="5754664119319872197">"نام کاربری و گذرواژه نامعتبر."</string>
+    <string name="kg_login_invalid_input" msgid="5754664119319872197">"نام کاربری یا گذرواژه نامعتبر."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"نام کاربری یا گذرواژه خود را فراموش کردید؟"\n"از "<b>"google.com/accounts/recovery"</b>" بازدید کنید."</string>
     <string name="kg_login_checking_password" msgid="8849589033659332457">"در حال بررسی..."</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"پین خود را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه تایپ کردید. "\n\n"پس از <xliff:g id="NUMBER_1">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>

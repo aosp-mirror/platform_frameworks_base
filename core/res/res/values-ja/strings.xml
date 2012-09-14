@@ -256,6 +256,10 @@
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"ウィンドウマネージャからウィンドウに関する情報を取得することをアプリに許可します。悪意のあるアプリが内部システムの利用を目的に情報を取得する恐れがあります。"</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"イベントのフィルタリング"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"すべてのユーザーイベントが送られる前にストリームをフィルタリングする入力フィルタを登録することをアプリに許可します。悪意のあるアプリがユーザーの操作なしでシステムUIを制御する恐れがあります。"</string>
+    <!-- no translation found for permlab_magnify_display (5973626738170618775) -->
+    <skip />
+    <!-- no translation found for permdesc_magnify_display (7121235684515003792) -->
+    <skip />
     <string name="permlab_shutdown" msgid="7185747824038909016">"部分的にシャットダウンする"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"アクティビティマネージャをシャットダウン状態にします。完全なシャットダウンは実行しません。"</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"アプリケーションの切り替えを禁止する"</string>
@@ -286,6 +290,10 @@
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"いつでもアニメーション全般の速度を変更する（速くする、または遅くする）ことをアプリに許可します。"</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"アプリのトークンの管理"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"通常のZ-orderingを回避して独自のトークンを作成、管理することをアプリに許可します。通常のアプリでは不要です。"</string>
+    <!-- no translation found for permlab_freezeScreen (4708181184441880175) -->
+    <skip />
+    <!-- no translation found for permdesc_freezeScreen (8558923789222670064) -->
+    <skip />
     <string name="permlab_injectEvents" msgid="1378746584023586600">"キーを押してボタンをコントロール"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"入力イベント（キーを押すなど）を他のアプリに伝えることをアプリに許可します。この許可を悪意のあるアプリに利用されると、タブレットが乗っ取られる恐れがあります。"</string>
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"入力イベント（キーを押すなど）を他のアプリに伝えることをアプリに許可します。この許可を悪意のあるアプリに利用されると、携帯端末が乗っ取られる恐れがあります。"</string>
@@ -398,6 +406,14 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"SurfaceFlingerの低レベルの機能の使用をアプリに許可します。"</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"フレームバッファの読み取り"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"フレームバッファの内容の読み取りをアプリに許可します。"</string>
+    <!-- no translation found for permlab_configureWifiDisplay (5595661694746742168) -->
+    <skip />
+    <!-- no translation found for permdesc_configureWifiDisplay (7916815158690218065) -->
+    <skip />
+    <!-- no translation found for permlab_controlWifiDisplay (393641276723695496) -->
+    <skip />
+    <!-- no translation found for permdesc_controlWifiDisplay (4543912292681826986) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"音声設定の変更"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"音声全般の設定（音量、出力に使用するスピーカーなど）の変更をアプリに許可します。"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"録音"</string>
@@ -547,10 +563,8 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"SDカードへの書き込みをアプリに許可します。"</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"内部メディアストレージの内容の変更/削除"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"内部メディアストレージの内容を変更することをアプリに許可します。"</string>
-    <!-- no translation found for permlab_sdcardAccessAll (8150613823900460576) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardAccessAll (3215208357415891320) -->
-    <skip />
+    <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"全ユーザー外部ストレージへのアクセス"</string>
+    <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"すべてのユーザーの外部ストレージへのアクセスをアプリに許可します。"</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"キャッシュファイルシステムにアクセス"</string>
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"キャッシュファイルシステムの読み書きをアプリに許可します。"</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"インターネット通話の発着信"</string>
@@ -1323,84 +1337,44 @@
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth音声"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"完了"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"メディア出力"</string>
-    <!-- no translation found for display_manager_built_in_display_name (2583134294292563941) -->
-    <skip />
-    <!-- no translation found for display_manager_hdmi_display_name (1555264559227470109) -->
-    <skip />
-    <!-- no translation found for display_manager_overlay_display_name (5142365982271620716) -->
-    <skip />
-    <!-- no translation found for display_manager_overlay_display_title (652124517672257172) -->
-    <skip />
-    <!-- no translation found for kg_emergency_call_label (684946192523830531) -->
-    <skip />
-    <!-- no translation found for kg_forgot_pattern_button_text (8852021467868220608) -->
-    <skip />
-    <!-- no translation found for kg_wrong_pattern (1850806070801358830) -->
-    <skip />
-    <!-- no translation found for kg_wrong_password (2333281762128113157) -->
-    <skip />
-    <!-- no translation found for kg_wrong_pin (1131306510833563801) -->
-    <skip />
-    <!-- no translation found for kg_too_many_failed_attempts_countdown (6358110221603297548) -->
-    <skip />
-    <!-- no translation found for kg_pattern_instructions (398978611683075868) -->
-    <skip />
-    <!-- no translation found for kg_sim_pin_instructions (2319508550934557331) -->
-    <skip />
-    <!-- no translation found for kg_pin_instructions (2377242233495111557) -->
-    <skip />
-    <!-- no translation found for kg_password_instructions (5753646556186936819) -->
-    <skip />
-    <!-- no translation found for kg_puk_enter_puk_hint (5183097160254244459) -->
-    <skip />
-    <!-- no translation found for kg_puk_enter_pin_hint (597821135578014901) -->
-    <skip />
-    <!-- no translation found for kg_sim_unlock_progress_dialog_message (8950398016976865762) -->
-    <skip />
-    <!-- no translation found for kg_password_wrong_pin_code (1139324887413846912) -->
-    <skip />
-    <!-- no translation found for kg_invalid_sim_pin_hint (8795159358110620001) -->
-    <skip />
-    <!-- no translation found for kg_invalid_sim_puk_hint (5216603185442368307) -->
-    <skip />
-    <!-- no translation found for kg_sim_puk_recovery_hint (5577753137718442566) -->
-    <skip />
-    <!-- no translation found for kg_invalid_puk (5809955359950817326) -->
-    <skip />
-    <!-- no translation found for kg_login_too_many_attempts (6486842094005698475) -->
-    <skip />
-    <!-- no translation found for kg_login_instructions (1100551261265506448) -->
-    <skip />
-    <!-- no translation found for kg_login_username_hint (5718534272070920364) -->
-    <skip />
-    <!-- no translation found for kg_login_password_hint (9057289103827298549) -->
-    <skip />
-    <!-- no translation found for kg_login_submit_button (5355904582674054702) -->
-    <skip />
-    <!-- no translation found for kg_login_invalid_input (5754664119319872197) -->
-    <skip />
-    <!-- no translation found for kg_login_account_recovery_hint (5690709132841752974) -->
-    <skip />
-    <!-- no translation found for kg_login_checking_password (8849589033659332457) -->
-    <skip />
-    <!-- no translation found for kg_too_many_failed_pin_attempts_dialog_message (8276745642049502550) -->
-    <skip />
-    <!-- no translation found for kg_too_many_failed_password_attempts_dialog_message (7813713389422226531) -->
-    <skip />
-    <!-- no translation found for kg_too_many_failed_pattern_attempts_dialog_message (74089475965050805) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_wipe (1575557200627128949) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_wipe (4051015943038199910) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_wiping (2072996269148483637) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_wiping (4817627474419471518) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_login (3253575572118914370) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_login (1437638152015574839) -->
-    <skip />
-    <!-- no translation found for kg_temp_back_string (5812983904056640466) -->
-    <skip />
+    <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"内蔵スクリーン"</string>
+    <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI画面"</string>
+    <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"オーバーレイ第<xliff:g id="ID">%1$d</xliff:g>"</string>
+    <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>、<xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
+    <string name="kg_emergency_call_label" msgid="684946192523830531">"緊急通報"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"パターンを忘れた場合"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"パターンが正しくありません"</string>
+    <string name="kg_wrong_password" msgid="2333281762128113157">"パスワードが正しくありません"</string>
+    <string name="kg_wrong_pin" msgid="1131306510833563801">"PINが正しくありません"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%d</xliff:g>秒以内にもう一度お試しください。"</string>
+    <string name="kg_pattern_instructions" msgid="398978611683075868">"パターンを入力"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"SIM PINを入力"</string>
+    <string name="kg_pin_instructions" msgid="2377242233495111557">"PINを入力"</string>
+    <string name="kg_password_instructions" msgid="5753646556186936819">"パスワードを入力"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="5183097160254244459">"PUKコード"</string>
+    <string name="kg_puk_enter_pin_hint" msgid="597821135578014901">"新しいPINコード"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIMカードのロック解除中…"</string>
+    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"PINコードが正しくありません。"</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"PINは4～8桁の数字で入力してください。"</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="5216603185442368307">"PUKは8桁以上で入力してください。"</string>
+    <string name="kg_sim_puk_recovery_hint" msgid="5577753137718442566">"PUKと新しいPINコードを入力"</string>
+    <string name="kg_invalid_puk" msgid="5809955359950817326">"入力したPUKは正しくありません。"</string>
+    <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"パターンの入力を所定の回数以上間違えました。"</string>
+    <string name="kg_login_instructions" msgid="1100551261265506448">"ロックを解除するにはGoogleアカウントでログインしてください。"</string>
+    <string name="kg_login_username_hint" msgid="5718534272070920364">"ユーザー名（メール）"</string>
+    <string name="kg_login_password_hint" msgid="9057289103827298549">"パスワード"</string>
+    <string name="kg_login_submit_button" msgid="5355904582674054702">"ログイン"</string>
+    <string name="kg_login_invalid_input" msgid="5754664119319872197">"ユーザー名またはパスワードが無効です。"</string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"ユーザー名またはパスワードを忘れた場合は"\n" "<b>"google.com/accounts/recovery"</b>" にアクセスしてください。"</string>
+    <string name="kg_login_checking_password" msgid="8849589033659332457">"チェックしています…"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"PINの入力を<xliff:g id="NUMBER_0">%d</xliff:g>回間違えました。"\n\n"<xliff:g id="NUMBER_1">%d</xliff:g>秒以内にもう一度お試しください。"</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"パスワードの入力を<xliff:g id="NUMBER_0">%d</xliff:g>回間違えました。"\n\n"<xliff:g id="NUMBER_1">%d</xliff:g>秒以内にもう一度お試しください。"</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%d</xliff:g>回間違えました。"\n\n"<xliff:g id="NUMBER_1">%d</xliff:g>秒以内にもう一度お試しください。"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"タブレットのロック解除に<xliff:g id="NUMBER_0">%d</xliff:g>回失敗しました。あと<xliff:g id="NUMBER_1">%d</xliff:g>回失敗すると、タブレットは出荷時設定にリセットされ、ユーザーのデータはすべて失われます。"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"携帯端末のロック解除に<xliff:g id="NUMBER_0">%d</xliff:g>回失敗しました。あと<xliff:g id="NUMBER_1">%d</xliff:g>回失敗すると、端末は出荷時設定にリセットされ、ユーザーのデータはすべて失われます。"</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"タブレットのロック解除を<xliff:g id="NUMBER">%d</xliff:g>回失敗しました。タブレットは出荷時設定にリセットされます。"</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"携帯端末のロック解除を<xliff:g id="NUMBER">%d</xliff:g>回失敗しました。端末は出荷時設定にリセットされます。"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%d</xliff:g>回間違えると、タブレットのロック解除にメールアカウントが必要になります。"\n\n"<xliff:g id="NUMBER_2">%d</xliff:g>秒以内にもう一度お試しください。"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%d</xliff:g>回間違えると、携帯端末のロック解除にメールアカウントが必要になります。"\n\n"<xliff:g id="NUMBER_2">%d</xliff:g>秒以内にもう一度お試しください。"</string>
+    <string name="kg_temp_back_string" msgid="5812983904056640466">"&lt;"</string>
 </resources>
