@@ -52,7 +52,7 @@ public class Convolve3x3 extends TestBase {
 
         if (mUseIntrinsic) {
             mIntrinsic = ScriptIntrinsicConvolve3x3.create(mRS, Element.U8_4(mRS));
-            mIntrinsic.setColorMatrix(f);
+            mIntrinsic.setCoefficients(f);
             mIntrinsic.setInput(mInPixelsAllocation);
         } else {
             mScript = new ScriptC_convolve3x3(mRS, res, R.raw.convolve3x3);
