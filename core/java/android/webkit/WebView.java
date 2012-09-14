@@ -555,6 +555,7 @@ public class WebView extends AbsoluteLayout
      * Gets the visible height (in pixels) of the embedded title bar (if any).
      *
      * @deprecated This method is now obsolete.
+     * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
      */
     public int getVisibleTitleHeight() {
         checkThread();
@@ -658,6 +659,7 @@ public class WebView extends AbsoluteLayout
      * Notifications are enabled by default.
      *
      * @deprecated This method is now obsolete.
+     * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
      */
     @Deprecated
     public static void enablePlatformNotifications() {
@@ -670,6 +672,7 @@ public class WebView extends AbsoluteLayout
      * Notifications are enabled by default.
      *
      * @deprecated This method is now obsolete.
+     * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
      */
     @Deprecated
     public static void disablePlatformNotifications() {
@@ -694,14 +697,11 @@ public class WebView extends AbsoluteLayout
      * {@link android.app.Activity#onSaveInstanceState}. Please note that this
      * method no longer stores the display data for this WebView. The previous
      * behavior could potentially leak files if {@link #restoreState} was never
-     * called. See {@link #savePicture} and {@link #restorePicture} for saving
-     * and restoring the display data.
+     * called.
      *
      * @param outState the Bundle to store this WebView's state
      * @return the same copy of the back/forward list used to save the state. If
      *         saveState fails, the returned list will be null.
-     * @see #savePicture
-     * @see #restorePicture
      */
     public WebBackForwardList saveState(Bundle outState) {
         checkThread();
@@ -716,6 +716,7 @@ public class WebView extends AbsoluteLayout
      *             overwritten with this WebView's picture data.
      * @return true if the picture was successfully saved
      * @deprecated This method is now obsolete.
+     * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
      */
     @Deprecated
     public boolean savePicture(Bundle b, final File dest) {
@@ -732,6 +733,7 @@ public class WebView extends AbsoluteLayout
      * @param src the file where the picture data was stored
      * @return true if the picture was successfully restored
      * @deprecated This method is now obsolete.
+     * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
      */
     @Deprecated
     public boolean restorePicture(Bundle b, File src) {
@@ -746,13 +748,10 @@ public class WebView extends AbsoluteLayout
      * it is called after this WebView has had a chance to build state (load
      * pages, create a back/forward list, etc.) there may be undesirable
      * side-effects. Please note that this method no longer restores the
-     * display data for this WebView. See {@link #savePicture} and {@link
-     * #restorePicture} for saving and restoring the display data.
+     * display data for this WebView.
      *
      * @param inState the incoming Bundle of state
      * @return the restored back/forward list or null if restoreState failed
-     * @see #savePicture
-     * @see #restorePicture
      */
     public WebBackForwardList restoreState(Bundle inState) {
         checkThread();
@@ -1334,12 +1333,11 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Highlights and scrolls to the next match found by {@link #findAll} or
+     * Highlights and scrolls to the next match found by
      * {@link #findAllAsync}, wrapping around page boundaries as necessary.
-     * Notifies any registered {@link FindListener}. If neither
-     * {@link #findAll} nor {@link #findAllAsync(String)} has been called yet,
-     * or if {@link #clearMatches} has been called since the last find
-     * operation, this function does nothing.
+     * Notifies any registered {@link FindListener}. If {@link #findAllAsync(String)}
+     * has not been called yet, or if {@link #clearMatches} has been called since the
+     * last find operation, this function does nothing.
      *
      * @param forward the direction to search
      * @see #setFindListener
@@ -1368,8 +1366,7 @@ public class WebView extends AbsoluteLayout
     /**
      * Finds all instances of find on the page and highlights them,
      * asynchronously. Notifies any registered {@link FindListener}.
-     * Successive calls to this or {@link #findAll} will cancel any
-     * pending searches.
+     * Successive calls to this will cancel any pending searches.
      *
      * @param find the string to find.
      * @see #setFindListener
@@ -1423,7 +1420,7 @@ public class WebView extends AbsoluteLayout
 
     /**
      * Clears the highlighting surrounding text matches created by
-     * {@link #findAll} or {@link #findAllAsync}.
+     * {@link #findAllAsync}.
      */
     public void clearMatches() {
         checkThread();
@@ -1483,6 +1480,7 @@ public class WebView extends AbsoluteLayout
      *
      * @param listener an implementation of WebView.PictureListener
      * @deprecated This method is now obsolete.
+     * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
      */
     @Deprecated
     public void setPictureListener(PictureListener listener) {
@@ -1590,6 +1588,7 @@ public class WebView extends AbsoluteLayout
      * functionality; it will be deprecated in the future.
      *
      * @deprecated This method is now obsolete.
+     * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
      */
     @Deprecated
     public void emulateShiftHeld() {
@@ -1709,6 +1708,7 @@ public class WebView extends AbsoluteLayout
 
     /**
      * @deprecated This method is now obsolete.
+     * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
      */
     @Deprecated
     public void debugDump() {

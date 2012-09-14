@@ -26107,35 +26107,6 @@ package android.view.textservice {
 
 package android.webkit {
 
-  public final deprecated class CacheManager {
-    ctor public CacheManager();
-    method public static deprecated boolean cacheDisabled();
-    method public static deprecated boolean endCacheTransaction();
-    method public static deprecated android.webkit.CacheManager.CacheResult getCacheFile(java.lang.String, java.util.Map<java.lang.String, java.lang.String>);
-    method public static deprecated java.io.File getCacheFileBaseDir();
-    method public static deprecated void saveCacheFile(java.lang.String, android.webkit.CacheManager.CacheResult);
-    method public static deprecated boolean startCacheTransaction();
-  }
-
-  public static deprecated class CacheManager.CacheResult {
-    ctor public CacheManager.CacheResult();
-    method public java.lang.String getContentDisposition();
-    method public long getContentLength();
-    method public java.lang.String getETag();
-    method public java.lang.String getEncoding();
-    method public long getExpires();
-    method public java.lang.String getExpiresString();
-    method public int getHttpStatusCode();
-    method public java.io.InputStream getInputStream();
-    method public java.lang.String getLastModified();
-    method public java.lang.String getLocalPath();
-    method public java.lang.String getLocation();
-    method public java.lang.String getMimeType();
-    method public java.io.OutputStream getOutputStream();
-    method public void setEncoding(java.lang.String);
-    method public void setInputStream(java.io.InputStream);
-  }
-
   public class ConsoleMessage {
     ctor public ConsoleMessage(java.lang.String, java.lang.String, int, android.webkit.ConsoleMessage.MessageLevel);
     method public int lineNumber();
@@ -26298,7 +26269,6 @@ package android.webkit {
 
   public class WebHistoryItem implements java.lang.Cloneable {
     method public android.graphics.Bitmap getFavicon();
-    method public deprecated int getId();
     method public java.lang.String getOriginalUrl();
     method public java.lang.String getTitle();
     method public java.lang.String getUrl();
@@ -26357,7 +26327,6 @@ package android.webkit {
     method public synchronized boolean getLoadsImagesAutomatically();
     method public synchronized int getMinimumFontSize();
     method public synchronized int getMinimumLogicalFontSize();
-    method public deprecated boolean getNavDump();
     method public synchronized android.webkit.WebSettings.PluginState getPluginState();
     method public deprecated synchronized boolean getPluginsEnabled();
     method public deprecated synchronized java.lang.String getPluginsPath();
@@ -26368,10 +26337,7 @@ package android.webkit {
     method public synchronized java.lang.String getStandardFontFamily();
     method public deprecated synchronized android.webkit.WebSettings.TextSize getTextSize();
     method public synchronized int getTextZoom();
-    method public deprecated synchronized boolean getUseDoubleTree();
-    method public deprecated boolean getUseWebViewBackgroundForOverscrollBackground();
     method public synchronized boolean getUseWideViewPort();
-    method public deprecated synchronized int getUserAgent();
     method public synchronized java.lang.String getUserAgentString();
     method public void setAllowContentAccess(boolean);
     method public void setAllowFileAccess(boolean);
@@ -26406,7 +26372,6 @@ package android.webkit {
     method public synchronized void setLoadsImagesAutomatically(boolean);
     method public synchronized void setMinimumFontSize(int);
     method public synchronized void setMinimumLogicalFontSize(int);
-    method public deprecated void setNavDump(boolean);
     method public void setNeedInitialFocus(boolean);
     method public synchronized void setPluginState(android.webkit.WebSettings.PluginState);
     method public deprecated synchronized void setPluginsEnabled(boolean);
@@ -26421,10 +26386,7 @@ package android.webkit {
     method public void setSupportZoom(boolean);
     method public deprecated synchronized void setTextSize(android.webkit.WebSettings.TextSize);
     method public synchronized void setTextZoom(int);
-    method public deprecated synchronized void setUseDoubleTree(boolean);
-    method public deprecated void setUseWebViewBackgroundForOverscrollBackground(boolean);
     method public synchronized void setUseWideViewPort(boolean);
-    method public deprecated synchronized void setUserAgent(int);
     method public synchronized void setUserAgentString(java.lang.String);
     method public synchronized boolean supportMultipleWindows();
     method public boolean supportZoom();
@@ -26529,12 +26491,8 @@ package android.webkit {
     method public void clearSslPreferences();
     method public void clearView();
     method public android.webkit.WebBackForwardList copyBackForwardList();
-    method public deprecated void debugDump();
     method public void destroy();
-    method public static deprecated void disablePlatformNotifications();
     method public void documentHasImages(android.os.Message);
-    method public deprecated void emulateShiftHeld();
-    method public static deprecated void enablePlatformNotifications();
     method public static java.lang.String findAddress(java.lang.String);
     method public deprecated int findAll(java.lang.String);
     method public void findAllAsync(java.lang.String);
@@ -26552,7 +26510,6 @@ package android.webkit {
     method public android.webkit.WebSettings getSettings();
     method public java.lang.String getTitle();
     method public java.lang.String getUrl();
-    method public deprecated int getVisibleTitleHeight();
     method public void goBack();
     method public void goBackOrForward(int);
     method public void goForward();
@@ -26577,11 +26534,9 @@ package android.webkit {
     method public void removeJavascriptInterface(java.lang.String);
     method public void requestFocusNodeHref(android.os.Message);
     method public void requestImageRef(android.os.Message);
-    method public deprecated boolean restorePicture(android.os.Bundle, java.io.File);
     method public android.webkit.WebBackForwardList restoreState(android.os.Bundle);
     method public void resumeTimers();
     method public void savePassword(java.lang.String, java.lang.String, java.lang.String);
-    method public deprecated boolean savePicture(android.os.Bundle, java.io.File);
     method public android.webkit.WebBackForwardList saveState(android.os.Bundle);
     method public void saveWebArchive(java.lang.String);
     method public void saveWebArchive(java.lang.String, boolean, android.webkit.ValueCallback<java.lang.String>);
@@ -26593,7 +26548,6 @@ package android.webkit {
     method public void setInitialScale(int);
     method public void setMapTrackballToArrowKeys(boolean);
     method public void setNetworkAvailable(boolean);
-    method public deprecated void setPictureListener(android.webkit.WebView.PictureListener);
     method public void setVerticalScrollbarOverlay(boolean);
     method public void setWebChromeClient(android.webkit.WebChromeClient);
     method public void setWebViewClient(android.webkit.WebViewClient);
@@ -26677,7 +26631,6 @@ package android.webkit {
     method public boolean hasFormData();
     method public boolean hasHttpAuthUsernamePassword();
     method public boolean hasUsernamePassword();
-    field protected static final java.lang.String LOGTAG = "webviewdatabase";
   }
 
   public class WebViewFragment extends android.app.Fragment {
