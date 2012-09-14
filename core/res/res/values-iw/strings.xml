@@ -171,12 +171,47 @@
     <string name="permgrouplab_messages" msgid="7521249148445456662">"ההודעות שלך"</string>
     <string name="permgroupdesc_messages" msgid="7821999071003699236">"קריאה וכתיבה בהודעות ה-SMS, הדוא\"ל והודעות אחרות שלך."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"המידע האישי שלך"</string>
-    <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"גישה ישירה לאנשי הקשר וללוח השנה המאוחסנים בטבלט."</string>
-    <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"גישה ישירה לאנשי הקשר וללוח השנה המאוחסנים בטלפון."</string>
+    <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"גישה ישירה למידע עליך, המאוחסן בכרטיס איש הקשר שלך."</string>
+    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"מידע על הקשרים החברתיים שלך"</string>
+    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"גישה ישירה למידע על אנשי קשר וקשרים חברתיים שלך."</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"המיקום שלך"</string>
     <string name="permgroupdesc_location" msgid="5704679763124170100">"עקוב אחר המיקום הפיזי שלך."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"תקשורת רשת"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"הרשאת גישה לתכונות רשת שונות."</string>
+    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"Bluetooth"</string>
+    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"גישה למכשירים ולרשתות באמצעות Bluetooth."</string>
+    <string name="permgrouplab_shortrangeNetwork" msgid="130808676377486118">"רשתות לטווח קצר"</string>
+    <string name="permgroupdesc_shortrangeNetwork" msgid="1884069062653436007">"גישה למכשירים באמצעות רשתות קצרות-טווח, כגון רשתות NFC."</string>
+    <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"הגדרות אודיו"</string>
+    <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"שינוי הגדרות האודיו."</string>
+    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"השפעה על הסוללה"</string>
+    <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"שימוש בתכונות שיכולות לרוקן את הסוללה במהירות."</string>
+    <string name="permgrouplab_calendar" msgid="5863508437783683902">"לוח שנה"</string>
+    <string name="permgroupdesc_calendar" msgid="5777534316982184416">"גישה ישירה ללוח השנה ולאירועים."</string>
+    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"קריאת מילון משתמש"</string>
+    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"קריאת מילים במילון משתמש."</string>
+    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"כתיבת מילון משתמש"</string>
+    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"הוספת מילים למילון משתמש."</string>
+    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"סימניות והיסטוריה"</string>
+    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"גישה ישירה אל סימניות והיסטוריית דפדפן."</string>
+    <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"שעון מעורר"</string>
+    <string name="permgroupdesc_deviceAlarms" msgid="4769356362251641175">"הגדרת השעון המעורר."</string>
+    <string name="permgrouplab_voicemail" msgid="4162237145027592133">"דואר קולי"</string>
+    <string name="permgroupdesc_voicemail" msgid="2498403969862951393">"גישה ישירה לדואר הקולי."</string>
+    <string name="permgrouplab_microphone" msgid="171539900250043464">"מיקרופון"</string>
+    <string name="permgroupdesc_microphone" msgid="7106618286905738408">"גישה ישירה אל המיקרופון להקלטת אודיו."</string>
+    <string name="permgrouplab_camera" msgid="4820372495894586615">"מצלמה"</string>
+    <string name="permgroupdesc_camera" msgid="2933667372289567714">"גישה ישירה למצלמה לצילום תמונות או וידאו."</string>
+    <string name="permgrouplab_appInfo" msgid="8028789762634147725">"מידע על היישומים שלך"</string>
+    <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"יכולת להשפיע על התנהגותם של יישומים אחרים במכשיר."</string>
+    <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"טפט"</string>
+    <string name="permgroupdesc_wallpaper" msgid="5630417854750540154">"שינוי הגדרות הטפט של המכשיר."</string>
+    <string name="permgrouplab_systemClock" msgid="406535759236612992">"שעון"</string>
+    <string name="permgroupdesc_systemClock" msgid="3944359833624094992">"שינוי השעה או אזור הזמן של המכשיר."</string>
+    <string name="permgrouplab_statusBar" msgid="2095862568113945398">"שורת המצב"</string>
+    <string name="permgroupdesc_statusBar" msgid="6242593432226807171">"שינוי הגדרות שורת המצב של המכשיר."</string>
+    <string name="permgrouplab_syncSettings" msgid="3341990986147826541">"הגדרות סנכרון"</string>
+    <string name="permgroupdesc_syncSettings" msgid="7603195265129031797">"גישה להגדרות הסנכרון."</string>
     <string name="permgrouplab_accounts" msgid="3359646291125325519">"החשבונות שלך"</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"גישה לכל החשבונות הזמינים."</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"בקרת חומרה"</string>
@@ -187,6 +222,8 @@
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"גישה ושליטה במערכת ברמה נמוכה."</string>
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"כלי פיתוח"</string>
     <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"תכונות הדרושות למפתחי יישומים בלבד."</string>
+    <string name="permgrouplab_display" msgid="4279909676036402636">"ממשק המשתמש של יישום אחר"</string>
+    <string name="permgroupdesc_display" msgid="6051002031933013714">"השפעה על ממשק המשתמש של יישומים אחרים."</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"אחסון"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"גישה לאמצעי אחסון מסוג USB."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"גש לכרטיס SD."</string>

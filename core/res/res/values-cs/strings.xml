@@ -171,12 +171,47 @@
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Vaše zprávy"</string>
     <string name="permgroupdesc_messages" msgid="7821999071003699236">"Čtení a zápis zpráv SMS, e-mailů a dalších zpráv."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Vaše osobní informace"</string>
-    <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"Přímý přístup k vašim kontaktům a kalendáři v tabletu."</string>
-    <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"Přímý přístup k vašim kontaktům a kalendáři v telefonu."</string>
+    <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"Přímý přístup k informacím o vás uložených na vaší vizitce"</string>
+    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Informace o vašich kontaktech a sociálních sítích"</string>
+    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Přímý přístup k informacím o vašich kontaktech a sociálních propojeních"</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"Vaše poloha"</string>
     <string name="permgroupdesc_location" msgid="5704679763124170100">"Sledovat vaši fyzickou polohu."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Síťová komunikace"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"Přístup k různým funkcím sítě."</string>
+    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"Bluetooth"</string>
+    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"Přístup do zařízení a k sítím prostřednictvím rozhraní Bluetooth."</string>
+    <string name="permgrouplab_shortrangeNetwork" msgid="130808676377486118">"Sítě krátkého dosahu"</string>
+    <string name="permgroupdesc_shortrangeNetwork" msgid="1884069062653436007">"Přístup do zařízení prostřednictvím sítí krátkého dosahu, např. NFC."</string>
+    <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"Nastavení zvuku"</string>
+    <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"Změna nastavení zvuku"</string>
+    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"Vliv na baterii"</string>
+    <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"Používání funkcí, které mohou rychle vyčerpat baterii"</string>
+    <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendář"</string>
+    <string name="permgroupdesc_calendar" msgid="5777534316982184416">"Přímý přístup ke kalendáři a událostem"</string>
+    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"Čtení uživatelského slovníku"</string>
+    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"Čtení slov v uživatelském slovníku."</string>
+    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"Zápis do uživatelského slovníku"</string>
+    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"Přidávání slov do uživatelského slovníku."</string>
+    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Záložky a historie"</string>
+    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Přímý přístup k záložkám a historii prohlížení"</string>
+    <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"Budík"</string>
+    <string name="permgroupdesc_deviceAlarms" msgid="4769356362251641175">"Nastavení budíku"</string>
+    <string name="permgrouplab_voicemail" msgid="4162237145027592133">"Hlasová schránka"</string>
+    <string name="permgroupdesc_voicemail" msgid="2498403969862951393">"Přímý přístup do hlasové schránky"</string>
+    <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
+    <string name="permgroupdesc_microphone" msgid="7106618286905738408">"Přímý přístup k mikrofonu a možnost nahrávání zvuku"</string>
+    <string name="permgrouplab_camera" msgid="4820372495894586615">"Fotoaparát"</string>
+    <string name="permgroupdesc_camera" msgid="2933667372289567714">"Přímý přístup k fotoaparátu a možnost pořizování fotografií a videí"</string>
+    <string name="permgrouplab_appInfo" msgid="8028789762634147725">"Informace o vašich aplikacích"</string>
+    <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"Možnost ovlivnit chování dalších aplikací v zařízení"</string>
+    <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"Tapeta"</string>
+    <string name="permgroupdesc_wallpaper" msgid="5630417854750540154">"Změna nastavení tapety zařízení"</string>
+    <string name="permgrouplab_systemClock" msgid="406535759236612992">"Hodiny"</string>
+    <string name="permgroupdesc_systemClock" msgid="3944359833624094992">"Změna času nebo časového pásma zařízení"</string>
+    <string name="permgrouplab_statusBar" msgid="2095862568113945398">"Stavový řádek"</string>
+    <string name="permgroupdesc_statusBar" msgid="6242593432226807171">"Změna nastavení stavového řádku zařízení"</string>
+    <string name="permgrouplab_syncSettings" msgid="3341990986147826541">"Synchronizace"</string>
+    <string name="permgroupdesc_syncSettings" msgid="7603195265129031797">"Přístup k nastavení synchronizace"</string>
     <string name="permgrouplab_accounts" msgid="3359646291125325519">"Vaše účty"</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Přístup k dostupným účtům."</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Řízení hardwaru"</string>
@@ -187,6 +222,8 @@
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"Nízkoúrovňový přístup a kontrola nad systémem."</string>
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Nástroje pro vývojáře"</string>
     <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"Funkce pouze pro vývojáře aplikací."</string>
+    <string name="permgrouplab_display" msgid="4279909676036402636">"Uživatelské rozhraní dalších aplikací"</string>
+    <string name="permgroupdesc_display" msgid="6051002031933013714">"Vliv na uživatelské rozhraní dalších aplikací"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Úložiště"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Přístup do úložiště USB."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Přístup ke kartě SD."</string>

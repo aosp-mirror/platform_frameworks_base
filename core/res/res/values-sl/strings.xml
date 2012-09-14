@@ -171,12 +171,47 @@
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Vaša sporočila"</string>
     <string name="permgroupdesc_messages" msgid="7821999071003699236">"Pisanje in branje SMS-ov, e-pošte in drugih sporočil."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Osebni podatki"</string>
-    <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"Neposreden dostop do stikov in koledarskih vnosov, shranjenih v tabličnem računalniku."</string>
-    <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"Neposreden dostop do stikov in koledarja, shranjenega v telefonu."</string>
+    <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"Neposreden dostop do podatkov o vas, shranjenih v vizitki."</string>
+    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Podatki v družabnih omrežjih"</string>
+    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Neposreden dostop do podatkov o stikih in družabnih povezav."</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"Vaša lokacija"</string>
     <string name="permgroupdesc_location" msgid="5704679763124170100">"Spremljanje fizične lokacije."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Omrežna komunikacija"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"Dostop do različnih funkcij omrežja."</string>
+    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"Bluetooth"</string>
+    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"Dostopanje do naprav in omrežij prek povezave Bluetooth."</string>
+    <string name="permgrouplab_shortrangeNetwork" msgid="130808676377486118">"Omrežja kratkega dosega"</string>
+    <string name="permgroupdesc_shortrangeNetwork" msgid="1884069062653436007">"Dostop do naprav z omrežji kratkega dosega, kot je NFC."</string>
+    <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"Nastavitve zvoka"</string>
+    <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"Spreminjanje nastavitev zvoka."</string>
+    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"Vpliv na baterijo"</string>
+    <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"Uporaba funkcij, ki lahko hitro izpraznijo baterijo."</string>
+    <string name="permgrouplab_calendar" msgid="5863508437783683902">"Google Koledar"</string>
+    <string name="permgroupdesc_calendar" msgid="5777534316982184416">"Neposreden dostop do koledarja in dogodkov."</string>
+    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"Branje uporabniškega slovarja"</string>
+    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"Branje besed v uporabniškem slovarju."</string>
+    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"Pisanje v uporabniški slovar"</string>
+    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"Dodajanje besed v uporabniški slovar."</string>
+    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Zaznamki in zgodovina"</string>
+    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Neposreden dostop do zaznamkov in zgodovine brskalnika."</string>
+    <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"Alarm"</string>
+    <string name="permgroupdesc_deviceAlarms" msgid="4769356362251641175">"Nastavitev budilke."</string>
+    <string name="permgrouplab_voicemail" msgid="4162237145027592133">"Odzivnik"</string>
+    <string name="permgroupdesc_voicemail" msgid="2498403969862951393">"Neposreden dostop do odzivnika."</string>
+    <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
+    <string name="permgroupdesc_microphone" msgid="7106618286905738408">"Neposreden dostop do mikrofona za snemanje zvoka."</string>
+    <string name="permgrouplab_camera" msgid="4820372495894586615">"Fotoaparat"</string>
+    <string name="permgroupdesc_camera" msgid="2933667372289567714">"Neposreden dostop do fotoaparata za fotografiranje ali snemanje videoposnetkov."</string>
+    <string name="permgrouplab_appInfo" msgid="8028789762634147725">"Podatki o vaših aplikacijah"</string>
+    <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"Zmožnost vpliva na delovanje drugih aplikacij v napravi."</string>
+    <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"Slika za ozadje"</string>
+    <string name="permgroupdesc_wallpaper" msgid="5630417854750540154">"Spreminjanje nastavitev slike za ozadje."</string>
+    <string name="permgrouplab_systemClock" msgid="406535759236612992">"Ura"</string>
+    <string name="permgroupdesc_systemClock" msgid="3944359833624094992">"Sprememba časa ali časovnega pasu naprave."</string>
+    <string name="permgrouplab_statusBar" msgid="2095862568113945398">"Vrstica stanja"</string>
+    <string name="permgroupdesc_statusBar" msgid="6242593432226807171">"Spreminjanje nastavitev vrstice stanja naprave."</string>
+    <string name="permgrouplab_syncSettings" msgid="3341990986147826541">"Nastavitve sinhronizacije"</string>
+    <string name="permgroupdesc_syncSettings" msgid="7603195265129031797">"Dostop do sinhronizacijskih nastavitev."</string>
     <string name="permgrouplab_accounts" msgid="3359646291125325519">"Vaši računi"</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Dostop do razpoložljivih računov."</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Kontrolniki strojne opreme"</string>
@@ -187,6 +222,8 @@
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"Dostop nižje ravni in nadzor sistema."</string>
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Razvojna orodja"</string>
     <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"Funkcije, ki jih potrebujejo le razvijalci programa."</string>
+    <string name="permgrouplab_display" msgid="4279909676036402636">"Uporabniški vmesnik druge aplikacije"</string>
+    <string name="permgroupdesc_display" msgid="6051002031933013714">"Vpliv na uporabniški vmesnik drugih aplikacij."</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Prostor za shranjevanje"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Dostop do pomnilnika USB."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Dostop do kartice SD."</string>
@@ -256,10 +293,8 @@
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Omogoča, da aplikacija iz upravitelja oken pridobiva podatke o oknih. Zlonamerne aplikacije lahko pridobivajo podatke, namenjene za notranjo uporabo v sistemu."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"filtriranje dogodkov"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Omogoča, da aplikacija registrira vhodni filter, ki pred razpošiljanjem filtrira tok vseh uporabniških dogodkov. Zlonamerne aplikacije lahko nadzirajo uporabniški vmesnik sistema brez posega uporabnika."</string>
-    <!-- no translation found for permlab_magnify_display (5973626738170618775) -->
-    <skip />
-    <!-- no translation found for permdesc_magnify_display (7121235684515003792) -->
-    <skip />
+    <string name="permlab_magnify_display" msgid="5973626738170618775">"povečevanje zaslona"</string>
+    <string name="permdesc_magnify_display" msgid="7121235684515003792">"Omogoča aplikaciji povečevanje vsebine zaslona. Zlonamerne aplikacije lahko preoblikujejo vsebino zaslona tako, da je naprava neuporabna."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"delna zaustavitev"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Upravitelja dejavnosti preklopi v stanje za zaustavitev. Ne izvede celotne zaustavitve."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"preprečevanje preklopa programov"</string>
@@ -290,10 +325,8 @@
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Programu omogoča, da kadar koli spremeni splošno hitrost animacije (hitrejše ali počasnejše animacije)."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"upravljanje žetonov programa"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Programu omogoča, da ustvari in upravlja svoje žetone ter obide navadno razvrščanje Z. Tega ni treba nikoli uporabiti za navadne programe."</string>
-    <!-- no translation found for permlab_freezeScreen (4708181184441880175) -->
-    <skip />
-    <!-- no translation found for permdesc_freezeScreen (8558923789222670064) -->
-    <skip />
+    <string name="permlab_freezeScreen" msgid="4708181184441880175">"zamrzovanje zaslona"</string>
+    <string name="permdesc_freezeScreen" msgid="8558923789222670064">"Omogoča aplikaciji začasno zamrznitev zaslona za prehod na celozaslonski način."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"pritiskanje tipk in gumbov za nadzor"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Programu omogoča, da svoje dogodke vnosa (pritiske tipk ipd.) dostavi drugim programom. Zlonamerni programi lahko s tem prevzamejo nadzor nad tabličnim računalnikom."</string>
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Programu omogoča, da svoje dogodke vnosa (pritiske tipk ipd.) dostavi drugim programom. Zlonamerni programi lahko s tem prevzamejo nadzor nad telefonom."</string>
@@ -406,14 +439,10 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Programu omogoča uporabo funkcij nizke ravni SurfaceFlinger."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"branje grafičnega/slikovnega medpomnilnika"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Programu omogoča branje vsebine grafičnega/slikovnega medpomnilnika."</string>
-    <!-- no translation found for permlab_configureWifiDisplay (5595661694746742168) -->
-    <skip />
-    <!-- no translation found for permdesc_configureWifiDisplay (7916815158690218065) -->
-    <skip />
-    <!-- no translation found for permlab_controlWifiDisplay (393641276723695496) -->
-    <skip />
-    <!-- no translation found for permdesc_controlWifiDisplay (4543912292681826986) -->
-    <skip />
+    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"konfiguriranje Wi-Fi zaslonov"</string>
+    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Omogoča aplikaciji konfiguriranje zaslonov Wi-Fi in povezovanje z njimi."</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"nadzor Wi-Fi zaslonov"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Omogoča aplikaciji nadzor osnovnih funkcij zaslonov Wi-Fi."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"spreminjanje nastavitev zvoka"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Aplikaciji omogoča spreminjanje splošnih zvočnih nastavitev, na primer glasnost in kateri zvočnik se uporablja."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"snemanje zvoka"</string>
@@ -595,10 +624,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Shranjeni podatki programa morajo biti šifrirani."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Onemogoči fotoaparate"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Prepreči uporabo vseh fotoaparatov v napravi."</string>
-    <!-- no translation found for policylab_disableKeyguardWidgets (1794894613389073926) -->
-    <skip />
-    <!-- no translation found for policydesc_disableKeyguardWidgets (7254624892984033592) -->
-    <skip />
+    <string name="policylab_disableKeyguardWidgets" msgid="1794894613389073926">"Onem. pripom. na varov. tipk."</string>
+    <string name="policydesc_disableKeyguardWidgets" msgid="7254624892984033592">"Preprečevanje uporabe nekaterih ali vseh pripomočkov na varovalu tipkovnice"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Začetna stran"</item>
     <item msgid="869923650527136615">"Mobilni"</item>

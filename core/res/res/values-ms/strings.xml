@@ -171,12 +171,47 @@
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Mesej anda"</string>
     <string name="permgroupdesc_messages" msgid="7821999071003699236">"Membaca dan menulis SMS, e-mel, dan mesej lain."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Maklumat peribadi anda"</string>
-    <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"Akses langsung kepada kenalan dan kalendar anda yang disimpan dalam tablet."</string>
-    <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"Akses langsung kepada kenalan dan kalendar yang disimpan pada telefon."</string>
+    <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"Akses langsung ke maklumat tentang anda, yang disimpan pada kad kenalan anda."</string>
+    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Maklumat sosial anda"</string>
+    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Akses langsung ke maklumat tentang kenalan anda dan sambungan sosial."</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"Lokasi anda"</string>
     <string name="permgroupdesc_location" msgid="5704679763124170100">"Pantau lokasi fizikal anda."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Komunikasi rangkaian"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"Akses pelbagai ciri rangkaian."</string>
+    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"Bluetooth"</string>
+    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"Akses peranti dan rangkaian melalui Bluetooth."</string>
+    <string name="permgrouplab_shortrangeNetwork" msgid="130808676377486118">"Rangkaian jarak-dekat"</string>
+    <string name="permgroupdesc_shortrangeNetwork" msgid="1884069062653436007">"Akses peranti melalui rangkaian jarak dekat seperti NFC."</string>
+    <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"Tetapan Audio"</string>
+    <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"Tukar tetapan audio."</string>
+    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"Menjejaskan Bateri"</string>
+    <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"Gunakan ciri yang boleh menghabiskan bateri dengan cepat."</string>
+    <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendar"</string>
+    <string name="permgroupdesc_calendar" msgid="5777534316982184416">"Akses langsung ke kalendar dan acara."</string>
+    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"Baca Kamus Pengguna"</string>
+    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"Baca perkataan di dalam kamus pengguna."</string>
+    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"Tulis Kamus Pengguna"</string>
+    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"Tambah perkataan ke kamus pengguna."</string>
+    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Penanda halaman dan Sejarah"</string>
+    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Akses langsung ke penanda halaman dan sejarah penyemak imbas."</string>
+    <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"Penggera"</string>
+    <string name="permgroupdesc_deviceAlarms" msgid="4769356362251641175">"Tetapkan jam penggera."</string>
+    <string name="permgrouplab_voicemail" msgid="4162237145027592133">"Mel suara"</string>
+    <string name="permgroupdesc_voicemail" msgid="2498403969862951393">"Akses langsung ke mel suara."</string>
+    <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
+    <string name="permgroupdesc_microphone" msgid="7106618286905738408">"Akses langsung ke mikrofon untuk merakam audio."</string>
+    <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
+    <string name="permgroupdesc_camera" msgid="2933667372289567714">"Akses langsung ke kamera untuk merakam imej atau video."</string>
+    <string name="permgrouplab_appInfo" msgid="8028789762634147725">"Maklumat aplikasi anda"</string>
+    <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"Keupayaan untuk mempengaruhi tingkah laku aplikasi lain pada peranti anda."</string>
+    <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"Kertas dinding"</string>
+    <string name="permgroupdesc_wallpaper" msgid="5630417854750540154">"Tukar tetapan kertas dinding peranti."</string>
+    <string name="permgrouplab_systemClock" msgid="406535759236612992">"Jam"</string>
+    <string name="permgroupdesc_systemClock" msgid="3944359833624094992">"Tukar masa peranti atau zon masa."</string>
+    <string name="permgrouplab_statusBar" msgid="2095862568113945398">"Bar Status"</string>
+    <string name="permgroupdesc_statusBar" msgid="6242593432226807171">"Tukar tetapan bar status peranti."</string>
+    <string name="permgrouplab_syncSettings" msgid="3341990986147826541">"Tetapan Penyegerakan"</string>
+    <string name="permgroupdesc_syncSettings" msgid="7603195265129031797">"Akses ke tetapan segerakan."</string>
     <string name="permgrouplab_accounts" msgid="3359646291125325519">"Akaun anda"</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Akses akaun yang tersedia."</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Kawalan perkakasan"</string>
@@ -187,6 +222,8 @@
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"Akses dan kawalan peringkat lebih rendah bagi sistem."</string>
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Alatan pembangunan"</string>
     <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"Ciri hanya diperlukan untuk pembangun apl."</string>
+    <string name="permgrouplab_display" msgid="4279909676036402636">"Aplikasi UI Lain"</string>
+    <string name="permgroupdesc_display" msgid="6051002031933013714">"Mempengaruhi UI aplikasi lain."</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Storan"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Akses storan USB."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Akses kad SD."</string>
