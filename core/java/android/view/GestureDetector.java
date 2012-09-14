@@ -482,6 +482,27 @@ public class GestureDetector {
         case MotionEvent.ACTION_POINTER_UP:
             mDownFocusX = mLastFocusX = focusX;
             mDownFocusY = mLastFocusY = focusY;
+
+            // Check the dot product of current velocities.
+            // If the pointer that left was opposing another velocity vector, clear.
+            mVelocityTracker.computeCurrentVelocity(1000, mMaximumFlingVelocity);
+            final int upIndex = ev.getActionIndex();
+            final int id1 = ev.getPointerId(upIndex);
+            final float x1 = mVelocityTracker.getXVelocity(id1);
+            final float y1 = mVelocityTracker.getYVelocity(id1);
+            for (int i = 0; i < count; i++) {
+                if (i == upIndex) continue;
+
+                final int id2 = ev.getPointerId(i);
+                final float x = x1 * mVelocityTracker.getXVelocity(id2);
+                final float y = y1 * mVelocityTracker.getYVelocity(id2);
+
+                final float dot = x + y;
+                if (dot < 0) {
+                    mVelocityTracker.clear();
+                    break;
+                }
+            }
             break;
 
         case MotionEvent.ACTION_DOWN:
