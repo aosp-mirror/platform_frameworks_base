@@ -20,45 +20,70 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.util.Log;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Map.Entry;
-import java.util.HashMap;
-
-
 /**
- * @hide
+ * Intrinsic for applying a 3x3 convolve to an allocation.
+ *
  **/
-public class ScriptIntrinsicConvolve3x3 extends ScriptIntrinsic {
-    private float[] mValues = new float[9];
+public final class ScriptIntrinsicConvolve3x3 extends ScriptIntrinsic {
+    private final float[] mValues = new float[9];
     private Allocation mInput;
 
-    ScriptIntrinsicConvolve3x3(int id, RenderScript rs) {
+    private ScriptIntrinsicConvolve3x3(int id, RenderScript rs) {
         super(id, rs);
     }
 
     /**
-     * Supported elements types are float, float4, uchar, uchar4
+     * Supported elements types are {@link Element#U8_4}
      *
+     * The default coefficients are.
      *
-     * @param rs
-     * @param e
+     * <code>
+     * <p> [ 0,  0,  0 ]
+     * <p> [ 0,  1,  0 ]
+     * <p> [ 0,  0,  0 ]
+     * </code>
+     *
+     * @param rs The Renderscript context
+     * @param e Element type for intputs and outputs
      *
      * @return ScriptIntrinsicConvolve3x3
      */
     public static ScriptIntrinsicConvolve3x3 create(RenderScript rs, Element e) {
+        float f[] = { 0, 0, 0, 0, 1, 0, 0, 0, 0};
+        if (e != Element.U8_4(rs)) {
+            throw new RSIllegalArgumentException("Unsuported element type.");
+        }
         int id = rs.nScriptIntrinsicCreate(1, e.getID(rs));
-        return new ScriptIntrinsicConvolve3x3(id, rs);
+        ScriptIntrinsicConvolve3x3 si = new ScriptIntrinsicConvolve3x3(id, rs);
+        si.setCoefficients(f);
+        return si;
 
     }
 
+    /**
+     * Set the input of the blur.
+     * Must match the element type supplied during create.
+     *
+     * @param ain The input allocation.
+     */
     public void setInput(Allocation ain) {
         mInput = ain;
         bindAllocation(ain, 1);
     }
 
-    public void setColorMatrix(float v[]) {
+    /**
+     * Set the coefficients for the convolve.
+     *
+     * The convolve layout is
+     * <code>
+     * <p> [ 0,  1,  2 ]
+     * <p> [ 3,  4,  5 ]
+     * <p> [ 6,  7,  8 ]
+     * </code>
+     *
+     * @param v The array of coefficients to set
+     */
+    public void setCoefficients(float v[]) {
         FieldPacker fp = new FieldPacker(9*4);
         for (int ct=0; ct < mValues.length; ct++) {
             mValues[ct] = v[ct];
@@ -67,6 +92,13 @@ public class ScriptIntrinsicConvolve3x3 extends ScriptIntrinsic {
         setVar(0, fp);
     }
 
+    /**
+     * Apply the filter to the input and save to the specified
+     * allocation.
+     *
+     * @param aout Output allocation. Must match creation element
+     *             type.
+     */
     public void forEach(Allocation aout) {
         forEach(0, null, aout, null);
     }
