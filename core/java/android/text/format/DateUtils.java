@@ -161,12 +161,17 @@ public class DateUtils
     public static final int FORMAT_NO_YEAR = 0x00008;
     public static final int FORMAT_SHOW_DATE = 0x00010;
     public static final int FORMAT_NO_MONTH_DAY = 0x00020;
+    @Deprecated
     public static final int FORMAT_12HOUR = 0x00040;
+    @Deprecated
     public static final int FORMAT_24HOUR = 0x00080;
+    @Deprecated
     public static final int FORMAT_CAP_AMPM = 0x00100;
     public static final int FORMAT_NO_NOON = 0x00200;
+    @Deprecated
     public static final int FORMAT_CAP_NOON = 0x00400;
     public static final int FORMAT_NO_MIDNIGHT = 0x00800;
+    @Deprecated
     public static final int FORMAT_CAP_MIDNIGHT = 0x01000;
     /**
      * @deprecated Use
@@ -181,19 +186,25 @@ public class DateUtils
     public static final int FORMAT_NUMERIC_DATE = 0x20000;
     public static final int FORMAT_ABBREV_RELATIVE = 0x40000;
     public static final int FORMAT_ABBREV_ALL = 0x80000;
+    @Deprecated
     public static final int FORMAT_CAP_NOON_MIDNIGHT = (FORMAT_CAP_NOON | FORMAT_CAP_MIDNIGHT);
+    @Deprecated
     public static final int FORMAT_NO_NOON_MIDNIGHT = (FORMAT_NO_NOON | FORMAT_NO_MIDNIGHT);
 
     // Date and time format strings that are constant and don't need to be
     // translated.
     /**
      * This is not actually the preferred 24-hour date format in all locales.
+     * @deprecated use {@link java.text.SimpleDateFormat} instead.
      */
+    @Deprecated
     public static final String HOUR_MINUTE_24 = "%H:%M";
     public static final String MONTH_FORMAT = "%B";
     /**
      * This is not actually a useful month name in all locales.
+     * @deprecated use {@link java.text.SimpleDateFormat} instead.
      */
+    @Deprecated
     public static final String ABBREV_MONTH_FORMAT = "%b";
     public static final String NUMERIC_MONTH_FORMAT = "%m";
     public static final String MONTH_DAY_FORMAT = "%-d";
@@ -207,6 +218,7 @@ public class DateUtils
     // The index is constructed from a bit-wise OR of the boolean values:
     // {showTime, showYear, showWeekDay}.  For example, if showYear and
     // showWeekDay are both true, then the index would be 3.
+    /** @deprecated do not use. */
     public static final int sameYearTable[] = {
         com.android.internal.R.string.same_year_md1_md2,
         com.android.internal.R.string.same_year_wday1_md1_wday2_md2,
@@ -233,6 +245,7 @@ public class DateUtils
     // The index is constructed from a bit-wise OR of the boolean values:
     // {showTime, showYear, showWeekDay}.  For example, if showYear and
     // showWeekDay are both true, then the index would be 3.
+    /** @deprecated do not use. */
     public static final int sameMonthTable[] = {
         com.android.internal.R.string.same_month_md1_md2,
         com.android.internal.R.string.same_month_wday1_md1_wday2_md2,
@@ -259,7 +272,9 @@ public class DateUtils
      *
      * @more <p>
      *       e.g. "Sunday" or "January"
+     * @deprecated use {@link java.text.SimpleDateFormat} instead.
      */
+    @Deprecated
     public static final int LENGTH_LONG = 10;
 
     /**
@@ -268,7 +283,9 @@ public class DateUtils
      *
      * @more <p>
      *       e.g. "Sun" or "Jan"
+     * @deprecated use {@link java.text.SimpleDateFormat} instead.
      */
+    @Deprecated
     public static final int LENGTH_MEDIUM = 20;
 
     /**
@@ -278,14 +295,18 @@ public class DateUtils
      * <p>e.g. "Su" or "Jan"
      * <p>In most languages, the results returned for LENGTH_SHORT will be the same as
      * the results returned for {@link #LENGTH_MEDIUM}.
+     * @deprecated use {@link java.text.SimpleDateFormat} instead.
      */
+    @Deprecated
     public static final int LENGTH_SHORT = 30;
 
     /**
      * Request an even shorter abbreviated version of the name.
      * Do not use this.  Currently this will always return the same result
      * as {@link #LENGTH_SHORT}.
+     * @deprecated use {@link java.text.SimpleDateFormat} instead.
      */
+    @Deprecated
     public static final int LENGTH_SHORTER = 40;
 
     /**
@@ -295,7 +316,9 @@ public class DateUtils
      * <p>e.g. "S", "T", "T" or "J"
      * <p>In some languages, the results returned for LENGTH_SHORTEST will be the same as
      * the results returned for {@link #LENGTH_SHORT}.
+     * @deprecated use {@link java.text.SimpleDateFormat} instead.
      */
+    @Deprecated
     public static final int LENGTH_SHORTEST = 50;
 
     /**
@@ -309,7 +332,9 @@ public class DateUtils
      *               Undefined lengths will return {@link #LENGTH_MEDIUM}
      *               but may return something different in the future.
      * @throws IndexOutOfBoundsException if the dayOfWeek is out of bounds.
+     * @deprecated use {@link java.text.SimpleDateFormat} instead.
      */
+    @Deprecated
     public static String getDayOfWeekString(int dayOfWeek, int abbrev) {
         int[] list;
         switch (abbrev) {
@@ -330,7 +355,9 @@ public class DateUtils
      * @param ampm Either {@link Calendar#AM Calendar.AM} or {@link Calendar#PM Calendar.PM}.
      * @throws IndexOutOfBoundsException if the ampm is out of bounds.
      * @return Localized version of "AM" or "PM".
+     * @deprecated use {@link java.text.SimpleDateFormat} instead.
      */
+    @Deprecated
     public static String getAMPMString(int ampm) {
         Resources r = Resources.getSystem();
         return r.getString(sAmPm[ampm - Calendar.AM]);
@@ -345,7 +372,9 @@ public class DateUtils
      *               Undefined lengths will return {@link #LENGTH_MEDIUM}
      *               but may return something different in the future.
      * @return Localized month of the year.
+     * @deprecated use {@link java.text.SimpleDateFormat} instead.
      */
+    @Deprecated
     public static String getMonthString(int month, int abbrev) {
         // Note that here we use sMonthsMedium for MEDIUM, SHORT and SHORTER.
         // This is a shortcut to not spam the translators with too many variations
@@ -378,7 +407,9 @@ public class DateUtils
      *               but may return something different in the future.
      * @return Localized month of the year.
      * @hide Pending API council approval
+     * @deprecated use {@link java.text.SimpleDateFormat} instead.
      */
+    @Deprecated
     public static String getStandaloneMonthString(int month, int abbrev) {
         // Note that here we use sMonthsMedium for MEDIUM, SHORT and SHORTER.
         // This is a shortcut to not spam the translators with too many variations
