@@ -321,6 +321,10 @@ bool Caches::unbindIndicesBuffer() {
     return false;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// Meshes and textures
+///////////////////////////////////////////////////////////////////////////////
+
 void Caches::bindPositionVertexPointer(bool force, GLuint slot, GLvoid* vertices, GLsizei stride) {
     if (force || vertices != mCurrentPositionPointer) {
         glVertexAttribPointer(slot, 2, GL_FLOAT, GL_FALSE, stride, vertices);
@@ -365,6 +369,10 @@ void Caches::activeTexture(GLuint textureUnit) {
         mTextureUnit = textureUnit;
     }
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// Scissor
+///////////////////////////////////////////////////////////////////////////////
 
 bool Caches::setScissor(GLint x, GLint y, GLint width, GLint height) {
     if (scissorEnabled && (x != mScissorX || y != mScissorY ||
@@ -411,6 +419,26 @@ void Caches::setScissorEnabled(bool enabled) {
 void Caches::resetScissor() {
     mScissorX = mScissorY = mScissorWidth = mScissorHeight = 0;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// Tiling
+///////////////////////////////////////////////////////////////////////////////
+
+void Caches::startTiling(GLuint x, GLuint y, GLuint width, GLuint height, bool opaque) {
+    if (extensions.hasTiledRendering()) {
+
+    }
+}
+
+void Caches::endTiling() {
+    if (extensions.hasTiledRendering()) {
+
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Regions
+///////////////////////////////////////////////////////////////////////////////
 
 TextureVertex* Caches::getRegionMesh() {
     // Create the mesh, 2 triangles and 4 vertices per rectangle in the region
