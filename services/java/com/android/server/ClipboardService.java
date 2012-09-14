@@ -17,6 +17,7 @@
 package com.android.server;
 
 import android.app.ActivityManagerNative;
+import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.ClipData;
@@ -26,6 +27,7 @@ import android.content.IOnPrimaryClipChangedListener;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -120,7 +122,6 @@ public class ClipboardService extends IClipboard.Stub {
 
     private PerUserClipboard getClipboard(int userId) {
         synchronized (mClipboards) {
-            Slog.i(TAG, "Got clipboard for user=" + userId);
             PerUserClipboard puc = mClipboards.get(userId);
             if (puc == null) {
                 puc = new PerUserClipboard(userId);
@@ -255,15 +256,22 @@ public class ClipboardService extends IClipboard.Stub {
     }
 
     private final void addActiveOwnerLocked(int uid, String pkg) {
-        PackageInfo pi;
+        final IPackageManager pm = AppGlobals.getPackageManager();
+        final int targetUserHandle = UserHandle.getCallingUserId();
+        final long oldIdentity = Binder.clearCallingIdentity();
         try {
-            pi = mPm.getPackageInfo(pkg, 0);
+            PackageInfo pi = pm.getPackageInfo(pkg, 0, targetUserHandle);
+            if (pi == null) {
+                throw new IllegalArgumentException("Unknown package " + pkg);
+            }
             if (!UserHandle.isSameApp(pi.applicationInfo.uid, uid)) {
                 throw new SecurityException("Calling uid " + uid
                         + " does not own package " + pkg);
             }
-        } catch (NameNotFoundException e) {
-            throw new IllegalArgumentException("Unknown package " + pkg, e);
+        } catch (RemoteException e) {
+            // Can't happen; the package manager is in the same process
+        } finally {
+            Binder.restoreCallingIdentity(oldIdentity);
         }
         PerUserClipboard clipboard = getClipboard();
         if (clipboard.primaryClip != null && !clipboard.activePermissionOwners.contains(pkg)) {
