@@ -86,6 +86,11 @@ public class KeyguardHostView extends KeyguardViewBase {
         void show();
     }
 
+    /*package*/ interface UserSwitcherCallback {
+        void hideSecurityView(int duration);
+        void showSecurityView();
+    }
+
     public KeyguardHostView(Context context) {
         this(context, null);
     }
@@ -690,11 +695,27 @@ public class KeyguardHostView extends KeyguardViewBase {
         List<UserInfo> users = mUm.getUsers();
 
         if (users.size() > 1) {
-            KeyguardWidgetFrame userswitcher = (KeyguardWidgetFrame)
+            KeyguardWidgetFrame userSwitcher = (KeyguardWidgetFrame)
                 LayoutInflater.from(mContext).inflate(R.layout.keyguard_multi_user_selector_widget,
                         mAppWidgetContainer, false);
-            // add the switcher to the left of status view
-            mAppWidgetContainer.addView(userswitcher, getWidgetPosition(R.id.keyguard_status_view));
+
+            // add the switcher in the first position
+            mAppWidgetContainer.addView(userSwitcher, getWidgetPosition(R.id.keyguard_status_view));
+            KeyguardMultiUserSelectorView multiUser = (KeyguardMultiUserSelectorView)
+                    userSwitcher.getChildAt(0);
+
+            UserSwitcherCallback callback = new UserSwitcherCallback() {
+                @Override
+                public void hideSecurityView(int duration) {
+                    mSecurityViewContainer.animate().alpha(0).setDuration(duration);
+                }
+
+                @Override
+                public void showSecurityView() {
+                    mSecurityViewContainer.setAlpha(1.0f);
+                }
+            };
+            multiUser.setCallback(callback);
         }
     }
 

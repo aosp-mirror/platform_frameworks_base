@@ -23,9 +23,11 @@
     android:layout_width="125dp"
     android:layout_height="125dp"
     android:background="#550000ff"
-    android:gravity="center_horizontal">
+    android:gravity="center_horizontal"
+    android:foreground="@drawable/kg_avatar_overlay">
     <ImageView
         android:id="@+id/keyguard_user_avatar"
+        android:scaleType="centerCrop"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"/>
