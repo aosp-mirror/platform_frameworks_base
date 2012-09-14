@@ -164,6 +164,7 @@ public abstract class WebSettings {
      * is false.
      *
      * @deprecated This method is now obsolete.
+     * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
      */
     @Deprecated
     public void setNavDump(boolean enabled) {
@@ -176,6 +177,7 @@ public abstract class WebSettings {
      * @return whether dumping the navigation cache is enabled
      * @see #setNavDump
      * @deprecated This method is now obsolete.
+     * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
      */
     @Deprecated
     public boolean getNavDump() {
@@ -377,6 +379,7 @@ public abstract class WebSettings {
      *
      * @see #setUseWebViewBackgroundForOverscrollBackground
      * @deprecated This method is now obsolete.
+     * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
      */
     @Deprecated
     public boolean getUseWebViewBackgroundForOverscrollBackground() {
@@ -518,6 +521,7 @@ public abstract class WebSettings {
      * it now has no effect.
      *
      * @deprecated This setting now has no effect.
+     * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
      */
     @Deprecated
     public synchronized void setUseDoubleTree(boolean use) {
@@ -529,6 +533,7 @@ public abstract class WebSettings {
      * it now has no effect.
      *
      * @deprecated This setting now has no effect.
+     * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
      */
     @Deprecated
     public synchronized boolean getUseDoubleTree() {
@@ -547,6 +552,7 @@ public abstract class WebSettings {
      *
      * @param ua the integer code for the user-agent string
      * @deprecated Please use {@link #setUserAgentString} instead.
+     * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
      */
     @Deprecated
     public synchronized void setUserAgent(int ua) {
@@ -565,6 +571,7 @@ public abstract class WebSettings {
      * @return the integer code for the user-agent string
      * @see #setUserAgent
      * @deprecated Please use {@link #getUserAgentString} instead.
+     * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
      */
     @Deprecated
     public synchronized int getUserAgent() {
@@ -1251,8 +1258,7 @@ public abstract class WebSettings {
     /**
      * Returns the default User-Agent used by a WebView.
      * An instance of WebView could use a different User-Agent if a call
-     * is made to {@link WebSettings#setUserAgent(int)} or
-     * {@link WebSettings#setUserAgentString(String)}.
+     * is made to {@link WebSettings#setUserAgentString(String)}.
      *
      * @param context a Context object used to access application assets
      */
