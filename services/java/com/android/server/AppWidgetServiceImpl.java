@@ -1358,10 +1358,10 @@ class AppWidgetServiceImpl {
                     com.android.internal.R.styleable.AppWidgetProviderInfo_resizeMode,
                     AppWidgetProviderInfo.RESIZE_NONE);
             info.widgetCategory = sa.getInt(
-                    com.android.internal.R.styleable.AppWidgetProviderInfo_resizeMode,
+                    com.android.internal.R.styleable.AppWidgetProviderInfo_widgetCategory,
                     AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN);
             info.widgetFeatures = sa.getInt(
-                    com.android.internal.R.styleable.AppWidgetProviderInfo_resizeMode,
+                    com.android.internal.R.styleable.AppWidgetProviderInfo_widgetFeatures,
                     AppWidgetProviderInfo.WIDGET_FEATURES_NONE);
 
             sa.recycle();
