@@ -671,11 +671,6 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
                 shader.append(gFS_Main_FetchColor);
             }
         }
-        if (description.isAARect) {
-            shader.append(gFS_Main_AccountForAARect);
-        } else if (description.isAA) {
-            shader.append(gFS_Main_AccountForAA);
-        }
         if (description.hasGradient) {
             shader.append(gFS_Main_FetchGradient[gradientIndex(description)]);
             shader.append(gFS_Main_AddDitherToGradient);
@@ -721,6 +716,13 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
         }
         // Apply the color op if needed
         shader.append(gFS_Main_ApplyColorOp[description.colorOp]);
+
+        if (description.isAARect) {
+            shader.append(gFS_Main_AccountForAARect);
+        } else if (description.isAA) {
+            shader.append(gFS_Main_AccountForAA);
+        }
+
         // Output the fragment
         if (!blendFramebuffer) {
             shader.append(gFS_Main_FragColor);
