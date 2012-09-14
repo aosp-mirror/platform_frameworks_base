@@ -256,6 +256,10 @@
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Laat \'n program toe om inligting oor vensters vanaf die vensterbestuurder op te haal. Kwaadwillige programme kan moontlik inligting ophaal wat vir interne stelselgebruik bedoel is."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"filter gebeure"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Laat \'n program toe om \'n invoerfilter te registreer wat die stroom van alle gebruikergebeure filter voordat dit versend word. Kwaadwillige programme kan moontlik die stelsel-UI beheer sonder gebruikers se tussentrede."</string>
+    <!-- no translation found for permlab_magnify_display (5973626738170618775) -->
+    <skip />
+    <!-- no translation found for permdesc_magnify_display (7121235684515003792) -->
+    <skip />
     <string name="permlab_shutdown" msgid="7185747824038909016">"gedeeltelike afskakeling"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Plaas die aktiwiteitbestuurder in \'n afsluitingstatus. Doen nie \'n volledige afsluiting nie."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"verhoed program-oorskakelings"</string>
@@ -286,6 +290,10 @@
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Laat die program toe om die globale animasiespoed te eniger tyd te verander (vinniger of stadiger animasie)."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"bestuur programtokens"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Laat die program toe om sy eie tokens te skep en te bestuur, deur hul normale Z-volgorde te omseil. Dit moet nooit vir normale programme nodig wees nie."</string>
+    <!-- no translation found for permlab_freezeScreen (4708181184441880175) -->
+    <skip />
+    <!-- no translation found for permdesc_freezeScreen (8558923789222670064) -->
+    <skip />
     <string name="permlab_injectEvents" msgid="1378746584023586600">"druk sleutels en beheerknoppies"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Laat die program toe om sy eie invoergebeure na ander programme te stuur (soos om sleutels te druk). Kwaadwillige programme kan dit dalk gebruik om beheer van die tablet oor te neem."</string>
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Laat die program toe om sy eie invoergebeure na ander programme te stuur (soos om sleutels te druk). Kwaadwillige programme kan dit dalk gebruik om beheer van die foon oor te neem."</string>
@@ -398,6 +406,14 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Laat die program toe om SurfaceFlinger se laevlak-kenmerke te gebruik."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"lees raambuffer"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Laat die program toe om die inhoud van die raambuffer te lees."</string>
+    <!-- no translation found for permlab_configureWifiDisplay (5595661694746742168) -->
+    <skip />
+    <!-- no translation found for permdesc_configureWifiDisplay (7916815158690218065) -->
+    <skip />
+    <!-- no translation found for permlab_controlWifiDisplay (393641276723695496) -->
+    <skip />
+    <!-- no translation found for permdesc_controlWifiDisplay (4543912292681826986) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"verander jou klankinstellings"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Laat die program toe om globale klankinstellings soos volume en watter luidspreker vir uitvoer gebruik word, te verander."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"neem klank op"</string>
@@ -1069,12 +1085,9 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Stel datum"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Stel"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Klaar"</string>
-    <string name="default_permission_group" msgid="2690160991405646128">"Verstek"</string>
-    <string name="no_permissions" msgid="7283357728219338112">"Geen toestemmings benodig nie"</string>
-    <string name="perms_hide" msgid="7283915391320676226"><b>"Versteek"</b></string>
-    <string name="perms_show_all" msgid="2671791163933091180"><b>"Wys alle"</b></string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"NUUT: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"Verskaf deur <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
+    <string name="no_permissions" msgid="7283357728219338112">"Geen toestemmings benodig nie"</string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB-geheue"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB gekoppel"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Jy het via USB aan jou rekenaar gekoppel. Raak die knoppie hier onder as jy lêers tussen jou rekenaar en jou Android se USB-geheue wil kopieer."</string>
@@ -1322,17 +1335,15 @@
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Klaar"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Media-uitvoer"</string>
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Ingeboude skerm"</string>
-    <!-- no translation found for display_manager_hdmi_display_name (1555264559227470109) -->
-    <skip />
+    <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI-skerm"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Oorlegger #<xliff:g id="ID">%1$d</xliff:g>"</string>
-    <!-- no translation found for display_manager_overlay_display_title (652124517672257172) -->
-    <skip />
+    <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Noodoproep"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Het jy die patroon vergeet?"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Verkeerde patroon"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Verkeerde wagwoord"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"Verkeerde PIN"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Probeer weer in <xliff:g id="NUMBER">%d</xliff:g> sekondes."</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Probeer weer oor <xliff:g id="NUMBER">%d</xliff:g> sekondes."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Teken jou patroon"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Voer SIM-PIN in"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Voer PIN in"</string>
@@ -1341,8 +1352,8 @@
     <string name="kg_puk_enter_pin_hint" msgid="597821135578014901">"Nuwe PIN-kode"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Ontsluit tans SIM-kaart…"</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Verkeerde PIN-kode."</string>
-    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Tik \'n PIN in wat 4 tot 8 nommers lank is."</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="5216603185442368307">"Tik \'n PUK in wat 8 nommers of meer is."</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Tik \'n PIN in wat 4 tot 8 syfers lank is."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="5216603185442368307">"Tik \'n PUK in wat 8 syfers of meer is."</string>
     <string name="kg_sim_puk_recovery_hint" msgid="5577753137718442566">"Voer PUK en nuwe PIN-kode in"</string>
     <string name="kg_invalid_puk" msgid="5809955359950817326">"Jy het die verkeerde PUK getik."</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Te veel patroonpogings"</string>
@@ -1351,16 +1362,16 @@
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Wagwoord"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Meld aan"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Ongeldige gebruikernaam of wagwoord."</string>
-    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Het jy jou gebruikernaam of wagwoord vergeet?"\n"Besoek"<b>"google.com/accounts/recovery"</b>"."</string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Het jy jou gebruikernaam of wagwoord vergeet?"\n"Besoek "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="kg_login_checking_password" msgid="8849589033659332457">"Kontroleer tans..."</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Jy het jou PIN <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerd ingetik. "\n\n"Probeer weer in <xliff:g id="NUMBER_1">%d</xliff:g> sekondes."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Jy het <xliff:g id="NUMBER_0">%d</xliff:g> keer jou wagwoord verkeerdelik getik. "\n\n"Probeer weer in <xliff:g id="NUMBER_1">%d</xliff:g> sekondes."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Jy het jou ontsluitpatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerdelik geteken. "\n\n"Probeer weer in <xliff:g id="NUMBER_1">%d</xliff:g> sekondes."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Jy het <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerdelik gepoog om die tablet te ontsluit. Na nog<xliff:g id="NUMBER_1">%d</xliff:g> onsuksesvolle pogings, sal die tablet na die fabrieksverstek teruggestel word en al die gebruikerdata sal verlore wees."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Jy het <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerdelik gepoog om die foon te ontsluit. Na nog<xliff:g id="NUMBER_1">%d</xliff:g> onsuksesvolle pogings, sal die foon na die fabrieksverstek teruggestel word en al die gebruikerdata sal verlore wees."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Jy het jou PIN <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerd ingetik. "\n\n"Probeer weer oor <xliff:g id="NUMBER_1">%d</xliff:g> sekondes."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Jy het <xliff:g id="NUMBER_0">%d</xliff:g> keer jou wagwoord verkeerdelik getik. "\n\n"Probeer weer oor <xliff:g id="NUMBER_1">%d</xliff:g> sekondes."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Jy het jou ontsluitpatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerdelik geteken. "\n\n"Probeer weer oor <xliff:g id="NUMBER_1">%d</xliff:g> sekondes."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Jy het <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerdelik gepoog om die tablet te ontsluit. Na nog <xliff:g id="NUMBER_1">%d</xliff:g> onsuksesvolle pogings, sal die tablet na die fabrieksverstek teruggestel word en al die gebruikerdata sal verlore wees."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Jy het <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerdelik gepoog om die foon te ontsluit. Na nog <xliff:g id="NUMBER_1">%d</xliff:g> onsuksesvolle pogings, sal die foon na die fabrieksverstek teruggestel word en al die gebruikerdata sal verlore wees."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Jy het <xliff:g id="NUMBER">%d</xliff:g> keer verkeerdelik gepoog om die tablet te ontsluit. Die tablet sal nou na fabrieksverstek teruggestel word."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Jy het <xliff:g id="NUMBER">%d</xliff:g> keer verkeerdelik gepoog om die foon te ontsluit. Die foon sal nou na fabrieksverstek teruggestel word."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Jy het jou ontsluitpatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerdelik geteken. Na nog <xliff:g id="NUMBER_1">%d</xliff:g> onsuksesvolle pogings, sal jy gevra word om jou tablet te ontsluit deur \'n e-posrekening te gebruik."\n\n" Probeer weer in <xliff:g id="NUMBER_2">%d</xliff:g> sekondes."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Jy het jou ontsluitpatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerdelik geteken. Na nog <xliff:g id="NUMBER_1">%d</xliff:g> onsuksesvolle pogings, sal jy gevra word om jou foon te ontsluit deur \'n e-posrekening te gebruik."\n\n" Probeer weer in <xliff:g id="NUMBER_2">%d</xliff:g> sekondes."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Jy het jou ontsluitpatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerdelik geteken. Na nog <xliff:g id="NUMBER_1">%d</xliff:g> onsuksesvolle pogings, sal jy gevra word om jou tablet te ontsluit deur middel van \'n e-posrekening."\n\n" Probeer weer oor <xliff:g id="NUMBER_2">%d</xliff:g> sekondes."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Jy het jou ontsluitpatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerdelik geteken. Na nog <xliff:g id="NUMBER_1">%d</xliff:g> onsuksesvolle pogings, sal jy gevra word om jou foon te ontsluit deur middel van \'n e-posrekening."\n\n" Probeer weer oor <xliff:g id="NUMBER_2">%d</xliff:g> sekondes."</string>
     <string name="kg_temp_back_string" msgid="5812983904056640466">"&lt;"</string>
 </resources>

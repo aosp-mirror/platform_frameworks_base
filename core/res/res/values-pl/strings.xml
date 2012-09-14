@@ -256,6 +256,10 @@
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Zezwala aplikacji na pobieranie informacji o oknach z menedżera okien. Złośliwe aplikacje mogą pobierać informacje przeznaczone do użytku wewnętrznego w systemie."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"filtrowanie zdarzeń"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Zezwala aplikacji na zarejestrowanie filtra wejściowego, który filtruje strumień wszystkich zdarzeń z udziałem użytkownika przed ich rozesłaniem. Złośliwe aplikacje mogą kontrolować interfejs systemu niezależnie od działań użytkownika."</string>
+    <!-- no translation found for permlab_magnify_display (5973626738170618775) -->
+    <skip />
+    <!-- no translation found for permdesc_magnify_display (7121235684515003792) -->
+    <skip />
     <string name="permlab_shutdown" msgid="7185747824038909016">"częściowe wyłączenie"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Przełącza menedżera aktywności w stan wyłączenia. Nie wykonuje pełnego wyłączenia."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"zapobieganie przełączaniu aplikacji"</string>
@@ -286,6 +290,10 @@
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Pozwala aplikacji na zmianę ogólnej prędkości animacji (szybsze lub wolniejsze animacje) w dowolnym momencie."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"zarządzanie tokenami aplikacji"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Pozwala aplikacji na tworzenie własnych tokenów i zarządzanie nimi z pominięciem zwykłego porządku warstw (Z-order). Nieprzeznaczone dla zwykłych aplikacji."</string>
+    <!-- no translation found for permlab_freezeScreen (4708181184441880175) -->
+    <skip />
+    <!-- no translation found for permdesc_freezeScreen (8558923789222670064) -->
+    <skip />
     <string name="permlab_injectEvents" msgid="1378746584023586600">"naciskanie klawiszy oraz przycisków sterujących"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Pozwala aplikacji na przesyłanie własnych zdarzeń wprowadzania danych (naciśnięć klawiszy itp.) do innych aplikacji. Złośliwe aplikacje mogą to wykorzystać do przejęcia kontroli nad tabletem."</string>
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Pozwala aplikacji na przesyłanie własnych zdarzeń wprowadzania danych (naciśnięć klawiszy itp.) do innych aplikacji. Złośliwe aplikacje mogą to wykorzystać do przejęcia kontroli nad telefonem."</string>
@@ -398,6 +406,14 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Pozwala aplikacji na wykorzystanie funkcji niskiego poziomu usługi SurfaceFlinger."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"czytanie bufora ramki"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Pozwala aplikacji na odczyt zawartości bufora ramki."</string>
+    <!-- no translation found for permlab_configureWifiDisplay (5595661694746742168) -->
+    <skip />
+    <!-- no translation found for permdesc_configureWifiDisplay (7916815158690218065) -->
+    <skip />
+    <!-- no translation found for permlab_controlWifiDisplay (393641276723695496) -->
+    <skip />
+    <!-- no translation found for permdesc_controlWifiDisplay (4543912292681826986) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"zmienianie ustawień audio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Pozwala aplikacji na modyfikowanie globalnych ustawień dźwięku, takich jak głośność oraz urządzenie wyjściowe."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"nagrywanie dźwięku"</string>
@@ -547,7 +563,7 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Pozwala aplikacji na zapis na karcie SD."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"modyfikowanie/usuwanie zawartości pamięci wew."</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Pozwala aplikacji na modyfikowanie zawartości pamięci wewnętrznej."</string>
-    <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"dostęp do zewnętrznej pamięci wszystkich użytkowników"</string>
+    <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"dostęp do zewnętrznej pamięci wszystkich"</string>
     <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"Pozwala aplikacji na dostęp do zewnętrznej pamięci masowej dla wszystkich użytkowników."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"dostęp do systemu plików pamięci podręcznej"</string>
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Pozwala aplikacji na odczyt i zapis w systemie plików pamięci podręcznej."</string>
@@ -1069,12 +1085,9 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Ustaw datę"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Ustaw"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Gotowe"</string>
-    <string name="default_permission_group" msgid="2690160991405646128">"Domyślne"</string>
-    <string name="no_permissions" msgid="7283357728219338112">"Nie są wymagane żadne uprawnienia"</string>
-    <string name="perms_hide" msgid="7283915391320676226"><b>"Ukryj"</b></string>
-    <string name="perms_show_all" msgid="2671791163933091180"><b>"Pokaż wszystko"</b></string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"NOWE: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"Dostarczane przez <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
+    <string name="no_permissions" msgid="7283357728219338112">"Nie są wymagane żadne uprawnienia"</string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"Pamięć masowa USB"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"Połączenie przez USB"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Nawiązano połączenie z komputerem przez USB. Jeśli chcesz skopiować pliki między komputerem a nośnikiem USB systemu Android, dotknij poniższego przycisku."</string>
@@ -1322,11 +1335,9 @@
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Gotowe"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Wyjście multimediów"</string>
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Wbudowany ekran"</string>
-    <!-- no translation found for display_manager_hdmi_display_name (1555264559227470109) -->
-    <skip />
+    <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"Ekran HDMI"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Nakładka nr <xliff:g id="ID">%1$d</xliff:g>"</string>
-    <!-- no translation found for display_manager_overlay_display_title (652124517672257172) -->
-    <skip />
+    <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Połączenie alarmowe"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Nie pamiętam wzoru"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Nieprawidłowy wzór"</string>
@@ -1351,7 +1362,7 @@
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Hasło"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Zaloguj się"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Nieprawidłowa nazwa użytkownika lub hasło."</string>
-    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Nie pamiętasz nazwy użytkownika lub hasła?"\n"Wejdź na stronę "<b>"google.com/accounts/recovery"</b>"."</string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Nie pamiętasz nazwy użytkownika lub hasła?"\n"Wejdź na "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="kg_login_checking_password" msgid="8849589033659332457">"Sprawdzam…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Po raz <xliff:g id="NUMBER_0">%d</xliff:g> wpisałeś nieprawidłowy PIN. "\n\n"Spróbuj ponownie za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Po raz <xliff:g id="NUMBER_0">%d</xliff:g> wpisałeś nieprawidłowe hasło. "\n\n"Spróbuj ponownie za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>

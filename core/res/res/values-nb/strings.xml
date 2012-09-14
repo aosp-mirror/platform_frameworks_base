@@ -256,6 +256,10 @@
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Lar appen hente informasjon om vinduene fra vindusbehandleren. Skadelige apper kan hente informasjon som ikke er ment for intern systembruk."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"filtrere hendelser"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Lar appen registrere et inndatafilter som filtrerer strømmen for alle brukerhendelser før de sendes ut. Skadelige apper kan kontrollere brukergrensesnittet for systemet uten at brukeren gjør noe."</string>
+    <!-- no translation found for permlab_magnify_display (5973626738170618775) -->
+    <skip />
+    <!-- no translation found for permdesc_magnify_display (7121235684515003792) -->
+    <skip />
     <string name="permlab_shutdown" msgid="7185747824038909016">"delvis avslutning"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Lar applikasjonen sette aktivitetshåndtereren i avslutningstilstand. Slår ikke systemet helt av."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"forhindre applikasjonsbytte"</string>
@@ -286,6 +290,10 @@
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Lar appen når som helst endre den globale animasjonshastigheten (raskere eller langsommere animasjoner)."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"administrere apptokener"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Lar appen opprette og administrere egne tokener, ved å forbigå normal Z-rekkefølge. Skal aldri være nødvendig for normale apper."</string>
+    <!-- no translation found for permlab_freezeScreen (4708181184441880175) -->
+    <skip />
+    <!-- no translation found for permdesc_freezeScreen (8558923789222670064) -->
+    <skip />
     <string name="permlab_injectEvents" msgid="1378746584023586600">"trykke taster og kontrolknapper"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Lar appen levere sine egne inndatahendelser (tastetrykk osv.) til andre apper. Ondsinnede apper kan bruke dette til å ta over nettbrettet."</string>
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Lar appen levere sine egne inndatahendelser (tastetrykk osv.) til andre apper. Ondsinnede apper kan bruke dette til å ta over telefonen."</string>
@@ -398,6 +406,14 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Lar appen bruke grunnleggende SurfaceFlinger-funksjoner."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"lese skjermbufferet"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Lar appen lese innholdet i rammebufferen."</string>
+    <!-- no translation found for permlab_configureWifiDisplay (5595661694746742168) -->
+    <skip />
+    <!-- no translation found for permdesc_configureWifiDisplay (7916815158690218065) -->
+    <skip />
+    <!-- no translation found for permlab_controlWifiDisplay (393641276723695496) -->
+    <skip />
+    <!-- no translation found for permdesc_controlWifiDisplay (4543912292681826986) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"endre lydinnstillinger"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Lar appen endre globale lydinnstillinger slik som volum og hvilken høyttaler som brukes for lydavspilling."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ta opp lyd"</string>
@@ -1069,12 +1085,9 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Angi dato"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Lagre"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Ferdig"</string>
-    <string name="default_permission_group" msgid="2690160991405646128">"Standard"</string>
-    <string name="no_permissions" msgid="7283357728219338112">"Trenger ingen rettigheter"</string>
-    <string name="perms_hide" msgid="7283915391320676226"><b>"Skjul"</b></string>
-    <string name="perms_show_all" msgid="2671791163933091180"><b>"Vis alle"</b></string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"NYTT: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"Levert av <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
+    <string name="no_permissions" msgid="7283357728219338112">"Trenger ingen rettigheter"</string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB-masselagring"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB koblet til"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Du har koblet deg til datamaskinen via USB. Trykk på knappen nedenfor hvis du vil kopiere filer mellom datamaskinen og Android-telefonens USB-lagring."</string>
@@ -1322,11 +1335,9 @@
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Fullført"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Medieutgang"</string>
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Innebygd skjerm"</string>
-    <!-- no translation found for display_manager_hdmi_display_name (1555264559227470109) -->
-    <skip />
+    <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI-skjerm"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Overlegg #<xliff:g id="ID">%1$d</xliff:g>"</string>
-    <!-- no translation found for display_manager_overlay_display_title (652124517672257172) -->
-    <skip />
+    <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Nødnummer"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Har du glemt mønsteret?"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Feil mønster"</string>
