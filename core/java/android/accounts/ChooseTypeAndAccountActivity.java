@@ -15,6 +15,8 @@
  */
 package android.accounts;
 
+import com.google.android.collect.Sets;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -105,6 +107,13 @@ public class ChooseTypeAndAccountActivity extends Activity
 
     private static final int SELECTED_ITEM_NONE = -1;
 
+    private Set<Account> mSetOfAllowableAccounts;
+    private Set<String> mSetOfRelevantAccountTypes;
+    private String mSelectedAccountName = null;
+    private boolean mSelectedAddNewAccount = false;
+    private boolean mAlwaysPromptForAccount = false;
+    private String mDescriptionOverride;
+
     private ArrayList<Account> mAccounts;
     private int mPendingRequest = REQUEST_NULL;
     private Parcelable[] mExistingAccounts = null;
@@ -120,11 +129,7 @@ public class ChooseTypeAndAccountActivity extends Activity
         }
 
         // save some items we use frequently
-        final AccountManager accountManager = AccountManager.get(this);
         final Intent intent = getIntent();
-
-        String selectedAccountName = null;
-        boolean selectedAddNewAccount = false;
 
         if (savedInstanceState != null) {
             mPendingRequest = savedInstanceState.getInt(KEY_INSTANCE_STATE_PENDING_REQUEST);
@@ -132,10 +137,10 @@ public class ChooseTypeAndAccountActivity extends Activity
                     savedInstanceState.getParcelableArray(KEY_INSTANCE_STATE_EXISTING_ACCOUNTS);
 
             // Makes sure that any user selection is preserved across orientation changes.
-            selectedAccountName = savedInstanceState.getString(
+            mSelectedAccountName = savedInstanceState.getString(
                     KEY_INSTANCE_STATE_SELECTED_ACCOUNT_NAME);
 
-            selectedAddNewAccount = savedInstanceState.getBoolean(
+            mSelectedAddNewAccount = savedInstanceState.getBoolean(
                     KEY_INSTANCE_STATE_SELECTED_ADD_ACCOUNT, false);
         } else {
             mPendingRequest = REQUEST_NULL;
@@ -144,85 +149,38 @@ public class ChooseTypeAndAccountActivity extends Activity
             // show is as pre-selected.
             Account selectedAccount = (Account) intent.getParcelableExtra(EXTRA_SELECTED_ACCOUNT);
             if (selectedAccount != null) {
-                selectedAccountName = selectedAccount.name;
+                mSelectedAccountName = selectedAccount.name;
             }
         }
 
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Log.v(TAG, "selected account name is " + selectedAccountName);
+            Log.v(TAG, "selected account name is " + mSelectedAccountName);
         }
 
-        // build an efficiently queryable map of account types to authenticator descriptions
-        final HashMap<String, AuthenticatorDescription> typeToAuthDescription =
-                new HashMap<String, AuthenticatorDescription>();
-        for(AuthenticatorDescription desc : accountManager.getAuthenticatorTypes()) {
-            typeToAuthDescription.put(desc.type, desc);
-        }
 
-        // Read the validAccounts, if present, and add them to the setOfAllowableAccounts
-        Set<Account> setOfAllowableAccounts = null;
-        final ArrayList<Parcelable> validAccounts =
-                intent.getParcelableArrayListExtra(EXTRA_ALLOWABLE_ACCOUNTS_ARRAYLIST);
-        if (validAccounts != null) {
-            setOfAllowableAccounts = new HashSet<Account>(validAccounts.size());
-            for (Parcelable parcelable : validAccounts) {
-                setOfAllowableAccounts.add((Account)parcelable);
-            }
-        }
+        mSetOfAllowableAccounts = getAllowableAccountSet(intent);
+        mSetOfRelevantAccountTypes = getReleventAccountTypes(intent);
+        mAlwaysPromptForAccount = intent.getBooleanExtra(EXTRA_ALWAYS_PROMPT_FOR_ACCOUNT, false);
+        mDescriptionOverride = intent.getStringExtra(EXTRA_DESCRIPTION_TEXT_OVERRIDE);
+    }
 
-        // An account type is relevant iff it is allowed by the caller and supported by the account
-        // manager.
-        Set<String> setOfRelevantAccountTypes = null;
-        final String[] allowedAccountTypes =
-                intent.getStringArrayExtra(EXTRA_ALLOWABLE_ACCOUNT_TYPES_STRING_ARRAY);
-        if (allowedAccountTypes != null) {
+    @Override
+    protected void onResume() {
+        super.onResume();
+        final AccountManager accountManager = AccountManager.get(this);
 
-            setOfRelevantAccountTypes = new HashSet<String>(allowedAccountTypes.length);
-            Set<String> setOfAllowedAccountTypes = new HashSet<String>(allowedAccountTypes.length);
-            for (String type : allowedAccountTypes) {
-                setOfAllowedAccountTypes.add(type);
-            }
+        mAccounts = getAcceptableAccountChoices(accountManager);
 
-            AuthenticatorDescription[] descs = AccountManager.get(this).getAuthenticatorTypes();
-            Set<String> supportedAccountTypes = new HashSet<String>(descs.length);
-            for (AuthenticatorDescription desc : descs) {
-                supportedAccountTypes.add(desc.type);
-            }
-
-            for (String acctType : setOfAllowedAccountTypes) {
-                if (supportedAccountTypes.contains(acctType)) {
-                    setOfRelevantAccountTypes.add(acctType);
-                }
-            }
-        }
-
-        // Create a list of AccountInfo objects for each account that is allowable. Filter out
-        // accounts that don't match the allowable types, if provided, or that don't match the
-        // allowable accounts, if provided.
-        final Account[] accounts = accountManager.getAccounts();
-        mAccounts = new ArrayList<Account>(accounts.length);
-        mSelectedItemIndex = SELECTED_ITEM_NONE;
-        for (Account account : accounts) {
-            if (setOfAllowableAccounts != null
-                    && !setOfAllowableAccounts.contains(account)) {
-                continue;
-            }
-            if (setOfRelevantAccountTypes != null
-                    && !setOfRelevantAccountTypes.contains(account.type)) {
-                continue;
-            }
-            if (account.name.equals(selectedAccountName)) {
-                mSelectedItemIndex = mAccounts.size();
-            }
-            mAccounts.add(account);
-        }
-
+        // In cases where the activity does not need to show an account picker, cut the chase
+        // and return the result directly. Eg:
+        // Single account -> select it directly
+        // No account -> launch add account activity directly
         if (mPendingRequest == REQUEST_NULL) {
             // If there are no relevant accounts and only one relevant account type go directly to
             // add account. Otherwise let the user choose.
             if (mAccounts.isEmpty()) {
-                if (setOfRelevantAccountTypes.size() == 1) {
-                    runAddAccountForAuthenticator(setOfRelevantAccountTypes.iterator().next());
+                if (mSetOfRelevantAccountTypes.size() == 1) {
+                    runAddAccountForAuthenticator(mSetOfRelevantAccountTypes.iterator().next());
                 } else {
                     startChooseAccountTypeActivity();
                 }
@@ -230,61 +188,22 @@ public class ChooseTypeAndAccountActivity extends Activity
             }
 
             // if there is only one allowable account return it
-            if (!intent.getBooleanExtra(EXTRA_ALWAYS_PROMPT_FOR_ACCOUNT, false)
-                    && mAccounts.size() == 1) {
+            if (!mAlwaysPromptForAccount && mAccounts.size() == 1) {
                 Account account = mAccounts.get(0);
                 setResultAndFinish(account.name, account.type);
                 return;
             }
         }
 
+        String[] listItems = getListOfDisplayableOptions(mAccounts);
+        mSelectedItemIndex = getItemIndexToSelect(
+            mAccounts, mSelectedAccountName, mSelectedAddNewAccount);
+
         // Cannot set content view until we know that mPendingRequest is not null, otherwise
         // would cause screen flicker.
         setContentView(R.layout.choose_type_and_account);
-
-        // Override the description text if supplied
-        final String descriptionOverride =
-                intent.getStringExtra(EXTRA_DESCRIPTION_TEXT_OVERRIDE);
-        TextView descriptionView = (TextView) findViewById(R.id.description);
-        if (!TextUtils.isEmpty(descriptionOverride)) {
-            descriptionView.setText(descriptionOverride);
-        } else {
-            descriptionView.setVisibility(View.GONE);
-        }
-
-        // List of options includes all accounts found together with "Add new account" as the
-        // last item in the list.
-        String[] listItems = new String[mAccounts.size() + 1];
-        for (int i = 0; i < mAccounts.size(); i++) {
-            listItems[i] = mAccounts.get(i).name;
-        }
-        listItems[mAccounts.size()] = getResources().getString(
-                R.string.add_account_button_label);
-
-        ListView list = (ListView) findViewById(android.R.id.list);
-        list.setAdapter(new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_single_choice, listItems));
-        list.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-        list.setItemsCanFocus(false);
-        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                mSelectedItemIndex = position;
-                mOkButton.setEnabled(true);
-            }
-        });
-
-        // If "Add account" option was previously selected by user, preserve it across
-        // orientation changes.
-        if (selectedAddNewAccount) {
-            mSelectedItemIndex = mAccounts.size();
-        }
-        if (mSelectedItemIndex != SELECTED_ITEM_NONE) {
-            list.setItemChecked(mSelectedItemIndex, true);
-            if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                Log.v(TAG, "List item " + mSelectedItemIndex + " should be selected");
-            }
-        }
+        overrideDescriptionIfSupplied(mDescriptionOverride);
+        populateUIAccountList(listItems);
 
         // Only enable "OK" button if something has been selected.
         mOkButton = (Button) findViewById(android.R.id.button2);
@@ -479,5 +398,138 @@ public class ChooseTypeAndAccountActivity extends Activity
                 getIntent().getStringExtra(EXTRA_ADD_ACCOUNT_AUTH_TOKEN_TYPE_STRING));
         startActivityForResult(intent, REQUEST_CHOOSE_TYPE);
         mPendingRequest = REQUEST_CHOOSE_TYPE;
+    }
+
+    /**
+     * @return a value between 0 (inclusive) and accounts.size() (inclusive) or SELECTED_ITEM_NONE.
+     *      An index value of accounts.size() indicates 'Add account' option.
+     */
+    private int getItemIndexToSelect(ArrayList<Account> accounts, String selectedAccountName,
+        boolean selectedAddNewAccount) {
+      // If "Add account" option was previously selected by user, preserve it across
+      // orientation changes.
+      if (selectedAddNewAccount) {
+          return accounts.size();
+      }
+      // search for the selected account name if present
+      for (int i = 0; i < accounts.size(); i++) {
+        if (accounts.get(i).name.equals(selectedAccountName)) {
+          return i;
+        }
+      }
+      // no account selected.
+      return SELECTED_ITEM_NONE;
+    }
+
+    private String[] getListOfDisplayableOptions(ArrayList<Account> accounts) {
+      // List of options includes all accounts found together with "Add new account" as the
+      // last item in the list.
+      String[] listItems = new String[accounts.size() + 1];
+      for (int i = 0; i < accounts.size(); i++) {
+          listItems[i] = accounts.get(i).name;
+      }
+      listItems[accounts.size()] = getResources().getString(
+              R.string.add_account_button_label);
+      return listItems;
+    }
+
+    /**
+     * Create a list of Account objects for each account that is acceptable. Filter out
+     * accounts that don't match the allowable types, if provided, or that don't match the
+     * allowable accounts, if provided.
+     */
+    private ArrayList<Account> getAcceptableAccountChoices(AccountManager accountManager) {
+      final Account[] accounts = accountManager.getAccounts();
+      ArrayList<Account> accountsToPopulate = new ArrayList<Account>(accounts.length);
+      for (Account account : accounts) {
+          if (mSetOfAllowableAccounts != null
+                  && !mSetOfAllowableAccounts.contains(account)) {
+              continue;
+          }
+          if (mSetOfRelevantAccountTypes != null
+                  && !mSetOfRelevantAccountTypes.contains(account.type)) {
+              continue;
+          }
+          accountsToPopulate.add(account);
+      }
+      return accountsToPopulate;
+    }
+
+    /**
+     * Return a set of account types speficied by the intent as well as supported by the
+     * AccountManager.
+     */
+    private Set<String> getReleventAccountTypes(final Intent intent) {
+      // An account type is relevant iff it is allowed by the caller and supported by the account
+      // manager.
+      Set<String> setOfRelevantAccountTypes = null;
+      final String[] allowedAccountTypes =
+              intent.getStringArrayExtra(EXTRA_ALLOWABLE_ACCOUNT_TYPES_STRING_ARRAY);
+      if (allowedAccountTypes != null) {
+          setOfRelevantAccountTypes = Sets.newHashSet(allowedAccountTypes);
+          AuthenticatorDescription[] descs = AccountManager.get(this).getAuthenticatorTypes();
+          Set<String> supportedAccountTypes = new HashSet<String>(descs.length);
+          for (AuthenticatorDescription desc : descs) {
+              supportedAccountTypes.add(desc.type);
+          }
+          setOfRelevantAccountTypes.retainAll(supportedAccountTypes);
+      }
+      return setOfRelevantAccountTypes;
+    }
+
+    /**
+     * Returns a set of whitelisted accounts given by the intent or null if none specified by the
+     * intent.
+     */
+    private Set<Account> getAllowableAccountSet(final Intent intent) {
+      Set<Account> setOfAllowableAccounts = null;
+      final ArrayList<Parcelable> validAccounts =
+              intent.getParcelableArrayListExtra(EXTRA_ALLOWABLE_ACCOUNTS_ARRAYLIST);
+      if (validAccounts != null) {
+          setOfAllowableAccounts = new HashSet<Account>(validAccounts.size());
+          for (Parcelable parcelable : validAccounts) {
+              setOfAllowableAccounts.add((Account)parcelable);
+          }
+      }
+      return setOfAllowableAccounts;
+    }
+
+    /**
+     * Overrides the description text view for the picker activity if specified by the intent.
+     * If not specified then makes the description invisible.
+     */
+    private void overrideDescriptionIfSupplied(String descriptionOverride) {
+      TextView descriptionView = (TextView) findViewById(R.id.description);
+      if (!TextUtils.isEmpty(descriptionOverride)) {
+          descriptionView.setText(descriptionOverride);
+      } else {
+          descriptionView.setVisibility(View.GONE);
+      }
+    }
+
+    /**
+     * Populates the UI ListView with the given list of items and selects an item
+     * based on {@code mSelectedItemIndex} member variable.
+     */
+    private final void populateUIAccountList(String[] listItems) {
+      ListView list = (ListView) findViewById(android.R.id.list);
+      list.setAdapter(new ArrayAdapter<String>(this,
+              android.R.layout.simple_list_item_single_choice, listItems));
+      list.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+      list.setItemsCanFocus(false);
+      list.setOnItemClickListener(
+              new AdapterView.OnItemClickListener() {
+                  @Override
+                  public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+                      mSelectedItemIndex = position;
+                      mOkButton.setEnabled(true);
+                  }
+              });
+      if (mSelectedItemIndex != SELECTED_ITEM_NONE) {
+          list.setItemChecked(mSelectedItemIndex, true);
+          if (Log.isLoggable(TAG, Log.VERBOSE)) {
+              Log.v(TAG, "List item " + mSelectedItemIndex + " should be selected");
+          }
+      }
     }
 }
