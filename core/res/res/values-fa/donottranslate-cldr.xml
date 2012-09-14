@@ -61,7 +61,21 @@
     <string name="day_of_week_long_friday">جمعه</string>
     <string name="day_of_week_long_saturday">شنبه</string>
 
+    <string name="day_of_week_medium_sunday">یکشنبه</string>
+    <string name="day_of_week_medium_monday">دوشنبه</string>
+    <string name="day_of_week_medium_tuesday">سه‌شنبه</string>
+    <string name="day_of_week_medium_wednesday">چهارشنبه</string>
+    <string name="day_of_week_medium_thursday">پنجشنبه</string>
+    <string name="day_of_week_medium_friday">جمعه</string>
+    <string name="day_of_week_medium_saturday">شنبه</string>
 
+    <string name="day_of_week_short_sunday">۱ش</string>
+    <string name="day_of_week_short_monday">۲ش</string>
+    <string name="day_of_week_short_tuesday">۳ش</string>
+    <string name="day_of_week_short_wednesday">۴ش</string>
+    <string name="day_of_week_short_thursday">۵ش</string>
+    <string name="day_of_week_short_friday">ج</string>
+    <string name="day_of_week_short_saturday">ش</string>
 
     <string name="day_of_week_shortest_sunday">ی</string>
     <string name="day_of_week_shortest_monday">د</string>
