@@ -153,7 +153,8 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
         // This must show before bind to guarantee that Face Unlock has a place to display
         show(SERVICE_STARTUP_VIEW_TIMEOUT);
         if (!mBoundToService) {
-            Log.d(TAG, "Binding to Face Unlock service");
+            Log.d(TAG, "Binding to Face Unlock service for user="
+                    + mLockPatternUtils.getCurrentUser());
             mContext.bindService(new Intent(IFaceLockInterface.class.getName()),
                     mConnection,
                     Context.BIND_AUTO_CREATE,
