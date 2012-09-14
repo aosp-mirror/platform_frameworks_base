@@ -5902,9 +5902,12 @@ public class PackageManagerService extends IPackageManager.Stub {
      * @return true if verification should be performed
      */
     private boolean isVerificationEnabled() {
+        if (!DEFAULT_VERIFY_ENABLE) {
+            return false;
+        }
+
         return android.provider.Settings.Global.getInt(mContext.getContentResolver(),
-                android.provider.Settings.Global.PACKAGE_VERIFIER_ENABLE,
-                DEFAULT_VERIFY_ENABLE ? 1 : 0) == 1 ? true : false;
+                android.provider.Settings.Global.PACKAGE_VERIFIER_ENABLE, 1) == 1;
     }
 
     /**
