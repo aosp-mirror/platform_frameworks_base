@@ -588,7 +588,17 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         }
 
         throw new SecurityException("Location requires either ACCESS_COARSE_LOCATION or" +
-                "ACCESS_FINE_LOCATION permission");
+                " ACCESS_FINE_LOCATION permission");
+    }
+
+    /**
+     * Throw SecurityException if caller lacks permission to use Geofences.
+     */
+    private void checkGeofencePermission() {
+        if (mContext.checkCallingOrSelfPermission(ACCESS_FINE_LOCATION) !=
+                PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Geofence usage requires ACCESS_FINE_LOCATION permission");
+        }
     }
 
     /**
@@ -1096,6 +1106,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     public void requestGeofence(LocationRequest request, Geofence geofence, PendingIntent intent,
             String packageName) {
         if (request == null) request = DEFAULT_LOCATION_REQUEST;
+        checkGeofencePermission();
         checkPermissionAndRequest(request);
         checkPendingIntent(intent);
         checkPackageName(packageName);
@@ -1114,7 +1125,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
     @Override
     public void removeGeofence(Geofence geofence, PendingIntent intent, String packageName) {
-        checkPermission();
+        checkGeofencePermission();
         checkPendingIntent(intent);
         checkPackageName(packageName);
 
