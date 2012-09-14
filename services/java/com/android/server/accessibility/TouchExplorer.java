@@ -333,24 +333,18 @@ class TouchExplorer implements EventStreamTransformation {
 
         // The event for gesture end should be strictly after the
         // last hover exit event.
-        if (mTouchExplorationGestureEnded) {
-            switch (eventType) {
-                case AccessibilityEvent.TYPE_VIEW_HOVER_EXIT: {
-                    mTouchExplorationGestureEnded = false;
-                    sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_END);                
-                } break;
-            }
+        if (mTouchExplorationGestureEnded
+                && eventType == AccessibilityEvent.TYPE_VIEW_HOVER_EXIT) {
+            mTouchExplorationGestureEnded = false;
+            sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_END);
         }
 
         // The event for touch interaction end should be strictly after the
         // last hover exit and the touch exploration gesture end events.
-        if (mTouchInteractionEnded) {
-            switch (eventType) {
-                case AccessibilityEvent.TYPE_VIEW_HOVER_EXIT: {
-                    mTouchInteractionEnded = false;
-                    sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_INTERACTION_END);
-                } break;
-            }
+        if (mTouchInteractionEnded
+                && eventType == AccessibilityEvent.TYPE_VIEW_HOVER_EXIT) {
+            mTouchInteractionEnded = false;
+            sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_INTERACTION_END);
         }
 
         // If a new window opens or the accessibility focus moves we no longer
@@ -393,9 +387,9 @@ class TouchExplorer implements EventStreamTransformation {
 
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
-            	// The delayed enter not delivered implies that we have delivered
-            	// TYPE_TOUCH_INTERACTION_START and not TYPE_TOUCH_INTERACTION_END,
-            	// therefore we need to deliver the interaction end event here.
+                // The delayed enter not delivered implies that we have delivered
+                // TYPE_TOUCH_INTERACTION_START and not TYPE_TOUCH_INTERACTION_END,
+                // therefore we need to deliver the interaction end event here.
                 if (mSendHoverEnterDelayed.isPending()) {
                     sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_INTERACTION_END);
                 }
@@ -1157,16 +1151,16 @@ class TouchExplorer implements EventStreamTransformation {
             }
 
             if (Build.IS_DEBUGGABLE) {
-            	if (mSendHoverEnterDelayed.isPending()) {
-            		throw new IllegalStateException("mSendHoverEnterDelayed must not be pending.");
-            	}
-            	if (mSendHoverExitDelayed.isPending()) {
-            		throw new IllegalStateException("mSendHoverExitDelayed must not be pending.");
-            	}
-            	if (!mPerformLongPressDelayed.isPending()) {
-            		throw new IllegalStateException(
-            				"mPerformLongPressDelayed must not be pending.");
-            	}
+                if (mSendHoverEnterDelayed.isPending()) {
+                    throw new IllegalStateException("mSendHoverEnterDelayed must not be pending.");
+                }
+                if (mSendHoverExitDelayed.isPending()) {
+                    throw new IllegalStateException("mSendHoverExitDelayed must not be pending.");
+                }
+                if (!mPerformLongPressDelayed.isPending()) {
+                    throw new IllegalStateException(
+                            "mPerformLongPressDelayed must not be pending.");
+                }
             }
 
             // Remove pending event deliveries.
