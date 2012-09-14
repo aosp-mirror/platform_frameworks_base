@@ -34,6 +34,7 @@ public class VerificationParamsTest extends AndroidTestCase {
     private final static String ORIGINATING_URI_STRING = "http://originating.uri/path";
     private final static String REFERRER_STRING = "http://referrer.uri/path";
     private final static byte[] DIGEST_BYTES = "fake digest".getBytes();
+    private final static int INSTALLER_UID = 42;
 
     private final static Uri VERIFICATION_URI = Uri.parse(VERIFICATION_URI_STRING);
     private final static Uri ORIGINATING_URI = Uri.parse(ORIGINATING_URI_STRING);
@@ -115,6 +116,18 @@ public class VerificationParamsTest extends AndroidTestCase {
         assertFalse(params1.equals(params2));
     }
 
+    public void testEquals_InstallerUid_Failure() throws Exception {
+        VerificationParams params1 = new VerificationParams(VERIFICATION_URI, ORIGINATING_URI,
+                REFERRER, MANIFEST_DIGEST);
+
+        VerificationParams params2 = new VerificationParams(
+                Uri.parse(VERIFICATION_URI_STRING), Uri.parse(ORIGINATING_URI_STRING),
+                Uri.parse(REFERRER_STRING), new ManifestDigest(DIGEST_BYTES));
+        params2.setInstallerUid(INSTALLER_UID);
+
+        assertFalse(params1.equals(params2));
+    }
+
     public void testHashCode_Success() throws Exception {
         VerificationParams params1 = new VerificationParams(VERIFICATION_URI, ORIGINATING_URI,
                 REFERRER, MANIFEST_DIGEST);
@@ -165,6 +178,18 @@ public class VerificationParamsTest extends AndroidTestCase {
         VerificationParams params2 = new VerificationParams(
                 Uri.parse(VERIFICATION_URI_STRING), Uri.parse(ORIGINATING_URI_STRING),
                 Uri.parse(REFERRER_STRING), new ManifestDigest("a different digest".getBytes()));
+
+        assertFalse(params1.hashCode() == params2.hashCode());
+    }
+
+    public void testHashCode_InstallerUid_Failure() throws Exception {
+        VerificationParams params1 = new VerificationParams(VERIFICATION_URI, ORIGINATING_URI,
+                REFERRER, MANIFEST_DIGEST);
+
+        VerificationParams params2 = new VerificationParams(
+                Uri.parse(VERIFICATION_URI_STRING), Uri.parse(ORIGINATING_URI_STRING),
+                Uri.parse(REFERRER_STRING), new ManifestDigest("a different digest".getBytes()));
+        params2.setInstallerUid(INSTALLER_UID);
 
         assertFalse(params1.hashCode() == params2.hashCode());
     }

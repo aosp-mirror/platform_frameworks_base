@@ -5664,6 +5664,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             filteredFlags = flags & ~PackageManager.INSTALL_FROM_ADB;
         }
 
+        verificationParams.setInstallerUid(uid);
+
         final Message msg = mHandler.obtainMessage(INIT_COPY);
         msg.obj = new InstallParams(packageURI, observer, filteredFlags, installerPackageName,
                 verificationParams, encryptionParams, user);
@@ -6428,6 +6430,12 @@ public class PackageManagerService extends IPackageManager.Stub {
 
                     verification.putExtra(PackageManager.EXTRA_VERIFICATION_INSTALL_FLAGS, flags);
 
+                    verification.putExtra(PackageManager.EXTRA_VERIFICATION_PACKAGE_NAME,
+                            pkgLite.packageName);
+
+                    verification.putExtra(PackageManager.EXTRA_VERIFICATION_VERSION_CODE,
+                            pkgLite.versionCode);
+
                     if (verificationParams != null) {
                         if (verificationParams.getVerificationURI() != null) {
                            verification.putExtra(PackageManager.EXTRA_VERIFICATION_URI,
@@ -6440,6 +6448,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                         if (verificationParams.getReferrer() != null) {
                             verification.putExtra(Intent.EXTRA_REFERRER,
                                   verificationParams.getReferrer());
+                        }
+                        if (verificationParams.getInstallerUid() >= 0) {
+                            verification.putExtra(PackageManager.EXTRA_VERIFICATION_INSTALLER_UID,
+                                  verificationParams.getInstallerUid());
                         }
                     }
 

@@ -39,6 +39,9 @@ public class VerificationParams implements Parcelable {
     /** HTTP referrer URI associated with the originatingURI. */
     private final Uri mReferrer;
 
+    /** UID of application requesting the install */
+    private int mInstallerUid;
+
     /**
      * An object that holds the digest of the package which can be used to
      * verify ownership.
@@ -63,6 +66,7 @@ public class VerificationParams implements Parcelable {
         mOriginatingURI = originatingURI;
         mReferrer = referrer;
         mManifestDigest = manifestDigest;
+        mInstallerUid = -1;
     }
 
     public Uri getVerificationURI() {
@@ -79,6 +83,15 @@ public class VerificationParams implements Parcelable {
 
     public ManifestDigest getManifestDigest() {
         return mManifestDigest;
+    }
+
+    /** @return -1 when not set */
+    public int getInstallerUid() {
+        return mInstallerUid;
+    }
+
+    public void setInstallerUid(int uid) {
+        mInstallerUid = uid;
     }
 
     @Override
@@ -126,6 +139,10 @@ public class VerificationParams implements Parcelable {
             return false;
         }
 
+        if (mInstallerUid != other.mInstallerUid) {
+            return false;
+        }
+
         return true;
     }
 
@@ -137,6 +154,7 @@ public class VerificationParams implements Parcelable {
         hash += 7 * (mOriginatingURI==null?1:mOriginatingURI.hashCode());
         hash += 11 * (mReferrer==null?1:mReferrer.hashCode());
         hash += 13 * (mManifestDigest==null?1:mManifestDigest.hashCode());
+        hash += 17 * mInstallerUid;
 
         return hash;
     }
@@ -153,6 +171,8 @@ public class VerificationParams implements Parcelable {
         sb.append(mReferrer.toString());
         sb.append(",mManifestDigest=");
         sb.append(mManifestDigest.toString());
+        sb.append(",mInstallerUid=");
+        sb.append(mInstallerUid);
         sb.append('}');
 
         return sb.toString();
@@ -164,6 +184,7 @@ public class VerificationParams implements Parcelable {
         dest.writeParcelable(mOriginatingURI, 0);
         dest.writeParcelable(mReferrer, 0);
         dest.writeParcelable(mManifestDigest, 0);
+        dest.writeInt(mInstallerUid);
     }
 
 
@@ -172,6 +193,7 @@ public class VerificationParams implements Parcelable {
         mOriginatingURI = source.readParcelable(Uri.class.getClassLoader());
         mReferrer = source.readParcelable(Uri.class.getClassLoader());
         mManifestDigest = source.readParcelable(ManifestDigest.class.getClassLoader());
+        mInstallerUid = source.readInt();
     }
 
     public static final Parcelable.Creator<VerificationParams> CREATOR =
