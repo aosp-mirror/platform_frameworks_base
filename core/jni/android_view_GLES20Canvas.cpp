@@ -766,14 +766,16 @@ static Layer* android_view_GLES20Canvas_createLayer(JNIEnv* env, jobject clazz,
     return layer;
 }
 
-static void android_view_GLES20Canvas_resizeLayer(JNIEnv* env, jobject clazz,
+static bool android_view_GLES20Canvas_resizeLayer(JNIEnv* env, jobject clazz,
         Layer* layer, jint width, jint height, jintArray layerInfo) {
-    LayerRenderer::resizeLayer(layer, width, height);
-
-    jint* storage = env->GetIntArrayElements(layerInfo, NULL);
-    storage[0] = layer->getWidth();
-    storage[1] = layer->getHeight();
-    env->ReleaseIntArrayElements(layerInfo, storage, 0);
+    if (LayerRenderer::resizeLayer(layer, width, height)) {
+        jint* storage = env->GetIntArrayElements(layerInfo, NULL);
+        storage[0] = layer->getWidth();
+        storage[1] = layer->getHeight();
+        env->ReleaseIntArrayElements(layerInfo, storage, 0);
+        return true;
+    }
+    return false;
 }
 
 static void android_view_GLES20Canvas_setLayerPaint(JNIEnv* env, jobject clazz,
@@ -992,7 +994,7 @@ static JNINativeMethod gMethods[] = {
 
     { "nCreateLayerRenderer",    "(I)I",       (void*) android_view_GLES20Canvas_createLayerRenderer },
     { "nCreateLayer",            "(IIZ[I)I",   (void*) android_view_GLES20Canvas_createLayer },
-    { "nResizeLayer",            "(III[I)V" ,  (void*) android_view_GLES20Canvas_resizeLayer },
+    { "nResizeLayer",            "(III[I)Z" ,  (void*) android_view_GLES20Canvas_resizeLayer },
     { "nSetLayerPaint",          "(II)V",      (void*) android_view_GLES20Canvas_setLayerPaint },
     { "nSetLayerColorFilter",    "(II)V",      (void*) android_view_GLES20Canvas_setLayerColorFilter },
     { "nSetOpaqueLayer",         "(IZ)V",      (void*) android_view_GLES20Canvas_setOpaqueLayer },

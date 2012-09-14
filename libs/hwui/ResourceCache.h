@@ -23,6 +23,7 @@
 #include <SkiaColorFilter.h>
 #include <SkiaShader.h>
 #include <utils/KeyedVector.h>
+#include "Layer.h"
 
 namespace android {
 namespace uirenderer {
@@ -35,6 +36,7 @@ enum ResourceType {
     kShader,
     kColorFilter,
     kPath,
+    kLayer
 };
 
 class ResourceReference {
@@ -67,21 +69,25 @@ public:
     void incrementRefcount(SkBitmap* resource);
     void incrementRefcount(SkiaShader* resource);
     void incrementRefcount(SkiaColorFilter* resource);
+    void incrementRefcount(Layer* resource);
 
     void incrementRefcountLocked(SkPath* resource);
     void incrementRefcountLocked(SkBitmap* resource);
     void incrementRefcountLocked(SkiaShader* resource);
     void incrementRefcountLocked(SkiaColorFilter* resource);
+    void incrementRefcountLocked(Layer* resource);
 
     void decrementRefcount(SkBitmap* resource);
     void decrementRefcount(SkPath* resource);
     void decrementRefcount(SkiaShader* resource);
     void decrementRefcount(SkiaColorFilter* resource);
+    void decrementRefcount(Layer* resource);
 
     void decrementRefcountLocked(SkBitmap* resource);
     void decrementRefcountLocked(SkPath* resource);
     void decrementRefcountLocked(SkiaShader* resource);
     void decrementRefcountLocked(SkiaColorFilter* resource);
+    void decrementRefcountLocked(Layer* resource);
 
     void destructor(SkPath* resource);
     void destructor(SkBitmap* resource);
