@@ -81,6 +81,7 @@ public class NetworkController extends BroadcastReceiver {
     String mNetworkNameDefault;
     String mNetworkNameSeparator;
     int mPhoneSignalIconId;
+    int mQSPhoneSignalIconId;
     int mDataDirectionIconId; // data + data direction on phones
     int mDataSignalIconId;
     int mDataTypeIconId;
@@ -105,6 +106,7 @@ public class NetworkController extends BroadcastReceiver {
     int mWifiRssi, mWifiLevel;
     String mWifiSsid;
     int mWifiIconId = 0;
+    int mQSWifiIconId = 0;
     int mWifiActivityIconId = 0; // overlay arrows for wifi direction
     int mWifiActivity = WifiManager.DATA_ACTIVITY_NONE;
 
@@ -175,8 +177,8 @@ public class NetworkController extends BroadcastReceiver {
     }
 
     public interface NetworkSignalChangedCallback {
-        void onWifiSignalChanged(boolean enabled, String description);
-        void onMobileDataSignalChanged(boolean enabled, String description);
+        void onWifiSignalChanged(boolean enabled, int wifiSignalIconId, String description);
+        void onMobileDataSignalChanged(boolean enabled, int mobileSignalIconId, String description);
         void onAirplaneModeChanged(boolean enabled);
     }
 
@@ -347,17 +349,18 @@ public class NetworkController extends BroadcastReceiver {
         boolean wifiEnabled = mWifiEnabled && (mWifiConnected || !mHasMobileDataFeature);
         String wifiDesc = wifiEnabled ?
                 mWifiSsid : null;
-        cb.onWifiSignalChanged(wifiEnabled, wifiDesc);
+        cb.onWifiSignalChanged(wifiEnabled, mQSWifiIconId, wifiDesc);
 
         if (isEmergencyOnly()) {
-            cb.onMobileDataSignalChanged(false, null);
+            cb.onMobileDataSignalChanged(false, mQSPhoneSignalIconId, null);
         } else {
             if (mIsWimaxEnabled && mWimaxConnected) {
                 // wimax is special
-                cb.onMobileDataSignalChanged(true, mNetworkName);
+                cb.onMobileDataSignalChanged(true, mQSPhoneSignalIconId, mNetworkName);
             } else {
                 // normal mobile data
-                cb.onMobileDataSignalChanged(mHasMobileDataFeature, mNetworkName);
+                cb.onMobileDataSignalChanged(mHasMobileDataFeature, mQSPhoneSignalIconId,
+                        mNetworkName);
             }
         }
         cb.onAirplaneModeChanged(mAirplaneMode);
@@ -517,11 +520,13 @@ public class NetworkController extends BroadcastReceiver {
         if (!hasService()) {
             if (CHATTY) Slog.d(TAG, "updateTelephonySignalStrength: !hasService()");
             mPhoneSignalIconId = R.drawable.stat_sys_signal_null;
+            mQSPhoneSignalIconId = R.drawable.ic_qs_signal_no_signal;
             mDataSignalIconId = R.drawable.stat_sys_signal_null;
         } else {
             if (mSignalStrength == null) {
                 if (CHATTY) Slog.d(TAG, "updateTelephonySignalStrength: mSignalStrength == null");
                 mPhoneSignalIconId = R.drawable.stat_sys_signal_null;
+                mQSPhoneSignalIconId = R.drawable.ic_qs_signal_no_signal;
                 mDataSignalIconId = R.drawable.stat_sys_signal_null;
                 mContentDescriptionPhoneSignal = mContext.getString(
                         AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0]);
@@ -552,6 +557,7 @@ public class NetworkController extends BroadcastReceiver {
                     }
                 }
                 mPhoneSignalIconId = iconList[iconLevel];
+                mQSPhoneSignalIconId = TelephonyIcons.QS_TELEPHONY_SIGNAL_STRENGTH[iconLevel];
                 mContentDescriptionPhoneSignal = mContext.getString(
                         AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[iconLevel]);
                 mDataSignalIconId = TelephonyIcons.DATA_SIGNAL_STRENGTH[mInetCondition][iconLevel];
@@ -844,13 +850,16 @@ public class NetworkController extends BroadcastReceiver {
     private void updateWifiIcons() {
         if (mWifiConnected) {
             mWifiIconId = WifiIcons.WIFI_SIGNAL_STRENGTH[mInetCondition][mWifiLevel];
+            mQSWifiIconId = WifiIcons.QS_WIFI_SIGNAL_STRENGTH[mWifiLevel];
             mContentDescriptionWifi = mContext.getString(
                     AccessibilityContentDescriptions.WIFI_CONNECTION_STRENGTH[mWifiLevel]);
         } else {
             if (mDataAndWifiStacked) {
                 mWifiIconId = 0;
+                mQSWifiIconId = 0;
             } else {
                 mWifiIconId = mWifiEnabled ? R.drawable.stat_sys_wifi_signal_null : 0;
+                mQSWifiIconId = mWifiEnabled ? R.drawable.ic_qs_wifi_no_network : 0;
             }
             mContentDescriptionWifi = mContext.getString(R.string.accessibility_no_wifi);
         }
@@ -975,6 +984,7 @@ public class NetworkController extends BroadcastReceiver {
 
         if (!mHasMobileDataFeature) {
             mDataSignalIconId = mPhoneSignalIconId = 0;
+            mQSPhoneSignalIconId = 0;
             mobileLabel = "";
         } else {
             // We want to show the carrier name if in service and either:
@@ -1086,6 +1096,7 @@ public class NetworkController extends BroadcastReceiver {
                     R.string.accessibility_airplane_mode);
             mAirplaneIconId = R.drawable.stat_sys_signal_flightmode;
             mPhoneSignalIconId = mDataSignalIconId = mDataTypeIconId = 0;
+            mQSPhoneSignalIconId = 0;
 
             // combined values from connected wifi take precedence over airplane mode
             if (mWifiConnected) {
@@ -1140,10 +1151,12 @@ public class NetworkController extends BroadcastReceiver {
                     + " mAirplaneMode=" + mAirplaneMode
                     + " mDataActivity=" + mDataActivity
                     + " mPhoneSignalIconId=0x" + Integer.toHexString(mPhoneSignalIconId)
+                    + " mQSPhoneSignalIconId=0x" + Integer.toHexString(mQSPhoneSignalIconId)
                     + " mDataDirectionIconId=0x" + Integer.toHexString(mDataDirectionIconId)
                     + " mDataSignalIconId=0x" + Integer.toHexString(mDataSignalIconId)
                     + " mDataTypeIconId=0x" + Integer.toHexString(mDataTypeIconId)
                     + " mWifiIconId=0x" + Integer.toHexString(mWifiIconId)
+                    + " mQSWifiIconId=0x" + Integer.toHexString(mQSWifiIconId)
                     + " mBluetoothTetherIconId=0x" + Integer.toHexString(mBluetoothTetherIconId));
         }
 
@@ -1357,6 +1370,9 @@ public class NetworkController extends BroadcastReceiver {
         pw.print("  mPhoneSignalIconId=0x");
         pw.print(Integer.toHexString(mPhoneSignalIconId));
         pw.print("/");
+        pw.print("  mQSPhoneSignalIconId=0x");
+        pw.print(Integer.toHexString(mQSPhoneSignalIconId));
+        pw.print("/");
         pw.println(getResourceName(mPhoneSignalIconId));
         pw.print("  mDataDirectionIconId=");
         pw.print(Integer.toHexString(mDataDirectionIconId));
@@ -1384,6 +1400,8 @@ public class NetworkController extends BroadcastReceiver {
         pw.println(mWifiSsid);
         pw.println(String.format("  mWifiIconId=0x%08x/%s",
                     mWifiIconId, getResourceName(mWifiIconId)));
+        pw.println(String.format("  mQSWifiIconId=0x%08x/%s",
+                    mQSWifiIconId, getResourceName(mQSWifiIconId)));
         pw.print("  mWifiActivity=");
         pw.println(mWifiActivity);
 
