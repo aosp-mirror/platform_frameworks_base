@@ -611,15 +611,6 @@ public class WindowAnimator {
                         !mService.okToDisplay());
             }
 
-            if (mService.mBlackFrame != null) {
-                if (mScreenRotationAnimation != null) {
-                    mService.mBlackFrame.setMatrix(
-                            mScreenRotationAnimation.getEnterTransformation().getMatrix());
-                } else {
-                    mService.mBlackFrame.clearMatrix();
-                }
-            }
-
             if (mService.mWatermark != null) {
                 mService.mWatermark.drawIfNeeded();
             }
