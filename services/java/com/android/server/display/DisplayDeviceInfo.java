@@ -180,7 +180,7 @@ final class DisplayDeviceInfo {
             msg.append(", FLAG_DEFAULT_DISPLAY");
         }
         if ((flags & FLAG_SUPPORTS_ROTATION) != 0) {
-            msg.append(", FLAG_DEFAULT_DISPLAY");
+            msg.append(", FLAG_SUPPORTS_ROTATION");
         }
         if ((flags & FLAG_SUPPORTS_SECURE_VIDEO_OUTPUT) != 0) {
             msg.append(", FLAG_SUPPORTS_SECURE_VIDEO_OUTPUT");
