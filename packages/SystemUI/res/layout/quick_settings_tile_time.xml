@@ -15,7 +15,7 @@
 -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:orientation="vertical">
@@ -24,6 +24,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
+        android:paddingTop="3dp"
+        android:paddingBottom="3dp"
         android:singleLine="true"
         />
     <com.android.systemui.statusbar.policy.QuickSettingsDateView
@@ -38,6 +40,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:drawableLeft="@drawable/stat_sys_alarm"
+        android:paddingTop="2dp"
+        android:paddingBottom="4dp"
+        android:drawableLeft="@drawable/ic_qs_alarm_on"
+        android:drawablePadding="4dp"
         />
 </LinearLayout>

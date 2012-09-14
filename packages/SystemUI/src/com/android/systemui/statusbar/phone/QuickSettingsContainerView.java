@@ -78,10 +78,8 @@ class QuickSettingsContainerView extends FrameLayout {
             lp.width = (int) ((colSpan * cellWidth) + (colSpan - 1) * mCellGap);
 
             // Measure the child
-            v.setMinimumWidth(lp.width);
-            v.setMinimumHeight(lp.height);
-            int newWidthSpec = MeasureSpec.makeMeasureSpec(lp.width, MeasureSpec.AT_MOST);
-            int newHeightSpec = MeasureSpec.makeMeasureSpec(lp.height, MeasureSpec.AT_MOST);
+            int newWidthSpec = MeasureSpec.makeMeasureSpec(lp.width, MeasureSpec.EXACTLY);
+            int newHeightSpec = MeasureSpec.makeMeasureSpec(lp.height, MeasureSpec.EXACTLY);
             v.measure(newWidthSpec, newHeightSpec);
 
             // Save the cell height

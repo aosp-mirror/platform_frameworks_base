@@ -15,12 +15,12 @@
 -->
 <TextView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/TextAppearance.QuickSettings.TileView"
     android:id="@+id/location_textview"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:gravity="center"
-    android:drawableTop="@drawable/stat_sys_gps_acquiring"
+    android:drawableTop="@drawable/ic_qs_location"
     android:text="@string/quick_settings_location_label"
-    android:textAppearance="@style/TextAppearance.QuickSettings.TileView"
     />
