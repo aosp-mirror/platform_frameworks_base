@@ -35,6 +35,14 @@ class TelephonyIcons {
           R.drawable.stat_sys_signal_4_fully }
     };
 
+    static final int[] QS_TELEPHONY_SIGNAL_STRENGTH = {
+          R.drawable.ic_qs_signal_0,
+          R.drawable.ic_qs_signal_1,
+          R.drawable.ic_qs_signal_2,
+          R.drawable.ic_qs_signal_3,
+          R.drawable.ic_qs_signal_4
+    };
+
     static final int[][] TELEPHONY_SIGNAL_STRENGTH_ROAMING = {
         { R.drawable.stat_sys_signal_0,
           R.drawable.stat_sys_signal_1,
