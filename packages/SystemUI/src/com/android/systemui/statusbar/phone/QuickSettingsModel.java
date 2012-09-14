@@ -36,6 +36,7 @@ import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
 
+import com.android.internal.view.RotationPolicy;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 import com.android.systemui.statusbar.policy.LocationController.LocationGpsStateChangeCallback;
@@ -140,6 +141,10 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private QuickSettingsTileView mImeTile;
     private RefreshCallback mImeCallback;
     private State mImeState = new State();
+
+    private QuickSettingsTileView mRotationLockTile;
+    private RefreshCallback mRotationLockCallback;
+    private State mRotationLockState = new State();
 
     public QuickSettingsModel(Context context) {
         mContext = context;
@@ -370,6 +375,24 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
             }
         }
         return null;
+    }
+
+    // Rotation lock
+    void addRotationLockTile(QuickSettingsTileView view, RefreshCallback cb) {
+        mRotationLockTile = view;
+        mRotationLockCallback = cb;
+        onRotationLockChanged();
+    }
+    void onRotationLockChanged() {
+        boolean locked = RotationPolicy.isRotationLocked(mContext);
+        mRotationLockState.enabled = locked;
+        mRotationLockState.iconId = locked
+                ? R.drawable.ic_qs_rotation_locked
+                : R.drawable.ic_qs_auto_rotate;
+        mRotationLockState.label = locked
+                ? mContext.getString(R.string.quick_settings_rotation_locked_label)
+                : mContext.getString(R.string.quick_settings_rotation_unlocked_label);
+        mRotationLockCallback.refreshView(mRotationLockTile, mRotationLockState);
     }
 
 }
