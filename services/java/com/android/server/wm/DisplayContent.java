@@ -124,7 +124,9 @@ class DisplayContent {
         pw.print("-"); pw.print(mDisplayInfo.largestNominalAppWidth);
         pw.print("x"); pw.println(mDisplayInfo.largestNominalAppHeight);
         pw.print("  layoutNeeded="); pw.println(layoutNeeded);
-        pw.print("magnificationSpec="); pw.println(mMagnificationSpec);
+        if (mMagnificationSpec != null) {
+            pw.print("  mMagnificationSpec="); pw.println(mMagnificationSpec);
+        }
         pw.println();
     }
 }
