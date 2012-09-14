@@ -171,12 +171,47 @@
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Tin nhắn của bạn"</string>
     <string name="permgroupdesc_messages" msgid="7821999071003699236">"Đọc và soạn SMS, email và các tin nhắn khác của bạn."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Thông tin cá nhân của bạn"</string>
-    <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"Quyền truy cập trực tiếp vào danh bạ và lịch của bạn được lưu trữ trên máy tính bảng."</string>
-    <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"Quyền truy cập trực tiếp vào danh bạ và lịch của bạn được lưu trữ trên điện thoại."</string>
+    <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"Truy cập trực tiếp vào thông tin về bạn, được lưu trữ trên thẻ liên hệ của bạn."</string>
+    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Thông tin xã hội của bạn"</string>
+    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Truy cập trực tiếp vào thông tin về các địa chỉ liên hệ và các kết nối xã hội của bạn."</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"Vị trí của bạn"</string>
     <string name="permgroupdesc_location" msgid="5704679763124170100">"Giám sát vị trí thực của bạn."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Kết nối mạng"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"Truy cập các tính năng mạng khác nhau."</string>
+    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"Bluetooth"</string>
+    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"Truy cập vào các thiết bị và mạng thông qua Bluetooth."</string>
+    <string name="permgrouplab_shortrangeNetwork" msgid="130808676377486118">"Mạng phạm vi ngắn"</string>
+    <string name="permgroupdesc_shortrangeNetwork" msgid="1884069062653436007">"Truy cập vào các thiết bị thông qua mạng phạm vi ngắn như NFC."</string>
+    <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"Cài đặt âm thanh"</string>
+    <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"Thay đổi cài đặt âm thanh."</string>
+    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"Ảnh hưởng tới pin"</string>
+    <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"Sử dụng các tính năng có thể làm nhanh hết pin."</string>
+    <string name="permgrouplab_calendar" msgid="5863508437783683902">"Lịch"</string>
+    <string name="permgroupdesc_calendar" msgid="5777534316982184416">"Truy cập trực tiếp vào lịch và sự kiện."</string>
+    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"Đọc từ điển người dùng"</string>
+    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"Đọc các từ trong từ điển người dùng."</string>
+    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"Ghi từ điển người dùng"</string>
+    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"Thêm từ vào từ điển người dùng."</string>
+    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Dấu trang và lịch sử"</string>
+    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Truy cập trực tiếp vào dấu trang và lịch sử trình duyệt."</string>
+    <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"Báo thức"</string>
+    <string name="permgroupdesc_deviceAlarms" msgid="4769356362251641175">"Đặt đồng hồ báo thức."</string>
+    <string name="permgrouplab_voicemail" msgid="4162237145027592133">"Thư thoại"</string>
+    <string name="permgroupdesc_voicemail" msgid="2498403969862951393">"Truy cập trực tiếp vào thư thoại."</string>
+    <string name="permgrouplab_microphone" msgid="171539900250043464">"Micrô"</string>
+    <string name="permgroupdesc_microphone" msgid="7106618286905738408">"Truy cập trực tiếp vào micrô để ghi âm."</string>
+    <string name="permgrouplab_camera" msgid="4820372495894586615">"Máy ảnh"</string>
+    <string name="permgroupdesc_camera" msgid="2933667372289567714">"Truy cập trực tiếp vào máy ảnh để chụp ảnh hoặc quay video."</string>
+    <string name="permgrouplab_appInfo" msgid="8028789762634147725">"Thông tin về các ứng dụng của bạn"</string>
+    <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"Khả năng ảnh hưởng tới hoạt động của các ứng dụng khác trên thiết bị của bạn."</string>
+    <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"Hình nền"</string>
+    <string name="permgroupdesc_wallpaper" msgid="5630417854750540154">"Thay đổi cài đặt hình nền của thiết bị."</string>
+    <string name="permgrouplab_systemClock" msgid="406535759236612992">"Đồng hồ"</string>
+    <string name="permgroupdesc_systemClock" msgid="3944359833624094992">"Thay đổi giờ hoặc múi giờ của thiết bị."</string>
+    <string name="permgrouplab_statusBar" msgid="2095862568113945398">"Thanh trạng thái"</string>
+    <string name="permgroupdesc_statusBar" msgid="6242593432226807171">"Thay đổi cài đặt thanh trạng thái của thiết bị."</string>
+    <string name="permgrouplab_syncSettings" msgid="3341990986147826541">"Cài đặt đồng bộ hóa"</string>
+    <string name="permgroupdesc_syncSettings" msgid="7603195265129031797">"Truy cập vào cài đặt đồng bộ hóa."</string>
     <string name="permgrouplab_accounts" msgid="3359646291125325519">"Tài khoản của bạn"</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Truy cập các tài khoản khả dụng."</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Kiểm soát phần cứng"</string>
@@ -187,6 +222,8 @@
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"Quyền truy cập và quyền kiểm soát hệ thống cấp thấp hơn."</string>
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Công cụ phát triển"</string>
     <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"Các tính năng chỉ cần cho nhà phát triển ứng dụng."</string>
+    <string name="permgrouplab_display" msgid="4279909676036402636">"Giao diện người dùng của ứng dụng khác"</string>
+    <string name="permgroupdesc_display" msgid="6051002031933013714">"Ảnh hưởng tới giao diện người dùng của các ứng dụng khác."</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Dung lượng"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Truy cập bộ nhớ USB."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Truy cập thẻ SD."</string>
@@ -1085,12 +1122,9 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Đặt ngày"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Đặt"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Xong"</string>
-    <string name="default_permission_group" msgid="2690160991405646128">"Mặc định"</string>
-    <string name="no_permissions" msgid="7283357728219338112">"Không yêu cầu quyền"</string>
-    <string name="perms_hide" msgid="7283915391320676226"><b>"Ẩn"</b></string>
-    <string name="perms_show_all" msgid="2671791163933091180"><b>"Hiển thị tất cả"</b></string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"MỚI: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"Được cung cấp bởi <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
+    <string name="no_permissions" msgid="7283357728219338112">"Không yêu cầu quyền"</string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"Bộ nhớ dung lượng lớn USB"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB đã kết nối"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Bạn đã kết nối với máy tính của mình qua USB. Hãy chạm vào nút bên dưới nếu bạn muốn sao chép các tệp giữa máy tính và bộ lưu trữ USB của Android của bạn."</string>

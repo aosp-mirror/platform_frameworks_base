@@ -171,12 +171,47 @@
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Pesan Anda"</string>
     <string name="permgroupdesc_messages" msgid="7821999071003699236">"Membaca dan menulis SMS, email, dan pesan Anda lainnya."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Informasi pribadi Anda"</string>
-    <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"Akses langsung ke kontak dan kalender yang disimpan di tablet."</string>
-    <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"akses langsung pada kontak dan kalender yang tersimpan pada ponsel."</string>
+    <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"Akses langsung ke informasi tentang Anda, yang tersimpan dalam kartu kontak Anda."</string>
+    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Informasi sosial Anda"</string>
+    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Akses langsung ke informasi tentang kontak dan hubungan sosial Anda."</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"Lokasi Anda"</string>
     <string name="permgroupdesc_location" msgid="5704679763124170100">"Memonitor lokasi fisik Anda."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Komunikasi jaringan"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"Mengakses berbagai fitur jaringan."</string>
+    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"Bluetooth"</string>
+    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"Mengakses perangkat dan jaringan melalui Bluetooth."</string>
+    <string name="permgrouplab_shortrangeNetwork" msgid="130808676377486118">"Jaringan jarak pendek"</string>
+    <string name="permgroupdesc_shortrangeNetwork" msgid="1884069062653436007">"Mengakses perangkat melalui jaringan jarak pendek seperti NFC."</string>
+    <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"Setelan Audio"</string>
+    <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"Mengubah setelan audio."</string>
+    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"Memengaruhi Baterai"</string>
+    <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"Menggunakan fitur yang dapat menguras baterai dengan cepat."</string>
+    <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalender"</string>
+    <string name="permgroupdesc_calendar" msgid="5777534316982184416">"Akses langsung ke kalender dan acara."</string>
+    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"Membaca Kamus Pengguna"</string>
+    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"Membaca kata dalam kamus pengguna."</string>
+    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"Menulis Kamus Pengguna"</string>
+    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"Menambahkan kata ke kamus pengguna."</string>
+    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Bookmark dan Riwayat"</string>
+    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Akses langsung ke bookmark dan riwayat browser."</string>
+    <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"Alarm"</string>
+    <string name="permgroupdesc_deviceAlarms" msgid="4769356362251641175">"Menyetel jam alarm."</string>
+    <string name="permgrouplab_voicemail" msgid="4162237145027592133">"Pesan Suara"</string>
+    <string name="permgroupdesc_voicemail" msgid="2498403969862951393">"Akses langsung ke pesan suara."</string>
+    <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
+    <string name="permgroupdesc_microphone" msgid="7106618286905738408">"Akses langsung ke mikrofon untuk merekam audio."</string>
+    <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
+    <string name="permgroupdesc_camera" msgid="2933667372289567714">"Akses langsung ke kamera untuk gambar atau tangkapan video."</string>
+    <string name="permgrouplab_appInfo" msgid="8028789762634147725">"Informasi aplikasi Anda"</string>
+    <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"Kemampuan untuk memengaruhi perilaku aplikasi lain pada perangkat Anda."</string>
+    <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"Wallpaper"</string>
+    <string name="permgroupdesc_wallpaper" msgid="5630417854750540154">"Mengubah setelan wallpaper perangkat."</string>
+    <string name="permgrouplab_systemClock" msgid="406535759236612992">"Jam"</string>
+    <string name="permgroupdesc_systemClock" msgid="3944359833624094992">"Mengubah zona waktu atau waktu perangkat."</string>
+    <string name="permgrouplab_statusBar" msgid="2095862568113945398">"Bilah Status"</string>
+    <string name="permgroupdesc_statusBar" msgid="6242593432226807171">"Mengubah setelan bilah status perangkat."</string>
+    <string name="permgrouplab_syncSettings" msgid="3341990986147826541">"Setelan Sinkronisasi"</string>
+    <string name="permgroupdesc_syncSettings" msgid="7603195265129031797">"Akses ke setelan sinkronisasi."</string>
     <string name="permgrouplab_accounts" msgid="3359646291125325519">"Akun-akun Anda"</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Akses akun yang tersedia."</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Kontrol perangkat keras"</string>
@@ -187,6 +222,8 @@
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"Akses tingkat rendah dan kontrol sistem."</string>
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Peralatan pengembangan"</string>
     <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"Fitur hanya diperlukan oleh pengembang apl."</string>
+    <string name="permgrouplab_display" msgid="4279909676036402636">"UI Aplikasi Lainnya"</string>
+    <string name="permgroupdesc_display" msgid="6051002031933013714">"Memengaruhi UI aplikasi lain."</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Penyimpanan"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Akses penyimpanan USB."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Akses kartu SD."</string>
@@ -256,10 +293,8 @@
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Mengizinkan aplikasi mengambil informasi tentang jendela dari pengelola jendela. Aplikasi berbahaya dapat mengambil informasi yang ditujukan untuk penggunaan sistem internal."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"memfilter acara"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Mengizinkan aplikasi mendaftarkan filter masukan yang memfilter streaming semua acara pengguna sebelum acara dikirimkan. Aplikasi berbahaya dapat mengontrol UI sistem tanpa campur tangan pengguna."</string>
-    <!-- no translation found for permlab_magnify_display (5973626738170618775) -->
-    <skip />
-    <!-- no translation found for permdesc_magnify_display (7121235684515003792) -->
-    <skip />
+    <string name="permlab_magnify_display" msgid="5973626738170618775">"memperbesar tampilan"</string>
+    <string name="permdesc_magnify_display" msgid="7121235684515003792">"Izinkan aplikasi memperbesar konten tampilan. Aplikasi berbahaya dapat mengubah konten tampilan dengan merender perangkat menjadi tidak dapat digunakan."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"penghentian sebagian"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Letakkan pengelola aktivitas dalam kondisi mati. Tidak melakukan penonaktifan penuh."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"cegah pergantian aplikasi"</string>
@@ -290,10 +325,8 @@
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Mengizinkan apl mengubah kecepatan animasi global (animasi lebih cepat atau lebih lambat) kapan saja."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"mengelola token apl"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Mengizinkan apl membuat dan mengelola tokennya sendiri, memintas pengurutan Z normalnya. Tidak pernah diperlukan oleh apl normal."</string>
-    <!-- no translation found for permlab_freezeScreen (4708181184441880175) -->
-    <skip />
-    <!-- no translation found for permdesc_freezeScreen (8558923789222670064) -->
-    <skip />
+    <string name="permlab_freezeScreen" msgid="4708181184441880175">"membekukan layar"</string>
+    <string name="permdesc_freezeScreen" msgid="8558923789222670064">"Izinkan aplikasi membekukan layar untuk transisi layar penuh untuk sementara."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"tekan kunci dan tombol kontrol"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Mengizinkan apl menyampaikan aktivitas masukannya sendiri (penekanan tombol, dll) ke apl lain. Apl berbahaya dapat menggunakan ini untuk mengambil alih tablet."</string>
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Mengizinkan apl menyampaikan aktivitas masukannya sendiri (penekanan tombol, dll) ke apl lain. Apl berbahaya dapat menggunakan ini untuk mengambil alih ponsel."</string>
@@ -406,14 +439,10 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Mengizinkan apl menggunakan fitur tingkat rendah SurfaceFlinger."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"baca buffer frame"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Mengizinkan apl membaca konten penyangga frame."</string>
-    <!-- no translation found for permlab_configureWifiDisplay (5595661694746742168) -->
-    <skip />
-    <!-- no translation found for permdesc_configureWifiDisplay (7916815158690218065) -->
-    <skip />
-    <!-- no translation found for permlab_controlWifiDisplay (393641276723695496) -->
-    <skip />
-    <!-- no translation found for permdesc_controlWifiDisplay (4543912292681826986) -->
-    <skip />
+    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"mengonfigurasi tampilan Wifi"</string>
+    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Izinkan aplikasi mengonfigurasi dan terhubung ke tampilan Wifi."</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"mengontrol tampilan Wifi"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Izinkan aplikasi mengontrol fitur tingkat rendah dari tampilan Wifi."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ubah setelan audio Anda"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Memungkinkan aplikasi mengubah setelan audio global, misalnya volume dan pengeras suara mana yang digunakan untuk keluaran."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"rekam audio"</string>
@@ -595,10 +624,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Mengharuskan data apl yang disimpan untuk dienkripsi."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Nonaktifkan kamera"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Mencegah penggunaan semua kamera perangkat."</string>
-    <!-- no translation found for policylab_disableKeyguardWidgets (1794894613389073926) -->
-    <skip />
-    <!-- no translation found for policydesc_disableKeyguardWidgets (7254624892984033592) -->
-    <skip />
+    <string name="policylab_disableKeyguardWidgets" msgid="1794894613389073926">"Nonaktifkan widgets pd keyguad"</string>
+    <string name="policydesc_disableKeyguardWidgets" msgid="7254624892984033592">"Mencegah penggunaan beberapa atau semua widget di keyguard."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Rumah"</item>
     <item msgid="869923650527136615">"Seluler"</item>
@@ -1085,12 +1112,9 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Setel tanggal"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Setel"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Selesai"</string>
-    <string name="default_permission_group" msgid="2690160991405646128">"Default"</string>
-    <string name="no_permissions" msgid="7283357728219338112">"Tidak perlu izin"</string>
-    <string name="perms_hide" msgid="7283915391320676226"><b>"Sembunyikan"</b></string>
-    <string name="perms_show_all" msgid="2671791163933091180"><b>"Tampilkan semua"</b></string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"BARU: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"Disediakan oleh <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
+    <string name="no_permissions" msgid="7283357728219338112">"Tidak perlu izin"</string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"Penyimpanan massal USB"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB terhubung"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Anda telah tersambung ke komputer melalui USB. Sentuh tombol di bawah jika Anda ingin menyalin file antara komputer dan penyimpanan USB Android Anda."</string>

@@ -171,12 +171,47 @@
     <string name="permgrouplab_messages" msgid="7521249148445456662">"메시지"</string>
     <string name="permgroupdesc_messages" msgid="7821999071003699236">"SMS, 이메일 및 기타 메시지를 읽고 씁니다."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"개인정보"</string>
-    <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"태블릿에 저장된 주소록 및 캘린더에 직접 액세스합니다."</string>
-    <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"휴대전화에 저장된 주소록 및 캘린더에 직접 액세스합니다."</string>
+    <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"연락처 카드에 저장된 내 개인 정보에 직접 액세스합니다."</string>
+    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"소셜 정보"</string>
+    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"내 연락처 및 소셜 친구의 개인 정보에 직접 액세스합니다."</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"위치"</string>
     <string name="permgroupdesc_location" msgid="5704679763124170100">"실제 위치 모니터링"</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"네트워크 통신"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"다양한 네트워크 기능에 액세스할 수 있도록 합니다."</string>
+    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"블루투스"</string>
+    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"블루투스를 통해 기기 및 네트워크에 액세스"</string>
+    <string name="permgrouplab_shortrangeNetwork" msgid="130808676377486118">"단거리 네트워크"</string>
+    <string name="permgroupdesc_shortrangeNetwork" msgid="1884069062653436007">"NFC와 같은 단거리 네트워크를 통해 기기에 액세스"</string>
+    <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"오디오 설정"</string>
+    <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"오디오 설정을 변경합니다."</string>
+    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"배터리 소모"</string>
+    <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"배터리를 빨리 소모시킬 수 있는 기능을 사용합니다."</string>
+    <string name="permgrouplab_calendar" msgid="5863508437783683902">"캘린더"</string>
+    <string name="permgroupdesc_calendar" msgid="5777534316982184416">"캘린더 및 일정에 직접 액세스합니다."</string>
+    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"사용자 사전 읽기"</string>
+    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"사용자 사전의 단어 읽기"</string>
+    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"사용자 사전 쓰기"</string>
+    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"사용자 사전에 단어 추가"</string>
+    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"북마크 및 기록"</string>
+    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"북마크 및 브라우저 기록에 직접 액세스합니다."</string>
+    <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"알람"</string>
+    <string name="permgroupdesc_deviceAlarms" msgid="4769356362251641175">"알람 시계를 설정합니다."</string>
+    <string name="permgrouplab_voicemail" msgid="4162237145027592133">"음성사서함"</string>
+    <string name="permgroupdesc_voicemail" msgid="2498403969862951393">"음성사서함에 직접 액세스합니다."</string>
+    <string name="permgrouplab_microphone" msgid="171539900250043464">"마이크"</string>
+    <string name="permgroupdesc_microphone" msgid="7106618286905738408">"오디오를 녹음하기 위해 마이크에 직접 액세스합니다."</string>
+    <string name="permgrouplab_camera" msgid="4820372495894586615">"카메라"</string>
+    <string name="permgroupdesc_camera" msgid="2933667372289567714">"이미지 및 동영상을 캡처하기 위해 카메라에 직접 액세스합니다."</string>
+    <string name="permgrouplab_appInfo" msgid="8028789762634147725">"애플리케이션 정보"</string>
+    <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"기기의 다른 애플리케이션의 작동에 영향을 줍니다."</string>
+    <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"배경화면"</string>
+    <string name="permgroupdesc_wallpaper" msgid="5630417854750540154">"기기 배경화면 설정을 변경합니다."</string>
+    <string name="permgrouplab_systemClock" msgid="406535759236612992">"시계"</string>
+    <string name="permgroupdesc_systemClock" msgid="3944359833624094992">"기기 시간 및 시간대를 변경합니다."</string>
+    <string name="permgrouplab_statusBar" msgid="2095862568113945398">"상태 표시줄"</string>
+    <string name="permgroupdesc_statusBar" msgid="6242593432226807171">"기기 상태 표시줄 설정을 변경합니다."</string>
+    <string name="permgrouplab_syncSettings" msgid="3341990986147826541">"동기화 설정"</string>
+    <string name="permgroupdesc_syncSettings" msgid="7603195265129031797">"동기화 설정에 액세스합니다."</string>
     <string name="permgrouplab_accounts" msgid="3359646291125325519">"계정"</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"사용 가능한 계정에 액세스합니다."</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"하드웨어 제어"</string>
@@ -187,6 +222,8 @@
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"시스템을 하위 수준에서 액세스하고 제어합니다."</string>
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"개발 도구"</string>
     <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"앱 개발자에게만 필요한 기능입니다."</string>
+    <string name="permgrouplab_display" msgid="4279909676036402636">"다른 애플리케이션 UI"</string>
+    <string name="permgroupdesc_display" msgid="6051002031933013714">"다른 애플리케이션의 UI에 영향을 줍니다."</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"저장"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"USB 저장소에 액세스합니다."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"SD 카드에 액세스합니다."</string>
@@ -256,10 +293,8 @@
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"애플리케이션이 Window Manager에서 창 관련 정보를 가져오도록 허용합니다. 이 경우 악성 앱이 내부 시스템에서만 사용하도록 되어 있는 정보를 가져올 수 있습니다."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"일정 필터링"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"애플리케이션에 입력 필터를 등록할 수 있도록 하여 모든 사용자 일정 스트림을 전달하기 전에 필터링합니다. 이 경우 사용자의 개입 없이 악성 앱이 시스템 UI를 제어할 수 있습니다."</string>
-    <!-- no translation found for permlab_magnify_display (5973626738170618775) -->
-    <skip />
-    <!-- no translation found for permdesc_magnify_display (7121235684515003792) -->
-    <skip />
+    <string name="permlab_magnify_display" msgid="5973626738170618775">"디스플레이 확대"</string>
+    <string name="permdesc_magnify_display" msgid="7121235684515003792">"앱이 표시된 콘텐츠를 확대하도록 허용합니다. 악성 앱은 표시된 콘텐츠를 변형시켜 기기를 사용할 수 없게 만들 수 있습니다."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"부분 종료"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"작업 관리자를 종료 상태로 설정합니다. 전체 종료를 수행하지는 않습니다."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"애플리케이션 전환 방지"</string>
@@ -290,10 +325,8 @@
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"애플리케이션이 언제든지 전체 애니메이션 속도를 빠르게 또는 느리게 변경할 수 있도록 허용합니다."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"앱 토큰 관리"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"앱이 일반적인 Z-순서를 무시하여 자체 토큰을 만들고 관리할 수 있도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
-    <!-- no translation found for permlab_freezeScreen (4708181184441880175) -->
-    <skip />
-    <!-- no translation found for permdesc_freezeScreen (8558923789222670064) -->
-    <skip />
+    <string name="permlab_freezeScreen" msgid="4708181184441880175">"화면 고정"</string>
+    <string name="permdesc_freezeScreen" msgid="8558923789222670064">"앱이 전체 화면 전환을 위해 일시적으로 화면을 고정하도록 허용합니다."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"키 및 컨트롤 버튼 누르기"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"앱이 입력 이벤트(예: 키 누름)를 다른 앱에 전달할 수 있도록 허용합니다. 이 경우 악성 앱이 태블릿을 완전히 제어할 수 있습니다."</string>
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"앱이 입력 이벤트(예: 키 누름)를 다른 앱에 전달할 수 있도록 허용합니다. 이 경우 악성 앱이 휴대전화를 완전히 제어할 수 있습니다."</string>
@@ -406,14 +439,10 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"앱이 SurfaceFlinger의 하위 수준 기능을 사용할 수 있도록 허용합니다."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"프레임 버퍼 읽기"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"앱이 프레임 버퍼의 내용을 읽을 수 있도록 허용합니다."</string>
-    <!-- no translation found for permlab_configureWifiDisplay (5595661694746742168) -->
-    <skip />
-    <!-- no translation found for permdesc_configureWifiDisplay (7916815158690218065) -->
-    <skip />
-    <!-- no translation found for permlab_controlWifiDisplay (393641276723695496) -->
-    <skip />
-    <!-- no translation found for permdesc_controlWifiDisplay (4543912292681826986) -->
-    <skip />
+    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"Wi-Fi 디스플레이 설정"</string>
+    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"앱이 Wi-Fi 디스플레이를 설정하고 연결하도록 허용합니다."</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"Wi-Fi 디스플레이 제어"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"앱이 Wi-Fi 디스플레이의 하위 수준 기능을 제어하도록 허용합니다."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"오디오 설정 변경"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"앱이 음량이나 출력을 위해 사용하는 스피커 등 전체 오디오 설정을 변경할 수 있도록 허용합니다."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"오디오 녹음"</string>
@@ -595,10 +624,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"저장한 애플리케이션 데이터를 암호화해야 합니다."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"카메라 사용 안함"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"모든 기기 카메라의 사용 차단"</string>
-    <!-- no translation found for policylab_disableKeyguardWidgets (1794894613389073926) -->
-    <skip />
-    <!-- no translation found for policydesc_disableKeyguardWidgets (7254624892984033592) -->
-    <skip />
+    <string name="policylab_disableKeyguardWidgets" msgid="1794894613389073926">"키가드에서 위젯 사용 중지"</string>
+    <string name="policydesc_disableKeyguardWidgets" msgid="7254624892984033592">"키가드에서 일부 또는 전체 위젯을 사용하지 못하도록 합니다."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"집"</item>
     <item msgid="869923650527136615">"모바일"</item>
@@ -1085,12 +1112,9 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"날짜 설정"</string>
     <string name="date_time_set" msgid="5777075614321087758">"설정"</string>
     <string name="date_time_done" msgid="2507683751759308828">"완료"</string>
-    <string name="default_permission_group" msgid="2690160991405646128">"기본값"</string>
-    <string name="no_permissions" msgid="7283357728219338112">"권한 필요 없음"</string>
-    <string name="perms_hide" msgid="7283915391320676226"><b>"숨기기"</b></string>
-    <string name="perms_show_all" msgid="2671791163933091180"><b>"모두 표시"</b></string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"신규: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"<xliff:g id="APP_NAME">%1$s</xliff:g> 제공"</string>
+    <string name="no_permissions" msgid="7283357728219338112">"권한 필요 없음"</string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB 대용량 저장소"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB 연결됨"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"USB를 통해 컴퓨터에 연결했습니다. 컴퓨터와 Android의 USB 저장소 간에 파일을 복사하려면 아래의 버튼을 터치하세요."</string>
