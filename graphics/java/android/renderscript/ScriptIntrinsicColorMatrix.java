@@ -20,33 +20,38 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.util.Log;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Map.Entry;
-import java.util.HashMap;
-
-
 /**
- * @hide
+ * Intrinsic for applying a color matrix to allocations.
+ *
+ * This has the same effect as loading each element and
+ * converting it to a {@link Element#F32_4}, multiplying the
+ * result by the 4x4 color matrix as performed by
+ * rsMatrixMultiply() and writing it to the output after
+ * conversion back to {@link Element#U8_4}.
  **/
-public class ScriptIntrinsicColorMatrix extends ScriptIntrinsic {
-    private Matrix4f mMatrix = new Matrix4f();
+public final class ScriptIntrinsicColorMatrix extends ScriptIntrinsic {
+    private final Matrix4f mMatrix = new Matrix4f();
     private Allocation mInput;
 
-    ScriptIntrinsicColorMatrix(int id, RenderScript rs) {
+    private ScriptIntrinsicColorMatrix(int id, RenderScript rs) {
         super(id, rs);
     }
 
     /**
-     * Supported elements types are uchar4
+     * Create an intrinsic for applying a color matrix to an
+     * allocation.
      *
-     * @param rs
-     * @param e
+     * Supported elements types are {@link Element#U8_4}
+     *
+     * @param rs The Renderscript context
+     * @param e Element type for intputs and outputs
      *
      * @return ScriptIntrinsicColorMatrix
      */
     public static ScriptIntrinsicColorMatrix create(RenderScript rs, Element e) {
+        if (e != Element.U8_4(rs)) {
+            throw new RSIllegalArgumentException("Unsuported element type.");
+        }
         int id = rs.nScriptIntrinsicCreate(2, e.getID(rs));
         return new ScriptIntrinsicColorMatrix(id, rs);
 
@@ -59,7 +64,8 @@ public class ScriptIntrinsicColorMatrix extends ScriptIntrinsic {
     }
 
     /**
-     * Set the color matrix which will be applied to each cell of the image.
+     * Set the color matrix which will be applied to each cell of
+     * the image.
      *
      * @param m The 4x4 matrix to set.
      */
