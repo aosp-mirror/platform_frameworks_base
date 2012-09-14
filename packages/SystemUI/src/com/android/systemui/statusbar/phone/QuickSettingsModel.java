@@ -60,6 +60,10 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         int batteryLevel;
         boolean pluggedIn;
     }
+    static class RSSIState extends State {
+        int signalIconId;
+        int dataTypeIconId;
+    }
     static class UserState extends State {
         Drawable avatar;
     }
@@ -124,7 +128,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
 
     private QuickSettingsTileView mRSSITile;
     private RefreshCallback mRSSICallback;
-    private State mRSSIState = new State();
+    private RSSIState mRSSIState = new RSSIState();
 
     private QuickSettingsTileView mBluetoothTile;
     private RefreshCallback mBluetoothCallback;
@@ -258,13 +262,16 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     // NetworkSignalChanged callback
     @Override
     public void onMobileDataSignalChanged(boolean enabled, int mobileSignalIconId,
-            String enabledDesc) {
+            int dataTypeIconId, String enabledDesc) {
         if (deviceSupportsTelephony()) {
             // TODO: If view is in awaiting state, disable
             Resources r = mContext.getResources();
-            mRSSIState.iconId = enabled && (mobileSignalIconId > 0)
+            mRSSIState.signalIconId = enabled && (mobileSignalIconId > 0)
                     ? mobileSignalIconId
                     : R.drawable.ic_qs_signal_no_signal;
+            mRSSIState.dataTypeIconId = enabled && (dataTypeIconId > 0)
+                    ? dataTypeIconId
+                    : 0;
             mRSSIState.label = enabled
                     ? enabledDesc
                     : r.getString(R.string.quick_settings_rssi_emergency_only);
