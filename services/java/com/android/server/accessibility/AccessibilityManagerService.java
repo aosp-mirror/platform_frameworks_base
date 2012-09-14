@@ -173,10 +173,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private Service mQueryBridge;
 
-    private boolean mTouchExplorationGestureEnded;
-
-    private boolean mTouchExplorationGestureStarted;
-
     private AlertDialog mEnableTouchExplorationDialog;
 
     /**
@@ -400,18 +396,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     }
 
     public boolean sendAccessibilityEvent(AccessibilityEvent event) {
-        final int eventType = event.getEventType();
-
-        // The event for gesture start should be strictly before the
-        // first hover enter event for the gesture.
-        if (eventType == AccessibilityEvent.TYPE_VIEW_HOVER_ENTER
-                && mTouchExplorationGestureStarted) {
-            mTouchExplorationGestureStarted = false;
-            AccessibilityEvent gestureStartEvent = AccessibilityEvent.obtain(
-                    AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_START);
-            sendAccessibilityEvent(gestureStartEvent);
-        }
-
         synchronized (mLock) {
             if (mSecurityPolicy.canDispatchAccessibilityEvent(event)) {
                 mSecurityPolicy.updateActiveWindowAndEventSourceLocked(event);
@@ -421,22 +405,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             if (mHasInputFilter && mInputFilter != null) {
                 mMainHandler.obtainMessage(MSG_SEND_ACCESSIBILITY_EVENT_TO_INPUT_FILTER,
                         AccessibilityEvent.obtain(event)).sendToTarget();
-
             }
             event.recycle();
             mHandledFeedbackTypes = 0;
         }
-
-        // The event for gesture end should be strictly after the
-        // last hover exit event for the gesture.
-        if (eventType == AccessibilityEvent.TYPE_VIEW_HOVER_EXIT
-                && mTouchExplorationGestureEnded) {
-            mTouchExplorationGestureEnded = false;
-            AccessibilityEvent gestureEndEvent = AccessibilityEvent.obtain(
-                    AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_END);
-            sendAccessibilityEvent(gestureEndEvent);
-        }
-
         return (OWN_PROCESS_ID != Binder.getCallingPid());
     }
 
@@ -626,14 +598,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             mQueryBridge = new Service(null, info, true);
         }
         return mQueryBridge;
-    }
-
-    public void touchExplorationGestureEnded() {
-        mTouchExplorationGestureEnded = true;
-    }
-
-    public void touchExplorationGestureStarted() {
-        mTouchExplorationGestureStarted = true;
     }
 
     private boolean notifyGestureLocked(int gestureId, boolean isDefault) {
