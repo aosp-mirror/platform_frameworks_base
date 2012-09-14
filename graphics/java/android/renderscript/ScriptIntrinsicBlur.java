@@ -21,43 +21,72 @@ import android.content.res.Resources;
 import android.util.Log;
 
 /**
- * @hide
+ * Intrinsic Gausian blur filter. Applies a gaussian blur of the
+ * specified radius to all elements of an allocation.
+ *
+ *
  **/
-public class ScriptIntrinsicBlur extends ScriptIntrinsic {
-    private float[] mValues = new float[9];
+public final class ScriptIntrinsicBlur extends ScriptIntrinsic {
+    private final float[] mValues = new float[9];
     private Allocation mInput;
 
-    ScriptIntrinsicBlur(int id, RenderScript rs) {
+    private ScriptIntrinsicBlur(int id, RenderScript rs) {
         super(id, rs);
     }
 
     /**
-     * Supported elements types are float, float4, uchar, uchar4
+     * Create an intrinsic for applying a blur to an allocation. The
+     * default radius is 5.0.
      *
+     * Supported elements types are {@link Element#U8_4}
      *
-     * @param rs
-     * @param e
+     * @param rs The Renderscript context
+     * @param e Element type for inputs and outputs
      *
-     * @return ScriptIntrinsicConvolve3x3
+     * @return ScriptIntrinsicBlur
      */
     public static ScriptIntrinsicBlur create(RenderScript rs, Element e) {
+        if (e != Element.U8_4(rs)) {
+            throw new RSIllegalArgumentException("Unsuported element type.");
+        }
         int id = rs.nScriptIntrinsicCreate(5, e.getID(rs));
-        return new ScriptIntrinsicBlur(id, rs);
-
+        ScriptIntrinsicBlur sib = new ScriptIntrinsicBlur(id, rs);
+        sib.setRadius(5.f);
+        return sib;
     }
 
+    /**
+     * Set the input of the blur.
+     * Must match the element type supplied during create.
+     *
+     * @param ain The input allocation
+     */
     public void setInput(Allocation ain) {
         mInput = ain;
         bindAllocation(ain, 1);
     }
 
-    public void setRadius(float v) {
-        if (v < 0 || v > 25) {
+    /**
+     * Set the radius of the Blur.
+     *
+     * Supported range 0-25
+     *
+     * @param radius The radius of the blur
+     */
+    public void setRadius(float radius) {
+        if (radius < 0 || radius > 25) {
             throw new RSIllegalArgumentException("Radius out of range (0-25).");
         }
-        setVar(0, v);
+        setVar(0, radius);
     }
 
+    /**
+     * Apply the filter to the input and save to the specified
+     * allocation.
+     *
+     * @param aout Output allocation. Must match creation element
+     *             type.
+     */
     public void forEach(Allocation aout) {
         forEach(0, null, aout, null);
     }
