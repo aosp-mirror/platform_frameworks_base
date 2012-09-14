@@ -2163,6 +2163,12 @@
             <enum name="no" value="2" />
         </attr>
 
+        <!-- Specifies the id of a view for which this view serves as a label for
+             accessibility purposes. For example, a TextView before an EditText in
+             the UI usually specifies what infomation is contained in the EditText.
+             Hence, the TextView is a label for the EditText. -->
+        <attr name="labelFor" format="integer" />
+
     </declare-styleable>
 
     <!-- Attributes that can be used with a {@link android.view.ViewGroup} or any

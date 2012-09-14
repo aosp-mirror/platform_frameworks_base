@@ -619,6 +619,7 @@ package android {
     field public static final int keycode = 16842949; // 0x10100c5
     field public static final int killAfterRestore = 16843420; // 0x101029c
     field public static final int label = 16842753; // 0x1010001
+    field public static final int labelFor = 16843717; // 0x10103c5
     field public static final int labelTextSize = 16843317; // 0x1010235
     field public static final int largeHeap = 16843610; // 0x101035a
     field public static final int largeScreens = 16843398; // 0x1010286
@@ -24853,6 +24854,7 @@ package android.view {
     method public int getImportantForAccessibility();
     method public boolean getKeepScreenOn();
     method public android.view.KeyEvent.DispatcherState getKeyDispatcherState();
+    method public int getLabelFor();
     method public int getLayerType();
     method public int getLayoutDirection();
     method public android.view.ViewGroup.LayoutParams getLayoutParams();
@@ -25115,6 +25117,7 @@ package android.view {
     method public void setId(int);
     method public void setImportantForAccessibility(int);
     method public void setKeepScreenOn(boolean);
+    method public void setLabelFor(int);
     method public void setLayerPaint(android.graphics.Paint);
     method public void setLayerType(int, android.graphics.Paint);
     method public void setLayoutDirection(int);
@@ -26106,6 +26109,8 @@ package android.view.accessibility {
     method public int getChildCount();
     method public java.lang.CharSequence getClassName();
     method public java.lang.CharSequence getContentDescription();
+    method public android.view.accessibility.AccessibilityNodeInfo getLabelFor();
+    method public android.view.accessibility.AccessibilityNodeInfo getLabeledBy();
     method public int getMovementGranularities();
     method public java.lang.CharSequence getPackageName();
     method public android.view.accessibility.AccessibilityNodeInfo getParent();
@@ -26141,6 +26146,10 @@ package android.view.accessibility {
     method public void setEnabled(boolean);
     method public void setFocusable(boolean);
     method public void setFocused(boolean);
+    method public void setLabelFor(android.view.View);
+    method public void setLabelFor(android.view.View, int);
+    method public void setLabeledBy(android.view.View);
+    method public void setLabeledBy(android.view.View, int);
     method public void setLongClickable(boolean);
     method public void setMovementGranularities(int);
     method public void setPackageName(java.lang.CharSequence);
@@ -28997,6 +29006,7 @@ package android.widget {
     method public void setImageViewUri(int, android.net.Uri);
     method public void setInt(int, java.lang.String, int);
     method public void setIntent(int, java.lang.String, android.content.Intent);
+    method public void setLabelFor(int, int);
     method public void setLong(int, java.lang.String, long);
     method public void setOnClickFillInIntent(int, android.content.Intent);
     method public void setOnClickPendingIntent(int, android.app.PendingIntent);
