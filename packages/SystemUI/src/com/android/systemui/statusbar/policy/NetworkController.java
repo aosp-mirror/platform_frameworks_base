@@ -556,7 +556,8 @@ public class NetworkController extends BroadcastReceiver {
                     }
                 }
                 mPhoneSignalIconId = iconList[iconLevel];
-                mQSPhoneSignalIconId = TelephonyIcons.QS_TELEPHONY_SIGNAL_STRENGTH[iconLevel];
+                mQSPhoneSignalIconId =
+                        TelephonyIcons.QS_TELEPHONY_SIGNAL_STRENGTH[mInetCondition][iconLevel];
                 mContentDescriptionPhoneSignal = mContext.getString(
                         AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[iconLevel]);
                 mDataSignalIconId = TelephonyIcons.DATA_SIGNAL_STRENGTH[mInetCondition][iconLevel];
@@ -863,7 +864,7 @@ public class NetworkController extends BroadcastReceiver {
     private void updateWifiIcons() {
         if (mWifiConnected) {
             mWifiIconId = WifiIcons.WIFI_SIGNAL_STRENGTH[mInetCondition][mWifiLevel];
-            mQSWifiIconId = WifiIcons.QS_WIFI_SIGNAL_STRENGTH[mWifiLevel];
+            mQSWifiIconId = WifiIcons.QS_WIFI_SIGNAL_STRENGTH[mInetCondition][mWifiLevel];
             mContentDescriptionWifi = mContext.getString(
                     AccessibilityContentDescriptions.WIFI_CONNECTION_STRENGTH[mWifiLevel]);
         } else {

@@ -17,6 +17,12 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/ic_qs_default_user"
+        android:scaleType="centerCrop"
+        />
     <TextView
         style="@style/TextAppearance.QuickSettings.TileView"
         android:id="@+id/user_textview"

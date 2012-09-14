@@ -39,6 +39,7 @@ import android.view.inputmethod.InputMethodSubtype;
 import com.android.internal.view.RotationPolicy;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
+import com.android.systemui.statusbar.policy.BrightnessController.BrightnessStateChangeCallback;
 import com.android.systemui.statusbar.policy.LocationController.LocationGpsStateChangeCallback;
 import com.android.systemui.statusbar.policy.NetworkController.NetworkSignalChangedCallback;
 
@@ -48,7 +49,8 @@ import java.util.List;
 class QuickSettingsModel implements BluetoothStateChangeCallback,
         NetworkSignalChangedCallback,
         BatteryStateChangeCallback,
-        LocationGpsStateChangeCallback {
+        LocationGpsStateChangeCallback,
+        BrightnessStateChangeCallback {
 
     /** Represents the state of a given attribute. */
     static class State {
@@ -66,6 +68,9 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     }
     static class UserState extends State {
         Drawable avatar;
+    }
+    static class BrightnessState extends State {
+        boolean autoBrightness;
     }
 
     /** The callback to update a given tile. */
@@ -149,6 +154,10 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private QuickSettingsTileView mRotationLockTile;
     private RefreshCallback mRotationLockCallback;
     private State mRotationLockState = new State();
+
+    private QuickSettingsTileView mBrightnessTile;
+    private RefreshCallback mBrightnessCallback;
+    private BrightnessState mBrightnessState = new BrightnessState();
 
     public QuickSettingsModel(Context context) {
         mContext = context;
@@ -404,6 +413,25 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         if (mRotationLockTile != null && mRotationLockCallback != null) {
             mRotationLockCallback.refreshView(mRotationLockTile, mRotationLockState);
         }
+    }
+
+    // Brightness
+    void addBrightnessTile(QuickSettingsTileView view, RefreshCallback cb) {
+        mBrightnessTile = view;
+        mBrightnessCallback = cb;
+        onBrightnessLevelChanged();
+    }
+    @Override
+    public void onBrightnessLevelChanged() {
+        int mode = Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
+        mBrightnessState.autoBrightness =
+                (mode == Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
+        mBrightnessState.iconId = mBrightnessState.autoBrightness
+                ? R.drawable.ic_qs_brightness_auto_on
+                : R.drawable.ic_qs_brightness_auto_off;
+        mBrightnessCallback.refreshView(mBrightnessTile, mBrightnessState);
     }
 
 }
