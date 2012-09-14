@@ -58,12 +58,9 @@
     <string name="label_view" msgid="6304565553218192990">"View"</string>
     <string name="always_use_device" msgid="1450287437017315906">"Use by default for this USB device"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"Use by default for this USB accessory"</string>
-    <!-- no translation found for usb_debugging_title (4513918393387141949) -->
-    <skip />
-    <!-- no translation found for usb_debugging_message (2220143855912376496) -->
-    <skip />
-    <!-- no translation found for usb_debugging_always (303335496705863070) -->
-    <skip />
+    <string name="usb_debugging_title" msgid="4513918393387141949">"Allow USB debugging?"</string>
+    <string name="usb_debugging_message" msgid="2220143855912376496">"The computer\'s RSA key fingerprint is:"\n"<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_always" msgid="303335496705863070">"Always allow from this computer"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom to fill screen"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Stretch to fill screen"</string>
     <string name="compat_mode_help_header" msgid="7969493989397529910">"Compatibility zoom"</string>
@@ -151,56 +148,33 @@
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Screen will rotate automatically."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Screen is locked in landscape orientation."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Screen is locked in portrait orientation."</string>
-    <!-- no translation found for jelly_bean_dream_name (5992026543636816792) -->
+    <string name="jelly_bean_dream_name" msgid="5992026543636816792">"BeanFlinger"</string>
+    <string name="start_dreams" msgid="870400522982252717">"Start dreams"</string>
+    <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"Aeroplane mode"</string>
+    <!-- no translation found for quick_settings_battery_charging_label (490074774465309209) -->
     <skip />
-    <!-- no translation found for start_dreams (870400522982252717) -->
+    <!-- no translation found for quick_settings_battery_charged_label (8865413079414246081) -->
     <skip />
-    <!-- no translation found for quick_settings_airplane_mode_label (5510520633448831350) -->
-    <skip />
-    <!-- no translation found for quick_settings_battery_label (2764511189368020794) -->
-    <skip />
-    <!-- no translation found for quick_settings_bluetooth_label (6304190285170721401) -->
-    <skip />
-    <!-- no translation found for quick_settings_brightness_label (6968372297018755815) -->
-    <skip />
-    <!-- no translation found for quick_settings_ime_label (6877325300716130498) -->
-    <skip />
-    <!-- no translation found for quick_settings_location_label (3292451598267467545) -->
-    <skip />
-    <!-- no translation found for quick_settings_media_device_label (1302906836372603762) -->
-    <skip />
-    <!-- no translation found for quick_settings_rssi_label (7725671335550695589) -->
-    <skip />
-    <!-- no translation found for quick_settings_rssi_emergency_only (2713774041672886750) -->
-    <skip />
-    <!-- no translation found for quick_settings_settings_label (5326556592578065401) -->
-    <skip />
-    <!-- no translation found for quick_settings_time_label (4635969182239736408) -->
-    <skip />
-    <!-- no translation found for quick_settings_user_label (5238995632130897840) -->
-    <skip />
-    <!-- no translation found for quick_settings_wifi_label (4393429107095001520) -->
-    <skip />
-    <!-- no translation found for quick_settings_wifi_no_network (2221993077220856376) -->
-    <skip />
-    <!-- no translation found for quick_settings_wifi_display_label (6653501376641018614) -->
-    <skip />
-    <!-- no translation found for quick_settings_wifi_display_no_connection_label (6255615315258869136) -->
-    <skip />
-    <!-- no translation found for quick_settings_brightness_dialog_title (8599674057673605368) -->
-    <skip />
-    <!-- no translation found for quick_settings_brightness_dialog_auto_brightness_label (5064982743784071218) -->
-    <skip />
-    <!-- no translation found for wifi_display_scan (8453135922233546097) -->
-    <skip />
-    <!-- no translation found for wifi_display_disconnect (5450214362789378584) -->
-    <skip />
-    <!-- no translation found for wifi_display_dialog_title (2817993038700218900) -->
-    <skip />
-    <!-- no translation found for wifi_display_state_available (980373281442607096) -->
-    <skip />
-    <!-- no translation found for wifi_display_state_connecting (1677010908036241940) -->
-    <skip />
-    <!-- no translation found for wifi_display_state_connected (9154375061719151149) -->
-    <skip />
+    <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
+    <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Brightness"</string>
+    <string name="quick_settings_ime_label" msgid="7073463064369468429">"Input Method"</string>
+    <string name="quick_settings_location_label" msgid="3292451598267467545">"Location in use"</string>
+    <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Media device"</string>
+    <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
+    <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Emergency Calls Only"</string>
+    <string name="quick_settings_settings_label" msgid="5326556592578065401">"Settings"</string>
+    <string name="quick_settings_time_label" msgid="4635969182239736408">"Time"</string>
+    <string name="quick_settings_user_label" msgid="5238995632130897840">"Me"</string>
+    <string name="quick_settings_wifi_label" msgid="4393429107095001520">"Wifi"</string>
+    <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"No Network"</string>
+    <string name="quick_settings_wifi_display_label" msgid="6653501376641018614">"Wifi Display"</string>
+    <string name="quick_settings_wifi_display_no_connection_label" msgid="6255615315258869136">"No Wifi Display Connection"</string>
+    <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Brightness"</string>
+    <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTO"</string>
+    <string name="wifi_display_scan" msgid="8453135922233546097">"Scan"</string>
+    <string name="wifi_display_disconnect" msgid="5450214362789378584">"Disconnect"</string>
+    <string name="wifi_display_dialog_title" msgid="2817993038700218900">"Wifi Display"</string>
+    <string name="wifi_display_state_available" msgid="980373281442607096">"Available"</string>
+    <string name="wifi_display_state_connecting" msgid="1677010908036241940">"Connecting"</string>
+    <string name="wifi_display_state_connected" msgid="9154375061719151149">"Connected"</string>
 </resources>

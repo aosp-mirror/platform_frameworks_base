@@ -153,56 +153,34 @@
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"L\'écran pivote automatiquement."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"L\'écran est verrouillé en mode paysage."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"L\'écran est verrouillé en mode portrait."</string>
-    <!-- no translation found for jelly_bean_dream_name (5992026543636816792) -->
+    <string name="jelly_bean_dream_name" msgid="5992026543636816792">"BeanFlinger"</string>
+    <string name="start_dreams" msgid="870400522982252717">"Lancer Rêves"</string>
+    <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"Mode avion"</string>
+    <!-- no translation found for quick_settings_battery_charging_label (490074774465309209) -->
     <skip />
-    <!-- no translation found for start_dreams (870400522982252717) -->
+    <!-- no translation found for quick_settings_battery_charged_label (8865413079414246081) -->
     <skip />
-    <!-- no translation found for quick_settings_airplane_mode_label (5510520633448831350) -->
+    <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
+    <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Luminosité"</string>
+    <!-- no translation found for quick_settings_ime_label (7073463064369468429) -->
     <skip />
-    <!-- no translation found for quick_settings_battery_label (2764511189368020794) -->
-    <skip />
-    <!-- no translation found for quick_settings_bluetooth_label (6304190285170721401) -->
-    <skip />
-    <!-- no translation found for quick_settings_brightness_label (6968372297018755815) -->
-    <skip />
-    <!-- no translation found for quick_settings_ime_label (6877325300716130498) -->
-    <skip />
-    <!-- no translation found for quick_settings_location_label (3292451598267467545) -->
-    <skip />
-    <!-- no translation found for quick_settings_media_device_label (1302906836372603762) -->
-    <skip />
-    <!-- no translation found for quick_settings_rssi_label (7725671335550695589) -->
-    <skip />
-    <!-- no translation found for quick_settings_rssi_emergency_only (2713774041672886750) -->
-    <skip />
-    <!-- no translation found for quick_settings_settings_label (5326556592578065401) -->
-    <skip />
-    <!-- no translation found for quick_settings_time_label (4635969182239736408) -->
-    <skip />
-    <!-- no translation found for quick_settings_user_label (5238995632130897840) -->
-    <skip />
-    <!-- no translation found for quick_settings_wifi_label (4393429107095001520) -->
-    <skip />
-    <!-- no translation found for quick_settings_wifi_no_network (2221993077220856376) -->
-    <skip />
-    <!-- no translation found for quick_settings_wifi_display_label (6653501376641018614) -->
-    <skip />
-    <!-- no translation found for quick_settings_wifi_display_no_connection_label (6255615315258869136) -->
-    <skip />
-    <!-- no translation found for quick_settings_brightness_dialog_title (8599674057673605368) -->
-    <skip />
-    <!-- no translation found for quick_settings_brightness_dialog_auto_brightness_label (5064982743784071218) -->
-    <skip />
-    <!-- no translation found for wifi_display_scan (8453135922233546097) -->
-    <skip />
-    <!-- no translation found for wifi_display_disconnect (5450214362789378584) -->
-    <skip />
-    <!-- no translation found for wifi_display_dialog_title (2817993038700218900) -->
-    <skip />
-    <!-- no translation found for wifi_display_state_available (980373281442607096) -->
-    <skip />
-    <!-- no translation found for wifi_display_state_connecting (1677010908036241940) -->
-    <skip />
-    <!-- no translation found for wifi_display_state_connected (9154375061719151149) -->
-    <skip />
+    <string name="quick_settings_location_label" msgid="3292451598267467545">"Utilisation des données de localisation"</string>
+    <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Appareil multimédia"</string>
+    <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
+    <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Appels d\'urgence uniquement"</string>
+    <string name="quick_settings_settings_label" msgid="5326556592578065401">"Paramètres"</string>
+    <string name="quick_settings_time_label" msgid="4635969182239736408">"Heure"</string>
+    <string name="quick_settings_user_label" msgid="5238995632130897840">"Moi"</string>
+    <string name="quick_settings_wifi_label" msgid="4393429107095001520">"Wi-Fi"</string>
+    <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Aucun réseau"</string>
+    <string name="quick_settings_wifi_display_label" msgid="6653501376641018614">"Écran Wi-Fi"</string>
+    <string name="quick_settings_wifi_display_no_connection_label" msgid="6255615315258869136">"Aucune connexion à un écran Wi-Fi"</string>
+    <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Luminosité"</string>
+    <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMATIQUE"</string>
+    <string name="wifi_display_scan" msgid="8453135922233546097">"Rechercher"</string>
+    <string name="wifi_display_disconnect" msgid="5450214362789378584">"Déconnecter"</string>
+    <string name="wifi_display_dialog_title" msgid="2817993038700218900">"Écran Wi-Fi"</string>
+    <string name="wifi_display_state_available" msgid="980373281442607096">"Disponible"</string>
+    <string name="wifi_display_state_connecting" msgid="1677010908036241940">"Connexion en cours…"</string>
+    <string name="wifi_display_state_connected" msgid="9154375061719151149">"Connecté"</string>
 </resources>
