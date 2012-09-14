@@ -1151,12 +1151,36 @@ public abstract class PackageManager {
             = "android.content.pm.extra.VERIFICATION_INSTALL_FLAGS";
 
     /**
+     * Extra field name for the uid of who is requesting to install
+     * the package.
+     *
+     * @hide
+     */
+    public static final String EXTRA_VERIFICATION_INSTALLER_UID
+            = "android.content.pm.extra.VERIFICATION_INSTALLER_UID";
+
+    /**
+     * Extra field name for the package name of a package pending verification.
+     *
+     * @hide
+     */
+    public static final String EXTRA_VERIFICATION_PACKAGE_NAME
+            = "android.content.pm.extra.VERIFICATION_PACKAGE_NAME";
+    /**
      * Extra field name for the result of a verification, either
      * {@link #VERIFICATION_ALLOW}, or {@link #VERIFICATION_REJECT}.
      * Passed to package verifiers after a package is verified.
      */
     public static final String EXTRA_VERIFICATION_RESULT
             = "android.content.pm.extra.VERIFICATION_RESULT";
+
+    /**
+     * Extra field name for the version code of a package pending verification.
+     *
+     * @hide
+     */
+    public static final String EXTRA_VERIFICATION_VERSION_CODE
+            = "android.content.pm.extra.VERIFICATION_VERSION_CODE";
 
     /**
      * Retrieve overall information about an application package that is
