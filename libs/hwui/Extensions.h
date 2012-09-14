@@ -65,11 +65,13 @@ public:
         mHasDiscardFramebuffer = hasExtension("GL_EXT_discard_framebuffer");
         mHasDebugMarker = hasExtension("GL_EXT_debug_marker");
         mHasDebugLabel = hasExtension("GL_EXT_debug_label");
+        mHasTiledRendering = hasExtension("GL_QCOM_tiled_rendering");
 
-        // We don't need to copy the string, the OpenGL ES spec
-        // guarantees the result of glGetString to point to a
-        // static string as long as our OpenGL context is valid
-        mExtensions = buffer;
+        mExtensions = strdup(buffer);
+    }
+
+    ~Extensions() {
+        free(mExtensions);
     }
 
     inline bool hasNPot() const { return mHasNPot; }
@@ -77,6 +79,7 @@ public:
     inline bool hasDiscardFramebuffer() const { return mHasDiscardFramebuffer; }
     inline bool hasDebugMarker() const { return mHasDebugMarker; }
     inline bool hasDebugLabel() const { return mHasDebugLabel; }
+    inline bool hasTiledRendering() const { return mHasTiledRendering; }
 
     bool hasExtension(const char* extension) const {
         const String8 s(extension);
@@ -90,13 +93,14 @@ public:
 private:
     SortedVector<String8> mExtensionList;
 
-    const char* mExtensions;
+    char* mExtensions;
 
     bool mHasNPot;
     bool mHasFramebufferFetch;
     bool mHasDiscardFramebuffer;
     bool mHasDebugMarker;
     bool mHasDebugLabel;
+    bool mHasTiledRendering;
 }; // class Extensions
 
 }; // namespace uirenderer
