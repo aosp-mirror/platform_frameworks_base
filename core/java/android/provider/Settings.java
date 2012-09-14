@@ -754,22 +754,29 @@ public final class Settings {
         }
 
         public String getStringForUser(ContentResolver cr, String name, final int userHandle) {
-            long newValuesVersion = SystemProperties.getLong(mVersionSystemProperty, 0);
+            final boolean isSelf = (userHandle == UserHandle.myUserId());
+            if (isSelf) {
+                long newValuesVersion = SystemProperties.getLong(mVersionSystemProperty, 0);
 
-            synchronized (this) {
-                if (mValuesVersion != newValuesVersion) {
-                    if (LOCAL_LOGV || false) {
-                        Log.v(TAG, "invalidate [" + mUri.getLastPathSegment() + "]: current " +
-                                newValuesVersion + " != cached " + mValuesVersion);
+                // Our own user's settings data uses a client-side cache
+                synchronized (this) {
+                    if (mValuesVersion != newValuesVersion) {
+                        if (LOCAL_LOGV || false) {
+                            Log.v(TAG, "invalidate [" + mUri.getLastPathSegment() + "]: current "
+                                    + newValuesVersion + " != cached " + mValuesVersion);
+                        }
+
+                        mValues.clear();
+                        mValuesVersion = newValuesVersion;
                     }
 
-                    mValues.clear();
-                    mValuesVersion = newValuesVersion;
+                    if (mValues.containsKey(name)) {
+                        return mValues.get(name);  // Could be null, that's OK -- negative caching
+                    }
                 }
-
-                if (mValues.containsKey(name)) {
-                    return mValues.get(name);  // Could be null, that's OK -- negative caching
-                }
+            } else {
+                if (LOCAL_LOGV) Log.v(TAG, "get setting for user " + userHandle
+                        + " by user " + UserHandle.myUserId() + " so skipping cache");
             }
 
             IContentProvider cp = lazyGetProvider(cr);
@@ -788,8 +795,15 @@ public final class Settings {
                     Bundle b = cp.call(mCallGetCommand, name, args);
                     if (b != null) {
                         String value = b.getPairValue();
-                        synchronized (this) {
-                            mValues.put(name, value);
+                        // Don't update our cache for reads of other users' data
+                        if (isSelf) {
+                            synchronized (this) {
+                                mValues.put(name, value);
+                            }
+                        } else {
+                            if (LOCAL_LOGV) Log.i(TAG, "call-query of user " + userHandle
+                                    + " by " + UserHandle.myUserId()
+                                    + " so not updating cache");
                         }
                         return value;
                     }
