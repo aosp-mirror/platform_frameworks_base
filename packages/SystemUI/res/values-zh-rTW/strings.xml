@@ -58,15 +58,18 @@
     <string name="label_view" msgid="6304565553218192990">"查看"</string>
     <string name="always_use_device" msgid="1450287437017315906">"預設用於這個 USB 裝置"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"預設用於這個 USB 配件"</string>
-    <string name="usb_debugging_title" msgid="1114766024068112429">"允許 USB 偵錯嗎？"</string>
-    <string name="usb_debugging_message" msgid="719863946976291180">"允許透過這台電腦進行 USB 偵錯嗎？"\n"您的 RSA 金鑰指紋如下"\n"<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
-    <string name="usb_debugging_always" msgid="4253099426793114693">"一律允許這台電腦"</string>
+    <!-- no translation found for usb_debugging_title (4513918393387141949) -->
+    <skip />
+    <!-- no translation found for usb_debugging_message (2220143855912376496) -->
+    <skip />
+    <!-- no translation found for usb_debugging_always (303335496705863070) -->
+    <skip />
     <string name="compat_mode_on" msgid="6623839244840638213">"放大為全螢幕"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"放大為全螢幕"</string>
     <string name="compat_mode_help_header" msgid="7969493989397529910">"相容性縮放"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"執行專為較小螢幕設計的應用程式時，系統會在時鐘旁顯示縮放控制項。"</string>
-    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"正在儲存螢幕擷取畫面..."</string>
-    <string name="screenshot_saving_title" msgid="8242282144535555697">"正在儲存螢幕擷取畫面..."</string>
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"正在儲存螢幕擷取畫面…"</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"正在儲存螢幕擷取畫面…"</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"正在儲存螢幕擷取畫面。"</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"已拍攝螢幕擷取畫面。"</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"輕觸即可查看螢幕擷取畫面。"</string>
@@ -162,7 +165,7 @@
     <skip />
     <!-- no translation found for quick_settings_brightness_label (6968372297018755815) -->
     <skip />
-    <!-- no translation found for quick_settings_ime_label (6877325300716130498) -->
+    <!-- no translation found for quick_settings_ime_label (7073463064369468429) -->
     <skip />
     <!-- no translation found for quick_settings_location_label (3292451598267467545) -->
     <skip />
@@ -185,6 +188,10 @@
     <!-- no translation found for quick_settings_wifi_display_label (6653501376641018614) -->
     <skip />
     <!-- no translation found for quick_settings_wifi_display_no_connection_label (6255615315258869136) -->
+    <skip />
+    <!-- no translation found for quick_settings_brightness_dialog_title (8599674057673605368) -->
+    <skip />
+    <!-- no translation found for quick_settings_brightness_dialog_auto_brightness_label (5064982743784071218) -->
     <skip />
     <!-- no translation found for wifi_display_scan (8453135922233546097) -->
     <skip />
