@@ -211,6 +211,9 @@ public:
     bool disableScissor();
     void setScissorEnabled(bool enabled);
 
+    void startTiling(GLuint x, GLuint y, GLuint width, GLuint height, bool opaque);
+    void endTiling();
+
     /**
      * Returns the mesh used to draw regions. Calling this method will
      * bind a VBO of type GL_ELEMENT_ARRAY_BUFFER that contains the
