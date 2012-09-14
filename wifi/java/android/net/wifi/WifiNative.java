@@ -49,6 +49,7 @@ public class WifiNative {
     static final int BLUETOOTH_COEXISTENCE_MODE_SENSE = 2;
 
     String mInterface = "";
+    private boolean mSuspendOptEnabled = false;
 
     public native static boolean loadDriver();
 
@@ -349,6 +350,8 @@ public class WifiNative {
     }
 
     public boolean setSuspendOptimizations(boolean enabled) {
+        if (mSuspendOptEnabled == enabled) return true;
+        mSuspendOptEnabled = enabled;
         if (enabled) {
             return doBooleanCommand("DRIVER SETSUSPENDMODE 1");
         } else {
