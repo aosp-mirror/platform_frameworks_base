@@ -424,6 +424,28 @@ import java.util.List;
  * </ul>
  * </p>
  * <p>
+ * <b>Touch interaction start</b> - represents the event of starting a touch
+ * interaction, which is the user starts touching the screen.</br>
+ * <em>Type:</em> {@link #TYPE_TOUCH_INTERACTION_START}</br>
+ * <em>Properties:</em></br>
+ * <ul>
+ *   <li>{@link #getEventType()} - The type of the event.</li>
+ * </ul>
+ * <em>Note:</em> This event is fired only by the system and is not passed to the
+ * view tree to be populated.</br>
+ * </p>
+ * <p>
+ * <b>Touch interaction end</b> - represents the event of ending a touch
+ * interaction, which is the user stops touching the screen.</br>
+ * <em>Type:</em> {@link #TYPE_TOUCH_INTERACTION_END}</br>
+ * <em>Properties:</em></br>
+ * <ul>
+ *   <li>{@link #getEventType()} - The type of the event.</li>
+ * </ul>
+ * <em>Note:</em> This event is fired only by the system and is not passed to the
+ * view tree to be populated.</br>
+ * </p>
+ * <p>
  * <b>Touch exploration gesture start</b> - represents the event of starting a touch
  * exploring gesture.</br>
  * <em>Type:</em> {@link #TYPE_TOUCH_EXPLORATION_GESTURE_START}</br>
@@ -431,15 +453,8 @@ import java.util.List;
  * <ul>
  *   <li>{@link #getEventType()} - The type of the event.</li>
  * </ul>
- * <em>Note:</em> This event type is not dispatched to descendants though
- * {@link android.view.View#dispatchPopulateAccessibilityEvent(AccessibilityEvent)
- * View.dispatchPopulateAccessibilityEvent(AccessibilityEvent)}, hence the event
- * source {@link android.view.View} and the sub-tree rooted at it will not receive
- * calls to {@link android.view.View#onPopulateAccessibilityEvent(AccessibilityEvent)
- * View.onPopulateAccessibilityEvent(AccessibilityEvent)}. The preferred way to add
- * text content to such events is by setting the
- * {@link android.R.styleable#View_contentDescription contentDescription} of the source
- * view.</br>
+ * <em>Note:</em> This event is fired only by the system and is not passed to the
+ * view tree to be populated.</br>
  * </p>
  * <p>
  * <b>Touch exploration gesture end</b> - represents the event of ending a touch
@@ -449,15 +464,30 @@ import java.util.List;
  * <ul>
  *   <li>{@link #getEventType()} - The type of the event.</li>
  * </ul>
- * <em>Note:</em> This event type is not dispatched to descendants though
- * {@link android.view.View#dispatchPopulateAccessibilityEvent(AccessibilityEvent)
- * View.dispatchPopulateAccessibilityEvent(AccessibilityEvent)}, hence the event
- * source {@link android.view.View} and the sub-tree rooted at it will not receive
- * calls to {@link android.view.View#onPopulateAccessibilityEvent(AccessibilityEvent)
- * View.onPopulateAccessibilityEvent(AccessibilityEvent)}. The preferred way to add
- * text content to such events is by setting the
- * {@link android.R.styleable#View_contentDescription contentDescription} of the source
- * view.</br>
+ * <em>Note:</em> This event is fired only by the system and is not passed to the
+ * view tree to be populated.</br>
+ * </p>
+ * <p>
+ * <b>Touch gesture detection start</b> - represents the event of starting a user
+ * gesture detection.</br>
+ * <em>Type:</em> {@link #TYPE_GESTURE_DETECTION_START}</br>
+ * <em>Properties:</em></br>
+ * <ul>
+ *   <li>{@link #getEventType()} - The type of the event.</li>
+ * </ul>
+ * <em>Note:</em> This event is fired only by the system and is not passed to the
+ * view tree to be populated.</br>
+ * </p>
+ * <p>
+ * <b>Touch gesture detection end</b> - represents the event of ending a user
+ * gesture detection.</br>
+ * <em>Type:</em> {@link #TYPE_GESTURE_DETECTION_END}</br>
+ * <em>Properties:</em></br>
+ * <ul>
+ *   <li>{@link #getEventType()} - The type of the event.</li>
+ * </ul>
+ * <em>Note:</em> This event is fired only by the system and is not passed to the
+ * view tree to be populated.</br>
  * </p>
  * <p>
  * <b>MISCELLANEOUS TYPES</b></br>
@@ -610,6 +640,26 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     public static final int TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY = 0x00020000;
 
     /**
+     * Represents the event of beginning gesture detection.
+     */
+    public static final int TYPE_GESTURE_DETECTION_START = 0x00040000;
+
+    /**
+     * Represents the event of ending gesture detection.
+     */
+    public static final int TYPE_GESTURE_DETECTION_END = 0x00080000;
+
+    /**
+     * Represents the event of the user starting to touch the screen.
+     */
+    public static final int TYPE_TOUCH_INTERACTION_START = 0x00100000;
+
+    /**
+     * Represents the event of the user ending to touch the screen.
+     */
+    public static final int TYPE_TOUCH_INTERACTION_END = 0x00200000;
+
+    /**
      * Mask for {@link AccessibilityEvent} all types.
      *
      * @see #TYPE_VIEW_CLICKED
@@ -628,6 +678,10 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * @see #TYPE_VIEW_TEXT_SELECTION_CHANGED
      * @see #TYPE_ANNOUNCEMENT
      * @see #TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY
+     * @see #TYPE_GESTURE_DETECTION_START
+     * @see #TYPE_GESTURE_DETECTION_END
+     * @see #TYPE_TOUCH_INTERACTION_START
+     * @see #TYPE_TOUCH_INTERACTION_END
      */
     public static final int TYPES_ALL_MASK = 0xFFFFFFFF;
 
@@ -1120,6 +1174,14 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
                 return "TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED";
             case TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY:
                 return "TYPE_CURRENT_AT_GRANULARITY_MOVEMENT_CHANGED";
+            case TYPE_GESTURE_DETECTION_START:
+                return "TYPE_GESTURE_DETECTION_START";
+            case TYPE_GESTURE_DETECTION_END:
+                return "TYPE_GESTURE_DETECTION_END";
+            case TYPE_TOUCH_INTERACTION_START:
+                return "TYPE_TOUCH_INTERACTION_START";
+            case TYPE_TOUCH_INTERACTION_END:
+                return "TYPE_TOUCH_INTERACTION_END";
             default:
                 return null;
         }
