@@ -24,7 +24,6 @@ import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.os.Bundle;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.View.OnFocusChangeListener;
@@ -435,42 +434,6 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
         info.setClassName(TabWidget.class.getName());
-
-        final int tabCount = getTabCount();
-
-        if (tabCount > 1) {
-            if (mSelectedTab > 0) {
-                info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
-                info.setScrollable(true);
-            }
-
-            if (mSelectedTab < (tabCount - 1)) {
-                info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
-                info.setScrollable(true);
-            }
-        }
-    }
-
-    @Override
-    public boolean performAccessibilityAction(int action, Bundle arguments) {
-        final int tabCount = getTabCount();
-
-        switch (action) {
-            case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD:
-                if ((tabCount > 1) && (mSelectedTab > 0)) {
-                    focusCurrentTab(mSelectedTab - 1);
-                    return true;
-                }
-                return false;
-            case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD:
-                if ((tabCount > 1) && (mSelectedTab < (tabCount - 1))) {
-                    focusCurrentTab(mSelectedTab + 1);
-                    return true;
-                }
-                return false;
-        }
-
-        return super.performAccessibilityAction(action, arguments);
     }
 
     /**
