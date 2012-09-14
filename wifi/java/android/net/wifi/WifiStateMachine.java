@@ -141,8 +141,6 @@ public class WifiStateMachine extends StateMachine {
 
     private boolean mBluetoothConnectionActive = false;
 
-    private BroadcastReceiver mScreenReceiver;
-    private IntentFilter mScreenFilter;
     private PowerManager.WakeLock mSuspendWakeLock;
 
     /**
@@ -628,15 +626,16 @@ public class WifiStateMachine extends StateMachine {
                 },
                 new IntentFilter(ACTION_START_SCAN));
 
-        mScreenFilter = new IntentFilter();
-        mScreenFilter.addAction(Intent.ACTION_SCREEN_ON);
-        mScreenFilter.addAction(Intent.ACTION_SCREEN_OFF);
-        mScreenReceiver = new BroadcastReceiver() {
+        IntentFilter screenFilter = new IntentFilter();
+        screenFilter.addAction(Intent.ACTION_SCREEN_ON);
+        screenFilter.addAction(Intent.ACTION_SCREEN_OFF);
+        BroadcastReceiver screenReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
 
                 if (action.equals(Intent.ACTION_SCREEN_ON)) {
+                    if (DBG) log("ACTION_SCREEN_ON");
                     enableRssiPolling(true);
                     if (mBackgroundScanSupported) {
                         enableBackgroundScanCommand(false);
@@ -647,6 +646,7 @@ public class WifiStateMachine extends StateMachine {
                         sendMessage(obtainMessage(CMD_SET_SUSPEND_OPT_ENABLED, 0, 0));
                     }
                 } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
+                    if (DBG) log("ACTION_SCREEN_OFF");
                     enableRssiPolling(false);
                     if (mBackgroundScanSupported) {
                         enableBackgroundScanCommand(true);
@@ -660,6 +660,7 @@ public class WifiStateMachine extends StateMachine {
                 }
             }
         };
+        mContext.registerReceiver(screenReceiver, screenFilter);
 
         mContext.registerReceiver(
                 new BroadcastReceiver() {
@@ -1335,12 +1336,10 @@ public class WifiStateMachine extends StateMachine {
             /* None of dhcp, screen or highperf need it disabled and user wants it enabled */
             if (mSuspendOptNeedsDisabled == 0 && mUserWantsSuspendOpt.get()) {
                 mWifiNative.setSuspendOptimizations(true);
-                if (DBG) log("Enabled, mSuspendOptNeedsDisabled " + mSuspendOptNeedsDisabled);
             }
         } else {
             mSuspendOptNeedsDisabled |= reason;
             mWifiNative.setSuspendOptimizations(false);
-            if (DBG) log("Disabled, mSuspendOptNeedsDisabled " + mSuspendOptNeedsDisabled);
         }
     }
 
@@ -2723,8 +2722,6 @@ public class WifiStateMachine extends StateMachine {
             }
 
             if (mP2pSupported) mWifiP2pChannel.sendMessage(WifiStateMachine.CMD_ENABLE_P2P);
-
-            mContext.registerReceiver(mScreenReceiver, mScreenFilter);
         }
         @Override
         public boolean processMessage(Message message) {
@@ -2861,7 +2858,6 @@ public class WifiStateMachine extends StateMachine {
             mScanResults = new ArrayList<ScanResult>();
 
             if (mP2pSupported) mWifiP2pChannel.sendMessage(WifiStateMachine.CMD_DISABLE_P2P);
-            mContext.unregisterReceiver(mScreenReceiver);
         }
     }
 
