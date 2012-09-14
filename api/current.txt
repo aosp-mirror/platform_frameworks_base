@@ -22205,9 +22205,9 @@ package android.text.format {
     method public static java.lang.String formatElapsedTime(long);
     method public static java.lang.String formatElapsedTime(java.lang.StringBuilder, long);
     method public static final java.lang.CharSequence formatSameDayTime(long, long, int, int);
-    method public static java.lang.String getAMPMString(int);
-    method public static java.lang.String getDayOfWeekString(int, int);
-    method public static java.lang.String getMonthString(int, int);
+    method public static deprecated java.lang.String getAMPMString(int);
+    method public static deprecated java.lang.String getDayOfWeekString(int, int);
+    method public static deprecated java.lang.String getMonthString(int, int);
     method public static java.lang.CharSequence getRelativeDateTimeString(android.content.Context, long, long, long, int);
     method public static java.lang.CharSequence getRelativeTimeSpanString(long);
     method public static java.lang.CharSequence getRelativeTimeSpanString(long, long, long);
@@ -22215,24 +22215,24 @@ package android.text.format {
     method public static java.lang.CharSequence getRelativeTimeSpanString(android.content.Context, long, boolean);
     method public static java.lang.CharSequence getRelativeTimeSpanString(android.content.Context, long);
     method public static boolean isToday(long);
-    field public static final java.lang.String ABBREV_MONTH_FORMAT = "%b";
+    field public static final deprecated java.lang.String ABBREV_MONTH_FORMAT = "%b";
     field public static final java.lang.String ABBREV_WEEKDAY_FORMAT = "%a";
     field public static final long DAY_IN_MILLIS = 86400000L; // 0x5265c00L
-    field public static final int FORMAT_12HOUR = 64; // 0x40
-    field public static final int FORMAT_24HOUR = 128; // 0x80
+    field public static final deprecated int FORMAT_12HOUR = 64; // 0x40
+    field public static final deprecated int FORMAT_24HOUR = 128; // 0x80
     field public static final int FORMAT_ABBREV_ALL = 524288; // 0x80000
     field public static final int FORMAT_ABBREV_MONTH = 65536; // 0x10000
     field public static final int FORMAT_ABBREV_RELATIVE = 262144; // 0x40000
     field public static final int FORMAT_ABBREV_TIME = 16384; // 0x4000
     field public static final int FORMAT_ABBREV_WEEKDAY = 32768; // 0x8000
-    field public static final int FORMAT_CAP_AMPM = 256; // 0x100
-    field public static final int FORMAT_CAP_MIDNIGHT = 4096; // 0x1000
-    field public static final int FORMAT_CAP_NOON = 1024; // 0x400
-    field public static final int FORMAT_CAP_NOON_MIDNIGHT = 5120; // 0x1400
+    field public static final deprecated int FORMAT_CAP_AMPM = 256; // 0x100
+    field public static final deprecated int FORMAT_CAP_MIDNIGHT = 4096; // 0x1000
+    field public static final deprecated int FORMAT_CAP_NOON = 1024; // 0x400
+    field public static final deprecated int FORMAT_CAP_NOON_MIDNIGHT = 5120; // 0x1400
     field public static final int FORMAT_NO_MIDNIGHT = 2048; // 0x800
     field public static final int FORMAT_NO_MONTH_DAY = 32; // 0x20
     field public static final int FORMAT_NO_NOON = 512; // 0x200
-    field public static final int FORMAT_NO_NOON_MIDNIGHT = 2560; // 0xa00
+    field public static final deprecated int FORMAT_NO_NOON_MIDNIGHT = 2560; // 0xa00
     field public static final int FORMAT_NO_YEAR = 8; // 0x8
     field public static final int FORMAT_NUMERIC_DATE = 131072; // 0x20000
     field public static final int FORMAT_SHOW_DATE = 16; // 0x10
@@ -22241,12 +22241,12 @@ package android.text.format {
     field public static final int FORMAT_SHOW_YEAR = 4; // 0x4
     field public static final deprecated int FORMAT_UTC = 8192; // 0x2000
     field public static final long HOUR_IN_MILLIS = 3600000L; // 0x36ee80L
-    field public static final java.lang.String HOUR_MINUTE_24 = "%H:%M";
-    field public static final int LENGTH_LONG = 10; // 0xa
-    field public static final int LENGTH_MEDIUM = 20; // 0x14
-    field public static final int LENGTH_SHORT = 30; // 0x1e
-    field public static final int LENGTH_SHORTER = 40; // 0x28
-    field public static final int LENGTH_SHORTEST = 50; // 0x32
+    field public static final deprecated java.lang.String HOUR_MINUTE_24 = "%H:%M";
+    field public static final deprecated int LENGTH_LONG = 10; // 0xa
+    field public static final deprecated int LENGTH_MEDIUM = 20; // 0x14
+    field public static final deprecated int LENGTH_SHORT = 30; // 0x1e
+    field public static final deprecated int LENGTH_SHORTER = 40; // 0x28
+    field public static final deprecated int LENGTH_SHORTEST = 50; // 0x32
     field public static final long MINUTE_IN_MILLIS = 60000L; // 0xea60L
     field public static final java.lang.String MONTH_DAY_FORMAT = "%-d";
     field public static final java.lang.String MONTH_FORMAT = "%B";
@@ -22257,8 +22257,8 @@ package android.text.format {
     field public static final java.lang.String YEAR_FORMAT = "%Y";
     field public static final java.lang.String YEAR_FORMAT_TWO_DIGITS = "%g";
     field public static final long YEAR_IN_MILLIS = 31449600000L; // 0x7528ad000L
-    field public static final int[] sameMonthTable;
-    field public static final int[] sameYearTable;
+    field public static final deprecated int[] sameMonthTable;
+    field public static final deprecated int[] sameYearTable;
   }
 
   public final class Formatter {
