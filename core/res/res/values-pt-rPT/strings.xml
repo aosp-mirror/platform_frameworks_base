@@ -256,6 +256,10 @@
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Permite que uma aplicação obtenha informações sobre as janelas a partir do gestor de janelas. Aplicações maliciosas podem obter informações que se destinam à utilização interna do sistema."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"filtrar eventos"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Permite que uma aplicação registe um filtro de entrada que filtra a transmissão em fluxo contínuo para todos os eventos de utilizador antes de serem entregues. Uma aplicação maliciosa pode controlar a IU do sistema sem intervenção do utilizador."</string>
+    <!-- no translation found for permlab_magnify_display (5973626738170618775) -->
+    <skip />
+    <!-- no translation found for permdesc_magnify_display (7121235684515003792) -->
+    <skip />
     <string name="permlab_shutdown" msgid="7185747824038909016">"encerramento parcial"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Coloca o gestor de actividade num estado de encerramento. Não executa um encerramento completo."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"impedir trocas de aplicações"</string>
@@ -286,6 +290,10 @@
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Permite que a aplicação altere a velocidade global da animação (animações mais rápidas ou mais lentas) em qualquer altura."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"gerir tokens da aplicação"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Permite que a aplicação crie e faça a gestão dos seus próprios tokens, ignorando a ordenação normal dos mesmos pelo eixo dos Z. Nunca deve ser necessário para aplicações normais."</string>
+    <!-- no translation found for permlab_freezeScreen (4708181184441880175) -->
+    <skip />
+    <!-- no translation found for permdesc_freezeScreen (8558923789222670064) -->
+    <skip />
     <string name="permlab_injectEvents" msgid="1378746584023586600">"premir teclas e botões de controlo"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Permite que a aplicação forneça os seus próprios eventos de entrada (toques em teclas, etc.) a outras aplicações. As aplicações maliciosas podem utilizar este item para controlar o tablet."</string>
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Permite que a aplicação forneça os seus próprios eventos de entrada (toques em teclas, etc.) a outras aplicações. As aplicações maliciosas podem utilizar isto para controlar o telemóvel."</string>
@@ -398,6 +406,14 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Permite à aplicação utilizar funcionalidades de SurfaceFlinger de nível inferior."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"ler memória intermédia de fotogramas"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Permite à aplicação ler o conteúdo da memória intermédia de fotogramas."</string>
+    <!-- no translation found for permlab_configureWifiDisplay (5595661694746742168) -->
+    <skip />
+    <!-- no translation found for permdesc_configureWifiDisplay (7916815158690218065) -->
+    <skip />
+    <!-- no translation found for permlab_controlWifiDisplay (393641276723695496) -->
+    <skip />
+    <!-- no translation found for permdesc_controlWifiDisplay (4543912292681826986) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"alterar as suas definições de áudio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Permite que a aplicação modifique definições de áudio globais, tais como o volume e qual o altifalante utilizado para a saída de som."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"gravar áudio"</string>
@@ -1069,12 +1085,9 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Definir data"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Definir"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Concluído"</string>
-    <string name="default_permission_group" msgid="2690160991405646128">"Predefinido"</string>
-    <string name="no_permissions" msgid="7283357728219338112">"Não são necessárias permissões"</string>
-    <string name="perms_hide" msgid="7283915391320676226"><b>"Ocultar"</b></string>
-    <string name="perms_show_all" msgid="2671791163933091180"><b>"Mostrar tudo"</b></string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"NOVA: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"Fornecido por <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
+    <string name="no_permissions" msgid="7283357728219338112">"Não são necessárias permissões"</string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"Armazenamento em massa USB"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"Ligado através de USB"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Ligou ao computador através de USB. Toque no botão abaixo se pretender copiar ficheiros entre o computador e a memória de armazenamento USB do Android."</string>
@@ -1322,11 +1335,9 @@
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Concluído"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Saída de som multimédia"</string>
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Ecrã Integrado"</string>
-    <!-- no translation found for display_manager_hdmi_display_name (1555264559227470109) -->
-    <skip />
+    <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"Ecrã HDMI"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Sobreposição #<xliff:g id="ID">%1$d</xliff:g>"</string>
-    <!-- no translation found for display_manager_overlay_display_title (652124517672257172) -->
-    <skip />
+    <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> ppp"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Chamada de emergência"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Esqueceu-se da Sequência"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Sequência Incorreta"</string>
@@ -1347,7 +1358,7 @@
     <string name="kg_invalid_puk" msgid="5809955359950817326">"O PUK que introduziu não está correto."</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Demasiadas tentativas para desenhar sequência"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"Para desbloquear, inicie sessão com a sua Conta do Google."</string>
-    <string name="kg_login_username_hint" msgid="5718534272070920364">"Nome de utilizador (mail)"</string>
+    <string name="kg_login_username_hint" msgid="5718534272070920364">"Nome de utilizador (email)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Palavra-passe"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Iniciar sessão"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Nome de utilizador ou palavra-passe inválidos."</string>

@@ -256,6 +256,10 @@
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Ermöglicht einer App, Informationen über die Fenster vom Fenster-Manager abzurufen. Schädliche Apps können Informationen abrufen, die für die systeminterne Nutzung gedacht sind."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"Ereignisse filtern"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Ermöglicht einer App, einen Eingabefilter zu registrieren, der den Stream aller Nutzerereignisse vor ihrem Versand filtert. Eine schädliche App kann die System-UI ohne Eingriff des Nutzers kontrollieren."</string>
+    <!-- no translation found for permlab_magnify_display (5973626738170618775) -->
+    <skip />
+    <!-- no translation found for permdesc_magnify_display (7121235684515003792) -->
+    <skip />
     <string name="permlab_shutdown" msgid="7185747824038909016">"partielles Herunterfahren"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Versetzt den Aktivitätsmanager in einen heruntergefahrenen Zustand. Führt kein vollständiges Herunterfahren aus."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"App-Wechsel verhindern"</string>
@@ -286,6 +290,10 @@
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Ermöglicht der App, die allgemeine Animationsgeschwindigkeit (langsamere oder schnellere Animationen) jederzeit anzupassen."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"App-Token verwalten"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Ermöglicht der App, ihre eigenen Token zu erstellen und zu verwalten. Hierbei wird die normale Z-Reihenfolge umgangen. Sollte nie für normale Apps benötigt werden."</string>
+    <!-- no translation found for permlab_freezeScreen (4708181184441880175) -->
+    <skip />
+    <!-- no translation found for permdesc_freezeScreen (8558923789222670064) -->
+    <skip />
     <string name="permlab_injectEvents" msgid="1378746584023586600">"Tasten und Steuerungstasten drücken"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Ermöglicht der App, ihre eigenen Eingabeaktionen, zum Beispiel das Drücken von Tasten, an andere Apps weiterzugeben. Schädliche Apps können so die Kontrolle über Ihr Tablet übernehmen."</string>
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Ermöglicht der App, ihre eigenen Eingabeaktionen, zum Beispiel das Drücken von Tasten, an andere Apps weiterzugeben. Schädliche Apps können so die Kontrolle über Ihr Telefon übernehmen."</string>
@@ -398,6 +406,14 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Ermöglicht der App, die systemnahen SurfaceFlinger-Funktionen zu verwenden"</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"Frame-Puffer lesen"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Ermöglicht der App, den Inhalt des Frame-Puffers zu lesen"</string>
+    <!-- no translation found for permlab_configureWifiDisplay (5595661694746742168) -->
+    <skip />
+    <!-- no translation found for permdesc_configureWifiDisplay (7916815158690218065) -->
+    <skip />
+    <!-- no translation found for permlab_controlWifiDisplay (393641276723695496) -->
+    <skip />
+    <!-- no translation found for permdesc_controlWifiDisplay (4543912292681826986) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"Audio-Einstellungen ändern"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Ermöglicht der App, globale Audio-Einstellungen zu ändern, etwa die Lautstärke und den Lautsprecher für die Ausgabe."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"Audio aufnehmen"</string>
@@ -1069,12 +1085,9 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Datum festlegen"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Speichern"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Fertig"</string>
-    <string name="default_permission_group" msgid="2690160991405646128">"Standard"</string>
-    <string name="no_permissions" msgid="7283357728219338112">"Keine Berechtigungen erforderlich"</string>
-    <string name="perms_hide" msgid="7283915391320676226"><b>"Ausblenden"</b></string>
-    <string name="perms_show_all" msgid="2671791163933091180"><b>"Alle anzeigen"</b></string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"Neu: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"Zur Verfügung gestellt von <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="no_permissions" msgid="7283357728219338112">"Keine Berechtigungen erforderlich"</string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB-Massenspeicher"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB-Verbindung"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Sie haben eine USB-Verbindung mit Ihrem Computer hergestellt. Berühren Sie die Schaltfläche unten, wenn Sie Dateien von Ihrem Computer in den USB-Speicher Ihres Android-Geräts und umgekehrt kopieren möchten."</string>
@@ -1322,11 +1335,9 @@
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Fertig"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Medienausgabe"</string>
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Integrierter Bildschirm"</string>
-    <!-- no translation found for display_manager_hdmi_display_name (1555264559227470109) -->
-    <skip />
+    <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI-Bildschirm"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Overlay-Nr. <xliff:g id="ID">%1$d</xliff:g>"</string>
-    <!-- no translation found for display_manager_overlay_display_title (652124517672257172) -->
-    <skip />
+    <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Notruf"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Muster vergessen"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Falsches Muster"</string>

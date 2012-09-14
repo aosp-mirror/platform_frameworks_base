@@ -256,6 +256,10 @@
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Permite que una aplicación recupere la información del administrador de ventanas relacionada con estas. Las aplicaciones maliciosas pueden recuperar información destinada al uso interno del sistema."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"filtrar eventos"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Permite que una aplicación registre un filtro de entrada que filtre la transmisión de todos los eventos del usuario antes de ser enviados. Las aplicaciones maliciosas pueden controlar la IU del sistema sin la intervención del usuario."</string>
+    <!-- no translation found for permlab_magnify_display (5973626738170618775) -->
+    <skip />
+    <!-- no translation found for permdesc_magnify_display (7121235684515003792) -->
+    <skip />
     <string name="permlab_shutdown" msgid="7185747824038909016">"cierre parcial"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Pone al administrador de la actividad en estado de cierre. No realiza un cierre completo."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"impedir conmutadores de aplicación"</string>
@@ -286,6 +290,10 @@
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Permite que la aplicación cambie la velocidad de animación global (animaciones más rápidas o más lentas) en cualquier momento."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"administrar tokens de aplicación"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Permite que la aplicación cree y administre sus propios tokens al ignorar su orden z normal. Las aplicaciones normales no deben utilizar este permiso."</string>
+    <!-- no translation found for permlab_freezeScreen (4708181184441880175) -->
+    <skip />
+    <!-- no translation found for permdesc_freezeScreen (8558923789222670064) -->
+    <skip />
     <string name="permlab_injectEvents" msgid="1378746584023586600">"presionar teclas y botones de control"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Permite que la aplicación ofrezca sus propios eventos de entrada (pulsaciones de teclas, etc.) a otras aplicaciones. Las aplicaciones maliciosas pueden utilizar este permiso para controlar la tableta."</string>
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Permite que la aplicación ofrezca sus propios eventos de entrada (pulsaciones de teclas, etc.) a otras aplicaciones. Las aplicaciones maliciosas pueden utilizar este permiso para controlar el dispositivo."</string>
@@ -398,6 +406,14 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Permite que la aplicación utilice funciones de SurfaceFlinger de bajo nivel."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"leer el búfer de tramas"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Permite que la aplicación lea el contenido del búfer de tramas."</string>
+    <!-- no translation found for permlab_configureWifiDisplay (5595661694746742168) -->
+    <skip />
+    <!-- no translation found for permdesc_configureWifiDisplay (7916815158690218065) -->
+    <skip />
+    <!-- no translation found for permlab_controlWifiDisplay (393641276723695496) -->
+    <skip />
+    <!-- no translation found for permdesc_controlWifiDisplay (4543912292681826986) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"cambiar tu configuración de audio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Permite que la aplicación modifique la configuración de audio global, por ejemplo, el volumen y el altavoz de salida."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"grabar audio"</string>
@@ -1069,12 +1085,9 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Configurar fecha"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Establecer"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Listo"</string>
-    <string name="default_permission_group" msgid="2690160991405646128">"Predeterminado"</string>
-    <string name="no_permissions" msgid="7283357728219338112">"No se requieren permisos"</string>
-    <string name="perms_hide" msgid="7283915391320676226"><b>"Ocultar"</b></string>
-    <string name="perms_show_all" msgid="2671791163933091180"><b>"Mostrar todos"</b></string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"NUEVO: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"Proporcionado por <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="no_permissions" msgid="7283357728219338112">"No se requieren permisos"</string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"Almacenamiento USB masivo"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"Conectado al USB"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Has conectado el dispositivo a la computadora por USB. Toca el siguiente botón si quieres copiar archivos entre tu computadora y el almacenamiento USB de tu Android."</string>
@@ -1322,11 +1335,9 @@
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Listo"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Salida multimedia"</string>
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Pantalla integrada"</string>
-    <!-- no translation found for display_manager_hdmi_display_name (1555264559227470109) -->
-    <skip />
-    <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Superposición N.°<xliff:g id="ID">%1$d</xliff:g>"</string>
-    <!-- no translation found for display_manager_overlay_display_title (652124517672257172) -->
-    <skip />
+    <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"Pantalla HDMI"</string>
+    <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Superposición #<xliff:g id="ID">%1$d</xliff:g>"</string>
+    <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> ppp"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Llamada de emergencia"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"¿Olvidaste el patrón?"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Patrón incorrecto"</string>
@@ -1341,26 +1352,26 @@
     <string name="kg_puk_enter_pin_hint" msgid="597821135578014901">"Nuevo código PIN"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Desbloqueando tarjeta SIM…"</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Código PIN incorrecto"</string>
-    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Escribe un PIN que tenga de 4 a 8 números."</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Escribe un PIN que tenga de cuatro a ocho números."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5216603185442368307">"Ingresa un código PUK de ocho números o más."</string>
     <string name="kg_sim_puk_recovery_hint" msgid="5577753137718442566">"Escribe el código PUK y un nuevo código PIN."</string>
     <string name="kg_invalid_puk" msgid="5809955359950817326">"El código PUK que escribiste es incorrecto."</string>
-    <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Demasiados intentos incorrectos para ingresar el patrón"</string>
-    <string name="kg_login_instructions" msgid="1100551261265506448">"Para desbloquear, inicia sesión en tu cuenta de Google."</string>
-    <string name="kg_login_username_hint" msgid="5718534272070920364">"Nombre de usuario (correo electrónico)"</string>
+    <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Demasiados intentos incorrectos de ingresar el patrón"</string>
+    <string name="kg_login_instructions" msgid="1100551261265506448">"Para desbloquear, accede con tu cuenta de Google."</string>
+    <string name="kg_login_username_hint" msgid="5718534272070920364">"Nombre de usuario (correo)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Contraseña"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Acceder"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Nombre de usuario o contraseña incorrectos"</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"¿Olvidaste tu nombre de usuario o contraseña?"\n"Accede a "<b>"google.com/accounts/recovery"</b>"."</string>
-    <string name="kg_login_checking_password" msgid="8849589033659332457">"Comprobando..."</string>
+    <string name="kg_login_checking_password" msgid="8849589033659332457">"Comprobando…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Escribiste incorrectamente tu PIN <xliff:g id="NUMBER_0">%d</xliff:g> veces. "\n\n"Vuelve a intentarlo en <xliff:g id="NUMBER_1">%d</xliff:g> segundos."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Escribiste incorrectamente tu contraseña <xliff:g id="NUMBER_0">%d</xliff:g> veces. "\n\n"Vuelve a intentarlo en <xliff:g id="NUMBER_1">%d</xliff:g> segundos."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Dibujaste incorrectamente tu patrón de desbloqueo <xliff:g id="NUMBER_0">%d</xliff:g> veces. "\n\n"Vuelve a intentarlo en <xliff:g id="NUMBER_1">%d</xliff:g> segundos."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Intentaste desbloquear la tableta <xliff:g id="NUMBER_0">%d</xliff:g> veces, pero no lo lograste. Puedes intentarlo <xliff:g id="NUMBER_1">%d</xliff:g> veces más antes de que se restablezcan los valores predeterminados de fábrica de la tableta y se pierdan todos los datos de usuario."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Intentaste desbloquear el dispositivo <xliff:g id="NUMBER_0">%d</xliff:g> veces, pero no lo lograste. Puedes intentarlo <xliff:g id="NUMBER_1">%d</xliff:g> veces más antes de que se restablezcan los valores predeterminados de fábrica del dispositivo y se pierdan todos los datos de usuario."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Intentaste desbloquear la tableta <xliff:g id="NUMBER_0">%d</xliff:g> veces, pero no lo lograste. Puedes intentarlo <xliff:g id="NUMBER_1">%d</xliff:g> veces más antes de que se restablezcan los valores predeterminados de fábrica de la tableta y se pierdan todos los datos del usuario."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Intentaste desbloquear el dispositivo <xliff:g id="NUMBER_0">%d</xliff:g> veces, pero no lo lograste. Puedes intentarlo <xliff:g id="NUMBER_1">%d</xliff:g> veces más antes de que se restablezcan los valores predeterminados de fábrica del dispositivo y se pierdan todos los datos del usuario."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Intentaste desbloquear la tableta <xliff:g id="NUMBER">%d</xliff:g> veces, pero no lo lograste. Se restablecerán los valores predeterminados de fábrica de la tableta."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Intentaste desbloquear el dispositivo <xliff:g id="NUMBER">%d</xliff:g> veces, pero no lo lograste. Se restablecerán los valores predeterminados de fábrica del dispositivo."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Dibujaste incorrectamente tu patrón de desbloqueo <xliff:g id="NUMBER_0">%d</xliff:g> veces. Luego de <xliff:g id="NUMBER_1">%d</xliff:g> intentos incorrectos, se te solicitará que desbloquees tu tableta mediante el uso de una cuenta de correo electrónico."\n\n" Vuelve a intentarlo en <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Dibujaste incorrectamente tu patrón de desbloqueo <xliff:g id="NUMBER_0">%d</xliff:g> veces. Luego de <xliff:g id="NUMBER_1">%d</xliff:g> intentos incorrectos, se te solicitará que desbloquees tu dispositivo mediante el uso de una cuenta de correo electrónico."\n\n" Vuelve a intentarlo en <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Dibujaste incorrectamente tu patrón de desbloqueo <xliff:g id="NUMBER_0">%d</xliff:g> veces. Luego de <xliff:g id="NUMBER_1">%d</xliff:g> intentos incorrectos más, se te solicitará que desbloquees tu tableta mediante el uso de una cuenta de correo."\n\n" Vuelve a intentarlo en <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Dibujaste incorrectamente tu patrón de desbloqueo <xliff:g id="NUMBER_0">%d</xliff:g> veces. Luego de <xliff:g id="NUMBER_1">%d</xliff:g> intentos incorrectos más, se te solicitará que desbloquees tu dispositivo mediante el uso de una cuenta de correo."\n\n" Vuelve a intentarlo en <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
     <string name="kg_temp_back_string" msgid="5812983904056640466">"&lt;"</string>
 </resources>

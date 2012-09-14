@@ -256,6 +256,10 @@
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Permet à une application de récupérer les informations sur les fenêtres depuis le gestionnaire de fenêtres. Des applications malveillantes peuvent récupérer des informations destinées à un usage interne du système."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"filtrer les événements"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Permet à une application d\'enregistrer un filtre d\'entrée pour filtrer le flux de tous les événements des utilisateurs avant qu\'ils ne soient traités. Des applications malveillantes peuvent contrôler l\'interface utilisateur du système sans l\'intervention de l\'utilisateur."</string>
+    <!-- no translation found for permlab_magnify_display (5973626738170618775) -->
+    <skip />
+    <!-- no translation found for permdesc_magnify_display (7121235684515003792) -->
+    <skip />
     <string name="permlab_shutdown" msgid="7185747824038909016">"arrêt partiel"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Place le gestionnaire d\'activités en état d\'arrêt. N\'effectue pas un arrêt complet."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"empêcher les changements d\'applications"</string>
@@ -286,6 +290,10 @@
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Permet à l\'application de modifier à tout moment la vitesse générale des animations pour les ralentir ou les accélérer."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"gérer les jetons d\'application"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Permet à l\'application de créer et de gérer ses propres jetons en ignorant leur ordre de plan normal. Les applications standards ne doivent jamais avoir recours à cette fonctionnalité."</string>
+    <!-- no translation found for permlab_freezeScreen (4708181184441880175) -->
+    <skip />
+    <!-- no translation found for permdesc_freezeScreen (8558923789222670064) -->
+    <skip />
     <string name="permlab_injectEvents" msgid="1378746584023586600">"Utilisation des touches ou contrôle des commandes"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Permet à l\'application de fournir ses propres événements d\'entrée (pression de touche, etc.) à d\'autres applications. Des applications malveillantes peuvent exploiter cette fonctionnalité pour prendre le contrôle de la tablette."</string>
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Permet à l\'application de fournir ses propres événements d\'entrée (pression de touche, etc.) à d\'autres applications. Des applications malveillantes peuvent exploiter cette fonctionnalité pour prendre le contrôle du téléphone."</string>
@@ -398,6 +406,14 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Permet à l\'application d\'utiliser les fonctionnalités de bas niveau de SurfaceFlinger."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"Lecture de la mémoire tampon graphique"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Permet à l\'application de lire le contenu de la mémoire tampon graphique."</string>
+    <!-- no translation found for permlab_configureWifiDisplay (5595661694746742168) -->
+    <skip />
+    <!-- no translation found for permdesc_configureWifiDisplay (7916815158690218065) -->
+    <skip />
+    <!-- no translation found for permlab_controlWifiDisplay (393641276723695496) -->
+    <skip />
+    <!-- no translation found for permdesc_controlWifiDisplay (4543912292681826986) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"modifier vos paramètres audio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Permet à l\'application de modifier les paramètres audio généraux, tels que le volume et la sortie audio utilisée."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"Enregistrement de fichier audio"</string>
@@ -491,7 +507,7 @@
     <string name="permdesc_useCredentials" msgid="7984227147403346422">"Permet à l\'application de demander des jetons d\'authentification."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"afficher les connexions réseau"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Permet à l\'application d\'accéder à des informations sur les connexions réseau, comme les réseaux existants et connectés."</string>
-    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"accès complet au réseau"</string>
+    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"bénéficier d\'un accès complet au réseau"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Permet à l\'application de créer des sockets réseau et d\'utiliser des protocoles réseau personnalisés. Le navigateur et d\'autres applications permettent d\'envoyer des données sur Internet. Cette autorisation n\'est donc pas nécessaire pour envoyer des données sur Internet."</string>
     <string name="permlab_writeApnSettings" msgid="505660159675751896">"changer/intercepter les paramètres et le trafic du réseau"</string>
     <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"Permet à l\'application de modifier les paramètres réseau, ainsi que d\'intercepter et de surveiller tout le trafic réseau ayant pour but de modifier le proxy et le port d\'un APN, par exemple. Des applications malveillantes peuvent exploiter cette fonctionnalité pour surveiller, rediriger ou modifier les paquets réseau à votre insu."</string>
@@ -721,7 +737,7 @@
     <string name="lockscreen_charged" msgid="4938930459620989972">"Chargé"</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Branchez votre chargeur."</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Aucune carte SIM n\'a été trouvée."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Aucune carte SIM."</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Aucune carte SIM n\'est insérée dans la tablette."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Aucune carte SIM n\'est insérée dans le téléphone."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Insérez une carte SIM."</string>
@@ -1069,12 +1085,9 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Définir la date"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Définir"</string>
     <string name="date_time_done" msgid="2507683751759308828">"OK"</string>
-    <string name="default_permission_group" msgid="2690160991405646128">"Par défaut"</string>
-    <string name="no_permissions" msgid="7283357728219338112">"Aucune autorisation requise"</string>
-    <string name="perms_hide" msgid="7283915391320676226"><b>"Masquer"</b></string>
-    <string name="perms_show_all" msgid="2671791163933091180"><b>"Tout afficher"</b></string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"NOUVEAU"</font>" :"</string>
     <string name="perms_description_app" msgid="5139836143293299417">"Fourni par <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="no_permissions" msgid="7283357728219338112">"Aucune autorisation requise"</string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"Mémoire de stockage de masse USB"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"Connecté par USB"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Vous êtes connecté à votre ordinateur via un câble USB. Appuyez sur le bouton ci-dessous pour copier des fichiers de votre ordinateur vers la mémoire de stockage USB de votre appareil Android, ou inversement."</string>
@@ -1322,11 +1335,9 @@
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"OK"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Sortie multimédia"</string>
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Écran intégré"</string>
-    <!-- no translation found for display_manager_hdmi_display_name (1555264559227470109) -->
-    <skip />
+    <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"Écran HDMI"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Superposition n° <xliff:g id="ID">%1$d</xliff:g>"</string>
-    <!-- no translation found for display_manager_overlay_display_title (652124517672257172) -->
-    <skip />
+    <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g> : <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Appel d\'urgence"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"J\'ai oublié le schéma"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Schéma incorrect."</string>
@@ -1342,7 +1353,7 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Déblocage de la carte SIM en cours…"</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Le code PIN est erroné."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Saisissez un code PIN comprenant entre quatre et huit chiffres"</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="5216603185442368307">"Saisissez une clé PUK comportant au moins huit chiffres"</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="5216603185442368307">"Saisissez une clé PUK comportant au moins huit chiffres."</string>
     <string name="kg_sim_puk_recovery_hint" msgid="5577753137718442566">"Saisissez la clé PUK et le nouveau code PIN"</string>
     <string name="kg_invalid_puk" msgid="5809955359950817326">"La clé PUK saisie est incorrecte."</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Trop de tentatives."</string>
@@ -1360,7 +1371,7 @@
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Vous avez tenté de déverrouiller le téléphone de façon incorrecte à <xliff:g id="NUMBER_0">%d</xliff:g> reprises. Si vous échouez encore <xliff:g id="NUMBER_1">%d</xliff:g> fois, sa configuration d\'usine sera rétablie, et toutes les données utilisateur seront perdues."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Vous avez tenté de déverrouiller la tablette de façon incorrecte à <xliff:g id="NUMBER">%d</xliff:g> reprises. Sa configuration d\'usine va être rétablie."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Vous avez tenté de déverrouiller le téléphone de façon incorrecte à <xliff:g id="NUMBER">%d</xliff:g> reprises. Sa configuration d\'usine va être rétablie."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Vous avez dessiné un schéma de déverrouillage incorrect à <xliff:g id="NUMBER_0">%d</xliff:g> reprises. Au bout de <xliff:g id="NUMBER_1">%d</xliff:g> échecs supplémentaires, vous devrez déverrouiller votre tablette à l\'aide d\'un compte de messagerie électronique."\n\n" Veuillez réessayer dans <xliff:g id="NUMBER_2">%d</xliff:g> secondes."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Vous avez dessiné un schéma de déverrouillage incorrect à <xliff:g id="NUMBER_0">%d</xliff:g> reprises. Au bout de <xliff:g id="NUMBER_1">%d</xliff:g> échecs supplémentaires, vous devrez déverrouiller votre téléphone à l\'aide d\'un compte de messagerie électronique."\n\n" Veuillez réessayer dans <xliff:g id="NUMBER_2">%d</xliff:g> secondes."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Vous avez dessiné un schéma de déverrouillage incorrect à <xliff:g id="NUMBER_0">%d</xliff:g> reprises. Si vous échouez encore <xliff:g id="NUMBER_1">%d</xliff:g> fois, vous devrez déverrouiller votre tablette à l\'aide d\'un compte de messagerie électronique."\n\n" Veuillez réessayer dans <xliff:g id="NUMBER_2">%d</xliff:g> secondes."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Vous avez dessiné un schéma de déverrouillage incorrect à <xliff:g id="NUMBER_0">%d</xliff:g> reprises. Si vous échouez encore <xliff:g id="NUMBER_1">%d</xliff:g> fois, vous devrez déverrouiller votre téléphone à l\'aide d\'un compte de messagerie électronique."\n\n" Veuillez réessayer dans <xliff:g id="NUMBER_2">%d</xliff:g> secondes."</string>
     <string name="kg_temp_back_string" msgid="5812983904056640466">"&lt;"</string>
 </resources>

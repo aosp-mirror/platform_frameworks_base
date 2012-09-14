@@ -256,6 +256,10 @@
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"อนุญาตให้แอปพลิเคชันดึงข้อมูลเกี่ยวกับหน้าต่างจากเครื่องมือจัดการหน้าต่าง แอปพลิเคชันที่เป็นอันตรายอาจดึงข้อมูลที่มีไว้เพื่อการใช้ของระบบภายใน"</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"กรองกิจกรรม"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"อนุญาตให้แอปพลิเคชันลงทะเบียนตัวกรองข้อมูลซึ่งจะกรองสตรีมกิจกรรมทั้งหมดของผู้ใช้ก่อนที่จะทำการเผยแพร่ออกไป แอปพลิเคชันที่เป็นอันตรายอาจควบคุม UI ของระบบโดยไม่ต้องให้ผู้ใช้จัดการ"</string>
+    <!-- no translation found for permlab_magnify_display (5973626738170618775) -->
+    <skip />
+    <!-- no translation found for permdesc_magnify_display (7121235684515003792) -->
+    <skip />
     <string name="permlab_shutdown" msgid="7185747824038909016">"ปิดการทำงานบางส่วน"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"กำหนดให้ตัวจัดการกิจกรรมอยู่ในสถานะปิดระบบ โดยไม่ได้ปิดระบบอย่างสมบูรณ์"</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"ป้องกันการเปลี่ยนแอปพลิเคชัน"</string>
@@ -286,6 +290,10 @@
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"อนุญาตให้แอปพลิเคชันเปลี่ยนความเร็วในการเคลื่อนไหวทั่วไป (ภาพเคลื่อนไหวได้เร็วขึ้นหรือช้าลง) ได้ตลอดเวลา"</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"จัดการโทเค็นของแอปพลิเคชัน"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"อนุญาตให้แอปพลิเคชันสร้างและจัดการโทเค็นของตนเอง โดยข้ามการจัดลำดับ Z ปกติไป ไม่ควรต้องใช้สำหรับแอปพลิเคชันทั่วไป"</string>
+    <!-- no translation found for permlab_freezeScreen (4708181184441880175) -->
+    <skip />
+    <!-- no translation found for permdesc_freezeScreen (8558923789222670064) -->
+    <skip />
     <string name="permlab_injectEvents" msgid="1378746584023586600">"กดปุ่มต่างๆ และปุ่ม Ctrl"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"อนุญาตให้แอปพลิเคชันส่งกิจกรรมการนำเข้าข้อมูลของตนเอง (เช่น การกดปุ่ม) ไปยังแอปพลิเคชันอื่นๆ แอปพลิเคชันที่เป็นอันตรายอาจใช้การอนุญาตนี้เข้าควบคุมแท็บเล็ต"</string>
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"อนุญาตให้แอปพลิเคชันส่งกิจกรรมการนำเข้าข้อมูลของตนเอง (เช่น การกดปุ่ม) ไปยังแอปพลิเคชันอื่นๆ แอปพลิเคชันที่เป็นอันตรายอาจใช้การอนุญาตนี้เข้าควบคุมโทรศัพท์"</string>
@@ -398,6 +406,14 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"อนุญาตให้แอปพลิเคชันใช้คุณลักษณะระดับต่ำของ SurfaceFlinger"</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"อ่านเฟรมบัฟเฟอร์"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"อนุญาตให้แอปพลิเคชันอ่านเนื้อหาในเฟรมบัฟเฟอร์"</string>
+    <!-- no translation found for permlab_configureWifiDisplay (5595661694746742168) -->
+    <skip />
+    <!-- no translation found for permdesc_configureWifiDisplay (7916815158690218065) -->
+    <skip />
+    <!-- no translation found for permlab_controlWifiDisplay (393641276723695496) -->
+    <skip />
+    <!-- no translation found for permdesc_controlWifiDisplay (4543912292681826986) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"เปลี่ยนการตั้งค่าเสียงของคุณ"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"อนุญาตให้แอปพลิเคชันปรับเปลี่ยนการตั้งค่าเสียงทั้งหมดได้ เช่น ระดับเสียงและลำโพงที่จะใช้งาน"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"บันทึกเสียง"</string>
@@ -547,7 +563,7 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"อนุญาตให้แอปพลิเคชันเขียนลงบนการ์ด SD"</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"แก้/ลบเนื้อหาข้อมูลสื่อภายใน"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"อนุญาตให้แอปพลิเคชันแก้ไขเนื้อหาของที่เก็บข้อมูลสื่อภายใน"</string>
-    <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"เข้าถึงที่จัดเก็บภายนอกของผู้ใช้ทั้งหมด"</string>
+    <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"เข้าถึงที่จัดเก็บภายนอกของทุกคน"</string>
     <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"อนุญาตให้แอปพลิเคชันเข้าถึงที่จัดเก็บข้อมูลภายนอกสำหรับผู้ใช้ทั้งหมด"</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"เข้าถึงระบบไฟล์แคช"</string>
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"อนุญาตให้แอปพลิเคชันอ่านและเขียนระบบไฟล์แคช"</string>
@@ -1069,12 +1085,9 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"ตั้งวันที่"</string>
     <string name="date_time_set" msgid="5777075614321087758">"ตั้งค่า"</string>
     <string name="date_time_done" msgid="2507683751759308828">"เสร็จสิ้น"</string>
-    <string name="default_permission_group" msgid="2690160991405646128">"เริ่มต้น"</string>
-    <string name="no_permissions" msgid="7283357728219338112">"ไม่ต้องการการอนุญาต"</string>
-    <string name="perms_hide" msgid="7283915391320676226"><b>"ซ่อน"</b></string>
-    <string name="perms_show_all" msgid="2671791163933091180"><b>"แสดงทั้งหมด"</b></string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"ใหม่: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"โดย <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="no_permissions" msgid="7283357728219338112">"ไม่ต้องการการอนุญาต"</string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"ที่จัดเก็บข้อมูลจำนวนมากแบบ USB"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"เชื่อมต่อ USB แล้ว"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"คุณได้เชื่อมต่อกับคอมพิวเตอร์ผ่าน USB แล้ว แตะปุ่มด้านล่างหากคุณต้องการคัดลอกไฟล์ระหว่างคอมพิวเตอร์กับที่จัดเก็บข้อมูล USB ของแอนดรอยด์"</string>
@@ -1322,11 +1335,9 @@
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"เสร็จสิ้น"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"เอาต์พุตสื่อ"</string>
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"หน้าจอในตัว"</string>
-    <!-- no translation found for display_manager_hdmi_display_name (1555264559227470109) -->
-    <skip />
+    <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"หน้าจอ HDMI"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"การวางซ้อน #<xliff:g id="ID">%1$d</xliff:g>"</string>
-    <!-- no translation found for display_manager_overlay_display_title (652124517672257172) -->
-    <skip />
+    <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"หมายเลขฉุกเฉิน"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"ลืมรูปแบบใช่หรือไม่"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"รูปแบบไม่ถูกต้อง"</string>
@@ -1353,7 +1364,7 @@
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง"</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"หากลืมชื่อผู้ใช้หรือรหัสผ่าน"\n"โปรดไปที่ "<b>"google.com/accounts/recovery"</b></string>
     <string name="kg_login_checking_password" msgid="8849589033659332457">"กำลังตรวจสอบ…"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"คุณพิมพ์ PIN ไม่ถูกต้องไป <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว "\n\n"โปรดลองอีกครั้งใน <xliff:g id="NUMBER_1">%d</xliff:g> วินาีที"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"คุณพิมพ์ PIN ไม่ถูกต้องไป <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว "\n\n"โปรดลองอีกครั้งใน <xliff:g id="NUMBER_1">%d</xliff:g> วินาที"</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"คุณพิมพ์รหัสผ่านไม่ถูกต้องไป <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว "\n\n"โปรดลองอีกครั้งใน <xliff:g id="NUMBER_1">%d</xliff:g> วินาที"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้องไป <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว "\n\n"โปรดลองอีกครั้งใน <xliff:g id="NUMBER_1">%d</xliff:g> วินาที"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"คุณพยายามปลดล็อกแท็บเล็ตอย่างไม่ถูกต้อง <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว หากพยายามแล้วไม่สำเร็จอีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง แท็บเล็ตจะถูกรีเซ็ตเป็นค่าเริ่มต้นจากโรงงานและข้อมูลผู้ใช้ทั้งหมดจะหายไป"</string>

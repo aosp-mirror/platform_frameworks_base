@@ -256,6 +256,10 @@
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Permite que una aplicación recupere información sobre las ventanas del administrador de ventanas. Las aplicaciones malintencionadas pueden recuperar información destinada al uso interno del sistema."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"filtrar eventos"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Permite que una aplicación registre un filtro de entrada que filtre el flujo de los eventos del usuario antes de que se envíe. Las aplicaciones malintencionadas pueden controlar la interfaz del sistema sin la intervención del usuario."</string>
+    <!-- no translation found for permlab_magnify_display (5973626738170618775) -->
+    <skip />
+    <!-- no translation found for permdesc_magnify_display (7121235684515003792) -->
+    <skip />
     <string name="permlab_shutdown" msgid="7185747824038909016">"cierre parcial"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Pone el administrador de actividades en estado de cierre. No realiza un cierre completo."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"evitar cambios de aplicación"</string>
@@ -286,6 +290,10 @@
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Permite que la aplicación cambie la velocidad de animación global (animaciones más rápidas o más lentas) en cualquier momento."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"administrar tokens de aplicación"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Permite que la aplicación cree y administre sus propios tokens al ignorar su orden Z normal. Nunca debería ser necesario para las aplicaciones normales."</string>
+    <!-- no translation found for permlab_freezeScreen (4708181184441880175) -->
+    <skip />
+    <!-- no translation found for permdesc_freezeScreen (8558923789222670064) -->
+    <skip />
     <string name="permlab_injectEvents" msgid="1378746584023586600">"pulsar teclas y botones de control"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Permite que la aplicación proporcione sus propios eventos de entrada (pulsación de teclas, etc.) a otras aplicaciones. Las aplicaciones malintencionadas pueden usar este permiso para controlar el tablet."</string>
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Permite que la aplicación proporcione sus propios eventos de entrada (pulsación de teclas, etc.) a otras aplicaciones. Las aplicaciones malintencionadas pueden usar este permiso para controlar el teléfono."</string>
@@ -398,6 +406,14 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Permite que la aplicación use funciones de SurfaceFlinger de nivel inferior."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"leer memoria de almacenamiento intermedio"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Permite que la aplicación lea el contenido de la memoria de almacenamiento intermedio."</string>
+    <!-- no translation found for permlab_configureWifiDisplay (5595661694746742168) -->
+    <skip />
+    <!-- no translation found for permdesc_configureWifiDisplay (7916815158690218065) -->
+    <skip />
+    <!-- no translation found for permlab_controlWifiDisplay (393641276723695496) -->
+    <skip />
+    <!-- no translation found for permdesc_controlWifiDisplay (4543912292681826986) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"cambiar la configuración de audio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Permite que la aplicación modifique la configuración de audio global (por ejemplo, el volumen y el altavoz de salida)."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"grabar sonido"</string>
@@ -547,7 +563,7 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Permite que la aplicación escriba en la tarjeta SD."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"modificar o eliminar el contenido del almacenamiento de medios interno"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Permite que la aplicación modifique el contenido del almacenamiento multimedia interno."</string>
-    <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"acceder almacenamiento externo"</string>
+    <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"acceder al almacenamiento externo de todos los usuarios"</string>
     <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"Permite que la aplicación acceda al almacenamiento externo de todos los usuarios."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"acceder al sistema de archivos almacenado en caché"</string>
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Permite que la aplicación lea y escriba el sistema de archivos almacenado en caché."</string>
@@ -1069,12 +1085,9 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Establecer fecha"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Establecer"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Listo"</string>
-    <string name="default_permission_group" msgid="2690160991405646128">"Predeterminado"</string>
-    <string name="no_permissions" msgid="7283357728219338112">"No es necesario ningún permiso"</string>
-    <string name="perms_hide" msgid="7283915391320676226"><b>"Ocultar"</b></string>
-    <string name="perms_show_all" msgid="2671791163933091180"><b>"Mostrar todos"</b></string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"NUEVO:"</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"Proporcionado por <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="no_permissions" msgid="7283357728219338112">"No es necesario ningún permiso"</string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"Almacenamiento USB masivo"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"Conexión por USB"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Has conectado el dispositivo al ordenador por USB. Toca el siguiente botón si quieres transferir archivos entre el ordenador y el almacenamiento USB del dispositivo."</string>
@@ -1322,11 +1335,9 @@
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Fin"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Salida multimedia"</string>
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Pantalla integrada"</string>
-    <!-- no translation found for display_manager_hdmi_display_name (1555264559227470109) -->
-    <skip />
+    <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"Pantalla HDMI"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Superposición #<xliff:g id="ID">%1$d</xliff:g>"</string>
-    <!-- no translation found for display_manager_overlay_display_title (652124517672257172) -->
-    <skip />
+    <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Llamada de emergencia"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"¿Has olvidado el patrón?"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Patrón incorrecto"</string>

@@ -365,6 +365,10 @@
     <skip />
     <!-- no translation found for permdesc_filter_events (8006236315888347680) -->
     <skip />
+    <!-- no translation found for permlab_magnify_display (5973626738170618775) -->
+    <skip />
+    <!-- no translation found for permdesc_magnify_display (7121235684515003792) -->
+    <skip />
     <string name="permlab_shutdown" msgid="7185747824038909016">"serrar parzialmain"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Metta l\'administratur dad activitads en in stadi da pausa. El na vegn betg serrà dal tut."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"evitar il midar tranter applicaziuns"</string>
@@ -413,6 +417,10 @@
     <!-- no translation found for permlab_manageAppTokens (1286505717050121370) -->
     <skip />
     <!-- no translation found for permdesc_manageAppTokens (8043431713014395671) -->
+    <skip />
+    <!-- no translation found for permlab_freezeScreen (4708181184441880175) -->
+    <skip />
+    <!-- no translation found for permdesc_freezeScreen (8558923789222670064) -->
     <skip />
     <string name="permlab_injectEvents" msgid="1378746584023586600">"smatgar tastas e tastas da controlla"</string>
     <!-- no translation found for permdesc_injectEvents (206352565599968632) -->
@@ -622,6 +630,14 @@
     <skip />
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"leger il paraculp da frame"</string>
     <!-- no translation found for permdesc_readFrameBuffer (4937405521809454680) -->
+    <skip />
+    <!-- no translation found for permlab_configureWifiDisplay (5595661694746742168) -->
+    <skip />
+    <!-- no translation found for permdesc_configureWifiDisplay (7916815158690218065) -->
+    <skip />
+    <!-- no translation found for permlab_controlWifiDisplay (393641276723695496) -->
+    <skip />
+    <!-- no translation found for permdesc_controlWifiDisplay (4543912292681826986) -->
     <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"modifitgar Voss parameters audio"</string>
     <!-- no translation found for permdesc_modifyAudioSettings (3522565366806248517) -->
@@ -1643,14 +1659,11 @@
     <string name="date_time_set" msgid="5777075614321087758">"Definir"</string>
     <!-- no translation found for date_time_done (2507683751759308828) -->
     <skip />
-    <string name="default_permission_group" msgid="2690160991405646128">"Standard"</string>
-    <string name="no_permissions" msgid="7283357728219338112">"Naginas permissiuns obligatoricas"</string>
-    <string name="perms_hide" msgid="7283915391320676226"><b>"Zuppentar"</b></string>
-    <string name="perms_show_all" msgid="2671791163933091180"><b>"Mussar tut"</b></string>
     <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
     <skip />
     <!-- no translation found for perms_description_app (5139836143293299417) -->
     <skip />
+    <string name="no_permissions" msgid="7283357728219338112">"Naginas permissiuns obligatoricas"</string>
     <!-- no translation found for usb_storage_activity_title (4465055157209648641) -->
     <skip />
     <string name="usb_storage_title" msgid="5901459041398751495">"Connectà cun agid d\'in cabel USB"</string>
