@@ -6334,7 +6334,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                             packageFile = mTempPackage;
 
                             FileUtils.setPermissions(packageFile.getAbsolutePath(),
-                                    FileUtils.S_IRUSR | FileUtils.S_IWUSR | FileUtils.S_IROTH,
+                                    FileUtils.S_IRUSR | FileUtils.S_IWUSR | FileUtils.S_IRGRP
+                                            | FileUtils.S_IROTH,
                                     -1, -1);
                         } else {
                             packageFile = null;
@@ -6515,12 +6516,12 @@ public class PackageManagerService extends IPackageManager.Stub {
             // will succeed.
             if (mArgs != null) {
                 processPendingInstall(mArgs, mRet);
-            }
 
-            if (mTempPackage != null) {
-                if (!mTempPackage.delete()) {
-                    Slog.w(TAG, "Couldn't delete temporary file: "
-                            + mTempPackage.getAbsolutePath());
+                if (mTempPackage != null) {
+                    if (!mTempPackage.delete()) {
+                        Slog.w(TAG, "Couldn't delete temporary file: " +
+                                mTempPackage.getAbsolutePath());
+                    }
                 }
             }
         }
@@ -7942,17 +7943,23 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private void deleteTempPackageFiles() {
-        FilenameFilter filter = new FilenameFilter() {
+        final FilenameFilter filter = new FilenameFilter() {
             public boolean accept(File dir, String name) {
                 return name.startsWith("vmdl") && name.endsWith(".tmp");
             }
         };
-        String tmpFilesList[] = mAppInstallDir.list(filter);
-        if(tmpFilesList == null) {
+        deleteTempPackageFilesInDirectory(mAppInstallDir, filter);
+        deleteTempPackageFilesInDirectory(mDrmAppPrivateInstallDir, filter);
+    }
+
+    private static final void deleteTempPackageFilesInDirectory(File directory,
+            FilenameFilter filter) {
+        final String[] tmpFilesList = directory.list(filter);
+        if (tmpFilesList == null) {
             return;
         }
-        for(int i = 0; i < tmpFilesList.length; i++) {
-            File tmpFile = new File(mAppInstallDir, tmpFilesList[i]);
+        for (int i = 0; i < tmpFilesList.length; i++) {
+            final File tmpFile = new File(directory, tmpFilesList[i]);
             tmpFile.delete();
         }
     }
