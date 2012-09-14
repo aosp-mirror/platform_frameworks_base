@@ -219,5 +219,13 @@ class DimAnimator {
             mDimHeight = o.mDimHeight;
             mDimTarget = o.mDimTarget;
         }
+
+        public void printTo(String prefix, PrintWriter pw) {
+            pw.print(prefix);
+            pw.print("mDimWinAnimator="); pw.print(mDimWinAnimator.mWin.mAttrs.getTitle());
+                    pw.print(" "); pw.print(mDimWidth); pw.print(" x ");
+                    pw.print(mDimHeight);
+            pw.print(" mDimTarget="); pw.println(mDimTarget);
+        }
     }
 }

@@ -4,6 +4,7 @@ package com.android.server.wm;
 
 import android.graphics.Matrix;
 import android.util.Slog;
+import android.view.Display;
 import android.view.Surface;
 import android.view.WindowManagerPolicy;
 import android.view.animation.Animation;
@@ -134,11 +135,13 @@ public class AppWindowAnimator {
         thumbnailTransformation.clear();
         thumbnailAnimation.getTransformation(currentTime, thumbnailTransformation);
         thumbnailTransformation.getMatrix().preTranslate(thumbnailX, thumbnailY);
-        final boolean screenAnimation = mAnimator.mScreenRotationAnimation != null
-                && mAnimator.mScreenRotationAnimation.isAnimating();
+
+        ScreenRotationAnimation screenRotationAnimation =
+                mAnimator.getScreenRotationAnimationLocked(Display.DEFAULT_DISPLAY);
+        final boolean screenAnimation = screenRotationAnimation != null
+                && screenRotationAnimation.isAnimating();
         if (screenAnimation) {
-            thumbnailTransformation.postCompose(
-                    mAnimator.mScreenRotationAnimation.getEnterTransformation());
+            thumbnailTransformation.postCompose(screenRotationAnimation.getEnterTransformation());
         }
         // cache often used attributes locally
         final float tmpFloats[] = mService.mTmpFloats;
