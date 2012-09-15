@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="yesterday">어제</string>
-    <string name="today">오늘</string>
-    <string name="tomorrow">내일</string>
-
     <string name="hour_minute_24">%-k:%M</string>
     <string name="hour_minute_ampm">%p %-l:%M</string>
     <string name="hour_minute_cap_ampm">%p %-l:%M</string>
