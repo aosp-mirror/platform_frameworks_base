@@ -239,31 +239,36 @@ static jstring android_text_format_Time_format(JNIEnv* env, jobject This,
         jobjectArray ja;
         ja = (jobjectArray) env->GetStaticObjectField(timeClass, g_shortMonthsField);
         for (int i = 0; i < 12; i++) {
+            // Calendar.JANUARY == 0.
             js_mon[i] = (jstring) env->NewGlobalRef(env->GetObjectArrayElement(ja, i));
             locale.mon[i] = env->GetStringUTFChars(js_mon[i], NULL);
         }
 
         ja = (jobjectArray) env->GetStaticObjectField(timeClass, g_longMonthsField);
         for (int i = 0; i < 12; i++) {
+            // Calendar.JANUARY == 0.
             js_month[i] = (jstring) env->NewGlobalRef(env->GetObjectArrayElement(ja, i));
             locale.month[i] = env->GetStringUTFChars(js_month[i], NULL);
         }
 
         ja = (jobjectArray) env->GetStaticObjectField(timeClass, g_longStandaloneMonthsField);
         for (int i = 0; i < 12; i++) {
+            // Calendar.JANUARY == 0.
             js_standalone_month[i] = (jstring) env->NewGlobalRef(env->GetObjectArrayElement(ja, i));
             locale.standalone_month[i] = env->GetStringUTFChars(js_standalone_month[i], NULL);
         }
 
         ja = (jobjectArray) env->GetStaticObjectField(timeClass, g_shortWeekdaysField);
         for (int i = 0; i < 7; i++) {
-            js_wday[i] = (jstring) env->NewGlobalRef(env->GetObjectArrayElement(ja, i));
+            // Calendar.SUNDAY == 1, and there's an empty string in element 0.
+            js_wday[i] = (jstring) env->NewGlobalRef(env->GetObjectArrayElement(ja, i + 1));
             locale.wday[i] = env->GetStringUTFChars(js_wday[i], NULL);
         }
 
         ja = (jobjectArray) env->GetStaticObjectField(timeClass, g_longWeekdaysField);
         for (int i = 0; i < 7; i++) {
-            js_weekday[i] = (jstring) env->NewGlobalRef(env->GetObjectArrayElement(ja, i));
+            // Calendar.SUNDAY == 1, and there's an empty string in element 0.
+            js_weekday[i] = (jstring) env->NewGlobalRef(env->GetObjectArrayElement(ja, i + 1));
             locale.weekday[i] = env->GetStringUTFChars(js_weekday[i], NULL);
         }
 
