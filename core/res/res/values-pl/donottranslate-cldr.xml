@@ -85,8 +85,6 @@
     <string name="day_of_week_shortest_friday">P</string>
     <string name="day_of_week_shortest_saturday">S</string>
 
-    <string name="am">AM</string>
-    <string name="pm">PM</string>
     <string name="yesterday">Wczoraj</string>
     <string name="today">Dzisiaj</string>
     <string name="tomorrow">Jutro</string>
