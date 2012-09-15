@@ -97,9 +97,15 @@ public class KeyguardPasswordView extends LinearLayout
         if (deadline != 0) {
             handleAttemptLockout(deadline);
         } else {
-            mNavigationManager.setMessage(
-                    mIsAlpha ? R.string.kg_password_instructions : R.string.kg_pin_instructions);
+            resetState();
         }
+    }
+
+    private void resetState() {
+        mNavigationManager.setMessage(
+                mIsAlpha ? R.string.kg_password_instructions : R.string.kg_pin_instructions);
+        mPasswordEntry.setEnabled(true);
+        mKeyboardView.setEnabled(true);
     }
 
     @Override
@@ -297,8 +303,7 @@ public class KeyguardPasswordView extends LinearLayout
 
             @Override
             public void onFinish() {
-                mPasswordEntry.setEnabled(true);
-                mKeyboardView.setEnabled(true);
+                resetState();
             }
         }.start();
     }
