@@ -21,6 +21,8 @@ import android.content.res.Resources;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import libcore.icu.LocaleData;
+
 /**
  * An alternative to the {@link java.util.Calendar} and
  * {@link java.util.GregorianCalendar} classes. An instance of the Time class represents
@@ -382,8 +384,10 @@ public class Time {
                 sTimeOnlyFormat = r.getString(com.android.internal.R.string.time_of_day);
                 sDateOnlyFormat = r.getString(com.android.internal.R.string.month_day_year);
                 sDateTimeFormat = r.getString(com.android.internal.R.string.date_and_time);
-                sAm = r.getString(com.android.internal.R.string.am);
-                sPm = r.getString(com.android.internal.R.string.pm);
+
+                LocaleData localeData = LocaleData.get(locale);
+                sAm = localeData.amPm[0];
+                sPm = localeData.amPm[1];
 
                 sLocale = locale;
             }
