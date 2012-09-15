@@ -84,7 +84,6 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.renderscript.RenderScript;
-import android.security.AndroidKeyStoreProvider;
 
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.RuntimeInit;
@@ -4879,8 +4878,6 @@ public final class ActivityThread {
         CloseGuard.setEnabled(false);
 
         Environment.initForCurrentUser();
-
-        Security.addProvider(new AndroidKeyStoreProvider());
 
         Process.setArgV0("<pre-initialized>");
 
