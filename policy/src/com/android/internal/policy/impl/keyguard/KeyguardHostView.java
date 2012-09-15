@@ -33,6 +33,7 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.os.Looper;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -344,7 +345,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         final boolean usingPattern = mode == KeyguardSecurityModel.SecurityMode.Pattern;
 
         final int failedAttemptsBeforeWipe = mLockPatternUtils.getDevicePolicyManager()
-                .getMaximumFailedPasswordsForWipe(null);
+                .getMaximumFailedPasswordsForWipe(null, mLockPatternUtils.getCurrentUser());
 
         final int failedAttemptWarning = LockPatternUtils.FAILED_ATTEMPTS_BEFORE_RESET
                 - LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT;
@@ -678,7 +679,7 @@ public class KeyguardHostView extends KeyguardViewBase {
     private void maybePopulateWidgets() {
         DevicePolicyManager dpm =
                 (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
-        if (dpm != null && dpm.getKeyguardWidgetsDisabled(null)
+        if (dpm != null && dpm.getKeyguardWidgetsDisabled(null, mLockPatternUtils.getCurrentUser())
                 != DevicePolicyManager.KEYGUARD_DISABLE_WIDGETS_NONE) {
             Log.v(TAG, "Keyguard widgets disabled because of device policy admin");
             return;

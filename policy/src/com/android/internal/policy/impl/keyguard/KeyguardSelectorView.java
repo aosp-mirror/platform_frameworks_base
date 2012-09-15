@@ -191,8 +191,9 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
     }
 
     private void updateTargets() {
+        int currentUserHandle = mLockPatternUtils.getCurrentUser();
         boolean disabledByAdmin = mLockPatternUtils.getDevicePolicyManager()
-                .getCameraDisabled(null);
+                .getCameraDisabled(null, currentUserHandle);
         final KeyguardUpdateMonitor monitor = KeyguardUpdateMonitor.getInstance(getContext());
         boolean disabledBySimState = monitor.isSimLocked();
         boolean cameraTargetPresent =

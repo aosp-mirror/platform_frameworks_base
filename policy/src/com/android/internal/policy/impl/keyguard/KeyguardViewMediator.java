@@ -559,7 +559,7 @@ public class KeyguardViewMediator {
 
                 // From DevicePolicyAdmin
                 final long policyTimeout = mLockPatternUtils.getDevicePolicyManager()
-                        .getMaximumTimeToLock(null);
+                        .getMaximumTimeToLock(null, mLockPatternUtils.getCurrentUser());
 
                 long timeout;
                 if (policyTimeout > 0) {

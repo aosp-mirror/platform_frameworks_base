@@ -16,12 +16,15 @@
 
 package com.android.server.wm;
 
+import android.app.ActivityManagerNative;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.RemoteException;
 import android.os.TokenWatcher;
+import android.os.UserHandle;
 import android.util.Log;
 import android.util.Pair;
 import android.view.WindowManagerPolicy;
@@ -87,9 +90,14 @@ public class KeyguardDisableHandler extends Handler {
                 DevicePolicyManager dpm = (DevicePolicyManager) mContext.getSystemService(
                         Context.DEVICE_POLICY_SERVICE);
                 if (dpm != null) {
-                    mAllowDisableKeyguard = dpm.getPasswordQuality(null)
-                            == DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED ?
-                                    ALLOW_DISABLE_YES : ALLOW_DISABLE_NO;
+                    try {
+                        mAllowDisableKeyguard = dpm.getPasswordQuality(null, 
+                                ActivityManagerNative.getDefault().getCurrentUser().id)
+                                == DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED ?
+                                        ALLOW_DISABLE_YES : ALLOW_DISABLE_NO;
+                    } catch (RemoteException re) {
+                        // Nothing much we can do
+                    }
                 }
             }
             if (mAllowDisableKeyguard == ALLOW_DISABLE_YES) {
