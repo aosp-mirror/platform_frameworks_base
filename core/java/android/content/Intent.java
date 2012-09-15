@@ -1473,7 +1473,7 @@ public class Intent implements Parcelable, Cloneable {
      * Broadcast Action: A new application package has been installed on the
      * device. The data contains the name of the package.  Note that the
      * newly installed package does <em>not</em> receive this broadcast.
-     * <p>My include the following extras:
+     * <p>May include the following extras:
      * <ul>
      * <li> {@link #EXTRA_UID} containing the integer uid assigned to the new package.
      * <li> {@link #EXTRA_REPLACING} is set to true if this is following
@@ -1489,7 +1489,7 @@ public class Intent implements Parcelable, Cloneable {
      * Broadcast Action: A new version of an application package has been
      * installed, replacing an existing version that was previously installed.
      * The data contains the name of the package.
-     * <p>My include the following extras:
+     * <p>May include the following extras:
      * <ul>
      * <li> {@link #EXTRA_UID} containing the integer uid assigned to the new package.
      * </ul>

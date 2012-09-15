@@ -87,15 +87,19 @@ public final class UserHandle implements Parcelable {
 
     /** @hide */
     public static final boolean isIsolated(int uid) {
-        uid = getAppId(uid);
-        return uid >= Process.FIRST_ISOLATED_UID && uid <= Process.LAST_ISOLATED_UID;
+        if (uid > 0) {
+            final int appId = getAppId(uid);
+            return appId >= Process.FIRST_ISOLATED_UID && appId <= Process.LAST_ISOLATED_UID;
+        } else {
+            return false;
+        }
     }
 
     /** @hide */
     public static boolean isApp(int uid) {
         if (uid > 0) {
-            uid = UserHandle.getAppId(uid);
-            return uid >= Process.FIRST_APPLICATION_UID && uid <= Process.LAST_APPLICATION_UID;
+            final int appId = getAppId(uid);
+            return appId >= Process.FIRST_APPLICATION_UID && appId <= Process.LAST_APPLICATION_UID;
         } else {
             return false;
         }
