@@ -1803,16 +1803,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             stmt = db.compileStatement("INSERT OR IGNORE INTO secure(name,value)"
                     + " VALUES(?,?);");
 
-            loadBooleanSetting(stmt, Settings.Secure.PACKAGE_VERIFIER_ENABLE,
-                R.bool.def_package_verifier_enable);
-
             loadStringSetting(stmt, Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
                     R.string.def_location_providers_allowed);
-
-            loadBooleanSetting(stmt, Settings.Secure.WIFI_ON,
-                    R.bool.def_wifi_on);
-            loadBooleanSetting(stmt, Settings.Secure.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,
-                    R.bool.def_networks_available_notification_on);
 
             String wifiWatchList = SystemProperties.get("ro.com.android.wifi-watchlist");
             if (!TextUtils.isEmpty(wifiWatchList)) {
@@ -1943,6 +1935,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     R.integer.def_wifi_sleep_policy);
 
             // --- Previously in 'secure'
+            loadBooleanSetting(stmt, Settings.Global.PACKAGE_VERIFIER_ENABLE,
+                    R.bool.def_package_verifier_enable);
+
+            loadBooleanSetting(stmt, Settings.Global.WIFI_ON,
+                    R.bool.def_wifi_on);
+
+            loadBooleanSetting(stmt, Settings.Global.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,
+                    R.bool.def_networks_available_notification_on);
+
             loadBooleanSetting(stmt, Settings.Global.BLUETOOTH_ON,
                     R.bool.def_bluetooth_on);
 
