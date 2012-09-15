@@ -399,7 +399,11 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mRotationLockState.label = locked
                 ? mContext.getString(R.string.quick_settings_rotation_locked_label)
                 : mContext.getString(R.string.quick_settings_rotation_unlocked_label);
-        mRotationLockCallback.refreshView(mRotationLockTile, mRotationLockState);
+
+        // may be called before addRotationLockTile due to RotationPolicyListener in QuickSettings 
+        if (mRotationLockTile != null && mRotationLockCallback != null) {
+            mRotationLockCallback.refreshView(mRotationLockTile, mRotationLockState);
+        }
     }
 
 }
