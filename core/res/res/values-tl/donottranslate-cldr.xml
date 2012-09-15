@@ -1,64 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="month_long_standalone_january">1</string>
-    <string name="month_long_standalone_february">2</string>
-    <string name="month_long_standalone_march">3</string>
-    <string name="month_long_standalone_april">4</string>
-    <string name="month_long_standalone_may">5</string>
-    <string name="month_long_standalone_june">6</string>
-    <string name="month_long_standalone_july">7</string>
-    <string name="month_long_standalone_august">8</string>
-    <string name="month_long_standalone_september">9</string>
-    <string name="month_long_standalone_october">10</string>
-    <string name="month_long_standalone_november">11</string>
-    <string name="month_long_standalone_december">12</string>
-
-    <string name="month_long_january">1</string>
-    <string name="month_long_february">2</string>
-    <string name="month_long_march">3</string>
-    <string name="month_long_april">4</string>
-    <string name="month_long_may">5</string>
-    <string name="month_long_june">6</string>
-    <string name="month_long_july">7</string>
-    <string name="month_long_august">8</string>
-    <string name="month_long_september">9</string>
-    <string name="month_long_october">10</string>
-    <string name="month_long_november">11</string>
-    <string name="month_long_december">12</string>
-
-
-    <string name="month_shortest_january">1</string>
-    <string name="month_shortest_february">2</string>
-    <string name="month_shortest_march">3</string>
-    <string name="month_shortest_april">4</string>
-    <string name="month_shortest_may">5</string>
-    <string name="month_shortest_june">6</string>
-    <string name="month_shortest_july">7</string>
-    <string name="month_shortest_august">8</string>
-    <string name="month_shortest_september">9</string>
-    <string name="month_shortest_october">10</string>
-    <string name="month_shortest_november">11</string>
-    <string name="month_shortest_december">12</string>
-
-    <string name="day_of_week_long_sunday">1</string>
-    <string name="day_of_week_long_monday">2</string>
-    <string name="day_of_week_long_tuesday">3</string>
-    <string name="day_of_week_long_wednesday">4</string>
-    <string name="day_of_week_long_thursday">5</string>
-    <string name="day_of_week_long_friday">6</string>
-    <string name="day_of_week_long_saturday">7</string>
-
-
-
-    <string name="day_of_week_shortest_sunday">1</string>
-    <string name="day_of_week_shortest_monday">2</string>
-    <string name="day_of_week_shortest_tuesday">3</string>
-    <string name="day_of_week_shortest_wednesday">4</string>
-    <string name="day_of_week_shortest_thursday">5</string>
-    <string name="day_of_week_shortest_friday">6</string>
-    <string name="day_of_week_shortest_saturday">7</string>
-
     <string name="yesterday">Yesterday</string>
     <string name="today">Today</string>
     <string name="tomorrow">Tomorrow</string>

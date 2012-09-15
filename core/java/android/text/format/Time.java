@@ -319,75 +319,21 @@ public class Time {
             Locale locale = Locale.getDefault();
 
             if (sLocale == null || locale == null || !(locale.equals(sLocale))) {
-                Resources r = Resources.getSystem();
+                LocaleData localeData = LocaleData.get(locale);
 
-                sShortMonths = new String[] {
-                    r.getString(com.android.internal.R.string.month_medium_january),
-                    r.getString(com.android.internal.R.string.month_medium_february),
-                    r.getString(com.android.internal.R.string.month_medium_march),
-                    r.getString(com.android.internal.R.string.month_medium_april),
-                    r.getString(com.android.internal.R.string.month_medium_may),
-                    r.getString(com.android.internal.R.string.month_medium_june),
-                    r.getString(com.android.internal.R.string.month_medium_july),
-                    r.getString(com.android.internal.R.string.month_medium_august),
-                    r.getString(com.android.internal.R.string.month_medium_september),
-                    r.getString(com.android.internal.R.string.month_medium_october),
-                    r.getString(com.android.internal.R.string.month_medium_november),
-                    r.getString(com.android.internal.R.string.month_medium_december),
-                };
-                sLongMonths = new String[] {
-                    r.getString(com.android.internal.R.string.month_long_january),
-                    r.getString(com.android.internal.R.string.month_long_february),
-                    r.getString(com.android.internal.R.string.month_long_march),
-                    r.getString(com.android.internal.R.string.month_long_april),
-                    r.getString(com.android.internal.R.string.month_long_may),
-                    r.getString(com.android.internal.R.string.month_long_june),
-                    r.getString(com.android.internal.R.string.month_long_july),
-                    r.getString(com.android.internal.R.string.month_long_august),
-                    r.getString(com.android.internal.R.string.month_long_september),
-                    r.getString(com.android.internal.R.string.month_long_october),
-                    r.getString(com.android.internal.R.string.month_long_november),
-                    r.getString(com.android.internal.R.string.month_long_december),
-                };
-                sLongStandaloneMonths = new String[] {
-                    r.getString(com.android.internal.R.string.month_long_standalone_january),
-                    r.getString(com.android.internal.R.string.month_long_standalone_february),
-                    r.getString(com.android.internal.R.string.month_long_standalone_march),
-                    r.getString(com.android.internal.R.string.month_long_standalone_april),
-                    r.getString(com.android.internal.R.string.month_long_standalone_may),
-                    r.getString(com.android.internal.R.string.month_long_standalone_june),
-                    r.getString(com.android.internal.R.string.month_long_standalone_july),
-                    r.getString(com.android.internal.R.string.month_long_standalone_august),
-                    r.getString(com.android.internal.R.string.month_long_standalone_september),
-                    r.getString(com.android.internal.R.string.month_long_standalone_october),
-                    r.getString(com.android.internal.R.string.month_long_standalone_november),
-                    r.getString(com.android.internal.R.string.month_long_standalone_december),
-                };
-                sShortWeekdays = new String[] {
-                    r.getString(com.android.internal.R.string.day_of_week_medium_sunday),
-                    r.getString(com.android.internal.R.string.day_of_week_medium_monday),
-                    r.getString(com.android.internal.R.string.day_of_week_medium_tuesday),
-                    r.getString(com.android.internal.R.string.day_of_week_medium_wednesday),
-                    r.getString(com.android.internal.R.string.day_of_week_medium_thursday),
-                    r.getString(com.android.internal.R.string.day_of_week_medium_friday),
-                    r.getString(com.android.internal.R.string.day_of_week_medium_saturday),
-                };
-                sLongWeekdays = new String[] {
-                    r.getString(com.android.internal.R.string.day_of_week_long_sunday),
-                    r.getString(com.android.internal.R.string.day_of_week_long_monday),
-                    r.getString(com.android.internal.R.string.day_of_week_long_tuesday),
-                    r.getString(com.android.internal.R.string.day_of_week_long_wednesday),
-                    r.getString(com.android.internal.R.string.day_of_week_long_thursday),
-                    r.getString(com.android.internal.R.string.day_of_week_long_friday),
-                    r.getString(com.android.internal.R.string.day_of_week_long_saturday),
-                };
+                sAm = localeData.amPm[0];
+                sPm = localeData.amPm[1];
+
+                sShortMonths = localeData.shortMonthNames;
+                sLongMonths = localeData.longMonthNames;
+                sLongStandaloneMonths = localeData.longStandAloneMonthNames;
+                sShortWeekdays = localeData.shortWeekdayNames;
+                sLongWeekdays = localeData.longWeekdayNames;
+
+                Resources r = Resources.getSystem();
                 sTimeOnlyFormat = r.getString(com.android.internal.R.string.time_of_day);
                 sDateOnlyFormat = r.getString(com.android.internal.R.string.month_day_year);
                 sDateTimeFormat = r.getString(com.android.internal.R.string.date_and_time);
-
-                LocaleData localeData = LocaleData.get(locale);
-                sAm = localeData.amPm[0];
-                sPm = localeData.amPm[1];
 
                 sLocale = locale;
             }
