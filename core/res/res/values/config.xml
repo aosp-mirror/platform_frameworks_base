@@ -925,4 +925,10 @@
 
     <!--  Maximum number of supported users -->
     <integer name="config_multiuserMaximumUsers">1</integer>
+
+    <!-- Minimum span needed to begin a touch scaling gesture.
+         This also takes into account the size of any active touch points.
+         Devices with screens that deviate too far from their assigned density
+         bucket should consider tuning this value in a device-specific overlay. -->
+    <dimen name="config_minScalingSpan">25mm</dimen>
 </resources>

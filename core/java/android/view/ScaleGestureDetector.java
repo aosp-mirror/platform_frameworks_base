@@ -137,6 +137,7 @@ public class ScaleGestureDetector {
     private long mPrevTime;
     private boolean mInProgress;
     private int mSpanSlop;
+    private int mMinSpan;
 
     /**
      * Consistency verifier for debugging purposes.
@@ -149,6 +150,8 @@ public class ScaleGestureDetector {
         mContext = context;
         mListener = listener;
         mSpanSlop = ViewConfiguration.get(context).getScaledTouchSlop() * 2;
+        mMinSpan = context.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.config_minScalingSpan);
     }
 
     /**
@@ -209,8 +212,12 @@ public class ScaleGestureDetector {
         float devSumX = 0, devSumY = 0;
         for (int i = 0; i < count; i++) {
             if (skipIndex == i) continue;
-            devSumX += Math.abs(event.getX(i) - focusX);
-            devSumY += Math.abs(event.getY(i) - focusY);
+
+            // touchMajor/Minor are axes of an ellipse; average them together and
+            // convert the resulting 'diameter' into a radius.
+            final float touchSize = (event.getTouchMajor(i) + event.getTouchMinor(i)) / 4;
+            devSumX += Math.abs(event.getX(i) - focusX) + touchSize;
+            devSumY += Math.abs(event.getY(i) - focusY) + touchSize;
         }
         final float devX = devSumX / div;
         final float devY = devSumY / div;
@@ -228,7 +235,7 @@ public class ScaleGestureDetector {
         final boolean wasInProgress = mInProgress;
         mFocusX = focusX;
         mFocusY = focusY;
-        if (mInProgress && (span == 0 || configChanged)) {
+        if (mInProgress && (span < mMinSpan || configChanged)) {
             mListener.onScaleEnd(this);
             mInProgress = false;
             mInitialSpan = span;
@@ -238,7 +245,7 @@ public class ScaleGestureDetector {
             mPrevSpanY = mCurrSpanY = spanY;
             mInitialSpan = mPrevSpan = mCurrSpan = span;
         }
-        if (!mInProgress && span != 0 &&
+        if (!mInProgress && span > mMinSpan &&
                 (wasInProgress || Math.abs(span - mInitialSpan) > mSpanSlop)) {
             mPrevSpanX = mCurrSpanX = spanX;
             mPrevSpanY = mCurrSpanY = spanY;
