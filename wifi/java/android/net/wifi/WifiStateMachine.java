@@ -398,14 +398,14 @@ public class WifiStateMachine extends StateMachine {
      * Default framework scan interval in milliseconds. This is used in the scenario in which
      * wifi chipset does not support background scanning to set up a
      * periodic wake up scan so that the device can connect to a new access
-     * point on the move. {@link Settings.Secure#WIFI_FRAMEWORK_SCAN_INTERVAL_MS} can
+     * point on the move. {@link Settings.Global#WIFI_FRAMEWORK_SCAN_INTERVAL_MS} can
      * override this.
      */
     private final int mDefaultFrameworkScanIntervalMs;
 
     /**
      * Supplicant scan interval in milliseconds.
-     * Comes from {@link Settings.Secure#WIFI_SUPPLICANT_SCAN_INTERVAL_MS} or
+     * Comes from {@link Settings.Global#WIFI_SUPPLICANT_SCAN_INTERVAL_MS} or
      * from the default config if the setting is not set
      */
     private long mSupplicantScanIntervalMs;
@@ -2403,8 +2403,8 @@ public class WifiStateMachine extends StateMachine {
             int defaultInterval = mContext.getResources().getInteger(
                     com.android.internal.R.integer.config_wifi_supplicant_scan_interval);
 
-            mSupplicantScanIntervalMs = Settings.Secure.getLong(mContext.getContentResolver(),
-                    Settings.Secure.WIFI_SUPPLICANT_SCAN_INTERVAL_MS,
+            mSupplicantScanIntervalMs = Settings.Global.getLong(mContext.getContentResolver(),
+                    Settings.Global.WIFI_SUPPLICANT_SCAN_INTERVAL_MS,
                     defaultInterval);
 
             mWifiNative.setScanInterval((int)mSupplicantScanIntervalMs / 1000);
@@ -3445,8 +3445,8 @@ public class WifiStateMachine extends StateMachine {
             if (DBG) log(getName() + "\n");
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
 
-            mFrameworkScanIntervalMs = Settings.Secure.getLong(mContext.getContentResolver(),
-                    Settings.Secure.WIFI_FRAMEWORK_SCAN_INTERVAL_MS,
+            mFrameworkScanIntervalMs = Settings.Global.getLong(mContext.getContentResolver(),
+                    Settings.Global.WIFI_FRAMEWORK_SCAN_INTERVAL_MS,
                     mDefaultFrameworkScanIntervalMs);
             /*
              * We initiate background scanning if it is enabled, otherwise we
