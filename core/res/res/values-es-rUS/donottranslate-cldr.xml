@@ -85,8 +85,6 @@
     <string name="day_of_week_shortest_friday">V</string>
     <string name="day_of_week_shortest_saturday">S</string>
 
-    <string name="am">a. m.</string>
-    <string name="pm">p. m.</string>
     <string name="yesterday">ayer</string>
     <string name="today">hoy</string>
     <string name="tomorrow">mañana</string>
