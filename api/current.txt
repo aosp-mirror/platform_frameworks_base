@@ -4169,6 +4169,7 @@ package android.app {
     method public android.graphics.drawable.Drawable getFastDrawable();
     method public static android.app.WallpaperManager getInstance(android.content.Context);
     method public android.app.WallpaperInfo getWallpaperInfo();
+    method public boolean hasResourceWallpaper(int);
     method public android.graphics.drawable.Drawable peekDrawable();
     method public android.graphics.drawable.Drawable peekFastDrawable();
     method public void sendWallpaperCommand(android.os.IBinder, java.lang.String, int, int, int, android.os.Bundle);
@@ -5843,6 +5844,9 @@ package android.content {
     field public static final deprecated java.lang.String ACTION_UMS_CONNECTED = "android.intent.action.UMS_CONNECTED";
     field public static final deprecated java.lang.String ACTION_UMS_DISCONNECTED = "android.intent.action.UMS_DISCONNECTED";
     field public static final java.lang.String ACTION_UNINSTALL_PACKAGE = "android.intent.action.UNINSTALL_PACKAGE";
+    field public static final java.lang.String ACTION_USER_BACKGROUND = "android.intent.action.USER_BACKGROUND";
+    field public static final java.lang.String ACTION_USER_FOREGROUND = "android.intent.action.USER_FOREGROUND";
+    field public static final java.lang.String ACTION_USER_INITIALIZE = "android.intent.action.USER_INITIALIZE";
     field public static final java.lang.String ACTION_USER_PRESENT = "android.intent.action.USER_PRESENT";
     field public static final java.lang.String ACTION_VIEW = "android.intent.action.VIEW";
     field public static final java.lang.String ACTION_VOICE_COMMAND = "android.intent.action.VOICE_COMMAND";

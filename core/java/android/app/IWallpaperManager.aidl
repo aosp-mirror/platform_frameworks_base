@@ -52,6 +52,11 @@ interface IWallpaperManager {
     void clearWallpaper();
 
     /**
+     * Return whether there is a wallpaper set with the given name.
+     */
+    boolean hasNamedWallpaper(String name);
+
+    /**
      * Sets the dimension hint for the wallpaper. These hints indicate the desired
      * minimum width and height for the wallpaper.
      */

@@ -30,6 +30,12 @@ public class UserInfo implements Parcelable {
     public static final int FLAG_MASK_USER_TYPE = 0x0000003F;
 
     /**
+     * *************************** NOTE ***************************
+     * These flag values CAN NOT CHANGE because they are written
+     * directly to storage.
+     */
+
+    /**
      * Primary user. Only one user can have this flag set. Meaning of this
      * flag TBD.
      */
@@ -51,6 +57,11 @@ public class UserInfo implements Parcelable {
      * Exact meaning TBD. For instance, maybe they can't install apps or administer WiFi access pts.
      */
     public static final int FLAG_RESTRICTED = 0x00000008;
+
+    /**
+     * Indicates that this user has gone through its first-time initialization.
+     */
+    public static final int FLAG_INITIALIZED = 0x00000010;
 
     public int id;
     public int serialNumber;
