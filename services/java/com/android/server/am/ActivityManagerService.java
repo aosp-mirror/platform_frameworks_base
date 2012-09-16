@@ -14224,12 +14224,14 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public UserInfo getCurrentUser() {
-        if (checkCallingPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
-                != PackageManager.PERMISSION_GRANTED) {
+        if ((checkCallingPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
+                != PackageManager.PERMISSION_GRANTED) && (
+                checkCallingPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+                != PackageManager.PERMISSION_GRANTED)) {
             String msg = "Permission Denial: getCurrentUser() from pid="
                     + Binder.getCallingPid()
                     + ", uid=" + Binder.getCallingUid()
-                    + " requires " + android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+                    + " requires " + android.Manifest.permission.INTERACT_ACROSS_USERS;
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }

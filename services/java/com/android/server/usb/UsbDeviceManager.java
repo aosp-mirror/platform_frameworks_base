@@ -91,6 +91,7 @@ public class UsbDeviceManager {
     private static final int MSG_SET_CURRENT_FUNCTIONS = 2;
     private static final int MSG_SYSTEM_READY = 3;
     private static final int MSG_BOOT_COMPLETED = 4;
+    private static final int MSG_USER_SWITCHED = 5;
 
     private static final int AUDIO_MODE_NONE = 0;
     private static final int AUDIO_MODE_SOURCE = 1;
@@ -295,11 +296,21 @@ public class UsbDeviceManager {
         private UsbAccessory mCurrentAccessory;
         private int mUsbNotificationId;
         private boolean mAdbNotificationShown;
+        private int mCurrentUser = UserHandle.USER_NULL;
 
         private final BroadcastReceiver mBootCompletedReceiver = new BroadcastReceiver() {
+            @Override
             public void onReceive(Context context, Intent intent) {
                 if (DEBUG) Slog.d(TAG, "boot completed");
                 mHandler.sendEmptyMessage(MSG_BOOT_COMPLETED);
+            }
+        };
+
+        private final BroadcastReceiver mUserSwitchedReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+                mHandler.obtainMessage(MSG_USER_SWITCHED, userId, 0).sendToTarget();
             }
         };
 
@@ -347,8 +358,10 @@ public class UsbDeviceManager {
                 mUEventObserver.startObserving(USB_STATE_MATCH);
                 mUEventObserver.startObserving(ACCESSORY_START_MATCH);
 
-                mContext.registerReceiver(mBootCompletedReceiver,
-                        new IntentFilter(Intent.ACTION_BOOT_COMPLETED));
+                mContext.registerReceiver(
+                        mBootCompletedReceiver, new IntentFilter(Intent.ACTION_BOOT_COMPLETED));
+                mContext.registerReceiver(
+                        mUserSwitchedReceiver, new IntentFilter(Intent.ACTION_USER_SWITCHED));
             } catch (Exception e) {
                 Slog.e(TAG, "Error initializing UsbHandler", e);
             }
@@ -611,6 +624,18 @@ public class UsbDeviceManager {
                         mDebuggingManager.setAdbEnabled(mAdbEnabled);
                     }
                     break;
+                case MSG_USER_SWITCHED: {
+                    final boolean mtpActive =
+                            containsFunction(mCurrentFunctions, UsbManager.USB_FUNCTION_MTP)
+                            || containsFunction(mCurrentFunctions, UsbManager.USB_FUNCTION_PTP);
+                    if (mtpActive && mCurrentUser != UserHandle.USER_NULL) {
+                        Slog.v(TAG, "Current user switched; resetting USB host stack for MTP");
+                        setUsbConfig("none");
+                        setUsbConfig(mCurrentFunctions);
+                    }
+                    mCurrentUser = msg.arg1;
+                    break;
+                }
             }
         }
 

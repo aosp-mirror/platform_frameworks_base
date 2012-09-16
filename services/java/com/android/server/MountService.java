@@ -549,34 +549,6 @@ class MountService extends IMountService.Stub
         }
     }
 
-    private final BroadcastReceiver mBootReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
-            if (userId == -1) return;
-            final UserHandle user = new UserHandle(userId);
-
-            Slog.d(TAG, "BOOT_COMPLETED for " + user);
-
-            // Broadcast mounted volumes to newly booted user. This kicks off
-            // media scanner when a user becomes active.
-            synchronized (mVolumesLock) {
-                for (StorageVolume volume : mVolumes) {
-                    final UserHandle owner = volume.getOwner();
-                    final boolean ownerMatch = owner == null
-                            || owner.getIdentifier() == user.getIdentifier();
-
-                    final String state = mVolumeStates.get(volume.getPath());
-
-                    if (ownerMatch && (Environment.MEDIA_MOUNTED.equals(state)
-                            || Environment.MEDIA_MOUNTED_READ_ONLY.equals(state))) {
-                        sendStorageIntent(Intent.ACTION_MEDIA_MOUNTED, volume, user);
-                    }
-                }
-            }
-        }
-    };
-
     private final BroadcastReceiver mUserReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -1308,10 +1280,6 @@ class MountService extends IMountService.Stub
         mHandlerThread = new HandlerThread("MountService");
         mHandlerThread.start();
         mHandler = new MountServiceHandler(mHandlerThread.getLooper());
-
-        // Watch for user boot completion
-        mContext.registerReceiverAsUser(mBootReceiver, UserHandle.ALL,
-                new IntentFilter(Intent.ACTION_BOOT_COMPLETED), null, mHandler);
 
         // Watch for user changes
         final IntentFilter userFilter = new IntentFilter();
