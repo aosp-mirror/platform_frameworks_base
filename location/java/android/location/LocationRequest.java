@@ -144,7 +144,7 @@ public final class LocationRequest implements Parcelable {
     private int mNumUpdates = Integer.MAX_VALUE;  // no expiry
     private float mSmallestDisplacement = 0.0f;    // meters
 
-    private String mProvider = null;  // for deprecated API's that explicitly request a provider
+    private String mProvider = LocationManager.FUSED_PROVIDER;  // for deprecated APIs that explicitly request a provider
 
     /**
      * Create a location request with default parameters.
