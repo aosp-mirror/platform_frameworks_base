@@ -239,6 +239,7 @@ final class DisplayPowerState {
     private void apply() {
         if (mDirty != 0) {
             if ((mDirty & DIRTY_SCREEN_ON) != 0 && !mScreenOn) {
+                mScreenBrightnessModulator.setBrightness(0, true /*sync*/);
                 PowerManagerService.nativeSetScreenState(false);
             }
 
@@ -246,13 +247,14 @@ final class DisplayPowerState {
                 mElectronBeam.draw(mElectronBeamLevel);
             }
 
-            if ((mDirty & (DIRTY_BRIGHTNESS | DIRTY_SCREEN_ON | DIRTY_ELECTRON_BEAM)) != 0) {
-                mScreenBrightnessModulator.setBrightness(mScreenOn ?
-                        (int)(mScreenBrightness * mElectronBeamLevel) : 0);
-            }
-
             if ((mDirty & DIRTY_SCREEN_ON) != 0 && mScreenOn) {
                 PowerManagerService.nativeSetScreenState(true);
+            }
+
+            if ((mDirty & (DIRTY_BRIGHTNESS | DIRTY_SCREEN_ON | DIRTY_ELECTRON_BEAM)) != 0
+                    && mScreenOn) {
+                mScreenBrightnessModulator.setBrightness(
+                        (int)(mScreenBrightness * mElectronBeamLevel), false /*sync*/);
             }
 
             mDirty = 0;
