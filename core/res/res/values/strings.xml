@@ -424,11 +424,6 @@
     <string name="permgroupdesc_bluetoothNetwork">Access devices and networks through Bluetooth.</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_shortrangeNetwork">Short-range Networks</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_shortrangeNetwork">Access devices through short-range networks such as NFC.</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_audioSettings">Audio Settings</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgroupdesc_audioSettings">Change audio settings.</string>
@@ -827,10 +822,17 @@
         to control whether activities are always finished as soon as they
         go to the background. Never needed for normal apps.</string>
 
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_batteryStats">modify battery statistics</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_batteryStats">Allows the app to modify
+    <!-- [CHAR LIMIT=NONE] Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_batteryStats">read battery statistics</string>
+    <!-- [CHAR LIMIT=NONE] Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_batteryStats">Allows an application to read the current low-level
+        battery use data.  May allow the application to find out detailed information about
+        which apps you use.</string>
+
+    <!-- [CHAR LIMIT=NONE] Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_updateBatteryStats">modify battery statistics</string>
+    <!-- [CHAR LIMIT=NONE] Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_updateBatteryStats">Allows the app to modify
         collected battery statistics. Not for use by normal apps.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -853,9 +855,10 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_systemAlertWindow">draw over other apps</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_systemAlertWindow">Allows the app to show system
-      alert windows.  Some alert windows may take over the entire screen.
-      </string>
+    <string name="permdesc_systemAlertWindow">Allows the app to draw on top of other
+        applications or parts of the user interface.  They may interfere with your
+        use of the interface in any application, or change what you think you are
+        seeing in other applications.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_setAnimationScale">modify global animation speed</string>
@@ -1000,12 +1003,12 @@
     <string name="permlab_clearAppCache">delete all app cache data</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_clearAppCache" product="tablet">Allows the app to free tablet storage
-        by deleting files in app cache directory. Access is very
-        restricted usually to system process.</string>
+        by deleting files in the cache directories of other applications.  This may cause other
+        applications to start up more slowly as they need to re-retrieve their data.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_clearAppCache" product="default">Allows the app to free phone storage
-        by deleting files in app cache directory. Access is very
-        restricted usually to system process.</string>
+        by deleting files in the cache directories of other applications.  This may cause other
+        applications to start up more slowly as they need to re-retrieve their data.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_movePackage">move app resources</string>
@@ -1632,7 +1635,7 @@
     <string name="permdesc_bluetoothAdmin" product="default">Allows the app to configure
       the local Bluetooth phone, and to discover and pair with remote devices.</string>
 
-    <string name="permlab_accessWimaxState">View WiMAX connections</string>
+    <string name="permlab_accessWimaxState">connect and disconnect from WiMAX</string>
     <string name="permdesc_accessWimaxState">Allows the app to determine whether
      WiMAX is enabled and information about any WiMAX networks that are
      connected. </string>
@@ -1701,7 +1704,7 @@
        names and phrases that the user may have stored in the user dictionary.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_writeDictionary">write to user-defined dictionary</string>
+    <string name="permlab_writeDictionary">add words to user-defined dictionary</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_writeDictionary">Allows the app to write new words into the
       user dictionary.</string>
@@ -3136,6 +3139,8 @@
     <string name="perms_description_app">Provided by <xliff:g id="app_name">%1$s</xliff:g>.</string>
     <!-- Shown for an application when it doesn't require any permission grants. -->
     <string name="no_permissions">No permissions required</string>
+    <!-- [CHAR LIMIT=NONE] Additional text in permission description for perms that can cost money. -->
+    <string name="perm_costs_money">this may cost you money</string>
 
     <!-- USB storage dialog strings -->
     <!-- This is the title for the activity's window. -->
