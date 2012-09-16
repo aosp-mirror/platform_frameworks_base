@@ -5331,6 +5331,13 @@ public final class Settings {
         * {@hide} */
        public static final String PACKAGE_VERIFIER_DEFAULT_RESPONSE = "verifier_default_response";
 
+       /** Show package verification setting in the Settings app.
+        * 1 = show (default)
+        * 0 = hide
+        * {@hide}
+        */
+       public static final String PACKAGE_VERIFIER_SETTING_VISIBLE = "verifier_setting_visible";
+
        /**
         * The interval in milliseconds at which to check packet counts on the
         * mobile data interface when screen is on, to detect possible data
