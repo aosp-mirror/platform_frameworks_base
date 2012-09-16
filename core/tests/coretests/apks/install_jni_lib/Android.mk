@@ -23,6 +23,6 @@ LOCAL_SHARED_LIBRARIES := \
     libnativehelper
 
 LOCAL_MODULE := libframeworks_coretests_jni
-LOCAL_MODULE_TAGS := optional
+LOCAL_MODULE_TAGS := tests
 
 include $(BUILD_SHARED_LIBRARY)
