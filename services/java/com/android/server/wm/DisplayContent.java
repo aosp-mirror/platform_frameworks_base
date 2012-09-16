@@ -101,31 +101,32 @@ class DisplayContent {
         mDisplay.getDisplayInfo(mDisplayInfo);
     }
 
-    public void dump(PrintWriter pw) {
-        pw.print("  Display: mDisplayId="); pw.println(mDisplayId);
-        pw.print("  init="); pw.print(mInitialDisplayWidth); pw.print("x");
-        pw.print(mInitialDisplayHeight); pw.print(" "); pw.print(mInitialDisplayDensity);
-        pw.print("dpi");
-        if (mInitialDisplayWidth != mBaseDisplayWidth
-                || mInitialDisplayHeight != mBaseDisplayHeight
-                || mInitialDisplayDensity != mBaseDisplayDensity) {
-            pw.print(" base=");
-            pw.print(mBaseDisplayWidth); pw.print("x"); pw.print(mBaseDisplayHeight);
-            pw.print(" "); pw.print(mBaseDisplayDensity); pw.print("dpi");
-        }
-        pw.print(" cur=");
-        pw.print(mDisplayInfo.logicalWidth);
-        pw.print("x"); pw.print(mDisplayInfo.logicalHeight);
-        pw.print(" app=");
-        pw.print(mDisplayInfo.appWidth);
-        pw.print("x"); pw.print(mDisplayInfo.appHeight);
-        pw.print(" rng="); pw.print(mDisplayInfo.smallestNominalAppWidth);
-        pw.print("x"); pw.print(mDisplayInfo.smallestNominalAppHeight);
-        pw.print("-"); pw.print(mDisplayInfo.largestNominalAppWidth);
-        pw.print("x"); pw.println(mDisplayInfo.largestNominalAppHeight);
-        pw.print("  layoutNeeded="); pw.println(layoutNeeded);
+    public void dump(String prefix, PrintWriter pw) {
+        pw.print(prefix); pw.print("Display: mDisplayId="); pw.println(mDisplayId);
+        final String subPrefix = "  " + prefix;
+        pw.print(subPrefix); pw.print("init="); pw.print(mInitialDisplayWidth); pw.print("x");
+            pw.print(mInitialDisplayHeight); pw.print(" "); pw.print(mInitialDisplayDensity);
+            pw.print("dpi");
+            if (mInitialDisplayWidth != mBaseDisplayWidth
+                    || mInitialDisplayHeight != mBaseDisplayHeight
+                    || mInitialDisplayDensity != mBaseDisplayDensity) {
+                pw.print(" base=");
+                pw.print(mBaseDisplayWidth); pw.print("x"); pw.print(mBaseDisplayHeight);
+                pw.print(" "); pw.print(mBaseDisplayDensity); pw.print("dpi");
+            }
+            pw.print(" cur=");
+            pw.print(mDisplayInfo.logicalWidth);
+            pw.print("x"); pw.print(mDisplayInfo.logicalHeight);
+            pw.print(" app=");
+            pw.print(mDisplayInfo.appWidth);
+            pw.print("x"); pw.print(mDisplayInfo.appHeight);
+            pw.print(" rng="); pw.print(mDisplayInfo.smallestNominalAppWidth);
+            pw.print("x"); pw.print(mDisplayInfo.smallestNominalAppHeight);
+            pw.print("-"); pw.print(mDisplayInfo.largestNominalAppWidth);
+            pw.print("x"); pw.println(mDisplayInfo.largestNominalAppHeight);
+        pw.print(subPrefix); pw.print("layoutNeeded="); pw.print(layoutNeeded);
         if (mMagnificationSpec != null) {
-            pw.print("  mMagnificationSpec="); pw.println(mMagnificationSpec);
+            pw.print(" mMagnificationSpec="); pw.print(mMagnificationSpec);
         }
         pw.println();
     }
