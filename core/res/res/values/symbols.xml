@@ -211,6 +211,10 @@
   <java-symbol type="id" name="status_bar_latest_event_content" />
   <java-symbol type="id" name="action_divider" />
   <java-symbol type="id" name="overflow_divider" />
+  <java-symbol type="id" name="sms_short_code_confirm_message" />
+  <java-symbol type="id" name="sms_short_code_detail_layout" />
+  <java-symbol type="id" name="sms_short_code_detail_message" />
+  <java-symbol type="id" name="sms_short_code_remember_choice_checkbox" />
 
   <java-symbol type="attr" name="actionModeShareDrawable" />
   <java-symbol type="attr" name="alertDialogCenterButtons" />
@@ -739,13 +743,13 @@
   <java-symbol type="string" name="sms_control_title" />
   <java-symbol type="string" name="sms_control_no" />
   <java-symbol type="string" name="sms_control_yes" />
-  <java-symbol type="string" name="sms_premium_short_code_confirm_message" />
-  <java-symbol type="string" name="sms_premium_short_code_confirm_title" />
   <java-symbol type="string" name="sms_short_code_confirm_allow" />
   <java-symbol type="string" name="sms_short_code_confirm_deny" />
+  <java-symbol type="string" name="sms_short_code_confirm_always_allow" />
+  <java-symbol type="string" name="sms_short_code_confirm_never_allow" />
   <java-symbol type="string" name="sms_short_code_confirm_message" />
-  <java-symbol type="string" name="sms_short_code_confirm_report" />
-  <java-symbol type="string" name="sms_short_code_confirm_title" />
+  <java-symbol type="string" name="sms_short_code_details" />
+  <java-symbol type="string" name="sms_premium_short_code_details" />
   <java-symbol type="string" name="submit" />
   <java-symbol type="string" name="sync_binding_label" />
   <java-symbol type="string" name="sync_do_nothing" />
@@ -1051,6 +1055,7 @@
   <java-symbol type="layout" name="notification_template_inbox" />
   <java-symbol type="layout" name="keyguard_multi_user_avatar" />
   <java-symbol type="layout" name="keyguard_multi_user_selector_widget" />
+  <java-symbol type="layout" name="sms_short_code_confirmation_dialog" />
 
   <java-symbol type="anim" name="slide_in_child_bottom" />
   <java-symbol type="anim" name="slide_in_right" />
