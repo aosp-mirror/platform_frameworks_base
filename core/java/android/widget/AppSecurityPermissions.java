@@ -67,7 +67,7 @@ public class AppSecurityPermissions {
     public static final int WHICH_ALL = 0xffff;
 
     private final static String TAG = "AppSecurityPermissions";
-    private boolean localLOGV = false;
+    private final static boolean localLOGV = false;
     private Context mContext;
     private LayoutInflater mInflater;
     private PackageManager mPm;
@@ -189,6 +189,8 @@ public class AppSecurityPermissions {
             permGrpIcon.setImageDrawable(icon);
             permNameView.setText(label);
             setOnClickListener(this);
+            if (localLOGV) Log.i(TAG, "Made perm item " + perm.name
+                    + ": " + label + " in group " + grp.name);
         }
 
         @Override
@@ -531,7 +533,9 @@ public class AppSecurityPermissions {
             MyPermissionGroupInfo grp, MyPermissionInfo perm, boolean first,
             CharSequence newPermPrefix) {
         PermissionItemView permView = (PermissionItemView)inflater.inflate(
-                R.layout.app_permission_item, null);
+                (perm.flags & PermissionInfo.FLAG_COSTS_MONEY) != 0
+                        ? R.layout.app_permission_item_money : R.layout.app_permission_item,
+                null);
         permView.setPermission(grp, perm, first, newPermPrefix);
         return permView;
     }
@@ -568,6 +572,8 @@ public class AppSecurityPermissions {
         // already granted, they will not be granted as part of the install.
         if ((existingReqFlags&PackageInfo.REQUESTED_PERMISSION_GRANTED) != 0
                 && (pInfo.protectionLevel & PermissionInfo.PROTECTION_FLAG_DEVELOPMENT) != 0) {
+            if (localLOGV) Log.i(TAG, "Special perm " + pInfo.name
+                    + ": protlevel=0x" + Integer.toHexString(pInfo.protectionLevel));
             return true;
         }
         return false;
@@ -650,9 +656,9 @@ public class AppSecurityPermissions {
             mPermGroupsList.add(pgrp);
         }
         Collections.sort(mPermGroupsList, mPermGroupComparator);
-        if (false) {
+        if (localLOGV) {
             for (MyPermissionGroupInfo grp : mPermGroupsList) {
-                Log.i("foo", "Group " + grp.name + " personal="
+                Log.i(TAG, "Group " + grp.name + " personal="
                         + ((grp.flags&PermissionGroupInfo.FLAG_PERSONAL_INFO) != 0)
                         + " priority=" + grp.priority);
             }
