@@ -590,6 +590,25 @@ public class WallpaperManager {
     }
 
     /**
+     * Return whether any users are currently set to use the wallpaper
+     * with the given resource ID.  That is, their wallpaper has been
+     * set through {@link #setResource(int)} with the same resource id.
+     */
+    public boolean hasResourceWallpaper(int resid) {
+        if (sGlobals.mService == null) {
+            Log.w(TAG, "WallpaperService not running");
+            return false;
+        }
+        try {
+            Resources resources = mContext.getResources();
+            String name = "res:" + resources.getResourceName(resid);
+            return sGlobals.mService.hasNamedWallpaper(name);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
      * Returns the desired minimum width for the wallpaper. Callers of
      * {@link #setBitmap(android.graphics.Bitmap)} or
      * {@link #setStream(java.io.InputStream)} should check this value

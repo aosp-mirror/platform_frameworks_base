@@ -83,6 +83,8 @@ public class UserManagerService extends IUserManager.Stub {
 
     private SparseArray<UserInfo> mUsers = new SparseArray<UserInfo>();
 
+    private final int mUserLimit;
+
     private int[] mUserIds;
     private boolean mGuestEnabled;
     private int mNextSerialNumber;
@@ -125,6 +127,8 @@ public class UserManagerService extends IUserManager.Stub {
             mPm = pm;
             mInstallLock = installLock;
             mPackagesLock = packagesLock;
+            mUserLimit = mContext.getResources().getInteger(
+                    com.android.internal.R.integer.config_multiuserMaximumUsers);
             mUsersDir = new File(dataDir, USER_INFO_DIR);
             mUsersDir.mkdirs();
             // Make zeroth user directory, for services to migrate their files to that location
@@ -237,16 +241,23 @@ public class UserManagerService extends IUserManager.Stub {
         // TODO:
     }
 
+    public void makeInitialized(int userId) {
+        checkManageUsersPermission("makeInitialized");
+        synchronized (mPackagesLock) {
+            UserInfo info = mUsers.get(userId);
+            if (info != null && (info.flags&UserInfo.FLAG_INITIALIZED) == 0) {
+                info.flags |= UserInfo.FLAG_INITIALIZED;
+                writeUserLocked(info);
+            }
+        }
+    }
+
     /**
      * Check if we've hit the limit of how many users can be created.
      */
-    private boolean isUserLimitReached() {
-        synchronized (mInstallLock) {
-            int nUsers = mUsers.size();
-            int userLimit = mContext.getResources().getInteger(
-                    com.android.internal.R.integer.config_multiuserMaximumUsers);
-            return nUsers >= userLimit;
-        }
+    private boolean isUserLimitReachedLocked() {
+        int nUsers = mUsers.size();
+        return nUsers >= mUserLimit;
     }
 
     /**
@@ -535,28 +546,31 @@ public class UserManagerService extends IUserManager.Stub {
     public UserInfo createUser(String name, int flags) {
         checkManageUsersPermission("Only the system can create users");
 
-        if (isUserLimitReached()) return null;
-
-        int userId = getNextAvailableId();
-        UserInfo userInfo = new UserInfo(userId, name, null, flags);
-        File userPath = new File(mBaseUserPath, Integer.toString(userId));
-        synchronized (mInstallLock) {
-            synchronized (mPackagesLock) {
-                userInfo.serialNumber = mNextSerialNumber++;
-                mUsers.put(userId, userInfo);
-                writeUserListLocked();
-                writeUserLocked(userInfo);
-                updateUserIdsLocked();
-                mPm.createNewUserLILPw(userId, userPath);
+        final long ident = Binder.clearCallingIdentity();
+        final UserInfo userInfo;
+        try {
+            synchronized (mInstallLock) {
+                synchronized (mPackagesLock) {
+                    if (isUserLimitReachedLocked()) return null;
+                    int userId = getNextAvailableIdLocked();
+                    userInfo = new UserInfo(userId, name, null, flags);
+                    File userPath = new File(mBaseUserPath, Integer.toString(userId));
+                    userInfo.serialNumber = mNextSerialNumber++;
+                    mUsers.put(userId, userInfo);
+                    writeUserListLocked();
+                    writeUserLocked(userInfo);
+                    updateUserIdsLocked();
+                    mPm.createNewUserLILPw(userId, userPath);
+                }
             }
-        }
-        if (userInfo != null) {
-            Intent addedIntent = new Intent(Intent.ACTION_USER_ADDED);
-            addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userInfo.id);
-            mContext.sendBroadcastAsUser(new Intent(Intent.ACTION_BOOT_COMPLETED),
-                    new UserHandle(userInfo.id));
-            mContext.sendBroadcastAsUser(addedIntent, UserHandle.ALL,
-                    android.Manifest.permission.MANAGE_USERS);
+            if (userInfo != null) {
+                Intent addedIntent = new Intent(Intent.ACTION_USER_ADDED);
+                addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userInfo.id);
+                mContext.sendBroadcastAsUser(addedIntent, UserHandle.ALL,
+                        android.Manifest.permission.MANAGE_USERS);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
         return userInfo;
     }
@@ -614,9 +628,15 @@ public class UserManagerService extends IUserManager.Stub {
         }
 
         // Let other services shutdown any activity
-        Intent addedIntent = new Intent(Intent.ACTION_USER_REMOVED);
-        addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userHandle);
-        mContext.sendBroadcast(addedIntent, android.Manifest.permission.MANAGE_USERS);
+        long ident = Binder.clearCallingIdentity();
+        try {
+            Intent addedIntent = new Intent(Intent.ACTION_USER_REMOVED);
+            addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userHandle);
+            mContext.sendBroadcastAsUser(addedIntent, UserHandle.ALL,
+                    android.Manifest.permission.MANAGE_USERS);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 
     private void removeDirectoryRecursive(File parent) {
@@ -666,7 +686,7 @@ public class UserManagerService extends IUserManager.Stub {
      * for data and battery stats collection, or unexpected cross-talk.
      * @return
      */
-    private int getNextAvailableId() {
+    private int getNextAvailableIdLocked() {
         synchronized (mPackagesLock) {
             int i = 0;
             while (i < Integer.MAX_VALUE) {
