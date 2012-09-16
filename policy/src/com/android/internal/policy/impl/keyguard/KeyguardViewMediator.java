@@ -1256,7 +1256,9 @@ public class KeyguardViewMediator {
             // windows that appear on top, ever
             int flags = StatusBarManager.DISABLE_NONE;
             if (mShowing) {
-                // disable navigation status bar components (home, recents) if lock screen is up
+                // Permanently disable components not available when keyguard is enabled
+                // (like recents). Temporary enable/disable (e.g. the "back" button) are
+                // done in KeyguardHostView.
                 flags |= StatusBarManager.DISABLE_RECENT;
                 if (isSecure() || !ENABLE_INSECURE_STATUS_BAR_EXPAND) {
                     // showing secure lockscreen; disable expanding.
