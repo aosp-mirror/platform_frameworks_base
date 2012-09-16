@@ -213,8 +213,7 @@ public class ScaleGestureDetector {
         for (int i = 0; i < count; i++) {
             if (skipIndex == i) continue;
 
-            // touchMajor/Minor are axes of an ellipse; average them together and
-            // convert the resulting 'diameter' into a radius.
+            // Average touch major and touch minor and convert the resulting diameter into a radius.
             final float touchSize = (event.getTouchMajor(i) + event.getTouchMinor(i)) / 4;
             devSumX += Math.abs(event.getX(i) - focusX) + touchSize;
             devSumY += Math.abs(event.getY(i) - focusY) + touchSize;
@@ -245,7 +244,7 @@ public class ScaleGestureDetector {
             mPrevSpanY = mCurrSpanY = spanY;
             mInitialSpan = mPrevSpan = mCurrSpan = span;
         }
-        if (!mInProgress && span > mMinSpan &&
+        if (!mInProgress && span >= mMinSpan &&
                 (wasInProgress || Math.abs(span - mInitialSpan) > mSpanSlop)) {
             mPrevSpanX = mCurrSpanX = spanX;
             mPrevSpanY = mCurrSpanY = spanY;
