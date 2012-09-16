@@ -49,11 +49,12 @@ final class PhotonicModulator {
     }
 
     /**
-     * Asynchronously sets the backlight brightness.
+     * Sets the backlight brightness, synchronously or asynchronously.
      *
      * @param lightValue The new light value, from 0 to 255.
+     * @param sync If true, waits for the brightness change to complete before returning.
      */
-    public void setBrightness(int lightValue) {
+    public void setBrightness(int lightValue, boolean sync) {
         synchronized (mLock) {
             if (lightValue != mPendingLightValue) {
                 mPendingLightValue = lightValue;
@@ -61,6 +62,15 @@ final class PhotonicModulator {
                     mPendingChange = true;
                     mSuspendBlocker.acquire();
                     mExecutor.execute(mTask);
+                }
+            }
+            if (sync) {
+                while (mPendingChange) {
+                    try {
+                        mLock.wait();
+                    } catch (InterruptedException ex) {
+                        // ignore it
+                    }
                 }
             }
         }
@@ -76,6 +86,7 @@ final class PhotonicModulator {
                     if (newLightValue == mActualLightValue) {
                         mSuspendBlocker.release();
                         mPendingChange = false;
+                        mLock.notifyAll();
                         return;
                     }
                     mActualLightValue = newLightValue;
