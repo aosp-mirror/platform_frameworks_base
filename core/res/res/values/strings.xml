@@ -1255,26 +1255,26 @@
       such as GPS or location providers.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_accessFineLocation">precise (GPS) location</string>
+    <string name="permlab_accessFineLocation">precise location (GPS and
+      network-based)</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_accessFineLocation" product="tablet">Access precise
-      location sources such as the Global Positioning System on the tablet. When
-      location services are available and turned on, this permission allows the
-      app to determine your precise location.</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_accessFineLocation" product="default">Access precise
-      location sources such as the Global Positioning System on the phone. When
-      location services are available and turned on, this permission allows the
-      app to determine your precise location.</string>
+    <string name="permdesc_accessFineLocation">Allows the app to get your
+      precise location using the Global Positioning System (GPS) or network
+      location sources such as cell towers and Wi-Fi. These location services
+      must be turned on and available to your device for the app to use them.
+      Apps may use this to determine where you are, and may consume additional
+      battery power.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_accessCoarseLocation">approximate (network-based) location</string>
+    <string name="permlab_accessCoarseLocation">approximate location
+      (network-based)</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_accessCoarseLocation">Access
-      approximate location from location providers using network sources such as
-      cell tower and Wi-Fi. When these location services are available and turned
-      on, this permission allows the app to determine your approximate
-      location.</string>
+    <string name="permdesc_accessCoarseLocation">Allows the app to get your
+      approximate location. This location is derived by location services using
+      network location sources such as cell towers and Wi-Fi. These location
+      services must be turned on and available to your device for the app to
+      use them. Apps may use this to determine approximately where you
+      are.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_accessSurfaceFlinger">access SurfaceFlinger</string>
