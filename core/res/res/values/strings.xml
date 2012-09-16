@@ -2100,7 +2100,7 @@
     <string name="lockscreen_low_battery">Connect your charger.</string>
 
     <!-- Shown in the lock screen when there is no SIM card. -->
-    <string name="lockscreen_missing_sim_message_short">No SIM card.</string>
+    <string name="lockscreen_missing_sim_message_short">No SIM card</string>
     <!-- Shown in the lock screen when there is no SIM card. -->
     <string name="lockscreen_missing_sim_message" product="tablet">No SIM card in tablet.</string>
     <!-- Shown in the lock screen when there is no SIM card. -->
