@@ -39,6 +39,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StatFs;
 import android.os.SystemClock;
+import android.os.UserManager;
 import android.os.storage.IMountService;
 import android.os.storage.StorageListener;
 import android.os.storage.StorageManager;
@@ -562,6 +563,14 @@ public class PackageManagerTests extends AndroidTestCase {
             fail(pkgName + " shouldnt be installed");
         } catch (NameNotFoundException e) {
         }
+
+        UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        List<UserInfo> users = um.getUsers();
+        for (UserInfo user : users) {
+            String dataDir = PackageManager.getDataDirForUser(user.id, pkgName);
+            assertFalse("Application data directory should not exist: " + dataDir,
+                    new File(dataDir).exists());
+        }
     }
 
     class InstallParams {
@@ -707,9 +716,7 @@ public class PackageManagerTests extends AndroidTestCase {
                         PackageManager.GET_UNINSTALLED_PACKAGES);
                 GenericReceiver receiver = new DeleteReceiver(pkg.packageName);
                 invokeDeletePackage(pkg.packageName, 0, receiver);
-            } catch (NameNotFoundException e1) {
-            } catch (Exception e) {
-                failStr(e);
+            } catch (NameNotFoundException e) {
             }
         }
         try {
@@ -3474,6 +3481,12 @@ public class PackageManagerTests extends AndroidTestCase {
         assertNotNull("receivers should not be null", packageInfo.receivers);
         assertNotNull("services should not be null", packageInfo.services);
         assertNotNull("signatures should not be null", packageInfo.signatures);
+    }
+
+    public void testInstall_BadDex_CleanUp() throws Exception {
+        int retCode = PackageManager.INSTALL_FAILED_DEXOPT;
+        installFromRawResource("install.apk", R.raw.install_bad_dex, 0, true, true, retCode,
+                PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
     }
 
     /*---------- Recommended install location tests ----*/
