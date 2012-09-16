@@ -348,6 +348,7 @@ public class KeyguardHostView extends KeyguardViewBase {
                 (failedAttemptsBeforeWipe - failedAttempts)
                 : Integer.MAX_VALUE; // because DPM returns 0 if no restriction
 
+        boolean showTimeout = false;
         if (remainingBeforeWipe < LockPatternUtils.FAILED_ATTEMPTS_BEFORE_WIPE_GRACE) {
             // If we reach this code, it means the user has installed a DevicePolicyManager
             // that requests device wipe after N attempts.  Once we get below the grace
@@ -361,7 +362,7 @@ public class KeyguardHostView extends KeyguardViewBase {
                 showWipeDialog(failedAttempts);
             }
         } else {
-            boolean showTimeout =
+            showTimeout =
                 (failedAttempts % LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT) == 0;
             if (usingPattern && mEnableFallback) {
                 if (failedAttempts == failedAttemptWarning) {
@@ -374,12 +375,12 @@ public class KeyguardHostView extends KeyguardViewBase {
                     showTimeout = false;
                 }
             }
-            if (showTimeout) {
-                showTimeoutDialog();
-            }
         }
         monitor.reportFailedUnlockAttempt();
         mLockPatternUtils.reportFailedPasswordAttempt();
+        if (showTimeout) {
+            showTimeoutDialog();
+        }
     }
 
     /**
