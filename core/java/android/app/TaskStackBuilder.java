@@ -124,24 +124,12 @@ public class TaskStackBuilder {
      * @return This TaskStackBuilder for method chaining
      */
     public TaskStackBuilder addParentStack(Activity sourceActivity) {
-        final int insertAt = mIntents.size();
-        Intent parent = sourceActivity.getParentActivityIntent();
-        PackageManager pm = sourceActivity.getPackageManager();
-        while (parent != null) {
-            mIntents.add(insertAt, parent);
-            try {
-                ActivityInfo info = pm.getActivityInfo(parent.getComponent(), 0);
-                String parentActivity = info.parentActivityName;
-                if (parentActivity != null) {
-                    parent = new Intent().setComponent(
-                            new ComponentName(mSourceContext, parentActivity));
-                } else {
-                    parent = null;
-                }
-            } catch (NameNotFoundException e) {
-                Log.e(TAG, "Bad ComponentName while traversing activity parent metadata");
-                throw new IllegalArgumentException(e);
-            }
+        final Intent parent = sourceActivity.getParentActivityIntent();
+        if (parent != null) {
+            // We have the actual parent intent, build the rest from static metadata
+            // then add the direct parent intent to the end.
+            addParentStack(parent.getComponent());
+            addNextIntent(parent);
         }
         return this;
     }
@@ -155,24 +143,7 @@ public class TaskStackBuilder {
      * @return This TaskStackBuilder for method chaining
      */
     public TaskStackBuilder addParentStack(Class<?> sourceActivityClass) {
-        final int insertAt = mIntents.size();
-        PackageManager pm = mSourceContext.getPackageManager();
-        try {
-            ActivityInfo info = pm.getActivityInfo(
-                    new ComponentName(mSourceContext, sourceActivityClass), 0);
-            String parentActivity = info.parentActivityName;
-            while (parentActivity != null) {
-                Intent parent = new Intent().setComponent(
-                        new ComponentName(mSourceContext, parentActivity));
-                mIntents.add(insertAt, parent);
-                info = pm.getActivityInfo(parent.getComponent(), 0);
-                parentActivity = info.parentActivityName;
-            }
-        } catch (NameNotFoundException e) {
-            Log.e(TAG, "Bad ComponentName while traversing activity parent metadata");
-            throw new IllegalArgumentException(e);
-        }
-        return this;
+        return addParentStack(new ComponentName(mSourceContext, sourceActivityClass));
     }
 
     /**
@@ -191,11 +162,13 @@ public class TaskStackBuilder {
             ActivityInfo info = pm.getActivityInfo(sourceActivityName, 0);
             String parentActivity = info.parentActivityName;
             while (parentActivity != null) {
-                Intent parent = new Intent().setComponent(
-                        new ComponentName(info.packageName, parentActivity));
-                mIntents.add(insertAt, parent);
-                info = pm.getActivityInfo(parent.getComponent(), 0);
+                final ComponentName target = new ComponentName(mSourceContext, parentActivity);
+                info = pm.getActivityInfo(target, 0);
                 parentActivity = info.parentActivityName;
+                final Intent parent = parentActivity == null && insertAt == 0
+                        ? Intent.makeMainActivity(target)
+                        : new Intent().setComponent(target);
+                mIntents.add(insertAt, parent);
             }
         } catch (NameNotFoundException e) {
             Log.e(TAG, "Bad ComponentName while traversing activity parent metadata");
