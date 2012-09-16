@@ -54,7 +54,7 @@ class KeyguardStatusViewManager {
     private static final int BATTERY_INFO = 15;
 
     private StatusMode mStatus;
-    private String mDateFormatString;
+    private CharSequence mDateFormatString;
 
     // Views that this class controls.
     // NOTE: These may be null in some LockScreen screens and should protect from NPE
@@ -101,7 +101,8 @@ class KeyguardStatusViewManager {
     public KeyguardStatusViewManager(View view) {
         if (DEBUG) Log.v(TAG, "KeyguardStatusViewManager()");
         mContainer = view;
-        mDateFormatString = getContext().getString(R.string.abbrev_wday_month_day_no_year);
+        mDateFormatString = getContext().getResources()
+            .getText(R.string.abbrev_wday_month_day_no_year);
         mLockPatternUtils = new LockPatternUtils(view.getContext());
         mUpdateMonitor = KeyguardUpdateMonitor.getInstance(view.getContext());
 
