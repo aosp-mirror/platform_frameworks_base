@@ -1020,6 +1020,12 @@ public abstract class WallpaperService extends Service {
                     mEngine = engine;
                     mActiveEngines.add(engine);
                     engine.attach(this);
+                    try {
+                        mConnection.engineShown(this);
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "Wallpaper host disappeared", e);
+                        return;
+                    }
                     return;
                 }
                 case DO_DETACH: {
