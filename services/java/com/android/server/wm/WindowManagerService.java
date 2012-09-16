@@ -623,11 +623,11 @@ public class WindowManagerService extends IWindowManager.Stub
         long mChanges;
 
         boolean mAnimationScheduled;
-        ArrayList<WinAnimatorList> mWinAnimatorLists = new ArrayList<WinAnimatorList>();
+        SparseArray<WinAnimatorList> mWinAnimatorLists = new SparseArray<WinAnimatorList>();
         WindowState mWallpaperTarget;
         WindowState mLowerWallpaperTarget;
         WindowState mUpperWallpaperTarget;
-        DimAnimator.Parameters mDimParams;
+        SparseArray<DimAnimator.Parameters> mDimParams = new SparseArray<DimAnimator.Parameters>();
         ArrayList<WindowToken> mWallpaperTokens = new ArrayList<WindowToken>();
         ArrayList<AppWindowAnimParams> mAppWindowAnimParams = new ArrayList<AppWindowAnimParams>();
     }
@@ -4121,6 +4121,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @Override
     public void overridePendingAppTransitionScaleUp(int startX, int startY, int startWidth,
             int startHeight) {
         synchronized(mWindowMap) {
@@ -4138,6 +4139,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @Override
     public void overridePendingAppTransitionThumb(Bitmap srcThumb, int startX,
             int startY, IRemoteCallback startedCallback, boolean scaleUp) {
         synchronized(mWindowMap) {
@@ -4157,6 +4159,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @Override
     public void executeAppTransition() {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "executeAppTransition()")) {
@@ -5943,8 +5946,9 @@ public class WindowManagerService extends IWindowManager.Stub
             return false;
         }
 
-        if (mAnimator.mScreenRotationAnimation != null &&
-                mAnimator.mScreenRotationAnimation.isAnimating()) {
+        ScreenRotationAnimation screenRotationAnimation =
+                mAnimator.getScreenRotationAnimationLocked(Display.DEFAULT_DISPLAY);
+        if (screenRotationAnimation != null && screenRotationAnimation.isAnimating()) {
             // Rotation updates cannot be performed while the previous rotation change
             // animation is still in progress.  Skip this update.  We will try updating
             // again after the animation is finished and the display is unfrozen.
@@ -5996,6 +6000,9 @@ public class WindowManagerService extends IWindowManager.Stub
         mWaitingForConfig = true;
         getDefaultDisplayContentLocked().layoutNeeded = true;
         startFreezingDisplayLocked(inTransaction, 0, 0);
+        // startFreezingDisplayLocked can reset the ScreenRotationAnimation.
+        screenRotationAnimation =
+                mAnimator.getScreenRotationAnimationLocked(Display.DEFAULT_DISPLAY);
 
         // We need to update our screen size information to match the new
         // rotation.  Note that this is redundant with the later call to
@@ -6016,9 +6023,9 @@ public class WindowManagerService extends IWindowManager.Stub
         try {
             // NOTE: We disable the rotation in the emulator because
             //       it doesn't support hardware OpenGL emulation yet.
-            if (CUSTOM_SCREEN_ROTATION && mAnimator.mScreenRotationAnimation != null
-                    && mAnimator.mScreenRotationAnimation.hasScreenshot()) {
-                if (mAnimator.mScreenRotationAnimation.setRotationInTransaction(
+            if (CUSTOM_SCREEN_ROTATION && screenRotationAnimation != null
+                    && screenRotationAnimation.hasScreenshot()) {
+                if (screenRotationAnimation.setRotationInTransaction(
                         rotation, mFxSession,
                         MAX_ANIMATION_DURATION, mTransitionAnimationScale,
                         displayInfo.logicalWidth, displayInfo.logicalHeight)) {
@@ -7158,8 +7165,6 @@ public class WindowManagerService extends IWindowManager.Stub
             mIsTouchDevice = mContext.getPackageManager().hasSystemFeature(
                     PackageManager.FEATURE_TOUCHSCREEN);
 
-            mAnimator.initializeLocked(display.getLayerStack());
-
             final DisplayInfo displayInfo = getDefaultDisplayInfoLocked();
             mAnimator.setDisplayDimensions(
                     displayInfo.logicalWidth, displayInfo.logicalHeight,
@@ -7181,6 +7186,7 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized(mWindowMap) {
             final DisplayContent displayContent = getDisplayContentLocked(displayId);
             final DisplayInfo displayInfo;
+            mAnimator.addDisplayLocked(displayId);
             synchronized(displayContent.mDisplaySizeLock) {
                 // Bootstrap the default logical display from the display manager.
                 displayInfo = displayContent.getDisplayInfo();
@@ -8136,7 +8142,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (winAnimator.mAnimLayer != oldLayer) {
                 layerChanged = true;
             }
-            if (layerChanged && mAnimator.isDimming(winAnimator)) {
+            if (layerChanged && mAnimator.isDimmingLocked(winAnimator)) {
                 // Force an animation pass just to update the mDimAnimator layer.
                 updateLayoutToAnimationLocked();
             }
@@ -8842,7 +8848,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 //Slog.i(TAG, "DIM BEHIND: " + w);
                 mInnerFields.mDimming = true;
                 final WindowStateAnimator winAnimator = w.mWinAnimator;
-                if (!mAnimator.isDimming(winAnimator)) {
+                if (!mAnimator.isDimmingLocked(winAnimator)) {
                     final int width, height;
                     if (attrs.type == WindowManager.LayoutParams.TYPE_BOOT_PROGRESS) {
                         final DisplayInfo displayInfo = w.mDisplayContent.getDisplayInfo();
@@ -8852,7 +8858,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         width = innerDw;
                         height = innerDh;
                     }
-                    startDimming(winAnimator, w.mExiting ? 0 : w.mAttrs.dimAmount, width, height);
+                    startDimmingLocked(
+                        winAnimator, w.mExiting ? 0 : w.mAttrs.dimAmount, width, height);
                 }
             }
         }
@@ -9080,7 +9087,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             }
                         }
 
-                        winAnimator.setSurfaceBoundaries(recoveringMemory);
+                        winAnimator.setSurfaceBoundariesLocked(recoveringMemory);
 
                         final AppWindowToken atoken = w.mAppToken;
                         if (DEBUG_STARTING_WINDOW && atoken != null && w == atoken.startingWindow) {
@@ -9138,6 +9145,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
                     updateResizingWindows(w);
                 }
+
+                if (!mInnerFields.mDimming && mAnimator.isDimmingLocked(displayId)) {
+                    stopDimmingLocked(displayId);
+                }
             }
 
             if (updateAllDrawn) {
@@ -9146,10 +9157,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (focusDisplayed) {
                 mH.sendEmptyMessage(H.REPORT_LOSING_FOCUS);
-            }
-
-            if (!mInnerFields.mDimming && mAnimator.isDimming()) {
-                stopDimming();
             }
         } catch (RuntimeException e) {
             Log.wtf(TAG, "Unhandled exception in Window Manager", e);
@@ -9515,7 +9522,7 @@ public class WindowManagerService extends IWindowManager.Stub
         final LayoutToAnimatorParams layoutToAnim = mLayoutToAnim;
         synchronized (layoutToAnim) {
             // Copy local params to transfer params.
-            ArrayList<WinAnimatorList> allWinAnimatorLists = layoutToAnim.mWinAnimatorLists;
+            SparseArray<WinAnimatorList> allWinAnimatorLists = layoutToAnim.mWinAnimatorLists;
             allWinAnimatorLists.clear();
             DisplayContentsIterator iterator = new DisplayContentsIterator();
             while (iterator.hasNext()) {
@@ -9529,7 +9536,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         winAnimatorList.add(winAnimator);
                     }
                 }
-                allWinAnimatorLists.add(winAnimatorList);
+                allWinAnimatorLists.put(displayContent.getDisplayId(), winAnimatorList);
             }
 
             layoutToAnim.mWallpaperTarget = mWallpaperTarget;
@@ -9555,20 +9562,21 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    void setAnimDimParams(DimAnimator.Parameters params) {
+    void setAnimDimParams(int displayId, DimAnimator.Parameters params) {
         synchronized (mLayoutToAnim) {
-            mLayoutToAnim.mDimParams = params;
+            mLayoutToAnim.mDimParams.put(displayId, params);
             scheduleAnimationLocked();
         }
     }
 
-    void startDimming(final WindowStateAnimator winAnimator, final float target,
+    void startDimmingLocked(final WindowStateAnimator winAnimator, final float target,
                       final int width, final int height) {
-        setAnimDimParams(new DimAnimator.Parameters(winAnimator, width, height, target));
+        setAnimDimParams(winAnimator.mWin.getDisplayId(),
+                new DimAnimator.Parameters(winAnimator, width, height, target));
     }
 
-    void stopDimming() {
-        setAnimDimParams(null);
+    void stopDimmingLocked(int displayId) {
+        setAnimDimParams(displayId, null);
     }
 
     private boolean needsLayout() {
@@ -9900,19 +9908,22 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         if (CUSTOM_SCREEN_ROTATION) {
-            if (mAnimator.mScreenRotationAnimation != null) {
-                mAnimator.mScreenRotationAnimation.kill();
-                mAnimator.mScreenRotationAnimation = null;
+            final DisplayContent displayContent = getDefaultDisplayContentLocked();
+            final int displayId = displayContent.getDisplayId();
+            ScreenRotationAnimation screenRotationAnimation =
+                    mAnimator.getScreenRotationAnimationLocked(displayId);
+            if (screenRotationAnimation != null) {
+                screenRotationAnimation.kill();
             }
 
             // TODO(multidisplay): rotation on main screen only.
-            final DisplayContent displayContent = getDefaultDisplayContentLocked();
             final Display display = displayContent.getDisplay();
             final DisplayInfo displayInfo = displayContent.getDisplayInfo();
-            mAnimator.mScreenRotationAnimation = new ScreenRotationAnimation(mContext,
+            screenRotationAnimation = new ScreenRotationAnimation(mContext,
                     display, mFxSession, inTransaction, displayInfo.logicalWidth,
                     displayInfo.logicalHeight, display.getRotation(),
                     exitAnim, enterAnim);
+            mAnimator.setScreenRotationAnimationLocked(displayId, screenRotationAnimation);
         }
     }
 
@@ -9940,24 +9951,30 @@ public class WindowManagerService extends IWindowManager.Stub
 
         boolean updateRotation = false;
 
-        if (CUSTOM_SCREEN_ROTATION && mAnimator.mScreenRotationAnimation != null
-                && mAnimator.mScreenRotationAnimation.hasScreenshot()) {
+        final DisplayContent displayContent = getDefaultDisplayContentLocked();
+        final int displayId = displayContent.getDisplayId();
+        ScreenRotationAnimation screenRotationAnimation =
+                mAnimator.getScreenRotationAnimationLocked(displayId);
+        if (CUSTOM_SCREEN_ROTATION && screenRotationAnimation != null
+                && screenRotationAnimation.hasScreenshot()) {
             if (DEBUG_ORIENTATION) Slog.i(TAG, "**** Dismissing screen rotation animation");
             // TODO(multidisplay): rotation on main screen only.
-            DisplayInfo displayInfo = getDefaultDisplayContentLocked().getDisplayInfo();
-            if (mAnimator.mScreenRotationAnimation.dismiss(mFxSession, MAX_ANIMATION_DURATION,
+            DisplayInfo displayInfo = displayContent.getDisplayInfo();
+            if (screenRotationAnimation.dismiss(mFxSession, MAX_ANIMATION_DURATION,
                     mTransitionAnimationScale, displayInfo.logicalWidth,
                         displayInfo.logicalHeight)) {
                 updateLayoutToAnimationLocked();
             } else {
-                mAnimator.mScreenRotationAnimation.kill();
-                mAnimator.mScreenRotationAnimation = null;
+                screenRotationAnimation.kill();
+                screenRotationAnimation = null;
+                mAnimator.setScreenRotationAnimationLocked(displayId, screenRotationAnimation);
                 updateRotation = true;
             }
         } else {
-            if (mAnimator.mScreenRotationAnimation != null) {
-                mAnimator.mScreenRotationAnimation.kill();
-                mAnimator.mScreenRotationAnimation = null;
+            if (screenRotationAnimation != null) {
+                screenRotationAnimation.kill();
+                screenRotationAnimation = null;
+                mAnimator.setScreenRotationAnimationLocked(displayId, screenRotationAnimation);
             }
             updateRotation = true;
         }
@@ -10394,11 +10411,11 @@ public class WindowManagerService extends IWindowManager.Stub
                         pw.print(": "); pw.println(pair.second);
             }
         }
-        pw.println();
+        pw.println("  DisplayContents");
         if (mDisplayReady) {
             DisplayContentsIterator dCIterator = new DisplayContentsIterator();
             while (dCIterator.hasNext()) {
-                dCIterator.next().dump(pw);
+                dCIterator.next().dump("    ", pw);
             }
         } else {
             pw.println("  NO DISPLAY");
@@ -10463,10 +10480,6 @@ public class WindowManagerService extends IWindowManager.Stub
             pw.print("  mLastWindowForcedOrientation="); pw.print(mLastWindowForcedOrientation);
                     pw.print(" mForcedAppOrientation="); pw.println(mForcedAppOrientation);
             pw.print("  mDeferredRotationPauseCount="); pw.println(mDeferredRotationPauseCount);
-            if (mAnimator.mScreenRotationAnimation != null) {
-                pw.println("  mScreenRotationAnimation:");
-                mAnimator.mScreenRotationAnimation.printTo("    ", pw);
-            }
             pw.print("  mWindowAnimationScale="); pw.print(mWindowAnimationScale);
                     pw.print(" mTransitionWindowAnimationScale="); pw.print(mTransitionAnimationScale);
                     pw.print(" mAnimatorDurationScale="); pw.println(mAnimatorDurationScale);
@@ -10515,7 +10528,7 @@ public class WindowManagerService extends IWindowManager.Stub
             pw.print("  mStartingIconInTransition="); pw.print(mStartingIconInTransition);
                     pw.print(" mSkipAppTransitionAnimation="); pw.println(mSkipAppTransitionAnimation);
             pw.println("  Window Animator:");
-            mAnimator.dump(pw, "    ", dumpAll);
+            mAnimator.dumpLocked(pw, "    ", dumpAll);
         }
     }
 
@@ -10850,6 +10863,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private void handleDisplayAddedLocked(int displayId) {
         createDisplayContentLocked(mDisplayManager.getDisplay(displayId));
+        displayReady(displayId);
     }
 
     @Override
@@ -10865,6 +10879,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final WindowState win = windows.get(i);
             removeWindowLocked(win.mSession, win);
         }
+        mAnimator.removeDisplayLocked(displayId);
     }
 
     @Override
