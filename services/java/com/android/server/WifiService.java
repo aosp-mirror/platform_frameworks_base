@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -55,6 +56,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -834,7 +836,11 @@ public class WifiService extends IWifiManager.Stub {
      */
     public List<ScanResult> getScanResults() {
         enforceAccessPermission();
-        return mWifiStateMachine.syncGetScanResultsList();
+        if (UserHandle.getCallingUserId() != ActivityManager.getCurrentUser()) {
+            return new ArrayList<ScanResult>();
+        } else {
+            return mWifiStateMachine.syncGetScanResultsList();
+        }
     }
 
     /**
