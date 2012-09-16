@@ -360,6 +360,9 @@ public interface IActivityManager extends IInterface {
     // manage your activity to make sure it is always the uid you expect.
     public int getLaunchedFromUid(IBinder activityToken) throws RemoteException;
 
+    public void registerUserSwitchObserver(IUserSwitchObserver observer) throws RemoteException;
+    public void unregisterUserSwitchObserver(IUserSwitchObserver observer) throws RemoteException;
+
     /*
      * Private non-Binder interfaces
      */
@@ -609,4 +612,6 @@ public interface IActivityManager extends IInterface {
     int IS_INTENT_SENDER_AN_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+151;
     int START_ACTIVITY_AS_USER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+152;
     int STOP_USER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+153;
+    int REGISTER_USER_SWITCH_OBSERVER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+154;
+    int UNREGISTER_USER_SWITCH_OBSERVER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+155;
 }

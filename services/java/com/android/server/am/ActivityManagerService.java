@@ -49,6 +49,7 @@ import android.app.IProcessObserver;
 import android.app.IServiceConnection;
 import android.app.IStopUserCallback;
 import android.app.IThumbnailReceiver;
+import android.app.IUserSwitchObserver;
 import android.app.Instrumentation;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -100,6 +101,7 @@ import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IPermissionController;
+import android.os.IRemoteCallback;
 import android.os.IUserManager;
 import android.os.Looper;
 import android.os.Message;
@@ -246,6 +248,10 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     // How long we wait until we timeout on key dispatching during instrumentation.
     static final int INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT = 60*1000;
+
+    // Amount of time we wait for observers to handle a user switch before
+    // giving up on them and unfreezing the screen.
+    static final int USER_SWITCH_TIMEOUT = 2*1000;
 
     static final int MY_PID = Process.myPid();
     
@@ -436,6 +442,17 @@ public final class ActivityManagerService extends ActivityManagerNative
      * LRU list of history of current users.  Most recently current is at the end.
      */
     final ArrayList<Integer> mUserLru = new ArrayList<Integer>();
+
+    /**
+     * Registered observers of the user switching mechanics.
+     */
+    final RemoteCallbackList<IUserSwitchObserver> mUserSwitchObservers
+            = new RemoteCallbackList<IUserSwitchObserver>();
+
+    /**
+     * Currently active user switch.
+     */
+    Object mCurUserSwitchCallback;
 
     /**
      * Packages that the user has asked to have run in screen size
@@ -863,6 +880,9 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int DISPATCH_PROCESSES_CHANGED = 31;
     static final int DISPATCH_PROCESS_DIED = 32;
     static final int REPORT_MEM_USAGE = 33;
+    static final int REPORT_USER_SWITCH_MSG = 34;
+    static final int CONTINUE_USER_SWITCH_MSG = 35;
+    static final int USER_SWITCH_TIMEOUT_MSG = 36;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -1291,6 +1311,18 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                 };
                 thread.start();
+                break;
+            }
+            case REPORT_USER_SWITCH_MSG: {
+                dispatchUserSwitch((UserStartedState)msg.obj, msg.arg1, msg.arg2);
+                break;
+            }
+            case CONTINUE_USER_SWITCH_MSG: {
+                continueUserSwitch((UserStartedState)msg.obj, msg.arg1, msg.arg2);
+                break;
+            }
+            case USER_SWITCH_TIMEOUT_MSG: {
+                timeoutUserSwitch((UserStartedState)msg.obj, msg.arg1, msg.arg2);
                 break;
             }
             }
@@ -2142,7 +2174,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    boolean startHomeActivityLocked(int userId, UserStartedState startingUser) {
+    boolean startHomeActivityLocked(int userId) {
         if (mHeadless) {
             // Added because none of the other calls to ensureBootCompleted seem to fire
             // when running headless.
@@ -2180,9 +2212,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mMainStack.startActivityLocked(null, intent, null, aInfo,
                         null, null, 0, 0, 0, 0, null, false, null);
             }
-        }
-        if (startingUser != null) {
-            mMainStack.addStartingUserLocked(startingUser);
         }
 
         return true;
@@ -3731,7 +3760,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         broadcastIntentLocked(null, null, intent,
                 null, null, 0, null, null, null,
                 false, false,
-                MY_PID, Process.SYSTEM_UID, userId);
+                MY_PID, Process.SYSTEM_UID, UserHandle.USER_ALL);
     }
 
     private final boolean killPackageProcessesLocked(String packageName, int appId,
@@ -7660,42 +7689,45 @@ public final class ActivityManagerService extends ActivityManagerNative
                         }
                     }
 
+                    final int[] users = getUsersLocked();
                     for (int i=0; i<ris.size(); i++) {
                         ActivityInfo ai = ris.get(i).activityInfo;
                         ComponentName comp = new ComponentName(ai.packageName, ai.name);
                         doneReceivers.add(comp);
                         intent.setComponent(comp);
-                        IIntentReceiver finisher = null;
-                        if (i == ris.size()-1) {
-                            finisher = new IIntentReceiver.Stub() {
-                                public void performReceive(Intent intent, int resultCode,
-                                        String data, Bundle extras, boolean ordered,
-                                        boolean sticky, int sendingUser) {
-                                    // The raw IIntentReceiver interface is called
-                                    // with the AM lock held, so redispatch to
-                                    // execute our code without the lock.
-                                    mHandler.post(new Runnable() {
-                                        public void run() {
-                                            synchronized (ActivityManagerService.this) {
-                                                mDidUpdate = true;
+                        for (int j=0; j<users.length; j++) {
+                            IIntentReceiver finisher = null;
+                            if (i == ris.size()-1 && j == users.length-1) {
+                                finisher = new IIntentReceiver.Stub() {
+                                    public void performReceive(Intent intent, int resultCode,
+                                            String data, Bundle extras, boolean ordered,
+                                            boolean sticky, int sendingUser) {
+                                        // The raw IIntentReceiver interface is called
+                                        // with the AM lock held, so redispatch to
+                                        // execute our code without the lock.
+                                        mHandler.post(new Runnable() {
+                                            public void run() {
+                                                synchronized (ActivityManagerService.this) {
+                                                    mDidUpdate = true;
+                                                }
+                                                writeLastDonePreBootReceivers(doneReceivers);
+                                                showBootMessage(mContext.getText(
+                                                        R.string.android_upgrading_complete),
+                                                        false);
+                                                systemReady(goingCallback);
                                             }
-                                            writeLastDonePreBootReceivers(doneReceivers);
-                                            showBootMessage(mContext.getText(
-                                                    R.string.android_upgrading_complete),
-                                                    false);
-                                            systemReady(goingCallback);
-                                        }
-                                    });
-                                }
-                            };
-                        }
-                        Slog.i(TAG, "Sending system update to: " + intent.getComponent());
-                        // XXX also need to send this to stopped users(!!!)
-                        broadcastIntentLocked(null, null, intent, null, finisher,
-                                0, null, null, null, true, false, MY_PID, Process.SYSTEM_UID,
-                                UserHandle.USER_ALL);
-                        if (finisher != null) {
-                            mWaitingUpdate = true;
+                                        });
+                                    }
+                                };
+                            }
+                            Slog.i(TAG, "Sending system update to " + intent.getComponent()
+                                    + " for user " + users[j]);
+                            broadcastIntentLocked(null, null, intent, null, finisher,
+                                    0, null, null, null, true, false, MY_PID, Process.SYSTEM_UID,
+                                    users[j]);
+                            if (finisher != null) {
+                                mWaitingUpdate = true;
+                            }
                         }
                     }
                 }
@@ -7817,7 +7849,19 @@ public final class ActivityManagerService extends ActivityManagerNative
             } catch (RemoteException e) {
             }
 
+            long ident = Binder.clearCallingIdentity();
+            try {
+                Intent intent = new Intent(Intent.ACTION_USER_STARTED);
+                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                intent.putExtra(Intent.EXTRA_USER_HANDLE, mCurrentUserId);
+                broadcastIntentLocked(null, null, intent,
+                        null, null, 0, null, null, null,
+                        false, false, MY_PID, Process.SYSTEM_UID, mCurrentUserId);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
             mMainStack.resumeTopActivityLocked(null);
+            sendUserSwitchBroadcastsLocked(-1, mCurrentUserId);
         }
     }
 
@@ -11435,9 +11479,12 @@ public final class ActivityManagerService extends ActivityManagerNative
         // Make sure that the user who is receiving this broadcast is started
         // If not, we will just skip it.
         if (userId != UserHandle.USER_ALL && mStartedUsers.get(userId) == null) {
-            Slog.w(TAG, "Skipping broadcast of " + intent
-                    + ": user " + userId + " is stopped");
-            return ActivityManager.BROADCAST_SUCCESS;
+            if (callingUid != Process.SYSTEM_UID || (intent.getFlags()
+                    & Intent.FLAG_RECEIVER_BOOT_UPGRADE) == 0) {
+                Slog.w(TAG, "Skipping broadcast of " + intent
+                        + ": user " + userId + " is stopped");
+                return ActivityManager.BROADCAST_SUCCESS;
+            }
         }
 
         /*
@@ -13884,44 +13931,177 @@ public final class ActivityManagerService extends ActivityManagerNative
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }
-        synchronized (this) {
-            if (mCurrentUserId == userId) {
-                return true;
-            }
 
-            mWindowManager.startFreezingScreen(R.anim.screen_user_exit,
-                    R.anim.screen_user_enter);
-
-            // If the user we are switching to is not currently started, then
-            // we need to start it now.
-            if (mStartedUsers.get(userId) == null) {
-                mStartedUsers.put(userId, new UserStartedState(new UserHandle(userId), false));
-            }
-
-            mCurrentUserId = userId;
-            Integer userIdInt = Integer.valueOf(userId);
-            mUserLru.remove(userIdInt);
-            mUserLru.add(userIdInt);
-            boolean haveActivities = mMainStack.switchUser(userId);
-            if (!haveActivities) {
-                startHomeActivityLocked(userId, mStartedUsers.get(userId));
-            } else {
-                mMainStack.addStartingUserLocked(mStartedUsers.get(userId));
-            }
-        }
-
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
-            // Inform of user switch
-            Intent addedIntent = new Intent(Intent.ACTION_USER_SWITCHED);
-            addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
-            mContext.sendBroadcastAsUser(addedIntent, UserHandle.ALL,
-                    android.Manifest.permission.MANAGE_USERS);
+            synchronized (this) {
+                final int oldUserId = mCurrentUserId;
+                if (oldUserId == userId) {
+                    return true;
+                }
+
+                final UserInfo userInfo = getUserManagerLocked().getUserInfo(userId);
+                if (userInfo == null) {
+                    Slog.w(TAG, "No user info for user #" + userId);
+                    return false;
+                }
+
+                mWindowManager.startFreezingScreen(R.anim.screen_user_exit,
+                        R.anim.screen_user_enter);
+
+                // If the user we are switching to is not currently started, then
+                // we need to start it now.
+                if (mStartedUsers.get(userId) == null) {
+                    mStartedUsers.put(userId, new UserStartedState(new UserHandle(userId), false));
+                }
+
+                mCurrentUserId = userId;
+                final Integer userIdInt = Integer.valueOf(userId);
+                mUserLru.remove(userIdInt);
+                mUserLru.add(userIdInt);
+
+                final UserStartedState uss = mStartedUsers.get(userId);
+
+                mHandler.removeMessages(REPORT_USER_SWITCH_MSG);
+                mHandler.removeMessages(USER_SWITCH_TIMEOUT_MSG);
+                mHandler.sendMessage(mHandler.obtainMessage(REPORT_USER_SWITCH_MSG,
+                        oldUserId, userId, uss));
+                mHandler.sendMessageDelayed(mHandler.obtainMessage(USER_SWITCH_TIMEOUT_MSG,
+                        oldUserId, userId, uss), USER_SWITCH_TIMEOUT);
+                Intent intent = new Intent(Intent.ACTION_USER_STARTED);
+                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
+                broadcastIntentLocked(null, null, intent,
+                        null, null, 0, null, null, null,
+                        false, false, MY_PID, Process.SYSTEM_UID, userId);
+
+                if ((userInfo.flags&UserInfo.FLAG_INITIALIZED) == 0) {
+                    if (userId != 0) {
+                        intent = new Intent(Intent.ACTION_USER_INITIALIZE);
+                        broadcastIntentLocked(null, null, intent, null,
+                                new IIntentReceiver.Stub() {
+                                    public void performReceive(Intent intent, int resultCode,
+                                            String data, Bundle extras, boolean ordered,
+                                            boolean sticky, int sendingUser) {
+                                        synchronized (ActivityManagerService.this) {
+                                            getUserManagerLocked().makeInitialized(userInfo.id);
+                                        }
+                                    }
+                                }, 0, null, null, null, true, false, MY_PID, Process.SYSTEM_UID,
+                                userId);
+                    } else {
+                        getUserManagerLocked().makeInitialized(userInfo.id);
+                    }
+                }
+
+                boolean haveActivities = mMainStack.switchUserLocked(userId, uss);
+                if (!haveActivities) {
+                    startHomeActivityLocked(userId);
+                }
+            
+                sendUserSwitchBroadcastsLocked(oldUserId, userId);
+            }
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
 
         return true;
+    }
+
+    void sendUserSwitchBroadcastsLocked(int oldUserId, int newUserId) {
+        long ident = Binder.clearCallingIdentity();
+        try {
+            Intent intent;
+            if (oldUserId >= 0) {
+                intent = new Intent(Intent.ACTION_USER_BACKGROUND);
+                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                intent.putExtra(Intent.EXTRA_USER_HANDLE, oldUserId);
+                broadcastIntentLocked(null, null, intent,
+                        null, null, 0, null, null, null,
+                        false, false, MY_PID, Process.SYSTEM_UID, oldUserId);
+            }
+            if (newUserId >= 0) {
+                intent = new Intent(Intent.ACTION_USER_FOREGROUND);
+                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                intent.putExtra(Intent.EXTRA_USER_HANDLE, newUserId);
+                broadcastIntentLocked(null, null, intent,
+                        null, null, 0, null, null, null,
+                        false, false, MY_PID, Process.SYSTEM_UID, newUserId);
+                intent = new Intent(Intent.ACTION_USER_SWITCHED);
+                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                intent.putExtra(Intent.EXTRA_USER_HANDLE, newUserId);
+                broadcastIntentLocked(null, null, intent,
+                        null, null, 0, null, null,
+                        android.Manifest.permission.MANAGE_USERS,
+                        false, false, MY_PID, Process.SYSTEM_UID, UserHandle.USER_ALL);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    void dispatchUserSwitch(final UserStartedState uss, final int oldUserId,
+            final int newUserId) {
+        final int N = mUserSwitchObservers.beginBroadcast();
+        if (N > 0) {
+            final IRemoteCallback callback = new IRemoteCallback.Stub() {
+                int mCount = 0;
+                @Override
+                public void sendResult(Bundle data) throws RemoteException {
+                    synchronized (ActivityManagerService.this) {
+                        if (mCurUserSwitchCallback == this) {
+                            mCount++;
+                            if (mCount == N) {
+                                sendContinueUserSwitchLocked(uss, oldUserId, newUserId);
+                            }
+                        }
+                    }
+                }
+            };
+            synchronized (this) {
+                mCurUserSwitchCallback = callback;
+            }
+            for (int i=0; i<N; i++) {
+                try {
+                    mUserSwitchObservers.getBroadcastItem(i).onUserSwitching(
+                            newUserId, callback);
+                } catch (RemoteException e) {
+                }
+            }
+        } else {
+            synchronized (this) {
+                sendContinueUserSwitchLocked(uss, oldUserId, newUserId);
+            }
+        }
+        mUserSwitchObservers.finishBroadcast();
+    }
+
+    void timeoutUserSwitch(UserStartedState uss, int oldUserId, int newUserId) {
+        synchronized (this) {
+            Slog.w(TAG, "User switch timeout: from " + oldUserId + " to " + newUserId);
+            sendContinueUserSwitchLocked(uss, oldUserId, newUserId);
+        }
+    }
+
+    void sendContinueUserSwitchLocked(UserStartedState uss, int oldUserId, int newUserId) {
+        mCurUserSwitchCallback = null;
+        mHandler.removeMessages(USER_SWITCH_TIMEOUT_MSG);
+        mHandler.sendMessage(mHandler.obtainMessage(CONTINUE_USER_SWITCH_MSG,
+                oldUserId, newUserId, uss));
+    }
+
+    void continueUserSwitch(UserStartedState uss, int oldUserId, int newUserId) {
+        final int N = mUserSwitchObservers.beginBroadcast();
+        for (int i=0; i<N; i++) {
+            try {
+                mUserSwitchObservers.getBroadcastItem(i).onUserSwitchComplete(newUserId);
+            } catch (RemoteException e) {
+            }
+        }
+        mUserSwitchObservers.finishBroadcast();
+        synchronized (this) {
+            mWindowManager.stopFreezingScreen();
+        }
     }
 
     void finishUserSwitch(UserStartedState uss) {
@@ -13937,7 +14117,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                         android.Manifest.permission.RECEIVE_BOOT_COMPLETED,
                         false, false, MY_PID, Process.SYSTEM_UID, userId);
             }
-            mWindowManager.stopFreezingScreen();
         }
     }
 
@@ -14072,6 +14251,26 @@ public final class ActivityManagerService extends ActivityManagerNative
     boolean isUserRunningLocked(int userId) {
         UserStartedState state = mStartedUsers.get(userId);
         return state != null && state.mState != UserStartedState.STATE_STOPPING;
+    }
+
+    @Override
+    public void registerUserSwitchObserver(IUserSwitchObserver observer) {
+        if (checkCallingPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+                != PackageManager.PERMISSION_GRANTED) {
+            String msg = "Permission Denial: registerUserSwitchObserver() from pid="
+                    + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid()
+                    + " requires " + android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
+
+        mUserSwitchObservers.register(observer);
+    }
+
+    @Override
+    public void unregisterUserSwitchObserver(IUserSwitchObserver observer) {
+        mUserSwitchObservers.unregister(observer);
     }
 
     private boolean userExists(int userId) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,12 @@
  * limitations under the License.
  */
 
-package android.service.wallpaper;
+package android.app;
 
-import android.os.ParcelFileDescriptor;
-import android.service.wallpaper.IWallpaperEngine;
+import android.os.IRemoteCallback;
 
-/**
- * @hide
- */
-interface IWallpaperConnection {
-	void attachEngine(IWallpaperEngine engine);
-	void engineShown(IWallpaperEngine engine);
-    ParcelFileDescriptor setWallpaper(String name);
+/** {@hide} */
+oneway interface IUserSwitchObserver {
+    void onUserSwitching(int newUserId, IRemoteCallback reply);
+    void onUserSwitchComplete(int newUserId);
 }

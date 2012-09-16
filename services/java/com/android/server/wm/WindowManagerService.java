@@ -294,7 +294,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     KeyguardDisableHandler.KEYGUARD_POLICY_CHANGED);
             } else if (Intent.ACTION_USER_SWITCHED.equals(action)) {
                 final int newUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
-                Slog.v(TAG, "Switching user from " + mCurrentUserId + " to " + newUserId);
                 mCurrentUserId = newUserId;
             }
         }

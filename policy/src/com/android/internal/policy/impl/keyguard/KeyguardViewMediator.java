@@ -48,6 +48,7 @@ import android.util.EventLog;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicy;
 
 
@@ -299,6 +300,12 @@ public class KeyguardViewMediator {
             mLockPatternUtils.setCurrentUser(userId);
             synchronized (KeyguardViewMediator.this) {
                 resetStateLocked();
+            }
+            // We should always go back to the locked state when a user
+            // switch happens.  Is there a more direct way to do this?
+            try {
+                WindowManagerGlobal.getWindowManagerService().lockNow();
+            } catch (RemoteException e) {
             }
         }
 
