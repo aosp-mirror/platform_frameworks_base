@@ -52,7 +52,6 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -755,8 +754,6 @@ final class ActivityStack {
             completeResumeLocked(r);
             checkReadyForSleepLocked();
             if (DEBUG_SAVED_STATE) Slog.i(TAG, "Launch completed; removing icicle of " + r.icicle);
-            r.icicle = null;
-            r.haveState = false;
         } else {
             // This activity is not starting in the resumed state... which
             // should look like we asked it to pause+stop (but remain visible),
@@ -1010,7 +1007,21 @@ final class ActivityStack {
             resumeTopActivityLocked(null);
         }
     }
-    
+
+    final void activityResumed(IBinder token) {
+        ActivityRecord r = null;
+
+        synchronized (mService) {
+            int index = indexOfTokenLocked(token);
+            if (index >= 0) {
+                r = mHistory.get(index);
+                if (DEBUG_SAVED_STATE) Slog.i(TAG, "Resumed activity; dropping state of: " + r);
+                r.icicle = null;
+                r.haveState = false;
+            }
+        }
+    }
+
     final void activityPaused(IBinder token, boolean timeout) {
         if (DEBUG_PAUSE) Slog.v(
             TAG, "Activity paused: token=" + token + ", timeout=" + timeout);
@@ -1488,6 +1499,15 @@ final class ActivityStack {
         // can be resumed...
         if (mResumedActivity != null) {
             if (DEBUG_SWITCH) Slog.v(TAG, "Skip resume: need to start pausing");
+            // At this point we want to put the upcoming activity's process
+            // at the top of the LRU list, since we know we will be needing it
+            // very soon and it would be a waste to let it get killed if it
+            // happens to be sitting towards the end.
+            if (next.app != null && next.app.thread != null) {
+                // No reason to do full oom adj update here; we'll let that
+                // happen whenever it needs to later.
+                mService.updateLruProcessLocked(next.app, false, true);
+            }
             startPausingLocked(userLeaving, false);
             return true;
         }
@@ -1728,11 +1748,6 @@ final class ActivityStack {
                         "resume-exception", true);
                 return true;
             }
-
-            // Didn't need to use the icicle, and it is now out of date.
-            if (DEBUG_SAVED_STATE) Slog.i(TAG, "Resumed activity; didn't need icicle of: " + next);
-            next.icicle = null;
-            next.haveState = false;
             next.stopped = false;
 
         } else {
@@ -2578,7 +2593,6 @@ final class ActivityStack {
             mDismissKeyguardOnNextActivity = false;
             mService.mWindowManager.dismissKeyguard();
         }
-        Slog.i(TAG, "DONE STARTING!");
         return err;
     }
   
