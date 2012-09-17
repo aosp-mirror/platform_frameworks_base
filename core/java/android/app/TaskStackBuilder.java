@@ -162,7 +162,7 @@ public class TaskStackBuilder {
             ActivityInfo info = pm.getActivityInfo(sourceActivityName, 0);
             String parentActivity = info.parentActivityName;
             while (parentActivity != null) {
-                final ComponentName target = new ComponentName(mSourceContext, parentActivity);
+                final ComponentName target = new ComponentName(info.packageName, parentActivity);
                 info = pm.getActivityInfo(target, 0);
                 parentActivity = info.parentActivityName;
                 final Intent parent = parentActivity == null && insertAt == 0
