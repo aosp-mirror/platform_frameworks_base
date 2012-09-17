@@ -1801,13 +1801,13 @@ public class Editor {
             mTextView.deleteText_internal(dragSourceStart, dragSourceEnd);
 
             // Make sure we do not leave two adjacent spaces.
-            CharSequence t = mTextView.getTransformedText(dragSourceStart - 1, dragSourceStart + 1);
-            if ( (dragSourceStart == 0 || Character.isSpaceChar(t.charAt(0))) &&
-                    (dragSourceStart == mTextView.getText().length() ||
-                    Character.isSpaceChar(t.charAt(1))) ) {
-                final int pos = dragSourceStart == mTextView.getText().length() ?
-                        dragSourceStart - 1 : dragSourceStart;
-                mTextView.deleteText_internal(pos, pos + 1);
+            final int prevCharIdx = Math.max(0,  dragSourceStart - 1);
+            final int nextCharIdx = Math.min(mTextView.getText().length(), dragSourceStart + 1);
+            if (nextCharIdx > prevCharIdx + 1) {
+                CharSequence t = mTextView.getTransformedText(prevCharIdx, nextCharIdx);
+                if (Character.isSpaceChar(t.charAt(0)) && Character.isSpaceChar(t.charAt(1))) {
+                    mTextView.deleteText_internal(prevCharIdx, prevCharIdx + 1);
+                }
             }
         }
     }
