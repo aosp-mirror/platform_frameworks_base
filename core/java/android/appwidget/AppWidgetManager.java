@@ -216,6 +216,20 @@ public class AppWidgetManager {
     public static final String EXTRA_CUSTOM_EXTRAS = "customExtras";
 
     /**
+     * An intent extra to pass to the AppWidget picker which allows the picker to filter
+     * the list based on the {@link AppWidgetProviderInfo#widgetCategory}.
+     */
+    /** @hide */
+    public static final String EXTRA_CATEGORY_FILTER = "categoryFilter";
+
+    /**
+     * An intent extra to pass to the AppWidget picker which allows the picker to filter
+     * the list based on the {@link AppWidgetProviderInfo#widgetFeatures}.
+     */
+    /** @hide */
+    public static final String EXTRA_FEATURES_FILTER = "featuresFilter";
+
+    /**
      * A sentiel value that the AppWidget manager will never return as a appWidgetId.
      */
     public static final int INVALID_APPWIDGET_ID = 0;
