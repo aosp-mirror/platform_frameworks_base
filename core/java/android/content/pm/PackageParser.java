@@ -1543,6 +1543,9 @@ public class PackageParser {
                 com.android.internal.R.styleable.AndroidManifestPermission_protectionLevel,
                 PermissionInfo.PROTECTION_NORMAL);
 
+        perm.info.flags = sa.getInt(
+                com.android.internal.R.styleable.AndroidManifestPermission_permissionFlags, 0);
+
         sa.recycle();
 
         if (perm.info.protectionLevel == -1) {

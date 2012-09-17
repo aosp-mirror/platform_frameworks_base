@@ -207,6 +207,14 @@
         <flag name="personalInfo" value="0x0001" />
     </attr>
 
+    <!-- Flags indicating more context for a permission. -->
+    <attr name="permissionFlags">
+        <!-- Set to indicate that this permission allows an operation that
+             may cost the user money.  Such permissions may be highlighted
+             when shown to the user with this additional information.  -->
+        <flag name="costsMoney" value="0x0001" />
+    </attr>
+
     <!-- Specified the name of a group that this permission is associated
          with.  The group must have been defined with the
          {@link android.R.styleable#AndroidManifestPermissionGroup permission-group} tag. -->
@@ -894,6 +902,7 @@
         <attr name="permissionGroup" />
         <attr name="description" />
         <attr name="protectionLevel" />
+        <attr name="permissionFlags" />
     </declare-styleable>
     
     <!-- The <code>permission-group</code> tag declares a logical grouping of
