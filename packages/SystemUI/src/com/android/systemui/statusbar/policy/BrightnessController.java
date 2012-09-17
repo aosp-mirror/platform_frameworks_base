@@ -29,6 +29,10 @@ import android.util.Slog;
 import android.view.IWindowManager;
 import android.widget.CompoundButton;
 
+import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
+
+import java.util.ArrayList;
+
 public class BrightnessController implements ToggleSlider.Listener {
     private static final String TAG = "StatusBar.BrightnessController";
 
@@ -38,6 +42,13 @@ public class BrightnessController implements ToggleSlider.Listener {
     private Context mContext;
     private ToggleSlider mControl;
     private IPowerManager mPower;
+
+    private ArrayList<BrightnessStateChangeCallback> mChangeCallbacks =
+            new ArrayList<BrightnessStateChangeCallback>();
+
+    public interface BrightnessStateChangeCallback {
+        public void onBrightnessLevelChanged();
+    }
 
     public BrightnessController(Context context, ToggleSlider control) {
         mContext = context;
@@ -79,6 +90,10 @@ public class BrightnessController implements ToggleSlider.Listener {
         control.setOnChangedListener(this);
     }
 
+    public void addStateChangedCallback(BrightnessStateChangeCallback cb) {
+        mChangeCallbacks.add(cb);
+    }
+
     public void onChanged(ToggleSlider view, boolean tracking, boolean automatic, int value) {
         setMode(automatic ? Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC
                 : Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
@@ -93,6 +108,10 @@ public class BrightnessController implements ToggleSlider.Listener {
                         }
                     });
             }
+        }
+
+        for (BrightnessStateChangeCallback cb : mChangeCallbacks) {
+            cb.onBrightnessLevelChanged();
         }
     }
 
