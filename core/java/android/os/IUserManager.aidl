@@ -28,6 +28,7 @@ interface IUserManager {
     boolean removeUser(int userHandle);
     void setUserName(int userHandle, String name);
     ParcelFileDescriptor setUserIcon(int userHandle);
+    ParcelFileDescriptor getUserIcon(int userHandle);
     List<UserInfo> getUsers();
     UserInfo getUserInfo(int userHandle);
     void setGuestEnabled(boolean enable);
