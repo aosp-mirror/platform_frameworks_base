@@ -177,6 +177,11 @@ void usage(void)
         "       Make the resources ID non constant. This is required to make an R java class\n"
         "       that does not contain the final value but is used to make reusable compiled\n"
         "       libraries that need to access resources.\n"
+        "   --error-on-failed-insert\n"
+        "       Forces aapt to return an error if it fails to insert values into the manifest\n"
+        "       with --debug-mode, --min-sdk-version, --target-sdk-version --version-code\n"
+        "       and --version-name.\n"
+        "       Insertion typically fails if the manifest already defines the attribute.\n"
         "   --ignore-assets\n"
         "       Assets to be ignored. Default pattern is:\n"
         "       %s\n",
@@ -542,6 +547,8 @@ int main(int argc, char* const argv[])
                     bundle.setInstrumentationPackageNameOverride(argv[0]);
                 } else if (strcmp(cp, "-auto-add-overlay") == 0) {
                     bundle.setAutoAddOverlay(true);
+                } else if (strcmp(cp, "-error-on-failed-insert") == 0) {
+                    bundle.setErrorOnFailedInsert(true);
                 } else if (strcmp(cp, "-product") == 0) {
                     argc--;
                     argv++;
