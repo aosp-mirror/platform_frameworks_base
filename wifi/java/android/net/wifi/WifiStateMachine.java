@@ -1771,15 +1771,18 @@ public class WifiStateMachine extends StateMachine {
         }
 
         /* Disable power save and suspend optimizations during DHCP */
-        mWifiNative.setPowerSave(false);
+        // Note: The order here is important for now. Brcm driver changes
+        // power settings when we control suspend mode optimizations.
+        // TODO: Remove this comment when the driver is fixed.
         setSuspendOptimizationsNative(SUSPEND_DUE_TO_DHCP, false);
+        mWifiNative.setPowerSave(false);
     }
 
 
     void handlePostDhcpSetup() {
         /* Restore power save and suspend optimizations */
-        mWifiNative.setPowerSave(true);
         setSuspendOptimizationsNative(SUSPEND_DUE_TO_DHCP, true);
+        mWifiNative.setPowerSave(true);
 
         // Set the coexistence mode back to its default value
         mWifiNative.setBluetoothCoexistenceMode(
@@ -2710,8 +2713,6 @@ public class WifiStateMachine extends StateMachine {
                 mWifiNative.stopFilteringMulticastV4Packets();
             }
 
-            mWifiNative.setPowerSave(true);
-
             if (mIsScanMode) {
                 mWifiNative.setScanResultHandling(SCAN_ONLY_MODE);
                 mWifiNative.disconnect();
@@ -2736,6 +2737,7 @@ public class WifiStateMachine extends StateMachine {
                 mWifiNative.setSuspendOptimizations(mSuspendOptNeedsDisabled == 0
                         && mUserWantsSuspendOpt.get());
             }
+            mWifiNative.setPowerSave(true);
 
             if (mP2pSupported) mWifiP2pChannel.sendMessage(WifiStateMachine.CMD_ENABLE_P2P);
         }
