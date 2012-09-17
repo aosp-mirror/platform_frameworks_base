@@ -18,7 +18,6 @@ package android.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.ValueModel;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
@@ -34,7 +33,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
  *
  * @attr ref android.R.styleable#SeekBar_thumb
  */
-public class SeekBar extends AbsSeekBar implements ValueEditor<Integer> {
+public class SeekBar extends AbsSeekBar {
 
     /**
      * A callback that notifies clients when the progress level has been
@@ -70,9 +69,8 @@ public class SeekBar extends AbsSeekBar implements ValueEditor<Integer> {
         void onStopTrackingTouch(SeekBar seekBar);
     }
 
-    private ValueModel<Integer> mValueModel = ValueModel.EMPTY;
     private OnSeekBarChangeListener mOnSeekBarChangeListener;
-
+    
     public SeekBar(Context context) {
         this(context, null);
     }
@@ -91,21 +89,7 @@ public class SeekBar extends AbsSeekBar implements ValueEditor<Integer> {
 
         if (mOnSeekBarChangeListener != null) {
             mOnSeekBarChangeListener.onProgressChanged(this, getProgress(), fromUser);
-            if (fromUser) {
-                mValueModel.set(getProgress());
-            }
         }
-    }
-
-    @Override
-    public ValueModel<Integer> getValueModel() {
-        return mValueModel;
-    }
-
-    @Override
-    public void setValueModel(ValueModel<Integer> valueModel) {
-        mValueModel = valueModel;
-        setProgress(mValueModel.get());
     }
 
     /**
