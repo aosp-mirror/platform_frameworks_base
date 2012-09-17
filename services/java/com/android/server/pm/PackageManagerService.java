@@ -3535,8 +3535,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                         return DEX_OPT_DEFERRED;
                     } else {
                         Log.i(TAG, "Running dexopt on: " + pkg.applicationInfo.packageName);
-                        ret = mInstaller.dexopt(path, pkg.applicationInfo.uid,
-                                !isForwardLocked(pkg));
+                        final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
+                        ret = mInstaller.dexopt(path, sharedGid, !isForwardLocked(pkg));
                         pkg.mDidDexOpt = true;
                         performed = true;
                     }
