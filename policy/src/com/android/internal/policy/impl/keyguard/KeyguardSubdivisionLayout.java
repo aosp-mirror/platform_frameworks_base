@@ -97,12 +97,14 @@ public class KeyguardSubdivisionLayout extends ViewGroup {
             leafs.clear();
             getLeafs(leafs, 1);
 
-            // We find the first leaf who's depth is not
+            // If the tree is complete, then we start a new level at the rightmost side.
             double r = log2(leafs.size());
             if (Math.ceil(r) == Math.floor(r)) {
                 return leafs.get(leafs.size() - 1);
             }
 
+            // Tree is not complete, find the first leaf who's depth is less than the depth of
+            // the tree.
             int treeDepth = depth();
             for (int i = leafs.size() - 1; i >= 0; i--) {
                 BiTree n = leafs.get(i);
