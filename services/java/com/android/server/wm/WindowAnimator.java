@@ -101,6 +101,23 @@ public class WindowAnimator {
 
     boolean mInitialized = false;
 
+    // forceHiding states.
+    static final int KEYGUARD_NOT_SHOWN     = 0;
+    static final int KEYGUARD_ANIMATING_IN  = 1;
+    static final int KEYGUARD_SHOWN         = 2;
+    static final int KEYGUARD_ANIMATING_OUT = 3;
+    int mForceHiding = KEYGUARD_NOT_SHOWN;
+
+    private String forceHidingToString() {
+        switch (mForceHiding) {
+            case KEYGUARD_NOT_SHOWN:    return "KEYGUARD_NOT_SHOWN";
+            case KEYGUARD_ANIMATING_IN: return "KEYGUARD_ANIMATING_IN";
+            case KEYGUARD_SHOWN:        return "KEYGUARD_SHOWN";
+            case KEYGUARD_ANIMATING_OUT:return "KEYGUARD_ANIMATING_OUT";
+            default: return "KEYGUARD STATE UNKNOWN " + mForceHiding;
+        }
+    }
+
     WindowAnimator(final WindowManagerService service) {
         mService = service;
         mContext = service.mContext;
@@ -280,13 +297,7 @@ public class WindowAnimator {
                 getDisplayContentsAnimatorLocked(displayId).mWinAnimators;
         ArrayList<WindowStateAnimator> unForceHiding = null;
         boolean wallpaperInUnForceHiding = false;
-
-        // forceHiding states.
-        final int KEYGUARD_NOT_SHOWN     = 0;
-        final int KEYGUARD_ANIMATING_IN  = 1;
-        final int KEYGUARD_SHOWN         = 2;
-        final int KEYGUARD_ANIMATING_OUT = 3;
-        int forceHiding = KEYGUARD_NOT_SHOWN;
+        mForceHiding = KEYGUARD_NOT_SHOWN;
 
         for (int i = winAnimatorList.size() - 1; i >= 0; i--) {
             WindowStateAnimator winAnimator = winAnimatorList.get(i);
@@ -329,16 +340,16 @@ public class WindowAnimator {
                     if (win.isReadyForDisplay()) {
                         if (nowAnimating) {
                             if (winAnimator.mAnimationIsEntrance) {
-                                forceHiding = KEYGUARD_ANIMATING_IN;
+                                mForceHiding = KEYGUARD_ANIMATING_IN;
                             } else {
-                                forceHiding = KEYGUARD_ANIMATING_OUT;
+                                mForceHiding = KEYGUARD_ANIMATING_OUT;
                             }
                         } else {
-                            forceHiding = KEYGUARD_SHOWN;
+                            mForceHiding = KEYGUARD_SHOWN;
                         }
                     }
                     if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(TAG,
-                            "Force hide " + forceHiding
+                            "Force hide " + mForceHiding
                             + " hasSurface=" + win.mHasSurface
                             + " policyVis=" + win.mPolicyVisibility
                             + " destroying=" + win.mDestroying
@@ -350,9 +361,9 @@ public class WindowAnimator {
                     final boolean hideWhenLocked =
                             (winAnimator.mAttrFlags & FLAG_SHOW_WHEN_LOCKED) == 0;
                     final boolean changed;
-                    if (((forceHiding == KEYGUARD_ANIMATING_IN)
+                    if (((mForceHiding == KEYGUARD_ANIMATING_IN)
                                 && (!winAnimator.isAnimating() || hideWhenLocked))
-                            || ((forceHiding == KEYGUARD_SHOWN) && hideWhenLocked)) {
+                            || ((mForceHiding == KEYGUARD_SHOWN) && hideWhenLocked)) {
                         changed = win.hideLw(false, false);
                         if (WindowManagerService.DEBUG_VISIBILITY && changed) Slog.v(TAG,
                                 "Now policy hidden: " + win);
@@ -708,10 +719,11 @@ public class WindowAnimator {
         if (dumpAll) {
             if (mWindowDetachedWallpaper != null) {
                 pw.print(prefix); pw.print("mWindowDetachedWallpaper=");
-                        pw.println(mWindowDetachedWallpaper);
+                    pw.println(mWindowDetachedWallpaper);
             }
             pw.print(prefix); pw.print("mAnimTransactionSequence=");
-                    pw.println(mAnimTransactionSequence);
+                pw.print(mAnimTransactionSequence);
+                pw.println(" mForceHiding=" + forceHidingToString());
             for (int i = 0; i < mDisplayContentsAnimators.size(); i++) {
                 pw.print(prefix); pw.print("DisplayContentsAnimator #");
                     pw.println(mDisplayContentsAnimators.keyAt(i));
