@@ -2287,17 +2287,62 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.PRE_BOOT_COMPLETED";
 
     /**
+     * Sent the first time a user is starting, to allow system apps to
+     * perform one time initialization.  (This will not be seen by third
+     * party applications because a newly initialized user does not have any
+     * third party applications installed for it.)  This is sent early in
+     * starting the user, around the time the home app is started, before
+     * {@link #ACTION_BOOT_COMPLETED} is sent.
+     */
+    public static final String ACTION_USER_INITIALIZE =
+            "android.intent.action.USER_INITIALIZE";
+
+    /**
+     * Sent when a user switch is happening, causing the process's user to be
+     * brought to the foreground.  This is only sent to receivers registered
+     * through {@link Context#registerReceiver(BroadcastReceiver, IntentFilter)
+     * Context.registerReceiver}.  It is sent to the user that is going to the
+     * foreground.
+     */
+    public static final String ACTION_USER_FOREGROUND =
+            "android.intent.action.USER_FOREGROUND";
+
+    /**
+     * Sent when a user switch is happening, causing the process's user to be
+     * sent to the background.  This is only sent to receivers registered
+     * through {@link Context#registerReceiver(BroadcastReceiver, IntentFilter)
+     * Context.registerReceiver}.  It is sent to the user that is going to the
+     * background.
+     */
+    public static final String ACTION_USER_BACKGROUND =
+            "android.intent.action.USER_BACKGROUND";
+
+    /**
      * Broadcast sent to the system when a user is added. Carries an extra EXTRA_USER_HANDLE that has the
-     * userHandle of the new user.
+     * userHandle of the new user.  It is sent to all running users.  You must hold
+     * {@link android.Manifest.permission#MANAGE_USERS} to receive this broadcast.
      * @hide
      */
     public static final String ACTION_USER_ADDED =
             "android.intent.action.USER_ADDED";
 
     /**
+     * Broadcast sent to the system when a user is started. Carries an extra EXTRA_USER_HANDLE that has
+     * the userHandle of the user.  This is only sent to
+     * registered receivers, not manifest receivers.  It is sent to the user
+     * that has been started.
+     * @hide
+     */
+    public static final String ACTION_USER_STARTED =
+            "android.intent.action.USER_STARTED";
+
+    /**
      * Broadcast sent to the system when a user is stopped. Carries an extra EXTRA_USER_HANDLE that has
      * the userHandle of the user.  This is similar to {@link #ACTION_PACKAGE_RESTARTED},
-     * but for an entire user instead of a specific package.
+     * but for an entire user instead of a specific package.  This is only sent to
+     * registered receivers, not manifest receivers.  It is sent to all running
+     * users <em>except</em> the one that has just been stopped (which is no
+     * longer running).
      * @hide
      */
     public static final String ACTION_USER_STOPPED =
@@ -2305,7 +2350,9 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * Broadcast sent to the system when a user is removed. Carries an extra EXTRA_USER_HANDLE that has
-     * the userHandle of the user.
+     * the userHandle of the user.  It is sent to all running users except the
+     * one that has been removed.  You must hold
+     * {@link android.Manifest.permission#MANAGE_USERS} to receive this broadcast.
      * @hide
      */
     public static final String ACTION_USER_REMOVED =
@@ -2313,7 +2360,10 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * Broadcast sent to the system when the user switches. Carries an extra EXTRA_USER_HANDLE that has
-     * the userHandle of the user to become the current one.
+     * the userHandle of the user to become the current one. This is only sent to
+     * registered receivers, not manifest receivers.  It is sent to all running users.
+     * You must hold
+     * {@link android.Manifest.permission#MANAGE_USERS} to receive this broadcast.
      * @hide
      */
     public static final String ACTION_USER_SWITCHED =

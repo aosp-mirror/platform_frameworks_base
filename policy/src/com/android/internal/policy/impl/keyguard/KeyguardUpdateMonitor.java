@@ -16,6 +16,8 @@
 
 package com.android.internal.policy.impl.keyguard;
 
+import android.app.ActivityManagerNative;
+import android.app.IUserSwitchObserver;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -32,7 +34,9 @@ import static android.os.BatteryManager.EXTRA_HEALTH;
 import android.media.AudioManager;
 import android.os.BatteryManager;
 import android.os.Handler;
+import android.os.IRemoteCallback;
 import android.os.Message;
+import android.os.RemoteException;
 import android.provider.Settings;
 
 import com.android.internal.telephony.IccCardConstants;
@@ -136,7 +140,7 @@ public class KeyguardUpdateMonitor {
                     handleDevicePolicyManagerStateChanged();
                     break;
                 case MSG_USER_SWITCHED:
-                    handleUserSwitched(msg.arg1);
+                    handleUserSwitched(msg.arg1, (IRemoteCallback)msg.obj);
                     break;
                 case MSG_USER_REMOVED:
                     handleUserRemoved(msg.arg1);
@@ -183,9 +187,6 @@ public class KeyguardUpdateMonitor {
             } else if (DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED
                     .equals(action)) {
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_DPM_STATE_CHANGED));
-            } else if (Intent.ACTION_USER_SWITCHED.equals(action)) {
-                mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_SWITCHED,
-                       intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0), 0));
             } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_REMOVED,
                        intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0), 0));
@@ -325,9 +326,25 @@ public class KeyguardUpdateMonitor {
         filter.addAction(TelephonyIntents.SPN_STRINGS_UPDATED_ACTION);
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
         filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
-        filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(Intent.ACTION_USER_REMOVED);
         context.registerReceiver(mBroadcastReceiver, filter);
+
+        try {
+            ActivityManagerNative.getDefault().registerUserSwitchObserver(
+                    new IUserSwitchObserver.Stub() {
+                        @Override
+                        public void onUserSwitching(int newUserId, IRemoteCallback reply) {
+                            mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_SWITCHED,
+                                    newUserId, 0, reply));
+                        }
+                        @Override
+                        public void onUserSwitchComplete(int newUserId) throws RemoteException {
+                        }
+                    });
+        } catch (RemoteException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     private void watchForDeviceProvisioning() {
@@ -375,12 +392,16 @@ public class KeyguardUpdateMonitor {
     /**
      * Handle {@link #MSG_USER_SWITCHED}
      */
-    protected void handleUserSwitched(int userId) {
+    protected void handleUserSwitched(int userId, IRemoteCallback reply) {
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
                 cb.onUserSwitched(userId);
             }
+        }
+        try {
+            reply.sendResult(null);
+        } catch (RemoteException e) {
         }
     }
 

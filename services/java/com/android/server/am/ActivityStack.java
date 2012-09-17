@@ -583,37 +583,36 @@ final class ActivityStack {
      * Move the activities around in the stack to bring a user to the foreground.
      * @return whether there are any activities for the specified user.
      */
-    final boolean switchUser(int userId) {
-        synchronized (mService) {
-            mCurrentUser = userId;
+    final boolean switchUserLocked(int userId, UserStartedState uss) {
+        mCurrentUser = userId;
+        mStartingUsers.add(uss);
 
-            // Only one activity? Nothing to do...
-            if (mHistory.size() < 2)
-                return false;
+        // Only one activity? Nothing to do...
+        if (mHistory.size() < 2)
+            return false;
 
-            boolean haveActivities = false;
-            // Check if the top activity is from the new user.
-            ActivityRecord top = mHistory.get(mHistory.size() - 1);
-            if (top.userId == userId) return true;
-            // Otherwise, move the user's activities to the top.
-            int N = mHistory.size();
-            int i = 0;
-            while (i < N) {
-                ActivityRecord r = mHistory.get(i);
-                if (r.userId == userId) {
-                    ActivityRecord moveToTop = mHistory.remove(i);
-                    mHistory.add(moveToTop);
-                    // No need to check the top one now
-                    N--;
-                    haveActivities = true;
-                } else {
-                    i++;
-                }
+        boolean haveActivities = false;
+        // Check if the top activity is from the new user.
+        ActivityRecord top = mHistory.get(mHistory.size() - 1);
+        if (top.userId == userId) return true;
+        // Otherwise, move the user's activities to the top.
+        int N = mHistory.size();
+        int i = 0;
+        while (i < N) {
+            ActivityRecord r = mHistory.get(i);
+            if (r.userId == userId) {
+                ActivityRecord moveToTop = mHistory.remove(i);
+                mHistory.add(moveToTop);
+                // No need to check the top one now
+                N--;
+                haveActivities = true;
+            } else {
+                i++;
             }
-            // Transition from the old top to the new top
-            resumeTopActivityLocked(top);
-            return haveActivities;
         }
+        // Transition from the old top to the new top
+        resumeTopActivityLocked(top);
+        return haveActivities;
     }
 
     final boolean realStartActivityLocked(ActivityRecord r,
@@ -1406,7 +1405,7 @@ final class ActivityStack {
             // Launcher...
             if (mMainStack) {
                 ActivityOptions.abort(options);
-                return mService.startHomeActivityLocked(mCurrentUser, null);
+                return mService.startHomeActivityLocked(mCurrentUser);
             }
         }
 
@@ -3583,10 +3582,6 @@ final class ActivityStack {
         }
 
         return res;
-    }
-
-    final void addStartingUserLocked(UserStartedState uss) {
-        mStartingUsers.add(uss);
     }
 
     /**
