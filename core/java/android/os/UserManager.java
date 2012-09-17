@@ -166,6 +166,22 @@ public class UserManager {
     }
 
     /**
+     * Returns a file descriptor for the user's photo. PNG data can be read from this file.
+     * @param userHandle the user whose photo we want to read.
+     * @return a {@link ParcelFileDescriptor} from which to read the file, or null if there's no
+     * photo.
+     * @hide
+     */
+    public ParcelFileDescriptor getUserIcon(int userHandle) {
+        try {
+            return mService.getUserIcon(userHandle);
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not set the user icon ", re);
+            return null;
+        }
+    }
+
+    /**
      * Enable or disable the use of a guest account. If disabled, the existing guest account
      * will be wiped.
      * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.

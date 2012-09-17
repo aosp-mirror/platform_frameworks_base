@@ -196,10 +196,21 @@ public class UserManagerService extends IUserManager.Stub {
         synchronized (mPackagesLock) {
             UserInfo info = mUsers.get(userId);
             if (info == null) return null;
-            ParcelFileDescriptor fd = updateIconBitmapLocked(info);
+            ParcelFileDescriptor fd = openIconBitmapLocked(info, true /* write */);
             if (fd != null) {
                 writeUserLocked(info);
             }
+            return fd;
+        }
+    }
+
+    @Override
+    public ParcelFileDescriptor getUserIcon(int userId) {
+        checkManageUsersPermission("read users");
+        synchronized (mPackagesLock) {
+            UserInfo info = mUsers.get(userId);
+            if (info == null || info.iconPath == null) return null;
+            ParcelFileDescriptor fd = openIconBitmapLocked(info, false /* read */);
             return fd;
         }
     }
@@ -278,7 +289,7 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
-    private ParcelFileDescriptor updateIconBitmapLocked(UserInfo info) {
+    private ParcelFileDescriptor openIconBitmapLocked(UserInfo info, boolean toWrite) {
         try {
             File dir = new File(mUsersDir, Integer.toString(info.id));
             File file = new File(dir, USER_PHOTO_FILENAME);
@@ -290,8 +301,10 @@ public class UserManagerService extends IUserManager.Stub {
                         -1, -1);
             }
             ParcelFileDescriptor fd = ParcelFileDescriptor.open(file,
-                    MODE_CREATE|MODE_READ_WRITE);
-            info.iconPath = file.getAbsolutePath();
+                    toWrite ? MODE_CREATE|MODE_READ_WRITE : MODE_READ_WRITE);
+            if (toWrite) {
+                info.iconPath = file.getAbsolutePath();
+            }
             return fd;
         } catch (FileNotFoundException e) {
             Slog.w(LOG_TAG, "Error setting photo for user ", e);
