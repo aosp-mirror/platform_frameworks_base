@@ -1133,7 +1133,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             pw.print(prefix); pw.print("mConfiguration="); pw.println(mConfiguration);
         }
         pw.print(prefix); pw.print("mHasSurface="); pw.print(mHasSurface);
-                pw.print(" mShownFrame="); mShownFrame.printShortString(pw); pw.println();
+                pw.print(" mShownFrame="); mShownFrame.printShortString(pw);
+                pw.print(" isReadyForDisplay()="); pw.println(isReadyForDisplay());
         if (dumpAll) {
             pw.print(prefix); pw.print("mFrame="); mFrame.printShortString(pw);
                     pw.print(" last="); mLastFrame.printShortString(pw);
