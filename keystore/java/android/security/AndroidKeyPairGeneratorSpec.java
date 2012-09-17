@@ -32,6 +32,7 @@ import javax.security.auth.x500.X500Principal;
  * generator that works with
  * <a href="{@docRoot}guide/topics/security/keystore.html">Android KeyStore
  * facility</a>.
+ * @hide
  */
 public class AndroidKeyPairGeneratorSpec implements AlgorithmParameterSpec {
     private final String mKeystoreAlias;
