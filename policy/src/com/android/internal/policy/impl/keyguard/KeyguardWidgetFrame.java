@@ -91,7 +91,14 @@ public class KeyguardWidgetFrame extends FrameLayout {
 
             mForegroundAlpha = (int) Math.round((r * 255));
             mForegroundDrawable.setAlpha(mForegroundAlpha);
+            if (getLayerType() != LAYER_TYPE_HARDWARE) {
+                setLayerType(LAYER_TYPE_HARDWARE, null);
+            }
             invalidate();
+        } else {
+            if (getLayerType() != LAYER_TYPE_NONE) {
+                setLayerType(LAYER_TYPE_NONE, null);
+            }
         }
     }
 }
