@@ -20,6 +20,7 @@ import com.android.internal.R;
 import com.android.internal.telephony.ITelephony;
 import com.google.android.collect.Lists;
 
+import android.app.ActivityManagerNative;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -225,7 +226,11 @@ public class LockPatternUtils {
 
     public int getCurrentUser() {
         if (Process.myUid() == Process.SYSTEM_UID) {
-            return mCurrentUserId;
+            try {
+                return ActivityManagerNative.getDefault().getCurrentUser().id;
+            } catch (RemoteException re) {
+                return mCurrentUserId;
+            }
         } else {
             throw new SecurityException("Only the system process can get the current user");
         }
