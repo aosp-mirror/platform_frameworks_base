@@ -937,4 +937,10 @@
          larger than the minimum reported touchMajor/touchMinor values
          reported by the hardware. -->
     <dimen name="config_minScalingSpan">25mm</dimen>
+
+    <!-- Safe headphone volume index. When music stream volume is below this index
+    the SPL on headphone output is compliant to EN 60950 requirements for portable music
+    players. -->
+    <integer name="config_safe_media_volume_index">10</integer>
+
 </resources>
