@@ -1332,8 +1332,14 @@ public class Camera {
         public Rect rect;
 
         /**
-         * The confidence level for the detection of the face. The range is 1 to 100. 100 is the
-         * highest confidence.
+         * <p>The confidence level for the detection of the face. The range is 1 to
+         * 100. 100 is the highest confidence.</p>
+         *
+         * <p>Depending on the device, even very low-confidence faces may be
+         * listed, so applications should filter out faces with low confidence,
+         * depending on the use case. For a typical point-and-shoot camera
+         * application that wishes to display rectangles around detected faces,
+         * filtering out faces with confidence less than 50 is recommended.</p>
          *
          * @see #startFaceDetection()
          */
