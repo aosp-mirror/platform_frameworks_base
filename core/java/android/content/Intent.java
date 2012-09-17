@@ -1345,6 +1345,13 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_UNINSTALL_PACKAGE = "android.intent.action.UNINSTALL_PACKAGE";
 
     /**
+     * Specify whether the package should be uninstalled for all users.
+     * @hide because these should not be part of normal application flow.
+     */
+    public static final String EXTRA_UNINSTALL_ALL_USERS
+            = "android.intent.extra.UNINSTALL_ALL_USERS";
+
+    /**
      * A string associated with a {@link #ACTION_UPGRADE_SETUP} activity
      * describing the last run version of the platform that was setup.
      * @hide
