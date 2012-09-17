@@ -5036,7 +5036,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             pid = tlsIdentity.pid;
         }
 
-        uid = UserHandle.getAppId(uid);
         // Our own process gets to do everything.
         if (pid == MY_PID) {
             return PackageManager.PERMISSION_GRANTED;
@@ -5088,7 +5087,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         } else {
             try {
                 pi = pm.resolveContentProvider(name,
-                        PackageManager.GET_URI_PERMISSION_PATTERNS, UserHandle.getUserId(callingUid));
+                        PackageManager.GET_URI_PERMISSION_PATTERNS,
+                        UserHandle.getUserId(callingUid));
             } catch (RemoteException ex) {
             }
         }
