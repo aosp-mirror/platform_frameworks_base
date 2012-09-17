@@ -89,12 +89,15 @@ public class ConfigUpdateInstallReceiver extends BroadcastReceiver {
                     // get the hash of the currently used value
                     String currentHash = getCurrentHash(getCurrentContent());
                     if (!verifyVersion(currentVersion, altVersion)) {
-                        Slog.e(TAG, "New version is not greater than current version, aborting!");
+                        EventLog.writeEvent(EventLogTags.CONFIG_INSTALL_FAILED,
+                                            "New version is not greater than current version");
                     } else if (!verifyPreviousHash(currentHash, altRequiredHash)) {
-                        Slog.e(TAG, "Current hash did not match required value, aborting!");
+                        EventLog.writeEvent(EventLogTags.CONFIG_INSTALL_FAILED,
+                                            "Current hash did not match required value");
                     } else if (!verifySignature(altContent, altVersion, altRequiredHash, altSig,
                                cert)) {
-                        Slog.e(TAG, "Signature did not verify, aborting!");
+                        EventLog.writeEvent(EventLogTags.CONFIG_INSTALL_FAILED,
+                                            "Signature did not verify");
                     } else {
                         // install the new content
                         Slog.i(TAG, "Found new update, installing...");
@@ -103,8 +106,12 @@ public class ConfigUpdateInstallReceiver extends BroadcastReceiver {
                     }
                 } catch (Exception e) {
                     Slog.e(TAG, "Could not update content!", e);
-                    EventLog.writeEvent(EventLogTags.CONFIG_INSTALL_FAILED,
-                                        updateDir.toString());
+                    // keep the error message <= 100 chars
+                    String errMsg = e.toString();
+                    if (errMsg.length() > 100) {
+                        errMsg = errMsg.substring(0, 99);
+                    }
+                    EventLog.writeEvent(EventLogTags.CONFIG_INSTALL_FAILED, errMsg);
                 }
             }
         }.start();
