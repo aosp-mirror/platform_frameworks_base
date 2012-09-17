@@ -31,6 +31,13 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 class WinAnimatorList extends ArrayList<WindowStateAnimator> {
+    public WinAnimatorList() {
+        super();
+    }
+
+    public WinAnimatorList(WinAnimatorList other) {
+        super(other);
+    }
 }
 
 /**
@@ -840,8 +847,11 @@ class WindowStateAnimator {
             }
         }
 
-        final boolean screenAnimation = mService.mAnimator.mScreenRotationAnimation != null
-                && mService.mAnimator.mScreenRotationAnimation.isAnimating();
+        final int displayId = mWin.getDisplayId();
+        final ScreenRotationAnimation screenRotationAnimation =
+                mAnimator.getScreenRotationAnimationLocked(displayId);
+        final boolean screenAnimation =
+                screenRotationAnimation != null && screenRotationAnimation.isAnimating();
         if (selfTransformation || attachedTransformation != null
                 || appTransformation != null || screenAnimation) {
             // cache often used attributes locally
@@ -883,8 +893,7 @@ class WindowStateAnimator {
                 tmpMatrix.postConcat(mAnimator.mUniverseBackground.mUniverseTransform.getMatrix());
             }
             if (screenAnimation) {
-                tmpMatrix.postConcat(
-                        mService.mAnimator.mScreenRotationAnimation.getEnterTransformation().getMatrix());
+                tmpMatrix.postConcat(screenRotationAnimation.getEnterTransformation().getMatrix());
             }
             MagnificationSpec spec = mWin.getWindowMagnificationSpecLocked();
             if (spec != null && !spec.isNop()) {
@@ -934,21 +943,21 @@ class WindowStateAnimator {
                     mShownAlpha *= mAnimator.mUniverseBackground.mUniverseTransform.getAlpha();
                 }
                 if (screenAnimation) {
-                    mShownAlpha *=
-                        mService.mAnimator.mScreenRotationAnimation.getEnterTransformation().getAlpha();
+                    mShownAlpha *= screenRotationAnimation.getEnterTransformation().getAlpha();
                 }
             } else {
                 //Slog.i(TAG, "Not applying alpha transform");
             }
 
-            if ((DEBUG_SURFACE_TRACE || WindowManagerService.localLOGV) && (mShownAlpha == 1.0 || mShownAlpha == 0.0)) Slog.v(
-                TAG, "computeShownFrameLocked: Animating " + this +
-                " mAlpha=" + mAlpha +
-                " self=" + (selfTransformation ? mTransformation.getAlpha() : "null") +
-                " attached=" + (attachedTransformation == null ? "null" : attachedTransformation.getAlpha()) +
-                " app=" + (appTransformation == null ? "null" : appTransformation.getAlpha()) +
-                " screen=" + (screenAnimation ? mService.mAnimator.mScreenRotationAnimation.getEnterTransformation().getAlpha()
-                        : "null"));
+            if ((DEBUG_SURFACE_TRACE || WindowManagerService.localLOGV)
+                    && (mShownAlpha == 1.0 || mShownAlpha == 0.0)) Slog.v(
+                    TAG, "computeShownFrameLocked: Animating " + this + " mAlpha=" + mAlpha
+                    + " self=" + (selfTransformation ? mTransformation.getAlpha() : "null")
+                    + " attached=" + (attachedTransformation == null ?
+                            "null" : attachedTransformation.getAlpha())
+                    + " app=" + (appTransformation == null ? "null" : appTransformation.getAlpha())
+                    + " screen=" + (screenAnimation ?
+                            screenRotationAnimation.getEnterTransformation().getAlpha() : "null"));
             return;
         } else if (mIsWallpaper &&
                     (mAnimator.mPendingActions & WindowAnimator.WALLPAPER_ACTION_PENDING) != 0) {
@@ -1083,7 +1092,7 @@ class WindowStateAnimator {
         }
     }
 
-    void setSurfaceBoundaries(final boolean recoveringMemory) {
+    void setSurfaceBoundariesLocked(final boolean recoveringMemory) {
         final WindowState w = mWin;
         int width, height;
         if ((w.mAttrs.flags & LayoutParams.FLAG_SCALED) != 0) {
@@ -1138,7 +1147,7 @@ class WindowStateAnimator {
                         WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER);
                 if ((w.mAttrs.flags & LayoutParams.FLAG_DIM_BEHIND) != 0) {
                     final DisplayInfo displayInfo = mWin.mDisplayContent.getDisplayInfo();
-                    mService.startDimming(this, w.mExiting ? 0 : w.mAttrs.dimAmount,
+                    mService.startDimmingLocked(this, w.mExiting ? 0 : w.mAttrs.dimAmount,
                             displayInfo.appWidth, displayInfo.appHeight);
                 }
             } catch (RuntimeException e) {
@@ -1172,7 +1181,7 @@ class WindowStateAnimator {
 
         computeShownFrameLocked();
 
-        setSurfaceBoundaries(recoveringMemory);
+        setSurfaceBoundariesLocked(recoveringMemory);
 
         if (mIsWallpaper && !mWin.mWallpaperVisible) {
             // Wallpaper is no longer visible and there is no wp target => hide it.
