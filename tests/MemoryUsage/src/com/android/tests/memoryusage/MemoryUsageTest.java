@@ -72,6 +72,7 @@ public class MemoryUsageTest extends InstrumentationTestCase {
             try {
                 processName = startApp(app);
                 measureMemory(app, processName, results);
+                closeApp();
             } catch (NameNotFoundException e) {
                 Log.i(TAG, "Application " + app + " not found");
             }
@@ -139,13 +140,22 @@ public class MemoryUsageTest extends InstrumentationTestCase {
         return process;
     }
 
+    private void closeApp() {
+        Intent homeIntent = new Intent(Intent.ACTION_MAIN);
+        homeIntent.addCategory(Intent.CATEGORY_HOME);
+        homeIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+        getInstrumentation().getContext().startActivity(homeIntent);
+        sleep(3000);
+    }
+
     private void measureMemory(String appName, String processName,
             Bundle results) {
         List<Integer> pssData = new ArrayList<Integer>();
         int pss = 0;
         int iteration = 0;
         while (iteration < MAX_ITERATIONS) {
-            sleep();
+            sleep(SLEEP_TIME);
             pss = getPss(processName);
             Log.i(TAG, appName + "=" + pss);
             if (pss < 0) {
@@ -184,9 +194,9 @@ public class MemoryUsageTest extends InstrumentationTestCase {
         return (diff1 + diff2) < THRESHOLD;
     }
 
-    private void sleep() {
+    private void sleep(int time) {
         try {
-            Thread.sleep(SLEEP_TIME);
+            Thread.sleep(time);
         } catch (InterruptedException e) {
             // ignore
         }
