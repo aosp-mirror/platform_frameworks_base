@@ -129,6 +129,9 @@ final class WifiDisplayController implements DumpUtils.Dump {
     // True if RTSP has connected.
     private boolean mRemoteDisplayConnected;
 
+    // True if the remote submix is enabled.
+    private boolean mRemoteSubmixOn;
+
     public WifiDisplayController(Context context, Handler handler, Listener listener) {
         mContext = context;
         mHandler = handler;
@@ -160,6 +163,7 @@ final class WifiDisplayController implements DumpUtils.Dump {
         pw.println("mRemoteDisplay=" + mRemoteDisplay);
         pw.println("mRemoteDisplayInterface=" + mRemoteDisplayInterface);
         pw.println("mRemoteDisplayConnected=" + mRemoteDisplayConnected);
+        pw.println("mRemoteSubmixOn=" + mRemoteSubmixOn);
 
         pw.println("mKnownWifiDisplayPeers: size=" + mKnownWifiDisplayPeers.size());
         for (WifiP2pDevice device : mKnownWifiDisplayPeers) {
@@ -390,15 +394,13 @@ final class WifiDisplayController implements DumpUtils.Dump {
             Slog.i(TAG, "Stopped listening for RTSP connection on " + mRemoteDisplayInterface
                     + " from Wifi display: " + mConnectedDevice.deviceName);
 
-            if (mRemoteDisplayConnected) {
-                mAudioManager.setRemoteSubmixOn(false, REMOTE_SUBMIX_ADDRESS);
-            }
-
             mRemoteDisplay.dispose();
             mRemoteDisplay = null;
             mRemoteDisplayInterface = null;
             mRemoteDisplayConnected = false;
             mHandler.removeCallbacks(mRtspTimeout);
+
+            setRemoteSubmixOn(false);
 
             mHandler.post(new Runnable() {
                 @Override
@@ -527,6 +529,8 @@ final class WifiDisplayController implements DumpUtils.Dump {
                 return; // done
             }
 
+            setRemoteSubmixOn(true);
+
             final WifiP2pDevice oldDevice = mConnectedDevice;
             final int port = getPortNumber(mConnectedDevice);
             final String iface = addr.getHostAddress() + ":" + port;
@@ -544,8 +548,6 @@ final class WifiDisplayController implements DumpUtils.Dump {
                                 + mConnectedDevice.deviceName);
                         mRemoteDisplayConnected = true;
                         mHandler.removeCallbacks(mRtspTimeout);
-
-                        mAudioManager.setRemoteSubmixOn(true, REMOTE_SUBMIX_ADDRESS);
 
                         final WifiDisplay display = createWifiDisplay(mConnectedDevice);
                         mHandler.post(new Runnable() {
@@ -580,6 +582,13 @@ final class WifiDisplayController implements DumpUtils.Dump {
             }, mHandler);
 
             mHandler.postDelayed(mRtspTimeout, RTSP_TIMEOUT_SECONDS * 1000);
+        }
+    }
+
+    private void setRemoteSubmixOn(boolean on) {
+        if (mRemoteSubmixOn != on) {
+            mRemoteSubmixOn = on;
+            mAudioManager.setRemoteSubmixOn(on, REMOTE_SUBMIX_ADDRESS);
         }
     }
 
