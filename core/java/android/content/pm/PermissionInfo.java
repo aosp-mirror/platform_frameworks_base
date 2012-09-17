@@ -79,11 +79,34 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     public static final int PROTECTION_MASK_FLAGS = 0xf0;
 
     /**
+     * The level of access this permission is protecting, as per
+     * {@link android.R.attr#protectionLevel}.  Values may be
+     * {@link #PROTECTION_NORMAL}, {@link #PROTECTION_DANGEROUS}, or
+     * {@link #PROTECTION_SIGNATURE}.  May also include the additional
+     * flags {@link #PROTECTION_FLAG_SYSTEM} or {@link #PROTECTION_FLAG_DEVELOPMENT}
+     * (which only make sense in combination with the base
+     * {@link #PROTECTION_SIGNATURE}.
+     */
+    public int protectionLevel;
+
+    /**
      * The group this permission is a part of, as per
      * {@link android.R.attr#permissionGroup}.
      */
     public String group;
-    
+
+    /**
+     * Flag for {@link #flags}, corresponding to <code>costsMoney</code>
+     * value of {@link android.R.attr#permissionFlags}.
+     */
+    public static final int FLAG_COSTS_MONEY = 1<<0;
+
+    /**
+     * Additional flags about this permission as given by
+     * {@link android.R.attr#permissionFlags}.
+     */
+    public int flags;
+
     /**
      * A string resource identifier (in the package's resources) of this
      * permission's description.  From the "description" attribute or,
@@ -98,17 +121,6 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
      * {@link PermissionInfo#loadDescription} instead.
      */
     public CharSequence nonLocalizedDescription;
-
-    /**
-     * The level of access this permission is protecting, as per
-     * {@link android.R.attr#protectionLevel}.  Values may be
-     * {@link #PROTECTION_NORMAL}, {@link #PROTECTION_DANGEROUS}, or
-     * {@link #PROTECTION_SIGNATURE}.  May also include the additional
-     * flags {@link #PROTECTION_FLAG_SYSTEM} or {@link #PROTECTION_FLAG_DEVELOPMENT}
-     * (which only make sense in combination with the base
-     * {@link #PROTECTION_SIGNATURE}.
-     */
-    public int protectionLevel;
 
     /** @hide */
     public static int fixProtectionLevel(int level) {
@@ -149,9 +161,10 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
 
     public PermissionInfo(PermissionInfo orig) {
         super(orig);
+        protectionLevel = orig.protectionLevel;
+        flags = orig.flags;
         group = orig.group;
         descriptionRes = orig.descriptionRes;
-        protectionLevel = orig.protectionLevel;
         nonLocalizedDescription = orig.nonLocalizedDescription;
     }
 
@@ -191,9 +204,10 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
 
     public void writeToParcel(Parcel dest, int parcelableFlags) {
         super.writeToParcel(dest, parcelableFlags);
+        dest.writeInt(protectionLevel);
+        dest.writeInt(flags);
         dest.writeString(group);
         dest.writeInt(descriptionRes);
-        dest.writeInt(protectionLevel);
         TextUtils.writeToParcel(nonLocalizedDescription, dest, parcelableFlags);
     }
 
@@ -209,9 +223,10 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
 
     private PermissionInfo(Parcel source) {
         super(source);
+        protectionLevel = source.readInt();
+        flags = source.readInt();
         group = source.readString();
         descriptionRes = source.readInt();
-        protectionLevel = source.readInt();
         nonLocalizedDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
     }
 }

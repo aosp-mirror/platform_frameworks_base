@@ -991,6 +991,7 @@
   <java-symbol type="layout" name="alert_dialog_progress" />
   <java-symbol type="layout" name="always_use_checkbox" />
   <java-symbol type="layout" name="app_permission_item" />
+  <java-symbol type="layout" name="app_permission_item_money" />
   <java-symbol type="layout" name="app_permission_item_old" />
   <java-symbol type="layout" name="app_perms_summary" />
   <java-symbol type="layout" name="calendar_view" />
