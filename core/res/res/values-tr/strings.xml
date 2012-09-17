@@ -293,10 +293,8 @@
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Uygulamaya, pencere yöneticisinden pencerelerle ilgili bilgi alma izni verir. Zararlı uygulamalar dahili sistem kullanımına yönelik bilgileri alabilir."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"etkinlikleri filtrele"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Uygulamaya, tüm kullanıcı etkinlikleri dağıtılmadan önce ilgili akışa filtre uygulayan bir giriş filtresi kaydetme izni verir. Zararlı uygulamalar kullanıcı müdahalesi olmadan sistem arayüzünü denetleyebilir."</string>
-    <!-- no translation found for permlab_magnify_display (5973626738170618775) -->
-    <skip />
-    <!-- no translation found for permdesc_magnify_display (7121235684515003792) -->
-    <skip />
+    <string name="permlab_magnify_display" msgid="5973626738170618775">"ekranı büyüt"</string>
+    <string name="permdesc_magnify_display" msgid="7121235684515003792">"Uygulamaya bir ekranın içeriğini büyütme izni verir. Kötü amaçlı uygulamalar ekranın içeriğini etkileyerek cihazı kullanılmaz hale getirebilir."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"kısmi kapatma"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Eylem yöneticisini kapalı duruma getirir. Tam kapatma işlemi gerçekleştirmez."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"uygulama değişimlerini engelle"</string>
@@ -327,10 +325,8 @@
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Uygulamaya, istediği zaman genel animasyon hızını değiştirme (animasyonları hızlandırma veya yavaşlatma) izni verir."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"uygulama jetonlarını yönet"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Uygulamaya, kendi normal Z sıralamalarını atlayarak kendi jetonlarını oluşturma ve yönetme izni verir. Normal uygulamalar için gerekli değildir."</string>
-    <!-- no translation found for permlab_freezeScreen (4708181184441880175) -->
-    <skip />
-    <!-- no translation found for permdesc_freezeScreen (8558923789222670064) -->
-    <skip />
+    <string name="permlab_freezeScreen" msgid="4708181184441880175">"ekranı dondur"</string>
+    <string name="permdesc_freezeScreen" msgid="8558923789222670064">"Uygulamaya tam ekran geçişi için ekranı geçici olarak dondurma izni verir."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"tuşlara bas ve düğmeleri denetle"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Uygulamaya, diğer uygulamalar için kendi giriş işlemlerini (tuşa basma vb.) gönderme izni verir. Kötü amaçlı uygulamalar tableti ele geçirmek için bunu kullanabilir."</string>
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Uygulamaya, kendi giriş etkinliklerini (tuşa basma vb.) diğer uygulamalara gönderme izni verir. Kötü amaçlı uygulamalar telefonu ele geçirmek için bunu kullanabilir."</string>
@@ -443,14 +439,10 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Uygulamaya, SurfaceFlinger\'a ait düşük düzey özellikleri kullanma izni verir."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"çerçeve arabelleğini oku"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Uygulamaya, çerçeve arabelleğinin içeriğini okuma izni verir."</string>
-    <!-- no translation found for permlab_configureWifiDisplay (5595661694746742168) -->
-    <skip />
-    <!-- no translation found for permdesc_configureWifiDisplay (7916815158690218065) -->
-    <skip />
-    <!-- no translation found for permlab_controlWifiDisplay (393641276723695496) -->
-    <skip />
-    <!-- no translation found for permdesc_controlWifiDisplay (4543912292681826986) -->
-    <skip />
+    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"Kablosuz ekranları yapılandır"</string>
+    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Uygulamaya kablosuz ekranları yapılandırma ve bunlara bağlanma izni verir."</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"Kablosuz ekranları denetle"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Uygulamaya Kablosuz ekranların alt düzey özelliklerini kontrol etme izni verir."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ses ayarlarınızı değiştirin"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Uygulamaya ses düzeyi ve ses çıkışı için kullanılan hoparlör gibi genel ses ayarlarını değiştirme izni verir."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ses kaydet"</string>
@@ -632,10 +624,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Depolanan uygulama verilerinin şifrelenmiş olmasını zorunlu kılma."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Kameraları devre dışı bırak"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Tüm cihaz kameralarının kullanımını engelleme."</string>
-    <!-- no translation found for policylab_disableKeyguardWidgets (1794894613389073926) -->
-    <skip />
-    <!-- no translation found for policydesc_disableKeyguardWidgets (7254624892984033592) -->
-    <skip />
+    <string name="policylab_disableKeyguardWidgets" msgid="1794894613389073926">"Tuş korumada widget\'ları devre dışı bırak"</string>
+    <string name="policydesc_disableKeyguardWidgets" msgid="7254624892984033592">"Tuş korumada widget\'ların bazılarının veya tümünün kullanılmasını engelleyin."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Ev"</item>
     <item msgid="869923650527136615">"Mobil"</item>

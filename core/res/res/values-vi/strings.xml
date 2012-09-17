@@ -293,10 +293,8 @@
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Cho phép ứng dụng truy xuất thông tin về các cửa sổ từ trình quản lý cửa sổ. Các ứng dụng độc hại có thể truy xuất thông tin được dành để sử dụng trong hệ thống nội bộ."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"lọc sự kiện"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Cho phép ứng dụng đăng ký bộ lọc dữ liệu nhập để lọc luồng tất cả các sự kiện người dùng trước khi chúng được gửi đi. Ứng dụng độc hại có thể kiểm soát Giao diện người dùng hệ thống mà không cần sự can thiệp của người dùng."</string>
-    <!-- no translation found for permlab_magnify_display (5973626738170618775) -->
-    <skip />
-    <!-- no translation found for permdesc_magnify_display (7121235684515003792) -->
-    <skip />
+    <string name="permlab_magnify_display" msgid="5973626738170618775">"thu phóng màn hình"</string>
+    <string name="permdesc_magnify_display" msgid="7121235684515003792">"Cho phép ứng dụng thu phóng nội dung trên màn hình. Ứng dụng độc hại có thể biến đổi nội dung trên màn hình theo cách kết xuất thiết bị không thể sử dụng được."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"tắt từng phần"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Đặt trình quản lý hoạt động sang trạng thái tắt. Không thực hiện tắt hoàn toàn."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"ngăn chuyển đổi ứng dụng"</string>
@@ -327,10 +325,8 @@
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Cho phép ứng dụng thay đổi tốc độ hoạt ảnh nói chung (hoạt ảnh nhanh hơn hoặc chậm hơn) bất cứ lúc nào."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"quản lý mã thông báo của ứng dụng"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Cho phép ứng dụng tạo và quản lý các mã thông báo riêng của mình, chuyển đổi thứ tự Z thông thường. Không cần thiết cho các ứng dụng thông thường."</string>
-    <!-- no translation found for permlab_freezeScreen (4708181184441880175) -->
-    <skip />
-    <!-- no translation found for permdesc_freezeScreen (8558923789222670064) -->
-    <skip />
+    <string name="permlab_freezeScreen" msgid="4708181184441880175">"đóng băng màn hình"</string>
+    <string name="permdesc_freezeScreen" msgid="8558923789222670064">"Cho phép ứng dụng tạm thời đóng băng màn hình để chuyển sang chế độ toàn màn hình."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"nhấn phím và kiểm soát các nút"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Cho phép ứng dụng gửi các sự kiện nhập của riêng ứng dụng (số lần nhấn phím, v.v..) đến các ứng dụng khác. Ứng dụng độc hại có thể sử dụng quyền này để kiểm soát máy tính bảng."</string>
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Cho phép ứng dụng gửi các sự kiện nhập của riêng ứng dụng (số lần nhấn phím, v.v..) đến các ứng dụng khác. Ứng dụng độc hại có thể sử dụng quyền này để kiểm soát điện thoại."</string>
@@ -443,14 +439,10 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Cho phép ứng dụng sử dụng các tính năng SurfaceFlinger cấp độ thấp."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"đọc bộ đệm khung"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Cho phép ứng dụng đọc nội dung của bộ đệm khung."</string>
-    <!-- no translation found for permlab_configureWifiDisplay (5595661694746742168) -->
-    <skip />
-    <!-- no translation found for permdesc_configureWifiDisplay (7916815158690218065) -->
-    <skip />
-    <!-- no translation found for permlab_controlWifiDisplay (393641276723695496) -->
-    <skip />
-    <!-- no translation found for permdesc_controlWifiDisplay (4543912292681826986) -->
-    <skip />
+    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"định cấu hình màn hình Wifi"</string>
+    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Cho phép ứng dụng định cấu hình và kết nối với màn hình Wifi."</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"kiểm soát màn hình Wifi"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Cho phép ứng dụng kiểm soát các tính năng cấp thấp của màn hình Wifi."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"thay đổi cài đặt âm thanh của bạn"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Cho phép ứng dụng sửa đổi cài đặt âm thanh chung chẳng hạn như âm lượng và loa nào được sử dụng cho thiết bị ra."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ghi âm"</string>
@@ -632,10 +624,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Yêu cầu dữ liệu ứng dụng được lưu trữ phải được mã hóa."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Vô hiệu hóa máy ảnh"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Ngăn sử dụng tất cả máy ảnh của thiết bị."</string>
-    <!-- no translation found for policylab_disableKeyguardWidgets (1794894613389073926) -->
-    <skip />
-    <!-- no translation found for policydesc_disableKeyguardWidgets (7254624892984033592) -->
-    <skip />
+    <string name="policylab_disableKeyguardWidgets" msgid="1794894613389073926">"Tắt tiện ích trên bàn phím"</string>
+    <string name="policydesc_disableKeyguardWidgets" msgid="7254624892984033592">"Ngăn sử dụng một số hoặc tất cả tiện ích trên bàn phím."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Nhà riêng"</item>
     <item msgid="869923650527136615">"ĐT di động"</item>

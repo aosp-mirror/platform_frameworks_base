@@ -1379,8 +1379,8 @@
     <string name="kg_puk_enter_pin_hint" msgid="597821135578014901">"Nouveau code PIN"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Déblocage de la carte SIM en cours…"</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Le code PIN est erroné."</string>
-    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Saisissez un code PIN comprenant entre quatre et huit chiffres"</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="5216603185442368307">"Saisissez une clé PUK comportant au moins huit chiffres."</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Veuillez saisir un code PIN comprenant entre quatre et huit chiffres."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="5216603185442368307">"Veuillez saisir une clé PUK comportant au moins huit chiffres."</string>
     <string name="kg_sim_puk_recovery_hint" msgid="5577753137718442566">"Saisissez la clé PUK et le nouveau code PIN"</string>
     <string name="kg_invalid_puk" msgid="5809955359950817326">"La clé PUK saisie est incorrecte."</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Trop de tentatives."</string>
