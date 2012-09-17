@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import android.app.Dialog;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -35,6 +36,7 @@ import android.hardware.display.DisplayManager;
 import android.hardware.display.WifiDisplay;
 import android.hardware.display.WifiDisplayStatus;
 import android.net.Uri;
+import android.os.Debug;
 import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.view.LayoutInflater;
@@ -51,6 +53,7 @@ import android.widget.TextView;
 
 import com.android.internal.view.RotationPolicy;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.QuickSettingsModel.BrightnessState;
 import com.android.systemui.statusbar.phone.QuickSettingsModel.RSSIState;
 import com.android.systemui.statusbar.phone.QuickSettingsModel.State;
 import com.android.systemui.statusbar.phone.QuickSettingsModel.UserState;
@@ -63,6 +66,7 @@ import com.android.systemui.statusbar.policy.ToggleSlider;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Set;
 
 
 /**
@@ -80,6 +84,7 @@ class QuickSettings {
     private WifiDisplayListAdapter mWifiDisplayListAdapter;
     
     private BrightnessController mBrightnessController;
+    private BluetoothController mBluetoothController;
     private Dialog mBrightnessDialog;
 
     private CursorLoader mUserInfoLoader;
@@ -116,10 +121,6 @@ class QuickSettings {
         IntentFilter filter = new IntentFilter();
         filter.addAction(DisplayManager.ACTION_WIFI_DISPLAY_STATUS_CHANGED);
         mContext.registerReceiver(mReceiver, filter);
-
-        setupQuickSettings();
-        updateWifiDisplayStatus();
-        updateResources();
     }
 
     void setBar(PanelBar bar) {
@@ -132,6 +133,12 @@ class QuickSettings {
 
     void setup(NetworkController networkController, BluetoothController bluetoothController,
             BatteryController batteryController, LocationController locationController) {
+        mBluetoothController = bluetoothController;
+
+        setupQuickSettings();
+        updateWifiDisplayStatus();
+        updateResources();
+
         networkController.addNetworkSignalChangedCallback(mModel);
         bluetoothController.addStateChangedCallback(mModel);
         batteryController.addStateChangedCallback(mModel);
@@ -273,7 +280,7 @@ class QuickSettings {
             @Override
             public void refreshView(QuickSettingsTileView view, State state) {
                 TextView tv = (TextView) view.findViewById(R.id.wifi_textview);
-                tv.setCompoundDrawablesRelativeWithIntrinsicBounds(0, state.iconId, 0, 0);
+                tv.setCompoundDrawablesWithIntrinsicBounds(0, state.iconId, 0, 0);
                 tv.setText(state.label);
             }
         });
@@ -329,7 +336,7 @@ class QuickSettings {
                 @Override
                 public void refreshView(QuickSettingsTileView view, State state) {
                     TextView tv = (TextView) view.findViewById(R.id.rotation_lock_textview);
-                    tv.setCompoundDrawablesRelativeWithIntrinsicBounds(0, state.iconId, 0, 0);
+                    tv.setCompoundDrawablesWithIntrinsicBounds(0, state.iconId, 0, 0);
                     tv.setText(state.label);
                 }
             });
@@ -381,7 +388,7 @@ class QuickSettings {
             @Override
             public void refreshView(QuickSettingsTileView view, State state) {
                 TextView tv = (TextView) view.findViewById(R.id.airplane_mode_textview);
-                tv.setCompoundDrawablesRelativeWithIntrinsicBounds(0, state.iconId, 0, 0);
+                tv.setCompoundDrawablesWithIntrinsicBounds(0, state.iconId, 0, 0);
             }
         });
         parent.addView(airplaneTile);
@@ -401,7 +408,27 @@ class QuickSettings {
                 @Override
                 public void refreshView(QuickSettingsTileView view, State state) {
                     TextView tv = (TextView) view.findViewById(R.id.bluetooth_textview);
-                    tv.setCompoundDrawablesRelativeWithIntrinsicBounds(0, state.iconId, 0, 0);
+                    tv.setCompoundDrawablesWithIntrinsicBounds(0, state.iconId, 0, 0);
+
+                    Resources r = mContext.getResources();
+                    String label = null;
+                    /*
+                    //TODO: Show connected bluetooth device label
+                    Set<BluetoothDevice> btDevices =
+                            mBluetoothController.getBondedBluetoothDevices();
+                    if (btDevices.size() == 1) {
+                        // Show the name of the bluetooth device you are connected to
+                        label = btDevices.iterator().next().getName();
+                    } else if (btDevices.size() > 1) {
+                        // Show a generic label about the number of bluetooth devices
+                        label = r.getString(R.string.quick_settings_bluetooth_multiple_devices_label,
+                                btDevices.size());
+                    }
+                    */
+                    if (label == null) {
+                        label = r.getString(R.string.quick_settings_bluetooth_label);
+                    }
+                    tv.setText(label);
                 }
             });
             parent.addView(bluetoothTile);
@@ -414,9 +441,15 @@ class QuickSettings {
         brightnessTile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // startSettingsActivity(android.provider.Settings.ACTION_DISPLAY_SETTINGS);
                 mBar.collapseAllPanels(true);
                 showBrightnessDialog();
+            }
+        });
+        mModel.addBrightnessTile(brightnessTile, new QuickSettingsModel.RefreshCallback() {
+            @Override
+            public void refreshView(QuickSettingsTileView view, State state) {
+                TextView tv = (TextView) view.findViewById(R.id.brightness_textview);
+                tv.setCompoundDrawablesWithIntrinsicBounds(0, state.iconId, 0, 0);
             }
         });
         parent.addView(brightnessTile);
@@ -529,6 +562,7 @@ class QuickSettings {
         
             mBrightnessController = new BrightnessController(mContext,
                     (ToggleSlider) mBrightnessDialog.findViewById(R.id.brightness_slider));
+            mBrightnessController.addStateChangedCallback(mModel);
             mBrightnessDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
                 @Override
                 public void onDismiss(DialogInterface dialog) {

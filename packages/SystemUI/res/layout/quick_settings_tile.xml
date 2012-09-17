@@ -17,4 +17,4 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="@dimen/quick_settings_cell_height"
-    android:background="#1B1D1B" />
+    android:background="@drawable/qs_tile_background" />

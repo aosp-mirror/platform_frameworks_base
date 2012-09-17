@@ -24,14 +24,17 @@
     <ImageView
         android:id="@+id/brightness_icon"
         style="@style/SystemBarPanelSettingsIcon"
+        android:layout_gravity="center_vertical"
+        android:paddingRight="10dp"
         android:src="@drawable/ic_sysbar_brightness"
         />
     <com.android.systemui.statusbar.policy.ToggleSlider
         android:id="@+id/brightness_slider"
         android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:layout_height="40dp"
         android:layout_weight="1"
         android:layout_marginRight="2dp"
+        android:layout_gravity="center_vertical"
         systemui:text="@string/status_bar_settings_auto_brightness_label"
         />
 </LinearLayout>
