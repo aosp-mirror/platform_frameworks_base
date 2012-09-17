@@ -318,8 +318,6 @@ public class PhoneStatusBar extends BaseStatusBar {
             mStatusBarWindow.setBackground(null);
             mNotificationPanel.setBackground(new FastColorDrawable(context.getResources().getColor(
                     R.color.notification_panel_solid_background)));
-            mSettingsPanel.setBackground(new FastColorDrawable(context.getResources().getColor(
-                    R.color.notification_panel_solid_background)));
         }
         if (ENABLE_INTRUDERS) {
             mIntruderAlertView = (IntruderAlertView) View.inflate(context, R.layout.intruder_alert, null);
@@ -435,6 +433,11 @@ public class PhoneStatusBar extends BaseStatusBar {
         mSettingsPanel.setBar(mStatusBarView);
         mSettingsPanel.setup(mNetworkController, mBluetoothController, mBatteryController,
                 mLocationController);
+
+        if (!ActivityManager.isHighEndGfx()) {
+            mSettingsPanel.setBackground(new FastColorDrawable(context.getResources().getColor(
+                    R.color.notification_panel_solid_background)));
+        }
 
 //        final ImageView wimaxRSSI =
 //                (ImageView)sb.findViewById(R.id.wimax_signal);
