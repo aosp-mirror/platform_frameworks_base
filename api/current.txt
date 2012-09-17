@@ -17297,6 +17297,7 @@ package android.provider {
     field public static final java.lang.String SYNC_DATA8 = "sync_data8";
     field public static final java.lang.String SYNC_DATA9 = "sync_data9";
     field public static final java.lang.String TITLE = "title";
+    field public static final java.lang.String UID_2445 = "uid2445";
   }
 
   public static final class CalendarContract.EventsEntity implements android.provider.BaseColumns android.provider.CalendarContract.EventsColumns android.provider.CalendarContract.SyncColumns {
