@@ -643,10 +643,8 @@ bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, Rect& clip, GLui
         ALOGE("Framebuffer incomplete (GL error code 0x%x)", status);
 
         glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
-        layer->deleteTexture();
-        mCaches.fboCache.put(layer->getFbo());
 
-        delete layer;
+        Caches::getInstance().resourceCache.decrementRefcount(layer);
 
         return false;
     }
@@ -732,8 +730,7 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
     // Failing to add the layer to the cache should happen only if the layer is too large
     if (!mCaches.layerCache.put(layer)) {
         LAYER_LOGD("Deleting layer");
-        layer->deleteTexture();
-        delete layer;
+        Caches::getInstance().resourceCache.decrementRefcount(layer);
     }
 }
 

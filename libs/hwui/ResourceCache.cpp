@@ -79,6 +79,10 @@ void ResourceCache::incrementRefcount(SkiaColorFilter* filterResource) {
     incrementRefcount((void*) filterResource, kColorFilter);
 }
 
+void ResourceCache::incrementRefcount(Layer* layerResource) {
+    incrementRefcount((void*) layerResource, kLayer);
+}
+
 void ResourceCache::incrementRefcountLocked(void* resource, ResourceType resourceType) {
     ssize_t index = mCache->indexOfKey(resource);
     ResourceReference* ref = index >= 0 ? mCache->valueAt(index) : NULL;
@@ -109,6 +113,10 @@ void ResourceCache::incrementRefcountLocked(SkiaColorFilter* filterResource) {
     incrementRefcountLocked((void*) filterResource, kColorFilter);
 }
 
+void ResourceCache::incrementRefcountLocked(Layer* layerResource) {
+    incrementRefcountLocked((void*) layerResource, kLayer);
+}
+
 void ResourceCache::decrementRefcount(void* resource) {
     Mutex::Autolock _l(mLock);
     decrementRefcountLocked(resource);
@@ -132,6 +140,10 @@ void ResourceCache::decrementRefcount(SkiaShader* shaderResource) {
 void ResourceCache::decrementRefcount(SkiaColorFilter* filterResource) {
     SkSafeUnref(filterResource->getSkColorFilter());
     decrementRefcount((void*) filterResource);
+}
+
+void ResourceCache::decrementRefcount(Layer* layerResource) {
+    decrementRefcount((void*) layerResource);
 }
 
 void ResourceCache::decrementRefcountLocked(void* resource) {
@@ -165,6 +177,10 @@ void ResourceCache::decrementRefcountLocked(SkiaShader* shaderResource) {
 void ResourceCache::decrementRefcountLocked(SkiaColorFilter* filterResource) {
     SkSafeUnref(filterResource->getSkColorFilter());
     decrementRefcountLocked((void*) filterResource);
+}
+
+void ResourceCache::decrementRefcountLocked(Layer* layerResource) {
+    decrementRefcountLocked((void*) layerResource);
 }
 
 void ResourceCache::destructor(SkPath* resource) {
@@ -280,7 +296,7 @@ void ResourceCache::deleteResourceReference(void* resource, ResourceReference* r
     if (ref->recycled && ref->resourceType == kBitmap) {
         ((SkBitmap*) resource)->setPixels(NULL, NULL);
     }
-    if (ref->destroyed) {
+    if (ref->destroyed || ref->resourceType == kLayer) {
         switch (ref->resourceType) {
             case kBitmap: {
                 SkBitmap* bitmap = (SkBitmap*) resource;
@@ -306,6 +322,11 @@ void ResourceCache::deleteResourceReference(void* resource, ResourceReference* r
             case kColorFilter: {
                 SkiaColorFilter* filter = (SkiaColorFilter*) resource;
                 delete filter;
+            }
+            break;
+            case kLayer: {
+                Layer* layer = (Layer*) resource;
+                delete layer;
             }
             break;
         }

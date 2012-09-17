@@ -135,8 +135,9 @@ abstract class HardwareLayer {
      * 
      * @param width The new desired minimum width for this layer
      * @param height The new desired minimum height for this layer
+     * @return True if the resulting layer is valid, false otherwise
      */
-    abstract void resize(int width, int height);
+    abstract boolean resize(int width, int height);
 
     /**
      * Returns a hardware canvas that can be used to render onto

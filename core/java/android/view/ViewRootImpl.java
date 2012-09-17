@@ -1402,6 +1402,7 @@ public final class ViewRootImpl implements ViewParent,
                                     mResizeBuffer.getHeight() != mHeight) {
                                 mResizeBuffer.resize(mWidth, mHeight);
                             }
+                            // TODO: should handle create/resize failure
                             layerCanvas = mResizeBuffer.start(hwRendererCanvas);
                             layerCanvas.setViewport(mWidth, mHeight);
                             layerCanvas.onPreDraw(null);
