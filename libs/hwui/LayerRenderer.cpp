@@ -211,10 +211,8 @@ Layer* LayerRenderer::createLayer(uint32_t width, uint32_t height, bool isOpaque
                     fbo, width, height);
 
             glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
-            caches.fboCache.put(fbo);
 
-            layer->deleteTexture();
-            delete layer;
+            Caches::getInstance().resourceCache.decrementRefcount(layer);
 
             return NULL;
         }
@@ -240,8 +238,7 @@ bool LayerRenderer::resizeLayer(Layer* layer, uint32_t width, uint32_t height) {
             layer->texCoords.set(0.0f, height / float(layer->getHeight()),
                     width / float(layer->getWidth()), 0.0f);
         } else {
-            layer->deleteTexture();
-            delete layer;
+            Caches::getInstance().resourceCache.decrementRefcount(layer);
             return false;
         }
     }
@@ -303,8 +300,7 @@ void LayerRenderer::destroyLayer(Layer* layer) {
 
         if (!Caches::getInstance().layerCache.put(layer)) {
             LAYER_RENDERER_LOGD("  Destroyed!");
-            layer->deleteTexture();
-            delete layer;
+            Caches::getInstance().resourceCache.decrementRefcount(layer);
         } else {
             LAYER_RENDERER_LOGD("  Cached!");
 #if DEBUG_LAYER_RENDERER

@@ -46,21 +46,7 @@ class DisplayList;
  */
 struct Layer {
 
-    Layer(const uint32_t layerWidth, const uint32_t layerHeight) {
-        mesh = NULL;
-        meshIndices = NULL;
-        meshElementCount = 0;
-        cacheable = true;
-        textureLayer = false;
-        renderTarget = GL_TEXTURE_2D;
-        texture.width = layerWidth;
-        texture.height = layerHeight;
-        colorFilter = NULL;
-        deferredUpdateScheduled = false;
-        renderer = NULL;
-        displayList = NULL;
-    }
-
+    Layer(const uint32_t layerWidth, const uint32_t layerHeight);
     ~Layer();
 
     /**
