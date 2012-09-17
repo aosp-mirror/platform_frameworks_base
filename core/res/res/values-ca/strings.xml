@@ -171,12 +171,47 @@
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Missatges"</string>
     <string name="permgroupdesc_messages" msgid="7821999071003699236">"Llegeix i escriu SMS, correus electrònics i altres missatges."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Informació personal"</string>
-    <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"Accés directe als contactes i al calendari emmagatzemat a la tauleta."</string>
-    <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"Accés directe als contactes i al calendari emmagatzemats al telèfon."</string>
+    <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"Accés directe a informació sobre tu, emmagatzemada a la targeta de contacte."</string>
+    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Informació social"</string>
+    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Accés directe a informació sobre els teus contactes i sobre les teves connexions socials."</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"La teva ubicació"</string>
     <string name="permgroupdesc_location" msgid="5704679763124170100">"Supervisa la teva ubicació física."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Comunicació de xarxa"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"Accedeix a diverses funcions de xarxa."</string>
+    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"Bluetooth"</string>
+    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"Accés a dispositius i a xarxes mitjançant Bluetooth."</string>
+    <string name="permgrouplab_shortrangeNetwork" msgid="130808676377486118">"Xarxes de poc abast"</string>
+    <string name="permgroupdesc_shortrangeNetwork" msgid="1884069062653436007">"Accés a dispositius mitjançant xarxes de poc abast, com ara NFC."</string>
+    <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"Configuració d\'àudio"</string>
+    <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"Canviar la configuració de l\'àudio."</string>
+    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"Afectar la bateria"</string>
+    <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"Fer servir funcions que poden consumir bateria ràpidament."</string>
+    <string name="permgrouplab_calendar" msgid="5863508437783683902">"Calendari"</string>
+    <string name="permgroupdesc_calendar" msgid="5777534316982184416">"Accés directe a calendaris i a esdeveniments."</string>
+    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"Llegeix el diccionari de l\'usuari"</string>
+    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"Llegeix paraules al diccionari de l\'usuari."</string>
+    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"Escriu al diccionari de l\'usuari"</string>
+    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"Afegeix paraules al diccionari de l\'usuari."</string>
+    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Marcadors i historial"</string>
+    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Accés directe a l\'historial de marcadors i de navegació."</string>
+    <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"Alarma"</string>
+    <string name="permgroupdesc_deviceAlarms" msgid="4769356362251641175">"Definir l\'alarma."</string>
+    <string name="permgrouplab_voicemail" msgid="4162237145027592133">"Bústia de veu"</string>
+    <string name="permgroupdesc_voicemail" msgid="2498403969862951393">"Accés directe a la bústia de veu."</string>
+    <string name="permgrouplab_microphone" msgid="171539900250043464">"Micròfon"</string>
+    <string name="permgroupdesc_microphone" msgid="7106618286905738408">"Accés directe al micròfon per enregistrar àudio."</string>
+    <string name="permgrouplab_camera" msgid="4820372495894586615">"Càmera"</string>
+    <string name="permgroupdesc_camera" msgid="2933667372289567714">"Accés directe a la càmera per a la captura d\'imatges o de vídeos."</string>
+    <string name="permgrouplab_appInfo" msgid="8028789762634147725">"Informació de les aplicacions"</string>
+    <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"Capacitat d\'afectar el rendiment d\'altres aplicacions del dispositiu."</string>
+    <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"Fons de pantalla"</string>
+    <string name="permgroupdesc_wallpaper" msgid="5630417854750540154">"Canviar la configuració del fons de pantalla del dispositiu."</string>
+    <string name="permgrouplab_systemClock" msgid="406535759236612992">"Rellotge"</string>
+    <string name="permgroupdesc_systemClock" msgid="3944359833624094992">"Canviar l\'hora o la zona horària del dispositiu."</string>
+    <string name="permgrouplab_statusBar" msgid="2095862568113945398">"Barra d\'estat"</string>
+    <string name="permgroupdesc_statusBar" msgid="6242593432226807171">"Canviar la configuració de la barra d\'estat del dispositiu."</string>
+    <string name="permgrouplab_syncSettings" msgid="3341990986147826541">"Configuració de sincronització"</string>
+    <string name="permgroupdesc_syncSettings" msgid="7603195265129031797">"Accedir a la configuració de sincronització."</string>
     <string name="permgrouplab_accounts" msgid="3359646291125325519">"Comptes"</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Accedeix als comptes disponibles."</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Controls de maquinari"</string>
@@ -187,6 +222,8 @@
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"Accés de nivell inferior i control del sistema."</string>
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Eines de desenvolupament"</string>
     <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"Funcions que només necessiten els desenvolupadors d\'aplicacions."</string>
+    <string name="permgrouplab_display" msgid="4279909676036402636">"IU d\'altres aplicacions"</string>
+    <string name="permgroupdesc_display" msgid="6051002031933013714">"Afectar la IU d\'altres aplicacions."</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Emmagatzematge"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Accedeix a l\'emmag. USB."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Accedeix a la targeta SD."</string>
@@ -256,10 +293,8 @@
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Permet que una aplicació recuperi informació sobre les finestres del gestor de finestres. Aplicacions malicioses podrien recuperar informació dirigida a la utilització per part del sistema intern."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"filtra els esdeveniments"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Permet que una aplicació registri un filtre d\'entrada per a l\'emissió de tots els esdeveniments d\'usuari abans no s\'enviïn. Aplicacions malicioses podrien controlar la IU del sistema sense la intervenció de l\'usuari."</string>
-    <!-- no translation found for permlab_magnify_display (5973626738170618775) -->
-    <skip />
-    <!-- no translation found for permdesc_magnify_display (7121235684515003792) -->
-    <skip />
+    <string name="permlab_magnify_display" msgid="5973626738170618775">"augment de la pantalla"</string>
+    <string name="permdesc_magnify_display" msgid="7121235684515003792">"Permet a una aplicació augmentar el contingut d\'una pantalla. Les aplicacions malicioses poden transformar el contingut de la pantalla de manera que el dispositiu no es pugui fer servir."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"apagar parcialment"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Posa el gestor d\'activitats en estat d\'apagada. No fa una apagada completa."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"impedir els canvis d\'aplicació"</string>
@@ -290,10 +325,8 @@
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Permet que l\'aplicació canviï la velocitat d\'animació global (animacions més ràpides o lentes) en qualsevol moment."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"gestiona els testimonis d\'aplicacions"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Permet que les aplicacions creïn i gestionin els seus propis testimonis, evitant l\'ordre Z normal. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
-    <!-- no translation found for permlab_freezeScreen (4708181184441880175) -->
-    <skip />
-    <!-- no translation found for permdesc_freezeScreen (8558923789222670064) -->
-    <skip />
+    <string name="permlab_freezeScreen" msgid="4708181184441880175">"bloqueig de la pantalla"</string>
+    <string name="permdesc_freezeScreen" msgid="8558923789222670064">"Permet a l\'aplicació bloquejar temporalment la pantalla per fer una transició de pantalla completa."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"prémer tecles i botons de control"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Permet que l\'aplicació lliuri els seus propis esdeveniments d\'entrada (tecles premudes, etc.) a d\'altres aplicacions. Les aplicacions malicioses poden utilitzar aquesta funció per controlar la tauleta."</string>
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Permet que l\'aplicació lliuri els seus propis esdeveniments d\'entrada (tecles premudes, etc.) a d\'altres aplicacions. Les aplicacions malicioses poden utilitzar aquesta funció per controlar el telèfon."</string>
@@ -406,14 +439,10 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Permet que l\'aplicació utilitzi funcions SurfaceFlinger de baix nivell."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"llegir la memòria intermèdia de marcs"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Permet que l\'aplicació llegeixi el contingut de la memòria intermèdia de marcs."</string>
-    <!-- no translation found for permlab_configureWifiDisplay (5595661694746742168) -->
-    <skip />
-    <!-- no translation found for permdesc_configureWifiDisplay (7916815158690218065) -->
-    <skip />
-    <!-- no translation found for permlab_controlWifiDisplay (393641276723695496) -->
-    <skip />
-    <!-- no translation found for permdesc_controlWifiDisplay (4543912292681826986) -->
-    <skip />
+    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"configuració de les pantalles Wi-Fi"</string>
+    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Permet a l\'aplicació configurar-se i connectar-se a les pantalles Wi-Fi."</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"control de les pantalles Wi-Fi"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Permet a l\'aplicació controlar les funcions de baix nivell de les pantalles Wi-Fi."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"canviar la configuració d\'àudio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Permet que l\'aplicació modifiqui la configuració d\'àudio general, com ara el volum i l\'altaveu de sortida que es fa servir."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"enregistrar àudio"</string>
@@ -595,10 +624,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Requereix que les dades de l\'aplicació emmagatzemades estiguin encriptades."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Desactiva les càmeres"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Impedeix l\'ús de totes les càmeres del dispositiu."</string>
-    <!-- no translation found for policylab_disableKeyguardWidgets (1794894613389073926) -->
-    <skip />
-    <!-- no translation found for policydesc_disableKeyguardWidgets (7254624892984033592) -->
-    <skip />
+    <string name="policylab_disableKeyguardWidgets" msgid="1794894613389073926">"Desactivació dels widgets bloquejats"</string>
+    <string name="policydesc_disableKeyguardWidgets" msgid="7254624892984033592">"Impedeix l\'ús de part o de la totalitat dels widgets bloquejats."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Casa"</item>
     <item msgid="869923650527136615">"Mòbil"</item>

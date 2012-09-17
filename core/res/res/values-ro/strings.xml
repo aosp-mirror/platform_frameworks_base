@@ -171,12 +171,47 @@
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Mesajele dvs."</string>
     <string name="permgroupdesc_messages" msgid="7821999071003699236">"Citire şi scriere mesaje SMS, e-mailuri şi alte mesaje."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Informaţiile dvs. personale"</string>
-    <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"Acces direct la agenda şi la calendarul stocate pe computerul dvs. tablet PC."</string>
-    <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"Acces direct la agenda şi la calendarul stocate pe telefonul dvs."</string>
+    <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"Acces direct la informaţii despre dvs., stocate pe cartea de vizită."</string>
+    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Informaţiile dvs. sociale"</string>
+    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Acces direct la informaţii despre persoanele de contact şi conexiunile dvs. sociale."</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"Locaţia dvs."</string>
     <string name="permgroupdesc_location" msgid="5704679763124170100">"Monitorizează locaţia dvs. fizică."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Comunicare în reţea"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"Accesează diferite funcţii ale reţelei."</string>
+    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"Bluetooth"</string>
+    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"Accesează dispozitive şi reţele prin intermediul Bluetooth."</string>
+    <string name="permgrouplab_shortrangeNetwork" msgid="130808676377486118">"Reţele cu distanţă scurtă"</string>
+    <string name="permgroupdesc_shortrangeNetwork" msgid="1884069062653436007">"Accesează dispozitive prin intermediul reţelelor cu distanţă scurtă, cum ar fi NFC."</string>
+    <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"Setările audio"</string>
+    <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"Modifică setările audio."</string>
+    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"Capacitatea de a afecta bateria"</string>
+    <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"Utilizează funcţii care pot consuma rapid bateria."</string>
+    <string name="permgrouplab_calendar" msgid="5863508437783683902">"Calendarul"</string>
+    <string name="permgroupdesc_calendar" msgid="5777534316982184416">"Acces direct la calendar şi la evenimente."</string>
+    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"Citeşte dicţionarul utilizatorului"</string>
+    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"Citeşte cuvinte din dicţionarul utilizatorului."</string>
+    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"Scrie în dicţionarul utilizatorului"</string>
+    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"Adaugă cuvinte în dicţionarul utilizatorului."</string>
+    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Marcajele şi Istoricul"</string>
+    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Acces direct la marcaje şi la istoricul navigării."</string>
+    <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"Alarma"</string>
+    <string name="permgroupdesc_deviceAlarms" msgid="4769356362251641175">"Setează ceasul cu alarmă."</string>
+    <string name="permgrouplab_voicemail" msgid="4162237145027592133">"Mesageria vocală"</string>
+    <string name="permgroupdesc_voicemail" msgid="2498403969862951393">"Acces direct la mesageria vocală."</string>
+    <string name="permgrouplab_microphone" msgid="171539900250043464">"Microfonul"</string>
+    <string name="permgroupdesc_microphone" msgid="7106618286905738408">"Acces direct la microfon pentru înregistrări audio."</string>
+    <string name="permgrouplab_camera" msgid="4820372495894586615">"Camera foto"</string>
+    <string name="permgroupdesc_camera" msgid="2933667372289567714">"Acces direct la camera foto pentru a realiza fotografii şi videoclipuri."</string>
+    <string name="permgrouplab_appInfo" msgid="8028789762634147725">"Informaţiile despre aplicaţiile dvs."</string>
+    <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"Capacitatea de a influenţa comportamentul altor aplicaţii de pe dispozitiv."</string>
+    <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"Imaginea de fundal"</string>
+    <string name="permgroupdesc_wallpaper" msgid="5630417854750540154">"Modifică setările pentru imaginea de fundal a dispozitivului."</string>
+    <string name="permgrouplab_systemClock" msgid="406535759236612992">"Ceasul"</string>
+    <string name="permgroupdesc_systemClock" msgid="3944359833624094992">"Modifică ora sau fusul orar ale dispozitivului."</string>
+    <string name="permgrouplab_statusBar" msgid="2095862568113945398">"Bara de stare"</string>
+    <string name="permgroupdesc_statusBar" msgid="6242593432226807171">"Modifică setările pentru bara de stare a dispozitivului."</string>
+    <string name="permgrouplab_syncSettings" msgid="3341990986147826541">"Setările de sincronizare"</string>
+    <string name="permgroupdesc_syncSettings" msgid="7603195265129031797">"Acces la setările de sincronizare."</string>
     <string name="permgrouplab_accounts" msgid="3359646291125325519">"Conturile dvs."</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Accesează conturile disponibile."</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Controale hardware"</string>
@@ -187,6 +222,8 @@
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"Acces şi control de nivel redus ale sistemului."</string>
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Instrumente de dezvoltare"</string>
     <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"Funcţii necesare doar pentru dezvoltatorii de aplicaţii."</string>
+    <string name="permgrouplab_display" msgid="4279909676036402636">"Interfaţa de utilizare a altor aplicaţii"</string>
+    <string name="permgroupdesc_display" msgid="6051002031933013714">"Influenţează interfaţa de utilizare a altor aplicaţii."</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Stocare"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Accesează stocarea USB."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Accesează cardul SD."</string>
