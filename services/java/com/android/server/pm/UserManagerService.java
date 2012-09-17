@@ -688,7 +688,7 @@ public class UserManagerService extends IUserManager.Stub {
      */
     private int getNextAvailableIdLocked() {
         synchronized (mPackagesLock) {
-            int i = 0;
+            int i = 10;
             while (i < Integer.MAX_VALUE) {
                 if (mUsers.indexOfKey(i) < 0) {
                     break;
