@@ -1001,6 +1001,17 @@ public class LockPatternUtils {
         }
     }
 
+    public int[] getUserDefinedWidgets() {
+        int appWidgetId = -1;
+        String appWidgetIdString = Settings.Secure.getString(
+                mContentResolver, Settings.Secure.LOCK_SCREEN_USER_SELECTED_APPWIDGET_ID);
+        if (appWidgetIdString != null) {
+            appWidgetId = (int) Integer.decode(appWidgetIdString);
+        }
+
+        return new int[] { appWidgetId };
+    }
+
     private long getLong(String secureSettingKey, long defaultValue) {
         try {
             return getLockSettings().getLong(secureSettingKey, defaultValue,

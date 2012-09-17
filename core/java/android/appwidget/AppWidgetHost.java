@@ -24,8 +24,10 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.widget.RemoteViews;
@@ -115,18 +117,22 @@ public class AppWidgetHost {
     private OnClickHandler mOnClickHandler;
 
     public AppWidgetHost(Context context, int hostId) {
-        this(context, hostId, null);
+        this(context, hostId, null, Looper.getMainLooper());
     }
 
     /**
      * @hide
      */
-    public AppWidgetHost(Context context, int hostId, OnClickHandler handler) {
+    public AppWidgetHost(Context context, int hostId, OnClickHandler handler, Looper looper) {
         mContext = context;
         mHostId = hostId;
         mOnClickHandler = handler;
-        mHandler = new UpdateHandler(context.getMainLooper());
+        mHandler = new UpdateHandler(looper);
         mDisplayMetrics = context.getResources().getDisplayMetrics();
+        bindService();
+    }
+
+    private static void bindService() {
         synchronized (sServiceLock) {
             if (sService == null) {
                 IBinder b = ServiceManager.getService(Context.APPWIDGET_SERVICE);
@@ -190,6 +196,32 @@ public class AppWidgetHost {
     }
 
     /**
+     * Get a appWidgetId for a host in the calling process.
+     *
+     * @return a appWidgetId
+     * @hide
+     */
+    public static int allocateAppWidgetIdForHost(String packageName, int hostId) {
+        checkCallerIsSystem();
+        try {
+            if (sService == null) {
+                bindService();
+            }
+            return sService.allocateAppWidgetId(packageName, hostId);
+        } catch (RemoteException e) {
+            throw new RuntimeException("system server dead?", e);
+        }
+    }
+
+    private static void checkCallerIsSystem() {
+        int uid = Process.myUid();
+        if (UserHandle.getAppId(uid) == Process.SYSTEM_UID || uid == 0) {
+            return;
+        }
+        throw new SecurityException("Disallowed call for uid " + uid);
+    }
+
+    /**
      * Stop listening to changes for this AppWidget.
      */
     public void deleteAppWidgetId(int appWidgetId) {
@@ -201,6 +233,22 @@ public class AppWidgetHost {
             catch (RemoteException e) {
                 throw new RuntimeException("system server dead?", e);
             }
+        }
+    }
+
+    /**
+     * Stop listening to changes for this AppWidget.
+     * @hide
+     */
+    public static void deleteAppWidgetIdForHost(int appWidgetId) {
+        checkCallerIsSystem();
+        try {
+            if (sService == null) {
+                bindService();
+            }
+            sService.deleteAppWidgetId(appWidgetId);
+        } catch (RemoteException e) {
+            throw new RuntimeException("system server dead?", e);
         }
     }
 

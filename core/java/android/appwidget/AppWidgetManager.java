@@ -218,16 +218,24 @@ public class AppWidgetManager {
     /**
      * An intent extra to pass to the AppWidget picker which allows the picker to filter
      * the list based on the {@link AppWidgetProviderInfo#widgetCategory}.
+     *
+     * @hide
      */
-    /** @hide */
     public static final String EXTRA_CATEGORY_FILTER = "categoryFilter";
 
     /**
      * An intent extra to pass to the AppWidget picker which allows the picker to filter
      * the list based on the {@link AppWidgetProviderInfo#widgetFeatures}.
+     * @hide
      */
-    /** @hide */
     public static final String EXTRA_FEATURES_FILTER = "featuresFilter";
+
+    /**
+     * An intent extra to pass to the AppWidget picker to specify whether or not to sort
+     * the list of caller-specified extra AppWidgets along with the rest of the AppWidgets
+     * @hide
+     */
+    public static final String EXTRA_CUSTOM_SORT = "customSort";
 
     /**
      * A sentiel value that the AppWidget manager will never return as a appWidgetId.

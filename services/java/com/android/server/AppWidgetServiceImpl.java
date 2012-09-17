@@ -42,6 +42,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -409,7 +410,7 @@ class AppWidgetServiceImpl {
     }
 
     public int allocateAppWidgetId(String packageName, int hostId) {
-        int callingUid = enforceCallingUid(packageName);
+        int callingUid = enforceSystemOrCallingUid(packageName);
         synchronized (mAppWidgetIds) {
             ensureStateLoadedLocked();
             int appWidgetId = mNextAppWidgetId++;
@@ -1389,6 +1390,15 @@ class AppWidgetServiceImpl {
             throw new PackageManager.NameNotFoundException();
         }
         return pkgInfo.applicationInfo.uid;
+    }
+
+    int enforceSystemOrCallingUid(String packageName) throws IllegalArgumentException {
+        int callingUid = Binder.getCallingUid();
+        int uid = Process.myUid();
+        if (UserHandle.getAppId(uid) == Process.SYSTEM_UID || uid == 0) {
+            return callingUid;
+        }
+        return enforceCallingUid(packageName);
     }
 
     int enforceCallingUid(String packageName) throws IllegalArgumentException {
