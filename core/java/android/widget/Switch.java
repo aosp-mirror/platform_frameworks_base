@@ -508,9 +508,9 @@ public class Switch extends CompoundButton {
     @Override
     public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
         super.onPopulateAccessibilityEvent(event);
-        CharSequence text = isChecked() ? mOnLayout.getText() : mOffLayout.getText();
-        if (!TextUtils.isEmpty(text)) {
-            event.getText().add(text);
+        Layout layout =  isChecked() ? mOnLayout : mOffLayout;
+        if (layout != null && !TextUtils.isEmpty(layout.getText())) {
+            event.getText().add(layout.getText());
         }
     }
 
