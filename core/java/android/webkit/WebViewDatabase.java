@@ -29,7 +29,9 @@ import android.content.Context;
  * </ul>
  */
 public class WebViewDatabase {
-    // TODO: deprecate/hide this.
+    /**
+     * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
+     */
     protected static final String LOGTAG = "webviewdatabase";
 
     /**

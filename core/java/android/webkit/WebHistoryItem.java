@@ -38,6 +38,7 @@ public class WebHistoryItem implements Cloneable {
      * same object.
      * @return The id for this item.
      * @deprecated This method is now obsolete.
+     * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
      */
     @Deprecated
     public int getId() {
