@@ -3563,46 +3563,51 @@ public final class Settings {
         public static final String TTS_ENABLED_PLUGINS = "tts_enabled_plugins";
 
         /**
-         * Whether to notify the user of open networks.
-         * <p>
-         * If not connected and the scan results have an open network, we will
-         * put this notification up. If we attempt to connect to a network or
-         * the open network(s) disappear, we remove the notification. When we
-         * show the notification, we will not show it again for
-         * {@link android.provider.Settings.Secure#WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY} time.
+         * @deprecated Use {@link android.provider.Settings.Global#WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON}
+         * instead.
          */
+        @Deprecated
         public static final String WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON =
-                "wifi_networks_available_notification_on";
+                Global.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON;
         /**
+         * @deprecated Moved to Global namespace
          * {@hide}
          */
+        @Deprecated
         public static final String WIMAX_NETWORKS_AVAILABLE_NOTIFICATION_ON =
-                "wimax_networks_available_notification_on";
+                Global.WIMAX_NETWORKS_AVAILABLE_NOTIFICATION_ON;
 
         /**
-         * Delay (in seconds) before repeating the Wi-Fi networks available notification.
-         * Connecting to a network will reset the timer.
+         * @deprecated Use {@link android.provider.Settings.Global#WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY}
+         * instead.
          */
+        @Deprecated
         public static final String WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY =
-                "wifi_networks_available_repeat_delay";
+                Global.WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY;
 
         /**
-         * 802.11 country code in ISO 3166 format
+         * @deprecated Use {@link android.provider.Settings.Global#WIFI_COUNTRY_CODE}
+         * instead.
          * @hide
          */
-        public static final String WIFI_COUNTRY_CODE = "wifi_country_code";
+        @Deprecated
+        public static final String WIFI_COUNTRY_CODE = Global.WIFI_COUNTRY_CODE;
 
 
         /**
-         * When the number of open networks exceeds this number, the
-         * least-recently-used excess networks will be removed.
+         * @deprecated Use {@link android.provider.Settings.Global#WIFI_NUM_OPEN_NETWORKS_KEPT}
+         * instead.
          */
-        public static final String WIFI_NUM_OPEN_NETWORKS_KEPT = "wifi_num_open_networks_kept";
+        @Deprecated
+        public static final String WIFI_NUM_OPEN_NETWORKS_KEPT =
+                Global.WIFI_NUM_OPEN_NETWORKS_KEPT;
 
         /**
-         * Whether the Wi-Fi should be on.  Only the Wi-Fi service should touch this.
+         * @deprecated Use {@link android.provider.Settings.Global#WIFI_ON}
+         * instead.
          */
-        public static final String WIFI_ON = "wifi_on";
+        @Deprecated
+        public static final String WIFI_ON = Global.WIFI_ON;
 
         /**
          * Used to save the Wifi_ON state prior to tethering.
@@ -3610,8 +3615,10 @@ public final class Settings {
          * the user turns off tethering.
          *
          * @hide
+         * @deprecated moved to Global
          */
-        public static final String WIFI_SAVED_STATE = "wifi_saved_state";
+        @Deprecated
+        public static final String WIFI_SAVED_STATE = Global.WIFI_SAVED_STATE;
 
         /**
          * AP SSID
@@ -4220,24 +4227,30 @@ public final class Settings {
          * When idle, it is possible for the device to be switched from Wi-Fi to
          * the mobile data network.
          * @hide
+         * @deprecated Moved to Global
          */
-        public static final String WIFI_IDLE_MS = "wifi_idle_ms";
+        @Deprecated
+        public static final String WIFI_IDLE_MS = Global.WIFI_IDLE_MS;
 
         /**
          * The interval in milliseconds to issue wake up scans when wifi needs
          * to connect. This is necessary to connect to an access point when
          * device is on the move and the screen is off.
          * @hide
+         * @deprecated Moved to Global
          */
+        @Deprecated
         public static final String WIFI_FRAMEWORK_SCAN_INTERVAL_MS =
-                "wifi_framework_scan_interval_ms";
+                Global.WIFI_FRAMEWORK_SCAN_INTERVAL_MS;
 
         /**
          * The interval in milliseconds to scan as used by the wifi supplicant
          * @hide
+         * @deprecated Moved to Global
          */
+        @Deprecated
         public static final String WIFI_SUPPLICANT_SCAN_INTERVAL_MS =
-                "wifi_supplicant_scan_interval_ms";
+                Global.WIFI_SUPPLICANT_SCAN_INTERVAL_MS;
 
         /**
          * @deprecated Moved to Settings.Global

@@ -133,8 +133,8 @@ public class WifiService extends IWifiManager.Stub {
     private static final int POLL_TRAFFIC_STATS_INTERVAL_MSECS = 1000;
 
     /**
-     * See {@link Settings.Secure#WIFI_IDLE_MS}. This is the default value if a
-     * Settings.Secure value is not present. This timeout value is chosen as
+     * See {@link Settings.Global#WIFI_IDLE_MS}. This is the default value if a
+     * Settings.Global value is not present. This timeout value is chosen as
      * the approximate point at which the battery drain caused by Wi-Fi
      * being enabled but not active exceeds the battery drain caused by
      * re-establishing a connection to the mobile data network.
@@ -431,8 +431,8 @@ public class WifiService extends IWifiManager.Stub {
         mWifiStateMachineHandler = new WifiStateMachineHandler(wifiThread.getLooper());
 
         // Setting is in seconds
-        NOTIFICATION_REPEAT_DELAY_MS = Settings.Secure.getInt(context.getContentResolver(),
-                Settings.Secure.WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY, 900) * 1000l;
+        NOTIFICATION_REPEAT_DELAY_MS = Settings.Global.getInt(context.getContentResolver(),
+                Settings.Global.WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY, 900) * 1000l;
         mNotificationEnabledSettingObserver = new NotificationEnabledSettingObserver(new Handler());
         mNotificationEnabledSettingObserver.register();
     }
@@ -502,9 +502,9 @@ public class WifiService extends IWifiManager.Stub {
         final ContentResolver cr = mContext.getContentResolver();
         int wifiSavedState = 0;
         try {
-            wifiSavedState = Settings.Secure.getInt(cr, Settings.Secure.WIFI_SAVED_STATE);
+            wifiSavedState = Settings.Global.getInt(cr, Settings.Global.WIFI_SAVED_STATE);
             if(wifiSavedState == 1)
-                Settings.Secure.putInt(cr, Settings.Secure.WIFI_SAVED_STATE, 0);
+                Settings.Global.putInt(cr, Settings.Global.WIFI_SAVED_STATE, 0);
         } catch (Settings.SettingNotFoundException e) {
             ;
         }
@@ -514,9 +514,9 @@ public class WifiService extends IWifiManager.Stub {
     private int getPersistedWifiState() {
         final ContentResolver cr = mContext.getContentResolver();
         try {
-            return Settings.Secure.getInt(cr, Settings.Secure.WIFI_ON);
+            return Settings.Global.getInt(cr, Settings.Global.WIFI_ON);
         } catch (Settings.SettingNotFoundException e) {
-            Settings.Secure.putInt(cr, Settings.Secure.WIFI_ON, WIFI_DISABLED);
+            Settings.Global.putInt(cr, Settings.Global.WIFI_ON, WIFI_DISABLED);
             return WIFI_DISABLED;
         }
     }
@@ -564,7 +564,7 @@ public class WifiService extends IWifiManager.Stub {
     private void persistWifiState(int state) {
         final ContentResolver cr = mContext.getContentResolver();
         mPersistWifiState.set(state);
-        Settings.Secure.putInt(cr, Settings.Secure.WIFI_ON, state);
+        Settings.Global.putInt(cr, Settings.Global.WIFI_ON, state);
     }
 
     /**
@@ -996,11 +996,11 @@ public class WifiService extends IWifiManager.Stub {
             String action = intent.getAction();
 
             long idleMillis =
-                Settings.Secure.getLong(mContext.getContentResolver(),
-                                        Settings.Secure.WIFI_IDLE_MS, DEFAULT_IDLE_MS);
+                Settings.Global.getLong(mContext.getContentResolver(),
+                                        Settings.Global.WIFI_IDLE_MS, DEFAULT_IDLE_MS);
             int stayAwakeConditions =
-                Settings.System.getInt(mContext.getContentResolver(),
-                                       Settings.System.STAY_ON_WHILE_PLUGGED_IN, 0);
+                Settings.Global.getInt(mContext.getContentResolver(),
+                                       Settings.Global.STAY_ON_WHILE_PLUGGED_IN, 0);
             if (action.equals(Intent.ACTION_SCREEN_ON)) {
                 if (DBG) {
                     Slog.d(TAG, "ACTION_SCREEN_ON");
@@ -1779,8 +1779,8 @@ public class WifiService extends IWifiManager.Stub {
 
         public void register() {
             ContentResolver cr = mContext.getContentResolver();
-            cr.registerContentObserver(Settings.Secure.getUriFor(
-                Settings.Secure.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON), true, this);
+            cr.registerContentObserver(Settings.Global.getUriFor(
+                Settings.Global.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON), true, this);
             mNotificationEnabled = getValue();
         }
 
@@ -1793,8 +1793,8 @@ public class WifiService extends IWifiManager.Stub {
         }
 
         private boolean getValue() {
-            return Settings.Secure.getInt(mContext.getContentResolver(),
-                    Settings.Secure.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON, 1) == 1;
+            return Settings.Global.getInt(mContext.getContentResolver(),
+                    Settings.Global.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON, 1) == 1;
         }
     }
 
