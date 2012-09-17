@@ -171,12 +171,47 @@
     <string name="permgrouplab_messages" msgid="7521249148445456662">"送受信したメッセージ"</string>
     <string name="permgroupdesc_messages" msgid="7821999071003699236">"SMS、メールなどのメッセージを読み書きします。"</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"個人情報"</string>
-    <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"タブレットの連絡先とカレンダーに直接アクセス"</string>
-    <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"端末の連絡先とカレンダーに直接アクセス"</string>
+    <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"連絡先カードに保存されている個人情報に直接アクセスします。"</string>
+    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"ソーシャル情報"</string>
+    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"連絡先とソーシャルコネクションに関する情報に直接アクセスします。"</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"現在地"</string>
     <string name="permgroupdesc_location" msgid="5704679763124170100">"現在地を追跡します。"</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"ネットワーク通信"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"さまざまなネットワーク機能にアクセスします。"</string>
+    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"Bluetooth"</string>
+    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"Bluetooth経由でデバイスやネットワークにアクセスします。"</string>
+    <string name="permgrouplab_shortrangeNetwork" msgid="130808676377486118">"短距離ネットワーク"</string>
+    <string name="permgroupdesc_shortrangeNetwork" msgid="1884069062653436007">"NFCなどの近距離ネットワーク経由でデバイスにアクセスします。"</string>
+    <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"音声設定"</string>
+    <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"音声設定を変更します。"</string>
+    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"電池への影響"</string>
+    <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"短時間で電池を消費する機能を使用します。"</string>
+    <string name="permgrouplab_calendar" msgid="5863508437783683902">"カレンダー"</string>
+    <string name="permgroupdesc_calendar" msgid="5777534316982184416">"カレンダーと予定に直接アクセスします。"</string>
+    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"単語リストの読み取り"</string>
+    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"単語リストから語句を読み取ります。"</string>
+    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"単語リストへの書き込み"</string>
+    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"単語リストに語句を追加します。"</string>
+    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"ブックマークと履歴"</string>
+    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"ブックマークとブラウザの履歴に直接アクセスします。"</string>
+    <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"アラーム"</string>
+    <string name="permgroupdesc_deviceAlarms" msgid="4769356362251641175">"アラームを設定します。"</string>
+    <string name="permgrouplab_voicemail" msgid="4162237145027592133">"ボイスメール"</string>
+    <string name="permgroupdesc_voicemail" msgid="2498403969862951393">"ボイスメールに直接アクセスします。"</string>
+    <string name="permgrouplab_microphone" msgid="171539900250043464">"マイク"</string>
+    <string name="permgroupdesc_microphone" msgid="7106618286905738408">"マイクに直接アクセスして音声を記録します。"</string>
+    <string name="permgrouplab_camera" msgid="4820372495894586615">"カメラ"</string>
+    <string name="permgroupdesc_camera" msgid="2933667372289567714">"カメラに直接アクセスして画像または動画を撮影します。"</string>
+    <string name="permgrouplab_appInfo" msgid="8028789762634147725">"アプリ情報"</string>
+    <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"端末上の他のアプリの動作に影響を及ぼします。"</string>
+    <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"壁紙"</string>
+    <string name="permgroupdesc_wallpaper" msgid="5630417854750540154">"端末の壁紙設定を変更します。"</string>
+    <string name="permgrouplab_systemClock" msgid="406535759236612992">"時刻"</string>
+    <string name="permgroupdesc_systemClock" msgid="3944359833624094992">"端末の時刻またはタイムゾーンを変更します。"</string>
+    <string name="permgrouplab_statusBar" msgid="2095862568113945398">"ステータスバー"</string>
+    <string name="permgroupdesc_statusBar" msgid="6242593432226807171">"端末のステータスバー設定を変更します。"</string>
+    <string name="permgrouplab_syncSettings" msgid="3341990986147826541">"同期設定"</string>
+    <string name="permgroupdesc_syncSettings" msgid="7603195265129031797">"同期設定にアクセスします。"</string>
     <string name="permgrouplab_accounts" msgid="3359646291125325519">"アカウント"</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"利用可能なアカウントにアクセスします。"</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"ハードウェアの制御"</string>
@@ -187,6 +222,8 @@
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"システムの低レベルのアクセスと制御"</string>
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"開発ツール"</string>
     <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"アプリのデベロッパーにのみ必要な機能です。"</string>
+    <string name="permgrouplab_display" msgid="4279909676036402636">"他のアプリのUI"</string>
+    <string name="permgroupdesc_display" msgid="6051002031933013714">"他のアプリのUIに影響を及ぼします。"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"ストレージ"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"USBストレージへのアクセス"</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"SDカードにアクセスします。"</string>
@@ -1085,12 +1122,9 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"日付設定"</string>
     <string name="date_time_set" msgid="5777075614321087758">"設定"</string>
     <string name="date_time_done" msgid="2507683751759308828">"完了"</string>
-    <string name="default_permission_group" msgid="2690160991405646128">"端末既定"</string>
-    <string name="no_permissions" msgid="7283357728219338112">"権限の許可は必要ありません"</string>
-    <string name="perms_hide" msgid="7283915391320676226"><b>"隠す"</b></string>
-    <string name="perms_show_all" msgid="2671791163933091180"><b>"すべて表示"</b></string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"NEW: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"<xliff:g id="APP_NAME">%1$s</xliff:g>で提供されます。"</string>
+    <string name="no_permissions" msgid="7283357728219338112">"権限の許可は必要ありません"</string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"USBマスストレージ"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB接続"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"USBでパソコンに接続しています。パソコンとAndroidのUSBストレージ間でファイルをコピーするには下のボタンをタップします。"</string>

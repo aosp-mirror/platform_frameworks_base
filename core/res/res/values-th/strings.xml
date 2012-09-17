@@ -171,12 +171,47 @@
     <string name="permgrouplab_messages" msgid="7521249148445456662">"ข้อความของคุณ"</string>
     <string name="permgroupdesc_messages" msgid="7821999071003699236">"อ่านและเขียน SMS อีเมล และข้อความอื่นๆ ของคุณ"</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"ข้อมูลส่วนบุคคลของคุณ"</string>
-    <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"การเข้าถึงสมุดโทรศัพท์และปฏิทินที่จัดเก็บอยู่บนแท็บเล็ตโดยตรง"</string>
-    <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"เข้าถึงที่อยู่ติดต่อและปฏิทินของที่จัดเก็บบนโทรศัพท์โดยตรง"</string>
+    <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"เข้าถึงข้อมูลเกี่ยวกับคุณซึ่งจัดเก็บไว้ในบัตรผู้ติดต่อของคุณได้โดยตรง"</string>
+    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"ข้อมูลทางสังคมของคุณ"</string>
+    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"เข้าถึงข้อมูลเกี่ยวกับผู้ติดต่อและเครือข่ายสังคมของคุณโดยตรง"</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"ตำแหน่งของคุณ"</string>
     <string name="permgroupdesc_location" msgid="5704679763124170100">"ตรวจดูตำแหน่งทางกายภาพของคุณ"</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"การสื่อสารของเครือข่าย"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"เข้าถึงคุณลักษณะเครือข่ายต่างๆ"</string>
+    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"บลูทูธ"</string>
+    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"เข้าถึงอุปกรณ์และเครือข่ายผ่านบลูทูธ"</string>
+    <string name="permgrouplab_shortrangeNetwork" msgid="130808676377486118">"เครือข่ายระยะใกล้"</string>
+    <string name="permgroupdesc_shortrangeNetwork" msgid="1884069062653436007">"เข้าถึงอุปกรณ์ผ่านเครือข่ายระยะใกล้ เช่น NFC"</string>
+    <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"การตั้งค่าเสียง"</string>
+    <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"เปลี่ยนการตั้งค่าเสียง"</string>
+    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"มีผลต่อแบตเตอรี่"</string>
+    <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"ใช้คุณลักษณะที่ทำให้พลังงานแบตเตอรี่ลดลงอย่างรวดเร็ว"</string>
+    <string name="permgrouplab_calendar" msgid="5863508437783683902">"ปฏิทิน"</string>
+    <string name="permgroupdesc_calendar" msgid="5777534316982184416">"เข้าถึงปฏิทินและกิจกรรมโดยตรง"</string>
+    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"อ่านพจนานุกรมผู้ใช้"</string>
+    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"อ่านคำในพจนานุกรมผู้ใช้"</string>
+    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"เขียนพจนานุกรมผู้ใช้"</string>
+    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"เพิ่มคำลงในพจนานุกรมผู้ใช้"</string>
+    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"บุ๊กมาร์กและประวัติ"</string>
+    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"เข้าถึงบุ๊กมาร์กและประวัติของเบราว์เซอร์โดยตรง"</string>
+    <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"เตือน"</string>
+    <string name="permgroupdesc_deviceAlarms" msgid="4769356362251641175">"ตั้งนาฬิกาปลุก"</string>
+    <string name="permgrouplab_voicemail" msgid="4162237145027592133">"ข้อความเสียง"</string>
+    <string name="permgroupdesc_voicemail" msgid="2498403969862951393">"เข้าถึงข้อความเสียงโดยตรง"</string>
+    <string name="permgrouplab_microphone" msgid="171539900250043464">"ไมโครโฟน"</string>
+    <string name="permgroupdesc_microphone" msgid="7106618286905738408">"เข้าถึงไมโครโฟนเพื่อบันทึกเสียงโดยตรง"</string>
+    <string name="permgrouplab_camera" msgid="4820372495894586615">"กล้องถ่ายรูป"</string>
+    <string name="permgroupdesc_camera" msgid="2933667372289567714">"เข้าถึงกล้องถ่ายรูปเพื่อดูภาพและวิดีโอที่ถ่ายไว้โดยตรง"</string>
+    <string name="permgrouplab_appInfo" msgid="8028789762634147725">"ข้อมูลแอปพลิเคชันของคุณ"</string>
+    <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"สามารถส่งผลต่อการทำงานของแอปพลิเคชันอื่นในอุปกรณ์ของคุณ"</string>
+    <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"วอลเปเปอร์"</string>
+    <string name="permgroupdesc_wallpaper" msgid="5630417854750540154">"เปลี่ยนการตั้งค่าวอลเปเปอร์ของอุปกรณ์"</string>
+    <string name="permgrouplab_systemClock" msgid="406535759236612992">"นาฬิกา"</string>
+    <string name="permgroupdesc_systemClock" msgid="3944359833624094992">"เปลี่ยนเวลาหรือเขตเวลาของอุปกรณ์"</string>
+    <string name="permgrouplab_statusBar" msgid="2095862568113945398">"แถบสถานะ"</string>
+    <string name="permgroupdesc_statusBar" msgid="6242593432226807171">"เปลี่ยนการตั้งค่าแถบสถานะของอุปกรณ์"</string>
+    <string name="permgrouplab_syncSettings" msgid="3341990986147826541">"การตั้งค่าการซิงค์"</string>
+    <string name="permgroupdesc_syncSettings" msgid="7603195265129031797">"เข้าถึงการตั้งค่าการซิงค์"</string>
     <string name="permgrouplab_accounts" msgid="3359646291125325519">"บัญชีของคุณ"</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"เข้าถึงบัญชีที่ใช้งานได้"</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"การควบคุมฮาร์ดแวร์"</string>
@@ -187,6 +222,8 @@
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"การเข้าถึงและควบคุมของระบบในระดับต่ำ"</string>
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"เครื่องมือในการพัฒนา"</string>
     <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"คุณลักษณะที่จำเป็นสำหรับนักพัฒนาแอปพลิเคชันเท่านั้น"</string>
+    <string name="permgrouplab_display" msgid="4279909676036402636">"UI แอปพลิเคชันอื่นๆ"</string>
+    <string name="permgroupdesc_display" msgid="6051002031933013714">"ส่งผลต่อ UI ของแอปพลิเคชันอื่น"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"พื้นที่เก็บข้อมูล"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"เข้าถึงที่เก็บข้อมูล USB"</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"เข้าถึงการ์ด SD"</string>
@@ -256,10 +293,8 @@
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"อนุญาตให้แอปพลิเคชันดึงข้อมูลเกี่ยวกับหน้าต่างจากเครื่องมือจัดการหน้าต่าง แอปพลิเคชันที่เป็นอันตรายอาจดึงข้อมูลที่มีไว้เพื่อการใช้ของระบบภายใน"</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"กรองกิจกรรม"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"อนุญาตให้แอปพลิเคชันลงทะเบียนตัวกรองข้อมูลซึ่งจะกรองสตรีมกิจกรรมทั้งหมดของผู้ใช้ก่อนที่จะทำการเผยแพร่ออกไป แอปพลิเคชันที่เป็นอันตรายอาจควบคุม UI ของระบบโดยไม่ต้องให้ผู้ใช้จัดการ"</string>
-    <!-- no translation found for permlab_magnify_display (5973626738170618775) -->
-    <skip />
-    <!-- no translation found for permdesc_magnify_display (7121235684515003792) -->
-    <skip />
+    <string name="permlab_magnify_display" msgid="5973626738170618775">"ขยายการแสดงผล"</string>
+    <string name="permdesc_magnify_display" msgid="7121235684515003792">"อนุญาตให้แอปพลิเคชันขยายเนื้อหาที่แสดงผล แอปพลิเคชันที่เป็นอันตรายอาจแปลงเนื้อหาที่แสดงในลักษณะที่ทำให้ไม่สามารถใช้อุปกรณ์ได้"</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"ปิดการทำงานบางส่วน"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"กำหนดให้ตัวจัดการกิจกรรมอยู่ในสถานะปิดระบบ โดยไม่ได้ปิดระบบอย่างสมบูรณ์"</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"ป้องกันการเปลี่ยนแอปพลิเคชัน"</string>
@@ -290,10 +325,8 @@
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"อนุญาตให้แอปพลิเคชันเปลี่ยนความเร็วในการเคลื่อนไหวทั่วไป (ภาพเคลื่อนไหวได้เร็วขึ้นหรือช้าลง) ได้ตลอดเวลา"</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"จัดการโทเค็นของแอปพลิเคชัน"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"อนุญาตให้แอปพลิเคชันสร้างและจัดการโทเค็นของตนเอง โดยข้ามการจัดลำดับ Z ปกติไป ไม่ควรต้องใช้สำหรับแอปพลิเคชันทั่วไป"</string>
-    <!-- no translation found for permlab_freezeScreen (4708181184441880175) -->
-    <skip />
-    <!-- no translation found for permdesc_freezeScreen (8558923789222670064) -->
-    <skip />
+    <string name="permlab_freezeScreen" msgid="4708181184441880175">"ตรึงหน้าจอ"</string>
+    <string name="permdesc_freezeScreen" msgid="8558923789222670064">"อนุญาตให้แอปพลิเคชันตรึงหน้าจอไว้ชั่วคราวสำหรับการเปลี่ยนเป็นแบบเต็มหน้าจอ"</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"กดปุ่มต่างๆ และปุ่ม Ctrl"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"อนุญาตให้แอปพลิเคชันส่งกิจกรรมการนำเข้าข้อมูลของตนเอง (เช่น การกดปุ่ม) ไปยังแอปพลิเคชันอื่นๆ แอปพลิเคชันที่เป็นอันตรายอาจใช้การอนุญาตนี้เข้าควบคุมแท็บเล็ต"</string>
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"อนุญาตให้แอปพลิเคชันส่งกิจกรรมการนำเข้าข้อมูลของตนเอง (เช่น การกดปุ่ม) ไปยังแอปพลิเคชันอื่นๆ แอปพลิเคชันที่เป็นอันตรายอาจใช้การอนุญาตนี้เข้าควบคุมโทรศัพท์"</string>
@@ -406,14 +439,10 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"อนุญาตให้แอปพลิเคชันใช้คุณลักษณะระดับต่ำของ SurfaceFlinger"</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"อ่านเฟรมบัฟเฟอร์"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"อนุญาตให้แอปพลิเคชันอ่านเนื้อหาในเฟรมบัฟเฟอร์"</string>
-    <!-- no translation found for permlab_configureWifiDisplay (5595661694746742168) -->
-    <skip />
-    <!-- no translation found for permdesc_configureWifiDisplay (7916815158690218065) -->
-    <skip />
-    <!-- no translation found for permlab_controlWifiDisplay (393641276723695496) -->
-    <skip />
-    <!-- no translation found for permdesc_controlWifiDisplay (4543912292681826986) -->
-    <skip />
+    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"กำหนดค่าการแสดงผลด้วย WiFi"</string>
+    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"อนุญาตให้แอปกำหนดค่าและเชื่อมต่อกับจอแสดงผล WiFi ได้"</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"ควบคุมการแสดงผลด้วย WiFi"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"อนุญาตให้แอปควบคุมคุณลักษณะต่างๆ ในระดับล่างของการแสดงผลด้วย WiFi"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"เปลี่ยนการตั้งค่าเสียงของคุณ"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"อนุญาตให้แอปพลิเคชันปรับเปลี่ยนการตั้งค่าเสียงทั้งหมดได้ เช่น ระดับเสียงและลำโพงที่จะใช้งาน"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"บันทึกเสียง"</string>
@@ -595,10 +624,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"ข้อมูลของแอปพลิเคชันที่จัดเก็บต้องมีการเข้ารหัส"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"ปิดใช้งานกล้องถ่ายรูป"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"ป้องกันการใช้กล้องถ่ายรูปของอุปกรณ์ทั้งหมด"</string>
-    <!-- no translation found for policylab_disableKeyguardWidgets (1794894613389073926) -->
-    <skip />
-    <!-- no translation found for policydesc_disableKeyguardWidgets (7254624892984033592) -->
-    <skip />
+    <string name="policylab_disableKeyguardWidgets" msgid="1794894613389073926">"ปิดใช้งานวิดเจ็ตเมื่อล็อกจอ"</string>
+    <string name="policydesc_disableKeyguardWidgets" msgid="7254624892984033592">"ป้องกันการใช้วิดเจ็ตบางส่วนหรือทั้งหมดเมื่อล็อกหน้าจอ"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"บ้าน"</item>
     <item msgid="869923650527136615">"มือถือ"</item>
@@ -1085,12 +1112,9 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"ตั้งวันที่"</string>
     <string name="date_time_set" msgid="5777075614321087758">"ตั้งค่า"</string>
     <string name="date_time_done" msgid="2507683751759308828">"เสร็จสิ้น"</string>
-    <string name="default_permission_group" msgid="2690160991405646128">"เริ่มต้น"</string>
-    <string name="no_permissions" msgid="7283357728219338112">"ไม่ต้องการการอนุญาต"</string>
-    <string name="perms_hide" msgid="7283915391320676226"><b>"ซ่อน"</b></string>
-    <string name="perms_show_all" msgid="2671791163933091180"><b>"แสดงทั้งหมด"</b></string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"ใหม่: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"โดย <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="no_permissions" msgid="7283357728219338112">"ไม่ต้องการการอนุญาต"</string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"ที่จัดเก็บข้อมูลจำนวนมากแบบ USB"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"เชื่อมต่อ USB แล้ว"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"คุณได้เชื่อมต่อกับคอมพิวเตอร์ผ่าน USB แล้ว แตะปุ่มด้านล่างหากคุณต้องการคัดลอกไฟล์ระหว่างคอมพิวเตอร์กับที่จัดเก็บข้อมูล USB ของแอนดรอยด์"</string>
