@@ -59,9 +59,9 @@ public class NtpTrustedTime implements TrustedTime {
             final long defaultTimeout = res.getInteger(
                     com.android.internal.R.integer.config_ntpTimeout);
 
-            final String secureServer = Settings.Secure.getString(
+            final String secureServer = Settings.Global.getString(
                     resolver, Settings.Global.NTP_SERVER);
-            final long timeout = Settings.Secure.getLong(
+            final long timeout = Settings.Global.getLong(
                     resolver, Settings.Global.NTP_TIMEOUT, defaultTimeout);
 
             final String server = secureServer != null ? secureServer : defaultServer;
