@@ -138,6 +138,10 @@ public class WifiStateMachine extends StateMachine {
     private boolean mScanResultIsPending = false;
     /* Tracks if the current scan settings are active */
     private boolean mSetScanActive = false;
+    /* Tracks if state machine has received any screen state change broadcast yet.
+     * We can miss one of these at boot.
+     */
+    private AtomicBoolean mScreenBroadcastReceived = new AtomicBoolean(false);
 
     private boolean mBluetoothConnectionActive = false;
 
@@ -635,28 +639,9 @@ public class WifiStateMachine extends StateMachine {
                 String action = intent.getAction();
 
                 if (action.equals(Intent.ACTION_SCREEN_ON)) {
-                    if (DBG) log("ACTION_SCREEN_ON");
-                    enableRssiPolling(true);
-                    if (mBackgroundScanSupported) {
-                        enableBackgroundScanCommand(false);
-                    }
-                    enableAllNetworks();
-                    if (mUserWantsSuspendOpt.get()) {
-                        if (DBG) log("Clear suspend optimizations");
-                        sendMessage(obtainMessage(CMD_SET_SUSPEND_OPT_ENABLED, 0, 0));
-                    }
+                    handleScreenStateChanged(true);
                 } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
-                    if (DBG) log("ACTION_SCREEN_OFF");
-                    enableRssiPolling(false);
-                    if (mBackgroundScanSupported) {
-                        enableBackgroundScanCommand(true);
-                    }
-                    if (mUserWantsSuspendOpt.get()) {
-                        if (DBG) log("Enable suspend optimizations");
-                        //Allow 2s for suspend optimizations to be set
-                        mSuspendWakeLock.acquire(2000);
-                        sendMessage(obtainMessage(CMD_SET_SUSPEND_OPT_ENABLED, 1, 0));
-                    }
+                    handleScreenStateChanged(false);
                 }
             }
         };
@@ -1220,6 +1205,26 @@ public class WifiStateMachine extends StateMachine {
     /*********************************************************
      * Internal private functions
      ********************************************************/
+
+    private void handleScreenStateChanged(boolean screenOn) {
+        if (DBG) log("handleScreenStateChanged: " + screenOn);
+        enableRssiPolling(screenOn);
+        if (mBackgroundScanSupported) {
+            enableBackgroundScanCommand(screenOn == false);
+        }
+
+        if (screenOn) enableAllNetworks();
+        if (mUserWantsSuspendOpt.get()) {
+            if (screenOn) {
+                sendMessage(obtainMessage(CMD_SET_SUSPEND_OPT_ENABLED, 0, 0));
+            } else {
+                //Allow 2s for suspend optimizations to be set
+                mSuspendWakeLock.acquire(2000);
+                sendMessage(obtainMessage(CMD_SET_SUSPEND_OPT_ENABLED, 1, 0));
+            }
+        }
+        mScreenBroadcastReceived.set(true);
+    }
 
     private void checkAndSetConnectivityInstance() {
         if (mCm == null) {
@@ -2719,6 +2724,17 @@ public class WifiStateMachine extends StateMachine {
                 // current supplicant state
                 mWifiNative.status();
                 transitionTo(mDisconnectedState);
+            }
+
+            // We may have missed screen update at boot
+            if (mScreenBroadcastReceived.get() == false) {
+                PowerManager powerManager = (PowerManager)mContext.getSystemService(
+                        Context.POWER_SERVICE);
+                handleScreenStateChanged(powerManager.isScreenOn());
+            } else {
+                // Set the right suspend mode settings
+                mWifiNative.setSuspendOptimizations(mSuspendOptNeedsDisabled == 0
+                        && mUserWantsSuspendOpt.get());
             }
 
             if (mP2pSupported) mWifiP2pChannel.sendMessage(WifiStateMachine.CMD_ENABLE_P2P);
