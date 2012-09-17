@@ -33,6 +33,7 @@ import com.android.systemui.statusbar.tablet.StatusBarPanel;
 public class RecentsActivity extends Activity {
     public static final String TOGGLE_RECENTS_INTENT = "com.android.systemui.TOGGLE_RECENTS";
     public static final String CLOSE_RECENTS_INTENT = "com.android.systemui.CLOSE_RECENTS";
+    private static final String WAS_SHOWING = "was_showing";
 
     private RecentsPanelView mRecentsPanel;
     private IntentFilter mIntentFilter;
@@ -139,11 +140,19 @@ public class RecentsActivity extends Activity {
         mRecentsPanel.setMinSwipeAlpha(
                 getResources().getInteger(R.integer.config_recent_item_min_alpha) / 100f);
 
-        handleIntent(getIntent());
+        if (savedInstanceState == null ||
+                savedInstanceState.getBoolean(WAS_SHOWING)) {
+            handleIntent(getIntent());
+        }
         mIntentFilter = new IntentFilter();
         mIntentFilter.addAction(CLOSE_RECENTS_INTENT);
         registerReceiver(mIntentReceiver, mIntentFilter);
         super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putBoolean(WAS_SHOWING, mRecentsPanel.isShowing());
     }
 
     @Override
@@ -165,7 +174,7 @@ public class RecentsActivity extends Activity {
 
         if (TOGGLE_RECENTS_INTENT.equals(intent.getAction())) {
             if (mRecentsPanel != null) {
-                if (mRecentsPanel.isShowing() && mForeground) {
+                if (mRecentsPanel.isShowing()) {
                     dismissAndGoBack();
                 } else {
                     final SystemUIApplication app = (SystemUIApplication) getApplication();
