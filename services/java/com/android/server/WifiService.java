@@ -640,8 +640,11 @@ public class WifiService extends IWifiManager.Stub {
          */
 
         long ident = Binder.clearCallingIdentity();
-        handleWifiToggled(enable);
-        Binder.restoreCallingIdentity(ident);
+        try {
+            handleWifiToggled(enable);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
 
         if (enable) {
             if (!mIsReceiverRegistered) {
@@ -838,12 +841,15 @@ public class WifiService extends IWifiManager.Stub {
         enforceAccessPermission();
         int userId = UserHandle.getCallingUserId();
         long ident = Binder.clearCallingIdentity();
-        int currentUser = ActivityManager.getCurrentUser();
-        Binder.restoreCallingIdentity(ident);
-        if (userId != currentUser) {
-            return new ArrayList<ScanResult>();
-        } else {
-            return mWifiStateMachine.syncGetScanResultsList();
+        try {
+            int currentUser = ActivityManager.getCurrentUser();
+            if (userId != currentUser) {
+                return new ArrayList<ScanResult>();
+            } else {
+                return mWifiStateMachine.syncGetScanResultsList();
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
