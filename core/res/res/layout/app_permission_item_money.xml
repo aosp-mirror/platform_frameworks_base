@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2008 The Android Open Source Project
+<!-- Copyright (C) 2012 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 -->
 
 <!--
-  Defines the layout of a single permission item.
+  Defines the layout of a single permission item that costs money.
 -->
 
 <view class="android.widget.AppSecurityPermissions$PermissionItemView"
@@ -38,13 +38,34 @@
         android:layout_height="match_parent"
         android:background="?android:attr/dividerVertical" />
 
-    <TextView
-        android:id="@+id/perm_name"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textSize="16sp"
-        android:layout_marginStart="8dp"
-        android:layout_width="wrap_content"
+    <RelativeLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="top|left" />
+        android:layout_marginStart="8dp">
+        <TextView
+            android:id="@+id/perm_name"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textSize="16sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true" />
+        <ImageView
+            android:id="@+id/perm_money_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_below="@id/perm_name"
+            android:scaleType="fitCenter" />
+        <TextView
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textSize="16sp"
+            android:textColor="@color/perms_costs_money"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/perm_money_icon"
+            android:layout_below="@id/perm_name"
+            android:text="@string/perm_costs_money" />
+    </RelativeLayout>
 
 </view>

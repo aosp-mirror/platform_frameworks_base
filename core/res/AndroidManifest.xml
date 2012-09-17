@@ -171,6 +171,7 @@
     <permission android:name="android.permission.SEND_SMS"
         android:permissionGroup="android.permission-group.MESSAGES"
         android:protectionLevel="dangerous"
+        android:permissionFlags="costsMoney"
         android:label="@string/permlab_sendSms"
         android:description="@string/permdesc_sendSms" />
 
@@ -404,7 +405,6 @@
         android:label="@string/permgrouplab_writeDictionary"
         android:icon="@drawable/perm_group_user_dictionary_write"
         android:description="@string/permgroupdesc_writeDictionary"
-        android:permissionGroupFlags="personalInfo"
         android:priority="160" />
 
     <!-- Allows an application to write to the user dictionary. -->
@@ -515,14 +515,14 @@
 
     <!-- Allows an application to create mock location providers for testing -->
     <permission android:name="android.permission.ACCESS_MOCK_LOCATION"
-        android:permissionGroup="android.permission-group.LOCATION"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
         android:protectionLevel="dangerous"
         android:label="@string/permlab_accessMockLocation"
         android:description="@string/permdesc_accessMockLocation" />
 
     <!-- Allows an application to access extra location provider commands -->
     <permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS"
-        android:permissionGroup="android.permission-group.LOCATION"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
         android:protectionLevel="normal"
         android:label="@string/permlab_accessLocationExtraCommands"
         android:description="@string/permdesc_accessLocationExtraCommands" />
@@ -616,24 +616,14 @@
         android:description="@string/permdesc_bluetoothAdmin"
         android:label="@string/permlab_bluetoothAdmin" />
    
-    <!-- Used for permissions that provide access to network services that
-         are for peripherals and other nearby devices.  These networks
-         generally do not provide IP based networking or internet access.-->
-    <permission-group android:name="android.permission-group.SHORTRANGE_NETWORK"
-        android:label="@string/permgrouplab_shortrangeNetwork"
-        android:icon="@drawable/perm_group_shortrange_network"
-        android:description="@string/permgroupdesc_shortrangeNetwork"
-        android:priority="250" />
-
     <!-- Allows applications to perform I/O operations over NFC -->
     <permission android:name="android.permission.NFC"
-        android:permissionGroup="android.permission-group.SHORTRANGE_NETWORK"
+        android:permissionGroup="android.permission-group.NETWORK"
         android:protectionLevel="dangerous"
         android:description="@string/permdesc_nfc"
         android:label="@string/permlab_nfc" />
 
-    <!-- Allows an internal user to use privileged ConnectivityManager
-    APIs.
+    <!-- Allows an internal user to use privileged ConnectivityManager APIs.
         @hide -->
     <permission android:name="android.permission.CONNECTIVITY_INTERNAL"
         android:permissionGroup="android.permission-group.NETWORK"
@@ -904,6 +894,7 @@
     <permission android:name="android.permission.CALL_PHONE"
         android:permissionGroup="android.permission-group.PHONE_CALLS"
         android:protectionLevel="dangerous"
+        android:permissionFlags="costsMoney"
         android:label="@string/permlab_callPhone"
         android:description="@string/permdesc_callPhone" />
 
@@ -929,7 +920,7 @@
 
     <!-- Allows an application to read from external storage -->
     <permission android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:permissionGroup="android.permission-group.DEVELOPMENT_TOOLS"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
         android:label="@string/permlab_sdcardRead"
         android:description="@string/permdesc_sdcardRead"
         android:protectionLevel="normal" />
@@ -1227,7 +1218,7 @@
     <!-- Allows an application to modify the current configuration, such
          as locale. -->
     <permission android:name="android.permission.CHANGE_CONFIGURATION"
-        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:permissionGroup="android.permission-group.DEVELOPMENT_TOOLS"
         android:protectionLevel="signature|system|development"
         android:label="@string/permlab_changeConfiguration"
         android:description="@string/permdesc_changeConfiguration" />
@@ -1287,7 +1278,7 @@
     <!-- @deprecated This functionality will be removed in the future; please do
          not use. Allow an application to make its activities persistent. -->
     <permission android:name="android.permission.PERSISTENT_ACTIVITY"
-        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:permissionGroup="android.permission-group.APP_INFO"
         android:protectionLevel="normal"
         android:label="@string/permlab_persistentActivity"
         android:description="@string/permdesc_persistentActivity" />
@@ -1320,7 +1311,7 @@
          explicitly declare your use of this facility to make that visible
          to the user. -->
     <permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"
-        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:permissionGroup="android.permission-group.APP_INFO"
         android:protectionLevel="normal"
         android:label="@string/permlab_receiveBootCompleted"
         android:description="@string/permdesc_receiveBootCompleted" />
@@ -1411,7 +1402,7 @@
 
     <!-- Allows applications to change network connectivity state -->
     <permission android:name="android.permission.CHANGE_NETWORK_STATE"
-        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:permissionGroup="android.permission-group.NETWORK"
         android:protectionLevel="normal"
         android:description="@string/permdesc_changeNetworkState"
         android:label="@string/permlab_changeNetworkState" />
@@ -1535,8 +1526,8 @@
     <!-- Allows an application to update device statistics. Not for
          use by third party apps. -->
     <permission android:name="android.permission.UPDATE_DEVICE_STATS"
-        android:label="@string/permlab_batteryStats"
-        android:description="@string/permdesc_batteryStats"
+        android:label="@string/permlab_updateBatteryStats"
+        android:description="@string/permdesc_updateBatteryStats"
         android:protectionLevel="signature|system" />
 
     <!-- Allows an application to open windows that are for use by parts
@@ -1854,9 +1845,10 @@
 
     <!-- Allows an application to collect battery statistics -->
     <permission android:name="android.permission.BATTERY_STATS"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
         android:label="@string/permlab_batteryStats"
         android:description="@string/permdesc_batteryStats"
-        android:protectionLevel="normal" />
+        android:protectionLevel="dangerous" />
 
     <!-- Allows an application to control the backup and restore process
          @hide pending API council -->

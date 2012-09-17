@@ -164,7 +164,6 @@ package android {
     field public static final java.lang.String PERSONAL_INFO = "android.permission-group.PERSONAL_INFO";
     field public static final java.lang.String PHONE_CALLS = "android.permission-group.PHONE_CALLS";
     field public static final java.lang.String SCREENLOCK = "android.permission-group.SCREENLOCK";
-    field public static final java.lang.String SHORTRANGE_NETWORK = "android.permission-group.SHORTRANGE_NETWORK";
     field public static final java.lang.String SOCIAL_INFO = "android.permission-group.SOCIAL_INFO";
     field public static final java.lang.String STATUS_BAR = "android.permission-group.STATUS_BAR";
     field public static final java.lang.String STORAGE = "android.permission-group.STORAGE";
@@ -775,6 +774,7 @@ package android {
     field public static final int pathPattern = 16842796; // 0x101002c
     field public static final int pathPrefix = 16842795; // 0x101002b
     field public static final int permission = 16842758; // 0x1010006
+    field public static final int permissionFlags = 16843719; // 0x10103c7
     field public static final int permissionGroup = 16842762; // 0x101000a
     field public static final int permissionGroupFlags = 16843717; // 0x10103c5
     field public static final int persistent = 16842765; // 0x101000d
@@ -6743,6 +6743,7 @@ package android.content.pm {
     method public int describeContents();
     method public java.lang.CharSequence loadDescription(android.content.pm.PackageManager);
     field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final int FLAG_COSTS_MONEY = 1; // 0x1
     field public static final int PROTECTION_DANGEROUS = 1; // 0x1
     field public static final int PROTECTION_FLAG_DEVELOPMENT = 32; // 0x20
     field public static final int PROTECTION_FLAG_SYSTEM = 16; // 0x10
@@ -6752,6 +6753,7 @@ package android.content.pm {
     field public static final int PROTECTION_SIGNATURE = 2; // 0x2
     field public static final int PROTECTION_SIGNATURE_OR_SYSTEM = 3; // 0x3
     field public int descriptionRes;
+    field public int flags;
     field public java.lang.String group;
     field public java.lang.CharSequence nonLocalizedDescription;
     field public int protectionLevel;
