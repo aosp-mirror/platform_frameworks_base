@@ -673,24 +673,40 @@ static bool applyFileOverlay(Bundle *bundle,
     return true;
 }
 
-void addTagAttribute(const sp<XMLNode>& node, const char* ns8,
-        const char* attr8, const char* value)
+/*
+ * Inserts an attribute in a given node, only if the attribute does not
+ * exist.
+ * If errorOnFailedInsert is true, and the attribute already exists, returns false.
+ * Returns true otherwise, even if the attribute already exists.
+ */
+bool addTagAttribute(const sp<XMLNode>& node, const char* ns8,
+        const char* attr8, const char* value, bool errorOnFailedInsert)
 {
     if (value == NULL) {
-        return;
+        return true;
     }
-    
+
     const String16 ns(ns8);
     const String16 attr(attr8);
-    
+
     if (node->getAttribute(ns, attr) != NULL) {
+        if (errorOnFailedInsert) {
+            fprintf(stderr, "Error: AndroidManifest.xml already defines %s (in %s);"
+                            " cannot insert new value %s.\n",
+                    String8(attr).string(), String8(ns).string(), value);
+            return false;
+        }
+
         fprintf(stderr, "Warning: AndroidManifest.xml already defines %s (in %s);"
                         " using existing value in manifest.\n",
                 String8(attr).string(), String8(ns).string());
-        return;
+
+        // don't stop the build.
+        return true;
     }
     
     node->addAttribute(ns, attr, String16(value));
+    return true;
 }
 
 static void fullyQualifyClassName(const String8& package, sp<XMLNode> node,
@@ -728,11 +744,17 @@ status_t massageManifest(Bundle* bundle, sp<XMLNode> root)
         fprintf(stderr, "No <manifest> tag.\n");
         return UNKNOWN_ERROR;
     }
-    
-    addTagAttribute(root, RESOURCES_ANDROID_NAMESPACE, "versionCode",
-            bundle->getVersionCode());
-    addTagAttribute(root, RESOURCES_ANDROID_NAMESPACE, "versionName",
-            bundle->getVersionName());
+
+    bool errorOnFailedInsert = bundle->getErrorOnFailedInsert();
+
+    if (!addTagAttribute(root, RESOURCES_ANDROID_NAMESPACE, "versionCode",
+            bundle->getVersionCode(), errorOnFailedInsert)) {
+        return UNKNOWN_ERROR;
+    }
+    if (!addTagAttribute(root, RESOURCES_ANDROID_NAMESPACE, "versionName",
+            bundle->getVersionName(), errorOnFailedInsert)) {
+        return UNKNOWN_ERROR;
+    }
     
     if (bundle->getMinSdkVersion() != NULL
             || bundle->getTargetSdkVersion() != NULL
@@ -743,18 +765,27 @@ status_t massageManifest(Bundle* bundle, sp<XMLNode> root)
             root->insertChildAt(vers, 0);
         }
         
-        addTagAttribute(vers, RESOURCES_ANDROID_NAMESPACE, "minSdkVersion",
-                bundle->getMinSdkVersion());
-        addTagAttribute(vers, RESOURCES_ANDROID_NAMESPACE, "targetSdkVersion",
-                bundle->getTargetSdkVersion());
-        addTagAttribute(vers, RESOURCES_ANDROID_NAMESPACE, "maxSdkVersion",
-                bundle->getMaxSdkVersion());
+        if (!addTagAttribute(vers, RESOURCES_ANDROID_NAMESPACE, "minSdkVersion",
+                bundle->getMinSdkVersion(), errorOnFailedInsert)) {
+            return UNKNOWN_ERROR;
+        }
+        if (!addTagAttribute(vers, RESOURCES_ANDROID_NAMESPACE, "targetSdkVersion",
+                bundle->getTargetSdkVersion(), errorOnFailedInsert)) {
+            return UNKNOWN_ERROR;
+        }
+        if (!addTagAttribute(vers, RESOURCES_ANDROID_NAMESPACE, "maxSdkVersion",
+                bundle->getMaxSdkVersion(), errorOnFailedInsert)) {
+            return UNKNOWN_ERROR;
+        }
     }
 
     if (bundle->getDebugMode()) {
         sp<XMLNode> application = root->getChildElement(String16(), String16("application"));
         if (application != NULL) {
-            addTagAttribute(application, RESOURCES_ANDROID_NAMESPACE, "debuggable", "true");
+            if (!addTagAttribute(application, RESOURCES_ANDROID_NAMESPACE, "debuggable", "true",
+                    errorOnFailedInsert)) {
+                return UNKNOWN_ERROR;
+            }
         }
     }
 
