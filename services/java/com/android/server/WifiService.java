@@ -836,7 +836,11 @@ public class WifiService extends IWifiManager.Stub {
      */
     public List<ScanResult> getScanResults() {
         enforceAccessPermission();
-        if (UserHandle.getCallingUserId() != ActivityManager.getCurrentUser()) {
+        int userId = UserHandle.getCallingUserId();
+        long ident = Binder.clearCallingIdentity();
+        int currentUser = ActivityManager.getCurrentUser();
+        Binder.restoreCallingIdentity(ident);
+        if (userId != currentUser) {
             return new ArrayList<ScanResult>();
         } else {
             return mWifiStateMachine.syncGetScanResultsList();
