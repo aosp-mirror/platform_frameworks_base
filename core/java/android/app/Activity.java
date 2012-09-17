@@ -5010,7 +5010,21 @@ public class Activity extends ContextThemeWrapper
         if (TextUtils.isEmpty(parentName)) {
             return null;
         }
-        return new Intent().setClassName(this, parentName);
+
+        // If the parent itself has no parent, generate a main activity intent.
+        final ComponentName target = new ComponentName(this, parentName);
+        try {
+            final ActivityInfo parentInfo = getPackageManager().getActivityInfo(target, 0);
+            final String parentActivity = parentInfo.parentActivityName;
+            final Intent parentIntent = parentActivity == null
+                    ? Intent.makeMainActivity(target)
+                    : new Intent().setComponent(target);
+            return parentIntent;
+        } catch (NameNotFoundException e) {
+            Log.e(TAG, "getParentActivityIntent: bad parentActivityName '" + parentName +
+                    "' in manifest");
+            return null;
+        }
     }
 
     // ------------------ Internal API ------------------
