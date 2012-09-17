@@ -1112,6 +1112,8 @@
   <java-symbol type="layout" name="media_route_list_item_collapse_group" />
   <java-symbol type="string" name="bluetooth_a2dp_audio_route_name" />
 
+  <java-symbol type="dimen" name="config_minScalingSpan" />
+
   <!-- From android.policy -->
   <java-symbol type="anim" name="app_starting_exit" />
   <java-symbol type="anim" name="lock_screen_behind_enter" />
