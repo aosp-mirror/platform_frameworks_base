@@ -22,15 +22,26 @@ import android.content.pm.UserInfo;
 import android.os.RemoteException;
 import android.os.UserManager;
 import android.util.AttributeSet;
-import android.widget.LinearLayout;
+import android.util.Log;
+import android.view.View;
+import android.view.WindowManagerGlobal;
+import android.widget.FrameLayout;
 
 import com.android.internal.R;
+import com.android.internal.policy.impl.keyguard.KeyguardHostView.UserSwitcherCallback;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
-public class KeyguardMultiUserSelectorView extends LinearLayout{
-    private KeyguardMultiUserAvatar mActiveUser;
-    private LinearLayout mInactiveUsers;
+public class KeyguardMultiUserSelectorView extends FrameLayout implements View.OnClickListener {
+    private static final String TAG = "KeyguardMultiUserSelectorView";
+
+    private KeyguardSubdivisionLayout mUsersGrid;
+    private KeyguardMultiUserAvatar mActiveUserAvatar;
+    private UserSwitcherCallback mCallback;
+    private static final int SWITCH_ANIMATION_DURATION = 150;
+    private static final int FADE_OUT_ANIMATION_DURATION = 100;
 
     public KeyguardMultiUserSelectorView(Context context) {
         this(context, null, 0);
@@ -48,37 +59,77 @@ public class KeyguardMultiUserSelectorView extends LinearLayout{
         init();
     }
 
+    public void setCallback(UserSwitcherCallback callback) {
+        mCallback = callback;
+    }
+
     public void init() {
-        mActiveUser = (KeyguardMultiUserAvatar) findViewById(R.id.keyguard_active_user);
-        mInactiveUsers = (LinearLayout) findViewById(R.id.keyguard_inactive_users);
+        mUsersGrid = (KeyguardSubdivisionLayout) findViewById(R.id.keyguard_users_grid);
+        mUsersGrid.removeAllViews();
+        setClipChildren(false);
+        setClipToPadding(false);
 
-        mInactiveUsers.removeAllViews();
-
-        UserInfo currentUser;
+        UserInfo activeUser;
         try {
-            currentUser = ActivityManagerNative.getDefault().getCurrentUser();
+            activeUser = ActivityManagerNative.getDefault().getCurrentUser();
         } catch (RemoteException re) {
-            currentUser = null;
+            activeUser = null;
         }
 
         UserManager mUm = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         ArrayList<UserInfo> users = new ArrayList<UserInfo>(mUm.getUsers());
+        Collections.sort(users, mOrderAddedComparator);
+
         for (UserInfo user: users) {
-            if (user.id == currentUser.id) {
-                setActiveUser(user);
-            } else {
-                createAndAddInactiveUser(user);
+            KeyguardMultiUserAvatar uv = createAndAddUser(user);
+            if (user.id == activeUser.id) {
+                mActiveUserAvatar = uv;
             }
         }
+        mActiveUserAvatar.setActive(true, false, 0, null);
     }
 
-    private void setActiveUser(UserInfo user) {
-        mActiveUser.setup(user, this);
-    }
+    Comparator<UserInfo> mOrderAddedComparator = new Comparator<UserInfo>() {
+        @Override
+        public int compare(UserInfo lhs, UserInfo rhs) {
+            return (lhs.serialNumber - rhs.serialNumber);
+        }
+    };
 
-    private void createAndAddInactiveUser(UserInfo user) {
+    private KeyguardMultiUserAvatar createAndAddUser(UserInfo user) {
         KeyguardMultiUserAvatar uv = KeyguardMultiUserAvatar.fromXml(
                 R.layout.keyguard_multi_user_avatar, mContext, this, user);
-        mInactiveUsers.addView(uv);
+        mUsersGrid.addView(uv);
+        return uv;
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (!(v instanceof KeyguardMultiUserAvatar)) return;
+        final KeyguardMultiUserAvatar avatar = (KeyguardMultiUserAvatar) v;
+        if (mActiveUserAvatar == avatar) {
+            // They clicked the active user, no need to do anything
+            return;
+        } else {
+            // Reset the previously active user to appear inactive
+            avatar.lockDrawableState();
+            mCallback.hideSecurityView(FADE_OUT_ANIMATION_DURATION);
+            mActiveUserAvatar.setActive(false, true,  SWITCH_ANIMATION_DURATION, new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        ActivityManagerNative.getDefault().switchUser(avatar.getUserInfo().id);
+                        WindowManagerGlobal.getWindowManagerService().lockNow();
+                        // Set the new active user, and make it appear active
+                        avatar.resetDrawableState();
+                        mCallback.showSecurityView();
+                        mActiveUserAvatar = avatar;
+                        mActiveUserAvatar.setActive(true, false, 0, null);
+                    } catch (RemoteException re) {
+                        Log.e(TAG, "Couldn't switch user " + re);
+                    }
+                }
+            });
+        }
     }
 }

@@ -16,16 +16,17 @@
 
 package com.android.internal.policy.impl.keyguard;
 
-import android.app.ActivityManagerNative;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
+import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.content.Context;
 import android.content.pm.UserInfo;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.os.RemoteException;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.View;
-import android.view.WindowManagerGlobal;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -33,11 +34,15 @@ import android.widget.TextView;
 import com.android.internal.R;
 
 class KeyguardMultiUserAvatar extends FrameLayout {
-    private static final String TAG = "KeyguardViewHost";
 
     private ImageView mUserImage;
     private TextView mUserName;
     private UserInfo mUserInfo;
+    private static final int INACTIVE_COLOR = 85;
+    private static final int INACTIVE_ALPHA = 195;
+    private static final float ACTIVE_SCALE = 1.1f;
+    private boolean mActive;
+    private boolean mInit = true;
     private KeyguardMultiUserSelectorView mUserSelector;
 
     public static KeyguardMultiUserAvatar fromXml(int resId, Context context,
@@ -73,17 +78,86 @@ class KeyguardMultiUserAvatar extends FrameLayout {
 
         mUserImage.setImageDrawable(Drawable.createFromPath(mUserInfo.iconPath));
         mUserName.setText(mUserInfo.name);
-        setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                try {
-                    ActivityManagerNative.getDefault().switchUser(mUserInfo.id);
-                    WindowManagerGlobal.getWindowManagerService().lockNow();
-                    mUserSelector.init();
-                } catch (RemoteException re) {
-                    Log.e(TAG, "Couldn't switch user " + re);
+        setOnClickListener(mUserSelector);
+        setActive(false, false, 0, null);
+        mInit = false;
+    }
+
+    public void setActive(boolean active, boolean animate, int duration, final Runnable onComplete) {
+        if (mActive != active || mInit) {
+            mActive = active;
+            final int finalFilterAlpha = mActive ? 0 : INACTIVE_ALPHA;
+            final int initFilterAlpha = mActive ? INACTIVE_ALPHA : 0;
+
+            final float finalScale = mActive ? ACTIVE_SCALE : 1.0f;
+            final float initScale = mActive ? 1.0f : ACTIVE_SCALE;
+
+            if (active) {
+                KeyguardSubdivisionLayout parent = (KeyguardSubdivisionLayout) getParent();
+                parent.setTopChild(parent.indexOfChild(this));
+            }
+
+            if (animate) {
+                ValueAnimator va = ValueAnimator.ofFloat(0f, 1f);
+                va.addUpdateListener(new AnimatorUpdateListener() {
+                    @Override
+                    public void onAnimationUpdate(ValueAnimator animation) {
+                        float r = animation.getAnimatedFraction();
+                        float scale = (1 - r) * initScale + r * finalScale;
+                        int filterAlpha = (int) ((1 - r) * initFilterAlpha + r * finalFilterAlpha);
+                        setScaleX(scale);
+                        setScaleY(scale);
+                        mUserImage.setColorFilter(Color.argb(filterAlpha, INACTIVE_COLOR,
+                                INACTIVE_COLOR, INACTIVE_COLOR));
+                        mUserSelector.invalidate();
+
+                    }
+                });
+                va.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        if (onComplete != null) {
+                            onComplete.run();
+                        }
+                    }
+                });
+                va.setDuration(duration);
+                va.start();
+            } else {
+                setScaleX(finalScale);
+                setScaleY(finalScale);
+                mUserImage.setColorFilter(Color.argb(finalFilterAlpha, INACTIVE_COLOR,
+                        INACTIVE_COLOR, INACTIVE_COLOR));
+                if (onComplete != null) {
+                    post(onComplete);
                 }
             }
+        }
+    }
+
+    boolean mLockDrawableState = false;
+
+    public void lockDrawableState() {
+        mLockDrawableState = true;
+    }
+
+    public void resetDrawableState() {
+        mLockDrawableState = false;
+        post(new Runnable() {
+            @Override
+            public void run() {
+                refreshDrawableState();
+            }
         });
+    }
+
+    protected void drawableStateChanged() {
+        if (!mLockDrawableState) {
+            super.drawableStateChanged();
+        }
+    }
+
+    public UserInfo getUserInfo() {
+        return mUserInfo;
     }
 }
