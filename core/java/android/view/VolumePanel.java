@@ -18,6 +18,7 @@ package android.view;
 
 import com.android.internal.R;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.BroadcastReceiver;
@@ -92,6 +93,7 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
     private static final int MSG_REMOTE_VOLUME_CHANGED = 8;
     private static final int MSG_REMOTE_VOLUME_UPDATE_IF_SHOWN = 9;
     private static final int MSG_SLIDER_VISIBILITY_CHANGED = 10;
+    private static final int MSG_DISPLAY_SAFE_VOLUME_WARNING = 11;
 
     // Pseudo stream type for master volume
     private static final int STREAM_MASTER = -100;
@@ -210,6 +212,31 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
     // Synchronize when accessing this
     private ToneGenerator mToneGenerators[];
     private Vibrator mVibrator;
+
+    private static AlertDialog sConfirmSafeVolumeDialog;
+
+    private static class WarningDialogReceiver extends BroadcastReceiver
+            implements DialogInterface.OnDismissListener {
+        private Context mContext;
+        private Dialog mDialog;
+
+        WarningDialogReceiver(Context context, Dialog dialog) {
+            mContext = context;
+            mDialog = dialog;
+            IntentFilter filter = new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+            context.registerReceiver(this, filter);
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            mDialog.cancel();
+        }
+
+        public void onDismiss(DialogInterface unused) {
+            mContext.unregisterReceiver(this);
+        }
+    }
+
 
     public VolumePanel(final Context context, AudioService volumeService) {
         mContext = context;
@@ -528,6 +555,10 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
         postMuteChanged(STREAM_MASTER, flags);
     }
 
+    public void postDisplaySafeVolumeWarning() {
+        obtainMessage(MSG_DISPLAY_SAFE_VOLUME_WARNING, 0, 0).sendToTarget();
+    }
+
     /**
      * Override this if you have other work to do when the volume changes (for
      * example, vibrating, playing a sound, etc.). Make sure to call through to
@@ -796,6 +827,32 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
         }
     }
 
+    protected void onDisplaySafeVolumeWarning() {
+        if (sConfirmSafeVolumeDialog != null) {
+            sConfirmSafeVolumeDialog.dismiss();
+        }
+        sConfirmSafeVolumeDialog = new AlertDialog.Builder(mContext)
+                .setTitle(android.R.string.dialog_alert_title)
+                .setMessage(com.android.internal.R.string.safe_media_volume_warning)
+                .setPositiveButton(com.android.internal.R.string.yes,
+                                    new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        mAudioService.disableSafeMediaVolume();
+                    }
+                })
+                .setNegativeButton(com.android.internal.R.string.no, null)
+                .setIconAttribute(android.R.attr.alertDialogIcon)
+                .create();
+
+        final WarningDialogReceiver warning = new WarningDialogReceiver(mContext,
+                sConfirmSafeVolumeDialog);
+
+        sConfirmSafeVolumeDialog.setOnDismissListener(warning);
+        sConfirmSafeVolumeDialog.getWindow().setType(
+                                                WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
+        sConfirmSafeVolumeDialog.show();
+    }
+
     /**
      * Lock on this VolumePanel instance as long as you use the returned ToneGenerator.
      */
@@ -909,6 +966,10 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
 
             case MSG_SLIDER_VISIBILITY_CHANGED:
                 onSliderVisibilityChanged(msg.arg1, msg.arg2);
+                break;
+
+            case MSG_DISPLAY_SAFE_VOLUME_WARNING:
+                onDisplaySafeVolumeWarning();
                 break;
         }
     }
