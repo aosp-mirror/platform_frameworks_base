@@ -171,12 +171,47 @@
     <string name="permgrouplab_messages" msgid="7521249148445456662">"رسائلك"</string>
     <string name="permgroupdesc_messages" msgid="7821999071003699236">"قراءة وكتابة الرسائل القصيرة SMS والرسائل الإلكترونية والرسائل الأخرى."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"معلوماتك الشخصية"</string>
-    <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"الدخول المباشر إلى جهات اتصالك والتقويم المخزنين على الجهاز اللوحي."</string>
-    <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"الدخول المباشر إلى التقويم وجهات الاتصال المخزّنة على الهاتف."</string>
+    <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"الدخول المباشر إلى معلومات عنك، تم تخزينها في بطاقة الاتصال."</string>
+    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"المعلومات الاجتماعية"</string>
+    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"الدخول المباشر إلى معلومات عن جهات الاتصال والاتصالات الاجتماعية."</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"موقعك"</string>
     <string name="permgroupdesc_location" msgid="5704679763124170100">"يمكنك مراقبة موقعك الفعلي."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"اتصال الشبكة"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"يمكنك الدخول إلى ميزات متعددة عبر الشبكة."</string>
+    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"بلوتوث"</string>
+    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"الدخول إلى الأجهزة والشبكات من خلال البلوتوث."</string>
+    <string name="permgrouplab_shortrangeNetwork" msgid="130808676377486118">"الشبكات قصيرة المدى"</string>
+    <string name="permgroupdesc_shortrangeNetwork" msgid="1884069062653436007">"الدخول إلى الأجهزة من خلال الشبكات قصيرة المدى مثل الاتصالات قريبة المدى (NFC)."</string>
+    <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"إعدادات الصوت"</string>
+    <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"تغيير إعدادات الصوت"</string>
+    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"التأثير على البطارية"</string>
+    <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"استخدم الميزات التي يمكن أن تؤدي إلى نفاد طاقة البطارية بسرعة."</string>
+    <string name="permgrouplab_calendar" msgid="5863508437783683902">"التقويم"</string>
+    <string name="permgroupdesc_calendar" msgid="5777534316982184416">"الدخول المباشر إلى التقويم والأحداث."</string>
+    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"قراءة قاموس المستخدم"</string>
+    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"قراءة الكلمات في قاموس المستخدم."</string>
+    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"كتابة قاموس المستخدم"</string>
+    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"إضافة الكلمات إلى قاموس المستخدم."</string>
+    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"الإشارات المرجعية والسجل"</string>
+    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"الدخول المباشر إلى الإشارات المرجعية وسجل المتصفح."</string>
+    <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"المنبه"</string>
+    <string name="permgroupdesc_deviceAlarms" msgid="4769356362251641175">"تعيين المنبه."</string>
+    <string name="permgrouplab_voicemail" msgid="4162237145027592133">"البريد الصوتي"</string>
+    <string name="permgroupdesc_voicemail" msgid="2498403969862951393">"الدخول المباشر إلى البريد الصوتي."</string>
+    <string name="permgrouplab_microphone" msgid="171539900250043464">"الميكروفون"</string>
+    <string name="permgroupdesc_microphone" msgid="7106618286905738408">"الدخول المباشر إلى الميكروفون لتسجيل الصوت."</string>
+    <string name="permgrouplab_camera" msgid="4820372495894586615">"الكاميرا"</string>
+    <string name="permgroupdesc_camera" msgid="2933667372289567714">"الدخول المباشر إلى الكاميرا لالتقاط صورة أو تصوير مقطع فيديو."</string>
+    <string name="permgrouplab_appInfo" msgid="8028789762634147725">"معلومات التطبيقات"</string>
+    <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"القدرة على التأثير في سلوك التطبيقات الأخرى بجهازك."</string>
+    <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"الخلفية"</string>
+    <string name="permgroupdesc_wallpaper" msgid="5630417854750540154">"تغيير إعدادات خلفية الجهاز."</string>
+    <string name="permgrouplab_systemClock" msgid="406535759236612992">"الساعة"</string>
+    <string name="permgroupdesc_systemClock" msgid="3944359833624094992">"تغيير وقت الجهاز أو المنطقة الزمنية."</string>
+    <string name="permgrouplab_statusBar" msgid="2095862568113945398">"شريط الحالة"</string>
+    <string name="permgroupdesc_statusBar" msgid="6242593432226807171">"تغيير إعدادات شريط حالة الجهاز."</string>
+    <string name="permgrouplab_syncSettings" msgid="3341990986147826541">"إعدادات المزامنة"</string>
+    <string name="permgroupdesc_syncSettings" msgid="7603195265129031797">"الدخول إلى إعدادات المزامنة."</string>
     <string name="permgrouplab_accounts" msgid="3359646291125325519">"حساباتك"</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"الوصول إلى الحسابات المتاحة."</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"عناصر التحكم بالأجهزة"</string>
@@ -187,6 +222,8 @@
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"دخول المستوى الأقل والتحكم بالنظام."</string>
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"أدوات التطوير"</string>
     <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"الميزات مطلوبة لمطوّري التطبيقات فقط."</string>
+    <string name="permgrouplab_display" msgid="4279909676036402636">"واجهة مستخدم تطبيقات أخرى"</string>
+    <string name="permgroupdesc_display" msgid="6051002031933013714">"التأثير على واجهة المستخدم بالتطبيقات الأخرى."</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"التخزين"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"الدخول إلى وحدة تخزين USB."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"الدخول إلى بطاقة SD."</string>
@@ -256,10 +293,8 @@
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"للسماح لأحد التطبيقات باستعادة معلومات حول النوافذ من مدير النوافذ. يمكن أن تستعيد التطبيقات الضارة معلومات الغرض منها استخدام النظام الداخلي."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"تصفية الأحداث"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"للسماح لأحد التطبيقات بتسجيل فلتر إدخال يعمل على تصفية مجموعة البث من جميع أحداث المستخدمين قبل إرسالها. يمكن أن يتحكم برنامج ضار في واجهة المستخدم النظام دون تدخل المستخدم."</string>
-    <!-- no translation found for permlab_magnify_display (5973626738170618775) -->
-    <skip />
-    <!-- no translation found for permdesc_magnify_display (7121235684515003792) -->
-    <skip />
+    <string name="permlab_magnify_display" msgid="5973626738170618775">"تكبير الشاشة"</string>
+    <string name="permdesc_magnify_display" msgid="7121235684515003792">"للسماح للتطبيق بتكبير محتوى شاشة. قد تؤدي التطبيقات الضارة إلى نقل محتوى الشاشة بطريقة تعرض الجهاز في وضع غير مفيد."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"إيقاف تشغيل جزئي"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"لوضع مدير الأنشطة في حالة إيقاف التشغيل. لا يتم تنفيذ إيقاف تشغيل كامل."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"منع التبديل بين التطبيقات"</string>
@@ -290,10 +325,8 @@
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"للسماح للتطبيق بتغيير سرعة الرسوم المتحركة العمومية (رسوم متحركة أسرع أو أبطأ) في أي وقت."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"إدارة الرموز المميزة للتطبيقات"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"للسماح للتطبيق بإنشاء وإدارة رموزه الخاصة، وتجاوز ترتيب Z العادي. لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
-    <!-- no translation found for permlab_freezeScreen (4708181184441880175) -->
-    <skip />
-    <!-- no translation found for permdesc_freezeScreen (8558923789222670064) -->
-    <skip />
+    <string name="permlab_freezeScreen" msgid="4708181184441880175">"تجميد الشاشة"</string>
+    <string name="permdesc_freezeScreen" msgid="8558923789222670064">"للمساح للتطبيق بتجميد الشاشة مؤقتًا لإجراء انتقال بملء الشاشة."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"مفاتيح الضغط وأزرار التحكم"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"للسماح للتطبيق بتسليم أحداث الإرسال الخاصة به (ضغطات المفاتيح وغير ذلك) إلى تطبيقات أخرى. يمكن أن تستخدم التطبيقات الضارة ذلك للاستحواذ على الجهاز اللوحي."</string>
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"للسماح للتطبيق بتسليم أحداث الإرسال الخاصة به (ضغطات المفاتيح وغير ذلك) إلى تطبيقات أخرى. يمكن أن تستخدم التطبيقات الضارة ذلك للاستحواذ على الهاتف."</string>
@@ -406,14 +439,10 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"للسماح للتطبيق باستخدام ميزات SurfaceFlinger ذات المستوى المنخفض."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"قراءة المخزن المؤقت للإطارات"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"للسماح للتطبيق بقراءة محتوى المخزن المؤقت للإطارات."</string>
-    <!-- no translation found for permlab_configureWifiDisplay (5595661694746742168) -->
-    <skip />
-    <!-- no translation found for permdesc_configureWifiDisplay (7916815158690218065) -->
-    <skip />
-    <!-- no translation found for permlab_controlWifiDisplay (393641276723695496) -->
-    <skip />
-    <!-- no translation found for permdesc_controlWifiDisplay (4543912292681826986) -->
-    <skip />
+    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"تهيئة شاشات Wifi"</string>
+    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"للسماح للتطبيق بتهيئة شاشات Wifi والاتصال بها."</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"التحكم في شاشات Wifi"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"للسماح للتطبيق بالتحكم في الميزات ذات المستوى المنخفض في شاشات Wifi."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"تغيير إعداداتك الصوتية"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"للسماح للتطبيق بتعديل إعدادات الصوت العامة مثل مستوى الصوت وأي السماعات يتم استخدامها للاستماع."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"تسجيل الصوت"</string>
@@ -595,10 +624,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"يمكنك طلب تشفير بيانات التطبيق المخزنة."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"تعطيل الكاميرات"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"يمكنك منح استخدام جميع كاميرات الجهاز."</string>
-    <!-- no translation found for policylab_disableKeyguardWidgets (1794894613389073926) -->
-    <skip />
-    <!-- no translation found for policydesc_disableKeyguardWidgets (7254624892984033592) -->
-    <skip />
+    <string name="policylab_disableKeyguardWidgets" msgid="1794894613389073926">"تعطيل الأدوات على حارس المفاتيح"</string>
+    <string name="policydesc_disableKeyguardWidgets" msgid="7254624892984033592">"منع استخدام بعض الأدوات أو كلها على حارس المفاتيح."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"الرئيسية"</item>
     <item msgid="869923650527136615">"الجوال"</item>

@@ -171,12 +171,47 @@
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Uw berichten"</string>
     <string name="permgroupdesc_messages" msgid="7821999071003699236">"Sms, e-mail en andere berichten lezen en schrijven."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Uw persoonlijke informatie"</string>
-    <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"Rechtstreekse toegang tot de op uw tablet opgeslagen contacten en agenda."</string>
-    <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"Rechtstreekse toegang tot de op uw telefoon opgeslagen contacten en agenda."</string>
+    <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"Rechtstreeks toegang krijgen tot informatie over u die is opgeslagen op uw contactkaart."</string>
+    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Uw sociale informatie"</string>
+    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Rechtstreeks toegang krijgen tot informatie over uw contacten en sociale connecties."</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"Uw locatie"</string>
     <string name="permgroupdesc_location" msgid="5704679763124170100">"Uw fysieke locatie bijhouden."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Netwerkcommunicatie"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"Toegang tot verschillende netwerkfuncties."</string>
+    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"Bluetooth"</string>
+    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"Toegang tot apparaten en netwerken via Bluetooth."</string>
+    <string name="permgrouplab_shortrangeNetwork" msgid="130808676377486118">"Netwerken op korte afstand"</string>
+    <string name="permgroupdesc_shortrangeNetwork" msgid="1884069062653436007">"Toegang tot apparaten via netwerken op korte afstand zoals NFC."</string>
+    <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"Audio-instellingen"</string>
+    <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"Audio-instellingen wijzigen."</string>
+    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"De accu beïnvloeden"</string>
+    <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"Functies gebruiken waardoor de accu snel leeg kan raken."</string>
+    <string name="permgrouplab_calendar" msgid="5863508437783683902">"Agenda"</string>
+    <string name="permgroupdesc_calendar" msgid="5777534316982184416">"Rechtstreeks toegang krijgen tot agenda en afspraken."</string>
+    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"Gebruikerswoordenboek lezen"</string>
+    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"Woorden lezen in het gebruikerswoordenboek."</string>
+    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"Gebruikerswoordenboek schrijven"</string>
+    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"Woorden toevoegen aan het gebruikerswoordenboek."</string>
+    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Bladwijzers en geschiedenis"</string>
+    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Rechtstreeks toegang krijgen tot bladwijzers en browsergeschiedenis."</string>
+    <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"Alarm"</string>
+    <string name="permgroupdesc_deviceAlarms" msgid="4769356362251641175">"De wekker instellen."</string>
+    <string name="permgrouplab_voicemail" msgid="4162237145027592133">"Voicemail"</string>
+    <string name="permgroupdesc_voicemail" msgid="2498403969862951393">"Rechtstreeks toegang krijgen tot voicemail."</string>
+    <string name="permgrouplab_microphone" msgid="171539900250043464">"Microfoon"</string>
+    <string name="permgroupdesc_microphone" msgid="7106618286905738408">"Rechtstreeks toegang krijgen tot de microfoon om geluid op te nemen."</string>
+    <string name="permgrouplab_camera" msgid="4820372495894586615">"Camera"</string>
+    <string name="permgroupdesc_camera" msgid="2933667372289567714">"Rechtstreeks toegang krijgen tot de camera om afbeeldingen of video\'s vast te leggen."</string>
+    <string name="permgrouplab_appInfo" msgid="8028789762634147725">"Informatie over uw applicaties"</string>
+    <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"Mogelijkheid om het gedrag van andere applicaties op uw apparaat te beïnvloeden."</string>
+    <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"Achtergrond"</string>
+    <string name="permgroupdesc_wallpaper" msgid="5630417854750540154">"De achtergrondinstellingen van het apparaat wijzigen."</string>
+    <string name="permgrouplab_systemClock" msgid="406535759236612992">"Klok"</string>
+    <string name="permgroupdesc_systemClock" msgid="3944359833624094992">"De tijd of tijdzone van het apparaat wijzigen."</string>
+    <string name="permgrouplab_statusBar" msgid="2095862568113945398">"Statusbalk"</string>
+    <string name="permgroupdesc_statusBar" msgid="6242593432226807171">"De instellingen van de apparaatstatusbalk wijzigen."</string>
+    <string name="permgrouplab_syncSettings" msgid="3341990986147826541">"Synchronisatie-instellingen"</string>
+    <string name="permgroupdesc_syncSettings" msgid="7603195265129031797">"Toegang krijgen tot de synchronisatie-instellingen."</string>
     <string name="permgrouplab_accounts" msgid="3359646291125325519">"Uw accounts"</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Toegang tot de beschikbare accounts."</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Bedieningselementen hardware"</string>
@@ -187,6 +222,8 @@
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"Toegang tot en beheer van het systeem op lager niveau."</string>
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Ontwikkelingshulpprogramma\'s"</string>
     <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"Functies die alleen nodig zijn voor app-ontwikkelaars."</string>
+    <string name="permgrouplab_display" msgid="4279909676036402636">"Gebruikersinterface van andere applicaties"</string>
+    <string name="permgroupdesc_display" msgid="6051002031933013714">"De gebruikersinterface van andere applicaties beïnvloeden."</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Opslagruimte"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Toegang krijgen tot USB-opslag."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Toegang tot de SD-kaart."</string>
@@ -256,10 +293,8 @@
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Toestaan dat een app gegevens over vensters kan ophalen uit vensterbeheer. Schadelijke apps kunnen gegevens ophalen die zijn bedoeld voor interne systeemfunctionaliteit."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"evenementen filteren"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Toestaan dat een app een invoerfilter registreert waarmee de streams van alle gebruikersgebeurtenissen worden gefilterd voordat deze worden verzonden. Schadelijke apps kunnen de gebruikersinterface van het systeem beheren zonder tussenkomst van de gebruiker."</string>
-    <!-- no translation found for permlab_magnify_display (5973626738170618775) -->
-    <skip />
-    <!-- no translation found for permdesc_magnify_display (7121235684515003792) -->
-    <skip />
+    <string name="permlab_magnify_display" msgid="5973626738170618775">"display vergroten"</string>
+    <string name="permdesc_magnify_display" msgid="7121235684515003792">"Een app toestaan de inhoud van een display te vergroten. Schadelijke apps kunnen de display-inhoud transformeren op een manier waardoor het apparaat onbruikbaar wordt."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"gedeeltelijke uitschakeling"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Hiermee wordt activiteitenbeheer uitgeschakeld. Er wordt geen volledige uitschakeling uitgevoerd."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"schakelen tussen apps voorkomen"</string>
@@ -290,10 +325,8 @@
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Hiermee kan de app op elk gewenst moment de algemene animatiesnelheid wijzigen (snellere of tragere animaties)."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"app-tokens beheren"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Hiermee kan de app zelf tokens maken en beheren buiten de normale Z-rangschikking om. Dit is in principe nooit nodig voor normale apps."</string>
-    <!-- no translation found for permlab_freezeScreen (4708181184441880175) -->
-    <skip />
-    <!-- no translation found for permdesc_freezeScreen (8558923789222670064) -->
-    <skip />
+    <string name="permlab_freezeScreen" msgid="4708181184441880175">"scherm bevriezen"</string>
+    <string name="permdesc_freezeScreen" msgid="8558923789222670064">"De app toestaan het scherm tijdelijk te bevriezen voor een volledige schermovergang."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"drukken op toetsen en bedieningselementen"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Hiermee kan de app de eigen invoergebeurtenissen (zoals toetsaanslagen) aan andere apps doorgeven. Schadelijke apps kunnen dit gebruiken om de tablet over te nemen."</string>
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Hiermee kan de app de eigen invoergebeurtenissen (toetsaanslagen, enzovoort) aan andere apps doorgeven. Schadelijke apps kunnen dit gebruiken om de telefoon over te nemen."</string>
@@ -406,14 +439,10 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Hiermee kan de app SurfaceFlinger-functies op laag niveau gebruiken."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"framebuffer lezen"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Hiermee kan de app de inhoud van de framebuffer lezen."</string>
-    <!-- no translation found for permlab_configureWifiDisplay (5595661694746742168) -->
-    <skip />
-    <!-- no translation found for permdesc_configureWifiDisplay (7916815158690218065) -->
-    <skip />
-    <!-- no translation found for permlab_controlWifiDisplay (393641276723695496) -->
-    <skip />
-    <!-- no translation found for permdesc_controlWifiDisplay (4543912292681826986) -->
-    <skip />
+    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"wifi-displays configureren"</string>
+    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"De app toestaan wifi-displays te configureren en hiermee verbinding te maken."</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"wifi-displays beheren"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"De app toestaan minder belangrijke functies van wifi-displays te beheren."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"uw audio-instellingen wijzigen"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Hiermee kan de app algemene audio-instellingen wijzigen zoals het volume en welke luidspreker wordt gebruikt voor de uitvoer."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"audio opnemen"</string>
@@ -595,10 +624,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Vereisen dat opgeslagen appgegevens kunnen worden gecodeerd."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Camera\'s uitschakelen"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Het gebruik van alle apparaatcamera\'s voorkomen."</string>
-    <!-- no translation found for policylab_disableKeyguardWidgets (1794894613389073926) -->
-    <skip />
-    <!-- no translation found for policydesc_disableKeyguardWidgets (7254624892984033592) -->
-    <skip />
+    <string name="policylab_disableKeyguardWidgets" msgid="1794894613389073926">"Widgets uitschakelen bij toetsblokkering"</string>
+    <string name="policydesc_disableKeyguardWidgets" msgid="7254624892984033592">"Gebruik van sommige of alle widgets uitschakelen bij toetsblokkering."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Thuis"</item>
     <item msgid="869923650527136615">"Mobiel"</item>

@@ -171,12 +171,47 @@
     <string name="permgrouplab_messages" msgid="7521249148445456662">"መልዕክቶችዎ"</string>
     <string name="permgroupdesc_messages" msgid="7821999071003699236">"ኤስ ኤም ኤስህን፣ ኢሜይልህን እና ሌላ መልዕክቶችህን አንብብና ፃፍ።"</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"የግል መረጃዎ"</string>
-    <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"በጡባዊዎ ላይ የተከማቹ እውቂያዎች እና ቀን መቁጠሪያጋ ቀጥታ ይድረሱ።"</string>
-    <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"በስልኩ ላይ ወደ ተከማቸው ዕውቂያዎችዎ እና የቀን መቁጠሪያዎበቀጥታ  ይድረሱ"</string>
+    <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"በእውቂያ ካርድህ ላይ ወደተከማቸ የአንተ መረጃ ቀጥተኛ መዳረሻ።"</string>
+    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"ማህበራዊ መረጃህ"</string>
+    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"ወደ የእውቂያዎችህና የማህበራዊ ግንኙነቶችህ መረጃ ቀጥተኛ መዳረሻ።"</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"ስፍራዎ"</string>
     <string name="permgroupdesc_location" msgid="5704679763124170100">"ያለህበትን አካባቢ ተቆጣጠር።"</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"የአውታረ መረብ ግኑኙነት"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"የተለያዩ የአውታረ መረብ ባህሪያትን ድረስ።"</string>
+    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"ብሉቱዝ"</string>
+    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"መሳሪያዎችን እና አውታረ መረቦችን በብሉቱዝ በኩል አግኝ።"</string>
+    <string name="permgrouplab_shortrangeNetwork" msgid="130808676377486118">"የአጭር ክልል አውታረ መረቦች"</string>
+    <string name="permgroupdesc_shortrangeNetwork" msgid="1884069062653436007">"መሳሪያዎችን እንደ NFC ባሉ የአጭር ክልል አውታረ መረቦች በኩል አግኝ።"</string>
+    <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"የድምጽ ቅንብሮች"</string>
+    <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"የድምጽ ቅንብሮችን ቀይር።"</string>
+    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"ባትሪ ላይ ተፅዕኖ ያሳርፋል"</string>
+    <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"ባትሪ ቶሎ ሊጨርሱ የሚችሉ ባህርያትን ተጠቀም።"</string>
+    <string name="permgrouplab_calendar" msgid="5863508437783683902">"ቀን መቁጠሪያ"</string>
+    <string name="permgroupdesc_calendar" msgid="5777534316982184416">"ወደ ቀን መቁጠሪያና ክስተቶች ቀጥተኛ መዳረሻ።"</string>
+    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"የተጠቃሚ መዝገበ ቃላት አንብብ"</string>
+    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"ቃላትን በተጠቃሚ መዝገበ ቃላት አንብብ።"</string>
+    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"የተጠቃሚ መዝገበ ቃላት ጻፍ"</string>
+    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"ቃላትን የተጠቃሚ መዝገበ ቃላትህ ላይ አክል።"</string>
+    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"ዕልባቶች እና ታሪክ"</string>
+    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"ወደ ዕልባቶችና የአሳሽ ታሪክ ቀጥተኛ መዳረሻ።"</string>
+    <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"ማንቂያ"</string>
+    <string name="permgroupdesc_deviceAlarms" msgid="4769356362251641175">"የማንቂያ ሰዓቱን አዘጋጅ።"</string>
+    <string name="permgrouplab_voicemail" msgid="4162237145027592133">"የድምጽ መልዕክት"</string>
+    <string name="permgroupdesc_voicemail" msgid="2498403969862951393">"ወደ የድምጽ መልዕክት ቀጥተኛ መዳረሻ።"</string>
+    <string name="permgrouplab_microphone" msgid="171539900250043464">"ማይክሮፎን"</string>
+    <string name="permgroupdesc_microphone" msgid="7106618286905738408">"ድምጽ ለመቅረጽ ወደ ማይክሮፎኑ ቀጥተኛ መዳረሻ።"</string>
+    <string name="permgrouplab_camera" msgid="4820372495894586615">"ካሜራ"</string>
+    <string name="permgroupdesc_camera" msgid="2933667372289567714">"ለካሜራ ምስል ወይም ቪዲዮ ለመቅረጽ ቀጥተኛ መዳረሻ።"</string>
+    <string name="permgrouplab_appInfo" msgid="8028789762634147725">"የመተግበሪያዎችህ መረጃ"</string>
+    <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"በመሣሪያህ ላይ ያሉ የሌሎች መተግበሪያዎች ባህሪዎች ላይ ተፅዕኖ የማሳረፍ ችሎታ።"</string>
+    <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"ልጣፍ"</string>
+    <string name="permgroupdesc_wallpaper" msgid="5630417854750540154">"የመሣሪያውን ልጣፍ ቅንብሮች ቀይር።"</string>
+    <string name="permgrouplab_systemClock" msgid="406535759236612992">"ሰዓት"</string>
+    <string name="permgroupdesc_systemClock" msgid="3944359833624094992">"የመሣሪያውን ሰዓት ወይም የሰዓት ሰቁን ቀይር።"</string>
+    <string name="permgrouplab_statusBar" msgid="2095862568113945398">"የሁኔታ አሞሌ"</string>
+    <string name="permgroupdesc_statusBar" msgid="6242593432226807171">"የመሣሪያ ሁኔታ አሞሌ ቅንብሮቹን ቀይር።"</string>
+    <string name="permgrouplab_syncSettings" msgid="3341990986147826541">"የማመሳሰል ቅንብሮች"</string>
+    <string name="permgroupdesc_syncSettings" msgid="7603195265129031797">"ወደ የማመሳሰል ቅንብሮች መዳረሻ።"</string>
     <string name="permgrouplab_accounts" msgid="3359646291125325519">"መለያዎችዎ"</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">" ለተገኙት መለያዎች ድረስ"</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"የሃርድዌር ቁጥጥሮች"</string>
@@ -187,6 +222,8 @@
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"የስርዓቱ ዝቅተኛ-ደረጃ ድረስ እና ጠብቅ"</string>
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"የግንባታ  መሣሪያዎች"</string>
     <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"ባህሪያት ለመተግበሪያ ገንቢዎች ብቻ ያስፈልጋሉ።"</string>
+    <string name="permgrouplab_display" msgid="4279909676036402636">"የሌላ መተግበሪያ ተጠቃሚ በይነገጽ"</string>
+    <string name="permgroupdesc_display" msgid="6051002031933013714">"የሌሎች መተግበሪያዎች ተጠቃሚ በይነገጽ ተግብር።"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"ማከማቻ"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"የUSB ማከማቻ ድረስ።"</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"SD ካርድ ድረስ"</string>
