@@ -293,10 +293,8 @@
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Permite unei aplicaţii să preia informaţii despre ferestrele din managerul de ferestre. Aplicaţiile rău intenţionate pot prelua informaţii care sunt destinate utilizării sistemului intern."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"filtrare evenimente"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Permite unei aplicaţii să înregistreze un filtru de intrare, care filtrează transmiterea în flux a tuturor evenimentelor utilizatorilor înainte ca acestea să fie expediate. Aplicaţiile rău intenţionate pot controla interfaţa de utilizare a sistemului fără intervenţia utilizatorului."</string>
-    <!-- no translation found for permlab_magnify_display (5973626738170618775) -->
-    <skip />
-    <!-- no translation found for permdesc_magnify_display (7121235684515003792) -->
-    <skip />
+    <string name="permlab_magnify_display" msgid="5973626738170618775">"măreşte afişajul"</string>
+    <string name="permdesc_magnify_display" msgid="7121235684515003792">"Permite unei aplicaţii să mărească conţinutul unui afişaj. Aplicaţiile rău intenţionate pot transforma conţinutul afişajului într-un mod care ar face inutilizabil dispozitivul."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"închidere parţială"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Plasează Managerul de activităţi într-o stare de închidere. Nu efectuează o închidere completă."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"împiedicare comutare între aplicaţii"</string>
@@ -327,10 +325,8 @@
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Permite aplicaţiei să modifice oricând viteza globală de animaţie (animaţii mai rapide sau mai lente)."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"gestionare indicative aplicaţii"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Permite aplicaţiei să creeze şi să gestioneze propriile indicative, evitând ordinea lor Z normală. Nu ar trebui să fie niciodată necesară pentru aplicaţiile obişnuite."</string>
-    <!-- no translation found for permlab_freezeScreen (4708181184441880175) -->
-    <skip />
-    <!-- no translation found for permdesc_freezeScreen (8558923789222670064) -->
-    <skip />
+    <string name="permlab_freezeScreen" msgid="4708181184441880175">"îngheaţă ecranul"</string>
+    <string name="permdesc_freezeScreen" msgid="8558923789222670064">"Permite aplicaţiei să îngheţe temporar ecranul pentru o tranziţie la ecran complet."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"apăsare taste şi control butoane"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Permite aplicaţiei să furnizeze propriile evenimente de intrare (apăsări de taste etc.) către alte aplicaţii. Aplicaţiile rău intenţionate pot să utilizeze această permisiune pentru a prelua controlul asupra tabletei."</string>
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Permite aplicaţiei să furnizeze propriile evenimente de intrare (apăsări de taste etc.) către alte aplicaţii. Aplicaţiile rău intenţionate pot să utilizeze această permisiune pentru a prelua controlul asupra telefonului."</string>
@@ -443,14 +439,10 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Permite aplicaţiei să utilizeze funcţiile de nivel redus SurfaceFlinger."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"citire zonă tampon de cadre"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Permite aplicaţiei să citească conţinutul zonei-tampon a cadrului."</string>
-    <!-- no translation found for permlab_configureWifiDisplay (5595661694746742168) -->
-    <skip />
-    <!-- no translation found for permdesc_configureWifiDisplay (7916815158690218065) -->
-    <skip />
-    <!-- no translation found for permlab_controlWifiDisplay (393641276723695496) -->
-    <skip />
-    <!-- no translation found for permdesc_controlWifiDisplay (4543912292681826986) -->
-    <skip />
+    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"configurează afişaje Wi-Fi"</string>
+    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Permite aplicaţiei să configureze şi să se conecteze la afişaje Wi-Fi."</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"controlează afişaje Wi-Fi"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Permite aplicaţiei să controleze funcţiile de nivel redus ale afişajelor Wi-Fi."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"modificare setări audio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Permite aplicaţiei să modifice setările audio globale, cum ar fi volumul şi difuzorul care este utilizat pentru ieşire."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"înregistrare audio"</string>
@@ -632,10 +624,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Necesită ca datele aplicaţiei stocate să fie criptate."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Dezactivaţi camerele foto"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Împiedicaţi utilizarea camerelor foto de pe dispozitiv."</string>
-    <!-- no translation found for policylab_disableKeyguardWidgets (1794894613389073926) -->
-    <skip />
-    <!-- no translation found for policydesc_disableKeyguardWidgets (7254624892984033592) -->
-    <skip />
+    <string name="policylab_disableKeyguardWidgets" msgid="1794894613389073926">"Protecţia dezact. widgeturile"</string>
+    <string name="policydesc_disableKeyguardWidgets" msgid="7254624892984033592">"Previne utilizarea unora dintre widgeturi sau a tuturor acestora la activarea protecţiei tastaturii."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Domiciliu"</item>
     <item msgid="869923650527136615">"Mobil"</item>

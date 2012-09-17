@@ -624,8 +624,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Krev at lagrede appdata krypteres."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Deaktiver kameraer"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Hindre bruk av alle kameraer på enheten."</string>
-    <string name="policylab_disableKeyguardWidgets" msgid="1794894613389073926">"Deaktivere moduler under bruk av tastelås"</string>
-    <string name="policydesc_disableKeyguardWidgets" msgid="7254624892984033592">"Forhindre bruk av noen eller alle modulene under bruk av tastelåsen."</string>
+    <string name="policylab_disableKeyguardWidgets" msgid="1794894613389073926">"Deaktivere moduler når tastelåsen er på"</string>
+    <string name="policydesc_disableKeyguardWidgets" msgid="7254624892984033592">"Forhindre bruk av noen eller alle modulene når tastelåsen er på."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Hjemmenummer"</item>
     <item msgid="869923650527136615">"Mobil"</item>

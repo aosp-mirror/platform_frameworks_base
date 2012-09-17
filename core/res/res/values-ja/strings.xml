@@ -293,10 +293,8 @@
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"ウィンドウマネージャからウィンドウに関する情報を取得することをアプリに許可します。悪意のあるアプリが内部システムの利用を目的に情報を取得する恐れがあります。"</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"イベントのフィルタリング"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"すべてのユーザーイベントが送られる前にストリームをフィルタリングする入力フィルタを登録することをアプリに許可します。悪意のあるアプリがユーザーの操作なしでシステムUIを制御する恐れがあります。"</string>
-    <!-- no translation found for permlab_magnify_display (5973626738170618775) -->
-    <skip />
-    <!-- no translation found for permdesc_magnify_display (7121235684515003792) -->
-    <skip />
+    <string name="permlab_magnify_display" msgid="5973626738170618775">"表示の拡大"</string>
+    <string name="permdesc_magnify_display" msgid="7121235684515003792">"表示内容を拡大することをアプリに許可します。悪意のあるアプリが、端末を使用できなくなるように表示内容を変換する恐れがあります。"</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"部分的にシャットダウンする"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"アクティビティマネージャをシャットダウン状態にします。完全なシャットダウンは実行しません。"</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"アプリケーションの切り替えを禁止する"</string>
@@ -327,10 +325,8 @@
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"いつでもアニメーション全般の速度を変更する（速くする、または遅くする）ことをアプリに許可します。"</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"アプリのトークンの管理"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"通常のZ-orderingを回避して独自のトークンを作成、管理することをアプリに許可します。通常のアプリでは不要です。"</string>
-    <!-- no translation found for permlab_freezeScreen (4708181184441880175) -->
-    <skip />
-    <!-- no translation found for permdesc_freezeScreen (8558923789222670064) -->
-    <skip />
+    <string name="permlab_freezeScreen" msgid="4708181184441880175">"画面のフリーズ"</string>
+    <string name="permdesc_freezeScreen" msgid="8558923789222670064">"全画面遷移のために画面を一時的にフリーズすることをアプリに許可します。"</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"キーを押してボタンをコントロール"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"入力イベント（キーを押すなど）を他のアプリに伝えることをアプリに許可します。この許可を悪意のあるアプリに利用されると、タブレットが乗っ取られる恐れがあります。"</string>
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"入力イベント（キーを押すなど）を他のアプリに伝えることをアプリに許可します。この許可を悪意のあるアプリに利用されると、携帯端末が乗っ取られる恐れがあります。"</string>
@@ -443,14 +439,10 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"SurfaceFlingerの低レベルの機能の使用をアプリに許可します。"</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"フレームバッファの読み取り"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"フレームバッファの内容の読み取りをアプリに許可します。"</string>
-    <!-- no translation found for permlab_configureWifiDisplay (5595661694746742168) -->
-    <skip />
-    <!-- no translation found for permdesc_configureWifiDisplay (7916815158690218065) -->
-    <skip />
-    <!-- no translation found for permlab_controlWifiDisplay (393641276723695496) -->
-    <skip />
-    <!-- no translation found for permdesc_controlWifiDisplay (4543912292681826986) -->
-    <skip />
+    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"Wi-Fiディスプレイの設定"</string>
+    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Wi-Fiディスプレイを設定して接続することをアプリに許可します。"</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"Wi-Fiディスプレイの制御"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Wi-Fiディスプレイの低レベル機能を制御することをアプリに許可します。"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"音声設定の変更"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"音声全般の設定（音量、出力に使用するスピーカーなど）の変更をアプリに許可します。"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"録音"</string>
@@ -632,10 +624,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"保存したアプリデータが暗号化されるようにします。"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"カメラを無効にする"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"すべての端末カメラを使用できないようにします。"</string>
-    <!-- no translation found for policylab_disableKeyguardWidgets (1794894613389073926) -->
-    <skip />
-    <!-- no translation found for policydesc_disableKeyguardWidgets (7254624892984033592) -->
-    <skip />
+    <string name="policylab_disableKeyguardWidgets" msgid="1794894613389073926">"キーガード上のウィジェットを無効にする"</string>
+    <string name="policydesc_disableKeyguardWidgets" msgid="7254624892984033592">"キーガード上の一部またはすべてのウィジェットの使用を禁止します。"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"自宅"</item>
     <item msgid="869923650527136615">"携帯"</item>

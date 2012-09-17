@@ -293,10 +293,8 @@
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Разрешава на приложението да извлича информация за прозорците от съответния мениджър. Злонамерените приложения може да извличат данни, които са предназначени за вътрешно използване от системата."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"филтриране на събитията"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Разрешава на приложението да регистрира входящ филтър, който филтрира потока на всички потребителски събития преди изпращането им. Злонамерено приложение може да контролира системния потребителски интерфейс без намесата на потребителя."</string>
-    <!-- no translation found for permlab_magnify_display (5973626738170618775) -->
-    <skip />
-    <!-- no translation found for permdesc_magnify_display (7121235684515003792) -->
-    <skip />
+    <string name="permlab_magnify_display" msgid="5973626738170618775">"промяна на мащаба на дисплея"</string>
+    <string name="permdesc_magnify_display" msgid="7121235684515003792">"Разрешава на приложението да променя мащаба на съдържанието на дисплей. Злонамерените приложения може да преобразят съдържанието на дисплея по начин, който изобразява устройството като неизползваемо."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"частично изключване"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Изключва диспечера на дейностите. Не извършва пълно изключване."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"предотвратяване на превключването между приложения"</string>
@@ -327,10 +325,8 @@
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Разрешава на приложението да променя глобалната скорост на анимациите (по-бавни или по-бързи) по всяко време."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"управление на означенията на приложения"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Разрешава на приложението да създава и управлява собствени означения, заобикаляйки нормалния им z-ред. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
-    <!-- no translation found for permlab_freezeScreen (4708181184441880175) -->
-    <skip />
-    <!-- no translation found for permdesc_freezeScreen (8558923789222670064) -->
-    <skip />
+    <string name="permlab_freezeScreen" msgid="4708181184441880175">"фиксиране на екрана"</string>
+    <string name="permdesc_freezeScreen" msgid="8558923789222670064">"Разрешава на приложението временно да фиксира екрана за преход към цял екран."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"натискане на клавиши и бутони за управление"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Разрешава на приложението да предава свои собствени събития при въвеждане (натискания на клавиши и др.) на други приложения. Злонамерените приложения могат да използват това, за да завладеят таблета."</string>
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Разрешава на приложението да предава свои собствени събития при въвеждане (натискания на клавиши и др.) на други приложения. Злонамерените приложения могат да използват това, за да завладеят телефона."</string>
@@ -443,14 +439,10 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Разрешава на приложението да използва функциите на SurfaceFlinger от ниско ниво."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"четене на кадровия буфер"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Разрешава на приложението да чете съдържанието на кадровия буфер."</string>
-    <!-- no translation found for permlab_configureWifiDisplay (5595661694746742168) -->
-    <skip />
-    <!-- no translation found for permdesc_configureWifiDisplay (7916815158690218065) -->
-    <skip />
-    <!-- no translation found for permlab_controlWifiDisplay (393641276723695496) -->
-    <skip />
-    <!-- no translation found for permdesc_controlWifiDisplay (4543912292681826986) -->
-    <skip />
+    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"конфигуриране на дисплеите през WiFi"</string>
+    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Разрешава на приложението да конфигурира и да се свързва с дисплеите през WiFi."</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"контролиране на дисплеите през WiFi"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Разрешава на приложението да контролира функциите от ниско ниво на дисплеите през WiFi."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"промяна на настройките ви за звука"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Разрешава на приложението да променя глобалните настройки за звука, като например силата и това, кой високоговорител се използва за изход."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"запис на звук"</string>
@@ -632,10 +624,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Изисква съхраняваните данни за приложенията да бъдат шифровани."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Деактивиране на камерите"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Предотвратява употребата на камерите на всички устройства."</string>
-    <!-- no translation found for policylab_disableKeyguardWidgets (1794894613389073926) -->
-    <skip />
-    <!-- no translation found for policydesc_disableKeyguardWidgets (7254624892984033592) -->
-    <skip />
+    <string name="policylab_disableKeyguardWidgets" msgid="1794894613389073926">"Приспособ. при защита на клавишите: Деактив."</string>
+    <string name="policydesc_disableKeyguardWidgets" msgid="7254624892984033592">"Предотвратява използването на някои или всички приспособления при защита на клавишите."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Домашен"</item>
     <item msgid="869923650527136615">"Мобилен"</item>
