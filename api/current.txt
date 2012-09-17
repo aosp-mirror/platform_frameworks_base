@@ -22194,6 +22194,7 @@ package android.text.format {
     field public static final char MONTH = 77; // 0x004d 'M'
     field public static final char QUOTE = 39; // 0x0027 '\''
     field public static final char SECONDS = 115; // 0x0073 's'
+    field public static final char STANDALONE_MONTH = 76; // 0x004c 'L'
     field public static final char TIME_ZONE = 122; // 0x007a 'z'
     field public static final char YEAR = 121; // 0x0079 'y'
   }
