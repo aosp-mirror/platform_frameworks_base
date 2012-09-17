@@ -204,8 +204,7 @@ struct ProgramDescription {
      * be provided with a modulation color.
      */
     bool setColor(const float r, const float g, const float b, const float a) {
-        modulate = a < COLOR_COMPONENT_THRESHOLD || r < COLOR_COMPONENT_THRESHOLD ||
-                g < COLOR_COMPONENT_THRESHOLD || b < COLOR_COMPONENT_THRESHOLD;
+        modulate = a < COLOR_COMPONENT_THRESHOLD;
         return modulate;
     }
 
