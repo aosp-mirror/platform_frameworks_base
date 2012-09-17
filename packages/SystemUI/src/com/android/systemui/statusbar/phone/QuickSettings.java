@@ -29,6 +29,7 @@ import android.content.Loader;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.LevelListDrawable;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.WifiDisplay;
@@ -50,6 +51,7 @@ import android.widget.TextView;
 
 import com.android.internal.view.RotationPolicy;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.QuickSettingsModel.RSSIState;
 import com.android.systemui.statusbar.phone.QuickSettingsModel.State;
 import com.android.systemui.statusbar.phone.QuickSettingsModel.UserState;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -295,8 +297,16 @@ class QuickSettings {
             mModel.addRSSITile(rssiTile, new QuickSettingsModel.RefreshCallback() {
                 @Override
                 public void refreshView(QuickSettingsTileView view, State state) {
+                    RSSIState rssiState = (RSSIState) state;
+                    ImageView iv = (ImageView) view.findViewById(R.id.rssi_image);
+                    ImageView iov = (ImageView) view.findViewById(R.id.rssi_overlay_image);
                     TextView tv = (TextView) view.findViewById(R.id.rssi_textview);
-                    tv.setCompoundDrawablesRelativeWithIntrinsicBounds(0, state.iconId, 0, 0);
+                    iv.setImageResource(rssiState.signalIconId);
+                    if (rssiState.dataTypeIconId > 0) {
+                        iov.setImageResource(rssiState.dataTypeIconId);
+                    } else {
+                        iov.setImageDrawable(null);
+                    }
                     tv.setText(state.label);
                 }
             });

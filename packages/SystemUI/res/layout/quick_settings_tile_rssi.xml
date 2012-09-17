@@ -13,13 +13,38 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<TextView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    style="@style/TextAppearance.QuickSettings.TileView"
-    android:id="@+id/rssi_textview"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
-    android:gravity="center"
-    android:text="@string/quick_settings_rssi_label"
-    />
+    android:orientation="vertical">
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center">
+        <ImageView
+            android:id="@+id/rssi_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:paddingBottom="10dp"
+            />
+        <ImageView
+            android:id="@+id/rssi_overlay_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:paddingBottom="10dp"
+            />
+    </FrameLayout>
+    <TextView
+        style="@style/TextAppearance.QuickSettings.TileView"
+        android:id="@+id/rssi_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:text="@string/quick_settings_rssi_label"
+        />
+</LinearLayout>
