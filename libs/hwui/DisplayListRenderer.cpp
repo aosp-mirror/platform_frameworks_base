@@ -182,6 +182,10 @@ void DisplayList::clearResources() {
         caches.resourceCache.decrementRefcountLocked(mSourcePaths.itemAt(i));
     }
 
+    for (size_t i = 0; i < mLayers.size(); i++) {
+        caches.resourceCache.decrementRefcountLocked(mLayers.itemAt(i));
+    }
+
     caches.resourceCache.unlock();
 
     for (size_t i = 0; i < mPaints.size(); i++) {
@@ -206,6 +210,7 @@ void DisplayList::clearResources() {
     mPaints.clear();
     mPaths.clear();
     mMatrices.clear();
+    mLayers.clear();
 }
 
 void DisplayList::initFromDisplayListRenderer(const DisplayListRenderer& recorder, bool reusing) {
@@ -262,6 +267,12 @@ void DisplayList::initFromDisplayListRenderer(const DisplayListRenderer& recorde
     for (size_t i = 0; i < sourcePaths.size(); i++) {
         mSourcePaths.add(sourcePaths.itemAt(i));
         caches.resourceCache.incrementRefcountLocked(sourcePaths.itemAt(i));
+    }
+
+    const Vector<Layer*>& layers = recorder.getLayers();
+    for (size_t i = 0; i < layers.size(); i++) {
+        mLayers.add(layers.itemAt(i));
+        caches.resourceCache.incrementRefcountLocked(layers.itemAt(i));
     }
 
     caches.resourceCache.unlock();
@@ -1361,6 +1372,10 @@ void DisplayListRenderer::reset() {
         mCaches.resourceCache.decrementRefcountLocked(mSourcePaths.itemAt(i));
     }
 
+    for (size_t i = 0; i < mLayers.size(); i++) {
+        mCaches.resourceCache.decrementRefcountLocked(mLayers.itemAt(i));
+    }
+
     mCaches.resourceCache.unlock();
 
     mBitmapResources.clear();
@@ -1378,6 +1393,8 @@ void DisplayListRenderer::reset() {
     mPathMap.clear();
 
     mMatrices.clear();
+
+    mLayers.clear();
 
     mHasDrawOps = false;
 }
@@ -1539,7 +1556,7 @@ status_t DisplayListRenderer::drawDisplayList(DisplayList* displayList,
 
 status_t DisplayListRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* paint) {
     addOp(DisplayList::DrawLayer);
-    addInt((int) layer);
+    addLayer(layer);
     addPoint(x, y);
     addPaint(paint);
     return DrawGlInfo::kStatusDone;

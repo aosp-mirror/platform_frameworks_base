@@ -12213,8 +12213,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 mLocalDirtyRect.set(0, 0, width, height);
             } else {
                 if (mHardwareLayer.getWidth() != width || mHardwareLayer.getHeight() != height) {
-                    mHardwareLayer.resize(width, height);
-                    mLocalDirtyRect.set(0, 0, width, height);
+                    if (mHardwareLayer.resize(width, height)) {
+                        mLocalDirtyRect.set(0, 0, width, height);
+                    }
                 }
 
                 // This should not be necessary but applications that change
@@ -12225,7 +12226,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 computeOpaqueFlags();
 
                 final boolean opaque = isOpaque();
-                if (mHardwareLayer.isOpaque() != opaque) {
+                if (mHardwareLayer.isValid() && mHardwareLayer.isOpaque() != opaque) {
                     mHardwareLayer.setOpaque(opaque);
                     mLocalDirtyRect.set(0, 0, width, height);
                 }

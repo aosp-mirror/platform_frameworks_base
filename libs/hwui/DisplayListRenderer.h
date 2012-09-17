@@ -496,6 +496,7 @@ private:
     SortedVector<SkPath*> mSourcePaths;
     Vector<SkMatrix*> mMatrices;
     Vector<SkiaShader*> mShaders;
+    Vector<Layer*> mLayers;
 
     mutable SkFlattenableReadBuffer mReader;
 
@@ -652,6 +653,10 @@ public:
         return mSourcePaths;
     }
 
+    const Vector<Layer*>& getLayers() const {
+        return mLayers;
+    }
+
     const Vector<SkMatrix*>& getMatrices() const {
         return mMatrices;
     }
@@ -804,6 +809,12 @@ private:
         mMatrices.add(copy);
     }
 
+    inline void addLayer(Layer* layer) {
+        addInt((int) layer);
+        mLayers.add(layer);
+        mCaches.resourceCache.incrementRefcount(layer);
+    }
+
     inline void addBitmap(SkBitmap* bitmap) {
         // Note that this assumes the bitmap is immutable. There are cases this won't handle
         // correctly, such as creating the bitmap from scratch, drawing with it, changing its
@@ -861,6 +872,8 @@ private:
     DefaultKeyedVector<SkiaShader*, SkiaShader*> mShaderMap;
 
     Vector<SkMatrix*> mMatrices;
+
+    Vector<Layer*> mLayers;
 
     uint32_t mBufferSize;
 

@@ -48,7 +48,8 @@ class GLES20TextureLayer extends GLES20Layer {
     }
 
     @Override
-    void resize(int width, int height) {
+    boolean resize(int width, int height) {
+        return isValid();
     }
 
     @Override
