@@ -62,21 +62,17 @@ package android {
     field public static final java.lang.String INJECT_EVENTS = "android.permission.INJECT_EVENTS";
     field public static final java.lang.String INSTALL_LOCATION_PROVIDER = "android.permission.INSTALL_LOCATION_PROVIDER";
     field public static final java.lang.String INSTALL_PACKAGES = "android.permission.INSTALL_PACKAGES";
-    field public static final java.lang.String INTERACT_ACROSS_USERS = "android.permission.INTERACT_ACROSS_USERS";
     field public static final java.lang.String INTERNAL_SYSTEM_WINDOW = "android.permission.INTERNAL_SYSTEM_WINDOW";
     field public static final java.lang.String INTERNET = "android.permission.INTERNET";
     field public static final java.lang.String KILL_BACKGROUND_PROCESSES = "android.permission.KILL_BACKGROUND_PROCESSES";
     field public static final java.lang.String MANAGE_ACCOUNTS = "android.permission.MANAGE_ACCOUNTS";
     field public static final java.lang.String MANAGE_APP_TOKENS = "android.permission.MANAGE_APP_TOKENS";
-    field public static final java.lang.String MANAGE_USERS = "android.permission.MANAGE_USERS";
     field public static final java.lang.String MASTER_CLEAR = "android.permission.MASTER_CLEAR";
     field public static final java.lang.String MODIFY_AUDIO_SETTINGS = "android.permission.MODIFY_AUDIO_SETTINGS";
     field public static final java.lang.String MODIFY_PHONE_STATE = "android.permission.MODIFY_PHONE_STATE";
     field public static final java.lang.String MOUNT_FORMAT_FILESYSTEMS = "android.permission.MOUNT_FORMAT_FILESYSTEMS";
     field public static final java.lang.String MOUNT_UNMOUNT_FILESYSTEMS = "android.permission.MOUNT_UNMOUNT_FILESYSTEMS";
-    field public static final java.lang.String NET_TUNNELING = "android.permission.NET_TUNNELING";
     field public static final java.lang.String NFC = "android.permission.NFC";
-    field public static final java.lang.String PACKAGE_VERIFICATION_AGENT = "android.permission.PACKAGE_VERIFICATION_AGENT";
     field public static final deprecated java.lang.String PERSISTENT_ACTIVITY = "android.permission.PERSISTENT_ACTIVITY";
     field public static final java.lang.String PROCESS_OUTGOING_CALLS = "android.permission.PROCESS_OUTGOING_CALLS";
     field public static final java.lang.String READ_CALENDAR = "android.permission.READ_CALENDAR";
@@ -3901,11 +3897,12 @@ package android.app {
     method public static android.app.PendingIntent getActivity(android.content.Context, int, android.content.Intent, int);
     method public static android.app.PendingIntent getActivity(android.content.Context, int, android.content.Intent, int, android.os.Bundle);
     method public static android.app.PendingIntent getBroadcast(android.content.Context, int, android.content.Intent, int);
+    method public java.lang.String getCreatorPackage();
+    method public int getCreatorUid();
+    method public android.os.UserHandle getCreatorUserHandle();
     method public android.content.IntentSender getIntentSender();
     method public static android.app.PendingIntent getService(android.content.Context, int, android.content.Intent, int);
-    method public java.lang.String getTargetPackage();
-    method public int getTargetUid();
-    method public android.os.UserHandle getTargetUserHandle();
+    method public deprecated java.lang.String getTargetPackage();
     method public static android.app.PendingIntent readPendingIntentOrNullFromParcel(android.os.Parcel);
     method public void send() throws android.app.PendingIntent.CanceledException;
     method public void send(int) throws android.app.PendingIntent.CanceledException;
@@ -6060,9 +6057,10 @@ package android.content {
 
   public class IntentSender implements android.os.Parcelable {
     method public int describeContents();
-    method public java.lang.String getTargetPackage();
-    method public int getTargetUid();
-    method public android.os.UserHandle getTargetUserHandle();
+    method public java.lang.String getCreatorPackage();
+    method public int getCreatorUid();
+    method public android.os.UserHandle getCreatorUserHandle();
+    method public deprecated java.lang.String getTargetPackage();
     method public static android.content.IntentSender readIntentSenderOrNullFromParcel(android.os.Parcel);
     method public void sendIntent(android.content.Context, int, android.content.Intent, android.content.IntentSender.OnFinished, android.os.Handler) throws android.content.IntentSender.SendIntentException;
     method public void sendIntent(android.content.Context, int, android.content.Intent, android.content.IntentSender.OnFinished, android.os.Handler, java.lang.String) throws android.content.IntentSender.SendIntentException;
@@ -6703,17 +6701,6 @@ package android.content.pm {
     field public long externalMediaSize;
     field public long externalObbSize;
     field public java.lang.String packageName;
-  }
-
-  public class PackageUserState {
-    ctor public PackageUserState();
-    ctor public PackageUserState(android.content.pm.PackageUserState);
-    field public java.util.HashSet disabledComponents;
-    field public int enabled;
-    field public java.util.HashSet enabledComponents;
-    field public boolean installed;
-    field public boolean notLaunched;
-    field public boolean stopped;
   }
 
   public class PathPermission extends android.os.PatternMatcher {

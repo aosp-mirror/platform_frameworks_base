@@ -22,6 +22,7 @@ import java.util.HashSet;
 
 /**
  * Per-user state information about a package.
+ * @hide
  */
 public class PackageUserState {
     public boolean stopped;
