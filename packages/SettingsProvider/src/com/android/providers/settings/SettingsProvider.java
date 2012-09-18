@@ -317,13 +317,14 @@ public class SettingsProvider extends ContentProvider {
 
         boolean backedUpDataChanged = false;
         String property = null, table = uri.getPathSegments().get(0);
+        final boolean isGlobal = table.equals(TABLE_GLOBAL);
         if (table.equals(TABLE_SYSTEM)) {
             property = Settings.System.SYS_PROP_SETTING_VERSION + '_' + userHandle;
             backedUpDataChanged = true;
         } else if (table.equals(TABLE_SECURE)) {
             property = Settings.Secure.SYS_PROP_SETTING_VERSION + '_' + userHandle;
             backedUpDataChanged = true;
-        } else if (table.equals(TABLE_GLOBAL)) {
+        } else if (isGlobal) {
             property = Settings.Global.SYS_PROP_SETTING_VERSION;    // this one is global
             backedUpDataChanged = true;
         }
@@ -342,8 +343,9 @@ public class SettingsProvider extends ContentProvider {
 
         String notify = uri.getQueryParameter("notify");
         if (notify == null || "true".equals(notify)) {
-            getContext().getContentResolver().notifyChange(uri, null);
-            if (LOCAL_LOGV) Log.v(TAG, "notifying: " + uri);
+            final int notifyTarget = isGlobal ? UserHandle.USER_ALL : userHandle;
+            getContext().getContentResolver().notifyChange(uri, null, true, notifyTarget);
+            if (LOCAL_LOGV) Log.v(TAG, "notifying for " + notifyTarget + ": " + uri);
         } else {
             if (LOCAL_LOGV) Log.v(TAG, "notification suppressed: " + uri);
         }
