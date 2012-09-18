@@ -8635,18 +8635,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
-    /**
-     * When searching for a view to focus this rectangle is used when considering if this view is
-     * a good candidate for receiving focus.
-     *
-     * By default, the rectangle is the {@link #getDrawingRect}) of the view.
-     *
-     * @param r The rectangle to fill in, in this view's coordinates.
-     */
-    public void getFocusRect(Rect r) {
-        getDrawingRect(r);
-    }
-
    /**
      * Utility method to retrieve the inverse of the current mMatrix property.
      * We cache the matrix to avoid recalculating it when transform properties
@@ -9625,7 +9613,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * When a view has focus and the user navigates away from it, the next view is searched for
      * starting from the rectangle filled in by this method.
      *
-     * By default, the rectange is the {@link #getDrawingRect(android.graphics.Rect)})
+     * By default, the rectangle is the {@link #getDrawingRect(android.graphics.Rect)})
      * of the view.  However, if your view maintains some idea of internal selection,
      * such as a cursor, or a selected row or column, you should override this method and
      * fill in a more specific rectangle.
