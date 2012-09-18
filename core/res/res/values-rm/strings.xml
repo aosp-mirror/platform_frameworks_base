@@ -215,14 +215,81 @@
     <!-- no translation found for permgroupdesc_messages (7821999071003699236) -->
     <skip />
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Vossas infurmaziuns persunalas"</string>
-    <!-- no translation found for permgroupdesc_personalInfo (6975389054186265786) -->
+    <!-- no translation found for permgroupdesc_personalInfo (8426453129788861338) -->
     <skip />
-    <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"Acceder directamain als contacts ed al chalender memorisà sin il telefonin."</string>
+    <!-- no translation found for permgrouplab_socialInfo (5799096623412043791) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_socialInfo (7129842457611643493) -->
+    <skip />
     <string name="permgrouplab_location" msgid="635149742436692049">"Vossa posiziun"</string>
     <!-- no translation found for permgroupdesc_location (5704679763124170100) -->
     <skip />
     <string name="permgrouplab_network" msgid="5808983377727109831">"Communicaziun rait"</string>
     <!-- no translation found for permgroupdesc_network (4478299413241861987) -->
+    <skip />
+    <!-- no translation found for permgrouplab_bluetoothNetwork (1585403544162128109) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_bluetoothNetwork (5625288577164282391) -->
+    <skip />
+    <!-- no translation found for permgrouplab_audioSettings (8329261670151871235) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_audioSettings (2641515403347568130) -->
+    <skip />
+    <!-- no translation found for permgrouplab_affectsBattery (6209246653424798033) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_affectsBattery (6441275320638916947) -->
+    <skip />
+    <!-- no translation found for permgrouplab_calendar (5863508437783683902) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_calendar (5777534316982184416) -->
+    <skip />
+    <!-- no translation found for permgrouplab_dictionary (4148597128843641379) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_dictionary (7921166355964764490) -->
+    <skip />
+    <!-- no translation found for permgrouplab_writeDictionary (8090237702432576788) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_writeDictionary (2711561994497361646) -->
+    <skip />
+    <!-- no translation found for permgrouplab_bookmarks (1949519673103968229) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_bookmarks (4169771606257963028) -->
+    <skip />
+    <!-- no translation found for permgrouplab_deviceAlarms (6117704629728824101) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_deviceAlarms (4769356362251641175) -->
+    <skip />
+    <!-- no translation found for permgrouplab_voicemail (4162237145027592133) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_voicemail (2498403969862951393) -->
+    <skip />
+    <!-- no translation found for permgrouplab_microphone (171539900250043464) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_microphone (7106618286905738408) -->
+    <skip />
+    <!-- no translation found for permgrouplab_camera (4820372495894586615) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_camera (2933667372289567714) -->
+    <skip />
+    <!-- no translation found for permgrouplab_appInfo (8028789762634147725) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_appInfo (3950378538049625907) -->
+    <skip />
+    <!-- no translation found for permgrouplab_wallpaper (3850280158041175998) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_wallpaper (5630417854750540154) -->
+    <skip />
+    <!-- no translation found for permgrouplab_systemClock (406535759236612992) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_systemClock (3944359833624094992) -->
+    <skip />
+    <!-- no translation found for permgrouplab_statusBar (2095862568113945398) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_statusBar (6242593432226807171) -->
+    <skip />
+    <!-- no translation found for permgrouplab_syncSettings (3341990986147826541) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_syncSettings (7603195265129031797) -->
     <skip />
     <string name="permgrouplab_accounts" msgid="3359646291125325519">"Voss contos"</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Access als contos disponibels"</string>
@@ -234,6 +301,10 @@
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"Access e controlla sin nivel datiers al sistem."</string>
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Utensils per sviluppaders"</string>
     <!-- no translation found for permgroupdesc_developmentTools (7058828032358142018) -->
+    <skip />
+    <!-- no translation found for permgrouplab_display (4279909676036402636) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_display (6051002031933013714) -->
     <skip />
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Memoria"</string>
     <!-- no translation found for permgroupdesc_storage (7442318502446874999) -->
@@ -365,6 +436,10 @@
     <skip />
     <!-- no translation found for permdesc_filter_events (8006236315888347680) -->
     <skip />
+    <!-- no translation found for permlab_magnify_display (5973626738170618775) -->
+    <skip />
+    <!-- no translation found for permdesc_magnify_display (7121235684515003792) -->
+    <skip />
     <string name="permlab_shutdown" msgid="7185747824038909016">"serrar parzialmain"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Metta l\'administratur dad activitads en in stadi da pausa. El na vegn betg serrà dal tut."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"evitar il midar tranter applicaziuns"</string>
@@ -390,8 +465,13 @@
     <skip />
     <!-- no translation found for permdesc_setAlwaysFinish (7471310652868841499) -->
     <skip />
-    <string name="permlab_batteryStats" msgid="7863923071360031652">"modifitgar las datas da l\'accu"</string>
-    <!-- no translation found for permdesc_batteryStats (6835186932305744068) -->
+    <!-- no translation found for permlab_batteryStats (2789610673514103364) -->
+    <skip />
+    <!-- no translation found for permdesc_batteryStats (5897346582882915114) -->
+    <skip />
+    <!-- no translation found for permlab_updateBatteryStats (3719689764536379557) -->
+    <skip />
+    <!-- no translation found for permdesc_updateBatteryStats (6862817857178025002) -->
     <skip />
     <string name="permlab_backup" msgid="470013022865453920">"controllar las copias da segirezza e la restauraziun dal sistem"</string>
     <!-- no translation found for permdesc_backup (6912230525140589891) -->
@@ -405,7 +485,7 @@
     <skip />
     <!-- no translation found for permlab_systemAlertWindow (3543347980839518613) -->
     <skip />
-    <!-- no translation found for permdesc_systemAlertWindow (4460454022797261814) -->
+    <!-- no translation found for permdesc_systemAlertWindow (8584678381972820118) -->
     <skip />
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"modifitgar la sveltezza globala da las animaziuns"</string>
     <!-- no translation found for permdesc_setAnimationScale (7690063428924343571) -->
@@ -413,6 +493,10 @@
     <!-- no translation found for permlab_manageAppTokens (1286505717050121370) -->
     <skip />
     <!-- no translation found for permdesc_manageAppTokens (8043431713014395671) -->
+    <skip />
+    <!-- no translation found for permlab_freezeScreen (4708181184441880175) -->
+    <skip />
+    <!-- no translation found for permdesc_freezeScreen (8558923789222670064) -->
     <skip />
     <string name="permlab_injectEvents" msgid="1378746584023586600">"smatgar tastas e tastas da controlla"</string>
     <!-- no translation found for permdesc_injectEvents (206352565599968632) -->
@@ -490,9 +574,9 @@
     <skip />
     <!-- no translation found for permlab_clearAppCache (7487279391723526815) -->
     <skip />
-    <!-- no translation found for permdesc_clearAppCache (3523396284474042284) -->
+    <!-- no translation found for permdesc_clearAppCache (8974640871945434565) -->
     <skip />
-    <!-- no translation found for permdesc_clearAppCache (5067988373366292186) -->
+    <!-- no translation found for permdesc_clearAppCache (2459441021956436779) -->
     <skip />
     <!-- no translation found for permlab_movePackage (3289890271645921411) -->
     <skip />
@@ -607,21 +691,27 @@
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"permetter l\'installaziun d\'in purschider da servetschs da localisaziun"</string>
     <!-- no translation found for permdesc_installLocationProvider (9066146120470591509) -->
     <skip />
-    <!-- no translation found for permlab_accessFineLocation (5885550969882561436) -->
+    <!-- no translation found for permlab_accessFineLocation (1191898061965273372) -->
     <skip />
-    <!-- no translation found for permdesc_accessFineLocation (8960597421469894181) -->
+    <!-- no translation found for permdesc_accessFineLocation (5295047563564981250) -->
     <skip />
-    <!-- no translation found for permdesc_accessFineLocation (239268765496141815) -->
+    <!-- no translation found for permlab_accessCoarseLocation (4887895362354239628) -->
     <skip />
-    <!-- no translation found for permlab_accessCoarseLocation (7422827215441638984) -->
-    <skip />
-    <!-- no translation found for permdesc_accessCoarseLocation (5383798877137640762) -->
+    <!-- no translation found for permdesc_accessCoarseLocation (2538200184373302295) -->
     <skip />
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"access a SurfaceFlinger"</string>
     <!-- no translation found for permdesc_accessSurfaceFlinger (1041619516733293551) -->
     <skip />
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"leger il paraculp da frame"</string>
     <!-- no translation found for permdesc_readFrameBuffer (4937405521809454680) -->
+    <skip />
+    <!-- no translation found for permlab_configureWifiDisplay (5595661694746742168) -->
+    <skip />
+    <!-- no translation found for permdesc_configureWifiDisplay (7916815158690218065) -->
+    <skip />
+    <!-- no translation found for permlab_controlWifiDisplay (393641276723695496) -->
+    <skip />
+    <!-- no translation found for permdesc_controlWifiDisplay (4543912292681826986) -->
     <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"modifitgar Voss parameters audio"</string>
     <!-- no translation found for permdesc_modifyAudioSettings (3522565366806248517) -->
@@ -823,7 +913,7 @@
     <skip />
     <!-- no translation found for permdesc_bluetoothAdmin (8931682159331542137) -->
     <skip />
-    <!-- no translation found for permlab_accessWimaxState (7436749103151096452) -->
+    <!-- no translation found for permlab_accessWimaxState (4195907010610205703) -->
     <skip />
     <!-- no translation found for permdesc_accessWimaxState (6360102877261978887) -->
     <skip />
@@ -867,7 +957,7 @@
     <skip />
     <!-- no translation found for permdesc_readDictionary (659614600338904243) -->
     <skip />
-    <!-- no translation found for permlab_writeDictionary (2296383164914812772) -->
+    <!-- no translation found for permlab_writeDictionary (2183110402314441106) -->
     <skip />
     <!-- no translation found for permdesc_writeDictionary (8185385716255065291) -->
     <skip />
@@ -950,6 +1040,10 @@
     <!-- no translation found for policylab_disableCamera (6395301023152297826) -->
     <skip />
     <!-- no translation found for policydesc_disableCamera (2306349042834754597) -->
+    <skip />
+    <!-- no translation found for policylab_disableKeyguardWidgets (1794894613389073926) -->
+    <skip />
+    <!-- no translation found for policydesc_disableKeyguardWidgets (7254624892984033592) -->
     <skip />
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Privat"</item>
@@ -1606,19 +1700,21 @@
     <skip />
     <!-- no translation found for sms_control_no (625438561395534982) -->
     <skip />
-    <!-- no translation found for sms_short_code_confirm_title (1666863092640877318) -->
+    <!-- no translation found for sms_short_code_confirm_message (1645436466285310855) -->
     <skip />
-    <!-- no translation found for sms_premium_short_code_confirm_title (3811263856304367838) -->
+    <!-- no translation found for sms_short_code_details (4992814738863678373) -->
     <skip />
-    <!-- no translation found for sms_short_code_confirm_message (5616409294907295407) -->
+    <!-- no translation found for sms_premium_short_code_details (4291752905667807485) -->
     <skip />
-    <!-- no translation found for sms_premium_short_code_confirm_message (6214083016284738667) -->
+    <!-- no translation found for sms_short_code_confirm_allow (4458878637111023413) -->
     <skip />
-    <!-- no translation found for sms_short_code_confirm_allow (8957573662645722940) -->
+    <!-- no translation found for sms_short_code_confirm_deny (2927389840209170706) -->
     <skip />
-    <!-- no translation found for sms_short_code_confirm_deny (6374609298084435887) -->
+    <!-- no translation found for sms_short_code_remember_choice (5289538592272218136) -->
     <skip />
-    <!-- no translation found for sms_short_code_confirm_report (2588793956061677070) -->
+    <!-- no translation found for sms_short_code_confirm_always_allow (3241181154869493368) -->
+    <skip />
+    <!-- no translation found for sms_short_code_confirm_never_allow (446992765774269673) -->
     <skip />
     <!-- no translation found for sim_removed_title (6227712319223226185) -->
     <skip />
@@ -1639,13 +1735,12 @@
     <string name="date_time_set" msgid="5777075614321087758">"Definir"</string>
     <!-- no translation found for date_time_done (2507683751759308828) -->
     <skip />
-    <string name="default_permission_group" msgid="2690160991405646128">"Standard"</string>
-    <string name="no_permissions" msgid="7283357728219338112">"Naginas permissiuns obligatoricas"</string>
-    <string name="perms_hide" msgid="7283915391320676226"><b>"Zuppentar"</b></string>
-    <string name="perms_show_all" msgid="2671791163933091180"><b>"Mussar tut"</b></string>
     <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
     <skip />
     <!-- no translation found for perms_description_app (5139836143293299417) -->
+    <skip />
+    <string name="no_permissions" msgid="7283357728219338112">"Naginas permissiuns obligatoricas"</string>
+    <!-- no translation found for perm_costs_money (4902470324142151116) -->
     <skip />
     <!-- no translation found for usb_storage_activity_title (4465055157209648641) -->
     <skip />
@@ -2084,9 +2179,11 @@
     <skip />
     <!-- no translation found for display_manager_built_in_display_name (2583134294292563941) -->
     <skip />
+    <!-- no translation found for display_manager_hdmi_display_name (1555264559227470109) -->
+    <skip />
     <!-- no translation found for display_manager_overlay_display_name (5142365982271620716) -->
     <skip />
-    <!-- no translation found for display_manager_overlay_display_title (8186674340178573982) -->
+    <!-- no translation found for display_manager_overlay_display_title (652124517672257172) -->
     <skip />
     <!-- no translation found for kg_emergency_call_label (684946192523830531) -->
     <skip />
@@ -2098,7 +2195,7 @@
     <skip />
     <!-- no translation found for kg_wrong_pin (1131306510833563801) -->
     <skip />
-    <!-- no translation found for kg_too_many_failed_attempts_countdown (353963338189371686) -->
+    <!-- no translation found for kg_too_many_failed_attempts_countdown (6358110221603297548) -->
     <skip />
     <!-- no translation found for kg_pattern_instructions (398978611683075868) -->
     <skip />
@@ -2139,6 +2236,26 @@
     <!-- no translation found for kg_login_account_recovery_hint (5690709132841752974) -->
     <skip />
     <!-- no translation found for kg_login_checking_password (8849589033659332457) -->
+    <skip />
+    <!-- no translation found for kg_too_many_failed_pin_attempts_dialog_message (8276745642049502550) -->
+    <skip />
+    <!-- no translation found for kg_too_many_failed_password_attempts_dialog_message (7813713389422226531) -->
+    <skip />
+    <!-- no translation found for kg_too_many_failed_pattern_attempts_dialog_message (74089475965050805) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_almost_at_wipe (1575557200627128949) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_almost_at_wipe (4051015943038199910) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_now_wiping (2072996269148483637) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_now_wiping (4817627474419471518) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_almost_at_login (3253575572118914370) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_almost_at_login (1437638152015574839) -->
+    <skip />
+    <!-- no translation found for safe_media_volume_warning (7382971871993371648) -->
     <skip />
     <!-- no translation found for kg_temp_back_string (5812983904056640466) -->
     <skip />
