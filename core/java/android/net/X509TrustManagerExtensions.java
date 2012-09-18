@@ -43,7 +43,7 @@ public class X509TrustManagerExtensions {
      * @throws IllegalArgumentException If tm is an unsupported TrustManager type.
      */
     public X509TrustManagerExtensions(X509TrustManager tm) throws IllegalArgumentException {
-        if (mDelegate instanceof TrustManagerImpl) {
+        if (tm instanceof TrustManagerImpl) {
             mDelegate = (TrustManagerImpl) tm;
         } else {
             throw new IllegalArgumentException("tm is not a supported type of X509TrustManager");
