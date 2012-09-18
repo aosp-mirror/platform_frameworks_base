@@ -153,8 +153,8 @@ public class Gravity
      *                container.
      * @param layoutDirection The layout direction.
      *
-     * @see {@link View#LAYOUT_DIRECTION_LTR}
-     * @see {@link View#LAYOUT_DIRECTION_RTL}
+     * @see View#LAYOUT_DIRECTION_LTR
+     * @see View#LAYOUT_DIRECTION_RTL
      */
     public static void apply(int gravity, int w, int h, Rect container,
             Rect outRect, int layoutDirection) {
@@ -290,8 +290,8 @@ public class Gravity
      *                container.
      * @param layoutDirection The layout direction.
      *
-     * @see {@link View#LAYOUT_DIRECTION_LTR}
-     * @see {@link View#LAYOUT_DIRECTION_RTL}
+     * @see View#LAYOUT_DIRECTION_LTR
+     * @see View#LAYOUT_DIRECTION_RTL
      */
     public static void apply(int gravity, int w, int h, Rect container,
                              int xAdj, int yAdj, Rect outRect, int layoutDirection) {
@@ -370,8 +370,8 @@ public class Gravity
      * modified if needed to fit in the display.
      * @param layoutDirection The layout direction.
      *
-     * @see {@link View#LAYOUT_DIRECTION_LTR}
-     * @see {@link View#LAYOUT_DIRECTION_RTL}
+     * @see View#LAYOUT_DIRECTION_LTR
+     * @see View#LAYOUT_DIRECTION_RTL
      */
     public static void applyDisplay(int gravity, Rect display, Rect inoutObj, int layoutDirection) {
         int absGravity = getAbsoluteGravity(gravity, layoutDirection);
