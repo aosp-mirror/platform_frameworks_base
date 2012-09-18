@@ -53,12 +53,10 @@ class KeyguardStatusViewManager {
     private static final int OWNER_INFO = 14;
     private static final int BATTERY_INFO = 15;
 
-    private StatusMode mStatus;
     private CharSequence mDateFormatString;
 
     // Views that this class controls.
     // NOTE: These may be null in some LockScreen screens and should protect from NPE
-    private TextView mCarrierView;
     private TextView mDateView;
     private TextView mStatus1View;
     private TextView mOwnerInfoView;
@@ -89,8 +87,6 @@ class KeyguardStatusViewManager {
     private String mInstructionText;
     private CharSequence mOwnerInfoText;
     private boolean mShowingStatus;
-    private CharSequence mPlmn;
-    private CharSequence mSpn;
     private DigitalClock mDigitalClock;
     protected boolean mBatteryCharged;
     protected boolean mBatteryIsLow;
@@ -106,7 +102,6 @@ class KeyguardStatusViewManager {
         mLockPatternUtils = new LockPatternUtils(view.getContext());
         mUpdateMonitor = KeyguardUpdateMonitor.getInstance(view.getContext());
 
-        mCarrierView = (TextView) findViewById(R.id.carrier);
         mDateView = (TextView) findViewById(R.id.date);
         mStatus1View = (TextView) findViewById(R.id.status1);
         mAlarmStatusView = (TextView) findViewById(R.id.alarm_status);
@@ -121,7 +116,7 @@ class KeyguardStatusViewManager {
         updateOwnerInfo();
 
         // Required to get Marquee to work.
-        final View scrollableViews[] = { mCarrierView, mDateView, mStatus1View, mOwnerInfoView,
+        final View scrollableViews[] = { mDateView, mStatus1View, mOwnerInfoView,
                 mAlarmStatusView };
         for (View v : scrollableViews) {
             if (v != null) {
@@ -213,7 +208,6 @@ class KeyguardStatusViewManager {
         updateAlarmInfo();
         updateOwnerInfo();
         updateStatus1();
-        updateCarrierText();
     }
 
     private void updateAlarmInfo() {
@@ -246,10 +240,6 @@ class KeyguardStatusViewManager {
             mStatus1View.setCompoundDrawablesWithIntrinsicBounds(icon.value, 0, 0, 0);
             mStatus1View.setVisibility(mShowingStatus ? View.VISIBLE : View.INVISIBLE);
         }
-    }
-
-    private void updateCarrierText() {
-        mCarrierView.setText(mCarrierText);
     }
 
     private CharSequence getAltTextMessage(MutableInt icon) {
@@ -304,182 +294,15 @@ class KeyguardStatusViewManager {
         }
     }
 
-    /**
-     * Determine the current status of the lock screen given the sim state and other stuff.
-     */
-    public StatusMode getStatusForIccState(IccCardConstants.State simState) {
-        // Since reading the SIM may take a while, we assume it is present until told otherwise.
-        if (simState == null) {
-            return StatusMode.Normal;
-        }
-
-        final boolean missingAndNotProvisioned = (!mUpdateMonitor.isDeviceProvisioned()
-                && (simState == IccCardConstants.State.ABSENT ||
-                        simState == IccCardConstants.State.PERM_DISABLED));
-
-        // Assume we're NETWORK_LOCKED if not provisioned
-        simState = missingAndNotProvisioned ? IccCardConstants.State.NETWORK_LOCKED : simState;
-        switch (simState) {
-            case ABSENT:
-                return StatusMode.SimMissing;
-            case NETWORK_LOCKED:
-                return StatusMode.SimMissingLocked;
-            case NOT_READY:
-                return StatusMode.SimMissing;
-            case PIN_REQUIRED:
-                return StatusMode.SimLocked;
-            case PUK_REQUIRED:
-                return StatusMode.SimPukLocked;
-            case READY:
-                return StatusMode.Normal;
-            case PERM_DISABLED:
-                return StatusMode.SimPermDisabled;
-            case UNKNOWN:
-                return StatusMode.SimMissing;
-        }
-        return StatusMode.SimMissing;
-    }
 
     private Context getContext() {
         return mContainer.getContext();
-    }
-
-    /**
-     * Update carrier text, carrier help and emergency button to match the current status based
-     * on SIM state.
-     *
-     * @param simState
-     */
-    private void updateCarrierStateWithSimStatus(IccCardConstants.State simState) {
-        if (DEBUG) Log.d(TAG, "updateCarrierTextWithSimStatus(), simState = " + simState);
-
-        CharSequence carrierText = null;
-        int carrierHelpTextId = 0;
-        mStatus = getStatusForIccState(simState);
-        mSimState = simState;
-        switch (mStatus) {
-            case Normal:
-                carrierText = makeCarierString(mPlmn, mSpn);
-                break;
-
-            case NetworkLocked:
-                carrierText = makeCarrierStringOnEmergencyCapable(
-                        getContext().getText(R.string.lockscreen_network_locked_message),
-                        mPlmn);
-                carrierHelpTextId = R.string.lockscreen_instructions_when_pattern_disabled;
-                break;
-
-            case SimMissing:
-                // Shows "No SIM card | Emergency calls only" on devices that are voice-capable.
-                // This depends on mPlmn containing the text "Emergency calls only" when the radio
-                // has some connectivity. Otherwise, it should be null or empty and just show
-                // "No SIM card"
-                carrierText =  makeCarrierStringOnEmergencyCapable(
-                        getContext().getText(R.string.lockscreen_missing_sim_message_short),
-                        mPlmn);
-                carrierHelpTextId = R.string.lockscreen_missing_sim_instructions_long;
-                break;
-
-            case SimPermDisabled:
-                carrierText = getContext().getText(
-                        R.string.lockscreen_permanent_disabled_sim_message_short);
-                carrierHelpTextId = R.string.lockscreen_permanent_disabled_sim_instructions;
-                break;
-
-            case SimMissingLocked:
-                carrierText =  makeCarrierStringOnEmergencyCapable(
-                        getContext().getText(R.string.lockscreen_missing_sim_message_short),
-                        mPlmn);
-                carrierHelpTextId = R.string.lockscreen_missing_sim_instructions;
-                break;
-
-            case SimLocked:
-                carrierText = makeCarrierStringOnEmergencyCapable(
-                        getContext().getText(R.string.lockscreen_sim_locked_message),
-                        mPlmn);
-                break;
-
-            case SimPukLocked:
-                carrierText = makeCarrierStringOnEmergencyCapable(
-                        getContext().getText(R.string.lockscreen_sim_puk_locked_message),
-                        mPlmn);
-                break;
-        }
-
-        setCarrierText(carrierText);
-        setCarrierHelpText(carrierHelpTextId);
-    }
-
-    /*
-     * Add emergencyCallMessage to carrier string only if phone supports emergency calls.
-     */
-    private CharSequence makeCarrierStringOnEmergencyCapable(
-            CharSequence simMessage, CharSequence emergencyCallMessage) {
-        if (mLockPatternUtils.isEmergencyCallCapable()) {
-            return makeCarierString(simMessage, emergencyCallMessage);
-        }
-        return simMessage;
     }
 
     private View findViewById(int id) {
         return mContainer.findViewById(id);
     }
 
-    /**
-     * The status of this lock screen. Primarily used for widgets on LockScreen.
-     */
-    enum StatusMode {
-        /**
-         * Normal case (sim card present, it's not locked)
-         */
-        Normal(true),
-
-        /**
-         * The sim card is 'network locked'.
-         */
-        NetworkLocked(true),
-
-        /**
-         * The sim card is missing.
-         */
-        SimMissing(false),
-
-        /**
-         * The sim card is missing, and this is the device isn't provisioned, so we don't let
-         * them get past the screen.
-         */
-        SimMissingLocked(false),
-
-        /**
-         * The sim card is PUK locked, meaning they've entered the wrong sim unlock code too many
-         * times.
-         */
-        SimPukLocked(false),
-
-        /**
-         * The sim card is locked.
-         */
-        SimLocked(true),
-
-        /**
-         * The sim card is permanently disabled due to puk unlock failure
-         */
-        SimPermDisabled(false);
-
-        private final boolean mShowStatusLines;
-
-        StatusMode(boolean mShowStatusLines) {
-            this.mShowStatusLines = mShowStatusLines;
-        }
-
-        /**
-         * @return Whether the status lines (battery level and / or next alarm) are shown while
-         *         in this state.  Mostly dictated by whether this is room for them.
-         */
-        public boolean shouldShowStatusLines() {
-            return mShowStatusLines;
-        }
-    }
 
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
 
@@ -498,37 +321,5 @@ class KeyguardStatusViewManager {
         public void onTimeChanged() {
             refreshDate();
         }
-
-        @Override
-        public void onRefreshCarrierInfo(CharSequence plmn, CharSequence spn) {
-            mPlmn = plmn;
-            mSpn = spn;
-            updateCarrierStateWithSimStatus(mSimState);
-        }
-
-        @Override
-        public void onSimStateChanged(IccCardConstants.State simState) {
-            updateCarrierStateWithSimStatus(simState);
-        }
     };
-
-    /**
-     * Performs concentenation of PLMN/SPN
-     * @param plmn
-     * @param spn
-     * @return
-     */
-    private static CharSequence makeCarierString(CharSequence plmn, CharSequence spn) {
-        final boolean plmnValid = !TextUtils.isEmpty(plmn);
-        final boolean spnValid = !TextUtils.isEmpty(spn);
-        if (plmnValid && spnValid) {
-            return plmn + "|" + spn;
-        } else if (plmnValid) {
-            return plmn;
-        } else if (spnValid) {
-            return spn;
-        } else {
-            return "";
-        }
-    }
 }
