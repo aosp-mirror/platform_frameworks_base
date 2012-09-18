@@ -1797,6 +1797,39 @@ public abstract class PackageManager {
     public abstract ResolveInfo resolveActivity(Intent intent, int flags);
 
     /**
+     * Determine the best action to perform for a given Intent for a given user. This
+     * is how {@link Intent#resolveActivity} finds an activity if a class has not
+     * been explicitly specified.
+     *
+     * <p><em>Note:</em> if using an implicit Intent (without an explicit ComponentName
+     * specified), be sure to consider whether to set the {@link #MATCH_DEFAULT_ONLY}
+     * only flag.  You need to do so to resolve the activity in the same way
+     * that {@link android.content.Context#startActivity(Intent)} and
+     * {@link android.content.Intent#resolveActivity(PackageManager)
+     * Intent.resolveActivity(PackageManager)} do.</p>
+     *
+     * @param intent An intent containing all of the desired specification
+     *               (action, data, type, category, and/or component).
+     * @param flags Additional option flags.  The most important is
+     * {@link #MATCH_DEFAULT_ONLY}, to limit the resolution to only
+     * those activities that support the {@link android.content.Intent#CATEGORY_DEFAULT}.
+     * @param userId The user id.
+     *
+     * @return Returns a ResolveInfo containing the final activity intent that
+     *         was determined to be the best action.  Returns null if no
+     *         matching activity was found. If multiple matching activities are
+     *         found and there is no default set, returns a ResolveInfo
+     *         containing something else, such as the activity resolver.
+     *
+     * @see #MATCH_DEFAULT_ONLY
+     * @see #GET_INTENT_FILTERS
+     * @see #GET_RESOLVED_FILTER
+     *
+     * @hide
+     */
+    public abstract ResolveInfo resolveActivityAsUser(Intent intent, int flags, int userId);
+
+    /**
      * Retrieve all activities that can be performed for the given intent.
      *
      * @param intent The desired intent as per resolveActivity().
@@ -1836,7 +1869,7 @@ public abstract class PackageManager {
      * @see #GET_RESOLVED_FILTER
      * @hide
      */
-    public abstract List<ResolveInfo> queryIntentActivitiesForUser(Intent intent,
+    public abstract List<ResolveInfo> queryIntentActivitiesAsUser(Intent intent,
             int flags, int userId);
 
 
@@ -1942,6 +1975,27 @@ public abstract class PackageManager {
      */
     public abstract List<ResolveInfo> queryIntentServices(Intent intent,
             int flags);
+
+    /**
+     * Retrieve all services that can match the given intent for a given user.
+     *
+     * @param intent The desired intent as per resolveService().
+     * @param flags Additional option flags.
+     * @param userId The user id.
+     *
+     * @return A List&lt;ResolveInfo&gt; containing one entry for each matching
+     *         ServiceInfo. These are ordered from best to worst match -- that
+     *         is, the first item in the list is what is returned by
+     *         resolveService().  If there are no matching services, an empty
+     *         list is returned.
+     *
+     * @see #GET_INTENT_FILTERS
+     * @see #GET_RESOLVED_FILTER
+     *
+     * @hide
+     */
+    public abstract List<ResolveInfo> queryIntentServicesAsUser(Intent intent,
+            int flags, int userId);
 
     /**
      * Find a single content provider by its base path name.

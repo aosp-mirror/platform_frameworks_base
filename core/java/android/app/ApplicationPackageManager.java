@@ -42,10 +42,8 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.ManifestDigest;
-import android.content.pm.UserInfo;
 import android.content.pm.VerificationParams;
 import android.content.pm.VerifierDeviceIdentity;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
@@ -453,11 +451,17 @@ final class ApplicationPackageManager extends PackageManager {
 
     @Override
     public ResolveInfo resolveActivity(Intent intent, int flags) {
+        return resolveActivityAsUser(intent, flags, UserHandle.myUserId());
+    }
+
+    @Override
+    public ResolveInfo resolveActivityAsUser(Intent intent, int flags, int userId) {
         try {
             return mPM.resolveIntent(
                 intent,
                 intent.resolveTypeIfNeeded(mContext.getContentResolver()),
-                    flags, UserHandle.myUserId());
+                flags,
+                userId);
         } catch (RemoteException e) {
             throw new RuntimeException("Package manager has died", e);
         }
@@ -466,12 +470,12 @@ final class ApplicationPackageManager extends PackageManager {
     @Override
     public List<ResolveInfo> queryIntentActivities(Intent intent,
                                                    int flags) {
-        return queryIntentActivitiesForUser(intent, flags, UserHandle.myUserId());
+        return queryIntentActivitiesAsUser(intent, flags, UserHandle.myUserId());
     }
 
     /** @hide Same as above but for a specific user */
     @Override
-    public List<ResolveInfo> queryIntentActivitiesForUser(Intent intent,
+    public List<ResolveInfo> queryIntentActivitiesAsUser(Intent intent,
                                                    int flags, int userId) {
         try {
             return mPM.queryIntentActivities(
@@ -551,16 +555,21 @@ final class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public List<ResolveInfo> queryIntentServices(Intent intent, int flags) {
+    public List<ResolveInfo> queryIntentServicesAsUser(Intent intent, int flags, int userId) {
         try {
             return mPM.queryIntentServices(
                 intent,
                 intent.resolveTypeIfNeeded(mContext.getContentResolver()),
                 flags,
-                UserHandle.myUserId());
+                userId);
         } catch (RemoteException e) {
             throw new RuntimeException("Package manager has died", e);
         }
+    }
+
+    @Override
+    public List<ResolveInfo> queryIntentServices(Intent intent, int flags) {
+        return queryIntentServicesAsUser(intent, flags, UserHandle.myUserId());
     }
 
     @Override

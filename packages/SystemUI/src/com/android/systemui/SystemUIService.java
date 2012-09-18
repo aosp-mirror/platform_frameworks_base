@@ -32,6 +32,7 @@ import android.os.ServiceManager;
 import android.util.Slog;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
+import android.view.accessibility.AccessibilityManager;
 
 public class SystemUIService extends Service {
     static final String TAG = "SystemUIService";
@@ -67,6 +68,10 @@ public class SystemUIService extends Service {
 
     @Override
     public void onCreate() {
+        // Tell the accessibility layer that this process will
+        // run as the current user, i.e. run across users.
+        AccessibilityManager.createAsSharedAcrossUsers(this);
+
         // Pick status bar or system bar.
         IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
         try {
