@@ -178,7 +178,7 @@ void Program::setColor(const float r, const float g, const float b, const float 
 void Program::use() {
     glUseProgram(mProgramId);
     if (texCoords >= 0 && !mHasSampler) {
-        glUniform1i(getUniform("sampler"), 0);
+        glUniform1i(getUniform("baseSampler"), 0);
         mHasSampler = true;
     }
     mUse = true;
