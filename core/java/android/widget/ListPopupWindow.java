@@ -21,8 +21,8 @@ import android.database.DataSetObserver;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.LocaleUtil;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -200,7 +200,7 @@ public class ListPopupWindow {
         mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
         // Set the default layout direction to match the default locale one
         final Locale locale = mContext.getResources().getConfiguration().locale;
-        mLayoutDirection = LocaleUtil.getLayoutDirectionFromLocale(locale);
+        mLayoutDirection = TextUtils.getLayoutDirectionFromLocale(locale);
     }
 
     /**
