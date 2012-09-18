@@ -650,8 +650,7 @@ static jobject nativeGetBuiltInDisplay(JNIEnv* env, jclass clazz, jint id) {
 
 static jobject nativeCreateDisplay(JNIEnv* env, jclass clazz, jstring nameObj) {
     ScopedUtfChars name(env, nameObj);
-    // TODO: pass the name to SF.
-    sp<IBinder> token(SurfaceComposerClient::createDisplay());
+    sp<IBinder> token(SurfaceComposerClient::createDisplay(String8(name.c_str())));
     return javaObjectForIBinder(env, token);
 }
 
