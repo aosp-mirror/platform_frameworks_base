@@ -134,5 +134,13 @@ public final class ScriptIntrinsicLUT extends ScriptIntrinsic {
         forEach(0, ain, aout, null);
     }
 
+    /**
+     * Get a KernelID for this intrinsic kernel.
+     *
+     * @return Script.KernelID The KernelID object.
+     */
+    public Script.KernelID getKernelID() {
+        return createKernelID(0, 3, null, null);
+    }
 }
 
