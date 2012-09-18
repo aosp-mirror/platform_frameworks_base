@@ -87,19 +87,15 @@ public interface IActivityManager extends IInterface {
             String resultData, Bundle map, String requiredPermission,
             boolean serialized, boolean sticky, int userId) throws RemoteException;
     public void unbroadcastIntent(IApplicationThread caller, Intent intent, int userId) throws RemoteException;
-    /* oneway */
     public void finishReceiver(IBinder who, int resultCode, String resultData, Bundle map, boolean abortBroadcast) throws RemoteException;
     public void attachApplication(IApplicationThread app) throws RemoteException;
-    /* oneway */
+    public void activityResumed(IBinder token) throws RemoteException;
     public void activityIdle(IBinder token, Configuration config,
             boolean stopProfiling) throws RemoteException;
     public void activityPaused(IBinder token) throws RemoteException;
-    /* oneway */
     public void activityStopped(IBinder token, Bundle state,
             Bitmap thumbnail, CharSequence description) throws RemoteException;
-    /* oneway */
     public void activitySlept(IBinder token) throws RemoteException;
-    /* oneway */
     public void activityDestroyed(IBinder token) throws RemoteException;
     public String getCallingPackage(IBinder token) throws RemoteException;
     public ComponentName getCallingActivity(IBinder token) throws RemoteException;
@@ -496,7 +492,7 @@ public interface IActivityManager extends IInterface {
     int BIND_SERVICE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+35;
     int UNBIND_SERVICE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+36;
     int PUBLISH_SERVICE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+37;
-
+    int ACTIVITY_RESUMED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+38;
     int GOING_TO_SLEEP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+39;
     int WAKING_UP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+40;
     int SET_DEBUG_APP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+41;
