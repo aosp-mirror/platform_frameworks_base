@@ -156,7 +156,13 @@
     <!-- no translation found for quick_settings_battery_charged_label (8865413079414246081) -->
     <skip />
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
+    <!-- no translation found for quick_settings_bluetooth_multiple_devices_label (3912245565613684735) -->
+    <skip />
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Lysstyrke"</string>
+    <!-- no translation found for quick_settings_rotation_unlocked_label (336054930362580584) -->
+    <skip />
+    <!-- no translation found for quick_settings_rotation_locked_label (8058646447242565486) -->
+    <skip />
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Inndatametode"</string>
     <string name="quick_settings_location_label" msgid="3292451598267467545">"Posisjon i bruk"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Medieenhet"</string>
