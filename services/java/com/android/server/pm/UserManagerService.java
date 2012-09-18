@@ -39,6 +39,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -85,8 +86,6 @@ public class UserManagerService extends IUserManager.Stub {
 
     private SparseArray<UserInfo> mUsers = new SparseArray<UserInfo>();
 
-    private final int mUserLimit;
-
     private int[] mUserIds;
     private boolean mGuestEnabled;
     private int mNextSerialNumber;
@@ -129,8 +128,6 @@ public class UserManagerService extends IUserManager.Stub {
             mPm = pm;
             mInstallLock = installLock;
             mPackagesLock = packagesLock;
-            mUserLimit = mContext.getResources().getInteger(
-                    com.android.internal.R.integer.config_multiuserMaximumUsers);
             mUsersDir = new File(dataDir, USER_INFO_DIR);
             mUsersDir.mkdirs();
             // Make zeroth user directory, for services to migrate their files to that location
@@ -275,7 +272,7 @@ public class UserManagerService extends IUserManager.Stub {
      */
     private boolean isUserLimitReachedLocked() {
         int nUsers = mUsers.size();
-        return nUsers >= mUserLimit;
+        return nUsers >= UserManager.getMaxSupportedUsers();
     }
 
     /**
