@@ -88,28 +88,28 @@ any way you want, provided that you follow the guidelines described below.</p>
           "Android is a trademark of Google Inc."</span>
         </p>
 
+
 <h2 id="brand-google_play">Google Play Brand</h2>
 
-<div style="clear:both">
-  <div style="float:right;width:50%;padding:1.5em;">
-    <p>
-      <img alt="Google Play logo" src="http://www.android.com/images/brand/google_play_logo_450.png">
-    </p>
-    <p>
-    <img alt="Get it on Google Play badge, large" src=
-            "http://www.android.com/images/brand/get_it_on_play_logo_large.png"><br>
-            Download: <a href="http://www.android.com/images/brand/get_it_on_play_logo_small.png">Small</a> | <a href=
-            "http://www.android.com/images/brand/get_it_on_play_logo_large.png">Large</a>
-          </p>
-          <p>
-            <img alt="Android App on Google Play badge, large" src=
-            "http://www.android.com/images/brand/android_app_on_play_logo_large.png"><br>
-            Download: <a href="http://www.android.com/images/brand/android_app_on_play_logo_small.png">Small</a> |
-            <a href="http://www.android.com/images/brand/android_app_on_play_large.png">Large</a>
-          </p>
-  </div> 
+    <img alt="" src="http://www.android.com/images/brand/google_play_logo_450.png"
+         style="float:right;">
+      
+    <img alt="Android app on Google Play badge, large"
+         src="{@docRoot}images/brand/en_app_rgb_wo_60.png"
+         style="float:right;clear:right;">
+
+    <img alt="Android app on Google Play badge, small"
+         src="{@docRoot}images/brand/en_app_rgb_wo_45.png"
+         style="float:right;margin:0 30px 30px">
+
+    <img alt="Get it on Google Play badge, large"
+         src="{@docRoot}images/brand/en_generic_rgb_wo_60.png"
+         style="float:right;clear:right;">
+
+    <img alt="Get it on Google Play badge, small"
+         src="{@docRoot}images/brand/en_generic_rgb_wo_45.png"
+         style="float:right;margin:0 30px 30px;">
         
-  <div style="width:45%;">
     <h4>06/ <em>Get it on Google Play</em> Badge
           </h4>
           <p>
@@ -118,57 +118,34 @@ any way you want, provided that you follow the guidelines described below.</p>
             Play.
           </p>
           <p>
-            The logos are available in two sizes:
-          </p>
-          <ul>
-            <li>Large: 60(h) x 172(w)</li>
-            </li>
-            <li>Small 45(h) x 129(w)
-            </li>
-          </ul>
-          <p>
             Guidelines for usage:
           </p>
           <ul>
-            <li>Never separate the phrase “Get it on Google Play” or "Android App on Google Play"
-            from the Google Play logo, and do not change the color, proportions, spacing or any
-            other aspect of the logo.
+            <li>Do not modify the color, proportions, spacing or any other aspect of the badge image.
             </li>
-     </ul>
-     </div>
-     
-     <ul>
-            <li>When used online, the badge logo should be used to direct users to:
+            <li>When used alongside logos for other application marketplaces, the Google Play logo
+            should be of equal or greater size.</li>
+            <li>When used online, the badge should link to either:
               <ul>
-                <li>The Google Play landing page: <br />
-                  <span style="margin-left:1em;">http://play.google.com</span>
-                </li>
-                <li>The Google Play Apps landing page: <br />
-                 <span style="margin-left:1em;">http://play.google.com/store/apps</span>
-                </li>
-                <li>A list of products that include your company name, for example, <br />
-                <span style="margin-left:1em;">http://play.google.com/store/search?q=<em>yourCompanyName</em></span>
-                </li>
-                <li>A list of products published by you, for example,<br />
+                <li>A list of products published by you, for example:<br />
                 <span style="margin-left:1em;">http://play.google.com/store/search?q=<em>publisherName</em></span>
                 </li>
-                <li>A specific app product details page within Google Play, for example,<br />
+                <li>A specific app product details page within Google Play, for example:<br />
                 <span style="margin-left:1em;">http://play.google.com/store/apps/details?id=<em>packageName</em></span>
                 </li>
               </ul>
             </li>
-            <li>When used alongside logos for other application marketplaces, the Google Play logo
-            should be of equal or greater size</li>
   </ul>
-            
-            <p>For details on all the ways that you can link to your product details page in Google Play, 
-            see <a href="{@docRoot}distribute/googleplay/promote/linking.html">Linking to your products</a></p>
 
-          <p>For convenience, if you are using the logos online, you can use the 
-            <a href="{@docRoot}distribute/googleplay/promote/badges.html">badge generator</a>
-            to create the appropriate markup and link to your apps.</p>
+          <p>For your convenience, you can use the 
+            <a href="{@docRoot}distribute/googleplay/promote/badges.html">Googe Play badge generator</a>
+            to create badges that link to your apps on Google Play.</p>
+            
+          <p>For details on all the ways that you can link to your product details page in Google Play, 
+            see <a href="{@docRoot}distribute/googleplay/promote/linking.html">Linking to your products</a></p>
 
 <h2>Other Brands</h2>
 
 <p>Any other brands or icons depicted on this site are <em>not</em> are the property of their
 respective owners and usage is reserved. You must seek the developer for appropriate permission to use them.</p>
+
