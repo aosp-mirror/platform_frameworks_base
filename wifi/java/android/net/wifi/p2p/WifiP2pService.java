@@ -1323,6 +1323,11 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                             if (!mAutonomousGroup && mGroup.isClientListEmpty()) {
                                 Slog.d(TAG, "Client list empty, remove non-persistent p2p group");
                                 mWifiNative.p2pGroupRemove(mGroup.getInterface());
+                                // We end up sending connection changed broadcast
+                                // when this happens at exit()
+                            } else {
+                                // Notify when a client disconnects from group
+                                sendP2pConnectionChangedBroadcast();
                             }
                         } else {
                             if (DBG) logd("Failed to remove client " + deviceAddress);
