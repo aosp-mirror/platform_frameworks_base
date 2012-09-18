@@ -344,7 +344,12 @@ public class SettingsProvider extends ContentProvider {
         String notify = uri.getQueryParameter("notify");
         if (notify == null || "true".equals(notify)) {
             final int notifyTarget = isGlobal ? UserHandle.USER_ALL : userHandle;
-            getContext().getContentResolver().notifyChange(uri, null, true, notifyTarget);
+            final long oldId = Binder.clearCallingIdentity();
+            try {
+                getContext().getContentResolver().notifyChange(uri, null, true, notifyTarget);
+            } finally {
+                Binder.restoreCallingIdentity(oldId);
+            }
             if (LOCAL_LOGV) Log.v(TAG, "notifying for " + notifyTarget + ": " + uri);
         } else {
             if (LOCAL_LOGV) Log.v(TAG, "notification suppressed: " + uri);
