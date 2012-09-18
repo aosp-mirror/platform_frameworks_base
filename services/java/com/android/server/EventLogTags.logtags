@@ -156,3 +156,8 @@ option java_package com.android.server
 51200 lockdown_vpn_connecting (egress_net|1)
 51201 lockdown_vpn_connected (egress_net|1)
 51202 lockdown_vpn_error (egress_net|1)
+
+# ---------------------------
+# ConfigUpdateInstallReceiver.java
+# ---------------------------
+51300 config_install_failed (dir|3)
