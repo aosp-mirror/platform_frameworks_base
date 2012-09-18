@@ -75,6 +75,7 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.LruCache;
 
+import com.android.internal.R;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
@@ -112,6 +113,7 @@ public class WifiStateMachine extends StateMachine {
     private ConnectivityManager mCm;
 
     private final boolean mP2pSupported;
+    private final AtomicBoolean mP2pConnected = new AtomicBoolean(false);
     private final String mPrimaryDeviceType;
 
     /* Scan results handling */
@@ -595,16 +597,16 @@ public class WifiStateMachine extends StateMachine {
         mScanIntent = PendingIntent.getBroadcast(mContext, SCAN_REQUEST, scanIntent, 0);
 
         mDefaultFrameworkScanIntervalMs = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_wifi_framework_scan_interval);
+                R.integer.config_wifi_framework_scan_interval);
 
         mDriverStopDelayMs = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_wifi_driver_stop_delay);
+                R.integer.config_wifi_driver_stop_delay);
 
         mBackgroundScanSupported = mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_wifi_background_scan_support);
+                R.bool.config_wifi_background_scan_support);
 
         mPrimaryDeviceType = mContext.getResources().getString(
-                com.android.internal.R.string.config_wifi_p2p_device_type);
+                R.string.config_wifi_p2p_device_type);
 
         mUserWantsSuspendOpt.set(Settings.Secure.getInt(mContext.getContentResolver(),
                     Settings.Secure.WIFI_SUSPEND_OPTIMIZATIONS_ENABLED, 1) == 1);
@@ -2011,6 +2013,10 @@ public class WifiStateMachine extends StateMachine {
                     replyToMessage(message, WifiManager.RSSI_PKTCNT_FETCH_FAILED,
                             WifiManager.BUSY);
                     break;
+                case WifiP2pService.P2P_CONNECTION_CHANGED:
+                    NetworkInfo info = (NetworkInfo) message.obj;
+                    mP2pConnected.set(info.isConnected());
+                    break;
                 default:
                     loge("Error! unhandled message" + message);
                     break;
@@ -2408,7 +2414,7 @@ public class WifiStateMachine extends StateMachine {
             mNetworkInfo.setIsAvailable(true);
 
             int defaultInterval = mContext.getResources().getInteger(
-                    com.android.internal.R.integer.config_wifi_supplicant_scan_interval);
+                    R.integer.config_wifi_supplicant_scan_interval);
 
             mSupplicantScanIntervalMs = Settings.Global.getLong(mContext.getContentResolver(),
                     Settings.Global.WIFI_SUPPLICANT_SCAN_INTERVAL_MS,
@@ -3486,7 +3492,7 @@ public class WifiStateMachine extends StateMachine {
              * The scans are useful to notify the user of the presence of an open network.
              * Note that these are not wake up scans.
              */
-            if (mWifiConfigStore.getConfiguredNetworks().size() == 0) {
+            if (!mP2pConnected.get() && mWifiConfigStore.getConfiguredNetworks().size() == 0) {
                 sendMessageDelayed(obtainMessage(CMD_NO_NETWORKS_PERIODIC_SCAN,
                             ++mPeriodicScanToken, 0), mSupplicantScanIntervalMs);
             }
@@ -3497,6 +3503,7 @@ public class WifiStateMachine extends StateMachine {
             boolean ret = HANDLED;
             switch (message.what) {
                 case CMD_NO_NETWORKS_PERIODIC_SCAN:
+                    if (mP2pConnected.get()) break;
                     if (message.arg1 == mPeriodicScanToken &&
                             mWifiConfigStore.getConfiguredNetworks().size() == 0) {
                         sendMessage(CMD_START_SCAN);
@@ -3557,6 +3564,21 @@ public class WifiStateMachine extends StateMachine {
                     /* Handled in parent state */
                     ret = NOT_HANDLED;
                     break;
+                case WifiP2pService.P2P_CONNECTION_CHANGED:
+                    NetworkInfo info = (NetworkInfo) message.obj;
+                    mP2pConnected.set(info.isConnected());
+                    if (mP2pConnected.get()) {
+                        int defaultInterval = mContext.getResources().getInteger(
+                                R.integer.config_wifi_scan_interval_p2p_connected);
+                        long scanIntervalMs = Settings.Global.getLong(mContext.getContentResolver(),
+                                Settings.Global.WIFI_SCAN_INTERVAL_WHEN_P2P_CONNECTED_MS,
+                                defaultInterval);
+                        mWifiNative.setScanInterval((int) scanIntervalMs/1000);
+                    } else if (mWifiConfigStore.getConfiguredNetworks().size() == 0) {
+                        if (DBG) log("Turn on scanning after p2p disconnected");
+                        sendMessageDelayed(obtainMessage(CMD_NO_NETWORKS_PERIODIC_SCAN,
+                                    ++mPeriodicScanToken, 0), mSupplicantScanIntervalMs);
+                    }
                 default:
                     ret = NOT_HANDLED;
             }
