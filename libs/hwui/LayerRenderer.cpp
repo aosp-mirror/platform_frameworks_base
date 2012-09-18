@@ -345,7 +345,7 @@ void LayerRenderer::flushLayer(Layer* layer) {
 
 bool LayerRenderer::copyLayer(Layer* layer, SkBitmap* bitmap) {
     Caches& caches = Caches::getInstance();
-    if (layer && layer->isTextureLayer() && bitmap->width() <= caches.maxTextureSize &&
+    if (layer && bitmap->width() <= caches.maxTextureSize &&
             bitmap->height() <= caches.maxTextureSize) {
 
         GLuint fbo = caches.fboCache.get();
@@ -358,6 +358,7 @@ bool LayerRenderer::copyLayer(Layer* layer, SkBitmap* bitmap) {
 
         GLuint texture;
         GLuint previousFbo;
+        GLuint previousViewport[4];
 
         GLenum format;
         GLenum type;
@@ -387,11 +388,13 @@ bool LayerRenderer::copyLayer(Layer* layer, SkBitmap* bitmap) {
 
         float alpha = layer->getAlpha();
         SkXfermode::Mode mode = layer->getMode();
+        GLuint previousLayerFbo = layer->getFbo();
 
         layer->setAlpha(255, SkXfermode::kSrc_Mode);
         layer->setFbo(fbo);
 
         glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint*) &previousFbo);
+        glGetIntegerv(GL_VIEWPORT, (GLint*) &previousViewport);
         glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
         glGenTextures(1, &texture);
@@ -459,9 +462,11 @@ error:
 
         glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
         layer->setAlpha(alpha, mode);
-        layer->setFbo(0);
+        layer->setFbo(previousLayerFbo);
         glDeleteTextures(1, &texture);
         caches.fboCache.put(fbo);
+        glViewport(previousViewport[0], previousViewport[1],
+                previousViewport[2], previousViewport[3]);
 
         return status;
     }

@@ -484,19 +484,6 @@ private:
     status_t drawShape(float left, float top, const PathTexture* texture, SkPaint* paint);
 
     /**
-     * Renders the rect defined by the specified bounds as a shape.
-     * This will render the rect using a path texture, which is used to render
-     * rects with stroke effects.
-     *
-     * @param left The left coordinate of the rect to draw
-     * @param top The top coordinate of the rect to draw
-     * @param right The right coordinate of the rect to draw
-     * @param bottom The bottom coordinate of the rect to draw
-     * @param p The paint to draw the rect with
-     */
-    status_t drawRectAsShape(float left, float top, float right, float bottom, SkPaint* p);
-
-    /**
      * Draws the specified texture as an alpha bitmap. Alpha bitmaps obey
      * different compositing rules.
      *
@@ -508,17 +495,14 @@ private:
     void drawAlphaBitmap(Texture* texture, float left, float top, SkPaint* paint);
 
     /**
-     * Renders the rect defined by the specified bounds as an anti-aliased rect.
+     * Renders the convex hull defined by the specified path as a strip of polygons.
      *
-     * @param left The left coordinate of the rect to draw
-     * @param top The top coordinate of the rect to draw
-     * @param right The right coordinate of the rect to draw
-     * @param bottom The bottom coordinate of the rect to draw
+     * @param path The hull of the path to draw
      * @param color The color of the rect
-     * @param mode The blending mode to draw the rect
+     * @param mode The blending mode to draw the path
+     * @param isAA True if the drawing should be anti-aliased
      */
-    void drawAARect(float left, float top, float right, float bottom,
-            int color, SkXfermode::Mode mode);
+    void drawConvexPath(const SkPath& path, int color, SkXfermode::Mode mode, bool isAA);
 
     /**
      * Draws a textured rectangle with the specified texture. The specified coordinates
@@ -679,8 +663,8 @@ private:
     void setupDrawWithTexture(bool isAlpha8 = false);
     void setupDrawWithExternalTexture();
     void setupDrawNoTexture();
-    void setupDrawAALine();
-    void setupDrawAARect();
+    void setupDrawAA();
+    void setupDrawVertexShape();
     void setupDrawPoint(float pointSize);
     void setupDrawColor(int color);
     void setupDrawColor(int color, int alpha);

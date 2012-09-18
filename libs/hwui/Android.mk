@@ -21,6 +21,7 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		LayerRenderer.cpp \
 		Matrix.cpp \
 		OpenGLRenderer.cpp \
+		PathRenderer.cpp \
 		Patch.cpp \
 		PatchCache.cpp \
 		PathCache.cpp \
@@ -34,7 +35,7 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		Stencil.cpp \
 		TextureCache.cpp \
 		TextDropShadowCache.cpp
-	
+
 	LOCAL_C_INCLUDES += \
 		$(JNI_H_INCLUDE) \
 		$(LOCAL_PATH)/../../include/utils \

@@ -81,7 +81,7 @@ namespace uirenderer {
 
 #define PROGRAM_IS_SIMPLE_GRADIENT 41
 
-#define PROGRAM_IS_AA_RECT_SHIFT 42
+#define PROGRAM_IS_VERTEX_SHAPE_SHIFT 42
 
 ///////////////////////////////////////////////////////////////////////////////
 // Types
@@ -130,7 +130,7 @@ struct ProgramDescription {
     bool isBitmapNpot;
 
     bool isAA;
-    bool isAARect;
+    bool isVertexShape;
 
     bool hasGradient;
     Gradient gradientType;
@@ -168,7 +168,7 @@ struct ProgramDescription {
         hasTextureTransform = false;
 
         isAA = false;
-        isAARect = false;
+        isVertexShape = false;
 
         modulate = false;
 
@@ -263,7 +263,7 @@ struct ProgramDescription {
         if (hasTextureTransform) key |= programid(0x1) << PROGRAM_HAS_TEXTURE_TRANSFORM_SHIFT;
         if (hasGammaCorrection) key |= programid(0x1) << PROGRAM_HAS_GAMMA_CORRECTION;
         if (isSimpleGradient) key |= programid(0x1) << PROGRAM_IS_SIMPLE_GRADIENT;
-        if (isAARect) key |= programid(0x1) << PROGRAM_IS_AA_RECT_SHIFT;
+        if (isVertexShape) key |= programid(0x1) << PROGRAM_IS_VERTEX_SHAPE_SHIFT;
         return key;
     }
 
