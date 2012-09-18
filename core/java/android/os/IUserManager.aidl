@@ -19,6 +19,7 @@ package android.os;
 
 import android.os.ParcelFileDescriptor;
 import android.content.pm.UserInfo;
+import android.graphics.Bitmap;
 
 /**
  *  {@hide}
@@ -27,8 +28,8 @@ interface IUserManager {
     UserInfo createUser(in String name, int flags);
     boolean removeUser(int userHandle);
     void setUserName(int userHandle, String name);
-    ParcelFileDescriptor setUserIcon(int userHandle);
-    ParcelFileDescriptor getUserIcon(int userHandle);
+    void setUserIcon(int userHandle, in Bitmap icon);
+    Bitmap getUserIcon(int userHandle);
     List<UserInfo> getUsers();
     UserInfo getUserInfo(int userHandle);
     void setGuestEnabled(boolean enable);

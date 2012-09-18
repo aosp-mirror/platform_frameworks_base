@@ -29,6 +29,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.FileUtils;
@@ -188,30 +190,35 @@ public class UserManagerService extends IUserManager.Stub {
                 writeUserLocked(info);
             }
         }
+        sendUserInfoChangedBroadcast(userId);
     }
 
     @Override
-    public ParcelFileDescriptor setUserIcon(int userId) {
+    public void setUserIcon(int userId, Bitmap bitmap) {
         checkManageUsersPermission("update users");
         synchronized (mPackagesLock) {
             UserInfo info = mUsers.get(userId);
-            if (info == null) return null;
-            ParcelFileDescriptor fd = openIconBitmapLocked(info, true /* write */);
-            if (fd != null) {
-                writeUserLocked(info);
-            }
-            return fd;
+            if (info == null) return;
+            writeBitmapLocked(info, bitmap);
+            writeUserLocked(info);
         }
+        sendUserInfoChangedBroadcast(userId);
+    }
+
+    private void sendUserInfoChangedBroadcast(int userId) {
+        Intent changedIntent = new Intent(Intent.ACTION_USER_INFO_CHANGED);
+        changedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
+        changedIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+        mContext.sendBroadcastAsUser(changedIntent, new UserHandle(userId));
     }
 
     @Override
-    public ParcelFileDescriptor getUserIcon(int userId) {
+    public Bitmap getUserIcon(int userId) {
         checkManageUsersPermission("read users");
         synchronized (mPackagesLock) {
             UserInfo info = mUsers.get(userId);
             if (info == null || info.iconPath == null) return null;
-            ParcelFileDescriptor fd = openIconBitmapLocked(info, false /* read */);
-            return fd;
+            return BitmapFactory.decodeFile(info.iconPath);
         }
     }
 
@@ -289,7 +296,7 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
-    private ParcelFileDescriptor openIconBitmapLocked(UserInfo info, boolean toWrite) {
+    private void writeBitmapLocked(UserInfo info, Bitmap bitmap) {
         try {
             File dir = new File(mUsersDir, Integer.toString(info.id));
             File file = new File(dir, USER_PHOTO_FILENAME);
@@ -300,16 +307,18 @@ public class UserManagerService extends IUserManager.Stub {
                         FileUtils.S_IRWXU|FileUtils.S_IRWXG|FileUtils.S_IXOTH,
                         -1, -1);
             }
-            ParcelFileDescriptor fd = ParcelFileDescriptor.open(file,
-                    toWrite ? MODE_CREATE|MODE_READ_WRITE : MODE_READ_WRITE);
-            if (toWrite) {
+            FileOutputStream os;
+            if (bitmap.compress(Bitmap.CompressFormat.PNG, 100, os = new FileOutputStream(file))) {
                 info.iconPath = file.getAbsolutePath();
             }
-            return fd;
+            try {
+                os.close();
+            } catch (IOException ioe) {
+                // What the ... !
+            }
         } catch (FileNotFoundException e) {
             Slog.w(LOG_TAG, "Error setting photo for user ", e);
         }
-        return null;
     }
 
     /**

@@ -2376,6 +2376,16 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_USER_SWITCHED =
             "android.intent.action.USER_SWITCHED";
 
+    /**
+     * Broadcast sent to the system when a user's information changes. Carries an extra
+     * {@link #EXTRA_USER_HANDLE} to indicate which user's information changed.
+     * This is only sent to registered receivers, not manifest receivers. It is sent to the user
+     * whose information has changed.
+     * @hide
+     */
+    public static final String ACTION_USER_INFO_CHANGED =
+            "android.intent.action.USER_INFO_CHANGED";
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Standard intent categories (see addCategory()).
