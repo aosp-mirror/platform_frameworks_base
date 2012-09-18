@@ -1648,7 +1648,8 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        if (mWallpaperTarget != foundW) {
+        if (mWallpaperTarget != foundW
+                && (mLowerWallpaperTarget == null || mLowerWallpaperTarget != foundW)) {
             if (DEBUG_WALLPAPER) {
                 Slog.v(TAG, "New wallpaper target: " + foundW
                         + " oldTarget: " + mWallpaperTarget);
@@ -3391,7 +3392,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // Exiting app
             if (scaleUp) {
                 // noop animation
-                a = new AlphaAnimation(1, 1);
+                a = new AlphaAnimation(1, 0);
                 a.setDuration(duration);
             } else {
                 float scaleW = thumbWidth / displayInfo.appWidth;
@@ -3440,7 +3441,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         "applyAnimation: atoken=" + atoken
                         + " anim=" + a + " nextAppTransition=ANIM_CUSTOM"
                         + " transit=" + transit + " isEntrance=" + enter
-                        + " Callers " + Debug.getCallers(3));
+                        + " Callers=" + Debug.getCallers(3));
             } else if (mNextAppTransitionType == ActivityOptions.ANIM_SCALE_UP) {
                 a = createScaleUpAnimationLocked(transit, enter);
                 initialized = true;
@@ -3448,7 +3449,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         "applyAnimation: atoken=" + atoken
                         + " anim=" + a + " nextAppTransition=ANIM_SCALE_UP"
                         + " transit=" + transit + " isEntrance=" + enter
-                        + " Callers " + Debug.getCallers(3));
+                        + " Callers=" + Debug.getCallers(3));
             } else if (mNextAppTransitionType == ActivityOptions.ANIM_THUMBNAIL_SCALE_UP ||
                     mNextAppTransitionType == ActivityOptions.ANIM_THUMBNAIL_SCALE_DOWN) {
                 boolean scaleUp = (mNextAppTransitionType == ActivityOptions.ANIM_THUMBNAIL_SCALE_UP);
@@ -3459,7 +3460,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     Slog.v(TAG, "applyAnimation: atoken=" + atoken
                             + " anim=" + a + " nextAppTransition=" + animName
                             + " transit=" + transit + " isEntrance=" + enter
-                            + " Callers " + Debug.getCallers(3));
+                            + " Callers=" + Debug.getCallers(3));
                 }
             } else {
                 int animAttr = 0;
@@ -3521,7 +3522,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         + " anim=" + a
                         + " animAttr=0x" + Integer.toHexString(animAttr)
                         + " transit=" + transit + " isEntrance=" + enter
-                        + " Callers " + Debug.getCallers(3));
+                        + " Callers=" + Debug.getCallers(3));
             }
             if (a != null) {
                 if (DEBUG_ANIM) {
@@ -4193,7 +4194,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         synchronized(mWindowMap) {
             if (DEBUG_STARTING_WINDOW) Slog.v(
-                    TAG, "setAppStartingIcon: token=" + token + " pkg=" + pkg
+                    TAG, "setAppStartingWindow: token=" + token + " pkg=" + pkg
                     + " transferFrom=" + transferFrom);
 
             AppWindowToken wtoken = findAppWindowToken(token);
@@ -4225,7 +4226,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             mSkipAppTransitionAnimation = true;
                         }
                         if (DEBUG_STARTING_WINDOW) Slog.v(TAG,
-                                "Moving existing starting from " + ttoken
+                                "Moving existing starting " + startingWindow + " from " + ttoken
                                 + " to " + wtoken);
                         final long origId = Binder.clearCallingIdentity();
 
@@ -4234,6 +4235,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         wtoken.startingData = ttoken.startingData;
                         wtoken.startingView = ttoken.startingView;
                         wtoken.startingDisplayed = ttoken.startingDisplayed;
+                        ttoken.startingDisplayed = false;
                         wtoken.startingWindow = startingWindow;
                         wtoken.reportedVisible = ttoken.reportedVisible;
                         ttoken.startingData = null;
@@ -4243,6 +4245,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         startingWindow.mToken = wtoken;
                         startingWindow.mRootToken = wtoken;
                         startingWindow.mAppToken = wtoken;
+                        startingWindow.mWinAnimator.mAppAnimator = wtoken.mAppAnimator;
+
                         if (DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE || DEBUG_STARTING_WINDOW) {
                             Slog.v(TAG, "Removing starting window: " + startingWindow);
                         }
@@ -4550,9 +4554,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 wtoken.hiddenRequested = !visible;
 
-                if (DEBUG_APP_TRANSITIONS) Slog.v(
-                        TAG, "Setting dummy animation on: " + wtoken);
                 if (!wtoken.startingDisplayed) {
+                    if (DEBUG_APP_TRANSITIONS) Slog.v(
+                            TAG, "Setting dummy animation on: " + wtoken);
                     wtoken.mAppAnimator.setDummyAnimation();
                 }
                 mOpeningApps.remove(wtoken);
@@ -8147,7 +8151,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 updateLayoutToAnimationLocked();
             }
             if (DEBUG_LAYERS) Slog.v(TAG, "Assign layer " + w + ": "
-                    + winAnimator.mAnimLayer);
+                    + "mBase=" + w.mBaseLayer
+                    + " mLayer=" + w.mLayer
+                    + (w.mAppToken == null ?
+                            "" : " mAppLayer=" + w.mAppToken.mAppAnimator.animLayerAdjustment)
+                    + " =mAnimLayer=" + winAnimator.mAnimLayer);
             //System.out.println(
             //    "Assigned layer " + curLayer + " to " + w.mClient.asBinder());
         }
@@ -8539,7 +8547,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 transit = WindowManagerPolicy.TRANSIT_WALLPAPER_CLOSE;
                 if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
                         "New transit away from wallpaper: " + transit);
-            } else if (mWallpaperTarget != null) {
+            } else if (mWallpaperTarget != null && mWallpaperTarget.isVisibleLw()) {
                 // We are transitioning from an activity without
                 // a wallpaper to now showing the wallpaper
                 transit = WindowManagerPolicy.TRANSIT_WALLPAPER_OPEN;
@@ -8596,7 +8604,7 @@ public class WindowManagerService extends IWindowManager.Stub
             for (i=0; i<NN; i++) {
                 AppWindowToken wtoken = mClosingApps.get(i);
                 if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
-                        "Now closing app" + wtoken);
+                        "Now closing app " + wtoken);
                 wtoken.mAppAnimator.clearThumbnail();
                 wtoken.inPendingTransaction = false;
                 wtoken.mAppAnimator.animation = null;

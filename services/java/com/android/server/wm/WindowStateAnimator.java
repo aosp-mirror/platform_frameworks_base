@@ -62,7 +62,7 @@ class WindowStateAnimator {
     final WindowState mWin;
     final WindowStateAnimator mAttachedWinAnimator;
     final WindowAnimator mAnimator;
-    final AppWindowAnimator mAppAnimator;
+    AppWindowAnimator mAppAnimator;
     final Session mSession;
     final WindowManagerPolicy mPolicy;
     final Context mContext;
@@ -1520,7 +1520,7 @@ class WindowStateAnimator {
                     "applyAnimation: win=" + this
                     + " anim=" + anim + " attr=0x" + Integer.toHexString(attr)
                     + " a=" + a
-                    + " mAnimation=" + mAnimation
+                    + " transit=" + transit
                     + " isEntrance=" + isEntrance + " Callers " + Debug.getCallers(3));
             if (a != null) {
                 if (WindowManagerService.DEBUG_ANIM) {
