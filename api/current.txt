@@ -13024,6 +13024,11 @@ package android.net.http {
     field public static final int SSL_UNTRUSTED = 3; // 0x3
   }
 
+  public class X509TrustManagerExtensions {
+    ctor public X509TrustManagerExtensions(javax.net.ssl.X509TrustManager) throws java.lang.IllegalArgumentException;
+    method public java.util.List<java.security.cert.X509Certificate> checkServerTrusted(java.security.cert.X509Certificate[], java.lang.String, java.lang.String) throws java.security.cert.CertificateException;
+  }
+
 }
 
 package android.net.nsd {
