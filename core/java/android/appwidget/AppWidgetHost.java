@@ -19,6 +19,7 @@ package android.appwidget;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import android.app.ActivityThread;
 import android.content.Context;
 import android.os.Handler;
 import android.os.IBinder;
@@ -201,12 +202,15 @@ public class AppWidgetHost {
      * @return a appWidgetId
      * @hide
      */
-    public static int allocateAppWidgetIdForHost(String packageName, int hostId) {
+    public static int allocateAppWidgetIdForSystem(int hostId) {
         checkCallerIsSystem();
         try {
             if (sService == null) {
                 bindService();
             }
+            Context systemContext =
+                    (Context) ActivityThread.currentActivityThread().getSystemContext();
+            String packageName = systemContext.getPackageName();
             return sService.allocateAppWidgetId(packageName, hostId);
         } catch (RemoteException e) {
             throw new RuntimeException("system server dead?", e);
@@ -240,7 +244,7 @@ public class AppWidgetHost {
      * Stop listening to changes for this AppWidget.
      * @hide
      */
-    public static void deleteAppWidgetIdForHost(int appWidgetId) {
+    public static void deleteAppWidgetIdForSystem(int appWidgetId) {
         checkCallerIsSystem();
         try {
             if (sService == null) {
