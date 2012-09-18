@@ -57,9 +57,7 @@ key</a>.</p>
 <p>We appreciate researchers practicing responsible disclosure by emailing us
 with a detailed summary of the issue and keeping the issue confidential while
 users are at risk. In return, we will make sure to keep the researcher informed
-of our progress in issuing a fix and will properly credit the reporter(s) when
-we provide the patch. We will always move swiftly to mitigate or fix an
-externally-reported flaw and provide updates to users. </p>
+of our progress in issuing a fix. </p>
 
 
 <a name="informed" id="informed"></a><h2>How can I stay informed about Android security?</h2>
