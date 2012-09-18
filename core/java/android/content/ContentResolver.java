@@ -1219,9 +1219,16 @@ public abstract class ContentResolver {
     public final void registerContentObserver(Uri uri, boolean notifyForDescendents,
             ContentObserver observer)
     {
+        registerContentObserver(uri, notifyForDescendents, observer, UserHandle.myUserId());
+    }
+
+    /** @hide - designated user version */
+    public final void registerContentObserver(Uri uri, boolean notifyForDescendents,
+            ContentObserver observer, int userHandle)
+    {
         try {
             getContentService().registerContentObserver(uri, notifyForDescendents,
-                    observer.getContentObserver());
+                    observer.getContentObserver(), userHandle);
         } catch (RemoteException e) {
         }
     }
@@ -1276,10 +1283,21 @@ public abstract class ContentResolver {
      * @see #requestSync(android.accounts.Account, String, android.os.Bundle)
      */
     public void notifyChange(Uri uri, ContentObserver observer, boolean syncToNetwork) {
+        notifyChange(uri, observer, syncToNetwork, UserHandle.myUserId());
+    }
+
+    /**
+     * Notify registered observers within the designated user(s) that a row was updated.
+     *
+     * @hide
+     */
+    public void notifyChange(Uri uri, ContentObserver observer, boolean syncToNetwork,
+            int userHandle) {
         try {
             getContentService().notifyChange(
                     uri, observer == null ? null : observer.getContentObserver(),
-                    observer != null && observer.deliverSelfNotifications(), syncToNetwork);
+                    observer != null && observer.deliverSelfNotifications(), syncToNetwork,
+                    userHandle);
         } catch (RemoteException e) {
         }
     }
