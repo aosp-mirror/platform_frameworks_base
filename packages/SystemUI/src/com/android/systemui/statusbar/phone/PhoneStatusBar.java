@@ -177,7 +177,6 @@ public class PhoneStatusBar extends BaseStatusBar {
     // top bar
     View mClearButton;
     View mSettingsButton;
-    RotationToggle mRotationButton;
 
     // carrier/wifi label
     private TextView mCarrierLabel;
@@ -365,8 +364,9 @@ public class PhoneStatusBar extends BaseStatusBar {
         mClearButton.setEnabled(false);
         mDateView = (DateView)mStatusBarWindow.findViewById(R.id.date);
         mSettingsButton = mStatusBarWindow.findViewById(R.id.settings_button);
-        mSettingsButton.setOnClickListener(mSettingsButtonListener);
-        mRotationButton = (RotationToggle) mStatusBarWindow.findViewById(R.id.rotation_lock_button);
+        if (mSettingsButton != null) {
+            mSettingsButton.setOnClickListener(mSettingsButtonListener);
+        }
         
         mScrollView = (ScrollView)mStatusBarWindow.findViewById(R.id.scroll);
         mScrollView.setVerticalScrollBarEnabled(false); // less drawing during pulldowns
@@ -819,7 +819,9 @@ public class PhoneStatusBar extends BaseStatusBar {
             }
         }
 
-        mSettingsButton.setEnabled(isDeviceProvisioned());
+        if (mSettingsButton != null) {
+            mSettingsButton.setEnabled(isDeviceProvisioned());
+        }
     }
 
     @Override
