@@ -11605,8 +11605,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @param layoutDirection the direction of the layout
      *
-     * @see {@link #LAYOUT_DIRECTION_LTR}
-     * @see {@link #LAYOUT_DIRECTION_RTL}
+     * @see #LAYOUT_DIRECTION_LTR
+     * @see #LAYOUT_DIRECTION_RTL
      */
     public void onPaddingChanged(int layoutDirection) {
     }
@@ -14053,8 +14053,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @param layoutDirection The resolved layout direction.
      *
-     * @see {@link #LAYOUT_DIRECTION_LTR}
-     * @see {@link #LAYOUT_DIRECTION_RTL}
+     * @see #LAYOUT_DIRECTION_LTR
+     * @see #LAYOUT_DIRECTION_RTL
      */
     public void onResolveDrawables(int layoutDirection) {
     }
