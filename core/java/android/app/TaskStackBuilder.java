@@ -216,11 +216,7 @@ public class TaskStackBuilder {
                     "No intents added to TaskStackBuilder; cannot startActivities");
         }
 
-        Intent[] intents = mIntents.toArray(new Intent[mIntents.size()]);
-        intents[0].addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
-                Intent.FLAG_ACTIVITY_CLEAR_TASK |
-                Intent.FLAG_ACTIVITY_TASK_ON_HOME);
-        mSourceContext.startActivities(intents, options);
+        mSourceContext.startActivities(getIntents(), options);
     }
 
     /**
@@ -260,11 +256,8 @@ public class TaskStackBuilder {
                     "No intents added to TaskStackBuilder; cannot getPendingIntent");
         }
 
-        Intent[] intents = mIntents.toArray(new Intent[mIntents.size()]);
-        intents[0].addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
-                Intent.FLAG_ACTIVITY_CLEAR_TASK |
-                Intent.FLAG_ACTIVITY_TASK_ON_HOME);
-        return PendingIntent.getActivities(mSourceContext, requestCode, intents, flags, options);
+        return PendingIntent.getActivities(mSourceContext, requestCode, getIntents(),
+                flags, options);
     }
 
     /**
@@ -275,6 +268,15 @@ public class TaskStackBuilder {
      * @return An array containing the intents added to this builder.
      */
     public Intent[] getIntents() {
-        return mIntents.toArray(new Intent[mIntents.size()]);
+        Intent[] intents = new Intent[mIntents.size()];
+        if (intents.length == 0) return intents;
+
+        intents[0] = new Intent(mIntents.get(0)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
+                Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                Intent.FLAG_ACTIVITY_TASK_ON_HOME);
+        for (int i = 1; i < intents.length; i++) {
+            intents[i] = new Intent(mIntents.get(i));
+        }
+        return intents;
     }
 }
