@@ -135,7 +135,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
     private static final int DISCOVER_TIMEOUT_S = 120;
 
     /* Idle time after a peer is gone when the group is torn down */
-    private static final int GROUP_IDLE_TIME_S = 5;
+    private static final int GROUP_IDLE_TIME_S = 20;
 
     private static final int BASE = Protocol.BASE_WIFI_P2P_SERVICE;
 
@@ -1212,13 +1212,10 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                                 mGroup.getNetworkName()));
                     }
 
+                    mWifiNative.setP2pGroupIdle(mGroup.getInterface(), GROUP_IDLE_TIME_S);
                     if (mGroup.isGroupOwner()) {
                         startDhcpServer(mGroup.getInterface());
                     } else {
-                        // Set group idle only for a client on the group interface to speed up
-                        // disconnect when GO is gone. Setting group idle time for a group owner
-                        // causes connectivity issues for new clients
-                        mWifiNative.setP2pGroupIdle(mGroup.getInterface(), GROUP_IDLE_TIME_S);
                         mDhcpStateMachine = DhcpStateMachine.makeDhcpStateMachine(mContext,
                                 P2pStateMachine.this, mGroup.getInterface());
                         mDhcpStateMachine.sendMessage(DhcpStateMachine.CMD_START_DHCP);
@@ -1283,7 +1280,6 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
             //DHCP server has already been started if I am a group owner
             if (mGroup.isGroupOwner()) {
                 setWifiP2pInfoOnGroupFormation(SERVER_ADDRESS);
-                sendP2pConnectionChangedBroadcast();
             }
         }
 
@@ -1306,6 +1302,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     } else {
                         loge("Connect on null device address, ignore");
                     }
+                    sendP2pConnectionChangedBroadcast();
                     break;
                 case WifiMonitor.AP_STA_DISCONNECTED_EVENT:
                     device = (WifiP2pDevice) message.obj;

@@ -37,6 +37,9 @@ public class WifiP2pConfig implements Parcelable {
      */
     public WpsInfo wps;
 
+    /** @hide */
+    public static final int MAX_GROUP_OWNER_INTENT   =   15;
+
     /**
      * This is an integer value between 0 and 15 where 0 indicates the least
      * inclination to be a group owner and 15 indicates the highest inclination
