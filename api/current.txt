@@ -16581,7 +16581,6 @@ package android.os {
 
   public class UserManager {
     method public java.lang.String getUserName();
-    method public boolean supportsMultipleUsers();
   }
 
   public abstract class Vibrator {
