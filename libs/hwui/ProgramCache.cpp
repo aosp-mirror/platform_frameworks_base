@@ -231,10 +231,10 @@ const char* gFS_Fast_SingleGradient[2] = {
 };
 const char* gFS_Fast_SingleModulateGradient[2] = {
         "\nvoid main(void) {\n"
-        "    gl_FragColor " FS_MAIN_DITHER " + color.a * texture2D(gradientSampler, linear);\n"
+        "    gl_FragColor = " FS_MAIN_DITHER " + color.a * texture2D(gradientSampler, linear);\n"
         "}\n\n",
         "\nvoid main(void) {\n"
-        "    gl_FragColor " FS_MAIN_DITHER " + color.a * mix(startColor, endColor, clamp(linear, 0.0, 1.0));\n"
+        "    gl_FragColor = " FS_MAIN_DITHER " + color.a * mix(startColor, endColor, clamp(linear, 0.0, 1.0));\n"
         "}\n\n"
 };
 
