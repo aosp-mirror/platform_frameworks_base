@@ -19,6 +19,8 @@ package android.net.http;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
 import junit.framework.TestCase;
@@ -42,15 +44,29 @@ public class X509TrustManagerExtensionsTest extends TestCase {
         NotATrustManagerImpl ntmi = new NotATrustManagerImpl();
         try {
             X509TrustManagerExtensions tme = new X509TrustManagerExtensions(ntmi);
-        } catch (IllegalArgumentException ignored) {
-            return;
+            fail();
+        } catch (IllegalArgumentException expected) {
         }
-        fail();
     }
 
     public void testGoodCast() throws Exception {
         String defaultType = KeyStore.getDefaultType();
         TrustManagerImpl tmi = new TrustManagerImpl(KeyStore.getInstance(defaultType));
         X509TrustManagerExtensions tme = new X509TrustManagerExtensions(tmi);
+    }
+
+    public void testNormalUseCase() throws Exception {
+        String defaultAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
+        TrustManagerFactory tmf = TrustManagerFactory.getInstance(defaultAlgorithm);
+        String defaultKeystoreType = KeyStore.getDefaultType();
+        tmf.init(KeyStore.getInstance(defaultKeystoreType));
+        TrustManager[] tms = tmf.getTrustManagers();
+        for (TrustManager tm : tms) {
+            if (tm instanceof X509TrustManager) {
+                new X509TrustManagerExtensions((X509TrustManager)tm);
+                return;
+            }
+        }
+        fail();
     }
 }
