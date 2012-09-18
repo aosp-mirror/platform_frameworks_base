@@ -832,7 +832,6 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
             sConfirmSafeVolumeDialog.dismiss();
         }
         sConfirmSafeVolumeDialog = new AlertDialog.Builder(mContext)
-                .setTitle(android.R.string.dialog_alert_title)
                 .setMessage(com.android.internal.R.string.safe_media_volume_warning)
                 .setPositiveButton(com.android.internal.R.string.yes,
                                     new DialogInterface.OnClickListener() {
