@@ -1377,6 +1377,14 @@ public class DateUtils
         String endMonthDayString = isInstant ? null : endDate.format(MONTH_DAY_FORMAT);
         String endYearString = isInstant ? null : endDate.format(YEAR_FORMAT);
 
+        String startStandaloneMonthString = startMonthString;
+        String endStandaloneMonthString = endMonthString;
+        // We need standalone months for these strings in Persian (fa): http://b/6811327
+        if (!numericDate && !abbrevMonth && Locale.getDefault().getLanguage().equals("fa")) {
+            startStandaloneMonthString = startDate.format("%-B");
+            endStandaloneMonthString = endDate.format("%-B");
+        }
+
         if (startMonthNum != endMonthNum) {
             // Same year, different month.
             // Example: "October 28 - November 3"
@@ -1397,7 +1405,8 @@ public class DateUtils
                     startWeekDayString, startMonthString, startMonthDayString,
                     startYearString, startTimeString,
                     endWeekDayString, endMonthString, endMonthDayString,
-                    endYearString, endTimeString);
+                    endYearString, endTimeString,
+                    startStandaloneMonthString, endStandaloneMonthString);
         }
 
         if (startDay != endDay) {
@@ -1416,7 +1425,8 @@ public class DateUtils
                     startWeekDayString, startMonthString, startMonthDayString,
                     startYearString, startTimeString,
                     endWeekDayString, endMonthString, endMonthDayString,
-                    endYearString, endTimeString);
+                    endYearString, endTimeString,
+                    startStandaloneMonthString, endStandaloneMonthString);
         }
 
         // Same start and end day
