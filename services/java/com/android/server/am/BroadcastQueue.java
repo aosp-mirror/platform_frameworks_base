@@ -965,12 +965,12 @@ public class BroadcastQueue {
                 if (!printed) {
                     if (needSep) {
                         pw.println();
-                        needSep = false;
                     }
+                    needSep = true;
                     printed = true;
                     pw.println("  Active broadcasts [" + mQueueName + "]:");
                 }
-                pw.println("  Broadcast #" + i + ":");
+                pw.println("  Active Broadcast " + mQueueName + " #" + i + ":");
                 br.dump(pw, "    ");
             }
             printed = false;
@@ -985,9 +985,10 @@ public class BroadcastQueue {
                         pw.println();
                     }
                     needSep = true;
+                    printed = true;
                     pw.println("  Active ordered broadcasts [" + mQueueName + "]:");
                 }
-                pw.println("  Ordered Broadcast #" + i + ":");
+                pw.println("  Active Ordered Broadcast " + mQueueName + " #" + i + ":");
                 mOrderedBroadcasts.get(i).dump(pw, "    ");
             }
             if (dumpPackage == null || (mPendingBroadcast != null
@@ -1023,7 +1024,8 @@ public class BroadcastQueue {
                 printed = true;
             }
             if (dumpAll) {
-                pw.print("  Historical Broadcast #"); pw.print(i); pw.println(":");
+                pw.print("  Historical Broadcast " + mQueueName + " #");
+                        pw.print(i); pw.println(":");
                 r.dump(pw, "    ");
             } else {
                 if (i >= 50) {
