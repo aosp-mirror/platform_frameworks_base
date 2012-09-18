@@ -435,7 +435,8 @@ public class GradientDrawable extends Drawable {
         final int currFillAlpha = modulateAlpha(prevFillAlpha);
         final int currStrokeAlpha = modulateAlpha(prevStrokeAlpha);
 
-        final boolean haveStroke = currStrokeAlpha > 0 && mStrokePaint.getStrokeWidth() > 0;
+        final boolean haveStroke = currStrokeAlpha > 0 && mStrokePaint != null &&
+                mStrokePaint.getStrokeWidth() > 0;
         final boolean haveFill = currFillAlpha > 0;
         final GradientState st = mGradientState;
         /*  we need a layer iff we're drawing both a fill and stroke, and the
@@ -603,9 +604,9 @@ public class GradientDrawable extends Drawable {
 
     /**
      * <p>Changes this drawbale to use a single color instead of a gradient.</p>
-     * <p><strong>Note</strong>: changing orientation will affect all instances
+     * <p><strong>Note</strong>: changing color will affect all instances
      * of a drawable loaded from a resource. It is recommended to invoke
-     * {@link #mutate()} before changing the orientation.</p>
+     * {@link #mutate()} before changing the color.</p>
      *
      * @param argb The color used to fill the shape
      *
@@ -649,7 +650,7 @@ public class GradientDrawable extends Drawable {
 
     @Override
     public int getOpacity() {
-        return PixelFormat.TRANSLUCENT;
+        return mGradientState.mOpaque ? PixelFormat.OPAQUE : PixelFormat.TRANSLUCENT;
     }
 
     @Override
@@ -1011,7 +1012,10 @@ public class GradientDrawable extends Drawable {
             } else {
                 Log.w("drawable", "Bad element under <shape>: " + name);
             }
+
         }
+
+        mGradientState.computeOpacity();
     }
 
     private static float getFloatOrFraction(TypedArray a, int index, float defaultValue) {
@@ -1079,10 +1083,11 @@ public class GradientDrawable extends Drawable {
         private float mGradientRadius = 0.5f;
         private boolean mUseLevel;
         private boolean mUseLevelForShape;
+        private boolean mOpaque;
 
         GradientState(Orientation orientation, int[] colors) {
             mOrientation = orientation;
-            mColors = colors;
+            setColors(colors);
         }
 
         public GradientState(GradientState state) {
@@ -1120,6 +1125,7 @@ public class GradientDrawable extends Drawable {
             mGradientRadius = state.mGradientRadius;
             mUseLevel = state.mUseLevel;
             mUseLevelForShape = state.mUseLevelForShape;
+            mOpaque = state.mOpaque;
         }
 
         @Override
@@ -1139,6 +1145,7 @@ public class GradientDrawable extends Drawable {
 
         public void setShape(int shape) {
             mShape = shape;
+            computeOpacity();
         }
 
         public void setGradientType(int gradient) {
@@ -1153,24 +1160,60 @@ public class GradientDrawable extends Drawable {
         public void setColors(int[] colors) {
             mHasSolidColor = false;
             mColors = colors;
+            computeOpacity();
         }
         
         public void setSolidColor(int argb) {
             mHasSolidColor = true;
             mSolidColor = argb;
             mColors = null;
+            computeOpacity();
+        }
+
+        private void computeOpacity() {
+            if (mShape != RECTANGLE) {
+                mOpaque = false;
+                return;
+            }
+
+            if (mStrokeWidth > 0 && !isOpaque(mStrokeColor)) {
+                mOpaque = false;
+                return;
+            }
+            
+            if (mHasSolidColor) {
+                mOpaque = isOpaque(mSolidColor);
+                return;
+            }
+
+            if (mColors != null) {
+                for (int i = 0; i < mColors.length; i++) {
+                    if (!isOpaque(mColors[i])) {
+                        mOpaque = false;
+                        return;
+                    }
+                }
+            }
+
+            mOpaque = true;
+        }
+
+        private static boolean isOpaque(int color) {
+            return ((color >> 24) & 0xff) == 0xff;
         }
 
         public void setStroke(int width, int color) {
             mStrokeWidth = width;
             mStrokeColor = color;
+            computeOpacity();
         }
-        
+
         public void setStroke(int width, int color, float dashWidth, float dashGap) {
             mStrokeWidth = width;
             mStrokeColor = color;
             mStrokeDashWidth = dashWidth;
             mStrokeDashGap = dashGap;
+            computeOpacity();
         }
 
         public void setCornerRadius(float radius) {
@@ -1180,14 +1223,14 @@ public class GradientDrawable extends Drawable {
             mRadius = radius;
             mRadiusArray = null;
         }
-        
+
         public void setCornerRadii(float[] radii) {
             mRadiusArray = radii;
             if (radii == null) {
                 mRadius = 0;
             }
         }
-        
+
         public void setSize(int width, int height) {
             mWidth = width;
             mHeight = height;

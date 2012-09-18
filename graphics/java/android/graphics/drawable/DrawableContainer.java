@@ -444,7 +444,6 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         int         mConstantMinimumWidth;
         int         mConstantMinimumHeight;
 
-        boolean     mHaveOpacity = false;
         int         mOpacity;
 
         boolean     mHaveStateful = false;
@@ -493,7 +492,6 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                 mConstantWidth = orig.mConstantWidth;
                 mConstantHeight = orig.mConstantHeight;
                 
-                mHaveOpacity = orig.mHaveOpacity;
                 mOpacity = orig.mOpacity;
                 mHaveStateful = orig.mHaveStateful;
                 mStateful = orig.mStateful;
@@ -528,7 +526,6 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
             mDrawables[pos] = dr;
             mNumChildren++;
             mChildrenChangingConfigurations |= dr.getChangingConfigurations();
-            mHaveOpacity = false;
             mHaveStateful = false;
 
             mConstantPadding = null;
@@ -656,10 +653,6 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         }
 
         public final int getOpacity() {
-            if (mHaveOpacity) {
-                return mOpacity;
-            }
-
             final int N = getChildCount();
             final Drawable[] drawables = mDrawables;
             int op = N > 0 ? drawables[0].getOpacity() : PixelFormat.TRANSPARENT;
@@ -667,7 +660,6 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                 op = Drawable.resolveOpacity(op, drawables[i].getOpacity());
             }
             mOpacity = op;
-            mHaveOpacity = true;
             return op;
         }
 
