@@ -98,7 +98,9 @@ public class MediaFrameworkTest extends Activity implements SurfaceHolder.Callba
         mWakeLock.acquire();
     }
 
-    public void onStop(Bundle icicle) {
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
         mWakeLock.release();
     }
 
