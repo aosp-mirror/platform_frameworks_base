@@ -117,7 +117,7 @@ public class AppWidgetHost {
     private OnClickHandler mOnClickHandler;
 
     public AppWidgetHost(Context context, int hostId) {
-        this(context, hostId, null, Looper.getMainLooper());
+        this(context, hostId, null, context.getMainLooper());
     }
 
     /**
