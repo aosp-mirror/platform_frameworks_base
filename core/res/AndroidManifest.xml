@@ -981,7 +981,7 @@
         android:protectionLevel="dangerous"
         android:label="@string/permlab_getTasks"
         android:description="@string/permdesc_getTasks" />
-    <!-- Allows an application to call APIs that allow it to do interactions
+    <!-- @hide Allows an application to call APIs that allow it to do interactions
          across the users on the device, using singleton services and
          user-targeted broadcasts.  This permission is not available to
          third party applications. -->
@@ -1000,7 +1000,7 @@
         android:label="@string/permlab_interactAcrossUsersFull"
         android:description="@string/permdesc_interactAcrossUsersFull" />
 
-    <!-- Allows an application to call APIs that allow it to query and manage
+    <!-- @hide Allows an application to call APIs that allow it to query and manage
          users on the device. This permission is not available to
          third party applications. -->
     <permission android:name="android.permission.MANAGE_USERS"
@@ -1769,7 +1769,7 @@
         android:description="@string/permdesc_devicePower"
         android:protectionLevel="signature" />
 
-   <!-- Allows low-level access to tun tap driver -->
+   <!-- @hide Allows low-level access to tun tap driver -->
     <permission android:name="android.permission.NET_TUNNELING"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
         android:protectionLevel="signature" />
@@ -1981,7 +1981,7 @@
           android:protectionLevel="signature" />
     <uses-permission android:name="android.intent.category.MASTER_CLEAR.permission.C2D_MESSAGE"/>
 
-    <!-- Package verifier needs to have this permission before the PackageManager will
+    <!-- @hide Package verifier needs to have this permission before the PackageManager will
          trust it to verify packages.
     -->
     <permission android:name="android.permission.PACKAGE_VERIFICATION_AGENT"
