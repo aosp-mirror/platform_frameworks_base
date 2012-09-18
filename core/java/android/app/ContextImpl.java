@@ -129,32 +129,33 @@ class ReceiverRestrictedContext extends ContextWrapper {
     @Override
     public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter,
             String broadcastPermission, Handler scheduler) {
-        throw new ReceiverCallNotAllowedException(
-                "IntentReceiver components are not allowed to register to receive intents");
-        //ex.fillInStackTrace();
-        //Log.e("IntentReceiver", ex.getMessage(), ex);
-        //return mContext.registerReceiver(receiver, filter, broadcastPermission,
-        //        scheduler);
+        if (receiver == null) {
+            // Allow retrieving current sticky broadcast; this is safe since we
+            // aren't actually registering a receiver.
+            return super.registerReceiver(null, filter, broadcastPermission, scheduler);
+        } else {
+            throw new ReceiverCallNotAllowedException(
+                    "BroadcastReceiver components are not allowed to register to receive intents");
+        }
     }
 
     @Override
     public Intent registerReceiverAsUser(BroadcastReceiver receiver, UserHandle user,
             IntentFilter filter, String broadcastPermission, Handler scheduler) {
-        throw new ReceiverCallNotAllowedException(
-                "IntentReceiver components are not allowed to register to receive intents");
-        //ex.fillInStackTrace();
-        //Log.e("IntentReceiver", ex.getMessage(), ex);
-        //return mContext.registerReceiver(receiver, filter, broadcastPermission,
-        //        scheduler);
+        if (receiver == null) {
+            // Allow retrieving current sticky broadcast; this is safe since we
+            // aren't actually registering a receiver.
+            return super.registerReceiverAsUser(null, user, filter, broadcastPermission, scheduler);
+        } else {
+            throw new ReceiverCallNotAllowedException(
+                    "BroadcastReceiver components are not allowed to register to receive intents");
+        }
     }
 
     @Override
     public boolean bindService(Intent service, ServiceConnection conn, int flags) {
         throw new ReceiverCallNotAllowedException(
-                "IntentReceiver components are not allowed to bind to services");
-        //ex.fillInStackTrace();
-        //Log.e("IntentReceiver", ex.getMessage(), ex);
-        //return mContext.bindService(service, interfaceName, conn, flags);
+                "BroadcastReceiver components are not allowed to bind to services");
     }
 }
 
