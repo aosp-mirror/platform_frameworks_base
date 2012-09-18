@@ -18,6 +18,7 @@ package android.os;
 import com.android.internal.R;
 import android.content.Context;
 import android.content.pm.UserInfo;
+import android.graphics.Bitmap;
 import android.util.Log;
 
 import java.util.List;
@@ -40,6 +41,7 @@ public class UserManager {
     /**
      * Returns whether the system supports multiple users.
      * @return true if multiple users can be created, false if it is a single user device.
+     * @hide
      */
     public boolean supportsMultipleUsers() {
         return getMaxSupportedUsers() > 1;
@@ -152,32 +154,30 @@ public class UserManager {
     }
 
     /**
-     * Returns a file descriptor for the user's photo. PNG data can be written into this file.
+     * Sets the user's photo.
      * @param userHandle the user for whom to change the photo.
-     * @return a {@link ParcelFileDescriptor} to which to write the photo.
+     * @param icon the bitmap to set as the photo.
      * @hide
      */
-    public ParcelFileDescriptor setUserIcon(int userHandle) {
+    public void setUserIcon(int userHandle, Bitmap icon) {
         try {
-            return mService.setUserIcon(userHandle);
+            mService.setUserIcon(userHandle, icon);
         } catch (RemoteException re) {
             Log.w(TAG, "Could not set the user icon ", re);
-            return null;
         }
     }
 
     /**
      * Returns a file descriptor for the user's photo. PNG data can be read from this file.
      * @param userHandle the user whose photo we want to read.
-     * @return a {@link ParcelFileDescriptor} from which to read the file, or null if there's no
-     * photo.
+     * @return a {@link Bitmap} of the user's photo, or null if there's no photo.
      * @hide
      */
-    public ParcelFileDescriptor getUserIcon(int userHandle) {
+    public Bitmap getUserIcon(int userHandle) {
         try {
             return mService.getUserIcon(userHandle);
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not set the user icon ", re);
+            Log.w(TAG, "Could not get the user icon ", re);
             return null;
         }
     }
