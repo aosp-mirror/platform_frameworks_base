@@ -98,5 +98,22 @@ public final class ScriptIntrinsicConvolve5x5 extends ScriptIntrinsic {
         forEach(0, null, aout, null);
     }
 
+    /**
+     * Get a KernelID for this intrinsic kernel.
+     *
+     * @return Script.KernelID The KernelID object.
+     */
+    public Script.KernelID getKernelID() {
+        return createKernelID(0, 2, null, null);
+    }
+
+    /**
+     * Get a FieldID for the input field of this intrinsic.
+     *
+     * @return Script.FieldID The FieldID object.
+     */
+    public Script.FieldID getFieldID_Input() {
+        return createFieldID(1, null);
+    }
 }
 
