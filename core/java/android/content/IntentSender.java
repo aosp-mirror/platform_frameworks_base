@@ -205,6 +205,20 @@ public class IntentSender implements Parcelable {
     }
 
     /**
+     * @deprecated Renamed to {@link #getCreatorPackage()}.
+     */
+    @Deprecated
+    public String getTargetPackage() {
+        try {
+            return ActivityManagerNative.getDefault()
+                .getPackageForIntentSender(mTarget);
+        } catch (RemoteException e) {
+            // Should never happen.
+            return null;
+        }
+    }
+
+    /**
      * Return the package name of the application that created this
      * IntentSender, that is the identity under which you will actually be
      * sending the Intent.  The returned string is supplied by the system, so
@@ -213,7 +227,7 @@ public class IntentSender implements Parcelable {
      * @return The package name of the PendingIntent, or null if there is
      * none associated with it.
      */
-    public String getTargetPackage() {
+    public String getCreatorPackage() {
         try {
             return ActivityManagerNative.getDefault()
                 .getPackageForIntentSender(mTarget);
@@ -232,7 +246,7 @@ public class IntentSender implements Parcelable {
      * @return The uid of the PendingIntent, or -1 if there is
      * none associated with it.
      */
-    public int getTargetUid() {
+    public int getCreatorUid() {
         try {
             return ActivityManagerNative.getDefault()
                 .getUidForIntentSender(mTarget);
@@ -253,7 +267,7 @@ public class IntentSender implements Parcelable {
      * @return The user handle of the PendingIntent, or null if there is
      * none associated with it.
      */
-    public UserHandle getTargetUserHandle() {
+    public UserHandle getCreatorUserHandle() {
         try {
             int uid = ActivityManagerNative.getDefault()
                 .getUidForIntentSender(mTarget);

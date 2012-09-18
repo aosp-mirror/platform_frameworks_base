@@ -55,8 +55,9 @@ public class UserManager {
     }
 
     /**
-     * Returns the user name of the user making this call.
-     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
+     * Returns the user name of the user making this call.  This call is only
+     * available to applications on the system image; it requires the
+     * MANAGE_USERS permission.
      * @return the user name
      */
     public String getUserName() {
