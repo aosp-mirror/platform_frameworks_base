@@ -294,8 +294,8 @@ const char* gFS_Main_BlendShaders_Modulate[6] = {
         ";\n",
         ";\n",
         // Modulate
-        " * fragColor.a;\n",
-        " * fragColor.a;\n",
+        " * color.a;\n",
+        " * color.a;\n",
         // Modulate with alpha 8 texture
         " * texture2D(baseSampler, outTexCoords).a;\n",
         " * pow(texture2D(baseSampler, outTexCoords).a, gamma);\n"
@@ -305,8 +305,8 @@ const char* gFS_Main_GradientShader_Modulate[6] = {
         "    fragColor = gradientColor;\n",
         "    fragColor = gradientColor;\n",
         // Modulate
-        "    fragColor = gradientColor * fragColor.a;\n",
-        "    fragColor = gradientColor * fragColor.a;\n",
+        "    fragColor = gradientColor * color.a;\n",
+        "    fragColor = gradientColor * color.a;\n",
         // Modulate with alpha 8 texture
         "    fragColor = gradientColor * texture2D(baseSampler, outTexCoords).a;\n",
         "    fragColor = gradientColor * pow(texture2D(baseSampler, outTexCoords).a, gamma);\n"
@@ -316,8 +316,8 @@ const char* gFS_Main_BitmapShader_Modulate[6] = {
         "    fragColor = bitmapColor;\n",
         "    fragColor = bitmapColor;\n",
         // Modulate
-        "    fragColor = bitmapColor * fragColor.a;\n",
-        "    fragColor = bitmapColor * fragColor.a;\n",
+        "    fragColor = bitmapColor * color.a;\n",
+        "    fragColor = bitmapColor * color.a;\n",
         // Modulate with alpha 8 texture
         "    fragColor = bitmapColor * texture2D(baseSampler, outTexCoords).a;\n",
         "    fragColor = bitmapColor * pow(texture2D(baseSampler, outTexCoords).a, gamma);\n"
