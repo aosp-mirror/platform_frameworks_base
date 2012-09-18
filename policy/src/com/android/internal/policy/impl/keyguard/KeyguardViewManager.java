@@ -90,11 +90,11 @@ public class KeyguardViewManager {
         maybeCreateKeyguardLocked(enableScreenRotation);
         maybeEnableScreenRotation(enableScreenRotation);
 
-        // Disable aspects of the system/status/navigation bars that are not appropriate or
-        // useful for the lockscreen but can be re-shown by dialogs or SHOW_WHEN_LOCKED activities.
-        // Other disabled bits are handled by the KeyguardViewMediator talking directly to the
-        // status bar service.
-        int visFlags = View.STATUS_BAR_DISABLE_BACK | View.STATUS_BAR_DISABLE_HOME;
+        // Disable common aspects of the system/status/navigation bars that are not appropriate or
+        // useful on any keyguard screen but can be re-shown by dialogs or SHOW_WHEN_LOCKED
+        // activities. Other disabled bits are handled by the KeyguardViewMediator talking
+        // directly to the status bar service.
+        final int visFlags = View.STATUS_BAR_DISABLE_HOME;
         if (DEBUG) Log.v(TAG, "KGVM: Set visibility on " + mKeyguardHost + " to " + visFlags);
         mKeyguardHost.setSystemUiVisibility(visFlags);
 
