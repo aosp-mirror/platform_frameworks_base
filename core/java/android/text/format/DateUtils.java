@@ -45,7 +45,6 @@ public class DateUtils
 
     private static final String FAST_FORMAT_HMMSS = "%1$d:%2$02d:%3$02d";
     private static final String FAST_FORMAT_MMSS = "%1$02d:%2$02d";
-    private static final char TIME_PADDING = '0';
     private static final char TIME_SEPARATOR = ':';
 
 
@@ -648,33 +647,36 @@ public class DateUtils
         }
     }
 
+    private static void append(StringBuilder sb, long value, boolean pad, char zeroDigit) {
+        if (value < 10) {
+            if (pad) {
+                sb.append(zeroDigit);
+            }
+        } else {
+            sb.append((char) (zeroDigit + (value / 10)));
+        }
+        sb.append((char) (zeroDigit + (value % 10)));
+    }
+
     /**
-     * Fast formatting of h:mm:ss
+     * Fast formatting of h:mm:ss.
      */
     private static String formatElapsedTime(StringBuilder recycle, String format, long hours,
             long minutes, long seconds) {
         if (FAST_FORMAT_HMMSS.equals(format)) {
+            char zeroDigit = LocaleData.get(Locale.getDefault()).zeroDigit;
+
             StringBuilder sb = recycle;
             if (sb == null) {
                 sb = new StringBuilder(8);
             } else {
                 sb.setLength(0);
             }
-            sb.append(hours);
+            append(sb, hours, false, zeroDigit);
             sb.append(TIME_SEPARATOR);
-            if (minutes < 10) {
-                sb.append(TIME_PADDING);
-            } else {
-                sb.append(toDigitChar(minutes / 10));
-            }
-            sb.append(toDigitChar(minutes % 10));
+            append(sb, minutes, true, zeroDigit);
             sb.append(TIME_SEPARATOR);
-            if (seconds < 10) {
-                sb.append(TIME_PADDING);
-            } else {
-                sb.append(toDigitChar(seconds / 10));
-            }
-            sb.append(toDigitChar(seconds % 10));
+            append(sb, seconds, true, zeroDigit);
             return sb.toString();
         } else {
             return String.format(format, hours, minutes, seconds);
@@ -682,38 +684,26 @@ public class DateUtils
     }
 
     /**
-     * Fast formatting of m:ss
+     * Fast formatting of mm:ss.
      */
     private static String formatElapsedTime(StringBuilder recycle, String format, long minutes,
             long seconds) {
         if (FAST_FORMAT_MMSS.equals(format)) {
+            char zeroDigit = LocaleData.get(Locale.getDefault()).zeroDigit;
+
             StringBuilder sb = recycle;
             if (sb == null) {
                 sb = new StringBuilder(8);
             } else {
                 sb.setLength(0);
             }
-            if (minutes < 10) {
-                sb.append(TIME_PADDING);
-            } else {
-                sb.append(toDigitChar(minutes / 10));
-            }
-            sb.append(toDigitChar(minutes % 10));
+            append(sb, minutes, false, zeroDigit);
             sb.append(TIME_SEPARATOR);
-            if (seconds < 10) {
-                sb.append(TIME_PADDING);
-            } else {
-                sb.append(toDigitChar(seconds / 10));
-            }
-            sb.append(toDigitChar(seconds % 10));
+            append(sb, seconds, true, zeroDigit);
             return sb.toString();
         } else {
             return String.format(format, minutes, seconds);
         }
-    }
-
-    private static char toDigitChar(long digit) {
-        return (char) (digit + '0');
     }
 
     /**

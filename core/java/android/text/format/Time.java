@@ -151,6 +151,8 @@ public class Time {
     private static String sDateTimeFormat;
     private static String sAm;
     private static String sPm;
+
+    // Referenced by native code.
     private static String sDateCommand = "%a %b %e %H:%M:%S %Z %Y";
 
     /**
@@ -673,7 +675,7 @@ public class Time {
             int minutes = (offset % 3600) / 60;
             int hours = offset / 3600;
 
-            return String.format("%s%s%02d:%02d", base, sign, hours, minutes);
+            return String.format(Locale.US, "%s%s%02d:%02d", base, sign, hours, minutes);
         }
     }
 
