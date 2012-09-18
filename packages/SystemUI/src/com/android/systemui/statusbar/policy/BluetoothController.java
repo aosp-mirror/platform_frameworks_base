@@ -96,16 +96,18 @@ public class BluetoothController extends BroadcastReceiver {
     }
 
     private void updateBondedBluetoothDevices() {
-        Set<BluetoothDevice> devices = BluetoothAdapter.getDefaultAdapter().getBondedDevices();
-        if (devices != null) {
-            mBondedDevices.clear();
-            for (BluetoothDevice device : devices) {
-                if (device.getBondState() != BluetoothDevice.BOND_NONE) {
-                    mBondedDevices.add(device);
+        mBondedDevices.clear();
+
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        if (adapter != null) {
+            Set<BluetoothDevice> devices = adapter.getBondedDevices();
+            if (devices != null) {
+                for (BluetoothDevice device : devices) {
+                    if (device.getBondState() != BluetoothDevice.BOND_NONE) {
+                        mBondedDevices.add(device);
+                    }
                 }
             }
-        } else {
-            mBondedDevices.clear();
         }
     }
 
