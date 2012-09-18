@@ -48,9 +48,9 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
-import android.util.LocaleUtil;
 import android.util.Log;
 import android.util.Pool;
 import android.util.Poolable;
@@ -11655,7 +11655,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return true if the Locale uses an RTL script.
      */
     protected static boolean isLayoutDirectionRtl(Locale locale) {
-        return (LAYOUT_DIRECTION_RTL == LocaleUtil.getLayoutDirectionFromLocale(locale));
+        return (LAYOUT_DIRECTION_RTL == TextUtils.getLayoutDirectionFromLocale(locale));
     }
 
     /**
