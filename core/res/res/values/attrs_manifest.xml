@@ -299,8 +299,9 @@
          with this component (by binding to a service for example) those processes will
          always interact with the instance running for user 0.  Enabling
          single user mode forces "exported" of the component to be false, to
-         help avoid introducing multi-user security bugs.  You must hold the
-         permission {@link android.Manifest.permission#INTERACT_ACROSS_USERS} in order
+         help avoid introducing multi-user security bugs.  This feature is only
+         available to applications built in to the system image; you must hold the
+         permission INTERACT_ACROSS_USERS in order
          to use this feature.  This flag can only be used with services,
          receivers, and providers; it can not be used with activities. -->
     <attr name="singleUser" format="boolean" />

@@ -2434,8 +2434,7 @@ public abstract class PackageManager {
      * @param verificationCode either {@link PackageManager#VERIFICATION_ALLOW}
      *            or {@link PackageManager#VERIFICATION_REJECT}.
      * @throws SecurityException if the caller does not have the
-     *            {@link android.Manifest.permission#PACKAGE_VERIFICATION_AGENT}
-     *            permission.
+     *            PACKAGE_VERIFICATION_AGENT permission.
      */
     public abstract void verifyPendingInstall(int id, int verificationCode);
 
@@ -2469,8 +2468,7 @@ public abstract class PackageManager {
      *            bounds value; namely, 0 or
      *            {@link PackageManager#MAXIMUM_VERIFICATION_TIMEOUT}.
      * @throws SecurityException if the caller does not have the
-     *            {@link android.Manifest.permission#PACKAGE_VERIFICATION_AGENT}
-     *            permission.
+     *            PACKAGE_VERIFICATION_AGENT permission.
      */
     public abstract void extendVerificationTimeout(int id,
             int verificationCodeAtTimeout, long millisecondsToDelay);

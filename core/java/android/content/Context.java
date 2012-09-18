@@ -856,8 +856,10 @@ public abstract class Context {
     public abstract void startActivity(Intent intent);
 
     /**
-     * Same as {@link #startActivity(Intent)}, but for a specific user. It requires holding
-     * the {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL} permission.
+     * Version of {@link #startActivity(Intent)} that allows you to specify the
+     * user the activity will be started for.  This is not available to applications
+     * that are not pre-installed on the system image.  Using it requires holding
+     * the INTERACT_ACROSS_USERS_FULL permission.
      * @param intent The description of the activity to start.
      * @param user The UserHandle of the user to start this activity for.
      * @throws ActivityNotFoundException
@@ -895,8 +897,10 @@ public abstract class Context {
     public abstract void startActivity(Intent intent, Bundle options);
 
     /**
-     * Same as {@link #startActivity(Intent, Bundle)}, but for a specific user. It requires holding
-     * the {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL} permission.
+     * Version of {@link #startActivity(Intent, Bundle)} that allows you to specify the
+     * user the activity will be started for.  This is not available to applications
+     * that are not pre-installed on the system image.  Using it requires holding
+     * the INTERACT_ACROSS_USERS_FULL permission.
      * @param intent The description of the activity to start.
      * @param options Additional options for how the Activity should be started.
      * May be null if there are no options.  See {@link android.app.ActivityOptions}
@@ -1118,10 +1122,10 @@ public abstract class Context {
             Bundle initialExtras);
 
     /**
-     * Same as {@link #sendBroadcast(Intent)}, but for a specific user.  This broadcast
-     * can only be sent to receivers that are part of the calling application.  It
-     * requires holding the {@link android.Manifest.permission#INTERACT_ACROSS_USERS}
-     * permission.
+     * Version of {@link #sendBroadcast(Intent)} that allows you to specify the
+     * user the broadcast will be sent to.  This is not available to applications
+     * that are not pre-installed on the system image.  Using it requires holding
+     * the INTERACT_ACROSS_USERS permission.
      * @param intent The intent to broadcast
      * @param user UserHandle to send the intent to.
      * @see #sendBroadcast(Intent)
@@ -1129,10 +1133,10 @@ public abstract class Context {
     public abstract void sendBroadcastAsUser(Intent intent, UserHandle user);
 
     /**
-     * Same as {@link #sendBroadcast(Intent, String)}, but for a specific user.  This broadcast
-     * can only be sent to receivers that are part of the calling application.  It
-     * requires holding the {@link android.Manifest.permission#INTERACT_ACROSS_USERS}
-     * permission.
+     * Version of {@link #sendBroadcast(Intent, String)} that allows you to specify the
+     * user the broadcast will be sent to.  This is not available to applications
+     * that are not pre-installed on the system image.  Using it requires holding
+     * the INTERACT_ACROSS_USERS permission.
      *
      * @param intent The Intent to broadcast; all receivers matching this
      *               Intent will receive the broadcast.
@@ -1147,12 +1151,12 @@ public abstract class Context {
             String receiverPermission);
 
     /**
-     * Same as
-     * {@link #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)},
-     * but for a specific user.  This broadcast
-     * can only be sent to receivers that are part of the calling application.  It
-     * requires holding the {@link android.Manifest.permission#INTERACT_ACROSS_USERS}
-     * permission.
+     * Version of
+     * {@link #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)}
+     * that allows you to specify the
+     * user the broadcast will be sent to.  This is not available to applications
+     * that are not pre-installed on the system image.  Using it requires holding
+     * the INTERACT_ACROSS_USERS permission.
      *
      * <p>See {@link BroadcastReceiver} for more information on Intent broadcasts.
      *
@@ -1261,11 +1265,10 @@ public abstract class Context {
     public abstract void removeStickyBroadcast(Intent intent);
 
     /**
-     * Same as {@link #sendStickyBroadcast(Intent)},
-     * but for a specific user.  This broadcast
-     * can only be sent to receivers that are part of the calling application.  It
-     * requires holding the {@link android.Manifest.permission#INTERACT_ACROSS_USERS}
-     * permission.
+     * Version of {@link #sendStickyBroadcast(Intent)} that allows you to specify the
+     * user the broadcast will be sent to.  This is not available to applications
+     * that are not pre-installed on the system image.  Using it requires holding
+     * the INTERACT_ACROSS_USERS permission.
      *
      * @param intent The Intent to broadcast; all receivers matching this
      * Intent will receive the broadcast, and the Intent will be held to
@@ -1277,12 +1280,12 @@ public abstract class Context {
     public abstract void sendStickyBroadcastAsUser(Intent intent, UserHandle user);
 
     /**
-     * Same as
-     * {@link #sendStickyOrderedBroadcast(Intent, BroadcastReceiver, Handler, int, String, Bundle)
-     * but for a specific user.  This broadcast
-     * can only be sent to receivers that are part of the calling application.  It
-     * requires holding the {@link android.Manifest.permission#INTERACT_ACROSS_USERS}
-     * permission.
+     * Version of
+     * {@link #sendStickyOrderedBroadcast(Intent, BroadcastReceiver, Handler, int, String, Bundle)}
+     * that allows you to specify the
+     * user the broadcast will be sent to.  This is not available to applications
+     * that are not pre-installed on the system image.  Using it requires holding
+     * the INTERACT_ACROSS_USERS permission.
      *
      * <p>See {@link BroadcastReceiver} for more information on Intent broadcasts.
      *
@@ -1309,12 +1312,10 @@ public abstract class Context {
             Bundle initialExtras);
 
     /**
-     * Same as
-     * {@link #sendStickyOrderedBroadcast(Intent, BroadcastReceiver, Handler, int, String, Bundle)
-     * but for a specific user.  This broadcast
-     * can only be sent to receivers that are part of the calling application.  It
-     * requires holding the {@link android.Manifest.permission#INTERACT_ACROSS_USERS}
-     * permission.
+     * Version of {@link #removeStickyBroadcast(Intent)} that allows you to specify the
+     * user the broadcast will be sent to.  This is not available to applications
+     * that are not pre-installed on the system image.  Using it requires holding
+     * the INTERACT_ACROSS_USERS permission.
      *
      * <p>You must hold the {@link android.Manifest.permission#BROADCAST_STICKY}
      * permission in order to use this API.  If you do not hold that

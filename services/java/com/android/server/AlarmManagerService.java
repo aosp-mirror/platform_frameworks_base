@@ -353,7 +353,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
 
         while (it.hasNext()) {
             Alarm alarm = it.next();
-            if (UserHandle.getUserId(alarm.operation.getTargetUid()) == userHandle) {
+            if (UserHandle.getUserId(alarm.operation.getCreatorUid()) == userHandle) {
                 it.remove();
             }
         }
