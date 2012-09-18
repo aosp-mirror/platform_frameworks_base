@@ -135,7 +135,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
     private static final int DISCOVER_TIMEOUT_S = 120;
 
     /* Idle time after a peer is gone when the group is torn down */
-    private static final int GROUP_IDLE_TIME_S = 25;
+    private static final int GROUP_IDLE_TIME_S = 5;
 
     /**
      * Delay between restarts upon failure to setup connection with supplicant
