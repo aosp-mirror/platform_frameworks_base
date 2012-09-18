@@ -58,12 +58,9 @@
     <string name="label_view" msgid="6304565553218192990">"Прагляд"</string>
     <string name="always_use_device" msgid="1450287437017315906">"Выкарыстоўваць налады па змаўчанні для дадзенай USB-прылады"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"Выкарыстоўваць налады па змаўчанні для дадзенай USB-прылады"</string>
-    <!-- no translation found for usb_debugging_title (4513918393387141949) -->
-    <skip />
-    <!-- no translation found for usb_debugging_message (2220143855912376496) -->
-    <skip />
-    <!-- no translation found for usb_debugging_always (303335496705863070) -->
-    <skip />
+    <string name="usb_debugging_title" msgid="4513918393387141949">"Дазволіць адладку USB?"</string>
+    <string name="usb_debugging_message" msgid="2220143855912376496">"Адбiтак ключа RSA на гэтым камп\'ютары:"\n"<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_always" msgid="303335496705863070">"Заўсёды дазваляць з гэтага камп\'ютара"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Павял. на ўвесь экран"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Расцягн. на ўвесь экран"</string>
     <string name="compat_mode_help_header" msgid="7969493989397529910">"Маштабаванне для сумяшчальнасцi"</string>
@@ -161,9 +158,14 @@
     <!-- no translation found for quick_settings_battery_charged_label (8865413079414246081) -->
     <skip />
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
-    <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Яркасць"</string>
-    <!-- no translation found for quick_settings_ime_label (7073463064369468429) -->
+    <!-- no translation found for quick_settings_bluetooth_multiple_devices_label (3912245565613684735) -->
     <skip />
+    <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Яркасць"</string>
+    <!-- no translation found for quick_settings_rotation_unlocked_label (336054930362580584) -->
+    <skip />
+    <!-- no translation found for quick_settings_rotation_locked_label (8058646447242565486) -->
+    <skip />
+    <string name="quick_settings_ime_label" msgid="7073463064369468429">"Метад уводу"</string>
     <string name="quick_settings_location_label" msgid="3292451598267467545">"Месцазнаходжанне выкарыстоўваецца"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Мультымедыйная прылада"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
