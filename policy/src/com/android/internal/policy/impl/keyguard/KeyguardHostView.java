@@ -179,6 +179,7 @@ public class KeyguardHostView extends KeyguardViewBase {
             });
         }
         updateSecurityViews();
+        setSystemUiVisibility(getSystemUiVisibility() | View.STATUS_BAR_DISABLE_BACK);
     }
 
     private void updateSecurityViews() {
@@ -558,9 +559,13 @@ public class KeyguardHostView extends KeyguardViewBase {
             }
         }
 
-        // Discard current runnable if we're switching back to the selector view
+
         if (securityMode == SecurityMode.None) {
+            // Discard current runnable if we're switching back to the selector view
             setOnDismissRunnable(null);
+            setSystemUiVisibility(getSystemUiVisibility() | View.STATUS_BAR_DISABLE_BACK);
+        } else {
+            setSystemUiVisibility(getSystemUiVisibility() & (~View.STATUS_BAR_DISABLE_BACK));
         }
 
         mCurrentSecuritySelection = securityMode;
