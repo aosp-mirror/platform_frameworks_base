@@ -1796,7 +1796,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private final void updateLruProcessInternalLocked(ProcessRecord app,
-            boolean oomAdj, boolean updateActivityTime, int bestPos) {
+            boolean updateActivityTime, int bestPos) {
         // put it on the LRU to keep track of when it should be exited.
         int lrui = mLruProcesses.indexOf(app);
         if (lrui >= 0) mLruProcesses.remove(lrui);
@@ -1853,7 +1853,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (cr.binding != null && cr.binding.service != null
                         && cr.binding.service.app != null
                         && cr.binding.service.app.lruSeq != mLruSeq) {
-                    updateLruProcessInternalLocked(cr.binding.service.app, false,
+                    updateLruProcessInternalLocked(cr.binding.service.app,
                             updateActivityTime, i+1);
                 }
             }
@@ -1861,21 +1861,21 @@ public final class ActivityManagerService extends ActivityManagerNative
         for (int j=app.conProviders.size()-1; j>=0; j--) {
             ContentProviderRecord cpr = app.conProviders.get(j).provider;
             if (cpr.proc != null && cpr.proc.lruSeq != mLruSeq) {
-                updateLruProcessInternalLocked(cpr.proc, false,
+                updateLruProcessInternalLocked(cpr.proc,
                         updateActivityTime, i+1);
             }
-        }
-        
-        //Slog.i(TAG, "Putting proc to front: " + app.processName);
-        if (oomAdj) {
-            updateOomAdjLocked();
         }
     }
 
     final void updateLruProcessLocked(ProcessRecord app,
             boolean oomAdj, boolean updateActivityTime) {
         mLruSeq++;
-        updateLruProcessInternalLocked(app, oomAdj, updateActivityTime, 0);
+        updateLruProcessInternalLocked(app, updateActivityTime, 0);
+
+        //Slog.i(TAG, "Putting proc to front: " + app.processName);
+        if (oomAdj) {
+            updateOomAdjLocked();
+        }
     }
 
     final ProcessRecord getProcessRecordLocked(
@@ -4457,7 +4457,13 @@ public final class ActivityManagerService extends ActivityManagerNative
             enableScreenAfterBoot();
         }
     }
-    
+
+    public final void activityResumed(IBinder token) {
+        final long origId = Binder.clearCallingIdentity();
+        mMainStack.activityResumed(token);
+        Binder.restoreCallingIdentity(origId);
+    }
+
     public final void activityPaused(IBinder token) {
         final long origId = Binder.clearCallingIdentity();
         mMainStack.activityPaused(token, false);

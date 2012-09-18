@@ -1245,7 +1245,7 @@ public final class ActivityThread {
                 case RESUME_ACTIVITY:
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "activityResume");
                     handleResumeActivity((IBinder)msg.obj, true,
-                            msg.arg1 != 0);
+                            msg.arg1 != 0, true);
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
                 case SEND_RESULT:
@@ -2175,7 +2175,8 @@ public final class ActivityThread {
         if (a != null) {
             r.createdConfig = new Configuration(mConfiguration);
             Bundle oldState = r.state;
-            handleResumeActivity(r.token, false, r.isForward);
+            handleResumeActivity(r.token, false, r.isForward,
+                    !r.activity.mFinished && !r.startsNotResumed);
 
             if (!r.activity.mFinished && r.startsNotResumed) {
                 // The activity manager actually wants this one to start out
@@ -2684,7 +2685,8 @@ public final class ActivityThread {
         r.mPendingRemoveWindowManager = null;
     }
 
-    final void handleResumeActivity(IBinder token, boolean clearHide, boolean isForward) {
+    final void handleResumeActivity(IBinder token, boolean clearHide, boolean isForward,
+            boolean reallyResume) {
         // If we are getting ready to gc after going to the background, well
         // we are back active so skip it.
         unscheduleGcIdler();
@@ -2781,6 +2783,14 @@ public final class ActivityThread {
             }
             r.onlyLocalRequest = false;
 
+            // Tell the activity manager we have resumed.
+            if (reallyResume) {
+                try {
+                    ActivityManagerNative.getDefault().activityResumed(token);
+                } catch (RemoteException ex) {
+                }
+            }
+
         } else {
             // If an exception was thrown when trying to resume, then
             // just end this activity.
@@ -2865,7 +2875,7 @@ public final class ActivityThread {
             if (r.isPreHoneycomb()) {
                 QueuedWork.waitToFinish();
             }
-            
+
             // Tell the activity manager we have paused.
             try {
                 ActivityManagerNative.getDefault().activityPaused(token);
