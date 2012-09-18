@@ -228,7 +228,7 @@ public class FocusFinder {
             if (focusable == focused || focusable == root) continue;
 
             // get focus bounds of other view in same coordinate system
-            focusable.getFocusRect(mOtherRect);
+            focusable.getFocusedRect(mOtherRect);
             root.offsetDescendantRectToMyCoords(focusable, mOtherRect);
 
             if (isBetterCandidate(direction, focusedRect, mOtherRect, mBestCandidateRect)) {
