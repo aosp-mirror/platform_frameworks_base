@@ -11432,7 +11432,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     // Add the new results to the existing results, tracking
                     // and de-dupping single user receivers.
                     for (int i=0; i<newReceivers.size(); i++) {
-                        ResolveInfo ri = receivers.get(i);
+                        ResolveInfo ri = newReceivers.get(i);
                         if ((ri.activityInfo.flags&ActivityInfo.FLAG_SINGLE_USER) != 0) {
                             ComponentName cn = new ComponentName(
                                     ri.activityInfo.packageName, ri.activityInfo.name);
