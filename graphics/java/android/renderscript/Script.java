@@ -16,10 +16,105 @@
 
 package android.renderscript;
 
+import android.util.SparseArray;
+
 /**
  *
  **/
 public class Script extends BaseObj {
+
+    /**
+     * KernelID is an identifier for a Script + root function pair. It is used
+     * as an identifier for ScriptGroup creation.
+     *
+     * This class should not be directly created. Instead use the method in the
+     * reflected or intrinsic code "getKernelID_funcname()".
+     *
+     */
+    public static final class KernelID extends BaseObj {
+        Script mScript;
+        int mSlot;
+        int mSig;
+        KernelID(int id, RenderScript rs, Script s, int slot, int sig) {
+            super(id, rs);
+            mScript = s;
+            mSlot = slot;
+            mSig = sig;
+        }
+    }
+
+    private final SparseArray<KernelID> mKIDs = new SparseArray<KernelID>();
+    /**
+     * Only to be used by generated reflected classes.
+     *
+     *
+     * @param slot
+     * @param sig
+     * @param ein
+     * @param eout
+     *
+     * @return KernelID
+     */
+    protected KernelID createKernelID(int slot, int sig, Element ein, Element eout) {
+        KernelID k = mKIDs.get(slot);
+        if (k != null) {
+            return k;
+        }
+
+        int id = mRS.nScriptKernelIDCreate(getID(mRS), slot, sig);
+        if (id == 0) {
+            throw new RSDriverException("Failed to create KernelID");
+        }
+
+        k = new KernelID(id, mRS, this, slot, sig);
+        mKIDs.put(slot, k);
+        return k;
+    }
+
+    /**
+     * FieldID is an identifier for a Script + exported field pair. It is used
+     * as an identifier for ScriptGroup creation.
+     *
+     * This class should not be directly created. Instead use the method in the
+     * reflected or intrinsic code "getFieldID_funcname()".
+     *
+     */
+    public static final class FieldID extends BaseObj {
+        Script mScript;
+        int mSlot;
+        FieldID(int id, RenderScript rs, Script s, int slot) {
+            super(id, rs);
+            mScript = s;
+            mSlot = slot;
+        }
+    }
+
+    private final SparseArray<FieldID> mFIDs = new SparseArray();
+    /**
+     * Only to be used by generated reflected classes.
+     *
+     * @param slot
+     * @param e
+     *
+     * @return FieldID
+     */
+    protected FieldID createFieldID(int slot, Element e) {
+        FieldID f = mFIDs.get(slot);
+        if (f != null) {
+            return f;
+        }
+
+        int id = mRS.nScriptFieldIDCreate(getID(mRS), slot);
+        if (id == 0) {
+            throw new RSDriverException("Failed to create FieldID");
+        }
+
+        f = new FieldID(id, mRS, this, slot);
+        mFIDs.put(slot, f);
+        return f;
+    }
+
+
     /**
      * Only intended for use by generated reflected code.
      *

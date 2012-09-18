@@ -17,91 +17,66 @@
 package android.renderscript;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 
 /**
- * @hide
+ * ScriptGroup creates a groups of scripts which are executed
+ * together based upon upon one execution call as if they were
+ * all part of a single script.  The scripts may be connected
+ * internally or to an external allocation. For the internal
+ * connections the intermediate results are not observable after
+ * the execution of the script.
+ * <p>
+ * The external connections are grouped into inputs and outputs.
+ * All outputs are produced by a script kernel and placed into a
+ * user supplied allocation. Inputs are similar but supply the
+ * input of a kernal. Inputs bounds to a script are set directly
+ * upon the script.
+ *
  **/
-public class ScriptGroup extends BaseObj {
-    Node mNodes[];
-    Connection mConnections[];
-    Node mFirstNode;
+public final class ScriptGroup extends BaseObj {
     IO mOutputs[];
     IO mInputs[];
 
     static class IO {
-        Script mScript;
+        Script.KernelID mKID;
         Allocation mAllocation;
-        String mName;
 
-        IO(Script s) {
-            mScript = s;
-        }
-        IO(Script s, String n) {
-            mScript = s;
-            mName = n;
+        IO(Script.KernelID s) {
+            mKID = s;
         }
     }
 
-    static class Connection {
-        Node mTo[];
-        String mToName[];
-        Node mFrom;
-        Type mAllocationType;
-        Allocation mInternalAllocation;
-
-        Connection(Node out, Type t) {
-            mFrom = out;
+    static class ConnectLine {
+        ConnectLine(Type t, Script.KernelID from, Script.KernelID to) {
+            mFrom = from;
+            mToK = to;
             mAllocationType = t;
         }
 
-        void addTo(Node n, String name) {
-            if (mTo == null) {
-                mTo = new Node[1];
-                mToName = new String[1];
-            } else {
-                Node nt[] = new Node[mTo.length + 1];
-                String ns[] = new String[mTo.length + 1];
-                System.arraycopy(mTo, 0, nt, 0, mTo.length);
-                System.arraycopy(mToName, 0, ns, 0, mTo.length);
-                mTo = nt;
-                mToName = ns;
-            }
-            mTo[mTo.length - 1] = n;
-            mToName[mTo.length - 1] = name;
+        ConnectLine(Type t, Script.KernelID from, Script.FieldID to) {
+            mFrom = from;
+            mToF = to;
+            mAllocationType = t;
         }
+
+        Script.FieldID mToF;
+        Script.KernelID mToK;
+        Script.KernelID mFrom;
+        Type mAllocationType;
     }
 
     static class Node {
         Script mScript;
-        Connection mInput[] = new Connection[8];
-        Connection mOutput[] = new Connection[1];
-        int mInputCount;
-        int mOutputCount;
-        int mDepth;
+        ArrayList<Script.KernelID> mKernels = new ArrayList<Script.KernelID>();
+        ArrayList<ConnectLine> mInputs = new ArrayList<ConnectLine>();
+        ArrayList<ConnectLine> mOutputs = new ArrayList<ConnectLine>();
         boolean mSeen;
 
         Node mNext;
 
         Node(Script s) {
             mScript = s;
-        }
-
-        void addInput(Connection c) {
-            if (mInput.length <= mInputCount) {
-                Connection[] nc = new Connection[mInput.length + 8];
-                System.arraycopy(mInput, 0, nc, 0, mInputCount);
-                mInput = nc;
-            }
-            mInput[mInputCount++] = c;
-        }
-
-        void addOutput(Connection c) {
-            if (mOutput.length <= mOutputCount) {
-                Connection[] nc = new Connection[mOutput.length + 8];
-                System.arraycopy(mOutput, 0, nc, 0, mOutputCount);
-                mOutput = nc;
-            }
-            mOutput[mOutputCount++] = c;
         }
     }
 
@@ -110,276 +85,326 @@ public class ScriptGroup extends BaseObj {
         super(id, rs);
     }
 
-    void init(int nodeCount, int connectionCount) {
-        mNodes = new Node[nodeCount];
-        mConnections = new Connection[connectionCount];
-
-        android.util.Log.v("RSR", "init" + nodeCount + ", " + connectionCount);
-
-        // Count outputs and create array.
-        Node n = mFirstNode;
-        int outputCount = 0;
-        int inputCount = 0;
-        int connectionIndex = 0;
-        int nodeNum = 0;
-        while (n != null) {
-            mNodes[nodeNum++] = n;
-
-            // Look for unattached kernel inputs
-            boolean hasInput = false;
-            for (int ct=0; ct < n.mInput.length; ct++) {
-                if (n.mInput[ct] != null) {
-                    if (n.mInput[ct].mToName == null) {
-                        hasInput = true;
-                    }
-                }
-            }
-            if (!hasInput) {
-                if (mInputs == null) {
-                    mInputs = new IO[1];
-                }
-                if (mInputs.length <= inputCount) {
-                    IO t[] = new IO[mInputs.length + 1];
-                    System.arraycopy(mInputs, 0, t, 0, mInputs.length);
-                    mInputs = t;
-                }
-                mInputs[inputCount++] = new IO(n.mScript);
-            }
-
-            // Look for unattached kernel outputs
-            boolean hasOutput = false;
-            for (int ct=0; ct < n.mOutput.length; ct++) {
-                if (n.mOutput[ct] != null) {
-                    hasOutput = true;
-                }
-            }
-            if (!hasOutput) {
-                if (mOutputs == null) {
-                    mOutputs = new IO[1];
-                }
-                if (mOutputs.length <= outputCount) {
-                    IO t[] = new IO[mOutputs.length + 1];
-                    System.arraycopy(mOutputs, 0, t, 0, mOutputs.length);
-                    mOutputs = t;
-                }
-                mOutputs[outputCount++] = new IO(n.mScript);
-            }
-
-            // Make allocations for internal connections
-            // Since script outputs are unique, use those to avoid duplicates.
-            for (int ct=0; ct < n.mOutput.length; ct++) {
-                android.util.Log.v("RSR", "init out2 " + n.mOutput[ct]);
-                if (n.mOutput[ct] != null) {
-                    Connection t = n.mOutput[ct];
-                    mConnections[connectionIndex++] = t;
-                    t.mInternalAllocation = Allocation.createTyped(mRS, t.mAllocationType);
-                }
-            }
-
-            n = n.mNext;
-        }
-    }
-
-    public void setInput(Script s, Allocation a) {
+    /**
+     * Sets an input of the ScriptGroup. This specifies an
+     * Allocation to be used for the kernels which require a kernel
+     * input and that input is provided external to the group.
+     *
+     * @param s The ID of the kernel where the allocation should be
+     *          connected.
+     * @param a The allocation to connect.
+     */
+    public void setInput(Script.KernelID s, Allocation a) {
         for (int ct=0; ct < mInputs.length; ct++) {
-            if (mInputs[ct].mScript == s) {
+            if (mInputs[ct].mKID == s) {
                 mInputs[ct].mAllocation = a;
+                mRS.nScriptGroupSetInput(getID(mRS), s.getID(mRS), mRS.safeID(a));
                 return;
             }
         }
         throw new RSIllegalArgumentException("Script not found");
     }
 
-    public void setOutput(Script s, Allocation a) {
+    /**
+     * Sets an output of the ScriptGroup. This specifies an
+     * Allocation to be used for the kernels which require a kernel
+     * output and that output is provided external to the group.
+     *
+     * @param s The ID of the kernel where the allocation should be
+     *          connected.
+     * @param a The allocation to connect.
+     */
+    public void setOutput(Script.KernelID s, Allocation a) {
         for (int ct=0; ct < mOutputs.length; ct++) {
-            if (mOutputs[ct].mScript == s) {
+            if (mOutputs[ct].mKID == s) {
                 mOutputs[ct].mAllocation = a;
+                mRS.nScriptGroupSetOutput(getID(mRS), s.getID(mRS), mRS.safeID(a));
                 return;
             }
         }
         throw new RSIllegalArgumentException("Script not found");
     }
 
+    /**
+     * Execute the ScriptGroup.  This will run all the kernels in
+     * the script.  The state of the connecting lines will not be
+     * observable after this operation.
+     */
     public void execute() {
-        android.util.Log.v("RSR", "execute");
-        boolean more = true;
-        int depth = 0;
-        while (more) {
-            more = false;
-            for (int ct=0; ct < mNodes.length; ct++) {
-                if (mNodes[ct].mDepth == depth) {
-                    more = true;
-
-                    Allocation kernelIn = null;
-                    for (int ct2=0; ct2 < mNodes[ct].mInputCount; ct2++) {
-                        android.util.Log.v("RSR", " kin " + ct2 + ", to " + mNodes[ct].mInput[ct2].mTo[0] + ", name " + mNodes[ct].mInput[ct2].mToName[0]);
-                        if (mNodes[ct].mInput[ct2].mToName[0] == null) {
-                            kernelIn = mNodes[ct].mInput[ct2].mInternalAllocation;
-                            break;
-                        }
-                    }
-
-                    Allocation kernelOut= null;
-                    for (int ct2=0; ct2 < mNodes[ct].mOutputCount; ct2++) {
-                        android.util.Log.v("RSR", " kout " + ct2 + ", from " + mNodes[ct].mOutput[ct2].mFrom);
-                        if (mNodes[ct].mOutput[ct2].mFrom != null) {
-                            kernelOut = mNodes[ct].mOutput[ct2].mInternalAllocation;
-                            break;
-                        }
-                    }
-                    if (kernelOut == null) {
-                        for (int ct2=0; ct2 < mOutputs.length; ct2++) {
-                            if (mOutputs[ct2].mScript == mNodes[ct].mScript) {
-                                kernelOut = mOutputs[ct2].mAllocation;
-                                break;
-                            }
-                        }
-                    }
-
-                    android.util.Log.v("RSR", "execute calling " + mNodes[ct] + ", with " + kernelIn);
-                    if (kernelIn != null) {
-                        try {
-
-                            Method m = mNodes[ct].mScript.getClass().getMethod("forEach_root",
-                                          new Class[] { Allocation.class, Allocation.class });
-                            m.invoke(mNodes[ct].mScript, new Object[] {kernelIn, kernelOut} );
-                        } catch (Throwable t) {
-                            android.util.Log.e("RSR", "execute error " + t);
-                        }
-                    } else {
-                        try {
-                            Method m = mNodes[ct].mScript.getClass().getMethod("forEach_root",
-                                          new Class[] { Allocation.class });
-                            m.invoke(mNodes[ct].mScript, new Object[] {kernelOut} );
-                        } catch (Throwable t) {
-                            android.util.Log.e("RSR", "execute error " + t);
-                        }
-                    }
-
-                }
-            }
-            depth ++;
-        }
-
+        mRS.nScriptGroupExecute(getID(mRS));
     }
 
 
-    public static class Builder {
-        RenderScript mRS;
-        Node mFirstNode;
-        int mConnectionCount = 0;
-        int mNodeCount = 0;
+    /**
+     * Create a ScriptGroup. There are two steps to creating a
+     * ScriptGoup.
+     * <p>
+     * First all the Kernels to be used by the group should be
+     * added.  Once this is done the kernels should be connected.
+     * Kernels cannot be added once a connection has been made.
+     * <p>
+     * Second, add connections. There are two forms of connections.
+     * Kernel to Kernel and Kernel to Field. Kernel to Kernel is
+     * higher performance and should be used where possible. The
+     * line of connections cannot form a loop. If a loop is detected
+     * an exception is thrown.
+     * <p>
+     * Once all the connections are made a call to create will
+     * return the ScriptGroup object.
+     *
+     */
+    public static final class Builder {
+        private RenderScript mRS;
+        private ArrayList<Node> mNodes = new ArrayList<Node>();
+        private ArrayList<ConnectLine> mLines = new ArrayList<ConnectLine>();
+        private int mKernelCount;
 
+        /**
+         * Create a builder for generating a ScriptGroup.
+         *
+         *
+         * @param rs The Renderscript context.
+         */
         public Builder(RenderScript rs) {
             mRS = rs;
         }
 
         private void validateRecurse(Node n, int depth) {
             n.mSeen = true;
-            if (depth > n.mDepth) {
-                n.mDepth = depth;
-            }
 
-            android.util.Log.v("RSR", " validateRecurse outputCount " + n.mOutputCount);
-            for (int ct=0; ct < n.mOutputCount; ct++) {
-                for (int ct2=0; ct2 < n.mOutput[ct].mTo.length; ct2++) {
-                    if (n.mOutput[ct].mTo[ct2].mSeen) {
+            //android.util.Log.v("RSR", " validateRecurse outputCount " + n.mOutputs.size());
+            for (int ct=0; ct < n.mOutputs.size(); ct++) {
+                final ConnectLine cl = n.mOutputs.get(ct);
+                if (cl.mToK != null) {
+                    Node tn = findNode(cl.mToK.mScript);
+                    if (tn.mSeen) {
                         throw new RSInvalidStateException("Loops in group not allowed.");
                     }
-                    validateRecurse(n.mOutput[ct].mTo[ct2], depth + 1);
+                    validateRecurse(tn, depth + 1);
+                }
+                if (cl.mToF != null) {
+                    Node tn = findNode(cl.mToF.mScript);
+                    if (tn.mSeen) {
+                        throw new RSInvalidStateException("Loops in group not allowed.");
+                    }
+                    validateRecurse(tn, depth + 1);
                 }
             }
         }
 
         private void validate() {
-            android.util.Log.v("RSR", "validate");
-            Node n = mFirstNode;
-            while (n != null) {
-                n.mSeen = false;
-                n.mDepth = 0;
-                n = n.mNext;
-            }
+            //android.util.Log.v("RSR", "validate");
 
-            n = mFirstNode;
-            while (n != null) {
-                android.util.Log.v("RSR", "validate n= " + n);
-                if ((n.mSeen == false) && (n.mInputCount == 0)) {
-                    android.util.Log.v("RSR", " recursing " + n);
+            for (int ct=0; ct < mNodes.size(); ct++) {
+                for (int ct2=0; ct2 < mNodes.size(); ct2++) {
+                    mNodes.get(ct2).mSeen = false;
+                }
+                Node n = mNodes.get(ct);
+                if (n.mInputs.size() == 0) {
                     validateRecurse(n, 0);
                 }
-                n = n.mNext;
             }
         }
 
-        private Node findScript(Script s) {
-            Node n = mFirstNode;
-            while (n != null) {
-                if (n.mScript == s) {
-                    return n;
+        private Node findNode(Script s) {
+            for (int ct=0; ct < mNodes.size(); ct++) {
+                if (s == mNodes.get(ct).mScript) {
+                    return mNodes.get(ct);
                 }
-                n = n.mNext;
             }
             return null;
         }
 
-        private void addNode(Node n) {
-            n.mNext = mFirstNode;
-            mFirstNode = n;
-        }
-
-        public Builder addConnection(Type t, Script output, Script input, String inputName) {
-            android.util.Log.v("RSR", "addConnection " + t +", " + output + ", " + input);
-
-            // Look for existing output
-            Node nout = findScript(output);
-            Connection c;
-            if (nout == null) {
-                // Make new node
-                android.util.Log.v("RSR", "addConnection new output node");
-                nout = new Node(output);
-                mNodeCount++;
-                c = new Connection(nout, t);
-                mConnectionCount++;
-                nout.addOutput(c);
-                addNode(nout);
-            } else {
-                // Add to existing node
-                android.util.Log.v("RSR", "addConnection reuse output node");
-                if (nout.mOutput[0] != null) {
-                    if (nout.mOutput[0].mFrom.mScript != output) {
-                        throw new RSInvalidStateException("Changed output of existing node");
-                    }
-                    if (nout.mOutput[0].mAllocationType != t) {
-                        throw new RSInvalidStateException("Changed output type of existing node");
+        private Node findNode(Script.KernelID k) {
+            for (int ct=0; ct < mNodes.size(); ct++) {
+                Node n = mNodes.get(ct);
+                for (int ct2=0; ct2 < n.mKernels.size(); ct2++) {
+                    if (k == n.mKernels.get(ct2)) {
+                        return n;
                     }
                 }
-                c = nout.mOutput[0];
             }
-            // At this point we should have a connection attached to a script ouput.
+            return null;
+        }
 
-            // Find input
-            Node nin = findScript(input);
-            if (nin == null) {
-                android.util.Log.v("RSR", "addConnection new input node");
-                nin = new Node(input);
-                mNodeCount++;
-                addNode(nin);
+        /**
+         * Adds a Kernel to the group.
+         *
+         *
+         * @param k The kernel to add.
+         *
+         * @return Builder Returns this.
+         */
+        public Builder addKernel(Script.KernelID k) {
+            if (mLines.size() != 0) {
+                throw new RSInvalidStateException(
+                    "Kernels may not be added once connections exist.");
             }
-            c.addTo(nin, inputName);
-            nin.addInput(c);
+
+            //android.util.Log.v("RSR", "addKernel 1 k=" + k);
+            if (findNode(k) != null) {
+                return this;
+            }
+            //android.util.Log.v("RSR", "addKernel 2 ");
+            mKernelCount++;
+            Node n = findNode(k.mScript);
+            if (n == null) {
+                //android.util.Log.v("RSR", "addKernel 3 ");
+                n = new Node(k.mScript);
+                mNodes.add(n);
+            }
+            n.mKernels.add(k);
+            return this;
+        }
+
+        /**
+         * Adds a connection to the group.
+         *
+         *
+         * @param t The type of the connection. This is used to
+         *          determine the kernel launch sizes on the source side
+         *          of this connection.
+         * @param from The source for the connection.
+         * @param to The destination of the connection.
+         *
+         * @return Builder Returns this
+         */
+        public Builder addConnection(Type t, Script.KernelID from, Script.FieldID to) {
+            //android.util.Log.v("RSR", "addConnection " + t +", " + from + ", " + to);
+
+            Node nf = findNode(from);
+            if (nf == null) {
+                throw new RSInvalidStateException("From kernel not found.");
+            }
+
+            Node nt = findNode(to.mScript);
+            if (nt == null) {
+                throw new RSInvalidStateException("To script not found.");
+            }
+
+            ConnectLine cl = new ConnectLine(t, from, to);
+            mLines.add(new ConnectLine(t, from, to));
+
+            nf.mOutputs.add(cl);
+            nt.mInputs.add(cl);
 
             validate();
             return this;
         }
 
+        /**
+         * Adds a connection to the group.
+         *
+         *
+         * @param t The type of the connection. This is used to
+         *          determine the kernel launch sizes for both sides of
+         *          this connection.
+         * @param from The source for the connection.
+         * @param to The destination of the connection.
+         *
+         * @return Builder Returns this
+         */
+        public Builder addConnection(Type t, Script.KernelID from, Script.KernelID to) {
+            //android.util.Log.v("RSR", "addConnection " + t +", " + from + ", " + to);
+
+            Node nf = findNode(from);
+            if (nf == null) {
+                throw new RSInvalidStateException("From kernel not found.");
+            }
+
+            Node nt = findNode(to);
+            if (nt == null) {
+                throw new RSInvalidStateException("To script not found.");
+            }
+
+            ConnectLine cl = new ConnectLine(t, from, to);
+            mLines.add(new ConnectLine(t, from, to));
+
+            nf.mOutputs.add(cl);
+            nt.mInputs.add(cl);
+
+            validate();
+            return this;
+        }
+
+
+
+        /**
+         * Creates the Script group.
+         *
+         *
+         * @return ScriptGroup The new ScriptGroup
+         */
         public ScriptGroup create() {
-            ScriptGroup sg = new ScriptGroup(0, mRS);
-            sg.mFirstNode = mFirstNode;
-            mFirstNode = null;
+            ArrayList<IO> inputs = new ArrayList<IO>();
+            ArrayList<IO> outputs = new ArrayList<IO>();
 
-            android.util.Log.v("RSR", "create nodes= " + mNodeCount + ", Connections= " + mConnectionCount);
+            int[] kernels = new int[mKernelCount];
+            int idx = 0;
+            for (int ct=0; ct < mNodes.size(); ct++) {
+                Node n = mNodes.get(ct);
+                for (int ct2=0; ct2 < n.mKernels.size(); ct2++) {
+                    final Script.KernelID kid = n.mKernels.get(ct2);
+                    kernels[idx++] = kid.getID(mRS);
 
-            sg.init(mNodeCount, mConnectionCount);
+                    boolean hasInput = false;
+                    boolean hasOutput = false;
+                    for (int ct3=0; ct3 < n.mInputs.size(); ct3++) {
+                        if (n.mInputs.get(ct3).mToK == kid) {
+                            hasInput = true;
+                        }
+                    }
+                    for (int ct3=0; ct3 < n.mOutputs.size(); ct3++) {
+                        if (n.mOutputs.get(ct3).mFrom == kid) {
+                            hasOutput = true;
+                        }
+                    }
+                    if (!hasInput) {
+                        inputs.add(new IO(kid));
+                    }
+                    if (!hasOutput) {
+                        outputs.add(new IO(kid));
+                    }
+
+                }
+            }
+            if (idx != mKernelCount) {
+                throw new RSRuntimeException("Count mismatch, should not happen.");
+            }
+
+            int[] src = new int[mLines.size()];
+            int[] dstk = new int[mLines.size()];
+            int[] dstf = new int[mLines.size()];
+            int[] types = new int[mLines.size()];
+
+            for (int ct=0; ct < mLines.size(); ct++) {
+                ConnectLine cl = mLines.get(ct);
+                src[ct] = cl.mFrom.getID(mRS);
+                if (cl.mToK != null) {
+                    dstk[ct] = cl.mToK.getID(mRS);
+                }
+                if (cl.mToF != null) {
+                    dstf[ct] = cl.mToF.getID(mRS);
+                }
+                types[ct] = cl.mAllocationType.getID(mRS);
+            }
+
+            int id = mRS.nScriptGroupCreate(kernels, src, dstk, dstf, types);
+            if (id == 0) {
+                throw new RSRuntimeException("Object creation error, should not happen.");
+            }
+
+            ScriptGroup sg = new ScriptGroup(id, mRS);
+            sg.mOutputs = new IO[outputs.size()];
+            for (int ct=0; ct < outputs.size(); ct++) {
+                sg.mOutputs[ct] = outputs.get(ct);
+            }
+
+            sg.mInputs = new IO[inputs.size()];
+            for (int ct=0; ct < inputs.size(); ct++) {
+                sg.mInputs[ct] = inputs.get(ct);
+            }
+
             return sg;
         }
 
