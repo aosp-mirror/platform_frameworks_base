@@ -19,6 +19,7 @@ import com.android.internal.R;
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.graphics.Bitmap;
+import android.content.res.Resources;
 import android.util.Log;
 
 import java.util.List;
@@ -232,8 +233,9 @@ public class UserManager {
      * @hide
      * @return a value greater than or equal to 1 
      */
-    public int getMaxSupportedUsers() {
-        return mContext.getResources().getInteger(R.integer.config_multiuserMaximumUsers);
+    public static int getMaxSupportedUsers() {
+        return SystemProperties.getInt("fw.max_users",
+                Resources.getSystem().getInteger(R.integer.config_multiuserMaximumUsers));
     }
 
     /**
