@@ -483,8 +483,6 @@ final class WifiDisplayController implements DumpUtils.Dump {
             mConnectingDevice = mDesiredDevice;
             WifiP2pConfig config = new WifiP2pConfig();
             config.deviceAddress = mConnectingDevice.deviceAddress;
-            // Helps with STA & P2P concurrency
-            config.groupOwnerIntent = WifiP2pConfig.MAX_GO_INTENT;
 
             final WifiDisplay display = createWifiDisplay(mConnectingDevice);
             mHandler.post(new Runnable() {
