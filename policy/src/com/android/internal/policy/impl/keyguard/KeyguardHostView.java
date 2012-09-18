@@ -662,8 +662,12 @@ public class KeyguardHostView extends KeyguardViewBase {
     private void addWidget(int appId) {
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(mContext);
         AppWidgetProviderInfo appWidgetInfo = appWidgetManager.getAppWidgetInfo(appId);
-        AppWidgetHostView view = getAppWidgetHost().createView(mContext, appId, appWidgetInfo);
-        addWidget(view);
+        if (appWidgetInfo != null) {
+            AppWidgetHostView view = getAppWidgetHost().createView(mContext, appId, appWidgetInfo);
+            addWidget(view);
+        } else {
+            Log.w(TAG, "AppWidgetInfo was null; not adding widget id " + appId);
+        }
     }
 
     private void maybePopulateWidgets() {
