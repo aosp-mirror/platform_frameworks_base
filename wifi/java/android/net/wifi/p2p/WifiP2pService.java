@@ -137,18 +137,6 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
     /* Idle time after a peer is gone when the group is torn down */
     private static final int GROUP_IDLE_TIME_S = 5;
 
-    /**
-     * Delay between restarts upon failure to setup connection with supplicant
-     */
-    private static final int P2P_RESTART_INTERVAL_MSECS = 5000;
-
-    /**
-     * Number of times we attempt to restart p2p
-     */
-    private static final int P2P_RESTART_TRIES = 5;
-
-    private int mP2pRestartCount = 0;
-
     private static final int BASE = Protocol.BASE_WIFI_P2P_SERVICE;
 
     /* Delayed message to timeout group creation */
@@ -158,6 +146,9 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
     private static final int PEER_CONNECTION_USER_ACCEPT    =   BASE + 2;
     /* User rejected a peer request */
     private static final int PEER_CONNECTION_USER_REJECT    =   BASE + 3;
+
+    /* Commands to the WifiStateMachine */
+    public static final int P2P_CONNECTION_CHANGED         =   BASE + 11;
 
     private final boolean mP2pSupported;
 
@@ -1597,6 +1588,8 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         intent.putExtra(WifiP2pManager.EXTRA_WIFI_P2P_INFO, new WifiP2pInfo(mWifiP2pInfo));
         intent.putExtra(WifiP2pManager.EXTRA_NETWORK_INFO, new NetworkInfo(mNetworkInfo));
         mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
+        mWifiChannel.sendMessage(WifiP2pService.P2P_CONNECTION_CHANGED,
+                new NetworkInfo(mNetworkInfo));
     }
 
     private void sendP2pPersistentGroupsChangedBroadcast() {
