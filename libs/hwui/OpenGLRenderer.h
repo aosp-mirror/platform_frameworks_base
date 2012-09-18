@@ -255,6 +255,17 @@ public:
 
 protected:
     /**
+     * Computes the projection matrix, initialize the first snapshot
+     * and stores the dimensions of the render target.
+     */
+    void initViewport(int width, int height);
+
+    /**
+     * Call this method after updating a layer during a drawing pass.
+     */
+    void resumeAfterLayer();
+
+    /**
      * Compose the layer defined in the current snapshot with the layer
      * defined by the previous snapshot.
      *
@@ -358,6 +369,13 @@ private:
      * the current snapshot's clipRect member.
      */
     void setScissorFromClip();
+
+    /**
+     * Performs a quick reject but does not affect the scissor. Returns
+     * the transformed rect to test and the current clip.
+     */
+    bool quickRejectNoScissor(float left, float top, float right, float bottom,
+            Rect& transformed, Rect& clip);
 
     /**
      * Creates a new layer stored in the specified snapshot.

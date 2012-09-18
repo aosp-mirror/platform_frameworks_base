@@ -144,6 +144,15 @@ bool OpenGLRenderer::isDeferred() {
 }
 
 void OpenGLRenderer::setViewport(int width, int height) {
+    initViewport(width, height);
+
+    glDisable(GL_DITHER);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+    glEnableVertexAttribArray(Program::kBindingPosition);
+}
+
+void OpenGLRenderer::initViewport(int width, int height) {
     mOrthoMatrix.loadOrtho(0, width, height, 0, -1, 1);
 
     mWidth = width;
@@ -151,11 +160,6 @@ void OpenGLRenderer::setViewport(int width, int height) {
 
     mFirstSnapshot->height = height;
     mFirstSnapshot->viewport.set(0, 0, width, height);
-
-    glDisable(GL_DITHER);
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
-    glEnableVertexAttribArray(Program::kBindingPosition);
 }
 
 int OpenGLRenderer::prepare(bool opaque) {
@@ -251,8 +255,9 @@ void OpenGLRenderer::interrupt() {
 
 void OpenGLRenderer::resume() {
     sp<Snapshot> snapshot = (mSnapshot != NULL) ? mSnapshot : mFirstSnapshot;
-
     glViewport(0, 0, snapshot->viewport.getWidth(), snapshot->viewport.getHeight());
+    glBindFramebuffer(GL_FRAMEBUFFER, snapshot->fbo);
+
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
     mCaches.scissorEnabled = glIsEnabled(GL_SCISSOR_TEST);
@@ -261,12 +266,20 @@ void OpenGLRenderer::resume() {
     dirtyClip();
 
     mCaches.activeTexture(0);
-    glBindFramebuffer(GL_FRAMEBUFFER, snapshot->fbo);
 
     mCaches.blend = true;
     glEnable(GL_BLEND);
     glBlendFunc(mCaches.lastSrcMode, mCaches.lastDstMode);
     glBlendEquation(GL_FUNC_ADD);
+}
+
+void OpenGLRenderer::resumeAfterLayer() {
+    sp<Snapshot> snapshot = (mSnapshot != NULL) ? mSnapshot : mFirstSnapshot;
+    glViewport(0, 0, snapshot->viewport.getWidth(), snapshot->viewport.getHeight());
+    glBindFramebuffer(GL_FRAMEBUFFER, snapshot->fbo);
+
+    mCaches.resetScissor();
+    dirtyClip();
 }
 
 void OpenGLRenderer::detachFunctor(Functor* functor) {
@@ -1079,6 +1092,22 @@ bool OpenGLRenderer::quickRejectNoScissor(float left, float top, float right, fl
     clipRect.snapToPixelBoundaries();
 
     return !clipRect.intersects(r);
+}
+
+bool OpenGLRenderer::quickRejectNoScissor(float left, float top, float right, float bottom,
+        Rect& transformed, Rect& clip) {
+    if (mSnapshot->isIgnored()) {
+        return true;
+    }
+
+    transformed.set(left, top, right, bottom);
+    mSnapshot->transform->mapRect(transformed);
+    transformed.snapToPixelBoundaries();
+
+    clip.set(*mSnapshot->clipRect);
+    clip.snapToPixelBoundaries();
+
+    return !clip.intersects(transformed);
 }
 
 bool OpenGLRenderer::quickReject(float left, float top, float right, float bottom) {
@@ -2574,22 +2603,30 @@ status_t OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {
 }
 
 status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* paint) {
-    if (!layer || quickReject(x, y, x + layer->layer.getWidth(), y + layer->layer.getHeight())) {
+    if (!layer) {
+        return DrawGlInfo::kStatusDone;
+    }
+
+    Rect transformed;
+    Rect clip;
+    const bool rejected = quickRejectNoScissor(x, y,
+            x + layer->layer.getWidth(), y + layer->layer.getHeight(), transformed, clip);
+
+    if (rejected) {
         return DrawGlInfo::kStatusDone;
     }
 
     bool debugLayerUpdate = false;
-
     if (layer->deferredUpdateScheduled && layer->renderer && layer->displayList) {
         OpenGLRenderer* renderer = layer->renderer;
         Rect& dirty = layer->dirtyRect;
 
-        interrupt();
         renderer->setViewport(layer->layer.getWidth(), layer->layer.getHeight());
         renderer->prepareDirty(dirty.left, dirty.top, dirty.right, dirty.bottom, !layer->isBlend());
         renderer->drawDisplayList(layer->displayList, dirty, DisplayList::kReplayFlag_ClipChildren);
         renderer->finish();
-        resume();
+
+        resumeAfterLayer();
 
         dirty.setEmpty();
         layer->deferredUpdateScheduled = false;
@@ -2599,6 +2636,7 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* pain
         debugLayerUpdate = mCaches.debugLayersUpdates;
     }
 
+    mCaches.setScissorEnabled(!clip.contains(transformed));
     mCaches.activeTexture(0);
 
     if (CC_LIKELY(!layer->region.isEmpty())) {
