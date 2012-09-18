@@ -37,7 +37,6 @@ import android.util.DisplayMetrics;
 import android.util.StateSet;
 import android.util.TypedValue;
 import android.util.Xml;
-import android.view.View;
 
 import java.io.IOException;
 import java.io.InputStream;
