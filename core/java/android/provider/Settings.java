@@ -5614,6 +5614,13 @@ public final class Settings {
                "wifi_supplicant_scan_interval_ms";
 
        /**
+        * The interval in milliseconds to scan at supplicant when p2p is connected
+        * @hide
+        */
+       public static final String WIFI_SCAN_INTERVAL_WHEN_P2P_CONNECTED_MS =
+               "wifi_scan_interval_p2p_connected_ms";
+
+       /**
         * Whether the Wi-Fi watchdog is enabled.
         */
        public static final String WIFI_WATCHDOG_ON = "wifi_watchdog_on";
