@@ -733,13 +733,17 @@ public abstract class HardwareRenderer {
          */
         void checkEglErrors() {
             if (isEnabled()) {
-                int error = sEgl.eglGetError();
-                if (error != EGL_SUCCESS) {
-                    // something bad has happened revert to
-                    // normal rendering.
-                    Log.w(LOG_TAG, "EGL error: " + GLUtils.getEGLErrorString(error));
-                    fallback(error != EGL11.EGL_CONTEXT_LOST);
-                }
+                checkEglErrorsForced();
+            }
+        }
+
+        private void checkEglErrorsForced() {
+            int error = sEgl.eglGetError();
+            if (error != EGL_SUCCESS) {
+                // something bad has happened revert to
+                // normal rendering.
+                Log.w(LOG_TAG, "EGL error: " + GLUtils.getEGLErrorString(error));
+                fallback(error != EGL11.EGL_CONTEXT_LOST);
             }
         }
 
@@ -812,7 +816,9 @@ public abstract class HardwareRenderer {
                         throw new RuntimeException("eglInitialize failed " +
                                 GLUtils.getEGLErrorString(sEgl.eglGetError()));
                     }
-        
+
+                    checkEglErrorsForced();
+
                     sEglConfig = chooseEglConfig();
                     if (sEglConfig == null) {
                         // We tried to use EGL_SWAP_BEHAVIOR_PRESERVED_BIT, try again without
