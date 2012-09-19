@@ -54,7 +54,6 @@
                 android:src="@drawable/ic_sysbar_back"
                 systemui:keyCode="4"
                 android:layout_weight="0"
-                android:scaleType="center"
                 android:contentDescription="@string/accessibility_back"
                 />
             <View 
@@ -241,7 +240,6 @@
                 android:layout_height="80dp"
                 android:layout_width="match_parent"
                 android:src="@drawable/ic_sysbar_back_land"
-                android:scaleType="center"
                 systemui:keyCode="4"
                 android:layout_weight="0"
                 android:contentDescription="@string/accessibility_back"

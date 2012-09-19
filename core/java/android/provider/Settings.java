@@ -2661,6 +2661,12 @@ public final class Settings {
         public static final String VOLUME_KEY_ADJUST_SOUND = "volume_key_adjust_sound";
 
         /**
+         * Navigation bar height
+         * @hide
+         */
+        public static final String NAVIGATION_BAR_HEIGHT = "navigation_bar_height";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
