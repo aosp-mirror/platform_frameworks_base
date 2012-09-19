@@ -16,14 +16,13 @@
 
 package android.net.http;
 
+import org.apache.harmony.xnet.provider.jsse.TrustManagerImpl;
+
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.security.KeyManagementException;
 import java.util.List;
 
 import javax.net.ssl.X509TrustManager;
-
-import org.apache.harmony.xnet.provider.jsse.TrustManagerImpl;
 
 /**
  * X509TrustManager wrapper exposing Android-added features.
