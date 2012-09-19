@@ -1995,6 +1995,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             loadIntegerSetting(stmt, Settings.Global.WIFI_MAX_DHCP_RETRY_COUNT,
                     R.integer.def_max_dhcp_retries);
 
+            loadBooleanSetting(stmt, Settings.Global.WIFI_DISPLAY_ON,
+                    R.bool.def_wifi_display_on);
+
             // --- New global settings start here
         } finally {
             if (stmt != null) stmt.close();

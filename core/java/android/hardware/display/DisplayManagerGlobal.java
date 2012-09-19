@@ -281,6 +281,31 @@ public final class DisplayManagerGlobal {
         }
     }
 
+    public void renameWifiDisplay(String deviceAddress, String alias) {
+        if (deviceAddress == null) {
+            throw new IllegalArgumentException("deviceAddress must not be null");
+        }
+
+        try {
+            mDm.renameWifiDisplay(deviceAddress, alias);
+        } catch (RemoteException ex) {
+            Log.e(TAG, "Failed to rename Wifi display " + deviceAddress
+                    + " with alias " + alias + ".", ex);
+        }
+    }
+
+    public void forgetWifiDisplay(String deviceAddress) {
+        if (deviceAddress == null) {
+            throw new IllegalArgumentException("deviceAddress must not be null");
+        }
+
+        try {
+            mDm.forgetWifiDisplay(deviceAddress);
+        } catch (RemoteException ex) {
+            Log.e(TAG, "Failed to forget Wifi display.", ex);
+        }
+    }
+
     public WifiDisplayStatus getWifiDisplayStatus() {
         try {
             return mDm.getWifiDisplayStatus();

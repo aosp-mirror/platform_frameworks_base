@@ -160,6 +160,10 @@ public final class DisplayManager {
     /**
      * Connects to a Wifi display.
      * The results are sent as a {@link #ACTION_WIFI_DISPLAY_STATUS_CHANGED} broadcast.
+     * <p>
+     * Automatically remembers the display after a successful connection, if not
+     * already remembered.
+     * </p>
      *
      * @param deviceAddress The MAC address of the device to which we should connect.
      * @hide
@@ -175,6 +179,36 @@ public final class DisplayManager {
      */
     public void disconnectWifiDisplay() {
         mGlobal.disconnectWifiDisplay();
+    }
+
+    /**
+     * Renames a Wifi display.
+     * <p>
+     * The display must already be remembered for this call to succeed.  In other words,
+     * we must already have successfully connected to the display at least once and then
+     * not forgotten it.
+     * </p>
+     *
+     * @param deviceAddress The MAC address of the device to rename.
+     * @param alias The alias name by which to remember the device, or null
+     * or empty if no alias should be used.
+     * @hide
+     */
+    public void renameWifiDisplay(String deviceAddress, String alias) {
+        mGlobal.renameWifiDisplay(deviceAddress, alias);
+    }
+
+    /**
+     * Forgets a previously remembered Wifi display.
+     * <p>
+     * Automatically disconnects from the display if currently connected to it.
+     * </p>
+     *
+     * @param deviceAddress The MAC address of the device to forget.
+     * @hide
+     */
+    public void forgetWifiDisplay(String deviceAddress) {
+        mGlobal.forgetWifiDisplay(deviceAddress);
     }
 
     /**
