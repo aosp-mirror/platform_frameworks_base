@@ -253,6 +253,9 @@ public final class ActivityManagerService extends ActivityManagerNative
     // giving up on them and unfreezing the screen.
     static final int USER_SWITCH_TIMEOUT = 2*1000;
 
+    // Maximum number of users we allow to be running at a time.
+    static final int MAX_RUNNING_USERS = 3;
+
     static final int MY_PID = Process.myPid();
     
     static final String[] EMPTY_STRING_ARRAY = new String[0];
@@ -14123,6 +14126,33 @@ public final class ActivityManagerService extends ActivityManagerNative
                         android.Manifest.permission.RECEIVE_BOOT_COMPLETED,
                         false, false, MY_PID, Process.SYSTEM_UID, userId);
             }
+            int num = mUserLru.size();
+            int i = 0;
+            while (num > MAX_RUNNING_USERS && i < mUserLru.size()) {
+                Integer oldUserId = mUserLru.get(i);
+                UserStartedState oldUss = mStartedUsers.get(oldUserId);
+                if (oldUss == null) {
+                    // Shouldn't happen, but be sane if it does.
+                    mUserLru.remove(i);
+                    num--;
+                    continue;
+                }
+                if (oldUss.mState == UserStartedState.STATE_STOPPING) {
+                    // This user is already stopping, doesn't count.
+                    num--;
+                    i++;
+                    continue;
+                }
+                if (oldUserId == UserHandle.USER_OWNER || oldUserId == mCurrentUserId) {
+                    // Owner and current can't be stopped, but count as running.
+                    i++;
+                    continue;
+                }
+                // This is a user to be stopped.
+                stopUserLocked(oldUserId, null);
+                num--;
+                i++;
+            }
         }
     }
 
@@ -14141,52 +14171,56 @@ public final class ActivityManagerService extends ActivityManagerNative
             throw new IllegalArgumentException("Can't stop primary user " + userId);
         }
         synchronized (this) {
-            if (mCurrentUserId == userId) {
-                return ActivityManager.USER_OP_IS_CURRENT;
-            }
+            return stopUserLocked(userId, callback);
+        }
+    }
 
-            final UserStartedState uss = mStartedUsers.get(userId);
-            if (uss == null) {
-                // User is not started, nothing to do...  but we do need to
-                // callback if requested.
-                if (callback != null) {
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                callback.userStopped(userId);
-                            } catch (RemoteException e) {
-                            }
-                        }
-                    });
-                }
-                return ActivityManager.USER_OP_SUCCESS;
-            }
+    private int stopUserLocked(final int userId, final IStopUserCallback callback) {
+        if (mCurrentUserId == userId) {
+            return ActivityManager.USER_OP_IS_CURRENT;
+        }
 
+        final UserStartedState uss = mStartedUsers.get(userId);
+        if (uss == null) {
+            // User is not started, nothing to do...  but we do need to
+            // callback if requested.
             if (callback != null) {
-                uss.mStopCallbacks.add(callback);
-            }
-
-            if (uss.mState != UserStartedState.STATE_STOPPING) {
-                uss.mState = UserStartedState.STATE_STOPPING;
-
-                long ident = Binder.clearCallingIdentity();
-                try {
-                    // Inform of user switch
-                    Intent intent = new Intent(Intent.ACTION_SHUTDOWN);
-                    final IIntentReceiver resultReceiver = new IIntentReceiver.Stub() {
-                        @Override
-                        public void performReceive(Intent intent, int resultCode, String data,
-                                Bundle extras, boolean ordered, boolean sticky, int sendingUser) {
-                            finishUserStop(uss);
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            callback.userStopped(userId);
+                        } catch (RemoteException e) {
                         }
-                    };
-                    broadcastIntentLocked(null, null, intent,
-                            null, resultReceiver, 0, null, null, null,
-                            true, false, MY_PID, Process.SYSTEM_UID, userId);
-                } finally {
-                    Binder.restoreCallingIdentity(ident);
-                }
+                    }
+                });
+            }
+            return ActivityManager.USER_OP_SUCCESS;
+        }
+
+        if (callback != null) {
+            uss.mStopCallbacks.add(callback);
+        }
+
+        if (uss.mState != UserStartedState.STATE_STOPPING) {
+            uss.mState = UserStartedState.STATE_STOPPING;
+
+            long ident = Binder.clearCallingIdentity();
+            try {
+                // Inform of user switch
+                Intent intent = new Intent(Intent.ACTION_SHUTDOWN);
+                final IIntentReceiver resultReceiver = new IIntentReceiver.Stub() {
+                    @Override
+                    public void performReceive(Intent intent, int resultCode, String data,
+                            Bundle extras, boolean ordered, boolean sticky, int sendingUser) {
+                        finishUserStop(uss);
+                    }
+                };
+                broadcastIntentLocked(null, null, intent,
+                        null, resultReceiver, 0, null, null, null,
+                        true, false, MY_PID, Process.SYSTEM_UID, userId);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
             }
         }
 
@@ -14206,6 +14240,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 stopped = true;
                 // User can no longer run.
                 mStartedUsers.remove(userId);
+                mUserLru.remove(Integer.valueOf(userId));
 
                 // Clean up all state and processes associated with the user.
                 // Kill all the processes for the user.
