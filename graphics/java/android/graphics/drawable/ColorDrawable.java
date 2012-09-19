@@ -43,7 +43,6 @@ public class ColorDrawable extends Drawable {
      */
     public ColorDrawable() {
         this(null);
-        mMutated = true;
     }
 
     /**
@@ -54,7 +53,6 @@ public class ColorDrawable extends Drawable {
     public ColorDrawable(int color) {
         this(null);
         setColor(color);
-        mMutated = true;
     }
 
     private ColorDrawable(ColorState state) {
