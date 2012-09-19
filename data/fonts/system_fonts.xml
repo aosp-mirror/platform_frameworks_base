@@ -46,6 +46,16 @@
 
     <family>
         <nameset>
+            <name>sans-serif-thin</name>
+        </nameset>
+        <fileset>
+            <file>Roboto-Thin.ttf</file>
+            <file>Roboto-ThinItalic.ttf</file>
+        </fileset>
+    </family>
+
+    <family>
+        <nameset>
             <name>sans-serif-condensed</name>
         </nameset>
         <fileset>

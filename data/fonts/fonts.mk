@@ -26,6 +26,8 @@ PRODUCT_PACKAGES := \
     Roboto-BoldItalic.ttf \
     Roboto-Light.ttf \
     Roboto-LightItalic.ttf \
+    Roboto-Thin.ttf \
+    Roboto-ThinItalic.ttf \
     RobotoCondensed-Regular.ttf \
     RobotoCondensed-Bold.ttf \
     RobotoCondensed-Italic.ttf \
