@@ -25,76 +25,76 @@ import android.os.RemoteCallback;
  * {@hide}
  */
 interface IDevicePolicyManager {
-    void setPasswordQuality(in ComponentName who, int quality);
-    int getPasswordQuality(in ComponentName who);
+    void setPasswordQuality(in ComponentName who, int quality, int userHandle);
+    int getPasswordQuality(in ComponentName who, int userHandle);
 
-    void setPasswordMinimumLength(in ComponentName who, int length);
-    int getPasswordMinimumLength(in ComponentName who);
+    void setPasswordMinimumLength(in ComponentName who, int length, int userHandle);
+    int getPasswordMinimumLength(in ComponentName who, int userHandle);
 
-    void setPasswordMinimumUpperCase(in ComponentName who, int length);
-    int getPasswordMinimumUpperCase(in ComponentName who);
+    void setPasswordMinimumUpperCase(in ComponentName who, int length, int userHandle);
+    int getPasswordMinimumUpperCase(in ComponentName who, int userHandle);
 
-    void setPasswordMinimumLowerCase(in ComponentName who, int length);
-    int getPasswordMinimumLowerCase(in ComponentName who);
+    void setPasswordMinimumLowerCase(in ComponentName who, int length, int userHandle);
+    int getPasswordMinimumLowerCase(in ComponentName who, int userHandle);
 
-    void setPasswordMinimumLetters(in ComponentName who, int length);
-    int getPasswordMinimumLetters(in ComponentName who);
+    void setPasswordMinimumLetters(in ComponentName who, int length, int userHandle);
+    int getPasswordMinimumLetters(in ComponentName who, int userHandle);
 
-    void setPasswordMinimumNumeric(in ComponentName who, int length);
-    int getPasswordMinimumNumeric(in ComponentName who);
+    void setPasswordMinimumNumeric(in ComponentName who, int length, int userHandle);
+    int getPasswordMinimumNumeric(in ComponentName who, int userHandle);
 
-    void setPasswordMinimumSymbols(in ComponentName who, int length);
-    int getPasswordMinimumSymbols(in ComponentName who);
+    void setPasswordMinimumSymbols(in ComponentName who, int length, int userHandle);
+    int getPasswordMinimumSymbols(in ComponentName who, int userHandle);
 
-    void setPasswordMinimumNonLetter(in ComponentName who, int length);
-    int getPasswordMinimumNonLetter(in ComponentName who);
+    void setPasswordMinimumNonLetter(in ComponentName who, int length, int userHandle);
+    int getPasswordMinimumNonLetter(in ComponentName who, int userHandle);
 
-    void setPasswordHistoryLength(in ComponentName who, int length);
-    int getPasswordHistoryLength(in ComponentName who);
+    void setPasswordHistoryLength(in ComponentName who, int length, int userHandle);
+    int getPasswordHistoryLength(in ComponentName who, int userHandle);
 
-    void setPasswordExpirationTimeout(in ComponentName who, long expiration);
-    long getPasswordExpirationTimeout(in ComponentName who);
+    void setPasswordExpirationTimeout(in ComponentName who, long expiration, int userHandle);
+    long getPasswordExpirationTimeout(in ComponentName who, int userHandle);
 
-    long getPasswordExpiration(in ComponentName who);
+    long getPasswordExpiration(in ComponentName who, int userHandle);
 
-    boolean isActivePasswordSufficient();
-    int getCurrentFailedPasswordAttempts();
+    boolean isActivePasswordSufficient(int userHandle);
+    int getCurrentFailedPasswordAttempts(int userHandle);
 
-    void setMaximumFailedPasswordsForWipe(in ComponentName admin, int num);
-    int getMaximumFailedPasswordsForWipe(in ComponentName admin);
+    void setMaximumFailedPasswordsForWipe(in ComponentName admin, int num, int userHandle);
+    int getMaximumFailedPasswordsForWipe(in ComponentName admin, int userHandle);
 
-    boolean resetPassword(String password, int flags);
+    boolean resetPassword(String password, int flags, int userHandle);
 
-    void setMaximumTimeToLock(in ComponentName who, long timeMs);
-    long getMaximumTimeToLock(in ComponentName who);
+    void setMaximumTimeToLock(in ComponentName who, long timeMs, int userHandle);
+    long getMaximumTimeToLock(in ComponentName who, int userHandle);
 
     void lockNow();
 
-    void wipeData(int flags);
+    void wipeData(int flags, int userHandle);
 
-    ComponentName setGlobalProxy(in ComponentName admin, String proxySpec, String exclusionList);
-    ComponentName getGlobalProxyAdmin();
+    ComponentName setGlobalProxy(in ComponentName admin, String proxySpec, String exclusionList, int userHandle);
+    ComponentName getGlobalProxyAdmin(int userHandle);
 
-    int setStorageEncryption(in ComponentName who, boolean encrypt);
-    boolean getStorageEncryption(in ComponentName who);
-    int getStorageEncryptionStatus();
+    int setStorageEncryption(in ComponentName who, boolean encrypt, int userHandle);
+    boolean getStorageEncryption(in ComponentName who, int userHandle);
+    int getStorageEncryptionStatus(int userHandle);
 
-    void setCameraDisabled(in ComponentName who, boolean disabled);
-    boolean getCameraDisabled(in ComponentName who);
+    void setCameraDisabled(in ComponentName who, boolean disabled, int userHandle);
+    boolean getCameraDisabled(in ComponentName who, int userHandle);
 
-    void setKeyguardWidgetsDisabled(in ComponentName who, int which);
-    int getKeyguardWidgetsDisabled(in ComponentName who);
+    void setKeyguardWidgetsDisabled(in ComponentName who, int which, int userHandle);
+    int getKeyguardWidgetsDisabled(in ComponentName who, int userHandle);
 
-    void setActiveAdmin(in ComponentName policyReceiver, boolean refreshing);
-    boolean isAdminActive(in ComponentName policyReceiver);
-    List<ComponentName> getActiveAdmins();
-    boolean packageHasActiveAdmins(String packageName);
-    void getRemoveWarning(in ComponentName policyReceiver, in RemoteCallback result);
-    void removeActiveAdmin(in ComponentName policyReceiver);
-    boolean hasGrantedPolicy(in ComponentName policyReceiver, int usesPolicy);
+    void setActiveAdmin(in ComponentName policyReceiver, boolean refreshing, int userHandle);
+    boolean isAdminActive(in ComponentName policyReceiver, int userHandle);
+    List<ComponentName> getActiveAdmins(int userHandle);
+    boolean packageHasActiveAdmins(String packageName, int userHandle);
+    void getRemoveWarning(in ComponentName policyReceiver, in RemoteCallback result, int userHandle);
+    void removeActiveAdmin(in ComponentName policyReceiver, int userHandle);
+    boolean hasGrantedPolicy(in ComponentName policyReceiver, int usesPolicy, int userHandle);
 
     void setActivePasswordState(int quality, int length, int letters, int uppercase, int lowercase,
-        int numbers, int symbols, int nonletter);
-    void reportFailedPasswordAttempt();
-    void reportSuccessfulPasswordAttempt();
+        int numbers, int symbols, int nonletter, int userHandle);
+    void reportFailedPasswordAttempt(int userHandle);
+    void reportSuccessfulPasswordAttempt(int userHandle);
 }
