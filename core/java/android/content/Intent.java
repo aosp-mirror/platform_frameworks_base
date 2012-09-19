@@ -1254,7 +1254,9 @@ public class Intent implements Parcelable, Cloneable {
      * Activity Action: Launch application installer.
      * <p>
      * Input: The data must be a content: or file: URI at which the application
-     * can be retrieved.  You can optionally supply
+     * can be retrieved.  As of {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1},
+     * you can also use "package:<package-name>" to install an application for the
+     * current user that is already installed for another user. You can optionally supply
      * {@link #EXTRA_INSTALLER_PACKAGE_NAME}, {@link #EXTRA_NOT_UNKNOWN_SOURCE},
      * {@link #EXTRA_ALLOW_REPLACE}, and {@link #EXTRA_RETURN_RESULT}.
      * <p>
