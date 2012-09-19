@@ -58,9 +58,9 @@
     <string name="label_view" msgid="6304565553218192990">"देखें"</string>
     <string name="always_use_device" msgid="1450287437017315906">"इस USB उपकरण के लिए डिफ़ॉल्‍ट रूप से उपयोग करें"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"इस USB एसेसरी के लिए डिफ़ॉल्‍ट रूप से उपयोग करें"</string>
-    <string name="usb_debugging_title" msgid="1114766024068112429">"USB डीबगिंग करने दें?"</string>
-    <string name="usb_debugging_message" msgid="719863946976291180">"इस कंप्यूटर से USB डीबगिंग करने दें?"\n"आपका RSA कुंजी फ़िंगरप्रिंट यह है:"\n"<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
-    <string name="usb_debugging_always" msgid="4253099426793114693">"इस कंप्यूटर को हमेशा अनुमति दें"</string>
+    <string name="usb_debugging_title" msgid="4513918393387141949">"USB डीबगिंग करने दें?"</string>
+    <string name="usb_debugging_message" msgid="2220143855912376496">"कंप्यूटर का RSA कुंजी फ़िंगरप्रिंट है:"\n"<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_always" msgid="303335496705863070">"इस कंप्यूटर से हमेशा अनुमति दें"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"स्‍क्रीन भरने हेतु ज़ूम करें"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"स्‍क्रीन को भरने के लिए खींचें"</string>
     <string name="compat_mode_help_header" msgid="7969493989397529910">"संगतता ज़ूम"</string>
@@ -141,7 +141,6 @@
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS को खोजा जा रहा है"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS द्वारा सेट किया गया स्‍थान"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"सभी सूचनाएं साफ़ करें."</string>
-    <string name="dreams_dock_launcher" msgid="3541196417659166245">"स्‍क्रीन सेवर सक्रिय करें"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"एप्‍लिकेशन जानकारी"</string>
     <string name="close_universe" msgid="3736513750241754348">"बंद करें"</string>
     <string name="notifications_off_title" msgid="8936620513608443224">"सूचनाएं बंद"</string>
@@ -149,4 +148,39 @@
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"स्‍क्रीन स्‍वचालित रूप से घूमेगी."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"स्‍क्रीन लैंडस्केप अभिविन्यास में लॉक है."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"स्‍क्रीन पोर्ट्रेट अभिविन्‍यास में लॉक है."</string>
+    <string name="jelly_bean_dream_name" msgid="5992026543636816792">"BeanFlinger"</string>
+    <string name="start_dreams" msgid="870400522982252717">"dreams प्रारंभ करें"</string>
+    <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"हवाई जहाज़ मोड"</string>
+    <!-- no translation found for quick_settings_battery_charging_label (490074774465309209) -->
+    <skip />
+    <!-- no translation found for quick_settings_battery_charged_label (8865413079414246081) -->
+    <skip />
+    <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
+    <!-- no translation found for quick_settings_bluetooth_multiple_devices_label (3912245565613684735) -->
+    <skip />
+    <string name="quick_settings_brightness_label" msgid="6968372297018755815">"चमक"</string>
+    <!-- no translation found for quick_settings_rotation_unlocked_label (336054930362580584) -->
+    <skip />
+    <!-- no translation found for quick_settings_rotation_locked_label (8058646447242565486) -->
+    <skip />
+    <string name="quick_settings_ime_label" msgid="7073463064369468429">"इनपुट विधि"</string>
+    <string name="quick_settings_location_label" msgid="3292451598267467545">"उपयोग हो रहा स्थान"</string>
+    <string name="quick_settings_media_device_label" msgid="1302906836372603762">"मीडिया उपकरण"</string>
+    <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
+    <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"केवल आपातकालीन कॉल"</string>
+    <string name="quick_settings_settings_label" msgid="5326556592578065401">"सेटिंग"</string>
+    <string name="quick_settings_time_label" msgid="4635969182239736408">"समय"</string>
+    <string name="quick_settings_user_label" msgid="5238995632130897840">"मुझे"</string>
+    <string name="quick_settings_wifi_label" msgid="4393429107095001520">"Wifi"</string>
+    <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"कोई नेटवर्क नहीं"</string>
+    <string name="quick_settings_wifi_display_label" msgid="6653501376641018614">"Wifi डिस्प्ले"</string>
+    <string name="quick_settings_wifi_display_no_connection_label" msgid="6255615315258869136">"कोई Wifi डिस्प्ले कनेक्शन नहीं"</string>
+    <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"चमक"</string>
+    <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"स्वत:"</string>
+    <string name="wifi_display_scan" msgid="8453135922233546097">"स्कैन करें"</string>
+    <string name="wifi_display_disconnect" msgid="5450214362789378584">"डिस्कनेक्ट करें"</string>
+    <string name="wifi_display_dialog_title" msgid="2817993038700218900">"Wifi डिस्प्ले"</string>
+    <string name="wifi_display_state_available" msgid="980373281442607096">"उपलब्ध"</string>
+    <string name="wifi_display_state_connecting" msgid="1677010908036241940">"कनेक्ट हो रहा है"</string>
+    <string name="wifi_display_state_connected" msgid="9154375061719151149">"कनेक्ट किया गया"</string>
 </resources>
