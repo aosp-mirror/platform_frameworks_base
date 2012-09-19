@@ -22,14 +22,11 @@ import com.google.android.collect.Lists;
 
 import android.app.ActivityManagerNative;
 import android.app.admin.DevicePolicyManager;
-import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Binder;
-import android.os.FileObserver;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
@@ -45,16 +42,10 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Utilities for the lock pattern and its settings.
@@ -134,7 +125,7 @@ public class LockPatternUtils {
     private final ContentResolver mContentResolver;
     private DevicePolicyManager mDevicePolicyManager;
     private ILockSettings mLockSettingsService;
-    private int mCurrentUserId = 0;
+    private int mCurrentUserId = UserHandle.USER_NULL;
 
     public DevicePolicyManager getDevicePolicyManager() {
         if (mDevicePolicyManager == null) {
@@ -233,10 +224,14 @@ public class LockPatternUtils {
 
     public int getCurrentUser() {
         if (Process.myUid() == Process.SYSTEM_UID) {
+            if (mCurrentUserId != UserHandle.USER_NULL) {
+                // Someone is regularly updating using setCurrentUser() use that value.
+                return mCurrentUserId;
+            }
             try {
                 return ActivityManagerNative.getDefault().getCurrentUser().id;
             } catch (RemoteException re) {
-                return mCurrentUserId;
+                return UserHandle.USER_OWNER;
             }
         } else {
             throw new SecurityException("Only the system process can get the current user");

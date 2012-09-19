@@ -292,9 +292,6 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED.equals(action)) {
                 mKeyguardDisableHandler.sendEmptyMessage(
                     KeyguardDisableHandler.KEYGUARD_POLICY_CHANGED);
-            } else if (Intent.ACTION_USER_SWITCHED.equals(action)) {
-                final int newUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
-                mCurrentUserId = newUserId;
             }
         }
     };
@@ -811,8 +808,6 @@ public class WindowManagerService extends IWindowManager.Stub
         // Track changes to DevicePolicyManager state so we can enable/disable keyguard.
         IntentFilter filter = new IntentFilter();
         filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
-        // Track user switching.
-        filter.addAction(Intent.ACTION_USER_SWITCHED);
         mContext.registerReceiver(mBroadcastReceiver, filter);
 
         mHoldingScreenWakeLock = pmc.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK
@@ -5394,6 +5389,13 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new SecurityException("Requires FILTER_EVENTS permission");
         }
         mInputManager.setInputFilter(filter);
+    }
+
+    public void setCurrentUser(final int newUserId) {
+        synchronized (mWindowMap) {
+            mCurrentUserId = newUserId;
+            mPolicy.setCurrentUserLw(newUserId);
+        }
     }
 
     public void enableScreenAfterBoot() {
