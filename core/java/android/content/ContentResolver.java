@@ -1219,7 +1219,7 @@ public abstract class ContentResolver {
     public final void registerContentObserver(Uri uri, boolean notifyForDescendents,
             ContentObserver observer)
     {
-        registerContentObserver(uri, notifyForDescendents, observer, UserHandle.myUserId());
+        registerContentObserver(uri, notifyForDescendents, observer, UserHandle.getCallingUserId());
     }
 
     /** @hide - designated user version */
@@ -1283,7 +1283,7 @@ public abstract class ContentResolver {
      * @see #requestSync(android.accounts.Account, String, android.os.Bundle)
      */
     public void notifyChange(Uri uri, ContentObserver observer, boolean syncToNetwork) {
-        notifyChange(uri, observer, syncToNetwork, UserHandle.myUserId());
+        notifyChange(uri, observer, syncToNetwork, UserHandle.getCallingUserId());
     }
 
     /**
