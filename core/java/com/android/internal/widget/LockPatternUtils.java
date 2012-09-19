@@ -165,7 +165,7 @@ public class LockPatternUtils {
     }
 
     public int getRequestedMinimumPasswordLength() {
-        return getDevicePolicyManager().getPasswordMinimumLength(null);
+        return getDevicePolicyManager().getPasswordMinimumLength(null, getCurrentOrCallingUserId());
     }
 
     /**
@@ -173,47 +173,54 @@ public class LockPatternUtils {
      * MODE_PATTERN which allows the user to choose anything.
      */
     public int getRequestedPasswordQuality() {
-        return getDevicePolicyManager().getPasswordQuality(null);
+        return getDevicePolicyManager().getPasswordQuality(null, getCurrentOrCallingUserId());
     }
 
     public int getRequestedPasswordHistoryLength() {
-        return getDevicePolicyManager().getPasswordHistoryLength(null);
+        return getDevicePolicyManager().getPasswordHistoryLength(null, getCurrentOrCallingUserId());
     }
 
     public int getRequestedPasswordMinimumLetters() {
-        return getDevicePolicyManager().getPasswordMinimumLetters(null);
+        return getDevicePolicyManager().getPasswordMinimumLetters(null,
+                getCurrentOrCallingUserId());
     }
 
     public int getRequestedPasswordMinimumUpperCase() {
-        return getDevicePolicyManager().getPasswordMinimumUpperCase(null);
+        return getDevicePolicyManager().getPasswordMinimumUpperCase(null,
+                getCurrentOrCallingUserId());
     }
 
     public int getRequestedPasswordMinimumLowerCase() {
-        return getDevicePolicyManager().getPasswordMinimumLowerCase(null);
+        return getDevicePolicyManager().getPasswordMinimumLowerCase(null,
+                getCurrentOrCallingUserId());
     }
 
     public int getRequestedPasswordMinimumNumeric() {
-        return getDevicePolicyManager().getPasswordMinimumNumeric(null);
+        return getDevicePolicyManager().getPasswordMinimumNumeric(null,
+                getCurrentOrCallingUserId());
     }
 
     public int getRequestedPasswordMinimumSymbols() {
-        return getDevicePolicyManager().getPasswordMinimumSymbols(null);
+        return getDevicePolicyManager().getPasswordMinimumSymbols(null,
+                getCurrentOrCallingUserId());
     }
 
     public int getRequestedPasswordMinimumNonLetter() {
-        return getDevicePolicyManager().getPasswordMinimumNonLetter(null);
+        return getDevicePolicyManager().getPasswordMinimumNonLetter(null,
+                getCurrentOrCallingUserId());
     }
+
     /**
      * Returns the actual password mode, as set by keyguard after updating the password.
      *
      * @return
      */
     public void reportFailedPasswordAttempt() {
-        getDevicePolicyManager().reportFailedPasswordAttempt();
+        getDevicePolicyManager().reportFailedPasswordAttempt(getCurrentOrCallingUserId());
     }
 
     public void reportSuccessfulPasswordAttempt() {
-        getDevicePolicyManager().reportSuccessfulPasswordAttempt();
+        getDevicePolicyManager().reportSuccessfulPasswordAttempt(getCurrentOrCallingUserId());
     }
 
     public void setCurrentUser(int userId) {
@@ -249,7 +256,9 @@ public class LockPatternUtils {
     private int getCurrentOrCallingUserId() {
         int callingUid = Binder.getCallingUid();
         if (callingUid == android.os.Process.SYSTEM_UID) {
-            return mCurrentUserId;
+            // TODO: This is a little inefficient. See if all users of this are able to
+            // handle USER_CURRENT and pass that instead.
+            return getCurrentUser();
         } else {
             return UserHandle.getUserId(callingUid);
         }
@@ -481,21 +490,21 @@ public class LockPatternUtils {
                     deleteGallery();
                     setLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
                     dpm.setActivePasswordState(DevicePolicyManager.PASSWORD_QUALITY_SOMETHING,
-                            pattern.size(), 0, 0, 0, 0, 0, 0);
+                            pattern.size(), 0, 0, 0, 0, 0, 0, getCurrentOrCallingUserId());
                 } else {
                     setLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK);
                     setLong(PASSWORD_TYPE_ALTERNATE_KEY,
                             DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
                     finishBiometricWeak();
                     dpm.setActivePasswordState(DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK,
-                            0, 0, 0, 0, 0, 0, 0);
+                            0, 0, 0, 0, 0, 0, 0, getCurrentOrCallingUserId());
                 }
             } else {
                 if (keyStore.isEmpty()) {
                     keyStore.reset();
                 }
                 dpm.setActivePasswordState(DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, 0, 0,
-                        0, 0, 0, 0, 0);
+                        0, 0, 0, 0, 0, getCurrentOrCallingUserId());
             }
         } catch (RemoteException re) {
             Log.e(TAG, "Couldn't save lock pattern " + re);
@@ -532,7 +541,8 @@ public class LockPatternUtils {
     /** Update the encryption password if it is enabled **/
     private void updateEncryptionPassword(String password) {
         DevicePolicyManager dpm = getDevicePolicyManager();
-        if (dpm.getStorageEncryptionStatus() != DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE) {
+        if (dpm.getStorageEncryptionStatus(getCurrentOrCallingUserId())
+                != DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE) {
             return;
         }
 
@@ -558,7 +568,7 @@ public class LockPatternUtils {
      * @param quality {@see DevicePolicyManager#getPasswordQuality(android.content.ComponentName)}
      */
     public void saveLockPassword(String password, int quality) {
-        this.saveLockPassword(password, quality, false);
+        this.saveLockPassword(password, quality, false, getCurrentOrCallingUserId());
     }
 
     /**
@@ -570,23 +580,42 @@ public class LockPatternUtils {
      * @param isFallback Specifies if this is a fallback to biometric weak
      */
     public void saveLockPassword(String password, int quality, boolean isFallback) {
+        saveLockPassword(password, quality, isFallback, getCurrentOrCallingUserId());
+    }
+
+    /**
+     * Save a lock password.  Does not ensure that the password is as good
+     * as the requested mode, but will adjust the mode to be as good as the
+     * pattern.
+     * @param password The password to save
+     * @param quality {@see DevicePolicyManager#getPasswordQuality(android.content.ComponentName)}
+     * @param isFallback Specifies if this is a fallback to biometric weak
+     * @param userHandle The userId of the user to change the password for
+     */
+    public void saveLockPassword(String password, int quality, boolean isFallback, int userHandle) {
         // Compute the hash
         final byte[] hash = passwordToHash(password);
         try {
-            getLockSettings().setLockPassword(hash, getCurrentOrCallingUserId());
+            if (Process.myUid() != Process.SYSTEM_UID && userHandle != UserHandle.myUserId()) {
+                throw new SecurityException(
+                        "Only the system process can save lock password for another user");
+            }
+            getLockSettings().setLockPassword(hash, userHandle);
             DevicePolicyManager dpm = getDevicePolicyManager();
             KeyStore keyStore = KeyStore.getInstance();
             if (password != null) {
-                // Update the encryption password.
-                updateEncryptionPassword(password);
+                if (userHandle == UserHandle.USER_OWNER) {
+                    // Update the encryption password.
+                    updateEncryptionPassword(password);
 
-                // Update the keystore password
-                keyStore.password(password);
+                    // Update the keystore password
+                    keyStore.password(password);
+                }
 
                 int computedQuality = computePasswordQuality(password);
                 if (!isFallback) {
                     deleteGallery();
-                    setLong(PASSWORD_TYPE_KEY, Math.max(quality, computedQuality));
+                    setLong(PASSWORD_TYPE_KEY, Math.max(quality, computedQuality), userHandle);
                     if (computedQuality != DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) {
                         int letters = 0;
                         int uppercase = 0;
@@ -612,25 +641,27 @@ public class LockPatternUtils {
                         }
                         dpm.setActivePasswordState(Math.max(quality, computedQuality),
                                 password.length(), letters, uppercase, lowercase,
-                                numbers, symbols, nonletter);
+                                numbers, symbols, nonletter, userHandle);
                     } else {
                         // The password is not anything.
                         dpm.setActivePasswordState(
                                 DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED,
-                                0, 0, 0, 0, 0, 0, 0);
+                                0, 0, 0, 0, 0, 0, 0, userHandle);
                     }
                 } else {
                     // Case where it's a fallback for biometric weak
-                    setLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK);
-                    setLong(PASSWORD_TYPE_ALTERNATE_KEY, Math.max(quality, computedQuality));
+                    setLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK,
+                            userHandle);
+                    setLong(PASSWORD_TYPE_ALTERNATE_KEY, Math.max(quality, computedQuality),
+                            userHandle);
                     finishBiometricWeak();
                     dpm.setActivePasswordState(DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK,
-                            0, 0, 0, 0, 0, 0, 0);
+                            0, 0, 0, 0, 0, 0, 0, userHandle);
                 }
                 // Add the password to the password history. We assume all
                 // password
                 // hashes have the same length for simplicity of implementation.
-                String passwordHistory = getString(PASSWORD_HISTORY_KEY);
+                String passwordHistory = getString(PASSWORD_HISTORY_KEY, userHandle);
                 if (passwordHistory == null) {
                     passwordHistory = new String();
                 }
@@ -645,7 +676,7 @@ public class LockPatternUtils {
                             * passwordHistoryLength + passwordHistoryLength - 1, passwordHistory
                             .length()));
                 }
-                setString(PASSWORD_HISTORY_KEY, passwordHistory);
+                setString(PASSWORD_HISTORY_KEY, passwordHistory, userHandle);
             } else {
                 // Conditionally reset the keystore if empty. If
                 // non-empty, we are just switching key guard type
@@ -653,7 +684,8 @@ public class LockPatternUtils {
                     keyStore.reset();
                 }
                 dpm.setActivePasswordState(
-                        DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, 0, 0, 0, 0, 0, 0, 0);
+                        DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, 0, 0, 0, 0, 0, 0, 0,
+                        userHandle);
             }
         } catch (RemoteException re) {
             // Cant do much
@@ -849,7 +881,7 @@ public class LockPatternUtils {
         if (!pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_FRONT)) {
             return false;
         }
-        if (getDevicePolicyManager().getCameraDisabled(null)) {
+        if (getDevicePolicyManager().getCameraDisabled(null, getCurrentOrCallingUserId())) {
             return false;
         }
 
@@ -1027,6 +1059,10 @@ public class LockPatternUtils {
     }
 
     private void setLong(String secureSettingKey, long value) {
+        setLong(secureSettingKey, value, getCurrentOrCallingUserId());
+    }
+
+    private void setLong(String secureSettingKey, long value, int userHandle) {
         try {
             getLockSettings().setLong(secureSettingKey, value, getCurrentOrCallingUserId());
         } catch (RemoteException re) {
@@ -1036,17 +1072,20 @@ public class LockPatternUtils {
     }
 
     private String getString(String secureSettingKey) {
+        return getString(secureSettingKey, getCurrentOrCallingUserId());
+    }
+
+    private String getString(String secureSettingKey, int userHandle) {
         try {
-            return getLockSettings().getString(secureSettingKey, null,
-                    getCurrentOrCallingUserId());
+            return getLockSettings().getString(secureSettingKey, null, userHandle);
         } catch (RemoteException re) {
             return null;
         }
     }
 
-    private void setString(String secureSettingKey, String value) {
+    private void setString(String secureSettingKey, String value, int userHandle) {
         try {
-            getLockSettings().setString(secureSettingKey, value, getCurrentOrCallingUserId());
+            getLockSettings().setString(secureSettingKey, value, userHandle);
         } catch (RemoteException re) {
             // What can we do?
             Log.e(TAG, "Couldn't write string " + secureSettingKey + re);
