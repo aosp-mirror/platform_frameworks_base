@@ -3490,12 +3490,15 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     (device == AudioSystem.DEVICE_OUT_WIRED_HEADPHONE))) {
                 setBluetoothA2dpOnInt(true);
             }
-            handleDeviceConnection((state == 1), device, "");
+            boolean isUsb = ((device & AudioSystem.DEVICE_OUT_ALL_USB) != 0);
+            handleDeviceConnection((state == 1), device, (isUsb ? name : ""));
             if ((state != 0) && ((device == AudioSystem.DEVICE_OUT_WIRED_HEADSET) ||
                     (device == AudioSystem.DEVICE_OUT_WIRED_HEADPHONE))) {
                 setBluetoothA2dpOnInt(false);
             }
-            sendDeviceConnectionIntent(device, state, name);
+            if (!isUsb) {
+                sendDeviceConnectionIntent(device, state, name);
+            }
         }
     }
 
@@ -3587,7 +3590,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                         + (action.equals(Intent.ACTION_USB_AUDIO_ACCESSORY_PLUG) ?
                               "ACTION_USB_AUDIO_ACCESSORY_PLUG" : "ACTION_USB_AUDIO_DEVICE_PLUG")
                         + ", state = " + state + ", card: " + alsaCard + ", device: " + alsaDevice);
-                handleDeviceConnection((state == 1), device, params);
+                setWiredDeviceConnectionState(device, state, params);
             } else if (action.equals(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)) {
                 boolean broadcast = false;
                 int scoAudioState = AudioManager.SCO_AUDIO_STATE_ERROR;
