@@ -157,8 +157,8 @@ public class KeyguardPatternView extends GridLayout implements KeyguardSecurityV
     }
 
     @Override
-    public boolean dispatchTouchEvent(MotionEvent ev) {
-        boolean result = super.dispatchTouchEvent(ev);
+    public boolean onTouchEvent(MotionEvent ev) {
+        boolean result = super.onTouchEvent(ev);
         // as long as the user is entering a pattern (i.e sending a touch event that was handled
         // by this screen), keep poking the wake lock so that the screen will stay on.
         final long elapsed = SystemClock.elapsedRealtime() - mLastPokeTime;
@@ -237,10 +237,11 @@ public class KeyguardPatternView extends GridLayout implements KeyguardSecurityV
 
         public void onPatternDetected(List<LockPatternView.Cell> pattern) {
             if (mLockPatternUtils.checkPattern(pattern)) {
+                mCallback.reportSuccessfulUnlockAttempt();
                 mLockPatternView.setDisplayMode(LockPatternView.DisplayMode.Correct);
-                mCallback.dismiss(true); // keyguardDone(true)
                 KeyStore.getInstance().password(LockPatternUtils.patternToString(pattern));
                 mTotalFailedPatternAttempts = 0;
+                mCallback.dismiss(true);
             } else {
                 if (pattern.size() > MIN_PATTERN_BEFORE_POKE_WAKELOCK) {
                     mCallback.userActivity(UNLOCK_PATTERN_WAKE_INTERVAL_MS);
