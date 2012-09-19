@@ -16,49 +16,74 @@
 
 package android.renderscript;
 
-import android.content.Context;
-import android.content.res.Resources;
-import android.util.Log;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Map.Entry;
-import java.util.HashMap;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 
 /**
- * @hide
- **/
-public class ScriptIntrinsicYuvToRGB extends ScriptIntrinsic {
+ * Intrinsic for converting an Android YUV buffer to RGB.
+ *
+ * The input allocation is supplied in NV21 format as a U8
+ * element type. The output is RGBA, the alpha channel will be
+ * set to 255.
+ */
+public final class ScriptIntrinsicYuvToRGB extends ScriptIntrinsic {
+    private Allocation mInput;
+
     ScriptIntrinsicYuvToRGB(int id, RenderScript rs) {
         super(id, rs);
     }
 
-
-
-    public static class Builder {
-        RenderScript mRS;
-
-        public Builder(RenderScript rs) {
-            mRS = rs;
-        }
-
-        public void setInputFormat(int inputFormat) {
-
-        }
-
-        public void setOutputFormat(Element e) {
-
-        }
-
-        public ScriptIntrinsicYuvToRGB create() {
-            return null;
-
-        }
-
+    /**
+     * Create an intrinsic for converting YUV to RGB.
+     *
+     * Supported elements types are {@link Element#U8_4}
+     *
+     * @param rs The Renderscript context
+     * @param e Element type for output
+     *
+     * @return ScriptIntrinsicYuvToRGB
+     */
+    public static ScriptIntrinsicYuvToRGB create(RenderScript rs, Element e) {
+        // 6 comes from RS_SCRIPT_INTRINSIC_YUV_TO_RGB in rsDefines.h
+        int id = rs.nScriptIntrinsicCreate(6, e.getID(rs));
+        ScriptIntrinsicYuvToRGB si = new ScriptIntrinsicYuvToRGB(id, rs);
+        return si;
     }
 
+
+    /**
+     * Set the input yuv allocation, must be {@link Element#U8}.
+     *
+     * @param ain The input allocation.
+     */
+    public void setInput(Allocation ain) {
+        mInput = ain;
+        bindAllocation(ain, 0);
+    }
+
+    /**
+     * Convert the image to RGB.
+     *
+     * @param aout Output allocation. Must match creation element
+     *             type.
+     */
+    public void forEach(Allocation aout) {
+        forEach(0, null, aout, null);
+    }
+
+    /**
+     * Get a KernelID for this intrinsic kernel.
+     *
+     * @return Script.KernelID The KernelID object.
+     */
+    public Script.KernelID getKernelID() {
+        return createKernelID(0, 2, null, null);
+    }
+
+    /**
+     * Get a FieldID for the input field of this intrinsic.
+     *
+     * @return Script.FieldID The FieldID object.
+     */
+    public Script.FieldID getFieldID_Input() {
+        return createFieldID(0, null);
+    }
 }
