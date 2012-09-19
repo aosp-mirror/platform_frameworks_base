@@ -292,7 +292,7 @@
     <string name="permlab_filter_events" msgid="8675535648807427389">"filtreeri sündmused"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Võimaldab rakendusel registreerida sisestusfiltri, mis filtreerib kõigi kasutaja sündmuste voo, enne kui need ära saadetakse. Pahatahtlik rakendus võib süsteemi kasutajaliidest juhtida ilma kasutaja sekkumiseta."</string>
     <string name="permlab_magnify_display" msgid="5973626738170618775">"kuva suurendamine"</string>
-    <string name="permdesc_magnify_display" msgid="7121235684515003792">"Lubab rakendusel kuva sisu suurendada. Pahatahtlikud rakendused võivad muundada kuva sisu nii, et seade muutub ebastabiilseks."</string>
+    <string name="permdesc_magnify_display" msgid="7121235684515003792">"Lubab rakendusel ekraani sisu suurendada. Pahatahtlikud rakendused võivad muundada kuva sisu nii, et seade muutub ebastabiilseks."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"osaline väljalülitamine"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Lülitab tegevushalduri väljalülitusolekusse. Ei lülita lõplikult välja."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"väldi rakenduste ümberlülitamist"</string>
@@ -331,7 +331,7 @@
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"Rakenduse lubade haldamine"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Võimaldab rakendusel luua ja hallata tema enda lube, möödudes tavapärasest Z-järjekorrast. Tavarakenduste puhul ei peaks seda kunagi vaja minema."</string>
     <string name="permlab_freezeScreen" msgid="4708181184441880175">"ekraanikuva peatamine"</string>
-    <string name="permdesc_freezeScreen" msgid="8558923789222670064">"Lubab rakendusel ajutiselt peatada ekraani kuva täisekraanil üleminekuks."</string>
+    <string name="permdesc_freezeScreen" msgid="8558923789222670064">"Lubab rakendusel ajutiselt peatada ekraani kuva täisekraanile üleminekuks."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"vajuta klahve ja juhtnuppe"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Võimaldab rakendusel saata oma sisendtoiminguid (klahvivajutusi jms) teistele rakendustele. Pahatahtlikud rakendused võivad seda kasutada tahvelarvuti ülevõtmiseks."</string>
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Võimaldab rakendusel saata oma sisendtoiminguid (klahvivajutusi jms) teistele rakendustele. Pahatahtlikud rakendused võivad seda kasutada telefoni ülevõtmiseks."</string>
@@ -449,10 +449,10 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Võimaldab rakendusel kasutada SurfaceFlingeri madalatasemelisi funktsioone."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"loe kaadripuhvrit"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Võimaldab rakendusel kaadripuhvri sisu lugeda."</string>
-    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"WiFi-kuvade seadistamine"</string>
-    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Lubab rakendusel seadistada WiFi-kuvasid ja nendega ühendus luua."</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"WiFi-kuvade juhtimine"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Lubab rakendusel juhtida WiFi-kuvade madala taseme funktsioone."</string>
+    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"WiFi-ekraanide seadistamine"</string>
+    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Lubab rakendusel seadistada WiFi-ekraane ja nendega ühendus luua."</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"WiFi-ekraanide juhtimine"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Lubab rakendusel juhtida WiFi-ekraanide madala taseme funktsioone."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"muuda heliseadeid"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Võimaldab rakendusel muuta üldiseid heliseadeid, näiteks helitugevust ja seda, millist kõlarit kasutatakse väljundiks."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"salvesta heli"</string>
@@ -776,7 +776,8 @@
     <string name="lockscreen_charged" msgid="4938930459620989972">"Laetud."</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Ühendage laadija."</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"SIM-kaarti pole."</string>
+    <!-- no translation found for lockscreen_missing_sim_message_short (5099439277819215399) -->
+    <skip />
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Tahvelarvutis pole SIM-kaarti."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Telefonis pole SIM-kaarti."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Sisestage SIM-kaart."</string>
@@ -1085,7 +1086,9 @@
     <item quantity="other" msgid="7915895323644292768">"Avatud WiFi-võrgud on saadaval"</item>
   </plurals>
     <string name="wifi_available_sign_in" msgid="4029489716605255386">"Logige sisse WiFi-võrku"</string>
-    <!-- no translation found for wifi_available_sign_in_detailed (6797764740339907572) -->
+    <!-- no translation found for network_available_sign_in (8495155593358054676) -->
+    <skip />
+    <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Ei saanud WiFi-ga ühendust"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" on halb Interneti-ühendus."</string>
@@ -1102,6 +1105,8 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"Saaja:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Sisestage nõutav PIN-kood:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN-kood:"</string>
+    <!-- no translation found for wifi_p2p_frequency_conflict_message (7363907213787469151) -->
+    <skip />
     <string name="select_character" msgid="3365550120617701745">"Sisesta tähemärk"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS-sõnumite saatmine"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; saadab suurel hulgal SMS-sõnumeid. Kas tahate lubada sellel rakendusel ka edaspidi sõnumeid saata?"</string>
