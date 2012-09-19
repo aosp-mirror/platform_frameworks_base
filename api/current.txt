@@ -20115,6 +20115,14 @@ package android.renderscript {
     method public void setRed(int, int);
   }
 
+  public final class ScriptIntrinsicYuvToRGB extends android.renderscript.ScriptIntrinsic {
+    method public static android.renderscript.ScriptIntrinsicYuvToRGB create(android.renderscript.RenderScript, android.renderscript.Element);
+    method public void forEach(android.renderscript.Allocation);
+    method public android.renderscript.Script.FieldID getFieldID_Input();
+    method public android.renderscript.Script.KernelID getKernelID();
+    method public void setInput(android.renderscript.Allocation);
+  }
+
   public class Short2 {
     ctor public Short2();
     ctor public Short2(short, short);
