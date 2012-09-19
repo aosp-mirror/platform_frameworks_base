@@ -24,8 +24,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.PackageParser;
-import android.content.pm.PackageUserState;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.graphics.drawable.Drawable;
@@ -272,7 +270,7 @@ public class AppSecurityPermissions {
         setPermissions(mPermsList);
     }
 
-    public AppSecurityPermissions(Context context, PackageParser.Package pkg) {
+    public AppSecurityPermissions(Context context, PackageInfo info) {
         mContext = context;
         mPm = mContext.getPackageManager();
         loadResources();
@@ -280,14 +278,11 @@ public class AppSecurityPermissions {
         mPermGroupComparator = new PermissionGroupInfoComparator();
         mPermsList = new ArrayList<MyPermissionInfo>();
         Set<MyPermissionInfo> permSet = new HashSet<MyPermissionInfo>();
-        if(pkg == null) {
+        if(info == null) {
             return;
         }
 
         // Convert to a PackageInfo
-        PackageInfo info = PackageParser.generatePackageInfo(pkg, null,
-                PackageManager.GET_PERMISSIONS, 0, 0, null,
-                new PackageUserState());
         PackageInfo installedPkgInfo = null;
         // Get requested permissions
         if (info.requestedPermissions != null) {
@@ -299,13 +294,13 @@ public class AppSecurityPermissions {
             extractPerms(info, permSet, installedPkgInfo);
         }
         // Get permissions related to  shared user if any
-        if (pkg.mSharedUserId != null) {
+        if (info.sharedUserId != null) {
             int sharedUid;
             try {
-                sharedUid = mPm.getUidForSharedUser(pkg.mSharedUserId);
+                sharedUid = mPm.getUidForSharedUser(info.sharedUserId);
                 getAllUsedPermissions(sharedUid, permSet);
             } catch (NameNotFoundException e) {
-                Log.w(TAG, "Could'nt retrieve shared user id for:"+pkg.packageName);
+                Log.w(TAG, "Could'nt retrieve shared user id for:"+info.packageName);
             }
         }
         // Retrieve list of permissions
