@@ -42,6 +42,15 @@
         </activity>
 
         <activity
+                android:name="MultiLayersActivity"
+                android:label="_MultiLayers">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
                 android:name="TJunctionActivity"
                 android:label="_T-Junction">
             <intent-filter>
