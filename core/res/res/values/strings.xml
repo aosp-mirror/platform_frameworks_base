@@ -3048,11 +3048,14 @@
         <item quantity="other">Open Wi-Fi networks available</item>
     </plurals>
 
-    <!-- A notification is shown when a captive portal network is detected.  This is the notification's title. -->
+    <!-- A notification is shown when a wifi captive portal network is detected.  This is the notification's title. -->
     <string name="wifi_available_sign_in">Sign into Wi-Fi network</string>
 
+    <!-- A notification is shown when a captive portal network is detected.  This is the notification's title. -->
+    <string name="network_available_sign_in">Sign into network</string>
+
     <!-- A notification is shown when a captive portal network is detected.  This is the notification's message. -->
-    <string name="wifi_available_sign_in_detailed"><xliff:g id="wifi_network_ssid">%1$s</xliff:g></string>
+    <string name="network_available_sign_in_detailed"><xliff:g id="network_ssid">%1$s</xliff:g></string>
 
      <!-- A notification is shown when a user's selected SSID is later disabled due to connectivity problems.  This is the notification's title / ticker. -->
      <string name="wifi_watchdog_network_disabled">Couldn\'t connect to Wi-Fi</string>
@@ -3077,6 +3080,8 @@
     <string name="wifi_p2p_to_message">To: </string>
     <string name="wifi_p2p_enter_pin_message">Type the required PIN: </string>
     <string name="wifi_p2p_show_pin_message">PIN: </string>
+
+    <string name="wifi_p2p_frequency_conflict_message">The phone will temporarily disconnect from Wi-Fi while it\'s connected to <xliff:g id="device_name">%1$s</xliff:g></string>
 
     <!-- Name of the dialog that lets the user choose an accented character to insert -->
     <string name="select_character">Insert character</string>
