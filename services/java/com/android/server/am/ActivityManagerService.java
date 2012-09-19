@@ -13982,6 +13982,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mUserLru.remove(userIdInt);
                 mUserLru.add(userIdInt);
 
+                mWindowManager.setCurrentUser(userId);
+
                 final UserStartedState uss = mStartedUsers.get(userId);
 
                 mHandler.removeMessages(REPORT_USER_SWITCH_MSG);
@@ -14020,7 +14022,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (!haveActivities) {
                     startHomeActivityLocked(userId);
                 }
-            
+
                 sendUserSwitchBroadcastsLocked(oldUserId, userId);
             }
         } finally {
