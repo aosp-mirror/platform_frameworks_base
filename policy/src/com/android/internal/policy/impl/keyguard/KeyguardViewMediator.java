@@ -131,7 +131,7 @@ public class KeyguardViewMediator {
     private static final int KEYGUARD_LOCK_AFTER_DELAY_DEFAULT = 5000;
 
     /**
-     * How long we'll wait for the {@link KeyguardViewCallback#keyguardDoneDrawing()}
+     * How long we'll wait for the {@link ViewMediatorCallback#keyguardDoneDrawing()}
      * callback before unblocking a call to {@link #setKeyguardEnabled(boolean)}
      * that is reenabling the keyguard.
      */
@@ -297,7 +297,7 @@ public class KeyguardViewMediator {
 
         @Override
         public void onUserSwitched(int userId) {
-            mLockPatternUtils.setCurrentUser(userId);
+            // Note that the mLockPatternUtils user has already been updated from setCurrentUser.
             synchronized (KeyguardViewMediator.this) {
                 resetStateLocked();
             }
@@ -465,6 +465,7 @@ public class KeyguardViewMediator {
 
         mLockPatternUtils = lockPatternUtils != null
                 ? lockPatternUtils : new LockPatternUtils(mContext);
+        mLockPatternUtils.setCurrentUser(UserHandle.USER_OWNER);
 
         WindowManager wm = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
 
@@ -888,6 +889,14 @@ public class KeyguardViewMediator {
     public boolean isSecure() {
         return mLockPatternUtils.isSecure()
             || KeyguardUpdateMonitor.getInstance(mContext).isSimPinSecure();
+    }
+
+    /**
+     * Update the newUserId. Call while holding WindowManagerService lock.
+     * @param newUserId The id of the incoming user.
+     */
+    public void setCurrentUser(int newUserId) {
+        mLockPatternUtils.setCurrentUser(newUserId);
     }
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
