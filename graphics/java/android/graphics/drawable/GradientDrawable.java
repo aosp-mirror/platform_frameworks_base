@@ -124,7 +124,7 @@ public class GradientDrawable extends Drawable {
     
     private Paint mLayerPaint;    // internal, used if we use saveLayer()
     private boolean mRectIsDirty;   // internal state
-    private boolean mMutated = true;
+    private boolean mMutated;
     private Path mRingPath;
     private boolean mPathIsDirty = true;
 
