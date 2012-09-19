@@ -19,11 +19,10 @@ package com.android.server.am;
 import java.util.ArrayList;
 
 import android.app.ActivityManager.TaskThumbnails;
-import android.graphics.Bitmap;
 
 final class TaskAccessInfo extends TaskThumbnails {
     final static class SubTask {
-        Bitmap thumbnail;
+        ThumbnailHolder holder;
         ActivityRecord activity;
         int index;
     }
