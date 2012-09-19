@@ -1218,7 +1218,8 @@
     <!-- no translation found for lockscreen_battery_short (4477264849386850266) -->
     <skip />
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Connectai Voss chargiader."</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Nagina carta SIM."</string>
+    <!-- no translation found for lockscreen_missing_sim_message_short (5099439277819215399) -->
+    <skip />
     <!-- no translation found for lockscreen_missing_sim_message (151659196095791474) -->
     <skip />
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"En il telefon na sa chatta nagina carta SIM."</string>

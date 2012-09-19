@@ -776,7 +776,8 @@
     <string name="lockscreen_charged" msgid="4938930459620989972">"Įkrauta."</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Prijunkite kroviklį."</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Nėra SIM kortelės."</string>
+    <!-- no translation found for lockscreen_missing_sim_message_short (5099439277819215399) -->
+    <skip />
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Planšetiniame kompiuteryje nėra SIM kortelės."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Telefone nėra SIM kortelės."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Įdėkite SIM kortelę."</string>

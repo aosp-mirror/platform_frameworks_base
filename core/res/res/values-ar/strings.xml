@@ -26,7 +26,7 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"غيغابايت"</string>
     <string name="terabyteShort" msgid="231613018159186962">"تيرابايت"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"بيتابايت"</string>
-    <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;بلا عنوان&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
     <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
@@ -292,7 +292,7 @@
     <string name="permlab_filter_events" msgid="8675535648807427389">"تصفية الأحداث"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"للسماح لأحد التطبيقات بتسجيل فلتر إدخال يعمل على تصفية مجموعة البث من جميع أحداث المستخدمين قبل إرسالها. يمكن أن يتحكم برنامج ضار في واجهة المستخدم النظام دون تدخل المستخدم."</string>
     <string name="permlab_magnify_display" msgid="5973626738170618775">"تكبير الشاشة"</string>
-    <string name="permdesc_magnify_display" msgid="7121235684515003792">"للسماح للتطبيق بتكبير محتوى شاشة. قد تؤدي التطبيقات الضارة إلى نقل محتوى الشاشة بطريقة تعرض الجهاز في وضع غير مفيد."</string>
+    <string name="permdesc_magnify_display" msgid="7121235684515003792">"للسماح للتطبيق بتكبير محتوى شاشة. قد تؤدي التطبيقات الضارة إلى نقل محتوى الشاشة بطريقة تعرض الجهاز في وضع غير قابل للاستخدام."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"إيقاف تشغيل جزئي"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"لوضع مدير الأنشطة في حالة إيقاف التشغيل. لا يتم تنفيذ إيقاف تشغيل كامل."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"منع التبديل بين التطبيقات"</string>
@@ -331,7 +331,7 @@
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"إدارة الرموز المميزة للتطبيقات"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"للسماح للتطبيق بإنشاء وإدارة رموزه الخاصة، وتجاوز ترتيب Z العادي. لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
     <string name="permlab_freezeScreen" msgid="4708181184441880175">"تجميد الشاشة"</string>
-    <string name="permdesc_freezeScreen" msgid="8558923789222670064">"للمساح للتطبيق بتجميد الشاشة مؤقتًا لإجراء انتقال بملء الشاشة."</string>
+    <string name="permdesc_freezeScreen" msgid="8558923789222670064">"للسماح للتطبيق بتجميد الشاشة مؤقتًا لإجراء انتقال بملء الشاشة."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"مفاتيح الضغط وأزرار التحكم"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"للسماح للتطبيق بتسليم أحداث الإرسال الخاصة به (ضغطات المفاتيح وغير ذلك) إلى تطبيقات أخرى. يمكن أن تستخدم التطبيقات الضارة ذلك للاستحواذ على الجهاز اللوحي."</string>
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"للسماح للتطبيق بتسليم أحداث الإرسال الخاصة به (ضغطات المفاتيح وغير ذلك) إلى تطبيقات أخرى. يمكن أن تستخدم التطبيقات الضارة ذلك للاستحواذ على الهاتف."</string>
@@ -776,7 +776,8 @@
     <string name="lockscreen_charged" msgid="4938930459620989972">"تم الشحن."</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"توصيل جهاز الشحن."</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"ليس هناك بطاقة SIM."</string>
+    <!-- no translation found for lockscreen_missing_sim_message_short (5099439277819215399) -->
+    <skip />
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"ليس هناك بطاقة SIM في الجهاز اللوحي."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"ليس هناك بطاقة SIM في الهاتف."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"أدخل بطاقة SIM."</string>
