@@ -80,7 +80,6 @@ public class BitmapDrawable extends Drawable {
     @Deprecated
     public BitmapDrawable() {
         mBitmapState = new BitmapState((Bitmap) null);
-        mMutated = true;
     }
 
     /**
@@ -91,7 +90,6 @@ public class BitmapDrawable extends Drawable {
     public BitmapDrawable(Resources res) {
         mBitmapState = new BitmapState((Bitmap) null);
         mBitmapState.mTargetDensity = mTargetDensity;
-        mMutated = true;
     }
 
     /**
@@ -102,7 +100,6 @@ public class BitmapDrawable extends Drawable {
     @Deprecated
     public BitmapDrawable(Bitmap bitmap) {
         this(new BitmapState(bitmap), null);
-        mMutated = true;
     }
 
     /**
@@ -112,7 +109,6 @@ public class BitmapDrawable extends Drawable {
     public BitmapDrawable(Resources res, Bitmap bitmap) {
         this(new BitmapState(bitmap), res);
         mBitmapState.mTargetDensity = mTargetDensity;
-        mMutated = true;
     }
 
     /**
@@ -126,7 +122,6 @@ public class BitmapDrawable extends Drawable {
         if (mBitmap == null) {
             android.util.Log.w("BitmapDrawable", "BitmapDrawable cannot decode " + filepath);
         }
-        mMutated = true;
     }
 
     /**
@@ -139,7 +134,6 @@ public class BitmapDrawable extends Drawable {
         if (mBitmap == null) {
             android.util.Log.w("BitmapDrawable", "BitmapDrawable cannot decode " + filepath);
         }
-        mMutated = true;
     }
 
     /**
@@ -153,7 +147,6 @@ public class BitmapDrawable extends Drawable {
         if (mBitmap == null) {
             android.util.Log.w("BitmapDrawable", "BitmapDrawable cannot decode " + is);
         }
-        mMutated = true;
     }
 
     /**
@@ -166,7 +159,6 @@ public class BitmapDrawable extends Drawable {
         if (mBitmap == null) {
             android.util.Log.w("BitmapDrawable", "BitmapDrawable cannot decode " + is);
         }
-        mMutated = true;
     }
 
     /**
@@ -560,7 +552,6 @@ public class BitmapDrawable extends Drawable {
         } else {
             mTargetDensity = state.mTargetDensity;
         }
-        mMutated = false;
         setBitmap(state != null ? state.mBitmap : null);
     }
 }
