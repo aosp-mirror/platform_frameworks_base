@@ -214,6 +214,7 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
     private Vibrator mVibrator;
 
     private static AlertDialog sConfirmSafeVolumeDialog;
+    private static Object sConfirmSafeVolumeLock = new Object();
 
     private static class WarningDialogReceiver extends BroadcastReceiver
             implements DialogInterface.OnDismissListener {
@@ -230,10 +231,16 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
         @Override
         public void onReceive(Context context, Intent intent) {
             mDialog.cancel();
+            synchronized (sConfirmSafeVolumeLock) {
+                sConfirmSafeVolumeDialog = null;
+            }
         }
 
         public void onDismiss(DialogInterface unused) {
             mContext.unregisterReceiver(this);
+            synchronized (sConfirmSafeVolumeLock) {
+                sConfirmSafeVolumeDialog = null;
+            }
         }
     }
 
@@ -556,6 +563,7 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
     }
 
     public void postDisplaySafeVolumeWarning() {
+        if (hasMessages(MSG_DISPLAY_SAFE_VOLUME_WARNING)) return;
         obtainMessage(MSG_DISPLAY_SAFE_VOLUME_WARNING, 0, 0).sendToTarget();
     }
 
@@ -828,28 +836,29 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
     }
 
     protected void onDisplaySafeVolumeWarning() {
-        if (sConfirmSafeVolumeDialog != null) {
-            sConfirmSafeVolumeDialog.dismiss();
+        synchronized (sConfirmSafeVolumeLock) {
+            if (sConfirmSafeVolumeDialog != null) {
+                return;
+            }
+            sConfirmSafeVolumeDialog = new AlertDialog.Builder(mContext)
+                    .setMessage(com.android.internal.R.string.safe_media_volume_warning)
+                    .setPositiveButton(com.android.internal.R.string.yes,
+                                        new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            mAudioService.disableSafeMediaVolume();
+                        }
+                    })
+                    .setNegativeButton(com.android.internal.R.string.no, null)
+                    .setIconAttribute(android.R.attr.alertDialogIcon)
+                    .create();
+            final WarningDialogReceiver warning = new WarningDialogReceiver(mContext,
+                    sConfirmSafeVolumeDialog);
+
+            sConfirmSafeVolumeDialog.setOnDismissListener(warning);
+            sConfirmSafeVolumeDialog.getWindow().setType(
+                                                    WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
+            sConfirmSafeVolumeDialog.show();
         }
-        sConfirmSafeVolumeDialog = new AlertDialog.Builder(mContext)
-                .setMessage(com.android.internal.R.string.safe_media_volume_warning)
-                .setPositiveButton(com.android.internal.R.string.yes,
-                                    new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        mAudioService.disableSafeMediaVolume();
-                    }
-                })
-                .setNegativeButton(com.android.internal.R.string.no, null)
-                .setIconAttribute(android.R.attr.alertDialogIcon)
-                .create();
-
-        final WarningDialogReceiver warning = new WarningDialogReceiver(mContext,
-                sConfirmSafeVolumeDialog);
-
-        sConfirmSafeVolumeDialog.setOnDismissListener(warning);
-        sConfirmSafeVolumeDialog.getWindow().setType(
-                                                WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
-        sConfirmSafeVolumeDialog.show();
     }
 
     /**
