@@ -109,8 +109,8 @@ public class KeyguardHostView extends KeyguardViewBase {
     }
 
     @Override
-    public boolean dispatchTouchEvent(MotionEvent ev) {
-        boolean result = super.dispatchTouchEvent(ev);
+    public boolean onTouchEvent(MotionEvent ev) {
+        boolean result = super.onTouchEvent(ev);
         mTempRect.set(0, 0, 0, 0);
         offsetRectIntoDescendantCoords(mSecurityViewContainer, mTempRect);
         ev.offsetLocation(mTempRect.left, mTempRect.top);

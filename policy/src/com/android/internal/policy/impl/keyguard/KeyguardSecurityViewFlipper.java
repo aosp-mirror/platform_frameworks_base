@@ -40,8 +40,8 @@ public class KeyguardSecurityViewFlipper extends ViewFlipper {
     }
 
     @Override
-    public boolean dispatchTouchEvent(MotionEvent ev) {
-        boolean result = super.dispatchTouchEvent(ev);
+    public boolean onTouchEvent(MotionEvent ev) {
+        boolean result = super.onTouchEvent(ev);
         mTempRect.set(0, 0, 0, 0);
         for (int i = 0; i < getChildCount(); i++) {
             View child = getChildAt(i);
