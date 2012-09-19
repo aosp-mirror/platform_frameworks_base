@@ -789,7 +789,8 @@
   <java-symbol type="string" name="webpage_unresponsive" />
   <java-symbol type="string" name="whichApplication" />
   <java-symbol type="string" name="wifi_available_sign_in" />
-  <java-symbol type="string" name="wifi_available_sign_in_detailed" />
+  <java-symbol type="string" name="network_available_sign_in" />
+  <java-symbol type="string" name="network_available_sign_in_detailed" />
   <java-symbol type="string" name="wifi_p2p_dialog_title" />
   <java-symbol type="string" name="wifi_p2p_enabled_notification_message" />
   <java-symbol type="string" name="wifi_p2p_enabled_notification_title" />
@@ -800,6 +801,7 @@
   <java-symbol type="string" name="wifi_p2p_show_pin_message" />
   <java-symbol type="string" name="wifi_p2p_to_message" />
   <java-symbol type="string" name="wifi_p2p_turnon_message" />
+  <java-symbol type="string" name="wifi_p2p_frequency_conflict_message" />
   <java-symbol type="string" name="wifi_tether_configure_ssid_default" />
   <java-symbol type="string" name="wifi_watchdog_network_disabled" />
   <java-symbol type="string" name="wifi_watchdog_network_disabled_detailed" />
