@@ -42,6 +42,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.ref.WeakReference;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -233,23 +234,27 @@ public class NetworkStatsRecorder {
      * Remove the given UID from all {@link FileRotator} history, migrating it
      * to {@link TrafficStats#UID_REMOVED}.
      */
-    public void removeUidLocked(int uid) {
+    public void removeUidsLocked(int[] uids) {
         try {
-            // process all existing data to migrate uid
-            mRotator.rewriteAll(new RemoveUidRewriter(mBucketDuration, uid));
+            // Rewrite all persisted data to migrate UID stats
+            mRotator.rewriteAll(new RemoveUidRewriter(mBucketDuration, uids));
         } catch (IOException e) {
-            Log.wtf(TAG, "problem removing UID " + uid, e);
+            Log.wtf(TAG, "problem removing UIDs " + Arrays.toString(uids), e);
             recoverFromWtf();
         }
 
-        // clear UID from current stats snapshot
+        // Remove any pending stats
+        mPending.removeUids(uids);
+        mSinceBoot.removeUids(uids);
+
+        // Clear UID from current stats snapshot
         if (mLastSnapshot != null) {
-            mLastSnapshot = mLastSnapshot.withoutUid(uid);
+            mLastSnapshot = mLastSnapshot.withoutUids(uids);
         }
 
         final NetworkStatsCollection complete = mComplete != null ? mComplete.get() : null;
         if (complete != null) {
-            complete.removeUid(uid);
+            complete.removeUids(uids);
         }
     }
 
@@ -293,11 +298,11 @@ public class NetworkStatsRecorder {
      */
     public static class RemoveUidRewriter implements FileRotator.Rewriter {
         private final NetworkStatsCollection mTemp;
-        private final int mUid;
+        private final int[] mUids;
 
-        public RemoveUidRewriter(long bucketDuration, int uid) {
+        public RemoveUidRewriter(long bucketDuration, int[] uids) {
             mTemp = new NetworkStatsCollection(bucketDuration);
-            mUid = uid;
+            mUids = uids;
         }
 
         @Override
@@ -309,7 +314,7 @@ public class NetworkStatsRecorder {
         public void read(InputStream in) throws IOException {
             mTemp.read(in);
             mTemp.clearDirty();
-            mTemp.removeUid(mUid);
+            mTemp.removeUids(mUids);
         }
 
         @Override
