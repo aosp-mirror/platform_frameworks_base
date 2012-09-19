@@ -26,7 +26,7 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"گیگابایت"</string>
     <string name="terabyteShort" msgid="231613018159186962">"ترابایت"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"پتابایت"</string>
-    <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;بدون عنوان&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
     <string name="ellipsis_two_dots" msgid="1228078994866030736">".."</string>
@@ -142,7 +142,7 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"زنگ خاموش"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"زنگ لرزشی"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"زنگ روشن"</string>
-    <string name="shutdown_progress" msgid="2281079257329981203">"خاموش کردن..."</string>
+    <string name="shutdown_progress" msgid="2281079257329981203">"در حال خاموش شدن…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"رایانهٔ لوحی شما خاموش می‌شود."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"گوشی شما خاموش می‌شود."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"آیا می‎خواهید تلفن خاموش شود؟"</string>
@@ -171,12 +171,45 @@
     <string name="permgrouplab_messages" msgid="7521249148445456662">"پیام‌های شما"</string>
     <string name="permgroupdesc_messages" msgid="7821999071003699236">"پیام کوتاه، ایمیل و دیگر پیام‌ها را بخوانید."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"اطلاعات شخصی شما"</string>
-    <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"دسترسی مستقیم به مخاطبین و تقویم ذخیره شده در رایانهٔ لوحی."</string>
-    <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"دسترسی مستقیم به مخاطبین و تقویم ذخیره شده در گوشی."</string>
+    <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"مستقیم به اطلاعات مربوط به خود، ذخیره شده در روی کارت تماس خود دسترسی داشته باشید."</string>
+    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"اطلاعات اجتماعی شما"</string>
+    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"مستقیم به اطلاعات مخاطبین و روابط اجتماعی دسترسی داشته باشید."</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"موقعیت مکانی شما"</string>
     <string name="permgroupdesc_location" msgid="5704679763124170100">"بر موقعیت مکانی فیزیکی خود نظارت داشته باشید."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"ارتباط شبکه‌ای"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"به ویژگی‎های مختلف شبکه دسترسی داشته باشید."</string>
+    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"بلوتوث"</string>
+    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"از طریق بلوتوث به دستگاه‌ها و شبکه‌ها دسترسی داشته باشد."</string>
+    <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"تنظیمات صدا"</string>
+    <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"تنظیمات صوتی را تغییر دهید."</string>
+    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"روی باتری اثر دارد"</string>
+    <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"از ویژگی‌هایی استفاده کنید که باتری را سریع خالی می‌کند."</string>
+    <string name="permgrouplab_calendar" msgid="5863508437783683902">"تقویم"</string>
+    <string name="permgroupdesc_calendar" msgid="5777534316982184416">"مستقیم به رویدادها و تقویم دسترسی داشته باشید."</string>
+    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"خواندن فرهنگ لغت کاربر"</string>
+    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"کلمات را در فرهنگ لغت کاربر بخواند."</string>
+    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"نوشتن فرهنگ لغت کاربر"</string>
+    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"کلمات را به فرهنگ لغت کاربر اضافه کند."</string>
+    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"نشانک‌ها و سابقه"</string>
+    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"مستقیم به نشانک‌ها و سابقه مرور دسترسی داشته باشید."</string>
+    <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"زنگ هشدار"</string>
+    <string name="permgroupdesc_deviceAlarms" msgid="4769356362251641175">"ساعت زنگ دار را تنظیم کنید."</string>
+    <string name="permgrouplab_voicemail" msgid="4162237145027592133">"پست صوتی"</string>
+    <string name="permgroupdesc_voicemail" msgid="2498403969862951393">"به پست صوتی مستقیم دسترسی داشته باشید."</string>
+    <string name="permgrouplab_microphone" msgid="171539900250043464">"میکروفن"</string>
+    <string name="permgroupdesc_microphone" msgid="7106618286905738408">"مستقیم به میکروفن برای ضبط صدا دسترسی داشته باشید."</string>
+    <string name="permgrouplab_camera" msgid="4820372495894586615">"دوربین"</string>
+    <string name="permgroupdesc_camera" msgid="2933667372289567714">"مستقیم به دوربین برای عکس گرفتن یا ضبط فیلم دسترسی داشته باشید."</string>
+    <string name="permgrouplab_appInfo" msgid="8028789762634147725">"اطلاعات برنامه‌های شما"</string>
+    <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"می‌تواند بر عملکرد برنامه‌های دیگر روی دستگاه اثر بگذارد."</string>
+    <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"تصویر زمینه"</string>
+    <string name="permgroupdesc_wallpaper" msgid="5630417854750540154">"تنظیمات تصویر زمینه دستگاه را تغییر دهید."</string>
+    <string name="permgrouplab_systemClock" msgid="406535759236612992">"ساعت"</string>
+    <string name="permgroupdesc_systemClock" msgid="3944359833624094992">"زمان یا منطقهٔ زمانی دستگاه را تغییر دهید."</string>
+    <string name="permgrouplab_statusBar" msgid="2095862568113945398">"نوار وضعیت"</string>
+    <string name="permgroupdesc_statusBar" msgid="6242593432226807171">"تنظیمات نوار وضعیت دستگاه را تغییر دهید."</string>
+    <string name="permgrouplab_syncSettings" msgid="3341990986147826541">"تنظیمات همگام‌سازی"</string>
+    <string name="permgroupdesc_syncSettings" msgid="7603195265129031797">"به تنظیمات همگام‌سازی دسترسی داشته باشید."</string>
     <string name="permgrouplab_accounts" msgid="3359646291125325519">"حساب‌های شما"</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"به حساب‌های موجود دسترسی داشته باشید."</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"کنترل‌های سخت‌افزار"</string>
@@ -187,6 +220,8 @@
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"دسترسی سطح پایین و کنترل سیستم."</string>
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"ابزارهای توسعه"</string>
     <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"ویژگیهایی که فقط مورد نیاز برنامه نویسان است."</string>
+    <string name="permgrouplab_display" msgid="4279909676036402636">"رابط برنامهٔ دیگر"</string>
+    <string name="permgroupdesc_display" msgid="6051002031933013714">"روی رابط برنامه‌های دیگر اثر دارد."</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"حافظه"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"به حافظهٔ USB دسترسی پیدا کنید."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"به کارت SD دسترسی داشته باشید."</string>
@@ -256,6 +291,8 @@
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"به یک برنامه کاربردی اجازه می‌دهد که اطلاعات مربوط به پنجره‌ها را از مدیریت پنجره بازیابی کند. برنامه‌های کاربردی مخرب ممکن است اطلاعاتی که برای استفاده سیستم داخلی درنظر گرفته شده‌اند را بازیابی کنند."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"فیلتر کردن رویدادها"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"به یک برنامه کاربردی اجازه می‌دهد یک فیلتر ورودی را که جریان تمام رویدادهای کاربران را قبل از ارسال شدن فیلتر می‌کند، ثبت نماید. برنامه‌ کاربردی مخرب ممکن است رابط کاربری سیستم را بدون مداخله کاربر، کنترل کند."</string>
+    <string name="permlab_magnify_display" msgid="5973626738170618775">"بزرگ کردن صفحه نمایش"</string>
+    <string name="permdesc_magnify_display" msgid="7121235684515003792">"به یک برنامه کاربردی اجازه بزرگ کردن محتوای یک صفحه نمایش را می‌دهد. برنامه‌های کاربردی مضر می‌توانند محتوای صفحه نمایش را به طریقی منتقل کنند که باعث غیرقابل‌استفاده شدن دستگاه شود."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"خاموش شدن جزئی"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"مدیر فعالیت را در حالت خاموشی قرار می‌دهد. خاموشی را به صورت کامل انجام نمی‌دهد."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"ممانعت از جابجایی برنامه"</string>
@@ -272,20 +309,29 @@
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"به برنامه اجازه می‎دهد تا حداکثر تعداد پردازشهایی را که اجرا خواهد شد کنترل کند. هرگز برای برنامه‎های عادی لازم نیست."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"بستن اجباری برنامه‌های پس‌زمینه"</string>
     <string name="permdesc_setAlwaysFinish" msgid="7471310652868841499">"به برنامه اجازه می‎دهد تا به محض اینکه فعالیتها به پس‌زمینه رفتند تمام شوند. برای برنامه‎های عادی نیازی نیست."</string>
-    <string name="permlab_batteryStats" msgid="7863923071360031652">"اصلاح کردن آمار مربوط به باتری"</string>
-    <string name="permdesc_batteryStats" msgid="6835186932305744068">"به برنامه اجازه می‎دهد تا آمار جمع‌آوری شده باتری را تغییر دهد. برای استفاده برنامه‎های عادی نیست."</string>
+    <!-- no translation found for permlab_batteryStats (2789610673514103364) -->
+    <skip />
+    <!-- no translation found for permdesc_batteryStats (5897346582882915114) -->
+    <skip />
+    <!-- no translation found for permlab_updateBatteryStats (3719689764536379557) -->
+    <skip />
+    <!-- no translation found for permdesc_updateBatteryStats (6862817857178025002) -->
+    <skip />
     <string name="permlab_backup" msgid="470013022865453920">"کنترل نسخهٔ پشتیبان سیستم و بازیابی"</string>
     <string name="permdesc_backup" msgid="6912230525140589891">"به برنامه اجازه می‎دهد پشتیبان سیستم را کنترل کند و مکانیستم را بازیابی کند. برای استفاده برنامه‎های عادی نیست."</string>
-    <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"تهیه نسخهٔ پشتیبان کامل را تأیید کرده یا عملیات را بازیابی کنید"</string>
+    <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"تهیهٔ نسخهٔ پشتیبان کامل را تأیید کرده یا عملیات را بازیابی کنید"</string>
     <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"به برنامه اجازه می‎دهد تا رابط کاربر تایید نسخه کامل پشتیبان را راه‌اندازی کند. هر برنامه‌ای نمی‎تواند از آن استفاده کند."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"نمایش پنجره‌های غیرمجاز"</string>
     <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"به برنامه اجازه می‎دهد پنجره‎هایی را ایجاد کند که می‎خواهد توسط رابط کاربر سیستم داخلی استفاده شود. برای استفاده برنامه‎های عادی نیست."</string>
     <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"ترسیم روی برنامه‌های دیگر"</string>
-    <string name="permdesc_systemAlertWindow" msgid="4460454022797261814">"به برنامه اجازه می‎دهد تا پنجره‎های هشدار سیستم را نشان دهد. برخی از پنجره‌های هشدار ممکن است کل صفحه را کنترل کنند."</string>
+    <!-- no translation found for permdesc_systemAlertWindow (8584678381972820118) -->
+    <skip />
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"اصلاح سرعت انیمیشن کلی"</string>
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"به برنامه اجازه می‎دهد سرعت کلی انیمیشن را هر زمان که بخواهد تغییر دهد (انیمیشن‎های سریعتر یا آهسته‎تر)."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"مدیریت نشانه‎های برنامه"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"به برنامه اجازه می‎دهد با ایجاد کنارگذر از سفارش عادی Z، نشانه‎های خود را ایجاد و مدیریت کند. برای برنامه‎های عادی مورد نیاز است."</string>
+    <string name="permlab_freezeScreen" msgid="4708181184441880175">"ثابت نگه داشتن صفحه"</string>
+    <string name="permdesc_freezeScreen" msgid="8558923789222670064">"به برنامه کاربردی اجازه می‌دهد که موقتاً صفحه را برای یک انتقال تمام صفحه ثابت نگه دارد."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"کلیدها و دکمه‌های کنترل را فشار دهید"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"به برنامه اجازه می‎دهد تا رویدادهای ورودی خود (فشردن کلیدها و غیره) را تحویل دهد. برنامه‎های مخرب می‎توانند از آن استفاده کنند تا کارکرد رایانهٔ لوحی را کنترل کنند."</string>
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"به برنامه اجازه می‎دهد تا رویدادهای ورودی خود را به برنامه‎های دیگر تحویل دهد (فشردن کلیدها و غیره). برنامه‎های مخرب می‎توانند از آن برای کنترل کارکرد تلفن استفاده کنند."</string>
@@ -327,8 +373,10 @@
     <string name="permlab_installPackages" msgid="2199128482820306924">"نصب مستقیم برنامه"</string>
     <string name="permdesc_installPackages" msgid="5628530972548071284">"به برنامه اجازه می‎دهد تا بسته‎های Android به روز شده یا جدید را نصب کند. برنامه‎های مخرب می‎توانند از این استفاده کنند تا برنامه‎های جدید را با مجوزهای قوی اختیاری اضافه کنند."</string>
     <string name="permlab_clearAppCache" msgid="7487279391723526815">"حذف تمام داده‎های حافظهٔ پنهان برنامه"</string>
-    <string name="permdesc_clearAppCache" product="tablet" msgid="3523396284474042284">"به برنامه اجازه می‎دهد تا حافظه رایانهٔ لوحی را با حذف فایل‌ها در فهرست حافظهٔ پنهان برنامه آزاد کند. معمولا دسترسی برای پردازش سیستم بسیار محدود است."</string>
-    <string name="permdesc_clearAppCache" product="default" msgid="5067988373366292186">"به برنامه اجازه می‎دهد تا با حذف فایل‌ها در فهرست حافظهٔ پنهان برنامه حافظه تلفن را آزاد کند. معمولا دسترسی به پردازش سیستم بسیار محدود است."</string>
+    <!-- no translation found for permdesc_clearAppCache (8974640871945434565) -->
+    <skip />
+    <!-- no translation found for permdesc_clearAppCache (2459441021956436779) -->
+    <skip />
     <string name="permlab_movePackage" msgid="3289890271645921411">"انتقال منابع برنامه"</string>
     <string name="permdesc_movePackage" msgid="319562217778244524">"به برنامه اجازه می‎دهد تا منابع برنامه را از رسانه داخلی به رسانه خارجی و بالعکس منتقل کند."</string>
     <string name="permlab_readLogs" msgid="6615778543198967614">"مطالعه داده‌های گزارش حساس"</string>
@@ -389,15 +437,22 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="5945166642335800763">"به برنامه اجازه می‎دهد تا به فرمان‌های ارائه‎دهنده موقعیت مکانی دیگری دسترسی داشته باشد. این ویژگی ممکن است باعث مختل شدن عملکرد GPS یا دیگر منابع موقعیت مکانی توسط این برنامه شود."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"مجوز برای نصب یک ارائه دهنده مکان"</string>
     <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"منابع موقعیت مکانی کاذب را برای تست کردن یا نصب یک ارائه‌دهنده موقعیت مکانی جدید ایجاد نمایید. این کار به برنامه امکان می‌دهد موقعیت مکانی و/یا وضعیت گزارش داده شده توسط سایر منابع موقعیت مکانی مانند GPS یا ارائه‌دهندگان موقعیت مکانی را نادیده بگیرد."</string>
-    <string name="permlab_accessFineLocation" msgid="5885550969882561436">"موقعیت مکانی دقیق (GPS)"</string>
-    <string name="permdesc_accessFineLocation" product="tablet" msgid="8960597421469894181">"به منابع موقعیت مکانی دقیق مانند سیستم موقعیت‌یابی جهانی در رایانهٔ لوحی خود دسترسی پیدا کنید. وقتی سرویس‌های موقعیت مکانی موجود و فعال باشند، این مجوز به برنامه اجازه می‌دهد موقعیت مکانی دقیق شما را تعیین کند."</string>
-    <string name="permdesc_accessFineLocation" product="default" msgid="239268765496141815">"به منابع موقعیت مکانی دقیق مانند سیستم موقعیت‌یابی جهانی در تلفن خود دسترسی پیدا کنید. وقتی سرویس‌های موقعیت مکانی موجود و فعال باشند، این مجوز به برنامه اجازه می‌دهد موقعیت مکانی دقیق شما را تعیین کند."</string>
-    <string name="permlab_accessCoarseLocation" msgid="7422827215441638984">"موقعیت مکانی تقریبی (مبتنی بر شبکه)"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="5383798877137640762">"به موقعیت مکانی تقریبی ارا‌ئه‌دهندگان موقعیت مکانی با استفاده از منابع شبکه مانند برج مخابراتی و Wi-Fi دسترسی پیدا کنید. وقتی این سرویس‌های موقعیت مکانی موجود و فعال باشند، این مجوز به برنامه امکان می‌دهد موقعیت مکانی تقریبی شما را تعیین کند."</string>
+    <!-- no translation found for permlab_accessFineLocation (1191898061965273372) -->
+    <skip />
+    <!-- no translation found for permdesc_accessFineLocation (5295047563564981250) -->
+    <skip />
+    <!-- no translation found for permlab_accessCoarseLocation (4887895362354239628) -->
+    <skip />
+    <!-- no translation found for permdesc_accessCoarseLocation (2538200184373302295) -->
+    <skip />
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"دسترسی به SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"اجازه می‎دهد برنامه از ویژگی‌های سطح پایین SurfaceFlinger استفاده کند."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"خواندن بافر قاب"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"به برنامه اجازه می‎دهد تا محتوای بافر کادر را بخواند."</string>
+    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"پیکربندی صفحه نمایش‌های Wifi"</string>
+    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"به برنامه اجازه می‌دهد تا اتصال به صفحات نمایش Wifi را پیکربندی کند."</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"کنترل صفحه نمایش‌های Wifi"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"به برنامه اجازه می‌دهد که ویژگی‌های سطح پایین صفحه‌های نمایش Wifi را کنترل کند."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"تغییر تنظیمات صوتی"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"به برنامه امکان می‌دهد تنظیمات صوتی کلی مانند میزان صدا و بلندگوی مورد استفاده برای پخش صدا را اصلاح کند."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ضبط صدا"</string>
@@ -511,7 +566,8 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"دسترسی به تنظیمات بلوتوث"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"به برنامه اجازه می‎دهد تا رایانهٔ لوحی بلوتوث محلی را پیکربندی کرده، دستگاه‌های راه دور را شناسایی کرده و با آن‌ها جفت شود."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"به برنامه اجازه می‎دهد تا تلفن بلوتوث محلی را پیکربندی کند و دستگاه‌های راه دور را پیدا کند و با آن‌ها جفت شود."</string>
-    <string name="permlab_accessWimaxState" msgid="7436749103151096452">"مشاهدهٔ اتصالات وایمکس"</string>
+    <!-- no translation found for permlab_accessWimaxState (4195907010610205703) -->
+    <skip />
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"به برنامه امکان می‌دهد فعال بودن وایمکس و اطلاعات مربوط به هر یک از شبکه‌های وایمکس متصل را مشخص کند."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"تغییر وضعیت WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"به برنامه امکان می‌دهد رایانهٔ لوحی را به شبکه‌های وایمکس متصل کرده یا اتصال آن را از این شبکه‌ها قطع کند."</string>
@@ -535,7 +591,8 @@
     <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"به برنامه اجازه می‎دهد تا فیدهای همگام شده کنونی را تغییر دهد. برنامه‎های مخرب می‎توانند فیدهای همگام شده را تغییر دهند."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"خواندن واژه‌هایی که به فرهنگ‌ لغت اضافه کردید"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"به برنامه اجازه می‎دهد همه کلمه، نام و عباراتی را که کاربر در فرهنگ لغت خود ذخیره کرده است بخواند."</string>
-    <string name="permlab_writeDictionary" msgid="2296383164914812772">"نوشتن در فرهنگ لغت تعریف شده از سوی کاربر"</string>
+    <!-- no translation found for permlab_writeDictionary (2183110402314441106) -->
+    <skip />
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"به برنامه اجازه می‎دهد تا کلمات جدید را در فهرست کاربر بنویسد."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"تست کردن دسترسی به حافظهٔ محافظت‌شده"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"تست کردن دسترسی به حافظهٔ محافظت‌شده"</string>
@@ -547,10 +604,8 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"به برنامه اجازه می‎دهد تا در کارت SD بنویسد."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"تغییر/حذف محتواهای حافظه رسانه داخلی"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"به برنامه اجازه می‎دهد تا محتویات حافظه رسانه داخلی را تغییر دهد."</string>
-    <!-- no translation found for permlab_sdcardAccessAll (8150613823900460576) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardAccessAll (3215208357415891320) -->
-    <skip />
+    <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"دسترسی به دستگاه ذخیره خارجی تمام کاربران"</string>
+    <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"به برنامه اجازه می‌دهد به دستگاه ذخیره خارجی برای همه کاربران دسترسی داشته باشد."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"دسترسی به سیستم فایل حافظهٔ پنهان"</string>
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"به برنامه اجازه می‎دهد تا سیستم فایل حافظهٔ پنهان را بخواند و بنویسد."</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"علامتگذاری/دریافت تماس‌های اینترنتی"</string>
@@ -581,6 +636,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"باید اطلاعات ذخیره شده برنامه رمزگذاری شود."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"غیر فعال کردن دوربین ها"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"از استفاده از تمام دوربین‎های دستگاه جلوگیری کنید."</string>
+    <string name="policylab_disableKeyguardWidgets" msgid="1794894613389073926">"غیرفعال کردن ابزارک‌های موجود در محافظ کلید"</string>
+    <string name="policydesc_disableKeyguardWidgets" msgid="7254624892984033592">"از استفاده از همه ابزارک‌های موجود در محافظ کلید یا برخی از آنها جلوگیری شود."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"خانه"</item>
     <item msgid="869923650527136615">"تلفن همراه"</item>
@@ -987,8 +1044,8 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"در تنظیمات سیستم &gt;برنامه‎ها &gt; مورد دانلود شده آن را دوباره فعال کنید."</string>
     <string name="smv_application" msgid="3307209192155442829">"برنامه <xliff:g id="APPLICATION">%1$s</xliff:g> (پردازش <xliff:g id="PROCESS">%2$s</xliff:g>) خط مشی StrictMode اجرایی خود را نقض کرده است."</string>
     <string name="smv_process" msgid="5120397012047462446">"فرآیند <xliff:g id="PROCESS">%1$s</xliff:g> خط مشی StrictMode اجرای خودکار خود را نقض کرده است."</string>
-    <string name="android_upgrading_title" msgid="1584192285441405746">"Android در حال ارتقا است..."</string>
-    <string name="android_upgrading_apk" msgid="7904042682111526169">"بهینه‌سازی برنامه <xliff:g id="NUMBER_0">%1$d</xliff:g> از <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
+    <string name="android_upgrading_title" msgid="1584192285441405746">"‏Android در حال ارتقا است..."</string>
+    <string name="android_upgrading_apk" msgid="7904042682111526169">"در حال بهینه‌سازی برنامهٔ <xliff:g id="NUMBER_0">%1$d</xliff:g> از <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"برنامه‎های شروع"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"در حال اتمام راه‌اندازی."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> در حال اجرا"</string>
@@ -1050,13 +1107,22 @@
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; در حال ارسال تعداد زیادی پیامک است. آیا اجازه می‌دهید این برنامه همچنان پیامک ارسال کند؟"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"اجازه دادن"</string>
     <string name="sms_control_no" msgid="625438561395534982">"ردکردن"</string>
-    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"پیامک به کد کوتاه ارسال شود؟"</string>
-    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"پیامک ممتاز ارسال شود؟"</string>
-    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; می‌خواهد یک پیام نوشتاری را به &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, ارسال کند که به نظر می‌رسد یک کد کوتاه پیامک است.&lt;p&gt;ارسال پیام‌های نوشتاری به برخی از کدهای کوتاه ممکن است باعث شود برای حساب تلفن همراه شما بابت استفاده از سرویس‌های ممتاز صورتحساب ارسال شود.&lt;p&gt;آیا به این برنامه اجازه می‌دهید پیام ارسال کند؟"</string>
-    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; می‌خواهد یک پیام نوشتاری را به &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, ارسال کند که یک کد کوتاه پیامک ممتاز است.&lt;p&gt;&lt;b&gt;ارسال پیام به این مقصد ممکن است باعث شود برای حساب تلفن همراه شما بابت استفاده از سرویس‌های ممتاز صورتحساب ارسال شود.&lt;/b&gt;&lt;p&gt;آیا به این برنامه اجازه می‌دهید پیامک ارسال کند؟"</string>
-    <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"ارسال پیام"</string>
-    <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"ارسال نشود"</string>
-    <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"گزارش برنامه مخرب"</string>
+    <!-- no translation found for sms_short_code_confirm_message (1645436466285310855) -->
+    <skip />
+    <!-- no translation found for sms_short_code_details (4992814738863678373) -->
+    <skip />
+    <!-- no translation found for sms_premium_short_code_details (4291752905667807485) -->
+    <skip />
+    <!-- no translation found for sms_short_code_confirm_allow (4458878637111023413) -->
+    <skip />
+    <!-- no translation found for sms_short_code_confirm_deny (2927389840209170706) -->
+    <skip />
+    <!-- no translation found for sms_short_code_remember_choice (5289538592272218136) -->
+    <skip />
+    <!-- no translation found for sms_short_code_confirm_always_allow (3241181154869493368) -->
+    <skip />
+    <!-- no translation found for sms_short_code_confirm_never_allow (446992765774269673) -->
+    <skip />
     <string name="sim_removed_title" msgid="6227712319223226185">"سیم کارت برداشته شد"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"تا وقتی که با یک سیم‌کارت معتبر راه‌اندازی مجدد نکنید شبکه تلفن همراه غیر قابل‌ دسترس خواهد بود."</string>
     <string name="sim_done_button" msgid="827949989369963775">"انجام شد"</string>
@@ -1067,12 +1133,11 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"تاریخ تنظیم"</string>
     <string name="date_time_set" msgid="5777075614321087758">"تنظیم"</string>
     <string name="date_time_done" msgid="2507683751759308828">"انجام شد"</string>
-    <string name="default_permission_group" msgid="2690160991405646128">"پیش‌فرض"</string>
-    <string name="no_permissions" msgid="7283357728219338112">"مجوزی لازم نیست"</string>
-    <string name="perms_hide" msgid="7283915391320676226"><b>"پنهان کردن"</b></string>
-    <string name="perms_show_all" msgid="2671791163933091180"><b>"نمایش همه"</b></string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"جدید: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"ارائه شده توسط <xliff:g id="APP_NAME">%1$s</xliff:g> ."</string>
+    <string name="no_permissions" msgid="7283357728219338112">"مجوزی لازم نیست"</string>
+    <!-- no translation found for perm_costs_money (4902470324142151116) -->
+    <skip />
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"حافظه انبوه USB"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB متصل شد"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"شما از طریق USB به رایانهٔ خود متصل شده‎اید. اگر می‎خواهید فایل‎ها را بین رایانهٔ خود و حافظهٔ USB در Android کپی کنید، دکمه زیر را لمس کنید."</string>
@@ -1319,64 +1384,46 @@
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"بلوتوث‌های صوتی"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"انجام شد"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"خروجی رسانه"</string>
-    <!-- no translation found for display_manager_built_in_display_name (2583134294292563941) -->
+    <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"صفحه نمایش از خود"</string>
+    <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"صفحه HDMI"</string>
+    <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"همپوشانی #<xliff:g id="ID">%1$d</xliff:g>"</string>
+    <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
+    <string name="kg_emergency_call_label" msgid="684946192523830531">"تماس اضطراری"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"الگو را فراموش کرده‌اید"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"الگوی اشتباه"</string>
+    <string name="kg_wrong_password" msgid="2333281762128113157">"گذرواژه اشتباه"</string>
+    <string name="kg_wrong_pin" msgid="1131306510833563801">"پین اشتباه"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"پس از <xliff:g id="NUMBER">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
+    <string name="kg_pattern_instructions" msgid="398978611683075868">"الگوی خود را رسم کنید"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"پین سیم کارت را وارد کنید"</string>
+    <string name="kg_pin_instructions" msgid="2377242233495111557">"پین را وارد کنید"</string>
+    <string name="kg_password_instructions" msgid="5753646556186936819">"گذرواژه را وارد کنید"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="5183097160254244459">"کد PUK"</string>
+    <string name="kg_puk_enter_pin_hint" msgid="597821135578014901">"پین کد جدید"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"بازگشایی قفل سیم کارت..."</string>
+    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"پین کد اشتباه است."</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"یک پین ۴ تا ۸ رقمی را تایپ کنید."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="5216603185442368307">"یک PUK با ۸ رقم یا بیشتر تایپ کنید."</string>
+    <string name="kg_sim_puk_recovery_hint" msgid="5577753137718442566">"PUK و پین کد جدید را تایپ کنید"</string>
+    <string name="kg_invalid_puk" msgid="5809955359950817326">"PUK که نوشته‌اید صحیح نیست."</string>
+    <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"تلاش‎های زیادی برای کشیدن الگو صورت گرفته است"</string>
+    <string name="kg_login_instructions" msgid="1100551261265506448">"برای بازگشایی قفل، با حساب Google خود وارد سیستم شوید."</string>
+    <string name="kg_login_username_hint" msgid="5718534272070920364">"نام کاربری (ایمیل)"</string>
+    <string name="kg_login_password_hint" msgid="9057289103827298549">"گذرواژه"</string>
+    <string name="kg_login_submit_button" msgid="5355904582674054702">"ورود به سیستم"</string>
+    <string name="kg_login_invalid_input" msgid="5754664119319872197">"نام کاربری یا گذرواژه نامعتبر."</string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"نام کاربری یا گذرواژه خود را فراموش کردید؟"\n"از "<b>"google.com/accounts/recovery"</b>" بازدید کنید."</string>
+    <string name="kg_login_checking_password" msgid="8849589033659332457">"در حال بررسی..."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"پین خود را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه تایپ کردید. "\n\n"پس از <xliff:g id="NUMBER_1">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"گذرواژه خود را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه تایپ کردید. "\n\n"پس از <xliff:g id="NUMBER_1">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه کشیدید. "\n\n"لطفاً پس از <xliff:g id="NUMBER_1">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"شما به اشتباه <xliff:g id="NUMBER_0">%d</xliff:g> بار اقدام به باز کردن قفل رایانه لوحی کرده‌اید. پس از <xliff:g id="NUMBER_1">%d</xliff:g> تلاش ناموفق دیگر، رایانهٔ لوحی به پیش‌فرض کارخانه بازنشانی می‌شود و تمام داده‌های کاربر از دست خواهد رفت."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"شما به اشتباه <xliff:g id="NUMBER_0">%d</xliff:g> بار اقدام به باز کردن قفل تلفن کرده‌اید. پس از <xliff:g id="NUMBER_1">%d</xliff:g> تلاش ناموفق دیگر، تلفن به پیش‌فرض کارخانه بازنشانی می‌شود و تمام داده‌های کاربر از دست خواهد رفت."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"شما به اشتباه <xliff:g id="NUMBER">%d</xliff:g> بار اقدام به باز کردن قفل رایانه لوحی کرده‌اید. رایانه لوحی اکنون به پیش‌فرض کارخانه بازنشانی می‌شود."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"شما به اشتباه <xliff:g id="NUMBER">%d</xliff:g> بار اقدام به باز کردن قفل تلفن کرده‌اید. این تلفن اکنون به پیش‌فرض کارخانه بازنشانی می‌شود."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه کشیده‎اید. بعد از <xliff:g id="NUMBER_1">%d</xliff:g> تلاش ناموفق، از شما خواسته می‎شود که با استفاده از یک حساب ایمیل قفل رایانه لوحی خود را باز کنید."\n\n" لطفاً پس از <xliff:g id="NUMBER_2">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه کشیده‌اید. پس از <xliff:g id="NUMBER_1">%d</xliff:g> تلاش ناموفق، از شما خواسته می‎شود که با استفاده از یک حساب ایمیل قفل تلفن خود را باز کنید."\n\n" لطفاً پس از <xliff:g id="NUMBER_2">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
+    <!-- no translation found for safe_media_volume_warning (7382971871993371648) -->
     <skip />
-    <!-- no translation found for display_manager_overlay_display_name (5142365982271620716) -->
-    <skip />
-    <!-- no translation found for display_manager_overlay_display_title (8186674340178573982) -->
-    <skip />
-    <!-- no translation found for kg_emergency_call_label (684946192523830531) -->
-    <skip />
-    <!-- no translation found for kg_forgot_pattern_button_text (8852021467868220608) -->
-    <skip />
-    <!-- no translation found for kg_wrong_pattern (1850806070801358830) -->
-    <skip />
-    <!-- no translation found for kg_wrong_password (2333281762128113157) -->
-    <skip />
-    <!-- no translation found for kg_wrong_pin (1131306510833563801) -->
-    <skip />
-    <!-- no translation found for kg_too_many_failed_attempts_countdown (353963338189371686) -->
-    <skip />
-    <!-- no translation found for kg_pattern_instructions (398978611683075868) -->
-    <skip />
-    <!-- no translation found for kg_sim_pin_instructions (2319508550934557331) -->
-    <skip />
-    <!-- no translation found for kg_pin_instructions (2377242233495111557) -->
-    <skip />
-    <!-- no translation found for kg_password_instructions (5753646556186936819) -->
-    <skip />
-    <!-- no translation found for kg_puk_enter_puk_hint (5183097160254244459) -->
-    <skip />
-    <!-- no translation found for kg_puk_enter_pin_hint (597821135578014901) -->
-    <skip />
-    <!-- no translation found for kg_sim_unlock_progress_dialog_message (8950398016976865762) -->
-    <skip />
-    <!-- no translation found for kg_password_wrong_pin_code (1139324887413846912) -->
-    <skip />
-    <!-- no translation found for kg_invalid_sim_pin_hint (8795159358110620001) -->
-    <skip />
-    <!-- no translation found for kg_invalid_sim_puk_hint (5216603185442368307) -->
-    <skip />
-    <!-- no translation found for kg_sim_puk_recovery_hint (5577753137718442566) -->
-    <skip />
-    <!-- no translation found for kg_invalid_puk (5809955359950817326) -->
-    <skip />
-    <!-- no translation found for kg_login_too_many_attempts (6486842094005698475) -->
-    <skip />
-    <!-- no translation found for kg_login_instructions (1100551261265506448) -->
-    <skip />
-    <!-- no translation found for kg_login_username_hint (5718534272070920364) -->
-    <skip />
-    <!-- no translation found for kg_login_password_hint (9057289103827298549) -->
-    <skip />
-    <!-- no translation found for kg_login_submit_button (5355904582674054702) -->
-    <skip />
-    <!-- no translation found for kg_login_invalid_input (5754664119319872197) -->
-    <skip />
-    <!-- no translation found for kg_login_account_recovery_hint (5690709132841752974) -->
-    <skip />
-    <!-- no translation found for kg_login_checking_password (8849589033659332457) -->
-    <skip />
-    <!-- no translation found for kg_temp_back_string (5812983904056640466) -->
-    <skip />
+    <string name="kg_temp_back_string" msgid="5812983904056640466">"&lt;"</string>
 </resources>
