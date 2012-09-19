@@ -1211,8 +1211,7 @@ final class ActivityStack {
         if (mMainStack) {
             mService.reportResumedActivityLocked(next);
         }
-        
-        next.clearThumbnail();
+
         if (mMainStack) {
             mService.setFocusedActivityLocked(next);
         }
@@ -4336,16 +4335,31 @@ final class ActivityStack {
         finishTaskMoveLocked(task);
         return true;
     }
-    
+
     public ActivityManager.TaskThumbnails getTaskThumbnailsLocked(TaskRecord tr) {
         TaskAccessInfo info = getTaskAccessInfoLocked(tr.taskId, true);
         ActivityRecord resumed = mResumedActivity;
         if (resumed != null && resumed.thumbHolder == tr) {
             info.mainThumbnail = resumed.stack.screenshotActivities(resumed);
-        } else {
-            info.mainThumbnail = tr.lastThumbnail;
         }
         return info;
+    }
+
+    public Bitmap getTaskTopThumbnailLocked(TaskRecord tr) {
+        ActivityRecord resumed = mResumedActivity;
+        if (resumed != null && resumed.task == tr) {
+            // This task is the current resumed task, we just need to take
+            // a screenshot of it and return that.
+            return resumed.stack.screenshotActivities(resumed);
+        }
+        // Return the information about the task, to figure out the top
+        // thumbnail to return.
+        TaskAccessInfo info = getTaskAccessInfoLocked(tr.taskId, true);
+        if (info.numSubThumbbails <= 0) {
+            return info.mainThumbnail;
+        } else {
+            return info.subtasks.get(info.numSubThumbbails-1).holder.lastThumbnail;
+        }
     }
 
     public ActivityRecord removeTaskActivitiesLocked(int taskId, int subTaskIndex,
@@ -4378,7 +4392,6 @@ final class ActivityStack {
     }
 
     public TaskAccessInfo getTaskAccessInfoLocked(int taskId, boolean inclThumbs) {
-        ActivityRecord resumed = mResumedActivity;
         final TaskAccessInfo thumbs = new TaskAccessInfo();
         // How many different sub-thumbnails?
         final int NA = mHistory.size();
@@ -4388,6 +4401,10 @@ final class ActivityStack {
             ActivityRecord ar = mHistory.get(j);
             if (!ar.finishing && ar.task.taskId == taskId) {
                 holder = ar.thumbHolder;
+                if (holder != null) {
+                    thumbs.mainThumbnail = holder.lastThumbnail;
+                }
+                j++;
                 break;
             }
             j++;
@@ -4402,7 +4419,6 @@ final class ActivityStack {
 
         ArrayList<TaskAccessInfo.SubTask> subtasks = new ArrayList<TaskAccessInfo.SubTask>();
         thumbs.subtasks = subtasks;
-        ActivityRecord lastActivity = null;
         while (j < NA) {
             ActivityRecord ar = mHistory.get(j);
             j++;
@@ -4412,21 +4428,14 @@ final class ActivityStack {
             if (ar.task.taskId != taskId) {
                 break;
             }
-            lastActivity = ar;
             if (ar.thumbHolder != holder && holder != null) {
                 thumbs.numSubThumbbails++;
                 holder = ar.thumbHolder;
                 TaskAccessInfo.SubTask sub = new TaskAccessInfo.SubTask();
-                sub.thumbnail = holder.lastThumbnail;
+                sub.holder = holder;
                 sub.activity = ar;
                 sub.index = j-1;
                 subtasks.add(sub);
-            }
-        }
-        if (lastActivity != null && subtasks.size() > 0) {
-            if (resumed == lastActivity) {
-                TaskAccessInfo.SubTask sub = subtasks.get(subtasks.size()-1);
-                sub.thumbnail = lastActivity.stack.screenshotActivities(lastActivity);
             }
         }
         if (thumbs.numSubThumbbails > 0) {
@@ -4435,7 +4444,12 @@ final class ActivityStack {
                     if (index < 0 || index >= thumbs.subtasks.size()) {
                         return null;
                     }
-                    return thumbs.subtasks.get(index).thumbnail;
+                    TaskAccessInfo.SubTask sub = thumbs.subtasks.get(index);
+                    ActivityRecord resumed = mResumedActivity;
+                    if (resumed != null && resumed.thumbHolder == sub.holder) {
+                        return resumed.stack.screenshotActivities(resumed);
+                    }
+                    return sub.holder.lastThumbnail;
                 }
             };
         }

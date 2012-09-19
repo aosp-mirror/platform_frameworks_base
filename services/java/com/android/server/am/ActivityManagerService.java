@@ -168,6 +168,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final boolean localLOGV = DEBUG;
     static final boolean DEBUG_SWITCH = localLOGV || false;
     static final boolean DEBUG_TASKS = localLOGV || false;
+    static final boolean DEBUG_THUMBNAILS = localLOGV || false;
     static final boolean DEBUG_PAUSE = localLOGV || false;
     static final boolean DEBUG_OOM_ADJ = localLOGV || false;
     static final boolean DEBUG_TRANSITION = localLOGV || false;
@@ -5846,6 +5847,18 @@ public final class ActivityManagerService extends ActivityManagerNative
             TaskRecord tr = taskForIdLocked(id);
             if (tr != null) {
                 return mMainStack.getTaskThumbnailsLocked(tr);
+            }
+        }
+        return null;
+    }
+
+    public Bitmap getTaskTopThumbnail(int id) {
+        synchronized (this) {
+            enforceCallingPermission(android.Manifest.permission.READ_FRAME_BUFFER,
+                    "getTaskTopThumbnail()");
+            TaskRecord tr = taskForIdLocked(id);
+            if (tr != null) {
+                return mMainStack.getTaskTopThumbnailLocked(tr);
             }
         }
         return null;

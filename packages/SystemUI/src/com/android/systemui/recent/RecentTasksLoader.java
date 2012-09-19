@@ -193,14 +193,14 @@ public class RecentTasksLoader implements View.OnTouchListener {
         final ActivityManager am = (ActivityManager)
                 mContext.getSystemService(Context.ACTIVITY_SERVICE);
         final PackageManager pm = mContext.getPackageManager();
-        ActivityManager.TaskThumbnails thumbs = am.getTaskThumbnails(td.persistentTaskId);
+        Bitmap thumbnail = am.getTaskTopThumbnail(td.persistentTaskId);
         Drawable icon = getFullResIcon(td.resolveInfo, pm);
 
         if (DEBUG) Log.v(TAG, "Loaded bitmap for task "
-                + td + ": " + thumbs.mainThumbnail);
+                + td + ": " + thumbnail);
         synchronized (td) {
-            if (thumbs != null && thumbs.mainThumbnail != null) {
-                td.setThumbnail(thumbs.mainThumbnail);
+            if (thumbnail != null) {
+                td.setThumbnail(thumbnail);
             } else {
                 td.setThumbnail(mDefaultThumbnailBackground);
             }
