@@ -452,7 +452,7 @@
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"Kablosuz ekranları yapılandır"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Uygulamaya kablosuz ekranları yapılandırma ve bunlara bağlanma izni verir."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"Kablosuz ekranları denetle"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Uygulamaya Kablosuz ekranların alt düzey özelliklerini kontrol etme izni verir."</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Uygulamaya kablosuz ekranların alt düzey özelliklerini kontrol etme izni verir."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ses ayarlarınızı değiştirin"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Uygulamaya ses düzeyi ve ses çıkışı için kullanılan hoparlör gibi genel ses ayarlarını değiştirme izni verir."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ses kaydet"</string>
@@ -776,7 +776,8 @@
     <string name="lockscreen_charged" msgid="4938930459620989972">"Şarj oldu."</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="PERCENT">%%</xliff:g><xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Şarj cihazınızı bağlayın."</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"SIM kart yok."</string>
+    <!-- no translation found for lockscreen_missing_sim_message_short (5099439277819215399) -->
+    <skip />
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Tablette SIM kart yok."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Telefonda SIM kart yok."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"SIM kartı takın."</string>
@@ -1085,7 +1086,9 @@
     <item quantity="other" msgid="7915895323644292768">"Kullanılabilir kablosuz ağları aç"</item>
   </plurals>
     <string name="wifi_available_sign_in" msgid="4029489716605255386">"Kablosuz ağda oturum açın"</string>
-    <!-- no translation found for wifi_available_sign_in_detailed (6797764740339907572) -->
+    <!-- no translation found for network_available_sign_in (8495155593358054676) -->
+    <skip />
+    <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Kablosuz bağlantısı kurulamadı"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" İnternet bağlantısı zayıf."</string>
@@ -1102,6 +1105,8 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"Alıcı:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Gerekli PIN\'i yazın:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
+    <!-- no translation found for wifi_p2p_frequency_conflict_message (7363907213787469151) -->
+    <skip />
     <string name="select_character" msgid="3365550120617701745">"Karakter ekle"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS mesajları gönderiliyor"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; çok sayıda SMS mesajı gönderiyor. Bu uygulamanın mesaj göndermeye devam etmesine izin veriyor musunuz?"</string>

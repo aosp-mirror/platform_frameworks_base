@@ -452,7 +452,7 @@
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"configurer les écrans Wi-Fi"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Permet à l\'application de configurer des écrans Wi-Fi et de s\'y connecter."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"contrôler les écrans Wi-Fi"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Permet à l\'application de contrôler les fonctionnalités de bas niveau des écrans Wi-Fi."</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Permet à l\'application de contrôler les fonctionnalités de base des écrans Wi-Fi."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"modifier vos paramètres audio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Permet à l\'application de modifier les paramètres audio généraux, tels que le volume et la sortie audio utilisée."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"Enregistrement de fichier audio"</string>
@@ -776,7 +776,8 @@
     <string name="lockscreen_charged" msgid="4938930459620989972">"Chargé"</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Branchez votre chargeur."</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Aucune carte SIM."</string>
+    <!-- no translation found for lockscreen_missing_sim_message_short (5099439277819215399) -->
+    <skip />
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Aucune carte SIM n\'est insérée dans la tablette."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Aucune carte SIM n\'est insérée dans le téléphone."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Insérez une carte SIM."</string>
@@ -1085,7 +1086,9 @@
     <item quantity="other" msgid="7915895323644292768">"Réseaux Wi-Fi ouverts disponibles"</item>
   </plurals>
     <string name="wifi_available_sign_in" msgid="4029489716605255386">"Connectez-vous au réseau Wi-Fi"</string>
-    <!-- no translation found for wifi_available_sign_in_detailed (6797764740339907572) -->
+    <!-- no translation found for network_available_sign_in (8495155593358054676) -->
+    <skip />
+    <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Impossible de se connecter au Wi-Fi."</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" dispose d\'une mauvaise connexion Internet."</string>
@@ -1102,6 +1105,8 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"À :"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Saisissez le code PIN requis :"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"Code PIN :"</string>
+    <!-- no translation found for wifi_p2p_frequency_conflict_message (7363907213787469151) -->
+    <skip />
     <string name="select_character" msgid="3365550120617701745">"Insérer un caractère"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Envoi de messages SMS"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; envoie un grand nombre de SMS. Autorisez-vous cette application à poursuivre l\'envoi des messages ?"</string>
