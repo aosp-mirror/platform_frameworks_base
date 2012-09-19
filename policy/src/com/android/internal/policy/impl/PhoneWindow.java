@@ -192,6 +192,20 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     private int mUiOptions = 0;
 
+    private boolean mInvalidatePanelMenuPosted;
+    private int mInvalidatePanelMenuFeatures;
+    private final Runnable mInvalidatePanelMenuRunnable = new Runnable() {
+        @Override public void run() {
+            for (int i = 0; i <= FEATURE_MAX; i++) {
+                if ((mInvalidatePanelMenuFeatures & 1 << i) != 0) {
+                    doInvalidatePanelMenu(i);
+                }
+            }
+            mInvalidatePanelMenuPosted = false;
+            mInvalidatePanelMenuFeatures = 0;
+        }
+    };
+
     static class WindowManagerHolder {
         static final IWindowManager sWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService("window"));
@@ -722,6 +736,15 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public void invalidatePanelMenu(int featureId) {
+        mInvalidatePanelMenuFeatures |= 1 << featureId;
+
+        if (!mInvalidatePanelMenuPosted && mDecor != null) {
+            mDecor.postOnAnimation(mInvalidatePanelMenuRunnable);
+            mInvalidatePanelMenuPosted = true;
+        }
+    }
+
+    void doInvalidatePanelMenu(int featureId) {
         PanelFeatureState st = getPanelState(featureId, true);
         Bundle savedActionViewStates = null;
         if (st.menu != null) {
@@ -2842,6 +2865,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             mDecor.setIsRootNamespace(true);
             mDecor.setLayoutDirection(
                     getContext().getResources().getConfiguration().getLayoutDirection());
+            if (!mInvalidatePanelMenuPosted && mInvalidatePanelMenuFeatures != 0) {
+                mDecor.postOnAnimation(mInvalidatePanelMenuRunnable);
+            }
         }
         if (mContentParent == null) {
             mContentParent = generateLayout(mDecor);
