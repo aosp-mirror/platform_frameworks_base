@@ -154,11 +154,15 @@ public final class ContentService extends IContentService.Stub {
             throw new IllegalArgumentException("You must pass a valid uri and observer");
         }
 
+        // STOPSHIP: disable the multi-user permission checks until a solid fix for the
+        // content provider / observer case is in place.
+        /*
         final int callingUser = UserHandle.getCallingUserId();
         if (callingUser != userHandle) {
             mContext.enforceCallingOrSelfPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL,
                     "no permission to observe other users' provider view");
         }
+        */
 
         if (userHandle < 0) {
             if (userHandle == UserHandle.USER_CURRENT) {
