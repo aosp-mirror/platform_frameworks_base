@@ -5257,36 +5257,23 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
+    /**
+     * @hide
+     */
     @Override
-    public void onResolvedLayoutDirectionReset() {
+    public void resetResolvedLayoutDirection() {
+        super.resetResolvedLayoutDirection();
+
         // Take care of resetting the children resolution too
-        final int count = getChildCount();
+        int count = getChildCount();
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
             if (child.getLayoutDirection() == LAYOUT_DIRECTION_INHERIT) {
                 child.resetResolvedLayoutDirection();
             }
-        }
-    }
-
-    @Override
-    public void onResolvedTextDirectionReset() {
-        // Take care of resetting the children resolution too
-        final int count = getChildCount();
-        for (int i = 0; i < count; i++) {
-            final View child = getChildAt(i);
             if (child.getTextDirection() == TEXT_DIRECTION_INHERIT) {
                 child.resetResolvedTextDirection();
             }
-        }
-    }
-
-    @Override
-    public void onResolvedTextAlignmentReset() {
-        // Take care of resetting the children resolution too
-        final int count = getChildCount();
-        for (int i = 0; i < count; i++) {
-            final View child = getChildAt(i);
             if (child.getTextAlignment() == TEXT_ALIGNMENT_INHERIT) {
                 child.resetResolvedTextAlignment();
             }
