@@ -1503,7 +1503,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private SparseArray<Object> mKeyedTags;
 
     /**
-     * The next available accessiiblity id.
+     * The next available accessibility id.
      */
     private static int sNextAccessibilityViewId;
 
@@ -2053,7 +2053,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public static final int IMPORTANT_FOR_ACCESSIBILITY_NO = 0x00000002;
 
     /**
-     * The default whether the view is important for accessiblity.
+     * The default whether the view is important for accessibility.
      */
     static final int IMPORTANT_FOR_ACCESSIBILITY_DEFAULT = IMPORTANT_FOR_ACCESSIBILITY_AUTO;
 
@@ -3108,7 +3108,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private boolean mSendingHoverAccessibilityEvents;
 
     /**
-     * Delegate for injecting accessiblity functionality.
+     * Delegate for injecting accessibility functionality.
      */
     AccessibilityDelegate mAccessibilityDelegate;
 
@@ -4455,7 +4455,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Sends an accessibility event of the given type. If accessiiblity is
+     * Sends an accessibility event of the given type. If accessibility is
      * not enabled this method has no effect. The default implementation calls
      * {@link #onInitializeAccessibilityEvent(AccessibilityEvent)} first
      * to populate information about the event source (this View), then calls
@@ -4852,7 +4852,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         info.setLongClickable(isLongClickable());
 
         // TODO: These make sense only if we are in an AdapterView but all
-        // views can be selected. Maybe from accessiiblity perspective
+        // views can be selected. Maybe from accessibility perspective
         // we should report as selectable view in an AdapterView.
         info.addAction(AccessibilityNodeInfo.ACTION_SELECT);
         info.addAction(AccessibilityNodeInfo.ACTION_CLEAR_SELECTION);
@@ -4954,7 +4954,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Sets a delegate for implementing accessibility support via compositon as
+     * Sets a delegate for implementing accessibility support via composition as
      * opposed to inheritance. The delegate's primary use is for implementing
      * backwards compatible widgets. For more details see {@link AccessibilityDelegate}.
      *
@@ -6607,7 +6607,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Returns whether the View is considered actionable from
      * accessibility perspective. Such view are important for
-     * accessiiblity.
+     * accessibility.
      *
      * @return True if the view is actionable for accessibility.
      *
@@ -6619,7 +6619,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Returns whether the View has registered callbacks wich makes it
-     * important for accessiiblity.
+     * important for accessibility.
      *
      * @return True if the view is actionable for accessibility.
      */
@@ -6658,7 +6658,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Reset the state indicating the this view has requested clients
-     * interested in its accessiblity state to be notified.
+     * interested in its accessibility state to be notified.
      *
      * @hide
      */
