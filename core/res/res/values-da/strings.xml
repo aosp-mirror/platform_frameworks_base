@@ -180,8 +180,6 @@
     <string name="permgroupdesc_network" msgid="4478299413241861987">"Få adgang til forskellige netværksfunktioner."</string>
     <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"Bluetooth"</string>
     <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"Få adgang til enheder og netværk via Bluetooth."</string>
-    <string name="permgrouplab_shortrangeNetwork" msgid="130808676377486118">"Kortrækkende netværk"</string>
-    <string name="permgroupdesc_shortrangeNetwork" msgid="1884069062653436007">"Få adgang til enheder via kortrækkende netværk, f.eks NFC."</string>
     <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"Lydindstillinger"</string>
     <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"Skifte lydindstillinger."</string>
     <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"Påvirker batteriet"</string>
@@ -311,8 +309,14 @@
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Tillader, at appen kan kontrollere det maksimale antal kørende processer. Dette er aldrig nødvendigt til normale apps."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"tvinge baggrundsapps til at lukke"</string>
     <string name="permdesc_setAlwaysFinish" msgid="7471310652868841499">"Tillader, at appen kan kontrollere, om aktiviteter altid afsluttes, så snart de går i baggrunden. Det er aldrig nødvendigt til normale apps."</string>
-    <string name="permlab_batteryStats" msgid="7863923071360031652">"rediger batteristatistikker"</string>
-    <string name="permdesc_batteryStats" msgid="6835186932305744068">"Tillader, at appen kan ændre indsamlet batteristatistik. Anvendes ikke af normale apps."</string>
+    <!-- no translation found for permlab_batteryStats (2789610673514103364) -->
+    <skip />
+    <!-- no translation found for permdesc_batteryStats (5897346582882915114) -->
+    <skip />
+    <!-- no translation found for permlab_updateBatteryStats (3719689764536379557) -->
+    <skip />
+    <!-- no translation found for permdesc_updateBatteryStats (6862817857178025002) -->
+    <skip />
     <string name="permlab_backup" msgid="470013022865453920">"kontroller sikkerhedskopiering af system, og gendan"</string>
     <string name="permdesc_backup" msgid="6912230525140589891">"Tillader, at appen kan kontrollere systemets sikkerhedskopi og gendannelsesmekanisme. Kan ikke anvendes af normale apps."</string>
     <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"bekræfte en komplet sikkerhedskopi, eller gendan drift"</string>
@@ -320,7 +324,8 @@
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"vis uautoriserede vinduer"</string>
     <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"Tillader, at appen kan oprette vinduer, der er beregnet til brugergrænsefladen i det interne system. Anvendes ikke af normale apps."</string>
     <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"tegne over andre apps"</string>
-    <string name="permdesc_systemAlertWindow" msgid="4460454022797261814">"Tillader, at appen kan vise vinduer med systemunderretninger. Nogle underretningsvinduer kan overtage hele skærmen."</string>
+    <!-- no translation found for permdesc_systemAlertWindow (8584678381972820118) -->
+    <skip />
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"rediger global animationshastighed"</string>
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Tillader, at appen til enhver tid kan ændre den globale animationshastighed (hurtigere eller langsommere animationer)."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"administrere apptokens"</string>
@@ -368,8 +373,10 @@
     <string name="permlab_installPackages" msgid="2199128482820306924">"installere apps direkte"</string>
     <string name="permdesc_installPackages" msgid="5628530972548071284">"Tillader, at appen kan installere nye eller opdaterede Android-pakker. Ondsindede apps kan bruge dette til at tilføje nye apps med vilkårligt effektive tilladelser."</string>
     <string name="permlab_clearAppCache" msgid="7487279391723526815">"slette alle appens cachedata"</string>
-    <string name="permdesc_clearAppCache" product="tablet" msgid="3523396284474042284">"Tillader, at en app kan frigøre plads på din tablet ved at slette filer i appens cachemappe. Adgangen er normalt begrænset til systemprocesser."</string>
-    <string name="permdesc_clearAppCache" product="default" msgid="5067988373366292186">"Tillader, at appen kan frigøre plads på din telefon ved at slette filer i appens cachemappe. Adgangen er normalt begrænset til systemprocesser."</string>
+    <!-- no translation found for permdesc_clearAppCache (8974640871945434565) -->
+    <skip />
+    <!-- no translation found for permdesc_clearAppCache (2459441021956436779) -->
+    <skip />
     <string name="permlab_movePackage" msgid="3289890271645921411">"flytte appressourcer"</string>
     <string name="permdesc_movePackage" msgid="319562217778244524">"Tillader, at appen kan flytte appressourcer fra interne til eksterne medier og omvendt."</string>
     <string name="permlab_readLogs" msgid="6615778543198967614">"læse følsomme logdata"</string>
@@ -430,11 +437,14 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="5945166642335800763">"Tillader, at appen kan få adgang til yderligere kommandoer for placeringsudbydere. Dette bevirker muligvis, at appen kan forstyrre GPS-funktionen eller andre placeringskilder."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"tilladelse til at installere en placeringsudbyder"</string>
     <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"Opret imiterede placeringskilder til test, eller installer en ny placeringsudbyder. Herved kan appen tilsidesætte den placering og/eller status, der returneres af andre placeringskilder, som f.eks. GPS eller placeringsudbydere."</string>
-    <string name="permlab_accessFineLocation" msgid="5885550969882561436">"præcis (GPS) placering"</string>
-    <string name="permdesc_accessFineLocation" product="tablet" msgid="8960597421469894181">"Få adgang til præcise placeringskilder, som f.eks. GPS (Global Positioning System) på tabletten. Når placeringstjenesterne er tilgængelige og aktiverede, kan appen med denne tilladelse bestemme din præcise placering."</string>
-    <string name="permdesc_accessFineLocation" product="default" msgid="239268765496141815">"Få adgang til præcise placeringskilder, som f.eks. GPS (Global Positioning System) på telefonen. Når placeringstjenesterne er tilgængelige og aktiverede, kan appen med denne tilladelse bestemme din præcise placering."</string>
-    <string name="permlab_accessCoarseLocation" msgid="7422827215441638984">"omtrentlig (netværksbaseret) placering"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="5383798877137640762">"Få adgang til den omtrentlige placering fra placeringsudbydere ved hjælp af netværkskilder, som f.eks. mobilmaster og Wi-Fi. Når disse placeringstjenester er tilgængelige og aktiverede, kan appen med denne tilladelse bestemme din omtrentlige placering."</string>
+    <!-- no translation found for permlab_accessFineLocation (1191898061965273372) -->
+    <skip />
+    <!-- no translation found for permdesc_accessFineLocation (5295047563564981250) -->
+    <skip />
+    <!-- no translation found for permlab_accessCoarseLocation (4887895362354239628) -->
+    <skip />
+    <!-- no translation found for permdesc_accessCoarseLocation (2538200184373302295) -->
+    <skip />
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"få adgang til SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Tillader, at appen kan bruge SurfaceFlinger-funktioner på lavt niveau."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"læs rammebuffer"</string>
@@ -556,7 +566,8 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"få adgang til Bluetooth-indstillinger"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Tillader, at appen kan konfigurere den lokale Bluetooth-tablet samt finde og parre med fjerne enheder."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Tillader, at appen kan konfigurere den lokale Bluetooth-telefon samt finde og parre med eksterne enheder."</string>
-    <string name="permlab_accessWimaxState" msgid="7436749103151096452">"få vist WiMAX-forbindelser"</string>
+    <!-- no translation found for permlab_accessWimaxState (4195907010610205703) -->
+    <skip />
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Tillader, at appen kan bestemme, hvorvidt WiMAX er aktiveret, og oplysninger om eventuelle WiMAX-netværk, der er forbundet."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Skift WiMAX-tilstand"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Tillader, at appen kan oprette forbindelse fra tabletten og afbryde forbindelsen til tabletten på WiMAX-netværk."</string>
@@ -580,7 +591,8 @@
     <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Tillader, at appen kan ændre dine synkroniserede feeds. Ondsindede apps kan ændre dine synkroniserede feeds."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"læse termer, som du har føjet til ordbogen"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Tillader, at appen kan læse alle ord, navne og sætninger, som brugeren har gemt i brugerordbogen."</string>
-    <string name="permlab_writeDictionary" msgid="2296383164914812772">"skrive til brugerordbogen"</string>
+    <!-- no translation found for permlab_writeDictionary (2183110402314441106) -->
+    <skip />
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Tillader, at appen kan skrive nye ord i brugerordbogen."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"test adgangen til beskyttet lagring"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"test adgangen til beskyttet lagring"</string>
@@ -1095,13 +1107,22 @@
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; sender et stort antal sms-beskeder. Vil du tillade, at denne app fortsat sender beskeder?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"Tillad"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Afvis"</string>
-    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"Send sms til shortcode?"</string>
-    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"Vil du sende en premium-sms?"</string>
-    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; vil du sende en sms til &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, som ser ud til at være en premium-sms-shortcode.&amp;.&lt;p&gt;Hvis du sender en sms til nogle shortcodes, kan det medføre, at din mobilkonto bliver debiteret for premium-tjenester.&lt;p&gt;Vil du tillade, at denne app sender beskeden?"</string>
-    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; vil du sende en sms til &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, som er en premium-sms-shortcode.&lt;p&gt;&lt;b&gt;Hvis du sender en besked til denne destination, bliver din mobilkonto debiteret for premium-tjenester.&lt;/b&gt;&lt;p&gt;Vil du tillade, at denne app sender beskeden?"</string>
-    <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"Send besked"</string>
-    <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"Send ikke"</string>
-    <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"Rapportér ondsindet app"</string>
+    <!-- no translation found for sms_short_code_confirm_message (1645436466285310855) -->
+    <skip />
+    <!-- no translation found for sms_short_code_details (4992814738863678373) -->
+    <skip />
+    <!-- no translation found for sms_premium_short_code_details (4291752905667807485) -->
+    <skip />
+    <!-- no translation found for sms_short_code_confirm_allow (4458878637111023413) -->
+    <skip />
+    <!-- no translation found for sms_short_code_confirm_deny (2927389840209170706) -->
+    <skip />
+    <!-- no translation found for sms_short_code_remember_choice (5289538592272218136) -->
+    <skip />
+    <!-- no translation found for sms_short_code_confirm_always_allow (3241181154869493368) -->
+    <skip />
+    <!-- no translation found for sms_short_code_confirm_never_allow (446992765774269673) -->
+    <skip />
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM-kort blev fjernet"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"Det mobile netværk er utilgængeligt, indtil du genstarter med et gyldigt SIM-kort."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Afslut"</string>
@@ -1115,6 +1136,8 @@
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"NYHED! "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"Leveret af <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="no_permissions" msgid="7283357728219338112">"Der kræves ingen tilladelser"</string>
+    <!-- no translation found for perm_costs_money (4902470324142151116) -->
+    <skip />
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB-masselager"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB er tilsluttet"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Du har fået forbindelse til din computer via USB. Tryk på knappen nedenfor, hvis du vil kopiere filer mellem din computer og din Androids USB-lager."</string>
@@ -1400,5 +1423,7 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Du har forsøgt at låse telefonen op forkert <xliff:g id="NUMBER">%d</xliff:g> gange. Telefonen nulstilles til fabriksindstillingerne."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Du har tegnet dit oplåsningsmønster forkert <xliff:g id="NUMBER_0">%d</xliff:g> gange. Efter <xliff:g id="NUMBER_1">%d</xliff:g> yderligere mislykkede forsøg vil du blive bedt om at låse din tablet op ved hjælp af en e-mailkonto"\n\n" Prøv igen om <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Du har tegnet dit oplåsningsmønster forkert <xliff:g id="NUMBER_0">%d</xliff:g> gange. Efter <xliff:g id="NUMBER_1">%d</xliff:g> yderligere mislykkede forsøg til vil du blive bedt om at låse din telefon op ved hjælp af en e-mailkonto."\n\n" Prøv igen om <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
+    <!-- no translation found for safe_media_volume_warning (7382971871993371648) -->
+    <skip />
     <string name="kg_temp_back_string" msgid="5812983904056640466">"&lt;"</string>
 </resources>
