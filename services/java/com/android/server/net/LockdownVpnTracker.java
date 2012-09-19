@@ -268,9 +268,11 @@ public class LockdownVpnTracker {
     }
 
     public NetworkInfo augmentNetworkInfo(NetworkInfo info) {
-        final NetworkInfo vpnInfo = mVpn.getNetworkInfo();
-        info = new NetworkInfo(info);
-        info.setDetailedState(vpnInfo.getDetailedState(), vpnInfo.getReason(), null);
+        if (info.isConnected()) {
+            final NetworkInfo vpnInfo = mVpn.getNetworkInfo();
+            info = new NetworkInfo(info);
+            info.setDetailedState(vpnInfo.getDetailedState(), vpnInfo.getReason(), null);
+        }
         return info;
     }
 

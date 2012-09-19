@@ -32,6 +32,7 @@ public class Environment {
 
     private static final String ENV_EXTERNAL_STORAGE = "EXTERNAL_STORAGE";
     private static final String ENV_EMULATED_STORAGE_TARGET = "EMULATED_STORAGE_TARGET";
+    private static final String ENV_MEDIA_STORAGE = "MEDIA_STORAGE";
 
     /** {@hide} */
     public static String DIRECTORY_ANDROID = "Android";
@@ -88,21 +89,30 @@ public class Environment {
         private final File mExternalStorageAndroidData;
         private final File mExternalStorageAndroidMedia;
         private final File mExternalStorageAndroidObb;
+        private final File mMediaStorage;
 
         public UserEnvironment(int userId) {
             // See storage config details at http://source.android.com/tech/storage/
             String rawExternalStorage = System.getenv(ENV_EXTERNAL_STORAGE);
             String rawEmulatedStorageTarget = System.getenv(ENV_EMULATED_STORAGE_TARGET);
+            String rawMediaStorage = System.getenv(ENV_MEDIA_STORAGE);
+            if (TextUtils.isEmpty(rawMediaStorage)) {
+                rawMediaStorage = "/data/media";
+            }
 
             if (!TextUtils.isEmpty(rawEmulatedStorageTarget)) {
                 // Device has emulated storage; external storage paths should have
                 // userId burned into them.
+                final String rawUserId = Integer.toString(userId);
                 final File emulatedBase = new File(rawEmulatedStorageTarget);
+                final File mediaBase = new File(rawMediaStorage);
 
                 // /storage/emulated/0
-                mExternalStorage = buildPath(emulatedBase, Integer.toString(userId));
+                mExternalStorage = buildPath(emulatedBase, rawUserId);
                 // /storage/emulated/obb
                 mExternalStorageAndroidObb = buildPath(emulatedBase, "obb");
+                // /data/media/0
+                mMediaStorage = buildPath(mediaBase, rawUserId);
 
             } else {
                 // Device has physical external storage; use plain paths.
@@ -115,6 +125,8 @@ public class Environment {
                 mExternalStorage = new File(rawExternalStorage);
                 // /storage/sdcard0/Android/obb
                 mExternalStorageAndroidObb = buildPath(mExternalStorage, DIRECTORY_ANDROID, "obb");
+                // /data/media
+                mMediaStorage = new File(rawMediaStorage);
             }
 
             mExternalStorageAndroidData = buildPath(mExternalStorage, DIRECTORY_ANDROID, "data");
@@ -151,6 +163,10 @@ public class Environment {
 
         public File getExternalStorageAppCacheDirectory(String packageName) {
             return new File(new File(mExternalStorageAndroidData, packageName), "cache");
+        }
+
+        public File getMediaStorageDirectory() {
+            return mMediaStorage;
         }
     }
 
@@ -198,7 +214,8 @@ public class Environment {
      * @hide
      */
     public static File getMediaStorageDirectory() {
-        return MEDIA_STORAGE_DIRECTORY;
+        throwIfSystem();
+        return sCurrentUser.getMediaStorageDirectory();
     }
 
     /**
@@ -230,10 +247,6 @@ public class Environment {
      */
     private static final File SECURE_DATA_DIRECTORY
             = getDirectory("ANDROID_SECURE_DATA", "/data/secure");
-
-    /** @hide */
-    private static final File MEDIA_STORAGE_DIRECTORY
-            = getDirectory("MEDIA_STORAGE", "/data/media");
 
     private static final File DOWNLOAD_CACHE_DIRECTORY = getDirectory("DOWNLOAD_CACHE", "/cache");
 
