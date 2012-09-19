@@ -57,7 +57,7 @@ page.title=Android Supported Media Formats
 
 <p class="table-caption" id="formats-table"><strong>Table 1.</strong> Core media format and codec support.</p>
 
-<table>
+<table style="font-size:12px">
 <tbody>
 
 <tr>
@@ -70,22 +70,22 @@ page.title=Android Supported Media Formats
 </tr>
 
 <tr>
-<td rowspan="10">Audio</td>
-<td>AAC LC/LTP</td>
+<td rowspan="11">Audio</td>
+<td>AAC LC</td>
 <td style="text-align: center;"><big>&bull;</big></td>
 <td style="text-align: center;"><big>&bull;</big></td>
-<td rowspan="3">Mono/Stereo content in any combination of standard bit
-rates up to 160 kbps and sampling rates from 8 to 48kHz</td>
-<td rowspan="3">
+<td rowspan="2">Support for mono/stereo/5.0/5.1
+content with standard sampling rates from 8 to 48 kHz.</td>
+<td rowspan="4">
   &bull; 3GPP (.3gp)<br>
-  &bull; MPEG-4 (.mp4, .m4a)<br>
+  <nobr>&bull; MPEG-4 (.mp4, .m4a)</nobr><br>
   &bull; ADTS raw AAC (.aac, decode in Android 3.1+, encode in Android 4.0+, ADIF not supported)<br>
   &bull; MPEG-TS (.ts, not seekable, Android 3.0+)</td>
 </tr>
 
 <tr>
 <td>HE-AACv1 (AAC+)</td>
-<td>&nbsp;</td>
+<td style="text-align: center;"><big>&bull;</big><br><small>(Android 4.1+)</small></td>
 <td style="text-align: center;"><big>&bull;</big></td>
 </tr>
 
@@ -93,6 +93,16 @@ rates up to 160 kbps and sampling rates from 8 to 48kHz</td>
 <td>HE-AACv2 (enhanced AAC+)</td>
 <td>&nbsp;</td>
 <td style="text-align: center;"><big>&bull;</big></td>
+<td>Support for stereo/5.0/5.1
+content with standard sampling rates from 8 to 48 kHz.</td>
+</tr>
+
+<tr>
+<td>AAC ELD (enhanced low delay AAC)</td>
+<td style="text-align: center;"><big>&bull;</big><br><small>(Android 4.1+)</small></td>
+<td style="text-align: center;"><big>&bull;</big><br><small>(Android 4.1+)</small></td>
+<td>Support for mono/stereo content
+with standard sampling rates from 16 to 48 kHz</td>
 </tr>
 
 <tr>
@@ -160,9 +170,10 @@ no dither applied for 24-bit.
 
 <tr>
 <td>PCM/WAVE</td>
-<td>&nbsp;</td>
+<td style="text-align: center;"><big>&bull;</big><br><small>(Android 4.1+)</small></td>
 <td style="text-align: center;"><big>&bull;</big></td>
-<td>8- and 16-bit linear PCM (rates up to limit of hardware)</td>
+<td>8- and 16-bit linear PCM (rates up to limit of hardware). Sampling
+rates for raw PCM recordings at 8000, 16000 and 44100 Hz.</td>
 <td>
   WAVE (.wav)</td>
 </tr>
