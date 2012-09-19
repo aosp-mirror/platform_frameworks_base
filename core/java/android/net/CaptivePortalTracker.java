@@ -251,7 +251,7 @@ public class CaptivePortalTracker {
 
         if (visible) {
             CharSequence title = r.getString(R.string.wifi_available_sign_in, 0);
-            CharSequence details = r.getString(R.string.wifi_available_sign_in_detailed,
+            CharSequence details = r.getString(R.string.network_available_sign_in_detailed,
                     mNetworkInfo.getExtraInfo());
 
             Notification notification = new Notification();
