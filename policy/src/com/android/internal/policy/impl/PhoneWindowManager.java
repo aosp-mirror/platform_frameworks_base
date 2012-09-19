@@ -71,7 +71,6 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.SparseIntArray;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
@@ -722,6 +721,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private final Runnable mPowerLongPress = new Runnable() {
+        @Override
         public void run() {
             // The context isn't read
             if (mLongPressOnPowerBehavior < 0) {
@@ -4316,7 +4316,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mLastInputMethodTargetWindow = target;
     }
 
-    public boolean canMagnifyWindow(WindowManager.LayoutParams attrs) {
+    @Override
+    public boolean canMagnifyWindowLw(WindowManager.LayoutParams attrs) {
         switch (attrs.type) {
             case WindowManager.LayoutParams.TYPE_INPUT_METHOD:
             case WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG:
@@ -4328,6 +4329,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return true;
     }
 
+    @Override
+    public void setCurrentUserLw(int newUserId) {
+        if (mKeyguardMediator != null) {
+            mKeyguardMediator.setCurrentUser(newUserId);
+        }
+    }
+
+    @Override
     public void dump(String prefix, PrintWriter pw, String[] args) {
         pw.print(prefix); pw.print("mSafeMode="); pw.print(mSafeMode);
                 pw.print(" mSystemReady="); pw.print(mSystemReady);
