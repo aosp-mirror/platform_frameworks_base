@@ -1136,9 +1136,8 @@ public abstract class HardwareRenderer {
                         }
                     }
 
-                    int status = onPreDraw(dirty);
-                    int saveCount = canvas.save();
-                    callbacks.onHardwarePreDraw(canvas);
+                    int saveCount = 0;
+                    int status = DisplayList.STATUS_DONE;
 
                     try {
                         view.mRecreateDisplayList = (view.mPrivateFlags & View.PFLAG_INVALIDATED)
@@ -1163,6 +1162,10 @@ public abstract class HardwareRenderer {
                         } finally {
                             Trace.traceEnd(Trace.TRACE_TAG_VIEW);
                         }
+
+                        status = onPreDraw(dirty);
+                        saveCount = canvas.save();
+                        callbacks.onHardwarePreDraw(canvas);
 
                         if (mProfileEnabled) {
                             long now = System.nanoTime();

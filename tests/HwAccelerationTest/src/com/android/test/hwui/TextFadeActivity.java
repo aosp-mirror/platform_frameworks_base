@@ -21,7 +21,9 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
+import android.widget.TextView;
 
 @SuppressWarnings({"UnusedDeclaration"})
 public class TextFadeActivity extends Activity {
@@ -30,5 +32,8 @@ public class TextFadeActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.text_fade);
+        
+        findViewById(R.id.contact_tile_name).setHorizontalFadingEdgeEnabled(true);
+        ((TextView) findViewById(R.id.contact_tile_name)).setEllipsize(TextUtils.TruncateAt.MARQUEE);
     }
 }
