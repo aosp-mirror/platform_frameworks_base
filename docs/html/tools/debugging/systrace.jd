@@ -1,0 +1,239 @@
+page.title=Analyzing Display and Performance with Systrace
+parent.title=Debugging
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>In this document</h2>
+    <ol>
+      <li><a href="#overview">Overview</a>
+      </li>
+      <li><a href="#generate">Generating Traces</a>
+        <ol>
+          <li><a href="#limit-trace">Limiting trace data</a></li>
+          <li><a href="#config-categories">Configuring trace data categories</a></li>
+          <li><a href="#running">Running a trace</a></li>
+        </ol>
+      </li>
+      <li><a href="#analysis">Analyzing Traces</a>
+        <ol>
+          <li><a href="#long-processes">Long running processes</a></li>
+          <li><a href="#display-interupts">Interruptions in display execution</a></li>
+        </ol>
+      </li>
+    </ol>
+    <h2>See also</h2>
+    <ol>
+      <li><a href="{@docRoot}tools/help/systrace.html">Systrace</a>
+      </li>
+    </ol>
+  </div>
+</div>
+
+<p>After building features, eliminating bugs and cleaning up your code, you should spend some
+  time looking at the performance of your application. The speed and smoothness with which your
+  application draws pixels and performs operations has an significant impact on your users'
+  experience.</p>
+
+<p>Android applications operate within a shared resource environment, and the performance of
+  your application can be impacted by how efficiently it interacts with those resources in
+  the larger system. Applications also operate in a multithreaded environment, competing with other
+  threaded processes for resources, which can cause performance problems that are hard to diagnose.
+</p>
+
+<p>The {@code systrace} tool allows you to collect and review code execution data for your
+  application and the Android system. You can use this data to diagnose execution problems and
+  improve the performance of your application.</p>
+
+
+<h2 id="overview">Overview</h2>
+
+<p>{@code systrace} helps you analyze how the execution of your application fits into the larger
+  Android environment, letting you see system and applications process execution on a common
+  timeline. The tool allows you to generate highly detailed, interactive reports from devices
+  running Android 4.1 and higher, such as the report in figure 1.</p>
+
+<img src="{@docRoot}images/systrace/report.png" alt="Systrace example report" id="figure1" />
+<p class="img-caption">
+  <strong>Figure 1.</strong> An example {@code systrace} report on 5 seconds of process execution
+  for a running application and related Android system processes.
+</p>
+
+
+<h2 id="generate">Generating Traces</h2>
+
+<p>In order to create a trace of your application, you must perform a few setup steps. First, you
+  must have a device running Android 4.1 or higher. Setup the device for
+  <a href="{@docRoot}tools/device.html#setting-up">debugging</a>, connect it to your development
+  system and install your application. Some types of trace information, specifically disk activity
+  and kernel work queues, require root access to the device, but most {@code systrace} log data
+  only requires that the device be enabled for developer debugging.</p>
+
+
+<h3 id="limit-trace">Limiting trace data</h3>
+
+<p>The {@code systrace} tool can generate a potentially huge amount of data from applications
+  and system sources. To limit the amount of data the tool collects and make the data more relevant
+  to your analysis, use the following options:</p>
+
+<ul>
+  <li>Limit the amount of time covered by the trace with the {@code -t, --time} option. The default
+    length of a trace is 5 seconds.</li>
+  <li>Limit the size of the data collected by the trace with the {@code -b, --buf-size} option.</li>
+  <li>Specify what types of processes are traced using the {@code --set-tags} option and the
+  {@code --disk}, {@code --cpu-freq}, {@code --cpu-idle}, {@code --cpu-load} options.</li>
+</ul>
+
+
+<h3 id="config-categories">Configuring trace data categories</h3>
+
+<p>To use {@code systrace} effectively, you must specify the types of processes you want to trace.
+  The tool can gather the following types of process information:</p>
+
+<ul>
+  <li>General system processes such as graphics, audio and input processes (selected using trace
+    <a href="{@docRoot}tools/help/systrace.html#tags">Tags</a>).</li>
+  <li>Low level system information such as CPU, kernel and disk activity (selected using
+    <a href="{@docRoot}tools/help/systrace.html#options">Options</a>).</li>
+</ul>
+
+<p>To set trace tags for {@code systrace} using the command-line:</p>
+
+<ol>
+  <li>Use the {@code --set-tags} option:
+<pre>
+$> python systrace.py --set-tags=gfx,view,wm
+</pre>
+  </li>
+  <li>Stop and restart the {@code adb} shell to enable tracing of these processes.
+<pre>
+$> adb shell stop
+$> adb shell start
+</pre></li>
+</ol>
+
+<p>To set trace tags for {@code systrace} using the device user interface:</p>
+
+<ol>
+  <li>On the device connected for tracing, navigate to: <strong>Settings &gt;
+      Developer options &gt; Monitoring &gt; Enable traces</strong>.</li>
+  <li>Select the categories of processes to be traced and click <strong>OK</strong>.</li>
+</ol>
+
+<p class="note">
+  <strong>Note:</strong> The {@code adb} shell does not have to be stopped and restarted when
+  selecting trace tags using this method.
+</p>
+
+
+<h3 id="running">Running a trace</h3>
+
+<p>After you have configured the category tags for your trace, you can start collecting
+  information for analysis.</p>
+
+<p>To run a trace using the current trace tag settings:</p>
+
+<ol>
+  <li>Make sure the device is connected through a USB cable and is
+  <a href="{@docRoot}tools/device.html#setting-up">enabled for debugging</a>.</li>
+  <li>Run the trace with the low-level system trace options and limits you want, for example:
+<pre>
+$> python systrace.py --cpu-freq --cpu-load --time=10 -o mytracefile.html
+</pre>
+  </li>
+  <li>On the device, execute any user actions you want be included in the trace.</li>
+</ol>
+
+
+<h2 id="analysis">Analyzing Traces</h2>
+
+<p>After you have generated a trace using {@code systrace}, it lists the location of the output
+  file and you can open the report using a web browser.
+  How you use the trace data depends on the performance issues you are investigating. However,
+  this section provides some general instructions on how to analyze a trace.</p>
+
+<p>The reports generated by {@code systrace} are interactive, allowing you to zoom into and out of
+  the process execution details. Use the <em>W</em> key to zoom in, the <em>S</em>
+  key to zoom out, the <em>A</em> key to pan left and the <em>D</em> key to pan
+  right. Select a task in timeline using your mouse to get more information about the task.
+  For more information about the using the keyboard navigation shortcuts and navigation, see the
+  <a href="{@docRoot}tools/help/systrace.html#viewing-options">Systrace</a> reference
+  documentation.</p>
+
+<h3 id="long-processes">Long running processes</h3>
+
+<p>A well-behaved application executes many small operations quickly and with a regular rhythm,
+  with individual operations completing within few milliseconds, depending on the device
+  and the processes being performed, as shown in figure 2:</p>
+
+<img src="{@docRoot}images/systrace/process-rhythm.png" alt="Systrace exerpt of app processing"
+id="figure2" />
+<p class="img-caption">
+  <strong>Figure 2.</strong> Excerpt from a trace of a smoothly running application with a regular
+  execution rhythm.
+</p>
+
+<p>The trace excerpt in figure 2 shows a well-behaved application with
+  a regular process rhythm (1). The lower section of figure 2 shows a magnified section of
+  the trace indicated by the dotted outline, which reveals some irregularity in the process
+  execution. In particular, one of the wider task bars, indicated by (2), is taking slightly
+  longer (14 milliseconds) than other, similar tasks on this thread, which are averaging between
+  9 and 12 milliseconds to complete. This particular task execution length is likely not noticeable
+  to a user, unless it impacts another process with specific timing, such as a screen update.</p>
+
+<p>Long running processes show up as thicker than usual execution bars in a trace. These thicker
+  bars can indicate a problem in your application performance. When they show up in your
+  trace, zoom in on the process using the
+  <a href="{@docRoot}tools/help/systrace.html#viewing-options">keyboard navigation</a> shortcuts to
+  identify the task causing the problem, and click on the task to get more information. You should
+  also look at other processes running at the same time, looking for a thread in one process that is
+  being blocked by another process.</p>
+
+
+<h3 id="display-interupts">Interruptions in display execution</h3>
+
+<p>The {@code systrace} tool is particularly useful in analyzing application display slowness,
+  or pauses in animations, because it shows you the execution of your application across multiple
+  system processes. With display execution, drawing screen frames with a regular rhythm is essential
+  for good performance. Having a regular rhythm for display ensures that animations and motion are
+  smooth on screen. If an application drops out of this rhythm, the display can become jerky or slow
+  from the users perspective.</p>
+
+<p>If you are analyzing an application for this type of problem, examine the
+  <strong>SurfaceFlinger</strong> process in the {@code systrace} report where your application is
+  also executing to look for places where it drops out of its regular rhythm.</p>
+
+<img src="{@docRoot}images/systrace/display-rhythm.png" alt="Systrace exerpt of display processing"
+id="figure3" />
+<p class="img-caption">
+  <strong>Figure 3.</strong> Excerpt from a trace of an application showing interruptions in
+  display processing.
+</p>
+
+<p>The trace excerpt in figure 3 shows an section of a trace that indicates an interruption in the
+  device display. The section of the <strong>SurfaceFlinger</strong> process in top excerpt,
+  indicated by (1), shows that display frames are being missed. These
+  dropped frames are potentially causing the display to stutter or halt. Zooming into this problem
+  area in the lower trace, shows that a memory operation (image buffer dequeuing and allocation) in
+  the <strong>surfaceflinger</strong> secondary thread is taking a long time (2). This delay
+  causes the application to miss the display update window, indicated by the dotted
+  line. As the developer of this application, you should investigate other threads in your
+  application that may also be trying to allocate memory at the same time or otherwise blocking
+  memory allocation with another request or task.</p>
+
+<p>Regular, rhythmic execution of the <strong>SurfaceFlinger</strong> process is essential to smooth
+  display of screen content, particularly for animations and motion. Interruptions in the regular
+  execution pattern of this thread is not always an indication of a display problem with your
+  application. Further testing is required to determine if this is actually a performance problem
+  from a user perspective. Being able to identify display execution patterns like the example above
+  can help you detect display problems and build a smooth-running, high-performance application.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> When using {@code systrace} to analyze display problems, make sure
+  you activate the tracing tags for <strong>Graphics</strong> and <strong>Views</strong>.
+</p>
+
+<p>For more information on the command line options and keyboard controls for {@code systrace},
+see the <a href="{@docRoot}tools/help/systrace.html">Systrace</a> reference page.</p>
