@@ -2528,6 +2528,9 @@ public final class WebViewCore {
             adjust = (float) mContext.getResources().getDisplayMetrics().densityDpi
                     / mViewportDensityDpi;
         }
+        // We make bad assumptions about multiplying and dividing by 100, force
+        // them to be true with this hack
+        adjust = ((int) (adjust * 100)) / 100.0f;
         // Remove any update density messages in flight.
         // If the density is indeed different from WebView's default scale,
         // a new message will be queued.
