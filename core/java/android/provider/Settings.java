@@ -934,6 +934,7 @@ public final class Settings {
             MOVED_TO_GLOBAL.add(Settings.Global.POWER_SOUNDS_ENABLED);
             MOVED_TO_GLOBAL.add(Settings.Global.STAY_ON_WHILE_PLUGGED_IN);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_SLEEP_POLICY);
+            MOVED_TO_GLOBAL.add(Settings.Global.MODE_RINGER);
         }
 
         private static void lazyInitCache() {
@@ -1497,6 +1498,12 @@ public final class Settings {
         @Deprecated
         public static final int WIFI_SLEEP_POLICY_NEVER = Global.WIFI_SLEEP_POLICY_NEVER;
 
+        /**
+         * @deprecated Use {@link android.provider.Settings.Global#MODE_RINGER} instead
+         */
+        @Deprecated
+        public static final String MODE_RINGER = Global.MODE_RINGER;
+
         //TODO: deprecate static IP constants
         /**
          * Whether to use static IP and other static network attributes.
@@ -1665,13 +1672,6 @@ public final class Settings {
          */
         public static final String ALWAYS_FINISH_ACTIVITIES =
                 "always_finish_activities";
-
-
-        /**
-         * Ringer mode. This is used internally, changing this value will not
-         * change the ringer mode. See AudioManager.
-         */
-        public static final String MODE_RINGER = "mode_ringer";
 
         /**
          * Determines which streams are affected by ringer mode changes. The
@@ -5738,7 +5738,11 @@ public final class Settings {
         */
        public static final String WTF_IS_FATAL = "wtf_is_fatal";
 
-
+       /**
+        * Ringer mode. This is used internally, changing this value will not
+        * change the ringer mode. See AudioManager.
+        */
+       public static final String MODE_RINGER = "mode_ringer";
 
 
         // Populated lazily, guarded by class object:
