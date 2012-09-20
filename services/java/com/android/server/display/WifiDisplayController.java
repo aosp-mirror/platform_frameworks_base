@@ -53,6 +53,8 @@ import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
+import libcore.util.Objects;
+
 /**
  * Manages all of the various asynchronous interactions with the {@link WifiP2pManager}
  * on behalf of {@link WifiDisplayAdapter}.
@@ -140,6 +142,13 @@ final class WifiDisplayController implements DumpUtils.Dump {
     // True if the remote submix is enabled.
     private boolean mRemoteSubmixOn;
 
+    // The information we have most recently told WifiDisplayAdapter about.
+    private WifiDisplay mAdvertisedDisplay;
+    private Surface mAdvertisedDisplaySurface;
+    private int mAdvertisedDisplayWidth;
+    private int mAdvertisedDisplayHeight;
+    private int mAdvertisedDisplayFlags;
+
     public WifiDisplayController(Context context, Handler handler, Listener listener) {
         mContext = context;
         mHandler = handler;
@@ -193,6 +202,11 @@ final class WifiDisplayController implements DumpUtils.Dump {
         pw.println("mRemoteDisplayInterface=" + mRemoteDisplayInterface);
         pw.println("mRemoteDisplayConnected=" + mRemoteDisplayConnected);
         pw.println("mRemoteSubmixOn=" + mRemoteSubmixOn);
+        pw.println("mAdvertisedDisplay=" + mAdvertisedDisplay);
+        pw.println("mAdvertisedDisplaySurface=" + mAdvertisedDisplaySurface);
+        pw.println("mAdvertisedDisplayWidth=" + mAdvertisedDisplayWidth);
+        pw.println("mAdvertisedDisplayHeight=" + mAdvertisedDisplayHeight);
+        pw.println("mAdvertisedDisplayFlags=" + mAdvertisedDisplayFlags);
 
         pw.println("mAvailableWifiDisplayPeers: size=" + mAvailableWifiDisplayPeers.size());
         for (WifiP2pDevice device : mAvailableWifiDisplayPeers) {
@@ -439,13 +453,7 @@ final class WifiDisplayController implements DumpUtils.Dump {
             mHandler.removeCallbacks(mRtspTimeout);
 
             setRemoteSubmixOn(false);
-
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    mListener.onDisplayDisconnected();
-                }
-            });
+            unadvertiseDisplay();
 
             // continue to next step
         }
@@ -453,6 +461,8 @@ final class WifiDisplayController implements DumpUtils.Dump {
         // Step 2. Before we try to connect to a new device, disconnect from the old one.
         if (mConnectedDevice != null && mConnectedDevice != mDesiredDevice) {
             Slog.i(TAG, "Disconnecting from Wifi display: " + mConnectedDevice.deviceName);
+
+            unadvertiseDisplay();
 
             final WifiP2pDevice oldDevice = mConnectedDevice;
             mWifiP2pManager.removeGroup(mWifiP2pChannel, new ActionListener() {
@@ -484,6 +494,7 @@ final class WifiDisplayController implements DumpUtils.Dump {
         if (mConnectingDevice != null && mConnectingDevice != mDesiredDevice) {
             Slog.i(TAG, "Canceling connection to Wifi display: " + mConnectingDevice.deviceName);
 
+            unadvertiseDisplay();
             mHandler.removeCallbacks(mConnectionTimeout);
 
             final WifiP2pDevice oldDevice = mConnectingDevice;
@@ -513,6 +524,7 @@ final class WifiDisplayController implements DumpUtils.Dump {
 
         // Step 4. If we wanted to disconnect, then mission accomplished.
         if (mDesiredDevice == null) {
+            unadvertiseDisplay();
             return; // done
         }
 
@@ -526,13 +538,8 @@ final class WifiDisplayController implements DumpUtils.Dump {
             // Helps with STA & P2P concurrency
             config.groupOwnerIntent = WifiP2pConfig.MAX_GROUP_OWNER_INTENT;
 
-            final WifiDisplay display = createWifiDisplay(mConnectingDevice);
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    mListener.onDisplayConnecting(display);
-                }
-            });
+            WifiDisplay display = createWifiDisplay(mConnectingDevice);
+            advertiseDisplay(display, null, 0, 0, 0);
 
             final WifiP2pDevice newDevice = mDesiredDevice;
             mWifiP2pManager.connect(mWifiP2pChannel, config, new ActionListener() {
@@ -551,13 +558,6 @@ final class WifiDisplayController implements DumpUtils.Dump {
                     if (mConnectingDevice == newDevice) {
                         Slog.i(TAG, "Failed to initiate connection to Wifi display: "
                                 + newDevice.deviceName + ", reason=" + reason);
-                        mHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                mListener.onDisplayDisconnected();
-                            }
-                        });
-
                         mConnectingDevice = null;
                         handleConnectionFailure(false);
                     }
@@ -588,8 +588,8 @@ final class WifiDisplayController implements DumpUtils.Dump {
 
             mRemoteDisplay = RemoteDisplay.listen(iface, new RemoteDisplay.Listener() {
                 @Override
-                public void onDisplayConnected(final Surface surface,
-                        final int width, final int height, final int flags) {
+                public void onDisplayConnected(Surface surface,
+                        int width, int height, int flags) {
                     if (mConnectedDevice == oldDevice && !mRemoteDisplayConnected) {
                         Slog.i(TAG, "Opened RTSP connection with Wifi display: "
                                 + mConnectedDevice.deviceName);
@@ -597,13 +597,7 @@ final class WifiDisplayController implements DumpUtils.Dump {
                         mHandler.removeCallbacks(mRtspTimeout);
 
                         final WifiDisplay display = createWifiDisplay(mConnectedDevice);
-                        mHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                mListener.onDisplayConnected(display,
-                                        surface, width, height, flags);
-                            }
-                        });
+                        advertiseDisplay(display, surface, width, height, flags);
                     }
                 }
 
@@ -728,13 +722,6 @@ final class WifiDisplayController implements DumpUtils.Dump {
     private void handleConnectionFailure(boolean timeoutOccurred) {
         Slog.i(TAG, "Wifi display connection failed!");
 
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                mListener.onDisplayConnectionFailed();
-            }
-        });
-
         if (mDesiredDevice != null) {
             if (mConnectionRetriesLeft > 0) {
                 final WifiP2pDevice oldDevice = mDesiredDevice;
@@ -753,6 +740,48 @@ final class WifiDisplayController implements DumpUtils.Dump {
                 disconnect();
             }
         }
+    }
+
+    private void advertiseDisplay(final WifiDisplay display,
+            final Surface surface, final int width, final int height, final int flags) {
+        if (!Objects.equal(mAdvertisedDisplay, display)
+                || mAdvertisedDisplaySurface != surface
+                || mAdvertisedDisplayWidth != width
+                || mAdvertisedDisplayHeight != height
+                || mAdvertisedDisplayFlags != flags) {
+            final WifiDisplay oldDisplay = mAdvertisedDisplay;
+            final Surface oldSurface = mAdvertisedDisplaySurface;
+
+            mAdvertisedDisplay = display;
+            mAdvertisedDisplaySurface = surface;
+            mAdvertisedDisplayWidth = width;
+            mAdvertisedDisplayHeight = height;
+            mAdvertisedDisplayFlags = flags;
+
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (oldSurface != null && surface != oldSurface) {
+                        mListener.onDisplayDisconnected();
+                    } else if (oldDisplay != null && !Objects.equal(display, oldDisplay)) {
+                        mListener.onDisplayConnectionFailed();
+                    }
+
+                    if (display != null) {
+                        if (!Objects.equal(display, oldDisplay)) {
+                            mListener.onDisplayConnecting(display);
+                        }
+                        if (surface != null && surface != oldSurface) {
+                            mListener.onDisplayConnected(display, surface, width, height, flags);
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    private void unadvertiseDisplay() {
+        advertiseDisplay(null, null, 0, 0, 0);
     }
 
     private static Inet4Address getInterfaceAddress(WifiP2pGroup info) {
