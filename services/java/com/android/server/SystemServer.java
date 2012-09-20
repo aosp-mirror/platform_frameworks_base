@@ -189,7 +189,7 @@ class ServerThread extends Thread {
 
                 // For debug builds, log event loop stalls to dropbox for analysis.
                 if (StrictMode.conditionallyEnableDebugLogging()) {
-                    Slog.i(TAG, "Enabled StrictMode logging for UI Looper");
+                    Slog.i(TAG, "Enabled StrictMode logging for WM Looper");
                 }
             }
         });

@@ -148,6 +148,9 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
     private final DisplayViewport mDefaultViewport = new DisplayViewport();
     private final DisplayViewport mExternalTouchViewport = new DisplayViewport();
 
+    // Persistent data store for all internal settings maintained by the display manager service.
+    private final PersistentDataStore mPersistentDataStore = new PersistentDataStore();
+
     // Temporary callback list, used when sending display events to applications.
     // May be used outside of the lock but only on the handler thread.
     private final ArrayList<CallbackRecord> mTempCallbacks = new ArrayList<CallbackRecord>();
@@ -403,6 +406,50 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
     }
 
     @Override // Binder call
+    public void renameWifiDisplay(String address, String alias) {
+        if (mContext.checkCallingPermission(android.Manifest.permission.CONFIGURE_WIFI_DISPLAY)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires CONFIGURE_WIFI_DISPLAY permission");
+        }
+        if (address == null) {
+            throw new IllegalArgumentException("address must not be null");
+        }
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mSyncRoot) {
+                if (mWifiDisplayAdapter != null) {
+                    mWifiDisplayAdapter.requestRenameLocked(address, alias);
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    @Override // Binder call
+    public void forgetWifiDisplay(String address) {
+        if (mContext.checkCallingPermission(android.Manifest.permission.CONFIGURE_WIFI_DISPLAY)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires CONFIGURE_WIFI_DISPLAY permission");
+        }
+        if (address == null) {
+            throw new IllegalArgumentException("address must not be null");
+        }
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mSyncRoot) {
+                if (mWifiDisplayAdapter != null) {
+                    mWifiDisplayAdapter.requestForgetLocked(address);
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    @Override // Binder call
     public WifiDisplayStatus getWifiDisplayStatus() {
         if (mContext.checkCallingPermission(android.Manifest.permission.CONFIGURE_WIFI_DISPLAY)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -439,12 +486,24 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
     private void registerAdditionalDisplayAdapters() {
         synchronized (mSyncRoot) {
             if (shouldRegisterNonEssentialDisplayAdaptersLocked()) {
-                registerDisplayAdapterLocked(new OverlayDisplayAdapter(
-                        mSyncRoot, mContext, mHandler, mDisplayAdapterListener, mUiHandler));
-                mWifiDisplayAdapter = new WifiDisplayAdapter(
-                        mSyncRoot, mContext, mHandler, mDisplayAdapterListener);
-                registerDisplayAdapterLocked(mWifiDisplayAdapter);
+                registerOverlayDisplayAdapterLocked();
+                registerWifiDisplayAdapterLocked();
             }
+        }
+    }
+
+    private void registerOverlayDisplayAdapterLocked() {
+        registerDisplayAdapterLocked(new OverlayDisplayAdapter(
+                mSyncRoot, mContext, mHandler, mDisplayAdapterListener, mUiHandler));
+    }
+
+    private void registerWifiDisplayAdapterLocked() {
+        if (mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_enableWifiDisplay)) {
+            mWifiDisplayAdapter = new WifiDisplayAdapter(
+                    mSyncRoot, mContext, mHandler, mDisplayAdapterListener,
+                    mPersistentDataStore);
+            registerDisplayAdapterLocked(mWifiDisplayAdapter);
         }
     }
 
