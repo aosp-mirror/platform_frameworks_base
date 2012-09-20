@@ -31,6 +31,7 @@ import android.net.TrafficStats;
 import android.text.format.DateUtils;
 import android.util.AtomicFile;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FileRotator;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Objects;
@@ -431,13 +432,13 @@ public class NetworkStatsCollection implements FileRotator.Reader {
      * moving any {@link NetworkStats#TAG_NONE} series to
      * {@link TrafficStats#UID_REMOVED}.
      */
-    public void removeUid(int uid) {
+    public void removeUids(int[] uids) {
         final ArrayList<Key> knownKeys = Lists.newArrayList();
         knownKeys.addAll(mStats.keySet());
 
         // migrate all UID stats into special "removed" bucket
         for (Key key : knownKeys) {
-            if (key.uid == uid) {
+            if (ArrayUtils.contains(uids, key.uid)) {
                 // only migrate combined TAG_NONE history
                 if (key.tag == TAG_NONE) {
                     final NetworkStatsHistory uidHistory = mStats.get(key);
