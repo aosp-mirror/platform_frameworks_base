@@ -2445,30 +2445,29 @@ public class AudioManager {
     }
 
     /**
-     * Used as a key for #getProperty to request the native or optimal output sample rate for
-     * this device, in decimal Hz.
-     * {@hide}
+     * Used as a key for {@link #getProperty} to request the native or optimal output sample rate
+     * for this device's primary output stream, in decimal Hz.
      */
     public static final String PROPERTY_OUTPUT_SAMPLE_RATE =
             "android.media.property.OUTPUT_SAMPLE_RATE";
 
     /**
-     * Used as a key for #getProperty to request the native or optimal output buffer size for
-     * this device, in decimal PCM frames.
-     * {@hide}
+     * Used as a key for {@link #getProperty} to request the native or optimal output buffer size
+     * for this device's primary output stream, in decimal PCM frames.
      */
     public static final String PROPERTY_OUTPUT_FRAMES_PER_BUFFER =
             "android.media.property.OUTPUT_FRAMES_PER_BUFFER";
 
     /**
+     * Returns the value of the property with the specified key.
      * @param key One of the strings corresponding to a property key: either
-     *            #PROPERTY_OUTPUT_SAMPLE_RATE or #PROPERTY_OUTPUT_FRAMES_PER_BUFFER
+     *            {@link #PROPERTY_OUTPUT_SAMPLE_RATE} or
+     *            {@link #PROPERTY_OUTPUT_FRAMES_PER_BUFFER}
      * @return A string representing the associated value for that property key,
      *         or null if there is no value for that key.
-     * {@hide}
      */
     public String getProperty(String key) {
-        // uses android.os.SystemProperties.get for selected keys, with suitable defaults
+        // implementation to be written
         return null;
     }
 
