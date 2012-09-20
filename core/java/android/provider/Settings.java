@@ -1338,7 +1338,7 @@ public final class Settings {
         /** @deprecated - Do not use */
         @Deprecated
         public static void setShowGTalkServiceStatus(ContentResolver cr, boolean flag) {
-            /* intentionally empty */
+            setShowGTalkServiceStatusForUser(cr, flag, UserHandle.myUserId());
         }
 
         /**
