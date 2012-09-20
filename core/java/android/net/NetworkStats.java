@@ -21,6 +21,7 @@ import android.os.Parcelable;
 import android.os.SystemClock;
 import android.util.SparseBooleanArray;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Objects;
 
 import java.io.CharArrayWriter;
@@ -608,13 +609,13 @@ public class NetworkStats implements Parcelable {
      * Return all rows except those attributed to the requested UID; doesn't
      * mutate the original structure.
      */
-    public NetworkStats withoutUid(int uid) {
+    public NetworkStats withoutUids(int[] uids) {
         final NetworkStats stats = new NetworkStats(elapsedRealtime, 10);
 
         Entry entry = new Entry();
         for (int i = 0; i < size; i++) {
             entry = getValues(i, entry);
-            if (entry.uid != uid) {
+            if (!ArrayUtils.contains(uids, entry.uid)) {
                 stats.addValues(entry);
             }
         }
