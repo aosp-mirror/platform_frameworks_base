@@ -3638,39 +3638,45 @@ public final class ActivityThread {
         }
     }
 
-    ArrayList<ComponentCallbacks2> collectComponentCallbacksLocked(
+    ArrayList<ComponentCallbacks2> collectComponentCallbacks(
             boolean allActivities, Configuration newConfig) {
         ArrayList<ComponentCallbacks2> callbacks
                 = new ArrayList<ComponentCallbacks2>();
 
-        if (mActivities.size() > 0) {
-            for (ActivityClientRecord ar : mActivities.values()) {
-                Activity a = ar.activity;
-                if (a != null) {
-                    Configuration thisConfig = applyConfigCompatMainThread(mCurDefaultDisplayDpi,
-                            newConfig, ar.packageInfo.mCompatibilityInfo.getIfNeeded());
-                    if (!ar.activity.mFinished && (allActivities || !ar.paused)) {
-                        // If the activity is currently resumed, its configuration
-                        // needs to change right now.
-                        callbacks.add(a);
-                    } else if (thisConfig != null) {
-                        // Otherwise, we will tell it about the change
-                        // the next time it is resumed or shown.  Note that
-                        // the activity manager may, before then, decide the
-                        // activity needs to be destroyed to handle its new
-                        // configuration.
-                        if (DEBUG_CONFIGURATION) {
-                            Slog.v(TAG, "Setting activity "
-                                    + ar.activityInfo.name + " newConfig=" + thisConfig);
+        synchronized (mPackages) {
+            final int N = mAllApplications.size();
+            for (int i=0; i<N; i++) {
+                callbacks.add(mAllApplications.get(i));
+            }
+            if (mActivities.size() > 0) {
+                for (ActivityClientRecord ar : mActivities.values()) {
+                    Activity a = ar.activity;
+                    if (a != null) {
+                        Configuration thisConfig = applyConfigCompatMainThread(mCurDefaultDisplayDpi,
+                                newConfig, ar.packageInfo.mCompatibilityInfo.getIfNeeded());
+                        if (!ar.activity.mFinished && (allActivities || !ar.paused)) {
+                            // If the activity is currently resumed, its configuration
+                            // needs to change right now.
+                            callbacks.add(a);
+                        } else if (thisConfig != null) {
+                            // Otherwise, we will tell it about the change
+                            // the next time it is resumed or shown.  Note that
+                            // the activity manager may, before then, decide the
+                            // activity needs to be destroyed to handle its new
+                            // configuration.
+                            if (DEBUG_CONFIGURATION) {
+                                Slog.v(TAG, "Setting activity "
+                                        + ar.activityInfo.name + " newConfig=" + thisConfig);
+                            }
+                            ar.newConfig = thisConfig;
                         }
-                        ar.newConfig = thisConfig;
                     }
                 }
             }
-        }
-        if (mServices.size() > 0) {
-            for (Service service : mServices.values()) {
-                callbacks.add(service);
+            if (mServices.size() > 0) {
+                for (Service service : mServices.values()) {
+                    callbacks.add(service);
+                }
             }
         }
         synchronized (mProviderMap) {
@@ -3679,10 +3685,6 @@ public final class ActivityThread {
                     callbacks.add(providerClientRecord.mLocalProvider);
                 }
             }
-        }
-        final int N = mAllApplications.size();
-        for (int i=0; i<N; i++) {
-            callbacks.add(mAllApplications.get(i));
         }
 
         return callbacks;
@@ -3844,7 +3846,6 @@ public final class ActivityThread {
 
     final void handleConfigurationChanged(Configuration config, CompatibilityInfo compat) {
 
-        ArrayList<ComponentCallbacks2> callbacks = null;
         int configDiff = 0;
 
         synchronized (mPackages) {
@@ -3875,9 +3876,10 @@ public final class ActivityThread {
             configDiff = mConfiguration.diff(config);
             mConfiguration.updateFrom(config);
             config = applyCompatConfiguration(mCurDefaultDisplayDpi);
-            callbacks = collectComponentCallbacksLocked(false, config);
         }
-        
+
+        ArrayList<ComponentCallbacks2> callbacks = collectComponentCallbacks(false, config);
+
         // Cleanup hardware accelerated stuff
         WindowManagerGlobal.getInstance().trimLocalMemory();
 
@@ -3990,11 +3992,7 @@ public final class ActivityThread {
     }
         
     final void handleLowMemory() {
-        ArrayList<ComponentCallbacks2> callbacks;
-
-        synchronized (mPackages) {
-            callbacks = collectComponentCallbacksLocked(true, null);
-        }
+        ArrayList<ComponentCallbacks2> callbacks = collectComponentCallbacks(true, null);
 
         final int N = callbacks.size();
         for (int i=0; i<N; i++) {
@@ -4022,10 +4020,7 @@ public final class ActivityThread {
         final WindowManagerGlobal windowManager = WindowManagerGlobal.getInstance();
         windowManager.startTrimMemory(level);
 
-        ArrayList<ComponentCallbacks2> callbacks;
-        synchronized (mPackages) {
-            callbacks = collectComponentCallbacksLocked(true, null);
-        }
+        ArrayList<ComponentCallbacks2> callbacks = collectComponentCallbacks(true, null);
 
         final int N = callbacks.size();
         for (int i = 0; i < N; i++) {
