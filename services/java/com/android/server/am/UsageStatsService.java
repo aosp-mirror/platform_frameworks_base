@@ -650,7 +650,7 @@ public final class UsageStatsService extends IUsageStats.Stub {
     public void monitorPackages() {
         mPackageMonitor = new PackageMonitor() {
             @Override
-            public void onPackageRemoved(String packageName, int uid) {
+            public void onPackageRemovedAllUsers(String packageName, int uid) {
                 synchronized (mStatsLock) {
                     mLastResumeTimes.remove(packageName);
                 }
