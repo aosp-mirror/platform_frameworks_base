@@ -81,11 +81,14 @@ public class ViewLayersActivity extends Activity {
                 leftList.setAlpha(0.5f);
                 middleList.setLayerType(View.LAYER_TYPE_HARDWARE, p3);
                 middleList.setAlpha(0.5f);
+                middleList.setVerticalFadingEdgeEnabled(true);
                 rightList.setLayerType(View.LAYER_TYPE_SOFTWARE, p2);
 
                 moveRight.start();
                 moveLeft.start();
                 rotate.start();
+
+                ((View) leftList.getParent()).setAlpha(0.5f);
             }
         }, 2000);
     }
