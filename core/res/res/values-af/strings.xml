@@ -292,7 +292,7 @@
     <string name="permlab_filter_events" msgid="8675535648807427389">"filter gebeure"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Laat \'n program toe om \'n invoerfilter te registreer wat die stroom van alle gebruikergebeure filter voordat dit versend word. Kwaadwillige programme kan moontlik die stelsel-UI beheer sonder gebruikers se tussentrede."</string>
     <string name="permlab_magnify_display" msgid="5973626738170618775">"vergroot skerm"</string>
-    <string name="permdesc_magnify_display" msgid="7121235684515003792">"Laat \'n program toe om die inhoud van \'n skerm te vergroot. Kwaadwillige programme kan die skerminhoud omskep sodat die toestel onbruikbaar word."</string>
+    <string name="permdesc_magnify_display" msgid="7121235684515003792">"Laat \'n program toe om die inhoud van \'n skerm te vergroot. Kwaadwillige programme kan die skerminhoud so omskep dat die toestel onbruikbaar word."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"gedeeltelike afskakeling"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Plaas die aktiwiteitbestuurder in \'n afsluitingstatus. Doen nie \'n volledige afsluiting nie."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"verhoed program-oorskakelings"</string>
@@ -449,7 +449,7 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Laat die program toe om SurfaceFlinger se laevlak-kenmerke te gebruik."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"lees raambuffer"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Laat die program toe om die inhoud van die raambuffer te lees."</string>
-    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"stel Wi-Fi-skerms sop"</string>
+    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"stel Wi-Fi-skerms op"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Laat die program toe om Wi-Fi-skerms op te stel en daaraan te koppel."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"beheer Wi-Fi-skerms"</string>
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Laat die program toe om laevlak-kenmerke van Wi-Fi-skerms te beheer."</string>
@@ -776,8 +776,7 @@
     <string name="lockscreen_charged" msgid="4938930459620989972">"Gehef."</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Koppel jou herlaaier."</string>
-    <!-- no translation found for lockscreen_missing_sim_message_short (5099439277819215399) -->
-    <skip />
+    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Geen SIM-kaart nie"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Geen SIM-kaart in tablet nie."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Geen SIM-kaart in foon nie."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Steek \'n SIM-kaart in."</string>
