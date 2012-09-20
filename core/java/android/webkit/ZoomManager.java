@@ -287,6 +287,7 @@ class ZoomManager {
         if (!exceedsMinScaleIncrement(mMinZoomScale, mMaxZoomScale)) {
             mMaxZoomScale = mMinZoomScale;
         }
+        sanitizeMinMaxScales();
     }
 
     public final float getScale() {
@@ -909,6 +910,14 @@ class ZoomManager {
         }
     }
 
+    private void sanitizeMinMaxScales() {
+        if (mMinZoomScale > mMaxZoomScale) {
+            Log.w(LOGTAG, "mMinZoom > mMaxZoom!!! " + mMinZoomScale + " > " + mMaxZoomScale,
+                    new Exception());
+            mMaxZoomScale = mMinZoomScale;
+        }
+    }
+
     public void onSizeChanged(int w, int h, int ow, int oh) {
         // reset zoom and anchor to the top left corner of the screen
         // unless we are already zooming
@@ -933,6 +942,7 @@ class ZoomManager {
             if (mInitialScale > 0 && mInitialScale < mMinZoomScale) {
                 mMinZoomScale = mInitialScale;
             }
+            sanitizeMinMaxScales();
         }
 
         dismissZoomPicker();
@@ -1004,6 +1014,7 @@ class ZoomManager {
         } else {
             mMaxZoomScale = viewState.mMaxScale;
         }
+        sanitizeMinMaxScales();
     }
 
     /**
@@ -1033,6 +1044,7 @@ class ZoomManager {
         if (!mMinZoomScaleFixed || settings.getUseWideViewPort()) {
             mMinZoomScale = newZoomOverviewScale;
             mMaxZoomScale = Math.max(mMaxZoomScale, mMinZoomScale);
+            sanitizeMinMaxScales();
         }
         // fit the content width to the current view for the first new picture
         // after first layout.
@@ -1113,6 +1125,7 @@ class ZoomManager {
             mMinZoomScale = (mInitialScale > 0) ?
                     Math.min(mInitialScale, overviewScale) : overviewScale;
             mMaxZoomScale = Math.max(mMaxZoomScale, mMinZoomScale);
+            sanitizeMinMaxScales();
         }
 
         if (!mWebView.drawHistory()) {
