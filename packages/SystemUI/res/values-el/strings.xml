@@ -174,10 +174,4 @@
     <string name="quick_settings_wifi_display_no_connection_label" msgid="6255615315258869136">"Δεν υπάρχει σύνδεση οθόνης Wifi"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Φωτεινότητα"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"ΑΥΤΟΜΑΤΗ"</string>
-    <string name="wifi_display_scan" msgid="8453135922233546097">"Σάρωση"</string>
-    <string name="wifi_display_disconnect" msgid="5450214362789378584">"Αποσύνδεση"</string>
-    <string name="wifi_display_dialog_title" msgid="2817993038700218900">"Οθόνη Wifi"</string>
-    <string name="wifi_display_state_available" msgid="980373281442607096">"Διαθέσιμη"</string>
-    <string name="wifi_display_state_connecting" msgid="1677010908036241940">"Σύνδεση"</string>
-    <string name="wifi_display_state_connected" msgid="9154375061719151149">"Έχει συνδεθεί"</string>
 </resources>

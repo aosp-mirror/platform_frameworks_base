@@ -151,18 +151,13 @@
     <string name="jelly_bean_dream_name" msgid="5992026543636816792">"BeanFlinger"</string>
     <string name="start_dreams" msgid="870400522982252717">"ህልሞችን ጀምር"</string>
     <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"የአውሮፕላን ሁነታ"</string>
-    <!-- no translation found for quick_settings_battery_charging_label (490074774465309209) -->
-    <skip />
-    <!-- no translation found for quick_settings_battery_charged_label (8865413079414246081) -->
-    <skip />
+    <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"ባትሪ በመሙላት ላይ፣ <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"ባትሪ ሞልቷል።"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"ብሉቱዝ"</string>
-    <!-- no translation found for quick_settings_bluetooth_multiple_devices_label (3912245565613684735) -->
-    <skip />
+    <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"ብሉቱዝ (<xliff:g id="NUMBER">%d</xliff:g> መሣሪያዎች)"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"ብሩህነት"</string>
-    <!-- no translation found for quick_settings_rotation_unlocked_label (336054930362580584) -->
-    <skip />
-    <!-- no translation found for quick_settings_rotation_locked_label (8058646447242565486) -->
-    <skip />
+    <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"ራስ-አዙር"</string>
+    <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"አዙሪት ተቆልፏል"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"የግቤት ዘዴ"</string>
     <string name="quick_settings_location_label" msgid="3292451598267467545">"በስራ ላይ ያለው አካባቢ"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"የሚዲያ መሣሪያ"</string>
@@ -177,10 +172,4 @@
     <string name="quick_settings_wifi_display_no_connection_label" msgid="6255615315258869136">"ምንም የWifi ማሳያ ግንኙነት የለም"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"ብሩህነት"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"ራስ-ሰር"</string>
-    <string name="wifi_display_scan" msgid="8453135922233546097">"ቃኝ"</string>
-    <string name="wifi_display_disconnect" msgid="5450214362789378584">"አለያይ"</string>
-    <string name="wifi_display_dialog_title" msgid="2817993038700218900">"የWifi ማሳያ"</string>
-    <string name="wifi_display_state_available" msgid="980373281442607096">"የሚገኝ"</string>
-    <string name="wifi_display_state_connecting" msgid="1677010908036241940">"በመገናኘት ላይ"</string>
-    <string name="wifi_display_state_connected" msgid="9154375061719151149">"ተገናኝቷል"</string>
 </resources>
