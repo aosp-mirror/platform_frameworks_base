@@ -220,6 +220,7 @@ public class TelephonyManager {
     public CellLocation getCellLocation() {
         try {
             Bundle bundle = getITelephony().getCellLocation();
+            if (bundle.isEmpty()) return null;
             CellLocation cl = CellLocation.newFromBundle(bundle);
             if (cl.isEmpty())
                 return null;

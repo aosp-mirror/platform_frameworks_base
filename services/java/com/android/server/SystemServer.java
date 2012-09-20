@@ -149,6 +149,7 @@ class ServerThread extends Thread {
         NetworkTimeUpdateService networkTimeUpdater = null;
         CommonTimeManagementService commonTimeMgmtService = null;
         InputManagerService inputManager = null;
+        TelephonyRegistry telephonyRegistry = null;
 
         // Create a shared handler thread for UI within the system server.
         // This thread is used by at least the following components:
@@ -219,7 +220,8 @@ class ServerThread extends Thread {
             ServiceManager.addService(Context.DISPLAY_SERVICE, display, true);
 
             Slog.i(TAG, "Telephony Registry");
-            ServiceManager.addService("telephony.registry", new TelephonyRegistry(context));
+            telephonyRegistry = new TelephonyRegistry(context);
+            ServiceManager.addService("telephony.registry", telephonyRegistry);
 
             Slog.i(TAG, "Scheduling Policy");
             ServiceManager.addService(Context.SCHEDULING_POLICY_SERVICE,
@@ -845,6 +847,7 @@ class ServerThread extends Thread {
         final StatusBarManagerService statusBarF = statusBar;
         final DreamManagerService dreamyF = dreamy;
         final InputManagerService inputManagerF = inputManager;
+        final TelephonyRegistry telephonyRegistryF = telephonyRegistry;
 
         // We now tell the activity manager it is okay to run third party
         // code.  It will call back into us once it has gotten to the state
@@ -971,6 +974,11 @@ class ServerThread extends Thread {
                     if (inputManagerF != null) inputManagerF.systemReady();
                 } catch (Throwable e) {
                     reportWtf("making InputManagerService ready", e);
+                }
+                try {
+                    if (telephonyRegistryF != null) telephonyRegistryF.systemReady();
+                } catch (Throwable e) {
+                    reportWtf("making TelephonyRegistry ready", e);
                 }
             }
         });
