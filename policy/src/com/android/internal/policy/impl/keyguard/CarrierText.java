@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2012 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.internal.policy.impl.keyguard;
 
 import android.content.Context;
@@ -34,14 +50,15 @@ public class CarrierText extends TextView {
     /**
      * The status of this lock screen. Primarily used for widgets on LockScreen.
      */
-    enum StatusMode {
+    private static enum StatusMode {
         Normal, // Normal case (sim card present, it's not locked)
         NetworkLocked, // SIM card is 'network locked'.
         SimMissing, // SIM card is missing.
         SimMissingLocked, // SIM card is missing, and device isn't provisioned; don't allow access
         SimPukLocked, // SIM card is PUK locked because SIM entered wrong too many times
         SimLocked, // SIM card is currently locked
-        SimPermDisabled; // SIM card is permanently disabled due to PUK unlock failure
+        SimPermDisabled, // SIM card is permanently disabled due to PUK unlock failure
+        SimNotReady; // SIM is not ready yet. May never be on devices w/o a SIM.
     }
 
     public CarrierText(Context context) {
@@ -54,7 +71,12 @@ public class CarrierText extends TextView {
     }
 
     protected void updateCarrierText(State simState, CharSequence plmn, CharSequence spn) {
-        setText(getCarrierTextForSimState(simState, plmn, spn));
+        CharSequence text = getCarrierTextForSimState(simState, plmn, spn);
+        if (KeyguardViewManager.USE_UPPER_CASE) {
+            setText(text != null ? text.toString().toUpperCase() : null);
+        } else {
+            setText(text);
+        }
     }
 
     @Override
@@ -80,6 +102,10 @@ public class CarrierText extends TextView {
         switch (status) {
             case Normal:
                 carrierText = concatenate(plmn, spn);
+                break;
+
+            case SimNotReady:
+                carrierText = null; // nothing to display yet.
                 break;
 
             case NetworkLocked:
@@ -157,7 +183,7 @@ public class CarrierText extends TextView {
             case NETWORK_LOCKED:
                 return StatusMode.SimMissingLocked;
             case NOT_READY:
-                return StatusMode.SimMissing;
+                return StatusMode.SimNotReady;
             case PIN_REQUIRED:
                 return StatusMode.SimLocked;
             case PUK_REQUIRED:
