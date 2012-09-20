@@ -25,4 +25,11 @@ LOCAL_SDK_VERSION := current
 
 LOCAL_PACKAGE_NAME := DownloadManagerTestApp
 
+ifneq ($(TARGET_BUILD_VARIANT),user)
+# Need to run as system app to get access to Settings.
+LOCAL_CERTIFICATE := platform
+else
+$(error "This test app will fail to run unless it is built in non-user mode.")
+endif
+
 include $(BUILD_PACKAGE)
