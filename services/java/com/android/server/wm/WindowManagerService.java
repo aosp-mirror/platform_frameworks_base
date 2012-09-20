@@ -74,6 +74,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
 import android.hardware.display.DisplayManager;
+import android.hardware.input.InputManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Debug;
@@ -738,6 +739,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public static WindowManagerService main(final Context context,
             final PowerManagerService pm, final DisplayManagerService dm,
+            final InputManagerService im,
             final Handler uiHandler, final Handler wmHandler,
             final boolean haveInputMethods, final boolean showBootMsgs,
             final boolean onlyCore) {
@@ -745,7 +747,7 @@ public class WindowManagerService extends IWindowManager.Stub
         wmHandler.runWithScissors(new Runnable() {
             @Override
             public void run() {
-                holder[0] = new WindowManagerService(context, pm, dm,
+                holder[0] = new WindowManagerService(context, pm, dm, im,
                         uiHandler, haveInputMethods, showBootMsgs, onlyCore);
             }
         }, 0);
@@ -767,7 +769,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private WindowManagerService(Context context, PowerManagerService pm,
-            DisplayManagerService displayManager, Handler uiHandler,
+            DisplayManagerService displayManager, InputManagerService inputManager,
+            Handler uiHandler,
             boolean haveInputMethods, boolean showBootMsgs, boolean onlyCore) {
         mContext = context;
         mHaveInputMethods = haveInputMethods;
@@ -814,13 +817,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 | PowerManager.ON_AFTER_RELEASE, TAG);
         mHoldingScreenWakeLock.setReferenceCounted(false);
 
-        mInputManager = new InputManagerService(context, mInputMonitor);
+        mInputManager = inputManager;
         mFxSession = new SurfaceSession();
         mAnimator = new WindowAnimator(this);
 
         initPolicy(uiHandler);
-
-        mInputManager.start();
 
         // Add ourself to the Watchdog monitors.
         Watchdog.getInstance().addMonitor(this);
@@ -833,8 +834,8 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public InputManagerService getInputManagerService() {
-        return mInputManager;
+    public InputMonitor getInputMonitor() {
+        return mInputMonitor;
     }
 
     @Override
