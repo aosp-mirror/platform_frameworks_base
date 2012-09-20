@@ -33,8 +33,6 @@ public class Blur25 extends TestBase {
 
     private int MAX_RADIUS = 25;
     private ScriptC_threshold mScript;
-    private ScriptC_vertical_blur mScriptVBlur;
-    private ScriptC_horizontal_blur mScriptHBlur;
     private int mRadius = MAX_RADIUS;
     private float mSaturation = 1.0f;
     private Allocation mScratchPixelsAllocation1;
@@ -50,22 +48,17 @@ public class Blur25 extends TestBase {
         b.setProgress(100);
         return true;
     }
-    public boolean onBar2Setup(SeekBar b, TextView t) {
-        b.setProgress(50);
-        t.setText("Saturation");
-        return true;
-    }
 
 
     public void onBar1Changed(int progress) {
         float fRadius = progress / 100.0f;
         fRadius *= (float)(MAX_RADIUS);
         mRadius = (int)fRadius;
-        mScript.set_radius(mRadius);
-    }
-    public void onBar2Changed(int progress) {
-        mSaturation = (float)progress / 50.0f;
-        mScriptVBlur.invoke_setSaturation(mSaturation);
+        if (mUseIntrinsic) {
+            mIntrinsic.setRadius(mRadius);
+        } else {
+            mScript.invoke_setRadius(mRadius);
+        }
     }
 
 
@@ -75,7 +68,7 @@ public class Blur25 extends TestBase {
 
         if (mUseIntrinsic) {
             mIntrinsic = ScriptIntrinsicBlur.create(mRS, Element.U8_4(mRS));
-            mIntrinsic.setRadius(25.f);
+            mIntrinsic.setRadius(MAX_RADIUS);
             mIntrinsic.setInput(mInPixelsAllocation);
         } else {
 
@@ -85,23 +78,14 @@ public class Blur25 extends TestBase {
             mScratchPixelsAllocation1 = Allocation.createTyped(mRS, tb.create());
             mScratchPixelsAllocation2 = Allocation.createTyped(mRS, tb.create());
 
-            mScriptVBlur = new ScriptC_vertical_blur(mRS, res, R.raw.vertical_blur);
-            mScriptHBlur = new ScriptC_horizontal_blur(mRS, res, R.raw.horizontal_blur);
-
             mScript = new ScriptC_threshold(mRS, res, R.raw.threshold);
             mScript.set_width(width);
             mScript.set_height(height);
-            mScript.set_radius(mRadius);
+            mScript.invoke_setRadius(MAX_RADIUS);
 
-            mScriptVBlur.invoke_setSaturation(mSaturation);
-
-            mScript.bind_InPixel(mInPixelsAllocation);
-            mScript.bind_OutPixel(mOutPixelsAllocation);
-            mScript.bind_ScratchPixel1(mScratchPixelsAllocation1);
-            mScript.bind_ScratchPixel2(mScratchPixelsAllocation2);
-
-            mScript.set_vBlurScript(mScriptVBlur);
-            mScript.set_hBlurScript(mScriptHBlur);
+            mScript.set_InPixel(mInPixelsAllocation);
+            mScript.set_ScratchPixel1(mScratchPixelsAllocation1);
+            mScript.set_ScratchPixel2(mScratchPixelsAllocation2);
         }
     }
 
@@ -109,7 +93,9 @@ public class Blur25 extends TestBase {
         if (mUseIntrinsic) {
             mIntrinsic.forEach(mOutPixelsAllocation);
         } else {
-            mScript.invoke_filter();
+            mScript.forEach_copyIn(mInPixelsAllocation, mScratchPixelsAllocation1);
+            mScript.forEach_horz(mScratchPixelsAllocation2);
+            mScript.forEach_vert(mOutPixelsAllocation);
         }
     }
 
@@ -117,7 +103,7 @@ public class Blur25 extends TestBase {
         if (mUseIntrinsic) {
             mIntrinsic.setRadius(MAX_RADIUS);
         } else {
-            mScript.set_radius(MAX_RADIUS);
+            mScript.invoke_setRadius(MAX_RADIUS);
         }
     }
 
@@ -125,7 +111,7 @@ public class Blur25 extends TestBase {
         if (mUseIntrinsic) {
             mIntrinsic.setRadius(mRadius);
         } else {
-            mScript.set_radius(mRadius);
+            mScript.invoke_setRadius(mRadius);
         }
     }
 }
