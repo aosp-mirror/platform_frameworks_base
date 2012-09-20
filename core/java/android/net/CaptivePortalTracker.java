@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -24,16 +25,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
-import android.database.ContentObserver;
 import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Looper;
+import android.os.UserHandle;
 import android.os.Message;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.util.Log;
+
+import com.android.internal.util.State;
+import com.android.internal.util.StateMachine;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -41,16 +42,15 @@ import java.net.InetAddress;
 import java.net.Inet4Address;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.android.internal.R;
 
 /**
- * This class allows captive portal detection
+ * This class allows captive portal detection on a network.
  * @hide
  */
-public class CaptivePortalTracker {
-    private static final boolean DBG = true;
+public class CaptivePortalTracker extends StateMachine {
+    private static final boolean DBG = false;
     private static final String TAG = "CaptivePortalTracker";
 
     private static final String DEFAULT_SERVER = "clients3.google.com";
@@ -62,37 +62,31 @@ public class CaptivePortalTracker {
     private String mUrl;
     private boolean mNotificationShown = false;
     private boolean mIsCaptivePortalCheckEnabled = false;
-    private InternalHandler mHandler;
     private IConnectivityManager mConnService;
     private Context mContext;
     private NetworkInfo mNetworkInfo;
-    private boolean mIsCaptivePortal = false;
 
-    private static final int DETECT_PORTAL = 0;
-    private static final int HANDLE_CONNECT = 1;
+    private static final int CMD_DETECT_PORTAL          = 0;
+    private static final int CMD_CONNECTIVITY_CHANGE    = 1;
+    private static final int CMD_DELAYED_CAPTIVE_CHECK  = 2;
 
-    /**
-     * Activity Action: Switch to the captive portal network
-     * <p>Input: Nothing.
-     * <p>Output: Nothing.
-     */
-    public static final String ACTION_SWITCH_TO_CAPTIVE_PORTAL
-            = "android.net.SWITCH_TO_CAPTIVE_PORTAL";
+    /* This delay happens every time before we do a captive check on a network */
+    private static final int DELAYED_CHECK_INTERVAL_MS = 10000;
+    private int mDelayedCheckToken = 0;
 
-    private CaptivePortalTracker(Context context, NetworkInfo info, IConnectivityManager cs) {
+    private State mDefaultState = new DefaultState();
+    private State mNoActiveNetworkState = new NoActiveNetworkState();
+    private State mActiveNetworkState = new ActiveNetworkState();
+    private State mDelayedCaptiveCheckState = new DelayedCaptiveCheckState();
+
+    private CaptivePortalTracker(Context context, IConnectivityManager cs) {
+        super(TAG);
+
         mContext = context;
-        mNetworkInfo = info;
         mConnService = cs;
 
-        HandlerThread handlerThread = new HandlerThread("CaptivePortalThread");
-        handlerThread.start();
-        mHandler = new InternalHandler(handlerThread.getLooper());
-        mHandler.obtainMessage(DETECT_PORTAL).sendToTarget();
-
         IntentFilter filter = new IntentFilter();
-        filter.addAction(ACTION_SWITCH_TO_CAPTIVE_PORTAL);
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-
         mContext.registerReceiver(mReceiver, filter);
 
         mServer = Settings.Secure.getString(mContext.getContentResolver(),
@@ -101,100 +95,180 @@ public class CaptivePortalTracker {
 
         mIsCaptivePortalCheckEnabled = Settings.Secure.getInt(mContext.getContentResolver(),
                 Settings.Secure.CAPTIVE_PORTAL_DETECTION_ENABLED, 1) == 1;
+
+        addState(mDefaultState);
+            addState(mNoActiveNetworkState, mDefaultState);
+            addState(mActiveNetworkState, mDefaultState);
+                addState(mDelayedCaptiveCheckState, mActiveNetworkState);
+        setInitialState(mNoActiveNetworkState);
     }
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (action.equals(ACTION_SWITCH_TO_CAPTIVE_PORTAL)) {
-                notifyPortalCheckComplete();
-            } else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
+            if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
                 NetworkInfo info = intent.getParcelableExtra(
                         ConnectivityManager.EXTRA_NETWORK_INFO);
-                mHandler.obtainMessage(HANDLE_CONNECT, info).sendToTarget();
+                sendMessage(obtainMessage(CMD_CONNECTIVITY_CHANGE, info));
             }
         }
     };
 
-    public static CaptivePortalTracker detect(Context context, NetworkInfo info,
+    public static CaptivePortalTracker makeCaptivePortalTracker(Context context,
             IConnectivityManager cs) {
-        CaptivePortalTracker captivePortal = new CaptivePortalTracker(context, info, cs);
+        CaptivePortalTracker captivePortal = new CaptivePortalTracker(context, cs);
+        captivePortal.start();
         return captivePortal;
     }
 
-    private class InternalHandler extends Handler {
-        public InternalHandler(Looper looper) {
-            super(looper);
+    public void detectCaptivePortal(NetworkInfo info) {
+        sendMessage(obtainMessage(CMD_DETECT_PORTAL, info));
+    }
+
+    private class DefaultState extends State {
+        @Override
+        public void enter() {
+            if (DBG) log(getName() + "\n");
         }
 
         @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case DETECT_PORTAL:
-                    InetAddress server = lookupHost(mServer);
-                    if (server != null) {
-                        requestRouteToHost(server);
-                        if (isCaptivePortal(server)) {
-                            if (DBG) log("Captive portal " + mNetworkInfo);
-                            setNotificationVisible(true);
-                            mIsCaptivePortal = true;
-                            break;
-                        }
-                    }
-                    notifyPortalCheckComplete();
-                    quit();
+        public boolean processMessage(Message message) {
+            if (DBG) log(getName() + message.toString() + "\n");
+            switch (message.what) {
+                case CMD_DETECT_PORTAL:
+                    NetworkInfo info = (NetworkInfo) message.obj;
+                    // Checking on a secondary connection is not supported
+                    // yet
+                    notifyPortalCheckComplete(info);
                     break;
-                case HANDLE_CONNECT:
-                    NetworkInfo info = (NetworkInfo) msg.obj;
-                    if (info.getType() != mNetworkInfo.getType()) break;
+                case CMD_CONNECTIVITY_CHANGE:
+                case CMD_DELAYED_CAPTIVE_CHECK:
+                    break;
+                default:
+                    loge("Ignoring " + message);
+                    break;
+            }
+            return HANDLED;
+        }
+    }
 
-                    if (info.getState() == NetworkInfo.State.CONNECTED ||
-                            info.getState() == NetworkInfo.State.DISCONNECTED) {
-                        setNotificationVisible(false);
-                    }
+    private class NoActiveNetworkState extends State {
+        @Override
+        public void enter() {
+            if (DBG) log(getName() + "\n");
+            mNetworkInfo = null;
+            /* Clear any previous notification */
+            setNotificationVisible(false);
+        }
 
-                    /* Connected to a captive portal */
-                    if (info.getState() == NetworkInfo.State.CONNECTED &&
-                            mIsCaptivePortal) {
-                        launchBrowser();
-                        quit();
+        @Override
+        public boolean processMessage(Message message) {
+            if (DBG) log(getName() + message.toString() + "\n");
+            InetAddress server;
+            NetworkInfo info;
+            switch (message.what) {
+                case CMD_CONNECTIVITY_CHANGE:
+                    info = (NetworkInfo) message.obj;
+                    if (info.isConnected() && isActiveNetwork(info)) {
+                        mNetworkInfo = info;
+                        transitionTo(mDelayedCaptiveCheckState);
                     }
                     break;
                 default:
-                    loge("Unhandled message " + msg);
-                    break;
+                    return NOT_HANDLED;
             }
-        }
-
-        private void quit() {
-            mIsCaptivePortal = false;
-            getLooper().quit();
-            mContext.unregisterReceiver(mReceiver);
+            return HANDLED;
         }
     }
 
-    private void launchBrowser() {
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUrl));
-        intent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK);
-        mContext.startActivity(intent);
+    private class ActiveNetworkState extends State {
+        @Override
+        public void enter() {
+            if (DBG) log(getName() + "\n");
+        }
+
+        @Override
+        public boolean processMessage(Message message) {
+            NetworkInfo info;
+            switch (message.what) {
+               case CMD_CONNECTIVITY_CHANGE:
+                    info = (NetworkInfo) message.obj;
+                    if (!info.isConnected()
+                            && info.getType() == mNetworkInfo.getType()) {
+                        if (DBG) log("Disconnected from active network " + info);
+                        transitionTo(mNoActiveNetworkState);
+                    } else if (info.getType() != mNetworkInfo.getType() &&
+                            info.isConnected() &&
+                            isActiveNetwork(info)) {
+                        if (DBG) log("Active network switched " + info);
+                        deferMessage(message);
+                        transitionTo(mNoActiveNetworkState);
+                    }
+                    break;
+                default:
+                    return NOT_HANDLED;
+            }
+            return HANDLED;
+        }
     }
 
-    private void notifyPortalCheckComplete() {
+
+
+    private class DelayedCaptiveCheckState extends State {
+        @Override
+        public void enter() {
+            if (DBG) log(getName() + "\n");
+            sendMessageDelayed(obtainMessage(CMD_DELAYED_CAPTIVE_CHECK,
+                        ++mDelayedCheckToken, 0), DELAYED_CHECK_INTERVAL_MS);
+        }
+
+        @Override
+        public boolean processMessage(Message message) {
+            if (DBG) log(getName() + message.toString() + "\n");
+            switch (message.what) {
+                case CMD_DELAYED_CAPTIVE_CHECK:
+                    if (message.arg1 == mDelayedCheckToken) {
+                        InetAddress server = lookupHost(mServer);
+                        if (server != null) {
+                            if (isCaptivePortal(server)) {
+                                if (DBG) log("Captive network " + mNetworkInfo);
+                                setNotificationVisible(true);
+                            }
+                        }
+                        if (DBG) log("Not captive network " + mNetworkInfo);
+                        transitionTo(mActiveNetworkState);
+                    }
+                    break;
+                default:
+                    return NOT_HANDLED;
+            }
+            return HANDLED;
+        }
+    }
+
+    private void notifyPortalCheckComplete(NetworkInfo info) {
+        if (info == null) {
+            loge("notifyPortalCheckComplete on null");
+            return;
+        }
         try {
-            mConnService.captivePortalCheckComplete(mNetworkInfo);
+            mConnService.captivePortalCheckComplete(info);
         } catch(RemoteException e) {
             e.printStackTrace();
         }
     }
 
-    private void requestRouteToHost(InetAddress server) {
+    private boolean isActiveNetwork(NetworkInfo info) {
         try {
-            mConnService.requestRouteToHostAddress(mNetworkInfo.getType(),
-                    server.getAddress());
+            NetworkInfo active = mConnService.getActiveNetworkInfo();
+            if (active != null && active.getType() == info.getType()) {
+                return true;
+            }
         } catch (RemoteException e) {
             e.printStackTrace();
         }
+        return false;
     }
 
     /**
@@ -205,6 +279,7 @@ public class CaptivePortalTracker {
         if (!mIsCaptivePortalCheckEnabled) return false;
 
         mUrl = "http://" + server.getHostAddress() + "/generate_204";
+        if (DBG) log("Checking " + mUrl);
         try {
             URL url = new URL(mUrl);
             urlConnection = (HttpURLConnection) url.openConnection();
@@ -250,7 +325,12 @@ public class CaptivePortalTracker {
             .getSystemService(Context.NOTIFICATION_SERVICE);
 
         if (visible) {
-            CharSequence title = r.getString(R.string.wifi_available_sign_in, 0);
+            CharSequence title;
+            if (mNetworkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
+                title = r.getString(R.string.wifi_available_sign_in, 0);
+            } else {
+                title = r.getString(R.string.network_available_sign_in, 0);
+            }
             CharSequence details = r.getString(R.string.network_available_sign_in_detailed,
                     mNetworkInfo.getExtraInfo());
 
@@ -258,9 +338,10 @@ public class CaptivePortalTracker {
             notification.when = 0;
             notification.icon = com.android.internal.R.drawable.stat_notify_wifi_in_range;
             notification.flags = Notification.FLAG_AUTO_CANCEL;
-            notification.contentIntent = PendingIntent.getBroadcast(mContext, 0,
-                    new Intent(CaptivePortalTracker.ACTION_SWITCH_TO_CAPTIVE_PORTAL), 0);
-
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUrl));
+            intent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT |
+                    Intent.FLAG_ACTIVITY_NEW_TASK);
+            notification.contentIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
             notification.tickerText = title;
             notification.setLatestEventInfo(mContext, title, details, notification.contentIntent);
 
