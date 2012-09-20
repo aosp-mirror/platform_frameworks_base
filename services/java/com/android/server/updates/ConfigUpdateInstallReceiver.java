@@ -223,7 +223,7 @@ public class ConfigUpdateInstallReceiver extends BroadcastReceiver {
         return signer.verify(Base64.decode(signature.getBytes(), Base64.DEFAULT));
     }
 
-    private void writeUpdate(File dir, File file, String content) {
+    private void writeUpdate(File dir, File file, String content) throws IOException {
         FileOutputStream out = null;
         File tmp = null;
         try {
@@ -247,8 +247,6 @@ public class ConfigUpdateInstallReceiver extends BroadcastReceiver {
             if (!tmp.renameTo(file)) {
                 throw new IOException("Failed to atomically rename " + file.getCanonicalPath());
             }
-        } catch (IOException e) {
-            Slog.e(TAG, "Failed to write update", e);
         } finally {
             if (tmp != null) {
                 tmp.delete();
@@ -257,7 +255,7 @@ public class ConfigUpdateInstallReceiver extends BroadcastReceiver {
         }
     }
 
-    private void install(String content, int version) {
+    private void install(String content, int version) throws IOException {
         writeUpdate(updateDir, updateContent, content);
         writeUpdate(updateDir, updateVersion, Long.toString(version));
     }
