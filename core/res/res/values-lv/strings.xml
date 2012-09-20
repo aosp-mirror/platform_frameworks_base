@@ -330,8 +330,8 @@
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Ļauj lietotnei jebkurā laikā mainīt vispārējo animācijas ātrumu (lēnākām vai ātrākām animācijām)."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"pārvaldīt lietotnes pilnvaras"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Ļauj lietotnei veidot un pārvaldīt savas pilnvaras, apejot to parasto “Z kārtošanu”. Parastajām lietotnēm tas nekad nav nepieciešams."</string>
-    <string name="permlab_freezeScreen" msgid="4708181184441880175">"ekrāna fiksēšana"</string>
-    <string name="permdesc_freezeScreen" msgid="8558923789222670064">"Ļauj lietojumprogrammai īslaicīgi fiksēt ekrānu, lai pārietu uz pilnekrāna režīmu."</string>
+    <string name="permlab_freezeScreen" msgid="4708181184441880175">"attēla “iesaldēšana”"</string>
+    <string name="permdesc_freezeScreen" msgid="8558923789222670064">"Ļauj lietojumprogrammai īslaicīgi “iesaldēt” attēlu, lai pārietu uz pilnekrāna režīmu."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"nospiest taustiņus un vadības pogas"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Ļauj lietotnei rādīt savas ievades notikumus (nospiestos taustiņus u.c.) citās lietotnēs. Ļaunprātīgas lietotnes to var izmantot, lai pārņemtu planšetdatora vadību."</string>
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Ļauj lietotnei rādīt savas ievades notikumus (nospiestos taustiņus u.c.) citās lietotnēs. Ļaunprātīgas lietotnes to var izmantot, lai pārņemtu tālruņa vadību."</string>
@@ -450,7 +450,7 @@
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"lasīt kadru buferi"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Ļauj lietotnei lasīt kadru bufera saturu."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"Wi-Fi displeju konfigurēšana"</string>
-    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Ļauj lietotnei konfigurēt Wi-Fi displejus un izveidot savienojumu ar tiem."</string>
+    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Ļauj lietotnei konfigurēt Wi-Fi displejus un veidot savienojumu ar tiem."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"Wi-Fi displeju vadība"</string>
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Ļauj lietotnei kontrolēt zema līmeņa funkcijas Wi-Fi displejos."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"mainīt audio iestatījumus"</string>
@@ -776,8 +776,7 @@
     <string name="lockscreen_charged" msgid="4938930459620989972">"Uzlādēts."</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Pievienojiet uzlādes ierīci."</string>
-    <!-- no translation found for lockscreen_missing_sim_message_short (5099439277819215399) -->
-    <skip />
+    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Nav SIM kartes"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Planšetdatorā nav SIM kartes."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Tālrunī nav SIM kartes."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Ievietojiet SIM karti."</string>
@@ -1086,7 +1085,9 @@
     <item quantity="other" msgid="7915895323644292768">"Ir pieejami atvērti Wi-Fi tīkli."</item>
   </plurals>
     <string name="wifi_available_sign_in" msgid="4029489716605255386">"Pierakstieties Wi-Fi tīklā."</string>
-    <!-- no translation found for wifi_available_sign_in_detailed (6797764740339907572) -->
+    <!-- no translation found for network_available_sign_in (8495155593358054676) -->
+    <skip />
+    <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Nevarēja izveidot savienojumu ar Wi-Fi."</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" ir slikts interneta savienojums."</string>
@@ -1103,6 +1104,8 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"Kam:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Ierakstiet pieprasīto PIN:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
+    <!-- no translation found for wifi_p2p_frequency_conflict_message (7363907213787469151) -->
+    <skip />
     <string name="select_character" msgid="3365550120617701745">"Ievietojiet rakstzīmi"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Īsziņu sūtīšana"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"Lietotne &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; sūta daudz īsziņu. Vai vēlaties, lai šī lietotne turpinātu sūtīt ziņojumus?"</string>

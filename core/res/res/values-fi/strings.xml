@@ -309,14 +309,10 @@
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Antaa sovelluksen hallita suoritettavien sovellusten enimmäismäärää. Ei tavallisten sovellusten käyttöön."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"pakota taustasovelluksia sulkeutumaan"</string>
     <string name="permdesc_setAlwaysFinish" msgid="7471310652868841499">"Antaa sovelluksen hallita, suoritetaanko toiminnot aina loppuun heti, kun ne siirtyvät taustalle. Ei tavallisten sovellusten käyttöön."</string>
-    <!-- no translation found for permlab_batteryStats (2789610673514103364) -->
-    <skip />
-    <!-- no translation found for permdesc_batteryStats (5897346582882915114) -->
-    <skip />
-    <!-- no translation found for permlab_updateBatteryStats (3719689764536379557) -->
-    <skip />
-    <!-- no translation found for permdesc_updateBatteryStats (6862817857178025002) -->
-    <skip />
+    <string name="permlab_batteryStats" msgid="2789610673514103364">"lue akkutilastoja"</string>
+    <string name="permdesc_batteryStats" msgid="5897346582882915114">"Antaa sovelluksen lukea nykyisiä alhaisen tason akunkäyttötietoja. Sovellus saattaa saada tietoonsa, mitä sovelluksia käytät."</string>
+    <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"muokkaa akkutilastoja"</string>
+    <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"Antaa sovelluksen muokata kerättyjä akkutilastoja. Ei tavallisten sovellusten käyttöön."</string>
     <string name="permlab_backup" msgid="470013022865453920">"hallitse järjestelmän varmuuskopiointia ja palauttamista"</string>
     <string name="permdesc_backup" msgid="6912230525140589891">"Antaa sovelluksen hallita järjestelmän varmuuskopiointi- ja palautusmekanismia. Ei tavallisten sovellusten käyttöön."</string>
     <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"vahvista täysi varmuuskopiointi tai palauta toiminto"</string>
@@ -324,8 +320,7 @@
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"näytä luvattomia ikkunoita"</string>
     <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"Antaa sovelluksen luoda ikkunoita, jotka on tarkoitettu sisäisen järjestelmäkäyttöliittymän käytettäviksi. Ei tavallisten sovellusten käyttöön."</string>
     <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"piirrä muihin sovelluksiin"</string>
-    <!-- no translation found for permdesc_systemAlertWindow (8584678381972820118) -->
-    <skip />
+    <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Antaa sovelluksen piirtää muiden sovelluksien tai niiden käyttöliittymän osien päälle. Luvan saaneet sovellukset voivat häiritä muiden sovelluksien käyttöliittymien käyttöä tai muuttaa muiden sovelluksien osiksi luulemiasi näkymiä."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"muokkaa yleistä animaationopeutta"</string>
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Antaa sovelluksen muuttaa yleistä animaationopeutta (nopeuttaa tai hidastaa animaatioita) milloin tahansa."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"sovellustunnusten hallinta"</string>
@@ -373,10 +368,8 @@
     <string name="permlab_installPackages" msgid="2199128482820306924">"sovellusten asentaminen suoraan"</string>
     <string name="permdesc_installPackages" msgid="5628530972548071284">"Antaa sovelluksen asentaa uusia tai päivitettyjä Android-paketteja. Haitalliset sovellukset voivat käyttää tätä uusien sovellusten asentamiseen mielivaltaisen voimakkailla käyttöluvilla."</string>
     <string name="permlab_clearAppCache" msgid="7487279391723526815">"sovellusvälimuistin kaikkien tietojen poistaminen"</string>
-    <!-- no translation found for permdesc_clearAppCache (8974640871945434565) -->
-    <skip />
-    <!-- no translation found for permdesc_clearAppCache (2459441021956436779) -->
-    <skip />
+    <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"Antaa sovelluksen vapauttaa tablet-laitteen tallennustilaa poistamalla tiedostoja muiden sovelluksien välimuistihakemistoista. Muut sovellukset voivat käynnistyä hitaammin, koska niiden täytyy noutaa tietonsa uudelleen."</string>
+    <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"Antaa sovelluksen vapauttaa puhelimen tallennustilaa poistamalla tiedostoja muiden sovelluksien välimuistihakemistoista. Muut sovellukset voivat käynnistyä hitaammin, koska niiden täytyy noutaa tietonsa uudelleen."</string>
     <string name="permlab_movePackage" msgid="3289890271645921411">"sovellusresurssien siirtäminen"</string>
     <string name="permdesc_movePackage" msgid="319562217778244524">"Antaa sovelluksen siirtää sovellusresursseja sisäisiltä tietovälineiltä ulkoisille ja päinvastoin."</string>
     <string name="permlab_readLogs" msgid="6615778543198967614">"lukea arkaluonteisia lokitietoja"</string>
@@ -437,14 +430,10 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="5945166642335800763">"Antaa sovelluksen käyttää ylimääräisiä sijaintipalvelukomentoja. Sovellus voi käyttää tätä GPS:n tai muun sijaintilähteen toiminnan häiritsemiseen."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"asenna sijainnintarjoaja"</string>
     <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"Luo imitoituja sijaintilähteitä testaustarkoituksessa tai asenna uusi sijaintipalvelu. Sovellus voi ohittaa muiden sijaintilähteiden kuten GPS:n ja sijaintipalveluiden palauttaman sijainnin ja/tai tilan."</string>
-    <!-- no translation found for permlab_accessFineLocation (1191898061965273372) -->
-    <skip />
-    <!-- no translation found for permdesc_accessFineLocation (5295047563564981250) -->
-    <skip />
-    <!-- no translation found for permlab_accessCoarseLocation (4887895362354239628) -->
-    <skip />
-    <!-- no translation found for permdesc_accessCoarseLocation (2538200184373302295) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"tarkka sijainti (GPS- ja verkkopohjainen)"</string>
+    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Antaa sovelluksen käyttää tarkkaa sijaintiasi, joka määritetään GPS:n tai verkon sijaintilähteiden kuten radiomastojen ja wifi-verkkojen avulla. Sijaintipalveluiden täytyy olla käytössä ja laitteesi saatavilla, jotta sovellus voi käyttää niitä. Sovellus voi määrittää tämän luvan avulla sijaintisi ja lisätä akun käyttöä."</string>
+    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"likimääräinen sijainti (verkkopohjainen)"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Antaa sovelluksen käyttää likimääräistä sijaintiasi. Sijainnin määrittävät sijaintipalvelut verkon sijaintilähteiden kuten radiomastojen ja wifi-verkkojen avulla. Sijaintipalveluiden täytyy olla käytössä ja laitteesi saatavilla, jotta sovellus voi käyttää niitä. Sovellus voi määrittää tämän luvan avulla likimääräisen sijaintisi."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"käytä SurfaceFlinger-sovellusta"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Antaa sovelluksen käyttää SurfaceFlingerin matalan tason ominaisuuksia."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"lue kehyspuskuria"</string>
@@ -566,8 +555,7 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"käytä Bluetooth-asetuksia"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Antaa sovelluksen määrittää paikallisen Bluetooth-tabletin asetukset sekä tunnistaa muita laitteita ja muodostaa niiden kanssa laitepareja."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Antaa sovelluksen määrittää paikallisen Bluetooth-puhelimen asetukset sekä tunnistaa muita laitteita ja muodostaa niiden kanssa laitepareja."</string>
-    <!-- no translation found for permlab_accessWimaxState (4195907010610205703) -->
-    <skip />
+    <string name="permlab_accessWimaxState" msgid="4195907010610205703">"muodosta yhteys WiMAXiin ja katkaise yhteys"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Antaa sovelluksen määrittää, onko WiMAX käytössä, sekä saada selville tietoja WiMAX-verkoista, joihin on muodostettu yhteys."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Vaihda WiMAX-verkon tilaa"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Antaa sovelluksen muodostaa tablet-laitteella yhteyden WiMAX-verkkoon ja katkaista yhteyden."</string>
@@ -591,8 +579,7 @@
     <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Antaa sovelluksen muokata synkronoitavia syötteitä. Haitalliset sovellukset voivat muuttaa synkronoitavia syötteitä."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"lue sanakirjaan lisättyjä termejä"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Antaa sovelluksen lukea sanoja, nimiä tai ilmauksia, joita käyttäjä on voinut tallentaa käyttäjän sanakirjaan."</string>
-    <!-- no translation found for permlab_writeDictionary (2183110402314441106) -->
-    <skip />
+    <string name="permlab_writeDictionary" msgid="2183110402314441106">"lisää sanoja käyttäjän sanakirjaan"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Antaa sovelluksen kirjoittaa uusia sanoja käyttäjän sanakirjaan."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"suojatun tallennustilan käyttöoikeuden testaus"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"suojatun tallennustilan käyttöoikeuden testaus"</string>
@@ -776,8 +763,7 @@
     <string name="lockscreen_charged" msgid="4938930459620989972">"Ladattu."</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Kytke laturi."</string>
-    <!-- no translation found for lockscreen_missing_sim_message_short (5099439277819215399) -->
-    <skip />
+    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Ei SIM-korttia"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Tablet-laitteessa ei ole SIM-korttia."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Puhelimessa ei ole SIM-korttia."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Aseta SIM-kortti."</string>
@@ -1086,7 +1072,9 @@
     <item quantity="other" msgid="7915895323644292768">"Avoimia wifi-verkkoja käytettävissä"</item>
   </plurals>
     <string name="wifi_available_sign_in" msgid="4029489716605255386">"Kirjaudu wifi-verkkoon"</string>
-    <!-- no translation found for wifi_available_sign_in_detailed (6797764740339907572) -->
+    <!-- no translation found for network_available_sign_in (8495155593358054676) -->
+    <skip />
+    <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wifi-yhteyden muodostaminen epäonnistui"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" : huono internetyhteys."</string>
@@ -1103,27 +1091,21 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"Kohde:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Kirjoita pyydetty PIN-koodi:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN-koodi:"</string>
+    <!-- no translation found for wifi_p2p_frequency_conflict_message (7363907213787469151) -->
+    <skip />
     <string name="select_character" msgid="3365550120617701745">"Lisää merkki"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Tekstiviestien lähettäminen"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; lähettää suuria määriä tekstiviestejä. Annetaanko tämän sovelluksen jatkaa tekstiviestien lähettämistä?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"Salli"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Kiellä"</string>
-    <!-- no translation found for sms_short_code_confirm_message (1645436466285310855) -->
-    <skip />
-    <!-- no translation found for sms_short_code_details (4992814738863678373) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_details (4291752905667807485) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_allow (4458878637111023413) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_deny (2927389840209170706) -->
-    <skip />
-    <!-- no translation found for sms_short_code_remember_choice (5289538592272218136) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_always_allow (3241181154869493368) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_never_allow (446992765774269673) -->
-    <skip />
+    <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; haluaa lähettää viestin osoitteeseen &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
+    <string name="sms_short_code_details" msgid="4992814738863678373">"Matkapuhelinliittymäsi tiliä voidaan veloittaa."</string>
+    <string name="sms_premium_short_code_details" msgid="4291752905667807485">"Matkapuhelinliittymäsi tiliä veloitetaan."</string>
+    <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Lähetä"</string>
+    <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Peruuta"</string>
+    <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Muista valintani"</string>
+    <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Salli aina"</string>
+    <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Älä koskaan salli"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM-kortti poistettu"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"Mobiiliverkko ei ole käytettävissä, ennen kuin käynnistät uudelleen kelvollisella laitteeseen kytketyllä SIM-kortilla."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Valmis"</string>
@@ -1137,8 +1119,7 @@
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"UUTTA: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"Palvelun tarjoaa <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="no_permissions" msgid="7283357728219338112">"Lupia ei tarvita"</string>
-    <!-- no translation found for perm_costs_money (4902470324142151116) -->
-    <skip />
+    <string name="perm_costs_money" msgid="4902470324142151116">"tämä voi maksaa"</string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB-massamuisti"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB yhdistetty"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Olet yhdistänyt laitteesi tietokoneeseen USB-kaapelin kautta. Kosketa alla olevaa painiketta, jos haluat kopioida tiedostoja tietokoneesi ja Androidin USB-tallennustilan välillä."</string>
@@ -1424,7 +1405,6 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Puhelimen lukituksen poisto epäonnistui <xliff:g id="NUMBER">%d</xliff:g> kertaa. Puhelimeen palautetaan nyt tehdasasetukset."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Piirsit lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. Jos piirrät kuvion väärin vielä <xliff:g id="NUMBER_1">%d</xliff:g> kertaa, sinua pyydetään poistamaan tablet-laitteesi lukitus sähköpostitilin avulla."\n\n" Yritä uudelleen <xliff:g id="NUMBER_2">%d</xliff:g> sekunnin kuluttua."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Piirsit lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. Jos piirrät kuvion väärin vielä <xliff:g id="NUMBER_1">%d</xliff:g> kertaa, sinua pyydetään poistamaan puhelimesi lukitus sähköpostitilin avulla."\n\n" Yritä uudelleen <xliff:g id="NUMBER_2">%d</xliff:g> sekunnin kuluttua."</string>
-    <!-- no translation found for safe_media_volume_warning (7382971871993371648) -->
-    <skip />
+    <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Nostetaanko äänenvoimakkuus turvallista tasoa voimakkaammaksi?"\n"Jos kuuntelet suurella äänenvoimakkuudella pitkiä aikoja, kuulosi voi vahingoittua."</string>
     <string name="kg_temp_back_string" msgid="5812983904056640466">"&lt;"</string>
 </resources>

@@ -309,14 +309,10 @@
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"للسماح للتطبيق بالتحكم في الحد الأقصى لعدد العمليات التي سيتم تشغيلها. غير مطلوب على الإطلاق للتطبيقات العادية."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"فرض إغلاق تطبيقات الخلفية"</string>
     <string name="permdesc_setAlwaysFinish" msgid="7471310652868841499">"للسماح للتطبيق بالتحكم في ما إذا كانت الأنشطة ستنتهي دائمًا عقب انتقالها إلى الخلفية. غير مطلوب على الإطلاق للتطبيقات العادية."</string>
-    <!-- no translation found for permlab_batteryStats (2789610673514103364) -->
-    <skip />
-    <!-- no translation found for permdesc_batteryStats (5897346582882915114) -->
-    <skip />
-    <!-- no translation found for permlab_updateBatteryStats (3719689764536379557) -->
-    <skip />
-    <!-- no translation found for permdesc_updateBatteryStats (6862817857178025002) -->
-    <skip />
+    <string name="permlab_batteryStats" msgid="2789610673514103364">"قراءة إحصاءات البطارية"</string>
+    <string name="permdesc_batteryStats" msgid="5897346582882915114">"للسماح لتطبيق بقراءة البيانات الحالية التي تستهلك مستوى منخفضًا من البطارية. قد يتيح التطبيق معرفة معلومات تفصيلية عن التطبيقات التي تستخدمها."</string>
+    <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"تعديل إحصاءات البطارية"</string>
+    <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"للسماح للتطبيق بتعديل إحصاءات البطارية المجمّعة. ليس للاستخدام بواسطة التطبيقات العادية."</string>
     <string name="permlab_backup" msgid="470013022865453920">"التحكم في النسخة الاحتياطية للنظام واستعادتها"</string>
     <string name="permdesc_backup" msgid="6912230525140589891">"للسماح للتطبيق بالتحكم في النسخة الاحتياطية للنظام وآلية الاستعادة. ليس للاستخدام بواسطة التطبيقات العادية."</string>
     <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"تأكيد إجراء عملية نسخ احتياطي أو استرداد كاملة"</string>
@@ -324,8 +320,7 @@
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"عرض النوافذ غير المصرح بها"</string>
     <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"للسماح للتطبيق بإنشاء نوافذ بقصد استخدامها بواسطة واجهة مستخدم النظام الداخلي. ليس للاستخدام بواسطة التطبيقات العادية."</string>
     <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"التغطية على تطبيقات أخرى"</string>
-    <!-- no translation found for permdesc_systemAlertWindow (8584678381972820118) -->
-    <skip />
+    <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"للسماح للتطبيق بالرسم على التطبيقات الأخرى أو أجزاء من واجهة المستخدم. وقد تتداخل مع استخدامك للواجهة في أي تطبيق أو قد تغير ما تعتقد أنك تراه في التطبيقات الأخرى."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"تعديل سرعة الرسوم المتحركة العمومية"</string>
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"للسماح للتطبيق بتغيير سرعة الرسوم المتحركة العمومية (رسوم متحركة أسرع أو أبطأ) في أي وقت."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"إدارة الرموز المميزة للتطبيقات"</string>
@@ -373,10 +368,8 @@
     <string name="permlab_installPackages" msgid="2199128482820306924">"تثبيت التطبيقات مباشرة"</string>
     <string name="permdesc_installPackages" msgid="5628530972548071284">"للسماح للتطبيق بتثبيت حزم Android الجديدة أو المحدّثة. يمكن أن تستخدم التطبيقات الضارة ذلك لإضافة تطبيقات جديدة ذات أذونات قوية على نحو عشوائي."</string>
     <string name="permlab_clearAppCache" msgid="7487279391723526815">"حذف جميع بيانات ذاكرة التخزين المؤقت للتطبيق"</string>
-    <!-- no translation found for permdesc_clearAppCache (8974640871945434565) -->
-    <skip />
-    <!-- no translation found for permdesc_clearAppCache (2459441021956436779) -->
-    <skip />
+    <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"للسماح للتطبيق بتفريغ سعة تخزين الجهاز اللوحي من خلال حذف الملفات من أدلة ذاكرة التخزين المؤقت للتطبيقات الأخرى. قد يتسبب هذا في تشغيل التطبيقات الأخرى بشكل أكثر بطئًا حيث يلزمها إعادة استرداد بياناتها."</string>
+    <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"للسماح للتطبيق بتفريغ مساحة تخزين الهاتف من خلال حذف الملفات من أدلة ذاكرة التخزين المؤقت للتطبيقات الأخرى. قد يتسبب هذا في تشغيل التطبيقات الأخرى بشكل أكثر بطئًا حيث يلزمها إعادة استرداد بياناتها."</string>
     <string name="permlab_movePackage" msgid="3289890271645921411">"نقل موارد التطبيقات"</string>
     <string name="permdesc_movePackage" msgid="319562217778244524">"للسماح للتطبيق بنقل موارد التطبيقات من الوسائط الداخلية إلى الوسائط الخارجية والعكس."</string>
     <string name="permlab_readLogs" msgid="6615778543198967614">"قراءة بيانات السجل الحساسة"</string>
@@ -437,14 +430,10 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="5945166642335800763">"للسماح للتطبيق بالدخول إلى المزيد من أوامر موفر خدمة الموقع. وقد يتيح هذا للتطبيق التدخل في عمل GPS أو مصادر المواقع الأخرى."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"إذن لتثبيت موفر خدمة موقع"</string>
     <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"لإنشاء مصادر مواقع زائفة للاختبار أو تثبيت موفر مواقع جديد. يتيح هذا للتطبيق إلغاء الموقع و/أو الحالة التي تعرضها مصادر المواقع الأخرى مثل GPS أو موفري المواقع."</string>
-    <!-- no translation found for permlab_accessFineLocation (1191898061965273372) -->
-    <skip />
-    <!-- no translation found for permdesc_accessFineLocation (5295047563564981250) -->
-    <skip />
-    <!-- no translation found for permlab_accessCoarseLocation (4887895362354239628) -->
-    <skip />
-    <!-- no translation found for permdesc_accessCoarseLocation (2538200184373302295) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"الموقع الدقيق (مستند إلى نظام تحديد المواقع العالمي والشبكة)"</string>
+    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"للسماح للتطبيق بتحديد موقعك بدقة وهذا باستخدام نظام تحديد المواقع العالمي (GPS) أو مصادر المواقع التي تستخدم الشبكات مثل الأبراج الخلوية أو تقنية Wi-Fi. يتعين توفر خدمات المواقع هذه وتشغيلها على جهازك للتطبيق كي يستخدمها. وقد تستخدم التطبيقات هذا لتحديد موقعك وقد تستهلك مزيدًا من طاقة البطارية."</string>
+    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"الموقع التقريبي (مستند إلى الشبكة)"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"للسماح للتطبيق بتحديد موقعك التقريبي الذي يستمد من خدمات الموقع باستخدام مصادر المواقع التي تستخدم الشبكات مثل الأبراج الخلوية وتقنية Wi-Fi. يتعين توفر خدمات المواقع هذه وتشغيلها على جهازك للتطبيق كي يستخدمها. وقد تستخدم التطبيقات هذا لتحديد موقعك التقريبي."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"الدخول إلى SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"للسماح للتطبيق باستخدام ميزات SurfaceFlinger ذات المستوى المنخفض."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"قراءة المخزن المؤقت للإطارات"</string>
@@ -566,8 +555,7 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"الدخول إلى إعدادات بلوتوث"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"للسماح للتطبيق بتهيئة لوحة البلوتوث المحلي، واكتشاف أجهزة التحكم عن بعد والاقتران بها."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"للسماح للتطبيق بتهيئة هاتف البلوتوث المحلي، واكتشاف أجهزة التحكم عن بعد والاقتران بها."</string>
-    <!-- no translation found for permlab_accessWimaxState (4195907010610205703) -->
-    <skip />
+    <string name="permlab_accessWimaxState" msgid="4195907010610205703">"الاتصال بـشبكة WiMAX وقطع الاتصال بها"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"للسماح للتطبيق بتحديد ما إذا تم تمكين WiMAX وتحديد معلومات حول أية شبكات WiMAX متصلة."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"تغيير حالة WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"للسماح للتطبيق بتوصيل الجهاز اللوحي بشبكات WiMAX وقطع اتصاله بها."</string>
@@ -591,8 +579,7 @@
     <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"للسماح للتطبيق بتعديل خلاصاتك المتزامنة في الوقت الحالي. قد تغيّر التطبيقات الضارة خلاصاتك المتزامنة."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"قراءة المصطلحات التي أضفتها إلى القاموس"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"للسماح للتطبيق بقراءة جميع الكلمات والأسماء والعبارات التي ربما يكون المستخدم قد خزنها في قاموس المستخدم."</string>
-    <!-- no translation found for permlab_writeDictionary (2183110402314441106) -->
-    <skip />
+    <string name="permlab_writeDictionary" msgid="2183110402314441106">"إضافة كلمات إلى القاموس المعرّف بواسطة المستخدم"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"للسماح للتطبيق بكتابة كلمات جديدة في قاموس المستخدم."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"اختبار إمكانية الدخول إلى وحدة تخزين محمية"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"اختبار إمكانية الدخول إلى وحدة تخزين محمية"</string>
@@ -776,8 +763,7 @@
     <string name="lockscreen_charged" msgid="4938930459620989972">"تم الشحن."</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"توصيل جهاز الشحن."</string>
-    <!-- no translation found for lockscreen_missing_sim_message_short (5099439277819215399) -->
-    <skip />
+    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"ليست هناك بطاقة SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"ليس هناك بطاقة SIM في الجهاز اللوحي."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"ليس هناك بطاقة SIM في الهاتف."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"أدخل بطاقة SIM."</string>
@@ -1086,7 +1072,9 @@
     <item quantity="other" msgid="7915895323644292768">"هناك شبكات Wi-Fi مفتوحة متاحة"</item>
   </plurals>
     <string name="wifi_available_sign_in" msgid="4029489716605255386">"تسجيل الدخول إلى شبكة Wi-Fi"</string>
-    <!-- no translation found for wifi_available_sign_in_detailed (6797764740339907572) -->
+    <!-- no translation found for network_available_sign_in (8495155593358054676) -->
+    <skip />
+    <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"تعذر الاتصال بـ Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" لديها اتصال إنترنت رديء."</string>
@@ -1103,27 +1091,21 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"إلى:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"اكتب رقم التعريف الشخصي المطلوب:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"رقم التعريف الشخصي:"</string>
+    <!-- no translation found for wifi_p2p_frequency_conflict_message (7363907213787469151) -->
+    <skip />
     <string name="select_character" msgid="3365550120617701745">"إدراج حرف"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"إرسال رسائل قصيرة SMS"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; يرسل عددًا كبيرًا من الرسائل القصيرة SMS. هل تريد السماح لهذا التطبيق بالاستمرار في إرسال الرسائل؟"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"السماح"</string>
     <string name="sms_control_no" msgid="625438561395534982">"رفض"</string>
-    <!-- no translation found for sms_short_code_confirm_message (1645436466285310855) -->
-    <skip />
-    <!-- no translation found for sms_short_code_details (4992814738863678373) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_details (4291752905667807485) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_allow (4458878637111023413) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_deny (2927389840209170706) -->
-    <skip />
-    <!-- no translation found for sms_short_code_remember_choice (5289538592272218136) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_always_allow (3241181154869493368) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_never_allow (446992765774269673) -->
-    <skip />
+    <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"هناك رغبة من &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; في إرسال رسالة إلى &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
+    <string name="sms_short_code_details" msgid="4992814738863678373">"قد يتسبب هذا في تحميل رسوم على حساب جوالك."</string>
+    <string name="sms_premium_short_code_details" msgid="4291752905667807485">"سوف يتسبب هذا في تحميل رسوم على حساب جوالك."</string>
+    <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"إرسال"</string>
+    <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"إلغاء"</string>
+    <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"تذكر اختياري"</string>
+    <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"السماح دومًا"</string>
+    <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"عدم السماح مطلقًا"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"تمت إزالة بطاقة SIM"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"لن تكون شبكة الجوال متاحة حتى تتم إعادة التشغيل وإدخال بطاقة SIM صالحة."</string>
     <string name="sim_done_button" msgid="827949989369963775">"تم"</string>
@@ -1137,8 +1119,7 @@
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"جديد: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"يقدمه <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="no_permissions" msgid="7283357728219338112">"لا أذونات مطلوبة"</string>
-    <!-- no translation found for perm_costs_money (4902470324142151116) -->
-    <skip />
+    <string name="perm_costs_money" msgid="4902470324142151116">"قد يكلفك هذا مالاً."</string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"تخزين USB كبير السعة"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB متصل"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"لقد اتصلت بجهاز الكمبيوتر من خلال USB. المس الزر أدناه إذا كنت تريد نسخ الملفات بين جهاز الكمبيوتر ووحدة تخزين USB في Android."</string>
@@ -1424,7 +1405,6 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"لقد حاولت إلغاء تأمين الهاتف بشكل غير صحيح <xliff:g id="NUMBER">%d</xliff:g> مرة. سيتم الآن إعادة تعيين الهاتف على الإعدادات الافتراضية للمصنع."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"لقد رسمت نقش إلغاء التأمين بشكل غير صحيح <xliff:g id="NUMBER_0">%d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة الأخرى، ستطالَب بإلغاء تأمين الجهاز اللوحي باستخدام معلومات حساب بريد إلكتروني."\n\n" أعد المحاولة خلال <xliff:g id="NUMBER_2">%d</xliff:g> ثانية."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"لقد رسمت نقش إلغاء التأمين بشكل غير صحيح <xliff:g id="NUMBER_0">%d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة الأخرى، ستُطالب بإلغاء تأمين الهاتف باستخدام حساب بريد إلكتروني لإلغاء تأمين الهاتف."\n\n" أعد المحاولة خلال <xliff:g id="NUMBER_2">%d</xliff:g> ثانية."</string>
-    <!-- no translation found for safe_media_volume_warning (7382971871993371648) -->
-    <skip />
+    <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"هل تريد رفع مستوى الصوت فوق المستوى الآمن؟"\n"قد يضر سماع صوت عالٍ لفترات طويلة بسمعك."</string>
     <string name="kg_temp_back_string" msgid="5812983904056640466">"&lt;"</string>
 </resources>

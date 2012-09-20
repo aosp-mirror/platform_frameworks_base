@@ -776,8 +776,7 @@
     <string name="lockscreen_charged" msgid="4938930459620989972">"चार्ज हो चुकी है."</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"अपना चार्जर कनेक्‍ट करें."</string>
-    <!-- no translation found for lockscreen_missing_sim_message_short (5099439277819215399) -->
-    <skip />
+    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"कोई सिम कार्ड नहीं है"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"टेबलेट में कोई सिम कार्ड नहीं है."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"फ़ोन में कोई सिम कार्ड नहीं है."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"कोई सिमकार्ड डालें."</string>
@@ -1086,7 +1085,9 @@
     <item quantity="other" msgid="7915895323644292768">"खुले Wi-Fi नेटवर्क उपलब्‍ध है"</item>
   </plurals>
     <string name="wifi_available_sign_in" msgid="4029489716605255386">"Wi-Fi नेटवर्क में साइन इन करें"</string>
-    <!-- no translation found for wifi_available_sign_in_detailed (6797764740339907572) -->
+    <!-- no translation found for network_available_sign_in (8495155593358054676) -->
+    <skip />
+    <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi से कनेक्‍ट नहीं हो सका"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" के पास एक कमज़ोर इंटरनेट कनेक्‍शन है."</string>
@@ -1103,6 +1104,8 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"प्रति:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"आवश्‍यक पिन लिखें:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"पिन:"</string>
+    <!-- no translation found for wifi_p2p_frequency_conflict_message (7363907213787469151) -->
+    <skip />
     <string name="select_character" msgid="3365550120617701745">"वर्ण सम्‍मिलित करें"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS संदेश भेज रहा है"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; बड़ी संख्या में SMS संदेश भेज रहा है. क्या आप इस एप्लिकेशन को संदेश भेजना जारी रखने देना चाहते हैं?"</string>

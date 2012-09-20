@@ -1072,7 +1072,9 @@
     <item quantity="other" msgid="7915895323644292768">"Open Wi-Fi-netwerken beschikbaar"</item>
   </plurals>
     <string name="wifi_available_sign_in" msgid="4029489716605255386">"Aanmelden bij wifi-netwerk"</string>
-    <!-- no translation found for wifi_available_sign_in_detailed (6797764740339907572) -->
+    <!-- no translation found for network_available_sign_in (8495155593358054676) -->
+    <skip />
+    <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Kan geen verbinding maken met Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" heeft een slechte internetverbinding."</string>
@@ -1089,6 +1091,8 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"Naar:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Voer de gewenste pincode in:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"Pincode"</string>
+    <!-- no translation found for wifi_p2p_frequency_conflict_message (7363907213787469151) -->
+    <skip />
     <string name="select_character" msgid="3365550120617701745">"Teken invoegen"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS-berichten verzenden"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; verzendt moment een groot aantal sms-berichten. Wilt u toestaan ​​dat deze app berichten blijft verzenden?"</string>

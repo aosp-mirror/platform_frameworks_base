@@ -309,14 +309,10 @@
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Ermöglicht der App, die maximale Anzahl an aktiven Prozessen zu steuern. Wird nie für normale Apps benötigt."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"Apps im Hintergrund schließen"</string>
     <string name="permdesc_setAlwaysFinish" msgid="7471310652868841499">"Überlässt der App die Entscheidung, ob Aktivitäten immer beendet werden, sobald sie in den Hintergrund rücken. Wird nie für normale Apps benötigt."</string>
-    <!-- no translation found for permlab_batteryStats (2789610673514103364) -->
-    <skip />
-    <!-- no translation found for permdesc_batteryStats (5897346582882915114) -->
-    <skip />
-    <!-- no translation found for permlab_updateBatteryStats (3719689764536379557) -->
-    <skip />
-    <!-- no translation found for permdesc_updateBatteryStats (6862817857178025002) -->
-    <skip />
+    <string name="permlab_batteryStats" msgid="2789610673514103364">"Akkudaten lesen"</string>
+    <string name="permdesc_batteryStats" msgid="5897346582882915114">"Ermöglicht einer Anwendung, den momentan niedrigen Akkustand zu erkennen. Unter Umständen erhält die App detaillierte Informationen darüber, welche Apps Sie verwenden."</string>
+    <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"Akkudaten ändern"</string>
+    <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"Ermöglicht der App, erfasste Akkudaten zu ändern. Nicht für normale Apps vorgesehen."</string>
     <string name="permlab_backup" msgid="470013022865453920">"Systemsicherung und -wiederherstellung kontrollieren"</string>
     <string name="permdesc_backup" msgid="6912230525140589891">"Ermöglicht der App, den Sicherungs- und Wiederherstellungsmechanismus des Systems zu steuern. Nicht für normale Apps vorgesehen."</string>
     <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"Vollständige Sicherung oder Wiederherstellung bestätigen"</string>
@@ -324,8 +320,7 @@
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"nicht autorisierte Fenster anzeigen"</string>
     <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"Ermöglicht der App die Erstellung von Fenstern, die von der Benutzeroberfläche des internen Systems verwendet werden. Nicht für normale Apps vorgesehen."</string>
     <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"Über andere Apps ziehen"</string>
-    <!-- no translation found for permdesc_systemAlertWindow (8584678381972820118) -->
-    <skip />
+    <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Ermöglicht der App, über andere Apps oder Teile der Benutzeroberfläche zu zeichnen. Dies kann sich auf die Oberfläche in jeder App auswirken oder die erwartete Darstellung in anderen Apps verändern."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"Allgemeine Animationsgeschwindigkeit einstellen"</string>
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Ermöglicht der App, die allgemeine Animationsgeschwindigkeit (langsamere oder schnellere Animationen) jederzeit anzupassen."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"App-Token verwalten"</string>
@@ -373,10 +368,8 @@
     <string name="permlab_installPackages" msgid="2199128482820306924">"Apps direkt installieren"</string>
     <string name="permdesc_installPackages" msgid="5628530972548071284">"Ermöglicht der App, neue oder aktualisierte Android-Pakete zu installieren. Schädliche Apps können so neue Apps mit beliebig umfangreichen Berechtigungen hinzufügen."</string>
     <string name="permlab_clearAppCache" msgid="7487279391723526815">"Alle Cache-Daten der App löschen"</string>
-    <!-- no translation found for permdesc_clearAppCache (8974640871945434565) -->
-    <skip />
-    <!-- no translation found for permdesc_clearAppCache (2459441021956436779) -->
-    <skip />
+    <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"Ermöglicht der App, Speicherplatz auf dem Tablet durch Löschen von Dateien in den Cache-Verzeichnissen anderer Apps freizusetzen. Der Startvorgang anderer Apps kann sich hierdurch verlangsamen, da die Daten neu abgerufen werden müssen."</string>
+    <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"Ermöglicht der App, Speicherplatz auf dem Telefon durch Löschen von Dateien in den Cache-Verzeichnissen anderer Apps freizusetzen. Der Startvorgang anderer Apps kann sich hierdurch verlangsamen, da die Daten neu abgerufen werden müssen."</string>
     <string name="permlab_movePackage" msgid="3289890271645921411">"App-Ressourcen verschieben"</string>
     <string name="permdesc_movePackage" msgid="319562217778244524">"Ermöglicht der App, App-Ressourcen von internen auf externe Medien zu verschieben und umgekehrt"</string>
     <string name="permlab_readLogs" msgid="6615778543198967614">"Vertrauliche Protokolldaten lesen"</string>
@@ -437,14 +430,10 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="5945166642335800763">"Ermöglicht der App, auf zusätzliche Standortanbieterbefehle zuzugreifen. Damit könnte die App die Funktionsweise von GPS oder anderen Standortquellen beeinträchtigen."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"Berechtigung zur Installation eines Standortanbieters"</string>
     <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"Erstellen von simulierten Standortquellen für Testzwecke oder Installation eines neuen Standortanbieters. Damit kann die App den von anderen Standortquellen wie GPS oder Standortanbietern zurückgegebenen Standort und/oder Status überschreiben."</string>
-    <!-- no translation found for permlab_accessFineLocation (1191898061965273372) -->
-    <skip />
-    <!-- no translation found for permdesc_accessFineLocation (5295047563564981250) -->
-    <skip />
-    <!-- no translation found for permlab_accessCoarseLocation (4887895362354239628) -->
-    <skip />
-    <!-- no translation found for permdesc_accessCoarseLocation (2538200184373302295) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"genauer Standort (GPS- und netzwerkbasiert)"</string>
+    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Ermöglicht der App, Ihre genaue Position anhand von GPS-Daten (Global Positioning System) oder über Netzwerkstandortquellen wie Sendemasten oder WLAN zu ermitteln. Diese Standortdienste müssen auf Ihrem Gerät verfügbar und aktiviert sein, damit die App sie verwenden kann. Apps können Ihren Standort anhand dieser Daten ermitteln und verbrauchen unter Umständen zusätzliche Akkuleistung."</string>
+    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"ungefährer Standort (netzwerkbasiert)"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Ermöglicht der App, Ihren ungefähren Standort zu ermitteln. Diese Standortangabe stammt von Standortdiensten, die Netzwerkstandortquellen wie etwa Sendemasten oder WLAN verwenden. Diese Standortdienste müssen auf Ihrem Gerät verfügbar und aktiviert sein, damit die App sie verwenden kann. Apps können Ihren ungefähren Standort anhand dieser Daten ermitteln."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"Auf SurfaceFlinger zugreifen"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Ermöglicht der App, die systemnahen SurfaceFlinger-Funktionen zu verwenden"</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"Frame-Puffer lesen"</string>
@@ -566,8 +555,7 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"Auf Bluetooth-Einstellungen zugreifen"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Ermöglicht der App, das lokale Bluetooth-Tablet zu konfigurieren, Remote-Geräte zu erkennen und eine Verbindung zu diesen herzustellen"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Ermöglicht der App, das lokale Bluetooth-Telefon zu konfigurieren, Remote-Geräte zu erkennen und eine Verbindung zu diesen herzustellen"</string>
-    <!-- no translation found for permlab_accessWimaxState (4195907010610205703) -->
-    <skip />
+    <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX-Verbindungen herstellen und trennen"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Ermöglicht der App festzustellen, ob WiMAX aktiviert ist. Zudem kann sie Informationen zu verbundenen WiMAX-Netzwerken abrufen."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX-Status ändern"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Ermöglicht der App, eine Verbindung zwischen dem Tablet und WiMAX-Netzwerken herzustellen und solche zu trennen."</string>
@@ -591,8 +579,7 @@
     <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Ermöglicht der App, Änderungen an kürzlich synchronisierten Feeds vorzunehmen. Schädliche Apps können so Ihre synchronisierten Feeds ändern."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"Begriffe lesen, die Sie zum Wörterbuch hinzugefügt haben"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Ermöglicht der App, alle Wörter, Namen und Ausdrücke zu lesen, die ein Nutzer in seinem Wörterbuch gespeichert hat."</string>
-    <!-- no translation found for permlab_writeDictionary (2183110402314441106) -->
-    <skip />
+    <string name="permlab_writeDictionary" msgid="2183110402314441106">"Wörter zu meinem Wörterbuch hinzufügen"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Ermöglicht der App, dem Nutzerwörterbuch neue Einträge hinzuzufügen"</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"Zugriff auf geschützten Speicher testen"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"Zugriff auf geschützten Speicher testen"</string>
@@ -776,8 +763,7 @@
     <string name="lockscreen_charged" msgid="4938930459620989972">"Aufgeladen"</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Bitte Ladegerät anschließen"</string>
-    <!-- no translation found for lockscreen_missing_sim_message_short (5099439277819215399) -->
-    <skip />
+    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Keine SIM-Karte"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Keine SIM-Karte im Tablet"</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Keine SIM-Karte im Telefon"</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Legen Sie eine SIM-Karte ein."</string>
@@ -1086,7 +1072,9 @@
     <item quantity="other" msgid="7915895323644292768">"Verfügbare WLAN-Netzwerke öffnen"</item>
   </plurals>
     <string name="wifi_available_sign_in" msgid="4029489716605255386">"Im WLAN-Netzwerk anmelden"</string>
-    <!-- no translation found for wifi_available_sign_in_detailed (6797764740339907572) -->
+    <!-- no translation found for network_available_sign_in (8495155593358054676) -->
+    <skip />
+    <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Es konnte keine WLAN-Verbindung hergestellt werden."</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" hat eine schlechte Internetverbindung."</string>
@@ -1103,27 +1091,21 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"An:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Geben Sie die erforderliche PIN ein:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
+    <!-- no translation found for wifi_p2p_frequency_conflict_message (7363907213787469151) -->
+    <skip />
     <string name="select_character" msgid="3365550120617701745">"Zeichen einfügen"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Kurznachrichten werden gesendet"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; sendet eine große Anzahl SMS. Möchten Sie zulassen, dass die App weiterhin Nachrichten sendet?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"Zulassen"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Nicht zulassen"</string>
-    <!-- no translation found for sms_short_code_confirm_message (1645436466285310855) -->
-    <skip />
-    <!-- no translation found for sms_short_code_details (4992814738863678373) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_details (4291752905667807485) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_allow (4458878637111023413) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_deny (2927389840209170706) -->
-    <skip />
-    <!-- no translation found for sms_short_code_remember_choice (5289538592272218136) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_always_allow (3241181154869493368) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_never_allow (446992765774269673) -->
-    <skip />
+    <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; möchte eine Nachricht an &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; senden."</string>
+    <string name="sms_short_code_details" msgid="4992814738863678373">"Hierfür können Ihrem Mobilfunkkonto Gebühren berechnet werden."</string>
+    <string name="sms_premium_short_code_details" msgid="4291752905667807485">"Hierfür werden Ihrem Mobilfunkkonto Gebühren berechnet."</string>
+    <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Senden"</string>
+    <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Abbrechen"</string>
+    <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Auswahl merken"</string>
+    <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Immer zulassen"</string>
+    <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Nie zulassen"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM-Karte entfernt"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"Das Mobilfunknetz ist erst wieder verfügbar, wenn Sie einen Neustart mit einer gültigen SIM-Karte durchführen."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Fertig"</string>
@@ -1137,8 +1119,7 @@
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"Neu: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"Zur Verfügung gestellt von <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="no_permissions" msgid="7283357728219338112">"Keine Berechtigungen erforderlich"</string>
-    <!-- no translation found for perm_costs_money (4902470324142151116) -->
-    <skip />
+    <string name="perm_costs_money" msgid="4902470324142151116">"Hierfür können Gebühren anfallen."</string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB-Massenspeicher"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB-Verbindung"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Sie haben eine USB-Verbindung mit Ihrem Computer hergestellt. Berühren Sie die Schaltfläche unten, wenn Sie Dateien von Ihrem Computer in den USB-Speicher Ihres Android-Geräts und umgekehrt kopieren möchten."</string>
@@ -1424,7 +1405,6 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Sie haben <xliff:g id="NUMBER">%d</xliff:g>-mal erfolglos versucht, das Telefon zu entsperren. Das Telefon wird nun auf die Werkseinstellungen zurückgesetzt."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Sie haben Ihr Entsperrungsmuster <xliff:g id="NUMBER_0">%d</xliff:g>-mal falsch gezeichnet. Nach <xliff:g id="NUMBER_1">%d</xliff:g> weiteren erfolglosen Versuchen werden Sie aufgefordert, Ihr Tablet mithilfe eines E-Mail-Kontos zu entsperren."\n\n" Versuchen Sie es in <xliff:g id="NUMBER_2">%d</xliff:g> Sekunden erneut."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Sie haben Ihr Entsperrungsmuster <xliff:g id="NUMBER_0">%d</xliff:g>-mal falsch gezeichnet. Nach <xliff:g id="NUMBER_1">%d</xliff:g> weiteren erfolglosen Versuchen werden Sie aufgefordert, Ihr Telefon mithilfe eines E-Mail-Kontos zu entsperren."\n\n" Versuchen Sie es in <xliff:g id="NUMBER_2">%d</xliff:g> Sekunden erneut."</string>
-    <!-- no translation found for safe_media_volume_warning (7382971871993371648) -->
-    <skip />
+    <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Lautstärke höher als Schwellenwert stellen?"\n"Wenn Sie über längere Zeiträume hinweg Musik in hoher Lautstärke hören, kann dies Ihr Gehör schädigen."</string>
     <string name="kg_temp_back_string" msgid="5812983904056640466">"&lt;"</string>
 </resources>
