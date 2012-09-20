@@ -44,7 +44,7 @@ public class UserManager {
      * @return true if multiple users can be created, false if it is a single user device.
      * @hide
      */
-    public boolean supportsMultipleUsers() {
+    public static boolean supportsMultipleUsers() {
         return getMaxSupportedUsers() > 1;
     }
 
