@@ -56,6 +56,10 @@
     <uses-permission android:name="android.permission.SET_ORIENTATION" />
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
 
+    <!-- DreamManager -->
+    <uses-permission android:name="android.permission.READ_DREAM_STATE" />
+    <uses-permission android:name="android.permission.WRITE_DREAM_STATE" />
+
     <application
         android:name="com.android.systemui.SystemUIApplication"
         android:persistent="true"

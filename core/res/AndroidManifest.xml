@@ -140,6 +140,9 @@
 
     <protected-broadcast android:name="android.os.UpdateLock.UPDATE_LOCK_CHANGED" />
 
+    <protected-broadcast android:name="android.intent.action.DREAMING_STARTED" />
+    <protected-broadcast android:name="android.intent.action.DREAMING_STOPPED" />
+
     <!-- ====================================== -->
     <!-- Permissions for things that cost money -->
     <!-- ====================================== -->
@@ -1928,6 +1931,18 @@
     <permission android:name="android.permission.SET_WALLPAPER_COMPONENT"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
         android:protectionLevel="signature|system" />
+
+    <!-- Allows applications to read dream settings and dream state.
+         @hide -->
+    <permission android:name="android.permission.READ_DREAM_STATE"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:protectionLevel="signature" />
+
+    <!-- Allows applications to write dream settings, and start or stop dreaming.
+         @hide -->
+    <permission android:name="android.permission.WRITE_DREAM_STATE"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:protectionLevel="signature" />
 
     <!-- Allow an application to read and write the cache partition.
          @hide -->

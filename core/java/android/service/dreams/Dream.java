@@ -22,7 +22,6 @@ import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Slog;
 import android.view.ActionMode;
@@ -40,12 +39,16 @@ import android.view.accessibility.AccessibilityEvent;
 import com.android.internal.policy.PolicyManager;
 
 /**
- *  Extend this class to implement a custom screensaver.
+ * Extend this class to implement a custom Dream.
+ *
+ * <p>Dreams are interactive screensavers launched when a charging device is idle, or docked in a
+ * desk dock. Dreams provide another modality for apps to express themselves, tailored for
+ * an exhibition/lean-back experience.</p>
  */
 public class Dream extends Service implements Window.Callback {
     private final static boolean DEBUG = true;
-    private final static String TAG = "Dream";
-    
+    private final String TAG = Dream.class.getSimpleName() + "[" + getClass().getSimpleName() + "]";
+
     /**
      * The {@link Intent} that must be declared as handled by the service.
      * To be supported, the service must also require the
@@ -60,28 +63,43 @@ public class Dream extends Service implements Window.Callback {
     public static final String METADATA_NAME_CONFIG_ACTIVITY =
             "android.service.dreams.config_activity";
 
-    private Window mWindow;
+    /**
+     * Broadcast Action: Sent after the system starts dreaming.
+     *
+     * <p class="note">This is a protected intent that can only be sent by the system.
+     * It is only sent to registered receivers.</p>
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_DREAMING_STARTED = "android.intent.action.DREAMING_STARTED";
 
+    /**
+     * Broadcast Action: Sent after the system stops dreaming.
+     *
+     * <p class="note">This is a protected intent that can only be sent by the system.
+     * It is only sent to registered receivers.</p>
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_DREAMING_STOPPED = "android.intent.action.DREAMING_STOPPED";
+
+    private final Handler mHandler = new Handler();
+    private IBinder mWindowToken;
+    private Window mWindow;
     private WindowManager mWindowManager;
     private IDreamManager mSandman;
-    
     private boolean mInteractive;
-    
-    final Handler mHandler = new Handler();
-    
-    boolean mFinished = false;
+    private boolean mFinished;
 
     // begin Window.Callback methods
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         // TODO: create more flexible version of mInteractive that allows use of KEYCODE_BACK
         if (!mInteractive) {
-            if (DEBUG) Slog.v(TAG, "finishing on keyEvent");
-            finish();
+            if (DEBUG) Slog.v(TAG, "Finishing on keyEvent");
+            safelyFinish();
             return true;
         } else if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
-            if (DEBUG) Slog.v(TAG, "finishing on back key");
-            finish();
+            if (DEBUG) Slog.v(TAG, "Finishing on back key");
+            safelyFinish();
             return true;
         }
         return mWindow.superDispatchKeyEvent(event);
@@ -90,8 +108,8 @@ public class Dream extends Service implements Window.Callback {
     @Override
     public boolean dispatchKeyShortcutEvent(KeyEvent event) {
         if (!mInteractive) { 
-            if (DEBUG) Slog.v(TAG, "finishing on keyShortcutEvent");
-            finish();
+            if (DEBUG) Slog.v(TAG, "Finishing on keyShortcutEvent");
+            safelyFinish();
             return true;
         }
         return mWindow.superDispatchKeyShortcutEvent(event);
@@ -102,8 +120,8 @@ public class Dream extends Service implements Window.Callback {
         // TODO: create more flexible version of mInteractive that allows clicks 
         // but finish()es on any other kind of activity
         if (!mInteractive) { 
-            if (DEBUG) Slog.v(TAG, "finishing on touchEvent");
-            finish();
+            if (DEBUG) Slog.v(TAG, "Finishing on touchEvent");
+            safelyFinish();
             return true;
         }
         return mWindow.superDispatchTouchEvent(event);
@@ -112,8 +130,8 @@ public class Dream extends Service implements Window.Callback {
     @Override
     public boolean dispatchTrackballEvent(MotionEvent event) {
         if (!mInteractive) {
-            if (DEBUG) Slog.v(TAG, "finishing on trackballEvent");
-            finish();
+            if (DEBUG) Slog.v(TAG, "Finishing on trackballEvent");
+            safelyFinish();
             return true;
         }
         return mWindow.superDispatchTrackballEvent(event);
@@ -122,8 +140,8 @@ public class Dream extends Service implements Window.Callback {
     @Override
     public boolean dispatchGenericMotionEvent(MotionEvent event) {
         if (!mInteractive) { 
-            if (DEBUG) Slog.v(TAG, "finishing on genericMotionEvent");
-            finish();
+            if (DEBUG) Slog.v(TAG, "Finishing on genericMotionEvent");
+            safelyFinish();
             return true;
         }
         return mWindow.superDispatchGenericMotionEvent(event);
@@ -212,30 +230,9 @@ public class Dream extends Service implements Window.Callback {
     public Window getWindow() {
         return mWindow;
     }
-    
-    /**
-     * Called when this Dream is constructed. Place your initialization here.
-     * 
-     * Subclasses must call through to the superclass implementation.
-     */
-    @Override
-    public void onCreate() {
-        super.onCreate();
-
-        if (DEBUG) Slog.v(TAG, "Dream created on thread " + Thread.currentThread().getId());
-
-        mSandman = IDreamManager.Stub.asInterface(ServiceManager.getService("dreams"));
-    }
-
-    /**
-     * Called when this Dream is started.
-     */
-    public void onStart() {
-        // hook for subclasses
-    }
 
    /**
-     * Inflate a layout resource and set it to be the content view for this Dream.
+     * Inflates a layout resource and set it to be the content view for this Dream.
      * Behaves similarly to {@link android.app.Activity#setContentView(int)}.
      *
      * @param layoutResID Resource ID to be inflated.
@@ -248,7 +245,7 @@ public class Dream extends Service implements Window.Callback {
     }
 
     /**
-     * Set a view to be the content view for this Dream.
+     * Sets a view to be the content view for this Dream.
      * Behaves similarly to {@link android.app.Activity#setContentView(android.view.View)},
      * including using {@link ViewGroup.LayoutParams#MATCH_PARENT} as the layout height and width of the view.
      * 
@@ -262,7 +259,7 @@ public class Dream extends Service implements Window.Callback {
     }
 
     /**
-     * Set a view to be the content view for this Dream.
+     * Sets a view to be the content view for this Dream.
      * Behaves similarly to 
      * {@link android.app.Activity#setContentView(android.view.View, android.view.ViewGroup.LayoutParams)}.
      *
@@ -277,7 +274,7 @@ public class Dream extends Service implements Window.Callback {
     }
 
     /**
-     * Add a view to the Dream's window, leaving other content views in place.
+     * Adds a view to the Dream's window, leaving other content views in place.
      * 
      * @param view The desired content to display.
      * @param params Layout parameters for the view.
@@ -285,21 +282,27 @@ public class Dream extends Service implements Window.Callback {
     public void addContentView(View view, ViewGroup.LayoutParams params) {
         getWindow().addContentView(view, params);
     }
-    
+
     /**
-     * @param mInteractive the mInteractive to set
+     * Marks this dream as interactive to receive input events.
+     *
+     * <p>Non-interactive dreams (default) will dismiss on the first input event.</p>
+     *
+     * <p>Interactive dreams should call {@link #finish()} to dismiss themselves.</p>
+     *
+     * @param interactive True if this dream will handle input events.
      */
-    public void setInteractive(boolean mInteractive) {
-        this.mInteractive = mInteractive;
+    public void setInteractive(boolean interactive) {
+        mInteractive = interactive;
     }
 
     /**
-     * @return the mInteractive
+     * Returns whether or not this dream is interactive.
      */
     public boolean isInteractive() {
         return mInteractive;
     }
-    
+
     /** Convenience method for setting View.SYSTEM_UI_FLAG_LOW_PROFILE on the content view. */
     protected void lightsOut() {
         // turn the lights down low
@@ -319,14 +322,29 @@ public class Dream extends Service implements Window.Callback {
     public View findViewById(int id) {
         return getWindow().findViewById(id);
     }
-    
+
     /**
-     * Called when this Dream is being removed from the screen and stopped.
+     * Called when this Dream is constructed. Place your initialization here.
+     *
+     * Subclasses must call through to the superclass implementation.
      */
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mWindowManager.removeView(mWindow.getDecorView());
+    public void onCreate() {
+        if (DEBUG) Slog.v(TAG, "onCreate() on thread " + Thread.currentThread().getId());
+        super.onCreate();
+        loadSandman();
+    }
+
+    /**
+     * Called when this Dream is started.
+     */
+    public void onStart() {
+        // hook for subclasses
+        Slog.v(TAG, "called Dream.onStart()");
+    }
+
+    private void loadSandman() {
+        mSandman = IDreamManager.Stub.asInterface(ServiceManager.getService("dreams"));
     }
 
     /**
@@ -335,16 +353,21 @@ public class Dream extends Service implements Window.Callback {
      * @param windowToken Binder to attach to the window to allow access to the correct window type.
      * @hide
      */
-    final /*package*/ void attach(IBinder windowToken) {
-        if (DEBUG) Slog.v(TAG, "Dream attached on thread " + Thread.currentThread().getId());
-        
+    private final void attach(IBinder windowToken) {
+        if (DEBUG) Slog.v(TAG, "Attached on thread " + Thread.currentThread().getId());
+
+        if (mSandman == null) {
+            Slog.w(TAG, "No dream manager found, super.onCreate may not have been called");
+            loadSandman();
+        }
+        mWindowToken = windowToken;
         mWindow = PolicyManager.makeNewWindow(this);
         mWindow.setCallback(this);
         mWindow.requestFeature(Window.FEATURE_NO_TITLE);
         mWindow.setBackgroundDrawable(new ColorDrawable(0xFF000000));
 
-        if (DEBUG) Slog.v(TAG, "attaching window token: " + windowToken 
-                + " to window of type " + WindowManager.LayoutParams.TYPE_DREAM);
+        if (DEBUG) Slog.v(TAG, String.format("Attaching window token: %s to window of type %s",
+                windowToken, WindowManager.LayoutParams.TYPE_DREAM));
 
         WindowManager.LayoutParams lp = mWindow.getAttributes();
         lp.type = WindowManager.LayoutParams.TYPE_DREAM;
@@ -355,58 +378,105 @@ public class Dream extends Service implements Window.Callback {
                     | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON 
                     );
         mWindow.setAttributes(lp);
-        
-        //WindowManagerImpl.getDefault().addView(mWindow.getDecorView(), lp);
-        
-        if (DEBUG) Slog.v(TAG, "created and attached window: " + mWindow);
+
+        if (DEBUG) Slog.v(TAG, "Created and attached window: " + mWindow);
 
         mWindow.setWindowManager(null, windowToken, "dream", true);
         mWindowManager = mWindow.getWindowManager();
-        
-        // now make it visible
+
+        // now make it visible (on the ui thread)
         mHandler.post(new Runnable(){
             @Override
             public void run() {
-                if (DEBUG) Slog.v(TAG, "Dream window added on thread " + Thread.currentThread().getId());
+                if (DEBUG) Slog.v(TAG, "Window added on thread " + Thread.currentThread().getId());
 
-                getWindowManager().addView(mWindow.getDecorView(), mWindow.getAttributes());
+                try {
+                    getWindowManager().addView(mWindow.getDecorView(), mWindow.getAttributes());
+                } catch (Throwable t) {
+                    Slog.w("Crashed adding window view", t);
+                    safelyFinish();
+                    return;
+                }
 
                 // start it up
-                onStart();
+                try {
+                    onStart();
+                } catch (Throwable t) {
+                    Slog.w("Crashed in onStart()", t);
+                    safelyFinish();
+                }
             }});
     }
-    
-    /**
-     * Stop the dream and wake up.
-     * 
-     * After this method is called, the service will be stopped.
-     */
-    public void finish() {
-        if (mFinished) return;
+
+    private void safelyFinish() {
+        if (DEBUG) Slog.v(TAG, "safelyFinish()");
         try {
-            mSandman.awaken(); // assuming we were started by the DreamManager
-            stopSelf(); // if launched via any other means
-            mFinished = true;
-        } catch (RemoteException ex) {
-            // sigh
+            finish();
+        } catch (Throwable t) {
+            Slog.w(TAG, "Crashed in safelyFinish()", t);
+            finishInternal();
+            return;
+        }
+
+        if (!mFinished) {
+            Slog.w(TAG, "Bad dream, did not call super.finish()");
+            finishInternal();
         }
     }
 
-    class IDreamServiceWrapper extends IDreamService.Stub {
-        public IDreamServiceWrapper() {
-        }
+    /**
+     * Stops the dream, detaches from the window, and wakes up.
+     *
+     * Subclasses must call through to the superclass implementation.
+     *
+     * <p>After this method is called, the service will be stopped.</p>
+     */
+    public void finish() {
+        if (DEBUG) Slog.v(TAG, "finish()");
+        finishInternal();
+    }
 
+    private void finishInternal() {
+        if (DEBUG) Slog.v(TAG, "finishInternal() mFinished = " + mFinished);
+        if (mFinished) return;
+        try {
+            mFinished = true;
+
+            if (mSandman != null) {
+                mSandman.awakenSelf(mWindowToken);
+            } else {
+                Slog.w(TAG, "No dream manager found");
+            }
+            stopSelf(); // if launched via any other means
+
+        } catch (Throwable t) {
+            Slog.w(TAG, "Crashed in finishInternal()", t);
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        if (DEBUG) Slog.v(TAG, "onDestroy()");
+        super.onDestroy();
+
+        if (DEBUG) Slog.v(TAG, "Removing window");
+        try {
+            mWindowManager.removeView(mWindow.getDecorView());
+        } catch (Throwable t) {
+            Slog.w(TAG, "Crashed removing window view", t);
+        }
+    }
+
+    @Override
+    public final IBinder onBind(Intent intent) {
+        if (DEBUG) Slog.v(TAG, "onBind() intent = " + intent);
+        return new DreamServiceWrapper();
+    }
+
+    private class DreamServiceWrapper extends IDreamService.Stub {
         public void attach(IBinder windowToken) {
             Dream.this.attach(windowToken);
         }
     }
 
-    /**
-     * Implement to return the implementation of the internal accessibility
-     * service interface.  Subclasses should not override.
-     */
-    @Override
-    public final IBinder onBind(Intent intent) {
-        return new IDreamServiceWrapper();
-    }
 }
