@@ -214,6 +214,21 @@ public final class Settings {
             "android.settings.BLUETOOTH_SETTINGS";
 
     /**
+     * Activity Action: Show settings to allow configuration of Wifi Displays.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_WIFI_DISPLAY_SETTINGS =
+            "android.settings.WIFI_DISPLAY_SETTINGS";
+
+    /**
      * Activity Action: Show settings to allow configuration of date and time.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
@@ -5538,6 +5553,13 @@ public final class Settings {
         * {@hide} */
        public static final String WEB_AUTOFILL_QUERY_URL =
            "web_autofill_query_url";
+
+       /**
+        * Whether Wifi display is enabled/disabled
+        * 0=disabled. 1=enabled.
+        * @hide
+        */
+       public static final String WIFI_DISPLAY_ON = "wifi_display_on";
 
        /**
         * Whether to notify the user of open networks.

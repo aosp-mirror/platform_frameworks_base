@@ -19,6 +19,8 @@ package android.hardware.display;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import libcore.util.Objects;
+
 /**
  * Describes the properties of a Wifi display.
  * <p>
@@ -30,6 +32,7 @@ import android.os.Parcelable;
 public final class WifiDisplay implements Parcelable {
     private final String mDeviceAddress;
     private final String mDeviceName;
+    private final String mDeviceAlias;
 
     public static final WifiDisplay[] EMPTY_ARRAY = new WifiDisplay[0];
 
@@ -37,7 +40,8 @@ public final class WifiDisplay implements Parcelable {
         public WifiDisplay createFromParcel(Parcel in) {
             String deviceAddress = in.readString();
             String deviceName = in.readString();
-            return new WifiDisplay(deviceAddress, deviceName);
+            String deviceAlias = in.readString();
+            return new WifiDisplay(deviceAddress, deviceName, deviceAlias);
         }
 
         public WifiDisplay[] newArray(int size) {
@@ -45,7 +49,7 @@ public final class WifiDisplay implements Parcelable {
         }
     };
 
-    public WifiDisplay(String deviceAddress, String deviceName) {
+    public WifiDisplay(String deviceAddress, String deviceName, String deviceAlias) {
         if (deviceAddress == null) {
             throw new IllegalArgumentException("deviceAddress must not be null");
         }
@@ -55,6 +59,7 @@ public final class WifiDisplay implements Parcelable {
 
         mDeviceAddress = deviceAddress;
         mDeviceName = deviceName;
+        mDeviceAlias = deviceAlias;
     }
 
     /**
@@ -71,6 +76,25 @@ public final class WifiDisplay implements Parcelable {
         return mDeviceName;
     }
 
+    /**
+     * Gets the user-specified alias of the Wifi display device, or null if none.
+     * <p>
+     * The alias should be used in the UI whenever available.  It is the value
+     * provided by the user when renaming the device.
+     * </p>
+     */
+    public String getDeviceAlias() {
+        return mDeviceAlias;
+    }
+
+    /**
+     * Gets the name to show in the UI.
+     * Uses the device alias if available, otherwise uses the device name.
+     */
+    public String getFriendlyDisplayName() {
+        return mDeviceAlias != null ? mDeviceAlias : mDeviceName;
+    }
+
     @Override
     public boolean equals(Object o) {
         return o instanceof WifiDisplay && equals((WifiDisplay)o);
@@ -79,7 +103,8 @@ public final class WifiDisplay implements Parcelable {
     public boolean equals(WifiDisplay other) {
         return other != null
                 && mDeviceAddress.equals(other.mDeviceAddress)
-                && mDeviceName.equals(other.mDeviceName);
+                && mDeviceName.equals(other.mDeviceName)
+                && Objects.equal(mDeviceAlias, other.mDeviceAlias);
     }
 
     @Override
@@ -92,6 +117,7 @@ public final class WifiDisplay implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mDeviceAddress);
         dest.writeString(mDeviceName);
+        dest.writeString(mDeviceAlias);
     }
 
     @Override
@@ -102,6 +128,10 @@ public final class WifiDisplay implements Parcelable {
     // For debugging purposes only.
     @Override
     public String toString() {
-        return mDeviceName + " (" + mDeviceAddress + ")";
+        String result = mDeviceName + " (" + mDeviceAddress + ")";
+        if (mDeviceAlias != null) {
+            result += ", alias " + mDeviceAlias;
+        }
+        return result;
     }
 }

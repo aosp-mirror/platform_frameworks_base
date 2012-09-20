@@ -81,8 +81,7 @@ class QuickSettings {
 
     private DisplayManager mDisplayManager;
     private WifiDisplayStatus mWifiDisplayStatus;
-    private WifiDisplayListAdapter mWifiDisplayListAdapter;
-    
+
     private BrightnessController mBrightnessController;
     private BluetoothController mBluetoothController;
     private Dialog mBrightnessDialog;
@@ -111,7 +110,6 @@ class QuickSettings {
         mContainerView = container;
         mModel = new QuickSettingsModel(context);
         mWifiDisplayStatus = new WifiDisplayStatus();
-        mWifiDisplayListAdapter = new WifiDisplayListAdapter(context);
 
         Resources r = mContext.getResources();
         mBatteryLevels = (LevelListDrawable) r.getDrawable(R.drawable.qs_sys_battery);
@@ -483,8 +481,7 @@ class QuickSettings {
         wifiDisplayTile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mBar.collapseAllPanels(true);
-                showWifiDisplayDialog();
+                startSettingsActivity(android.provider.Settings.ACTION_WIFI_DISPLAY_SETTINGS);
             }
         });
         mModel.addWifiDisplayTile(wifiDisplayTile, new QuickSettingsModel.RefreshCallback() {
@@ -578,71 +575,13 @@ class QuickSettings {
         }
     }
 
-    // Wifi Display
-    private void showWifiDisplayDialog() {
-        mDisplayManager.scanWifiDisplays();
-        updateWifiDisplayStatus();
-
-        Dialog dialog = new Dialog(mContext);
-        dialog.setContentView(R.layout.wifi_display_dialog);
-        dialog.setCanceledOnTouchOutside(true);
-        dialog.setTitle(R.string.wifi_display_dialog_title);
-
-        Button scanButton = (Button)dialog.findViewById(R.id.scan);
-        scanButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mDisplayManager.scanWifiDisplays();
-            }
-        });
-
-        Button disconnectButton = (Button)dialog.findViewById(R.id.disconnect);
-        disconnectButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mDisplayManager.disconnectWifiDisplay();
-            }
-        });
-
-        ListView list = (ListView)dialog.findViewById(R.id.list);
-        list.setAdapter(mWifiDisplayListAdapter);
-        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                WifiDisplay display = mWifiDisplayListAdapter.getItem(position);
-                mDisplayManager.connectWifiDisplay(display.getDeviceAddress());
-            }
-        });
-
-        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-        dialog.show();
-    }
-
     private void updateWifiDisplayStatus() {
-        applyWifiDisplayStatus(mDisplayManager.getWifiDisplayStatus());
+        mWifiDisplayStatus = mDisplayManager.getWifiDisplayStatus();
+        applyWifiDisplayStatus();
     }
 
-    private void applyWifiDisplayStatus(WifiDisplayStatus status) {
-        mWifiDisplayStatus = status;
-
-        mWifiDisplayListAdapter.clear();
-        mWifiDisplayListAdapter.addAll(status.getKnownDisplays());
-        if (status.getActiveDisplay() != null
-                && !contains(status.getKnownDisplays(), status.getActiveDisplay())) {
-            mWifiDisplayListAdapter.add(status.getActiveDisplay());
-        }
-        mWifiDisplayListAdapter.sort(mWifiDisplayComparator);
-
-        mModel.onWifiDisplayStateChanged(status);
-    }
-
-    private static boolean contains(WifiDisplay[] displays, WifiDisplay display) {
-        for (WifiDisplay d : displays) {
-            if (d.equals(display)) {
-                return true;
-            }
-        }
-        return false;
+    private void applyWifiDisplayStatus() {
+        mModel.onWifiDisplayStateChanged(mWifiDisplayStatus);
     }
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
@@ -651,59 +590,9 @@ class QuickSettings {
             if (intent.getAction().equals(DisplayManager.ACTION_WIFI_DISPLAY_STATUS_CHANGED)) {
                 WifiDisplayStatus status = (WifiDisplayStatus)intent.getParcelableExtra(
                         DisplayManager.EXTRA_WIFI_DISPLAY_STATUS);
-                applyWifiDisplayStatus(status);
+                mWifiDisplayStatus = status;
+                applyWifiDisplayStatus();
             }
-        }
-    };
-
-    private final class WifiDisplayListAdapter extends ArrayAdapter<WifiDisplay> {
-        private final LayoutInflater mInflater;
-
-        public WifiDisplayListAdapter(Context context) {
-            super(context, android.R.layout.simple_list_item_2);
-            mInflater = LayoutInflater.from(context);
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            WifiDisplay item = getItem(position);
-            View view = convertView;
-            if (view == null) {
-                view = mInflater.inflate(android.R.layout.simple_list_item_2,
-                        parent, false);
-            }
-            TextView headline = (TextView) view.findViewById(android.R.id.text1);
-            TextView subText = (TextView) view.findViewById(android.R.id.text2);
-            headline.setText(item.getDeviceName());
-
-            int state = WifiDisplayStatus.DISPLAY_STATE_NOT_CONNECTED;
-            if (item.equals(mWifiDisplayStatus.getActiveDisplay())) {
-                state = mWifiDisplayStatus.getActiveDisplayState();
-            }
-            switch (state) {
-                case WifiDisplayStatus.DISPLAY_STATE_CONNECTING:
-                    subText.setText(R.string.wifi_display_state_connecting);
-                    break;
-                case WifiDisplayStatus.DISPLAY_STATE_CONNECTED:
-                    subText.setText(R.string.wifi_display_state_connected);
-                    break;
-                case WifiDisplayStatus.DISPLAY_STATE_NOT_CONNECTED:
-                default:
-                    subText.setText(R.string.wifi_display_state_available);
-                    break;
-            }
-            return view;
-        }
-    }
-
-    private final Comparator<WifiDisplay> mWifiDisplayComparator = new Comparator<WifiDisplay>() {
-        @Override
-        public int compare(WifiDisplay lhs, WifiDisplay rhs) {
-            int c = lhs.getDeviceName().compareToIgnoreCase(rhs.getDeviceName());
-            if (c == 0) {
-                c = lhs.getDeviceAddress().compareToIgnoreCase(rhs.getDeviceAddress());
-            }
-            return c;
         }
     };
 }

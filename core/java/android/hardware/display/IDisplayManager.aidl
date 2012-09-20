@@ -38,5 +38,11 @@ interface IDisplayManager {
     void disconnectWifiDisplay();
 
     // Requires CONFIGURE_WIFI_DISPLAY permission.
+    void renameWifiDisplay(String address, String alias);
+
+    // Requires CONFIGURE_WIFI_DISPLAY permission.
+    void forgetWifiDisplay(String address);
+
+    // Requires CONFIGURE_WIFI_DISPLAY permission.
     WifiDisplayStatus getWifiDisplayStatus();
 }

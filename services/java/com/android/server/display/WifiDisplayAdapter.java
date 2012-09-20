@@ -49,21 +49,26 @@ import java.util.Arrays;
 final class WifiDisplayAdapter extends DisplayAdapter {
     private static final String TAG = "WifiDisplayAdapter";
 
+    private PersistentDataStore mPersistentDataStore;
+
     private WifiDisplayController mDisplayController;
     private WifiDisplayDevice mDisplayDevice;
 
     private WifiDisplayStatus mCurrentStatus;
-    private boolean mEnabled;
+    private int mFeatureState;
     private int mScanState;
     private int mActiveDisplayState;
     private WifiDisplay mActiveDisplay;
-    private WifiDisplay[] mKnownDisplays = WifiDisplay.EMPTY_ARRAY;
+    private WifiDisplay[] mAvailableDisplays = WifiDisplay.EMPTY_ARRAY;
+    private WifiDisplay[] mRememberedDisplays = WifiDisplay.EMPTY_ARRAY;
 
     private boolean mPendingStatusChangeBroadcast;
 
     public WifiDisplayAdapter(DisplayManagerService.SyncRoot syncRoot,
-            Context context, Handler handler, Listener listener) {
+            Context context, Handler handler, Listener listener,
+            PersistentDataStore persistentDataStore) {
         super(syncRoot, context, handler, listener, TAG);
+        mPersistentDataStore = persistentDataStore;
     }
 
     @Override
@@ -71,11 +76,12 @@ final class WifiDisplayAdapter extends DisplayAdapter {
         super.dumpLocked(pw);
 
         pw.println("mCurrentStatus=" + getWifiDisplayStatusLocked());
-        pw.println("mEnabled=" + mEnabled);
+        pw.println("mFeatureState=" + mFeatureState);
         pw.println("mScanState=" + mScanState);
         pw.println("mActiveDisplayState=" + mActiveDisplayState);
         pw.println("mActiveDisplay=" + mActiveDisplay);
-        pw.println("mKnownDisplays=" + Arrays.toString(mKnownDisplays));
+        pw.println("mAvailableDisplays=" + Arrays.toString(mAvailableDisplays));
+        pw.println("mRememberedDisplays=" + Arrays.toString(mRememberedDisplays));
         pw.println("mPendingStatusChangeBroadcast=" + mPendingStatusChangeBroadcast);
 
         // Try to dump the controller state.
@@ -92,6 +98,8 @@ final class WifiDisplayAdapter extends DisplayAdapter {
     @Override
     public void registerLocked() {
         super.registerLocked();
+
+        updateRememberedDisplaysLocked();
 
         getHandler().post(new Runnable() {
             @Override
@@ -135,17 +143,57 @@ final class WifiDisplayAdapter extends DisplayAdapter {
         });
     }
 
+    public void requestRenameLocked(String address, String alias) {
+        if (alias != null) {
+            alias = alias.trim();
+            if (alias.isEmpty()) {
+                alias = null;
+            }
+        }
+
+        if (mPersistentDataStore.renameWifiDisplay(address, alias)) {
+            mPersistentDataStore.saveIfNeeded();
+            updateRememberedDisplaysLocked();
+            scheduleStatusChangedBroadcastLocked();
+        }
+    }
+
+    public void requestForgetLocked(String address) {
+        if (mPersistentDataStore.forgetWifiDisplay(address)) {
+            mPersistentDataStore.saveIfNeeded();
+            updateRememberedDisplaysLocked();
+            scheduleStatusChangedBroadcastLocked();
+        }
+
+        if (mActiveDisplay != null && mActiveDisplay.getDeviceAddress().equals(address)) {
+            requestDisconnectLocked();
+        }
+    }
+
     public WifiDisplayStatus getWifiDisplayStatusLocked() {
         if (mCurrentStatus == null) {
-            mCurrentStatus = new WifiDisplayStatus(mEnabled, mScanState, mActiveDisplayState,
-                    mActiveDisplay, mKnownDisplays);
+            mCurrentStatus = new WifiDisplayStatus(
+                    mFeatureState, mScanState, mActiveDisplayState,
+                    mActiveDisplay, mAvailableDisplays, mRememberedDisplays);
         }
         return mCurrentStatus;
+    }
+
+    private void updateRememberedDisplaysLocked() {
+        mRememberedDisplays = mPersistentDataStore.getRememberedWifiDisplays();
+        mActiveDisplay = mPersistentDataStore.applyWifiDisplayAlias(mActiveDisplay);
+        mAvailableDisplays = mPersistentDataStore.applyWifiDisplayAliases(mAvailableDisplays);
     }
 
     private void handleConnectLocked(WifiDisplay display,
             Surface surface, int width, int height, int flags) {
         handleDisconnectLocked();
+
+        if (mPersistentDataStore.rememberWifiDisplay(display)) {
+            mPersistentDataStore.saveIfNeeded();
+            updateRememberedDisplaysLocked();
+            scheduleStatusChangedBroadcastLocked();
+        }
 
         int deviceFlags = 0;
         if ((flags & RemoteDisplay.DISPLAY_FLAG_SECURE) != 0) {
@@ -154,7 +202,7 @@ final class WifiDisplayAdapter extends DisplayAdapter {
 
         float refreshRate = 60.0f; // TODO: get this for real
 
-        String name = display.getDeviceName();
+        String name = display.getFriendlyDisplayName();
         IBinder displayToken = Surface.createDisplay(name);
         mDisplayDevice = new WifiDisplayDevice(displayToken, name, width, height,
                 refreshRate, deviceFlags, surface);
@@ -170,6 +218,7 @@ final class WifiDisplayAdapter extends DisplayAdapter {
     }
 
     private void scheduleStatusChangedBroadcastLocked() {
+        mCurrentStatus = null;
         if (!mPendingStatusChangeBroadcast) {
             mPendingStatusChangeBroadcast = true;
             getHandler().post(mStatusChangeBroadcast);
@@ -202,11 +251,10 @@ final class WifiDisplayAdapter extends DisplayAdapter {
     private final WifiDisplayController.Listener mWifiDisplayListener =
             new WifiDisplayController.Listener() {
         @Override
-        public void onEnablementChanged(boolean enabled) {
+        public void onFeatureStateChanged(int featureState) {
             synchronized (getSyncRoot()) {
-                if (mEnabled != enabled) {
-                    mCurrentStatus = null;
-                    mEnabled = enabled;
+                if (mFeatureState != featureState) {
+                    mFeatureState = featureState;
                     scheduleStatusChangedBroadcastLocked();
                 }
             }
@@ -216,20 +264,21 @@ final class WifiDisplayAdapter extends DisplayAdapter {
         public void onScanStarted() {
             synchronized (getSyncRoot()) {
                 if (mScanState != WifiDisplayStatus.SCAN_STATE_SCANNING) {
-                    mCurrentStatus = null;
                     mScanState = WifiDisplayStatus.SCAN_STATE_SCANNING;
                     scheduleStatusChangedBroadcastLocked();
                 }
             }
         }
 
-        public void onScanFinished(WifiDisplay[] knownDisplays) {
+        public void onScanFinished(WifiDisplay[] availableDisplays) {
             synchronized (getSyncRoot()) {
+                availableDisplays = mPersistentDataStore.applyWifiDisplayAliases(
+                        availableDisplays);
+
                 if (mScanState != WifiDisplayStatus.SCAN_STATE_NOT_SCANNING
-                        || !Arrays.equals(mKnownDisplays, knownDisplays)) {
-                    mCurrentStatus = null;
+                        || !Arrays.equals(mAvailableDisplays, availableDisplays)) {
                     mScanState = WifiDisplayStatus.SCAN_STATE_NOT_SCANNING;
-                    mKnownDisplays = knownDisplays;
+                    mAvailableDisplays = availableDisplays;
                     scheduleStatusChangedBroadcastLocked();
                 }
             }
@@ -238,10 +287,11 @@ final class WifiDisplayAdapter extends DisplayAdapter {
         @Override
         public void onDisplayConnecting(WifiDisplay display) {
             synchronized (getSyncRoot()) {
+                display = mPersistentDataStore.applyWifiDisplayAlias(display);
+
                 if (mActiveDisplayState != WifiDisplayStatus.DISPLAY_STATE_CONNECTING
                         || mActiveDisplay == null
                         || !mActiveDisplay.equals(display)) {
-                    mCurrentStatus = null;
                     mActiveDisplayState = WifiDisplayStatus.DISPLAY_STATE_CONNECTING;
                     mActiveDisplay = display;
                     scheduleStatusChangedBroadcastLocked();
@@ -254,7 +304,6 @@ final class WifiDisplayAdapter extends DisplayAdapter {
             synchronized (getSyncRoot()) {
                 if (mActiveDisplayState != WifiDisplayStatus.DISPLAY_STATE_NOT_CONNECTED
                         || mActiveDisplay != null) {
-                    mCurrentStatus = null;
                     mActiveDisplayState = WifiDisplayStatus.DISPLAY_STATE_NOT_CONNECTED;
                     mActiveDisplay = null;
                     scheduleStatusChangedBroadcastLocked();
@@ -266,12 +315,12 @@ final class WifiDisplayAdapter extends DisplayAdapter {
         public void onDisplayConnected(WifiDisplay display, Surface surface,
                 int width, int height, int flags) {
             synchronized (getSyncRoot()) {
+                display = mPersistentDataStore.applyWifiDisplayAlias(display);
                 handleConnectLocked(display, surface, width, height, flags);
 
                 if (mActiveDisplayState != WifiDisplayStatus.DISPLAY_STATE_CONNECTED
                         || mActiveDisplay == null
                         || !mActiveDisplay.equals(display)) {
-                    mCurrentStatus = null;
                     mActiveDisplayState = WifiDisplayStatus.DISPLAY_STATE_CONNECTED;
                     mActiveDisplay = display;
                     scheduleStatusChangedBroadcastLocked();
@@ -287,7 +336,6 @@ final class WifiDisplayAdapter extends DisplayAdapter {
 
                 if (mActiveDisplayState != WifiDisplayStatus.DISPLAY_STATE_NOT_CONNECTED
                         || mActiveDisplay != null) {
-                    mCurrentStatus = null;
                     mActiveDisplayState = WifiDisplayStatus.DISPLAY_STATE_NOT_CONNECTED;
                     mActiveDisplay = null;
                     scheduleStatusChangedBroadcastLocked();
