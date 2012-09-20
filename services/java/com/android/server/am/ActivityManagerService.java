@@ -147,6 +147,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -446,6 +447,11 @@ public final class ActivityManagerService extends ActivityManagerNative
      * LRU list of history of current users.  Most recently current is at the end.
      */
     final ArrayList<Integer> mUserLru = new ArrayList<Integer>();
+
+    /**
+     * Constant array of the users that are currently started.
+     */
+    int[] mStartedUserArray = new int[] { 0 };
 
     /**
      * Registered observers of the user switching mechanics.
@@ -832,7 +838,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     static ActivityManagerService mSelf;
     static ActivityThread mSystemThread;
 
-    private int mCurrentUserId;
+    private int mCurrentUserId = 0;
+    private int[] mCurrentUserArray = new int[] { 0 };
     private UserManagerService mUserManager;
 
     private final class AppDeathRecipient implements IBinder.DeathRecipient {
@@ -1568,6 +1575,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         // User 0 is the first and only user that runs at boot.
         mStartedUsers.put(0, new UserStartedState(new UserHandle(0), true));
         mUserLru.add(Integer.valueOf(0));
+        updateStartedUserArrayLocked();
 
         GL_ES_VERSION = SystemProperties.getInt("ro.opengles.version",
             ConfigurationInfo.GL_ES_VERSION_UNDEFINED);
@@ -3750,6 +3758,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
         }
         intent.putExtra(Intent.EXTRA_UID, uid);
+        intent.putExtra(Intent.EXTRA_USER_HANDLE, UserHandle.getUserId(uid));
         broadcastIntentLocked(null, null, intent,
                 null, null, 0, null, null, null,
                 false, false,
@@ -9311,6 +9320,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             pw.print(mUserLru.get(i));
         }
         pw.println("]");
+        if (dumpAll) {
+            pw.print("  mStartedUserArray: "); pw.println(Arrays.toString(mStartedUserArray));
+        }
         pw.println("  mHomeProcess: " + mHomeProcess);
         pw.println("  mPreviousProcess: " + mPreviousProcess);
         if (dumpAll) {
@@ -11498,7 +11510,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         userId = handleIncomingUserLocked(callingPid, callingUid, userId,
                 true, false, "broadcast", callerPackage);
 
-        // Make sure that the user who is receiving this broadcast is started
+        // Make sure that the user who is receiving this broadcast is started.
         // If not, we will just skip it.
         if (userId != UserHandle.USER_ALL && mStartedUsers.get(userId) == null) {
             if (callingUid != Process.SYSTEM_UID || (intent.getFlags()
@@ -11693,13 +11705,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         int[] users;
         if (userId == UserHandle.USER_ALL) {
             // Caller wants broadcast to go to all started users.
-            users = new int[mStartedUsers.size()];
-            for (int i=0; i<mStartedUsers.size(); i++) {
-                users[i] = mStartedUsers.keyAt(i);
-            }
+            users = mStartedUserArray;
         } else {
             // Caller wants broadcast to go to one specific user.
-            users = new int[] {userId};
+            users = mCurrentUserArray;
         }
 
         // Figure out who all will receive this broadcast.
@@ -13975,9 +13984,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // we need to start it now.
                 if (mStartedUsers.get(userId) == null) {
                     mStartedUsers.put(userId, new UserStartedState(new UserHandle(userId), false));
+                    updateStartedUserArrayLocked();
                 }
 
                 mCurrentUserId = userId;
+                mCurrentUserArray = new int[] { userId };
                 final Integer userIdInt = Integer.valueOf(userId);
                 mUserLru.remove(userIdInt);
                 mUserLru.add(userIdInt);
@@ -14256,6 +14267,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // User can no longer run.
                 mStartedUsers.remove(userId);
                 mUserLru.remove(Integer.valueOf(userId));
+                updateStartedUserArrayLocked();
 
                 // Clean up all state and processes associated with the user.
                 // Kill all the processes for the user.
@@ -14309,6 +14321,29 @@ public final class ActivityManagerService extends ActivityManagerNative
     boolean isUserRunningLocked(int userId) {
         UserStartedState state = mStartedUsers.get(userId);
         return state != null && state.mState != UserStartedState.STATE_STOPPING;
+    }
+
+    @Override
+    public int[] getRunningUserIds() {
+        if (checkCallingPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
+                != PackageManager.PERMISSION_GRANTED) {
+            String msg = "Permission Denial: isUserRunning() from pid="
+                    + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid()
+                    + " requires " + android.Manifest.permission.INTERACT_ACROSS_USERS;
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
+        synchronized (this) {
+            return mStartedUserArray;
+        }
+    }
+
+    private void updateStartedUserArrayLocked() {
+        mStartedUserArray = new int[mStartedUsers.size()];
+        for (int i=0; i<mStartedUsers.size();  i++) {
+            mStartedUserArray[i] = mStartedUsers.keyAt(i);
+        }
     }
 
     @Override

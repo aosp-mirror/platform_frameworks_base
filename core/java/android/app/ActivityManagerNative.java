@@ -1611,6 +1611,14 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case GET_RUNNING_USER_IDS_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            int[] result = getRunningUserIds();
+            reply.writeNoException();
+            reply.writeIntArray(result);
+            return true;
+        }
+
         case REMOVE_SUB_TASK_TRANSACTION:
         {
             data.enforceInterface(IActivityManager.descriptor);
@@ -3841,6 +3849,18 @@ class ActivityManagerProxy implements IActivityManager
         mRemote.transact(IS_USER_RUNNING_TRANSACTION, data, reply, 0);
         reply.readException();
         boolean result = reply.readInt() != 0;
+        reply.recycle();
+        data.recycle();
+        return result;
+    }
+
+    public int[] getRunningUserIds() throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        mRemote.transact(GET_RUNNING_USER_IDS_TRANSACTION, data, reply, 0);
+        reply.readException();
+        int[] result = reply.createIntArray();
         reply.recycle();
         data.recycle();
         return result;
