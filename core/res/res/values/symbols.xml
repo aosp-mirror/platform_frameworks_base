@@ -1250,6 +1250,7 @@
   <java-symbol type="id" name="keyguard_sim_pin_view" />
   <java-symbol type="id" name="keyguard_sim_puk_view" />
   <java-symbol type="id" name="keyguard_account_view" />
+  <java-symbol type="id" name="keyguard_selector_fade_container" />
   <java-symbol type="id" name="app_widget_container" />
   <java-symbol type="id" name="view_flipper" />
   <java-symbol type="id" name="emergency_call_button" />
@@ -1269,6 +1270,8 @@
   <java-symbol type="id" name="keyguard_transport_control" />
   <java-symbol type="id" name="keyguard_status_view" />
   <java-symbol type="id" name="keyguard_users_grid" />
+  <java-symbol type="id" name="clock_text" />
+  <java-symbol type="id" name="clock_view" />
   <java-symbol type="integer" name="config_carDockRotation" />
   <java-symbol type="integer" name="config_defaultUiModeType" />
   <java-symbol type="integer" name="config_deskDockRotation" />
@@ -1357,6 +1360,7 @@
   <java-symbol type="string" name="lockscreen_too_many_failed_pin_attempts_dialog_message" />
   <java-symbol type="string" name="lockscreen_unlock_label" />
   <java-symbol type="string" name="status_bar_device_locked" />
+  <java-symbol type="string" name="keyguard_wday_day_month" />
   <java-symbol type="style" name="Animation.LockScreen" />
   <java-symbol type="style" name="Theme.Dialog.RecentApplications" />
   <java-symbol type="style" name="Theme.ExpandedMenu" />

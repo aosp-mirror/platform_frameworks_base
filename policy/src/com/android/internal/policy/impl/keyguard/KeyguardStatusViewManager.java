@@ -27,6 +27,7 @@ import libcore.util.MutableInt;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.graphics.Typeface;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
@@ -42,21 +43,13 @@ class KeyguardStatusViewManager {
     private static final String TAG = "KeyguardStatusView";
 
     public static final int LOCK_ICON = 0; // R.drawable.ic_lock_idle_lock;
-    public static final int ALARM_ICON = R.drawable.ic_lock_idle_alarm;
+    public static final int ALARM_ICON = com.android.internal.R.drawable.ic_lock_idle_alarm;
     public static final int CHARGING_ICON = 0; //R.drawable.ic_lock_idle_charging;
     public static final int BATTERY_LOW_ICON = 0; //R.drawable.ic_lock_idle_low_battery;
-
-    private static final int INSTRUCTION_TEXT = 10;
-    private static final int CARRIER_TEXT = 11;
-    private static final int CARRIER_HELP_TEXT = 12;
-    private static final int HELP_MESSAGE_TEXT = 13;
-    private static final int OWNER_INFO = 14;
-    private static final int BATTERY_INFO = 15;
 
     private CharSequence mDateFormatString;
 
     // Views that this class controls.
-    // NOTE: These may be null in some LockScreen screens and should protect from NPE
     private TextView mDateView;
     private TextView mStatus1View;
     private TextView mOwnerInfoView;
@@ -81,15 +74,26 @@ class KeyguardStatusViewManager {
     private KeyguardUpdateMonitor mUpdateMonitor;
 
     // Shadowed text values
-    private CharSequence mCarrierText;
-    private CharSequence mCarrierHelpText;
-    private String mHelpMessageText;
-    private String mInstructionText;
-    private CharSequence mOwnerInfoText;
-    private boolean mShowingStatus;
-    private DigitalClock mDigitalClock;
+    private ClockView mClockView;
     protected boolean mBatteryCharged;
     protected boolean mBatteryIsLow;
+
+    private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
+        @Override
+        public void onRefreshBatteryInfo(KeyguardUpdateMonitor.BatteryStatus status) {
+            mShowingBatteryInfo = status.isPluggedIn() || status.isBatteryLow();
+            mPluggedIn = status.isPluggedIn();
+            mBatteryLevel = status.level;
+            mBatteryCharged = status.isCharged();
+            mBatteryIsLow = status.isBatteryLow();
+            updateStatusLines();
+        }
+
+        @Override
+        public void onTimeChanged() {
+            refreshDate();
+        }
+    };
 
     /**
      * @param view the containing view of all widgets
@@ -97,16 +101,28 @@ class KeyguardStatusViewManager {
     public KeyguardStatusViewManager(View view) {
         if (DEBUG) Log.v(TAG, "KeyguardStatusViewManager()");
         mContainer = view;
-        mDateFormatString = getContext().getResources()
-            .getText(R.string.abbrev_wday_month_day_no_year);
+        mDateFormatString = getContext().getResources().getText(R.string.keyguard_wday_day_month);
         mLockPatternUtils = new LockPatternUtils(view.getContext());
         mUpdateMonitor = KeyguardUpdateMonitor.getInstance(view.getContext());
 
-        mDateView = (TextView) findViewById(R.id.date);
-        mStatus1View = (TextView) findViewById(R.id.status1);
-        mAlarmStatusView = (TextView) findViewById(R.id.alarm_status);
-        mOwnerInfoView = (TextView) findViewById(R.id.owner_info);
-        mDigitalClock = (DigitalClock) findViewById(R.id.time);
+        mDateView = (TextView) view.findViewById(R.id.date);
+        mStatus1View = (TextView) view.findViewById(R.id.status1);
+        mAlarmStatusView = (TextView) view.findViewById(R.id.alarm_status);
+        mOwnerInfoView = (TextView) view.findViewById(R.id.owner_info);
+        mClockView = (ClockView) view.findViewById(R.id.clock_view);
+
+        // Use custom font in mDateView
+        mDateView.setTypeface(Typeface.create("sans-serif-thin", Typeface.NORMAL));
+
+        // Required to get Marquee to work.
+        final View marqueeViews[] = { mDateView, mStatus1View, mOwnerInfoView, mAlarmStatusView };
+        for (int i = 0; i < marqueeViews.length; i++) {
+            View v = marqueeViews[i];
+            if (v == null) {
+                throw new RuntimeException("Can't find widget at index " + i);
+            }
+            v.setSelected(true);
+        }
 
         // Registering this callback immediately updates the battery state, among other things.
         mUpdateMonitor.registerCallback(mInfoCallback);
@@ -114,62 +130,6 @@ class KeyguardStatusViewManager {
         resetStatusInfo();
         refreshDate();
         updateOwnerInfo();
-
-        // Required to get Marquee to work.
-        final View scrollableViews[] = { mDateView, mStatus1View, mOwnerInfoView,
-                mAlarmStatusView };
-        for (View v : scrollableViews) {
-            if (v != null) {
-                v.setSelected(true);
-            }
-        }
-    }
-
-    void setInstructionText(String string) {
-        mInstructionText = string;
-        update(INSTRUCTION_TEXT, string);
-    }
-
-    void setCarrierText(CharSequence string) {
-        mCarrierText = string;
-        update(CARRIER_TEXT, string);
-    }
-
-    void setOwnerInfo(CharSequence string) {
-        mOwnerInfoText = string;
-        update(OWNER_INFO, string);
-    }
-
-    /**
-     * Sets the carrier help text message, if view is present. Carrier help text messages are
-     * typically for help dealing with SIMS and connectivity.
-     *
-     * @param resId resource id of the message
-     */
-    public void setCarrierHelpText(int resId) {
-        mCarrierHelpText = getText(resId);
-        update(CARRIER_HELP_TEXT, mCarrierHelpText);
-    }
-
-    private CharSequence getText(int resId) {
-        return resId == 0 ? null : getContext().getText(resId);
-    }
-
-    /**
-     * Unlock help message.  This is typically for help with unlock widgets, e.g. "wrong password"
-     * or "try again."
-     *
-     * @param textResId
-     * @param lockIcon
-     */
-    public void setHelpMessage(int textResId, int lockIcon) {
-        final CharSequence tmp = getText(textResId);
-        mHelpMessageText = tmp == null ? null : tmp.toString();
-        update(HELP_MESSAGE_TEXT, mHelpMessageText);
-    }
-
-    private void update(int what, CharSequence string) {
-        updateStatusLines(mShowingStatus);
     }
 
     public void onPause() {
@@ -181,18 +141,15 @@ class KeyguardStatusViewManager {
     public void onResume() {
         if (DEBUG) Log.v(TAG, "onResume()");
 
-        // First update the clock, if present.
-        if (mDigitalClock != null) {
-            mDigitalClock.updateTime();
-        }
+        // Force-update the time when we show this view.
+        mClockView.updateTime();
 
         mUpdateMonitor.registerCallback(mInfoCallback);
         resetStatusInfo();
     }
 
     void resetStatusInfo() {
-        mInstructionText = null;
-        updateStatusLines(true);
+        updateStatusLines();
     }
 
     /**
@@ -202,21 +159,20 @@ class KeyguardStatusViewManager {
      * prioritized in that order.
      * @param showStatusLines status lines are shown if true
      */
-    void updateStatusLines(boolean showStatusLines) {
-        if (DEBUG) Log.v(TAG, "updateStatusLines(" + showStatusLines + ")");
-        mShowingStatus = showStatusLines;
+    void updateStatusLines() {
         updateAlarmInfo();
         updateOwnerInfo();
         updateStatus1();
     }
 
     private void updateAlarmInfo() {
-        if (mAlarmStatusView != null) {
-            String nextAlarm = mLockPatternUtils.getNextAlarm();
-            boolean showAlarm = mShowingStatus && !TextUtils.isEmpty(nextAlarm);
-            mAlarmStatusView.setText(nextAlarm);
+        String nextAlarm = mLockPatternUtils.getNextAlarm();
+        if (!TextUtils.isEmpty(nextAlarm)) {
+            maybeSetUpperCaseText(mAlarmStatusView, nextAlarm);
             mAlarmStatusView.setCompoundDrawablesWithIntrinsicBounds(ALARM_ICON, 0, 0, 0);
-            mAlarmStatusView.setVisibility(showAlarm ? View.VISIBLE : View.GONE);
+            mAlarmStatusView.setVisibility(View.VISIBLE);
+        } else {
+            mAlarmStatusView.setVisibility(View.GONE);
         }
     }
 
@@ -224,102 +180,62 @@ class KeyguardStatusViewManager {
         final ContentResolver res = getContext().getContentResolver();
         final boolean ownerInfoEnabled = Settings.Secure.getInt(res,
                 Settings.Secure.LOCK_SCREEN_OWNER_INFO_ENABLED, 1) != 0;
-        mOwnerInfoText = ownerInfoEnabled ?
-                Settings.Secure.getString(res, Settings.Secure.LOCK_SCREEN_OWNER_INFO) : null;
-        if (mOwnerInfoView != null) {
-            mOwnerInfoView.setText(mOwnerInfoText);
-            mOwnerInfoView.setVisibility(TextUtils.isEmpty(mOwnerInfoText) ? View.GONE:View.VISIBLE);
+        String text = Settings.Secure.getString(res, Settings.Secure.LOCK_SCREEN_OWNER_INFO);
+        if (ownerInfoEnabled && !TextUtils.isEmpty(text)) {
+            maybeSetUpperCaseText(mOwnerInfoView, text);
+            mOwnerInfoView.setVisibility(View.VISIBLE);
+        } else {
+            mOwnerInfoView.setVisibility(View.GONE);
         }
     }
 
     private void updateStatus1() {
-        if (mStatus1View != null) {
-            MutableInt icon = new MutableInt(0);
-            CharSequence string = getPriorityTextMessage(icon);
-            mStatus1View.setText(string);
+        MutableInt icon = new MutableInt(0);
+        CharSequence string = getPriorityTextMessage(icon);
+        if (!TextUtils.isEmpty(string)) {
+            maybeSetUpperCaseText(mStatus1View, string);
             mStatus1View.setCompoundDrawablesWithIntrinsicBounds(icon.value, 0, 0, 0);
-            mStatus1View.setVisibility(mShowingStatus ? View.VISIBLE : View.INVISIBLE);
+            mStatus1View.setVisibility(View.VISIBLE);
+        } else {
+            mStatus1View.setVisibility(View.GONE);
         }
     }
 
-    private CharSequence getAltTextMessage(MutableInt icon) {
-        // If we have replaced the status area with a single widget, then this code
-        // prioritizes what to show in that space when all transient messages are gone.
+    private CharSequence getPriorityTextMessage(MutableInt icon) {
         CharSequence string = null;
         if (mShowingBatteryInfo) {
             // Battery status
             if (mPluggedIn) {
                 // Charging, charged or waiting to charge.
-                string = getContext().getString(mBatteryCharged ? R.string.lockscreen_charged
-                        :R.string.lockscreen_plugged_in, mBatteryLevel);
+                string = getContext().getString(mBatteryCharged ?
+                        com.android.internal.R.string.lockscreen_charged
+                        :com.android.internal.R.string.lockscreen_plugged_in, mBatteryLevel);
                 icon.value = CHARGING_ICON;
             } else if (mBatteryIsLow) {
                 // Battery is low
-                string = getContext().getString(R.string.lockscreen_low_battery);
+                string = getContext().getString(
+                        com.android.internal.R.string.lockscreen_low_battery);
                 icon.value = BATTERY_LOW_ICON;
             }
-        } else {
-            string = mCarrierText;
-        }
-        return string;
-    }
-
-    private CharSequence getPriorityTextMessage(MutableInt icon) {
-        CharSequence string = null;
-        if (!TextUtils.isEmpty(mInstructionText)) {
-            // Instructions only
-            string = mInstructionText;
-            icon.value = LOCK_ICON;
-        } else if (mShowingBatteryInfo) {
-            // Battery status
-            if (mPluggedIn) {
-                // Charging, charged or waiting to charge.
-                string = getContext().getString(mBatteryCharged ? R.string.lockscreen_charged
-                        :R.string.lockscreen_plugged_in, mBatteryLevel);
-                icon.value = CHARGING_ICON;
-            } else if (mBatteryIsLow) {
-                // Battery is low
-                string = getContext().getString(R.string.lockscreen_low_battery);
-                icon.value = BATTERY_LOW_ICON;
-            }
-        } else if (mOwnerInfoView == null && mOwnerInfoText != null) {
-            string = mOwnerInfoText;
         }
         return string;
     }
 
     void refreshDate() {
-        if (mDateView != null) {
-            mDateView.setText(DateFormat.format(mDateFormatString, new Date()));
-        }
+        maybeSetUpperCaseText(mDateView, DateFormat.format(mDateFormatString, new Date()));
     }
 
+    private void maybeSetUpperCaseText(TextView textView, CharSequence text) {
+        if (KeyguardViewManager.USE_UPPER_CASE
+                && (textView == mDateView)) { // currently only required for date view
+            textView.setText(text != null ? text.toString().toUpperCase() : null);
+        } else {
+            textView.setText(text);
+        }
+    }
 
     private Context getContext() {
         return mContainer.getContext();
     }
 
-    private View findViewById(int id) {
-        return mContainer.findViewById(id);
-    }
-
-
-    private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
-
-        @Override
-        public void onRefreshBatteryInfo(KeyguardUpdateMonitor.BatteryStatus status) {
-            mShowingBatteryInfo = status.isPluggedIn() || status.isBatteryLow();
-            mPluggedIn = status.isPluggedIn();
-            mBatteryLevel = status.level;
-            mBatteryCharged = status.isCharged();
-            mBatteryIsLow = status.isBatteryLow();
-            final MutableInt tmpIcon = new MutableInt(0);
-            update(BATTERY_INFO, getAltTextMessage(tmpIcon));
-        }
-
-        @Override
-        public void onTimeChanged() {
-            refreshDate();
-        }
-    };
 }

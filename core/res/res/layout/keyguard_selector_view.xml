@@ -30,7 +30,7 @@
         android:id="@+id/app_widget_container"
         android:layout_width="match_parent"
         android:layout_height="0dip"
-        android:layout_weight="1"
+        android:layout_weight="0.45"
         android:visibility="gone">
             <!-- TODO: Remove this when supported as a widget -->
             <include layout="@layout/keyguard_status_view"/>
@@ -40,7 +40,7 @@
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="0dip"
-        android:layout_weight="1"
+        android:layout_weight="0.55"
         android:layout_gravity="center"
         android:gravity="center">
 
@@ -64,27 +64,34 @@
             prvandroid:glowRadius="@*android:dimen/glowpadview_glow_radius"
             prvandroid:pointDrawable="@*android:drawable/ic_lockscreen_glowdot"/>
 
-        <Button
-            android:id="@+id/emergency_call_button"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/keyguard_selector_fade_container"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/lockscreen_emergency_button"
-            android:text="@string/kg_emergency_call_label"
-            style="?android:attr/buttonBarButtonStyle"
-            android:drawablePadding="8dip"
-            android:layout_alignParentBottom="true"
-            />
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:layout_alignParentBottom="true">
 
-        <com.android.internal.policy.impl.keyguard.CarrierText
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_above="@id/emergency_call_button"
-            android:singleLine="true"
-            android:ellipsize="marquee"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
-            android:textColor="?android:attr/textColorSecondary"
-            />
+            <com.android.internal.policy.impl.keyguard.CarrierText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:ellipsize="marquee"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textSize="@*android:dimen/keyguard_lockscreen_status_line_font_size"
+                android:textColor="?android:attr/textColorSecondary"
+                />
+
+            <com.android.internal.policy.impl.keyguard.EmergencyButton
+                android:id="@+id/emergency_call_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@*android:drawable/lockscreen_emergency_button"
+                android:text="@string/kg_emergency_call_label"
+                style="?android:attr/buttonBarButtonStyle"
+                android:drawablePadding="8dip" />
+
+        </LinearLayout>
 
     </RelativeLayout>
 
