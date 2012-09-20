@@ -20289,6 +20289,8 @@ package android.service.dreams {
     method public void setContentView(android.view.View);
     method public void setContentView(android.view.View, android.view.ViewGroup.LayoutParams);
     method public void setInteractive(boolean);
+    field public static final java.lang.String ACTION_DREAMING_STARTED = "android.intent.action.DREAMING_STARTED";
+    field public static final java.lang.String ACTION_DREAMING_STOPPED = "android.intent.action.DREAMING_STOPPED";
     field public static final java.lang.String METADATA_NAME_CONFIG_ACTIVITY = "android.service.dreams.config_activity";
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.dreams.Dream";
   }
