@@ -117,8 +117,8 @@ public interface IActivityManager extends IInterface {
     public void reportThumbnail(IBinder token,
             Bitmap thumbnail, CharSequence description) throws RemoteException;
     public ContentProviderHolder getContentProvider(IApplicationThread caller,
-            String name, boolean stable) throws RemoteException;
-    public ContentProviderHolder getContentProviderExternal(String name, IBinder token)
+            String name, int userId, boolean stable) throws RemoteException;
+    public ContentProviderHolder getContentProviderExternal(String name, int userId, IBinder token)
             throws RemoteException;
     public void removeContentProvider(IBinder connection, boolean stable) throws RemoteException;
     public void removeContentProviderExternal(String name, IBinder token) throws RemoteException;
