@@ -151,6 +151,9 @@ public class Time {
     private static String sDateTimeFormat;
     private static String sAm;
     private static String sPm;
+    private static char sZeroDigit;
+
+    // Referenced by native code.
     private static String sDateCommand = "%a %b %e %H:%M:%S %Z %Y";
 
     /**
@@ -323,6 +326,7 @@ public class Time {
 
                 sAm = localeData.amPm[0];
                 sPm = localeData.amPm[1];
+                sZeroDigit = localeData.zeroDigit;
 
                 sShortMonths = localeData.shortMonthNames;
                 sLongMonths = localeData.longMonthNames;
@@ -338,11 +342,31 @@ public class Time {
                 sLocale = locale;
             }
 
-            return format1(format);
+            String result = format1(format);
+            if (sZeroDigit != '0') {
+                result = localizeDigits(result);
+            }
+            return result;
         }
     }
 
     native private String format1(String format);
+
+    // TODO: unify this with java.util.Formatter's copy.
+    private String localizeDigits(String s) {
+        int length = s.length();
+        int offsetToLocalizedDigits = sZeroDigit - '0';
+        StringBuilder result = new StringBuilder(length);
+        for (int i = 0; i < length; ++i) {
+            char ch = s.charAt(i);
+            if (ch >= '0' && ch <= '9') {
+                ch += offsetToLocalizedDigits;
+            }
+            result.append(ch);
+        }
+        return result.toString();
+    }
+
 
     /**
      * Return the current time in YYYYMMDDTHHMMSS<tz> format
@@ -670,7 +694,7 @@ public class Time {
             int minutes = (offset % 3600) / 60;
             int hours = offset / 3600;
 
-            return String.format("%s%s%02d:%02d", base, sign, hours, minutes);
+            return String.format(Locale.US, "%s%s%02d:%02d", base, sign, hours, minutes);
         }
     }
 
