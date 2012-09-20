@@ -94,6 +94,9 @@ public class RecentsActivity extends Activity {
     @Override
     public void onResume() {
         mForeground = true;
+        if (mRecentsPanel != null) {
+            mRecentsPanel.refreshViews();
+        }
         super.onResume();
     }
 
@@ -186,4 +189,7 @@ public class RecentsActivity extends Activity {
         }
     }
 
+    boolean isForeground() {
+        return mForeground;
+    }
 }
