@@ -1661,7 +1661,9 @@
   </plurals>
     <!-- no translation found for wifi_available_sign_in (4029489716605255386) -->
     <skip />
-    <!-- no translation found for wifi_available_sign_in_detailed (6797764740339907572) -->
+    <!-- no translation found for network_available_sign_in (8495155593358054676) -->
+    <skip />
+    <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <!-- no translation found for wifi_watchdog_network_disabled (7904214231651546347) -->
     <skip />
@@ -1692,6 +1694,8 @@
     <!-- no translation found for wifi_p2p_enter_pin_message (5920929550367828970) -->
     <skip />
     <!-- no translation found for wifi_p2p_show_pin_message (8530563323880921094) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_frequency_conflict_message (7363907213787469151) -->
     <skip />
     <string name="select_character" msgid="3365550120617701745">"Inserir in caracter"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Trametter messadis SMS"</string>
