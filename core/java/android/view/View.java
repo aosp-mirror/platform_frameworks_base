@@ -13856,6 +13856,25 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Return true if o is a ViewGroup that is laying out using optical bounds.
+     * @hide
+     */
+    public static boolean isLayoutModeOptical(Object o) {
+        return o instanceof ViewGroup && ((ViewGroup) o).isLayoutModeOptical();
+    }
+
+    private boolean setOpticalFrame(int left, int top, int right, int bottom) {
+        Insets parentInsets = mParent instanceof View ?
+                ((View) mParent).getOpticalInsets() : Insets.NONE;
+        Insets childInsets = getOpticalInsets();
+        return setFrame(
+                left   + parentInsets.left - childInsets.left,
+                top    + parentInsets.top  - childInsets.top,
+                right  + parentInsets.left + childInsets.right,
+                bottom + parentInsets.top  + childInsets.bottom);
+    }
+
+    /**
      * Assign a size and position to a view and all of its
      * descendants
      *
@@ -13881,7 +13900,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         int oldT = mTop;
         int oldB = mBottom;
         int oldR = mRight;
-        boolean changed = setFrame(l, t, r, b);
+        boolean changed = isLayoutModeOptical(mParent) ?
+                setOpticalFrame(l, t, r, b) : setFrame(l, t, r, b);
         if (changed || (mPrivateFlags & PFLAG_LAYOUT_REQUIRED) == PFLAG_LAYOUT_REQUIRED) {
             onLayout(changed, l, t, r, b);
             mPrivateFlags &= ~PFLAG_LAYOUT_REQUIRED;
@@ -14681,21 +14701,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return (mUserPaddingStart != UNDEFINED_PADDING || mUserPaddingEnd != UNDEFINED_PADDING);
     }
 
-    /**
-     * @hide
-     */
-    public Insets getOpticalInsets() {
-        if (mLayoutInsets == null) {
-            mLayoutInsets = (mBackground == null) ? Insets.NONE : mBackground.getLayoutInsets();
-        }
-        return mLayoutInsets;
+    Insets computeOpticalInsets() {
+        return (mBackground == null) ? Insets.NONE : mBackground.getOpticalInsets();
     }
 
     /**
      * @hide
      */
-    public void setLayoutInsets(Insets layoutInsets) {
-        mLayoutInsets = layoutInsets;
+    public Insets getOpticalInsets() {
+        if (mLayoutInsets == null) {
+            mLayoutInsets = computeOpticalInsets();
+        }
+        return mLayoutInsets;
     }
 
     /**
@@ -15372,6 +15389,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #onMeasure(int, int)
      */
     public final void measure(int widthMeasureSpec, int heightMeasureSpec) {
+        boolean optical = isLayoutModeOptical(this);
+        if (optical != isLayoutModeOptical(mParent)) {
+            Insets insets = getOpticalInsets();
+            int oWidth  = insets.left + insets.right;
+            int oHeight = insets.top  + insets.bottom;
+            widthMeasureSpec  = MeasureSpec.adjust(widthMeasureSpec,  optical ? -oWidth  : oWidth);
+            heightMeasureSpec = MeasureSpec.adjust(heightMeasureSpec, optical ? -oHeight : oHeight);
+        }
         if ((mPrivateFlags & PFLAG_FORCE_LAYOUT) == PFLAG_FORCE_LAYOUT ||
                 widthMeasureSpec != mOldWidthMeasureSpec ||
                 heightMeasureSpec != mOldHeightMeasureSpec) {
@@ -15465,6 +15490,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link #MEASURED_STATE_TOO_SMALL}.
      */
     protected final void setMeasuredDimension(int measuredWidth, int measuredHeight) {
+        boolean optical = isLayoutModeOptical(this);
+        if (optical != isLayoutModeOptical(mParent)) {
+            Insets insets = getOpticalInsets();
+            int opticalWidth  = insets.left + insets.right;
+            int opticalHeight = insets.top  + insets.bottom;
+
+            measuredWidth  += optical ? opticalWidth  : -opticalWidth;
+            measuredHeight += optical ? opticalHeight : -opticalHeight;
+        }
         mMeasuredWidth = measuredWidth;
         mMeasuredHeight = measuredHeight;
 
@@ -17123,6 +17157,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          */
         public static int getSize(int measureSpec) {
             return (measureSpec & ~MODE_MASK);
+        }
+
+        static int adjust(int measureSpec, int delta) {
+            return makeMeasureSpec(getSize(measureSpec + delta), getMode(measureSpec));
         }
 
         /**

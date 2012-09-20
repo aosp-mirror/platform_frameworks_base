@@ -26,6 +26,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.Canvas;
+import android.graphics.Insets;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
@@ -4214,6 +4215,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /////////////////////////////////////////////////////////////////////////
 
+    private int getBoxHeight(Layout l) {
+        Insets opticalInsets = isLayoutModeOptical(mParent) ? getOpticalInsets() : Insets.NONE;
+        int padding = (l == mHintLayout) ?
+                getCompoundPaddingTop() + getCompoundPaddingBottom() :
+                getExtendedPaddingTop() + getExtendedPaddingBottom();
+        return getMeasuredHeight() - padding + opticalInsets.top + opticalInsets.bottom;
+    }
+
     int getVerticalOffset(boolean forceNormal) {
         int voffset = 0;
         final int gravity = mGravity & Gravity.VERTICAL_GRAVITY_MASK;
@@ -4224,15 +4233,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         if (gravity != Gravity.TOP) {
-            int boxht;
-
-            if (l == mHintLayout) {
-                boxht = getMeasuredHeight() - getCompoundPaddingTop() -
-                        getCompoundPaddingBottom();
-            } else {
-                boxht = getMeasuredHeight() - getExtendedPaddingTop() -
-                        getExtendedPaddingBottom();
-            }
+            int boxht = getBoxHeight(l);
             int textht = l.getHeight();
 
             if (textht < boxht) {
@@ -4255,15 +4256,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         if (gravity != Gravity.BOTTOM) {
-            int boxht;
-
-            if (l == mHintLayout) {
-                boxht = getMeasuredHeight() - getCompoundPaddingTop() -
-                        getCompoundPaddingBottom();
-            } else {
-                boxht = getMeasuredHeight() - getExtendedPaddingTop() -
-                        getExtendedPaddingBottom();
-            }
+            int boxht = getBoxHeight(l);
             int textht = l.getHeight();
 
             if (textht < boxht) {
@@ -4997,6 +4990,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         int voffset = 0;
         if ((mGravity & Gravity.VERTICAL_GRAVITY_MASK) != Gravity.TOP) {
             voffset = getVerticalOffset(true);
+        }
+
+        if (isLayoutModeOptical(mParent)) {
+            voffset -= getOpticalInsets().top;
         }
 
         return getExtendedPaddingTop() + voffset + mLayout.getLineBaseline(0);

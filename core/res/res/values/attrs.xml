@@ -2244,6 +2244,14 @@
              See {@link android.view.ViewGroup#setMotionEventSplittingEnabled(boolean)}
              for more information. -->
         <attr name="splitMotionEvents" format="boolean" />
+
+        <!-- Defines the layout mode of this ViewGroup. -->
+        <attr name="layoutMode">
+            <!-- Use the children's clip bounds when laying out this container. -->
+            <enum name="clipBounds" value="0" />
+            <!-- Use the children's optical bounds when laying out this container. -->
+            <enum name="opticalBounds" value="1" />
+        </attr>
     </declare-styleable>
 
     <!-- A {@link android.view.ViewStub} lets you lazily include other XML layouts

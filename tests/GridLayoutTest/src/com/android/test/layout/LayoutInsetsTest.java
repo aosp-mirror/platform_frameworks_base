@@ -10,9 +10,8 @@ import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.TextView;
 
-import static android.widget.GridLayout.ALIGN_BOUNDS;
 import static android.widget.GridLayout.LayoutParams;
-import static android.widget.GridLayout.OPTICAL_BOUNDS;
+import static android.widget.GridLayout.LAYOUT_MODE_OPTICAL_BOUNDS;
 
 public class LayoutInsetsTest extends Activity {
     static int[] GRAVITIES = {Gravity.LEFT, Gravity.LEFT, Gravity.CENTER_HORIZONTAL, Gravity.RIGHT, Gravity.RIGHT};
@@ -23,7 +22,7 @@ public class LayoutInsetsTest extends Activity {
         GridLayout p = new GridLayout(context);
         p.setUseDefaultMargins(true);
         //p.setAlignmentMode(ALIGN_BOUNDS);
-        p.setLayoutMode(OPTICAL_BOUNDS);
+        p.setLayoutMode(LAYOUT_MODE_OPTICAL_BOUNDS);
 
         p.setColumnCount(N);
 
