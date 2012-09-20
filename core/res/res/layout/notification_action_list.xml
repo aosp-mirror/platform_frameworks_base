@@ -21,6 +21,7 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:visibility="gone"
+    android:layout_marginBottom="8dp"
     android:showDividers="middle"
     android:divider="?android:attr/listDivider"
     android:dividerPadding="12dp"
