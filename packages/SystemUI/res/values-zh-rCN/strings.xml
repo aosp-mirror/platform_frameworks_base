@@ -60,7 +60,7 @@
     <string name="always_use_accessory" msgid="1210954576979621596">"默认情况下用于该 USB 配件"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"允许 USB 调试吗？"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"这台计算机的 RSA 密钥指纹如下："\n"<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
-    <string name="usb_debugging_always" msgid="303335496705863070">"一律允许通过这台计算机进行"</string>
+    <string name="usb_debugging_always" msgid="303335496705863070">"一律允许使用这台计算机进行调试"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"缩放以填满屏幕"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"拉伸以填满屏幕"</string>
     <string name="compat_mode_help_header" msgid="7969493989397529910">"兼容性缩放"</string>
