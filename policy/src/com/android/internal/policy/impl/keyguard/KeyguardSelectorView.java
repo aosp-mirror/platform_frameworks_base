@@ -18,6 +18,7 @@ package com.android.internal.policy.impl.keyguard;
 import android.animation.ObjectAnimator;
 import android.app.ActivityManagerNative;
 import android.app.SearchManager;
+import android.app.admin.DevicePolicyManager;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
@@ -192,8 +193,12 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
 
     private void updateTargets() {
         int currentUserHandle = mLockPatternUtils.getCurrentUser();
-        boolean disabledByAdmin = mLockPatternUtils.getDevicePolicyManager()
-                .getCameraDisabled(null, currentUserHandle);
+        DevicePolicyManager dpm = mLockPatternUtils.getDevicePolicyManager();
+        int disabledFeatures = dpm.getKeyguardDisabledFeatures(null, currentUserHandle);
+        boolean secureCameraDisabled = mLockPatternUtils.isSecure()
+                && (disabledFeatures & DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA) != 0;
+        boolean cameraDisabledByAdmin = dpm.getCameraDisabled(null, currentUserHandle)
+                || secureCameraDisabled;
         final KeyguardUpdateMonitor monitor = KeyguardUpdateMonitor.getInstance(getContext());
         boolean disabledBySimState = monitor.isSimLocked();
         boolean cameraTargetPresent =
@@ -201,7 +206,7 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
         boolean searchTargetPresent =
             isTargetPresent(com.android.internal.R.drawable.ic_action_assist_generic);
 
-        if (disabledByAdmin) {
+        if (cameraDisabledByAdmin) {
             Log.v(TAG, "Camera disabled by Device Policy");
         } else if (disabledBySimState) {
             Log.v(TAG, "Camera disabled by Sim State");
@@ -209,7 +214,7 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
         boolean searchActionAvailable =
                 ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
                 .getAssistIntent(mContext, UserHandle.USER_CURRENT) != null;
-        mCameraDisabled = disabledByAdmin || disabledBySimState || !cameraTargetPresent;
+        mCameraDisabled = cameraDisabledByAdmin || disabledBySimState || !cameraTargetPresent;
         mSearchDisabled = disabledBySimState || !searchActionAvailable || !searchTargetPresent;
         updateResources();
     }

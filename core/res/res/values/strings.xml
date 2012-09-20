@@ -878,7 +878,7 @@
     <!-- [CHAR LIMIT=NONE] Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_freezeScreen">Allows the application to temporarily freeze
         the screen for a full-screen transition.</string>
-    
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_injectEvents">press keys and control buttons</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -1810,9 +1810,9 @@
     <!-- Description of policy access to disable all device cameras [CHAR LIMIT=110]-->
     <string name="policydesc_disableCamera">Prevent use of all device cameras.</string>
     <!-- Title of policy access to disable all device cameras [CHAR LIMIT=30]-->
-    <string name="policylab_disableKeyguardWidgets">Disable widgets on keyguard</string>
+    <string name="policylab_disableKeyguardFeatures">Disable features in keyguard</string>
     <!-- Description of policy access to disable all device cameras [CHAR LIMIT=110]-->
-    <string name="policydesc_disableKeyguardWidgets">Prevent use of some or all widgets on keyguard.</string>
+    <string name="policydesc_disableKeyguardFeatures">Prevent use of some features in keyguard.</string>
 
     <!-- The order of these is important, don't reorder without changing Contacts.java --> <skip />
     <!-- Phone number types from android.provider.Contacts. This could be used when adding a new phone number for a contact, for example. -->

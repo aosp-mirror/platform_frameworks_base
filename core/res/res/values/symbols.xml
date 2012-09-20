@@ -630,7 +630,7 @@
   <java-symbol type="string" name="policydesc_setGlobalProxy" />
   <java-symbol type="string" name="policydesc_watchLogin" />
   <java-symbol type="string" name="policydesc_wipeData" />
-  <java-symbol type="string" name="policydesc_disableKeyguardWidgets" />
+  <java-symbol type="string" name="policydesc_disableKeyguardFeatures" />
   <java-symbol type="string" name="policylab_disableCamera" />
   <java-symbol type="string" name="policylab_encryptedStorage" />
   <java-symbol type="string" name="policylab_expirePassword" />
@@ -640,7 +640,7 @@
   <java-symbol type="string" name="policylab_setGlobalProxy" />
   <java-symbol type="string" name="policylab_watchLogin" />
   <java-symbol type="string" name="policylab_wipeData" />
-  <java-symbol type="string" name="policylab_disableKeyguardWidgets" />
+  <java-symbol type="string" name="policylab_disableKeyguardFeatures" />
   <java-symbol type="string" name="postalTypeCustom" />
   <java-symbol type="string" name="postalTypeHome" />
   <java-symbol type="string" name="postalTypeOther" />

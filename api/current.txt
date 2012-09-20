@@ -4207,7 +4207,7 @@ package android.app.admin {
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int USES_ENCRYPTED_STORAGE = 7; // 0x7
     field public static final int USES_POLICY_DISABLE_CAMERA = 8; // 0x8
-    field public static final int USES_POLICY_DISABLE_KEYGUARD_WIDGETS = 9; // 0x9
+    field public static final int USES_POLICY_DISABLE_KEYGUARD_FEATURES = 9; // 0x9
     field public static final int USES_POLICY_EXPIRE_PASSWORD = 6; // 0x6
     field public static final int USES_POLICY_FORCE_LOCK = 3; // 0x3
     field public static final int USES_POLICY_LIMIT_PASSWORD = 0; // 0x0
@@ -4243,7 +4243,7 @@ package android.app.admin {
     method public java.util.List<android.content.ComponentName> getActiveAdmins();
     method public boolean getCameraDisabled(android.content.ComponentName);
     method public int getCurrentFailedPasswordAttempts();
-    method public int getKeyguardWidgetsDisabled(android.content.ComponentName);
+    method public int getKeyguardDisabledFeatures(android.content.ComponentName);
     method public int getMaximumFailedPasswordsForWipe(android.content.ComponentName);
     method public long getMaximumTimeToLock(android.content.ComponentName);
     method public long getPasswordExpiration(android.content.ComponentName);
@@ -4267,7 +4267,7 @@ package android.app.admin {
     method public void removeActiveAdmin(android.content.ComponentName);
     method public boolean resetPassword(java.lang.String, int);
     method public void setCameraDisabled(android.content.ComponentName, boolean);
-    method public void setKeyguardWidgetsDisabled(android.content.ComponentName, int);
+    method public void setKeyguardDisabledFeatures(android.content.ComponentName, int);
     method public void setMaximumFailedPasswordsForWipe(android.content.ComponentName, int);
     method public void setMaximumTimeToLock(android.content.ComponentName, long);
     method public void setPasswordExpirationTimeout(android.content.ComponentName, long);
@@ -4291,8 +4291,10 @@ package android.app.admin {
     field public static final int ENCRYPTION_STATUS_UNSUPPORTED = 0; // 0x0
     field public static final java.lang.String EXTRA_ADD_EXPLANATION = "android.app.extra.ADD_EXPLANATION";
     field public static final java.lang.String EXTRA_DEVICE_ADMIN = "android.app.extra.DEVICE_ADMIN";
-    field public static final int KEYGUARD_DISABLE_WIDGETS_ALL = 2147483647; // 0x7fffffff
-    field public static final int KEYGUARD_DISABLE_WIDGETS_NONE = 0; // 0x0
+    field public static final int KEYGUARD_DISABLE_FEATURES_ALL = 2147483647; // 0x7fffffff
+    field public static final int KEYGUARD_DISABLE_FEATURES_NONE = 0; // 0x0
+    field public static final int KEYGUARD_DISABLE_SECURE_CAMERA = 2; // 0x2
+    field public static final int KEYGUARD_DISABLE_WIDGETS_ALL = 1; // 0x1
     field public static final int PASSWORD_QUALITY_ALPHABETIC = 262144; // 0x40000
     field public static final int PASSWORD_QUALITY_ALPHANUMERIC = 327680; // 0x50000
     field public static final int PASSWORD_QUALITY_BIOMETRIC_WEAK = 32768; // 0x8000
