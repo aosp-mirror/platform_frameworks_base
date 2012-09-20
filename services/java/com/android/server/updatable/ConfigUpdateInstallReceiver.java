@@ -89,8 +89,7 @@ public class ConfigUpdateInstallReceiver extends BroadcastReceiver {
                     // get the hash of the currently used value
                     String currentHash = getCurrentHash(getCurrentContent());
                     if (!verifyVersion(currentVersion, altVersion)) {
-                        EventLog.writeEvent(EventLogTags.CONFIG_INSTALL_FAILED,
-                                            "New version is not greater than current version");
+                        Slog.i(TAG, "Not installing, new version is <= current version");
                     } else if (!verifyPreviousHash(currentHash, altRequiredHash)) {
                         EventLog.writeEvent(EventLogTags.CONFIG_INSTALL_FAILED,
                                             "Current hash did not match required value");
