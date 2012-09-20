@@ -179,10 +179,4 @@
     <string name="quick_settings_wifi_display_no_connection_label" msgid="6255615315258869136">"Wi-Fiディスプレイ接続なし"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"画面の明るさ"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"自動"</string>
-    <string name="wifi_display_scan" msgid="8453135922233546097">"スキャン"</string>
-    <string name="wifi_display_disconnect" msgid="5450214362789378584">"切断"</string>
-    <string name="wifi_display_dialog_title" msgid="2817993038700218900">"Wi-Fiディスプレイ"</string>
-    <string name="wifi_display_state_available" msgid="980373281442607096">"使用可能"</string>
-    <string name="wifi_display_state_connecting" msgid="1677010908036241940">"接続中"</string>
-    <string name="wifi_display_state_connected" msgid="9154375061719151149">"接続"</string>
 </resources>
