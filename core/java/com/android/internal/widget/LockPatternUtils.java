@@ -1112,8 +1112,13 @@ public class LockPatternUtils {
      *  {@link TelephonyManager#CALL_STATE_RINGING}
      *  {@link TelephonyManager#CALL_STATE_OFFHOOK}
      * @param shown indicates whether the given screen wants the emergency button to show at all
+     * @param button
+     * @param phoneState
+     * @param shown shown if true; hidden if false
+     * @param upperCase if true, converts button label string to upper case
      */
-    public void updateEmergencyCallButtonState(Button button, int  phoneState, boolean shown) {
+    public void updateEmergencyCallButtonState(Button button, int  phoneState, boolean shown,
+            boolean upperCase, boolean showIcon) {
         if (isEmergencyCallCapable() && shown) {
             button.setVisibility(View.VISIBLE);
         } else {
@@ -1125,14 +1130,30 @@ public class LockPatternUtils {
         if (phoneState == TelephonyManager.CALL_STATE_OFFHOOK) {
             // show "return to call" text and show phone icon
             textId = R.string.lockscreen_return_to_call;
-            int phoneCallIcon = R.drawable.stat_sys_phone_call;
+            int phoneCallIcon = showIcon ? R.drawable.stat_sys_phone_call : 0;
             button.setCompoundDrawablesWithIntrinsicBounds(phoneCallIcon, 0, 0, 0);
         } else {
             textId = R.string.lockscreen_emergency_call;
-            int emergencyIcon = R.drawable.ic_emergency;
+            int emergencyIcon = showIcon ? R.drawable.ic_emergency : 0;
             button.setCompoundDrawablesWithIntrinsicBounds(emergencyIcon, 0, 0, 0);
         }
-        button.setText(textId);
+        if (upperCase) {
+            CharSequence original = mContext.getResources().getText(textId);
+            String upper = original != null ? original.toString().toUpperCase() : null;
+            button.setText(upper);
+        } else {
+            button.setText(textId);
+        }
+    }
+
+    /**
+     * @deprecated
+     * @param button
+     * @param phoneState
+     * @param shown
+     */
+    public void updateEmergencyCallButtonState(Button button, int  phoneState, boolean shown) {
+        updateEmergencyCallButtonState(button, phoneState, shown, false, true);
     }
 
     /**

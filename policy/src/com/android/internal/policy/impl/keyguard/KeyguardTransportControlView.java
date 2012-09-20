@@ -46,10 +46,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-
 import com.android.internal.R;
-import com.android.internal.policy.impl.keyguard.KeyguardHostView.TransportCallback;
-
 /**
  * This is the widget responsible for showing music controls in keyguard.
  */
@@ -125,7 +122,7 @@ public class KeyguardTransportControlView extends KeyguardWidgetFrame implements
             }
         }
     };
-    private TransportCallback mTransportCallback;
+    private KeyguardHostView.TransportCallback mTransportCallback;
 
     /**
      * This class is required to have weak linkage to the current TransportControlView
@@ -528,7 +525,7 @@ public class KeyguardTransportControlView extends KeyguardWidgetFrame implements
         }
     }
 
-    public void setKeyguardCallback(TransportCallback transportCallback) {
+    public void setKeyguardCallback(KeyguardHostView.TransportCallback transportCallback) {
         mTransportCallback = transportCallback;
     }
 }
