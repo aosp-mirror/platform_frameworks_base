@@ -309,14 +309,10 @@
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Consente all\'applicazione di controllare il numero massimo di processi che verranno eseguiti. Mai necessaria per le applicazioni normali."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"chiusura forzata applicazioni di background"</string>
     <string name="permdesc_setAlwaysFinish" msgid="7471310652868841499">"Consente all\'applicazione di controllare se le attività sono sempre terminate non appena passano in background. Mai necessaria per le applicazioni normali."</string>
-    <!-- no translation found for permlab_batteryStats (2789610673514103364) -->
-    <skip />
-    <!-- no translation found for permdesc_batteryStats (5897346582882915114) -->
-    <skip />
-    <!-- no translation found for permlab_updateBatteryStats (3719689764536379557) -->
-    <skip />
-    <!-- no translation found for permdesc_updateBatteryStats (6862817857178025002) -->
-    <skip />
+    <string name="permlab_batteryStats" msgid="2789610673514103364">"lettura statistiche batteria"</string>
+    <string name="permdesc_batteryStats" msgid="5897346582882915114">"Consente a un\'applicazione di leggere i dati di utilizzo della batteria di basso livello correnti. Potrebbe consentire all\'applicazione di trovare informazioni dettagliate sulle applicazioni che utilizzi."</string>
+    <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"modifica statistiche batteria"</string>
+    <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"Consente all\'applicazione di modificare le statistiche raccolte sulla batteria. Da non usare per normali applicazioni."</string>
     <string name="permlab_backup" msgid="470013022865453920">"controllo del backup di sistema e ripristino"</string>
     <string name="permdesc_backup" msgid="6912230525140589891">"Consente all\'applicazione di controllare il meccanismo di backup e di ripristino del sistema. Da non usare per normali applicazioni."</string>
     <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"conferma di un\'operazione completa di backup o di ripristino"</string>
@@ -324,8 +320,7 @@
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"visualizzazione finestre non autorizzate"</string>
     <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"Consente all\'applicazione di creare finestre destinate all\'uso da parte dell\'interfaccia utente del sistema interno. Da non usare per normali applicazioni."</string>
     <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"disegno su altre applicazioni"</string>
-    <!-- no translation found for permdesc_systemAlertWindow (8584678381972820118) -->
-    <skip />
+    <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Consente all\'applicazione di spostarsi sopra ad altre applicazioni o parti dell\'interfaccia utente. Potrebbe interferire con il tuo utilizzo dell\'interfaccia in qualsiasi applicazione o cambiare ciò che credi di vedere in altre applicazioni."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"modifica velocità di animazione globale"</string>
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Consente all\'applicazione di modificare la velocità di animazione globale (animazioni più veloci o più lente) in qualsiasi momento."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"gestione token applicazioni"</string>
@@ -373,10 +368,8 @@
     <string name="permlab_installPackages" msgid="2199128482820306924">"installazione diretta di applicazioni"</string>
     <string name="permdesc_installPackages" msgid="5628530972548071284">"Consente all\'applicazione da installare pacchetti Android nuovi o aggiornati. Le applicazioni dannose potrebbero farne uso per aggiungere nuove applicazioni con autorizzazioni arbitrariamente importanti."</string>
     <string name="permlab_clearAppCache" msgid="7487279391723526815">"eliminazione di tutti i dati della cache applicazioni"</string>
-    <!-- no translation found for permdesc_clearAppCache (8974640871945434565) -->
-    <skip />
-    <!-- no translation found for permdesc_clearAppCache (2459441021956436779) -->
-    <skip />
+    <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"Consente all\'applicazione di liberare memoria sul tablet eliminando file nelle directory della cache di altre applicazioni. Altre applicazioni potrebbero avviarsi più lentamente perché devono recuperare di nuovo i loro dati."</string>
+    <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"Consente all\'applicazione di liberare memoria sul telefono eliminando file nelle directory della cache di altre applicazioni. Altre applicazioni potrebbero avviarsi più lentamente perché devono recuperare di nuovo i loro dati."</string>
     <string name="permlab_movePackage" msgid="3289890271645921411">"spostamento delle risorse dell\'applicazione"</string>
     <string name="permdesc_movePackage" msgid="319562217778244524">"Consente all\'applicazione di spostare le risorse delle applicazioni da supporti interni a supporti esterni e viceversa."</string>
     <string name="permlab_readLogs" msgid="6615778543198967614">"Lettura dati di registro sensibili"</string>
@@ -437,14 +430,10 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="5945166642335800763">"Consente all\'applicazione di accedere a ulteriori comandi del fornitore di posizione. Ciò potrebbe consentire all\'applicazione di interferire con il funzionamento del GPS o di altre fonti di localizzazione."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"autorizzazione a installare un provider di localizzazione"</string>
     <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"Crea fonti di localizzazione fittizie per i test o installa un nuovo fornitore di posizione. Ciò consente all\'applicazione di ignorare la posizione e/o lo stato restituito da altre fonti di localizzazione, come il GPS o fornitori di posizione."</string>
-    <!-- no translation found for permlab_accessFineLocation (1191898061965273372) -->
-    <skip />
-    <!-- no translation found for permdesc_accessFineLocation (5295047563564981250) -->
-    <skip />
-    <!-- no translation found for permlab_accessCoarseLocation (4887895362354239628) -->
-    <skip />
-    <!-- no translation found for permdesc_accessCoarseLocation (2538200184373302295) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"posizione precisa (GPS e basata sulla rete)"</string>
+    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Consente all\'applicazione di ottenere la tua posizione esatta utilizzando il sistema GPS (Global Positioning System) o fonti di localizzazione delle reti come ripetitori di telefonia mobile e Wi-Fi. Questi servizi di localizzazione devono essere attivi e disponibili sul dispositivo per poter essere utilizzati dall\'applicazione. Le applicazioni potrebbero utilizzare questa autorizzazione per stabilire la tua posizione e potrebbero consumare ulteriore batteria."</string>
+    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"posizione approssimativa (basata sulla rete)"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Consente all\'applicazione di ottenere la tua posizione approssimativa. Questa posizione viene ottenuta da servizi di localizzazione utilizzando fonti di localizzazione delle reti come ripetitori di telefonia mobile e Wi-Fi. Questi servizi di localizzazione devono essere attivi e disponibili sul dispositivo per poter essere utilizzati dall\'applicazione. Le applicazioni potrebbero utilizzare questa autorizzazione per stabilire la tua posizione approssimativa."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"accesso a SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Consente all\'applicazione l\'utilizzo di funzioni di basso livello SurfaceFlinger."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"lettura buffer di frame"</string>
@@ -566,8 +555,7 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"accesso alle impostazioni Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Consente all\'applicazione di configurare il tablet Bluetooth locale e di rilevare ed effettuare l\'accoppiamento con dispositivi remoti."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Consente all\'applicazione di configurare il telefono Bluetooth locale e di rilevare ed effettuare l\'accoppiamento con dispositivi remoti."</string>
-    <!-- no translation found for permlab_accessWimaxState (4195907010610205703) -->
-    <skip />
+    <string name="permlab_accessWimaxState" msgid="4195907010610205703">"connessione e disconnessione da WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Consente all\'applicazione di determinare se WiMAX è abilitato e informazioni su eventuali reti WiMAX che sono connesse."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Modifica stato WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Consente all\'applicazione di connettere/disconnettere il tablet dalle reti WiMAX."</string>
@@ -591,8 +579,7 @@
     <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Consente all\'applicazione di modificare i feed attualmente sincronizzati. Le applicazioni dannose potrebbero modificare i tuoi feed sincronizzati."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"lettura termini aggiunti al dizionario"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Consente all\'applicazione di leggere tutte le parole, le frasi e i nomi che l\'utente potrebbe aver memorizzato nel dizionario utente."</string>
-    <!-- no translation found for permlab_writeDictionary (2183110402314441106) -->
-    <skip />
+    <string name="permlab_writeDictionary" msgid="2183110402314441106">"aggiunta di parole al dizionario definito dall\'utente"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Consente all\'applicazione di scrivere nuove parole nel dizionario utente."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"test dell\'accesso all\'archivio protetto"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"test dell\'accesso all\'archivio protetto"</string>
@@ -1111,22 +1098,14 @@
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; sta inviando molti SMS. Vuoi consentire all\'applicazione di continuare a inviare messaggi?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"Consenti"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Nega"</string>
-    <!-- no translation found for sms_short_code_confirm_message (1645436466285310855) -->
-    <skip />
-    <!-- no translation found for sms_short_code_details (4992814738863678373) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_details (4291752905667807485) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_allow (4458878637111023413) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_deny (2927389840209170706) -->
-    <skip />
-    <!-- no translation found for sms_short_code_remember_choice (5289538592272218136) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_always_allow (3241181154869493368) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_never_allow (446992765774269673) -->
-    <skip />
+    <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; vorrebbe inviare un messaggio a &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
+    <string name="sms_short_code_details" msgid="4992814738863678373">"Potrebbero essere addebitati dei costi sul tuo account mobile."</string>
+    <string name="sms_premium_short_code_details" msgid="4291752905667807485">"Verranno addebitati dei costi sul tuo account mobile."</string>
+    <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Invia"</string>
+    <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Annulla"</string>
+    <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Memorizza la mia scelta"</string>
+    <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Consenti sempre"</string>
+    <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Non consentire mai"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Scheda SIM rimossa"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"La rete mobile non sarà disponibile finché non eseguirai il riavvio con una scheda SIM valida inserita."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Fine"</string>
@@ -1140,8 +1119,7 @@
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"NUOVA: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"Fornito da <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="no_permissions" msgid="7283357728219338112">"Nessuna autorizzazione richiesta"</string>
-    <!-- no translation found for perm_costs_money (4902470324142151116) -->
-    <skip />
+    <string name="perm_costs_money" msgid="4902470324142151116">"potrebbe comportare dei costi"</string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"Archivio di massa USB"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB collegata"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Ti sei collegato al computer tramite USB. Tocca il pulsante in basso se desideri copiare file tra il computer e l\'archivio USB di Android."</string>
@@ -1427,7 +1405,6 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"<xliff:g id="NUMBER">%d</xliff:g> tentativi errati di sblocco del telefono. Il telefono verrà sottoposto a un ripristino dei dati di fabbrica."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"<xliff:g id="NUMBER_0">%d</xliff:g> tentativi errati di inserimento della sequenza di sblocco. Dopo altri <xliff:g id="NUMBER_1">%d</xliff:g> tentativi falliti, ti verrà chiesto di sbloccare il tablet con un account email."\n\n" Riprova tra <xliff:g id="NUMBER_2">%d</xliff:g> secondi."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"<xliff:g id="NUMBER_0">%d</xliff:g> tentativi errati di inserimento della sequenza di sblocco. Dopo altri <xliff:g id="NUMBER_1">%d</xliff:g> tentativi falliti, ti verrà chiesto di sbloccare il telefono con un account email."\n\n" Riprova tra <xliff:g id="NUMBER_2">%d</xliff:g> secondi."</string>
-    <!-- no translation found for safe_media_volume_warning (7382971871993371648) -->
-    <skip />
+    <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Aumentare il volume oltre il livello di sicurezza?"\n"Ascoltare musica ad alto volume per lunghi periodi potrebbe danneggiare l\'udito."</string>
     <string name="kg_temp_back_string" msgid="5812983904056640466">"&lt;"</string>
 </resources>
