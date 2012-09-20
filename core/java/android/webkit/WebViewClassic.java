@@ -4528,11 +4528,11 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     private void ensureSelectionHandles() {
         if (mSelectHandleCenter == null) {
             mSelectHandleCenter = mContext.getResources().getDrawable(
-                    com.android.internal.R.drawable.text_select_handle_middle);
+                    com.android.internal.R.drawable.text_select_handle_middle).mutate();
             mSelectHandleLeft = mContext.getResources().getDrawable(
-                    com.android.internal.R.drawable.text_select_handle_left);
+                    com.android.internal.R.drawable.text_select_handle_left).mutate();
             mSelectHandleRight = mContext.getResources().getDrawable(
-                    com.android.internal.R.drawable.text_select_handle_right);
+                    com.android.internal.R.drawable.text_select_handle_right).mutate();
             mHandleAlpha.setAlpha(mHandleAlpha.getAlpha());
             mSelectHandleCenterOffset = new Point(0,
                     -mSelectHandleCenter.getIntrinsicHeight());
