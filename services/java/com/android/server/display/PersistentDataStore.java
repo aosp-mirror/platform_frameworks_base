@@ -90,9 +90,13 @@ final class PersistentDataStore {
         if (display != null) {
             loadIfNeeded();
 
+            String alias = null;
             int index = findRememberedWifiDisplay(display.getDeviceAddress());
             if (index >= 0) {
-                return mRememberedWifiDisplays.get(index);
+                alias = mRememberedWifiDisplays.get(index).getDeviceAlias();
+            }
+            if (!Objects.equal(display.getDeviceAlias(), alias)) {
+                return new WifiDisplay(display.getDeviceAddress(), display.getDeviceName(), alias);
             }
         }
         return display;
