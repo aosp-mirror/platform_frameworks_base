@@ -719,7 +719,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         PackageInstalledInfo res = data.res;
 
                         if (res.returnCode == PackageManager.INSTALL_SUCCEEDED) {
-                            res.removedInfo.sendBroadcast(false, true);
+                            res.removedInfo.sendBroadcast(false, true, false);
                             Bundle extras = new Bundle(1);
                             extras.putInt(Intent.EXTRA_UID, res.uid);
                             // Determine the set of users who are adding this
@@ -5386,7 +5386,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (am != null) {
             try {
                 if (userIds == null) {
-                    userIds = sUserManager.getUserIds();
+                    userIds = am.getRunningUserIds();
                 }
                 for (int id : userIds) {
                     final Intent intent = new Intent(action,
@@ -5403,6 +5403,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         uid = UserHandle.getUid(id, UserHandle.getAppId(uid));
                         intent.putExtra(Intent.EXTRA_UID, uid);
                     }
+                    intent.putExtra(Intent.EXTRA_USER_HANDLE, id);
                     intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
                     if (DEBUG_BROADCASTS) {
                         RuntimeException here = new RuntimeException("here");
@@ -8051,18 +8052,23 @@ public class PackageManagerService extends IPackageManager.Stub {
         } catch (RemoteException e) {
         }
 
+        boolean removedForAllUsers = false;
+        boolean systemUpdate = false;
         synchronized (mInstallLock) {
             res = deletePackageLI(packageName,
                     (flags & PackageManager.DELETE_ALL_USERS) != 0
                             ? UserHandle.ALL : new UserHandle(UserHandle.getUserId(uid)),
                     true, flags | REMOVE_CHATTY, info, true);
+            systemUpdate = info.isRemovedPackageSystemUpdate;
+            if (res && !systemUpdate && mPackages.get(packageName) == null) {
+                removedForAllUsers = true;
+            }
         }
 
         if (res) {
-            boolean systemUpdate = info.isRemovedPackageSystemUpdate;
-            info.sendBroadcast(true, systemUpdate);
+            info.sendBroadcast(true, systemUpdate, removedForAllUsers);
 
-            // If the removed package was a system update, the old system packaged
+            // If the removed package was a system update, the old system package
             // was re-enabled; we need to broadcast this information
             if (systemUpdate) {
                 Bundle extras = new Bundle(1);
@@ -8100,13 +8106,14 @@ public class PackageManagerService extends IPackageManager.Stub {
         // Clean up resources deleted packages.
         InstallArgs args = null;
 
-        void sendBroadcast(boolean fullRemove, boolean replacing) {
+        void sendBroadcast(boolean fullRemove, boolean replacing, boolean removedForAllUsers) {
             Bundle extras = new Bundle(1);
             extras.putInt(Intent.EXTRA_UID, removedAppId >= 0 ? removedAppId : uid);
             extras.putBoolean(Intent.EXTRA_DATA_REMOVED, fullRemove);
             if (replacing) {
                 extras.putBoolean(Intent.EXTRA_REPLACING, true);
             }
+            extras.putBoolean(Intent.EXTRA_REMOVED_FOR_ALL_USERS, removedForAllUsers);
             if (removedPackage != null) {
                 sendPackageBroadcast(Intent.ACTION_PACKAGE_REMOVED, removedPackage,
                         extras, null, null, removedUsers);
