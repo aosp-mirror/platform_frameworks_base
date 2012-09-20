@@ -219,7 +219,13 @@ final class ActivityRecord {
         pw.print(prefix); pw.print("frozenBeforeDestroy="); pw.print(frozenBeforeDestroy);
                 pw.print(" thumbnailNeeded="); pw.print(thumbnailNeeded);
                 pw.print(" forceNewConfig="); pw.println(forceNewConfig);
-        pw.print(prefix); pw.print("thumbHolder="); pw.println(thumbHolder);
+        pw.print(prefix); pw.print("thumbHolder: ");
+                pw.print(Integer.toHexString(System.identityHashCode(thumbHolder)));
+                if (thumbHolder != null) {
+                    pw.print(" bm="); pw.print(thumbHolder.lastThumbnail);
+                    pw.print(" desc="); pw.print(thumbHolder.lastDescription);
+                }
+                pw.println();
         if (launchTime != 0 || startTime != 0) {
             pw.print(prefix); pw.print("launchTime=");
                     if (launchTime == 0) pw.print("0");
@@ -674,16 +680,12 @@ final class ActivityRecord {
         }
         if (thumbHolder != null) {
             if (newThumbnail != null) {
+                if (ActivityManagerService.DEBUG_THUMBNAILS) Slog.i(ActivityManagerService.TAG,
+                        "Setting thumbnail of " + this + " holder " + thumbHolder
+                        + " to " + newThumbnail);
                 thumbHolder.lastThumbnail = newThumbnail;
             }
             thumbHolder.lastDescription = description;
-        }
-    }
-
-    void clearThumbnail() {
-        if (thumbHolder != null) {
-            thumbHolder.lastThumbnail = null;
-            thumbHolder.lastDescription = null;
         }
     }
 

@@ -864,7 +864,17 @@ public class ActivityManager {
             return null;
         }
     }
-    
+
+    /** @hide */
+    public Bitmap getTaskTopThumbnail(int id) throws SecurityException {
+        try {
+            return ActivityManagerNative.getDefault().getTaskTopThumbnail(id);
+        } catch (RemoteException e) {
+            // System dead, we will be dead too soon!
+            return null;
+        }
+    }
+
     /**
      * Flag for {@link #moveTaskToFront(int, int)}: also move the "home"
      * activity along with the task, so it is positioned immediately behind

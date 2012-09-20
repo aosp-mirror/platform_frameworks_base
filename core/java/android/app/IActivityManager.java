@@ -104,6 +104,7 @@ public interface IActivityManager extends IInterface {
     public List<ActivityManager.RecentTaskInfo> getRecentTasks(int maxNum,
             int flags, int userId) throws RemoteException;
     public ActivityManager.TaskThumbnails getTaskThumbnails(int taskId) throws RemoteException;
+    public Bitmap getTaskTopThumbnail(int taskId) throws RemoteException;
     public List getServices(int maxNum, int flags) throws RemoteException;
     public List<ActivityManager.ProcessErrorStateInfo> getProcessesInErrorState()
             throws RemoteException;
@@ -548,7 +549,7 @@ public interface IActivityManager extends IInterface {
     int UNBIND_BACKUP_AGENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+91;
     int GET_UID_FOR_INTENT_SENDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+92;
     int HANDLE_INCOMING_USER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+93;
-
+    int GET_TASK_TOP_THUMBNAIL_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+94;
     int KILL_APPLICATION_WITH_APPID_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+95;
     int CLOSE_SYSTEM_DIALOGS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+96;
     int GET_PROCESS_MEMORY_INFO_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+97;
