@@ -23,6 +23,7 @@ import static android.Manifest.permission.MODIFY_NETWORK_ACCOUNTING;
 import static android.Manifest.permission.READ_NETWORK_USAGE_HISTORY;
 import static android.content.Intent.ACTION_SHUTDOWN;
 import static android.content.Intent.ACTION_UID_REMOVED;
+import static android.content.Intent.ACTION_USER_REMOVED;
 import static android.content.Intent.EXTRA_UID;
 import static android.net.ConnectivityManager.ACTION_TETHER_STATE_CHANGED;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION_IMMEDIATE;
@@ -76,6 +77,8 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.net.IConnectivityManager;
 import android.net.INetworkManagementEventObserver;
 import android.net.INetworkStatsService;
@@ -112,6 +115,7 @@ import android.util.Slog;
 import android.util.SparseIntArray;
 import android.util.TrustedTime;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FileRotator;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.EventLogTags;
@@ -122,8 +126,10 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 /**
  * Collect and persist detailed network statistics, and provide this data to
@@ -321,6 +327,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         // listen for uid removal to clean stats
         final IntentFilter removedFilter = new IntentFilter(ACTION_UID_REMOVED);
         mContext.registerReceiver(mRemovedReceiver, removedFilter, null, mHandler);
+
+        // listen for user changes to clean stats
+        final IntentFilter userFilter = new IntentFilter(ACTION_USER_REMOVED);
+        mContext.registerReceiver(mUserReceiver, userFilter, null, mHandler);
 
         // persist stats during clean shutdown
         final IntentFilter shutdownFilter = new IntentFilter(ACTION_SHUTDOWN);
@@ -739,11 +749,34 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         public void onReceive(Context context, Intent intent) {
             // on background handler thread, and UID_REMOVED is protected
             // broadcast.
-            final int uid = intent.getIntExtra(EXTRA_UID, 0);
+
+            final int uid = intent.getIntExtra(EXTRA_UID, -1);
+            if (uid == -1) return;
+
             synchronized (mStatsLock) {
                 mWakeLock.acquire();
                 try {
-                    removeUidLocked(uid);
+                    removeUidsLocked(uid);
+                } finally {
+                    mWakeLock.release();
+                }
+            }
+        }
+    };
+
+    private BroadcastReceiver mUserReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // On background handler thread, and USER_REMOVED is protected
+            // broadcast.
+
+            final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+            if (userId == -1) return;
+
+            synchronized (mStatsLock) {
+                mWakeLock.acquire();
+                try {
+                    removeUserLocked(userId);
                 } finally {
                     mWakeLock.release();
                 }
@@ -1034,15 +1067,37 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     /**
      * Clean up {@link #mUidRecorder} after UID is removed.
      */
-    private void removeUidLocked(int uid) {
-        // perform one last poll before removing
+    private void removeUidsLocked(int... uids) {
+        if (LOGV) Slog.v(TAG, "removeUidsLocked() for UIDs " + Arrays.toString(uids));
+
+        // Perform one last poll before removing
         performPollLocked(FLAG_PERSIST_ALL);
 
-        mUidRecorder.removeUidLocked(uid);
-        mUidTagRecorder.removeUidLocked(uid);
+        mUidRecorder.removeUidsLocked(uids);
+        mUidTagRecorder.removeUidsLocked(uids);
 
-        // clear kernel stats associated with UID
-        resetKernelUidStats(uid);
+        // Clear kernel stats associated with UID
+        for (int uid : uids) {
+            resetKernelUidStats(uid);
+        }
+    }
+
+    /**
+     * Clean up {@link #mUidRecorder} after user is removed.
+     */
+    private void removeUserLocked(int userId) {
+        if (LOGV) Slog.v(TAG, "removeUserLocked() for userId=" + userId);
+
+        // Build list of UIDs that we should clean up
+        int[] uids = new int[0];
+        final List<ApplicationInfo> apps = mContext.getPackageManager().getInstalledApplications(
+                PackageManager.GET_UNINSTALLED_PACKAGES | PackageManager.GET_DISABLED_COMPONENTS);
+        for (ApplicationInfo app : apps) {
+            final int uid = UserHandle.getUid(userId, app.uid);
+            uids = ArrayUtils.appendInt(uids, uid);
+        }
+
+        removeUidsLocked(uids);
     }
 
     @Override
