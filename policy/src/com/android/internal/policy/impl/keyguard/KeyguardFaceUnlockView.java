@@ -23,8 +23,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 
 import com.android.internal.R;
-import com.android.internal.policy.impl.keyguard.BiometricSensorUnlock;
-import com.android.internal.policy.impl.keyguard.FaceUnlock;
+
 import com.android.internal.widget.LockPatternUtils;
 
 public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecurityView {

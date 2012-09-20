@@ -45,13 +45,11 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
     private static final String TAG = "SecuritySelectorView";
     private static final String ASSIST_ICON_METADATA_NAME =
         "com.android.systemui.action_assist_icon";
-    private static final int EMERGENCY_CALL_TIMEOUT = 10000; // screen timeout after starting e.d.
-    static final String ACTION_EMERGENCY_DIAL = "com.android.phone.EmergencyDialer.DIAL";
 
     private KeyguardSecurityCallback mCallback;
     private GlowPadView mGlowPadView;
-    private Button mEmergencyCallButton;
     private ObjectAnimator mAnim;
+    private View mFadeView;
     private boolean mCameraDisabled;
     private boolean mSearchDisabled;
     private LockPatternUtils mLockPatternUtils;
@@ -86,11 +84,11 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
         }
 
         public void onReleased(View v, int handle) {
-            doTransition(mEmergencyCallButton, 1.0f);
+            doTransition(mFadeView, 1.0f);
         }
 
         public void onGrabbed(View v, int handle) {
-            doTransition(mEmergencyCallButton, 0.0f);
+            doTransition(mFadeView, 0.0f);
         }
 
         public void onGrabbedStateChange(View v, int handle) {
@@ -103,18 +101,6 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
 
     };
 
-    private void updateEmergencyCallButton(State simState, int phoneState) {
-        if (mEmergencyCallButton != null) {
-            boolean en = mLockPatternUtils.isEmergencyCallCapable()
-                || (phoneState == TelephonyManager.CALL_STATE_OFFHOOK); // voice call in progress
-            if (en && KeyguardUpdateMonitor.isSimLocked(simState)) {
-                // Some countries can't handle emergency calls while SIM is locked.
-                en = mLockPatternUtils.isEmergencyCallEnabledWhileSimLocked();
-            }
-            mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton, phoneState, en);
-        }
-    }
-
     KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
 
         @Override
@@ -124,15 +110,8 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
 
         @Override
         public void onSimStateChanged(State simState) {
-            int phoneState = KeyguardUpdateMonitor.getInstance(mContext).getPhoneState();
-            updateEmergencyCallButton(simState, phoneState);
             updateTargets();
         }
-
-        void onPhoneStateChanged(int phoneState) {
-            State simState = KeyguardUpdateMonitor.getInstance(mContext).getSimState();
-            updateEmergencyCallButton(simState, phoneState);
-        };
     };
 
     public KeyguardSelectorView(Context context) {
@@ -161,29 +140,8 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
         super.onFinishInflate();
         mGlowPadView = (GlowPadView) findViewById(R.id.glow_pad_view);
         mGlowPadView.setOnTriggerListener(mOnTriggerListener);
-        mEmergencyCallButton = (Button) findViewById(R.id.emergency_call_button);
-        mEmergencyCallButton.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                takeEmergencyCallAction();
-            }
-        });
+        mFadeView = (View) findViewById(R.id.keyguard_selector_fade_container);
         updateTargets();
-    }
-
-    /**
-     * Shows the emergency dialer or returns the user to the existing call.
-     */
-    public void takeEmergencyCallAction() {
-        mCallback.userActivity(EMERGENCY_CALL_TIMEOUT);
-        if (TelephonyManager.getDefault().getCallState()
-                == TelephonyManager.CALL_STATE_OFFHOOK) {
-            mLockPatternUtils.resumeCall();
-        } else {
-            Intent intent = new Intent(ACTION_EMERGENCY_DIAL);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                    | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-            getContext().startActivity(intent);
-        }
     }
 
     public boolean isTargetPresent(int resId) {
@@ -242,11 +200,11 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
                 .ic_action_assist_generic, !mSearchDisabled);
     }
 
-    void doTransition(Object v, float to) {
+    void doTransition(View view, float to) {
         if (mAnim != null) {
             mAnim.cancel();
         }
-        mAnim = ObjectAnimator.ofFloat(mEmergencyCallButton, "alpha", to);
+        mAnim = ObjectAnimator.ofFloat(view, "alpha", to);
         mAnim.start();
     }
 

@@ -28,7 +28,6 @@ import android.view.WindowManagerGlobal;
 import android.widget.FrameLayout;
 
 import com.android.internal.R;
-import com.android.internal.policy.impl.keyguard.KeyguardHostView.UserSwitcherCallback;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,7 +38,7 @@ public class KeyguardMultiUserSelectorView extends FrameLayout implements View.O
 
     private KeyguardSubdivisionLayout mUsersGrid;
     private KeyguardMultiUserAvatar mActiveUserAvatar;
-    private UserSwitcherCallback mCallback;
+    private KeyguardHostView.UserSwitcherCallback mCallback;
     private static final int SWITCH_ANIMATION_DURATION = 150;
     private static final int FADE_OUT_ANIMATION_DURATION = 100;
 
@@ -59,7 +58,7 @@ public class KeyguardMultiUserSelectorView extends FrameLayout implements View.O
         init();
     }
 
-    public void setCallback(UserSwitcherCallback callback) {
+    public void setCallback(KeyguardHostView.UserSwitcherCallback callback) {
         mCallback = callback;
     }
 

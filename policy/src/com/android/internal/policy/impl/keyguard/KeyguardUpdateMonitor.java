@@ -238,6 +238,11 @@ public class KeyguardUpdateMonitor {
                 }
             } else if (IccCardConstants.INTENT_VALUE_LOCKED_NETWORK.equals(stateExtra)) {
                 state = IccCardConstants.State.NETWORK_LOCKED;
+            } else if (IccCardConstants.INTENT_VALUE_ICC_LOADED.equals(stateExtra)
+                        || IccCardConstants.INTENT_VALUE_ICC_IMSI.equals(stateExtra)) {
+                // This is required because telephony doesn't return to "READY" after
+                // these state transitions. See bug 7197471.
+                state = IccCardConstants.State.READY;
             } else {
                 state = IccCardConstants.State.UNKNOWN;
             }
