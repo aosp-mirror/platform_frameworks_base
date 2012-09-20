@@ -776,7 +776,7 @@
     <string name="lockscreen_charged" msgid="4938930459620989972">"Opladt."</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Tilslut din oplader."</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Der er ikke noget SIM-kort."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Intet SIM-kort"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Der er ikke noget SIM-kort i tabletcomputeren."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Der er ikke noget SIM-kort i telefonen."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Indsæt et SIM-kort."</string>
