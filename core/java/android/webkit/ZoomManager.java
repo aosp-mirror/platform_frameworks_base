@@ -204,7 +204,7 @@ class ZoomManager {
      */
     private boolean mAllowPanAndScale;
 
-    // use the framework's ScaleGestureDetector to handle multi-touch
+    // use the framework's ScaleGestureDetector to handle scale gestures
     private ScaleGestureDetector mScaleDetector;
     private boolean mPinchToZoomAnimating = false;
 
@@ -776,7 +776,7 @@ class ZoomManager {
         return isZoomAnimating();
     }
 
-    public ScaleGestureDetector getMultiTouchGestureDetector() {
+    public ScaleGestureDetector getScaleGestureDetector() {
         return mScaleDetector;
     }
 
