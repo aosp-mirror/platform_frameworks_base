@@ -1111,7 +1111,15 @@ public interface WindowManagerPolicy {
      * @param attrs The window's LayoutParams.
      * @return Whether magnification can be applied.
      */
-    public boolean canMagnifyWindow(WindowManager.LayoutParams attrs);
+    public boolean canMagnifyWindowLw(WindowManager.LayoutParams attrs);
+
+    /**
+     * Called when the current user changes. Guaranteed to be called before the broadcast
+     * of the new user id is made to all listeners.
+     *
+     * @param newUserId The id of the incoming user.
+     */
+    public void setCurrentUserLw(int newUserId);
 
     /**
      * Print the WindowManagerPolicy's state into the given stream.
