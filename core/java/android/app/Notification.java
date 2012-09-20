@@ -1923,6 +1923,7 @@ public class Notification implements Parcelable
                 contentView.setViewVisibility(rowId, View.GONE);
             }
 
+
             int i=0;
             while (i < mTexts.size() && i < rowIds.length) {
                 CharSequence str = mTexts.get(i);
@@ -1933,11 +1934,11 @@ public class Notification implements Parcelable
                 i++;
             }
 
-            if  (mTexts.size() > rowIds.length) {
-                contentView.setViewVisibility(R.id.inbox_more, View.VISIBLE);
-            } else {
-                contentView.setViewVisibility(R.id.inbox_more, View.GONE);
-            }
+            contentView.setViewVisibility(R.id.inbox_end_pad,
+                    mTexts.size() > 0 ? View.VISIBLE : View.GONE);
+
+            contentView.setViewVisibility(R.id.inbox_more,
+                    mTexts.size() > rowIds.length ? View.VISIBLE : View.GONE);
 
             return contentView;
         }
