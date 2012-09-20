@@ -347,6 +347,20 @@ private:
     void syncState();
 
     /**
+     * Tells the GPU what part of the screen is about to be redrawn.
+     * This method needs to be invoked every time getTargetFbo() is
+     * bound again.
+     */
+    void startTiling();
+    void startTiling(const sp<Snapshot>& snapshot);
+
+    /**
+     * Tells the GPU that we are done drawing the frame or that we
+     * are switching to another render target.
+     */
+    void endTiling();
+
+    /**
      * Saves the current state of the renderer as a new snapshot.
      * The new snapshot is saved in mSnapshot and the previous snapshot
      * is linked from mSnapshot->previous.
@@ -735,6 +749,8 @@ private:
     sp<Snapshot> mFirstSnapshot;
     // Current state
     sp<Snapshot> mSnapshot;
+    // State used to define the clipping region
+    sp<Snapshot> mTilingSnapshot;
 
     // Shaders
     SkiaShader* mShader;
@@ -784,6 +800,8 @@ private:
     GLuint mTextureUnit;
     // Track dirty regions, true by default
     bool mTrackDirtyRegions;
+    // Indicate whether we are drawing an opaque frame
+    bool mOpaqueFrame;
 
     friend class DisplayListRenderer;
 

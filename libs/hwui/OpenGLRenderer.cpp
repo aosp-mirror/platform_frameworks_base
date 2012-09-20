@@ -175,7 +175,7 @@ int OpenGLRenderer::prepareDirty(float left, float top, float right, float botto
     mSaveCount = 1;
 
     mSnapshot->setClip(left, top, right, bottom);
-    mDirtyClip = opaque;
+    mDirtyClip = mOpaqueFrame = opaque;
 
     // If we know that we are going to redraw the entire framebuffer,
     // perform a discard to let the driver know we don't need to preserve
@@ -187,6 +187,9 @@ int OpenGLRenderer::prepareDirty(float left, float top, float right, float botto
     }
 
     syncState();
+
+    mTilingSnapshot = mSnapshot;
+    startTiling();
 
     if (!opaque) {
         mCaches.enableScissor();
@@ -210,7 +213,30 @@ void OpenGLRenderer::syncState() {
     }
 }
 
+void OpenGLRenderer::startTiling() {
+    startTiling(mTilingSnapshot);
+}
+
+void OpenGLRenderer::startTiling(const sp<Snapshot>& s) {
+    bool opaque = mOpaqueFrame;
+    Rect* clip = mTilingSnapshot->clipRect;
+
+    if (s->flags & Snapshot::kFlagIsFboLayer) {
+        opaque = !s->layer->isBlend();
+        clip = s->clipRect;
+    }
+
+    mCaches.startTiling(clip->left, s->height - clip->bottom,
+            clip->right - clip->left, clip->bottom - clip->top, opaque);
+}
+
+void OpenGLRenderer::endTiling() {
+    mCaches.endTiling();
+}
+
 void OpenGLRenderer::finish() {
+    endTiling();
+
 #if DEBUG_OPENGL
     GLenum status = GL_NO_ERROR;
     while ((status = glGetError()) != GL_NO_ERROR) {
@@ -637,6 +663,7 @@ bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, Rect& clip, GLui
     mSnapshot->flags |= Snapshot::kFlagDirtyOrtho;
     mSnapshot->orthoMatrix.load(mOrthoMatrix);
 
+    endTiling();
     // Bind texture to FBO
     glBindFramebuffer(GL_FRAMEBUFFER, layer->getFbo());
     layer->bindTexture();
@@ -650,18 +677,7 @@ bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, Rect& clip, GLui
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
             layer->getTexture(), 0);
 
-#if DEBUG_LAYERS_AS_REGIONS
-    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    if (status != GL_FRAMEBUFFER_COMPLETE) {
-        ALOGE("Framebuffer incomplete (GL error code 0x%x)", status);
-
-        glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
-
-        Caches::getInstance().resourceCache.decrementRefcount(layer);
-
-        return false;
-    }
-#endif
+    startTiling(mSnapshot);
 
     // Clear the FBO, expand the clear region by 1 to get nice bilinear filtering
     mCaches.enableScissor();
@@ -690,11 +706,14 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
     const bool fboLayer = current->flags & Snapshot::kFlagIsFboLayer;
 
     if (fboLayer) {
+        endTiling();
+
         // Detach the texture from the FBO
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
-
         // Unbind current FBO and restore previous one
         glBindFramebuffer(GL_FRAMEBUFFER, previous->fbo);
+
+        startTiling(previous);
     }
 
     Layer* layer = current->layer;
@@ -2621,12 +2640,15 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* pain
         OpenGLRenderer* renderer = layer->renderer;
         Rect& dirty = layer->dirtyRect;
 
+        endTiling();
+
         renderer->setViewport(layer->layer.getWidth(), layer->layer.getHeight());
         renderer->prepareDirty(dirty.left, dirty.top, dirty.right, dirty.bottom, !layer->isBlend());
         renderer->drawDisplayList(layer->displayList, dirty, DisplayList::kReplayFlag_ClipChildren);
         renderer->finish();
 
         resumeAfterLayer();
+        startTiling(mSnapshot);
 
         dirty.setEmpty();
         layer->deferredUpdateScheduled = false;
