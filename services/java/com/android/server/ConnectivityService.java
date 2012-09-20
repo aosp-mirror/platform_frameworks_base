@@ -32,6 +32,7 @@ import static android.net.ConnectivityManager.isNetworkTypeValid;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 
+import android.app.Activity;
 import android.bluetooth.BluetoothTetheringDataTracker;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -548,6 +549,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         mSettingsObserver = new SettingsObserver(mHandler, EVENT_APPLY_GLOBAL_HTTP_PROXY);
         mSettingsObserver.observe(mContext);
 
+        mCaptivePortalTracker = CaptivePortalTracker.makeCaptivePortalTracker(mContext, this);
         loadGlobalProxy();
     }
 
@@ -1694,7 +1696,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
 
         Intent intent = new Intent(ConnectivityManager.CONNECTIVITY_ACTION);
-        intent.putExtra(ConnectivityManager.EXTRA_NETWORK_INFO, info);
+        intent.putExtra(ConnectivityManager.EXTRA_NETWORK_INFO, new NetworkInfo(info));
         intent.putExtra(ConnectivityManager.EXTRA_NETWORK_TYPE, info.getType());
         if (info.isFailover()) {
             intent.putExtra(ConnectivityManager.EXTRA_IS_FAILOVER, true);
@@ -1825,7 +1827,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
 
         Intent intent = new Intent(bcastType);
-        intent.putExtra(ConnectivityManager.EXTRA_NETWORK_INFO, info);
+        intent.putExtra(ConnectivityManager.EXTRA_NETWORK_INFO, new NetworkInfo(info));
         intent.putExtra(ConnectivityManager.EXTRA_NETWORK_TYPE, info.getType());
         if (info.isFailover()) {
             intent.putExtra(ConnectivityManager.EXTRA_IS_FAILOVER, true);
@@ -1882,7 +1884,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         loge("Attempt to connect to " + info.getTypeName() + " failed" + reasonText);
 
         Intent intent = new Intent(ConnectivityManager.CONNECTIVITY_ACTION);
-        intent.putExtra(ConnectivityManager.EXTRA_NETWORK_INFO, info);
+        intent.putExtra(ConnectivityManager.EXTRA_NETWORK_INFO, new NetworkInfo(info));
         intent.putExtra(ConnectivityManager.EXTRA_NETWORK_TYPE, info.getType());
         if (getActiveNetworkInfo() == null) {
             intent.putExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, true);
@@ -2075,8 +2077,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             if (mActiveDefaultNetwork != -1 && mActiveDefaultNetwork != type) {
                 if (isNewNetTypePreferredOverCurrentNetType(type)) {
                     if (DBG) log("Captive check on " + info.getTypeName());
-                    mCaptivePortalTracker = CaptivePortalTracker.detect(mContext, info,
-                            ConnectivityService.this);
+                    mCaptivePortalTracker.detectCaptivePortal(new NetworkInfo(info));
                     return;
                 } else {
                     if (DBG) log("Tear down low priority net " + info.getTypeName());
@@ -2092,7 +2093,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     /** @hide */
     public void captivePortalCheckComplete(NetworkInfo info) {
         mNetTrackers[info.getType()].captivePortalCheckComplete();
-        mCaptivePortalTracker = null;
     }
 
     /**
