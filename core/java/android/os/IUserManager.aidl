@@ -30,7 +30,7 @@ interface IUserManager {
     void setUserName(int userHandle, String name);
     void setUserIcon(int userHandle, in Bitmap icon);
     Bitmap getUserIcon(int userHandle);
-    List<UserInfo> getUsers();
+    List<UserInfo> getUsers(boolean excludeDying);
     UserInfo getUserInfo(int userHandle);
     void setGuestEnabled(boolean enable);
     boolean isGuestEnabled();
