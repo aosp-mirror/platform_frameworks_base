@@ -49,9 +49,9 @@ void root(const uchar4 *in, uchar4 *out, uint32_t x, uint32_t y) {
     const float4 fin = convert_float4(*in);
     const float2 inCoord = {(float)x, (float)y};
     const float2 coord = mad(inCoord, inv_dimensions, neg_center);
-    const float sloped_dist_ratio = approx_length(axis_scale * coord)  * sloped_inv_max_dist;
-    // TODO:  add approx_exp once implemented
-    const float lumen = opp_shade + shade * approx_recip(1.f + sloped_neg_range * exp(sloped_dist_ratio));
+    const float sloped_dist_ratio = fast_length(axis_scale * coord)  * sloped_inv_max_dist;
+    // TODO:  add half_exp once implemented
+    const float lumen = opp_shade + shade * half_recip(1.f + sloped_neg_range * exp(sloped_dist_ratio));
     float4 fout;
     fout.rgb = fin.rgb * lumen;
     fout.w = fin.w;
