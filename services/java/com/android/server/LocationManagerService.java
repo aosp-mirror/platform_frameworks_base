@@ -601,6 +601,23 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         }
     }
 
+    private boolean isAllowedProviderSafe(String provider) {
+        if (LocationManager.GPS_PROVIDER.equals(provider) ||
+                LocationManager.PASSIVE_PROVIDER.equals(provider)) {
+            // gps and passive providers require FINE permission
+            return mContext.checkCallingOrSelfPermission(ACCESS_FINE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED;
+        } else if (LocationManager.NETWORK_PROVIDER.equals(provider) ||
+                LocationManager.FUSED_PROVIDER.equals(provider)) {
+            // network and fused providers are ok with COARSE or FINE
+            return (mContext.checkCallingOrSelfPermission(ACCESS_FINE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED) ||
+                    (mContext.checkCallingOrSelfPermission(ACCESS_COARSE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED);
+        }
+        return false;
+    }
+
     /**
      * Returns all providers by name, including passive, but excluding
      * fused.
@@ -632,8 +649,6 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
      */
     @Override
     public List<String> getProviders(Criteria criteria, boolean enabledOnly) {
-        checkPermission();
-
         ArrayList<String> out;
         synchronized (mLock) {
             out = new ArrayList<String>(mProviders.size());
@@ -642,14 +657,16 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                 if (LocationManager.FUSED_PROVIDER.equals(name)) {
                     continue;
                 }
-                if (enabledOnly && !isAllowedBySettingsLocked(name)) {
-                    continue;
+                if (isAllowedProviderSafe(name)) {
+                    if (enabledOnly && !isAllowedBySettingsLocked(name)) {
+                        continue;
+                    }
+                    if (criteria != null && !LocationProvider.propertiesMeetCriteria(
+                            name, provider.getProperties(), criteria)) {
+                        continue;
+                    }
+                    out.add(name);
                 }
-                if (criteria != null && !LocationProvider.propertiesMeetCriteria(
-                        name, provider.getProperties(), criteria)) {
-                    continue;
-                }
-                out.add(name);
             }
         }
 
@@ -660,23 +677,22 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     /**
      * Return the name of the best provider given a Criteria object.
      * This method has been deprecated from the public API,
-     * and the whole LoactionProvider (including #meetsCriteria)
+     * and the whole LocationProvider (including #meetsCriteria)
      * has been deprecated as well. So this method now uses
      * some simplified logic.
      */
     @Override
     public String getBestProvider(Criteria criteria, boolean enabledOnly) {
         String result = null;
-        checkPermission();
 
         List<String> providers = getProviders(criteria, enabledOnly);
-        if (providers.size() < 1) {
+        if (!providers.isEmpty()) {
             result = pickBest(providers);
             if (D) Log.d(TAG, "getBestProvider(" + criteria + ", " + enabledOnly + ")=" + result);
             return result;
         }
         providers = getProviders(null, enabledOnly);
-        if (providers.size() >= 1) {
+        if (!providers.isEmpty()) {
             result = pickBest(providers);
             if (D) Log.d(TAG, "getBestProvider(" + criteria + ", " + enabledOnly + ")=" + result);
             return result;
