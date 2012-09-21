@@ -206,6 +206,29 @@ public final class MediaStore {
     public final static String ACTION_IMAGE_CAPTURE = "android.media.action.IMAGE_CAPTURE";
 
     /**
+     * Intent action that can be sent to have the camera application capture an image and return
+     * it when the device is secured (e.g. with a pin, password, pattern, or face unlock).
+     * Applications responding to this intent must not expose any personal content like existing
+     * photos or videos on the device. The applications should be careful not to share any photo
+     * or video with other applications or internet. The activity should use {@link
+     * android.view.WindowManager.LayoutParams#FLAG_SHOW_WHEN_LOCKED} to display on top of the
+     * lock screen while secured. There is no activity stack when this flag is used, so
+     * launching more than one activity is strongly discouraged.
+     * <p>
+     * The caller may pass an extra EXTRA_OUTPUT to control where this image will be written.
+     * If the EXTRA_OUTPUT is not present, then a small sized image is returned as a Bitmap
+     * object in the extra field. This is useful for applications that only need a small image.
+     * If the EXTRA_OUTPUT is present, then the full-sized image will be written to the Uri
+     * value of EXTRA_OUTPUT.
+     *
+     * @see #ACTION_IMAGE_CAPTURE
+     * @see #EXTRA_OUTPUT
+     * @hide
+     */
+    public static final String ACTION_IMAGE_CAPTURE_SECURE =
+            "android.media.action.IMAGE_CAPTURE_SECURE";
+
+    /**
      * Standard Intent action that can be sent to have the camera application
      * capture a video and return it.
      * <p>
