@@ -33,7 +33,6 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.os.Looper;
-import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -42,6 +41,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.widget.RemoteViews.OnClickHandler;
@@ -691,6 +691,23 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
         inflateAndAddUserSelectorWidgetIfNecessary();
 
+        // Add status widget
+        int statusWidgetId = mLockPatternUtils.getStatusWidget();
+        if (statusWidgetId != -1) {
+            addWidget(statusWidgetId);
+            View newStatusWidget = mAppWidgetContainer.getChildAt(
+                    mAppWidgetContainer.getChildCount() - 1);
+
+            int oldStatusWidgetPosition = getWidgetPosition(R.id.keyguard_status_view);
+            mAppWidgetContainer.removeViewAt(oldStatusWidgetPosition);
+
+            // Re-add new status widget at position of old one
+            mAppWidgetContainer.removeView(newStatusWidget);
+            newStatusWidget.setId(R.id.keyguard_status_view);
+            mAppWidgetContainer.addView(newStatusWidget, oldStatusWidgetPosition);
+        }
+
+        // Add user-selected widget
         final int[] widgets = mLockPatternUtils.getUserDefinedWidgets();
         for (int i = 0; i < widgets.length; i++) {
             if (widgets[i] != -1) {
