@@ -147,7 +147,17 @@ class GLES20Canvas extends HardwareCanvas {
     ///////////////////////////////////////////////////////////////////////////
     // Hardware layers
     ///////////////////////////////////////////////////////////////////////////
-    
+
+    @Override
+    void pushLayerUpdate(HardwareLayer layer) {
+        nPushLayerUpdate(mRenderer, ((GLES20RenderLayer) layer).mLayer);
+    }
+
+    @Override
+    void clearLayerUpdates() {
+        nClearLayerUpdates(mRenderer);
+    }
+
     static native int nCreateTextureLayer(boolean opaque, int[] layerInfo);
     static native int nCreateLayer(int width, int height, boolean isOpaque, int[] layerInfo);
     static native boolean nResizeLayer(int layerId, int width, int height, int[] layerInfo);
@@ -162,6 +172,9 @@ class GLES20Canvas extends HardwareCanvas {
     static native void nUpdateRenderLayer(int layerId, int renderer, int displayList,
             int left, int top, int right, int bottom);
     static native boolean nCopyLayer(int layerId, int bitmap);
+
+    private static native void nClearLayerUpdates(int renderer);
+    private static native void nPushLayerUpdate(int renderer, int layer);
 
     ///////////////////////////////////////////////////////////////////////////
     // Canvas management
