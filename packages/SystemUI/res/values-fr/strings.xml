@@ -179,10 +179,4 @@
     <string name="quick_settings_wifi_display_no_connection_label" msgid="6255615315258869136">"Aucune connexion à un écran Wi-Fi"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Luminosité"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMATIQUE"</string>
-    <string name="wifi_display_scan" msgid="8453135922233546097">"Rechercher"</string>
-    <string name="wifi_display_disconnect" msgid="5450214362789378584">"Déconnecter"</string>
-    <string name="wifi_display_dialog_title" msgid="2817993038700218900">"Écran Wi-Fi"</string>
-    <string name="wifi_display_state_available" msgid="980373281442607096">"Disponible"</string>
-    <string name="wifi_display_state_connecting" msgid="1677010908036241940">"Connexion en cours…"</string>
-    <string name="wifi_display_state_connected" msgid="9154375061719151149">"Connecté"</string>
 </resources>
