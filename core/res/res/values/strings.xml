@@ -3495,6 +3495,10 @@
     <string name="find">Find</string>
     <!-- ActionBar action to use the current selection to perform a web search [CHAR-LIMIT=16] -->
     <string name="websearch">Web Search</string>
+    <!-- ActionBar action to find the next match in the page [CHAR LIMIT=24] -->
+    <string name="find_next">Find next</string>
+    <!-- ActionBar action to find the previous match in the page [CHAR LIMIT=24] -->
+    <string name="find_previous">Find previous</string>
 
     <!-- Network positioning notification ticker. The name of the user (e.g. John Doe) who sent
          the request is shown as a dynamic string. -->
