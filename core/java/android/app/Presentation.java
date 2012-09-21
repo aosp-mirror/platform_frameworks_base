@@ -32,24 +32,26 @@ import android.util.TypedValue;
 
 /**
  * Base class for presentations.
- *
+ * <p>
  * A presentation is a special kind of dialog whose purpose is to present
  * content on a secondary display.  A {@link Presentation} is associated with
  * the target {@link Display} at creation time and configures its context and
  * resource configuration according to the display's metrics.
- *
+ * </p><p>
  * Notably, the {@link Context} of a presentation is different from the context
  * of its containing {@link Activity}.  It is important to inflate the layout
  * of a presentation and load other resources using the presentation's own context
  * to ensure that assets of the correct size and density for the target display
  * are loaded.
- *
+ * </p><p>
  * A presentation is automatically canceled (see {@link Dialog#cancel()}) when
  * the display to which it is attached is removed.  An activity should take
  * care of pausing and resuming whatever content is playing within the presentation
- * whenever the activity itself is paused or resume.
+ * whenever the activity itself is paused or resumed.
+ * </p>
  *
- * @see {@link DisplayManager} for information on how to enumerate displays.
+ * @see DisplayManager for information on how to enumerate displays and receive
+ * notifications when displays are added or removed.
  */
 public class Presentation extends Dialog {
     private static final String TAG = "Presentation";
