@@ -3219,8 +3219,8 @@ public final class Settings {
          * Id of the time appwidget on the lockscreen, or -1 if none
          * @hide
          */
-        public static final String LOCK_SCREEN_CLOCK_APPWIDGET_ID =
-            "lock_screen_clock_appwidget_id";
+        public static final String LOCK_SCREEN_STATUS_APPWIDGET_ID =
+            "lock_screen_status_appwidget_id";
 
         /**
          * Id of the user-selected appwidget on the lockscreen, or -1 if none
