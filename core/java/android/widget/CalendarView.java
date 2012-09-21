@@ -1573,7 +1573,8 @@ public class CalendarView extends FrameLayout {
             // If we're showing the week number calculate it based on Monday
             int i = 0;
             if (mShowWeekNumber) {
-                mDayNumbers[0] = Integer.toString(mTempDate.get(Calendar.WEEK_OF_YEAR));
+                mDayNumbers[0] = String.format(Locale.getDefault(), "%d",
+                        mTempDate.get(Calendar.WEEK_OF_YEAR));
                 i++;
             }
 
@@ -1594,7 +1595,8 @@ public class CalendarView extends FrameLayout {
                 if (mTempDate.before(mMinDate) || mTempDate.after(mMaxDate)) {
                     mDayNumbers[i] = "";
                 } else {
-                    mDayNumbers[i] = Integer.toString(mTempDate.get(Calendar.DAY_OF_MONTH));
+                    mDayNumbers[i] = String.format(Locale.getDefault(), "%d",
+                            mTempDate.get(Calendar.DAY_OF_MONTH));
                 }
                 mTempDate.add(Calendar.DAY_OF_MONTH, 1);
             }
