@@ -48,8 +48,8 @@ void root(uchar4 *out, uint32_t x, uint32_t y) {
     const float2 coord = mad(inCoord, inv_dimensions, neg_center);
     const float2 scaledCoord = axis_scale * coord;
     const float dist2 = scaledCoord.x*scaledCoord.x + scaledCoord.y*scaledCoord.y;
-    const float inv_dist = approx_rsqrt(dist2);
-    const float radian = M_PI_2 - approx_atan((alpha * approx_sqrt(radius2 - dist2)) * inv_dist);
+    const float inv_dist = half_rsqrt(dist2);
+    const float radian = M_PI_2 - atan((alpha * half_sqrt(radius2 - dist2)) * inv_dist);
     const float scalar = radian * factor * inv_dist;
     const float2 new_coord = mad(coord, scalar, center);
     const float4 fout = rsSample(in_alloc, sampler, new_coord);
