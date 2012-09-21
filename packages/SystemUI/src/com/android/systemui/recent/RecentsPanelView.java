@@ -24,7 +24,6 @@ import android.app.ActivityOptions;
 import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -67,7 +66,6 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         StatusBarPanel, Animator.AnimatorListener {
     static final String TAG = "RecentsPanelView";
     static final boolean DEBUG = TabletStatusBar.DEBUG || PhoneStatusBar.DEBUG || false;
-    private Context mContext;
     private PopupMenu mPopup;
     private View mRecentsScrim;
     private View mRecentsNoApps;
@@ -203,7 +201,6 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
 
     public RecentsPanelView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        mContext = context;
         updateValuesFromResources();
 
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.RecentsPanelView,
@@ -374,7 +371,6 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     protected void onFinishInflate() {
         super.onFinishInflate();
 
-        mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mRecentsContainer = (ViewGroup) findViewById(R.id.recents_container);
         mStatusBarTouchProxy = (StatusBarTouchProxy) findViewById(R.id.status_bar_touch_proxy);
         mListAdapter = new TaskDescriptionAdapter(mContext);
@@ -488,7 +484,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                     }
                 }
             }
-            }
+        }
         showIfReady();
     }
 
@@ -506,6 +502,12 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             mRecentTaskDescriptions = null;
             mListAdapter.notifyDataSetInvalidated();
         }
+    }
+
+    public void refreshViews() {
+        mListAdapter.notifyDataSetInvalidated();
+        updateUiElements();
+        showIfReady();
     }
 
     public void refreshRecentTasksList() {
@@ -530,12 +532,12 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         } else {
             mRecentTaskDescriptions.addAll(tasks);
         }
-        mListAdapter.notifyDataSetInvalidated();
-        updateUiElements(getResources().getConfiguration());
-        showIfReady();
+        if (((RecentsActivity)mContext).isForeground()) {
+            refreshViews();
+        }
     }
 
-    private void updateUiElements(Configuration config) {
+    private void updateUiElements() {
         final int items = mRecentTaskDescriptions.size();
 
         mRecentsContainer.setVisibility(items > 0 ? View.VISIBLE : View.GONE);
