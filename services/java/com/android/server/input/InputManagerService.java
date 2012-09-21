@@ -113,6 +113,7 @@ public class InputManagerService extends IInputManager.Stub
     private final InputManagerHandler mHandler;
 
     private WindowManagerCallbacks mWindowManagerCallbacks;
+    private WiredAccessoryCallbacks mWiredAccessoryCallbacks;
     private boolean mSystemReady;
     private NotificationManager mNotificationManager;
 
@@ -197,7 +198,7 @@ public class InputManagerService extends IInputManager.Stub
 
     // Key states (may be returned by queries about the current state of a
     // particular key code, scan code or switch).
-    
+
     /** The key state is unknown or the requested key itself is not supported. */
     public static final int KEY_STATE_UNKNOWN = -1;
 
@@ -213,22 +214,50 @@ public class InputManagerService extends IInputManager.Stub
     /** Scan code: Mouse / trackball button. */
     public static final int BTN_MOUSE = 0x110;
 
+    // Switch code values must match bionic/libc/kernel/common/linux/input.h
     /** Switch code: Lid switch.  When set, lid is shut. */
     public static final int SW_LID = 0x00;
 
     /** Switch code: Keypad slide.  When set, keyboard is exposed. */
     public static final int SW_KEYPAD_SLIDE = 0x0a;
 
+    /** Switch code: Headphone.  When set, headphone is inserted. */
+    public static final int SW_HEADPHONE_INSERT = 0x02;
+
+    /** Switch code: Microphone.  When set, microphone is inserted. */
+    public static final int SW_MICROPHONE_INSERT = 0x04;
+
+    /** Switch code: Headphone/Microphone Jack.  When set, something is inserted. */
+    public static final int SW_JACK_PHYSICAL_INSERT = 0x07;
+
+    public static final int SW_LID_BIT = 1 << SW_LID;
+    public static final int SW_KEYPAD_SLIDE_BIT = 1 << SW_KEYPAD_SLIDE;
+    public static final int SW_HEADPHONE_INSERT_BIT = 1 << SW_HEADPHONE_INSERT;
+    public static final int SW_MICROPHONE_INSERT_BIT = 1 << SW_MICROPHONE_INSERT;
+    public static final int SW_JACK_PHYSICAL_INSERT_BIT = 1 << SW_JACK_PHYSICAL_INSERT;
+    public static final int SW_JACK_BITS =
+            SW_HEADPHONE_INSERT_BIT | SW_MICROPHONE_INSERT_BIT | SW_JACK_PHYSICAL_INSERT_BIT;
+
+    /** Whether to use the dev/input/event or uevent subsystem for the audio jack. */
+    final boolean mUseDevInputEventForAudioJack;
+
     public InputManagerService(Context context, Handler handler) {
         this.mContext = context;
         this.mHandler = new InputManagerHandler(handler.getLooper());
 
-        Slog.i(TAG, "Initializing input manager");
+        mUseDevInputEventForAudioJack =
+                context.getResources().getBoolean(R.bool.config_useDevInputEventForAudioJack);
+        Slog.i(TAG, "Initializing input manager, mUseDevInputEventForAudioJack="
+                + mUseDevInputEventForAudioJack);
         mPtr = nativeInit(this, mContext, mHandler.getLooper().getQueue());
     }
 
     public void setWindowManagerCallbacks(WindowManagerCallbacks callbacks) {
         mWindowManagerCallbacks = callbacks;
+    }
+
+    public void setWiredAccessoryCallbacks(WiredAccessoryCallbacks callbacks) {
+        mWiredAccessoryCallbacks = callbacks;
     }
 
     public void start() {
@@ -335,7 +364,7 @@ public class InputManagerService extends IInputManager.Stub
     public int getKeyCodeState(int deviceId, int sourceMask, int keyCode) {
         return nativeGetKeyCodeState(mPtr, deviceId, sourceMask, keyCode);
     }
-    
+
     /**
      * Gets the current state of a key or button by scan code.
      * @param deviceId The input device id, or -1 to consult all devices.
@@ -513,7 +542,7 @@ public class InputManagerService extends IInputManager.Stub
 
     /**
      * Gets information about the input device with the specified id.
-     * @param id The device id.
+     * @param deviceId The device id.
      * @return The input device or null if not found.
      */
     @Override // Binder call
@@ -976,8 +1005,8 @@ public class InputManagerService extends IInputManager.Stub
     // Must be called on handler.
     private void handleSwitchKeyboardLayout(int deviceId, int direction) {
         final InputDevice device = getInputDevice(deviceId);
-        final String inputDeviceDescriptor = device.getDescriptor();
         if (device != null) {
+            final String inputDeviceDescriptor = device.getDescriptor();
             final boolean changed;
             final String keyboardLayoutDescriptor;
             synchronized (mDataStore) {
@@ -1214,6 +1243,7 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     // Called by the heartbeat to ensure locks are not held indefinitely (for deadlock detection).
+    @Override
     public void monitor() {
         synchronized (mInputFilterLock) { }
         nativeMonitor(mPtr);
@@ -1244,9 +1274,14 @@ public class InputManagerService extends IInputManager.Stub
                     + ", mask=" + Integer.toHexString(switchMask));
         }
 
-        if ((switchMask & (1 << SW_LID)) != 0) {
-            final boolean lidOpen = ((switchValues & (1 << SW_LID)) == 0);
+        if ((switchMask & SW_LID_BIT) != 0) {
+            final boolean lidOpen = ((switchValues & SW_LID_BIT) == 0);
             mWindowManagerCallbacks.notifyLidSwitchChanged(whenNanos, lidOpen);
+        }
+
+        if (mUseDevInputEventForAudioJack && (switchMask & SW_JACK_BITS) != 0) {
+            mWiredAccessoryCallbacks.notifyWiredAccessoryChanged(whenNanos, switchValues,
+                    switchMask);
         }
     }
 
@@ -1431,7 +1466,6 @@ public class InputManagerService extends IInputManager.Stub
         return null;
     }
 
-
     /**
      * Callback interface implemented by the Window Manager.
      */
@@ -1456,6 +1490,13 @@ public class InputManagerService extends IInputManager.Stub
                 KeyEvent event, int policyFlags);
 
         public int getPointerLayer();
+    }
+
+    /**
+     * Callback interface implemented by WiredAccessoryObserver.
+     */
+    public interface WiredAccessoryCallbacks {
+        public void notifyWiredAccessoryChanged(long whenNanos, int switchValues, int switchMask);
     }
 
     /**
@@ -1498,6 +1539,7 @@ public class InputManagerService extends IInputManager.Stub
             mDisconnected = true;
         }
 
+        @Override
         public void sendInputEvent(InputEvent event, int policyFlags) {
             if (event == null) {
                 throw new IllegalArgumentException("event must not be null");
