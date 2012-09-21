@@ -223,13 +223,6 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 	LOCAL_SHARED_LIBRARIES += libhwui
 endif
 
-ifeq ($(BOARD_HAVE_BLUETOOTH),true)
-LOCAL_C_INCLUDES += \
-	external/dbus \
-	system/bluetooth/bluez-clean-headers
-LOCAL_CFLAGS += -DHAVE_BLUETOOTH
-endif
-
 LOCAL_SHARED_LIBRARIES += \
 	libdl
 # we need to access the private Bionic header
