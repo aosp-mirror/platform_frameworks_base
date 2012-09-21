@@ -53,6 +53,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.MessageQueue;
 import android.os.Process;
@@ -70,7 +71,6 @@ import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.KeyEvent;
 import android.view.PointerIcon;
-import android.view.Surface;
 import android.view.ViewConfiguration;
 import android.view.WindowManagerPolicy;
 import android.widget.Toast;
@@ -109,8 +109,9 @@ public class InputManagerService extends IInputManager.Stub
     private final int mPtr;
 
     private final Context mContext;
-    private final Callbacks mCallbacks;
     private final InputManagerHandler mHandler;
+
+    private WindowManagerCallbacks mWindowManagerCallbacks;
     private boolean mSystemReady;
     private NotificationManager mNotificationManager;
 
@@ -217,13 +218,16 @@ public class InputManagerService extends IInputManager.Stub
     /** Switch code: Keypad slide.  When set, keyboard is exposed. */
     public static final int SW_KEYPAD_SLIDE = 0x0a;
 
-    public InputManagerService(Context context, Callbacks callbacks) {
+    public InputManagerService(Context context, Handler handler) {
         this.mContext = context;
-        this.mCallbacks = callbacks;
-        this.mHandler = new InputManagerHandler();
+        this.mHandler = new InputManagerHandler(handler.getLooper());
 
         Slog.i(TAG, "Initializing input manager");
         mPtr = nativeInit(this, mContext, mHandler.getLooper().getQueue());
+    }
+
+    public void setWindowManagerCallbacks(WindowManagerCallbacks callbacks) {
+        mWindowManagerCallbacks = callbacks;
     }
 
     public void start() {
@@ -1204,7 +1208,7 @@ public class InputManagerService extends IInputManager.Stub
 
     // Native callback.
     private void notifyConfigurationChanged(long whenNanos) {
-        mCallbacks.notifyConfigurationChanged();
+        mWindowManagerCallbacks.notifyConfigurationChanged();
     }
 
     // Native callback.
@@ -1224,20 +1228,20 @@ public class InputManagerService extends IInputManager.Stub
     private void notifySwitch(long whenNanos, int switchCode, int switchValue) {
         switch (switchCode) {
             case SW_LID:
-                mCallbacks.notifyLidSwitchChanged(whenNanos, switchValue == 0);
+                mWindowManagerCallbacks.notifyLidSwitchChanged(whenNanos, switchValue == 0);
                 break;
         }
     }
 
     // Native callback.
     private void notifyInputChannelBroken(InputWindowHandle inputWindowHandle) {
-        mCallbacks.notifyInputChannelBroken(inputWindowHandle);
+        mWindowManagerCallbacks.notifyInputChannelBroken(inputWindowHandle);
     }
 
     // Native callback.
     private long notifyANR(InputApplicationHandle inputApplicationHandle,
             InputWindowHandle inputWindowHandle) {
-        return mCallbacks.notifyANR(inputApplicationHandle, inputWindowHandle);
+        return mWindowManagerCallbacks.notifyANR(inputApplicationHandle, inputWindowHandle);
     }
 
     // Native callback.
@@ -1258,25 +1262,25 @@ public class InputManagerService extends IInputManager.Stub
 
     // Native callback.
     private int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags, boolean isScreenOn) {
-        return mCallbacks.interceptKeyBeforeQueueing(
+        return mWindowManagerCallbacks.interceptKeyBeforeQueueing(
                 event, policyFlags, isScreenOn);
     }
 
     // Native callback.
     private int interceptMotionBeforeQueueingWhenScreenOff(int policyFlags) {
-        return mCallbacks.interceptMotionBeforeQueueingWhenScreenOff(policyFlags);
+        return mWindowManagerCallbacks.interceptMotionBeforeQueueingWhenScreenOff(policyFlags);
     }
 
     // Native callback.
     private long interceptKeyBeforeDispatching(InputWindowHandle focus,
             KeyEvent event, int policyFlags) {
-        return mCallbacks.interceptKeyBeforeDispatching(focus, event, policyFlags);
+        return mWindowManagerCallbacks.interceptKeyBeforeDispatching(focus, event, policyFlags);
     }
 
     // Native callback.
     private KeyEvent dispatchUnhandledKey(InputWindowHandle focus,
             KeyEvent event, int policyFlags) {
-        return mCallbacks.dispatchUnhandledKey(focus, event, policyFlags);
+        return mWindowManagerCallbacks.dispatchUnhandledKey(focus, event, policyFlags);
     }
 
     // Native callback.
@@ -1359,7 +1363,7 @@ public class InputManagerService extends IInputManager.Stub
 
     // Native callback.
     private int getPointerLayer() {
-        return mCallbacks.getPointerLayer();
+        return mWindowManagerCallbacks.getPointerLayer();
     }
 
     // Native callback.
@@ -1414,7 +1418,7 @@ public class InputManagerService extends IInputManager.Stub
     /**
      * Callback interface implemented by the Window Manager.
      */
-    public interface Callbacks {
+    public interface WindowManagerCallbacks {
         public void notifyConfigurationChanged();
 
         public void notifyLidSwitchChanged(long whenNanos, boolean lidOpen);
@@ -1441,8 +1445,8 @@ public class InputManagerService extends IInputManager.Stub
      * Private handler for the input manager.
      */
     private final class InputManagerHandler extends Handler {
-        public InputManagerHandler() {
-            super(true /*async*/);
+        public InputManagerHandler(Looper looper) {
+            super(looper, null, true /*async*/);
         }
 
         @Override

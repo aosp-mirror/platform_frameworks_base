@@ -33,7 +33,7 @@ import android.view.WindowManager;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-final class InputMonitor implements InputManagerService.Callbacks {
+final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
     private final WindowManagerService mService;
     
     // Current window with input focus for keys and other non-touch events.  May be null.
