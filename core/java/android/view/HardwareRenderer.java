@@ -370,6 +370,14 @@ public abstract class HardwareRenderer {
     private static native void nDisableVsync();
 
     /**
+     * Indicates that the specified hardware layer needs to be updated
+     * as soon as possible.
+     * 
+     * @param layer The hardware layer that needs an update
+     */
+    abstract void pushLayerUpdate(HardwareLayer layer);
+
+    /**
      * Interface used to receive callbacks whenever a view is drawn by
      * a hardware renderer instance.
      */
@@ -1154,8 +1162,9 @@ public abstract class HardwareRenderer {
                             getDisplayListStartTime = System.nanoTime();
                         }
 
-                        DisplayList displayList;
+                        canvas.clearLayerUpdates();
 
+                        DisplayList displayList;
                         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "getDisplayList");
                         try {
                             displayList = view.getDisplayList();
@@ -1449,6 +1458,11 @@ public abstract class HardwareRenderer {
             if (mVsyncDisabled) {
                 disableVsync();
             }
+        }
+
+        @Override
+        void pushLayerUpdate(HardwareLayer layer) {
+            mGlCanvas.pushLayerUpdate(layer);
         }
 
         @Override

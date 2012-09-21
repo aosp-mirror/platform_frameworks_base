@@ -177,6 +177,8 @@ int OpenGLRenderer::prepareDirty(float left, float top, float right, float botto
     mSnapshot->setClip(left, top, right, bottom);
     mDirtyClip = opaque;
 
+    updateLayers();
+
     // If we know that we are going to redraw the entire framebuffer,
     // perform a discard to let the driver know we don't need to preserve
     // the back buffer for this frame.
@@ -230,33 +232,36 @@ void OpenGLRenderer::endTiling() {
 void OpenGLRenderer::finish() {
     endTiling();
 
+    if (!suppressErrorChecks()) {
 #if DEBUG_OPENGL
-    GLenum status = GL_NO_ERROR;
-    while ((status = glGetError()) != GL_NO_ERROR) {
-        ALOGD("GL error from OpenGLRenderer: 0x%x", status);
-        switch (status) {
-            case GL_INVALID_ENUM:
-                ALOGE("  GL_INVALID_ENUM");
-                break;
-            case GL_INVALID_VALUE:
-                ALOGE("  GL_INVALID_VALUE");
-                break;
-            case GL_INVALID_OPERATION:
-                ALOGE("  GL_INVALID_OPERATION");
-                break;
-            case GL_OUT_OF_MEMORY:
-                ALOGE("  Out of memory!");
-                break;
+        GLenum status = GL_NO_ERROR;
+        while ((status = glGetError()) != GL_NO_ERROR) {
+            ALOGD("GL error from OpenGLRenderer: 0x%x", status);
+            switch (status) {
+                case GL_INVALID_ENUM:
+                    ALOGE("  GL_INVALID_ENUM");
+                    break;
+                case GL_INVALID_VALUE:
+                    ALOGE("  GL_INVALID_VALUE");
+                    break;
+                case GL_INVALID_OPERATION:
+                    ALOGE("  GL_INVALID_OPERATION");
+                    break;
+                case GL_OUT_OF_MEMORY:
+                    ALOGE("  Out of memory!");
+                    break;
+            }
         }
-    }
 #endif
+
 #if DEBUG_MEMORY_USAGE
-    mCaches.dumpMemoryUsage();
-#else
-    if (mCaches.getDebugLevel() & kDebugMemory) {
         mCaches.dumpMemoryUsage();
-    }
+#else
+        if (mCaches.getDebugLevel() & kDebugMemory) {
+            mCaches.dumpMemoryUsage();
+        }
 #endif
+    }
 }
 
 void OpenGLRenderer::interrupt() {
@@ -390,6 +395,75 @@ status_t OpenGLRenderer::callDrawGLFunction(Functor* functor, Rect& dirty) {
 
     resume();
     return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Layers
+///////////////////////////////////////////////////////////////////////////////
+
+bool OpenGLRenderer::updateLayer(Layer* layer, bool inFrame) {
+    if (layer->deferredUpdateScheduled && layer->renderer && layer->displayList) {
+        OpenGLRenderer* renderer = layer->renderer;
+        Rect& dirty = layer->dirtyRect;
+
+        if (inFrame) endTiling();
+
+        renderer->setViewport(layer->layer.getWidth(), layer->layer.getHeight());
+        renderer->prepareDirty(dirty.left, dirty.top, dirty.right, dirty.bottom, !layer->isBlend());
+        renderer->drawDisplayList(layer->displayList, dirty, DisplayList::kReplayFlag_ClipChildren);
+        renderer->finish();
+
+        if (inFrame) {
+            resumeAfterLayer();
+            startTiling(mSnapshot);
+        }
+
+        dirty.setEmpty();
+        layer->deferredUpdateScheduled = false;
+        layer->renderer = NULL;
+        layer->displayList = NULL;
+
+        return true;
+    }
+
+    return false;
+}
+
+void OpenGLRenderer::updateLayers() {
+    int count = mLayerUpdates.size();
+    if (count > 0) {
+        startMark("Layer Updates");
+
+        // Note: it is very important to update the layers in reverse order
+        for (int i = count - 1; i >= 0; i--) {
+            Layer* layer = mLayerUpdates.itemAt(i);
+            updateLayer(layer, false);
+            mCaches.resourceCache.decrementRefcount(layer);
+        }
+        mLayerUpdates.clear();
+
+        glBindFramebuffer(GL_FRAMEBUFFER, getTargetFbo());
+        endMark();
+    }
+}
+
+void OpenGLRenderer::pushLayerUpdate(Layer* layer) {
+    if (layer) {
+        mLayerUpdates.push_back(layer);
+        mCaches.resourceCache.incrementRefcount(layer);
+    }
+}
+
+void OpenGLRenderer::clearLayerUpdates() {
+    size_t count = mLayerUpdates.size();
+    if (count > 0) {
+        mCaches.resourceCache.lock();
+        for (size_t i = 0; i < count; i++) {
+            mCaches.resourceCache.decrementRefcountLocked(mLayerUpdates.itemAt(i));
+        }
+        mCaches.resourceCache.unlock();
+        mLayerUpdates.clear();
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2629,25 +2703,7 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* pain
     }
 
     bool debugLayerUpdate = false;
-    if (layer->deferredUpdateScheduled && layer->renderer && layer->displayList) {
-        OpenGLRenderer* renderer = layer->renderer;
-        Rect& dirty = layer->dirtyRect;
-
-        endTiling();
-
-        renderer->setViewport(layer->layer.getWidth(), layer->layer.getHeight());
-        renderer->prepareDirty(dirty.left, dirty.top, dirty.right, dirty.bottom, !layer->isBlend());
-        renderer->drawDisplayList(layer->displayList, dirty, DisplayList::kReplayFlag_ClipChildren);
-        renderer->finish();
-
-        resumeAfterLayer();
-        startTiling(mSnapshot);
-
-        dirty.setEmpty();
-        layer->deferredUpdateScheduled = false;
-        layer->renderer = NULL;
-        layer->displayList = NULL;
-
+    if (updateLayer(layer, true)) {
         debugLayerUpdate = mCaches.debugLayersUpdates;
     }
 
