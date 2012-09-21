@@ -776,8 +776,7 @@
     <string name="lockscreen_charged" msgid="4938930459620989972">"شارژ شد."</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"شارژر خود را متصل کنید."</string>
-    <!-- no translation found for lockscreen_missing_sim_message_short (5099439277819215399) -->
-    <skip />
+    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"سیم کارت موجود نیست"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"سیم کارت درون رایانهٔ لوحی نیست."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"سیم کارت درون تلفن نیست."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"سیم کارت را وارد کنید."</string>
@@ -1047,7 +1046,7 @@
     <string name="smv_process" msgid="5120397012047462446">"فرآیند <xliff:g id="PROCESS">%1$s</xliff:g> خط مشی StrictMode اجرای خودکار خود را نقض کرده است."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"‏Android در حال ارتقا است..."</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"در حال بهینه‌سازی برنامهٔ <xliff:g id="NUMBER_0">%1$d</xliff:g> از <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
-    <string name="android_upgrading_starting_apps" msgid="451464516346926713">"برنامه‎های شروع"</string>
+    <string name="android_upgrading_starting_apps" msgid="451464516346926713">"در حال آغاز برنامه‌ها."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"در حال اتمام راه‌اندازی."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> در حال اجرا"</string>
     <string name="heavy_weight_notification_detail" msgid="1721681741617898865">"لمس کردن برای بازکردن برنامه"</string>
