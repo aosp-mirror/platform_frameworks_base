@@ -2773,14 +2773,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@hide}
      */
     @ViewDebug.ExportedProperty(category = "padding")
-    protected int mPaddingLeft;
+    protected int mPaddingLeft = UNDEFINED_PADDING;
     /**
      * The right padding in pixels, that is the distance in pixels between the
      * right edge of this view and the right edge of its content.
      * {@hide}
      */
     @ViewDebug.ExportedProperty(category = "padding")
-    protected int mPaddingRight;
+    protected int mPaddingRight = UNDEFINED_PADDING;
     /**
      * The top padding in pixels, that is the distance in pixels between the
      * top edge of this view and the top edge of its content.
@@ -3620,9 +3620,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         // (stored at this point in mPadding*)
         mUserPaddingLeftInitial = leftPadding >= 0 ? leftPadding : mPaddingLeft;
         mUserPaddingRightInitial = rightPadding >= 0 ? rightPadding : mPaddingRight;
-        internalSetPadding(mUserPaddingLeftInitial,
+        internalSetPadding(
+                mUserPaddingLeftInitial != UNDEFINED_PADDING ? mUserPaddingLeftInitial : 0,
                 topPadding >= 0 ? topPadding : mPaddingTop,
-                mUserPaddingRightInitial,
+                mUserPaddingRightInitial != UNDEFINED_PADDING ? mUserPaddingRightInitial : 0,
                 bottomPadding >= 0 ? bottomPadding : mPaddingBottom);
 
         if (viewFlagMasks != 0) {
@@ -11597,8 +11598,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     mUserPaddingStart != UNDEFINED_PADDING) {
                 mUserPaddingLeft = mUserPaddingStart;
             }
-            if (mUserPaddingRightInitial == UNDEFINED_PADDING
-                    && mUserPaddingEnd != UNDEFINED_PADDING) {
+            if (mUserPaddingRightInitial == UNDEFINED_PADDING &&
+                    mUserPaddingEnd != UNDEFINED_PADDING) {
                 mUserPaddingRight = mUserPaddingEnd;
             }
 
