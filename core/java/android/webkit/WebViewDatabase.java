@@ -40,7 +40,7 @@ public class WebViewDatabase {
     protected WebViewDatabase() {
     }
 
-    public static synchronized WebViewDatabase getInstance(Context context) {
+    public static WebViewDatabase getInstance(Context context) {
         return WebViewFactory.getProvider().getWebViewDatabase(context);
     }
 
