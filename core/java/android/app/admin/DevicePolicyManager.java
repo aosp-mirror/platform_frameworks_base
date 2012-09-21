@@ -1215,12 +1215,22 @@ public class DevicePolicyManager {
     /**
      * Widgets are enabled in keyguard
      */
-    public static final int KEYGUARD_DISABLE_WIDGETS_NONE = 0;
+    public static final int KEYGUARD_DISABLE_FEATURES_NONE = 0;
 
     /**
      * Disable all keyguard widgets
      */
-    public static final int KEYGUARD_DISABLE_WIDGETS_ALL = 0x7fffffff;
+    public static final int KEYGUARD_DISABLE_WIDGETS_ALL = 1 << 0;
+
+    /**
+     * Disable the camera on secure keyguard screens (e.g. PIN/Pattern/Password)
+     */
+    public static final int KEYGUARD_DISABLE_SECURE_CAMERA = 1 << 1;
+
+    /**
+     * Disable all current and future keyguard customizations
+     */
+    public static final int KEYGUARD_DISABLE_FEATURES_ALL = 0x7fffffff;
 
     /**
      * Called by an application that is administering the device to
@@ -1362,22 +1372,22 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by an application that is administering the device to disable adding widgets to
-     * keyguard.  After setting this, keyguard widgets will be disabled according to the state
-     * provided.
+     * Called by an application that is administering the device to disable keyguard customizations,
+     * such as widgets. After setting this, keyguard features will be disabled according to the
+     * provided feature list.
      *
      * <p>The calling device admin must have requested
-     * {@link DeviceAdminInfo#USES_POLICY_DISABLE_KEYGUARD_WIDGETS} to be able to call
+     * {@link DeviceAdminInfo#USES_POLICY_DISABLE_KEYGUARD_FEATURES} to be able to call
      * this method; if it has not, a security exception will be thrown.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param which {@link DevicePolicyManager#KEYGUARD_DISABLE_WIDGETS_ALL} or
-     * {@link DevicePolicyManager#KEYGUARD_DISABLE_WIDGETS_NONE} (the default).
+     * {@link DevicePolicyManager#KEYGUARD_DISABLE_FEATURES_NONE} (the default).
      */
-    public void setKeyguardWidgetsDisabled(ComponentName admin, int which) {
+    public void setKeyguardDisabledFeatures(ComponentName admin, int which) {
         if (mService != null) {
             try {
-                mService.setKeyguardWidgetsDisabled(admin, which, UserHandle.myUserId());
+                mService.setKeyguardDisabledFeatures(admin, which, UserHandle.myUserId());
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
@@ -1385,25 +1395,25 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Determine whether or not widgets have been disabled in keyguard either by the current
+     * Determine whether or not features have been disabled in keyguard either by the current
      * admin, if specified, or all admins.
      * @param admin The name of the admin component to check, or null to check if any admins
-     * have disabled widgets in keyguard.
+     * have disabled features in keyguard.
      */
-    public int getKeyguardWidgetsDisabled(ComponentName admin) {
-        return getKeyguardWidgetsDisabled(admin, UserHandle.myUserId());
+    public int getKeyguardDisabledFeatures(ComponentName admin) {
+        return getKeyguardDisabledFeatures(admin, UserHandle.myUserId());
     }
 
     /** @hide per-user version */
-    public int getKeyguardWidgetsDisabled(ComponentName admin, int userHandle) {
+    public int getKeyguardDisabledFeatures(ComponentName admin, int userHandle) {
         if (mService != null) {
             try {
-                return mService.getKeyguardWidgetsDisabled(admin, userHandle);
+                return mService.getKeyguardDisabledFeatures(admin, userHandle);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
         }
-        return KEYGUARD_DISABLE_WIDGETS_NONE;
+        return KEYGUARD_DISABLE_FEATURES_NONE;
     }
 
     /**

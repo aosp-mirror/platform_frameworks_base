@@ -684,10 +684,13 @@ public class KeyguardHostView extends KeyguardViewBase {
     private void maybePopulateWidgets() {
         DevicePolicyManager dpm =
                 (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
-        if (dpm != null && dpm.getKeyguardWidgetsDisabled(null, mLockPatternUtils.getCurrentUser())
-                != DevicePolicyManager.KEYGUARD_DISABLE_WIDGETS_NONE) {
-            Log.v(TAG, "Keyguard widgets disabled because of device policy admin");
-            return;
+        if (dpm != null) {
+            final int currentUser = mLockPatternUtils.getCurrentUser();
+            final int disabledFeatures = dpm.getKeyguardDisabledFeatures(null, currentUser);
+            if ((disabledFeatures & DevicePolicyManager.KEYGUARD_DISABLE_WIDGETS_ALL) != 0) {
+                Log.v(TAG, "Keyguard widgets disabled because of device policy admin");
+                return;
+            }
         }
         inflateAndAddUserSelectorWidgetIfNecessary();
 

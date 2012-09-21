@@ -82,8 +82,8 @@ interface IDevicePolicyManager {
     void setCameraDisabled(in ComponentName who, boolean disabled, int userHandle);
     boolean getCameraDisabled(in ComponentName who, int userHandle);
 
-    void setKeyguardWidgetsDisabled(in ComponentName who, int which, int userHandle);
-    int getKeyguardWidgetsDisabled(in ComponentName who, int userHandle);
+    void setKeyguardDisabledFeatures(in ComponentName who, int which, int userHandle);
+    int getKeyguardDisabledFeatures(in ComponentName who, int userHandle);
 
     void setActiveAdmin(in ComponentName policyReceiver, boolean refreshing, int userHandle);
     boolean isAdminActive(in ComponentName policyReceiver, int userHandle);

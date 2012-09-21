@@ -144,7 +144,7 @@ public final class DeviceAdminInfo implements Parcelable {
      * <p>To control this policy, the device admin must have a "disable-keyguard-widgets"
      * tag in the "uses-policies" section of its meta-data.
      */
-    public static final int USES_POLICY_DISABLE_KEYGUARD_WIDGETS = 9;
+    public static final int USES_POLICY_DISABLE_KEYGUARD_FEATURES = 9;
 
     /** @hide */
     public static class PolicyInfo {
@@ -194,9 +194,9 @@ public final class DeviceAdminInfo implements Parcelable {
                 com.android.internal.R.string.policylab_disableCamera,
                 com.android.internal.R.string.policydesc_disableCamera));
         sPoliciesDisplayOrder.add(new PolicyInfo(
-                USES_POLICY_DISABLE_KEYGUARD_WIDGETS, "disable-keyguard-widgets",
-                com.android.internal.R.string.policylab_disableKeyguardWidgets,
-                com.android.internal.R.string.policydesc_disableKeyguardWidgets));
+                USES_POLICY_DISABLE_KEYGUARD_FEATURES, "disable-keyguard-features",
+                com.android.internal.R.string.policylab_disableKeyguardFeatures,
+                com.android.internal.R.string.policydesc_disableKeyguardFeatures));
 
         for (int i=0; i<sPoliciesDisplayOrder.size(); i++) {
             PolicyInfo pi = sPoliciesDisplayOrder.get(i);
