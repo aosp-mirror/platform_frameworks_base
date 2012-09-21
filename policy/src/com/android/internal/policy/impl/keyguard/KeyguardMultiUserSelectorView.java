@@ -76,7 +76,7 @@ public class KeyguardMultiUserSelectorView extends FrameLayout implements View.O
         }
 
         UserManager mUm = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-        ArrayList<UserInfo> users = new ArrayList<UserInfo>(mUm.getUsers());
+        ArrayList<UserInfo> users = new ArrayList<UserInfo>(mUm.getUsers(true));
         Collections.sort(users, mOrderAddedComparator);
 
         for (UserInfo user: users) {

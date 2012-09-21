@@ -703,7 +703,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         // if there are multiple users, we need to add the multi-user switcher widget to the
         // keyguard.
         UserManager mUm = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-        List<UserInfo> users = mUm.getUsers();
+        List<UserInfo> users = mUm.getUsers(true);
 
         if (users.size() > 1) {
             KeyguardWidgetFrame userSwitcher = (KeyguardWidgetFrame)
