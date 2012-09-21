@@ -30,6 +30,7 @@ import android.graphics.drawable.Drawable;
 import android.hardware.display.WifiDisplayStatus;
 import android.os.Handler;
 import android.provider.Settings;
+import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.inputmethod.InputMethodInfo;
@@ -107,9 +108,26 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         }
     }
 
+    /** ContentObserver to watch adb */
+    private class BugreportObserver extends ContentObserver {
+        public BugreportObserver(Handler handler) {
+            super(handler);
+        }
+
+        @Override public void onChange(boolean selfChange) {
+            onBugreportChanged();
+        }
+
+        public void startObserving() {
+            final ContentResolver cr = mContext.getContentResolver();
+            cr.registerContentObserver(
+                    Settings.Secure.getUriFor(Settings.Secure.BUGREPORT_IN_POWER_MENU), false, this);
+        }
+    }
     private Context mContext;
     private Handler mHandler;
     private NextAlarmObserver mNextAlarmObserver;
+    private BugreportObserver mBugreportObserver;
 
     private QuickSettingsTileView mUserTile;
     private RefreshCallback mUserCallback;
@@ -159,11 +177,17 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private RefreshCallback mBrightnessCallback;
     private BrightnessState mBrightnessState = new BrightnessState();
 
+    private QuickSettingsTileView mBugreportTile;
+    private RefreshCallback mBugreportCallback;
+    private State mBugreportState = new State();
+
     public QuickSettingsModel(Context context) {
         mContext = context;
         mHandler = new Handler();
         mNextAlarmObserver = new NextAlarmObserver(mHandler);
         mNextAlarmObserver.startObserving();
+        mBugreportObserver = new BugreportObserver(mHandler);
+        mBugreportObserver.startObserving();
 
         IntentFilter alarmIntentFilter = new IntentFilter();
         alarmIntentFilter.addAction(Intent.ACTION_ALARM_CHANGED);
@@ -339,6 +363,25 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mLocationState.enabled = inUse;
         mLocationState.label = description;
         mLocationCallback.refreshView(mLocationTile, mLocationState);
+    }
+
+    // Bug report
+    void addBugreportTile(QuickSettingsTileView view, RefreshCallback cb) {
+        mBugreportTile = view;
+        mBugreportCallback = cb;
+        onBugreportChanged();
+    }
+    // SettingsObserver callback
+    public void onBugreportChanged() {
+        final ContentResolver cr = mContext.getContentResolver();
+        boolean enabled = false;
+        try {
+            enabled = (Settings.Secure.getInt(cr, Settings.Secure.BUGREPORT_IN_POWER_MENU) != 0);
+        } catch (SettingNotFoundException e) {
+        }
+
+        mBugreportState.enabled = enabled;
+        mBugreportCallback.refreshView(mBugreportTile, mBugreportState);
     }
 
     // Wifi Display
