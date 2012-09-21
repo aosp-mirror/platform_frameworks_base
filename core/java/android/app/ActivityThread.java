@@ -52,6 +52,7 @@ import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Debug;
+import android.os.DropBoxManager;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
@@ -108,6 +109,7 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 
+import libcore.io.DropBox;
 import libcore.io.IoUtils;
 
 import dalvik.system.CloseGuard;
@@ -4830,7 +4832,10 @@ public final class ActivityThread {
                         "Unable to instantiate Application():" + e.toString(), e);
             }
         }
-        
+
+        // add dropbox logging to libcore
+        DropBox.setReporter(new DropBoxReporter());
+
         ViewRootImpl.addConfigCallback(new ComponentCallbacks2() {
             public void onConfigurationChanged(Configuration newConfig) {
                 synchronized (mPackages) {
@@ -4879,6 +4884,25 @@ public final class ActivityThread {
         }
     }
 
+        }
+    }
+
+    private class DropBoxReporter implements DropBox.Reporter {
+
+        private DropBoxManager dropBox;
+
+        public DropBoxReporter() {
+            dropBox = (DropBoxManager) getSystemContext().getSystemService(Context.DROPBOX_SERVICE);
+        }
+
+        @Override
+        public void addData(String tag, byte[] data, int flags) {
+            dropBox.addData(tag, data, flags);
+        }
+
+        @Override
+        public void addText(String tag, String data) {
+            dropBox.addText(tag, data);
     public static void main(String[] args) {
         SamplingProfilerIntegration.start();
 
