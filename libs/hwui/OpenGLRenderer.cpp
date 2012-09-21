@@ -175,7 +175,7 @@ int OpenGLRenderer::prepareDirty(float left, float top, float right, float botto
     mSaveCount = 1;
 
     mSnapshot->setClip(left, top, right, bottom);
-    mDirtyClip = mOpaqueFrame = opaque;
+    mDirtyClip = opaque;
 
     // If we know that we are going to redraw the entire framebuffer,
     // perform a discard to let the driver know we don't need to preserve
@@ -189,7 +189,7 @@ int OpenGLRenderer::prepareDirty(float left, float top, float right, float botto
     syncState();
 
     mTilingSnapshot = mSnapshot;
-    startTiling();
+    startTiling(mTilingSnapshot, true);
 
     if (!opaque) {
         mCaches.enableScissor();
@@ -213,16 +213,9 @@ void OpenGLRenderer::syncState() {
     }
 }
 
-void OpenGLRenderer::startTiling() {
-    startTiling(mTilingSnapshot);
-}
-
-void OpenGLRenderer::startTiling(const sp<Snapshot>& s) {
-    bool opaque = mOpaqueFrame;
+void OpenGLRenderer::startTiling(const sp<Snapshot>& s, bool opaque) {
     Rect* clip = mTilingSnapshot->clipRect;
-
     if (s->flags & Snapshot::kFlagIsFboLayer) {
-        opaque = !s->layer->isBlend();
         clip = s->clipRect;
     }
 

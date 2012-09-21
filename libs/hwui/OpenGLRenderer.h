@@ -351,8 +351,7 @@ private:
      * This method needs to be invoked every time getTargetFbo() is
      * bound again.
      */
-    void startTiling();
-    void startTiling(const sp<Snapshot>& snapshot);
+    void startTiling(const sp<Snapshot>& snapshot, bool opaque = false);
 
     /**
      * Tells the GPU that we are done drawing the frame or that we
