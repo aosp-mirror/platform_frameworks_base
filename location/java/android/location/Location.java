@@ -505,7 +505,7 @@ public class Location implements Parcelable {
      * Return the time of this fix, in elapsed real-time since system boot.
      *
      * <p>This value can be reliably compared to
-     * {@link android.os.SystemClock#elapsedRealtimeNano},
+     * {@link android.os.SystemClock#elapsedRealtimeNanos},
      * to calculate the age of a fix and to compare Location fixes. This
      * is reliable because elapsed real-time is guaranteed monotonic for
      * each system boot and continues to increment even when the system
@@ -782,7 +782,7 @@ public class Location implements Parcelable {
             mAccuracy = 100.0f;
         }
         if (mTime == 0) mTime = System.currentTimeMillis();
-        if (mElapsedRealtimeNano == 0) mElapsedRealtimeNano = SystemClock.elapsedRealtimeNano();
+        if (mElapsedRealtimeNano == 0) mElapsedRealtimeNano = SystemClock.elapsedRealtimeNanos();
     }
 
     /**
