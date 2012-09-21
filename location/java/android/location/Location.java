@@ -83,7 +83,7 @@ public class Location implements Parcelable {
     private float mDistance = 0.0f;
     private float mInitialBearing = 0.0f;
     // Scratchpad
-    private float[] mResults = new float[2];
+    private final float[] mResults = new float[2];
 
     /**
      * Construct a new Location with a named provider.
@@ -839,10 +839,6 @@ public class Location implements Parcelable {
         return s.toString();
     }
 
-    /**
-     * @deprecated Use {@link #toString} instead
-     */
-    @Deprecated
     public void dump(Printer pw, String prefix) {
         pw.println(prefix + toString());
     }
