@@ -383,13 +383,12 @@ static void bench_fp_math() {
 }
 
 static void bench_approx_math() {
-    BENCH_FN_FUNC_FN(approx_recip);
-    BENCH_FN_FUNC_FN(approx_sqrt);
-    BENCH_FN_FUNC_FN(approx_rsqrt);
-    BENCH_FN_FUNC_FN(approx_length);
-    BENCH_FN_FUNC_FN_FN(approx_distance);
-    BENCH_FN_FUNC_FN(approx_normalize);
-    BENCH_FN_FUNC_FN(approx_atan);
+    BENCH_FN_FUNC_FN(half_recip);
+    BENCH_FN_FUNC_FN(half_sqrt);
+    BENCH_FN_FUNC_FN(half_rsqrt);
+    BENCH_FN_FUNC_FN(fast_length);
+    BENCH_FN_FUNC_FN_FN(fast_distance);
+    BENCH_FN_FUNC_FN(fast_normalize);
 }
 
 void bench() {
