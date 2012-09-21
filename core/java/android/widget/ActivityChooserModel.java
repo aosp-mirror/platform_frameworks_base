@@ -21,7 +21,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.database.DataSetObservable;
-import android.database.DataSetObserver;
 import android.os.AsyncTask;
 import android.text.TextUtils;
 import android.util.Log;
@@ -458,13 +457,18 @@ public class ActivityChooserModel extends DataSetObservable {
      * </p>
      *
      * @return An {@link Intent} for launching the activity or null if the
-     *         policy has consumed the intent.
+     *         policy has consumed the intent or there is not current intent
+     *         set via {@link #setIntent(Intent)}.
      *
      * @see HistoricalRecord
      * @see OnChooseActivityListener
      */
     public Intent chooseActivity(int index) {
         synchronized (mInstanceLock) {
+            if (mIntent == null) {
+                return null;
+            }
+
             ensureConsistentState();
 
             ActivityResolveInfo chosenActivity = mActivities.get(index);
