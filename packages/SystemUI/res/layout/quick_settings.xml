@@ -29,9 +29,6 @@
           android:id="@+id/quick_settings_container"
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
-          android:paddingBottom="@dimen/quick_settings_container_padding"
-          android:paddingLeft="@dimen/quick_settings_container_padding"
-          android:paddingRight="@dimen/quick_settings_container_padding"
           android:animateLayoutChanges="true"
           android:columnCount="@integer/quick_settings_num_columns"
           />
