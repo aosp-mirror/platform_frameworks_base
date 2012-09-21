@@ -14036,6 +14036,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     startHomeActivityLocked(userId);
                 }
 
+                getUserManagerLocked().userForeground(userId);
                 sendUserSwitchBroadcastsLocked(oldUserId, userId);
             }
         } finally {

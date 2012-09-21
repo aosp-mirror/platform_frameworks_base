@@ -1025,7 +1025,7 @@ public final class Pm {
 
     public void runListUsers() {
         try {
-            List<UserInfo> users = mUm.getUsers();
+            List<UserInfo> users = mUm.getUsers(false);
             if (users == null) {
                 System.err.println("Error: couldn't get users");
             } else {

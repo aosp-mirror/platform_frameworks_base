@@ -1176,7 +1176,7 @@ class MountService extends IMountService.Stub
                                 true, mtpReserve, false, maxFileSize, null);
 
                         final UserManagerService userManager = UserManagerService.getInstance();
-                        for (UserInfo user : userManager.getUsers()) {
+                        for (UserInfo user : userManager.getUsers(false)) {
                             createEmulatedVolumeForUserLocked(user.getUserHandle());
                         }
 

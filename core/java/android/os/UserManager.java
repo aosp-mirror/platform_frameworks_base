@@ -116,7 +116,23 @@ public class UserManager {
      */
     public List<UserInfo> getUsers() {
         try {
-            return mService.getUsers();
+            return mService.getUsers(false);
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not get user list", re);
+            return null;
+        }
+    }
+
+    /**
+     * Returns information for all users on this device.
+     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
+     * @param excludeDying specify if the list should exclude users being removed.
+     * @return the list of users that were created.
+     * @hide
+     */
+    public List<UserInfo> getUsers(boolean excludeDying) {
+        try {
+            return mService.getUsers(excludeDying);
         } catch (RemoteException re) {
             Log.w(TAG, "Could not get user list", re);
             return null;
@@ -271,6 +287,4 @@ public class UserManager {
         }
         return -1;
     }
-
-
 }
