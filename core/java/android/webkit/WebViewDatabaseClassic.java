@@ -52,6 +52,7 @@ final class WebViewDatabaseClassic extends WebViewDatabase {
     //          implemented for b/5265606.
 
     private static WebViewDatabaseClassic sInstance = null;
+    private static final Object sInstanceLock = new Object();
 
     private static SQLiteDatabase sDatabase = null;
 
@@ -99,7 +100,7 @@ final class WebViewDatabaseClassic extends WebViewDatabase {
     // Initially true until the background thread completes.
     private boolean mInitialized = false;
 
-    WebViewDatabaseClassic(final Context context) {
+    private WebViewDatabaseClassic(final Context context) {
         JniUtil.setContext(context);
         new Thread() {
             @Override
@@ -111,11 +112,13 @@ final class WebViewDatabaseClassic extends WebViewDatabase {
         // Singleton only, use getInstance()
     }
 
-    public static synchronized WebViewDatabaseClassic getInstance(Context context) {
-        if (sInstance == null) {
-            sInstance = new WebViewDatabaseClassic(context);
+    public static WebViewDatabaseClassic getInstance(Context context) {
+        synchronized (sInstanceLock) {
+            if (sInstance == null) {
+                sInstance = new WebViewDatabaseClassic(context);
+            }
+            return sInstance;
         }
-        return sInstance;
     }
 
     private synchronized void init(Context context) {
