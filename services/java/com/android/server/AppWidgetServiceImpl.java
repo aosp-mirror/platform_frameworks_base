@@ -980,9 +980,13 @@ class AppWidgetServiceImpl {
         // drop unbound appWidgetIds (shouldn't be possible under normal circumstances)
         if (id != null && id.provider != null && !id.provider.zombie && !id.host.zombie) {
 
-            // We do not want to save this RemoteViews
-            if (!isPartialUpdate)
+            if (!isPartialUpdate) {
+                // For a full update we replace the RemoteViews completely.
                 id.views = views;
+            } else {
+                // For a partial update, we merge the new RemoteViews with the old.
+                id.views.mergeRemoteViews(views);
+            }
 
             // is anyone listening?
             if (id.host.callbacks != null) {

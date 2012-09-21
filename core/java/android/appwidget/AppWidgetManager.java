@@ -436,10 +436,9 @@ public class AppWidgetManager {
      *
      * This update  differs from {@link #updateAppWidget(int[], RemoteViews)} in that the
      * RemoteViews object which is passed is understood to be an incomplete representation of the 
-     * widget, and hence is not cached by the AppWidgetService. Note that because these updates are 
-     * not cached, any state that they modify that is not restored by restoreInstanceState will not
-     * persist in the case that the widgets are restored using the cached version in
-     * AppWidgetService.
+     * widget, and hence does not replace the cached representation of the widget. As of API
+     * level 17, the new properties set within the views objects will be appended to the cached
+     * representation of the widget, and hence will persist.
      *
      * Use with {@link RemoteViews#showNext(int)}, {@link RemoteViews#showPrevious(int)},
      * {@link RemoteViews#setScrollPosition(int, int)} and similar commands.
