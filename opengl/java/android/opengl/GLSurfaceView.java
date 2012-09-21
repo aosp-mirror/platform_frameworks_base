@@ -83,7 +83,7 @@ import android.view.SurfaceView;
  * </ul>
  * <p>
  * <h4>Specifying the android.view.Surface</h4>
- * By default GLSurfaceView will create a PixelFormat.RGB_565 format surface. If a translucent
+ * By default GLSurfaceView will create a PixelFormat.RGB_888 format surface. If a translucent
  * surface is required, call getHolder().setFormat(PixelFormat.TRANSLUCENT).
  * The exact format of a TRANSLUCENT surface is device dependent, but it will be
  * a 32-bit-per-pixel surface with 8 bits per component.
@@ -94,7 +94,7 @@ import android.view.SurfaceView;
  * well as how many bits are allocated to each channel. Therefore, the first thing
  * GLSurfaceView has to do when starting to render is choose what EGLConfig to use.
  * <p>
- * By default GLSurfaceView chooses a EGLConfig that has an RGB_565 pixel format,
+ * By default GLSurfaceView chooses a EGLConfig that has an RGB_888 pixel format,
  * with at least a 16-bit depth buffer and no stencil.
  * <p>
  * If you would prefer a different EGLConfig
@@ -414,7 +414,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      * is called.
      * <p>
      * If no setEGLConfigChooser method is called, then by default the
-     * view will choose an RGB_565 surface with a depth buffer depth of
+     * view will choose an RGB_888 surface with a depth buffer depth of
      * at least 16 bits.
      *
      * @param needDepth
@@ -432,7 +432,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      * is called.
      * <p>
      * If no setEGLConfigChooser method is called, then by default the
-     * view will choose an RGB_565 surface with a depth buffer depth of
+     * view will choose an RGB_888 surface with a depth buffer depth of
      * at least 16 bits.
      *
      */
@@ -968,13 +968,13 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         }
 
     /**
-     * This class will choose a RGB_565 surface with
+     * This class will choose a RGB_888 surface with
      * or without a depth buffer.
      *
      */
     private class SimpleEGLConfigChooser extends ComponentSizeChooser {
         public SimpleEGLConfigChooser(boolean withDepthBuffer) {
-            super(5, 6, 5, 0, withDepthBuffer ? 16 : 0, 0);
+            super(8, 8, 8, 0, withDepthBuffer ? 16 : 0, 0);
         }
     }
 
