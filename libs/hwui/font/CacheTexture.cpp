@@ -171,6 +171,9 @@ bool CacheTexture::fitBitmap(const SkGlyph& glyph, uint32_t* retOriginX, uint32_
             }
 
             mDirty = true;
+            const Rect r(*retOriginX - TEXTURE_BORDER_SIZE, *retOriginY - TEXTURE_BORDER_SIZE,
+                    *retOriginX + glyphW, *retOriginY + glyphH);
+            mDirtyRect.unionWith(r);
             mNumGlyphs++;
 
 #if DEBUG_FONT_RENDERER
