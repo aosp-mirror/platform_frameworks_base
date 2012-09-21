@@ -153,18 +153,13 @@
     <string name="jelly_bean_dream_name" msgid="5992026543636816792">"BeanFlinger"</string>
     <string name="start_dreams" msgid="870400522982252717">"Avvia Dreams"</string>
     <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"Modalità aereo"</string>
-    <!-- no translation found for quick_settings_battery_charging_label (490074774465309209) -->
-    <skip />
-    <!-- no translation found for quick_settings_battery_charged_label (8865413079414246081) -->
-    <skip />
+    <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"In carica (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
+    <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"Carica"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
-    <!-- no translation found for quick_settings_bluetooth_multiple_devices_label (3912245565613684735) -->
-    <skip />
+    <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> dispositivi)"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Luminosità"</string>
-    <!-- no translation found for quick_settings_rotation_unlocked_label (336054930362580584) -->
-    <skip />
-    <!-- no translation found for quick_settings_rotation_locked_label (8058646447242565486) -->
-    <skip />
+    <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"Rotazione automatica"</string>
+    <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"Rotazione bloccata"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Metodo di immissione"</string>
     <string name="quick_settings_location_label" msgid="3292451598267467545">"Posizione in uso"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Dispositivo multimediale"</string>
@@ -179,10 +174,4 @@
     <string name="quick_settings_wifi_display_no_connection_label" msgid="6255615315258869136">"Nessun collegamento a schermi Wi-Fi"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Luminosità"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTO"</string>
-    <string name="wifi_display_scan" msgid="8453135922233546097">"Scansione"</string>
-    <string name="wifi_display_disconnect" msgid="5450214362789378584">"Disconnetti"</string>
-    <string name="wifi_display_dialog_title" msgid="2817993038700218900">"Schermo Wi-Fi"</string>
-    <string name="wifi_display_state_available" msgid="980373281442607096">"Disponibile"</string>
-    <string name="wifi_display_state_connecting" msgid="1677010908036241940">"Collegamento"</string>
-    <string name="wifi_display_state_connected" msgid="9154375061719151149">"Collegato"</string>
 </resources>
