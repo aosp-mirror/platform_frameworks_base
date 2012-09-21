@@ -68,6 +68,8 @@ public class UserInfo implements Parcelable {
     public String name;
     public String iconPath;
     public int flags;
+    public long creationTime;
+    public long lastLoggedInTime;
 
     public UserInfo(int id, String name, int flags) {
         this(id, name, null, flags);
@@ -101,6 +103,8 @@ public class UserInfo implements Parcelable {
         id = orig.id;
         flags = orig.flags;
         serialNumber = orig.serialNumber;
+        creationTime = orig.creationTime;
+        lastLoggedInTime = orig.lastLoggedInTime;
     }
 
     public UserHandle getUserHandle() {
@@ -122,6 +126,8 @@ public class UserInfo implements Parcelable {
         dest.writeString(iconPath);
         dest.writeInt(flags);
         dest.writeInt(serialNumber);
+        dest.writeLong(creationTime);
+        dest.writeLong(lastLoggedInTime);
     }
 
     public static final Parcelable.Creator<UserInfo> CREATOR
@@ -140,5 +146,7 @@ public class UserInfo implements Parcelable {
         iconPath = source.readString();
         flags = source.readInt();
         serialNumber = source.readInt();
+        creationTime = source.readLong();
+        lastLoggedInTime = source.readLong();
     }
 }
