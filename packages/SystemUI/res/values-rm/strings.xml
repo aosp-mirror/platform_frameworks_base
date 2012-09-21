@@ -314,16 +314,4 @@
     <skip />
     <!-- no translation found for quick_settings_brightness_dialog_auto_brightness_label (5064982743784071218) -->
     <skip />
-    <!-- no translation found for wifi_display_scan (8453135922233546097) -->
-    <skip />
-    <!-- no translation found for wifi_display_disconnect (5450214362789378584) -->
-    <skip />
-    <!-- no translation found for wifi_display_dialog_title (2817993038700218900) -->
-    <skip />
-    <!-- no translation found for wifi_display_state_available (980373281442607096) -->
-    <skip />
-    <!-- no translation found for wifi_display_state_connecting (1677010908036241940) -->
-    <skip />
-    <!-- no translation found for wifi_display_state_connected (9154375061719151149) -->
-    <skip />
 </resources>

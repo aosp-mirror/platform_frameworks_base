@@ -151,18 +151,13 @@
     <string name="jelly_bean_dream_name" msgid="5992026543636816792">"BeanFlinger"</string>
     <string name="start_dreams" msgid="870400522982252717">"بدء Dreams"</string>
     <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"وضع الطائرة"</string>
-    <!-- no translation found for quick_settings_battery_charging_label (490074774465309209) -->
-    <skip />
-    <!-- no translation found for quick_settings_battery_charged_label (8865413079414246081) -->
-    <skip />
+    <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"جارٍ الشحن، <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"تم الشحن"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"بلوتوث"</string>
-    <!-- no translation found for quick_settings_bluetooth_multiple_devices_label (3912245565613684735) -->
-    <skip />
+    <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"بلوتوث (<xliff:g id="NUMBER">%d</xliff:g> من الأجهزة)"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"السطوع"</string>
-    <!-- no translation found for quick_settings_rotation_unlocked_label (336054930362580584) -->
-    <skip />
-    <!-- no translation found for quick_settings_rotation_locked_label (8058646447242565486) -->
-    <skip />
+    <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"تدوير تلقائي"</string>
+    <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"تم قفل التدوير"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"أسلوب الإدخال"</string>
     <string name="quick_settings_location_label" msgid="3292451598267467545">"الموقع المستخدم"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"جهاز الوسائط"</string>
@@ -177,10 +172,4 @@
     <string name="quick_settings_wifi_display_no_connection_label" msgid="6255615315258869136">"لا يتوفر اتصال بشاشة Wifi"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"السطوع"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"تلقائي"</string>
-    <string name="wifi_display_scan" msgid="8453135922233546097">"فحص"</string>
-    <string name="wifi_display_disconnect" msgid="5450214362789378584">"قطع الاتصال"</string>
-    <string name="wifi_display_dialog_title" msgid="2817993038700218900">"شاشة Wifi"</string>
-    <string name="wifi_display_state_available" msgid="980373281442607096">"متوفرة"</string>
-    <string name="wifi_display_state_connecting" msgid="1677010908036241940">"جارٍ الاتصال"</string>
-    <string name="wifi_display_state_connected" msgid="9154375061719151149">"متصلة"</string>
 </resources>
