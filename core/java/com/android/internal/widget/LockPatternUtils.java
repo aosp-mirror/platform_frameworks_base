@@ -215,36 +215,26 @@ public class LockPatternUtils {
     }
 
     public void setCurrentUser(int userId) {
-        if (Process.myUid() == Process.SYSTEM_UID) {
-            mCurrentUserId = userId;
-        } else {
-            throw new SecurityException("Only the system process can set the current user");
-        }
+        mCurrentUserId = userId;
     }
 
     public int getCurrentUser() {
-        if (Process.myUid() == Process.SYSTEM_UID) {
-            if (mCurrentUserId != UserHandle.USER_NULL) {
-                // Someone is regularly updating using setCurrentUser() use that value.
-                return mCurrentUserId;
-            }
-            try {
-                return ActivityManagerNative.getDefault().getCurrentUser().id;
-            } catch (RemoteException re) {
-                return UserHandle.USER_OWNER;
-            }
-        } else {
-            throw new SecurityException("Only the system process can get the current user");
+        if (mCurrentUserId != UserHandle.USER_NULL) {
+            // Someone is regularly updating using setCurrentUser() use that value.
+            return mCurrentUserId;
+        }
+        try {
+            return ActivityManagerNative.getDefault().getCurrentUser().id;
+        } catch (RemoteException re) {
+            return UserHandle.USER_OWNER;
         }
     }
 
     public void removeUser(int userId) {
-        if (Process.myUid() == Process.SYSTEM_UID) {
-            try {
-                getLockSettings().removeUser(userId);
-            } catch (RemoteException re) {
-                Log.e(TAG, "Couldn't remove lock settings for user " + userId);
-            }
+        try {
+            getLockSettings().removeUser(userId);
+        } catch (RemoteException re) {
+            Log.e(TAG, "Couldn't remove lock settings for user " + userId);
         }
     }
 
@@ -591,10 +581,6 @@ public class LockPatternUtils {
         // Compute the hash
         final byte[] hash = passwordToHash(password);
         try {
-            if (Process.myUid() != Process.SYSTEM_UID && userHandle != UserHandle.myUserId()) {
-                throw new SecurityException(
-                        "Only the system process can save lock password for another user");
-            }
             getLockSettings().setLockPassword(hash, userHandle);
             DevicePolicyManager dpm = getDevicePolicyManager();
             KeyStore keyStore = KeyStore.getInstance();
