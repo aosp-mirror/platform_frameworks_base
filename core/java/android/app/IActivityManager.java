@@ -327,6 +327,7 @@ public interface IActivityManager extends IInterface {
     public int stopUser(int userid, IStopUserCallback callback) throws RemoteException;
     public UserInfo getCurrentUser() throws RemoteException;
     public boolean isUserRunning(int userid) throws RemoteException;
+    public int[] getRunningUserIds() throws RemoteException;
 
     public boolean removeSubTask(int taskId, int subTaskIndex) throws RemoteException;
 
@@ -611,4 +612,5 @@ public interface IActivityManager extends IInterface {
     int STOP_USER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+153;
     int REGISTER_USER_SWITCH_OBSERVER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+154;
     int UNREGISTER_USER_SWITCH_OBSERVER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+155;
+    int GET_RUNNING_USER_IDS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+156;
 }

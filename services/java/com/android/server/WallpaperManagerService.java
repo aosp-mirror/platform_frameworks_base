@@ -293,17 +293,18 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
         @Override
         public void onPackageUpdateFinished(String packageName, int uid) {
             synchronized (mLock) {
-                for (int i = 0; i < mWallpaperMap.size(); i++) {
-                    WallpaperData wallpaper = mWallpaperMap.valueAt(i);
+                if (mCurrentUserId != getChangingUserId()) {
+                    return;
+                }
+                WallpaperData wallpaper = mWallpaperMap.get(mCurrentUserId);
+                if (wallpaper != null) {
                     if (wallpaper.wallpaperComponent != null
                             && wallpaper.wallpaperComponent.getPackageName().equals(packageName)) {
                         wallpaper.wallpaperUpdating = false;
                         ComponentName comp = wallpaper.wallpaperComponent;
                         clearWallpaperComponentLocked(wallpaper);
-                        // Do this only for the current user's wallpaper
-                        if (wallpaper.userId == mCurrentUserId
-                                && !bindWallpaperComponentLocked(comp, false, false,
-                                        wallpaper, null)) {
+                        if (!bindWallpaperComponentLocked(comp, false, false,
+                                wallpaper, null)) {
                             Slog.w(TAG, "Wallpaper no longer available; reverting to default");
                             clearWallpaperLocked(false, wallpaper.userId, null);
                         }
@@ -315,11 +316,14 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
         @Override
         public void onPackageModified(String packageName) {
             synchronized (mLock) {
-                for (int i = 0; i < mWallpaperMap.size(); i++) {
-                    WallpaperData wallpaper = mWallpaperMap.valueAt(i);
+                if (mCurrentUserId != getChangingUserId()) {
+                    return;
+                }
+                WallpaperData wallpaper = mWallpaperMap.get(mCurrentUserId);
+                if (wallpaper != null) {
                     if (wallpaper.wallpaperComponent == null
                             || !wallpaper.wallpaperComponent.getPackageName().equals(packageName)) {
-                        continue;
+                        return;
                     }
                     doPackagesChangedLocked(true, wallpaper);
                 }
@@ -329,8 +333,11 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
         @Override
         public void onPackageUpdateStarted(String packageName, int uid) {
             synchronized (mLock) {
-                for (int i = 0; i < mWallpaperMap.size(); i++) {
-                    WallpaperData wallpaper = mWallpaperMap.valueAt(i);
+                if (mCurrentUserId != getChangingUserId()) {
+                    return;
+                }
+                WallpaperData wallpaper = mWallpaperMap.get(mCurrentUserId);
+                if (wallpaper != null) {
                     if (wallpaper.wallpaperComponent != null
                             && wallpaper.wallpaperComponent.getPackageName().equals(packageName)) {
                         wallpaper.wallpaperUpdating = true;
@@ -343,8 +350,11 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
         public boolean onHandleForceStop(Intent intent, String[] packages, int uid, boolean doit) {
             synchronized (mLock) {
                 boolean changed = false;
-                for (int i = 0; i < mWallpaperMap.size(); i++) {
-                    WallpaperData wallpaper = mWallpaperMap.valueAt(i);
+                if (mCurrentUserId != getChangingUserId()) {
+                    return false;
+                }
+                WallpaperData wallpaper = mWallpaperMap.get(mCurrentUserId);
+                if (wallpaper != null) {
                     boolean res = doPackagesChangedLocked(doit, wallpaper);
                     changed |= res;
                 }
@@ -355,8 +365,11 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
         @Override
         public void onSomePackagesChanged() {
             synchronized (mLock) {
-                for (int i = 0; i < mWallpaperMap.size(); i++) {
-                    WallpaperData wallpaper = mWallpaperMap.valueAt(i);
+                if (mCurrentUserId != getChangingUserId()) {
+                    return;
+                }
+                WallpaperData wallpaper = mWallpaperMap.get(mCurrentUserId);
+                if (wallpaper != null) {
                     doPackagesChangedLocked(true, wallpaper);
                 }
             }
@@ -416,7 +429,7 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
                 ServiceManager.getService(Context.WINDOW_SERVICE));
         mIPackageManager = AppGlobals.getPackageManager();
         mMonitor = new MyPackageMonitor();
-        mMonitor.register(context, null, true);
+        mMonitor.register(context, null, UserHandle.ALL, true);
         getWallpaperDir(UserHandle.USER_OWNER).mkdirs();
         loadSettingsLocked(UserHandle.USER_OWNER);
     }
