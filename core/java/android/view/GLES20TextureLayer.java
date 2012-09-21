@@ -98,6 +98,6 @@ class GLES20TextureLayer extends GLES20Layer {
     }
 
     @Override
-    void redraw(DisplayList displayList, Rect dirtyRect) {
+    void redrawLater(DisplayList displayList, Rect dirtyRect) {
     }
 }

@@ -132,6 +132,9 @@ public:
     ANDROID_API void attachFunctor(Functor* functor);
     virtual status_t callDrawGLFunction(Functor* functor, Rect& dirty);
 
+    ANDROID_API void pushLayerUpdate(Layer* layer);
+    ANDROID_API void clearLayerUpdates();
+
     ANDROID_API int getSaveCount() const;
     virtual int save(int flags);
     virtual void restore();
@@ -337,6 +340,13 @@ protected:
             resultMode = SkXfermode::kSrcOver_Mode;
         }
         return resultMode;
+    }
+
+    /**
+     * Set to true to suppress error checks at the end of a frame.
+     */
+    virtual bool suppressErrorChecks() {
+        return false;
     }
 
 private:
@@ -720,6 +730,9 @@ private:
     void finishDrawTexture();
     void accountForClear(SkXfermode::Mode mode);
 
+    bool updateLayer(Layer* layer, bool inFrame);
+    void updateLayers();
+
     /**
      * Renders the specified region as a series of rectangles. This method
      * is used for debugging only.
@@ -780,6 +793,8 @@ private:
     Vector<Rect*> mLayers;
     // List of functors to invoke after a frame is drawn
     SortedVector<Functor*> mFunctors;
+    // List of layers to update at the beginning of a frame
+    Vector<Layer*> mLayerUpdates;
 
     // Indentity matrix
     const mat4 mIdentity;

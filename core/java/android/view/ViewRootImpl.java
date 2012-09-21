@@ -658,6 +658,12 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
+    void pushHardwareLayerUpdate(HardwareLayer layer) {
+        if (mAttachInfo.mHardwareRenderer != null && mAttachInfo.mHardwareRenderer.isEnabled()) {
+            mAttachInfo.mHardwareRenderer.pushLayerUpdate(layer);
+        }
+    }
+
     public boolean attachFunctor(int functor) {
         //noinspection SimplifiableIfStatement
         if (mAttachInfo.mHardwareRenderer != null && mAttachInfo.mHardwareRenderer.isEnabled()) {
