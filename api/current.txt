@@ -10654,7 +10654,7 @@ package android.location {
     method public int describeContents();
     method public static void distanceBetween(double, double, double, double, float[]);
     method public float distanceTo(android.location.Location);
-    method public deprecated void dump(android.util.Printer, java.lang.String);
+    method public void dump(android.util.Printer, java.lang.String);
     method public float getAccuracy();
     method public double getAltitude();
     method public float getBearing();
