@@ -707,11 +707,11 @@
          backup and restore of the application's data on external storage. -->
     <attr name="backupAgent" format="string" />
 
-    <!-- Whether to allow the application to participate in backup
-         infrastructure.  If this attribute is set to <code>false</code>, no backup
-         of the application will ever be performed, even by a full-system backup that
-         would otherwise cause all application data to be saved via adb.  The
-         default value of this attribute is <code>true</code>. -->
+    <!-- Whether to allow the application to participate in the backup
+         and restore infrastructure.  If this attribute is set to <code>false</code>,
+         no backup or restore of the application will ever be performed, even by a
+         full-system backup that would otherwise cause all application data to be saved
+         via adb.  The default value of this attribute is <code>true</code>. -->
     <attr name="allowBackup" format="boolean" />
 
     <!-- Whether the application in question should be terminated after its
