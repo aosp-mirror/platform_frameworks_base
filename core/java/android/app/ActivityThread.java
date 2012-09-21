@@ -4884,9 +4884,6 @@ public final class ActivityThread {
         }
     }
 
-        }
-    }
-
     private class DropBoxReporter implements DropBox.Reporter {
 
         private DropBoxManager dropBox;
@@ -4903,6 +4900,9 @@ public final class ActivityThread {
         @Override
         public void addText(String tag, String data) {
             dropBox.addText(tag, data);
+        }
+    }
+
     public static void main(String[] args) {
         SamplingProfilerIntegration.start();
 
