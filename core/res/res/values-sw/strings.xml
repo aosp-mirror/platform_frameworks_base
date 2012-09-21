@@ -440,7 +440,7 @@
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Inaruhusu programu kusoma maudhui ya fremu ya bafa."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"sanidi maonyesho ya Wifi"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Inaruhusu programu kusanidi na kuunganika kwenye maonyesho ya Wifi."</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"dhibiti  maonyesho ya Wifi"</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"dhibiti maonyesho ya Wifi"</string>
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Inaruhusu programu kudhibiti vipengele vya kiwango cha chini vya maonyesho ya Wifi."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"badilisha mipangilio yako ya sauti"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Inaruhusu programu kurekebisha mipangilio ya sauti kila mahali kama vile sauti na ni kipaza sauti kipi ambacho kinatumika kwa kutoa."</string>
@@ -1116,7 +1116,7 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Weka tarehe"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Weka"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Imekamilika"</string>
-    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">" MPYA: "</font></string>
+    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff33b5e5">" MPYA: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"Imetolewa na <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="no_permissions" msgid="7283357728219338112">"Hakuna vibali vinavyohitajika"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"huenda hii ikakugharimu pesa"</string>
