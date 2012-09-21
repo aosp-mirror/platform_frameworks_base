@@ -1097,8 +1097,7 @@ public class NetworkController extends BroadcastReceiver {
 
         final boolean ethernetConnected = (mConnectedNetworkType == ConnectivityManager.TYPE_ETHERNET);
         if (ethernetConnected) {
-            // TODO: icons and strings for Ethernet connectivity
-            combinedLabel = mConnectedNetworkTypeName;
+            combinedLabel = context.getString(R.string.ethernet_label);
         }
 
         if (mAirplaneMode &&

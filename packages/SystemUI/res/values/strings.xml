@@ -401,6 +401,9 @@
     <!-- Name of the launcher shortcut icon that allows dreams to be started immediately [CHAR LIMIT=20] -->
     <string name="start_dreams">Start dreams</string>
 
+    <!-- Textual description of Ethernet connections -->
+    <string name="ethernet_label">Ethernet</string>
+
     <!-- QuickSettings: Airplane mode [CHAR LIMIT=NONE] -->
     <string name="quick_settings_airplane_mode_label">Airplane mode</string>
     <!-- QuickSettings: Battery Charging [CHAR LIMIT=NONE] -->
