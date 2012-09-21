@@ -23,7 +23,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.backup.BackupManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentProvider;
@@ -33,20 +32,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.content.pm.UserInfo;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteQueryBuilder;
-import android.database.sqlite.SQLiteStatement;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.FileObserver;
 import android.os.ParcelFileDescriptor;
-import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -656,53 +652,59 @@ public class SettingsProvider extends ContentProvider {
             }
         }
 
-        // Note: we assume that get/put operations for moved-to-global names have already
-        // been directed to the new location on the caller side (otherwise we'd fix them
-        // up here).
+        // Okay, permission checks have cleared.  Reset to our own identity so we can
+        // manipulate all users' data with impunity.
+        long oldId = Binder.clearCallingIdentity();
+        try {
+            // Note: we assume that get/put operations for moved-to-global names have already
+            // been directed to the new location on the caller side (otherwise we'd fix them
+            // up here).
+            DatabaseHelper dbHelper;
+            SettingsCache cache;
 
-        DatabaseHelper dbHelper;
-        SettingsCache cache;
+            // Get methods
+            if (Settings.CALL_METHOD_GET_SYSTEM.equals(method)) {
+                if (LOCAL_LOGV) Slog.v(TAG, "call(system:" + request + ") for " + callingUser);
+                dbHelper = getOrEstablishDatabase(callingUser);
+                cache = sSystemCaches.get(callingUser);
+                return lookupValue(dbHelper, TABLE_SYSTEM, cache, request);
+            }
+            if (Settings.CALL_METHOD_GET_SECURE.equals(method)) {
+                if (LOCAL_LOGV) Slog.v(TAG, "call(secure:" + request + ") for " + callingUser);
+                dbHelper = getOrEstablishDatabase(callingUser);
+                cache = sSecureCaches.get(callingUser);
+                return lookupValue(dbHelper, TABLE_SECURE, cache, request);
+            }
+            if (Settings.CALL_METHOD_GET_GLOBAL.equals(method)) {
+                if (LOCAL_LOGV) Slog.v(TAG, "call(global:" + request + ") for " + callingUser);
+                // fast path: owner db & cache are immutable after onCreate() so we need not
+                // guard on the attempt to look them up
+                return lookupValue(getOrEstablishDatabase(UserHandle.USER_OWNER), TABLE_GLOBAL,
+                        sGlobalCache, request);
+            }
 
-        // Get methods
-        if (Settings.CALL_METHOD_GET_SYSTEM.equals(method)) {
-            if (LOCAL_LOGV) Slog.v(TAG, "call(system:" + request + ") for " + callingUser);
-            dbHelper = getOrEstablishDatabase(callingUser);
-            cache = sSystemCaches.get(callingUser);
-            return lookupValue(dbHelper, TABLE_SYSTEM, cache, request);
-        }
-        if (Settings.CALL_METHOD_GET_SECURE.equals(method)) {
-            if (LOCAL_LOGV) Slog.v(TAG, "call(secure:" + request + ") for " + callingUser);
-            dbHelper = getOrEstablishDatabase(callingUser);
-            cache = sSecureCaches.get(callingUser);
-            return lookupValue(dbHelper, TABLE_SECURE, cache, request);
-        }
-        if (Settings.CALL_METHOD_GET_GLOBAL.equals(method)) {
-            if (LOCAL_LOGV) Slog.v(TAG, "call(global:" + request + ") for " + callingUser);
-            // fast path: owner db & cache are immutable after onCreate() so we need not
-            // guard on the attempt to look them up
-            return lookupValue(getOrEstablishDatabase(UserHandle.USER_OWNER), TABLE_GLOBAL,
-                    sGlobalCache, request);
-        }
+            // Put methods - new value is in the args bundle under the key named by
+            // the Settings.NameValueTable.VALUE static.
+            final String newValue = (args == null)
+                    ? null : args.getString(Settings.NameValueTable.VALUE);
 
-        // Put methods - new value is in the args bundle under the key named by
-        // the Settings.NameValueTable.VALUE static.
-        final String newValue = (args == null)
-                ? null : args.getString(Settings.NameValueTable.VALUE);
-
-        final ContentValues values = new ContentValues();
-        values.put(Settings.NameValueTable.NAME, request);
-        values.put(Settings.NameValueTable.VALUE, newValue);
-        if (Settings.CALL_METHOD_PUT_SYSTEM.equals(method)) {
-            if (LOCAL_LOGV) Slog.v(TAG, "call_put(system:" + request + "=" + newValue + ") for " + callingUser);
-            insertForUser(Settings.System.CONTENT_URI, values, callingUser);
-        } else if (Settings.CALL_METHOD_PUT_SECURE.equals(method)) {
-            if (LOCAL_LOGV) Slog.v(TAG, "call_put(secure:" + request + "=" + newValue + ") for " + callingUser);
-            insertForUser(Settings.Secure.CONTENT_URI, values, callingUser);
-        } else if (Settings.CALL_METHOD_PUT_GLOBAL.equals(method)) {
-            if (LOCAL_LOGV) Slog.v(TAG, "call_put(global:" + request + "=" + newValue + ") for " + callingUser);
-            insertForUser(Settings.Global.CONTENT_URI, values, callingUser);
-        } else {
-            Slog.w(TAG, "call() with invalid method: " + method);
+            final ContentValues values = new ContentValues();
+            values.put(Settings.NameValueTable.NAME, request);
+            values.put(Settings.NameValueTable.VALUE, newValue);
+            if (Settings.CALL_METHOD_PUT_SYSTEM.equals(method)) {
+                if (LOCAL_LOGV) Slog.v(TAG, "call_put(system:" + request + "=" + newValue + ") for " + callingUser);
+                insertForUser(Settings.System.CONTENT_URI, values, callingUser);
+            } else if (Settings.CALL_METHOD_PUT_SECURE.equals(method)) {
+                if (LOCAL_LOGV) Slog.v(TAG, "call_put(secure:" + request + "=" + newValue + ") for " + callingUser);
+                insertForUser(Settings.Secure.CONTENT_URI, values, callingUser);
+            } else if (Settings.CALL_METHOD_PUT_GLOBAL.equals(method)) {
+                if (LOCAL_LOGV) Slog.v(TAG, "call_put(global:" + request + "=" + newValue + ") for " + callingUser);
+                insertForUser(Settings.Global.CONTENT_URI, values, callingUser);
+            } else {
+                Slog.w(TAG, "call() with invalid method: " + method);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(oldId);
         }
 
         return null;
@@ -758,7 +760,7 @@ public class SettingsProvider extends ContentProvider {
         return queryForUser(url, select, where, whereArgs, sort, UserHandle.getCallingUserId());
     }
 
-    public Cursor queryForUser(Uri url, String[] select, String where, String[] whereArgs,
+    private Cursor queryForUser(Uri url, String[] select, String where, String[] whereArgs,
             String sort, int forUser) {
         if (LOCAL_LOGV) Slog.v(TAG, "query(" + url + ") for user " + forUser);
         SqlArguments args = new SqlArguments(url, where, whereArgs);
