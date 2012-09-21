@@ -1,0 +1,234 @@
+page.title=Systrace
+parent.title=Tools
+parent.link=index.html
+@jd:body
+
+
+<p>The {@code systrace} tool helps analyze the performance of your application by capturing and
+  displaying execution times of your applications processes and other Android system processes. The
+  tool combines data from the Android kernel such as the CPU scheduler, disk activity and
+  application threads to generate an HTML report that shows an overall picture of an Android
+  device’s system processes for a given period of time.</p>
+
+<p>The {@code systrace} tool is particularly useful in diagnosing display problems where an
+  application is slow to draw or stutters while displaying motion or animation. For more information
+  on how to use {@code systrace}, see <a href="{@docRoot}tools/debugging/systrace.html">Analyzing
+  Display and Performance with Systrace</a>.</p>
+
+
+<h2 id="usage">Usage</h2>
+
+<p>In order to run {@code systrace}, the {@code adb} tool and
+<a href="http://www.python.org/">Python</a> must be installed and included in your development
+computer's execution path. In order to generate a trace, you must connect a device running Android
+4.1 (API Level 16) or higher to your development system using a USB debugging connection.</p>
+
+<p>The syntax for running {@code systrace} is as follows.</p>
+
+<pre>
+$> python systrace.py [options]
+</pre>
+
+<p>Here is an example execution run that sets trace tags and generates a trace from a connected
+Android device.</p>
+
+<pre>
+$> cd <em>android-sdk</em>/tools/systrace
+$> python systrace.py --set-tags gfx,view,wm
+$> adb shell stop
+$> adb shell start
+$> python systrace.py --disk --time=10 -o mynewtrace.html
+</pre>
+
+
+
+<h2 id="options">Options</h2>
+
+<p>The table below lists the command line options for {@code systrace}.</p>
+
+<table>
+  <tr>
+    <th>Option</th>
+
+    <th>Description</th>
+  </tr>
+
+  <tr>
+    <td><code>-o&nbsp;&lt;<em>FILE</em>&gt;</code></td>
+
+    <td>Write the HTML trace report to the specified file.</td>
+  </tr>
+
+  <tr>
+    <td><code>-t N, --time=N</code></td>
+
+    <td>Trace activity for N seconds. Default value is 5 seconds.</td>
+  </tr>
+
+  <tr>
+    <td><code>-b N, --buf-size=N</code></td>
+
+    <td>Use a trace buffer size of N kilobytes. This option lets you limit the total size of the
+    data collected during a trace.</td>
+  </tr>
+
+  <tr>
+    <td><code>-d, --disk</code></td>
+
+    <td>Trace disk input and output activity. This option requires root access on the device.</td>
+  </tr>
+
+  <tr>
+    <td><code>-f, --cpu-freq</code></td>
+
+    <td>Trace CPU frequency changes. Only changes to the CPU frequency are logged, so the initial
+    frequency of the CPU when tracing starts is not shown.</td>
+  </tr>
+
+  <tr>
+    <td><code>-i, --cpu-idle</code></td>
+
+    <td>Trace CPU idle events.</td>
+  </tr>
+
+  <tr>
+    <td><code>-l, --cpu-load</code></td>
+
+    <td>Trace CPU load. This value is a percentage determined by the interactive CPU frequency
+    governor.</td>
+  </tr>
+
+  <tr>
+    <td><nobr><code>-s,&nbsp;--no-cpu-sched</code></nobr></td>
+
+    <td>Prevent tracing of the CPU scheduler. This option allows for longer trace times by reducing
+    the rate of data flowing into the trace buffer.</td>
+  </tr>
+
+  <tr>
+    <td><code>-w, --workqueue</code></td>
+
+    <td>Trace kernel work queues. This option requires root access on the device.</td>
+  </tr>
+
+  <tr>
+    <td id="tags"><code>--set-tags=&lt;<em>TAGS</em>&gt;</code></td>
+
+    <td>Set the enabled trace tags in a comma separated list. The available tags are:
+      <ul>
+        <li><code>gfx</code> - Graphics</li>
+        <li><code>input</code> - Input</li>
+        <li><code>view</code> - View</li>
+        <li><code>webview</code> - WebView</li>
+        <li><code>wm</code> - Window Manager</li>
+        <li><code>am</code> - Activity Manager</li>
+        <li><code>sync</code> - Sync Manager</li>
+        <li><code>audio</code> - Audio</li>
+        <li><code>video</code> - Video</li>
+        <li><code>camera</code> - Camera</li>
+      </ul>
+      <p class="note"><strong>Note:</strong> When setting trace tags from the command line, you
+      must stop and restart the framework ({@code $&gt; adb shell stop; adb shell start}) for the
+      tag tracing changes to take effect.</p>
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>--link-assets</code></td>
+
+    <td>Link to the original CSS or JS resources instead of embedding them in the HTML trace
+    report.</td>
+  </tr>
+
+  <tr>
+    <td><nobr><code>-h, --help</code></nobr></td>
+
+    <td>Show the help message.</td>
+  </tr>
+
+</table>
+
+<p>You can set the trace <a href="#tags">tags</a> for {@code systrace} with your device's user
+interface, by navigating to <strong>Settings &gt; Developer options &gt; Monitoring &gt; Enable
+traces</strong>.</p>
+
+
+<h2 id="viewing-options">Trace Viewing Shortcuts</h2>
+
+<p>The table below lists the keyboard shortcuts that are available while viewing a {@code systrace}
+trace HTML report.</p>
+
+<table>
+  <tr>
+    <th>Key</th>
+
+    <th>Description</th>
+  </tr>
+
+  <tr>
+    <td><strong>w</strong></td>
+
+    <td>Zoom into the trace timeline.</td>
+  </tr>
+
+  <tr>
+    <td><strong>s</strong></td>
+
+    <td>Zoom out of the trace timeline.</td>
+  </tr>
+
+  <tr>
+    <td><strong>a</strong></td>
+
+    <td>Pan left on the trace timeline.</td>
+  </tr>
+
+  <tr>
+    <td><strong>d</strong></td>
+
+    <td>Pan right on the trace timeline.</td>
+  </tr>
+
+  <tr>
+    <td><strong>e</strong></td>
+
+    <td>Center the trace timeline on the current mouse location.</td>
+  </tr>
+
+  <tr>
+    <td><strong>g</strong></td>
+
+    <td>Show grid at the start of the currently selected task.</td>
+  </tr>
+
+  <tr>
+    <td><strong>Shift+g</strong></td>
+
+    <td>Show grid at the end of the currently selected task.</td>
+  </tr>
+
+  <tr>
+    <td><strong>Right Arrow</strong></td>
+
+    <td>Select the next event on the currently selected timeline.</td>
+  </tr>
+
+  <tr>
+    <td><strong>Left Arrow</strong></td>
+
+    <td>Select the previous event on the currently selected timeline.</td>
+  </tr>
+
+  <tr>
+    <td><strong>Double Click</strong></td>
+
+    <td>Zoom into the trace timeline.</td>
+  </tr>
+
+  <tr>
+    <td><strong>Shift+Double Click</strong></td>
+
+    <td>Zoom out of the trace timeline.</td>
+  </tr>
+
+</table>
