@@ -222,6 +222,14 @@ public class RemoteViews implements Parcelable, Filter {
         int viewId;
     }
 
+    /**
+     * Merges the passed RemoteViews actions with this RemoteViews actions according to
+     * action-specific merge rules.
+     * 
+     * @param newRv
+     * 
+     * @hide
+     */
     public void mergeRemoteViews(RemoteViews newRv) {
         // We first copy the new RemoteViews, as the process of merging modifies the way the actions
         // reference the bitmap cache. We don't want to modify the object as it may need to
