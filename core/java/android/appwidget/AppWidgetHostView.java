@@ -226,7 +226,12 @@ public class AppWidgetHostView extends FrameLayout {
 
         if (jail == null) jail = new ParcelableSparseArray();
 
-        super.dispatchRestoreInstanceState(jail);
+        try  {
+            super.dispatchRestoreInstanceState(jail);
+        } catch (Exception e) {
+            Log.e(TAG, "failed to restoreInstanceState for widget id: " + mAppWidgetId + ", "
+                    + (mInfo == null ? "null" : mInfo.provider), e);
+        }
     }
 
     /**
