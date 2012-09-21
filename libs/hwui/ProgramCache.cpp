@@ -53,11 +53,14 @@ const char* gVS_Header_Uniforms_IsPoint =
         "uniform mediump float pointSize;\n";
 const char* gVS_Header_Uniforms_HasGradient[3] = {
         // Linear
-        "uniform mat4 screenSpace;\n",
+        "uniform mat4 screenSpace;\n"
+        "uniform float ditherSize;\n",
         // Circular
-        "uniform mat4 screenSpace;\n",
+        "uniform mat4 screenSpace;\n"
+        "uniform float ditherSize;\n",
         // Sweep
         "uniform mat4 screenSpace;\n"
+        "uniform float ditherSize;\n"
 };
 const char* gVS_Header_Uniforms_HasBitmap =
         "uniform mat4 textureTransform;\n"
@@ -75,16 +78,22 @@ const char* gVS_Header_Varyings_PointHasBitmap =
         "varying highp vec2 outPointBitmapTexCoords;\n";
 const char* gVS_Header_Varyings_HasGradient[6] = {
         // Linear
-        "varying highp vec2 linear;\n",
-        "varying float linear;\n",
+        "varying highp vec2 linear;\n"
+        "varying vec2 ditherTexCoords;\n",
+        "varying float linear;\n"
+        "varying vec2 ditherTexCoords;\n",
 
         // Circular
-        "varying highp vec2 circular;\n",
-        "varying highp vec2 circular;\n",
+        "varying highp vec2 circular;\n"
+        "varying vec2 ditherTexCoords;\n",
+        "varying highp vec2 circular;\n"
+        "varying vec2 ditherTexCoords;\n",
 
         // Sweep
-        "varying highp vec2 sweep;\n",
-        "varying highp vec2 sweep;\n",
+        "varying highp vec2 sweep;\n"
+        "varying vec2 ditherTexCoords;\n",
+        "varying highp vec2 sweep;\n"
+        "varying vec2 ditherTexCoords;\n",
 };
 const char* gVS_Main =
         "\nvoid main(void) {\n";
@@ -94,16 +103,22 @@ const char* gVS_Main_OutTransformedTexCoords =
         "    outTexCoords = (mainTextureTransform * vec4(texCoords, 0.0, 1.0)).xy;\n";
 const char* gVS_Main_OutGradient[6] = {
         // Linear
-        "    linear = vec2((screenSpace * position).x, 0.5);\n",
-        "    linear = (screenSpace * position).x;\n",
+        "    linear = vec2((screenSpace * position).x, 0.5);\n"
+        "    ditherTexCoords = (gl_Position * ditherSize).xy;\n",
+        "    linear = (screenSpace * position).x;\n"
+        "    ditherTexCoords = (gl_Position * ditherSize).xy;\n",
 
         // Circular
-        "    circular = (screenSpace * position).xy;\n",
-        "    circular = (screenSpace * position).xy;\n",
+        "    circular = (screenSpace * position).xy;\n"
+        "    ditherTexCoords = (gl_Position * ditherSize).xy;\n",
+        "    circular = (screenSpace * position).xy;\n"
+        "    ditherTexCoords = (gl_Position * ditherSize).xy;\n",
 
         // Sweep
-        "    sweep = (screenSpace * position).xy;\n",
-        "    sweep = (screenSpace * position).xy;\n",
+        "    sweep = (screenSpace * position).xy;\n"
+        "    ditherTexCoords = (gl_Position * ditherSize).xy;\n",
+        "    sweep = (screenSpace * position).xy;\n"
+        "    ditherTexCoords = (gl_Position * ditherSize).xy;\n",
 };
 const char* gVS_Main_OutBitmapTexCoords =
         "    outBitmapTexCoords = (textureTransform * position).xy * textureDimension;\n";
@@ -144,7 +159,7 @@ const char* gFS_Uniforms_TextureSampler =
 const char* gFS_Uniforms_ExternalTextureSampler =
         "uniform samplerExternalOES baseSampler;\n";
 #define FS_UNIFORMS_DITHER \
-        "uniform float ditherSize;\n" \
+        "uniform float ditherSizeSquared;\n" \
         "uniform sampler2D ditherSampler;\n"
 #define FS_UNIFORMS_GRADIENT \
         "uniform vec4 startColor;\n" \
@@ -188,7 +203,7 @@ const char* gFS_Main_PointBitmapTexCoords =
         "((gl_PointCoord - vec2(0.5, 0.5)) * textureDimension * vec2(pointSize, pointSize));\n";
 
 #define FS_MAIN_DITHER \
-        "texture2D(ditherSampler, gl_FragCoord.xy * ditherSize).a * ditherSize * ditherSize"
+        "texture2D(ditherSampler, ditherTexCoords).a * ditherSizeSquared"
 const char* gFS_Main_AddDitherToGradient =
         "    gradientColor += " FS_MAIN_DITHER ";\n";
 
@@ -505,9 +520,6 @@ String8 ProgramCache::generateVertexShader(const ProgramDescription& description
         } else if (description.isAA) {
             shader.append(gVS_Main_AA);
         }
-        if (description.hasGradient) {
-            shader.append(gVS_Main_OutGradient[gradientIndex(description)]);
-        }
         if (description.hasBitmap) {
             shader.append(description.isPoint ?
                     gVS_Main_OutPointBitmapTexCoords :
@@ -518,6 +530,9 @@ String8 ProgramCache::generateVertexShader(const ProgramDescription& description
         }
         // Output transformed position
         shader.append(gVS_Main_Position);
+        if (description.hasGradient) {
+            shader.append(gVS_Main_OutGradient[gradientIndex(description)]);
+        }
     }
     // End the shader
     shader.append(gVS_Footer);
