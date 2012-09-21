@@ -23,6 +23,7 @@
 #include "JNIHelp.h"
 #include "android_runtime/AndroidRuntime.h"
 
+#include <cutils/properties.h>
 #include <utils/Vector.h>
 
 #include <gui/SurfaceTexture.h>
@@ -38,6 +39,7 @@ struct fields_t {
     jfieldID    surfaceTexture;
     jfieldID    facing;
     jfieldID    orientation;
+    jfieldID    canDisableShutterSound;
     jfieldID    face_rect;
     jfieldID    face_score;
     jfieldID    rect_left;
@@ -453,6 +455,12 @@ static void android_hardware_Camera_getCameraInfo(JNIEnv *env, jobject thiz,
     }
     env->SetIntField(info_obj, fields.facing, cameraInfo.facing);
     env->SetIntField(info_obj, fields.orientation, cameraInfo.orientation);
+
+    char value[PROPERTY_VALUE_MAX];
+    property_get("ro.camera.sound.forced", value, "0");
+    jboolean canDisableShutterSound = (strncmp(value, "0", 2) == 0);
+    env->SetBooleanField(info_obj, fields.canDisableShutterSound,
+            canDisableShutterSound);
 }
 
 // connect to camera service
@@ -962,6 +970,8 @@ int register_android_hardware_Camera(JNIEnv *env)
           ANDROID_GRAPHICS_SURFACETEXTURE_JNI_ID, "I", &fields.surfaceTexture },
         { "android/hardware/Camera$CameraInfo", "facing",   "I", &fields.facing },
         { "android/hardware/Camera$CameraInfo", "orientation",   "I", &fields.orientation },
+        { "android/hardware/Camera$CameraInfo", "canDisableShutterSound",   "Z",
+          &fields.canDisableShutterSound },
         { "android/hardware/Camera$Face", "rect", "Landroid/graphics/Rect;", &fields.face_rect },
         { "android/hardware/Camera$Face", "score", "I", &fields.face_score },
         { "android/graphics/Rect", "left", "I", &fields.rect_left },
