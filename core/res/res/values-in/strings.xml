@@ -309,14 +309,10 @@
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Mengizinkan apl mengontrol jumlah maksimum proses yang akan berjalan. Tidak pernah diperlukan oleh apl normal."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"paksa aplikasi latar belakang agar menutup"</string>
     <string name="permdesc_setAlwaysFinish" msgid="7471310652868841499">"Mengizinkan apl mengontrol apakah aktivitas selalu selesai setelah berpindah ke latar belakang. Tidak pernah digunakan untuk apl normal."</string>
-    <!-- no translation found for permlab_batteryStats (2789610673514103364) -->
-    <skip />
-    <!-- no translation found for permdesc_batteryStats (5897346582882915114) -->
-    <skip />
-    <!-- no translation found for permlab_updateBatteryStats (3719689764536379557) -->
-    <skip />
-    <!-- no translation found for permdesc_updateBatteryStats (6862817857178025002) -->
-    <skip />
+    <string name="permlab_batteryStats" msgid="2789610673514103364">"baca statistik baterai"</string>
+    <string name="permdesc_batteryStats" msgid="5897346582882915114">"Mengizinkan aplikasi membaca data penggunaan baterai tingkat rendah. Dapat mengizinkan aplikasi mencari informasi mendetail tentang aplikasi mana yang Anda gunakan."</string>
+    <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"ubah statistik baterai"</string>
+    <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"Mengizinkan aplikasi mengubah statistik baterai yang dikumpulkan. Tidak untuk digunakan oleh aplikasi normal."</string>
     <string name="permlab_backup" msgid="470013022865453920">"mengontrol cadangan dan pemulihan sistem"</string>
     <string name="permdesc_backup" msgid="6912230525140589891">"Mengizinkan apl mengontrol mekanisme pencadangan dan pemulihan sistem. Tidak untuk digunakan oleh apl normal."</string>
     <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"konfirmasi pencadangan penuh atau pulihkan operasi"</string>
@@ -324,8 +320,7 @@
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"tampilkan jendela yang tidak diizinkan"</string>
     <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"Mengizinkan apl membuat jendela agar dapat digunakan oleh antarmuka pengguna sistem internal. Tidak untuk digunakan oleh apl normal."</string>
     <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"tutup aplikasi lain"</string>
-    <!-- no translation found for permdesc_systemAlertWindow (8584678381972820118) -->
-    <skip />
+    <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Mengizinkan aplikasi untuk berada di atas aplikasi lainnya atau bagian antarmuka pengguna. Aplikasi tersebut mungkin menganggu penggunaan Anda atas antarmuka pada aplikasi mana pun, atau ubah apa yang Anda lihat di aplikasi lainnya."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"ubah kecepatan animasi global"</string>
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Mengizinkan apl mengubah kecepatan animasi global (animasi lebih cepat atau lebih lambat) kapan saja."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"mengelola token apl"</string>
@@ -373,10 +368,8 @@
     <string name="permlab_installPackages" msgid="2199128482820306924">"langsung memasang apl"</string>
     <string name="permdesc_installPackages" msgid="5628530972548071284">"Mengizinkan apl memasang paket Android yang baru atau diperbarui. Apl berbahaya dapat menggunakan ini untuk menambahkan apl baru dengan sembarang izin yang kuat."</string>
     <string name="permlab_clearAppCache" msgid="7487279391723526815">"menghapus semua data cache apl"</string>
-    <!-- no translation found for permdesc_clearAppCache (8974640871945434565) -->
-    <skip />
-    <!-- no translation found for permdesc_clearAppCache (2459441021956436779) -->
-    <skip />
+    <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"Mengizinkan aplikasi mengosongkan penyimpanan tablet menghapus file dalam direktori cache aplikasi lainnya. Ini dapat menyebabkan aplikasi lain memulai lebih lambat karena perlu mengambil ulang data mereka."</string>
+    <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"Mengizinkan aplikasi mengosongkan penyimpanan ponsel menghapus file dalam direktori cache aplikasi lainnya. Ini dapat menyebabkan aplikasi lain memulai lebih lambat karena perlu mengambil ulang data mereka."</string>
     <string name="permlab_movePackage" msgid="3289890271645921411">"memindahkan sumber daya apl"</string>
     <string name="permdesc_movePackage" msgid="319562217778244524">"Mengizinkan apl memindahkan sumber daya apl dari media internal ke eksternal dan sebaliknya."</string>
     <string name="permlab_readLogs" msgid="6615778543198967614">"baca data log sensitif"</string>
@@ -437,14 +430,10 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="5945166642335800763">"Memungkinkan aplikasi mengakses perintah penyedia lokasi ekstra. Izin ini dapat memungkinkan aplikasi mengganggu pengoperasian GPS atau sumber lokasi lain."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"izin untuk memasang suatu penyedia lokasi"</string>
     <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"Membuat sumber lokasi palsu untuk uji coba atau memasang penyedia lokasi baru. Izin ini memungkinkan aplikasi mengganti lokasi dan/atau status yang dimunculkan sumber lokasi lain, misalnya GPS atau penyedia lokasi."</string>
-    <!-- no translation found for permlab_accessFineLocation (1191898061965273372) -->
-    <skip />
-    <!-- no translation found for permdesc_accessFineLocation (5295047563564981250) -->
-    <skip />
-    <!-- no translation found for permlab_accessCoarseLocation (4887895362354239628) -->
-    <skip />
-    <!-- no translation found for permdesc_accessCoarseLocation (2538200184373302295) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"lokasi akurat (berbasis jaringan dan GPS)"</string>
+    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Mengizinkan aplikasi memperoleh lokasi Anda yang akurat menggunakan Sistem Pemosisian Global (GPS) atau sumber lokasi jaringan, misalnya menara seluler dan Wi-Fi. Layanan lokasi ini harus diaktifkan dan tersedia untuk perangkat Anda agar aplikasi dapat menggunakannya. Aplikasi dapat menggunakan ini untuk menentukan perkiraan tempat Anda berada dan dapat menghabiskan daya baterai tambahan."</string>
+    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"perkiraan lokasi (berbasis jaringan)"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Mengizinkan aplikasi untuk mendapatkan perkiraan lokasi Anda. Lokasi ini diperoleh dengan layanan lokasi yang menggunakan sumber lokasi jaringan, misalnya menara seluler dan Wi-Fi. Layanan lokasi ini harus diaktifkan dan tersedia untuk perangkat Anda agar aplikasi dapat menggunakannya. Aplikasi dapat menggunakan ini untuk menentukan perkiraan tempat Anda berada."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"akses SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Mengizinkan apl menggunakan fitur tingkat rendah SurfaceFlinger."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"baca buffer frame"</string>
@@ -566,8 +555,7 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"akses setelan Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Mengizinkan apl mengonfigurasi tablet Bluetooth lokal, dan menemukan serta menyandingkan dengan perangkat jarak jauh."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Mengizinkan apl mengonfigurasi ponsel Bluetooth lokal, dan menemukan serta menyandingkan dengan perangkat jarak jauh."</string>
-    <!-- no translation found for permlab_accessWimaxState (4195907010610205703) -->
-    <skip />
+    <string name="permlab_accessWimaxState" msgid="4195907010610205703">"sambungkan dan putuskan dari WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Memungkinkan aplikasi menentukan apakah WiMAX diaktifkan dan informasi tentang jaringan WiMAX apa saja yang tersambung."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Ubah status WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Memungkinkan aplikasi menyambungkan tablet ke dan memutus tablet dari jaringan WiMAX."</string>
@@ -591,8 +579,7 @@
     <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Mengizinkan apl memodifikasi umpan Anda yang disinkronkan saat ini. Apl berbahaya dapat mengubah umpan Anda yang disinkronkan."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"baca istilah yang Anda tambahkan ke kamus"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Memungkinkan aplikasi membaca semua kata, nama, dan frasa yang mungkin disimpan oleh pengguna di kamus pengguna."</string>
-    <!-- no translation found for permlab_writeDictionary (2183110402314441106) -->
-    <skip />
+    <string name="permlab_writeDictionary" msgid="2183110402314441106">"Menambahkan kata ke kamus yang ditentukan pengguna"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Mengizinkan apl menulis kata-kata baru ke dalam kamus pengguna."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"akses uji coba ke penyimpanan yang dilindungi"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"akses uji coba ke penyimpanan yang dilindungi"</string>
@@ -1111,22 +1098,14 @@
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; sedang mengirim pesan SMS dalam jumlah besar. Izinkan aplikasi ini untuk melanjutkan pengiriman pesan?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"Izinkan"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Tolak"</string>
-    <!-- no translation found for sms_short_code_confirm_message (1645436466285310855) -->
-    <skip />
-    <!-- no translation found for sms_short_code_details (4992814738863678373) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_details (4291752905667807485) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_allow (4458878637111023413) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_deny (2927389840209170706) -->
-    <skip />
-    <!-- no translation found for sms_short_code_remember_choice (5289538592272218136) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_always_allow (3241181154869493368) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_never_allow (446992765774269673) -->
-    <skip />
+    <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ingin mengirim pesan kepada &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
+    <string name="sms_short_code_details" msgid="4992814738863678373">"Ini dapat menyebabkan tagihan pada akun seluler Anda."</string>
+    <string name="sms_premium_short_code_details" msgid="4291752905667807485">"Ini akan menyebabkan tagihan pada akun seluler Anda."</string>
+    <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Kirim"</string>
+    <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Batal"</string>
+    <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Ingat pilihan saya"</string>
+    <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Selalu Izinkan"</string>
+    <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Jangan Pernah Izinkan"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Kartu SIM dihapus"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"Jaringan seluler tidak akan tersedia sampai Anda memulai lagi dengan memasukkan kartu SIM yang valid."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Selesai"</string>
@@ -1137,11 +1116,10 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Setel tanggal"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Setel"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Selesai"</string>
-    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"BARU: "</font></string>
+    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff33b5e5">"BARU: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"Disediakan oleh <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="no_permissions" msgid="7283357728219338112">"Tidak perlu izin"</string>
-    <!-- no translation found for perm_costs_money (4902470324142151116) -->
-    <skip />
+    <string name="perm_costs_money" msgid="4902470324142151116">"ini mungkin tidak gratis"</string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"Penyimpanan massal USB"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB terhubung"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Anda telah tersambung ke komputer melalui USB. Sentuh tombol di bawah jika Anda ingin menyalin file antara komputer dan penyimpanan USB Android Anda."</string>
@@ -1427,7 +1405,6 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Anda telah <xliff:g id="NUMBER">%d</xliff:g> kali gagal saat berusaha untuk membuka kunci ponsel. Kini ponsel akan disetel ulang ke setelan default pabrik."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Anda telah <xliff:g id="NUMBER_0">%d</xliff:g> kali salah menggambar pola pembuka kunci. Setelah <xliff:g id="NUMBER_1">%d</xliff:g> lagi upaya gagal, Anda akan diminta membuka kunci tablet menggunakan akun email."\n\n"Coba lagi dalam <xliff:g id="NUMBER_2">%d</xliff:g> detik."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Anda telah <xliff:g id="NUMBER_0">%d</xliff:g> kali salah menggambar pola pembuka kunci. Setelah <xliff:g id="NUMBER_1">%d</xliff:g> lagi upaya gagal, Anda akan diminta membuka kunci ponsel menggunakan akun email."\n\n"Coba lagi dalam <xliff:g id="NUMBER_2">%d</xliff:g> detik."</string>
-    <!-- no translation found for safe_media_volume_warning (7382971871993371648) -->
-    <skip />
+    <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Naikkan volume di atas tingkat aman?"\n"Mendengarkan volume tinggi dalam jangka waktu yang lama dapat merusak pendengaran Anda."</string>
     <string name="kg_temp_back_string" msgid="5812983904056640466">"&lt;"</string>
 </resources>
