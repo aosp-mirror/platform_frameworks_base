@@ -16,14 +16,17 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.PendingIntent;
+import android.app.AlertDialog.Builder;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.Loader;
@@ -37,6 +40,7 @@ import android.hardware.display.WifiDisplay;
 import android.hardware.display.WifiDisplayStatus;
 import android.net.Uri;
 import android.os.Debug;
+import android.os.SystemProperties;
 import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.view.LayoutInflater;
@@ -521,6 +525,24 @@ class QuickSettings {
         });
         parent.addView(imeTile);
 
+        // Bug reports
+        QuickSettingsTileView bugreportTile = (QuickSettingsTileView)
+                inflater.inflate(R.layout.quick_settings_tile, parent, false);
+        bugreportTile.setContent(R.layout.quick_settings_tile_bugreport, inflater);
+        bugreportTile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mBar.collapseAllPanels(true);
+                showBugreportDialog();
+            }
+        });
+        mModel.addBugreportTile(bugreportTile, new QuickSettingsModel.RefreshCallback() {
+            @Override
+            public void refreshView(QuickSettingsTileView view, State state) {
+                view.setVisibility(state.enabled ? View.VISIBLE : View.GONE);
+            }
+        });
+        parent.addView(bugreportTile);
         /*
         QuickSettingsTileView mediaTile = (QuickSettingsTileView)
                 inflater.inflate(R.layout.quick_settings_tile, parent, false);
@@ -573,6 +595,24 @@ class QuickSettings {
         if (!mBrightnessDialog.isShowing()) {
             mBrightnessDialog.show();
         }
+    }
+
+    private void showBugreportDialog() {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+        builder.setPositiveButton(com.android.internal.R.string.report, new OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (which == DialogInterface.BUTTON_POSITIVE) {
+                    SystemProperties.set("ctl.start", "bugreport");
+                }
+            }
+        });
+        builder.setMessage(com.android.internal.R.string.bugreport_message);
+        builder.setTitle(com.android.internal.R.string.bugreport_title);
+        builder.setCancelable(true);
+        final Dialog dialog = builder.create();
+        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        dialog.show();
     }
 
     private void updateWifiDisplayStatus() {
