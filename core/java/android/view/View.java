@@ -12286,9 +12286,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (!mHardwareLayer.isValid()) {
                 return null;
             }
-            mHardwareLayer.setLayerPaint(mLayerPaint);
 
-            mHardwareLayer.redraw(getHardwareLayerDisplayList(mHardwareLayer), mLocalDirtyRect);
+            mHardwareLayer.setLayerPaint(mLayerPaint);
+            mHardwareLayer.redrawLater(getHardwareLayerDisplayList(mHardwareLayer), mLocalDirtyRect);
+            ViewRootImpl viewRoot = getViewRootImpl();
+            if (viewRoot != null) viewRoot.pushHardwareLayerUpdate(mHardwareLayer);
+
             mLocalDirtyRect.setEmpty();
         }
 

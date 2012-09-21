@@ -203,5 +203,5 @@ abstract class HardwareLayer {
      *                    execute in this layer
      * @param dirtyRect The dirty region of the layer that needs to be redrawn
      */
-    abstract void redraw(DisplayList displayList, Rect dirtyRect);
+    abstract void redrawLater(DisplayList displayList, Rect dirtyRect);
 }
