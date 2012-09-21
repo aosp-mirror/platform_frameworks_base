@@ -302,16 +302,22 @@ class ServerThread extends Thread {
             Watchdog.getInstance().init(context, battery, power, alarm,
                     ActivityManagerService.self());
 
+            Slog.i(TAG, "Input Manager");
+            inputManager = new InputManagerService(context, wmHandler);
+
             Slog.i(TAG, "Window Manager");
-            wm = WindowManagerService.main(context, power, display,
+            wm = WindowManagerService.main(context, power, display, inputManager,
                     uiHandler, wmHandler,
                     factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL,
                     !firstBoot, onlyCore);
             ServiceManager.addService(Context.WINDOW_SERVICE, wm);
-            inputManager = wm.getInputManagerService();
             ServiceManager.addService(Context.INPUT_SERVICE, inputManager);
 
             ActivityManagerService.self().setWindowManager(wm);
+
+            inputManager.setWindowManagerCallbacks(wm.getInputMonitor());
+            inputManager.start();
+
             display.setWindowManager(wm);
             display.setInputManager(inputManager);
 
