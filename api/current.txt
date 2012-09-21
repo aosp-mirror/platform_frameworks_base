@@ -10854,6 +10854,7 @@ package android.media {
     method public void adjustVolume(int, int);
     method public int getMode();
     method public java.lang.String getParameters(java.lang.String);
+    method public java.lang.String getProperty(java.lang.String);
     method public int getRingerMode();
     method public deprecated int getRouting(int);
     method public int getStreamMaxVolume(int);
@@ -10931,6 +10932,8 @@ package android.media {
     field public static final int MODE_NORMAL = 0; // 0x0
     field public static final int MODE_RINGTONE = 1; // 0x1
     field public static final deprecated int NUM_STREAMS = 5; // 0x5
+    field public static final java.lang.String PROPERTY_OUTPUT_FRAMES_PER_BUFFER = "android.media.property.OUTPUT_FRAMES_PER_BUFFER";
+    field public static final java.lang.String PROPERTY_OUTPUT_SAMPLE_RATE = "android.media.property.OUTPUT_SAMPLE_RATE";
     field public static final java.lang.String RINGER_MODE_CHANGED_ACTION = "android.media.RINGER_MODE_CHANGED";
     field public static final int RINGER_MODE_NORMAL = 2; // 0x2
     field public static final int RINGER_MODE_SILENT = 0; // 0x0
