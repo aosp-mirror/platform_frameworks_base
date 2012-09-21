@@ -20581,66 +20581,65 @@ package android.speech.tts {
 
 package android.telephony {
 
-  public abstract class CellIdentity implements android.os.Parcelable {
+  public final class CellIdentityCdma implements android.os.Parcelable {
     method public int describeContents();
-    method public abstract int hashCode();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
-  }
-
-  public final class CellIdentityCdma extends android.telephony.CellIdentity implements android.os.Parcelable {
     method public int getBasestationId();
     method public int getLatitude();
     method public int getLongitude();
     method public int getNetworkId();
     method public int getSystemId();
-    method public int hashCode();
+    method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
   }
 
-  public final class CellIdentityGsm extends android.telephony.CellIdentity implements android.os.Parcelable {
+  public final class CellIdentityGsm implements android.os.Parcelable {
+    method public int describeContents();
     method public int getCid();
     method public int getLac();
     method public int getMcc();
     method public int getMnc();
     method public int getPsc();
-    method public int hashCode();
+    method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
   }
 
-  public final class CellIdentityLte extends android.telephony.CellIdentity implements android.os.Parcelable {
+  public final class CellIdentityLte implements android.os.Parcelable {
+    method public int describeContents();
     method public int getCi();
     method public int getMcc();
     method public int getMnc();
     method public int getPci();
     method public int getTac();
-    method public int hashCode();
+    method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
   }
 
-  public class CellInfo implements android.os.Parcelable {
+  public abstract class CellInfo implements android.os.Parcelable {
     method public int describeContents();
     method public long getTimeStamp();
     method public boolean isRegistered();
-    method public void writeToParcel(android.os.Parcel, int);
+    method public abstract void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
   }
 
   public final class CellInfoCdma extends android.telephony.CellInfo implements android.os.Parcelable {
     method public android.telephony.CellIdentityCdma getCellIdentity();
     method public android.telephony.CellSignalStrengthCdma getCellSignalStrength();
+    method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
   }
 
   public final class CellInfoGsm extends android.telephony.CellInfo implements android.os.Parcelable {
     method public android.telephony.CellIdentityGsm getCellIdentity();
     method public android.telephony.CellSignalStrengthGsm getCellSignalStrength();
+    method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
   }
 
   public final class CellInfoLte extends android.telephony.CellInfo implements android.os.Parcelable {
     method public android.telephony.CellIdentityLte getCellIdentity();
     method public android.telephony.CellSignalStrengthLte getCellSignalStrength();
+    method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
   }
 
@@ -20650,18 +20649,16 @@ package android.telephony {
     method public static void requestLocationUpdate();
   }
 
-  public abstract class CellSignalStrength implements android.os.Parcelable {
-    method public int describeContents();
+  public abstract class CellSignalStrength {
     method public abstract boolean equals(java.lang.Object);
     method public abstract int getAsuLevel();
     method public abstract int getDbm();
     method public abstract int getLevel();
     method public abstract int hashCode();
-    method public abstract void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
   }
 
-  public class CellSignalStrengthCdma extends android.telephony.CellSignalStrength implements android.os.Parcelable {
+  public final class CellSignalStrengthCdma extends android.telephony.CellSignalStrength implements android.os.Parcelable {
+    method public int describeContents();
     method public boolean equals(java.lang.Object);
     method public int getAsuLevel();
     method public int getCdmaDbm();
@@ -20678,7 +20675,8 @@ package android.telephony {
     field public static final android.os.Parcelable.Creator CREATOR;
   }
 
-  public class CellSignalStrengthGsm extends android.telephony.CellSignalStrength implements android.os.Parcelable {
+  public final class CellSignalStrengthGsm extends android.telephony.CellSignalStrength implements android.os.Parcelable {
+    method public int describeContents();
     method public boolean equals(java.lang.Object);
     method public int getAsuLevel();
     method public int getDbm();
@@ -20688,7 +20686,8 @@ package android.telephony {
     field public static final android.os.Parcelable.Creator CREATOR;
   }
 
-  public class CellSignalStrengthLte extends android.telephony.CellSignalStrength implements android.os.Parcelable {
+  public final class CellSignalStrengthLte extends android.telephony.CellSignalStrength implements android.os.Parcelable {
+    method public int describeContents();
     method public boolean equals(java.lang.Object);
     method public int getAsuLevel();
     method public int getDbm();

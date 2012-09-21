@@ -104,8 +104,7 @@ public final class CellInfoGsm extends CellInfo implements Parcelable {
     /** Implement the Parcelable interface */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(TYPE_LTE);
-        super.writeToParcel(dest, flags);
+        super.writeToParcel(dest, flags, TYPE_GSM);
         mCellIdentityGsm.writeToParcel(dest, flags);
         mCellSignalStrengthGsm.writeToParcel(dest, flags);
     }

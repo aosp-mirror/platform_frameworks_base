@@ -22,16 +22,7 @@ import android.os.Parcelable;
 /**
  * Abstract base class for cell phone signal strength related information.
  */
-public abstract class CellSignalStrength implements Parcelable {
-
-    // Type fields for parceling
-    /** @hide */
-    protected static final int TYPE_GSM = 1;
-    /** @hide */
-    protected static final int TYPE_CDMA = 2;
-    /** @hide */
-    protected static final int TYPE_LTE = 3;
-
+public abstract class CellSignalStrength {
 
     /** @hide */
     public static final int SIGNAL_STRENGTH_NONE_OR_UNKNOWN = 0;
@@ -85,34 +76,4 @@ public abstract class CellSignalStrength implements Parcelable {
 
     @Override
     public abstract boolean equals (Object o);
-
-    /** Implement the Parcelable interface */
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    /** Implement the Parcelable interface */
-    @Override
-    public abstract void writeToParcel(Parcel dest, int flags);
-
-    /** Implement the Parcelable interface */
-    public static final Creator<CellSignalStrength> CREATOR =
-            new Creator<CellSignalStrength>() {
-        @Override
-        public CellSignalStrength createFromParcel(Parcel in) {
-            int type = in.readInt();
-            switch (type) {
-                case TYPE_GSM: return CellSignalStrengthGsm.createFromParcelBody(in);
-                case TYPE_CDMA: return CellSignalStrengthCdma.createFromParcelBody(in);
-                case TYPE_LTE: return CellSignalStrengthLte.createFromParcelBody(in);
-                default: throw new RuntimeException("Bad CellSignalStrength Parcel");
-            }
-        }
-
-        @Override
-        public CellSignalStrength[] newArray(int size) {
-            return new CellSignalStrength[size];
-        }
-    };
 }
