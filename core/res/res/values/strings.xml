@@ -3141,7 +3141,7 @@
 
     <!-- Security Permissions strings-->
     <!-- Text that is placed at the front of a permission name that is being added to an app [CHAR LIMIT=NONE] -->
-    <string name="perms_new_perm_prefix"><font size="12" fgcolor="#ff900000">NEW: </font></string>
+    <string name="perms_new_perm_prefix"><font size="12" fgcolor="#ff33b5e5">NEW: </font></string>
     <!-- Text that is placed at the front of a permission name that is being added to an app [CHAR LIMIT=NONE] -->
     <string name="perms_description_app">Provided by <xliff:g id="app_name">%1$s</xliff:g>.</string>
     <!-- Shown for an application when it doesn't require any permission grants. -->
