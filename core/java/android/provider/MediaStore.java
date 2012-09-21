@@ -122,6 +122,38 @@ public final class MediaStore {
             "android.media.action.MEDIA_PLAY_FROM_SEARCH";
 
     /**
+     * An intent to perform a search for readable media and automatically play content from the
+     * result when possible. This can be fired, for example, by the result of a voice recognition
+     * command to read a book or magazine.
+     * <p>
+     * Contains the {@link android.app.SearchManager#QUERY} extra, which is a string that can
+     * contain any type of unstructured text search, like the name of a book or magazine, an author
+     * a genre, a publisher, or any combination of these.
+     * <p>
+     * Because this intent includes an open-ended unstructured search string, it makes the most
+     * sense for apps that can support large-scale search of text media, such as services connected
+     * to an online database of books and/or magazines which can be read on the device.
+     */
+    public static final String INTENT_ACTION_TEXT_OPEN_FROM_SEARCH =
+            "android.media.action.TEXT_OPEN_FROM_SEARCH";
+
+    /**
+     * An intent to perform a search for video media and automatically play content from the
+     * result when possible. This can be fired, for example, by the result of a voice recognition
+     * command to play movies.
+     * <p>
+     * Contains the {@link android.app.SearchManager#QUERY} extra, which is a string that can
+     * contain any type of unstructured video search, like the name of a movie, one or more actors,
+     * a genre, or any combination of these.
+     * <p>
+     * Because this intent includes an open-ended unstructured search string, it makes the most
+     * sense for apps that can support large-scale search of video, such as services connected to an
+     * online database of videos which can be streamed and played on the device.
+     */
+    public static final String INTENT_ACTION_VIDEO_PLAY_FROM_SEARCH =
+            "android.media.action.VIDEO_PLAY_FROM_SEARCH";
+
+    /**
      * The name of the Intent-extra used to define the artist
      */
     public static final String EXTRA_MEDIA_ARTIST = "android.intent.extra.artist";
