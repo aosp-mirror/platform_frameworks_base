@@ -52,6 +52,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 
 /**
@@ -187,6 +188,10 @@ public class RemoteViews implements Parcelable, Filter {
         public abstract void apply(View root, ViewGroup rootParent,
                 OnClickHandler handler) throws ActionException;
 
+        public static final int MERGE_REPLACE = 0;
+        public static final int MERGE_APPEND = 1;
+        public static final int MERGE_IGNORE = 2;
+
         public int describeContents() {
             return 0;
         }
@@ -203,6 +208,60 @@ public class RemoteViews implements Parcelable, Filter {
         public void setBitmapCache(BitmapCache bitmapCache) {
             // Do nothing
         }
+
+        public int mergeBehavior() {
+            return MERGE_REPLACE;
+        }
+
+        public abstract String getActionName();
+
+        public String getUniqueKey() {
+            return (getActionName() + viewId);
+        }
+
+        int viewId;
+    }
+
+    public void mergeRemoteViews(RemoteViews newRv) {
+        // We first copy the new RemoteViews, as the process of merging modifies the way the actions
+        // reference the bitmap cache. We don't want to modify the object as it may need to
+        // be merged and applied multiple times.
+        Parcel p = Parcel.obtain();
+        newRv.writeToParcel(p, 0);
+        RemoteViews copy = new RemoteViews(p);
+
+        HashMap<String, Action> map = new HashMap<String, Action>();
+        if (mActions == null) {
+            mActions = new ArrayList<Action>();
+        }
+
+        int count = mActions.size();
+        for (int i = 0; i < count; i++) {
+            Action a = mActions.get(i);
+            map.put(a.getUniqueKey(), a);
+        }
+
+        ArrayList<Action> newActions = copy.mActions;
+        if (newActions == null) return;
+        count = newActions.size();
+        for (int i = 0; i < count; i++) {
+            Action a = newActions.get(i);
+            String key = newActions.get(i).getUniqueKey();
+            int mergeBehavior = map.get(key).mergeBehavior();
+            if (map.containsKey(key) && mergeBehavior == Action.MERGE_REPLACE) {
+                mActions.remove(map.get(key));
+                map.remove(key);
+            }
+
+            // If the merge behavior is ignore, we don't bother keeping the extra action
+            if (mergeBehavior == Action.MERGE_REPLACE || mergeBehavior == Action.MERGE_APPEND) {
+                mActions.add(a);
+            }
+        }
+
+        // Because pruning can remove the need for bitmaps, we reconstruct the bitmap cache
+        mBitmapCache = new BitmapCache();
+        setBitmapCache(mBitmapCache);
     }
 
     private class SetEmptyView extends Action {
@@ -238,6 +297,10 @@ public class RemoteViews implements Parcelable, Filter {
             if (emptyView == null) return;
 
             adapterView.setEmptyView(emptyView);
+        }
+
+        public String getActionName() {
+            return "SetEmptyView";
         }
     }
 
@@ -316,7 +379,10 @@ public class RemoteViews implements Parcelable, Filter {
             }
         }
 
-        int viewId;
+        public String getActionName() {
+            return "SetOnClickFillInIntent";
+        }
+
         Intent fillInIntent;
 
         public final static int TAG = 9;
@@ -399,7 +465,10 @@ public class RemoteViews implements Parcelable, Filter {
             }
         }
 
-        int viewId;
+        public String getActionName() {
+            return "SetPendingIntentTemplate";
+        }
+
         PendingIntent pendingIntentTemplate;
 
         public final static int TAG = 8;
@@ -453,7 +522,10 @@ public class RemoteViews implements Parcelable, Filter {
             }
         }
 
-        int viewId;
+        public String getActionName() {
+            return "SetRemoteViewsAdapterIntent";
+        }
+
         Intent intent;
 
         public final static int TAG = 10;
@@ -539,7 +611,10 @@ public class RemoteViews implements Parcelable, Filter {
             }
         }
 
-        int viewId;
+        public String getActionName() {
+            return "SetOnClickPendingIntent";
+        }
+
         PendingIntent pendingIntent;
 
         public final static int TAG = 1;
@@ -625,7 +700,10 @@ public class RemoteViews implements Parcelable, Filter {
             }
         }
 
-        int viewId;
+        public String getActionName() {
+            return "SetDrawableParameters";
+        }
+
         boolean targetBackground;
         int alpha;
         int colorFilter;
@@ -636,7 +714,6 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     private class ReflectionActionWithoutParams extends Action {
-        int viewId;
         String methodName;
 
         public final static int TAG = 5;
@@ -687,6 +764,19 @@ public class RemoteViews implements Parcelable, Filter {
             } catch (Exception ex) {
                 throw new ActionException(ex);
             }
+        }
+
+        public int mergeBehavior() {
+            // we don't need to build up showNext or showPrevious calls
+            if (methodName.equals("showNext") || methodName.equals("showPrevious")) {
+                return MERGE_IGNORE;
+            } else {
+                return MERGE_REPLACE;
+            }
+        }
+
+        public String getActionName() {
+            return "ReflectionActionWithoutParams";
         }
     }
 
@@ -755,7 +845,6 @@ public class RemoteViews implements Parcelable, Filter {
 
     private class BitmapReflectionAction extends Action {
         int bitmapId;
-        int viewId;
         Bitmap bitmap;
         String methodName;
 
@@ -794,6 +883,10 @@ public class RemoteViews implements Parcelable, Filter {
             bitmapId = bitmapCache.getBitmapId(bitmap);
         }
 
+        public String getActionName() {
+            return "BitmapReflectionAction";
+        }
+
         public final static int TAG = 12;
     }
 
@@ -814,11 +907,12 @@ public class RemoteViews implements Parcelable, Filter {
         static final int STRING = 9;
         static final int CHAR_SEQUENCE = 10;
         static final int URI = 11;
+        // BITMAP actions are never stored in the list of actions. They are only used locally
+        // to implement BitmapReflectionAction, which eliminates duplicates using BitmapCache.
         static final int BITMAP = 12;
         static final int BUNDLE = 13;
         static final int INTENT = 14;
 
-        int viewId;
         String methodName;
         int type;
         Object value;
@@ -1041,19 +1135,19 @@ public class RemoteViews implements Parcelable, Filter {
             }
         }
 
-        @Override
-        public void updateMemoryUsageEstimate(MemoryUsageCounter counter) {
-            // We currently only calculate Bitmap memory usage
-            switch (this.type) {
-                case BITMAP:
-                    if (this.value != null) {
-                        final Bitmap b = (Bitmap) this.value;
-                        counter.addBitmapMemory(b);
-                    }
-                    break;
-                default:
-                    break;
+        public int mergeBehavior() {
+            // smoothScrollBy is cumulative, everything else overwites.
+            if (methodName.equals("smoothScrollBy")) {
+                return MERGE_APPEND;
+            } else {
+                return MERGE_REPLACE;
             }
+        }
+
+        public String getActionName() {
+            // Each type of reflection action corresponds to a setter, so each should be seen as
+            // unique from the standpoint of merging.
+            return "ReflectionAction" + this.methodName + this.type;
         }
     }
 
@@ -1131,7 +1225,14 @@ public class RemoteViews implements Parcelable, Filter {
             }
         }
 
-        int viewId;
+        public String getActionName() {
+            return "ViewGroupAction" + this.nestedViews == null ? "Remove" : "Add";
+        }
+
+        public int mergeBehavior() {
+            return MERGE_APPEND;
+        }
+
         RemoteViews nestedViews;
 
         public final static int TAG = 4;
@@ -1182,7 +1283,10 @@ public class RemoteViews implements Parcelable, Filter {
             }
         }
 
-        int viewId;
+        public String getActionName() {
+            return "TextViewDrawableAction";
+        }
+
         boolean isRelative = false;
         int d1, d2, d3, d4;
 
@@ -1220,7 +1324,10 @@ public class RemoteViews implements Parcelable, Filter {
             target.setTextSize(units, size);
         }
 
-        int viewId;
+        public String getActionName() {
+            return "TextViewSizeAction";
+        }
+
         int units;
         float size;
 
@@ -1264,7 +1371,10 @@ public class RemoteViews implements Parcelable, Filter {
             target.setPadding(left, top, right, bottom);
         }
 
-        int viewId;
+        public String getActionName() {
+            return "ViewPaddingAction";
+        }
+
         int left, top, right, bottom;
 
         public final static int TAG = 14;
