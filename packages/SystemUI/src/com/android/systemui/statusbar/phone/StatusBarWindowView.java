@@ -17,6 +17,8 @@
 package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -28,12 +30,14 @@ import android.widget.TextSwitcher;
 
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
 
 
 public class StatusBarWindowView extends FrameLayout
 {
-    private static final String TAG = "StatusBarWindowView";
+    public static final String TAG = "StatusBarWindowView";
+    public static final boolean DEBUG = BaseStatusBar.DEBUG;
 
     private ExpandHelper mExpandHelper;
     private NotificationRowLayout latestItems;
@@ -44,6 +48,7 @@ public class StatusBarWindowView extends FrameLayout
     public StatusBarWindowView(Context context, AttributeSet attrs) {
         super(context, attrs);
         setMotionEventSplittingEnabled(false);
+        setWillNotDraw(!DEBUG);
     }
 
     @Override
@@ -100,6 +105,18 @@ public class StatusBarWindowView extends FrameLayout
             handled = super.onTouchEvent(ev);
         }
         return handled;
+    }
+
+    @Override
+    public void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        if (DEBUG) {
+            Paint pt = new Paint();
+            pt.setColor(0x80FFFF00);
+            pt.setStrokeWidth(12.0f);
+            pt.setStyle(Paint.Style.STROKE);
+            canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), pt);
+        }
     }
 }
 

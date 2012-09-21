@@ -9,6 +9,7 @@ import android.util.Slog;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import com.android.systemui.R;
@@ -18,7 +19,7 @@ import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
 
 public class PanelView extends FrameLayout {
-    public static final boolean DEBUG = false;
+    public static final boolean DEBUG = PanelBar.DEBUG;
     public static final String TAG = PanelView.class.getSimpleName();
     public final void LOG(String fmt, Object... args) {
         if (!DEBUG) return;
@@ -298,10 +299,16 @@ public class PanelView extends FrameLayout {
 
         LOG("onMeasure(%d, %d) -> (%d, %d)",
                 widthMeasureSpec, heightMeasureSpec, getMeasuredWidth(), getMeasuredHeight());
-        mFullHeight = getMeasuredHeight();
-        // if one of our children is getting smaller, we should track that
-        if (!mTracking && !mRubberbanding && !mTimeAnimator.isStarted() && mExpandedHeight > 0 && mExpandedHeight != mFullHeight) {
-            mExpandedHeight = mFullHeight;
+
+        // Did one of our children change size?
+        int newHeight = getMeasuredHeight();
+        if (newHeight != mFullHeight) {
+            mFullHeight = newHeight;
+            // If the user isn't actively poking us, let's rubberband to the content
+            if (!mTracking && !mRubberbanding && !mTimeAnimator.isStarted() 
+                    && mExpandedHeight > 0 && mExpandedHeight != mFullHeight) {
+                mExpandedHeight = mFullHeight;
+            }
         }
         heightMeasureSpec = MeasureSpec.makeMeasureSpec(
                     (int) mExpandedHeight, MeasureSpec.AT_MOST); // MeasureSpec.getMode(heightMeasureSpec));
@@ -310,6 +317,7 @@ public class PanelView extends FrameLayout {
 
 
     public void setExpandedHeight(float height) {
+        mTracking = mRubberbanding = false;
         post(mStopAnimator);
         setExpandedHeightInternal(height);
     }
@@ -326,21 +334,26 @@ public class PanelView extends FrameLayout {
             // Hmm, full height hasn't been computed yet
         }
 
-        LOG("setExpansion: height=%.1f fh=%.1f tracking=%s rubber=%s", h, fh, mTracking?"T":"f", mRubberbanding?"T":"f");
-
         if (h < 0) h = 0;
         if (!(STRETCH_PAST_CONTENTS && (mTracking || mRubberbanding)) && h > fh) h = fh;
         mExpandedHeight = h;
+
+        LOG("setExpansion: height=%.1f fh=%.1f tracking=%s rubber=%s", h, fh, mTracking?"T":"f", mRubberbanding?"T":"f");
 
         requestLayout();
 //        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) getLayoutParams();
 //        lp.height = (int) mExpandedHeight;
 //        setLayoutParams(lp);
 
-        mExpandedFraction = Math.min(1f, h / fh);
+        mExpandedFraction = Math.min(1f, (fh == 0) ? 0 : h / fh);
     }
 
     private float getFullHeight() {
+        if (mFullHeight <= 0) {
+            LOG("Forcing measure() since fullHeight=" + mFullHeight);
+            measure(MeasureSpec.makeMeasureSpec(LayoutParams.WRAP_CONTENT, MeasureSpec.EXACTLY),
+                    MeasureSpec.makeMeasureSpec(LayoutParams.WRAP_CONTENT, MeasureSpec.EXACTLY));
+        }
         return mFullHeight;
     }
 
@@ -385,8 +398,12 @@ public class PanelView extends FrameLayout {
     }
 
     public void expand() {
-        if (!isFullyExpanded()) {
+        if (isFullyCollapsed()) {
+            mBar.startOpeningPanel(this);
+            LOG("expand: calling fling(%s, true)", mSelfExpandVelocityPx);
             fling (mSelfExpandVelocityPx, /*always=*/ true);
+        } else if (DEBUG) {
+            LOG("skipping expansion: is expanded");
         }
     }
 }
