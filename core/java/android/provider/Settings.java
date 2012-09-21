@@ -5334,24 +5334,33 @@ public final class Settings {
         * review apps prior to installation.
         * 1 = request apps to be verified prior to installation, if a verifier exists.
         * 0 = do not verify apps before installation
-        * {@hide}
+        * @hide
         */
        public static final String PACKAGE_VERIFIER_ENABLE = "package_verifier_enable";
 
        /** Timeout for package verification.
-        * {@hide} */
+        * @hide */
        public static final String PACKAGE_VERIFIER_TIMEOUT = "verifier_timeout";
 
        /** Default response code for package verification.
-        * {@hide} */
+        * @hide */
        public static final String PACKAGE_VERIFIER_DEFAULT_RESPONSE = "verifier_default_response";
 
-       /** Show package verification setting in the Settings app.
+       /**
+        * Show package verification setting in the Settings app.
         * 1 = show (default)
         * 0 = hide
-        * {@hide}
+        * @hide
         */
        public static final String PACKAGE_VERIFIER_SETTING_VISIBLE = "verifier_setting_visible";
+
+       /**
+        * Run package verificaiton on apps installed through ADB/ADT/USB
+        * 1 = perform package verification on ADB installs (default)
+        * 0 = bypass package verification on ADB installs
+        * @hide
+        */
+       public static final String PACKAGE_VERIFIER_INCLUDE_ADB = "verifier_verify_adb_installs";
 
        /**
         * The interval in milliseconds at which to check packet counts on the
