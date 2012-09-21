@@ -368,8 +368,8 @@
     <string name="permlab_installPackages" msgid="2199128482820306924">"sovellusten asentaminen suoraan"</string>
     <string name="permdesc_installPackages" msgid="5628530972548071284">"Antaa sovelluksen asentaa uusia tai päivitettyjä Android-paketteja. Haitalliset sovellukset voivat käyttää tätä uusien sovellusten asentamiseen mielivaltaisen voimakkailla käyttöluvilla."</string>
     <string name="permlab_clearAppCache" msgid="7487279391723526815">"sovellusvälimuistin kaikkien tietojen poistaminen"</string>
-    <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"Antaa sovelluksen vapauttaa tablet-laitteen tallennustilaa poistamalla tiedostoja muiden sovelluksien välimuistihakemistoista. Muut sovellukset voivat käynnistyä hitaammin, koska niiden täytyy noutaa tietonsa uudelleen."</string>
-    <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"Antaa sovelluksen vapauttaa puhelimen tallennustilaa poistamalla tiedostoja muiden sovelluksien välimuistihakemistoista. Muut sovellukset voivat käynnistyä hitaammin, koska niiden täytyy noutaa tietonsa uudelleen."</string>
+    <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"Antaa sovelluksen vapauttaa tablet-laitteen tallennustilaa poistamalla tiedostoja muiden sovellusten välimuistihakemistosta. Muut sovellukset voivat käynnistyä hitaammin, koska niiden täytyy noutaa tietonsa uudelleen."</string>
+    <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"Antaa sovelluksen vapauttaa puhelimen tallennustilaa poistamalla tiedostoja muiden sovellusten välimuistihakemistosta. Muut sovellukset voivat käynnistyä hitaammin, koska niiden täytyy noutaa tietonsa uudelleen."</string>
     <string name="permlab_movePackage" msgid="3289890271645921411">"sovellusresurssien siirtäminen"</string>
     <string name="permdesc_movePackage" msgid="319562217778244524">"Antaa sovelluksen siirtää sovellusresursseja sisäisiltä tietovälineiltä ulkoisille ja päinvastoin."</string>
     <string name="permlab_readLogs" msgid="6615778543198967614">"lukea arkaluonteisia lokitietoja"</string>
@@ -1116,7 +1116,7 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Aseta päivämäärä"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Aseta"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Valmis"</string>
-    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"UUTTA: "</font></string>
+    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff33b5e5">"UUTTA: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"Palvelun tarjoaa <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="no_permissions" msgid="7283357728219338112">"Lupia ei tarvita"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"tämä voi maksaa"</string>

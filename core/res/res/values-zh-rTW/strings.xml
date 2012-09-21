@@ -438,10 +438,10 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"允許應用程式使用 SurfaceFlinger 的低階功能。"</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"讀取框架緩衝"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"允許應用程式讀取畫面緩衝區的內容。"</string>
-    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"設定 WiFi Display"</string>
-    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"允許應用程式設定及連接 WiFi Display。"</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"控制 WiFi Display"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"允許應用程式控制 WiFi Display 的低階功能。"</string>
+    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"設定 WiFi 顯示裝置"</string>
+    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"允許應用程式設定及連接 WiFi 顯示裝置。"</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"控制 WiFi 顯示裝置"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"允許應用程式控制 WiFi 顯示裝置的低階功能。"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"變更音訊設定"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"允許應用程式修改全域音訊設定，例如音量和用來輸出的喇叭。"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"錄製音訊"</string>
@@ -1116,7 +1116,7 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"日期設定"</string>
     <string name="date_time_set" msgid="5777075614321087758">"設定"</string>
     <string name="date_time_done" msgid="2507683751759308828">"完成"</string>
-    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"新增："</font></string>
+    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff33b5e5">"新增："</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"由「<xliff:g id="APP_NAME">%1$s</xliff:g>」提供。"</string>
     <string name="no_permissions" msgid="7283357728219338112">"無須許可"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"這可能需要付費"</string>
