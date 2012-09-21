@@ -20080,6 +20080,40 @@ package android.renderscript {
   public abstract class ScriptIntrinsic extends android.renderscript.Script {
   }
 
+  public class ScriptIntrinsicBlend extends android.renderscript.ScriptIntrinsic {
+    method public static android.renderscript.ScriptIntrinsicBlend create(android.renderscript.RenderScript, android.renderscript.Element);
+    method public void forEachAdd(android.renderscript.Allocation, android.renderscript.Allocation);
+    method public void forEachClear(android.renderscript.Allocation, android.renderscript.Allocation);
+    method public void forEachDst(android.renderscript.Allocation, android.renderscript.Allocation);
+    method public void forEachDstAtop(android.renderscript.Allocation, android.renderscript.Allocation);
+    method public void forEachDstIn(android.renderscript.Allocation, android.renderscript.Allocation);
+    method public void forEachDstOut(android.renderscript.Allocation, android.renderscript.Allocation);
+    method public void forEachDstOver(android.renderscript.Allocation, android.renderscript.Allocation);
+    method public void forEachMultiply(android.renderscript.Allocation, android.renderscript.Allocation);
+    method public void forEachSrc(android.renderscript.Allocation, android.renderscript.Allocation);
+    method public void forEachSrcAtop(android.renderscript.Allocation, android.renderscript.Allocation);
+    method public void forEachSrcIn(android.renderscript.Allocation, android.renderscript.Allocation);
+    method public void forEachSrcOut(android.renderscript.Allocation, android.renderscript.Allocation);
+    method public void forEachSrcOver(android.renderscript.Allocation, android.renderscript.Allocation);
+    method public void forEachSubtract(android.renderscript.Allocation, android.renderscript.Allocation);
+    method public void forEachXor(android.renderscript.Allocation, android.renderscript.Allocation);
+    method public android.renderscript.Script.KernelID getKernelIDAdd();
+    method public android.renderscript.Script.KernelID getKernelIDClear();
+    method public android.renderscript.Script.KernelID getKernelIDDst();
+    method public android.renderscript.Script.KernelID getKernelIDDstAtop();
+    method public android.renderscript.Script.KernelID getKernelIDDstIn();
+    method public android.renderscript.Script.KernelID getKernelIDDstOut();
+    method public android.renderscript.Script.KernelID getKernelIDDstOver();
+    method public android.renderscript.Script.KernelID getKernelIDMultiply();
+    method public android.renderscript.Script.KernelID getKernelIDSrc();
+    method public android.renderscript.Script.KernelID getKernelIDSrcAtop();
+    method public android.renderscript.Script.KernelID getKernelIDSrcIn();
+    method public android.renderscript.Script.KernelID getKernelIDSrcOut();
+    method public android.renderscript.Script.KernelID getKernelIDSrcOver();
+    method public android.renderscript.Script.KernelID getKernelIDSubtract();
+    method public android.renderscript.Script.KernelID getKernelIDXor();
+  }
+
   public final class ScriptIntrinsicBlur extends android.renderscript.ScriptIntrinsic {
     method public static android.renderscript.ScriptIntrinsicBlur create(android.renderscript.RenderScript, android.renderscript.Element);
     method public void forEach(android.renderscript.Allocation);
