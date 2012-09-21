@@ -89,6 +89,11 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
     private static final String TAG = "DisplayManagerService";
     private static final boolean DEBUG = false;
 
+    // When this system property is set to 0, WFD is forcibly disabled on boot.
+    // When this system property is set to 1, WFD is forcibly enabled on boot.
+    // Otherwise WFD is enabled according to the value of config_enableWifiDisplay.
+    private static final String FORCE_WIFI_DISPLAY_ENABLE = "persist.debug.wfd.enable";
+
     private static final String SYSTEM_HEADLESS = "ro.config.headless";
     private static final long WAIT_FOR_DEFAULT_DISPLAY_TIMEOUT = 10000;
 
@@ -499,7 +504,8 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
 
     private void registerWifiDisplayAdapterLocked() {
         if (mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_enableWifiDisplay)) {
+                com.android.internal.R.bool.config_enableWifiDisplay)
+                || SystemProperties.getInt(FORCE_WIFI_DISPLAY_ENABLE, -1) == 1) {
             mWifiDisplayAdapter = new WifiDisplayAdapter(
                     mSyncRoot, mContext, mHandler, mDisplayAdapterListener,
                     mPersistentDataStore);
