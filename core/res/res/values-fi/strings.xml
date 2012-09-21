@@ -368,8 +368,8 @@
     <string name="permlab_installPackages" msgid="2199128482820306924">"sovellusten asentaminen suoraan"</string>
     <string name="permdesc_installPackages" msgid="5628530972548071284">"Antaa sovelluksen asentaa uusia tai päivitettyjä Android-paketteja. Haitalliset sovellukset voivat käyttää tätä uusien sovellusten asentamiseen mielivaltaisen voimakkailla käyttöluvilla."</string>
     <string name="permlab_clearAppCache" msgid="7487279391723526815">"sovellusvälimuistin kaikkien tietojen poistaminen"</string>
-    <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"Antaa sovelluksen vapauttaa tablet-laitteen tallennustilaa poistamalla tiedostoja muiden sovelluksien välimuistihakemistoista. Muut sovellukset voivat käynnistyä hitaammin, koska niiden täytyy noutaa tietonsa uudelleen."</string>
-    <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"Antaa sovelluksen vapauttaa puhelimen tallennustilaa poistamalla tiedostoja muiden sovelluksien välimuistihakemistoista. Muut sovellukset voivat käynnistyä hitaammin, koska niiden täytyy noutaa tietonsa uudelleen."</string>
+    <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"Antaa sovelluksen vapauttaa tablet-laitteen tallennustilaa poistamalla tiedostoja muiden sovellusten välimuistihakemistosta. Muut sovellukset voivat käynnistyä hitaammin, koska niiden täytyy noutaa tietonsa uudelleen."</string>
+    <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"Antaa sovelluksen vapauttaa puhelimen tallennustilaa poistamalla tiedostoja muiden sovellusten välimuistihakemistosta. Muut sovellukset voivat käynnistyä hitaammin, koska niiden täytyy noutaa tietonsa uudelleen."</string>
     <string name="permlab_movePackage" msgid="3289890271645921411">"sovellusresurssien siirtäminen"</string>
     <string name="permdesc_movePackage" msgid="319562217778244524">"Antaa sovelluksen siirtää sovellusresursseja sisäisiltä tietovälineiltä ulkoisille ja päinvastoin."</string>
     <string name="permlab_readLogs" msgid="6615778543198967614">"lukea arkaluonteisia lokitietoja"</string>

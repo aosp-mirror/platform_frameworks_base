@@ -440,7 +440,7 @@
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Inaruhusu programu kusoma maudhui ya fremu ya bafa."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"sanidi maonyesho ya Wifi"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Inaruhusu programu kusanidi na kuunganika kwenye maonyesho ya Wifi."</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"dhibiti  maonyesho ya Wifi"</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"dhibiti maonyesho ya Wifi"</string>
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Inaruhusu programu kudhibiti vipengele vya kiwango cha chini vya maonyesho ya Wifi."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"badilisha mipangilio yako ya sauti"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Inaruhusu programu kurekebisha mipangilio ya sauti kila mahali kama vile sauti na ni kipaza sauti kipi ambacho kinatumika kwa kutoa."</string>
