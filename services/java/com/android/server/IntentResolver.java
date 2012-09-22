@@ -46,6 +46,7 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
     final private static String TAG = "IntentResolver";
     final private static boolean DEBUG = false;
     final private static boolean localLOGV = DEBUG || false;
+    final private static boolean VALIDATE = false;
 
     public void addFilter(F f) {
         if (localLOGV) {
@@ -67,16 +68,20 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
                     mTypedActionToFilter, "      TypedAction: ");
         }
 
-        mOldResolver.addFilter(f);
-        verifyDataStructures(f);
+        if (VALIDATE) {
+            mOldResolver.addFilter(f);
+            verifyDataStructures(f);
+        }
     }
 
     public void removeFilter(F f) {
         removeFilterInternal(f);
         mFilters.remove(f);
 
-        mOldResolver.removeFilter(f);
-        verifyDataStructures(f);
+        if (VALIDATE) {
+            mOldResolver.removeFilter(f);
+            verifyDataStructures(f);
+        }
     }
 
     void removeFilterInternal(F f) {
@@ -314,12 +319,14 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
         }
         sortResults(finalList);
 
-        List<R> oldList = mOldResolver.queryIntent(intent, resolvedType, defaultOnly, userId);
-        if (oldList.size() != finalList.size()) {
-            ValidationFailure here = new ValidationFailure();
-            here.fillInStackTrace();
-            Log.wtf(TAG, "Query result " + intent + " size is " + finalList.size()
-                    + "; old implementation is " + oldList.size(), here);
+        if (VALIDATE) {
+            List<R> oldList = mOldResolver.queryIntent(intent, resolvedType, defaultOnly, userId);
+            if (oldList.size() != finalList.size()) {
+                ValidationFailure here = new ValidationFailure();
+                here.fillInStackTrace();
+                Log.wtf(TAG, "Query result " + intent + " size is " + finalList.size()
+                        + "; old implementation is " + oldList.size(), here);
+            }
         }
 
         if (debug) {
