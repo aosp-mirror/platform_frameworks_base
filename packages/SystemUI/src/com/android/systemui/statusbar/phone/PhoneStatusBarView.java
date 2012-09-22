@@ -27,6 +27,7 @@ import android.graphics.Rect;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Slog;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -41,6 +42,8 @@ import com.android.systemui.statusbar.policy.FixedSizeDrawable;
 
 public class PhoneStatusBarView extends PanelBar {
     private static final String TAG = "PhoneStatusBarView";
+    private static final boolean DEBUG = PhoneStatusBar.DEBUG;
+
     PhoneStatusBar mBar;
     int mScrimColor;
     float mMinFlingGutter;
@@ -151,6 +154,10 @@ public class PhoneStatusBarView extends PanelBar {
     @Override
     public void panelExpansionChanged(PanelView pv, float frac) {
         super.panelExpansionChanged(pv, frac);
+
+        if (DEBUG) {
+            Slog.v(TAG, "panelExpansionChanged: f=" + frac);
+        }
 
         if (mFadingPanel == pv 
                 && mScrimColor != 0 && ActivityManager.isHighEndGfx()) {

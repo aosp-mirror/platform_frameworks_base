@@ -84,8 +84,8 @@ import java.util.ArrayList;
 
 public abstract class BaseStatusBar extends SystemUI implements
         CommandQueue.Callbacks {
-    static final String TAG = "StatusBar";
-    private static final boolean DEBUG = false;
+    public static final String TAG = "StatusBar";
+    public static final boolean DEBUG = false;
     public static final boolean MULTIUSER_DEBUG = false;
 
     protected static final int MSG_TOGGLE_RECENTS_PANEL = 1020;
@@ -162,6 +162,9 @@ public abstract class BaseStatusBar extends SystemUI implements
     private RemoteViews.OnClickHandler mOnClickHandler = new RemoteViews.OnClickHandler() {
         @Override
         public boolean onClickHandler(View view, PendingIntent pendingIntent, Intent fillInIntent) {
+            if (DEBUG) {
+                Slog.v(TAG, "Notification click handler invoked for intent: " + pendingIntent);
+            }
             final boolean isActivity = pendingIntent.isActivity();
             if (isActivity) {
                 try {

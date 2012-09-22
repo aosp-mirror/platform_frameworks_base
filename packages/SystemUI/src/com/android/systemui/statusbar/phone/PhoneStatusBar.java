@@ -95,7 +95,7 @@ import java.util.ArrayList;
 
 public class PhoneStatusBar extends BaseStatusBar {
     static final String TAG = "PhoneStatusBar";
-    public static final boolean DEBUG = false;
+    public static final boolean DEBUG = BaseStatusBar.DEBUG;
     public static final boolean SPEW = DEBUG;
     public static final boolean DUMPTRUCK = true; // extra dumpsys info
 
@@ -285,9 +285,6 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         mStatusBarWindow = (StatusBarWindowView) View.inflate(context,
                 R.layout.super_status_bar, null);
-        if (DEBUG) {
-            mStatusBarWindow.setBackgroundColor(0x6000FF80);
-        }
         mStatusBarWindow.mService = this;
         mStatusBarWindow.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -1160,7 +1157,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     public void animateCollapse(int flags) {
         if (SPEW) {
-            Slog.d(TAG, "animateCollapse(): "
+            Slog.d(TAG, "animateCollapse():"
                     + " mExpandedVisible=" + mExpandedVisible
                     + " mAnimating=" + mAnimating
                     + " mAnimatingReveal=" + mAnimatingReveal
@@ -1203,7 +1200,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
 
         // Ensure the panel is fully collapsed (just in case; bug 6765842)
-        mStatusBarView.collapseAllPanels(/*animate=*/ false);
+ // @@@        mStatusBarView.collapseAllPanels(/*animate=*/ false);
 
         mExpandedVisible = false;
         mPile.setLayoutTransitionsEnabled(false);
