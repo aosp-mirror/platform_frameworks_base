@@ -792,7 +792,7 @@ public class KeyguardViewMediator {
             return;
         }
 
-        if (mUserManager.getUsers().size() < 2
+        if (mUserManager.getUsers(true).size() < 2
                 && mLockPatternUtils.isLockScreenDisabled() && !lockedOrMissing) {
             if (DEBUG) Log.d(TAG, "doKeyguard: not showing because lockscreen is off");
             return;

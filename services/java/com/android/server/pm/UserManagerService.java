@@ -43,15 +43,19 @@ import android.os.UserManager;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.TimeUtils;
 import android.util.Xml;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -66,6 +70,8 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String ATTR_FLAGS = "flags";
     private static final String ATTR_ICON_PATH = "icon";
     private static final String ATTR_ID = "id";
+    private static final String ATTR_CREATION_TIME = "created";
+    private static final String ATTR_LAST_LOGGED_IN_TIME = "lastLoggedIn";
     private static final String ATTR_SERIAL_NO = "serialNumber";
     private static final String ATTR_NEXT_SERIAL_NO = "nextSerialNumber";
     private static final String TAG_USERS = "users";
@@ -74,6 +80,8 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String USER_INFO_DIR = "system" + File.separator + "users";
     private static final String USER_LIST_FILENAME = "userlist.xml";
     private static final String USER_PHOTO_FILENAME = "photo.png";
+
+    private static final long EPOCH_PLUS_30_YEARS = 30L * 365 * 24 * 60 * 60 * 1000L; // ms
 
     private final Context mContext;
     private final PackageManagerService mPm;
@@ -85,6 +93,7 @@ public class UserManagerService extends IUserManager.Stub {
     private final File mBaseUserPath;
 
     private SparseArray<UserInfo> mUsers = new SparseArray<UserInfo>();
+    private HashSet<Integer> mRemovingUserIds = new HashSet<Integer>();
 
     private int[] mUserIds;
     private boolean mGuestEnabled;
@@ -145,12 +154,14 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public List<UserInfo> getUsers() {
+    public List<UserInfo> getUsers(boolean excludeDying) {
         checkManageUsersPermission("query users");
         synchronized (mPackagesLock) {
             ArrayList<UserInfo> users = new ArrayList<UserInfo>(mUsers.size());
             for (int i = 0; i < mUsers.size(); i++) {
-                users.add(mUsers.valueAt(i));
+                if (!excludeDying || !mRemovingUserIds.contains(mUsers.keyAt(i))) {
+                    users.add(mUsers.valueAt(i));
+                }
             }
             return users;
         }
@@ -436,6 +447,9 @@ public class UserManagerService extends IUserManager.Stub {
             serializer.attribute(null, ATTR_ID, Integer.toString(userInfo.id));
             serializer.attribute(null, ATTR_SERIAL_NO, Integer.toString(userInfo.serialNumber));
             serializer.attribute(null, ATTR_FLAGS, Integer.toString(userInfo.flags));
+            serializer.attribute(null, ATTR_CREATION_TIME, Long.toString(userInfo.creationTime));
+            serializer.attribute(null, ATTR_LAST_LOGGED_IN_TIME,
+                    Long.toString(userInfo.lastLoggedInTime));
             if (userInfo.iconPath != null) {
                 serializer.attribute(null,  ATTR_ICON_PATH, userInfo.iconPath);
             }
@@ -500,6 +514,8 @@ public class UserManagerService extends IUserManager.Stub {
         int serialNumber = id;
         String name = null;
         String iconPath = null;
+        long creationTime = 0L;
+        long lastLoggedInTime = 0L;
 
         FileInputStream fis = null;
         try {
@@ -520,18 +536,16 @@ public class UserManagerService extends IUserManager.Stub {
             }
 
             if (type == XmlPullParser.START_TAG && parser.getName().equals(TAG_USER)) {
-                String storedId = parser.getAttributeValue(null, ATTR_ID);
-                if (Integer.parseInt(storedId) != id) {
+                int storedId = readIntAttribute(parser, ATTR_ID, -1);
+                if (storedId != id) {
                     Slog.e(LOG_TAG, "User id does not match the file name");
                     return null;
                 }
-                String serialNumberValue = parser.getAttributeValue(null, ATTR_SERIAL_NO);
-                if (serialNumberValue != null) {
-                    serialNumber = Integer.parseInt(serialNumberValue);
-                }
-                String flagString = parser.getAttributeValue(null, ATTR_FLAGS);
-                flags = Integer.parseInt(flagString);
+                serialNumber = readIntAttribute(parser, ATTR_SERIAL_NO, id);
+                flags = readIntAttribute(parser, ATTR_FLAGS, 0);
                 iconPath = parser.getAttributeValue(null, ATTR_ICON_PATH);
+                creationTime = readLongAttribute(parser, ATTR_CREATION_TIME, 0);
+                lastLoggedInTime = readLongAttribute(parser, ATTR_LAST_LOGGED_IN_TIME, 0);
 
                 while ((type = parser.next()) != XmlPullParser.START_TAG
                         && type != XmlPullParser.END_DOCUMENT) {
@@ -546,6 +560,8 @@ public class UserManagerService extends IUserManager.Stub {
 
             UserInfo userInfo = new UserInfo(id, name, iconPath, flags);
             userInfo.serialNumber = serialNumber;
+            userInfo.creationTime = creationTime;
+            userInfo.lastLoggedInTime = lastLoggedInTime;
             return userInfo;
 
         } catch (IOException ioe) {
@@ -559,6 +575,26 @@ public class UserManagerService extends IUserManager.Stub {
             }
         }
         return null;
+    }
+
+    private int readIntAttribute(XmlPullParser parser, String attr, int defaultValue) {
+        String valueString = parser.getAttributeValue(null, attr);
+        if (valueString == null) return defaultValue;
+        try {
+            return Integer.parseInt(valueString);
+        } catch (NumberFormatException nfe) {
+            return defaultValue;
+        }
+    }
+
+    private long readLongAttribute(XmlPullParser parser, String attr, long defaultValue) {
+        String valueString = parser.getAttributeValue(null, attr);
+        if (valueString == null) return defaultValue;
+        try {
+            return Long.parseLong(valueString);
+        } catch (NumberFormatException nfe) {
+            return defaultValue;
+        }
     }
 
     @Override
@@ -575,6 +611,8 @@ public class UserManagerService extends IUserManager.Stub {
                     userInfo = new UserInfo(userId, name, null, flags);
                     File userPath = new File(mBaseUserPath, Integer.toString(userId));
                     userInfo.serialNumber = mNextSerialNumber++;
+                    long now = System.currentTimeMillis();
+                    userInfo.creationTime = (now > EPOCH_PLUS_30_YEARS) ? now : 0;
                     mUsers.put(userId, userInfo);
                     writeUserListLocked();
                     writeUserLocked(userInfo);
@@ -607,6 +645,7 @@ public class UserManagerService extends IUserManager.Stub {
             if (userHandle == 0 || user == null) {
                 return false;
             }
+            mRemovingUserIds.add(userHandle);
         }
 
         int res;
@@ -636,6 +675,7 @@ public class UserManagerService extends IUserManager.Stub {
 
                 // Remove this user from the list
                 mUsers.remove(userHandle);
+                mRemovingUserIds.remove(userHandle);
                 // Remove user file
                 AtomicFile userFile = new AtomicFile(new File(mUsersDir, userHandle + ".xml"));
                 userFile.delete();
@@ -700,6 +740,21 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     /**
+     * Make a note of the last started time of a user.
+     * @param userId the user that was just foregrounded
+     */
+    public void userForeground(int userId) {
+        synchronized (mPackagesLock) {
+            UserInfo user = mUsers.get(userId);
+            long now = System.currentTimeMillis();
+            if (user != null && now > EPOCH_PLUS_30_YEARS) {
+                user.lastLoggedInTime = now;
+                writeUserLocked(user);
+            }
+        }
+    }
+
+    /**
      * Returns the next available user id, filling in any holes in the ids.
      * TODO: May not be a good idea to recycle ids, in case it results in confusion
      * for data and battery stats collection, or unexpected cross-talk.
@@ -709,12 +764,55 @@ public class UserManagerService extends IUserManager.Stub {
         synchronized (mPackagesLock) {
             int i = 10;
             while (i < Integer.MAX_VALUE) {
-                if (mUsers.indexOfKey(i) < 0) {
+                if (mUsers.indexOfKey(i) < 0 && !mRemovingUserIds.contains(i)) {
                     break;
                 }
                 i++;
             }
             return i;
+        }
+    }
+
+    @Override
+    protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
+                != PackageManager.PERMISSION_GRANTED) {
+            pw.println("Permission Denial: can't dump UserManager from from pid="
+                    + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid()
+                    + " without permission "
+                    + android.Manifest.permission.DUMP);
+            return;
+        }
+
+        long now = System.currentTimeMillis();
+        StringBuilder sb = new StringBuilder();
+        synchronized (mPackagesLock) {
+            pw.println("Users:");
+            for (int i = 0; i < mUsers.size(); i++) {
+                UserInfo user = mUsers.valueAt(i);
+                if (user == null) continue;
+                pw.print("  "); pw.print(user);
+                pw.println(mRemovingUserIds.contains(mUsers.keyAt(i)) ? " <removing> " : "");
+                pw.print("    Created: ");
+                if (user.creationTime == 0) {
+                    pw.println("<unknown>");
+                } else {
+                    sb.setLength(0);
+                    TimeUtils.formatDuration(now - user.creationTime, sb);
+                    sb.append(" ago");
+                    pw.println(sb);
+                }
+                pw.print("    Last logged in: ");
+                if (user.lastLoggedInTime == 0) {
+                    pw.println("<unknown>");
+                } else {
+                    sb.setLength(0);
+                    TimeUtils.formatDuration(now - user.lastLoggedInTime, sb);
+                    sb.append(" ago");
+                    pw.println(sb);
+                }
+            }
         }
     }
 }
