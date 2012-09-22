@@ -1007,8 +1007,8 @@ public class LockPatternUtils {
      *   or null if there is no next alarm.
      */
     public String getNextAlarm() {
-        String nextAlarm = Settings.System.getString(mContentResolver,
-                Settings.System.NEXT_ALARM_FORMATTED);
+        String nextAlarm = Settings.System.getStringForUser(mContentResolver,
+                Settings.System.NEXT_ALARM_FORMATTED, UserHandle.USER_CURRENT);
         if (nextAlarm == null || TextUtils.isEmpty(nextAlarm)) {
             return null;
         }
@@ -1035,8 +1035,9 @@ public class LockPatternUtils {
 
     public int[] getUserDefinedWidgets() {
         int appWidgetId = -1;
-        String appWidgetIdString = Settings.Secure.getString(
-                mContentResolver, Settings.Secure.LOCK_SCREEN_USER_SELECTED_APPWIDGET_ID);
+        String appWidgetIdString = Settings.Secure.getStringForUser(
+                mContentResolver, Settings.Secure.LOCK_SCREEN_USER_SELECTED_APPWIDGET_ID,
+                UserHandle.USER_CURRENT);
         if (appWidgetIdString != null) {
             appWidgetId = (int) Integer.decode(appWidgetIdString);
         }
@@ -1046,8 +1047,9 @@ public class LockPatternUtils {
 
     public int getStatusWidget() {
         int appWidgetId = -1;
-        String appWidgetIdString = Settings.Secure.getString(
-                mContentResolver, Settings.Secure.LOCK_SCREEN_STATUS_APPWIDGET_ID);
+        String appWidgetIdString = Settings.Secure.getStringForUser(
+                mContentResolver, Settings.Secure.LOCK_SCREEN_STATUS_APPWIDGET_ID,
+                UserHandle.USER_CURRENT);
         if (appWidgetIdString != null) {
             appWidgetId = (int) Integer.decode(appWidgetIdString);
         }
