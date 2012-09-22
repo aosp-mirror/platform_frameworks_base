@@ -100,6 +100,15 @@
         <item name="android:textColor">#ff3a3b39</item>
     </style>
 
+    <style name="BaseBrightnessDialogContainer">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginLeft">8dp</item>
+        <item name="android:layout_marginRight">8dp</item>
+        <item name="android:padding">16dp</item>
+    </style>
+    <style name="BrightnessDialogContainer" parent="@style/BaseBrightnessDialogContainer" />
+
     <style name="Animation" />
 
     <style name="Animation.ShirtPocketPanel">

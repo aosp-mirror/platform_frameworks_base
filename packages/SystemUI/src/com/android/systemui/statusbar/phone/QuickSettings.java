@@ -19,8 +19,6 @@ package com.android.systemui.statusbar.phone;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.PendingIntent;
-import android.app.AlertDialog.Builder;
-import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -33,13 +31,11 @@ import android.content.Loader;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.LevelListDrawable;
 import android.hardware.display.DisplayManager;
-import android.hardware.display.WifiDisplay;
 import android.hardware.display.WifiDisplayStatus;
 import android.net.Uri;
-import android.os.Debug;
+import android.os.Handler;
 import android.os.SystemProperties;
 import android.provider.ContactsContract;
 import android.provider.Settings;
@@ -48,16 +44,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.android.internal.view.RotationPolicy;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.phone.QuickSettingsModel.BrightnessState;
 import com.android.systemui.statusbar.phone.QuickSettingsModel.RSSIState;
 import com.android.systemui.statusbar.phone.QuickSettingsModel.State;
 import com.android.systemui.statusbar.phone.QuickSettingsModel.UserState;
@@ -69,8 +60,6 @@ import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.ToggleSlider;
 
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Set;
 
 
 /**
@@ -88,12 +77,17 @@ class QuickSettings {
 
     private BrightnessController mBrightnessController;
     private BluetoothController mBluetoothController;
+
     private Dialog mBrightnessDialog;
+    private int mBrightnessDialogShortTimeout;
+    private int mBrightnessDialogLongTimeout;
 
     private CursorLoader mUserInfoLoader;
 
     private LevelListDrawable mBatteryLevels;
     private LevelListDrawable mChargingBatteryLevels;
+
+    private Handler mHandler;
 
     // The set of QuickSettingsTiles that have dynamic spans (and need to be updated on
     // configuration change)
@@ -114,11 +108,16 @@ class QuickSettings {
         mContainerView = container;
         mModel = new QuickSettingsModel(context);
         mWifiDisplayStatus = new WifiDisplayStatus();
+        mHandler = new Handler();
 
         Resources r = mContext.getResources();
         mBatteryLevels = (LevelListDrawable) r.getDrawable(R.drawable.qs_sys_battery);
         mChargingBatteryLevels =
                 (LevelListDrawable) r.getDrawable(R.drawable.qs_sys_battery_charging);
+        mBrightnessDialogLongTimeout =
+                r.getInteger(R.integer.quick_settings_brightness_dialog_long_timeout);
+        mBrightnessDialogShortTimeout =
+                r.getInteger(R.integer.quick_settings_brightness_dialog_short_timeout);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(DisplayManager.ACTION_WIFI_DISPLAY_STATUS_CHANGED);
@@ -213,6 +212,15 @@ class QuickSettings {
         QuickSettingsTileView userTile = (QuickSettingsTileView)
                 inflater.inflate(R.layout.quick_settings_tile, parent, false);
         userTile.setContent(R.layout.quick_settings_tile_user, inflater);
+        userTile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mBar.collapseAllPanels(true);
+                ContactsContract.QuickContact.showQuickContact(mContext, v,
+                        ContactsContract.Profile.CONTENT_URI,
+                        ContactsContract.QuickContact.MODE_LARGE, null);
+            }
+        });
         mModel.addUserTile(userTile, new QuickSettingsModel.RefreshCallback() {
             @Override
             public void refreshView(QuickSettingsTileView view, State state) {
@@ -452,6 +460,7 @@ class QuickSettings {
             public void refreshView(QuickSettingsTileView view, State state) {
                 TextView tv = (TextView) view.findViewById(R.id.brightness_textview);
                 tv.setCompoundDrawablesWithIntrinsicBounds(0, state.iconId, 0, 0);
+                dismissBrightnessDialog(mBrightnessDialogShortTimeout);
             }
         });
         parent.addView(brightnessTile);
@@ -570,8 +579,34 @@ class QuickSettings {
             v.setColumnSpan(span);
         }
         mContainerView.requestLayout();
+
+        // Reset the dialog
+        boolean isBrightnessDialogVisible = false;
+        if (mBrightnessDialog != null) {
+            removeAllBrightnessDialogCallbacks();
+
+            isBrightnessDialogVisible = mBrightnessDialog.isShowing();
+            mBrightnessDialog.dismiss();
+        }
+        mBrightnessDialog = null;
+        if (isBrightnessDialogVisible) {
+            showBrightnessDialog();
+        }
     }
     
+    private void removeAllBrightnessDialogCallbacks() {
+        mHandler.removeCallbacks(mDismissBrightnessDialogRunnable);
+    }
+
+    private Runnable mDismissBrightnessDialogRunnable = new Runnable() {
+        public void run() {
+            if (mBrightnessDialog != null && mBrightnessDialog.isShowing()) {
+                mBrightnessDialog.dismiss();
+            }
+            removeAllBrightnessDialogCallbacks();
+        };
+    };
+
     private void showBrightnessDialog() {
         if (mBrightnessDialog == null) {
             mBrightnessDialog = new Dialog(mContext);
@@ -594,6 +629,13 @@ class QuickSettings {
         }
         if (!mBrightnessDialog.isShowing()) {
             mBrightnessDialog.show();
+            dismissBrightnessDialog(mBrightnessDialogLongTimeout);
+        }
+    }
+
+    private void dismissBrightnessDialog(int timeout) {
+        if (mBrightnessDialog != null) {
+            mHandler.postDelayed(mDismissBrightnessDialogRunnable, timeout);
         }
     }
 
