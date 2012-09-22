@@ -257,7 +257,7 @@ public class AppSecurityPermissions {
         try {
             pkgInfo = mPm.getPackageInfo(packageName, PackageManager.GET_PERMISSIONS);
         } catch (NameNotFoundException e) {
-            Log.w(TAG, "Could'nt retrieve permissions for package:"+packageName);
+            Log.w(TAG, "Couldn't retrieve permissions for package:"+packageName);
             return;
         }
         // Extract all user permissions
