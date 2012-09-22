@@ -506,6 +506,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mPowerKeyTriggered;
     private long mPowerKeyTime;
 
+    SettingsObserver mSettingsObserver;
     ShortcutManager mShortcutManager;
     PowerManager.WakeLock mBroadcastWakeLock;
     boolean mHavePendingMediaKeyRepeatWithWakeLock;
@@ -552,23 +553,32 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         void observe() {
+            // Observe all users' changes
             ContentResolver resolver = mContext.getContentResolver();
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.END_BUTTON_BEHAVIOR), false, this);
+                    Settings.System.END_BUTTON_BEHAVIOR), false, this,
+                    UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.Secure.getUriFor(
-                    Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR), false, this);
+                    Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR), false, this,
+                    UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.ACCELEROMETER_ROTATION), false, this);
+                    Settings.System.ACCELEROMETER_ROTATION), false, this,
+                    UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.USER_ROTATION), false, this);
+                    Settings.System.USER_ROTATION), false, this,
+                    UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.SCREEN_OFF_TIMEOUT), false, this);
+                    Settings.System.SCREEN_OFF_TIMEOUT), false, this,
+                    UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.POINTER_LOCATION), false, this);
+                    Settings.System.POINTER_LOCATION), false, this,
+                    UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.Secure.getUriFor(
-                    Settings.Secure.DEFAULT_INPUT_METHOD), false, this);
+                    Settings.Secure.DEFAULT_INPUT_METHOD), false, this,
+                    UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    "fancy_rotation_anim"), false, this);
+                    "fancy_rotation_anim"), false, this,
+                    UserHandle.USER_ALL);
             updateSettings();
         }
 
@@ -875,8 +885,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         try {
             mOrientationListener.setCurrentRotation(windowManager.getRotation());
         } catch (RemoteException ex) { }
-        SettingsObserver settingsObserver = new SettingsObserver(mHandler);
-        settingsObserver.observe();
+        mSettingsObserver = new SettingsObserver(mHandler);
+        mSettingsObserver.observe();
         mShortcutManager = new ShortcutManager(context, mHandler);
         mShortcutManager.observe();
         mUiMode = context.getResources().getInteger(
@@ -927,6 +937,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mDockMode = intent.getIntExtra(Intent.EXTRA_DOCK_STATE,
                     Intent.EXTRA_DOCK_STATE_UNDOCKED);
         }
+
+        // register for multiuser-relevant broadcasts
+        filter = new IntentFilter(Intent.ACTION_USER_SWITCHED);
+        context.registerReceiver(mMultiuserReceiver, filter);
 
         mVibrator = (Vibrator)context.getSystemService(Context.VIBRATOR_SERVICE);
         mLongPressVibePattern = getLongIntArray(mContext.getResources(),
@@ -1066,22 +1080,25 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         ContentResolver resolver = mContext.getContentResolver();
         boolean updateRotation = false;
         synchronized (mLock) {
-            mEndcallBehavior = Settings.System.getInt(resolver,
+            mEndcallBehavior = Settings.System.getIntForUser(resolver,
                     Settings.System.END_BUTTON_BEHAVIOR,
-                    Settings.System.END_BUTTON_BEHAVIOR_DEFAULT);
-            mIncallPowerBehavior = Settings.Secure.getInt(resolver,
+                    Settings.System.END_BUTTON_BEHAVIOR_DEFAULT,
+                    UserHandle.USER_CURRENT);
+            mIncallPowerBehavior = Settings.Secure.getIntForUser(resolver,
                     Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR,
-                    Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR_DEFAULT);
+                    Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR_DEFAULT,
+                    UserHandle.USER_CURRENT);
 
             // Configure rotation lock.
-            int userRotation = Settings.System.getInt(resolver,
-                    Settings.System.USER_ROTATION, Surface.ROTATION_0);
+            int userRotation = Settings.System.getIntForUser(resolver,
+                    Settings.System.USER_ROTATION, Surface.ROTATION_0,
+                    UserHandle.USER_CURRENT);
             if (mUserRotation != userRotation) {
                 mUserRotation = userRotation;
                 updateRotation = true;
             }
-            int userRotationMode = Settings.System.getInt(resolver,
-                    Settings.System.ACCELEROMETER_ROTATION, 0) != 0 ?
+            int userRotationMode = Settings.System.getIntForUser(resolver,
+                    Settings.System.ACCELEROMETER_ROTATION, 0, UserHandle.USER_CURRENT) != 0 ?
                             WindowManagerPolicy.USER_ROTATION_FREE :
                                     WindowManagerPolicy.USER_ROTATION_LOCKED;
             if (mUserRotationMode != userRotationMode) {
@@ -1091,8 +1108,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
 
             if (mSystemReady) {
-                int pointerLocation = Settings.System.getInt(resolver,
-                        Settings.System.POINTER_LOCATION, 0);
+                int pointerLocation = Settings.System.getIntForUser(resolver,
+                        Settings.System.POINTER_LOCATION, 0, UserHandle.USER_CURRENT);
                 if (mPointerLocationMode != pointerLocation) {
                     mPointerLocationMode = pointerLocation;
                     mHandler.sendEmptyMessage(pointerLocation != 0 ?
@@ -1100,10 +1117,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
             }
             // use screen off timeout setting as the timeout for the lockscreen
-            mLockScreenTimeout = Settings.System.getInt(resolver,
-                    Settings.System.SCREEN_OFF_TIMEOUT, 0);
-            String imId = Settings.Secure.getString(resolver,
-                    Settings.Secure.DEFAULT_INPUT_METHOD);
+            mLockScreenTimeout = Settings.System.getIntForUser(resolver,
+                    Settings.System.SCREEN_OFF_TIMEOUT, 0, UserHandle.USER_CURRENT);
+            String imId = Settings.Secure.getStringForUser(resolver,
+                    Settings.Secure.DEFAULT_INPUT_METHOD, UserHandle.USER_CURRENT);
             boolean hasSoftInput = imId != null && imId.length() > 0;
             if (mHasSoftInput != hasSoftInput) {
                 mHasSoftInput = hasSoftInput;
@@ -3557,6 +3574,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     };
 
+    BroadcastReceiver mMultiuserReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Intent.ACTION_USER_SWITCHED.equals(intent.getAction())) {
+                // tickle the settings observer: this first ensures that we're
+                // observing the relevant settings for the newly-active user,
+                // and then updates our own bookkeeping based on the now-
+                // current user.
+                mSettingsObserver.onChange(false);
+            }
+        }
+    };
+
     /** {@inheritDoc} */
     public void screenTurnedOff(int why) {
         EventLog.writeEvent(70000, 0);
@@ -3889,16 +3919,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // mUserRotationMode and mUserRotation will be assigned by the content observer
         if (mode == WindowManagerPolicy.USER_ROTATION_LOCKED) {
-            Settings.System.putInt(res,
+            Settings.System.putIntForUser(res,
                     Settings.System.USER_ROTATION,
-                    rot);
-            Settings.System.putInt(res,
+                    rot,
+                    UserHandle.USER_CURRENT);
+            Settings.System.putIntForUser(res,
                     Settings.System.ACCELEROMETER_ROTATION,
-                    0);
+                    0,
+                    UserHandle.USER_CURRENT);
         } else {
-            Settings.System.putInt(res,
+            Settings.System.putIntForUser(res,
                     Settings.System.ACCELEROMETER_ROTATION,
-                    1);
+                    1,
+                    UserHandle.USER_CURRENT);
         }
     }
 
@@ -4218,8 +4251,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     public boolean performHapticFeedbackLw(WindowState win, int effectId, boolean always) {
-        final boolean hapticsDisabled = Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.HAPTIC_FEEDBACK_ENABLED, 0) == 0;
+        final boolean hapticsDisabled = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.HAPTIC_FEEDBACK_ENABLED, 0, UserHandle.USER_CURRENT) == 0;
         if (!always && (hapticsDisabled || mKeyguardMediator.isShowingAndNotHidden())) {
             return false;
         }

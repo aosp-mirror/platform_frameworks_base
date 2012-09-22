@@ -799,7 +799,7 @@ public final class Settings {
             if (mCallGetCommand != null) {
                 try {
                     Bundle args = null;
-                    if (userHandle != UserHandle.myUserId()) {
+                    if (!isSelf) {
                         args = new Bundle();
                         args.putInt(CALL_METHOD_USER_KEY, userHandle);
                     }
