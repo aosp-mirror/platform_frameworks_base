@@ -340,7 +340,9 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
 
         bitmap->setConfig(config, scaledWidth, scaledHeight);
         bitmap->setIsOpaque(decoded->isOpaque());
-        bitmap->allocPixels(&javaAllocator, NULL);
+        if (!bitmap->allocPixels(&javaAllocator, NULL)) {
+            return nullObjectReturn("allocation failed for scaled bitmap");
+        }
         bitmap->eraseColor(0);
 
         SkPaint paint;
