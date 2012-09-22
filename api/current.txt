@@ -29028,7 +29028,6 @@ package android.widget {
     method public int describeContents();
     method public int getLayoutId();
     method public java.lang.String getPackage();
-    method public void mergeRemoteViews(android.widget.RemoteViews);
     method public boolean onLoadClass(java.lang.Class);
     method public void reapply(android.content.Context, android.view.View);
     method public void removeAllViews(int);
