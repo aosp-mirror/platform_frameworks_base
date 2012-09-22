@@ -212,8 +212,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         static final long DEF_PASSWORD_EXPIRATION_DATE = 0;
         long passwordExpirationDate = DEF_PASSWORD_EXPIRATION_DATE;
 
-        static final int DEF_KEYGUARD_WIDGET_DISABLED = 0; // none
-        int disableKeyguardWidgets = DEF_KEYGUARD_WIDGET_DISABLED;
+        static final int DEF_KEYGUARD_FEATURES_DISABLED = 0; // none
+        int disabledKeyguardFeatures = DEF_KEYGUARD_FEATURES_DISABLED;
 
         boolean encryptionRequested = false;
         boolean disableCamera = false;
@@ -328,10 +328,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.attribute(null, "value", Boolean.toString(disableCamera));
                 out.endTag(null, "disable-camera");
             }
-            if (disableKeyguardWidgets != DEF_KEYGUARD_WIDGET_DISABLED) {
-                out.startTag(null, "disable-keyguard-widgets");
-                out.attribute(null, "value", Integer.toString(disableKeyguardWidgets));
-                out.endTag(null, "disable-keyguard-widgets");
+            if (disabledKeyguardFeatures != DEF_KEYGUARD_FEATURES_DISABLED) {
+                out.startTag(null, "disable-keyguard-features");
+                out.attribute(null, "value", Integer.toString(disabledKeyguardFeatures));
+                out.endTag(null, "disable-keyguard-features");
             }
         }
 
@@ -2300,18 +2300,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     /**
-     * Selectively disable keyguard widgets.
+     * Selectively disable keyguard features.
      */
-    public void setKeyguardWidgetsDisabled(ComponentName who, int which, int userHandle) {
+    public void setKeyguardDisabledFeatures(ComponentName who, int which, int userHandle) {
         enforceCrossUserPermission(userHandle);
         synchronized (this) {
             if (who == null) {
                 throw new NullPointerException("ComponentName is null");
             }
             ActiveAdmin ap = getActiveAdminForCallerLocked(who,
-                    DeviceAdminInfo.USES_POLICY_DISABLE_KEYGUARD_WIDGETS);
-            if ((ap.disableKeyguardWidgets & which) != which) {
-                ap.disableKeyguardWidgets |= which;
+                    DeviceAdminInfo.USES_POLICY_DISABLE_KEYGUARD_FEATURES);
+            if (ap.disabledKeyguardFeatures != which) {
+                ap.disabledKeyguardFeatures = which;
                 saveSettingsLocked(userHandle);
             }
             syncDeviceCapabilitiesLocked(getUserData(userHandle));
@@ -2319,24 +2319,24 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     /**
-     * Gets the disabled state for widgets in keyguard for the given admin,
+     * Gets the disabled state for features in keyguard for the given admin,
      * or the aggregate of all active admins if who is null.
      */
-    public int getKeyguardWidgetsDisabled(ComponentName who, int userHandle) {
+    public int getKeyguardDisabledFeatures(ComponentName who, int userHandle) {
         enforceCrossUserPermission(userHandle);
         synchronized (this) {
             if (who != null) {
                 ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle);
-                return (admin != null) ? admin.disableKeyguardWidgets : 0;
+                return (admin != null) ? admin.disabledKeyguardFeatures : 0;
             }
 
-            // Determine whether or not keyguard widgets are disabled for any active admins.
+            // Determine which keyguard features are disabled for any active admins.
             DevicePolicyData policy = getUserData(userHandle);
             final int N = policy.mAdminList.size();
             int which = 0;
             for (int i = 0; i < N; i++) {
                 ActiveAdmin admin = policy.mAdminList.get(i);
-                which |= admin.disableKeyguardWidgets;
+                which |= admin.disabledKeyguardFeatures;
             }
             return which;
         }
