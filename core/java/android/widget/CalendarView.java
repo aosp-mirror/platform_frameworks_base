@@ -1609,7 +1609,7 @@ public class CalendarView extends FrameLayout {
         }
 
         /**
-         * Initialize the paint isntances.
+         * Initialize the paint instances.
          */
         private void initilaizePaints() {
             mDrawPaint.setFakeBoldText(false);
@@ -1620,6 +1620,7 @@ public class CalendarView extends FrameLayout {
             mMonthNumDrawPaint.setAntiAlias(true);
             mMonthNumDrawPaint.setStyle(Style.FILL);
             mMonthNumDrawPaint.setTextAlign(Align.CENTER);
+            mMonthNumDrawPaint.setTextSize(mDateTextSize);
         }
 
         /**
