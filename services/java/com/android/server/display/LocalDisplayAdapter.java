@@ -19,7 +19,9 @@ package com.android.server.display;
 import android.content.Context;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.util.SparseArray;
+import android.view.DisplayEventReceiver;
 import android.view.Surface;
 import android.view.Surface.PhysicalDisplayInfo;
 
@@ -41,12 +43,14 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
     private final SparseArray<LocalDisplayDevice> mDevices =
             new SparseArray<LocalDisplayDevice>();
+    private final HotplugDisplayEventReceiver mHotplugReceiver;
 
     private final PhysicalDisplayInfo mTempPhys = new PhysicalDisplayInfo();
 
     public LocalDisplayAdapter(DisplayManagerService.SyncRoot syncRoot,
             Context context, Handler handler, Listener listener) {
         super(syncRoot, context, handler, listener, TAG);
+        mHotplugReceiver = new HotplugDisplayEventReceiver(handler.getLooper());
     }
 
     @Override
@@ -146,6 +150,19 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             super.dumpLocked(pw);
             pw.println("mBuiltInDisplayId=" + mBuiltInDisplayId);
             pw.println("mPhys=" + mPhys);
+        }
+    }
+
+    private final class HotplugDisplayEventReceiver extends DisplayEventReceiver {
+        public HotplugDisplayEventReceiver(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void onHotplug(long timestampNanos, int builtInDisplayId, boolean connected) {
+            synchronized (getSyncRoot()) {
+                scanDisplaysLocked();
+            }
         }
     }
 }
