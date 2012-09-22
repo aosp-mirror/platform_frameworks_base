@@ -1150,20 +1150,9 @@ class TouchExplorer implements EventStreamTransformation {
                 return;
             }
 
-            if (Build.IS_DEBUGGABLE) {
-                if (mSendHoverEnterDelayed.isPending()) {
-                    throw new IllegalStateException("mSendHoverEnterDelayed must not be pending.");
-                }
-                if (mSendHoverExitDelayed.isPending()) {
-                    throw new IllegalStateException("mSendHoverExitDelayed must not be pending.");
-                }
-                if (!mPerformLongPressDelayed.isPending()) {
-                    throw new IllegalStateException(
-                            "mPerformLongPressDelayed must not be pending.");
-                }
-            }
-
             // Remove pending event deliveries.
+            mSendHoverEnterDelayed.remove();
+            mSendHoverExitDelayed.remove();
             mPerformLongPressDelayed.remove();
 
             // The touch interaction has ended since we will send a click.
