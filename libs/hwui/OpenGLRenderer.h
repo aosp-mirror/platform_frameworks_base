@@ -723,6 +723,9 @@ private:
      */
     void drawRegionRects(const Region& region);
 
+    void debugOverdraw(bool enable, bool clear);
+    void renderOverdraw();
+
     /**
      * Should be invoked every time the glScissor is modified.
      */
