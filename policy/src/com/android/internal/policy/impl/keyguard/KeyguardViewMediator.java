@@ -339,7 +339,7 @@ public class KeyguardViewMediator {
 
         @Override
         public void onDeviceProvisioned() {
-            mContext.sendBroadcast(mUserPresentIntent);
+            sendUserPresentBroadcast();
         }
 
         @Override
@@ -511,6 +511,9 @@ public class KeyguardViewMediator {
             mUpdateMonitor.registerCallback(mUpdateCallback);
             doKeyguardLocked();
         }
+        // Most services aren't available until the system reaches the ready state, so we
+        // send it here when the device first boots.
+        maybeSendUserPresentBroadcast();
     }
 
     /**
@@ -605,6 +608,17 @@ public class KeyguardViewMediator {
             if (showListener != null) {
                 notifyScreenOnLocked(showListener);
             }
+        }
+        maybeSendUserPresentBroadcast();
+    }
+
+    private void maybeSendUserPresentBroadcast() {
+        if (mSystemReady && mLockPatternUtils.isLockScreenDisabled()
+                && mUserManager.getUsers(true).size() == 1) {
+            // Lock screen is disabled because the user has set the preference to "None".
+            // In this case, send out ACTION_USER_PRESENT here instead of in
+            // handleKeyguardDone()
+            sendUserPresentBroadcast();
         }
     }
 
@@ -1093,6 +1107,10 @@ public class KeyguardViewMediator {
         }
         mWakeLock.release();
 
+        sendUserPresentBroadcast();
+    }
+
+    private void sendUserPresentBroadcast() {
         if (!(mContext instanceof Activity)) {
             final UserHandle currentUser = new UserHandle(mLockPatternUtils.getCurrentUser());
             mContext.sendBroadcastAsUser(mUserPresentIntent, currentUser);
