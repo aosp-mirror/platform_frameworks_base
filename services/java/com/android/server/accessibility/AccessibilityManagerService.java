@@ -2123,7 +2123,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             if (OWN_PROCESS_ID == Binder.getCallingPid()) {
                 return;
             }
-            if (hasPermission(permission)) {
+            if (!hasPermission(permission)) {
                 throw new SecurityException("You do not have " + permission
                         + " required to call " + function);
             }
