@@ -36,6 +36,9 @@ import java.io.InputStream;
 public final class BitmapRegionDecoder {
     private int mNativeBitmapRegionDecoder;
     private boolean mRecycled;
+    // ensures that the native decoder object exists and that only one decode can
+    // occur at a time.
+    private final Object mNativeLock = new Object();
 
     /**
      * Create a BitmapRegionDecoder from the specified byte array.
@@ -179,24 +182,30 @@ public final class BitmapRegionDecoder {
      *         decoded.
      */
     public Bitmap decodeRegion(Rect rect, BitmapFactory.Options options) {
-        checkRecycled("decodeRegion called on recycled region decoder");
-        if (rect.right <= 0 || rect.bottom <= 0 || rect.left >= getWidth()
-                || rect.top >= getHeight())
-            throw new IllegalArgumentException("rectangle is outside the image");
-        return nativeDecodeRegion(mNativeBitmapRegionDecoder, rect.left, rect.top,
-                rect.right - rect.left, rect.bottom - rect.top, options);
+        synchronized (mNativeLock) {
+            checkRecycled("decodeRegion called on recycled region decoder");
+            if (rect.right <= 0 || rect.bottom <= 0 || rect.left >= getWidth()
+                    || rect.top >= getHeight())
+                throw new IllegalArgumentException("rectangle is outside the image");
+            return nativeDecodeRegion(mNativeBitmapRegionDecoder, rect.left, rect.top,
+                    rect.right - rect.left, rect.bottom - rect.top, options);
+        }
     }
 
     /** Returns the original image's width */
     public int getWidth() {
-        checkRecycled("getWidth called on recycled region decoder");
-        return nativeGetWidth(mNativeBitmapRegionDecoder);
+        synchronized (mNativeLock) {
+            checkRecycled("getWidth called on recycled region decoder");
+            return nativeGetWidth(mNativeBitmapRegionDecoder);
+        }
     }
 
     /** Returns the original image's height */
     public int getHeight() {
-        checkRecycled("getHeight called on recycled region decoder");
-        return nativeGetHeight(mNativeBitmapRegionDecoder);
+        synchronized (mNativeLock) {
+            checkRecycled("getHeight called on recycled region decoder");
+            return nativeGetHeight(mNativeBitmapRegionDecoder);
+        }
     }
 
     /**
@@ -210,9 +219,11 @@ public final class BitmapRegionDecoder {
      * memory when there are no more references to this region decoder.
      */
     public void recycle() {
-        if (!mRecycled) {
-            nativeClean(mNativeBitmapRegionDecoder);
-            mRecycled = true;
+        synchronized (mNativeLock) {
+            if (!mRecycled) {
+                nativeClean(mNativeBitmapRegionDecoder);
+                mRecycled = true;
+            }
         }
     }
 
