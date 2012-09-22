@@ -193,6 +193,8 @@ int OpenGLRenderer::prepareDirty(float left, float top, float right, float botto
     mTilingSnapshot = mSnapshot;
     startTiling(mTilingSnapshot, true);
 
+    debugOverdraw(true, true);
+
     if (!opaque) {
         mCaches.enableScissor();
         mCaches.setScissor(left, mSnapshot->height - bottom, right - left, bottom - top);
@@ -230,6 +232,7 @@ void OpenGLRenderer::endTiling() {
 }
 
 void OpenGLRenderer::finish() {
+    renderOverdraw();
     endTiling();
 
     if (!suppressErrorChecks()) {
@@ -264,6 +267,40 @@ void OpenGLRenderer::finish() {
     }
 }
 
+void OpenGLRenderer::debugOverdraw(bool enable, bool clear) {
+    if (mCaches.debugOverdraw && getTargetFbo() == 0) {
+        if (clear) {
+            mCaches.disableScissor();
+            mCaches.stencil.clear();
+        }
+        if (enable) {
+            mCaches.stencil.enableDebugWrite();
+        } else {
+            mCaches.stencil.disable();
+        }
+    }
+}
+
+void OpenGLRenderer::renderOverdraw() {
+    if (mCaches.debugOverdraw && getTargetFbo() == 0) {
+        const Rect* clip = mTilingSnapshot->clipRect;
+
+        mCaches.enableScissor();
+        mCaches.setScissor(clip->left, mTilingSnapshot->height - clip->bottom,
+                clip->right - clip->left, clip->bottom - clip->top);
+
+        mCaches.stencil.enableDebugTest(2);
+        drawColor(0x2f0000ff, SkXfermode::kSrcOver_Mode);
+        mCaches.stencil.enableDebugTest(3);
+        drawColor(0x2f00ff00, SkXfermode::kSrcOver_Mode);
+        mCaches.stencil.enableDebugTest(4);
+        drawColor(0x3fff0000, SkXfermode::kSrcOver_Mode);
+        mCaches.stencil.enableDebugTest(4, true);
+        drawColor(0x7fff0000, SkXfermode::kSrcOver_Mode);
+        mCaches.stencil.disable();
+    }
+}
+
 void OpenGLRenderer::interrupt() {
     if (mCaches.currentProgram) {
         if (mCaches.currentProgram->isInUse()) {
@@ -275,12 +312,14 @@ void OpenGLRenderer::interrupt() {
     mCaches.unbindIndicesBuffer();
     mCaches.resetVertexPointers();
     mCaches.disbaleTexCoordsVertexArray();
+    debugOverdraw(false, false);
 }
 
 void OpenGLRenderer::resume() {
     sp<Snapshot> snapshot = (mSnapshot != NULL) ? mSnapshot : mFirstSnapshot;
     glViewport(0, 0, snapshot->viewport.getWidth(), snapshot->viewport.getHeight());
     glBindFramebuffer(GL_FRAMEBUFFER, snapshot->fbo);
+    debugOverdraw(true, false);
 
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
@@ -301,6 +340,7 @@ void OpenGLRenderer::resumeAfterLayer() {
     sp<Snapshot> snapshot = (mSnapshot != NULL) ? mSnapshot : mFirstSnapshot;
     glViewport(0, 0, snapshot->viewport.getWidth(), snapshot->viewport.getHeight());
     glBindFramebuffer(GL_FRAMEBUFFER, snapshot->fbo);
+    debugOverdraw(true, false);
 
     mCaches.resetScissor();
     dirtyClip();
@@ -406,7 +446,10 @@ bool OpenGLRenderer::updateLayer(Layer* layer, bool inFrame) {
         OpenGLRenderer* renderer = layer->renderer;
         Rect& dirty = layer->dirtyRect;
 
-        if (inFrame) endTiling();
+        if (inFrame) {
+            endTiling();
+            debugOverdraw(false, false);
+        }
 
         renderer->setViewport(layer->layer.getWidth(), layer->layer.getHeight());
         renderer->prepareDirty(dirty.left, dirty.top, dirty.right, dirty.bottom, !layer->isBlend());
@@ -731,6 +774,7 @@ bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, Rect& clip, GLui
     mSnapshot->orthoMatrix.load(mOrthoMatrix);
 
     endTiling();
+    debugOverdraw(false, false);
     // Bind texture to FBO
     glBindFramebuffer(GL_FRAMEBUFFER, layer->getFbo());
     layer->bindTexture();
@@ -779,6 +823,7 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
         // Unbind current FBO and restore previous one
         glBindFramebuffer(GL_FRAMEBUFFER, previous->fbo);
+        debugOverdraw(true, false);
 
         startTiling(previous);
     }

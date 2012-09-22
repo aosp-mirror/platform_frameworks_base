@@ -131,6 +131,13 @@ void Caches::initProperties() {
     } else {
         debugLayersUpdates = false;
     }
+
+    if (property_get(PROPERTY_DEBUG_OVERDRAW, property, NULL) > 0) {
+        INIT_LOGD("  Overdraw debug enabled: %s", property);
+        debugOverdraw = !strcmp(property, "true");
+    } else {
+        debugOverdraw = false;
+    }
 }
 
 void Caches::terminate() {
@@ -429,7 +436,9 @@ void Caches::resetScissor() {
 
 void Caches::startTiling(GLuint x, GLuint y, GLuint width, GLuint height, bool opaque) {
     if (extensions.hasTiledRendering()) {
-        glStartTilingQCOM(x, y, width, height, opaque ? GL_NONE : GL_COLOR_BUFFER_BIT0_QCOM);
+        glStartTilingQCOM(x, y, width, height,
+                (opaque ? GL_NONE : GL_COLOR_BUFFER_BIT0_QCOM) |
+                (debugOverdraw ? GL_STENCIL_BUFFER_BIT0_QCOM : 0));
     }
 }
 
