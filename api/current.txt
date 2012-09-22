@@ -16593,6 +16593,7 @@ package android.os {
 
   public class UserManager {
     method public java.lang.String getUserName();
+    method public boolean isUserAGoat();
   }
 
   public abstract class Vibrator {
