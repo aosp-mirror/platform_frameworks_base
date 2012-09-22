@@ -72,7 +72,7 @@ public class Dream extends Service implements Window.Callback {
     private final String TAG = Dream.class.getSimpleName() + "[" + getClass().getSimpleName() + "]";
 
     /**
-     * Used with {@link #ACTION_MAIN} to declare the necessary intent-filter for a dream.
+     * Used with {@link Intent#ACTION_MAIN} to declare the necessary intent-filter for a dream.
      *
      * @see Dream
      */
@@ -393,7 +393,7 @@ public class Dream extends Service implements Window.Callback {
     /**
      * Sets View.SYSTEM_UI_FLAG_LOW_PROFILE on the content view.
      *
-     * @param lightsOut True to set View.SYSTEM_UI_FLAG_LOW_PROFILE
+     * @param lowProfile True to set View.SYSTEM_UI_FLAG_LOW_PROFILE
      */
     public void setLowProfile(boolean lowProfile) {
         mLowProfile = lowProfile;
