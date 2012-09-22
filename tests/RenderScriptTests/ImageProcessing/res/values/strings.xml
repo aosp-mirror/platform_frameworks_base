@@ -29,5 +29,6 @@
     <string name="gamma">Gamma</string>
     <string name="saturation">Saturation</string>
     <string name="benchmark">Benchmark</string>
+    <string name="benchmark_all">Benchmark All</string>
 
 </resources>
