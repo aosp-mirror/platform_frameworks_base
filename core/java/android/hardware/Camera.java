@@ -233,6 +233,21 @@ public class Camera {
          * @see Parameters#setJpegThumbnailSize(int, int)
          */
         public int orientation;
+
+        /**
+         * <p>Whether the shutter sound can be disabled.</p>
+         *
+         * <p>On some devices, the camera shutter sound cannot be turned off
+         * through {@link #enableShutterSound enableShutterSound}. This field
+         * can be used to determine whether a call to disable the shutter sound
+         * will succeed.</p>
+         *
+         * <p>If this field is set to true, then a call of
+         * {@code enableShutterSound(false)} will be successful. If set to
+         * false, then that call will fail, and the shutter sound will be played
+         * when {@link Camera#takePicture takePicture} is called.</p>
+         */
+        public boolean canDisableShutterSound;
     };
 
     /**
