@@ -33,6 +33,7 @@
 
 #include "OpenGLRenderer.h"
 #include "DisplayListRenderer.h"
+#include "PathRenderer.h"
 #include "Vector.h"
 
 namespace android {
@@ -540,15 +541,7 @@ int OpenGLRenderer::saveLayer(float left, float top, float right, float bottom,
 
         if (p) {
             alpha = p->getAlpha();
-            if (!mCaches.extensions.hasFramebufferFetch()) {
-                const bool isMode = SkXfermode::IsMode(p->getXfermode(), &mode);
-                if (!isMode) {
-                    // Assume SRC_OVER
-                    mode = SkXfermode::kSrcOver_Mode;
-                }
-            } else {
-                mode = getXfermode(p->getXfermode());
-            }
+            mode = getXfermode(p->getXfermode());
         } else {
             mode = SkXfermode::kSrcOver_Mode;
         }
@@ -1260,12 +1253,12 @@ void OpenGLRenderer::setupDrawNoTexture() {
     mCaches.disbaleTexCoordsVertexArray();
 }
 
-void OpenGLRenderer::setupDrawAALine() {
+void OpenGLRenderer::setupDrawAA() {
     mDescription.isAA = true;
 }
 
-void OpenGLRenderer::setupDrawAARect() {
-    mDescription.isAARect = true;
+void OpenGLRenderer::setupDrawVertexShape() {
+    mDescription.isVertexShape = true;
 }
 
 void OpenGLRenderer::setupDrawPoint(float pointSize) {
@@ -1872,97 +1865,48 @@ status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const
  * a fragment shader to compute the translucency of the color from its position, we simply use a
  * varying parameter to define how far a given pixel is into the region.
  */
-void OpenGLRenderer::drawAARect(float left, float top, float right, float bottom,
-        int color, SkXfermode::Mode mode) {
-    float inverseScaleX = 1.0f;
-    float inverseScaleY = 1.0f;
+void OpenGLRenderer::drawConvexPath(const SkPath& path, int color, SkXfermode::Mode mode, bool isAA) {
+    VertexBuffer vertexBuffer;
+    // TODO: try clipping large paths to viewport
+    PathRenderer::convexPathFillVertices(path, mSnapshot->transform, vertexBuffer, isAA);
 
-    // The quad that we use needs to account for scaling.
-    if (CC_UNLIKELY(!mSnapshot->transform->isPureTranslate())) {
-        Matrix4 *mat = mSnapshot->transform;
-        float m00 = mat->data[Matrix4::kScaleX];
-        float m01 = mat->data[Matrix4::kSkewY];
-        float m10 = mat->data[Matrix4::kSkewX];
-        float m11 = mat->data[Matrix4::kScaleY];
-        float scaleX = sqrt(m00 * m00 + m01 * m01);
-        float scaleY = sqrt(m10 * m10 + m11 * m11);
-        inverseScaleX = (scaleX != 0) ? (inverseScaleX / scaleX) : 0;
-        inverseScaleY = (scaleY != 0) ? (inverseScaleY / scaleY) : 0;
-    }
+    setupDraw();
+    setupDrawNoTexture();
+    if (isAA) setupDrawAA();
+    setupDrawVertexShape();
+    setupDrawColor(color, ((color >> 24) & 0xFF) * mSnapshot->alpha);
+    setupDrawColorFilter();
+    setupDrawShader();
+    setupDrawBlending(isAA, mode);
+    setupDrawProgram();
+    setupDrawModelViewIdentity(true);
+    setupDrawColorUniforms();
+    setupDrawColorFilterUniforms();
+    setupDrawShaderIdentityUniforms();
 
-    float boundarySizeX = .5 * inverseScaleX;
-    float boundarySizeY = .5 * inverseScaleY;
+    void* vertices = vertexBuffer.getBuffer();
+    bool force = mCaches.unbindMeshBuffer();
+    mCaches.bindPositionVertexPointer(force, mCaches.currentProgram->position,
+                                      vertices, isAA ? gAlphaVertexStride : gVertexStride);
+    mCaches.resetTexCoordsVertexPointer();
+    mCaches.unbindIndicesBuffer();
 
-    float innerLeft = left + boundarySizeX;
-    float innerRight = right - boundarySizeX;
-    float innerTop = top + boundarySizeY;
-    float innerBottom = bottom - boundarySizeY;
+    int alphaSlot = -1;
+    if (isAA) {
+        void* alphaCoords = ((GLbyte*) vertices) + gVertexAlphaOffset;
+        alphaSlot = mCaches.currentProgram->getAttrib("vtxAlpha");
 
-    // Adjust the rect by the AA boundary padding
-    left -= boundarySizeX;
-    right += boundarySizeX;
-    top -= boundarySizeY;
-    bottom += boundarySizeY;
-
-    if (!quickReject(left, top, right, bottom)) {
-        setupDraw();
-        setupDrawNoTexture();
-        setupDrawAARect();
-        setupDrawColor(color, ((color >> 24) & 0xFF) * mSnapshot->alpha);
-        setupDrawColorFilter();
-        setupDrawShader();
-        setupDrawBlending(true, mode);
-        setupDrawProgram();
-        setupDrawModelViewIdentity(true);
-        setupDrawColorUniforms();
-        setupDrawColorFilterUniforms();
-        setupDrawShaderIdentityUniforms();
-
-        AlphaVertex rects[14];
-        AlphaVertex* aVertices = &rects[0];
-        void* alphaCoords = ((GLbyte*) aVertices) + gVertexAlphaOffset;
-
-        bool force = mCaches.unbindMeshBuffer();
-        mCaches.bindPositionVertexPointer(force, mCaches.currentProgram->position,
-                aVertices, gAlphaVertexStride);
-        mCaches.resetTexCoordsVertexPointer();
-        mCaches.unbindIndicesBuffer();
-
-        int alphaSlot = mCaches.currentProgram->getAttrib("vtxAlpha");
+        // TODO: avoid enable/disable in back to back uses of the alpha attribute
         glEnableVertexAttribArray(alphaSlot);
         glVertexAttribPointer(alphaSlot, 1, GL_FLOAT, GL_FALSE, gAlphaVertexStride, alphaCoords);
+    }
 
-        // draw left
-        AlphaVertex::set(aVertices++, left, bottom, 0);
-        AlphaVertex::set(aVertices++, innerLeft, innerBottom, 1);
-        AlphaVertex::set(aVertices++, left, top, 0);
-        AlphaVertex::set(aVertices++, innerLeft, innerTop, 1);
+    SkRect bounds = path.getBounds();
+    dirtyLayer(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom, *mSnapshot->transform);
 
-        // draw top
-        AlphaVertex::set(aVertices++, right, top, 0);
-        AlphaVertex::set(aVertices++, innerRight, innerTop, 1);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, vertexBuffer.getSize());
 
-        // draw right
-        AlphaVertex::set(aVertices++, right, bottom, 0);
-        AlphaVertex::set(aVertices++, innerRight, innerBottom, 1);
-
-        // draw bottom
-        AlphaVertex::set(aVertices++, left, bottom, 0);
-        AlphaVertex::set(aVertices++, innerLeft, innerBottom, 1);
-
-        // draw inner rect (repeating last vertex to create degenerate bridge triangles)
-        // TODO: also consider drawing the inner rect without the blending-forced shader, if
-        // blending is expensive. Note: can't use drawColorRect() since it doesn't use vertex
-        // buffers like below, resulting in slightly different transformed coordinates.
-        AlphaVertex::set(aVertices++, innerLeft, innerBottom, 1);
-        AlphaVertex::set(aVertices++, innerLeft, innerTop, 1);
-        AlphaVertex::set(aVertices++, innerRight, innerBottom, 1);
-        AlphaVertex::set(aVertices++, innerRight, innerTop, 1);
-
-        dirtyLayer(left, top, right, bottom, *mSnapshot->transform);
-
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
-
+    if (isAA) {
         glDisableVertexAttribArray(alphaSlot);
     }
 }
@@ -2040,7 +1984,7 @@ status_t OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
     setupDraw();
     setupDrawNoTexture();
     if (isAA) {
-        setupDrawAALine();
+        setupDrawAA();
     }
     setupDrawColor(paint->getColor(), alpha);
     setupDrawColorFilter();
@@ -2326,30 +2270,62 @@ status_t OpenGLRenderer::drawShape(float left, float top, const PathTexture* tex
 }
 
 status_t OpenGLRenderer::drawRoundRect(float left, float top, float right, float bottom,
-        float rx, float ry, SkPaint* paint) {
-    if (mSnapshot->isIgnored()) return DrawGlInfo::kStatusDone;
+        float rx, float ry, SkPaint* p) {
+    if (mSnapshot->isIgnored() || quickReject(left, top, right, bottom)) {
+        return DrawGlInfo::kStatusDone;
+    }
 
-    mCaches.activeTexture(0);
-    const PathTexture* texture = mCaches.roundRectShapeCache.getRoundRect(
-            right - left, bottom - top, rx, ry, paint);
-    return drawShape(left, top, texture, paint);
+    if (p->getStyle() != SkPaint::kFill_Style) {
+        mCaches.activeTexture(0);
+        const PathTexture* texture = mCaches.roundRectShapeCache.getRoundRect(
+                right - left, bottom - top, rx, ry, p);
+        return drawShape(left, top, texture, p);
+    }
+
+    SkPath path;
+    SkRect rect = SkRect::MakeLTRB(left, top, right, bottom);
+    path.addRoundRect(rect, rx, ry);
+    drawConvexPath(path, p->getColor(), getXfermode(p->getXfermode()), p->isAntiAlias());
+
+    return DrawGlInfo::kStatusDrew;
 }
 
-status_t OpenGLRenderer::drawCircle(float x, float y, float radius, SkPaint* paint) {
-    if (mSnapshot->isIgnored()) return DrawGlInfo::kStatusDone;
+status_t OpenGLRenderer::drawCircle(float x, float y, float radius, SkPaint* p) {
+    if (mSnapshot->isIgnored() || quickReject(x - radius, y - radius, x + radius, y + radius)) {
+        return DrawGlInfo::kStatusDone;
+    }
 
-    mCaches.activeTexture(0);
-    const PathTexture* texture = mCaches.circleShapeCache.getCircle(radius, paint);
-    return drawShape(x - radius, y - radius, texture, paint);
+    if (p->getStyle() != SkPaint::kFill_Style) {
+        mCaches.activeTexture(0);
+        const PathTexture* texture = mCaches.circleShapeCache.getCircle(radius, p);
+        return drawShape(x - radius, y - radius, texture, p);
+    }
+
+    SkPath path;
+    path.addCircle(x, y, radius);
+    drawConvexPath(path, p->getColor(), getXfermode(p->getXfermode()), p->isAntiAlias());
+
+    return DrawGlInfo::kStatusDrew;
 }
 
 status_t OpenGLRenderer::drawOval(float left, float top, float right, float bottom,
-        SkPaint* paint) {
-    if (mSnapshot->isIgnored()) return DrawGlInfo::kStatusDone;
+        SkPaint* p) {
+    if (mSnapshot->isIgnored() || quickReject(left, top, right, bottom)) {
+        return DrawGlInfo::kStatusDone;
+    }
 
-    mCaches.activeTexture(0);
-    const PathTexture* texture = mCaches.ovalShapeCache.getOval(right - left, bottom - top, paint);
-    return drawShape(left, top, texture, paint);
+    if (p->getStyle() != SkPaint::kFill_Style) {
+        mCaches.activeTexture(0);
+        const PathTexture* texture = mCaches.ovalShapeCache.getOval(right - left, bottom - top, p);
+        return drawShape(left, top, texture, p);
+    }
+
+    SkPath path;
+    SkRect rect = SkRect::MakeLTRB(left, top, right, bottom);
+    path.addOval(rect);
+    drawConvexPath(path, p->getColor(), getXfermode(p->getXfermode()), p->isAntiAlias());
+
+    return DrawGlInfo::kStatusDrew;
 }
 
 status_t OpenGLRenderer::drawArc(float left, float top, float right, float bottom,
@@ -2366,40 +2342,23 @@ status_t OpenGLRenderer::drawArc(float left, float top, float right, float botto
     return drawShape(left, top, texture, paint);
 }
 
-status_t OpenGLRenderer::drawRectAsShape(float left, float top, float right, float bottom,
-        SkPaint* paint) {
-    if (mSnapshot->isIgnored()) return DrawGlInfo::kStatusDone;
-
-    mCaches.activeTexture(0);
-    const PathTexture* texture = mCaches.rectShapeCache.getRect(right - left, bottom - top, paint);
-    return drawShape(left, top, texture, paint);
-}
-
 status_t OpenGLRenderer::drawRect(float left, float top, float right, float bottom, SkPaint* p) {
-    if (p->getStyle() != SkPaint::kFill_Style) {
-        return drawRectAsShape(left, top, right, bottom, p);
-    }
-
-    if (quickReject(left, top, right, bottom)) {
+    if (mSnapshot->isIgnored() || quickReject(left, top, right, bottom)) {
         return DrawGlInfo::kStatusDone;
     }
 
-    SkXfermode::Mode mode;
-    if (!mCaches.extensions.hasFramebufferFetch()) {
-        const bool isMode = SkXfermode::IsMode(p->getXfermode(), &mode);
-        if (!isMode) {
-            // Assume SRC_OVER
-            mode = SkXfermode::kSrcOver_Mode;
-        }
-    } else {
-        mode = getXfermode(p->getXfermode());
+    if (p->getStyle() != SkPaint::kFill_Style) {
+        mCaches.activeTexture(0);
+        const PathTexture* texture = mCaches.rectShapeCache.getRect(right - left, bottom - top, p);
+        return drawShape(left, top, texture, p);
     }
 
-    int color = p->getColor();
     if (p->isAntiAlias() && !mSnapshot->transform->isSimple()) {
-        drawAARect(left, top, right, bottom, color, mode);
+        SkPath path;
+        path.addRect(left, top, right, bottom);
+        drawConvexPath(path, p->getColor(), getXfermode(p->getXfermode()), true);
     } else {
-        drawColorRect(left, top, right, bottom, color, mode);
+        drawColorRect(left, top, right, bottom, p->getColor(), getXfermode(p->getXfermode()));
     }
 
     return DrawGlInfo::kStatusDrew;

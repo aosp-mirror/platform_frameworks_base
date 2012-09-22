@@ -55,21 +55,21 @@ void Matrix4::loadIdentity() {
     mSimpleMatrix = true;
 }
 
-bool Matrix4::changesBounds() {
+bool Matrix4::changesBounds() const {
     return !(data[0] == 1.0f && data[1] == 0.0f && data[2] == 0.0f && data[4] == 0.0f &&
              data[5] == 1.0f && data[6] == 0.0f && data[8] == 0.0f && data[9] == 0.0f &&
              data[10] == 1.0f);
 }
 
-bool Matrix4::isPureTranslate() {
+bool Matrix4::isPureTranslate() const {
     return mSimpleMatrix && data[kScaleX] == 1.0f && data[kScaleY] == 1.0f;
 }
 
-bool Matrix4::isSimple() {
+bool Matrix4::isSimple() const {
     return mSimpleMatrix;
 }
 
-bool Matrix4::isIdentity() {
+bool Matrix4::isIdentity() const {
     return mIsIdentity;
 }
 
