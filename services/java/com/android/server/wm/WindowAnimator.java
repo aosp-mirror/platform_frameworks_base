@@ -139,10 +139,8 @@ public class WindowAnimator {
     }
 
     void addDisplayLocked(final int displayId) {
-        DisplayContentsAnimator displayAnimator = getDisplayContentsAnimatorLocked(displayId);
-        displayAnimator.mWindowAnimationBackgroundSurface =
-                new DimSurface(mService.mFxSession, displayId);
-        displayAnimator.mDimAnimator = new DimAnimator(mService.mFxSession, displayId);
+        // Create the DisplayContentsAnimator object by retrieving it.
+        getDisplayContentsAnimatorLocked(displayId);
         if (displayId == Display.DEFAULT_DISPLAY) {
             mInitialized = true;
         }
@@ -787,7 +785,7 @@ public class WindowAnimator {
     private DisplayContentsAnimator getDisplayContentsAnimatorLocked(int displayId) {
         DisplayContentsAnimator displayAnimator = mDisplayContentsAnimators.get(displayId);
         if (displayAnimator == null) {
-            displayAnimator = new DisplayContentsAnimator();
+            displayAnimator = new DisplayContentsAnimator(displayId);
             mDisplayContentsAnimators.put(displayId, displayAnimator);
         }
         return displayAnimator;
@@ -801,11 +799,17 @@ public class WindowAnimator {
         return getDisplayContentsAnimatorLocked(displayId).mScreenRotationAnimation;
     }
 
-    private static class DisplayContentsAnimator {
+    private class DisplayContentsAnimator {
         WinAnimatorList mWinAnimators = new WinAnimatorList();
-        DimAnimator mDimAnimator = null;
+        final DimAnimator mDimAnimator;
         DimAnimator.Parameters mDimParams = null;
-        DimSurface mWindowAnimationBackgroundSurface = null;
+        final DimSurface mWindowAnimationBackgroundSurface;
         ScreenRotationAnimation mScreenRotationAnimation = null;
+
+        public DisplayContentsAnimator(int displayId) {
+            mDimAnimator = new DimAnimator(mService.mFxSession, displayId);
+            mWindowAnimationBackgroundSurface =
+                    new DimSurface(mService.mFxSession, displayId);
+        }
     }
 }
