@@ -21,6 +21,7 @@ import android.util.Log;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.SocketException;
 import java.security.KeyManagementException;
 import java.security.cert.X509Certificate;
 import javax.net.SocketFactory;
@@ -339,6 +340,22 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
      */
     public void setHostname(Socket socket, String hostName) {
         castToOpenSSLSocket(socket).setHostname(hostName);
+    }
+
+    /**
+     * Sets this socket's SO_SNDTIMEO write timeout in milliseconds.
+     * Use 0 for no timeout.
+     * To take effect, this option must be set before the blocking method was called.
+     *
+     * @param socket a socket created by this factory.
+     * @param timeout the desired write timeout in milliseconds.
+     * @throws IllegalArgumentException if the socket was not created by this factory.
+     *
+     * @hide
+     */
+    public void setSoWriteTimeout(Socket socket, int writeTimeoutMilliseconds)
+            throws SocketException {
+        castToOpenSSLSocket(socket).setSoWriteTimeout(writeTimeoutMilliseconds);
     }
 
     private static OpenSSLSocketImpl castToOpenSSLSocket(Socket socket) {
