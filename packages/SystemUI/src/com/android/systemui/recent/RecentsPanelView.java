@@ -538,12 +538,14 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     }
 
     private void updateUiElements() {
-        final int items = mRecentTaskDescriptions.size();
+        final int items = mRecentTaskDescriptions != null
+                ? mRecentTaskDescriptions.size() : 0;
 
         mRecentsContainer.setVisibility(items > 0 ? View.VISIBLE : View.GONE);
 
         // Set description for accessibility
-        int numRecentApps = mRecentTaskDescriptions.size();
+        int numRecentApps = mRecentTaskDescriptions != null
+                ? mRecentTaskDescriptions.size() : 0;
         String recentAppsAccessibilityDescription;
         if (numRecentApps == 0) {
             recentAppsAccessibilityDescription =

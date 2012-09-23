@@ -6769,6 +6769,7 @@ package android.content.pm {
 
   public class ResolveInfo implements android.os.Parcelable {
     ctor public ResolveInfo();
+    ctor public ResolveInfo(android.content.pm.ResolveInfo);
     method public int describeContents();
     method public void dump(android.util.Printer, java.lang.String);
     method public final int getIconResource();
