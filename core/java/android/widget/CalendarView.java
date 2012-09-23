@@ -1660,16 +1660,34 @@ public class CalendarView extends FrameLayout {
          * @return True if a day was found for the given location.
          */
         public boolean getDayFromLocation(float x, Calendar outCalendar) {
-            int dayStart = mShowWeekNumber ? mWidth / mNumCells : 0;
-            if (x < dayStart || x > mWidth) {
+            final boolean isLayoutRtl = isLayoutRtl();
+
+            int start;
+            int end;
+
+            if (isLayoutRtl) {
+                start = 0;
+                end = mShowWeekNumber ? mWidth - mWidth / mNumCells : mWidth;
+            } else {
+                start = mShowWeekNumber ? mWidth / mNumCells : 0;
+                end = mWidth;
+            }
+
+            if (x < start || x > end) {
                 outCalendar.clear();
                 return false;
             }
-            // Selection is (x - start) / (pixels/day) == (x -s) * day / pixels
-            int dayPosition = (int) ((x - dayStart) * mDaysPerWeek
-                    / (mWidth - dayStart));
+
+            // Selection is (x - start) / (pixels/day) which is (x - start) * day / pixels
+            int dayPosition = (int) ((x - start) * mDaysPerWeek / (end - start));
+
+            if (isLayoutRtl) {
+                dayPosition = mDaysPerWeek - 1 - dayPosition;
+            }
+
             outCalendar.setTimeInMillis(mFirstDay.getTimeInMillis());
             outCalendar.add(Calendar.DAY_OF_MONTH, dayPosition);
+
             return true;
         }
 
@@ -1694,12 +1712,25 @@ public class CalendarView extends FrameLayout {
 
             mTempRect.top = mWeekSeperatorLineWidth;
             mTempRect.bottom = mHeight;
-            mTempRect.left = mShowWeekNumber ? mWidth / mNumCells : 0;
-            mTempRect.right = mSelectedLeft - 2;
+
+            final boolean isLayoutRtl = isLayoutRtl();
+
+            if (isLayoutRtl) {
+                mTempRect.left = 0;
+                mTempRect.right = mSelectedLeft - 2;
+            } else {
+                mTempRect.left = mShowWeekNumber ? mWidth / mNumCells : 0;
+                mTempRect.right = mSelectedLeft - 2;
+            }
             canvas.drawRect(mTempRect, mDrawPaint);
 
-            mTempRect.left = mSelectedRight + 3;
-            mTempRect.right = mWidth;
+            if (isLayoutRtl) {
+                mTempRect.left = mSelectedRight + 3;
+                mTempRect.right = mShowWeekNumber ? mWidth - mWidth / mNumCells : mWidth;
+            } else {
+                mTempRect.left = mSelectedRight + 3;
+                mTempRect.right = mWidth;
+            }
             canvas.drawRect(mTempRect, mDrawPaint);
         }
 
@@ -1709,25 +1740,41 @@ public class CalendarView extends FrameLayout {
          * @param canvas The canvas to draw on
          */
         private void drawWeekNumbersAndDates(Canvas canvas) {
-            float textHeight = mDrawPaint.getTextSize();
-            int y = (int) ((mHeight + textHeight) / 2) - mWeekSeperatorLineWidth;
-            int nDays = mNumCells;
+            final float textHeight = mDrawPaint.getTextSize();
+            final int y = (int) ((mHeight + textHeight) / 2) - mWeekSeperatorLineWidth;
+            final int nDays = mNumCells;
+            final int divisor = 2 * nDays;
 
             mDrawPaint.setTextAlign(Align.CENTER);
             mDrawPaint.setTextSize(mDateTextSize);
+
             int i = 0;
-            int divisor = 2 * nDays;
-            if (mShowWeekNumber) {
-                mDrawPaint.setColor(mWeekNumberColor);
-                int x = mWidth / divisor;
-                canvas.drawText(mDayNumbers[0], x, y, mDrawPaint);
-                i++;
-            }
-            for (; i < nDays; i++) {
-                mMonthNumDrawPaint.setColor(mFocusDay[i] ? mFocusedMonthDateColor
-                        : mUnfocusedMonthDateColor);
-                int x = (2 * i + 1) * mWidth / divisor;
-                canvas.drawText(mDayNumbers[i], x, y, mMonthNumDrawPaint);
+
+            if (isLayoutRtl()) {
+                for (; i < nDays - 1; i++) {
+                    mMonthNumDrawPaint.setColor(mFocusDay[i] ? mFocusedMonthDateColor
+                            : mUnfocusedMonthDateColor);
+                    int x = (2 * i + 1) * mWidth / divisor;
+                    canvas.drawText(mDayNumbers[nDays - 1 - i], x, y, mMonthNumDrawPaint);
+                }
+                if (mShowWeekNumber) {
+                    mDrawPaint.setColor(mWeekNumberColor);
+                    int x = mWidth - mWidth / divisor;
+                    canvas.drawText(mDayNumbers[0], x, y, mDrawPaint);
+                }
+            } else {
+                if (mShowWeekNumber) {
+                    mDrawPaint.setColor(mWeekNumberColor);
+                    int x = mWidth / divisor;
+                    canvas.drawText(mDayNumbers[0], x, y, mDrawPaint);
+                    i++;
+                }
+                for (; i < nDays; i++) {
+                    mMonthNumDrawPaint.setColor(mFocusDay[i] ? mFocusedMonthDateColor
+                            : mUnfocusedMonthDateColor);
+                    int x = (2 * i + 1) * mWidth / divisor;
+                    canvas.drawText(mDayNumbers[i], x, y, mMonthNumDrawPaint);
+                }
             }
         }
 
@@ -1747,8 +1794,16 @@ public class CalendarView extends FrameLayout {
             }
             mDrawPaint.setColor(mWeekSeparatorLineColor);
             mDrawPaint.setStrokeWidth(mWeekSeperatorLineWidth);
-            float x = mShowWeekNumber ? mWidth / mNumCells : 0;
-            canvas.drawLine(x, 0, mWidth, 0, mDrawPaint);
+            float startX;
+            float stopX;
+            if (isLayoutRtl()) {
+                startX = 0;
+                stopX = mShowWeekNumber ? mWidth - mWidth / mNumCells : mWidth;
+            } else {
+                startX = mShowWeekNumber ? mWidth / mNumCells : 0;
+                stopX = mWidth;
+            }
+            canvas.drawLine(startX, 0, stopX, 0, mDrawPaint);
         }
 
         /**
@@ -1781,15 +1836,21 @@ public class CalendarView extends FrameLayout {
          */
         private void updateSelectionPositions() {
             if (mHasSelectedDay) {
+                final boolean isLayoutRtl = isLayoutRtl();
                 int selectedPosition = mSelectedDay - mFirstDayOfWeek;
                 if (selectedPosition < 0) {
                     selectedPosition += 7;
                 }
-                if (mShowWeekNumber) {
+                if (mShowWeekNumber && !isLayoutRtl) {
                     selectedPosition++;
                 }
-                mSelectedLeft = selectedPosition * mWidth / mNumCells;
-                mSelectedRight = (selectedPosition + 1) * mWidth / mNumCells;
+                if (isLayoutRtl) {
+                    mSelectedLeft = (mDaysPerWeek - 1 - selectedPosition) * mWidth / mNumCells;
+
+                } else {
+                    mSelectedLeft = selectedPosition * mWidth / mNumCells;
+                }
+                mSelectedRight = mSelectedLeft + mWidth / mNumCells;
             }
         }
 
