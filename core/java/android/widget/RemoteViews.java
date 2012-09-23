@@ -23,7 +23,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -35,9 +34,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.LayoutInflater.Filter;
 import android.view.RemotableViewMethod;
@@ -70,6 +69,13 @@ public class RemoteViews implements Parcelable, Filter {
      * @hide
      */
     static final String EXTRA_REMOTEADAPTER_APPWIDGET_ID = "remoteAdapterAppWidgetId";
+
+    /**
+     * User that these views should be applied as. Requires
+     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL} when
+     * crossing user boundaries.
+     */
+    private UserHandle mUser = android.os.Process.myUserHandle();
 
     /**
      * The package name of the package containing the layout
@@ -1446,11 +1452,16 @@ public class RemoteViews implements Parcelable, Filter {
         recalculateMemoryUsage();
     }
 
+    /** {@hide} */
+    public void setUser(UserHandle user) {
+        mUser = user;
+    }
+
     private boolean hasLandscapeAndPortraitLayouts() {
         return (mLandscape != null) && (mPortrait != null);
     }
 
-     /**
+    /**
      * Create a new RemoteViews object that will inflate as the specified
      * landspace or portrait RemoteViews, depending on the current configuration.
      *
@@ -2309,7 +2320,8 @@ public class RemoteViews implements Parcelable, Filter {
 
         if (packageName != null) {
             try {
-                c = context.createPackageContext(packageName, Context.CONTEXT_RESTRICTED);
+                c = context.createPackageContextAsUser(
+                        packageName, Context.CONTEXT_RESTRICTED, mUser);
             } catch (NameNotFoundException e) {
                 Log.e(LOG_TAG, "Package name " + packageName + " not found");
                 c = context;

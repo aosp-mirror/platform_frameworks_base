@@ -1370,9 +1370,8 @@ public class TabletStatusBar extends BaseStatusBar implements
                 iconView.setPadding(mIconHPadding, 0, mIconHPadding, 0);
 
                 mNotificationDNDDummyEntry = new NotificationData.Entry(
-                        null,
-                        new StatusBarNotification("", 0, "", 0, 0, Notification.PRIORITY_MAX, dndNotification),
-                        iconView);
+                        null, new StatusBarNotification("", 0, "", 0, 0, Notification.PRIORITY_MAX,
+                                dndNotification, android.os.Process.myUserHandle()), iconView);
 
                 mIconLayout.addView(iconView, params);
             }

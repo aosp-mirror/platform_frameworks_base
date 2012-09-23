@@ -6414,10 +6414,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                           + " (pid=" + Binder.getCallingPid()
                           + ") when getting content provider " + name);
                 }
-                if (r.userId != userId) {
-                    throw new SecurityException("Calling requested user " + userId
-                            + " but app is user " + r.userId);
-                }
             }
 
             // First check if this content provider has been published...
@@ -6666,7 +6662,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     public final ContentProviderHolder getContentProvider(
-            IApplicationThread caller, String name, boolean stable) {
+            IApplicationThread caller, String name, int userId, boolean stable) {
         enforceNotIsolatedCaller("getContentProvider");
         if (caller == null) {
             String msg = "null IApplicationThread when getting content provider "
@@ -6675,14 +6671,18 @@ public final class ActivityManagerService extends ActivityManagerNative
             throw new SecurityException(msg);
         }
 
-        return getContentProviderImpl(caller, name, null, stable,
-                UserHandle.getCallingUserId());
+        userId = handleIncomingUserLocked(Binder.getCallingPid(), Binder.getCallingUid(), userId,
+                false, true, "getContentProvider", null);
+        return getContentProviderImpl(caller, name, null, stable, userId);
     }
 
-    public ContentProviderHolder getContentProviderExternal(String name, IBinder token) {
+    public ContentProviderHolder getContentProviderExternal(
+            String name, int userId, IBinder token) {
         enforceCallingPermission(android.Manifest.permission.ACCESS_CONTENT_PROVIDERS_EXTERNALLY,
             "Do not have permission in call getContentProviderExternal()");
-        return getContentProviderExternalUnchecked(name, token, UserHandle.getCallingUserId());
+        userId = handleIncomingUserLocked(Binder.getCallingPid(), Binder.getCallingUid(), userId,
+                false, true, "getContentProvider", null);
+        return getContentProviderExternalUnchecked(name, token, userId);
     }
 
     private ContentProviderHolder getContentProviderExternalUnchecked(String name,
