@@ -1088,7 +1088,7 @@ public class ActionBarView extends AbsActionBarView {
             customView = mCustomNavView;
         }
         if (customView != null) {
-            final int resolvedLayoutDirection = getResolvedLayoutDirection();
+            final int resolvedLayoutDirection = getLayoutDirection();
             ViewGroup.LayoutParams lp = customView.getLayoutParams();
             lp.onResolveLayoutDirection(resolvedLayoutDirection);
             final ActionBar.LayoutParams ablp = lp instanceof ActionBar.LayoutParams ?
@@ -1372,7 +1372,7 @@ public class ActionBarView extends AbsActionBarView {
         protected void onLayout(boolean changed, int l, int t, int r, int b) {
             final int vCenter = (b - t) / 2;
             final boolean isLayoutRtl = isLayoutRtl();
-            final int layoutDirection = getResolvedLayoutDirection();
+            final int layoutDirection = getLayoutDirection();
             final int width = getWidth();
             int upOffset = 0;
             if (mUpView.getVisibility() != GONE) {
