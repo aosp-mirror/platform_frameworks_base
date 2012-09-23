@@ -148,6 +148,15 @@ public interface TagTechnology extends Closeable {
     public static final int MIFARE_ULTRALIGHT = 9;
 
     /**
+     * This technology is an instance of {@link NfcBarcode}.
+     * <p>Support for this technology type is optional. If a stack doesn't support this technology
+     * type tags using it must still be discovered and present the lower level radio interface
+     * technologies in use.
+     * @hide
+     */
+    public static final int NFC_BARCODE = 10;
+
+    /**
      * Get the {@link Tag} object backing this {@link TagTechnology} object.
      * @return the {@link Tag} backing this {@link TagTechnology} object.
      */
