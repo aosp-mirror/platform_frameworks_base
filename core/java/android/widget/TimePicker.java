@@ -172,7 +172,7 @@ public class TimePicker extends FrameLayout {
         mMinuteSpinner.setMinValue(0);
         mMinuteSpinner.setMaxValue(59);
         mMinuteSpinner.setOnLongPressUpdateInterval(100);
-        mMinuteSpinner.setFormatter(NumberPicker.TWO_DIGIT_FORMATTER);
+        mMinuteSpinner.setFormatter(NumberPicker.getTwoDigitFormatter());
         mMinuteSpinner.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             public void onValueChange(NumberPicker spinner, int oldVal, int newVal) {
                 updateInputState();
@@ -500,7 +500,7 @@ public class TimePicker extends FrameLayout {
         if (is24HourView()) {
             mHourSpinner.setMinValue(0);
             mHourSpinner.setMaxValue(23);
-            mHourSpinner.setFormatter(NumberPicker.TWO_DIGIT_FORMATTER);
+            mHourSpinner.setFormatter(NumberPicker.getTwoDigitFormatter());
         } else {
             mHourSpinner.setMinValue(1);
             mHourSpinner.setMaxValue(12);
