@@ -26,7 +26,7 @@ import android.util.Log;
 public final class CellInfoLte extends CellInfo implements Parcelable {
 
     private static final String LOG_TAG = "CellInfoLte";
-    private static final boolean DBG = false;
+    private static final boolean DBG = true;
 
     private CellIdentityLte mCellIdentityLte;
     private CellSignalStrengthLte mCellSignalStrengthLte;
@@ -46,18 +46,22 @@ public final class CellInfoLte extends CellInfo implements Parcelable {
     }
 
     public CellIdentityLte getCellIdentity() {
+        if (DBG) log("getCellIdentity: " + mCellIdentityLte);
         return mCellIdentityLte;
     }
     /** @hide */
     public void setCellIdentity(CellIdentityLte cid) {
+        if (DBG) log("setCellIdentity: " + cid);
         mCellIdentityLte = cid;
     }
 
     public CellSignalStrengthLte getCellSignalStrength() {
+        if (DBG) log("getCellSignalStrength: " + mCellSignalStrengthLte);
         return mCellSignalStrengthLte;
     }
     /** @hide */
     public void setCellSignalStrength(CellSignalStrengthLte css) {
+        if (DBG) log("setCellSignalStrength: " + css);
         mCellSignalStrengthLte = css;
     }
 
@@ -105,8 +109,7 @@ public final class CellInfoLte extends CellInfo implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         if (DBG) log("writeToParcel(Parcel, int): " + toString());
-        dest.writeInt(TYPE_LTE);
-        super.writeToParcel(dest, flags);
+        super.writeToParcel(dest, flags, TYPE_LTE);
         mCellIdentityLte.writeToParcel(dest, flags);
         mCellSignalStrengthLte.writeToParcel(dest, flags);
     }

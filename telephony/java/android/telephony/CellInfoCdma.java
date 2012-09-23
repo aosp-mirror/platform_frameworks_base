@@ -104,9 +104,7 @@ public final class CellInfoCdma extends CellInfo implements Parcelable {
     /** Implement the Parcelable interface */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        if (DBG) log("writeToParcel(Parcel, int): " + toString());
-        dest.writeInt(TYPE_LTE);
-        super.writeToParcel(dest, flags);
+        super.writeToParcel(dest, flags, TYPE_CDMA);
         mCellIdentityCdma.writeToParcel(dest, flags);
         mCellSignalStrengthCdma.writeToParcel(dest, flags);
     }
