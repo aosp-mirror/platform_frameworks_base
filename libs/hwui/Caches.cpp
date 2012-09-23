@@ -435,15 +435,13 @@ void Caches::resetScissor() {
 ///////////////////////////////////////////////////////////////////////////////
 
 void Caches::startTiling(GLuint x, GLuint y, GLuint width, GLuint height, bool opaque) {
-    if (extensions.hasTiledRendering()) {
-        glStartTilingQCOM(x, y, width, height,
-                (opaque ? GL_NONE : GL_COLOR_BUFFER_BIT0_QCOM) |
-                (debugOverdraw ? GL_STENCIL_BUFFER_BIT0_QCOM : 0));
+    if (extensions.hasTiledRendering() && !debugOverdraw) {
+        glStartTilingQCOM(x, y, width, height, (opaque ? GL_NONE : GL_COLOR_BUFFER_BIT0_QCOM));
     }
 }
 
 void Caches::endTiling() {
-    if (extensions.hasTiledRendering()) {
+    if (extensions.hasTiledRendering() && !debugOverdraw) {
         glEndTilingQCOM(GL_COLOR_BUFFER_BIT0_QCOM);
     }
 }
