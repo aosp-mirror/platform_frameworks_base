@@ -331,10 +331,14 @@ void FontRenderer::checkTextureUpdate() {
     for (uint32_t i = 0; i < mCacheTextures.size(); i++) {
         CacheTexture* cacheTexture = mCacheTextures[i];
         if (cacheTexture->isDirty() && cacheTexture->getTexture()) {
-            uint32_t xOffset = 0;
+            // Can't copy inner rect; glTexSubimage expects pointer to deal with entire buffer
+            // of data. So expand the dirty rect to the encompassing horizontal stripe.
+            const Rect* dirtyRect = cacheTexture->getDirtyRect();
+            uint32_t x = 0;
+            uint32_t y = dirtyRect->top;
             uint32_t width = cacheTexture->getWidth();
-            uint32_t height = cacheTexture->getHeight();
-            void* textureData = cacheTexture->getTexture();
+            uint32_t height = dirtyRect->getHeight();
+            void* textureData = cacheTexture->getTexture() + y * width;
 
             if (cacheTexture->getTextureId() != lastTextureId) {
                 lastTextureId = cacheTexture->getTextureId();
@@ -342,12 +346,11 @@ void FontRenderer::checkTextureUpdate() {
                 glBindTexture(GL_TEXTURE_2D, lastTextureId);
             }
 #if DEBUG_FONT_RENDERER
-            ALOGD("glTextSubimage for cacheTexture %d: xOff, width height = %d, %d, %d",
-                    i, xOffset, width, height);
+            ALOGD("glTexSubimage for cacheTexture %d: x, y, width height = %d, %d, %d, %d",
+                    i, x, y, width, height);
 #endif
-            glTexSubImage2D(GL_TEXTURE_2D, 0, xOffset, 0, width, height,
+            glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height,
                     GL_ALPHA, GL_UNSIGNED_BYTE, textureData);
-
             cacheTexture->setDirty(false);
         }
     }
