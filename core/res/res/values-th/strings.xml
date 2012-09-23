@@ -623,8 +623,10 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"ข้อมูลของแอปพลิเคชันที่จัดเก็บต้องมีการเข้ารหัส"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"ปิดใช้งานกล้องถ่ายรูป"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"ป้องกันการใช้กล้องถ่ายรูปของอุปกรณ์ทั้งหมด"</string>
-    <string name="policylab_disableKeyguardWidgets" msgid="1794894613389073926">"ปิดใช้งานวิดเจ็ตเมื่อล็อกจอ"</string>
-    <string name="policydesc_disableKeyguardWidgets" msgid="7254624892984033592">"ป้องกันการใช้วิดเจ็ตบางส่วนหรือทั้งหมดเมื่อล็อกหน้าจอ"</string>
+    <!-- no translation found for policylab_disableKeyguardFeatures (266329104542638802) -->
+    <skip />
+    <!-- no translation found for policydesc_disableKeyguardFeatures (3467082272186534614) -->
+    <skip />
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"บ้าน"</item>
     <item msgid="869923650527136615">"มือถือ"</item>
@@ -1116,7 +1118,7 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"ตั้งวันที่"</string>
     <string name="date_time_set" msgid="5777075614321087758">"ตั้งค่า"</string>
     <string name="date_time_done" msgid="2507683751759308828">"เสร็จสิ้น"</string>
-    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"ใหม่: "</font></string>
+    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff33b5e5">"ใหม่: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"โดย <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="no_permissions" msgid="7283357728219338112">"ไม่ต้องการการอนุญาต"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"รายการนี้อาจมีการเรียกเก็บเงิน"</string>
@@ -1260,6 +1262,10 @@
     <string name="share" msgid="1778686618230011964">"แบ่งปัน"</string>
     <string name="find" msgid="4808270900322985960">"ค้นหา"</string>
     <string name="websearch" msgid="4337157977400211589">"ค้นเว็บ"</string>
+    <!-- no translation found for find_next (5742124618942193978) -->
+    <skip />
+    <!-- no translation found for find_previous (2196723669388360506) -->
+    <skip />
     <string name="gpsNotifTicker" msgid="5622683912616496172">"คำขอสถานที่จาก <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="gpsNotifTitle" msgid="5446858717157416839">"คำขอสถานที่"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"ร้องขอโดย <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>

@@ -623,8 +623,10 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Wymaganie szyfrowania przechowywanych danych aplikacji"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Wyłącz aparaty"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Zapobieganie używaniu wszystkich aparatów w urządzeniu"</string>
-    <string name="policylab_disableKeyguardWidgets" msgid="1794894613389073926">"Wył. widżety przy blokadzie klawiszy"</string>
-    <string name="policydesc_disableKeyguardWidgets" msgid="7254624892984033592">"Uniemożliwiaj użycie części lub wszystkich widżetów przy blokadzie klawiszy."</string>
+    <!-- no translation found for policylab_disableKeyguardFeatures (266329104542638802) -->
+    <skip />
+    <!-- no translation found for policydesc_disableKeyguardFeatures (3467082272186534614) -->
+    <skip />
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Dom"</item>
     <item msgid="869923650527136615">"Komórka"</item>
@@ -1117,7 +1119,7 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Ustaw datę"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Ustaw"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Gotowe"</string>
-    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"NOWE: "</font></string>
+    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff33b5e5">"NOWE: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"Dostarczane przez <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="no_permissions" msgid="7283357728219338112">"Nie są wymagane żadne uprawnienia"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"to może spowodować naliczenie opłat"</string>
@@ -1261,6 +1263,10 @@
     <string name="share" msgid="1778686618230011964">"Udostępnij"</string>
     <string name="find" msgid="4808270900322985960">"Znajdź"</string>
     <string name="websearch" msgid="4337157977400211589">"Wyszukiwarka"</string>
+    <!-- no translation found for find_next (5742124618942193978) -->
+    <skip />
+    <!-- no translation found for find_previous (2196723669388360506) -->
+    <skip />
     <string name="gpsNotifTicker" msgid="5622683912616496172">"Prośba o lokalizację od użytkownika <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="gpsNotifTitle" msgid="5446858717157416839">"Prośba o lokalizację"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"Żądane przez <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>

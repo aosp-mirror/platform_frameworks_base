@@ -623,8 +623,10 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Necesită ca datele aplicaţiei stocate să fie criptate."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Dezactivaţi camerele foto"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Împiedicaţi utilizarea camerelor foto de pe dispozitiv."</string>
-    <string name="policylab_disableKeyguardWidgets" msgid="1794894613389073926">"Protecţia dezact. widgeturile"</string>
-    <string name="policydesc_disableKeyguardWidgets" msgid="7254624892984033592">"Previne utilizarea unora dintre widgeturi sau a tuturor acestora la activarea protecţiei tastaturii."</string>
+    <!-- no translation found for policylab_disableKeyguardFeatures (266329104542638802) -->
+    <skip />
+    <!-- no translation found for policydesc_disableKeyguardFeatures (3467082272186534614) -->
+    <skip />
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Domiciliu"</item>
     <item msgid="869923650527136615">"Mobil"</item>
@@ -1116,7 +1118,7 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Setaţi data"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Setaţi"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Terminat"</string>
-    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff900000">"NOU: "</font></string>
+    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff33b5e5">"NOU: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"Furnizată de <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="no_permissions" msgid="7283357728219338112">"Nu se solicită nicio permisiune"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"aceasta poate să genereze costuri"</string>
@@ -1260,6 +1262,10 @@
     <string name="share" msgid="1778686618230011964">"Distribuiţi"</string>
     <string name="find" msgid="4808270900322985960">"Găsiţi"</string>
     <string name="websearch" msgid="4337157977400211589">"Căutare pe web"</string>
+    <!-- no translation found for find_next (5742124618942193978) -->
+    <skip />
+    <!-- no translation found for find_previous (2196723669388360506) -->
+    <skip />
     <string name="gpsNotifTicker" msgid="5622683912616496172">"Solicitare de locaţie de la <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="gpsNotifTitle" msgid="5446858717157416839">"Solicitare de locaţie"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"Solicitat de <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
