@@ -900,25 +900,41 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         return receiver;
     }
 
+    private boolean isProviderAllowedByCoarsePermission(String provider) {
+        if (LocationManager.FUSED_PROVIDER.equals(provider)) {
+            return true;
+        }
+        if (LocationManager.PASSIVE_PROVIDER.equals(provider)) {
+            return true;
+        }
+        if (LocationManager.NETWORK_PROVIDER.equals(provider)) {
+            return true;
+        }
+        return false;
+    }
+
     private String checkPermissionAndRequest(LocationRequest request) {
         String perm = checkPermission();
 
         if (ACCESS_COARSE_LOCATION.equals(perm)) {
-             switch (request.getQuality()) {
-                 case LocationRequest.ACCURACY_FINE:
-                     request.setQuality(LocationRequest.ACCURACY_BLOCK);
-                     break;
-                 case LocationRequest.POWER_HIGH:
-                     request.setQuality(LocationRequest.POWER_LOW);
-                     break;
-             }
-             // throttle
-             if (request.getInterval() < LocationFudger.FASTEST_INTERVAL_MS) {
-                 request.setInterval(LocationFudger.FASTEST_INTERVAL_MS);
-             }
-             if (request.getFastestInterval() < LocationFudger.FASTEST_INTERVAL_MS) {
-                 request.setFastestInterval(LocationFudger.FASTEST_INTERVAL_MS);
-             }
+            if (!isProviderAllowedByCoarsePermission(request.getProvider())) {
+                throw new SecurityException("Requires ACCESS_FINE_LOCATION permission");
+            }
+            switch (request.getQuality()) {
+                case LocationRequest.ACCURACY_FINE:
+                    request.setQuality(LocationRequest.ACCURACY_BLOCK);
+                    break;
+                case LocationRequest.POWER_HIGH:
+                    request.setQuality(LocationRequest.POWER_LOW);
+                    break;
+            }
+            // throttle
+            if (request.getInterval() < LocationFudger.FASTEST_INTERVAL_MS) {
+                request.setInterval(LocationFudger.FASTEST_INTERVAL_MS);
+            }
+            if (request.getFastestInterval() < LocationFudger.FASTEST_INTERVAL_MS) {
+                request.setFastestInterval(LocationFudger.FASTEST_INTERVAL_MS);
+            }
         }
         // make getFastestInterval() the minimum of interval and fastest interval
         if (request.getFastestInterval() > request.getInterval()) {
@@ -990,7 +1006,9 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         // use the fused provider
         if (request == null) request = DEFAULT_LOCATION_REQUEST;
         String name = request.getProvider();
-        if (name == null) name = LocationManager.FUSED_PROVIDER;
+        if (name == null) {
+            throw new IllegalArgumentException("provider name must not be null");
+        }
         LocationProviderInterface provider = mProvidersByName.get(name);
         if (provider == null) {
             throw new IllegalArgumentException("provider doesn't exisit: " + provider);
@@ -1094,12 +1112,19 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             if (!isAllowedBySettingsLocked(name)) return null;
 
             Location location = mLastLocation.get(name);
+            if (location == null) {
+                return null;
+            }
             if (ACCESS_FINE_LOCATION.equals(perm)) {
                 return location;
             } else {
-                return mLocationFudger.getOrCreate(location);
+                Location noGPSLocation = location.getExtraLocation(Location.EXTRA_NO_GPS_LOCATION);
+                if (noGPSLocation != null) {
+                    return mLocationFudger.getOrCreate(noGPSLocation);
+                }
             }
         }
+        return null;
     }
 
     @Override
@@ -1329,16 +1354,28 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         LocationProviderInterface p = mProvidersByName.get(provider);
         if (p == null) return;
 
-        // Add the coarse location as an extra
-        Location coarse = mLocationFudger.getOrCreate(location);
-
         // Update last known locations
+        Location noGPSLocation = location.getExtraLocation(Location.EXTRA_NO_GPS_LOCATION);
+        Location lastNoGPSLocation = null;
         Location lastLocation = mLastLocation.get(provider);
         if (lastLocation == null) {
             lastLocation = new Location(provider);
             mLastLocation.put(provider, lastLocation);
+        } else {
+            lastNoGPSLocation = lastLocation.getExtraLocation(Location.EXTRA_NO_GPS_LOCATION);
+            if (noGPSLocation == null && lastNoGPSLocation != null) {
+                // New location has no no-GPS location: adopt last no-GPS location. This is set
+                // directly into location because we do not want to notify COARSE clients.
+                location.setExtraLocation(Location.EXTRA_NO_GPS_LOCATION, lastNoGPSLocation);
+            }
         }
         lastLocation.set(location);
+
+        // Fetch coarse location
+        Location coarseLocation = null;
+        if (noGPSLocation != null && !noGPSLocation.equals(lastNoGPSLocation)) {
+            coarseLocation = mLocationFudger.getOrCreate(noGPSLocation);
+        }
 
         // Fetch latest status update time
         long newStatusUpdateTime = p.getStatusUpdateTime();
@@ -1361,29 +1398,31 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                 continue;
             }
 
+            Location notifyLocation = null;
             if (ACCESS_FINE_LOCATION.equals(receiver.mPermission)) {
-                location = lastLocation;  // use fine location
+                notifyLocation = lastLocation;  // use fine location
             } else {
-                location = coarse;  // use coarse location
+                notifyLocation = coarseLocation;  // use coarse location if available
             }
-
-            Location lastLoc = r.mLastFixBroadcast;
-            if ((lastLoc == null) || shouldBroadcastSafe(location, lastLoc, r)) {
-                if (lastLoc == null) {
-                    lastLoc = new Location(location);
-                    r.mLastFixBroadcast = lastLoc;
-                } else {
-                    lastLoc.set(location);
-                }
-                if (!receiver.callLocationChangedLocked(location)) {
-                    Slog.w(TAG, "RemoteException calling onLocationChanged on " + receiver);
-                    receiverDead = true;
+            if (notifyLocation != null) {
+                Location lastLoc = r.mLastFixBroadcast;
+                if ((lastLoc == null) || shouldBroadcastSafe(notifyLocation, lastLoc, r)) {
+                    if (lastLoc == null) {
+                        lastLoc = new Location(notifyLocation);
+                        r.mLastFixBroadcast = lastLoc;
+                    } else {
+                        lastLoc.set(notifyLocation);
+                    }
+                    if (!receiver.callLocationChangedLocked(notifyLocation)) {
+                        Slog.w(TAG, "RemoteException calling onLocationChanged on " + receiver);
+                        receiverDead = true;
+                    }
                 }
             }
 
             long prevStatusUpdateTime = r.mLastStatusBroadcast;
             if ((newStatusUpdateTime > prevStatusUpdateTime) &&
-                (prevStatusUpdateTime != 0 || status != LocationProvider.AVAILABLE)) {
+                    (prevStatusUpdateTime != 0 || status != LocationProvider.AVAILABLE)) {
 
                 r.mLastStatusBroadcast = newStatusUpdateTime;
                 if (!receiver.callStatusChangedLocked(provider, status, extras)) {

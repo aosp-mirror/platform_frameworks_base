@@ -302,6 +302,10 @@ public class FusionEngine implements LocationListener {
                     0.0, 360.0));
         }
 
+        if (mNetworkLocation != null) {
+            fused.setExtraLocation(Location.EXTRA_NO_GPS_LOCATION, mNetworkLocation);
+        }
+
         mFusedLocation = fused;
 
         mCallback.reportLocation(mFusedLocation);
