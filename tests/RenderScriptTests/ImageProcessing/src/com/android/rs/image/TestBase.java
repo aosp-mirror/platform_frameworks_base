@@ -108,6 +108,10 @@ public class TestBase  {
         mRS.finish();
     }
 
+    public void destroy() {
+        mRS.destroy();
+    }
+
     public void updateBitmap(Bitmap b) {
         mOutPixelsAllocation.copyTo(b);
     }
