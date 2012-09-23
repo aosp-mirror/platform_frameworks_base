@@ -1546,7 +1546,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     public int getCompoundPaddingStart() {
         resolveDrawables();
-        switch(getResolvedLayoutDirection()) {
+        switch(getLayoutDirection()) {
             default:
             case LAYOUT_DIRECTION_LTR:
                 return getCompoundPaddingLeft();
@@ -1561,7 +1561,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     public int getCompoundPaddingEnd() {
         resolveDrawables();
-        switch(getResolvedLayoutDirection()) {
+        switch(getLayoutDirection()) {
             default:
             case LAYOUT_DIRECTION_LTR:
                 return getCompoundPaddingRight();
@@ -4858,7 +4858,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         final boolean isLayoutRtl = isLayoutRtl();
 
-        final int layoutDirection = getResolvedLayoutDirection();
+        final int layoutDirection = getLayoutDirection();
         final int absoluteGravity = Gravity.getAbsoluteGravity(mGravity, layoutDirection);
         if (mEllipsize == TextUtils.TruncateAt.MARQUEE &&
                 mMarqueeFadeMode != MARQUEE_FADE_SWITCH_SHOW_ELLIPSIS) {
@@ -5680,11 +5680,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     mLayoutAlignment = Layout.Alignment.ALIGN_CENTER;
                     break;
                 case TEXT_ALIGNMENT_VIEW_START:
-                    mLayoutAlignment = (getResolvedLayoutDirection() == LAYOUT_DIRECTION_RTL) ?
+                    mLayoutAlignment = (getLayoutDirection() == LAYOUT_DIRECTION_RTL) ?
                             Layout.Alignment.ALIGN_RIGHT : Layout.Alignment.ALIGN_LEFT;
                     break;
                 case TEXT_ALIGNMENT_VIEW_END:
-                    mLayoutAlignment = (getResolvedLayoutDirection() == LAYOUT_DIRECTION_RTL) ?
+                    mLayoutAlignment = (getLayoutDirection() == LAYOUT_DIRECTION_RTL) ?
                             Layout.Alignment.ALIGN_LEFT : Layout.Alignment.ALIGN_RIGHT;
                     break;
                 case TEXT_ALIGNMENT_INHERIT:
@@ -7485,7 +7485,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     return 0.0f;
                 }
             } else if (getLineCount() == 1) {
-                final int layoutDirection = getResolvedLayoutDirection();
+                final int layoutDirection = getLayoutDirection();
                 final int absoluteGravity = Gravity.getAbsoluteGravity(mGravity, layoutDirection);
                 switch (absoluteGravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
                     case Gravity.LEFT:
@@ -7512,7 +7512,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 final float scroll = marquee.getScroll();
                 return (maxFadeScroll - scroll) / getHorizontalFadingEdgeLength();
             } else if (getLineCount() == 1) {
-                final int layoutDirection = getResolvedLayoutDirection();
+                final int layoutDirection = getLayoutDirection();
                 final int absoluteGravity = Gravity.getAbsoluteGravity(mGravity, layoutDirection);
                 switch (absoluteGravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
                     case Gravity.LEFT:
@@ -8189,7 +8189,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         // Always need to resolve layout direction first
-        final boolean defaultIsRtl = (getResolvedLayoutDirection() == LAYOUT_DIRECTION_RTL);
+        final boolean defaultIsRtl = (getLayoutDirection() == LAYOUT_DIRECTION_RTL);
 
         // Now, we can select the heuristic
         int textDir = getResolvedTextDirection();

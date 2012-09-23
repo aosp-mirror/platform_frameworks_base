@@ -411,7 +411,7 @@ public class FrameLayout extends ViewGroup {
                     gravity = DEFAULT_CHILD_GRAVITY;
                 }
 
-                final int layoutDirection = getResolvedLayoutDirection();
+                final int layoutDirection = getLayoutDirection();
                 final int absoluteGravity = Gravity.getAbsoluteGravity(gravity, layoutDirection);
                 final int verticalGravity = gravity & Gravity.VERTICAL_GRAVITY_MASK;
 
@@ -483,7 +483,7 @@ public class FrameLayout extends ViewGroup {
                     selfBounds.set(mPaddingLeft, mPaddingTop, w - mPaddingRight, h - mPaddingBottom);
                 }
 
-                final int layoutDirection = getResolvedLayoutDirection();
+                final int layoutDirection = getLayoutDirection();
                 Gravity.apply(mForegroundGravity, foreground.getIntrinsicWidth(),
                         foreground.getIntrinsicHeight(), selfBounds, overlayBounds,
                         layoutDirection);
