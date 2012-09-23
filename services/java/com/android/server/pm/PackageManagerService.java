@@ -2488,6 +2488,15 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (ri != null) {
                     return ri;
                 }
+                if (userId != 0) {
+                    ri = new ResolveInfo(mResolveInfo);
+                    ri.activityInfo = new ActivityInfo(ri.activityInfo);
+                    ri.activityInfo.applicationInfo = new ApplicationInfo(
+                            ri.activityInfo.applicationInfo);
+                    ri.activityInfo.applicationInfo.uid = UserHandle.getUid(userId,
+                            UserHandle.getAppId(ri.activityInfo.applicationInfo.uid));
+                    return ri;
+                }
                 return mResolveInfo;
             }
         }
@@ -3668,7 +3677,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 mResolveActivity.applicationInfo = mAndroidApplication;
                 mResolveActivity.name = ResolverActivity.class.getName();
                 mResolveActivity.packageName = mAndroidApplication.packageName;
-                mResolveActivity.processName = mAndroidApplication.processName;
+                mResolveActivity.processName = "system:ui";
                 mResolveActivity.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
                 mResolveActivity.flags = ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS;
                 mResolveActivity.theme = com.android.internal.R.style.Theme_Holo_Dialog_Alert;
