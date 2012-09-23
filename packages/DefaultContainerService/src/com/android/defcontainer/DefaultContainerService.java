@@ -35,6 +35,7 @@ import android.content.res.ObbInfo;
 import android.content.res.ObbScanner;
 import android.net.Uri;
 import android.os.Environment;
+import android.os.Environment.UserEnvironment;
 import android.os.FileUtils;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
@@ -268,15 +269,16 @@ public class DefaultContainerService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         if (PackageManager.ACTION_CLEAN_EXTERNAL_STORAGE.equals(intent.getAction())) {
-            IPackageManager pm = IPackageManager.Stub.asInterface(
+            final IPackageManager pm = IPackageManager.Stub.asInterface(
                     ServiceManager.getService("package"));
-            PackageCleanItem pkg = null;
+            PackageCleanItem item = null;
             try {
-                while ((pkg=pm.nextPackageToClean(pkg)) != null) {
-                    eraseFiles(Environment.getExternalStorageAppDataDirectory(pkg.packageName));
-                    eraseFiles(Environment.getExternalStorageAppMediaDirectory(pkg.packageName));
-                    if (pkg.andCode) {
-                        eraseFiles(Environment.getExternalStorageAppObbDirectory(pkg.packageName));
+                while ((item = pm.nextPackageToClean(item)) != null) {
+                    final UserEnvironment userEnv = new UserEnvironment(item.userId);
+                    eraseFiles(userEnv.getExternalStorageAppDataDirectory(item.packageName));
+                    eraseFiles(userEnv.getExternalStorageAppMediaDirectory(item.packageName));
+                    if (item.andCode) {
+                        eraseFiles(userEnv.getExternalStorageAppObbDirectory(item.packageName));
                     }
                 }
             } catch (RemoteException e) {
