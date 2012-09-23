@@ -77,12 +77,7 @@ public:
     }
 
     ~CacheTexture() {
-        if (mTexture) {
-            delete[] mTexture;
-        }
-        if (mTextureId) {
-            glDeleteTextures(1, &mTextureId);
-        }
+        releaseTexture();
         reset();
     }
 
@@ -105,38 +100,40 @@ public:
 
     void releaseTexture() {
         if (mTexture) {
-            glDeleteTextures(1, &mTextureId);
             delete[] mTexture;
             mTexture = NULL;
+        }
+        if (mTextureId) {
+            glDeleteTextures(1, &mTextureId);
             mTextureId = 0;
         }
+        mDirty = false;
     }
 
     /**
      * This method assumes that the proper texture unit is active.
      */
     void allocateTexture() {
-        int width = mWidth;
-        int height = mHeight;
-
-        mTexture = new uint8_t[width * height];
+        if (!mTexture) {
+            mTexture = new uint8_t[mWidth * mHeight];
+        }
 
         if (!mTextureId) {
             glGenTextures(1, &mTextureId);
+
+            glBindTexture(GL_TEXTURE_2D, mTextureId);
+            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+            // Initialize texture dimensions
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, mWidth, mHeight, 0,
+                    GL_ALPHA, GL_UNSIGNED_BYTE, 0);
+
+            const GLenum filtering = getLinearFiltering() ? GL_LINEAR : GL_NEAREST;
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filtering);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filtering);
+
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         }
-
-        glBindTexture(GL_TEXTURE_2D, mTextureId);
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        // Initialize texture dimensions
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, width, height, 0,
-                GL_ALPHA, GL_UNSIGNED_BYTE, 0);
-
-        const GLenum filtering = getLinearFiltering() ? GL_LINEAR : GL_NEAREST;
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filtering);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filtering);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     }
 
     bool fitBitmap(const SkGlyph& glyph, uint32_t* retOriginX, uint32_t* retOriginY);
@@ -153,7 +150,8 @@ public:
         return mTexture;
     }
 
-    inline GLuint getTextureId() const {
+    GLuint getTextureId() {
+        allocateTexture();
         return mTextureId;
     }
 
