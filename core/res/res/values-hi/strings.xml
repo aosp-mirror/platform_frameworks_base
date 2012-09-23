@@ -623,8 +623,10 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"संग्रहीत एप्‍लिकेशन डेटा को एन्क्रिप्ट किया जाना आवश्‍यक है."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"कैमरों को अक्षम करें"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"सभी उपकरण कैमरों का उपयोग रोकें."</string>
-    <string name="policylab_disableKeyguardWidgets" msgid="1794894613389073926">"कीगार्ड पर विजेट को अक्षम करें"</string>
-    <string name="policydesc_disableKeyguardWidgets" msgid="7254624892984033592">"कीगार्ड पर कुछ या सभी विजेट का उपयोग रोकें."</string>
+    <!-- no translation found for policylab_disableKeyguardFeatures (266329104542638802) -->
+    <skip />
+    <!-- no translation found for policydesc_disableKeyguardFeatures (3467082272186534614) -->
+    <skip />
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"घर"</item>
     <item msgid="869923650527136615">"मोबाइल"</item>
@@ -1260,6 +1262,10 @@
     <string name="share" msgid="1778686618230011964">"शेयर करें"</string>
     <string name="find" msgid="4808270900322985960">"ढूंढें"</string>
     <string name="websearch" msgid="4337157977400211589">"वेब खोज"</string>
+    <!-- no translation found for find_next (5742124618942193978) -->
+    <skip />
+    <!-- no translation found for find_previous (2196723669388360506) -->
+    <skip />
     <string name="gpsNotifTicker" msgid="5622683912616496172">"<xliff:g id="NAME">%s</xliff:g> की ओर से स्‍थान अनुरोध"</string>
     <string name="gpsNotifTitle" msgid="5446858717157416839">"स्‍थान अनुरोध"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"<xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>) द्वारा अनुरोधित"</string>

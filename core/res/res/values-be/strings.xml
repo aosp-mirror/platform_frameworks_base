@@ -623,8 +623,10 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Запыт на шыфраванне захаваных дадзеных прыкладанняў."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Адключыць камеры"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Забараніць выкарыстанне ўсіх камер прылады."</string>
-    <string name="policylab_disableKeyguardWidgets" msgid="1794894613389073926">"Адключыць вiджэты на клавіятуры"</string>
-    <string name="policydesc_disableKeyguardWidgets" msgid="7254624892984033592">"Прадухіліць выкарыстанне некаторых ці ўсіх віджэтаў на клавіятуры."</string>
+    <!-- no translation found for policylab_disableKeyguardFeatures (266329104542638802) -->
+    <skip />
+    <!-- no translation found for policydesc_disableKeyguardFeatures (3467082272186534614) -->
+    <skip />
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Галоўная старонка"</item>
     <item msgid="869923650527136615">"Мабільны"</item>
@@ -1261,6 +1263,10 @@
     <string name="share" msgid="1778686618230011964">"Адкрыць доступ"</string>
     <string name="find" msgid="4808270900322985960">"Пошук"</string>
     <string name="websearch" msgid="4337157977400211589">"Вэб-пошук"</string>
+    <!-- no translation found for find_next (5742124618942193978) -->
+    <skip />
+    <!-- no translation found for find_previous (2196723669388360506) -->
+    <skip />
     <string name="gpsNotifTicker" msgid="5622683912616496172">"Запыт пра месцазнаходжанне ад карыстальніка <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="gpsNotifTitle" msgid="5446858717157416839">"Запыт месцазнаходжання"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"Запыт ад карыстальнiка <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
