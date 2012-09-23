@@ -149,7 +149,6 @@ public class NumberPicker extends LinearLayout {
      * strings like "01". Keeping a static formatter etc. is the most efficient
      * way to do this; it avoids creating temporary objects on every call to
      * format().
-     *
      */
     private static class TwoDigitFormatter implements NumberPicker.Formatter {
         final StringBuilder mBuilder = new StringBuilder();
@@ -191,10 +190,12 @@ public class NumberPicker extends LinearLayout {
 
     private static final TwoDigitFormatter sTwoDigitFormatter = new TwoDigitFormatter();
 
-    static final Formatter getTwoDigitFormatter() {
+    /**
+     * @hide
+     */
+    public static final Formatter getTwoDigitFormatter() {
         return sTwoDigitFormatter;
     }
-
 
     /**
      * The increment button.
