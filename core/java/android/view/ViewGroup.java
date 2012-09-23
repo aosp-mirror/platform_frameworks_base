@@ -5274,7 +5274,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             if (child.isTextDirectionInherited()) {
                 child.resetResolvedTextDirection();
             }
-            if (child.getTextAlignment() == TEXT_ALIGNMENT_INHERIT) {
+            if (child.isTextAlignmentInherited()) {
                 child.resetResolvedTextAlignment();
             }
         }
