@@ -21,10 +21,12 @@ import android.os.Parcelable;
 
 /** @hide */
 public class PackageCleanItem {
+    public final int userId;
     public final String packageName;
     public final boolean andCode;
 
-    public PackageCleanItem(String packageName, boolean andCode) {
+    public PackageCleanItem(int userId, String packageName, boolean andCode) {
+        this.userId = userId;
         this.packageName = packageName;
         this.andCode = andCode;
     }
@@ -37,7 +39,8 @@ public class PackageCleanItem {
         try {
             if (obj != null) {
                 PackageCleanItem other = (PackageCleanItem)obj;
-                return packageName.equals(other.packageName) && andCode == other.andCode;
+                return userId == other.userId && packageName.equals(other.packageName)
+                        && andCode == other.andCode;
             }
         } catch (ClassCastException e) {
         }
@@ -47,6 +50,7 @@ public class PackageCleanItem {
     @Override
     public int hashCode() {
         int result = 17;
+        result = 31 * result + userId;
         result = 31 * result + packageName.hashCode();
         result = 31 * result + (andCode ? 1 : 0);
         return result;
@@ -57,6 +61,7 @@ public class PackageCleanItem {
     }
 
     public void writeToParcel(Parcel dest, int parcelableFlags) {
+        dest.writeInt(userId);
         dest.writeString(packageName);
         dest.writeInt(andCode ? 1 : 0);
     }
@@ -73,6 +78,7 @@ public class PackageCleanItem {
     };
 
     private PackageCleanItem(Parcel source) {
+        userId = source.readInt();
         packageName = source.readString();
         andCode = source.readInt() != 0;
     }
