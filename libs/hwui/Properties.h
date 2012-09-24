@@ -37,7 +37,7 @@
 // Defines the size in bits of the stencil buffer
 // Note: Only 1 bit is required for clipping but more bits are required
 // to properly implement the winding fill rule when rasterizing paths
-#define STENCIL_BUFFER_SIZE 0
+#define STENCIL_BUFFER_SIZE 8
 
 /**
  * Debug level for app developers. The value is a numeric value defined
@@ -56,10 +56,16 @@ enum DebugLevel {
 };
 
 /**
- * Used to enable/disbale layers update debugging. The accepted values are
+ * Used to enable/disable layers update debugging. The accepted values are
  * "true" and "false". The default value is "false".
  */
 #define PROPERTY_DEBUG_LAYERS_UPDATES "debug.hwui.show_layers_updates"
+
+/**
+ * Used to enable/disable overdraw debugging. The accepted values are
+ * "true" and "false". The default value is "false".
+ */
+#define PROPERTY_DEBUG_OVERDRAW "debug.hwui.show_overdraw"
 
 // These properties are defined in mega-bytes
 #define PROPERTY_TEXTURE_CACHE_SIZE "ro.hwui.texture_cache_size"

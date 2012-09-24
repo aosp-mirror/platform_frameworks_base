@@ -59,6 +59,16 @@ public:
     void enableWrite();
 
     /**
+     * The test passes only when equal to the specified value.
+     */
+    void enableDebugTest(GLint value, bool greater = false);
+
+    /**
+     * Used for debugging. The stencil test always passes and increments.
+     */
+    void enableDebugWrite();
+
+    /**
      * Disables stencil test and write.
      */
     void disable();
