@@ -536,6 +536,8 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
                 return;
             }
 
+            Slog.i(TAG, "Display device added: " + device.getDisplayDeviceInfoLocked());
+
             mDisplayDevices.add(device);
             addLogicalDisplayLocked(device);
             scheduleTraversalLocked();
@@ -549,6 +551,8 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
                         + device.getDisplayDeviceInfoLocked());
                 return;
             }
+
+            Slog.i(TAG, "Display device changed: " + device.getDisplayDeviceInfoLocked());
 
             device.applyPendingDisplayDeviceInfoChangesLocked();
             if (updateLogicalDisplaysLocked()) {
@@ -564,6 +568,8 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
                         + device.getDisplayDeviceInfoLocked());
                 return;
             }
+
+            Slog.i(TAG, "Display device removed: " + device.getDisplayDeviceInfoLocked());
 
             mRemovedDisplayDevices.add(device);
             updateLogicalDisplaysLocked();
