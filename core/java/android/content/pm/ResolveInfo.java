@@ -230,6 +230,21 @@ public class ResolveInfo implements Parcelable {
     public ResolveInfo() {
     }
 
+    public ResolveInfo(ResolveInfo orig) {
+        activityInfo = orig.activityInfo;
+        serviceInfo = orig.serviceInfo;
+        filter = orig.filter;
+        priority = orig.priority;
+        preferredOrder = orig.preferredOrder;
+        match = orig.match;
+        specificIndex = orig.specificIndex;
+        labelRes = orig.labelRes;
+        nonLocalizedLabel = orig.nonLocalizedLabel;
+        icon = orig.icon;
+        resolvePackageName = orig.resolvePackageName;
+        system = orig.system;
+    }
+
     public String toString() {
         ComponentInfo ci = activityInfo != null ? activityInfo : serviceInfo;
         return "ResolveInfo{"
