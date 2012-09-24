@@ -5635,7 +5635,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     @Override
-    public void onResolvedLayoutDirectionReset() {
+    public void onRtlPropertiesChanged() {
         if (mLayoutAlignment != null) {
             if (mResolvedTextAlignment == TEXT_ALIGNMENT_VIEW_START ||
                     mResolvedTextAlignment == TEXT_ALIGNMENT_VIEW_END) {
@@ -5733,7 +5733,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         if (mTextDir == null) {
-            resolveTextDirection();
+            mTextDir = getTextDirectionHeuristic();
         }
 
         mLayout = makeSingleLayout(wantWidth, boring, ellipsisWidth, alignment, shouldEllipsize,
@@ -5995,7 +5995,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         BoringLayout.Metrics hintBoring = UNKNOWN_BORING;
 
         if (mTextDir == null) {
-            resolveTextDirection();
+            getTextDirectionHeuristic();
         }
 
         int des = -1;
@@ -8181,13 +8181,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return mEditor.mInBatchEditControllers;
     }
 
-    @Override
-    public void onResolvedTextDirectionChanged() {
+    TextDirectionHeuristic getTextDirectionHeuristic() {
         if (hasPasswordTransformationMethod()) {
             // TODO: take care of the content direction to show the password text and dots justified
             // to the left or to the right
-            mTextDir = TextDirectionHeuristics.LOCALE;
-            return;
+            return TextDirectionHeuristics.LOCALE;
         }
 
         // Always need to resolve layout direction first
@@ -8198,24 +8196,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         switch (textDir) {
             default:
             case TEXT_DIRECTION_FIRST_STRONG:
-                mTextDir = (defaultIsRtl ? TextDirectionHeuristics.FIRSTSTRONG_RTL :
+                return (defaultIsRtl ? TextDirectionHeuristics.FIRSTSTRONG_RTL :
                         TextDirectionHeuristics.FIRSTSTRONG_LTR);
-                break;
             case TEXT_DIRECTION_ANY_RTL:
-                mTextDir = TextDirectionHeuristics.ANYRTL_LTR;
-                break;
+                return TextDirectionHeuristics.ANYRTL_LTR;
             case TEXT_DIRECTION_LTR:
-                mTextDir = TextDirectionHeuristics.LTR;
-                break;
+                return TextDirectionHeuristics.LTR;
             case TEXT_DIRECTION_RTL:
-                mTextDir = TextDirectionHeuristics.RTL;
-                break;
+                return TextDirectionHeuristics.RTL;
             case TEXT_DIRECTION_LOCALE:
-                mTextDir = TextDirectionHeuristics.LOCALE;
-                break;
+                return TextDirectionHeuristics.LOCALE;
         }
     }
 
+    /**
+     * @hide
+     */
     @Override
     public void onResolveDrawables(int layoutDirection) {
         // No need to resolve twice
