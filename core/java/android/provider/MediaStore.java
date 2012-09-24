@@ -255,7 +255,6 @@ public final class MediaStore {
      *
      * @see #ACTION_IMAGE_CAPTURE
      * @see #EXTRA_OUTPUT
-     * @hide
      */
     public static final String ACTION_IMAGE_CAPTURE_SECURE =
             "android.media.action.IMAGE_CAPTURE_SECURE";
