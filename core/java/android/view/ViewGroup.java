@@ -3391,11 +3391,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         if (child.hasTransientState()) {
             childHasTransientStateChanged(child, true);
         }
-
-        if (child.isLayoutDirectionInherited()) {
-            child.resetResolvedLayoutDirection();
-            child.resolveRtlProperties();
-        }
     }
 
     private void addInArray(View child, int index) {
@@ -3621,7 +3616,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             childHasTransientStateChanged(view, false);
         }
 
-        view.resetResolvedLayoutDirection();
+        view.resetRtlProperties();
 
         onViewRemoved(view);
 
@@ -5261,19 +5256,92 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @hide
      */
     @Override
+    public void resolveLayoutDirection() {
+        super.resolveLayoutDirection();
+
+        int count = getChildCount();
+        for (int i = 0; i < count; i++) {
+            final View child = getChildAt(i);
+            if (child.isLayoutDirectionInherited()) {
+                child.resolveLayoutDirection();
+            }
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void resolveTextDirection() {
+        super.resolveTextDirection();
+
+        int count = getChildCount();
+        for (int i = 0; i < count; i++) {
+            final View child = getChildAt(i);
+            if (child.isTextDirectionInherited()) {
+                child.resolveTextDirection();
+            }
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void resolveTextAlignment() {
+        super.resolveTextAlignment();
+
+        int count = getChildCount();
+        for (int i = 0; i < count; i++) {
+            final View child = getChildAt(i);
+            if (child.isTextAlignmentInherited()) {
+                child.resolveTextAlignment();
+            }
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @Override
     public void resetResolvedLayoutDirection() {
         super.resetResolvedLayoutDirection();
 
-        // Take care of resetting the children resolution too
         int count = getChildCount();
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
             if (child.isLayoutDirectionInherited()) {
                 child.resetResolvedLayoutDirection();
             }
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void resetResolvedTextDirection() {
+        super.resetResolvedTextDirection();
+
+        int count = getChildCount();
+        for (int i = 0; i < count; i++) {
+            final View child = getChildAt(i);
             if (child.isTextDirectionInherited()) {
                 child.resetResolvedTextDirection();
             }
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void resetResolvedTextAlignment() {
+        super.resetResolvedTextAlignment();
+
+        int count = getChildCount();
+        for (int i = 0; i < count; i++) {
+            final View child = getChildAt(i);
             if (child.isTextAlignmentInherited()) {
                 child.resetResolvedTextAlignment();
             }
