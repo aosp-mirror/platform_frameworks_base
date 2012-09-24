@@ -523,6 +523,13 @@ public class MockContext extends Context {
         throw new UnsupportedOperationException();
     }
 
+    /** {@hide} */
+    @Override
+    public Context createPackageContextAsUser(String packageName, int flags, UserHandle user)
+            throws PackageManager.NameNotFoundException {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public Context createConfigurationContext(Configuration overrideConfiguration) {
         throw new UnsupportedOperationException();

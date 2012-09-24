@@ -29,6 +29,7 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.IntProperty;
 import android.util.Log;
@@ -891,6 +892,19 @@ public class Notification implements Parcelable
         }
         sb.append(")");
         return sb.toString();
+    }
+
+    /** {@hide} */
+    public void setUser(UserHandle user) {
+        if (tickerView != null) {
+            tickerView.setUser(user);
+        }
+        if (contentView != null) {
+            contentView.setUser(user);
+        }
+        if (bigContentView != null) {
+            bigContentView.setUser(user);
+        }
     }
 
     /**
