@@ -4337,6 +4337,9 @@ final class ActivityStack {
         if (resumed != null && resumed.thumbHolder == tr) {
             info.mainThumbnail = resumed.stack.screenshotActivities(resumed);
         }
+        if (info.mainThumbnail == null) {
+            info.mainThumbnail = tr.lastThumbnail;
+        }
         return info;
     }
 
@@ -4351,7 +4354,7 @@ final class ActivityStack {
         // thumbnail to return.
         TaskAccessInfo info = getTaskAccessInfoLocked(tr.taskId, true);
         if (info.numSubThumbbails <= 0) {
-            return info.mainThumbnail;
+            return info.mainThumbnail != null ? info.mainThumbnail : tr.lastThumbnail;
         } else {
             return info.subtasks.get(info.numSubThumbbails-1).holder.lastThumbnail;
         }
