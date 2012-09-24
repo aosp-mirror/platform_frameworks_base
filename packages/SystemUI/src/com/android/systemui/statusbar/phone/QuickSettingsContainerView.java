@@ -64,7 +64,7 @@ class QuickSettingsContainerView extends FrameLayout {
         int height = MeasureSpec.getSize(heightMeasureSpec);
         int availableWidth = (int) (width - getPaddingLeft() - getPaddingRight() -
                 (mNumColumns - 1) * mCellGap);
-        float cellWidth = availableWidth / mNumColumns;
+        float cellWidth = (float) Math.ceil(((float) availableWidth) / mNumColumns);
 
         // Update each of the children's widths accordingly to the cell width
         int N = getChildCount();
