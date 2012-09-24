@@ -1398,8 +1398,7 @@ class AppWidgetServiceImpl {
 
     int enforceSystemOrCallingUid(String packageName) throws IllegalArgumentException {
         int callingUid = Binder.getCallingUid();
-        int uid = Process.myUid();
-        if (UserHandle.getAppId(uid) == Process.SYSTEM_UID || uid == 0) {
+        if (UserHandle.getAppId(callingUid) == Process.SYSTEM_UID || callingUid == 0) {
             return callingUid;
         }
         return enforceCallingUid(packageName);
