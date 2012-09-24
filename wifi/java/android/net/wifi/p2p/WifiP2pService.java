@@ -527,6 +527,11 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                 case WifiMonitor.NETWORK_CONNECTION_EVENT:
                 case WifiMonitor.NETWORK_DISCONNECTION_EVENT:
                 case WifiMonitor.SUPPLICANT_STATE_CHANGE_EVENT:
+                case WifiMonitor.AUTHENTICATION_FAILURE_EVENT:
+                case WifiMonitor.WPS_SUCCESS_EVENT:
+                case WifiMonitor.WPS_FAIL_EVENT:
+                case WifiMonitor.WPS_OVERLAP_EVENT:
+                case WifiMonitor.WPS_TIMEOUT_EVENT:
                 case WifiMonitor.P2P_GROUP_REMOVED_EVENT:
                 case WifiMonitor.P2P_DEVICE_FOUND_EVENT:
                 case WifiMonitor.P2P_DEVICE_LOST_EVENT:
@@ -537,6 +542,9 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                 case PEER_CONNECTION_USER_ACCEPT:
                 case PEER_CONNECTION_USER_REJECT:
                 case GROUP_CREATING_TIMED_OUT:
+                case DhcpStateMachine.CMD_PRE_DHCP_ACTION:
+                case DhcpStateMachine.CMD_POST_DHCP_ACTION:
+                case DhcpStateMachine.CMD_ON_QUIT:
                     break;
                     /* unexpected group created, remove */
                 case WifiMonitor.P2P_GROUP_STARTED_EVENT:
@@ -1351,34 +1359,18 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     if (mWifiNative.p2pGroupRemove(mGroup.getInterface())) {
                         replyToMessage(message, WifiP2pManager.REMOVE_GROUP_SUCCEEDED);
                     } else {
+                        handleGroupRemoved();
+                        transitionTo(mInactiveState);
                         replyToMessage(message, WifiP2pManager.REMOVE_GROUP_FAILED,
                                 WifiP2pManager.ERROR);
                     }
                     break;
+                /* The supplicant misses the group removed event at times and just
+                 * sends a network disconnect event */
+                case WifiMonitor.NETWORK_DISCONNECTION_EVENT:
                 case WifiMonitor.P2P_GROUP_REMOVED_EVENT:
                     if (DBG) logd(getName() + " group removed");
-                    Collection <WifiP2pDevice> devices = mGroup.getClientList();
-                    boolean changed = false;
-                    for (WifiP2pDevice d : mPeers.getDeviceList()) {
-                        if (devices.contains(d) || mGroup.getOwner().equals(d)) {
-                            d.status = WifiP2pDevice.AVAILABLE;
-                            changed = true;
-                        }
-                    }
-
-                    if (mGroup.isGroupOwner()) {
-                        stopDhcpServer(mGroup.getInterface());
-                    } else {
-                        if (DBG) logd("stop DHCP client");
-                        mDhcpStateMachine.sendMessage(DhcpStateMachine.CMD_STOP_DHCP);
-                        mDhcpStateMachine.doQuit();
-                        mDhcpStateMachine = null;
-                    }
-
-                    mGroup = null;
-                    mWifiNative.p2pFlush();
-                    mServiceDiscReqId = null;
-                    if (changed) sendP2pPeersChangedBroadcast();
+                    handleGroupRemoved();
                     transitionTo(mInactiveState);
                     break;
                 case WifiMonitor.P2P_DEVICE_LOST_EVENT:
@@ -1734,9 +1726,12 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
      */
     private void updatePersistentNetworks() {
         String listStr = mWifiNative.listNetworks();
+        if (listStr == null) return;
 
         boolean isSaveRequired = false;
         String[] lines = listStr.split("\n");
+        if (lines == null) return;
+
         // Skip the first line, which is a header
         for (int i = 1; i < lines.length; i++) {
             String[] result = lines[i].split("\t");
@@ -2099,6 +2094,31 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         mWifiNative.p2pFlush();
         mServiceDiscReqId = null;
         sendMessage(WifiP2pManager.DISCOVER_PEERS);
+    }
+
+    private void handleGroupRemoved() {
+        Collection <WifiP2pDevice> devices = mGroup.getClientList();
+        boolean changed = false;
+        for (WifiP2pDevice d : mPeers.getDeviceList()) {
+            if (devices.contains(d) || mGroup.getOwner().equals(d)) {
+                d.status = WifiP2pDevice.AVAILABLE;
+                changed = true;
+            }
+        }
+
+        if (mGroup.isGroupOwner()) {
+            stopDhcpServer(mGroup.getInterface());
+        } else {
+            if (DBG) logd("stop DHCP client");
+            mDhcpStateMachine.sendMessage(DhcpStateMachine.CMD_STOP_DHCP);
+            mDhcpStateMachine.doQuit();
+            mDhcpStateMachine = null;
+        }
+
+        mGroup = null;
+        mWifiNative.p2pFlush();
+        mServiceDiscReqId = null;
+        if (changed) sendP2pPeersChangedBroadcast();
     }
 
     //State machine initiated requests can have replyTo set to null indicating

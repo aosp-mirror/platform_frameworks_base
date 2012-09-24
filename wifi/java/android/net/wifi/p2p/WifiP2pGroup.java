@@ -68,7 +68,7 @@ public class WifiP2pGroup implements Parcelable {
         "ssid=\"(.+)\" " +
         "freq=(\\d+) " +
         "(?:psk=)?([0-9a-fA-F]{64})?" +
-        "(?:passphrase=)?(?:\"(.{8,63})\")? " +
+        "(?:passphrase=)?(?:\"(.{0,63})\")? " +
         "go_dev_addr=((?:[0-9a-f]{2}:){5}[0-9a-f]{2})" +
         " ?(\\[PERSISTENT\\])?"
     );
