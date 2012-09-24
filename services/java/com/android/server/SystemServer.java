@@ -768,6 +768,12 @@ class ServerThread extends Thread {
             reportWtf("making Vibrator Service ready", e);
         }
 
+        try {
+            lockSettings.systemReady();
+        } catch (Throwable e) {
+            reportWtf("making Lock Settings Service ready", e);
+        }
+
         if (devicePolicy != null) {
             try {
                 devicePolicy.systemReady();
@@ -782,12 +788,6 @@ class ServerThread extends Thread {
             } catch (Throwable e) {
                 reportWtf("making Notification Service ready", e);
             }
-        }
-
-        try {
-            lockSettings.systemReady();
-        } catch (Throwable e) {
-            reportWtf("making Lock Settings Service ready", e);
         }
 
         try {
