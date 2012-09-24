@@ -217,6 +217,8 @@ public class WifiMonitor {
        pri_dev_type=1-0050F204-1 name='p2p-TEST2' config_methods=0x188 dev_capab=0x27
        group_capab=0x0 */
     private static final String P2P_PROV_DISC_SHOW_PIN_STR = "P2P-PROV-DISC-SHOW-PIN";
+    /* P2P-PROV-DISC-FAILURE p2p_dev_addr=42:fc:89:e1:e2:27 */
+    private static final String P2P_PROV_DISC_FAILURE_STR = "P2P-PROV-DISC-FAILURE";
 
     /*
      * Protocol format is as follows.<br>
@@ -319,6 +321,7 @@ public class WifiMonitor {
     public static final int P2P_PROV_DISC_SHOW_PIN_EVENT         = BASE + 36;
     public static final int P2P_FIND_STOPPED_EVENT               = BASE + 37;
     public static final int P2P_SERV_DISC_RESP_EVENT             = BASE + 38;
+    public static final int P2P_PROV_DISC_FAILURE_EVENT          = BASE + 39;
 
     /* hostap events */
     public static final int AP_STA_DISCONNECTED_EVENT            = BASE + 41;
@@ -615,6 +618,8 @@ public class WifiMonitor {
             } else if (dataString.startsWith(P2P_PROV_DISC_SHOW_PIN_STR)) {
                 mStateMachine.sendMessage(P2P_PROV_DISC_SHOW_PIN_EVENT,
                         new WifiP2pProvDiscEvent(dataString));
+            } else if (dataString.startsWith(P2P_PROV_DISC_FAILURE_STR)) {
+                mStateMachine.sendMessage(P2P_PROV_DISC_FAILURE_EVENT);
             } else if (dataString.startsWith(P2P_SERV_DISC_RESP_STR)) {
                 List<WifiP2pServiceResponse> list = WifiP2pServiceResponse.newInstance(dataString);
                 if (list != null) {
