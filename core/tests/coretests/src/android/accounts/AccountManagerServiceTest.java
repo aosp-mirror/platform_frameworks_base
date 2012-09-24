@@ -23,6 +23,7 @@ import android.content.pm.RegisteredServicesCache.ServiceInfo;
 import android.content.pm.RegisteredServicesCacheListener;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.UserHandle;
 import android.test.AndroidTestCase;
 import android.test.IsolatedContext;
 import android.test.RenamingDelegatingContext;
@@ -243,11 +244,11 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         }
 
         @Override
-        protected void installNotification(final int notificationId, final Notification n) {
+        protected void installNotification(final int notificationId, final Notification n, UserHandle user) {
         }
 
         @Override
-        protected void cancelNotification(final int id) {
+        protected void cancelNotification(final int id, UserHandle user) {
         }
     }
 }

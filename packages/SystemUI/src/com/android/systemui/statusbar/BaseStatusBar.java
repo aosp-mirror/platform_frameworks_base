@@ -293,7 +293,8 @@ public abstract class BaseStatusBar extends SystemUI implements
             Slog.v(TAG, String.format("%s: current userid: %d, notification userid: %d",
                     n, thisUserId, notificationUserId));
         }
-        return thisUserId == notificationUserId;
+        return notificationUserId == UserHandle.USER_ALL
+                || thisUserId == notificationUserId;
     }
 
     protected View updateNotificationVetoButton(View row, StatusBarNotification n) {

@@ -50,6 +50,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemService;
+import android.os.UserHandle;
 import android.security.Credentials;
 import android.security.KeyStore;
 import android.util.Log;
@@ -421,7 +422,7 @@ public class Vpn extends BaseNetworkStateTracker {
                     .setDefaults(0)
                     .setOngoing(true)
                     .build();
-            nm.notify(R.drawable.vpn_connected, notification);
+            nm.notifyAsUser(null, R.drawable.vpn_connected, notification, UserHandle.ALL);
         }
     }
 
@@ -433,7 +434,7 @@ public class Vpn extends BaseNetworkStateTracker {
                 mContext.getSystemService(Context.NOTIFICATION_SERVICE);
 
         if (nm != null) {
-            nm.cancel(R.drawable.vpn_connected);
+            nm.cancelAsUser(null, R.drawable.vpn_connected, UserHandle.ALL);
         }
     }
 
