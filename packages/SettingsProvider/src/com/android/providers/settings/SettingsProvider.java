@@ -252,7 +252,8 @@ public class SettingsProvider extends ContentProvider {
                 if (!DatabaseHelper.isValidTable(this.table)) {
                     throw new IllegalArgumentException("Bad root path: " + this.table);
                 }
-                if (TABLE_SYSTEM.equals(this.table) || TABLE_SECURE.equals(this.table)) {
+                if (TABLE_SYSTEM.equals(this.table) || TABLE_SECURE.equals(this.table) ||
+                    TABLE_GLOBAL.equals(this.table)) {
                     this.where = Settings.NameValueTable.NAME + "=?";
                     this.args = new String[] { url.getPathSegments().get(1) };
                 } else {
