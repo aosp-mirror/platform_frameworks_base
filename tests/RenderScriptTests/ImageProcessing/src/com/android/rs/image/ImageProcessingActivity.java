@@ -203,6 +203,9 @@ public class ImageProcessingActivity extends Activity
         case 26:
             mTest = new Convolve5x5(true);
             break;
+        case 27:
+            mTest = new Mandelbrot();
+            break;
         }
 
         mTest.createBaseTest(this, mBitmapIn);
@@ -215,7 +218,7 @@ public class ImageProcessingActivity extends Activity
     }
 
     void setupTests() {
-        mTestNames = new String[27];
+        mTestNames = new String[28];
         mTestNames[0] = "Levels Vec3 Relaxed";
         mTestNames[1] = "Levels Vec4 Relaxed";
         mTestNames[2] = "Levels Vec3 Full";
@@ -243,6 +246,8 @@ public class ImageProcessingActivity extends Activity
         mTestNames[24] = "CrossProcess (using LUT)";
         mTestNames[25] = "Convolve 5x5";
         mTestNames[26] = "Intrinsics Convolve 5x5";
+        mTestNames[27] = "Mandelbrot";
+
         mTestSpinner.setAdapter(new ArrayAdapter<String>(
             this, R.layout.spinner_layout, mTestNames));
     }
