@@ -568,7 +568,6 @@ android.media.MediaRecorder
 android.media.MediaScanner
 android.media.RemoteDisplay
 android.media.ToneGenerator
-android.media.videoeditor.MediaArtistNativeHelper
 android.net.ConnectivityManager
 android.net.Credentials
 android.net.DhcpInfoInternal
