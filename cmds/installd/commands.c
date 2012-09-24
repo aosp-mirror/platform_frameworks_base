@@ -338,13 +338,32 @@ int free_cache(int64_t free_size)
         closedir(d);
     }
 
-    // Collect cache files on external storage (if it is mounted as part
+    // Collect cache files on external storage for all users (if it is mounted as part
     // of the internal storage).
     strcpy(tmpdir, android_media_dir.path);
-    if (lookup_media_dir(tmpdir, "Android") == 0
-            && lookup_media_dir(tmpdir, "data") == 0) {
-        //ALOGI("adding cache files from %s\n", tmpdir);
-        add_cache_files(cache, tmpdir, "cache");
+    dirpos = tmpdir + strlen(tmpdir);
+    d = opendir(tmpdir);
+    if (d != NULL) {
+        while ((de = readdir(d))) {
+            if (de->d_type == DT_DIR) {
+                const char *name = de->d_name;
+                    /* skip any dir that doesn't start with a number, so not a user */
+                if (name[0] < '0' || name[0] > '9') {
+                    continue;
+                }
+                if ((strlen(name)+(dirpos-tmpdir)) < (sizeof(tmpdir)-1)) {
+                    strcpy(dirpos, name);
+                    if (lookup_media_dir(tmpdir, "Android") == 0
+                            && lookup_media_dir(tmpdir, "data") == 0) {
+                        //ALOGI("adding cache files from %s\n", tmpdir);
+                        add_cache_files(cache, tmpdir, "cache");
+                    }
+                } else {
+                    ALOGW("Path exceeds limit: %s%s", tmpdir, name);
+                }
+            }
+        }
+        closedir(d);
     }
 
     clear_cache_files(cache, free_size);
