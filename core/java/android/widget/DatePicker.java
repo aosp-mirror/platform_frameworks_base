@@ -220,7 +220,7 @@ public class DatePicker extends FrameLayout {
 
         // day
         mDaySpinner = (NumberPicker) findViewById(R.id.day);
-        mDaySpinner.setFormatter(NumberPicker.TWO_DIGIT_FORMATTER);
+        mDaySpinner.setFormatter(NumberPicker.getTwoDigitFormatter());
         mDaySpinner.setOnLongPressUpdateInterval(100);
         mDaySpinner.setOnValueChangedListener(onChangeListener);
         mDaySpinnerInput = (EditText) mDaySpinner.findViewById(R.id.numberpicker_input);
