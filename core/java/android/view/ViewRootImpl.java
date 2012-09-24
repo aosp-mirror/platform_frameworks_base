@@ -52,6 +52,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
+import android.os.UserHandle;
 import android.util.AndroidRuntimeException;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -1495,7 +1496,8 @@ public final class ViewRootImpl implements ViewParent,
                             } catch (Surface.OutOfResourcesException e) {
                                 Log.e(TAG, "OutOfResourcesException initializing HW surface", e);
                                 try {
-                                    if (!mWindowSession.outOfMemory(mWindow)) {
+                                    if (!mWindowSession.outOfMemory(mWindow) &&
+                                            Process.myUid() != Process.SYSTEM_UID) {
                                         Slog.w(TAG, "No processes killed for memory; killing self");
                                         Process.killProcess(Process.myPid());
                                     }
