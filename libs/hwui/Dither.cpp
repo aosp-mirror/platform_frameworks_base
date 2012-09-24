@@ -76,8 +76,10 @@ void Dither::setupProgram(Program* program, GLuint* textureUnit) {
 
     bindDitherTexture();
 
+    float ditherSize = 1.0f / DITHER_KERNEL_SIZE;
     glUniform1i(program->getUniform("ditherSampler"), textureSlot);
-    glUniform1f(program->getUniform("ditherSize"), 1.0f / DITHER_KERNEL_SIZE);
+    glUniform1f(program->getUniform("ditherSize"), ditherSize);
+    glUniform1f(program->getUniform("ditherSizeSquared"), ditherSize * ditherSize);
 }
 
 }; // namespace uirenderer
