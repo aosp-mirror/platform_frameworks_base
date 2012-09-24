@@ -38,10 +38,8 @@ import android.content.pm.PermissionInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.content.pm.UserInfo;
 import android.content.pm.VerificationParams;
 import android.content.pm.VerifierDeviceIdentity;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
@@ -216,6 +214,12 @@ public class MockPackageManager extends PackageManager {
         throw new UnsupportedOperationException();
     }
 
+    /** @hide */
+    @Override
+    public ResolveInfo resolveActivityAsUser(Intent intent, int flags, int userId) {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public List<ResolveInfo> queryIntentActivities(Intent intent, int flags) {
         throw new UnsupportedOperationException();
@@ -223,7 +227,7 @@ public class MockPackageManager extends PackageManager {
 
     /** @hide */
     @Override
-    public List<ResolveInfo> queryIntentActivitiesForUser(Intent intent,
+    public List<ResolveInfo> queryIntentActivitiesAsUser(Intent intent,
                                                    int flags, int userId) {
         throw new UnsupportedOperationException();
     }
@@ -252,6 +256,12 @@ public class MockPackageManager extends PackageManager {
 
     @Override
     public List<ResolveInfo> queryIntentServices(Intent intent, int flags) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @Override
+    public List<ResolveInfo> queryIntentServicesAsUser(Intent intent, int flags, int userId) {
         throw new UnsupportedOperationException();
     }
 
