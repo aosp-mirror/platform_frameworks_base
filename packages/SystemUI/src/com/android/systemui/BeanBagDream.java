@@ -19,7 +19,7 @@ public class BeanBagDream extends Dream {
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
         setContentView(mBoard);
-        lightsOut();
+        setFullscreen(true);
         mBoard.startAnimation();
     }
 
