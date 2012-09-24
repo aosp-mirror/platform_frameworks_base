@@ -154,6 +154,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     private static final int MSG_SET_RSX_CONNECTION_STATE = 23; // change remote submix connection
     private static final int MSG_SET_FORCE_RSX_USE = 24;        // force remote submix audio routing
     private static final int MSG_CHECK_MUSIC_ACTIVE = 25;
+    private static final int MSG_BROADCAST_AUDIO_BECOMING_NOISY = 26;
 
     // flags for MSG_PERSIST_VOLUME indicating if current and/or last audible volume should be
     // persisted
@@ -3252,6 +3253,10 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 case MSG_CHECK_MUSIC_ACTIVE:
                     onCheckMusicActive();
                     break;
+
+                case MSG_BROADCAST_AUDIO_BECOMING_NOISY:
+                    onSendBecomingNoisyIntent();
+                    break;
             }
         }
     }
@@ -3308,7 +3313,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 address);
     }
 
-    private void sendBecomingNoisyIntent() {
+    private void onSendBecomingNoisyIntent() {
         sendBroadcastToAll(new Intent(AudioManager.ACTION_AUDIO_BECOMING_NOISY));
     }
 
@@ -3443,8 +3448,14 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 }
             }
             if (devices == device) {
+                sendMsg(mAudioHandler,
+                        MSG_BROADCAST_AUDIO_BECOMING_NOISY,
+                        SENDMSG_REPLACE,
+                        0,
+                        0,
+                        null,
+                        0);
                 delay = 1000;
-                sendBecomingNoisyIntent();
             }
         }
 
@@ -3710,6 +3721,15 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             } else if (action.equalsIgnoreCase(Intent.ACTION_CONFIGURATION_CHANGED)) {
                 handleConfigurationChanged(context);
             } else if (action.equals(Intent.ACTION_USER_SWITCHED)) {
+                // attempt to stop music playabck for background user
+                sendMsg(mAudioHandler,
+                        MSG_BROADCAST_AUDIO_BECOMING_NOISY,
+                        SENDMSG_REPLACE,
+                        0,
+                        0,
+                        null,
+                        0);
+                // load volume settings for new user
                 readAudioSettings(true /*userSwitch*/);
                 // preserve STREAM_MUSIC volume from one user to the next.
                 sendMsg(mAudioHandler,
