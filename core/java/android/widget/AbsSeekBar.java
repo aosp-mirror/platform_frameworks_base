@@ -108,7 +108,7 @@ public abstract class AbsSeekBar extends ProgressBar {
         if (thumb != null) {
             thumb.setCallback(this);
             if (canResolveLayoutDirection()) {
-                thumb.setLayoutDirection(getResolvedLayoutDirection());
+                thumb.setLayoutDirection(getLayoutDirection());
             }
 
             // Assuming the thumb drawable is symmetric, set the thumb offset

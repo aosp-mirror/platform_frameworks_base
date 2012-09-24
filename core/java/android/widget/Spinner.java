@@ -492,7 +492,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         View sel = makeAndAddView(mSelectedPosition);
         int width = sel.getMeasuredWidth();
         int selectedOffset = childrenLeft;
-        final int layoutDirection = getResolvedLayoutDirection();
+        final int layoutDirection = getLayoutDirection();
         final int absoluteGravity = Gravity.getAbsoluteGravity(mGravity, layoutDirection);
         switch (absoluteGravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
             case Gravity.CENTER_HORIZONTAL:

@@ -3392,7 +3392,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             childHasTransientStateChanged(child, true);
         }
 
-        if (child.getLayoutDirection() == View.LAYOUT_DIRECTION_INHERIT) {
+        if (child.isLayoutDirectionInherited()) {
             child.resetResolvedLayoutDirection();
             child.resolveRtlProperties();
         }
@@ -5268,7 +5268,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         int count = getChildCount();
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
-            if (child.getLayoutDirection() == LAYOUT_DIRECTION_INHERIT) {
+            if (child.isLayoutDirectionInherited()) {
                 child.resetResolvedLayoutDirection();
             }
             if (child.getTextDirection() == TEXT_DIRECTION_INHERIT) {
@@ -6155,7 +6155,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             view.getDrawingRect(viewLocation);
             root.offsetDescendantRectToMyCoords(view, viewLocation);
             mView = view;
-            mLayoutDirection = root.getResolvedLayoutDirection();
+            mLayoutDirection = root.getLayoutDirection();
         }
 
         private void clear() {

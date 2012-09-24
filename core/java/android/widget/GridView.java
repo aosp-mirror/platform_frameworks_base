@@ -1425,7 +1425,7 @@ public class GridView extends AbsListView {
         int childLeft;
         final int childTop = flow ? y : y - h;
 
-        final int layoutDirection = getResolvedLayoutDirection();
+        final int layoutDirection = getLayoutDirection();
         final int absoluteGravity = Gravity.getAbsoluteGravity(mGravity, layoutDirection);
         switch (absoluteGravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
             case Gravity.LEFT:

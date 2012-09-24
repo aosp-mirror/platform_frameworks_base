@@ -88,9 +88,6 @@ import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.Editor.InputContentType;
-import android.widget.Editor.InputMethodState;
-import android.widget.Editor.SelectionModifierCursorController;
 import android.widget.TextView.Drawables;
 import android.widget.TextView.OnEditorActionListener;
 
@@ -292,7 +289,7 @@ public class Editor {
         mErrorWasChanged = true;
         final Drawables dr = mTextView.mDrawables;
         if (dr != null) {
-            switch (mTextView.getResolvedLayoutDirection()) {
+            switch (mTextView.getLayoutDirection()) {
                 default:
                 case View.LAYOUT_DIRECTION_LTR:
                     mTextView.setCompoundDrawables(dr.mDrawableLeft, dr.mDrawableTop, icon,

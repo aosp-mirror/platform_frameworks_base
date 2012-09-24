@@ -3927,7 +3927,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         // Apply layout direction to the new Drawables if needed
-        final int layoutDirection = getResolvedLayoutDirection();
+        final int layoutDirection = getLayoutDirection();
         if (track != null) {
             track.setLayoutDirection(layoutDirection);
         }
@@ -5779,7 +5779,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         @ViewDebug.IntToString(from = LAYOUT_DIRECTION_INHERIT, to = "INHERIT"),
         @ViewDebug.IntToString(from = LAYOUT_DIRECTION_LOCALE,  to = "LOCALE")
     })
-    public int getLayoutDirection() {
+    private int getRawLayoutDirection() {
         return (mPrivateFlags2 & PFLAG2_LAYOUT_DIRECTION_MASK) >> PFLAG2_LAYOUT_DIRECTION_MASK_SHIFT;
     }
 
@@ -5796,7 +5796,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @RemotableViewMethod
     public void setLayoutDirection(int layoutDirection) {
-        if (getLayoutDirection() != layoutDirection) {
+        if (getRawLayoutDirection() != layoutDirection) {
             // Reset the current layout direction and the resolved one
             mPrivateFlags2 &= ~PFLAG2_LAYOUT_DIRECTION_MASK;
             resetRtlProperties();
@@ -5821,7 +5821,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         @ViewDebug.IntToString(from = LAYOUT_DIRECTION_LTR, to = "RESOLVED_DIRECTION_LTR"),
         @ViewDebug.IntToString(from = LAYOUT_DIRECTION_RTL, to = "RESOLVED_DIRECTION_RTL")
     })
-    public int getResolvedLayoutDirection() {
+    public int getLayoutDirection() {
         final int targetSdkVersion = getContext().getApplicationInfo().targetSdkVersion;
         if (targetSdkVersion < JELLY_BEAN_MR1) {
             mPrivateFlags2 |= PFLAG2_LAYOUT_DIRECTION_RESOLVED;
@@ -5843,7 +5843,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @ViewDebug.ExportedProperty(category = "layout")
     public boolean isLayoutRtl() {
-        return (getResolvedLayoutDirection() == LAYOUT_DIRECTION_RTL);
+        return (getLayoutDirection() == LAYOUT_DIRECTION_RTL);
     }
 
     /**
@@ -9936,7 +9936,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     private void resolveLayoutParams() {
         if (mLayoutParams != null) {
-            mLayoutParams.onResolveLayoutDirection(getResolvedLayoutDirection());
+            mLayoutParams.onResolveLayoutDirection(getLayoutDirection());
         }
     }
 
@@ -11561,7 +11561,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         if (hasRtlSupport()) {
             // Set resolved depending on layout direction
-            switch (getLayoutDirection()) {
+            switch ((mPrivateFlags2 & PFLAG2_LAYOUT_DIRECTION_MASK) >>
+                    PFLAG2_LAYOUT_DIRECTION_MASK_SHIFT) {
                 case LAYOUT_DIRECTION_INHERIT:
                     // We cannot resolve yet. LTR is by default and let the resolution happen again
                     // later to get the correct resolved value
@@ -11573,7 +11574,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     // resolution happen again later
                     if (!viewGroup.canResolveLayoutDirection()) return;
 
-                    if (viewGroup.getResolvedLayoutDirection() == LAYOUT_DIRECTION_RTL) {
+                    if (viewGroup.getLayoutDirection() == LAYOUT_DIRECTION_RTL) {
                         mPrivateFlags2 |= PFLAG2_LAYOUT_DIRECTION_RESOLVED_RTL;
                     }
                     break;
@@ -11603,7 +11604,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public boolean canResolveLayoutDirection() {
-        switch (getLayoutDirection()) {
+        switch ((mPrivateFlags2 & PFLAG2_LAYOUT_DIRECTION_MASK) >>
+                PFLAG2_LAYOUT_DIRECTION_MASK_SHIFT) {
             case LAYOUT_DIRECTION_INHERIT:
                 return (mParent != null) && (mParent instanceof ViewGroup);
             default:
@@ -11619,6 +11621,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public void resetResolvedLayoutDirection() {
         // Reset the current resolved bits
         mPrivateFlags2 &= ~PFLAG2_LAYOUT_DIRECTION_RESOLVED_MASK;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean isLayoutDirectionInherited() {
+        return (getRawLayoutDirection() == LAYOUT_DIRECTION_INHERIT);
     }
 
     /**
@@ -11660,7 +11669,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // If start / end padding are defined, they will be resolved (hence overriding) to
             // left / right or right / left depending on the resolved layout direction.
             // If start / end padding are not defined, use the left / right ones.
-            int resolvedLayoutDirection = getResolvedLayoutDirection();
+            int resolvedLayoutDirection = getLayoutDirection();
             // Set user padding to initial values ...
             mUserPaddingLeft = (mUserPaddingLeftInitial == UNDEFINED_PADDING) ?
                     0 : mUserPaddingLeftInitial;
@@ -14105,9 +14114,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void resolveDrawables() {
         if (mBackground != null) {
-            mBackground.setLayoutDirection(getResolvedLayoutDirection());
+            mBackground.setLayoutDirection(getLayoutDirection());
         }
-        onResolveDrawables(getResolvedLayoutDirection());
+        onResolveDrawables(getLayoutDirection());
     }
 
     /**
@@ -14394,7 +14403,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 padding = new Rect();
                 sThreadLocal.set(padding);
             }
-            background.setLayoutDirection(getResolvedLayoutDirection());
+            background.setLayoutDirection(getLayoutDirection());
             if (background.getPadding(padding)) {
                 resetResolvedPadding();
                 switch (background.getLayoutDirection()) {
@@ -14591,7 +14600,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         mUserPaddingStart = start;
         mUserPaddingEnd = end;
 
-        switch(getResolvedLayoutDirection()) {
+        switch(getLayoutDirection()) {
             case LAYOUT_DIRECTION_RTL:
                 mUserPaddingLeftInitial = end;
                 mUserPaddingRightInitial = start;
@@ -14650,7 +14659,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (!isPaddingResolved()) {
             resolvePadding();
         }
-        return (getResolvedLayoutDirection() == LAYOUT_DIRECTION_RTL) ?
+        return (getLayoutDirection() == LAYOUT_DIRECTION_RTL) ?
                 mPaddingRight : mPaddingLeft;
     }
 
@@ -14679,7 +14688,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (!isPaddingResolved()) {
             resolvePadding();
         }
-        return (getResolvedLayoutDirection() == LAYOUT_DIRECTION_RTL) ?
+        return (getLayoutDirection() == LAYOUT_DIRECTION_RTL) ?
                 mPaddingLeft : mPaddingRight;
     }
 

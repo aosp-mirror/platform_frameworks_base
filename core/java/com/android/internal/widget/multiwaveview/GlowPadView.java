@@ -39,7 +39,6 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.R;
@@ -957,7 +956,7 @@ public class GlowPadView extends View {
     }
 
     private void computeInsets(int dx, int dy) {
-        final int layoutDirection = getResolvedLayoutDirection();
+        final int layoutDirection = getLayoutDirection();
         final int absoluteGravity = Gravity.getAbsoluteGravity(mGravity, layoutDirection);
 
         switch (absoluteGravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
