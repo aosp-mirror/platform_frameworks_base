@@ -28,6 +28,7 @@ import libcore.util.MutableInt;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.Typeface;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
@@ -178,9 +179,10 @@ class KeyguardStatusViewManager {
 
     private void updateOwnerInfo() {
         final ContentResolver res = getContext().getContentResolver();
-        final boolean ownerInfoEnabled = Settings.Secure.getInt(res,
-                Settings.Secure.LOCK_SCREEN_OWNER_INFO_ENABLED, 1) != 0;
-        String text = Settings.Secure.getString(res, Settings.Secure.LOCK_SCREEN_OWNER_INFO);
+        final boolean ownerInfoEnabled = Settings.Secure.getIntForUser(res,
+                Settings.Secure.LOCK_SCREEN_OWNER_INFO_ENABLED, 1, UserHandle.USER_CURRENT) != 0;
+        String text = Settings.Secure.getStringForUser(res, Settings.Secure.LOCK_SCREEN_OWNER_INFO,
+                UserHandle.USER_CURRENT);
         if (ownerInfoEnabled && !TextUtils.isEmpty(text)) {
             maybeSetUpperCaseText(mOwnerInfoView, text);
             mOwnerInfoView.setVisibility(View.VISIBLE);
