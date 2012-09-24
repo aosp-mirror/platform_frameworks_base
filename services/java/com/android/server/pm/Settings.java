@@ -159,8 +159,7 @@ final class Settings {
 
     // Packages that have been uninstalled and still need their external
     // storage data deleted.
-    final SparseArray<ArrayList<PackageCleanItem>> mPackagesToBeCleaned
-            = new SparseArray<ArrayList<PackageCleanItem>>();
+    final ArrayList<PackageCleanItem> mPackagesToBeCleaned = new ArrayList<PackageCleanItem>();
     
     // Packages that have been renamed since they were first installed.
     // Keys are the new names of the packages, values are the original
@@ -1257,18 +1256,13 @@ final class Settings {
             }
 
             if (mPackagesToBeCleaned.size() > 0) {
-                for (int i=0; i<mPackagesToBeCleaned.size(); i++) {
-                    final int userId = mPackagesToBeCleaned.keyAt(i);
-                    final String userStr = Integer.toString(userId);
-                    final ArrayList<PackageCleanItem> pkgs = mPackagesToBeCleaned.valueAt(i);
-                    for (int j=0; j<pkgs.size(); j++) {
-                        serializer.startTag(null, "cleaning-package");
-                        PackageCleanItem item = pkgs.get(j);
-                        serializer.attribute(null, ATTR_NAME, item.packageName);
-                        serializer.attribute(null, ATTR_CODE, item.andCode ? "true" : "false");
-                        serializer.attribute(null, ATTR_USER, userStr);
-                        serializer.endTag(null, "cleaning-package");
-                    }
+                for (PackageCleanItem item : mPackagesToBeCleaned) {
+                    final String userStr = Integer.toString(item.userId);
+                    serializer.startTag(null, "cleaning-package");
+                    serializer.attribute(null, ATTR_NAME, item.packageName);
+                    serializer.attribute(null, ATTR_CODE, item.andCode ? "true" : "false");
+                    serializer.attribute(null, ATTR_USER, userStr);
+                    serializer.endTag(null, "cleaning-package");
                 }
             }
             
@@ -1524,14 +1518,9 @@ final class Settings {
         return ret;
     }
 
-    void addPackageToCleanLPw(int userId, PackageCleanItem pkg) {
-        ArrayList<PackageCleanItem> pkgs = mPackagesToBeCleaned.get(userId);
-        if (pkgs == null) {
-            pkgs = new ArrayList<PackageCleanItem>();
-            mPackagesToBeCleaned.put(userId, pkgs);
-        }
-        if (!pkgs.contains(pkg)) {
-            pkgs.add(pkg);
+    void addPackageToCleanLPw(PackageCleanItem pkg) {
+        if (!mPackagesToBeCleaned.contains(pkg)) {
+            mPackagesToBeCleaned.add(pkg);
         }
     }
 
@@ -1615,18 +1604,18 @@ final class Settings {
                     String userStr = parser.getAttributeValue(null, ATTR_USER);
                     String codeStr = parser.getAttributeValue(null, ATTR_CODE);
                     if (name != null) {
-                        int user = 0;
+                        int userId = 0;
                         boolean andCode = true;
                         try {
                             if (userStr != null) {
-                                user = Integer.parseInt(userStr);
+                                userId = Integer.parseInt(userStr);
                             }
                         } catch (NumberFormatException e) {
                         }
                         if (codeStr != null) {
                             andCode = Boolean.parseBoolean(codeStr);
                         }
-                        addPackageToCleanLPw(user, new PackageCleanItem(name, andCode));
+                        addPackageToCleanLPw(new PackageCleanItem(userId, name, andCode));
                     }
                 } else if (tagName.equals("renamed-package")) {
                     String nname = parser.getAttributeValue(null, "new");
