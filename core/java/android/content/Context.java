@@ -63,18 +63,34 @@ public abstract class Context {
      */
     public static final int MODE_PRIVATE = 0x0000;
     /**
+     * @deprecated Creating world-readable files is very dangerous, and likely
+     * to cause security holes in applications.  It is strongly discouraged;
+     * instead, applications should use more formal mechanism for interactions
+     * such as {@link ContentProvider}, {@link BroadcastReceiver}, and
+     * {@link android.app.Service}.  There are no guarantees that this
+     * access mode will remain on a file, such as when it goes through a
+     * backup and restore.
      * File creation mode: allow all other applications to have read access
      * to the created file.
      * @see #MODE_PRIVATE
      * @see #MODE_WORLD_WRITEABLE
      */
+    @Deprecated
     public static final int MODE_WORLD_READABLE = 0x0001;
     /**
+     * @deprecated Creating world-writable files is very dangerous, and likely
+     * to cause security holes in applications.  It is strongly discouraged;
+     * instead, applications should use more formal mechanism for interactions
+     * such as {@link ContentProvider}, {@link BroadcastReceiver}, and
+     * {@link android.app.Service}.  There are no guarantees that this
+     * access mode will remain on a file, such as when it goes through a
+     * backup and restore.
      * File creation mode: allow all other applications to have write access
      * to the created file.
      * @see #MODE_PRIVATE
      * @see #MODE_WORLD_READABLE
      */
+    @Deprecated
     public static final int MODE_WORLD_WRITEABLE = 0x0002;
     /**
      * File creation mode: for use with {@link #openFileOutput}, if the file
@@ -645,8 +661,12 @@ public abstract class Context {
      * are some important differences:
      *
      * <ul>
-     * <li>The platform does not monitor the space available in external storage,
-     * and thus will not automatically delete these files.  Note that you should
+     * <li>The platform does not always monitor the space available in external
+     * storage, and thus may not automatically delete these files.  Currently
+     * the only time files here will be deleted by the platform is when running
+     * on {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1} or later and
+     * {@link android.os.Environment#isExternalStorageEmulated()
+     * Environment.isExternalStorageEmulated()} returns true.  Note that you should
      * be managing the maximum space you will use for these anyway, just like
      * with {@link #getCacheDir()}.
      * <li>External files are not always available: they will disappear if the
