@@ -447,7 +447,7 @@ public final class TwilightService {
                 location.setLatitude(0);
                 location.setAccuracy(417000.0f);
                 location.setTime(System.currentTimeMillis());
-                location.setElapsedRealtimeNano(SystemClock.elapsedRealtimeNanos());
+                location.setElapsedRealtimeNano(SystemClock.elapsedRealtimeNano());
 
                 if (DEBUG) {
                     Slog.d(TAG, "Estimated location from timezone: " + location);
