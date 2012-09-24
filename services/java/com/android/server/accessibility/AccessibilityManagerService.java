@@ -79,7 +79,6 @@ import android.view.accessibility.IAccessibilityManagerClient;
 
 import com.android.internal.R;
 import com.android.internal.content.PackageMonitor;
-import com.android.internal.os.SomeArgs;
 import com.android.internal.statusbar.IStatusBarService;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -472,13 +471,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             // If necessary enable accessibility and announce that.
             if (!userState.mIsAccessibilityEnabled) {
                 userState.mIsAccessibilityEnabled = true;
-                scheduleSendStateToClientsLocked(userState);
             }
+            // No touch exploration.
+            userState.mIsTouchExplorationEnabled = false;
+
+            // Hook the automation service up.
+            mUiAutomationService = new Service(mCurrentUserId, componentName,
+                    accessibilityServiceInfo, true);
+            mUiAutomationService.onServiceConnected(componentName, serviceClient.asBinder());
+
+            updateInputFilterLocked(userState);
+            scheduleSendStateToClientsLocked(userState);
         }
-        // Hook the automation service up.
-        mUiAutomationService = new Service(mCurrentUserId, componentName,
-                accessibilityServiceInfo, true);
-        mUiAutomationService.onServiceConnected(componentName, serviceClient.asBinder());
     }
 
     public void unregisterUiTestAutomationService(IAccessibilityServiceClient serviceClient) {
@@ -591,16 +595,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             // Recreate the internal state for the new user.
             mMainHandler.obtainMessage(MainHandler.MSG_SEND_RECREATE_INTERNAL_STATE,
                     mCurrentUserId, 0).sendToTarget();
-
-            // Re-register the test automation service after the new state is recreated.
-            if (mUiAutomationService != null) {
-                unregisterUiTestAutomationService(mUiAutomationService.mServiceInterface);
-                SomeArgs args = SomeArgs.obtain();
-                args.arg1 = mUiAutomationService.mServiceInterface;
-                args.arg2 = mUiAutomationService.mAccessibilityServiceInfo;
-                mMainHandler.obtainMessage(MainHandler.MSG_REGISTER_UI_TEST_AUTOMATION_SERVICE,
-                        args).sendToTarget();
-            }
         }
     }
 
@@ -1166,7 +1160,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         public static final int MSG_SEND_STATE_TO_CLIENTS = 2;
         public static final int MSG_SEND_CLEARED_STATE_TO_CLIENTS_FOR_USER = 3;
         public static final int MSG_SEND_RECREATE_INTERNAL_STATE = 4;
-        public static final int MSG_REGISTER_UI_TEST_AUTOMATION_SERVICE = 5;
 
         public MainHandler(Looper looper) {
             super(looper);
@@ -1200,17 +1193,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     synchronized (mLock) {
                         UserState userState = getUserStateLocked(userId);
                         recreateInternalStateLocked(userState);
-                    }
-                } break;
-                case MSG_REGISTER_UI_TEST_AUTOMATION_SERVICE: {
-                    SomeArgs args = (SomeArgs) msg.obj;
-                    try {
-                        IAccessibilityServiceClient client =
-                                (IAccessibilityServiceClient) args.arg1;
-                        AccessibilityServiceInfo info = (AccessibilityServiceInfo) args.arg2;
-                        registerUiTestAutomationService(client, info);
-                    } finally {
-                        args.recycle();
                     }
                 } break;
             }
