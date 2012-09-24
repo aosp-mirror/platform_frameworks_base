@@ -63,6 +63,7 @@ import android.util.Slog;
 import android.util.Xml;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
+import android.widget.RemoteViews;
 import android.widget.Toast;
 
 import com.android.internal.statusbar.StatusBarNotification;
@@ -877,7 +878,6 @@ public class NotificationManagerService extends INotificationManager.Stub
         return (x < low) ? low : ((x > high) ? high : x);
     }
 
-    
     // Not exposed via Binder; for system use only (otherwise malicious apps could spoof the
     // uid/pid of another application)
     public void enqueueNotificationInternal(String pkg, int callingUid, int callingPid,
@@ -992,8 +992,9 @@ public class NotificationManagerService extends INotificationManager.Stub
             }
 
             if (notification.icon != 0) {
-                StatusBarNotification n = new StatusBarNotification(pkg, id, tag,
-                        r.uid, r.initialPid, score, notification);
+                final UserHandle user = new UserHandle(userId);
+                final StatusBarNotification n = new StatusBarNotification(
+                        pkg, id, tag, r.uid, r.initialPid, score, notification, user);
                 if (old != null && old.statusBarKey != null) {
                     r.statusBarKey = old.statusBarKey;
                     long identity = Binder.clearCallingIdentity();

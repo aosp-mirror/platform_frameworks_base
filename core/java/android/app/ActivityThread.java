@@ -89,6 +89,7 @@ import android.renderscript.RenderScript;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.RuntimeInit;
 import com.android.internal.os.SamplingProfilerIntegration;
+import com.android.internal.util.Objects;
 
 import org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
 
@@ -213,9 +214,33 @@ public final class ActivityThread {
             = new ArrayList<ActivityClientRecord>();
     Configuration mPendingConfiguration = null;
 
+    private static final class ProviderKey {
+        final String authority;
+        final int userId;
+
+        public ProviderKey(String authority, int userId) {
+            this.authority = authority;
+            this.userId = userId;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o instanceof ProviderKey) {
+                final ProviderKey other = (ProviderKey) o;
+                return Objects.equal(authority, other.authority) && userId == other.userId;
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return ((authority != null) ? authority.hashCode() : 0) ^ userId;
+        }
+    }
+
     // The lock of mProviderMap protects the following variables.
-    final HashMap<String, ProviderClientRecord> mProviderMap
-        = new HashMap<String, ProviderClientRecord>();
+    final HashMap<ProviderKey, ProviderClientRecord> mProviderMap
+        = new HashMap<ProviderKey, ProviderClientRecord>();
     final HashMap<IBinder, ProviderRefCount> mProviderRefCountMap
         = new HashMap<IBinder, ProviderRefCount>();
     final HashMap<IBinder, ProviderClientRecord> mLocalProviders
@@ -4359,8 +4384,9 @@ public final class ActivityThread {
         }
     }
 
-    public final IContentProvider acquireProvider(Context c, String name, boolean stable) {
-        IContentProvider provider = acquireExistingProvider(c, name, stable);
+    public final IContentProvider acquireProvider(
+            Context c, String auth, int userId, boolean stable) {
+        final IContentProvider provider = acquireExistingProvider(c, auth, userId, stable);
         if (provider != null) {
             return provider;
         }
@@ -4374,11 +4400,11 @@ public final class ActivityThread {
         IActivityManager.ContentProviderHolder holder = null;
         try {
             holder = ActivityManagerNative.getDefault().getContentProvider(
-                    getApplicationThread(), name, stable);
+                    getApplicationThread(), auth, userId, stable);
         } catch (RemoteException ex) {
         }
         if (holder == null) {
-            Slog.e(TAG, "Failed to find provider info for " + name);
+            Slog.e(TAG, "Failed to find provider info for " + auth);
             return null;
         }
 
@@ -4455,10 +4481,11 @@ public final class ActivityThread {
         }
     }
 
-    public final IContentProvider acquireExistingProvider(Context c, String name,
-            boolean stable) {
+    public final IContentProvider acquireExistingProvider(
+            Context c, String auth, int userId, boolean stable) {
         synchronized (mProviderMap) {
-            ProviderClientRecord pr = mProviderMap.get(name);
+            final ProviderKey key = new ProviderKey(auth, userId);
+            final ProviderClientRecord pr = mProviderMap.get(key);
             if (pr == null) {
                 return null;
             }
@@ -4638,17 +4665,20 @@ public final class ActivityThread {
     }
 
     private ProviderClientRecord installProviderAuthoritiesLocked(IContentProvider provider,
-            ContentProvider localProvider,IActivityManager.ContentProviderHolder holder) {
-        String names[] = PATTERN_SEMICOLON.split(holder.info.authority);
-        ProviderClientRecord pcr = new ProviderClientRecord(names, provider,
-                localProvider, holder);
-        for (int i = 0; i < names.length; i++) {
-            ProviderClientRecord existing = mProviderMap.get(names[i]);
+            ContentProvider localProvider, IActivityManager.ContentProviderHolder holder) {
+        final String auths[] = PATTERN_SEMICOLON.split(holder.info.authority);
+        final int userId = UserHandle.getUserId(holder.info.applicationInfo.uid);
+
+        final ProviderClientRecord pcr = new ProviderClientRecord(
+                auths, provider, localProvider, holder);
+        for (String auth : auths) {
+            final ProviderKey key = new ProviderKey(auth, userId);
+            final ProviderClientRecord existing = mProviderMap.get(key);
             if (existing != null) {
                 Slog.w(TAG, "Content provider " + pcr.mHolder.info.name
-                        + " already published as " + names[i]);
+                        + " already published as " + auth);
             } else {
-                mProviderMap.put(names[i], pcr);
+                mProviderMap.put(key, pcr);
             }
         }
         return pcr;

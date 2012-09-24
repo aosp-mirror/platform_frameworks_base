@@ -920,6 +920,12 @@ public final class BridgeContext extends Context {
     }
 
     @Override
+    public Context createPackageContextAsUser(String arg0, int arg1, UserHandle user) {
+        // pass
+        return null;
+    }
+
+    @Override
     public Context createConfigurationContext(Configuration overrideConfiguration) {
         // pass
         return null;

@@ -2574,6 +2574,17 @@ public abstract class Context {
             int flags) throws PackageManager.NameNotFoundException;
 
     /**
+     * Similar to {@link #createPackageContext(String, int)}, but with a
+     * different {@link UserHandle}. For example, {@link #getContentResolver()}
+     * will open any {@link Uri} as the given user.
+     *
+     * @hide
+     */
+    public abstract Context createPackageContextAsUser(
+            String packageName, int flags, UserHandle user)
+            throws PackageManager.NameNotFoundException;
+
+    /**
      * Return a new Context object for the current Context but whose resources
      * are adjusted to match the given Configuration.  Each call to this method
      * returns a new instance of a Context object; Context objects are not
