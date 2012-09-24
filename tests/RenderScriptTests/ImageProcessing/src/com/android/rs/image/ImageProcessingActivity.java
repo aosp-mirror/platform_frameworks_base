@@ -39,9 +39,21 @@ import android.view.View;
 import android.util.Log;
 import java.lang.Math;
 
+import android.os.Environment;
+import android.app.Instrumentation;
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
 public class ImageProcessingActivity extends Activity
                                        implements SeekBar.OnSeekBarChangeListener {
     private final String TAG = "Img";
+    private final String RESULT_FILE = "image_processing_result.csv";
+
     Bitmap mBitmapIn;
     Bitmap mBitmapOut;
     String mTestNames[];
@@ -325,6 +337,33 @@ public class ImageProcessingActivity extends Activity
         //long javaTime = javaFilter();
         //mBenchmarkResult.setText("RS: " + t + " ms  Java: " + javaTime + " ms");
         mBenchmarkResult.setText("Result: " + t + " ms");
+        Log.v(TAG, "getBenchmark: Renderscript frame time core ms " + t);
+    }
+
+    public void benchmark_all(View v) {
+        // write result into a file
+        File externalStorage = Environment.getExternalStorageDirectory();
+        if (!externalStorage.canWrite()) {
+            Log.v(TAG, "sdcard is not writable");
+            return;
+        }
+        File resultFile = new File(externalStorage, RESULT_FILE);
+        resultFile.setWritable(true, false);
+        try {
+            BufferedWriter rsWriter = new BufferedWriter(new FileWriter(resultFile));
+            Log.v(TAG, "Saved results in: " + resultFile.getAbsolutePath());
+            for (int i = 0; i < mTestNames.length; i++ ) {
+                changeTest(i);
+                float t = getBenchmark();
+                String s = new String("" + mTestNames[i] + ", " + t);
+                rsWriter.write(s + "\n");
+                Log.v(TAG, "Test " + s + "ms\n");
+            }
+            rsWriter.close();
+        } catch (IOException e) {
+            Log.v(TAG, "Unable to write result file " + e.getMessage());
+        }
+        changeTest(0);
     }
 
     // For benchmark test
@@ -334,7 +373,7 @@ public class ImageProcessingActivity extends Activity
         mTest.setupBenchmark();
         long result = 0;
 
-        Log.v(TAG, "Warming");
+        //Log.v(TAG, "Warming");
         long t = java.lang.System.currentTimeMillis() + 2000;
         do {
             mTest.runTest();
@@ -342,17 +381,18 @@ public class ImageProcessingActivity extends Activity
         } while (t > java.lang.System.currentTimeMillis());
 
 
-        Log.v(TAG, "Benchmarking");
+        //Log.v(TAG, "Benchmarking");
+        int ct = 0;
         t = java.lang.System.currentTimeMillis();
-        for (int i=0; i<10; i++) {
+        do {
             mTest.runTest();
-        }
-        mTest.finish();
+            mTest.finish();
+            ct++;
+        } while ((t+5000) > java.lang.System.currentTimeMillis());
         t = java.lang.System.currentTimeMillis() - t;
         float ft = (float)t;
-        ft /= 10;
+        ft /= ct;
 
-        Log.v(TAG, "getBenchmark: Renderscript frame time core ms " + ft);
         mTest.exitBenchmark();
         mDoingBenchmark = false;
 
