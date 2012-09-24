@@ -23,7 +23,7 @@ import android.util.Log;
 /**
  * CellIdentity is to represent a unique CDMA cell
  */
-public final class CellIdentityCdma extends CellIdentity implements Parcelable {
+public final class CellIdentityCdma implements Parcelable {
 
     private static final String LOG_TAG = "CellSignalStrengthCdma";
     private static final boolean DBG = false;
@@ -81,7 +81,6 @@ public final class CellIdentityCdma extends CellIdentity implements Parcelable {
     }
 
     private CellIdentityCdma(CellIdentityCdma cid) {
-        super(cid);
         mNetworkId = cid.mNetworkId;
         mSystemId = cid.mSystemId;
         mBasestationId = cid.mBasestationId;
@@ -89,7 +88,6 @@ public final class CellIdentityCdma extends CellIdentity implements Parcelable {
         mLatitude = cid.mLatitude;
     }
 
-    @Override
     CellIdentityCdma copy() {
         return new CellIdentityCdma(this);
     }
@@ -185,8 +183,6 @@ public final class CellIdentityCdma extends CellIdentity implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         if (DBG) log("writeToParcel(Parcel, int): " + toString());
-        dest.writeInt(TYPE_CDMA);
-        super.writeToParcel(dest, flags);
         dest.writeInt(mNetworkId);
         dest.writeInt(mSystemId);
         dest.writeInt(mBasestationId);
@@ -196,7 +192,6 @@ public final class CellIdentityCdma extends CellIdentity implements Parcelable {
 
     /** Construct from Parcel, type has already been processed */
     private CellIdentityCdma(Parcel in) {
-        super(in);
         mNetworkId = in.readInt();
         mSystemId = in.readInt();
         mBasestationId = in.readInt();
@@ -211,8 +206,7 @@ public final class CellIdentityCdma extends CellIdentity implements Parcelable {
             new Creator<CellIdentityCdma>() {
         @Override
         public CellIdentityCdma createFromParcel(Parcel in) {
-            in.readInt(); // Skip past token, we know what it is
-            return createFromParcelBody(in);
+            return new CellIdentityCdma(in);
         }
 
         @Override
@@ -220,11 +214,6 @@ public final class CellIdentityCdma extends CellIdentity implements Parcelable {
             return new CellIdentityCdma[size];
         }
     };
-
-    /** @hide */
-    static CellIdentityCdma createFromParcelBody(Parcel in) {
-        return new CellIdentityCdma(in);
-    }
 
     /**
      * log
