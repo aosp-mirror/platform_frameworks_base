@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.app.ActivityManagerNative;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.PendingIntent;
@@ -36,6 +37,7 @@ import android.hardware.display.DisplayManager;
 import android.hardware.display.WifiDisplayStatus;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.ContactsContract;
@@ -75,6 +77,7 @@ class QuickSettings {
 
     private DisplayManager mDisplayManager;
     private WifiDisplayStatus mWifiDisplayStatus;
+    private PhoneStatusBar mStatusBarService;
 
     private BrightnessController mBrightnessController;
     private BluetoothController mBluetoothController;
@@ -127,6 +130,14 @@ class QuickSettings {
 
     void setBar(PanelBar bar) {
         mBar = bar;
+    }
+
+    public void setService(PhoneStatusBar phoneStatusBar) {
+        mStatusBarService = phoneStatusBar;
+    }
+
+    public PhoneStatusBar getService() {
+        return mStatusBarService;
     }
 
     public void setImeWindowStatus(boolean visible) {
@@ -203,10 +214,21 @@ class QuickSettings {
         Intent intent = new Intent(action);
         startSettingsActivity(intent);
     }
+
     private void startSettingsActivity(Intent intent) {
+        startSettingsActivity(intent, true);
+    }
+
+    private void startSettingsActivity(Intent intent, boolean onlyProvisioned) {
+        if (onlyProvisioned && !getService().isDeviceProvisioned()) return;
+        try {
+            // Dismiss the lock screen when Settings starts.
+            ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
+        } catch (RemoteException e) {
+        }
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        mBar.collapseAllPanels(true);
-        mContext.startActivityAsUser(intent, UserHandle.CURRENT);
+        mContext.startActivityAsUser(intent, UserHandle.USER_CURRENT);
+        getService().animateCollapse();
     }
 
     private void addUserTiles(ViewGroup parent, LayoutInflater inflater) {
