@@ -227,7 +227,7 @@ class QuickSettings {
         } catch (RemoteException e) {
         }
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        mContext.startActivityAsUser(intent, UserHandle.USER_CURRENT);
+        mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
         getService().animateCollapse();
     }
 
