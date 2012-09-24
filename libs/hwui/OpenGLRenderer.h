@@ -64,6 +64,12 @@ public:
     virtual ~OpenGLRenderer();
 
     /**
+     * Read externally defined properties to control the behavior
+     * of the renderer.
+     */
+    ANDROID_API void initProperties();
+
+    /**
      * Indicates whether this renderer executes drawing commands immediately.
      * If this method returns true, the drawing commands will be executed
      * later.
@@ -803,6 +809,10 @@ private:
     bool mTrackDirtyRegions;
     // Indicate whether we are drawing an opaque frame
     bool mOpaqueFrame;
+
+    // See PROPERTY_DISABLE_SCISSOR_OPTIMIZATION in
+    // Properties.h
+    bool mScissorOptimizationDisabled;
 
     friend class DisplayListRenderer;
 
