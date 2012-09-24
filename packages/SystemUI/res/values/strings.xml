@@ -414,6 +414,8 @@
     <string name="quick_settings_bluetooth_label">Bluetooth</string>
     <!-- QuickSettings: Bluetooth (Multiple) [CHAR LIMIT=NONE] -->
     <string name="quick_settings_bluetooth_multiple_devices_label">Bluetooth (<xliff:g id="number">%d</xliff:g> Devices)</string>
+    <!-- QuickSettings: Bluetooth (Off) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_bluetooth_off_label">Bluetooth Off</string>
     <!-- QuickSettings: Brightness [CHAR LIMIT=NONE] -->
     <string name="quick_settings_brightness_label">Brightness</string>
     <!-- QuickSettings: Rotation Unlocked [CHAR LIMIT=NONE] -->
@@ -440,6 +442,8 @@
     <string name="quick_settings_wifi_label">Wifi</string>
     <!-- QuickSettings: Wifi (No network) [CHAR LIMIT=NONE] -->
     <string name="quick_settings_wifi_no_network">No Network</string>
+    <!-- QuickSettings: Wifi (Off) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_wifi_off_label">Wifi Off</string>
     <!-- QuickSettings: Wifi display [CHAR LIMIT=NONE] -->
     <string name="quick_settings_wifi_display_label">Wifi Display</string>
     <!-- QuickSettings: Wifi display [CHAR LIMIT=NONE] -->

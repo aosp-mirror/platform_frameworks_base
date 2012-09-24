@@ -53,6 +53,9 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         LocationGpsStateChangeCallback,
         BrightnessStateChangeCallback {
 
+    // Sett InputMethoManagerService
+    private static final String TAG_TRY_SUPPRESSING_IME_SWITCHER = "TrySuppressingImeSwitcher";
+
     /** Represents the state of a given attribute. */
     static class State {
         int iconId;
@@ -268,17 +271,27 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mWifiCallback = cb;
         mWifiCallback.refreshView(mWifiTile, mWifiState);
     }
+    // Remove the double quotes that the SSID may contain
+    public static String removeDoubleQuotes(String string) {
+        if (string == null) return null;
+        final int length = string.length();
+        if ((length > 1) && (string.charAt(0) == '"') && (string.charAt(length - 1) == '"')) {
+            return string.substring(1, length - 1);
+        }
+        return string;
+    }
     // NetworkSignalChanged callback
     @Override
     public void onWifiSignalChanged(boolean enabled, int wifiSignalIconId, String enabledDesc) {
         // TODO: If view is in awaiting state, disable
         Resources r = mContext.getResources();
+        mWifiState.enabled = enabled;
         mWifiState.iconId = enabled && (wifiSignalIconId > 0)
                 ? wifiSignalIconId
                 : R.drawable.ic_qs_wifi_no_network;
-        mWifiState.label = enabled
-                ? enabledDesc
-                : r.getString(R.string.quick_settings_wifi_no_network);
+        mWifiState.label = enabled && (enabledDesc != null)
+                ? removeDoubleQuotes(enabledDesc)
+                : r.getString(R.string.quick_settings_wifi_off_label);
         mWifiCallback.refreshView(mWifiTile, mWifiState);
     }
 
@@ -331,8 +344,10 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mBluetoothState.enabled = on;
         if (on) {
             mBluetoothState.iconId = R.drawable.ic_qs_bluetooth_on;
+            mBluetoothState.label = r.getString(R.string.quick_settings_bluetooth_label);
         } else {
             mBluetoothState.iconId = R.drawable.ic_qs_bluetooth_off;
+            mBluetoothState.label = r.getString(R.string.quick_settings_bluetooth_off_label);
         }
         mBluetoothCallback.refreshView(mBluetoothTile, mBluetoothState);
     }
@@ -408,12 +423,57 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mImeCallback = cb;
         mImeCallback.refreshView(mImeTile, mImeState);
     }
+    /* This implementation is taken from
+       InputMethodManagerService.needsToShowImeSwitchOngoingNotification(). */
+    private boolean needsToShowImeSwitchOngoingNotification(InputMethodManager imm) {
+        List<InputMethodInfo> imis = imm.getEnabledInputMethodList();
+        final int N = imis.size();
+        if (N > 2) return true;
+        if (N < 1) return false;
+        int nonAuxCount = 0;
+        int auxCount = 0;
+        InputMethodSubtype nonAuxSubtype = null;
+        InputMethodSubtype auxSubtype = null;
+        for(int i = 0; i < N; ++i) {
+            final InputMethodInfo imi = imis.get(i);
+            final List<InputMethodSubtype> subtypes = imm.getEnabledInputMethodSubtypeList(imi,
+                    true);
+            final int subtypeCount = subtypes.size();
+            if (subtypeCount == 0) {
+                ++nonAuxCount;
+            } else {
+                for (int j = 0; j < subtypeCount; ++j) {
+                    final InputMethodSubtype subtype = subtypes.get(j);
+                    if (!subtype.isAuxiliary()) {
+                        ++nonAuxCount;
+                        nonAuxSubtype = subtype;
+                    } else {
+                        ++auxCount;
+                        auxSubtype = subtype;
+                    }
+                }
+            }
+        }
+        if (nonAuxCount > 1 || auxCount > 1) {
+            return true;
+        } else if (nonAuxCount == 1 && auxCount == 1) {
+            if (nonAuxSubtype != null && auxSubtype != null
+                    && (nonAuxSubtype.getLocale().equals(auxSubtype.getLocale())
+                            || auxSubtype.overridesImplicitlyEnabledSubtype()
+                            || nonAuxSubtype.overridesImplicitlyEnabledSubtype())
+                    && nonAuxSubtype.containsExtraValueKey(TAG_TRY_SUPPRESSING_IME_SWITCHER)) {
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
     void onImeWindowStatusChanged(boolean visible) {
         InputMethodManager imm =
                 (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
         List<InputMethodInfo> imis = imm.getInputMethodList();
 
-        mImeState.enabled = visible;
+        mImeState.enabled = (visible && needsToShowImeSwitchOngoingNotification(imm));
         mImeState.label = getCurrentInputMethodName(mContext, mContext.getContentResolver(),
                 imm, imis, mContext.getPackageManager());
         mImeCallback.refreshView(mImeTile, mImeState);

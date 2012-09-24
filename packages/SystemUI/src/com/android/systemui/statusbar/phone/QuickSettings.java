@@ -37,6 +37,7 @@ import android.hardware.display.WifiDisplayStatus;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.view.LayoutInflater;
@@ -205,7 +206,7 @@ class QuickSettings {
     private void startSettingsActivity(Intent intent) {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         mBar.collapseAllPanels(true);
-        mContext.startActivity(intent);
+        mContext.startActivityAsUser(intent, UserHandle.CURRENT);
     }
 
     private void addUserTiles(ViewGroup parent, LayoutInflater inflater) {
@@ -421,7 +422,7 @@ class QuickSettings {
                     tv.setCompoundDrawablesWithIntrinsicBounds(0, state.iconId, 0, 0);
 
                     Resources r = mContext.getResources();
-                    String label = null;
+                    String label = state.label;
                     /*
                     //TODO: Show connected bluetooth device label
                     Set<BluetoothDevice> btDevices =
@@ -435,9 +436,6 @@ class QuickSettings {
                                 btDevices.size());
                     }
                     */
-                    if (label == null) {
-                        label = r.getString(R.string.quick_settings_bluetooth_label);
-                    }
                     tv.setText(label);
                 }
             });
