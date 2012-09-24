@@ -50,7 +50,7 @@ package android.os;
  *     interval does not span device sleep.  Most methods that accept a
  *     timestamp value currently expect the {@link #uptimeMillis} clock.
  *
- *     <li> <p> {@link #elapsedRealtime} and {@link #elapsedRealtimeNano}
+ *     <li> <p> {@link #elapsedRealtime} and {@link #elapsedRealtimeNanos}
  *     return the time since the system was booted, and include deep sleep.
  *     This clock is guaranteed to be monotonic, and continues to tick even
  *     when the CPU is in power saving modes, so is the recommend basis
@@ -157,7 +157,7 @@ public final class SystemClock {
      *
      * @return elapsed nanoseconds since boot.
      */
-    public static native long elapsedRealtimeNano();
+    public static native long elapsedRealtimeNanos();
 
     /**
      * Returns milliseconds running in the current thread.
