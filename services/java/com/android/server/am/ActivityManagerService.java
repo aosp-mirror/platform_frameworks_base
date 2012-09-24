@@ -1402,7 +1402,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         context.setTheme(android.R.style.Theme_Holo);
         m.mContext = context;
         m.mFactoryTest = factoryTest;
-        m.mMainStack = new ActivityStack(m, context, true);
+        m.mMainStack = new ActivityStack(m, context, true, thr.mLooper);
         
         m.mBatteryStatsService.publish(context);
         m.mUsageStatsService.publish(context);
@@ -1423,6 +1423,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     
     static class AThread extends Thread {
         ActivityManagerService mService;
+        Looper mLooper;
         boolean mReady = false;
 
         public AThread() {
@@ -1440,6 +1441,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
             synchronized (this) {
                 mService = m;
+                mLooper = Looper.myLooper();
                 notifyAll();
             }
 

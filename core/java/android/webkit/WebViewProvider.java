@@ -341,6 +341,8 @@ public interface WebViewProvider {
         public void setBackgroundColor(int color);
 
         public void setLayerType(int layerType, Paint paint);
+
+        public void preDispatchDraw(Canvas canvas);
     }
 
     interface ScrollDelegate {

@@ -20,6 +20,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.util.ValueModel;
 
 
 /**
@@ -55,7 +56,9 @@ import android.view.accessibility.AccessibilityNodeInfo;
  * {@link android.R.styleable#View View Attributes}
  * </p>
  */
-public class CheckBox extends CompoundButton {
+public class CheckBox extends CompoundButton implements ValueEditor<Boolean> {
+    private ValueModel<Boolean> mValueModel = ValueModel.EMPTY;
+
     public CheckBox(Context context) {
         this(context, null);
     }
@@ -78,5 +81,23 @@ public class CheckBox extends CompoundButton {
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
         info.setClassName(CheckBox.class.getName());
+    }
+
+    @Override
+    public ValueModel<Boolean> getValueModel() {
+        return mValueModel;
+    }
+
+    @Override
+    public void setValueModel(ValueModel<Boolean> valueModel) {
+        mValueModel = valueModel;
+        setChecked(mValueModel.get());
+    }
+
+    @Override
+    public boolean performClick() {
+        boolean handled = super.performClick();
+        mValueModel.set(isChecked());
+        return handled;
     }
 }

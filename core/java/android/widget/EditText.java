@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.content.Context;
+import android.graphics.Rect;
 import android.text.Editable;
 import android.text.Selection;
 import android.text.Spannable;
@@ -24,6 +25,7 @@ import android.text.TextUtils;
 import android.text.method.ArrowKeyMovementMethod;
 import android.text.method.MovementMethod;
 import android.util.AttributeSet;
+import android.util.ValueModel;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
@@ -47,7 +49,9 @@ import android.view.accessibility.AccessibilityNodeInfo;
  * {@link android.R.styleable#TextView TextView Attributes},
  * {@link android.R.styleable#View View Attributes}
  */
-public class EditText extends TextView {
+public class EditText extends TextView implements ValueEditor<CharSequence> {
+    private ValueModel<CharSequence> mValueModel = ValueModel.EMPTY;
+
     public EditText(Context context) {
         this(context, null);
     }
@@ -127,5 +131,22 @@ public class EditText extends TextView {
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
         info.setClassName(EditText.class.getName());
+    }
+
+    @Override
+    public ValueModel<CharSequence> getValueModel() {
+        return mValueModel;
+    }
+
+    @Override
+    public void setValueModel(ValueModel<CharSequence> valueModel) {
+        mValueModel = valueModel;
+        setText(mValueModel.get());
+    }
+
+    @Override
+    void sendAfterTextChanged(Editable text) {
+        super.sendAfterTextChanged(text);
+        mValueModel.set(text);
     }
 }

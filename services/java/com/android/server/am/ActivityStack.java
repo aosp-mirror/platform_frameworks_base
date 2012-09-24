@@ -49,6 +49,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
@@ -305,11 +306,17 @@ final class ActivityStack {
         }
     }
 
-    final Handler mHandler = new Handler() {
+    final Handler mHandler;
+
+    final class ActivityStackHandler extends Handler {
         //public Handler() {
         //    if (localLOGV) Slog.v(TAG, "Handler started!");
         //}
+        public ActivityStackHandler(Looper looper) {
+            super(looper);
+        }
 
+        @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case SLEEP_TIMEOUT_MSG: {
@@ -409,7 +416,8 @@ final class ActivityStack {
         }
     };
     
-    ActivityStack(ActivityManagerService service, Context context, boolean mainStack) {
+    ActivityStack(ActivityManagerService service, Context context, boolean mainStack, Looper looper) {
+        mHandler = new ActivityStackHandler(looper);
         mService = service;
         mContext = context;
         mMainStack = mainStack;

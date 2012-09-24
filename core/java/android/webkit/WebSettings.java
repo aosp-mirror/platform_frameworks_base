@@ -89,6 +89,14 @@ public abstract class WebSettings {
         ZoomDensity(int size) {
             value = size;
         }
+
+        /**
+         * @hide Only for use by WebViewProvider implementations
+         */
+        public int getValue() {
+            return value;
+        }
+
         int value;
     }
 
@@ -935,6 +943,9 @@ public abstract class WebSettings {
      * access to content from other file scheme URLs. See
      * {@link #setAllowFileAccessFromFileURLs}. To enable the most restrictive,
      * and therefore secure policy, this setting should be disabled.
+     * Note that this setting affects only JavaScript access to file scheme
+     * resources. Other access to such resources, for example, from image HTML
+     * elements, is unaffected.
      * <p>
      * The default value is true for API level
      * {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH_MR1} and below,
@@ -952,6 +963,9 @@ public abstract class WebSettings {
      * enable the most restrictive, and therefore secure policy, this setting
      * should be disabled. Note that the value of this setting is ignored if
      * the value of {@link #getAllowUniversalAccessFromFileURLs} is true.
+     * Note too, that this setting affects only JavaScript access to file scheme
+     * resources. Other access to such resources, for example, from image HTML
+     * elements, is unaffected.
      * <p>
      * The default value is true for API level
      * {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH_MR1} and below,
@@ -1120,9 +1134,22 @@ public abstract class WebSettings {
     }
 
     /**
-     * Sets whether Geolocation is enabled. The default is true. See also
-     * {@link #setGeolocationDatabasePath} for how to correctly set up
-     * Geolocation.
+     * Sets whether Geolocation is enabled. The default is true.
+     * <p>
+     * Please note that in order for the Geolocation API to be usable
+     * by a page in the WebView, the following requirements must be met:
+     * <ul>
+     *   <li>an application must have permission to access the device location,
+     *   see {@link android.Manifest.permission#ACCESS_COARSE_LOCATION},
+     *   {@link android.Manifest.permission#ACCESS_FINE_LOCATION};
+     *   <li>an application must provide an implementation of the
+     *   {@link WebChromeClient#onGeolocationPermissionsShowPrompt} callback
+     *   to receive notifications that a page is requesting access to location
+     *   via the JavaScript Geolocation API.
+     * </ul>
+     * <p>
+     * As an option, it is possible to store previous locations and web origin
+     * permissions in a database. See {@link #setGeolocationDatabasePath}.
      *
      * @param flag whether Geolocation should be enabled
      */
@@ -1294,7 +1321,7 @@ public abstract class WebSettings {
      * and content is re-validated as needed. When navigating back, content is
      * not revalidated, instead the content is just retrieved from the cache.
      * This method allows the client to override this behavior by specifying
-     * one of {@link #LOAD_DEFAULT}, {@link #LOAD_NORMAL},
+     * one of {@link #LOAD_DEFAULT},
      * {@link #LOAD_CACHE_ELSE_NETWORK}, {@link #LOAD_NO_CACHE} or
      * {@link #LOAD_CACHE_ONLY}. The default value is {@link #LOAD_DEFAULT}.
      *

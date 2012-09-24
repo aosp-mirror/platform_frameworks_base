@@ -8,4 +8,3 @@ option java_package android.webkit;
 # 70103- used by the browser app itself
 
 70150 browser_snap_center
-70151 browser_text_size_change (oldSize|1|5), (newSize|1|5)

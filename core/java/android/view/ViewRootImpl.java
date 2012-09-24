@@ -316,6 +316,11 @@ public final class ViewRootImpl implements ViewParent,
     private final int mDensity;
     private final int mNoncompatDensity;
 
+    private boolean mInLayout = false;
+    ArrayList<View> mLayoutRequesters = new ArrayList<View>();
+    boolean mHandlingLayoutInLayoutRequest = false;
+
+
     /**
      * Consistency verifier for debugging purposes.
      */
@@ -1866,9 +1871,49 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
+    /**
+     * Called by {@link android.view.View#isInLayout()} to determine whether the view hierarchy
+     * is currently undergoing a layout pass.
+     *
+     * @return whether the view hierarchy is currently undergoing a layout pass
+     */
+    boolean isInLayout() {
+        return mInLayout;
+    }
+
+    /**
+     * Called by {@link android.view.View#requestLayout()} if the view hiearchy is currently
+     * undergoing a layout pass. requestLayout() should not be called during layout, but if it
+     * is called anyway, we handle the situation here rather than leave the hierarchy in an
+     * indeterminate state. The solution is to queue up all requests during layout, apply those
+     * requests as soon as layout is complete, and then run layout once more immediately. If
+     * more requestLayout() calls are received during that second layout pass, we post those
+     * requests to the next frame, to avoid possible infinite loops.
+     *
+     * @param view the view that requested the layout.
+     */
+    void requestLayoutDuringLayout(final View view) {
+        if (!mHandlingLayoutInLayoutRequest) {
+            if (!mLayoutRequesters.contains(view)) {
+                Log.w("View", "requestLayout() called by " + view + " during layout pass");
+                mLayoutRequesters.add(view);
+            }
+        } else {
+            Log.w("View", "requestLayout() called by " + view + " during second layout pass: " +
+                    "posting to next frame");
+            view.post(new Runnable() {
+                @Override
+                public void run() {
+                    view.requestLayout();
+                }
+            });
+        }
+    }
+
     private void performLayout() {
         mLayoutRequested = false;
         mScrollMayChange = true;
+        mInLayout = true;
 
         final View host = mView;
         if (DEBUG_ORIENTATION || DEBUG_LAYOUT) {
@@ -1879,9 +1924,22 @@ public final class ViewRootImpl implements ViewParent,
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "layout");
         try {
             host.layout(0, 0, host.getMeasuredWidth(), host.getMeasuredHeight());
+            int numViewsRequestingLayout = mLayoutRequesters.size();
+            if (numViewsRequestingLayout > 0) {
+                // requestLayout() was called during layout: unusual, but try to handle correctly
+                mHandlingLayoutInLayoutRequest = true;
+                for (int i = 0; i < numViewsRequestingLayout; ++i) {
+                    mLayoutRequesters.get(i).requestLayout();
+                }
+                // Now run layout one more time
+                host.layout(0, 0, host.getMeasuredWidth(), host.getMeasuredHeight());
+                mHandlingLayoutInLayoutRequest = false;
+                mLayoutRequesters.clear();
+            }
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_VIEW);
         }
+        mInLayout = false;
     }
 
     public void requestTransparentRegion(View child) {
