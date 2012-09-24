@@ -159,6 +159,8 @@
     <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"Chargée"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> appareils)"</string>
+    <!-- no translation found for quick_settings_bluetooth_off_label (8159652146149219937) -->
+    <skip />
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Luminosité"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"Rotation automatique"</string>
     <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"Rotation verrouillée"</string>
@@ -172,6 +174,8 @@
     <string name="quick_settings_user_label" msgid="5238995632130897840">"Moi"</string>
     <string name="quick_settings_wifi_label" msgid="4393429107095001520">"Wi-Fi"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Aucun réseau"</string>
+    <!-- no translation found for quick_settings_wifi_off_label (3343111275022978538) -->
+    <skip />
     <string name="quick_settings_wifi_display_label" msgid="6653501376641018614">"Écran Wi-Fi"</string>
     <string name="quick_settings_wifi_display_no_connection_label" msgid="6255615315258869136">"Aucune connexion à un écran Wi-Fi"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Luminosité"</string>
