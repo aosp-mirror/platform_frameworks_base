@@ -196,6 +196,7 @@ public class GlowPadView extends View {
     private Tweener mBackgroundAnimator;
     private PointCloud mPointCloud;
     private float mInnerRadius;
+    private int mPointerId;
 
     public GlowPadView(Context context) {
         this(context, null);
@@ -736,9 +737,10 @@ public class GlowPadView extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        final int action = event.getAction();
+        final int action = event.getActionMasked();
         boolean handled = false;
         switch (action) {
+            case MotionEvent.ACTION_POINTER_DOWN:
             case MotionEvent.ACTION_DOWN:
                 if (DEBUG) Log.v(TAG, "*** DOWN ***");
                 handleDown(event);
@@ -752,6 +754,7 @@ public class GlowPadView extends View {
                 handled = true;
                 break;
 
+            case MotionEvent.ACTION_POINTER_UP:
             case MotionEvent.ACTION_UP:
                 if (DEBUG) Log.v(TAG, "*** UP ***");
                 handleMove(event);
@@ -765,6 +768,7 @@ public class GlowPadView extends View {
                 handleCancel(event);
                 handled = true;
                 break;
+
         }
         invalidate();
         return handled ? true : super.onTouchEvent(event);
@@ -776,19 +780,24 @@ public class GlowPadView extends View {
     }
 
     private void handleDown(MotionEvent event) {
-        float eventX = event.getX();
-        float eventY = event.getY();
+        int actionIndex = event.getActionIndex();
+        float eventX = event.getX(actionIndex);
+        float eventY = event.getY(actionIndex);
         switchToState(STATE_START, eventX, eventY);
         if (!trySwitchToFirstTouchState(eventX, eventY)) {
             mDragging = false;
         } else {
+            mPointerId = event.getPointerId(actionIndex);
             updateGlowPosition(eventX, eventY);
         }
     }
 
     private void handleUp(MotionEvent event) {
         if (DEBUG && mDragging) Log.v(TAG, "** Handle RELEASE");
-        switchToState(STATE_FINISH, event.getX(), event.getY());
+        int actionIndex = event.getActionIndex();
+        if (event.getPointerId(actionIndex) == mPointerId) {
+            switchToState(STATE_FINISH, event.getX(actionIndex), event.getY(actionIndex));
+        }
     }
 
     private void handleCancel(MotionEvent event) {
@@ -801,7 +810,9 @@ public class GlowPadView extends View {
 
         // mActiveTarget = -1; // Drop the active target if canceled.
 
-        switchToState(STATE_FINISH, event.getX(), event.getY());
+        int actionIndex = event.findPointerIndex(mPointerId);
+        actionIndex = actionIndex == -1 ? 0 : actionIndex;
+        switchToState(STATE_FINISH, event.getX(actionIndex), event.getY(actionIndex));
     }
 
     private void handleMove(MotionEvent event) {
@@ -811,9 +822,17 @@ public class GlowPadView extends View {
         int ntargets = targets.size();
         float x = 0.0f;
         float y = 0.0f;
+        int actionIndex = event.findPointerIndex(mPointerId);
+
+        if (actionIndex == -1) {
+            return;  // no data for this pointer
+        }
+
         for (int k = 0; k < historySize + 1; k++) {
-            float eventX = k < historySize ? event.getHistoricalX(k) : event.getX();
-            float eventY = k < historySize ? event.getHistoricalY(k) : event.getY();
+            float eventX = k < historySize ? event.getHistoricalX(actionIndex, k)
+                    : event.getX(actionIndex);
+            float eventY = k < historySize ? event.getHistoricalY(actionIndex, k)
+                    : event.getY(actionIndex);
             // tx and ty are relative to wave center
             float tx = eventX - mWaveCenterX;
             float ty = eventY - mWaveCenterY;
