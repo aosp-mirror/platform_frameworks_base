@@ -95,13 +95,18 @@ public class SyncOperation implements Comparable {
     }
 
     public String dump(boolean useOneLine) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(account.name);
-        sb.append(" (" + account.type + ")");
-        sb.append(", " + authority);
-        sb.append(", ");
-        sb.append(SyncStorageEngine.SOURCES[syncSource]);
-        sb.append(", earliestRunTime " + earliestRunTime);
+        StringBuilder sb = new StringBuilder()
+                .append(account.name)
+                .append(" u")
+                .append(userId).append(" (")
+                .append(account.type)
+                .append(")")
+                .append(", ")
+                .append(authority)
+                .append(", ")
+                .append(SyncStorageEngine.SOURCES[syncSource])
+                .append(", earliestRunTime ")
+                .append(earliestRunTime);
         if (expedited) {
             sb.append(", EXPEDITED");
         }
