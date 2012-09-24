@@ -17,16 +17,13 @@
 <LinearLayout 
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:padding="16dp">
+    style="@style/BrightnessDialogContainer">
 
     <ImageView
         android:id="@+id/brightness_icon"
-        style="@style/SystemBarPanelSettingsIcon"
         android:layout_gravity="center_vertical"
         android:paddingRight="10dp"
-        android:src="@drawable/ic_sysbar_brightness"
+        android:src="@drawable/ic_qs_brightness_auto_off"
         />
     <com.android.systemui.statusbar.policy.ToggleSlider
         android:id="@+id/brightness_slider"

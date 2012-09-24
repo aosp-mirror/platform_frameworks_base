@@ -391,7 +391,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     }
     public void onWifiDisplayStateChanged(WifiDisplayStatus status) {
         mWifiDisplayState.enabled =
-                (status.getFeatureState() != WifiDisplayStatus.FEATURE_STATE_UNAVAILABLE);
+                (status.getFeatureState() == WifiDisplayStatus.FEATURE_STATE_ON);
         if (status.getActiveDisplay() != null) {
             mWifiDisplayState.label = status.getActiveDisplay().getFriendlyDisplayName();
         } else {
