@@ -215,7 +215,7 @@ public class FusionEngine implements LocationListener {
     }
 
     private static double weighAge(Location loc) {
-        long ageSeconds = SystemClock.elapsedRealtimeNanos() - loc.getElapsedRealtimeNano();
+        long ageSeconds = SystemClock.elapsedRealtimeNano() - loc.getElapsedRealtimeNano();
         ageSeconds /= 1000000000L;
         if (ageSeconds < 0) ageSeconds = 0;
         return Math.exp(-ageSeconds * AGE_DECAY_CONSTANT_S);
@@ -266,7 +266,7 @@ public class FusionEngine implements LocationListener {
 
         // fused time - now
         fused.setTime(System.currentTimeMillis());
-        fused.setElapsedRealtimeNano(SystemClock.elapsedRealtimeNanos());
+        fused.setElapsedRealtimeNano(SystemClock.elapsedRealtimeNano());
 
         // fuse altitude
         if (mGpsLocation.hasAltitude() && !mNetworkLocation.hasAltitude() &&
