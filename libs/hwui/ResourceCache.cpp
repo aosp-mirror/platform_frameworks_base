@@ -155,7 +155,7 @@ void ResourceCache::decrementRefcountLocked(void* resource) {
     }
     ref->refCount--;
     if (ref->refCount == 0) {
-        deleteResourceReference(resource, ref);
+        deleteResourceReferenceLocked(resource, ref);
     }
 }
 
@@ -201,7 +201,7 @@ void ResourceCache::destructorLocked(SkPath* resource) {
     }
     ref->destroyed = true;
     if (ref->refCount == 0) {
-        deleteResourceReference(resource, ref);
+        deleteResourceReferenceLocked(resource, ref);
     }
 }
 
@@ -223,7 +223,7 @@ void ResourceCache::destructorLocked(SkBitmap* resource) {
     }
     ref->destroyed = true;
     if (ref->refCount == 0) {
-        deleteResourceReference(resource, ref);
+        deleteResourceReferenceLocked(resource, ref);
     }
 }
 
@@ -242,7 +242,7 @@ void ResourceCache::destructorLocked(SkiaShader* resource) {
     }
     ref->destroyed = true;
     if (ref->refCount == 0) {
-        deleteResourceReference(resource, ref);
+        deleteResourceReferenceLocked(resource, ref);
     }
 }
 
@@ -261,7 +261,7 @@ void ResourceCache::destructorLocked(SkiaColorFilter* resource) {
     }
     ref->destroyed = true;
     if (ref->refCount == 0) {
-        deleteResourceReference(resource, ref);
+        deleteResourceReferenceLocked(resource, ref);
     }
 }
 
@@ -284,7 +284,7 @@ void ResourceCache::recycleLocked(SkBitmap* resource) {
     }
     ref->recycled = true;
     if (ref->refCount == 0) {
-        deleteResourceReference(resource, ref);
+        deleteResourceReferenceLocked(resource, ref);
     }
 }
 
@@ -292,7 +292,7 @@ void ResourceCache::recycleLocked(SkBitmap* resource) {
  * This method should only be called while the mLock mutex is held (that mutex is grabbed
  * by the various destructor() and recycle() methods which call this method).
  */
-void ResourceCache::deleteResourceReference(void* resource, ResourceReference* ref) {
+void ResourceCache::deleteResourceReferenceLocked(void* resource, ResourceReference* ref) {
     if (ref->recycled && ref->resourceType == kBitmap) {
         ((SkBitmap*) resource)->setPixels(NULL, NULL);
     }
@@ -326,6 +326,7 @@ void ResourceCache::deleteResourceReference(void* resource, ResourceReference* r
             break;
             case kLayer: {
                 Layer* layer = (Layer*) resource;
+                layer->freeResourcesLocked();
                 delete layer;
             }
             break;
