@@ -561,7 +561,7 @@ is sensitive to delays or lag in sound input or output.</td>
 </td>
     </tr>
     <tr>
-       <td rowspan="4">Camera</td>
+       <td rowspan="5">Camera</td>
        <td><code>android.hardware.camera</code></td>
        <td>The application uses the device's camera. If the device supports
            multiple cameras, the application uses the camera that facing
@@ -582,6 +582,12 @@ is sensitive to delays or lag in sound input or output.</td>
 <tr>
   <td><code>android.hardware.camera.front</code></td>
   <td>Subfeature. The application uses a front-facing camera on the device.</td>
+</tr>
+<tr>
+  <td><code>android.hardware.camera.any</code></td>
+  <td>The application uses at least one camera facing in any direction. Use this
+in preference to <code>android.hardware.camera</code> if a back-facing camera is
+not required.</td>
 </tr>
 
 <tr>
