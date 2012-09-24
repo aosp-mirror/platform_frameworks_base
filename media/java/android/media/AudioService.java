@@ -457,6 +457,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         updateStreamVolumeAlias(false /*updateVolumes*/);
         createStreamStates();
 
+        mSafeMediaVolumeEnabled = new Boolean(true);
         synchronized (mSafeMediaVolumeEnabled) {
             enforceSafeMediaVolume();
         }
@@ -1715,7 +1716,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         checkAllAliasStreamVolumes();
 
         synchronized (mSafeMediaVolumeEnabled) {
-            enforceSafeMediaVolume();
+            if (mSafeMediaVolumeEnabled) {
+                enforceSafeMediaVolume();
+            }
         }
 
         // apply new ringer mode
@@ -2184,11 +2187,14 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     sendMsg(mAudioHandler,
                             MSG_CHECK_MUSIC_ACTIVE,
                             SENDMSG_REPLACE,
-                            device,
+                            0,
                             0,
                             null,
                             MUSIC_ACTIVE_POLL_PERIOD_MS);
-                    if (AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, 0)) {
+                    int index = mStreamStates[AudioSystem.STREAM_MUSIC].getIndex(device,
+                                                                            false /*lastAudible*/);
+                    if (AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, 0) &&
+                            (index > mSafeMediaVolumeIndex)) {
                         // Approximate cumulative active music time
                         mMusicActiveMs += MUSIC_ACTIVE_POLL_PERIOD_MS;
                         if (mMusicActiveMs > UNSAFE_VOLUME_MUSIC_ACTIVE_MS_MAX) {
@@ -2461,14 +2467,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     public void setWiredDeviceConnectionState(int device, int state, String name) {
         synchronized (mConnectedDevices) {
             int delay = checkSendBecomingNoisyIntent(device, state);
-            if ((device & mSafeMediaVolumeDevices) != 0) {
-                setSafeMediaVolumeEnabled(state != 0);
-                // insert delay to allow new volume to apply before switching to headphones
-                if ((delay < SAFE_VOLUME_DELAY_MS) && (state != 0)) {
-                    delay = SAFE_VOLUME_DELAY_MS;
-                }
-            }
-
             queueMsgUnderWakeLock(mAudioHandler,
                     MSG_SET_WIRED_DEVICE_CONNECTION_STATE,
                     device,
@@ -3519,9 +3517,20 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             }
             boolean isUsb = ((device & AudioSystem.DEVICE_OUT_ALL_USB) != 0);
             handleDeviceConnection((state == 1), device, (isUsb ? name : ""));
-            if ((state != 0) && ((device == AudioSystem.DEVICE_OUT_WIRED_HEADSET) ||
-                    (device == AudioSystem.DEVICE_OUT_WIRED_HEADPHONE))) {
-                setBluetoothA2dpOnInt(false);
+            if (state != 0) {
+                if ((device == AudioSystem.DEVICE_OUT_WIRED_HEADSET) ||
+                    (device == AudioSystem.DEVICE_OUT_WIRED_HEADPHONE)) {
+                    setBluetoothA2dpOnInt(false);
+                }
+                if ((device & mSafeMediaVolumeDevices) != 0) {
+                    sendMsg(mAudioHandler,
+                            MSG_CHECK_MUSIC_ACTIVE,
+                            SENDMSG_REPLACE,
+                            0,
+                            0,
+                            null,
+                            MUSIC_ACTIVE_POLL_PERIOD_MS);
+                }
             }
             if (!isUsb) {
                 sendDeviceConnectionIntent(device, state, name);
@@ -5528,7 +5537,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     // mSafeMediaVolumeEnabled indicates whether the media volume is limited over headphones.
     // It is true by default when headphones or a headset are inserted and can be overriden by
     // calling AudioService.disableSafeMediaVolume() (when user opts out).
-    private Boolean mSafeMediaVolumeEnabled = new Boolean(false);
+    private Boolean mSafeMediaVolumeEnabled;
     // mSafeMediaVolumeIndex is the cached value of config_safe_media_volume_index property
     private final int mSafeMediaVolumeIndex;
     // mSafeMediaVolumeDevices lists the devices for which safe media volume is enforced,
@@ -5540,7 +5549,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     private int mMusicActiveMs;
     private static final int UNSAFE_VOLUME_MUSIC_ACTIVE_MS_MAX = (20 * 3600 * 1000); // 20 hours
     private static final int MUSIC_ACTIVE_POLL_PERIOD_MS = 60000;  // 1 minute polling interval
-    private static final int SAFE_VOLUME_DELAY_MS = 500;  // 500ms before switching to headphones
 
     private void setSafeMediaVolumeEnabled(boolean on) {
         synchronized (mSafeMediaVolumeEnabled) {
