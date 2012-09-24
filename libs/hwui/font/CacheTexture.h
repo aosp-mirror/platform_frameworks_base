@@ -24,6 +24,7 @@
 #include <utils/Log.h>
 
 #include "FontUtil.h"
+#include "Rect.h"
 
 namespace android {
 namespace uirenderer {
@@ -149,6 +150,10 @@ public:
         return mHeight;
     }
 
+    inline const Rect* getDirtyRect() const {
+        return &mDirtyRect;
+    }
+
     inline uint8_t* getTexture() const {
         return mTexture;
     }
@@ -163,6 +168,9 @@ public:
 
     inline void setDirty(bool dirty) {
         mDirty = dirty;
+        if (!dirty) {
+            mDirtyRect.setEmpty();
+        }
     }
 
     inline bool getLinearFiltering() const {
@@ -196,6 +204,7 @@ private:
     bool mDirty;
     uint16_t mNumGlyphs;
     CacheBlock* mCacheBlocks;
+    Rect mDirtyRect;
 };
 
 }; // namespace uirenderer
