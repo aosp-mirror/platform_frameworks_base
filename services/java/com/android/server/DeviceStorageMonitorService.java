@@ -396,13 +396,15 @@ public class DeviceStorageMonitorService extends Binder {
                 com.android.internal.R.string.low_internal_storage_view_title);
         CharSequence details = mContext.getText(
                 com.android.internal.R.string.low_internal_storage_view_text);
-        PendingIntent intent = PendingIntent.getActivity(mContext, 0,  lowMemIntent, 0);
+        PendingIntent intent = PendingIntent.getActivityAsUser(mContext, 0,  lowMemIntent, 0,
+                null, UserHandle.CURRENT);
         Notification notification = new Notification();
         notification.icon = com.android.internal.R.drawable.stat_notify_disk_full;
         notification.tickerText = title;
         notification.flags |= Notification.FLAG_NO_CLEAR;
         notification.setLatestEventInfo(mContext, title, details, intent);
-        mNotificationMgr.notify(LOW_MEMORY_NOTIFICATION_ID, notification);
+        mNotificationMgr.notifyAsUser(null, LOW_MEMORY_NOTIFICATION_ID, notification,
+                UserHandle.ALL);
         mContext.sendStickyBroadcast(mStorageLowIntent);
     }
 
@@ -415,7 +417,7 @@ public class DeviceStorageMonitorService extends Binder {
                 (NotificationManager)mContext.getSystemService(
                         Context.NOTIFICATION_SERVICE);
         //cancel notification since memory has been freed
-        mNotificationMgr.cancel(LOW_MEMORY_NOTIFICATION_ID);
+        mNotificationMgr.cancelAsUser(null, LOW_MEMORY_NOTIFICATION_ID, UserHandle.ALL);
 
         mContext.removeStickyBroadcastAsUser(mStorageLowIntent, UserHandle.ALL);
         mContext.sendBroadcastAsUser(mStorageOkIntent, UserHandle.ALL);
