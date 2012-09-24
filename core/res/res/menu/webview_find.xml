@@ -18,9 +18,11 @@
     <item android:id="@+id/find_prev"
         android:icon="?android:attr/findOnPagePreviousDrawable"
         android:showAsAction="always"
+        android:title="@string/find_previous"
         />
     <item android:id="@+id/find_next"
         android:icon="?android:attr/findOnPageNextDrawable"
         android:showAsAction="always"
+        android:title="@string/find_next"
         />
 </menu>
