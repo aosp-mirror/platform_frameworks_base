@@ -73,7 +73,7 @@ public final class NfcBarcode extends BasicTagTechnology {
     /**
      * Returns the NFC Barcode tag type.
      *
-     * <p>Currently only one of {@link #TYPE_KOVIO} or {@link TYPE_UNKNOWN}.
+     * <p>Currently only one of {@link #TYPE_KOVIO} or {@link #TYPE_UNKNOWN}.
      *
      * <p>Does not cause any RF activity and does not block.
      *
