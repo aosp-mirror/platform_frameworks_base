@@ -623,8 +623,10 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Να απαιτείται η κρυπτογράφηση των αποθηκευμένων δεδομένων εφαρμογής"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Απενεργοποίηση φωτογρ. μηχανών"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Να αποτρέπεται η χρήση των φωτογραφικών μηχανών της συσκευής."</string>
-    <string name="policylab_disableKeyguardWidgets" msgid="1794894613389073926">"Απεν.γραφ.στοιχ.ασφ.πλήκτρ."</string>
-    <string name="policydesc_disableKeyguardWidgets" msgid="7254624892984033592">"Παρεμπόδιση της χρήσης ορισμένων ή όλων των γραφικών στοιχείων στην ασφάλεια πλήκτρων."</string>
+    <!-- no translation found for policylab_disableKeyguardFeatures (266329104542638802) -->
+    <skip />
+    <!-- no translation found for policydesc_disableKeyguardFeatures (3467082272186534614) -->
+    <skip />
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Οικία"</item>
     <item msgid="869923650527136615">"Κινητό"</item>
@@ -1260,6 +1262,10 @@
     <string name="share" msgid="1778686618230011964">"Κοινή χρ."</string>
     <string name="find" msgid="4808270900322985960">"Εύρεση"</string>
     <string name="websearch" msgid="4337157977400211589">"Αναζήτηση ιστού"</string>
+    <!-- no translation found for find_next (5742124618942193978) -->
+    <skip />
+    <!-- no translation found for find_previous (2196723669388360506) -->
+    <skip />
     <string name="gpsNotifTicker" msgid="5622683912616496172">"Αίτημα τοποθεσίας από <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="gpsNotifTitle" msgid="5446858717157416839">"Αίτημα τοποθεσίας"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"Ζητήθηκε από <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
