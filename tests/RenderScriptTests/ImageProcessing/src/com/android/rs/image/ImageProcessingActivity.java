@@ -133,6 +133,9 @@ public class ImageProcessingActivity extends Activity
 
 
     void changeTest(int testID) {
+        if (mTest != null) {
+            mTest.destroy();
+        }
         switch(testID) {
         case 0:
             mTest = new LevelsV4(false, false);
