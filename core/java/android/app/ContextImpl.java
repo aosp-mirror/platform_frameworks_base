@@ -17,6 +17,7 @@
 package android.app;
 
 import com.android.internal.policy.PolicyManager;
+import com.android.internal.util.Preconditions;
 
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
@@ -35,6 +36,7 @@ import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
@@ -183,6 +185,7 @@ class ContextImpl extends Context {
     private Display mDisplay; // may be null if default display
     private Context mReceiverRestrictedContext = null;
     private boolean mRestricted;
+    private UserHandle mUser;
 
     private final Object mSync = new Object();
 
@@ -1676,7 +1679,13 @@ class ContextImpl extends Context {
 
     @Override
     public Context createPackageContext(String packageName, int flags)
-        throws PackageManager.NameNotFoundException {
+            throws NameNotFoundException {
+        return createPackageContextAsUser(packageName, flags, Process.myUserHandle());
+    }
+
+    @Override
+    public Context createPackageContextAsUser(String packageName, int flags, UserHandle user)
+            throws NameNotFoundException {
         if (packageName.equals("system") || packageName.equals("android")) {
             final ContextImpl context = new ContextImpl(mMainThread.getSystemContext());
             context.mBasePackageName = mBasePackageName;
@@ -1688,7 +1697,7 @@ class ContextImpl extends Context {
         if (pi != null) {
             ContextImpl c = new ContextImpl();
             c.mRestricted = (flags & CONTEXT_RESTRICTED) == CONTEXT_RESTRICTED;
-            c.init(pi, null, mMainThread, mResources, mBasePackageName);
+            c.init(pi, null, mMainThread, mResources, mBasePackageName, user);
             if (c.mResources != null) {
                 return c;
             }
@@ -1769,8 +1778,8 @@ class ContextImpl extends Context {
     }
 
     static ContextImpl createSystemContext(ActivityThread mainThread) {
-        ContextImpl context = new ContextImpl();
-        context.init(Resources.getSystem(), mainThread);
+        final ContextImpl context = new ContextImpl();
+        context.init(Resources.getSystem(), mainThread, Process.myUserHandle());
         return context;
     }
 
@@ -1790,18 +1799,17 @@ class ContextImpl extends Context {
         mResources = context.mResources;
         mMainThread = context.mMainThread;
         mContentResolver = context.mContentResolver;
+        mUser = context.mUser;
         mDisplay = context.mDisplay;
         mOuterContext = this;
     }
 
-    final void init(LoadedApk packageInfo,
-            IBinder activityToken, ActivityThread mainThread) {
-        init(packageInfo, activityToken, mainThread, null, null);
+    final void init(LoadedApk packageInfo, IBinder activityToken, ActivityThread mainThread) {
+        init(packageInfo, activityToken, mainThread, null, null, Process.myUserHandle());
     }
 
-    final void init(LoadedApk packageInfo,
-                IBinder activityToken, ActivityThread mainThread,
-                Resources container, String basePackageName) {
+    final void init(LoadedApk packageInfo, IBinder activityToken, ActivityThread mainThread,
+            Resources container, String basePackageName, UserHandle user) {
         mPackageInfo = packageInfo;
         mBasePackageName = basePackageName != null ? basePackageName : packageInfo.mPackageName;
         mResources = mPackageInfo.getResources(mainThread);
@@ -1818,16 +1826,18 @@ class ContextImpl extends Context {
                     null, container.getCompatibilityInfo());
         }
         mMainThread = mainThread;
-        mContentResolver = new ApplicationContentResolver(this, mainThread);
         mActivityToken = activityToken;
+        mContentResolver = new ApplicationContentResolver(this, mainThread, user);
+        mUser = user;
     }
 
-    final void init(Resources resources, ActivityThread mainThread) {
+    final void init(Resources resources, ActivityThread mainThread, UserHandle user) {
         mPackageInfo = null;
         mBasePackageName = null;
         mResources = resources;
         mMainThread = mainThread;
-        mContentResolver = new ApplicationContentResolver(this, mainThread);
+        mContentResolver = new ApplicationContentResolver(this, mainThread, user);
+        mUser = user;
     }
 
     final void scheduleFinalCleanup(String who, String what) {
@@ -1912,19 +1922,24 @@ class ContextImpl extends Context {
     // ----------------------------------------------------------------------
 
     private static final class ApplicationContentResolver extends ContentResolver {
-        public ApplicationContentResolver(Context context, ActivityThread mainThread) {
+        private final ActivityThread mMainThread;
+        private final UserHandle mUser;
+
+        public ApplicationContentResolver(
+                Context context, ActivityThread mainThread, UserHandle user) {
             super(context);
-            mMainThread = mainThread;
+            mMainThread = Preconditions.checkNotNull(mainThread);
+            mUser = Preconditions.checkNotNull(user);
         }
 
         @Override
-        protected IContentProvider acquireProvider(Context context, String name) {
-            return mMainThread.acquireProvider(context, name, true);
+        protected IContentProvider acquireProvider(Context context, String auth) {
+            return mMainThread.acquireProvider(context, auth, mUser.getIdentifier(), true);
         }
 
         @Override
-        protected IContentProvider acquireExistingProvider(Context context, String name) {
-            return mMainThread.acquireExistingProvider(context, name, true);
+        protected IContentProvider acquireExistingProvider(Context context, String auth) {
+            return mMainThread.acquireExistingProvider(context, auth, mUser.getIdentifier(), true);
         }
 
         @Override
@@ -1933,8 +1948,8 @@ class ContextImpl extends Context {
         }
 
         @Override
-        protected IContentProvider acquireUnstableProvider(Context c, String name) {
-            return mMainThread.acquireProvider(c, name, false);
+        protected IContentProvider acquireUnstableProvider(Context c, String auth) {
+            return mMainThread.acquireProvider(c, auth, mUser.getIdentifier(), false);
         }
 
         @Override
@@ -1946,7 +1961,5 @@ class ContextImpl extends Context {
         public void unstableProviderDied(IContentProvider icp) {
             mMainThread.handleUnstableProviderDied(icp.asBinder(), true);
         }
-
-        private final ActivityThread mMainThread;
     }
 }

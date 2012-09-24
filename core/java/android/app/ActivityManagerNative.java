@@ -632,8 +632,9 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             IBinder b = data.readStrongBinder();
             IApplicationThread app = ApplicationThreadNative.asInterface(b);
             String name = data.readString();
+            int userId = data.readInt();
             boolean stable = data.readInt() != 0;
-            ContentProviderHolder cph = getContentProvider(app, name, stable);
+            ContentProviderHolder cph = getContentProvider(app, name, userId, stable);
             reply.writeNoException();
             if (cph != null) {
                 reply.writeInt(1);
@@ -647,8 +648,9 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         case GET_CONTENT_PROVIDER_EXTERNAL_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             String name = data.readString();
+            int userId = data.readInt();
             IBinder token = data.readStrongBinder();
-            ContentProviderHolder cph = getContentProviderExternal(name, token);
+            ContentProviderHolder cph = getContentProviderExternal(name, userId, token);
             reply.writeNoException();
             if (cph != null) {
                 reply.writeInt(1);
@@ -2495,12 +2497,13 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
     }
     public ContentProviderHolder getContentProvider(IApplicationThread caller,
-            String name, boolean stable) throws RemoteException {
+            String name, int userId, boolean stable) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(caller != null ? caller.asBinder() : null);
         data.writeString(name);
+        data.writeInt(userId);
         data.writeInt(stable ? 1 : 0);
         mRemote.transact(GET_CONTENT_PROVIDER_TRANSACTION, data, reply, 0);
         reply.readException();
@@ -2513,13 +2516,13 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
         return cph;
     }
-    public ContentProviderHolder getContentProviderExternal(String name, IBinder token)
-            throws RemoteException
-    {
+    public ContentProviderHolder getContentProviderExternal(String name, int userId, IBinder token)
+            throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeString(name);
+        data.writeInt(userId);
         data.writeStrongBinder(token);
         mRemote.transact(GET_CONTENT_PROVIDER_EXTERNAL_TRANSACTION, data, reply, 0);
         reply.readException();
