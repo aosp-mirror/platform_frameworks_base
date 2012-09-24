@@ -16500,6 +16500,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link #TEXT_DIRECTION_LTR},
      * {@link #TEXT_DIRECTION_RTL},
      * {@link #TEXT_DIRECTION_LOCALE}
+     *
+     * @hide
      */
     @ViewDebug.ExportedProperty(category = "text", mapping = {
             @ViewDebug.IntToString(from = TEXT_DIRECTION_INHERIT, to = "INHERIT"),
@@ -16509,7 +16511,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             @ViewDebug.IntToString(from = TEXT_DIRECTION_RTL, to = "RTL"),
             @ViewDebug.IntToString(from = TEXT_DIRECTION_LOCALE, to = "LOCALE")
     })
-    public int getTextDirection() {
+    public int getRawTextDirection() {
         return (mPrivateFlags2 & PFLAG2_TEXT_DIRECTION_MASK) >> PFLAG2_TEXT_DIRECTION_MASK_SHIFT;
     }
 
@@ -16526,7 +16528,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link #TEXT_DIRECTION_LOCALE}
      */
     public void setTextDirection(int textDirection) {
-        if (getTextDirection() != textDirection) {
+        if (getRawTextDirection() != textDirection) {
             // Reset the current text direction and the resolved one
             mPrivateFlags2 &= ~PFLAG2_TEXT_DIRECTION_MASK;
             resetResolvedTextDirection();
@@ -16543,10 +16545,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Return the resolved text direction.
      *
-     * This needs resolution if the value is TEXT_DIRECTION_INHERIT. The resolution matches
-     * {@link #getTextDirection()}if it is not TEXT_DIRECTION_INHERIT, otherwise resolution proceeds
-     * up the parent chain of the view. if there is no parent, then it will return the default
-     * {@link #TEXT_DIRECTION_FIRST_STRONG}.
+     * This needs resolution if the value is TEXT_DIRECTION_INHERIT. The resolution matches what has
+     * been set by {@link #setTextDirection(int)} if it is not TEXT_DIRECTION_INHERIT, otherwise the
+     * resolution proceeds up the parent chain of the view. If there is no parent, then it will
+     * return the default {@link #TEXT_DIRECTION_FIRST_STRONG}.
      *
      * @return the resolved text direction. Returns one of:
      *
@@ -16556,7 +16558,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link #TEXT_DIRECTION_RTL},
      * {@link #TEXT_DIRECTION_LOCALE}
      */
-    public int getResolvedTextDirection() {
+    public int getTextDirection() {
         // The text direction will be resolved only if needed
         if ((mPrivateFlags2 & PFLAG2_TEXT_DIRECTION_RESOLVED) != PFLAG2_TEXT_DIRECTION_RESOLVED) {
             resolveTextDirection();
@@ -16575,14 +16577,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         if (hasRtlSupport()) {
             // Set resolved text direction flag depending on text direction flag
-            final int textDirection = getTextDirection();
+            final int textDirection = getRawTextDirection();
             switch(textDirection) {
                 case TEXT_DIRECTION_INHERIT:
                     if (canResolveTextDirection()) {
                         ViewGroup viewGroup = ((ViewGroup) mParent);
 
                         // Set current resolved direction to the same value as the parent's one
-                        final int parentResolvedDirection = viewGroup.getResolvedTextDirection();
+                        final int parentResolvedDirection = viewGroup.getTextDirection();
                         switch (parentResolvedDirection) {
                             case TEXT_DIRECTION_FIRST_STRONG:
                             case TEXT_DIRECTION_ANY_RTL:
@@ -16628,7 +16630,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return true if text direction resolution can be done otherwise return false.
      */
     private boolean canResolveTextDirection() {
-        switch (getTextDirection()) {
+        switch (getRawTextDirection()) {
             case TEXT_DIRECTION_INHERIT:
                 return (mParent != null) && (mParent instanceof ViewGroup);
             default:
@@ -16638,12 +16640,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Reset resolved text direction. Text direction can be resolved with a call to
-     * getResolvedTextDirection().
+     * getTextDirection().
      *
      * @hide
      */
     public void resetResolvedTextDirection() {
         mPrivateFlags2 &= ~(PFLAG2_TEXT_DIRECTION_RESOLVED | PFLAG2_TEXT_DIRECTION_RESOLVED_MASK);
+    }
+
+    /**
+     * @hide
+     */
+    public boolean isTextDirectionInherited() {
+        return (getRawTextDirection() == TEXT_DIRECTION_INHERIT);
     }
 
     /**
