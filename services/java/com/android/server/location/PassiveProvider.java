@@ -114,6 +114,6 @@ public class PassiveProvider implements LocationProviderInterface {
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.println("mReportLocaiton=" + mReportLocation);
+        pw.println("mReportLocation=" + mReportLocation);
     }
 }

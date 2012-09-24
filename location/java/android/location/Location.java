@@ -59,6 +59,16 @@ public class Location implements Parcelable {
      */
     public static final int FORMAT_SECONDS = 2;
 
+    /**
+     * @hide
+     */
+    public static final String EXTRA_COARSE_LOCATION = "coarseLocation";
+
+    /**
+     * @hide
+     */
+    public static final String EXTRA_NO_GPS_LOCATION = "noGPSLocation";
+
     private String mProvider;
     private long mTime = 0;
     private long mElapsedRealtimeNano = 0;
@@ -892,5 +902,37 @@ public class Location implements Parcelable {
         parcel.writeInt(mHasAccuracy ? 1 : 0);
         parcel.writeFloat(mAccuracy);
         parcel.writeBundle(mExtras);
+    }
+
+    /**
+     * Returns one of the optional extra {@link Location}s that can be attached
+     * to this Location.
+     *
+     * @param key the key associated with the desired extra Location
+     * @return the extra Location, or null if unavailable
+     * @hide
+     */
+    public Location getExtraLocation(String key) {
+        if (mExtras != null) {
+            Parcelable value = mExtras.getParcelable(key);
+            if (value instanceof Location) {
+                return (Location) value;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Attaches an extra {@link Location} to this Location.
+     *
+     * @param key the key associated with the Location extra
+     * @param location the Location to attach
+     * @hide
+     */
+    public void setExtraLocation(String key, Location value) {
+        if (mExtras == null) {
+            mExtras = new Bundle();
+        }
+        mExtras.putParcelable(key, value);
     }
 }

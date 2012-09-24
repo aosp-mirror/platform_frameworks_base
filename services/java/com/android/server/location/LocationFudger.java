@@ -22,6 +22,7 @@ import java.security.SecureRandom;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
@@ -39,8 +40,6 @@ import android.util.Log;
 public class LocationFudger {
     private static final boolean D = false;
     private static final String TAG = "LocationFudge";
-
-    private static final String EXTRA_COARSE_LOCATION = "coarseLocation";
 
     /**
      * Default coarse accuracy in meters.
@@ -168,18 +167,10 @@ public class LocationFudger {
      */
     public Location getOrCreate(Location location) {
         synchronized (mLock) {
-            Bundle extras = location.getExtras();
-            if (extras == null) {
+            Location coarse = location.getExtraLocation(Location.EXTRA_COARSE_LOCATION);
+            if (coarse == null) {
                 return addCoarseLocationExtraLocked(location);
             }
-            Parcelable parcel = extras.getParcelable(EXTRA_COARSE_LOCATION);
-            if (parcel == null) {
-                return addCoarseLocationExtraLocked(location);
-            }
-            if (!(parcel instanceof Location)) {
-                return addCoarseLocationExtraLocked(location);
-            }
-            Location coarse = (Location) parcel;
             if (coarse.getAccuracy() < mAccuracyInMeters) {
                 return addCoarseLocationExtraLocked(location);
             }
@@ -188,11 +179,8 @@ public class LocationFudger {
     }
 
     private Location addCoarseLocationExtraLocked(Location location) {
-        Bundle extras = location.getExtras();
-        if (extras == null) extras = new Bundle();
         Location coarse = createCoarseLocked(location);
-        extras.putParcelable(EXTRA_COARSE_LOCATION, coarse);
-        location.setExtras(extras);
+        location.setExtraLocation(Location.EXTRA_COARSE_LOCATION, coarse);
         return coarse;
     }
 
