@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
@@ -27,6 +28,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -193,31 +195,44 @@ class AppWidgetService extends IAppWidgetService.Stub
         }, UserHandle.ALL, userFilter, null, null);
     }
 
+    private int getCallingOrCurrentUserId() {
+        int callingUid = Binder.getCallingUid();
+        if (callingUid == android.os.Process.myUid()) {
+            try {
+                return ActivityManagerNative.getDefault().getCurrentUser().id;
+            } catch (RemoteException re) {
+                return UserHandle.getUserId(callingUid);
+            }
+        } else {
+            return UserHandle.getUserId(callingUid);
+        }
+    }
+
     @Override
     public int allocateAppWidgetId(String packageName, int hostId) throws RemoteException {
-        return getImplForUser(UserHandle.getCallingUserId()).allocateAppWidgetId(
+        return getImplForUser(getCallingOrCurrentUserId()).allocateAppWidgetId(
                 packageName, hostId);
     }
     
     @Override
     public void deleteAppWidgetId(int appWidgetId) throws RemoteException {
-        getImplForUser(UserHandle.getCallingUserId()).deleteAppWidgetId(appWidgetId);
+        getImplForUser(getCallingOrCurrentUserId()).deleteAppWidgetId(appWidgetId);
     }
 
     @Override
     public void deleteHost(int hostId) throws RemoteException {
-        getImplForUser(UserHandle.getCallingUserId()).deleteHost(hostId);
+        getImplForUser(getCallingOrCurrentUserId()).deleteHost(hostId);
     }
 
     @Override
     public void deleteAllHosts() throws RemoteException {
-        getImplForUser(UserHandle.getCallingUserId()).deleteAllHosts();
+        getImplForUser(getCallingOrCurrentUserId()).deleteAllHosts();
     }
 
     @Override
     public void bindAppWidgetId(int appWidgetId, ComponentName provider, Bundle options)
             throws RemoteException {
-        getImplForUser(UserHandle.getCallingUserId()).bindAppWidgetId(appWidgetId, provider,
+        getImplForUser(getCallingOrCurrentUserId()).bindAppWidgetId(appWidgetId, provider,
                 options);
     }
 
@@ -225,34 +240,34 @@ class AppWidgetService extends IAppWidgetService.Stub
     public boolean bindAppWidgetIdIfAllowed(
             String packageName, int appWidgetId, ComponentName provider, Bundle options)
                     throws RemoteException {
-        return getImplForUser(UserHandle.getCallingUserId()).bindAppWidgetIdIfAllowed(
+        return getImplForUser(getCallingOrCurrentUserId()).bindAppWidgetIdIfAllowed(
                 packageName, appWidgetId, provider, options);
     }
 
     @Override
     public boolean hasBindAppWidgetPermission(String packageName) throws RemoteException {
-        return getImplForUser(UserHandle.getCallingUserId()).hasBindAppWidgetPermission(
+        return getImplForUser(getCallingOrCurrentUserId()).hasBindAppWidgetPermission(
                 packageName);
     }
 
     @Override
     public void setBindAppWidgetPermission(String packageName, boolean permission)
             throws RemoteException {
-        getImplForUser(UserHandle.getCallingUserId()).setBindAppWidgetPermission(
+        getImplForUser(getCallingOrCurrentUserId()).setBindAppWidgetPermission(
                 packageName, permission);
     }
 
     @Override
     public void bindRemoteViewsService(int appWidgetId, Intent intent, IBinder connection)
             throws RemoteException {
-        getImplForUser(UserHandle.getCallingUserId()).bindRemoteViewsService(
+        getImplForUser(getCallingOrCurrentUserId()).bindRemoteViewsService(
                 appWidgetId, intent, connection);
     }
 
     @Override
     public int[] startListening(IAppWidgetHost host, String packageName, int hostId,
             List<RemoteViews> updatedViews) throws RemoteException {
-        return getImplForUser(UserHandle.getCallingUserId()).startListening(host,
+        return getImplForUser(getCallingOrCurrentUserId()).startListening(host,
                 packageName, hostId, updatedViews);
     }
 
@@ -287,27 +302,27 @@ class AppWidgetService extends IAppWidgetService.Stub
 
     @Override
     public int[] getAppWidgetIds(ComponentName provider) throws RemoteException {
-        return getImplForUser(UserHandle.getCallingUserId()).getAppWidgetIds(provider);
+        return getImplForUser(getCallingOrCurrentUserId()).getAppWidgetIds(provider);
     }
 
     @Override
     public AppWidgetProviderInfo getAppWidgetInfo(int appWidgetId) throws RemoteException {
-        return getImplForUser(UserHandle.getCallingUserId()).getAppWidgetInfo(appWidgetId);
+        return getImplForUser(getCallingOrCurrentUserId()).getAppWidgetInfo(appWidgetId);
     }
 
     @Override
     public RemoteViews getAppWidgetViews(int appWidgetId) throws RemoteException {
-        return getImplForUser(UserHandle.getCallingUserId()).getAppWidgetViews(appWidgetId);
+        return getImplForUser(getCallingOrCurrentUserId()).getAppWidgetViews(appWidgetId);
     }
 
     @Override
     public void updateAppWidgetOptions(int appWidgetId, Bundle options) {
-        getImplForUser(UserHandle.getCallingUserId()).updateAppWidgetOptions(appWidgetId, options);
+        getImplForUser(getCallingOrCurrentUserId()).updateAppWidgetOptions(appWidgetId, options);
     }
 
     @Override
     public Bundle getAppWidgetOptions(int appWidgetId) {
-        return getImplForUser(UserHandle.getCallingUserId()).getAppWidgetOptions(appWidgetId);
+        return getImplForUser(getCallingOrCurrentUserId()).getAppWidgetOptions(appWidgetId);
     }
 
     static int[] getAppWidgetIds(Provider p) {
@@ -321,43 +336,43 @@ class AppWidgetService extends IAppWidgetService.Stub
 
     @Override
     public List<AppWidgetProviderInfo> getInstalledProviders() throws RemoteException {
-        return getImplForUser(UserHandle.getCallingUserId()).getInstalledProviders();
+        return getImplForUser(getCallingOrCurrentUserId()).getInstalledProviders();
     }
 
     @Override
     public void notifyAppWidgetViewDataChanged(int[] appWidgetIds, int viewId)
             throws RemoteException {
-        getImplForUser(UserHandle.getCallingUserId()).notifyAppWidgetViewDataChanged(
+        getImplForUser(getCallingOrCurrentUserId()).notifyAppWidgetViewDataChanged(
                 appWidgetIds, viewId);
     }
 
     @Override
     public void partiallyUpdateAppWidgetIds(int[] appWidgetIds, RemoteViews views)
             throws RemoteException {
-        getImplForUser(UserHandle.getCallingUserId()).partiallyUpdateAppWidgetIds(
+        getImplForUser(getCallingOrCurrentUserId()).partiallyUpdateAppWidgetIds(
                 appWidgetIds, views);
     }
 
     @Override
     public void stopListening(int hostId) throws RemoteException {
-        getImplForUser(UserHandle.getCallingUserId()).stopListening(hostId);
+        getImplForUser(getCallingOrCurrentUserId()).stopListening(hostId);
     }
 
     @Override
     public void unbindRemoteViewsService(int appWidgetId, Intent intent) throws RemoteException {
-        getImplForUser(UserHandle.getCallingUserId()).unbindRemoteViewsService(
+        getImplForUser(getCallingOrCurrentUserId()).unbindRemoteViewsService(
                 appWidgetId, intent);
     }
 
     @Override
     public void updateAppWidgetIds(int[] appWidgetIds, RemoteViews views) throws RemoteException {
-        getImplForUser(UserHandle.getCallingUserId()).updateAppWidgetIds(appWidgetIds, views);
+        getImplForUser(getCallingOrCurrentUserId()).updateAppWidgetIds(appWidgetIds, views);
     }
 
     @Override
     public void updateAppWidgetProvider(ComponentName provider, RemoteViews views)
             throws RemoteException {
-        getImplForUser(UserHandle.getCallingUserId()).updateAppWidgetProvider(provider, views);
+        getImplForUser(getCallingOrCurrentUserId()).updateAppWidgetProvider(provider, views);
     }
 
     @Override
