@@ -479,7 +479,7 @@ public class ProgressBar extends View {
         }
         mIndeterminateDrawable = d;
         if (mIndeterminateDrawable != null && canResolveLayoutDirection()) {
-            mIndeterminateDrawable.setLayoutDirection(getResolvedLayoutDirection());
+            mIndeterminateDrawable.setLayoutDirection(getLayoutDirection());
         }
         if (mIndeterminate) {
             mCurrentDrawable = d;
@@ -521,7 +521,7 @@ public class ProgressBar extends View {
         if (d != null) {
             d.setCallback(this);
             if (canResolveLayoutDirection()) {
-                d.setLayoutDirection(getResolvedLayoutDirection());
+                d.setLayoutDirection(getLayoutDirection());
             }
 
             // Make sure the ProgressBar is always tall enough
@@ -672,7 +672,7 @@ public class ProgressBar extends View {
             if (d instanceof LayerDrawable) {
                 progressDrawable = ((LayerDrawable) d).findDrawableByLayerId(id);
                 if (progressDrawable != null && canResolveLayoutDirection()) {
-                    progressDrawable.setLayoutDirection(getResolvedLayoutDirection());
+                    progressDrawable.setLayoutDirection(getLayoutDirection());
                 }
             }
 
