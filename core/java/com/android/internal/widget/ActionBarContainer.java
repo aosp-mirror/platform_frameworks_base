@@ -161,6 +161,9 @@ public class ActionBarContainer extends FrameLayout {
         }
     }
 
+    /**
+     * @hide
+     */
     @Override
     public void onResolveDrawables(int layoutDirection) {
         super.onResolveDrawables(layoutDirection);

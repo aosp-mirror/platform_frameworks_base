@@ -5799,13 +5799,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (getLayoutDirection() != layoutDirection) {
             // Reset the current layout direction and the resolved one
             mPrivateFlags2 &= ~PFLAG2_LAYOUT_DIRECTION_MASK;
-            resetResolvedLayoutDirection();
-            // Reset padding resolution
-            mPrivateFlags2 &= ~PFLAG2_PADDING_RESOLVED;
+            resetRtlProperties();
             // Set the new layout direction (filtered)
             mPrivateFlags2 |=
                     ((layoutDirection << PFLAG2_LAYOUT_DIRECTION_MASK_SHIFT) & PFLAG2_LAYOUT_DIRECTION_MASK);
             resolveRtlProperties();
+            // Notify changes
+            onRtlPropertiesChanged();
             // ... and ask for a layout pass
             requestLayout();
         }
@@ -11475,6 +11475,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         jumpDrawablesToCurrentState();
 
         resolveRtlProperties();
+        // Notify changes
+        onRtlPropertiesChanged();
 
         clearAccessibilityFocus();
         if (isFocused()) {
@@ -11487,15 +11489,26 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
+    /**
+     * Resolve all RTL related properties
+     */
     void resolveRtlProperties() {
         // Order is important here: LayoutDirection MUST be resolved first...
         resolveLayoutDirection();
         // ... then we can resolve the others properties depending on the resolved LayoutDirection.
-        resolvePadding();
-        resolveLayoutParams();
         resolveTextDirection();
         resolveTextAlignment();
+        resolvePadding();
+        resolveLayoutParams();
         resolveDrawables();
+    }
+
+    // Reset resolution of all RTL related properties
+    void resetRtlProperties() {
+        resetResolvedLayoutDirection();
+        resetResolvedTextDirection();
+        resetResolvedTextAlignment();
+        resetResolvedPadding();
     }
 
     /**
@@ -11525,9 +11538,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Called when any RTL property (layout direction or text direction or text alignment) has
+     * been changed.
+     *
+     * Subclasses need to override this method to take care of cached information that depends on the
+     * resolved layout direction, or to inform child views that inherit their layout direction.
+     *
+     * The default implementation does nothing.
+     */
+    public void onRtlPropertiesChanged() {
+    }
+
+    /**
      * Resolve and cache the layout direction. LTR is set initially. This is implicitly supposing
      * that the parent directionality can and will be resolved before its children.
-     * Will call {@link View#onResolvedLayoutDirectionChanged} when resolution is done.
+     *
+     * @hide
      */
     public void resolveLayoutDirection() {
         // Clear any previous layout direction resolution
@@ -11555,7 +11581,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     mPrivateFlags2 |= PFLAG2_LAYOUT_DIRECTION_RESOLVED_RTL;
                     break;
                 case LAYOUT_DIRECTION_LOCALE:
-                    if(isLayoutDirectionRtl(Locale.getDefault())) {
+                    if((LAYOUT_DIRECTION_RTL ==
+                            TextUtils.getLayoutDirectionFromLocale(Locale.getDefault()))) {
                         mPrivateFlags2 |= PFLAG2_LAYOUT_DIRECTION_RESOLVED_RTL;
                     }
                     break;
@@ -11566,19 +11593,38 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         // Set to resolved
         mPrivateFlags2 |= PFLAG2_LAYOUT_DIRECTION_RESOLVED;
-        onResolvedLayoutDirectionChanged();
     }
 
     /**
-     * Called when layout direction has been resolved.
+     * Check if layout direction resolution can be done.
      *
-     * The default implementation does nothing.
+     * @return true if layout direction resolution can be done otherwise return false.
+     *
+     * @hide
      */
-    public void onResolvedLayoutDirectionChanged() {
+    public boolean canResolveLayoutDirection() {
+        switch (getLayoutDirection()) {
+            case LAYOUT_DIRECTION_INHERIT:
+                return (mParent != null) && (mParent instanceof ViewGroup);
+            default:
+                return true;
+        }
+    }
+
+    /**
+     * Reset the resolved layout direction.
+     *
+     * @hide
+     */
+    public void resetResolvedLayoutDirection() {
+        // Reset the current resolved bits
+        mPrivateFlags2 &= ~PFLAG2_LAYOUT_DIRECTION_RESOLVED_MASK;
     }
 
     /**
      * Return if padding has been resolved
+     *
+     * @hide
      */
     boolean isPaddingResolved() {
         return (mPrivateFlags2 & PFLAG2_PADDING_RESOLVED) != 0;
@@ -11586,6 +11632,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Resolve padding depending on layout direction.
+     *
+     * @hide
      */
     public void resolvePadding() {
         final int targetSdkVersion = getContext().getApplicationInfo().targetSdkVersion;
@@ -11649,6 +11697,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Reset the resolved layout direction.
+     *
+     * @hide
+     */
+    public void resetResolvedPadding() {
+        mPrivateFlags2 &= ~PFLAG2_PADDING_RESOLVED;
+    }
+
+    /**
      * Resolve padding depending on the layout direction. Subclasses that care about
      * padding resolution should override this method. The default implementation does
      * nothing.
@@ -11659,53 +11716,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #LAYOUT_DIRECTION_RTL
      */
     public void onPaddingChanged(int layoutDirection) {
-    }
-
-    /**
-     * Check if layout direction resolution can be done.
-     *
-     * @return true if layout direction resolution can be done otherwise return false.
-     */
-    public boolean canResolveLayoutDirection() {
-        switch (getLayoutDirection()) {
-            case LAYOUT_DIRECTION_INHERIT:
-                return (mParent != null) && (mParent instanceof ViewGroup);
-            default:
-                return true;
-        }
-    }
-
-    /**
-     * Reset the resolved layout direction. Will call {@link View#onResolvedLayoutDirectionReset}
-     * when reset is done.
-     */
-    public void resetResolvedLayoutDirection() {
-        // Reset the current resolved bits
-        mPrivateFlags2 &= ~PFLAG2_LAYOUT_DIRECTION_RESOLVED_MASK;
-        onResolvedLayoutDirectionReset();
-        // Reset also the text direction
-        resetResolvedTextDirection();
-    }
-
-    /**
-     * Called during reset of resolved layout direction.
-     *
-     * Subclasses need to override this method to clear cached information that depends on the
-     * resolved layout direction, or to inform child views that inherit their layout direction.
-     *
-     * The default implementation does nothing.
-     */
-    public void onResolvedLayoutDirectionReset() {
-    }
-
-    /**
-     * Check if a Locale uses an RTL script.
-     *
-     * @param locale Locale to check
-     * @return true if the Locale uses an RTL script.
-     */
-    protected static boolean isLayoutDirectionRtl(Locale locale) {
-        return (LAYOUT_DIRECTION_RTL == TextUtils.getLayoutDirectionFromLocale(locale));
     }
 
     /**
@@ -11738,10 +11748,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         mCurrentAnimation = null;
 
-        resetResolvedLayoutDirection();
-        resetResolvedTextAlignment();
+        resetRtlProperties();
+        onRtlPropertiesChanged();
         resetAccessibilityStateChanged();
-        mPrivateFlags2 &= ~PFLAG2_PADDING_RESOLVED;
     }
 
     /**
@@ -14091,6 +14100,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * that the View directionality can and will be resolved before its Drawables.
      *
      * Will call {@link View#onResolveDrawables} when resolution is done.
+     *
+     * @hide
      */
     public void resolveDrawables() {
         if (mBackground != null) {
@@ -14108,6 +14119,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @see #LAYOUT_DIRECTION_LTR
      * @see #LAYOUT_DIRECTION_RTL
+     *
+     * @hide
      */
     public void onResolveDrawables(int layoutDirection) {
     }
@@ -14383,8 +14396,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
             background.setLayoutDirection(getResolvedLayoutDirection());
             if (background.getPadding(padding)) {
-                // Reset padding resolution
-                mPrivateFlags2 &= ~PFLAG2_PADDING_RESOLVED;
+                resetResolvedPadding();
                 switch (background.getLayoutDirection()) {
                     case LAYOUT_DIRECTION_RTL:
                         mUserPaddingLeftInitial = padding.right;
@@ -14485,8 +14497,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param bottom the bottom padding in pixels
      */
     public void setPadding(int left, int top, int right, int bottom) {
-        // Reset padding resolution
-        mPrivateFlags2 &= ~PFLAG2_PADDING_RESOLVED;
+        resetResolvedPadding();
 
         mUserPaddingStart = UNDEFINED_PADDING;
         mUserPaddingEnd = UNDEFINED_PADDING;
@@ -14575,8 +14586,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param bottom the bottom padding in pixels
      */
     public void setPaddingRelative(int start, int top, int end, int bottom) {
-        // Reset padding resolution
-        mPrivateFlags2 &= ~PFLAG2_PADDING_RESOLVED;
+        resetResolvedPadding();
 
         mUserPaddingStart = start;
         mUserPaddingEnd = end;
@@ -16536,6 +16546,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             resetResolvedTextDirection();
             // Set the new text direction
             mPrivateFlags2 |= ((textDirection << PFLAG2_TEXT_DIRECTION_MASK_SHIFT) & PFLAG2_TEXT_DIRECTION_MASK);
+            // Notify change
+            onRtlPropertiesChanged();
             // Refresh
             requestLayout();
             invalidate(true);
@@ -16567,8 +16579,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Resolve the text direction. Will call {@link View#onResolvedTextDirectionChanged} when
-     * resolution is done.
+     * Resolve the text direction.
+     *
+     * @hide
      */
     public void resolveTextDirection() {
         // Reset any previous text direction resolution
@@ -16621,16 +16634,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         // Set to resolved
         mPrivateFlags2 |= PFLAG2_TEXT_DIRECTION_RESOLVED;
-        onResolvedTextDirectionChanged();
-    }
-
-    /**
-     * Called when text direction has been resolved. Subclasses that care about text direction
-     * resolution should override this method.
-     *
-     * The default implementation does nothing.
-     */
-    public void onResolvedTextDirectionChanged() {
     }
 
     /**
@@ -16638,7 +16641,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @return true if text direction resolution can be done otherwise return false.
      */
-    public boolean canResolveTextDirection() {
+    private boolean canResolveTextDirection() {
         switch (getTextDirection()) {
             case TEXT_DIRECTION_INHERIT:
                 return (mParent != null) && (mParent instanceof ViewGroup);
@@ -16649,20 +16652,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Reset resolved text direction. Text direction can be resolved with a call to
-     * getResolvedTextDirection(). Will call {@link View#onResolvedTextDirectionReset} when
-     * reset is done.
+     * getResolvedTextDirection().
+     *
+     * @hide
      */
     public void resetResolvedTextDirection() {
         mPrivateFlags2 &= ~(PFLAG2_TEXT_DIRECTION_RESOLVED | PFLAG2_TEXT_DIRECTION_RESOLVED_MASK);
-        onResolvedTextDirectionReset();
-    }
-
-    /**
-     * Called when text direction is reset. Subclasses that care about text direction reset should
-     * override this method and do a reset of the text direction of their children. The default
-     * implementation does nothing.
-     */
-    public void onResolvedTextDirectionReset() {
     }
 
     /**
@@ -16714,6 +16709,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             resetResolvedTextAlignment();
             // Set the new text alignment
             mPrivateFlags2 |= ((textAlignment << PFLAG2_TEXT_ALIGNMENT_MASK_SHIFT) & PFLAG2_TEXT_ALIGNMENT_MASK);
+            // Notify change
+            onRtlPropertiesChanged();
             // Refresh
             requestLayout();
             invalidate(true);
@@ -16754,8 +16751,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Resolve the text alignment. Will call {@link View#onResolvedTextAlignmentChanged} when
-     * resolution is done.
+     * Resolve the text alignment.
+     *
+     * @hide
      */
     public void resolveTextAlignment() {
         // Reset any previous text alignment resolution
@@ -16767,7 +16765,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             switch (textAlignment) {
                 case TEXT_ALIGNMENT_INHERIT:
                     // Check if we can resolve the text alignment
-                    if (canResolveLayoutDirection() && mParent instanceof View) {
+                    if (canResolveTextAlignment() && mParent instanceof View) {
                         View view = (View) mParent;
 
                         final int parentResolvedTextAlignment = view.getResolvedTextAlignment();
@@ -16813,7 +16811,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         // Set the resolved
         mPrivateFlags2 |= PFLAG2_TEXT_ALIGNMENT_RESOLVED;
-        onResolvedTextAlignmentChanged();
     }
 
     /**
@@ -16821,7 +16818,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @return true if text alignment resolution can be done otherwise return false.
      */
-    public boolean canResolveTextAlignment() {
+    private boolean canResolveTextAlignment() {
         switch (getTextAlignment()) {
             case TEXT_DIRECTION_INHERIT:
                 return (mParent != null);
@@ -16831,31 +16828,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Called when text alignment has been resolved. Subclasses that care about text alignment
-     * resolution should override this method.
+     * Reset resolved text alignment.
      *
-     * The default implementation does nothing.
-     */
-    public void onResolvedTextAlignmentChanged() {
-    }
-
-    /**
-     * Reset resolved text alignment. Text alignment can be resolved with a call to
-     * getResolvedTextAlignment(). Will call {@link View#onResolvedTextAlignmentReset} when
-     * reset is done.
+     * @hide
      */
     public void resetResolvedTextAlignment() {
         // Reset any previous text alignment resolution
         mPrivateFlags2 &= ~(PFLAG2_TEXT_ALIGNMENT_RESOLVED | PFLAG2_TEXT_ALIGNMENT_RESOLVED_MASK);
-        onResolvedTextAlignmentReset();
-    }
-
-    /**
-     * Called when text alignment is reset. Subclasses that care about text alignment reset should
-     * override this method and do a reset of the text alignment of their children. The default
-     * implementation does nothing.
-     */
-    public void onResolvedTextAlignmentReset() {
     }
 
     /**

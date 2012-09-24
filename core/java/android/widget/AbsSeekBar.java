@@ -308,6 +308,9 @@ public abstract class AbsSeekBar extends ProgressBar {
         thumb.setBounds(left, topBound, left + thumbWidth, bottomBound);
     }
 
+    /**
+     * @hide
+     */
     @Override
     public void onResolveDrawables(int layoutDirection) {
         super.onResolveDrawables(layoutDirection);
