@@ -2623,10 +2623,13 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     public final int startActivities(IApplicationThread caller,
-            Intent[] intents, String[] resolvedTypes, IBinder resultTo, Bundle options) {
+            Intent[] intents, String[] resolvedTypes, IBinder resultTo, Bundle options,
+            int userId) {
         enforceNotIsolatedCaller("startActivities");
+        userId = handleIncomingUserLocked(Binder.getCallingPid(), Binder.getCallingUid(), userId,
+                false, true, "startActivity", null);
         int ret = mMainStack.startActivities(caller, -1, intents, resolvedTypes, resultTo,
-                options, UserHandle.getCallingUserId());
+                options, userId);
         return ret;
     }
 
@@ -12434,7 +12437,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 } else {
                     try {
                         ActivityInfo aInfo = AppGlobals.getPackageManager().getActivityInfo(
-                                destIntent.getComponent(), 0, UserHandle.getCallingUserId());
+                                destIntent.getComponent(), 0, srec.userId);
                         int res = mMainStack.startActivityLocked(srec.app.thread, destIntent,
                                 null, aInfo, parent.appToken, null,
                                 0, -1, parent.launchedFromUid, 0, null, true, null);

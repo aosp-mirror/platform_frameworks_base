@@ -23,6 +23,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
+import android.os.UserHandle;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -205,18 +206,26 @@ public class TaskStackBuilder {
 
     /**
      * Start the task stack constructed by this builder.
+     * @hide
+     */
+    public void startActivities(Bundle options, UserHandle userHandle) {
+        if (mIntents.isEmpty()) {
+            throw new IllegalStateException(
+                    "No intents added to TaskStackBuilder; cannot startActivities");
+        }
+
+        mSourceContext.startActivitiesAsUser(getIntents(), options, userHandle);
+    }
+
+    /**
+     * Start the task stack constructed by this builder.
      *
      * @param options Additional options for how the Activity should be started.
      * See {@link android.content.Context#startActivity(Intent, Bundle)
      * Context.startActivity(Intent, Bundle)} for more details.
      */
     public void startActivities(Bundle options) {
-        if (mIntents.isEmpty()) {
-            throw new IllegalStateException(
-                    "No intents added to TaskStackBuilder; cannot startActivities");
-        }
-
-        mSourceContext.startActivities(getIntents(), options);
+        startActivities(options, new UserHandle(UserHandle.myUserId()));
     }
 
     /**
