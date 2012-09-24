@@ -23,7 +23,7 @@ import android.util.Log;
 /**
  * CellIdentity is to represent a unique LTE cell
  */
-public final class CellIdentityLte extends CellIdentity implements Parcelable {
+public final class CellIdentityLte implements Parcelable {
 
     private static final String LOG_TAG = "CellIdentityLte";
     private static final boolean DBG = false;
@@ -69,7 +69,6 @@ public final class CellIdentityLte extends CellIdentity implements Parcelable {
     }
 
     private CellIdentityLte(CellIdentityLte cid) {
-        super(cid);
         mMcc = cid.mMcc;
         mMnc = cid.mMnc;
         mCi = cid.mCi;
@@ -77,7 +76,6 @@ public final class CellIdentityLte extends CellIdentity implements Parcelable {
         mTac = cid.mTac;
     }
 
-    @Override
     CellIdentityLte copy() {
         return new CellIdentityLte(this);
     }
@@ -165,8 +163,6 @@ public final class CellIdentityLte extends CellIdentity implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         if (DBG) log("writeToParcel(Parcel, int): " + toString());
-        dest.writeInt(TYPE_LTE);
-        super.writeToParcel(dest, flags);
         dest.writeInt(mMcc);
         dest.writeInt(mMnc);
         dest.writeInt(mCi);
@@ -176,7 +172,6 @@ public final class CellIdentityLte extends CellIdentity implements Parcelable {
 
     /** Construct from Parcel, type has already been processed */
     private CellIdentityLte(Parcel in) {
-        super(in);
         mMcc = in.readInt();
         mMnc = in.readInt();
         mCi = in.readInt();
@@ -191,8 +186,7 @@ public final class CellIdentityLte extends CellIdentity implements Parcelable {
             new Creator<CellIdentityLte>() {
         @Override
         public CellIdentityLte createFromParcel(Parcel in) {
-            in.readInt(); // Skip past token, we know what it is
-            return createFromParcelBody(in);
+            return new CellIdentityLte(in);
         }
 
         @Override
@@ -200,11 +194,6 @@ public final class CellIdentityLte extends CellIdentity implements Parcelable {
             return new CellIdentityLte[size];
         }
     };
-
-    /** @hide */
-    static CellIdentityLte createFromParcelBody(Parcel in) {
-        return new CellIdentityLte(in);
-    }
 
     /**
      * log

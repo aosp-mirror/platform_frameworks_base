@@ -23,7 +23,7 @@ import android.util.Log;
 /**
  * LTE signal strength related information.
  */
-public class CellSignalStrengthCdma extends CellSignalStrength implements Parcelable {
+public final class CellSignalStrengthCdma extends CellSignalStrength implements Parcelable {
 
     private static final String LOG_TAG = "CellSignalStrengthCdma";
     private static final boolean DBG = false;
@@ -331,7 +331,6 @@ public class CellSignalStrengthCdma extends CellSignalStrength implements Parcel
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         if (DBG) log("writeToParcel(Parcel, int): " + toString());
-        dest.writeInt(CellSignalStrength.TYPE_CDMA);
         dest.writeInt(mCdmaDbm);
         dest.writeInt(mCdmaEcio);
         dest.writeInt(mEvdoDbm);
@@ -364,10 +363,7 @@ public class CellSignalStrengthCdma extends CellSignalStrength implements Parcel
             new Parcelable.Creator<CellSignalStrengthCdma>() {
         @Override
         public CellSignalStrengthCdma createFromParcel(Parcel in) {
-            if (in.readInt() != CellSignalStrength.TYPE_CDMA) {
-                throw new RuntimeException("Expecting TYPE_CDMA");
-            }
-            return createFromParcelBody(in);
+            return new CellSignalStrengthCdma(in);
         }
 
         @Override
@@ -375,11 +371,6 @@ public class CellSignalStrengthCdma extends CellSignalStrength implements Parcel
             return new CellSignalStrengthCdma[size];
         }
     };
-
-    /** @hide */
-    public static CellSignalStrengthCdma createFromParcelBody(Parcel in) {
-        return new CellSignalStrengthCdma(in);
-    }
 
     /**
      * log
