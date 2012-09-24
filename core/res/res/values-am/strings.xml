@@ -623,8 +623,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"የተከማቸ ትግበራ ውሂብ የተመሰጠረ እንዲሆን ጠይቅ።"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"ካሜራዎችን አቦዝን"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"የሁሉንም መሣሪያ ካሜራዎች መጠቀም ከልክል።"</string>
-    <string name="policylab_disableKeyguardWidgets" msgid="1794894613389073926">"መግብሮችን በቁልፍ ጠባቂ ላይ አሰናክል"</string>
-    <string name="policydesc_disableKeyguardWidgets" msgid="7254624892984033592">"በቁልፍ ጠባቂ ላይ የአንዳንድ ወይም የሁሉም መግብሮች መጠቀምን ይከለክላል።"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"በቁልፍ ጠባቂ ውስጥ ባህሪያትን ያሰናክሉ"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"በቁልፍ ጠባቂ ውስጥ የአንዳንድ ባህሪያትን መጠቀም ያግዱ።"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"መነሻ"</item>
     <item msgid="869923650527136615">"ተንቀሳቃሽ"</item>
@@ -1072,8 +1072,7 @@
     <item quantity="other" msgid="7915895323644292768">"አውታረ መረቦች ሲኖሩ Wi-Fi ክፈት"</item>
   </plurals>
     <string name="wifi_available_sign_in" msgid="4029489716605255386">"ወደ Wi-Fi አውታረ መረብ በመለያ ግባ"</string>
-    <!-- no translation found for network_available_sign_in (8495155593358054676) -->
-    <skip />
+    <string name="network_available_sign_in" msgid="8495155593358054676">"ወደ አውታረ መረብ ይግቡ"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"ወደ Wi-Fi ለማያያዝ አልተቻለም"</string>
@@ -1091,8 +1090,7 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"ለ፦"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"የሚፈለገውን ፒን ተይብ፦"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"ፒን፦"</string>
-    <!-- no translation found for wifi_p2p_frequency_conflict_message (7363907213787469151) -->
-    <skip />
+    <string name="wifi_p2p_frequency_conflict_message" msgid="7363907213787469151">"ስልኩ ከ<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ጋር ተገናኝቶ ባለበት ጊዜ በጊዜያዊነት ከWi-Fi ጋር ይላቀቃል"</string>
     <string name="select_character" msgid="3365550120617701745">"ቁምፊ አስገባ"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"የSMS መልዕክቶች መበላክ ላይ"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ቁጥራቸው ብዙ የሆኑ የኤስ.ኤም.ኤስ. መልዕክቶችን እየላከ ነው። ይሄ መተግበሪያ መልዕክቶችን መላኩን እንዲቀጥል መፍቀድ ትፈልጋለህ?"</string>
@@ -1260,6 +1258,8 @@
     <string name="share" msgid="1778686618230011964">"አጋራ"</string>
     <string name="find" msgid="4808270900322985960">"አግኝ"</string>
     <string name="websearch" msgid="4337157977400211589">"ድረ ፍለጋ"</string>
+    <string name="find_next" msgid="5742124618942193978">"ቀጣዩን አግኝ"</string>
+    <string name="find_previous" msgid="2196723669388360506">"ቀዳሚውን አግኝ"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"የስፍራ ጥየቃ ቅፅ<xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="gpsNotifTitle" msgid="5446858717157416839">"የስፍራ ጥየቃ"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">" በ፡<xliff:g id="NAME">%1$s</xliff:g>(<xliff:g id="SERVICE">%2$s</xliff:g>) ተጠየቀ"</string>

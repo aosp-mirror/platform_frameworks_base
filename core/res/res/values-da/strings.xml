@@ -623,8 +623,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Kræver, at gemte appdata krypteres."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Deaktiver kameraer"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Bloker brug af alle kameraer på enheden."</string>
-    <string name="policylab_disableKeyguardWidgets" msgid="1794894613389073926">"Deaktiver widgets på tastaturlåsen"</string>
-    <string name="policydesc_disableKeyguardWidgets" msgid="7254624892984033592">"Undgå brug af nogle eller alle widgets på tastaturlåsen."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Deaktiver tastaturlåsfunktioner"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Forbyd brugen af ​​visse tastaturlåsfunktioner."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Hjem"</item>
     <item msgid="869923650527136615">"Mobil"</item>
@@ -1260,6 +1260,8 @@
     <string name="share" msgid="1778686618230011964">"Del"</string>
     <string name="find" msgid="4808270900322985960">"Find"</string>
     <string name="websearch" msgid="4337157977400211589">"Websøgning"</string>
+    <string name="find_next" msgid="5742124618942193978">"Find næste"</string>
+    <string name="find_previous" msgid="2196723669388360506">"Find forrige"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"Placeringsanmodning fra <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="gpsNotifTitle" msgid="5446858717157416839">"Placeringsanmodning"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"Anmodet om af <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>

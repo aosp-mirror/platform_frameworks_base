@@ -541,8 +541,8 @@
     <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"Permet que l\'aplicació pugui canviar la configuració de xarxa i interceptar i inspeccionar tot el trànsit de la xarxa, per exemple, canviar el servidor intermediari i el port de qualsevol APN. Les aplicacions malicioses poden controlar, redireccionar o modificar paquets de la xarxa sense el teu coneixement."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"canviar la connectivitat de xarxa"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Permet que l\'aplicació pugui canviar l\'estat de connectivitat de la xarxa."</string>
-    <string name="permlab_changeTetherState" msgid="5952584964373017960">"Canvia la connectivitat de connexió compartida"</string>
-    <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Permet a l\'aplicació canviar l\'estat de la connectivitat de les xarxes compartides."</string>
+    <string name="permlab_changeTetherState" msgid="5952584964373017960">"Canvia la connectivitat d\'ancoratge a xarxa"</string>
+    <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Permet que l\'aplicació canviï l\'estat de la connectivitat de la xarxa d\'ancoratge."</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"canviar la configuració d\'ús de dades de referència"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Permet que l\'aplicació canviï la configuració d\'ús de les dades de fons."</string>
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"visualització de les connexions Wi-Fi"</string>
@@ -623,8 +623,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Requereix que les dades de l\'aplicació emmagatzemades estiguin encriptades."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Desactiva les càmeres"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Impedeix l\'ús de totes les càmeres del dispositiu."</string>
-    <string name="policylab_disableKeyguardWidgets" msgid="1794894613389073926">"Desactivació dels widgets bloquejats"</string>
-    <string name="policydesc_disableKeyguardWidgets" msgid="7254624892984033592">"Impedeix l\'ús de part o de la totalitat dels widgets bloquejats."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Des. funcions en bloq. tecles"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Impedeix l\'ús d\'algunes funcions en bloqueig de tecles."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Casa"</item>
     <item msgid="869923650527136615">"Mòbil"</item>
@@ -1228,7 +1228,7 @@
     <string name="submit" msgid="1602335572089911941">"Envia"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Mode de cotxe activat"</string>
     <string name="car_mode_disable_notification_message" msgid="8035230537563503262">"Toca per sortir del mode de cotxe."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"Ancoratge a la xarxa o punt de connexió actiu"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Ancoratge a la xarxa o zona Wi-Fi activat"</string>
     <string name="tethered_notification_message" msgid="6857031760103062982">"Toca per configurar."</string>
     <string name="back_button_label" msgid="2300470004503343439">"Enrere"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Següent"</string>
@@ -1260,6 +1260,8 @@
     <string name="share" msgid="1778686618230011964">"Comparteix"</string>
     <string name="find" msgid="4808270900322985960">"Cerca"</string>
     <string name="websearch" msgid="4337157977400211589">"Cerca al web"</string>
+    <string name="find_next" msgid="5742124618942193978">"Cerca el següent"</string>
+    <string name="find_previous" msgid="2196723669388360506">"Cerca l\'anterior"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"Sol·licitud d\'ubicació de <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="gpsNotifTitle" msgid="5446858717157416839">"Sol·licitud d\'ubicació"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"Sol·licitat per <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
