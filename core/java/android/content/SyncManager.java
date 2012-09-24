@@ -16,10 +16,6 @@
 
 package android.content;
 
-import com.android.internal.R;
-import com.google.android.collect.Lists;
-import com.google.android.collect.Maps;
-
 import android.accounts.Account;
 import android.accounts.AccountAndUser;
 import android.accounts.AccountManager;
@@ -27,7 +23,6 @@ import android.accounts.AccountManagerService;
 import android.accounts.OnAccountsUpdateListener;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
-import android.app.AppGlobals;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -62,6 +57,11 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.Pair;
 
+import com.android.internal.R;
+import com.google.android.collect.Lists;
+import com.google.android.collect.Maps;
+import com.google.android.collect.Sets;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -75,6 +75,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -151,7 +152,7 @@ public class SyncManager implements OnAccountsUpdateListener {
     private AlarmManager mAlarmService = null;
 
     private SyncStorageEngine mSyncStorageEngine;
-    public SyncQueue mSyncQueue;
+    final public SyncQueue mSyncQueue;
 
     protected final ArrayList<ActiveSyncContext> mActiveSyncContexts = Lists.newArrayList();
 
@@ -328,7 +329,21 @@ public class SyncManager implements OnAccountsUpdateListener {
     private BroadcastReceiver mUserIntentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            onUserRemoved(intent);
+            String action = intent.getAction();
+            final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+            if (Intent.ACTION_USER_REMOVED.equals(action)) {
+                Log.i(TAG, "User removed - cleanup: u" + userId);
+                onUserRemoved(intent);
+            } else if (Intent.ACTION_USER_STARTED.equals(action)) {
+                Log.i(TAG, "User started - check alarms: u" + userId);
+                sendCheckAlarmsMessage();
+            } else if (Intent.ACTION_USER_STOPPED.equals(action)) {
+                Log.i(TAG, "User stopped - stop syncs: u" + userId);
+                cancelActiveSync(
+                        null /* any account */,
+                        userId,
+                        null /* any authority */);
+            }
         }
     };
 
@@ -401,7 +416,9 @@ public class SyncManager implements OnAccountsUpdateListener {
 
         intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_USER_REMOVED);
-        mContext.registerReceiver(mUserIntentReceiver, intentFilter);
+        intentFilter.addAction(Intent.ACTION_USER_STARTED);
+        mContext.registerReceiverAsUser(
+                mUserIntentReceiver, UserHandle.ALL, intentFilter, null, null);
 
         if (!factoryTest) {
             mNotificationMgr = (NotificationManager)
@@ -897,7 +914,10 @@ public class SyncManager implements OnAccountsUpdateListener {
     private void onUserRemoved(Intent intent) {
         int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
         if (userId == -1) return;
+        removeUser(userId);
+    }
 
+    private void removeUser(int userId) {
         // Clean up the storage engine database
         mSyncStorageEngine.doDatabaseCleanup(new Account[0], userId);
         onAccountsUpdated(null);
@@ -1267,7 +1287,8 @@ public class SyncManager implements OnAccountsUpdateListener {
                 final String accountKey;
                 if (authority != null) {
                     authorityName = authority.authority;
-                    accountKey = authority.account.name + "/" + authority.account.type;
+                    accountKey = authority.account.name + "/" + authority.account.type
+                            + " u" + authority.userId;
                 } else {
                     authorityName = "Unknown";
                     accountKey = "Unknown";
@@ -1394,7 +1415,8 @@ public class SyncManager implements OnAccountsUpdateListener {
                 final String accountKey;
                 if (authority != null) {
                     authorityName = authority.authority;
-                    accountKey = authority.account.name + "/" + authority.account.type;
+                    accountKey = authority.account.name + "/" + authority.account.type
+                            + " u" + authority.userId;
                 } else {
                     authorityName = "Unknown";
                     accountKey = "Unknown";
@@ -1924,6 +1946,10 @@ public class SyncManager implements OnAccountsUpdateListener {
                 }
                 Iterator<SyncOperation> operationIterator =
                         mSyncQueue.mOperationsMap.values().iterator();
+
+                final ActivityManager activityManager
+                        = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
+                final Set<Integer> removedUsers = Sets.newHashSet();
                 while (operationIterator.hasNext()) {
                     final SyncOperation op = operationIterator.next();
 
@@ -1940,6 +1966,15 @@ public class SyncManager implements OnAccountsUpdateListener {
                     if (syncableState == 0) {
                         operationIterator.remove();
                         mSyncStorageEngine.deleteFromPending(op.pendingOperation);
+                        continue;
+                    }
+
+                    // if the user in not running, drop the request
+                    if (!activityManager.isUserRunning(op.userId)) {
+                        final UserInfo userInfo = mUserManager.getUserInfo(op.userId);
+                        if (userInfo == null) {
+                            removedUsers.add(op.userId);
+                        }
                         continue;
                     }
 
@@ -1982,6 +2017,12 @@ public class SyncManager implements OnAccountsUpdateListener {
                     }
 
                     operations.add(op);
+                }
+                for (Integer user : removedUsers) {
+                    // if it's still removed
+                    if (mUserManager.getUserInfo(user) == null) {
+                        removeUser(user);
+                    }
                 }
             }
 
@@ -2168,13 +2209,13 @@ public class SyncManager implements OnAccountsUpdateListener {
                     new ArrayList<ActiveSyncContext>(mActiveSyncContexts);
             for (ActiveSyncContext activeSyncContext : activeSyncs) {
                 if (activeSyncContext != null) {
-                    // if an authority was specified then only cancel the sync if it matches
+                    // if an account was specified then only cancel the sync if it matches
                     if (account != null) {
                         if (!account.equals(activeSyncContext.mSyncOperation.account)) {
                             continue;
                         }
                     }
-                    // if an account was specified then only cancel the sync if it matches
+                    // if an authority was specified then only cancel the sync if it matches
                     if (authority != null) {
                         if (!authority.equals(activeSyncContext.mSyncOperation.authority)) {
                             continue;
