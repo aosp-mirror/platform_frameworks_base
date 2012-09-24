@@ -4597,8 +4597,16 @@ public final class ActivityManagerService extends ActivityManagerNative
         
         synchronized(this) {
             int callingUid = Binder.getCallingUid();
+            int origUserId = userId;
             userId = handleIncomingUserLocked(Binder.getCallingPid(), callingUid, userId,
-                    false, true, "getIntentSender", null);
+                    type == ActivityManager.INTENT_SENDER_BROADCAST, true,
+                    "getIntentSender", null);
+            if (origUserId == UserHandle.USER_CURRENT) {
+                // We don't want to evaluate this until the pending intent is
+                // actually executed.  However, we do want to always do the
+                // security checking for it above.
+                userId = UserHandle.USER_CURRENT;
+            }
             try {
                 if (callingUid != 0 && callingUid != Process.SYSTEM_UID) {
                     int uid = AppGlobals.getPackageManager()
@@ -14303,6 +14311,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized (this) {
             return getUserManagerLocked().getUserInfo(mCurrentUserId);
         }
+    }
+
+    int getCurrentUserIdLocked() {
+        return mCurrentUserId;
     }
 
     @Override

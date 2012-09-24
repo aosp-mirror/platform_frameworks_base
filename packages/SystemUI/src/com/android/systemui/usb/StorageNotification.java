@@ -25,6 +25,7 @@ import android.content.res.Resources;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.UserHandle;
 import android.os.storage.StorageEventListener;
 import android.os.storage.StorageManager;
 import android.provider.Settings;
@@ -311,7 +312,8 @@ public class StorageNotification extends StorageEventListener {
             mUsbStorageNotification.tickerText = title;
             if (pi == null) {
                 Intent intent = new Intent();
-                pi = PendingIntent.getBroadcast(mContext, 0, intent, 0);
+                pi = PendingIntent.getBroadcastAsUser(mContext, 0, intent, 0,
+                        UserHandle.CURRENT);
             }
 
             mUsbStorageNotification.setLatestEventInfo(mContext, title, message, pi);
@@ -336,9 +338,10 @@ public class StorageNotification extends StorageEventListener {
     
         final int notificationId = mUsbStorageNotification.icon;
         if (visible) {
-            notificationManager.notify(notificationId, mUsbStorageNotification);
+            notificationManager.notifyAsUser(null, notificationId, mUsbStorageNotification,
+                    UserHandle.ALL);
         } else {
-            notificationManager.cancel(notificationId);
+            notificationManager.cancelAsUser(null, notificationId, UserHandle.ALL);
         }
     }
 
@@ -398,7 +401,8 @@ public class StorageNotification extends StorageEventListener {
             mMediaStorageNotification.tickerText = title;
             if (pi == null) {
                 Intent intent = new Intent();
-                pi = PendingIntent.getBroadcast(mContext, 0, intent, 0);
+                pi = PendingIntent.getBroadcastAsUser(mContext, 0, intent, 0,
+                        UserHandle.CURRENT);
             }
 
             mMediaStorageNotification.icon = icon;
@@ -407,9 +411,10 @@ public class StorageNotification extends StorageEventListener {
     
         final int notificationId = mMediaStorageNotification.icon;
         if (visible) {
-            notificationManager.notify(notificationId, mMediaStorageNotification);
+            notificationManager.notifyAsUser(null, notificationId,
+                    mMediaStorageNotification, UserHandle.ALL);
         } else {
-            notificationManager.cancel(notificationId);
+            notificationManager.cancelAsUser(null, notificationId, UserHandle.ALL);
         }
     }
 }

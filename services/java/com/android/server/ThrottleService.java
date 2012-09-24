@@ -670,7 +670,8 @@ public class ThrottleService extends IThrottleManager.Stub {
             intent.setClassName("com.android.phone", "com.android.phone.DataUsage");
             intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
 
-            PendingIntent pi = PendingIntent.getActivity(mContext, 0, intent, 0);
+            PendingIntent pi = PendingIntent.getActivityAsUser(mContext, 0, intent, 0,
+                    null, UserHandle.CURRENT);
 
             Resources r = Resources.getSystem();
             CharSequence title = r.getText(titleInt);
@@ -686,7 +687,8 @@ public class ThrottleService extends IThrottleManager.Stub {
             mThrottlingNotification.tickerText = title;
             mThrottlingNotification.setLatestEventInfo(mContext, title, message, pi);
 
-            mNotificationManager.notify(mThrottlingNotification.icon, mThrottlingNotification);
+            mNotificationManager.notifyAsUser(null, mThrottlingNotification.icon,
+                    mThrottlingNotification, UserHandle.ALL);
         }
 
 
@@ -701,7 +703,8 @@ public class ThrottleService extends IThrottleManager.Stub {
                 Intent broadcast = new Intent(ThrottleManager.THROTTLE_ACTION);
                 broadcast.putExtra(ThrottleManager.EXTRA_THROTTLE_LEVEL, -1);
                 mContext.sendStickyBroadcastAsUser(broadcast, UserHandle.ALL);
-                mNotificationManager.cancel(R.drawable.stat_sys_throttled);
+                mNotificationManager.cancelAsUser(null, R.drawable.stat_sys_throttled,
+                        UserHandle.ALL);
                 mWarningNotificationSent = false;
             }
         }

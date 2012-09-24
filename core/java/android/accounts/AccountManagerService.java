@@ -647,16 +647,17 @@ public class AccountManagerService
         if (response == null) throw new IllegalArgumentException("response is null");
         if (account == null) throw new IllegalArgumentException("account is null");
         checkManageAccountsPermission();
+        UserHandle user = Binder.getCallingUserHandle();
         UserAccounts accounts = getUserAccountsForCaller();
         long identityToken = clearCallingIdentity();
 
-        cancelNotification(getSigninRequiredNotificationId(accounts, account));
+        cancelNotification(getSigninRequiredNotificationId(accounts, account), user);
         synchronized(accounts.credentialsPermissionNotificationIds) {
             for (Pair<Pair<Account, String>, Integer> pair:
                 accounts.credentialsPermissionNotificationIds.keySet()) {
                 if (account.equals(pair.first.first)) {
                     int id = accounts.credentialsPermissionNotificationIds.get(pair);
-                    cancelNotification(id);
+                    cancelNotification(id, user);
                 }
             }
         }
@@ -789,7 +790,8 @@ public class AccountManagerService
         if (account == null || type == null) {
             return false;
         }
-        cancelNotification(getSigninRequiredNotificationId(accounts, account));
+        cancelNotification(getSigninRequiredNotificationId(accounts, account),
+                new UserHandle(accounts.userId));
         synchronized (accounts.cacheLock) {
             final SQLiteDatabase db = accounts.openHelper.getWritableDatabase();
             db.beginTransaction();
@@ -1173,11 +1175,12 @@ public class AccountManagerService
             title = titleAndSubtitle.substring(0, index);
             subtitle = titleAndSubtitle.substring(index + 1);            
         }
+        UserHandle user = new UserHandle(userId);
         n.setLatestEventInfo(mContext, title, subtitle,
                 PendingIntent.getActivityAsUser(mContext, 0, intent,
-                        PendingIntent.FLAG_CANCEL_CURRENT,
-                        null, new UserHandle(userId)));
-        installNotification(getCredentialPermissionNotificationId(account, authTokenType, uid), n);
+                        PendingIntent.FLAG_CANCEL_CURRENT, null, user));
+        installNotification(getCredentialPermissionNotificationId(
+                account, authTokenType, uid), n, user);
     }
 
     String getAccountLabel(String accountType) {
@@ -1763,7 +1766,8 @@ public class AccountManagerService
                 String accountType = result.getString(AccountManager.KEY_ACCOUNT_TYPE);
                 if (!TextUtils.isEmpty(accountName) && !TextUtils.isEmpty(accountType)) {
                     Account account = new Account(accountName, accountType);
-                    cancelNotification(getSigninRequiredNotificationId(mAccounts, account));
+                    cancelNotification(getSigninRequiredNotificationId(mAccounts, account),
+                            new UserHandle(mAccounts.userId));
                 }
             }
             IAccountManagerResponse response;
@@ -2101,30 +2105,32 @@ public class AccountManagerService
                 intent.addCategory(String.valueOf(notificationId));
                 Notification n = new Notification(android.R.drawable.stat_sys_warning, null,
                         0 /* when */);
+                UserHandle user = new UserHandle(userId);
                 final String notificationTitleFormat =
                         mContext.getText(R.string.notification_title).toString();
                 n.setLatestEventInfo(mContext,
                         String.format(notificationTitleFormat, account.name),
                         message, PendingIntent.getActivityAsUser(
                         mContext, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT,
-                        null, new UserHandle(userId)));
-                installNotification(notificationId, n);
+                        null, user));
+                installNotification(notificationId, n, user);
             }
         } finally {
             restoreCallingIdentity(identityToken);
         }
     }
 
-    protected void installNotification(final int notificationId, final Notification n) {
+    protected void installNotification(final int notificationId, final Notification n,
+            UserHandle user) {
         ((NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE))
-                .notify(notificationId, n);
+                .notifyAsUser(null, notificationId, n, user);
     }
 
-    protected void cancelNotification(int id) {
+    protected void cancelNotification(int id, UserHandle user) {
         long identityToken = clearCallingIdentity();
         try {
             ((NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE))
-                .cancel(id);
+                .cancelAsUser(null, id, user);
         } finally {
             restoreCallingIdentity(identityToken);
         }
@@ -2289,7 +2295,8 @@ public class AccountManagerService
             } finally {
                 db.endTransaction();
             }
-            cancelNotification(getCredentialPermissionNotificationId(account, authTokenType, uid));
+            cancelNotification(getCredentialPermissionNotificationId(account, authTokenType, uid),
+                    new UserHandle(accounts.userId));
         }
     }
 
@@ -2323,7 +2330,8 @@ public class AccountManagerService
             } finally {
                 db.endTransaction();
             }
-            cancelNotification(getCredentialPermissionNotificationId(account, authTokenType, uid));
+            cancelNotification(getCredentialPermissionNotificationId(account, authTokenType, uid),
+                    new UserHandle(accounts.userId));
         }
     }
 

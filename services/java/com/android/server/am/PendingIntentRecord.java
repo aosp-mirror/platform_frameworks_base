@@ -25,6 +25,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.Slog;
 
 import java.io.PrintWriter;
@@ -220,6 +221,10 @@ class PendingIntentRecord extends IIntentSender.Stub {
                 final long origId = Binder.clearCallingIdentity();
                 
                 boolean sendFinish = finishedReceiver != null;
+                int userId = key.userId;
+                if (userId == UserHandle.USER_CURRENT) {
+                    userId = owner.getCurrentUserIdLocked();
+                }
                 switch (key.type) {
                     case ActivityManager.INTENT_SENDER_ACTIVITY:
                         if (options == null) {
@@ -242,10 +247,10 @@ class PendingIntentRecord extends IIntentSender.Stub {
                                 allIntents[allIntents.length-1] = finalIntent;
                                 allResolvedTypes[allResolvedTypes.length-1] = resolvedType;
                                 owner.startActivitiesInPackage(uid, allIntents,
-                                        allResolvedTypes, resultTo, options, key.userId);
+                                        allResolvedTypes, resultTo, options, userId);
                             } else {
                                 owner.startActivityInPackage(uid, finalIntent, resolvedType,
-                                        resultTo, resultWho, requestCode, 0, options, key.userId);
+                                        resultTo, resultWho, requestCode, 0, options, userId);
                             }
                         } catch (RuntimeException e) {
                             Slog.w(ActivityManagerService.TAG,
@@ -263,7 +268,7 @@ class PendingIntentRecord extends IIntentSender.Stub {
                             owner.broadcastIntentInPackage(key.packageName, uid,
                                     finalIntent, resolvedType,
                                     finishedReceiver, code, null, null,
-                                requiredPermission, (finishedReceiver != null), false, key.userId);
+                                requiredPermission, (finishedReceiver != null), false, userId);
                             sendFinish = false;
                         } catch (RuntimeException e) {
                             Slog.w(ActivityManagerService.TAG,
@@ -273,7 +278,7 @@ class PendingIntentRecord extends IIntentSender.Stub {
                     case ActivityManager.INTENT_SENDER_SERVICE:
                         try {
                             owner.startServiceInPackage(uid,
-                                    finalIntent, resolvedType, key.userId);
+                                    finalIntent, resolvedType, userId);
                         } catch (RuntimeException e) {
                             Slog.w(ActivityManagerService.TAG,
                                     "Unable to send startService intent", e);
