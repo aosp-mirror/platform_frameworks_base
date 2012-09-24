@@ -23,7 +23,7 @@ import android.util.Log;
 /**
  * CellIdentity to represent a unique GSM or UMTS cell
  */
-public final class CellIdentityGsm extends CellIdentity implements Parcelable {
+public final class CellIdentityGsm implements Parcelable {
 
     private static final String LOG_TAG = "CellIdentityGsm";
     private static final boolean DBG = false;
@@ -69,7 +69,6 @@ public final class CellIdentityGsm extends CellIdentity implements Parcelable {
     }
 
     private CellIdentityGsm(CellIdentityGsm cid) {
-        super(cid);
         mMcc = cid.mMcc;
         mMnc = cid.mMnc;
         mLac = cid.mLac;
@@ -77,7 +76,6 @@ public final class CellIdentityGsm extends CellIdentity implements Parcelable {
         mPsc = cid.mPsc;
     }
 
-    @Override
     CellIdentityGsm copy() {
        return new CellIdentityGsm(this);
     }
@@ -170,8 +168,6 @@ public final class CellIdentityGsm extends CellIdentity implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         if (DBG) log("writeToParcel(Parcel, int): " + toString());
-        dest.writeInt(TYPE_GSM);
-        super.writeToParcel(dest, flags);
         dest.writeInt(mMcc);
         dest.writeInt(mMnc);
         dest.writeInt(mLac);
@@ -181,7 +177,6 @@ public final class CellIdentityGsm extends CellIdentity implements Parcelable {
 
     /** Construct from Parcel, type has already been processed */
     private CellIdentityGsm(Parcel in) {
-        super(in);
         mMcc = in.readInt();
         mMnc = in.readInt();
         mLac = in.readInt();
@@ -196,8 +191,7 @@ public final class CellIdentityGsm extends CellIdentity implements Parcelable {
             new Creator<CellIdentityGsm>() {
         @Override
         public CellIdentityGsm createFromParcel(Parcel in) {
-            in.readInt(); // Skip past token, we know what it is
-            return createFromParcelBody(in);
+            return new CellIdentityGsm(in);
         }
 
         @Override
@@ -205,11 +199,6 @@ public final class CellIdentityGsm extends CellIdentity implements Parcelable {
             return new CellIdentityGsm[size];
         }
     };
-
-    /** @hide */
-    static CellIdentityGsm createFromParcelBody(Parcel in) {
-        return new CellIdentityGsm(in);
-    }
 
     /**
      * log

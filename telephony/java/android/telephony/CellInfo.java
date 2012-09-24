@@ -22,7 +22,7 @@ import android.os.Parcelable;
 /**
  * Immutable cell information from a point in time.
  */
-public class CellInfo implements Parcelable {
+public abstract class CellInfo implements Parcelable {
 
     // Type fields for parceling
     /** @hide */
@@ -157,7 +157,9 @@ public class CellInfo implements Parcelable {
         return sb.toString();
     }
 
-    /** Implement the Parcelable interface */
+    /**
+     * Implement the Parcelable interface
+     */
     @Override
     public int describeContents() {
         return 0;
@@ -165,13 +167,25 @@ public class CellInfo implements Parcelable {
 
     /** Implement the Parcelable interface */
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public abstract void writeToParcel(Parcel dest, int flags);
+
+    /**
+     * Used by child classes for parceling.
+     *
+     * @hide
+     */
+    protected void writeToParcel(Parcel dest, int flags, int type) {
+        dest.writeInt(type);
         dest.writeInt(mRegistered ? 1 : 0);
         dest.writeInt(mTimeStampType);
         dest.writeLong(mTimeStamp);
     }
 
-    /** @hide */
+    /**
+     * Used by child classes for parceling
+     *
+     * @hide
+     */
     protected CellInfo(Parcel in) {
         mRegistered = (in.readInt() == 1) ? true : false;
         mTimeStampType = in.readInt();

@@ -23,7 +23,7 @@ import android.util.Log;
 /**
  * LTE signal strength related information.
  */
-public class CellSignalStrengthGsm extends CellSignalStrength implements Parcelable {
+public final class CellSignalStrengthGsm extends CellSignalStrength implements Parcelable {
 
     private static final String LOG_TAG = "CellSignalStrengthGsm";
     private static final boolean DBG = false;
@@ -190,7 +190,6 @@ public class CellSignalStrengthGsm extends CellSignalStrength implements Parcela
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         if (DBG) log("writeToParcel(Parcel, int): " + toString());
-        dest.writeInt(CellSignalStrength.TYPE_GSM);
         dest.writeInt(mSignalStrength);
         dest.writeInt(mBitErrorRate);
     }
@@ -217,10 +216,7 @@ public class CellSignalStrengthGsm extends CellSignalStrength implements Parcela
             new Parcelable.Creator<CellSignalStrengthGsm>() {
         @Override
         public CellSignalStrengthGsm createFromParcel(Parcel in) {
-            if (in.readInt() != CellSignalStrength.TYPE_GSM) {
-                throw new RuntimeException("Expecting TYPE_GSM");
-            }
-            return createFromParcelBody(in);
+            return new CellSignalStrengthGsm(in);
         }
 
         @Override
@@ -228,11 +224,6 @@ public class CellSignalStrengthGsm extends CellSignalStrength implements Parcela
             return new CellSignalStrengthGsm[size];
         }
     };
-
-    /** @hide */
-    public static CellSignalStrengthGsm createFromParcelBody(Parcel in) {
-        return new CellSignalStrengthGsm(in);
-    }
 
     /**
      * log
