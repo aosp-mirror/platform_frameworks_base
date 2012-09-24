@@ -116,7 +116,9 @@ static void android_view_GLES20Canvas_terminateCaches(JNIEnv* env, jobject clazz
 
 static OpenGLRenderer* android_view_GLES20Canvas_createRenderer(JNIEnv* env, jobject clazz) {
     RENDERER_LOGD("Create OpenGLRenderer");
-    return new OpenGLRenderer;
+    OpenGLRenderer* renderer = new OpenGLRenderer();
+    renderer->initProperties();
+    return renderer;
 }
 
 static void android_view_GLES20Canvas_destroyRenderer(JNIEnv* env, jobject clazz,
@@ -734,7 +736,9 @@ static void android_view_GLES20Canvas_resume(JNIEnv* env, jobject clazz,
 static OpenGLRenderer* android_view_GLES20Canvas_createLayerRenderer(JNIEnv* env,
         jobject clazz, Layer* layer) {
     if (layer) {
-        return new LayerRenderer(layer);
+        OpenGLRenderer* renderer = new LayerRenderer(layer);
+        renderer->initProperties();
+        return renderer;
     }
     return NULL;
 }
