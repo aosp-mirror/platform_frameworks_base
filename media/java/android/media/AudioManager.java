@@ -314,6 +314,13 @@ public class AudioManager {
     public static final int FLAG_VIBRATE = 1 << 4;
 
     /**
+     * Indicates to VolumePanel that the volume slider should be disabled as user
+     * cannot change the stream volume
+     * @hide
+     */
+    public static final int FLAG_FIXED_VOLUME = 1 << 5;
+
+    /**
      * Ringer mode that will be silent and will not vibrate. (This overrides the
      * vibrate setting.)
      *
