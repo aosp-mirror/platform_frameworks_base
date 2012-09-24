@@ -149,6 +149,17 @@ public abstract class HardwareRenderer {
             "debug.hwui.show_layers_updates";
 
     /**
+     * Turn on to show overdraw level.
+     *
+     * Possible values:
+     * "true", to enable overdraw debugging
+     * "false", to disable overdraw debugging
+     *
+     * @hide
+     */
+    public static final String DEBUG_SHOW_OVERDRAW_PROPERTY = "debug.hwui.show_overdraw";
+
+    /**
      * A process can set this flag to false to prevent the use of hardware
      * rendering.
      * 
@@ -649,6 +660,7 @@ public abstract class HardwareRenderer {
         int mProfileCurrentFrame = -PROFILE_FRAME_DATA_COUNT;
         
         final boolean mDebugDirtyRegions;
+        final boolean mShowOverdraw;
 
         final int mGlVersion;
         final boolean mTranslucent;
@@ -698,6 +710,9 @@ public abstract class HardwareRenderer {
             if (mDebugDirtyRegions) {
                 Log.d(LOG_TAG, "Debugging dirty regions");
             }
+
+            mShowOverdraw = SystemProperties.getBoolean(
+                    HardwareRenderer.DEBUG_SHOW_OVERDRAW_PROPERTY, false);
         }
 
         @Override
@@ -1414,7 +1429,8 @@ public abstract class HardwareRenderer {
                     EGL_BLUE_SIZE, 8,
                     EGL_ALPHA_SIZE, 8,
                     EGL_DEPTH_SIZE, 0,
-                    EGL_STENCIL_SIZE, GLES20Canvas.getStencilSize(),
+                    // TODO: Find a better way to choose the stencil size
+                    EGL_STENCIL_SIZE, mShowOverdraw ? GLES20Canvas.getStencilSize() : 0,
                     EGL_SURFACE_TYPE, EGL_WINDOW_BIT |
                             (dirtyRegions ? EGL_SWAP_BEHAVIOR_PRESERVED_BIT : 0),
                     EGL_NONE

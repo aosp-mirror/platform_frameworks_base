@@ -37,7 +37,7 @@ void Stencil::clear() {
 void Stencil::enableTest() {
     if (mState != kTest) {
         enable();
-        glStencilFunc(GL_EQUAL, 0x0, 0x1);
+        glStencilFunc(GL_EQUAL, 0x1, 0x1);
         // We only want to test, let's keep everything
         glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
         glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
@@ -56,8 +56,27 @@ void Stencil::enableWrite() {
     }
 }
 
+void Stencil::enableDebugTest(GLint value, bool greater) {
+    enable();
+    glStencilFunc(greater ? GL_LESS : GL_EQUAL, value, 0xffffffff);
+    // We only want to test, let's keep everything
+    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+    mState = kTest;
+}
+
+void Stencil::enableDebugWrite() {
+    if (mState != kWrite) {
+        enable();
+        glStencilFunc(GL_ALWAYS, 0x1, 0xffffffff);
+        // The test always passes so the first two values are meaningless
+        glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
+        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+        mState = kWrite;
+    }
+}
+
 void Stencil::enable() {
-    if (!mState == kDisabled) {
+    if (mState == kDisabled) {
         glEnable(GL_STENCIL_TEST);
     }
 }

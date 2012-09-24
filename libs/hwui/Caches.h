@@ -242,6 +242,7 @@ public:
     // Misc
     GLint maxTextureSize;
     bool debugLayersUpdates;
+    bool debugOverdraw;
 
     TextureCache textureCache;
     LayerCache layerCache;
