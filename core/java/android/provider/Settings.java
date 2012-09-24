@@ -5458,10 +5458,20 @@ public final class Settings {
 
        /**
         * Used to disable SMS short code confirmation - defaults to true.
+        * True indcates we will do the check, etc.  Set to false to disable.
         * @see com.android.internal.telephony.SmsUsageMonitor
         * @hide
         */
        public static final String SMS_SHORT_CODE_CONFIRMATION = "sms_short_code_confirmation";
+
+        /**
+         * Used to select which country we use to determine premium sms codes.
+         * One of com.android.internal.telephony.SMSDispatcher.PREMIUM_RULE_USE_SIM,
+         * com.android.internal.telephony.SMSDispatcher.PREMIUM_RULE_USE_NETWORK,
+         * or com.android.internal.telephony.SMSDispatcher.PREMIUM_RULE_USE_BOTH.
+         * @hide
+         */
+        public static final String SMS_SHORT_CODE_RULE = "sms_short_code_rule";
 
        /**
         * Prefix for SMS short code regex patterns (country code is appended).
