@@ -869,8 +869,22 @@ public final class ScreenMagnifier implements EventStreamTransformation {
             mDisplayContentChangeListener = new IDisplayContentChangeListener.Stub() {
                 @Override
                 public void onWindowTransition(int displayId, int transition, WindowInfo info) {
-                    mHandler.obtainMessage(MESSAGE_ON_WINDOW_TRANSITION, transition, 0,
-                            WindowInfo.obtain(info)).sendToTarget();
+                    Message message = mHandler.obtainMessage(MESSAGE_ON_WINDOW_TRANSITION,
+                            transition, 0, WindowInfo.obtain(info));
+                    // TODO: This makes me quite unhappy but for the time being the
+                    //       least risky fix for cases where the keyguard is removed but
+                    //       the windows it force hides are not made visible yet. Hence,
+                    //       we would compute the magnified frame before we have a stable
+                    //       state. One more reason to move the magnified frame computation
+                    //       in the window manager!
+                    if (info.type == WindowManager.LayoutParams.TYPE_KEYGUARD
+                                || info.type == WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG
+                            && (transition == WindowManagerPolicy.TRANSIT_EXIT
+                                || transition == WindowManagerPolicy.TRANSIT_HIDE)) {
+                        mHandler.sendMessageDelayed(message, mLongAnimationDuration);
+                    } else {
+                        message.sendToTarget();
+                    }
                 }
 
                 @Override
