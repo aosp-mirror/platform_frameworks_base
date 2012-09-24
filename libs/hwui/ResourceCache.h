@@ -103,7 +103,7 @@ public:
     void recycleLocked(SkBitmap* resource);
 
 private:
-    void deleteResourceReference(void* resource, ResourceReference* ref);
+    void deleteResourceReferenceLocked(void* resource, ResourceReference* ref);
 
     void incrementRefcount(void* resource, ResourceType resourceType);
     void incrementRefcountLocked(void* resource, ResourceType resourceType);

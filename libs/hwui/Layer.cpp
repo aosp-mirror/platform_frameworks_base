@@ -50,6 +50,13 @@ Layer::~Layer() {
     deleteTexture();
 }
 
+void Layer::freeResourcesLocked() {
+    if (colorFilter) {
+        Caches::getInstance().resourceCache.decrementRefcountLocked(colorFilter);
+        colorFilter = NULL;
+    }
+}
+
 void Layer::setPaint(SkPaint* paint) {
     OpenGLRenderer::getAlphaAndModeDirect(paint, &alpha, &mode);
 }
