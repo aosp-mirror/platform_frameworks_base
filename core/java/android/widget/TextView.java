@@ -8192,8 +8192,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         final boolean defaultIsRtl = (getLayoutDirection() == LAYOUT_DIRECTION_RTL);
 
         // Now, we can select the heuristic
-        int textDir = getResolvedTextDirection();
-        switch (textDir) {
+        switch (getTextDirection()) {
             default:
             case TEXT_DIRECTION_FIRST_STRONG:
                 return (defaultIsRtl ? TextDirectionHeuristics.FIRSTSTRONG_RTL :
