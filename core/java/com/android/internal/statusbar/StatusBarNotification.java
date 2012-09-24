@@ -48,6 +48,7 @@ public class StatusBarNotification implements Parcelable {
     public final int score;
     public final UserHandle user;
 
+    /** This is temporarily needed for the JB MR1 PDK. */
     @Deprecated
     public StatusBarNotification(String pkg, int id, String tag, int uid, int initialPid, int score,
             Notification notification) {
@@ -143,6 +144,6 @@ public class StatusBarNotification implements Parcelable {
 
     /** Returns a userHandle for the instance of the app that posted this notification. */
     public int getUserId() {
-        return UserHandle.getUserId(this.uid);
+        return this.user.getIdentifier();
     }
 }
