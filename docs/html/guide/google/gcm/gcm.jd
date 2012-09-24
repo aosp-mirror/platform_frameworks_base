@@ -906,6 +906,7 @@ Check that the token you're sending inside the <code>Authorization</code> header
 # curl --header "Authorization: key=$api_key" --header Content-Type:"application/json" https://android.googleapis.com/gcm/send  -d "{\"registration_ids\":[\"ABC\"]}"</pre>
 
 
+
 If you receive a 401 HTTP status code, your API key is not valid. Otherwise you should see something like this:<br/>
 
 <pre>

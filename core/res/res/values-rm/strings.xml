@@ -1041,9 +1041,9 @@
     <skip />
     <!-- no translation found for policydesc_disableCamera (2306349042834754597) -->
     <skip />
-    <!-- no translation found for policylab_disableKeyguardFeatures (266329104542638802) -->
+    <!-- no translation found for policylab_disableKeyguardWidgets (1794894613389073926) -->
     <skip />
-    <!-- no translation found for policydesc_disableKeyguardFeatures (3467082272186534614) -->
+    <!-- no translation found for policydesc_disableKeyguardWidgets (7254624892984033592) -->
     <skip />
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Privat"</item>
@@ -1969,10 +1969,6 @@
     <!-- no translation found for find (4808270900322985960) -->
     <skip />
     <!-- no translation found for websearch (4337157977400211589) -->
-    <skip />
-    <!-- no translation found for find_next (5742124618942193978) -->
-    <skip />
-    <!-- no translation found for find_previous (2196723669388360506) -->
     <skip />
     <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
     <skip />

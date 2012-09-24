@@ -623,10 +623,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Yêu cầu dữ liệu ứng dụng được lưu trữ phải được mã hóa."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Vô hiệu hóa máy ảnh"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Ngăn sử dụng tất cả máy ảnh của thiết bị."</string>
-    <!-- no translation found for policylab_disableKeyguardFeatures (266329104542638802) -->
-    <skip />
-    <!-- no translation found for policydesc_disableKeyguardFeatures (3467082272186534614) -->
-    <skip />
+    <string name="policylab_disableKeyguardWidgets" msgid="1794894613389073926">"Tắt tiện ích trên bàn phím"</string>
+    <string name="policydesc_disableKeyguardWidgets" msgid="7254624892984033592">"Ngăn sử dụng một số hoặc tất cả tiện ích trên bàn phím."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Nhà riêng"</item>
     <item msgid="869923650527136615">"ĐT di động"</item>
@@ -1262,10 +1260,6 @@
     <string name="share" msgid="1778686618230011964">"Chia sẻ"</string>
     <string name="find" msgid="4808270900322985960">"Tìm"</string>
     <string name="websearch" msgid="4337157977400211589">"Tìm kiếm trên web"</string>
-    <!-- no translation found for find_next (5742124618942193978) -->
-    <skip />
-    <!-- no translation found for find_previous (2196723669388360506) -->
-    <skip />
     <string name="gpsNotifTicker" msgid="5622683912616496172">"Yêu cầu vị trí từ <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="gpsNotifTitle" msgid="5446858717157416839">"Yêu cầu vị trí"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"Được yêu cầu bởi <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>

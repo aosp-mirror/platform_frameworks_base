@@ -2138,4 +2138,10 @@ public class WebView extends AbsoluteLayout
         super.setLayerType(layerType, paint);
         mProvider.getViewDelegate().setLayerType(layerType, paint);
     }
+
+    @Override
+    protected void dispatchDraw(Canvas canvas) {
+        mProvider.getViewDelegate().preDispatchDraw(canvas);
+        super.dispatchDraw(canvas);
+    }
 }
