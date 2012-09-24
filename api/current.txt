@@ -9746,6 +9746,7 @@ package android.hardware {
     ctor public Camera.CameraInfo();
     field public static final int CAMERA_FACING_BACK = 0; // 0x0
     field public static final int CAMERA_FACING_FRONT = 1; // 0x1
+    field public boolean canDisableShutterSound;
     field public int facing;
     field public int orientation;
   }
