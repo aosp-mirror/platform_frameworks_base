@@ -128,7 +128,11 @@ public class TaskStackBuilder {
         if (parent != null) {
             // We have the actual parent intent, build the rest from static metadata
             // then add the direct parent intent to the end.
-            addParentStack(parent.getComponent());
+            ComponentName target = parent.getComponent();
+            if (target == null) {
+                target = parent.resolveActivity(mSourceContext.getPackageManager());
+            }
+            addParentStack(target);
             addNextIntent(parent);
         }
         return this;
