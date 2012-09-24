@@ -26,7 +26,6 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.SystemClock;
-import android.security.KeyStore;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -239,7 +238,6 @@ public class KeyguardPatternView extends GridLayout implements KeyguardSecurityV
             if (mLockPatternUtils.checkPattern(pattern)) {
                 mCallback.reportSuccessfulUnlockAttempt();
                 mLockPatternView.setDisplayMode(LockPatternView.DisplayMode.Correct);
-                KeyStore.getInstance().password(LockPatternUtils.patternToString(pattern));
                 mTotalFailedPatternAttempts = 0;
                 mCallback.dismiss(true);
             } else {

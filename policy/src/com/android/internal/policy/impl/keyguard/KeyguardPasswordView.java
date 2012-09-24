@@ -32,7 +32,6 @@ import com.android.internal.widget.PasswordEntryKeyboardView;
 
 import android.os.CountDownTimer;
 import android.os.SystemClock;
-import android.security.KeyStore;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -270,7 +269,6 @@ public class KeyguardPasswordView extends LinearLayout
         String entry = mPasswordEntry.getText().toString();
         if (mLockPatternUtils.checkPassword(entry)) {
             mCallback.reportSuccessfulUnlockAttempt();
-            KeyStore.getInstance().password(entry);
             mCallback.dismiss(true);
         } else if (entry.length() > MINIMUM_PASSWORD_LENGTH_BEFORE_REPORT ) {
             // to avoid accidental lockout, only count attempts that are long enough to be a
