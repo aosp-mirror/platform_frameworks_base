@@ -4390,6 +4390,8 @@ final class ActivityStack {
         while (j < NA) {
             ActivityRecord ar = mHistory.get(j);
             if (!ar.finishing && ar.task.taskId == taskId) {
+                thumbs.root = ar;
+                thumbs.rootIndex = j;
                 holder = ar.thumbHolder;
                 if (holder != null) {
                     thumbs.mainThumbnail = holder.lastThumbnail;
@@ -4403,9 +4405,6 @@ final class ActivityStack {
         if (j >= NA) {
             return thumbs;
         }
-
-        thumbs.root = mHistory.get(j);
-        thumbs.rootIndex = j;
 
         ArrayList<TaskAccessInfo.SubTask> subtasks = new ArrayList<TaskAccessInfo.SubTask>();
         thumbs.subtasks = subtasks;
