@@ -16,7 +16,6 @@
 
 package android.widget;
 
-import android.app.SearchManager.OnDismissListener;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
@@ -1094,7 +1093,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
             mPopup.setInputMethodMode(ListPopupWindow.INPUT_METHOD_NEEDED);
             mPopup.setListItemExpandMax(EXPAND_MAX);
         }
-        mPopup.setLayoutDirection(getResolvedLayoutDirection());
+        mPopup.setLayoutDirection(getLayoutDirection());
         mPopup.show();
         mPopup.getListView().setOverScrollMode(View.OVER_SCROLL_ALWAYS);
     }

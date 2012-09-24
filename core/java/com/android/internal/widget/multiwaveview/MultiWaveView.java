@@ -19,7 +19,6 @@ package com.android.internal.widget.multiwaveview;
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
@@ -970,7 +969,7 @@ public class MultiWaveView extends View {
     }
 
     private void computeInsets(int dx, int dy) {
-        final int layoutDirection = getResolvedLayoutDirection();
+        final int layoutDirection = getLayoutDirection();
         final int absoluteGravity = Gravity.getAbsoluteGravity(mGravity, layoutDirection);
 
         switch (absoluteGravity & Gravity.HORIZONTAL_GRAVITY_MASK) {

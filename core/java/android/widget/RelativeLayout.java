@@ -483,7 +483,7 @@ public class RelativeLayout extends ViewGroup {
             }
         }
 
-        final int layoutDirection = getResolvedLayoutDirection();
+        final int layoutDirection = getLayoutDirection();
 
         if (isWrapContentWidth) {
             // Width already has left padding in it since it was calculated by looking at
@@ -578,7 +578,7 @@ public class RelativeLayout extends ViewGroup {
     }
 
     private void alignBaseline(View child, LayoutParams params) {
-        final int layoutDirection = getResolvedLayoutDirection();
+        final int layoutDirection = getLayoutDirection();
         int[] rules = params.getRules(layoutDirection);
         int anchorBaseline = getRelatedViewBaseline(rules, ALIGN_BASELINE);
 
@@ -727,7 +727,7 @@ public class RelativeLayout extends ViewGroup {
     private boolean positionChildHorizontal(View child, LayoutParams params, int myWidth,
             boolean wrapContent) {
 
-        final int layoutDirection = getResolvedLayoutDirection();
+        final int layoutDirection = getLayoutDirection();
         int[] rules = params.getRules(layoutDirection);
         params.onResolveLayoutDirection(layoutDirection);
 
@@ -792,7 +792,7 @@ public class RelativeLayout extends ViewGroup {
     }
 
     private void applyHorizontalSizeRules(LayoutParams childParams, int myWidth) {
-        final int layoutDirection = getResolvedLayoutDirection();
+        final int layoutDirection = getLayoutDirection();
         int[] rules = childParams.getRules(layoutDirection);
         RelativeLayout.LayoutParams anchorParams;
 
@@ -983,7 +983,7 @@ public class RelativeLayout extends ViewGroup {
             if (child.getVisibility() != GONE) {
                 RelativeLayout.LayoutParams st =
                         (RelativeLayout.LayoutParams) child.getLayoutParams();
-                st.onResolveLayoutDirection(getResolvedLayoutDirection());
+                st.onResolveLayoutDirection(getLayoutDirection());
                 child.layout(st.mLeft, st.mTop, st.mRight, st.mBottom);
             }
         }
