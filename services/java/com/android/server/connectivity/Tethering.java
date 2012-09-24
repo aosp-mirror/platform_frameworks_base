@@ -461,7 +461,8 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         intent.setClassName("com.android.settings", "com.android.settings.TetherSettings");
         intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
 
-        PendingIntent pi = PendingIntent.getActivity(mContext, 0, intent, 0);
+        PendingIntent pi = PendingIntent.getActivityAsUser(mContext, 0, intent, 0,
+                null, UserHandle.CURRENT);
 
         Resources r = Resources.getSystem();
         CharSequence title = r.getText(com.android.internal.R.string.tethered_notification_title);
@@ -478,14 +479,16 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         mTetheredNotification.tickerText = title;
         mTetheredNotification.setLatestEventInfo(mContext, title, message, pi);
 
-        notificationManager.notify(mTetheredNotification.icon, mTetheredNotification);
+        notificationManager.notifyAsUser(null, mTetheredNotification.icon,
+                mTetheredNotification, UserHandle.ALL);
     }
 
     private void clearTetheredNotification() {
         NotificationManager notificationManager =
             (NotificationManager)mContext.getSystemService(Context.NOTIFICATION_SERVICE);
         if (notificationManager != null && mTetheredNotification != null) {
-            notificationManager.cancel(mTetheredNotification.icon);
+            notificationManager.cancelAsUser(null, mTetheredNotification.icon,
+                    UserHandle.ALL);
             mTetheredNotification = null;
         }
     }

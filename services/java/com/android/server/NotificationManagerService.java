@@ -53,7 +53,6 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.Vibrator;
 import android.provider.Settings;
-import android.service.dreams.IDreamManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.AtomicFile;
@@ -890,7 +889,7 @@ public class NotificationManagerService extends INotificationManager.Stub
         final boolean isSystemNotification = ("android".equals(pkg));
 
         userId = ActivityManager.handleIncomingUser(callingPid,
-                callingUid, userId, false, true, "enqueueNotification", pkg);
+                callingUid, userId, true, true, "enqueueNotification", pkg);
 
         // Limit the number of notifications that any given package except the android
         // package can enqueue.  Prevents DOS attacks and deals with leaks.
@@ -900,7 +899,7 @@ public class NotificationManagerService extends INotificationManager.Stub
                 final int N = mNotificationList.size();
                 for (int i=0; i<N; i++) {
                     final NotificationRecord r = mNotificationList.get(i);
-                    if (r.pkg.equals(pkg)) {
+                    if (r.pkg.equals(pkg) && r.userId == userId) {
                         count++;
                         if (count >= MAX_PACKAGE_NOTIFICATIONS) {
                             Slog.e(TAG, "Package has already posted " + count
@@ -1261,7 +1260,7 @@ public class NotificationManagerService extends INotificationManager.Stub
     public void cancelNotificationWithTag(String pkg, String tag, int id, int userId) {
         checkCallerIsSystemOrSameApp(pkg);
         userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
-                Binder.getCallingUid(), userId, false, true, "cancelNotificationWithTag", pkg);
+                Binder.getCallingUid(), userId, true, true, "cancelNotificationWithTag", pkg);
         // Don't allow client applications to cancel foreground service notis.
         cancelNotification(pkg, tag, id, 0,
                 Binder.getCallingUid() == Process.SYSTEM_UID

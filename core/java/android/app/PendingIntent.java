@@ -265,6 +265,8 @@ public final class PendingIntent implements Parcelable {
 
     /**
      * @hide
+     * Note that UserHandle.CURRENT will be interpreted at the time the
+     * activity is started, not when the pending intent is created.
      */
     public static PendingIntent getActivityAsUser(Context context, int requestCode,
             Intent intent, int flags, Bundle options, UserHandle user) {
@@ -417,7 +419,11 @@ public final class PendingIntent implements Parcelable {
                 new UserHandle(UserHandle.myUserId()));
     }
 
-    /** @hide */
+    /**
+     * @hide
+     * Note that UserHandle.CURRENT will be interpreted at the time the
+     * broadcast is sent, not when the pending intent is created.
+     */
     public static PendingIntent getBroadcastAsUser(Context context, int requestCode,
             Intent intent, int flags, UserHandle userHandle) {
         String packageName = context.getPackageName();

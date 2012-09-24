@@ -521,10 +521,13 @@ class UiModeManagerService extends IUiModeManager.Stub {
                         mContext,
                         mContext.getString(R.string.car_mode_disable_notification_title),
                         mContext.getString(R.string.car_mode_disable_notification_message),
-                        PendingIntent.getActivity(mContext, 0, carModeOffIntent, 0));
-                mNotificationManager.notify(0, n);
+                        PendingIntent.getActivityAsUser(mContext, 0, carModeOffIntent, 0,
+                                null, UserHandle.CURRENT));
+                mNotificationManager.notifyAsUser(null,
+                        R.string.car_mode_disable_notification_title, n, UserHandle.ALL);
             } else {
-                mNotificationManager.cancel(0);
+                mNotificationManager.cancelAsUser(null,
+                        R.string.car_mode_disable_notification_title, UserHandle.ALL);
             }
         }
     }

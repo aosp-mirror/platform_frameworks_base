@@ -1766,8 +1766,9 @@ public class WifiService extends IWifiManager.Stub {
                 mNotification.when = 0;
                 mNotification.icon = ICON_NETWORKS_AVAILABLE;
                 mNotification.flags = Notification.FLAG_AUTO_CANCEL;
-                mNotification.contentIntent = PendingIntent.getActivity(mContext, 0,
-                        new Intent(WifiManager.ACTION_PICK_WIFI_NETWORK), 0);
+                mNotification.contentIntent = PendingIntent.getActivityAsUser(mContext, 0,
+                        new Intent(WifiManager.ACTION_PICK_WIFI_NETWORK), 0,
+                        null, UserHandle.CURRENT);
             }
 
             CharSequence title = mContext.getResources().getQuantityText(
@@ -1779,9 +1780,10 @@ public class WifiService extends IWifiManager.Stub {
 
             mNotificationRepeatTime = System.currentTimeMillis() + NOTIFICATION_REPEAT_DELAY_MS;
 
-            notificationManager.notify(ICON_NETWORKS_AVAILABLE, mNotification);
+            notificationManager.notifyAsUser(null, ICON_NETWORKS_AVAILABLE, mNotification,
+                    UserHandle.ALL);
         } else {
-            notificationManager.cancel(ICON_NETWORKS_AVAILABLE);
+            notificationManager.cancelAsUser(null, ICON_NETWORKS_AVAILABLE, UserHandle.ALL);
         }
 
         mNotificationShown = visible;

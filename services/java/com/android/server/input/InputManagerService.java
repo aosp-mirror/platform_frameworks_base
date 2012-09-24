@@ -58,6 +58,7 @@ import android.os.Message;
 import android.os.MessageQueue;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.util.Log;
@@ -660,7 +661,8 @@ public class InputManagerService extends IInputManager.Stub
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                         | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
                         | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                mKeyboardLayoutIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
+                mKeyboardLayoutIntent = PendingIntent.getActivityAsUser(mContext, 0,
+                        intent, 0, null, UserHandle.CURRENT);
             }
 
             Resources r = mContext.getResources();
@@ -673,8 +675,9 @@ public class InputManagerService extends IInputManager.Stub
                     .setSmallIcon(R.drawable.ic_settings_language)
                     .setPriority(Notification.PRIORITY_LOW)
                     .build();
-            mNotificationManager.notify(R.string.select_keyboard_layout_notification_title,
-                    notification);
+            mNotificationManager.notifyAsUser(null,
+                    R.string.select_keyboard_layout_notification_title,
+                    notification, UserHandle.ALL);
             mKeyboardLayoutNotificationShown = true;
         }
     }
@@ -683,7 +686,9 @@ public class InputManagerService extends IInputManager.Stub
     private void hideMissingKeyboardLayoutNotification() {
         if (mKeyboardLayoutNotificationShown) {
             mKeyboardLayoutNotificationShown = false;
-            mNotificationManager.cancel(R.string.select_keyboard_layout_notification_title);
+            mNotificationManager.cancelAsUser(null,
+                    R.string.select_keyboard_layout_notification_title,
+                    UserHandle.ALL);
         }
     }
 

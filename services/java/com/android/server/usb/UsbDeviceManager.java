@@ -667,7 +667,8 @@ public class UsbDeviceManager {
             if (id != mUsbNotificationId) {
                 // clear notification if title needs changing
                 if (mUsbNotificationId != 0) {
-                    mNotificationManager.cancel(mUsbNotificationId);
+                    mNotificationManager.cancelAsUser(null, mUsbNotificationId,
+                            UserHandle.ALL);
                     mUsbNotificationId = 0;
                 }
                 if (id != 0) {
@@ -688,10 +689,11 @@ public class UsbDeviceManager {
                     Intent intent = Intent.makeRestartActivityTask(
                             new ComponentName("com.android.settings",
                                     "com.android.settings.UsbSettings"));
-                    PendingIntent pi = PendingIntent.getActivity(mContext, 0,
-                            intent, 0);
+                    PendingIntent pi = PendingIntent.getActivityAsUser(mContext, 0,
+                            intent, 0, null, UserHandle.CURRENT);
                     notification.setLatestEventInfo(mContext, title, message, pi);
-                    mNotificationManager.notify(id, notification);
+                    mNotificationManager.notifyAsUser(null, id, notification,
+                            UserHandle.ALL);
                     mUsbNotificationId = id;
                 }
             }
@@ -722,15 +724,16 @@ public class UsbDeviceManager {
                     Intent intent = Intent.makeRestartActivityTask(
                             new ComponentName("com.android.settings",
                                     "com.android.settings.DevelopmentSettings"));
-                    PendingIntent pi = PendingIntent.getActivity(mContext, 0,
-                            intent, 0);
+                    PendingIntent pi = PendingIntent.getActivityAsUser(mContext, 0,
+                            intent, 0, null, UserHandle.CURRENT);
                     notification.setLatestEventInfo(mContext, title, message, pi);
                     mAdbNotificationShown = true;
-                    mNotificationManager.notify(id, notification);
+                    mNotificationManager.notifyAsUser(null, id, notification,
+                            UserHandle.ALL);
                 }
             } else if (mAdbNotificationShown) {
                 mAdbNotificationShown = false;
-                mNotificationManager.cancel(id);
+                mNotificationManager.cancelAsUser(null, id, UserHandle.ALL);
             }
         }
 
