@@ -467,6 +467,13 @@ public final class CalendarContract {
          *
          */
         public static final String ALLOWED_ATTENDEE_TYPES = "allowedAttendeeTypes";
+
+        /**
+         * Is this the primary calendar for this account. If this column is not explicitly set, the
+         * provider will return 1 if {@link Calendars#ACCOUNT_NAME} is equal to
+         * {@link Calendars#OWNER_ACCOUNT}.
+         */
+        public static final String IS_PRIMARY = "isPrimary";
     }
 
     /**
@@ -1206,6 +1213,14 @@ public final class CalendarContract {
         public static final String ORGANIZER = "organizer";
 
         /**
+         * Are we the organizer of this event. If this column is not explicitly set, the provider
+         * will return 1 if {@link #ORGANIZER} is equal to {@link Calendars#OWNER_ACCOUNT}.
+         * Column name.
+         * <P>Type: STRING</P>
+         */
+        public static final String IS_ORGANIZER = "isOrganizer";
+
+        /**
          * Whether the user can invite others to the event. The
          * GUESTS_CAN_INVITE_OTHERS is a setting that applies to an arbitrary
          * guest, while CAN_INVITE_OTHERS indicates if the user can invite
@@ -1368,6 +1383,7 @@ public final class CalendarContract {
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, CUSTOM_APP_PACKAGE);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, CUSTOM_APP_URI);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, ORGANIZER);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, IS_ORGANIZER);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_ID);
                 DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, DIRTY);
                 DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, LAST_SYNCED);

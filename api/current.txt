@@ -17179,6 +17179,7 @@ package android.provider {
     field public static final int CAL_ACCESS_ROOT = 800; // 0x320
     field public static final java.lang.String CAN_MODIFY_TIME_ZONE = "canModifyTimeZone";
     field public static final java.lang.String CAN_ORGANIZER_RESPOND = "canOrganizerRespond";
+    field public static final java.lang.String IS_PRIMARY = "isPrimary";
     field public static final java.lang.String MAX_REMINDERS = "maxReminders";
     field public static final java.lang.String OWNER_ACCOUNT = "ownerAccount";
     field public static final java.lang.String SYNC_EVENTS = "sync_events";
@@ -17270,6 +17271,7 @@ package android.provider {
     field public static final java.lang.String HAS_ALARM = "hasAlarm";
     field public static final java.lang.String HAS_ATTENDEE_DATA = "hasAttendeeData";
     field public static final java.lang.String HAS_EXTENDED_PROPERTIES = "hasExtendedProperties";
+    field public static final java.lang.String IS_ORGANIZER = "isOrganizer";
     field public static final java.lang.String LAST_DATE = "lastDate";
     field public static final java.lang.String LAST_SYNCED = "lastSynced";
     field public static final java.lang.String ORGANIZER = "organizer";
