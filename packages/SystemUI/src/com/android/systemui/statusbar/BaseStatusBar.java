@@ -143,7 +143,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         return mBarService;
     }
 
-    protected boolean isDeviceProvisioned() {
+    public boolean isDeviceProvisioned() {
         return mDeviceProvisioned;
     }
 

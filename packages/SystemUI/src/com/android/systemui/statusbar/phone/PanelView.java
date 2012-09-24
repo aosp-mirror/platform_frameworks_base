@@ -381,15 +381,6 @@ public class PanelView extends FrameLayout {
         mBar = panelBar;
     }
 
-    public void setImeWindowStatus(boolean visible) {
-        // To be implemented by classes extending PanelView
-    }
-
-    public void setup(NetworkController network, BluetoothController bt, BatteryController batt,
-            LocationController location) {
-        // To be implemented by classes extending PanelView
-    }
-
     public void collapse() {
         // TODO: abort animation or ongoing touch
         if (!isFullyCollapsed()) {

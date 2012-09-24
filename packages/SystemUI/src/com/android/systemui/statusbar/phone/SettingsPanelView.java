@@ -58,18 +58,14 @@ public class SettingsPanelView extends PanelView {
         }
     }
 
-    @Override
     public void setImeWindowStatus(boolean visible) {
         if (mQS != null) {
             mQS.setImeWindowStatus(visible);
         }
     }
 
-    @Override
     public void setup(NetworkController networkController, BluetoothController bluetoothController,
             BatteryController batteryController, LocationController locationController) {
-        super.setup(networkController, bluetoothController, batteryController, locationController);
-
         if (mQS != null) {
             mQS.setup(networkController, bluetoothController, batteryController,
                     locationController);
@@ -92,5 +88,11 @@ public class SettingsPanelView extends PanelView {
             "fling " + ((vel > 0) ? "open" : "closed"),
             "settings,v=" + vel);
         super.fling(vel, always);
+    }
+
+    public void setService(PhoneStatusBar phoneStatusBar) {
+        if (mQS != null) {
+            mQS.setService(phoneStatusBar);
+        }
     }
 }

@@ -171,7 +171,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     TextView mNotificationPanelDebugText;
 
     // settings
-    PanelView mSettingsPanel;
+    SettingsPanelView mSettingsPanel;
     int mSettingsPanelGravity;
 
     // top bar
@@ -426,8 +426,9 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
 
         // Quick Settings (WIP)
-        mSettingsPanel = (PanelView) mStatusBarWindow.findViewById(R.id.settings_panel);
+        mSettingsPanel = (SettingsPanelView) mStatusBarWindow.findViewById(R.id.settings_panel);
         mSettingsPanel.setBar(mStatusBarView);
+        mSettingsPanel.setService(this);
         mSettingsPanel.setup(mNetworkController, mBluetoothController, mBatteryController,
                 mLocationController);
 
@@ -1854,7 +1855,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
 
         // Update the QuickSettings container
-        ((SettingsPanelView) mSettingsPanel).updateResources();
+        mSettingsPanel.updateResources();
 
         loadDimens();
     }
