@@ -565,6 +565,9 @@ public class ProgressBar extends View {
         if (mIndeterminateDrawable != null) mIndeterminateDrawable.jumpToCurrentState();
     }
 
+    /**
+     * @hide
+     */
     @Override
     public void onResolveDrawables(int layoutDirection) {
         final Drawable d = mCurrentDrawable;
