@@ -864,6 +864,12 @@ public abstract class HardwareRenderer {
 
             if (mEglContext == null) {
                 mEglContext = createContext(sEgl, sEglDisplay, sEglConfig);
+                if (mEglContext == null) {
+                    //noinspection ConstantConditions
+                    throw new IllegalStateException("Could not create an EGL context. " +
+                            "eglCreateContext failed with error: " +
+                            GLUtils.getEGLErrorString(sEgl.eglGetError()));
+                }
                 sEglContextStorage.set(createManagedContext(mEglContext));
             }
         }
