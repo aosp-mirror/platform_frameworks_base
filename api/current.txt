@@ -24972,7 +24972,6 @@ package android.view {
     method public android.view.ViewParent getParentForAccessibility();
     method public float getPivotX();
     method public float getPivotY();
-    method public int getResolvedTextAlignment();
     method public android.content.res.Resources getResources();
     method public final int getRight();
     method protected float getRightFadingEdgeStrength();

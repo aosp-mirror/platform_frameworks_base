@@ -16668,6 +16668,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link #TEXT_ALIGNMENT_TEXT_END},
      * {@link #TEXT_ALIGNMENT_VIEW_START},
      * {@link #TEXT_ALIGNMENT_VIEW_END}
+     *
+     * @hide
      */
     @ViewDebug.ExportedProperty(category = "text", mapping = {
             @ViewDebug.IntToString(from = TEXT_ALIGNMENT_INHERIT, to = "INHERIT"),
@@ -16678,7 +16680,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             @ViewDebug.IntToString(from = TEXT_ALIGNMENT_VIEW_START, to = "VIEW_START"),
             @ViewDebug.IntToString(from = TEXT_ALIGNMENT_VIEW_END, to = "VIEW_END")
     })
-    public int getTextAlignment() {
+    public int getRawTextAlignment() {
         return (mPrivateFlags2 & PFLAG2_TEXT_ALIGNMENT_MASK) >> PFLAG2_TEXT_ALIGNMENT_MASK_SHIFT;
     }
 
@@ -16698,7 +16700,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @attr ref android.R.styleable#View_textAlignment
      */
     public void setTextAlignment(int textAlignment) {
-        if (textAlignment != getTextAlignment()) {
+        if (textAlignment != getRawTextAlignment()) {
             // Reset the current and resolved text alignment
             mPrivateFlags2 &= ~PFLAG2_TEXT_ALIGNMENT_MASK;
             resetResolvedTextAlignment();
@@ -16737,7 +16739,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             @ViewDebug.IntToString(from = TEXT_ALIGNMENT_VIEW_START, to = "VIEW_START"),
             @ViewDebug.IntToString(from = TEXT_ALIGNMENT_VIEW_END, to = "VIEW_END")
     })
-    public int getResolvedTextAlignment() {
+    public int getTextAlignment() {
         // If text alignment is not resolved, then resolve it
         if ((mPrivateFlags2 & PFLAG2_TEXT_ALIGNMENT_RESOLVED) != PFLAG2_TEXT_ALIGNMENT_RESOLVED) {
             resolveTextAlignment();
@@ -16756,14 +16758,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         if (hasRtlSupport()) {
             // Set resolved text alignment flag depending on text alignment flag
-            final int textAlignment = getTextAlignment();
+            final int textAlignment = getRawTextAlignment();
             switch (textAlignment) {
                 case TEXT_ALIGNMENT_INHERIT:
                     // Check if we can resolve the text alignment
                     if (canResolveTextAlignment() && mParent instanceof View) {
                         View view = (View) mParent;
 
-                        final int parentResolvedTextAlignment = view.getResolvedTextAlignment();
+                        final int parentResolvedTextAlignment = view.getTextAlignment();
                         switch (parentResolvedTextAlignment) {
                             case TEXT_ALIGNMENT_GRAVITY:
                             case TEXT_ALIGNMENT_TEXT_START:
@@ -16814,7 +16816,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return true if text alignment resolution can be done otherwise return false.
      */
     private boolean canResolveTextAlignment() {
-        switch (getTextAlignment()) {
+        switch (getRawTextAlignment()) {
             case TEXT_DIRECTION_INHERIT:
                 return (mParent != null);
             default:
@@ -16830,6 +16832,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public void resetResolvedTextAlignment() {
         // Reset any previous text alignment resolution
         mPrivateFlags2 &= ~(PFLAG2_TEXT_ALIGNMENT_RESOLVED | PFLAG2_TEXT_ALIGNMENT_RESOLVED_MASK);
+    }
+
+    /**
+     * @hide
+     */
+    public boolean isTextAlignmentInherited() {
+        return (getRawTextAlignment() == TEXT_ALIGNMENT_INHERIT);
     }
 
     /**

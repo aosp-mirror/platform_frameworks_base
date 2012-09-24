@@ -5646,7 +5646,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private Layout.Alignment getLayoutAlignment() {
         if (mLayoutAlignment == null) {
-            mResolvedTextAlignment = getResolvedTextAlignment();
+            mResolvedTextAlignment = getTextAlignment();
             switch (mResolvedTextAlignment) {
                 case TEXT_ALIGNMENT_GRAVITY:
                     switch (mGravity & Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK) {
