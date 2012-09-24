@@ -1627,22 +1627,22 @@ class AppWidgetServiceImpl {
                                     Integer.parseInt(minWidthString, 16));
                         }
                         String minHeightString = parser.getAttributeValue(null, "min_height");
-                        if (minWidthString != null) {
+                        if (minHeightString != null) {
                             options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT,
                                     Integer.parseInt(minHeightString, 16));
                         }
-                        String maxWidthString = parser.getAttributeValue(null, "max_height");
-                        if (minWidthString != null) {
+                        String maxWidthString = parser.getAttributeValue(null, "max_width");
+                        if (maxWidthString != null) {
                             options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH,
                                     Integer.parseInt(maxWidthString, 16));
                         }
                         String maxHeightString = parser.getAttributeValue(null, "max_height");
-                        if (minWidthString != null) {
+                        if (maxHeightString != null) {
                             options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT,
                                     Integer.parseInt(maxHeightString, 16));
                         }
                         String categoryString = parser.getAttributeValue(null, "host_category");
-                        if (minWidthString != null) {
+                        if (categoryString != null) {
                             options.putInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY,
                                     Integer.parseInt(categoryString, 16));
                         }
