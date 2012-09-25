@@ -2042,7 +2042,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 case AccessibilityEvent.TYPE_VIEW_HOVER_EXIT: {
                     mActiveWindowId = windowId;
                 } break;
-                case AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_END: {
+                case AccessibilityEvent.TYPE_TOUCH_INTERACTION_END: {
                     mActiveWindowId = getFocusedWindowId();
                 } break;
             }
