@@ -65,6 +65,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.util.AndroidRuntimeException;
@@ -2114,9 +2115,7 @@ public final class ActivityThread {
                     + ", dir=" + r.packageInfo.getAppDir());
 
             if (activity != null) {
-                ContextImpl appContext = new ContextImpl();
-                appContext.init(r.packageInfo, r.token, this);
-                appContext.setOuterContext(activity);
+                Context appContext = createBaseContextForActivity(r, activity);
                 CharSequence title = r.activityInfo.loadLabel(appContext.getPackageManager());
                 Configuration config = new Configuration(mCompatConfiguration);
                 if (DEBUG_CONFIGURATION) Slog.v(TAG, "Launching activity "
@@ -2179,6 +2178,31 @@ public final class ActivityThread {
         }
 
         return activity;
+    }
+
+    private Context createBaseContextForActivity(ActivityClientRecord r,
+            final Activity activity) {
+        ContextImpl appContext = new ContextImpl();
+        appContext.init(r.packageInfo, r.token, this);
+        appContext.setOuterContext(activity);
+
+        // For debugging purposes, if the activity's package name contains the value of
+        // the "debug.use-second-display" system property as a substring, then show
+        // its content on a secondary display if there is one.
+        Context baseContext = appContext;
+        String pkgName = SystemProperties.get("debug.second-display.pkg");
+        if (pkgName != null && !pkgName.isEmpty()
+                && r.packageInfo.mPackageName.contains(pkgName)) {
+            DisplayManagerGlobal dm = DisplayManagerGlobal.getInstance();
+            for (int displayId : dm.getDisplayIds()) {
+                if (displayId != Display.DEFAULT_DISPLAY) {
+                    Display display = dm.getRealDisplay(displayId);
+                    baseContext = appContext.createDisplayContext(display);
+                    break;
+                }
+            }
+        }
+        return baseContext;
     }
 
     private void handleLaunchActivity(ActivityClientRecord r, Intent customIntent) {
